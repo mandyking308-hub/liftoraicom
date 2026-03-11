@@ -27,6 +27,8 @@ const navItems = [
   { label: "Security", to: "/founder/security", icon: ShieldAlert },
   { label: "Templates", to: "/founder/templates", icon: LayoutTemplate },
   { label: "Expansion", to: "/founder/expansion", icon: Sparkles },
+  { label: "Manual", to: "/founder/manual", icon: BookOpenCheck },
+  { label: "Build Log", to: "/founder/build-log", icon: ClipboardList },
   { label: "Documents", to: "/founder/documents", icon: FileText },
 ];
 
