@@ -59,6 +59,8 @@ import ExecutionDetail from "./pages/founder/ExecutionDetail";
 import CommandCenter from "./pages/founder/CommandCenter";
 import ProcessDirectory from "./pages/founder/ProcessDirectory";
 import ProcessDetail from "./pages/founder/ProcessDetail";
+import ArchitectureDirectory from "./pages/founder/ArchitectureDirectory";
+import ArchitectureDetail from "./pages/founder/ArchitectureDetail";
 // Partner pages
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import PartnerOpportunities from "./pages/partner/PartnerOpportunities";
