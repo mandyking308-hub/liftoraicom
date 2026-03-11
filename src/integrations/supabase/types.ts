@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      access_anomalies: {
+        Row: {
+          anomaly_type: string
+          created_at: string
+          description: string | null
+          flagged: boolean
+          id: string
+          severity: string
+          user_id: string | null
+          user_name: string | null
+        }
+        Insert: {
+          anomaly_type: string
+          created_at?: string
+          description?: string | null
+          flagged?: boolean
+          id?: string
+          severity?: string
+          user_id?: string | null
+          user_name?: string | null
+        }
+        Update: {
+          anomaly_type?: string
+          created_at?: string
+          description?: string | null
+          flagged?: boolean
+          id?: string
+          severity?: string
+          user_id?: string | null
+          user_name?: string | null
+        }
+        Relationships: []
+      }
       access_audit_log: {
         Row: {
           action: string
@@ -479,6 +512,69 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      compliance_documents: {
+        Row: {
+          category: string
+          created_at: string
+          file_path: string
+          file_size: number | null
+          id: string
+          name: string
+          uploaded_by: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          file_path: string
+          file_size?: number | null
+          id?: string
+          name: string
+          uploaded_by?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          name?: string
+          uploaded_by?: string
+        }
+        Relationships: []
+      }
+      compliance_items: {
+        Row: {
+          area: string
+          created_at: string
+          description: string | null
+          id: string
+          last_review_date: string | null
+          next_review_date: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          area: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          last_review_date?: string | null
+          next_review_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          area?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          last_review_date?: string | null
+          next_review_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       deployment_checklist: {
         Row: {
@@ -1934,6 +2030,47 @@ export type Database = {
         }
         Relationships: []
       }
+      risk_indicators: {
+        Row: {
+          created_at: string
+          id: string
+          risk_description: string
+          severity: string
+          status: string
+          system_id: string | null
+          system_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          risk_description: string
+          severity?: string
+          status?: string
+          system_id?: string | null
+          system_name?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          risk_description?: string
+          severity?: string
+          status?: string
+          system_id?: string | null
+          system_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "risk_indicators_system_id_fkey"
+            columns: ["system_id"]
+            isOneToOne: false
+            referencedRelation: "monitored_systems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       role_permissions: {
         Row: {
           created_at: string
@@ -1965,6 +2102,83 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      security_alerts: {
+        Row: {
+          alert_type: string
+          created_at: string
+          description: string | null
+          id: string
+          resolved: boolean
+          resolved_at: string | null
+          severity: string
+          system_id: string | null
+          system_name: string | null
+          title: string
+        }
+        Insert: {
+          alert_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          resolved?: boolean
+          resolved_at?: string | null
+          severity?: string
+          system_id?: string | null
+          system_name?: string | null
+          title: string
+        }
+        Update: {
+          alert_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          resolved?: boolean
+          resolved_at?: string | null
+          severity?: string
+          system_id?: string | null
+          system_name?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "security_alerts_system_id_fkey"
+            columns: ["system_id"]
+            isOneToOne: false
+            referencedRelation: "monitored_systems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      security_events: {
+        Row: {
+          affected_system: string | null
+          created_at: string
+          description: string | null
+          event_type: string
+          id: string
+          user_id: string | null
+          user_name: string | null
+        }
+        Insert: {
+          affected_system?: string | null
+          created_at?: string
+          description?: string | null
+          event_type: string
+          id?: string
+          user_id?: string | null
+          user_name?: string | null
+        }
+        Update: {
+          affected_system?: string | null
+          created_at?: string
+          description?: string | null
+          event_type?: string
+          id?: string
+          user_id?: string | null
+          user_name?: string | null
+        }
+        Relationships: []
       }
       subscriptions: {
         Row: {
