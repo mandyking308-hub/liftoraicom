@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { LayoutDashboard, FileInput, GitBranch, FolderKanban, Activity, FileText, LogOut, Menu, X, Monitor, Bot, Workflow, Plug, Play, Command } from "lucide-react";
+import { LayoutDashboard, FileInput, GitBranch, FolderKanban, Activity, FileText, LogOut, Menu, X, Monitor, Bot, Workflow, Plug, Play, Command, Network } from "lucide-react";
 import { useState } from "react";
 
 const navItems = [
@@ -13,6 +13,7 @@ const navItems = [
   { label: "Agents", to: "/founder/agents", icon: Bot },
   { label: "Workflows", to: "/founder/workflows", icon: Workflow },
   { label: "Executions", to: "/founder/executions", icon: Play },
+  { label: "Processes", to: "/founder/processes", icon: Network },
   { label: "Integrations", to: "/founder/integrations", icon: Plug },
   { label: "Activity", to: "/founder/activity", icon: Activity },
   { label: "Documents", to: "/founder/documents", icon: FileText },
