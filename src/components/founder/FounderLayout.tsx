@@ -1,11 +1,12 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { LayoutDashboard, FileInput, GitBranch, FolderKanban, Activity, FileText, LogOut, Menu, X, Monitor, Bot, Workflow, Plug, Play, Command, Network, Layers, Rocket } from "lucide-react";
+import { LayoutDashboard, FileInput, GitBranch, FolderKanban, Activity, FileText, LogOut, Menu, X, Monitor, Bot, Workflow, Plug, Play, Command, Network, Layers, Rocket, BarChart3 } from "lucide-react";
 import { useState } from "react";
 
 const navItems = [
   { label: "Command Center", to: "/founder/command-center", icon: Command },
   { label: "Overview", to: "/founder", icon: LayoutDashboard },
+  { label: "Analytics", to: "/founder/analytics", icon: BarChart3 },
   { label: "Proposals", to: "/founder/proposals", icon: FileInput },
   { label: "Lead Pipeline", to: "/founder/pipeline", icon: GitBranch },
   { label: "Projects", to: "/founder/projects", icon: FolderKanban },
