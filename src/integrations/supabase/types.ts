@@ -842,6 +842,144 @@ export type Database = {
           },
         ]
       }
+      process_documents: {
+        Row: {
+          category: string
+          created_at: string
+          file_path: string
+          file_size: number | null
+          id: string
+          name: string
+          process_id: string
+          uploaded_by: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          file_path: string
+          file_size?: number | null
+          id?: string
+          name: string
+          process_id: string
+          uploaded_by?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          name?: string
+          process_id?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "process_documents_process_id_fkey"
+            columns: ["process_id"]
+            isOneToOne: false
+            referencedRelation: "processes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      process_steps: {
+        Row: {
+          agent_id: string | null
+          classification: string
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          order_index: number
+          process_id: string
+          responsible_role: string | null
+          updated_at: string
+          workflow_id: string | null
+        }
+        Insert: {
+          agent_id?: string | null
+          classification?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          order_index?: number
+          process_id: string
+          responsible_role?: string | null
+          updated_at?: string
+          workflow_id?: string | null
+        }
+        Update: {
+          agent_id?: string | null
+          classification?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          order_index?: number
+          process_id?: string
+          responsible_role?: string | null
+          updated_at?: string
+          workflow_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "process_steps_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "process_steps_process_id_fkey"
+            columns: ["process_id"]
+            isOneToOne: false
+            referencedRelation: "processes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "process_steps_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "automation_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      processes: {
+        Row: {
+          automation_status: string
+          client_organisation: string
+          created_at: string
+          department: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          automation_status?: string
+          client_organisation?: string
+          created_at?: string
+          department?: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          automation_status?: string
+          client_organisation?: string
+          created_at?: string
+          department?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
