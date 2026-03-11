@@ -42,6 +42,15 @@ import FounderProjectDetail from "./pages/founder/FounderProjectDetail";
 import FounderActivity from "./pages/founder/FounderActivity";
 import FounderDocuments from "./pages/founder/FounderDocuments";
 
+// Partner pages
+import PartnerDashboard from "./pages/partner/PartnerDashboard";
+import PartnerOpportunities from "./pages/partner/PartnerOpportunities";
+import PartnerOpportunityDetail from "./pages/partner/PartnerOpportunityDetail";
+import PartnerProjects from "./pages/partner/PartnerProjects";
+import PartnerProjectDetail from "./pages/partner/PartnerProjectDetail";
+import PartnerDocuments from "./pages/partner/PartnerDocuments";
+import PartnerMessages from "./pages/partner/PartnerMessages";
+
 const queryClient = new QueryClient();
 
 const App = () => (
