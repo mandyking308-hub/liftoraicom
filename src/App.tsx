@@ -85,6 +85,7 @@ import ManualPageDetail from "./pages/founder/ManualPageDetail";
 import BuildLog from "./pages/founder/BuildLog";
 import FounderRevenue from "./pages/founder/FounderRevenue";
 import BrainCore from "./pages/founder/BrainCore";
+import DecisionEngine from "./pages/founder/DecisionEngine";
 // Partner pages
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import PartnerOpportunities from "./pages/partner/PartnerOpportunities";
