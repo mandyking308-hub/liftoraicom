@@ -35,6 +35,7 @@ import MaintenanceDashboard from "./pages/portal/MaintenanceDashboard";
 import MaintenanceSchedule from "./pages/portal/MaintenanceSchedule";
 import MaintenanceUpdates from "./pages/portal/MaintenanceUpdates";
 import FeatureRequests from "./pages/portal/FeatureRequests";
+import ClientSystemMonitoring from "./pages/portal/ClientSystemMonitoring";
 
 // Founder pages
 import FounderOverview from "./pages/founder/FounderOverview";
@@ -45,7 +46,8 @@ import FounderProjects from "./pages/founder/FounderProjects";
 import FounderProjectDetail from "./pages/founder/FounderProjectDetail";
 import FounderActivity from "./pages/founder/FounderActivity";
 import FounderDocuments from "./pages/founder/FounderDocuments";
-
+import MonitoringDashboard from "./pages/founder/MonitoringDashboard";
+import MonitoringSystemDetail from "./pages/founder/MonitoringSystemDetail";
 // Partner pages
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import PartnerOpportunities from "./pages/partner/PartnerOpportunities";
@@ -93,6 +95,7 @@ const App = () => (
             <Route path="/portal/maintenance/schedule" element={<ProtectedRoute><MaintenanceSchedule /></ProtectedRoute>} />
             <Route path="/portal/maintenance/updates" element={<ProtectedRoute><MaintenanceUpdates /></ProtectedRoute>} />
             <Route path="/portal/maintenance/features" element={<ProtectedRoute><FeatureRequests /></ProtectedRoute>} />
+            <Route path="/portal/monitoring" element={<ProtectedRoute><ClientSystemMonitoring /></ProtectedRoute>} />
 
             {/* Founder Console */}
             <Route path="/founder" element={<FounderRoute><FounderOverview /></FounderRoute>} />
@@ -103,6 +106,8 @@ const App = () => (
             <Route path="/founder/projects/:id" element={<FounderRoute><FounderProjectDetail /></FounderRoute>} />
             <Route path="/founder/activity" element={<FounderRoute><FounderActivity /></FounderRoute>} />
             <Route path="/founder/documents" element={<FounderRoute><FounderDocuments /></FounderRoute>} />
+            <Route path="/founder/monitoring" element={<FounderRoute><MonitoringDashboard /></FounderRoute>} />
+            <Route path="/founder/monitoring/:id" element={<FounderRoute><MonitoringSystemDetail /></FounderRoute>} />
 
             {/* Partner Portal */}
             <Route path="/partner" element={<PartnerRoute><PartnerDashboard /></PartnerRoute>} />
