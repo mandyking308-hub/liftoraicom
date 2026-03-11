@@ -122,6 +122,8 @@ const App = () => (
             <Route path="/founder/workflows/:id" element={<FounderRoute><WorkflowDetail /></FounderRoute>} />
             <Route path="/founder/integrations" element={<FounderRoute><IntegrationDirectory /></FounderRoute>} />
             <Route path="/founder/integrations/:id" element={<FounderRoute><IntegrationDetail /></FounderRoute>} />
+            <Route path="/founder/executions" element={<FounderRoute><ExecutionDashboard /></FounderRoute>} />
+            <Route path="/founder/executions/:id" element={<FounderRoute><ExecutionDetail /></FounderRoute>} />
 
             {/* Partner Portal */}
             <Route path="/partner" element={<PartnerRoute><PartnerDashboard /></PartnerRoute>} />
