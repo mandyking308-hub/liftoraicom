@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/portal/ProtectedRoute";
 import FounderRoute from "@/components/founder/FounderRoute";
+import PartnerRoute from "@/components/partner/PartnerRoute";
 
 // Public pages
 import Index from "./pages/Index";
@@ -40,6 +41,15 @@ import FounderProjects from "./pages/founder/FounderProjects";
 import FounderProjectDetail from "./pages/founder/FounderProjectDetail";
 import FounderActivity from "./pages/founder/FounderActivity";
 import FounderDocuments from "./pages/founder/FounderDocuments";
+
+// Partner pages
+import PartnerDashboard from "./pages/partner/PartnerDashboard";
+import PartnerOpportunities from "./pages/partner/PartnerOpportunities";
+import PartnerOpportunityDetail from "./pages/partner/PartnerOpportunityDetail";
+import PartnerProjects from "./pages/partner/PartnerProjects";
+import PartnerProjectDetail from "./pages/partner/PartnerProjectDetail";
+import PartnerDocuments from "./pages/partner/PartnerDocuments";
+import PartnerMessages from "./pages/partner/PartnerMessages";
 
 const queryClient = new QueryClient();
 
@@ -85,6 +95,15 @@ const App = () => (
             <Route path="/founder/projects/:id" element={<FounderRoute><FounderProjectDetail /></FounderRoute>} />
             <Route path="/founder/activity" element={<FounderRoute><FounderActivity /></FounderRoute>} />
             <Route path="/founder/documents" element={<FounderRoute><FounderDocuments /></FounderRoute>} />
+
+            {/* Partner Portal */}
+            <Route path="/partner" element={<PartnerRoute><PartnerDashboard /></PartnerRoute>} />
+            <Route path="/partner/opportunities" element={<PartnerRoute><PartnerOpportunities /></PartnerRoute>} />
+            <Route path="/partner/opportunities/:id" element={<PartnerRoute><PartnerOpportunityDetail /></PartnerRoute>} />
+            <Route path="/partner/projects" element={<PartnerRoute><PartnerProjects /></PartnerRoute>} />
+            <Route path="/partner/projects/:id" element={<PartnerRoute><PartnerProjectDetail /></PartnerRoute>} />
+            <Route path="/partner/documents" element={<PartnerRoute><PartnerDocuments /></PartnerRoute>} />
+            <Route path="/partner/messages" element={<PartnerRoute><PartnerMessages /></PartnerRoute>} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>
