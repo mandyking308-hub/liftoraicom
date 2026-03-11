@@ -31,6 +31,10 @@ import ProjectDetail from "./pages/portal/ProjectDetail";
 import Documents from "./pages/portal/Documents";
 import Messages from "./pages/portal/Messages";
 import Support from "./pages/portal/Support";
+import MaintenanceDashboard from "./pages/portal/MaintenanceDashboard";
+import MaintenanceSchedule from "./pages/portal/MaintenanceSchedule";
+import MaintenanceUpdates from "./pages/portal/MaintenanceUpdates";
+import FeatureRequests from "./pages/portal/FeatureRequests";
 
 // Founder pages
 import FounderOverview from "./pages/founder/FounderOverview";
@@ -85,6 +89,10 @@ const App = () => (
             <Route path="/portal/documents" element={<ProtectedRoute><Documents /></ProtectedRoute>} />
             <Route path="/portal/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
             <Route path="/portal/support" element={<ProtectedRoute><Support /></ProtectedRoute>} />
+            <Route path="/portal/maintenance" element={<ProtectedRoute><MaintenanceDashboard /></ProtectedRoute>} />
+            <Route path="/portal/maintenance/schedule" element={<ProtectedRoute><MaintenanceSchedule /></ProtectedRoute>} />
+            <Route path="/portal/maintenance/updates" element={<ProtectedRoute><MaintenanceUpdates /></ProtectedRoute>} />
+            <Route path="/portal/maintenance/features" element={<ProtectedRoute><FeatureRequests /></ProtectedRoute>} />
 
             {/* Founder Console */}
             <Route path="/founder" element={<FounderRoute><FounderOverview /></FounderRoute>} />
