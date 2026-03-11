@@ -61,6 +61,8 @@ import ProcessDirectory from "./pages/founder/ProcessDirectory";
 import ProcessDetail from "./pages/founder/ProcessDetail";
 import ArchitectureDirectory from "./pages/founder/ArchitectureDirectory";
 import ArchitectureDetail from "./pages/founder/ArchitectureDetail";
+import DeploymentDirectory from "./pages/founder/DeploymentDirectory";
+import DeploymentDetail from "./pages/founder/DeploymentDetail";
 // Partner pages
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import PartnerOpportunities from "./pages/partner/PartnerOpportunities";
@@ -134,6 +136,8 @@ const App = () => (
             <Route path="/founder/processes/:id" element={<FounderRoute><ProcessDetail /></FounderRoute>} />
             <Route path="/founder/architectures" element={<FounderRoute><ArchitectureDirectory /></FounderRoute>} />
             <Route path="/founder/architectures/:id" element={<FounderRoute><ArchitectureDetail /></FounderRoute>} />
+            <Route path="/founder/deployments" element={<FounderRoute><DeploymentDirectory /></FounderRoute>} />
+            <Route path="/founder/deployments/:id" element={<FounderRoute><DeploymentDetail /></FounderRoute>} />
 
             {/* Partner Portal */}
             <Route path="/partner" element={<PartnerRoute><PartnerDashboard /></PartnerRoute>} />
