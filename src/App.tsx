@@ -65,6 +65,7 @@ import ArchitectureDirectory from "./pages/founder/ArchitectureDirectory";
 import ArchitectureDetail from "./pages/founder/ArchitectureDetail";
 import DeploymentDirectory from "./pages/founder/DeploymentDirectory";
 import DeploymentDetail from "./pages/founder/DeploymentDetail";
+import FounderAnalytics from "./pages/founder/FounderAnalytics";
 // Partner pages
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import PartnerOpportunities from "./pages/partner/PartnerOpportunities";
