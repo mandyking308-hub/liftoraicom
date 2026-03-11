@@ -114,6 +114,8 @@ const App = () => (
             <Route path="/founder/monitoring/:id" element={<FounderRoute><MonitoringSystemDetail /></FounderRoute>} />
             <Route path="/founder/agents" element={<FounderRoute><AgentDirectory /></FounderRoute>} />
             <Route path="/founder/agents/:id" element={<FounderRoute><AgentProfile /></FounderRoute>} />
+            <Route path="/founder/workflows" element={<FounderRoute><WorkflowDirectory /></FounderRoute>} />
+            <Route path="/founder/workflows/:id" element={<FounderRoute><WorkflowDetail /></FounderRoute>} />
 
             {/* Partner Portal */}
             <Route path="/partner" element={<PartnerRoute><PartnerDashboard /></PartnerRoute>} />
