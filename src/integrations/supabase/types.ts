@@ -513,6 +513,36 @@ export type Database = {
           },
         ]
       }
+      build_log_entries: {
+        Row: {
+          author: string
+          change_type: string
+          created_at: string
+          description: string | null
+          id: string
+          module_affected: string
+          title: string
+        }
+        Insert: {
+          author?: string
+          change_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          module_affected?: string
+          title: string
+        }
+        Update: {
+          author?: string
+          change_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          module_affected?: string
+          title?: string
+        }
+        Relationships: []
+      }
       compliance_documents: {
         Row: {
           category: string
@@ -1240,6 +1270,81 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      manual_pages: {
+        Row: {
+          connected_modules: string | null
+          content: string | null
+          core_functions: string | null
+          created_at: string
+          data_inputs: string | null
+          data_outputs: string | null
+          id: string
+          module_name: string
+          operational_notes: string | null
+          order_index: number
+          purpose: string | null
+          section: string
+          updated_at: string
+          user_roles: string | null
+          version: number
+        }
+        Insert: {
+          connected_modules?: string | null
+          content?: string | null
+          core_functions?: string | null
+          created_at?: string
+          data_inputs?: string | null
+          data_outputs?: string | null
+          id?: string
+          module_name: string
+          operational_notes?: string | null
+          order_index?: number
+          purpose?: string | null
+          section?: string
+          updated_at?: string
+          user_roles?: string | null
+          version?: number
+        }
+        Update: {
+          connected_modules?: string | null
+          content?: string | null
+          core_functions?: string | null
+          created_at?: string
+          data_inputs?: string | null
+          data_outputs?: string | null
+          id?: string
+          module_name?: string
+          operational_notes?: string | null
+          order_index?: number
+          purpose?: string | null
+          section?: string
+          updated_at?: string
+          user_roles?: string | null
+          version?: number
+        }
+        Relationships: []
+      }
+      manual_versions: {
+        Row: {
+          created_at: string
+          id: string
+          summary: string
+          version_number: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          summary?: string
+          version_number?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          summary?: string
+          version_number?: number
+        }
+        Relationships: []
       }
       monitored_systems: {
         Row: {

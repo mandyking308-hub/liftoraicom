@@ -80,6 +80,9 @@ import TemplateDirectory from "./pages/founder/TemplateDirectory";
 import TemplateDetail from "./pages/founder/TemplateDetail";
 import PlatformExpansion from "./pages/founder/PlatformExpansion";
 import PlatformLaunchDetail from "./pages/founder/PlatformLaunchDetail";
+import FounderManual from "./pages/founder/FounderManual";
+import ManualPageDetail from "./pages/founder/ManualPageDetail";
+import BuildLog from "./pages/founder/BuildLog";
 // Partner pages
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import PartnerOpportunities from "./pages/partner/PartnerOpportunities";
@@ -172,6 +175,9 @@ const App = () => (
             <Route path="/founder/templates/:id" element={<FounderRoute><TemplateDetail /></FounderRoute>} />
             <Route path="/founder/expansion" element={<FounderRoute><PlatformExpansion /></FounderRoute>} />
             <Route path="/founder/expansion/:id" element={<FounderRoute><PlatformLaunchDetail /></FounderRoute>} />
+            <Route path="/founder/manual" element={<FounderRoute><FounderManual /></FounderRoute>} />
+            <Route path="/founder/manual/:id" element={<FounderRoute><ManualPageDetail /></FounderRoute>} />
+            <Route path="/founder/build-log" element={<FounderRoute><BuildLog /></FounderRoute>} />
 
             {/* Partner Portal */}
             <Route path="/partner" element={<PartnerRoute><PartnerDashboard /></PartnerRoute>} />
