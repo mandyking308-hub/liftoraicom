@@ -80,7 +80,7 @@ const Navbar = () => {
                 </Link>
               ))}
               <Button variant="glow" size="sm" className="mt-2" asChild>
-                <Link to="/project-discovery" onClick={() => setOpen(false)}>
+                <Link to="/ai-proposal" onClick={() => setOpen(false)}>
                   Start a Project
                 </Link>
               </Button>
