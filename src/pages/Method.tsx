@@ -1,11 +1,7 @@
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { motion } from "framer-motion";
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
-  visible: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.1, duration: 0.6 } }),
-};
+import { fadeUp } from "@/lib/animations";
 
 const steps = [
   { num: "01", title: "Concept", desc: "Understand workflows, identify automation opportunities, and define the intelligent system roadmap." },

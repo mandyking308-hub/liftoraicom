@@ -3,16 +3,8 @@ import { Button } from "@/components/ui/button";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { motion } from "framer-motion";
+import { fadeUp } from "@/lib/animations";
 import { Bot, Cpu, Workflow, Building2, Landmark, Briefcase, Rocket, Building } from "lucide-react";
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: i * 0.1, duration: 0.6, ease: "easeOut" },
-  }),
-};
 
 const features = [
   { icon: Cpu, title: "AI Platforms", desc: "Custom software platforms and operational dashboards." },
