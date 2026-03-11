@@ -83,6 +83,7 @@ import PlatformLaunchDetail from "./pages/founder/PlatformLaunchDetail";
 import FounderManual from "./pages/founder/FounderManual";
 import ManualPageDetail from "./pages/founder/ManualPageDetail";
 import BuildLog from "./pages/founder/BuildLog";
+import FounderRevenue from "./pages/founder/FounderRevenue";
 // Partner pages
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import PartnerOpportunities from "./pages/partner/PartnerOpportunities";
