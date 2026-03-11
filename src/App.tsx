@@ -31,6 +31,10 @@ import ProjectDetail from "./pages/portal/ProjectDetail";
 import Documents from "./pages/portal/Documents";
 import Messages from "./pages/portal/Messages";
 import Support from "./pages/portal/Support";
+import MaintenanceDashboard from "./pages/portal/MaintenanceDashboard";
+import MaintenanceSchedule from "./pages/portal/MaintenanceSchedule";
+import MaintenanceUpdates from "./pages/portal/MaintenanceUpdates";
+import FeatureRequests from "./pages/portal/FeatureRequests";
 
 // Founder pages
 import FounderOverview from "./pages/founder/FounderOverview";
