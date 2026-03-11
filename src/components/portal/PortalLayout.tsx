@@ -7,6 +7,7 @@ const navItems = [
   { label: "Dashboard", to: "/portal/dashboard", icon: LayoutDashboard },
   { label: "Systems", to: "/portal/systems", icon: Server },
   { label: "Analytics", to: "/portal/analytics", icon: BarChart3 },
+  { label: "Optimisation", to: "/portal/optimisation", icon: Zap },
   { label: "Projects", to: "/portal/projects", icon: FolderKanban },
   { label: "Documents", to: "/portal/documents", icon: FileText },
   { label: "Messages", to: "/portal/messages", icon: MessageSquare },

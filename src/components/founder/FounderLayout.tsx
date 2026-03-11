@@ -7,6 +7,7 @@ const navItems = [
   { label: "Command Center", to: "/founder/command-center", icon: Command },
   { label: "Overview", to: "/founder", icon: LayoutDashboard },
   { label: "Analytics", to: "/founder/analytics", icon: BarChart3 },
+  { label: "Optimisation", to: "/founder/optimisation", icon: Zap },
   { label: "Proposals", to: "/founder/proposals", icon: FileInput },
   { label: "Lead Pipeline", to: "/founder/pipeline", icon: GitBranch },
   { label: "Projects", to: "/founder/projects", icon: FolderKanban },
