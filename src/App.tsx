@@ -85,6 +85,7 @@ import ManualPageDetail from "./pages/founder/ManualPageDetail";
 import BuildLog from "./pages/founder/BuildLog";
 import FounderRevenue from "./pages/founder/FounderRevenue";
 import BrainCore from "./pages/founder/BrainCore";
+import DecisionEngine from "./pages/founder/DecisionEngine";
 // Partner pages
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import PartnerOpportunities from "./pages/partner/PartnerOpportunities";
@@ -182,6 +183,7 @@ const App = () => (
             <Route path="/founder/build-log" element={<FounderRoute><BuildLog /></FounderRoute>} />
             <Route path="/founder/revenue" element={<FounderRoute><FounderRevenue /></FounderRoute>} />
             <Route path="/founder/brain" element={<FounderRoute><BrainCore /></FounderRoute>} />
+            <Route path="/founder/decisions" element={<FounderRoute><DecisionEngine /></FounderRoute>} />
 
             {/* Partner Portal */}
             <Route path="/partner" element={<PartnerRoute><PartnerDashboard /></PartnerRoute>} />
