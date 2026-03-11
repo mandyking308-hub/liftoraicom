@@ -243,7 +243,9 @@ export type Database = {
       }
       automation_workflows: {
         Row: {
+          automation_type: string
           created_at: string
+          description: string | null
           execution_count: number
           failure_count: number
           id: string
@@ -256,7 +258,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          automation_type?: string
           created_at?: string
+          description?: string | null
           execution_count?: number
           failure_count?: number
           id?: string
@@ -269,7 +273,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          automation_type?: string
           created_at?: string
+          description?: string | null
           execution_count?: number
           failure_count?: number
           id?: string
@@ -1140,6 +1146,127 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      workflow_activity_logs: {
+        Row: {
+          action: string
+          created_at: string
+          details: string | null
+          id: string
+          workflow_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: string | null
+          id?: string
+          workflow_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: string | null
+          id?: string
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_activity_logs_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "automation_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_alerts: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          resolved: boolean
+          severity: string
+          title: string
+          workflow_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          resolved?: boolean
+          severity?: string
+          title: string
+          workflow_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          resolved?: boolean
+          severity?: string
+          title?: string
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_alerts_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "automation_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_steps: {
+        Row: {
+          agent_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          order_index: number
+          status: string
+          updated_at: string
+          workflow_id: string
+        }
+        Insert: {
+          agent_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          order_index: number
+          status?: string
+          updated_at?: string
+          workflow_id: string
+        }
+        Update: {
+          agent_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          order_index?: number
+          status?: string
+          updated_at?: string
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_steps_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_steps_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "automation_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
