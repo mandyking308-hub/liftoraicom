@@ -41,7 +41,7 @@ const Navbar = () => {
             </Link>
           ))}
           <Button variant="glow" size="sm" className="ml-4" asChild>
-            <Link to="/project-discovery">Start a Project</Link>
+            <Link to="/ai-proposal">Start a Project</Link>
           </Button>
         </div>
 
