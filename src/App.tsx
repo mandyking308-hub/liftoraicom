@@ -120,6 +120,7 @@ const App = () => (
             <Route path="/portal/systems" element={<ProtectedRoute><ClientControlPanel /></ProtectedRoute>} />
             <Route path="/portal/systems/:id" element={<ProtectedRoute><ClientSystemDetail /></ProtectedRoute>} />
             <Route path="/portal/analytics" element={<ProtectedRoute><ClientAnalytics /></ProtectedRoute>} />
+            <Route path="/portal/optimisation" element={<ProtectedRoute><ClientOptimisation /></ProtectedRoute>} />
 
             {/* Founder Console */}
             <Route path="/founder" element={<FounderRoute><FounderOverview /></FounderRoute>} />
