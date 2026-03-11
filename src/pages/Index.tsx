@@ -207,7 +207,7 @@ const Index = () => {
             </motion.h2>
             <motion.div variants={fadeUp} custom={1}>
               <Button variant="glow" size="lg" asChild>
-                <Link to="/project-discovery">Start Your Project</Link>
+                <Link to="/ai-proposal">Start Your Project</Link>
               </Button>
             </motion.div>
           </motion.div>
