@@ -142,7 +142,7 @@ const ClientSystemMonitoring = () => {
                               {statusIcon(w.status)}
                               <span className="text-sm">{w.name}</span>
                             </div>
-                            <Badge className={statusBadge(w.status)} variant="secondary" className={`text-xs ${statusBadge(w.status)}`}>{w.status}</Badge>
+                            <Badge variant="secondary" className={`text-xs ${statusBadge(w.status)}`}>{w.status}</Badge>
                           </div>
                         ))}
                       </div>
