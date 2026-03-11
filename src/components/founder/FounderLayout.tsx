@@ -20,6 +20,7 @@ const navItems = [
   { label: "Deployments", to: "/founder/deployments", icon: Rocket },
   { label: "Integrations", to: "/founder/integrations", icon: Plug },
   { label: "Activity", to: "/founder/activity", icon: Activity },
+  { label: "Knowledge", to: "/founder/knowledge", icon: BookOpen },
   { label: "Documents", to: "/founder/documents", icon: FileText },
 ];
 
