@@ -45,7 +45,8 @@ import FounderProjects from "./pages/founder/FounderProjects";
 import FounderProjectDetail from "./pages/founder/FounderProjectDetail";
 import FounderActivity from "./pages/founder/FounderActivity";
 import FounderDocuments from "./pages/founder/FounderDocuments";
-
+import MonitoringDashboard from "./pages/founder/MonitoringDashboard";
+import MonitoringSystemDetail from "./pages/founder/MonitoringSystemDetail";
 // Partner pages
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import PartnerOpportunities from "./pages/partner/PartnerOpportunities";
