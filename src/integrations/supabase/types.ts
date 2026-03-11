@@ -1115,6 +1115,94 @@ export type Database = {
           },
         ]
       }
+      launch_checklist: {
+        Row: {
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          id: string
+          item: string
+          order_index: number
+          platform_id: string
+        }
+        Insert: {
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          item: string
+          order_index?: number
+          platform_id: string
+        }
+        Update: {
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          item?: string
+          order_index?: number
+          platform_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "launch_checklist_platform_id_fkey"
+            columns: ["platform_id"]
+            isOneToOne: false
+            referencedRelation: "launched_platforms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      launched_platforms: {
+        Row: {
+          created_at: string
+          id: string
+          industry: string
+          launched_at: string | null
+          name: string
+          organisation_name: string
+          platform_purpose: string | null
+          status: string
+          template_id: string | null
+          template_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          industry?: string
+          launched_at?: string | null
+          name: string
+          organisation_name?: string
+          platform_purpose?: string | null
+          status?: string
+          template_id?: string | null
+          template_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          industry?: string
+          launched_at?: string | null
+          name?: string
+          organisation_name?: string
+          platform_purpose?: string | null
+          status?: string
+          template_id?: string | null
+          template_name?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "launched_platforms_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "system_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       maintenance_events: {
         Row: {
           created_at: string

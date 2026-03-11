@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { LayoutDashboard, FileInput, GitBranch, FolderKanban, Activity, FileText, LogOut, Menu, X, Monitor, Bot, Workflow, Plug, Play, Command, Network, Layers, Rocket, BarChart3, Zap, BookOpen, Globe, Building2, Shield, ShieldAlert, LayoutTemplate } from "lucide-react";
+import { LayoutDashboard, FileInput, GitBranch, FolderKanban, Activity, FileText, LogOut, Menu, X, Monitor, Bot, Workflow, Plug, Play, Command, Network, Layers, Rocket, BarChart3, Zap, BookOpen, Globe, Building2, Shield, ShieldAlert, LayoutTemplate, Sparkles } from "lucide-react";
 import { useState } from "react";
 
 const navItems = [
@@ -26,6 +26,7 @@ const navItems = [
   { label: "Access Control", to: "/founder/access-control", icon: Shield },
   { label: "Security", to: "/founder/security", icon: ShieldAlert },
   { label: "Templates", to: "/founder/templates", icon: LayoutTemplate },
+  { label: "Expansion", to: "/founder/expansion", icon: Sparkles },
   { label: "Documents", to: "/founder/documents", icon: FileText },
 ];
 

@@ -78,6 +78,8 @@ import AccessControl from "./pages/founder/AccessControl";
 import SecurityDashboard from "./pages/founder/SecurityDashboard";
 import TemplateDirectory from "./pages/founder/TemplateDirectory";
 import TemplateDetail from "./pages/founder/TemplateDetail";
+import PlatformExpansion from "./pages/founder/PlatformExpansion";
+import PlatformLaunchDetail from "./pages/founder/PlatformLaunchDetail";
 // Partner pages
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import PartnerOpportunities from "./pages/partner/PartnerOpportunities";
@@ -168,6 +170,8 @@ const App = () => (
             <Route path="/founder/security" element={<FounderRoute><SecurityDashboard /></FounderRoute>} />
             <Route path="/founder/templates" element={<FounderRoute><TemplateDirectory /></FounderRoute>} />
             <Route path="/founder/templates/:id" element={<FounderRoute><TemplateDetail /></FounderRoute>} />
+            <Route path="/founder/expansion" element={<FounderRoute><PlatformExpansion /></FounderRoute>} />
+            <Route path="/founder/expansion/:id" element={<FounderRoute><PlatformLaunchDetail /></FounderRoute>} />
 
             {/* Partner Portal */}
             <Route path="/partner" element={<PartnerRoute><PartnerDashboard /></PartnerRoute>} />
