@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/portal/ProtectedRoute";
+import FounderRoute from "@/components/founder/FounderRoute";
 
 // Public pages
 import Index from "./pages/Index";
@@ -29,6 +30,16 @@ import ProjectDetail from "./pages/portal/ProjectDetail";
 import Documents from "./pages/portal/Documents";
 import Messages from "./pages/portal/Messages";
 import Support from "./pages/portal/Support";
+
+// Founder pages
+import FounderOverview from "./pages/founder/FounderOverview";
+import FounderProposals from "./pages/founder/FounderProposals";
+import ProposalDetail from "./pages/founder/ProposalDetail";
+import LeadPipeline from "./pages/founder/LeadPipeline";
+import FounderProjects from "./pages/founder/FounderProjects";
+import FounderProjectDetail from "./pages/founder/FounderProjectDetail";
+import FounderActivity from "./pages/founder/FounderActivity";
+import FounderDocuments from "./pages/founder/FounderDocuments";
 
 const queryClient = new QueryClient();
 
@@ -57,13 +68,23 @@ const App = () => (
             <Route path="/portal/forgot-password" element={<ForgotPassword />} />
             <Route path="/portal/reset-password" element={<ResetPassword />} />
 
-            {/* Protected Portal */}
+            {/* Protected Client Portal */}
             <Route path="/portal/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/portal/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
             <Route path="/portal/projects/:id" element={<ProtectedRoute><ProjectDetail /></ProtectedRoute>} />
             <Route path="/portal/documents" element={<ProtectedRoute><Documents /></ProtectedRoute>} />
             <Route path="/portal/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
             <Route path="/portal/support" element={<ProtectedRoute><Support /></ProtectedRoute>} />
+
+            {/* Founder Console */}
+            <Route path="/founder" element={<FounderRoute><FounderOverview /></FounderRoute>} />
+            <Route path="/founder/proposals" element={<FounderRoute><FounderProposals /></FounderRoute>} />
+            <Route path="/founder/proposals/:id" element={<FounderRoute><ProposalDetail /></FounderRoute>} />
+            <Route path="/founder/pipeline" element={<FounderRoute><LeadPipeline /></FounderRoute>} />
+            <Route path="/founder/projects" element={<FounderRoute><FounderProjects /></FounderRoute>} />
+            <Route path="/founder/projects/:id" element={<FounderRoute><FounderProjectDetail /></FounderRoute>} />
+            <Route path="/founder/activity" element={<FounderRoute><FounderActivity /></FounderRoute>} />
+            <Route path="/founder/documents" element={<FounderRoute><FounderDocuments /></FounderRoute>} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>
