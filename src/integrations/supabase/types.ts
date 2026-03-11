@@ -297,6 +297,114 @@ export type Database = {
           },
         ]
       }
+      execution_logs: {
+        Row: {
+          created_at: string
+          details: string | null
+          event: string
+          execution_id: string
+          id: string
+          result: string | null
+          step_name: string | null
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          event: string
+          execution_id: string
+          id?: string
+          result?: string | null
+          step_name?: string | null
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          event?: string
+          execution_id?: string
+          id?: string
+          result?: string | null
+          step_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "execution_logs_execution_id_fkey"
+            columns: ["execution_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_executions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      execution_steps: {
+        Row: {
+          agent_id: string | null
+          agent_name: string | null
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          execution_id: string
+          id: string
+          order_index: number
+          result: string | null
+          started_at: string | null
+          status: string
+          step_id: string | null
+          step_name: string
+        }
+        Insert: {
+          agent_id?: string | null
+          agent_name?: string | null
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          execution_id: string
+          id?: string
+          order_index: number
+          result?: string | null
+          started_at?: string | null
+          status?: string
+          step_id?: string | null
+          step_name: string
+        }
+        Update: {
+          agent_id?: string | null
+          agent_name?: string | null
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          execution_id?: string
+          id?: string
+          order_index?: number
+          result?: string | null
+          started_at?: string | null
+          status?: string
+          step_id?: string | null
+          step_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "execution_steps_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "execution_steps_execution_id_fkey"
+            columns: ["execution_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_executions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "execution_steps_step_id_fkey"
+            columns: ["step_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_steps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feature_requests: {
         Row: {
           business_impact: string | null
@@ -1354,6 +1462,63 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "workflow_alerts_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "automation_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_executions: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          priority: string
+          result: string | null
+          started_at: string | null
+          status: string
+          system_id: string
+          updated_at: string
+          workflow_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          priority?: string
+          result?: string | null
+          started_at?: string | null
+          status?: string
+          system_id: string
+          updated_at?: string
+          workflow_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          priority?: string
+          result?: string | null
+          started_at?: string | null
+          status?: string
+          system_id?: string
+          updated_at?: string
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_executions_system_id_fkey"
+            columns: ["system_id"]
+            isOneToOne: false
+            referencedRelation: "monitored_systems"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_executions_workflow_id_fkey"
             columns: ["workflow_id"]
             isOneToOne: false
             referencedRelation: "automation_workflows"
