@@ -158,6 +158,8 @@ const App = () => (
             <Route path="/founder/knowledge" element={<FounderRoute><KnowledgeDirectory /></FounderRoute>} />
             <Route path="/founder/knowledge/:id" element={<FounderRoute><KnowledgeDetail /></FounderRoute>} />
             <Route path="/founder/operations" element={<FounderRoute><GlobalOperations /></FounderRoute>} />
+            <Route path="/founder/organisations" element={<FounderRoute><OrganisationDirectory /></FounderRoute>} />
+            <Route path="/founder/organisations/:id" element={<FounderRoute><OrganisationProfile /></FounderRoute>} />
 
             {/* Partner Portal */}
             <Route path="/partner" element={<PartnerRoute><PartnerDashboard /></PartnerRoute>} />
