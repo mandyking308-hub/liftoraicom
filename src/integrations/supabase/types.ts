@@ -513,6 +513,105 @@ export type Database = {
           },
         ]
       }
+      brain_insights: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          insight_type: string
+          priority: string
+          source_module: string | null
+          status: string
+          system_affected: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          insight_type?: string
+          priority?: string
+          source_module?: string | null
+          status?: string
+          system_affected?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          insight_type?: string
+          priority?: string
+          source_module?: string | null
+          status?: string
+          system_affected?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      brain_learning_records: {
+        Row: {
+          category: string
+          confidence_level: string
+          created_at: string
+          id: string
+          pattern_description: string
+          source_system: string | null
+        }
+        Insert: {
+          category?: string
+          confidence_level?: string
+          created_at?: string
+          id?: string
+          pattern_description: string
+          source_system?: string | null
+        }
+        Update: {
+          category?: string
+          confidence_level?: string
+          created_at?: string
+          id?: string
+          pattern_description?: string
+          source_system?: string | null
+        }
+        Relationships: []
+      }
+      brain_recommendations: {
+        Row: {
+          affected_system: string | null
+          created_at: string
+          description: string | null
+          id: string
+          priority: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          affected_system?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          priority?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          affected_system?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          priority?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       build_log_entries: {
         Row: {
           author: string
