@@ -341,6 +341,150 @@ export type Database = {
           },
         ]
       }
+      integration_activity_logs: {
+        Row: {
+          created_at: string
+          details: string | null
+          event_type: string
+          id: string
+          integration_id: string
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          event_type: string
+          id?: string
+          integration_id: string
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          event_type?: string
+          id?: string
+          integration_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_activity_logs_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "integrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integration_alerts: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          integration_id: string
+          resolved: boolean
+          severity: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          integration_id: string
+          resolved?: boolean
+          severity?: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          integration_id?: string
+          resolved?: boolean
+          severity?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_alerts_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "integrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integration_linked_systems: {
+        Row: {
+          entity_id: string
+          entity_name: string
+          entity_type: string
+          id: string
+          integration_id: string
+          linked_at: string
+        }
+        Insert: {
+          entity_id: string
+          entity_name: string
+          entity_type: string
+          id?: string
+          integration_id: string
+          linked_at?: string
+        }
+        Update: {
+          entity_id?: string
+          entity_name?: string
+          entity_type?: string
+          id?: string
+          integration_id?: string
+          linked_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_linked_systems_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "integrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integrations: {
+        Row: {
+          auth_method: string
+          created_at: string
+          description: string | null
+          endpoint_url: string | null
+          id: string
+          last_sync: string | null
+          name: string
+          service_type: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          auth_method?: string
+          created_at?: string
+          description?: string | null
+          endpoint_url?: string | null
+          id?: string
+          last_sync?: string | null
+          name: string
+          service_type?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          auth_method?: string
+          created_at?: string
+          description?: string | null
+          endpoint_url?: string | null
+          id?: string
+          last_sync?: string | null
+          name?: string
+          service_type?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       maintenance_events: {
         Row: {
           created_at: string
