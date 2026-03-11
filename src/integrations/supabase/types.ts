@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      access_audit_log: {
+        Row: {
+          action: string
+          created_at: string
+          details: string | null
+          id: string
+          ip_address: string | null
+          user_id: string | null
+          user_name: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: string | null
+          id?: string
+          ip_address?: string | null
+          user_id?: string | null
+          user_name?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: string | null
+          id?: string
+          ip_address?: string | null
+          user_id?: string | null
+          user_name?: string | null
+        }
+        Relationships: []
+      }
       activity_log: {
         Row: {
           created_at: string
@@ -1410,6 +1440,33 @@ export type Database = {
           },
         ]
       }
+      platform_roles: {
+        Row: {
+          access_level: string
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          access_level?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          access_level?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       process_documents: {
         Row: {
           category: string
@@ -1877,6 +1934,38 @@ export type Database = {
         }
         Relationships: []
       }
+      role_permissions: {
+        Row: {
+          created_at: string
+          granted: boolean
+          id: string
+          permission: string
+          role_id: string
+        }
+        Insert: {
+          created_at?: string
+          granted?: boolean
+          id?: string
+          permission: string
+          role_id: string
+        }
+        Update: {
+          created_at?: string
+          granted?: boolean
+          id?: string
+          permission?: string
+          role_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_permissions_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "platform_roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscriptions: {
         Row: {
           client_id: string
@@ -2094,6 +2183,48 @@ export type Database = {
             columns: ["subscription_id"]
             isOneToOne: false
             referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_platform_roles: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          id: string
+          organisation_id: string | null
+          role_id: string
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          id?: string
+          organisation_id?: string | null
+          role_id: string
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          id?: string
+          organisation_id?: string | null
+          role_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_platform_roles_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_platform_roles_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "platform_roles"
             referencedColumns: ["id"]
           },
         ]
