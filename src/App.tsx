@@ -78,6 +78,8 @@ import AccessControl from "./pages/founder/AccessControl";
 import SecurityDashboard from "./pages/founder/SecurityDashboard";
 import TemplateDirectory from "./pages/founder/TemplateDirectory";
 import TemplateDetail from "./pages/founder/TemplateDetail";
+import PlatformExpansion from "./pages/founder/PlatformExpansion";
+import PlatformLaunchDetail from "./pages/founder/PlatformLaunchDetail";
 // Partner pages
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import PartnerOpportunities from "./pages/partner/PartnerOpportunities";
