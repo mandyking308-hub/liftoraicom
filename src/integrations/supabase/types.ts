@@ -2621,6 +2621,42 @@ export type Database = {
         }
         Relationships: []
       }
+      strategy_insights: {
+        Row: {
+          category: string
+          confidence_level: string
+          created_at: string
+          description: string | null
+          id: string
+          status: string
+          target_industry: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          confidence_level?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          status?: string
+          target_industry?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          confidence_level?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          status?: string
+          target_industry?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           client_id: string
