@@ -450,6 +450,158 @@ export type Database = {
           },
         ]
       }
+      deployment_checklist: {
+        Row: {
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          deployment_id: string
+          id: string
+          item: string
+          order_index: number
+        }
+        Insert: {
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          deployment_id: string
+          id?: string
+          item: string
+          order_index?: number
+        }
+        Update: {
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          deployment_id?: string
+          id?: string
+          item?: string
+          order_index?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deployment_checklist_deployment_id_fkey"
+            columns: ["deployment_id"]
+            isOneToOne: false
+            referencedRelation: "deployments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deployment_logs: {
+        Row: {
+          created_at: string
+          deployment_id: string
+          details: string | null
+          event: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          deployment_id: string
+          details?: string | null
+          event: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          deployment_id?: string
+          details?: string | null
+          event?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deployment_logs_deployment_id_fkey"
+            columns: ["deployment_id"]
+            isOneToOne: false
+            referencedRelation: "deployments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deployment_stages: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          deployment_id: string
+          id: string
+          name: string
+          order_index: number
+          status: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          deployment_id: string
+          id?: string
+          name: string
+          order_index?: number
+          status?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          deployment_id?: string
+          id?: string
+          name?: string
+          order_index?: number
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deployment_stages_deployment_id_fkey"
+            columns: ["deployment_id"]
+            isOneToOne: false
+            referencedRelation: "deployments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deployments: {
+        Row: {
+          architecture_id: string | null
+          client_organisation: string
+          created_at: string
+          expected_launch_date: string | null
+          id: string
+          launched_at: string | null
+          status: string
+          system_name: string
+          updated_at: string
+        }
+        Insert: {
+          architecture_id?: string | null
+          client_organisation?: string
+          created_at?: string
+          expected_launch_date?: string | null
+          id?: string
+          launched_at?: string | null
+          status?: string
+          system_name: string
+          updated_at?: string
+        }
+        Update: {
+          architecture_id?: string | null
+          client_organisation?: string
+          created_at?: string
+          expected_launch_date?: string | null
+          id?: string
+          launched_at?: string | null
+          status?: string
+          system_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deployments_architecture_id_fkey"
+            columns: ["architecture_id"]
+            isOneToOne: false
+            referencedRelation: "architectures"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       execution_logs: {
         Row: {
           created_at: string
