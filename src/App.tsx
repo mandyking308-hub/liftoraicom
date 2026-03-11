@@ -56,6 +56,7 @@ import IntegrationDirectory from "./pages/founder/IntegrationDirectory";
 import IntegrationDetail from "./pages/founder/IntegrationDetail";
 import ExecutionDashboard from "./pages/founder/ExecutionDashboard";
 import ExecutionDetail from "./pages/founder/ExecutionDetail";
+import CommandCenter from "./pages/founder/CommandCenter";
 // Partner pages
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import PartnerOpportunities from "./pages/partner/PartnerOpportunities";
