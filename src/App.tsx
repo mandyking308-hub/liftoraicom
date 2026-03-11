@@ -187,6 +187,7 @@ const App = () => (
             <Route path="/founder/brain" element={<FounderRoute><BrainCore /></FounderRoute>} />
             <Route path="/founder/decisions" element={<FounderRoute><DecisionEngine /></FounderRoute>} />
             <Route path="/founder/strategy" element={<FounderRoute><StrategyEngine /></FounderRoute>} />
+            <Route path="/founder/copilot" element={<FounderRoute><FounderCoPilot /></FounderRoute>} />
 
             {/* Partner Portal */}
             <Route path="/partner" element={<PartnerRoute><PartnerDashboard /></PartnerRoute>} />
