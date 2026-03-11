@@ -50,6 +50,8 @@ import MonitoringDashboard from "./pages/founder/MonitoringDashboard";
 import MonitoringSystemDetail from "./pages/founder/MonitoringSystemDetail";
 import AgentDirectory from "./pages/founder/AgentDirectory";
 import AgentProfile from "./pages/founder/AgentProfile";
+import WorkflowDirectory from "./pages/founder/WorkflowDirectory";
+import WorkflowDetail from "./pages/founder/WorkflowDetail";
 // Partner pages
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import PartnerOpportunities from "./pages/partner/PartnerOpportunities";
