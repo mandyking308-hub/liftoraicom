@@ -8,18 +8,30 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { motion } from "framer-motion";
 import { fadeUp } from "@/lib/animations";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const PartnerProgram = () => {
   const [loading, setLoading] = useState(false);
+  const [partnerType, setPartnerType] = useState("");
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    const form = new FormData(e.currentTarget);
+    const { error } = await supabase.from("partner_applications").insert({
+      company_name: form.get("company_name") as string,
+      contact_email: form.get("contact_email") as string,
+      partner_type: partnerType,
+      project_description: form.get("project_description") as string,
+    });
+    setLoading(false);
+    if (error) {
+      toast.error("Failed to submit application.");
+    } else {
       toast.success("Partner application submitted successfully.");
       (e.target as HTMLFormElement).reset();
-    }, 1000);
+      setPartnerType("");
+    }
   };
 
   return (
@@ -56,15 +68,15 @@ const PartnerProgram = () => {
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label className="text-sm font-medium mb-1.5 block">Company Name</label>
-                <Input required placeholder="Your company" className="bg-secondary border-border" />
+                <Input name="company_name" required placeholder="Your company" className="bg-secondary border-border" />
               </div>
               <div>
                 <label className="text-sm font-medium mb-1.5 block">Contact Email</label>
-                <Input required type="email" placeholder="contact@company.com" className="bg-secondary border-border" />
+                <Input name="contact_email" required type="email" placeholder="contact@company.com" className="bg-secondary border-border" />
               </div>
               <div>
                 <label className="text-sm font-medium mb-1.5 block">Partner Type</label>
-                <Select required>
+                <Select value={partnerType} onValueChange={setPartnerType} required>
                   <SelectTrigger className="bg-secondary border-border">
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
@@ -73,12 +85,13 @@ const PartnerProgram = () => {
                     <SelectItem value="consultant">Consultant</SelectItem>
                     <SelectItem value="vc">Venture Capital</SelectItem>
                     <SelectItem value="incubator">Incubator</SelectItem>
+                    <SelectItem value="enterprise_advisor">Enterprise Advisor</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div>
                 <label className="text-sm font-medium mb-1.5 block">Project Type</label>
-                <Textarea required placeholder="Describe the type of projects you'd like to collaborate on..." className="bg-secondary border-border min-h-[100px]" />
+                <Textarea name="project_description" required placeholder="Describe the type of projects you'd like to collaborate on..." className="bg-secondary border-border min-h-[100px]" />
               </div>
               <Button type="submit" variant="glow" className="w-full" disabled={loading}>
                 {loading ? "Submitting..." : "Submit Application"}

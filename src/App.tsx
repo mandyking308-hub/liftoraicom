@@ -96,6 +96,15 @@ const App = () => (
             <Route path="/founder/activity" element={<FounderRoute><FounderActivity /></FounderRoute>} />
             <Route path="/founder/documents" element={<FounderRoute><FounderDocuments /></FounderRoute>} />
 
+            {/* Partner Portal */}
+            <Route path="/partner" element={<PartnerRoute><PartnerDashboard /></PartnerRoute>} />
+            <Route path="/partner/opportunities" element={<PartnerRoute><PartnerOpportunities /></PartnerRoute>} />
+            <Route path="/partner/opportunities/:id" element={<PartnerRoute><PartnerOpportunityDetail /></PartnerRoute>} />
+            <Route path="/partner/projects" element={<PartnerRoute><PartnerProjects /></PartnerRoute>} />
+            <Route path="/partner/projects/:id" element={<PartnerRoute><PartnerProjectDetail /></PartnerRoute>} />
+            <Route path="/partner/documents" element={<PartnerRoute><PartnerDocuments /></PartnerRoute>} />
+            <Route path="/partner/messages" element={<PartnerRoute><PartnerMessages /></PartnerRoute>} />
+
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
