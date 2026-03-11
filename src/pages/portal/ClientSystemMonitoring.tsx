@@ -167,7 +167,7 @@ const ClientSystemMonitoring = () => {
                                 <p className="text-xs text-muted-foreground">{a.agent_function}</p>
                               </div>
                             </div>
-                            <Badge className={statusBadge(a.status)} variant="secondary" className={`text-xs ${statusBadge(a.status)}`}>{a.status}</Badge>
+                            <Badge variant="secondary" className={`text-xs ${statusBadge(a.status)}`}>{a.status}</Badge>
                           </div>
                         ))}
                       </div>

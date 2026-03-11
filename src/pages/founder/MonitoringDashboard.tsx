@@ -271,7 +271,7 @@ const MonitoringDashboard = () => {
                     </div>
                     <p className="text-xs text-muted-foreground">{a.agent_function || "—"}</p>
                     <div className="flex items-center justify-between mt-3">
-                      <Badge className={statusBadge(a.status)} variant="secondary" className={`text-xs ${statusBadge(a.status)}`}>{a.status}</Badge>
+                      <Badge variant="secondary" className={`text-xs ${statusBadge(a.status)}`}>{a.status}</Badge>
                       <span className="text-xs text-muted-foreground">
                         {a.last_activity ? format(new Date(a.last_activity), "MMM d") : "—"}
                       </span>
