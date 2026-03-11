@@ -14,7 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      proposals: {
+        Row: {
+          ai_estimated_scope: string | null
+          ai_estimated_timeline: string | null
+          ai_suggested_solution: string | null
+          business_problem: string
+          company_name: string
+          company_size: string
+          contact_email: string | null
+          contact_name: string | null
+          created_at: string
+          id: string
+          industry: string
+          processes_to_automate: string[]
+          project_scale: string
+          project_types: string[]
+          status: string
+          timeline: string
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          ai_estimated_scope?: string | null
+          ai_estimated_timeline?: string | null
+          ai_suggested_solution?: string | null
+          business_problem: string
+          company_name: string
+          company_size: string
+          contact_email?: string | null
+          contact_name?: string | null
+          created_at?: string
+          id?: string
+          industry: string
+          processes_to_automate: string[]
+          project_scale: string
+          project_types: string[]
+          status?: string
+          timeline: string
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          ai_estimated_scope?: string | null
+          ai_estimated_timeline?: string | null
+          ai_suggested_solution?: string | null
+          business_problem?: string
+          company_name?: string
+          company_size?: string
+          contact_email?: string | null
+          contact_name?: string | null
+          created_at?: string
+          id?: string
+          industry?: string
+          processes_to_automate?: string[]
+          project_scale?: string
+          project_types?: string[]
+          status?: string
+          timeline?: string
+          updated_at?: string
+          website_url?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
