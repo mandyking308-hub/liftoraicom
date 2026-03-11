@@ -1599,6 +1599,56 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_deals: {
+        Row: {
+          client_organisation: string
+          created_at: string
+          currency: string
+          deal_status: string
+          id: string
+          opportunity_id: string | null
+          partner_commission: number
+          partner_name: string
+          project_name: string
+          project_value: number
+          updated_at: string
+        }
+        Insert: {
+          client_organisation?: string
+          created_at?: string
+          currency?: string
+          deal_status?: string
+          id?: string
+          opportunity_id?: string | null
+          partner_commission?: number
+          partner_name?: string
+          project_name?: string
+          project_value?: number
+          updated_at?: string
+        }
+        Update: {
+          client_organisation?: string
+          created_at?: string
+          currency?: string
+          deal_status?: string
+          id?: string
+          opportunity_id?: string | null
+          partner_commission?: number
+          partner_name?: string
+          project_name?: string
+          project_value?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_deals_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "partner_opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partner_documents: {
         Row: {
           created_at: string
@@ -2220,6 +2270,54 @@ export type Database = {
           timeline?: string
           updated_at?: string
           website_url?: string | null
+        }
+        Relationships: []
+      }
+      revenue_records: {
+        Row: {
+          client_organisation: string
+          created_at: string
+          currency: string
+          id: string
+          notes: string | null
+          period_end: string | null
+          period_start: string | null
+          revenue_value: number
+          source_id: string | null
+          source_name: string
+          source_type: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          client_organisation?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          notes?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          revenue_value?: number
+          source_id?: string | null
+          source_name?: string
+          source_type?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          client_organisation?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          notes?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          revenue_value?: number
+          source_id?: string | null
+          source_name?: string
+          source_type?: string
+          status?: string
+          updated_at?: string
         }
         Relationships: []
       }
