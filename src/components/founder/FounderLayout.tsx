@@ -26,6 +26,7 @@ const navItems = [
   { label: "Access Control", to: "/founder/access-control", icon: Shield },
   { label: "Security", to: "/founder/security", icon: ShieldAlert },
   { label: "Templates", to: "/founder/templates", icon: LayoutTemplate },
+  { label: "Expansion", to: "/founder/expansion", icon: Sparkles },
   { label: "Documents", to: "/founder/documents", icon: FileText },
 ];
 
