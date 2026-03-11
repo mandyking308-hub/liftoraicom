@@ -41,6 +41,172 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_applications: {
+        Row: {
+          company_name: string
+          contact_email: string
+          created_at: string
+          id: string
+          partner_type: string
+          project_description: string | null
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          company_name: string
+          contact_email: string
+          created_at?: string
+          id?: string
+          partner_type?: string
+          project_description?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          company_name?: string
+          contact_email?: string
+          created_at?: string
+          id?: string
+          partner_type?: string
+          project_description?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      partner_documents: {
+        Row: {
+          created_at: string
+          file_path: string
+          file_size: number | null
+          id: string
+          name: string
+          opportunity_id: string
+          uploaded_by: string
+        }
+        Insert: {
+          created_at?: string
+          file_path: string
+          file_size?: number | null
+          id?: string
+          name: string
+          opportunity_id: string
+          uploaded_by?: string
+        }
+        Update: {
+          created_at?: string
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          name?: string
+          opportunity_id?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_documents_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "partner_opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          opportunity_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          opportunity_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          opportunity_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_messages_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "partner_opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_opportunities: {
+        Row: {
+          company_name: string
+          created_at: string
+          estimated_scope: string | null
+          id: string
+          industry: string
+          partner_id: string
+          primary_contact: string | null
+          project_description: string
+          project_id: string | null
+          status: string
+          timeline: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_name: string
+          created_at?: string
+          estimated_scope?: string | null
+          id?: string
+          industry?: string
+          partner_id: string
+          primary_contact?: string | null
+          project_description?: string
+          project_id?: string | null
+          status?: string
+          timeline?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_name?: string
+          created_at?: string
+          estimated_scope?: string | null
+          id?: string
+          industry?: string
+          partner_id?: string
+          primary_contact?: string | null
+          project_description?: string
+          project_id?: string | null
+          status?: string
+          timeline?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_opportunities_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_opportunities_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
