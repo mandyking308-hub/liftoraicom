@@ -2363,6 +2363,105 @@ export type Database = {
           },
         ]
       }
+      system_templates: {
+        Row: {
+          architecture_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          template_type: string
+          updated_at: string
+          usage_count: number
+        }
+        Insert: {
+          architecture_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          template_type?: string
+          updated_at?: string
+          usage_count?: number
+        }
+        Update: {
+          architecture_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          template_type?: string
+          updated_at?: string
+          usage_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "system_templates_architecture_id_fkey"
+            columns: ["architecture_id"]
+            isOneToOne: false
+            referencedRelation: "architectures"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      template_components: {
+        Row: {
+          agent_id: string | null
+          component_type: string
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          order_index: number
+          template_id: string
+          workflow_id: string | null
+        }
+        Insert: {
+          agent_id?: string | null
+          component_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          order_index?: number
+          template_id: string
+          workflow_id?: string | null
+        }
+        Update: {
+          agent_id?: string | null
+          component_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          order_index?: number
+          template_id?: string
+          workflow_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "template_components_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "template_components_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "system_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "template_components_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "automation_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       update_logs: {
         Row: {
           affected_system: string | null

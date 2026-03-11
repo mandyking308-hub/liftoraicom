@@ -76,6 +76,8 @@ import OrganisationDirectory from "./pages/founder/OrganisationDirectory";
 import OrganisationProfile from "./pages/founder/OrganisationProfile";
 import AccessControl from "./pages/founder/AccessControl";
 import SecurityDashboard from "./pages/founder/SecurityDashboard";
+import TemplateDirectory from "./pages/founder/TemplateDirectory";
+import TemplateDetail from "./pages/founder/TemplateDetail";
 // Partner pages
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import PartnerOpportunities from "./pages/partner/PartnerOpportunities";
@@ -164,6 +166,8 @@ const App = () => (
             <Route path="/founder/organisations/:id" element={<FounderRoute><OrganisationProfile /></FounderRoute>} />
             <Route path="/founder/access-control" element={<FounderRoute><AccessControl /></FounderRoute>} />
             <Route path="/founder/security" element={<FounderRoute><SecurityDashboard /></FounderRoute>} />
+            <Route path="/founder/templates" element={<FounderRoute><TemplateDirectory /></FounderRoute>} />
+            <Route path="/founder/templates/:id" element={<FounderRoute><TemplateDetail /></FounderRoute>} />
 
             {/* Partner Portal */}
             <Route path="/partner" element={<PartnerRoute><PartnerDashboard /></PartnerRoute>} />
