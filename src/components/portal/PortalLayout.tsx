@@ -1,10 +1,11 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { LayoutDashboard, FolderKanban, FileText, MessageSquare, LifeBuoy, LogOut, Menu, X, Wrench, Monitor } from "lucide-react";
+import { LayoutDashboard, FolderKanban, FileText, MessageSquare, LifeBuoy, LogOut, Menu, X, Wrench, Monitor, Server } from "lucide-react";
 import { useState } from "react";
 
 const navItems = [
   { label: "Dashboard", to: "/portal/dashboard", icon: LayoutDashboard },
+  { label: "Systems", to: "/portal/systems", icon: Server },
   { label: "Projects", to: "/portal/projects", icon: FolderKanban },
   { label: "Documents", to: "/portal/documents", icon: FileText },
   { label: "Messages", to: "/portal/messages", icon: MessageSquare },
