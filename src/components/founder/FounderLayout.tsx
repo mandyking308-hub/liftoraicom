@@ -8,6 +8,7 @@ const navItems = [
   { label: "Operations", to: "/founder/operations", icon: Globe },
   { label: "Organisations", to: "/founder/organisations", icon: Building2 },
   { label: "Overview", to: "/founder", icon: LayoutDashboard },
+  { label: "Revenue", to: "/founder/revenue", icon: PoundSterling },
   { label: "Analytics", to: "/founder/analytics", icon: BarChart3 },
   { label: "Optimisation", to: "/founder/optimisation", icon: Zap },
   { label: "Proposals", to: "/founder/proposals", icon: FileInput },
