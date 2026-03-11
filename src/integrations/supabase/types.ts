@@ -705,6 +705,57 @@ export type Database = {
         }
         Relationships: []
       }
+      decision_recommendations: {
+        Row: {
+          affected_system: string | null
+          category: string
+          created_at: string
+          decided_at: string | null
+          decision_maker: string | null
+          description: string | null
+          id: string
+          potential_benefits: string | null
+          potential_risks: string | null
+          priority: string
+          status: string
+          target_module: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          affected_system?: string | null
+          category?: string
+          created_at?: string
+          decided_at?: string | null
+          decision_maker?: string | null
+          description?: string | null
+          id?: string
+          potential_benefits?: string | null
+          potential_risks?: string | null
+          priority?: string
+          status?: string
+          target_module?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          affected_system?: string | null
+          category?: string
+          created_at?: string
+          decided_at?: string | null
+          decision_maker?: string | null
+          description?: string | null
+          id?: string
+          potential_benefits?: string | null
+          potential_risks?: string | null
+          priority?: string
+          status?: string
+          target_module?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       deployment_checklist: {
         Row: {
           completed: boolean
