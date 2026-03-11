@@ -241,6 +241,159 @@ export type Database = {
           },
         ]
       }
+      architecture_components: {
+        Row: {
+          agent_id: string | null
+          architecture_id: string
+          component_type: string
+          created_at: string
+          description: string | null
+          id: string
+          integration_id: string | null
+          name: string
+          order_index: number
+          workflow_id: string | null
+        }
+        Insert: {
+          agent_id?: string | null
+          architecture_id: string
+          component_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          integration_id?: string | null
+          name: string
+          order_index?: number
+          workflow_id?: string | null
+        }
+        Update: {
+          agent_id?: string | null
+          architecture_id?: string
+          component_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          integration_id?: string | null
+          name?: string
+          order_index?: number
+          workflow_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "architecture_components_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "architecture_components_architecture_id_fkey"
+            columns: ["architecture_id"]
+            isOneToOne: false
+            referencedRelation: "architectures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "architecture_components_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "integrations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "architecture_components_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "automation_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      architecture_relationships: {
+        Row: {
+          architecture_id: string
+          created_at: string
+          id: string
+          relationship_label: string | null
+          source_component_id: string
+          target_component_id: string
+        }
+        Insert: {
+          architecture_id: string
+          created_at?: string
+          id?: string
+          relationship_label?: string | null
+          source_component_id: string
+          target_component_id: string
+        }
+        Update: {
+          architecture_id?: string
+          created_at?: string
+          id?: string
+          relationship_label?: string | null
+          source_component_id?: string
+          target_component_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "architecture_relationships_architecture_id_fkey"
+            columns: ["architecture_id"]
+            isOneToOne: false
+            referencedRelation: "architectures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "architecture_relationships_source_component_id_fkey"
+            columns: ["source_component_id"]
+            isOneToOne: false
+            referencedRelation: "architecture_components"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "architecture_relationships_target_component_id_fkey"
+            columns: ["target_component_id"]
+            isOneToOne: false
+            referencedRelation: "architecture_components"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      architectures: {
+        Row: {
+          client_organisation: string
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          status: string
+          system_purpose: string | null
+          system_type: string
+          updated_at: string
+        }
+        Insert: {
+          client_organisation?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          status?: string
+          system_purpose?: string | null
+          system_type?: string
+          updated_at?: string
+        }
+        Update: {
+          client_organisation?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          status?: string
+          system_purpose?: string | null
+          system_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       automation_workflows: {
         Row: {
           automation_type: string
