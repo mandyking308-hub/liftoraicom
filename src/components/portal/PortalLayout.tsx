@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { LayoutDashboard, FolderKanban, FileText, MessageSquare, LifeBuoy, LogOut, Menu, X, Wrench, Monitor, Server, BarChart3 } from "lucide-react";
+import { LayoutDashboard, FolderKanban, FileText, MessageSquare, LifeBuoy, LogOut, Menu, X, Wrench, Monitor, Server, BarChart3, Zap } from "lucide-react";
 import { useState } from "react";
 
 const navItems = [
