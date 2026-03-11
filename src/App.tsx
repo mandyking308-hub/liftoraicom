@@ -95,6 +95,7 @@ const App = () => (
             <Route path="/portal/maintenance/schedule" element={<ProtectedRoute><MaintenanceSchedule /></ProtectedRoute>} />
             <Route path="/portal/maintenance/updates" element={<ProtectedRoute><MaintenanceUpdates /></ProtectedRoute>} />
             <Route path="/portal/maintenance/features" element={<ProtectedRoute><FeatureRequests /></ProtectedRoute>} />
+            <Route path="/portal/monitoring" element={<ProtectedRoute><ClientSystemMonitoring /></ProtectedRoute>} />
 
             {/* Founder Console */}
             <Route path="/founder" element={<FounderRoute><FounderOverview /></FounderRoute>} />
