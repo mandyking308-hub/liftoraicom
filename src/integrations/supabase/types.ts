@@ -41,6 +41,88 @@ export type Database = {
         }
         Relationships: []
       }
+      feature_requests: {
+        Row: {
+          business_impact: string | null
+          created_at: string
+          description: string
+          id: string
+          status: string
+          subscription_id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          business_impact?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          status?: string
+          subscription_id: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          business_impact?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          status?: string
+          subscription_id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feature_requests_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      maintenance_events: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          scheduled_date: string
+          status: string
+          subscription_id: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          scheduled_date: string
+          status?: string
+          subscription_id: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          scheduled_date?: string
+          status?: string
+          subscription_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_events_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partner_applications: {
         Row: {
           company_name: string
@@ -525,6 +607,66 @@ export type Database = {
         }
         Relationships: []
       }
+      subscriptions: {
+        Row: {
+          client_id: string
+          coverage_type: string
+          created_at: string
+          id: string
+          last_renewal_date: string | null
+          next_renewal_date: string | null
+          plan_name: string
+          project_id: string
+          start_date: string
+          status: string
+          support_level: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          coverage_type?: string
+          created_at?: string
+          id?: string
+          last_renewal_date?: string | null
+          next_renewal_date?: string | null
+          plan_name?: string
+          project_id: string
+          start_date?: string
+          status?: string
+          support_level?: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          coverage_type?: string
+          created_at?: string
+          id?: string
+          last_renewal_date?: string | null
+          next_renewal_date?: string | null
+          plan_name?: string
+          project_id?: string
+          start_date?: string
+          status?: string
+          support_level?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       support_requests: {
         Row: {
           created_at: string
@@ -568,6 +710,79 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      system_status: {
+        Row: {
+          created_at: string
+          id: string
+          last_checked: string
+          service_name: string
+          status: string
+          subscription_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_checked?: string
+          service_name: string
+          status?: string
+          subscription_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_checked?: string
+          service_name?: string
+          status?: string
+          subscription_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "system_status_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      update_logs: {
+        Row: {
+          affected_system: string | null
+          created_at: string
+          description: string | null
+          id: string
+          performed_at: string
+          subscription_id: string
+          title: string
+        }
+        Insert: {
+          affected_system?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          performed_at?: string
+          subscription_id: string
+          title: string
+        }
+        Update: {
+          affected_system?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          performed_at?: string
+          subscription_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "update_logs_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
             referencedColumns: ["id"]
           },
         ]
