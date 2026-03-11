@@ -81,7 +81,7 @@ const CaseStudies = () => (
           className="mt-16 text-center"
         >
           <Button variant="glow" size="lg" asChild>
-            <Link to="/project-discovery">Start Your Project</Link>
+            <Link to="/ai-proposal">Start Your Project</Link>
           </Button>
         </motion.div>
       </div>

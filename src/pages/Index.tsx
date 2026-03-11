@@ -69,7 +69,7 @@ const Index = () => {
               className="mt-10 flex flex-col sm:flex-row gap-4 justify-center"
             >
               <Button variant="glow" size="lg" asChild>
-                <Link to="/project-discovery">Start a Project</Link>
+                <Link to="/ai-proposal">Start a Project</Link>
               </Button>
               <Button variant="outline-light" size="lg" asChild>
                 <Link to="/case-studies">Explore Our Work</Link>
@@ -207,7 +207,7 @@ const Index = () => {
             </motion.h2>
             <motion.div variants={fadeUp} custom={1}>
               <Button variant="glow" size="lg" asChild>
-                <Link to="/project-discovery">Start Your Project</Link>
+                <Link to="/ai-proposal">Start Your Project</Link>
               </Button>
             </motion.div>
           </motion.div>
