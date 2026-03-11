@@ -132,6 +132,8 @@ const App = () => (
             <Route path="/founder/command-center" element={<FounderRoute><CommandCenter /></FounderRoute>} />
             <Route path="/founder/processes" element={<FounderRoute><ProcessDirectory /></FounderRoute>} />
             <Route path="/founder/processes/:id" element={<FounderRoute><ProcessDetail /></FounderRoute>} />
+            <Route path="/founder/architectures" element={<FounderRoute><ArchitectureDirectory /></FounderRoute>} />
+            <Route path="/founder/architectures/:id" element={<FounderRoute><ArchitectureDetail /></FounderRoute>} />
 
             {/* Partner Portal */}
             <Route path="/partner" element={<PartnerRoute><PartnerDashboard /></PartnerRoute>} />
