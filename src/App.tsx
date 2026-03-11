@@ -48,6 +48,8 @@ import FounderActivity from "./pages/founder/FounderActivity";
 import FounderDocuments from "./pages/founder/FounderDocuments";
 import MonitoringDashboard from "./pages/founder/MonitoringDashboard";
 import MonitoringSystemDetail from "./pages/founder/MonitoringSystemDetail";
+import AgentDirectory from "./pages/founder/AgentDirectory";
+import AgentProfile from "./pages/founder/AgentProfile";
 // Partner pages
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import PartnerOpportunities from "./pages/partner/PartnerOpportunities";
