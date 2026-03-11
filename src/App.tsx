@@ -72,6 +72,8 @@ import OptimisationDashboard from "./pages/founder/OptimisationDashboard";
 import KnowledgeDirectory from "./pages/founder/KnowledgeDirectory";
 import KnowledgeDetail from "./pages/founder/KnowledgeDetail";
 import GlobalOperations from "./pages/founder/GlobalOperations";
+import OrganisationDirectory from "./pages/founder/OrganisationDirectory";
+import OrganisationProfile from "./pages/founder/OrganisationProfile";
 // Partner pages
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import PartnerOpportunities from "./pages/partner/PartnerOpportunities";
@@ -156,6 +158,8 @@ const App = () => (
             <Route path="/founder/knowledge" element={<FounderRoute><KnowledgeDirectory /></FounderRoute>} />
             <Route path="/founder/knowledge/:id" element={<FounderRoute><KnowledgeDetail /></FounderRoute>} />
             <Route path="/founder/operations" element={<FounderRoute><GlobalOperations /></FounderRoute>} />
+            <Route path="/founder/organisations" element={<FounderRoute><OrganisationDirectory /></FounderRoute>} />
+            <Route path="/founder/organisations/:id" element={<FounderRoute><OrganisationProfile /></FounderRoute>} />
 
             {/* Partner Portal */}
             <Route path="/partner" element={<PartnerRoute><PartnerDashboard /></PartnerRoute>} />
