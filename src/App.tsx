@@ -36,6 +36,8 @@ import MaintenanceSchedule from "./pages/portal/MaintenanceSchedule";
 import MaintenanceUpdates from "./pages/portal/MaintenanceUpdates";
 import FeatureRequests from "./pages/portal/FeatureRequests";
 import ClientSystemMonitoring from "./pages/portal/ClientSystemMonitoring";
+import ClientControlPanel from "./pages/portal/ClientControlPanel";
+import ClientSystemDetail from "./pages/portal/ClientSystemDetail";
 
 // Founder pages
 import FounderOverview from "./pages/founder/FounderOverview";
@@ -111,6 +113,8 @@ const App = () => (
             <Route path="/portal/maintenance/updates" element={<ProtectedRoute><MaintenanceUpdates /></ProtectedRoute>} />
             <Route path="/portal/maintenance/features" element={<ProtectedRoute><FeatureRequests /></ProtectedRoute>} />
             <Route path="/portal/monitoring" element={<ProtectedRoute><ClientSystemMonitoring /></ProtectedRoute>} />
+            <Route path="/portal/systems" element={<ProtectedRoute><ClientControlPanel /></ProtectedRoute>} />
+            <Route path="/portal/systems/:id" element={<ProtectedRoute><ClientSystemDetail /></ProtectedRoute>} />
 
             {/* Founder Console */}
             <Route path="/founder" element={<FounderRoute><FounderOverview /></FounderRoute>} />
