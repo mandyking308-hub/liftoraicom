@@ -75,6 +75,7 @@ import GlobalOperations from "./pages/founder/GlobalOperations";
 import OrganisationDirectory from "./pages/founder/OrganisationDirectory";
 import OrganisationProfile from "./pages/founder/OrganisationProfile";
 import AccessControl from "./pages/founder/AccessControl";
+import SecurityDashboard from "./pages/founder/SecurityDashboard";
 // Partner pages
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import PartnerOpportunities from "./pages/partner/PartnerOpportunities";
@@ -162,6 +163,7 @@ const App = () => (
             <Route path="/founder/organisations" element={<FounderRoute><OrganisationDirectory /></FounderRoute>} />
             <Route path="/founder/organisations/:id" element={<FounderRoute><OrganisationProfile /></FounderRoute>} />
             <Route path="/founder/access-control" element={<FounderRoute><AccessControl /></FounderRoute>} />
+            <Route path="/founder/security" element={<FounderRoute><SecurityDashboard /></FounderRoute>} />
 
             {/* Partner Portal */}
             <Route path="/partner" element={<PartnerRoute><PartnerDashboard /></PartnerRoute>} />
