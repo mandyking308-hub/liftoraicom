@@ -72,6 +72,8 @@ import OptimisationDashboard from "./pages/founder/OptimisationDashboard";
 import KnowledgeDirectory from "./pages/founder/KnowledgeDirectory";
 import KnowledgeDetail from "./pages/founder/KnowledgeDetail";
 import GlobalOperations from "./pages/founder/GlobalOperations";
+import OrganisationDirectory from "./pages/founder/OrganisationDirectory";
+import OrganisationProfile from "./pages/founder/OrganisationProfile";
 // Partner pages
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import PartnerOpportunities from "./pages/partner/PartnerOpportunities";
