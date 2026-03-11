@@ -24,6 +24,7 @@ const navItems = [
   { label: "Activity", to: "/founder/activity", icon: Activity },
   { label: "Knowledge", to: "/founder/knowledge", icon: BookOpen },
   { label: "Access Control", to: "/founder/access-control", icon: Shield },
+  { label: "Security", to: "/founder/security", icon: ShieldAlert },
   { label: "Documents", to: "/founder/documents", icon: FileText },
 ];
 
