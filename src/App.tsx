@@ -50,6 +50,8 @@ import MonitoringDashboard from "./pages/founder/MonitoringDashboard";
 import MonitoringSystemDetail from "./pages/founder/MonitoringSystemDetail";
 import AgentDirectory from "./pages/founder/AgentDirectory";
 import AgentProfile from "./pages/founder/AgentProfile";
+import WorkflowDirectory from "./pages/founder/WorkflowDirectory";
+import WorkflowDetail from "./pages/founder/WorkflowDetail";
 // Partner pages
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import PartnerOpportunities from "./pages/partner/PartnerOpportunities";
@@ -112,6 +114,8 @@ const App = () => (
             <Route path="/founder/monitoring/:id" element={<FounderRoute><MonitoringSystemDetail /></FounderRoute>} />
             <Route path="/founder/agents" element={<FounderRoute><AgentDirectory /></FounderRoute>} />
             <Route path="/founder/agents/:id" element={<FounderRoute><AgentProfile /></FounderRoute>} />
+            <Route path="/founder/workflows" element={<FounderRoute><WorkflowDirectory /></FounderRoute>} />
+            <Route path="/founder/workflows/:id" element={<FounderRoute><WorkflowDetail /></FounderRoute>} />
 
             {/* Partner Portal */}
             <Route path="/partner" element={<PartnerRoute><PartnerDashboard /></PartnerRoute>} />
