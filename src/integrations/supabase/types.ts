@@ -898,6 +898,97 @@ export type Database = {
         }
         Relationships: []
       }
+      knowledge_documents: {
+        Row: {
+          created_at: string
+          file_path: string
+          file_size: number | null
+          id: string
+          knowledge_entry_id: string
+          name: string
+          uploaded_by: string
+        }
+        Insert: {
+          created_at?: string
+          file_path: string
+          file_size?: number | null
+          id?: string
+          knowledge_entry_id: string
+          name: string
+          uploaded_by?: string
+        }
+        Update: {
+          created_at?: string
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          knowledge_entry_id?: string
+          name?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_documents_knowledge_entry_id_fkey"
+            columns: ["knowledge_entry_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      knowledge_entries: {
+        Row: {
+          category: string
+          content: string | null
+          created_at: string
+          description: string | null
+          entry_type: string
+          id: string
+          linked_agent_ids: string[] | null
+          linked_workflow_ids: string[] | null
+          related_system_id: string | null
+          related_system_name: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          content?: string | null
+          created_at?: string
+          description?: string | null
+          entry_type?: string
+          id?: string
+          linked_agent_ids?: string[] | null
+          linked_workflow_ids?: string[] | null
+          related_system_id?: string | null
+          related_system_name?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          content?: string | null
+          created_at?: string
+          description?: string | null
+          entry_type?: string
+          id?: string
+          linked_agent_ids?: string[] | null
+          linked_workflow_ids?: string[] | null
+          related_system_id?: string | null
+          related_system_name?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_entries_related_system_id_fkey"
+            columns: ["related_system_id"]
+            isOneToOne: false
+            referencedRelation: "monitored_systems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       maintenance_events: {
         Row: {
           created_at: string
