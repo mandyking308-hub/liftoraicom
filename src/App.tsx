@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/portal/ProtectedRoute";
 import FounderRoute from "@/components/founder/FounderRoute";
+import PartnerRoute from "@/components/partner/PartnerRoute";
 
 // Public pages
 import Index from "./pages/Index";
