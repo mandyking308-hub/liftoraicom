@@ -39,6 +39,7 @@ import ClientSystemMonitoring from "./pages/portal/ClientSystemMonitoring";
 import ClientControlPanel from "./pages/portal/ClientControlPanel";
 import ClientSystemDetail from "./pages/portal/ClientSystemDetail";
 import ClientAnalytics from "./pages/portal/ClientAnalytics";
+import ClientOptimisation from "./pages/portal/ClientOptimisation";
 
 // Founder pages
 import FounderOverview from "./pages/founder/FounderOverview";
