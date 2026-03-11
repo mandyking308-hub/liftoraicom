@@ -41,6 +41,97 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_agents: {
+        Row: {
+          agent_function: string
+          created_at: string
+          id: string
+          last_activity: string | null
+          name: string
+          status: string
+          system_id: string
+          updated_at: string
+        }
+        Insert: {
+          agent_function?: string
+          created_at?: string
+          id?: string
+          last_activity?: string | null
+          name: string
+          status?: string
+          system_id: string
+          updated_at?: string
+        }
+        Update: {
+          agent_function?: string
+          created_at?: string
+          id?: string
+          last_activity?: string | null
+          name?: string
+          status?: string
+          system_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_agents_system_id_fkey"
+            columns: ["system_id"]
+            isOneToOne: false
+            referencedRelation: "monitored_systems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      automation_workflows: {
+        Row: {
+          created_at: string
+          execution_count: number
+          failure_count: number
+          id: string
+          last_execution: string | null
+          last_result: string | null
+          name: string
+          status: string
+          success_count: number
+          system_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          execution_count?: number
+          failure_count?: number
+          id?: string
+          last_execution?: string | null
+          last_result?: string | null
+          name: string
+          status?: string
+          success_count?: number
+          system_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          execution_count?: number
+          failure_count?: number
+          id?: string
+          last_execution?: string | null
+          last_result?: string | null
+          name?: string
+          status?: string
+          success_count?: number
+          system_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_workflows_system_id_fkey"
+            columns: ["system_id"]
+            isOneToOne: false
+            referencedRelation: "monitored_systems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feature_requests: {
         Row: {
           business_impact: string | null
@@ -119,6 +210,51 @@ export type Database = {
             columns: ["subscription_id"]
             isOneToOne: false
             referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      monitored_systems: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: string
+          project_id: string
+          status: string
+          system_name: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: string
+          project_id: string
+          status?: string
+          system_name: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: string
+          project_id?: string
+          status?: string
+          system_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "monitored_systems_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "monitored_systems_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]
@@ -710,6 +846,47 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      system_alerts: {
+        Row: {
+          affected_system: string | null
+          created_at: string
+          description: string | null
+          id: string
+          resolved: boolean
+          severity: string
+          system_id: string
+          title: string
+        }
+        Insert: {
+          affected_system?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          resolved?: boolean
+          severity?: string
+          system_id: string
+          title: string
+        }
+        Update: {
+          affected_system?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          resolved?: boolean
+          severity?: string
+          system_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "system_alerts_system_id_fkey"
+            columns: ["system_id"]
+            isOneToOne: false
+            referencedRelation: "monitored_systems"
             referencedColumns: ["id"]
           },
         ]
