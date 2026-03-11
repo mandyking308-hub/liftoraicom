@@ -1,10 +1,11 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { LayoutDashboard, FileInput, GitBranch, FolderKanban, Activity, FileText, LogOut, Menu, X, Monitor, Bot, Workflow, Plug, Play, Command, Network, Layers, Rocket, BarChart3, Zap, BookOpen, Globe, Building2, Shield, ShieldAlert, LayoutTemplate, Sparkles, BookOpenCheck, ClipboardList, PoundSterling, Brain, Scale, Compass } from "lucide-react";
+import { LayoutDashboard, FileInput, GitBranch, FolderKanban, Activity, FileText, LogOut, Menu, X, Monitor, Bot, Workflow, Plug, Play, Command, Network, Layers, Rocket, BarChart3, Zap, BookOpen, Globe, Building2, Shield, ShieldAlert, LayoutTemplate, Sparkles, BookOpenCheck, ClipboardList, PoundSterling, Brain, Scale, Compass, MessageSquare } from "lucide-react";
 import { useState } from "react";
 
 const navItems = [
   { label: "Command Center", to: "/founder/command-center", icon: Command },
+  { label: "AI Co-Pilot", to: "/founder/copilot", icon: MessageSquare },
   { label: "AI Brain", to: "/founder/brain", icon: Brain },
   { label: "Decisions", to: "/founder/decisions", icon: Scale },
   { label: "Strategy", to: "/founder/strategy", icon: Compass },
