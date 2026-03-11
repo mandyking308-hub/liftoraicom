@@ -39,6 +39,7 @@ import ClientSystemMonitoring from "./pages/portal/ClientSystemMonitoring";
 import ClientControlPanel from "./pages/portal/ClientControlPanel";
 import ClientSystemDetail from "./pages/portal/ClientSystemDetail";
 import ClientAnalytics from "./pages/portal/ClientAnalytics";
+import ClientOptimisation from "./pages/portal/ClientOptimisation";
 
 // Founder pages
 import FounderOverview from "./pages/founder/FounderOverview";
@@ -67,6 +68,7 @@ import ArchitectureDetail from "./pages/founder/ArchitectureDetail";
 import DeploymentDirectory from "./pages/founder/DeploymentDirectory";
 import DeploymentDetail from "./pages/founder/DeploymentDetail";
 import FounderAnalytics from "./pages/founder/FounderAnalytics";
+import OptimisationDashboard from "./pages/founder/OptimisationDashboard";
 // Partner pages
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import PartnerOpportunities from "./pages/partner/PartnerOpportunities";
@@ -118,6 +120,7 @@ const App = () => (
             <Route path="/portal/systems" element={<ProtectedRoute><ClientControlPanel /></ProtectedRoute>} />
             <Route path="/portal/systems/:id" element={<ProtectedRoute><ClientSystemDetail /></ProtectedRoute>} />
             <Route path="/portal/analytics" element={<ProtectedRoute><ClientAnalytics /></ProtectedRoute>} />
+            <Route path="/portal/optimisation" element={<ProtectedRoute><ClientOptimisation /></ProtectedRoute>} />
 
             {/* Founder Console */}
             <Route path="/founder" element={<FounderRoute><FounderOverview /></FounderRoute>} />
@@ -146,6 +149,7 @@ const App = () => (
             <Route path="/founder/deployments" element={<FounderRoute><DeploymentDirectory /></FounderRoute>} />
             <Route path="/founder/deployments/:id" element={<FounderRoute><DeploymentDetail /></FounderRoute>} />
             <Route path="/founder/analytics" element={<FounderRoute><FounderAnalytics /></FounderRoute>} />
+            <Route path="/founder/optimisation" element={<FounderRoute><OptimisationDashboard /></FounderRoute>} />
 
             {/* Partner Portal */}
             <Route path="/partner" element={<PartnerRoute><PartnerDashboard /></PartnerRoute>} />

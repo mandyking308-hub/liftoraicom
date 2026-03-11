@@ -981,6 +981,62 @@ export type Database = {
           },
         ]
       }
+      optimisation_insights: {
+        Row: {
+          created_at: string
+          description: string | null
+          entity_id: string | null
+          entity_name: string
+          entity_type: string
+          id: string
+          insight_type: string
+          priority: string
+          recommended_action: string | null
+          status: string
+          system_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          entity_id?: string | null
+          entity_name?: string
+          entity_type?: string
+          id?: string
+          insight_type?: string
+          priority?: string
+          recommended_action?: string | null
+          status?: string
+          system_id?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          entity_id?: string | null
+          entity_name?: string
+          entity_type?: string
+          id?: string
+          insight_type?: string
+          priority?: string
+          recommended_action?: string | null
+          status?: string
+          system_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "optimisation_insights_system_id_fkey"
+            columns: ["system_id"]
+            isOneToOne: false
+            referencedRelation: "monitored_systems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partner_applications: {
         Row: {
           company_name: string
