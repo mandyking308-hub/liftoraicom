@@ -181,6 +181,7 @@ const App = () => (
             <Route path="/founder/manual/:id" element={<FounderRoute><ManualPageDetail /></FounderRoute>} />
             <Route path="/founder/build-log" element={<FounderRoute><BuildLog /></FounderRoute>} />
             <Route path="/founder/revenue" element={<FounderRoute><FounderRevenue /></FounderRoute>} />
+            <Route path="/founder/brain" element={<FounderRoute><BrainCore /></FounderRoute>} />
 
             {/* Partner Portal */}
             <Route path="/partner" element={<PartnerRoute><PartnerDashboard /></PartnerRoute>} />
