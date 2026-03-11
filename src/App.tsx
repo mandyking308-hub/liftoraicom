@@ -35,6 +35,7 @@ import MaintenanceDashboard from "./pages/portal/MaintenanceDashboard";
 import MaintenanceSchedule from "./pages/portal/MaintenanceSchedule";
 import MaintenanceUpdates from "./pages/portal/MaintenanceUpdates";
 import FeatureRequests from "./pages/portal/FeatureRequests";
+import ClientSystemMonitoring from "./pages/portal/ClientSystemMonitoring";
 
 // Founder pages
 import FounderOverview from "./pages/founder/FounderOverview";
