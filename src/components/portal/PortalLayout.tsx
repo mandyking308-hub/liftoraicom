@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { LayoutDashboard, FolderKanban, FileText, MessageSquare, LifeBuoy, LogOut, Menu, X, Wrench } from "lucide-react";
+import { LayoutDashboard, FolderKanban, FileText, MessageSquare, LifeBuoy, LogOut, Menu, X, Wrench, Monitor } from "lucide-react";
 import { useState } from "react";
 
 const navItems = [
@@ -10,6 +10,7 @@ const navItems = [
   { label: "Messages", to: "/portal/messages", icon: MessageSquare },
   { label: "Support", to: "/portal/support", icon: LifeBuoy },
   { label: "Maintenance", to: "/portal/maintenance", icon: Wrench },
+  { label: "Monitoring", to: "/portal/monitoring", icon: Monitor },
 ];
 
 const PortalLayout = ({ children }: { children: React.ReactNode }) => {
