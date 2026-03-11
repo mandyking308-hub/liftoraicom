@@ -52,6 +52,8 @@ import AgentDirectory from "./pages/founder/AgentDirectory";
 import AgentProfile from "./pages/founder/AgentProfile";
 import WorkflowDirectory from "./pages/founder/WorkflowDirectory";
 import WorkflowDetail from "./pages/founder/WorkflowDetail";
+import IntegrationDirectory from "./pages/founder/IntegrationDirectory";
+import IntegrationDetail from "./pages/founder/IntegrationDetail";
 // Partner pages
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import PartnerOpportunities from "./pages/partner/PartnerOpportunities";
@@ -116,6 +118,8 @@ const App = () => (
             <Route path="/founder/agents/:id" element={<FounderRoute><AgentProfile /></FounderRoute>} />
             <Route path="/founder/workflows" element={<FounderRoute><WorkflowDirectory /></FounderRoute>} />
             <Route path="/founder/workflows/:id" element={<FounderRoute><WorkflowDetail /></FounderRoute>} />
+            <Route path="/founder/integrations" element={<FounderRoute><IntegrationDirectory /></FounderRoute>} />
+            <Route path="/founder/integrations/:id" element={<FounderRoute><IntegrationDetail /></FounderRoute>} />
 
             {/* Partner Portal */}
             <Route path="/partner" element={<PartnerRoute><PartnerDashboard /></PartnerRoute>} />
