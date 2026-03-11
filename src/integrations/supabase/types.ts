@@ -41,6 +41,156 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_activity_logs: {
+        Row: {
+          action: string
+          agent_id: string
+          created_at: string
+          details: string | null
+          id: string
+          system_name: string | null
+        }
+        Insert: {
+          action: string
+          agent_id: string
+          created_at?: string
+          details?: string | null
+          id?: string
+          system_name?: string | null
+        }
+        Update: {
+          action?: string
+          agent_id?: string
+          created_at?: string
+          details?: string | null
+          id?: string
+          system_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_activity_logs_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_alerts: {
+        Row: {
+          affected_system: string | null
+          agent_id: string
+          created_at: string
+          description: string | null
+          id: string
+          resolved: boolean
+          severity: string
+          title: string
+        }
+        Insert: {
+          affected_system?: string | null
+          agent_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          resolved?: boolean
+          severity?: string
+          title: string
+        }
+        Update: {
+          affected_system?: string | null
+          agent_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          resolved?: boolean
+          severity?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_alerts_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_system_assignments: {
+        Row: {
+          agent_id: string
+          assigned_at: string
+          id: string
+          system_id: string
+        }
+        Insert: {
+          agent_id: string
+          assigned_at?: string
+          id?: string
+          system_id: string
+        }
+        Update: {
+          agent_id?: string
+          assigned_at?: string
+          id?: string
+          system_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_system_assignments_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_system_assignments_system_id_fkey"
+            columns: ["system_id"]
+            isOneToOne: false
+            referencedRelation: "monitored_systems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_task_stats: {
+        Row: {
+          agent_id: string
+          created_at: string
+          date: string
+          id: string
+          tasks_completed: number
+          tasks_failed: number
+          tasks_pending: number
+        }
+        Insert: {
+          agent_id: string
+          created_at?: string
+          date?: string
+          id?: string
+          tasks_completed?: number
+          tasks_failed?: number
+          tasks_pending?: number
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string
+          date?: string
+          id?: string
+          tasks_completed?: number
+          tasks_failed?: number
+          tasks_pending?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_task_stats_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_agents: {
         Row: {
           agent_function: string
@@ -48,8 +198,11 @@ export type Database = {
           id: string
           last_activity: string | null
           name: string
+          purpose: string | null
           status: string
           system_id: string
+          tasks_completed_total: number
+          tasks_pending: number
           updated_at: string
         }
         Insert: {
@@ -58,8 +211,11 @@ export type Database = {
           id?: string
           last_activity?: string | null
           name: string
+          purpose?: string | null
           status?: string
           system_id: string
+          tasks_completed_total?: number
+          tasks_pending?: number
           updated_at?: string
         }
         Update: {
@@ -68,8 +224,11 @@ export type Database = {
           id?: string
           last_activity?: string | null
           name?: string
+          purpose?: string | null
           status?: string
           system_id?: string
+          tasks_completed_total?: number
+          tasks_pending?: number
           updated_at?: string
         }
         Relationships: [
