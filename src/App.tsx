@@ -76,6 +76,8 @@ import OrganisationDirectory from "./pages/founder/OrganisationDirectory";
 import OrganisationProfile from "./pages/founder/OrganisationProfile";
 import AccessControl from "./pages/founder/AccessControl";
 import SecurityDashboard from "./pages/founder/SecurityDashboard";
+import TemplateDirectory from "./pages/founder/TemplateDirectory";
+import TemplateDetail from "./pages/founder/TemplateDetail";
 // Partner pages
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import PartnerOpportunities from "./pages/partner/PartnerOpportunities";
