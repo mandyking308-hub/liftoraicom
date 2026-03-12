@@ -347,7 +347,7 @@ const AIProposal = () => {
             </motion.p>
           </motion.div>
 
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid md:grid-cols-3 gap-6">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {featureCards.map((card, i) => (
               <motion.div key={card.title} variants={fadeUp} custom={i} className="tech-card !p-6 flex flex-col">
                 <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 text-primary mb-4">
