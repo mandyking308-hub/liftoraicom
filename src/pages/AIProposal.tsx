@@ -10,7 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, Sparkles, Cpu, Layers, Clock } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, Sparkles, Cpu, Layers, Clock, ExternalLink } from "lucide-react";
+import ArchitectureDiagram from "@/components/proposal/ArchitectureDiagram";
 
 const TOTAL_STEPS = 7;
 
@@ -71,10 +72,16 @@ interface FormData {
   timeline: string;
 }
 
+interface ArchComponent {
+  name: string;
+  type: string;
+}
+
 interface Proposal {
   suggested_solution: string;
   estimated_scope: string;
   estimated_timeline: string;
+  architecture_components?: ArchComponent[];
 }
 
 const featureCards = [
@@ -180,6 +187,11 @@ const AIProposal = () => {
         throw new Error("Proposal generation encountered a formatting issue. Please try again.");
       }
 
+      // Ensure architecture_components is an array (graceful fallback)
+      if (!Array.isArray(data.architecture_components)) {
+        data.architecture_components = [];
+      }
+
       setProposal(data);
       setStep(7);
     } catch (e: any) {
@@ -215,6 +227,37 @@ const AIProposal = () => {
       });
 
       if (error) throw error;
+
+      // Save architecture to the architectures table
+      if (proposal.architecture_components && proposal.architecture_components.length > 0) {
+        const typeToSystemType: Record<string, string> = {
+          system: "platform",
+          agent: "ai_agent_system",
+          workflow: "automation_system",
+          integration: "integration_layer",
+          interface: "platform",
+        };
+        const primaryType = proposal.architecture_components[0]?.type || "system";
+
+        const { data: archData, error: archError } = await supabase.from("architectures").insert({
+          name: `${form.companyName} – AI Proposed Architecture`,
+          client_organisation: form.companyName,
+          system_type: typeToSystemType[primaryType] || "platform",
+          system_purpose: proposal.suggested_solution,
+          status: "draft",
+        }).select("id").single();
+
+        if (!archError && archData) {
+          const compRows = proposal.architecture_components.map((comp, idx) => ({
+            architecture_id: archData.id,
+            name: comp.name,
+            component_type: comp.type === "system" ? "data_layer" : comp.type,
+            order_index: idx,
+          }));
+          await supabase.from("architecture_components").insert(compRows);
+        }
+      }
+
       setSubmitted(true);
       toast.success("Proposal submitted successfully.");
     } catch (e: any) {
@@ -579,6 +622,13 @@ const AIProposal = () => {
                       <h3 className="text-xs font-medium text-primary tracking-widest uppercase mb-1">Estimated Development Timeline</h3>
                       <p className="text-sm text-muted-foreground">{proposal.estimated_timeline}</p>
                     </div>
+
+                    {/* Architecture Diagram */}
+                    {proposal.architecture_components && proposal.architecture_components.length > 0 && (
+                      <div className="p-5 rounded-lg bg-secondary/50 border border-border/50">
+                        <ArchitectureDiagram components={proposal.architecture_components} />
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
