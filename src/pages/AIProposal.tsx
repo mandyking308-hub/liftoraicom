@@ -187,6 +187,11 @@ const AIProposal = () => {
         throw new Error("Proposal generation encountered a formatting issue. Please try again.");
       }
 
+      // Ensure architecture_components is an array (graceful fallback)
+      if (!Array.isArray(data.architecture_components)) {
+        data.architecture_components = [];
+      }
+
       setProposal(data);
       setStep(7);
     } catch (e: any) {
