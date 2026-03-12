@@ -27,11 +27,12 @@ Deno.serve(async (req) => {
     const startTime = Date.now();
 
     // Helper
-    const runTest = async (module: string, name: string, fn: () => Promise<{ ok: boolean; detail: string }>) => {
+    const runTest = async (module: string, name: string, fn: () => Promise<{ ok: boolean; detail: string; warning?: boolean }>) => {
       const t0 = Date.now();
       try {
         const r = await fn();
-        results.push({ module, test_name: name, status: r.ok ? "passed" : "failed", details: r.detail, duration_ms: Date.now() - t0 });
+        const status = r.warning ? "warning" : r.ok ? "passed" : "failed";
+        results.push({ module, test_name: name, status, details: r.detail, duration_ms: Date.now() - t0 });
       } catch (e) {
         results.push({ module, test_name: name, status: "failed", details: String(e), duration_ms: Date.now() - t0 });
       }
