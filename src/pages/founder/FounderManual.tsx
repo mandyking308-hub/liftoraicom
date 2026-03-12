@@ -1,15 +1,83 @@
 import FounderLayout from "@/components/founder/FounderLayout";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { BookOpenCheck, Download, Layers, Monitor, Bot, Workflow, Plug, Rocket, Shield, Brain, Scale, Compass, MessageSquare, BarChart3, Globe, Building2, LayoutTemplate, Play, Network, ClipboardList, FlaskConical, FileText, Command, Zap } from "lucide-react";
+import {
+  BookOpenCheck, Download, Layers, Monitor, Bot, Workflow, Plug, Rocket,
+  Shield, Brain, Scale, Compass, MessageSquare, BarChart3, Globe, Building2,
+  LayoutTemplate, Play, Network, ClipboardList, FlaskConical, FileText,
+  Command, Zap, Sparkles, Printer, RefreshCw,
+} from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
-import { generateManualMarkdown } from "@/lib/founderManualContent";
+import { generateManualMarkdown, type ManualLiveData } from "@/lib/founderManualContent";
+
+const useLiveManualData = () => {
+  return useQuery<ManualLiveData>({
+    queryKey: ["founder-manual-live-data"],
+    queryFn: async () => {
+      const countQuery = async (table: string) => {
+        const { count } = await supabase.from(table).select("id", { count: "exact", head: true });
+        return count ?? 0;
+      };
+
+      const [
+        orgCount, workflowCount, agentCount, integrationCount,
+        deploymentCount, templateCount, knowledgeCount, brainInsightCount,
+        decisionCount, testRunCount, buildLogCount, manualPageCount,
+        systemCount, architectureCount, launchedPlatformCount,
+        { data: recentBuildLogs },
+        { data: recentTestRuns },
+      ] = await Promise.all([
+        countQuery("organisations"),
+        countQuery("automation_workflows"),
+        countQuery("ai_agents"),
+        countQuery("integrations"),
+        countQuery("deployments"),
+        countQuery("system_templates"),
+        countQuery("knowledge_entries"),
+        countQuery("brain_insights"),
+        countQuery("decision_recommendations"),
+        countQuery("platform_test_runs"),
+        countQuery("build_log_entries"),
+        countQuery("manual_pages"),
+        countQuery("monitored_systems"),
+        countQuery("architectures"),
+        countQuery("launched_platforms"),
+        supabase.from("build_log_entries").select("title, change_type, module_affected, author, created_at, description").order("created_at", { ascending: false }).limit(10),
+        supabase.from("platform_test_runs").select("run_name, status, total_tests, passed, failed, created_at").order("created_at", { ascending: false }).limit(5),
+      ]);
+
+      return {
+        orgCount, workflowCount, agentCount, integrationCount,
+        deploymentCount, templateCount, knowledgeCount, brainInsightCount,
+        decisionCount, testRunCount, buildLogCount, manualPageCount,
+        systemCount, architectureCount, launchedPlatformCount,
+        recentBuildLogs: (recentBuildLogs ?? []) as ManualLiveData["recentBuildLogs"],
+        recentTestRuns: (recentTestRuns ?? []) as ManualLiveData["recentTestRuns"],
+      };
+    },
+  });
+};
 
 const FounderManual = () => {
-  const handleExport = () => {
-    const md = generateManualMarkdown();
+  const { data: liveData, isLoading, refetch } = useLiveManualData();
+
+  const defaultData: ManualLiveData = {
+    orgCount: 0, workflowCount: 0, agentCount: 0, integrationCount: 0,
+    deploymentCount: 0, templateCount: 0, knowledgeCount: 0, brainInsightCount: 0,
+    decisionCount: 0, testRunCount: 0, buildLogCount: 0, manualPageCount: 0,
+    systemCount: 0, architectureCount: 0, launchedPlatformCount: 0,
+    recentBuildLogs: [], recentTestRuns: [],
+  };
+
+  const d = liveData ?? defaultData;
+
+  const handleExportMarkdown = () => {
+    const md = generateManualMarkdown(d);
     const blob = new Blob([md], { type: "text/markdown" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -17,8 +85,408 @@ const FounderManual = () => {
     a.download = `liftor-ai-founder-manual-${format(new Date(), "yyyy-MM-dd")}.md`;
     a.click();
     URL.revokeObjectURL(url);
-    toast.success("Complete Founder Manual exported as Markdown");
+    toast.success("Founder Manual exported as Markdown");
   };
+
+  const handleExportPDF = () => {
+    const md = generateManualMarkdown(d);
+    // Convert markdown to simple HTML for print
+    const html = md
+      .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+      .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+      .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/`([^`]+)`/g, '<code style="background:#1e293b;padding:1px 4px;border-radius:3px;font-size:12px;">$1</code>')
+      .replace(/^- (.*$)/gm, '<li>$1</li>')
+      .replace(/^(\d+)\. (.*$)/gm, '<li>$2</li>')
+      .replace(/\n\n/g, '<br/><br/>')
+      .replace(/---/g, '<hr/>')
+      .replace(/\|(.+)\|/g, (match) => {
+        const cells = match.split('|').filter(c => c.trim());
+        if (cells.every(c => c.trim().match(/^[-]+$/))) return '';
+        return '<tr>' + cells.map(c => `<td style="padding:4px 8px;border:1px solid #334155;">${c.trim()}</td>`).join('') + '</tr>';
+      });
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) { toast.error("Please allow popups for PDF export"); return; }
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Liftor AI — Founder Manual</title>
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 800px; margin: 0 auto; padding: 40px; color: #e2e8f0; background: #0f172a; font-size: 13px; line-height: 1.6; }
+          h1 { font-size: 24px; border-bottom: 2px solid #3b82f6; padding-bottom: 8px; }
+          h2 { font-size: 18px; margin-top: 32px; color: #93c5fd; }
+          h3 { font-size: 14px; margin-top: 20px; color: #bfdbfe; }
+          table { border-collapse: collapse; width: 100%; margin: 12px 0; }
+          td, th { padding: 4px 8px; border: 1px solid #334155; font-size: 12px; }
+          hr { border: none; border-top: 1px solid #334155; margin: 24px 0; }
+          code { background: #1e293b; padding: 1px 4px; border-radius: 3px; font-size: 11px; }
+          li { margin: 2px 0; }
+          @media print { body { color: #1e293b; background: white; } h2 { color: #1e40af; } h3 { color: #1e3a5f; } td, th { border-color: #cbd5e1; } code { background: #f1f5f9; } hr { border-color: #cbd5e1; } }
+        </style>
+      </head>
+      <body>${html}</body>
+      </html>
+    `);
+    printWindow.document.close();
+    setTimeout(() => printWindow.print(), 500);
+    toast.success("PDF export opened — use Save as PDF in the print dialog");
+  };
+
+  const stats = [
+    { label: "Organisations", value: d.orgCount, icon: Building2 },
+    { label: "Systems", value: d.systemCount, icon: Monitor },
+    { label: "Agents", value: d.agentCount, icon: Bot },
+    { label: "Workflows", value: d.workflowCount, icon: Workflow },
+    { label: "Integrations", value: d.integrationCount, icon: Plug },
+    { label: "Deployments", value: d.deploymentCount, icon: Rocket },
+    { label: "Templates", value: d.templateCount, icon: LayoutTemplate },
+    { label: "Brain Insights", value: d.brainInsightCount, icon: Brain },
+    { label: "Decisions", value: d.decisionCount, icon: Scale },
+    { label: "Test Runs", value: d.testRunCount, icon: FlaskConical },
+    { label: "Build Entries", value: d.buildLogCount, icon: ClipboardList },
+    { label: "Architectures", value: d.architectureCount, icon: Layers },
+  ];
+
+  const sections: Array<{ id: string; title: string; icon: React.ElementType; content: React.ReactNode }> = [
+    {
+      id: "s1", title: "1. Platform Overview", icon: Layers,
+      content: (
+        <div className="space-y-3">
+          <p>Liftor AI is an AI infrastructure platform capable of building, deploying, running, and optimising AI systems for multiple organisations simultaneously. The platform acts as an <strong className="text-foreground">AI operating system for organisations</strong>.</p>
+          <p><strong className="text-foreground">Capabilities:</strong> Design & Build, Deploy & Launch, Run & Monitor, Optimise & Evolve, Scale & Expand.</p>
+          <p><strong className="text-foreground">Supports:</strong> Internal companies, external client organisations, automation workflows, AI agents, AI decision systems, venture creation using templates.</p>
+          <p><strong className="text-foreground">Stack:</strong> React 18 + Vite + TypeScript + Tailwind CSS + shadcn/ui, Lovable Cloud (Supabase PostgreSQL), Deno edge functions, Lovable AI gateway (Gemini).</p>
+        </div>
+      ),
+    },
+    {
+      id: "s2", title: "2. Full Platform Architecture", icon: Network,
+      content: (
+        <div className="space-y-4">
+          {[
+            { layer: "Layer 1 — Public Platform", desc: "9 public marketing routes. No auth. SEO-optimised. Pages: Home, What We Build, Industries, Method, Case Studies, Partners, Project Discovery, About, AI Proposal." },
+            { layer: "Layer 2 — Platform Infrastructure", desc: "PostgreSQL 50+ tables with RLS, Supabase Auth (email/password), 3 Deno edge functions, 5 private storage buckets, app_role enum (admin, moderator, user, founder, partner)." },
+            { layer: "Layer 3 — Enterprise Platform Management", desc: "Client Portal (15 routes, ProtectedRoute guard) + Partner Portal (7 routes, PartnerRoute guard). Clients and partners see only their own data via RLS." },
+            { layer: "Layer 4 — Platform Operations Control", desc: "Global Operations, Organisation Management, Access Control, Security & Compliance, Template Library, Platform Expansion / Venture Launcher." },
+            { layer: "Layer 5 — Founder Control Systems", desc: "39 founder routes with FounderRoute guard. Command Center, Revenue Console, Manual, Testing Dashboard, AI Co-Pilot." },
+            { layer: "Layer 6 — AI Brain Layer", desc: "Brain Core (insights + learning), Decision Engine, Strategy Engine, Optimisation Engine, Brain Orchestrator (Observation → Learning → Optimisation → Decision → Strategy), Founder AI Co-Pilot." },
+          ].map((l) => (
+            <div key={l.layer}>
+              <p className="font-medium text-foreground">{l.layer}</p>
+              <p>{l.desc}</p>
+            </div>
+          ))}
+        </div>
+      ),
+    },
+    {
+      id: "s3", title: "3. Platform Infrastructure Modules", icon: Monitor,
+      content: (
+        <div className="space-y-3">
+          {[
+            { name: "Proposal Generator", desc: "AI-powered proposal generation (generate-proposal edge function, Gemini AI with tool calling). Public route /ai-proposal." },
+            { name: "Client Portal", desc: "15 protected routes for project management, documents, messaging, support, maintenance, monitoring, analytics, optimisation." },
+            { name: "Founder Console", desc: "39 protected routes. Central management interface. FounderLayout sidebar + FounderRoute guard." },
+            { name: "Partner Portal", desc: "7 protected routes for opportunity management, project tracking, documents, messaging." },
+            { name: "Subscription Maintenance System", desc: "4 maintenance routes. maintenance_events + feature_requests tables. Client-facing maintenance management." },
+            { name: "Monitoring Dashboard", desc: "Real-time monitoring of deployed systems. monitored_systems table. Client + founder views." },
+            { name: "Workflow Builder", desc: "automation_workflows + workflow_steps. Execution tracking, success/failure counts, automation type classification." },
+            { name: "AI Agent Management", desc: "ai_agents + 4 related tables. Agent function, status, task metrics, system assignments, activity logs, alerts." },
+            { name: "Automation Execution Engine", desc: "workflow_executions + execution_steps + execution_logs. Full execution lifecycle tracking." },
+          ].map((m) => (
+            <div key={m.name} className="border-b border-border/30 pb-2 last:border-0">
+              <p className="font-medium text-foreground">{m.name}</p>
+              <p>{m.desc}</p>
+            </div>
+          ))}
+        </div>
+      ),
+    },
+    {
+      id: "s4", title: "4. Enterprise Platform Management", icon: Sparkles,
+      content: (
+        <div className="space-y-3">
+          {[
+            { name: "Process Automation Designer", desc: "Business process design and automation planning. /founder/processes." },
+            { name: "AI System Architecture Designer", desc: "Visual architecture design with components and relationships. architectures + architecture_components + architecture_relationships." },
+            { name: "Deployment & Launch Manager", desc: "Staged deployment pipelines with checklists, monitoring, rollback. deployments + deployment_stages + deployment_checklist + deployment_logs." },
+            { name: "Client System Control Panel", desc: "Client-facing system management at /portal/systems. Scoped via RLS." },
+            { name: "Analytics & Performance Dashboard", desc: "Platform-wide and client-specific analytics. Workflow performance, agent metrics, system health." },
+            { name: "Automation Optimisation Engine", desc: "Entity-level optimisation (workflow/agent/system). optimisation_insights table." },
+            { name: "Knowledge Base & System Memory", desc: "knowledge_entries + knowledge_documents. Links to agents and workflows. knowledge-documents bucket." },
+          ].map((m) => (
+            <div key={m.name} className="border-b border-border/30 pb-2 last:border-0">
+              <p className="font-medium text-foreground">{m.name}</p>
+              <p>{m.desc}</p>
+            </div>
+          ))}
+          <div>
+            <p className="font-medium text-foreground">Enterprise AI System Lifecycle</p>
+            <p>Discovery → Proposal → Architecture → Build → Test → Deploy → Monitor → Optimise → Maintain</p>
+          </div>
+        </div>
+      ),
+    },
+    {
+      id: "s5", title: "5. Platform Operations Control", icon: Globe,
+      content: (
+        <div className="space-y-3">
+          {[
+            { name: "Global AI Operations Manager", desc: `Aggregated operational intelligence across all systems. /founder/operations.` },
+            { name: `Multi-Organisation Management (${d.orgCount} orgs)`, desc: "Multi-tenant directory with members, documents, industry tracking. Isolated data via RLS." },
+            { name: "Role & Access Control System", desc: "app_role enum + user_roles + platform_roles + access_audit_log + access_anomalies. has_role() security-definer function." },
+            { name: "Security & Compliance Manager", desc: "compliance_items + compliance_documents. Review schedules and regulatory tracking." },
+            { name: `System Template Library (${d.templateCount} templates)`, desc: "Reusable system_templates for rapid deployment of standardised AI systems." },
+            { name: `Platform Expansion (${d.launchedPlatformCount} launched)`, desc: "Venture launcher with launch_checklist. launched_platforms table." },
+          ].map((m) => (
+            <div key={m.name} className="border-b border-border/30 pb-2 last:border-0">
+              <p className="font-medium text-foreground">{m.name}</p>
+              <p>{m.desc}</p>
+            </div>
+          ))}
+        </div>
+      ),
+    },
+    {
+      id: "s6", title: "6. Founder Control Systems", icon: Command,
+      content: (
+        <div className="space-y-3">
+          <div><p className="font-medium text-foreground">Founder Console</p><p>39 routes. FounderLayout sidebar + FounderRoute guard checking user_roles for 'founder'. Unrestricted visibility across all platform data.</p></div>
+          <div><p className="font-medium text-foreground">Revenue Console</p><p>revenue_records with source attribution, multi-currency, period analysis. /founder/revenue.</p></div>
+          <div><p className="font-medium text-foreground">Founder Manual (This Document)</p><p>Self-updating documentation. 15 sections generated from live platform data. Markdown + PDF export.</p></div>
+          <div><p className="font-medium text-foreground">Platform Testing Dashboard</p><p>20+ automated tests via platform-testing edge function. platform_test_runs + platform_test_results. /founder/testing.</p></div>
+          <div>
+            <p className="font-medium text-foreground">Founder Visibility</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
+              {[
+                { l: "Systems", v: d.systemCount }, { l: "Agents", v: d.agentCount },
+                { l: "Workflows", v: d.workflowCount }, { l: "Insights", v: d.brainInsightCount },
+                { l: "Decisions", v: d.decisionCount }, { l: "Test Runs", v: d.testRunCount },
+              ].map((s) => (
+                <div key={s.l} className="bg-secondary/50 rounded p-2 text-center">
+                  <p className="text-lg font-bold text-foreground">{s.v}</p>
+                  <p className="text-xs">{s.l}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      id: "s7", title: "7. AI Brain Architecture", icon: Brain,
+      content: (
+        <div className="space-y-3">
+          <p>Multi-layer autonomous intelligence system processing platform signals into actionable insights.</p>
+          {[
+            { name: `AI Brain Core (${d.brainInsightCount} insights)`, desc: "brain_insights + brain_recommendations + brain_learning_records. Pipeline: Observation → Pattern Detection → Learning → Insight Generation → Recommendations." },
+            { name: "Automation Optimisation Engine", desc: "optimisation_insights. Entity-level (workflow/agent/system) performance, efficiency, reliability insights." },
+            { name: `AI Decision Engine (${d.decisionCount} decisions)`, desc: "decision_recommendations. Categories: operational/strategic/expansion. Status: pending → approved/rejected → implemented." },
+            { name: "AI Strategy Engine", desc: "strategy_insights. Market signals, competitive analysis, expansion opportunities. Confidence levels and industry targeting." },
+            { name: "AI Brain Orchestrator", desc: "Signal flow: Observation → Learning → Optimisation → Decision → Strategy. Each stage enriches and passes to the next." },
+            { name: "Founder AI Co-Pilot", desc: "Streaming Gemini AI (founder-copilot edge function) with real-time context from 9 platform tables." },
+          ].map((m) => (
+            <div key={m.name} className="border-b border-border/30 pb-2 last:border-0">
+              <p className="font-medium text-foreground">{m.name}</p>
+              <p>{m.desc}</p>
+            </div>
+          ))}
+        </div>
+      ),
+    },
+    {
+      id: "s8", title: "8. Platform Testing & Validation Suite", icon: FlaskConical,
+      content: (
+        <div className="space-y-3">
+          <p>Automated validation at <code className="text-xs bg-secondary px-1 rounded">/founder/testing</code>. {d.testRunCount} test runs completed.</p>
+          <div><p className="font-medium text-foreground">Tables:</p><p className="text-xs font-mono">platform_test_runs (run metadata), platform_test_results (individual results, FK to runs)</p></div>
+          <div><p className="font-medium text-foreground">Edge Function: platform-testing</p><p>20+ tests: Organisations, Automations, Agents, Systems, Brain, Decisions, Strategy, Deployments, Architectures, Templates, Knowledge, Integrations, Build Log, Optimisation, Security, Data Integrity, Manual, Executions, Expansion, Compliance. Creates [TEST] data → validates → records results → cleans up.</p></div>
+          {d.recentTestRuns.length > 0 && (
+            <div><p className="font-medium text-foreground">Recent Runs:</p>
+              {d.recentTestRuns.map((r, i) => (
+                <p key={i} className="text-xs"><Badge variant="secondary" className={`mr-2 ${r.status === "passed" ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>{r.status}</Badge>{r.run_name} — {r.passed}/{r.total_tests} passed — {format(new Date(r.created_at), "MMM d, HH:mm")}</p>
+              ))}
+            </div>
+          )}
+        </div>
+      ),
+    },
+    {
+      id: "s9", title: "9. Database Structure", icon: FileText,
+      content: (
+        <div className="space-y-3">
+          <p>50+ PostgreSQL tables with RLS on every table.</p>
+          {[
+            { group: "Core Platform", tables: "profiles, projects, subscriptions, user_roles, activity_log" },
+            { group: "Client Systems", tables: "monitored_systems, automation_workflows, ai_agents, agent_system_assignments, agent_task_stats, agent_activity_logs, agent_alerts" },
+            { group: "Workflow Execution", tables: "workflow_executions, workflow_steps, execution_steps, execution_logs" },
+            { group: "AI Brain", tables: "brain_insights, brain_recommendations, brain_learning_records" },
+            { group: "Decision & Strategy", tables: "decision_recommendations, strategy_insights" },
+            { group: "Architecture & Deployment", tables: "architectures, architecture_components, architecture_relationships, deployments, deployment_stages, deployment_checklist, deployment_logs" },
+            { group: "Integrations", tables: "integrations, integration_activity_logs, integration_alerts, integration_linked_systems" },
+            { group: "Knowledge", tables: "knowledge_entries, knowledge_documents, manual_pages, manual_versions" },
+            { group: "Organisations", tables: "organisations, organisation_members, organisation_documents" },
+            { group: "Expansion", tables: "launched_platforms, launch_checklist, system_templates" },
+            { group: "Security", tables: "platform_roles, access_audit_log, access_anomalies, compliance_items, compliance_documents" },
+            { group: "Partners", tables: "partner_applications, partner_opportunities, partner_deals, partner_documents, partner_messages" },
+            { group: "Build & Testing", tables: "build_log_entries, platform_test_runs, platform_test_results" },
+          ].map((g) => (
+            <div key={g.group}>
+              <p className="font-medium text-foreground">{g.group}</p>
+              <p className="text-xs font-mono">{g.tables}</p>
+            </div>
+          ))}
+          <div>
+            <p className="font-medium text-foreground">Functions</p>
+            <p className="text-xs font-mono">handle_new_user(), has_role(), update_updated_at_column(), log_new_proposal(), log_new_support_request(), log_new_opportunity()</p>
+          </div>
+          <div>
+            <p className="font-medium text-foreground">Storage Buckets (all private)</p>
+            <p className="text-xs font-mono">project-documents, partner-documents, knowledge-documents, organisation-documents, compliance-documents</p>
+          </div>
+        </div>
+      ),
+    },
+    {
+      id: "s10", title: "10. Edge Functions", icon: Play,
+      content: (
+        <div className="space-y-3">
+          {[
+            { name: "generate-proposal", desc: "AI proposal generation. Gemini + tool calling. Input: projectTypes, businessProblem, processesToAutomate, projectScale, timeline, industry. Output: suggested_solution, estimated_scope, estimated_timeline." },
+            { name: "founder-copilot", desc: "Streaming AI assistant with 9-table context injection. Gemini with SSE responses. Uses SUPABASE_SERVICE_ROLE_KEY for unrestricted data access." },
+            { name: "platform-testing", desc: "20+ automated validation tests. Creates [TEST] data → validates all modules → records to platform_test_runs/results → cleans up. Uses SUPABASE_SERVICE_ROLE_KEY." },
+          ].map((f) => (
+            <div key={f.name} className="border-b border-border/30 pb-2 last:border-0">
+              <p className="font-medium text-foreground">{f.name}</p>
+              <p>{f.desc}</p>
+            </div>
+          ))}
+        </div>
+      ),
+    },
+    {
+      id: "s11", title: "11. Navigation & Routes", icon: Globe,
+      content: (
+        <div className="space-y-3">
+          <div><p className="font-medium text-foreground">Public (9)</p><p className="text-xs font-mono">/ /what-we-build /industries /method /case-studies /partners /project-discovery /about /ai-proposal</p></div>
+          <div><p className="font-medium text-foreground">Auth (4)</p><p className="text-xs font-mono">/portal/login /portal/signup /portal/forgot-password /portal/reset-password</p></div>
+          <div><p className="font-medium text-foreground">Client Portal (15)</p><p className="text-xs font-mono">/portal/dashboard /portal/projects /portal/projects/:id /portal/documents /portal/messages /portal/support /portal/maintenance /portal/maintenance/schedule /portal/maintenance/updates /portal/maintenance/features /portal/monitoring /portal/systems /portal/systems/:id /portal/analytics /portal/optimisation</p></div>
+          <div><p className="font-medium text-foreground">Founder Console (39)</p><p className="text-xs font-mono">/founder /founder/command-center /founder/copilot /founder/brain /founder/decisions /founder/strategy /founder/operations /founder/organisations /founder/organisations/:id /founder/revenue /founder/analytics /founder/optimisation /founder/proposals /founder/proposals/:id /founder/pipeline /founder/projects /founder/projects/:id /founder/monitoring /founder/monitoring/:id /founder/agents /founder/agents/:id /founder/workflows /founder/workflows/:id /founder/executions /founder/executions/:id /founder/processes /founder/processes/:id /founder/architectures /founder/architectures/:id /founder/deployments /founder/deployments/:id /founder/integrations /founder/integrations/:id /founder/activity /founder/knowledge /founder/knowledge/:id /founder/access-control /founder/security /founder/templates /founder/templates/:id /founder/expansion /founder/expansion/:id /founder/manual /founder/manual/:id /founder/build-log /founder/documents /founder/testing</p></div>
+          <div><p className="font-medium text-foreground">Partner Portal (7)</p><p className="text-xs font-mono">/partner /partner/opportunities /partner/opportunities/:id /partner/projects /partner/projects/:id /partner/documents /partner/messages</p></div>
+        </div>
+      ),
+    },
+    {
+      id: "s12", title: "12. Deployment Architecture", icon: Rocket,
+      content: (
+        <div className="space-y-3">
+          {[
+            { name: "Frontend", desc: "React 18 + Vite + TypeScript SPA. Tailwind CSS + shadcn/ui. @tanstack/react-query, react-router-dom v6, framer-motion, recharts. Lovable hosting." },
+            { name: "Database", desc: "PostgreSQL via Lovable Cloud. 50+ tables with RLS. app_role enum. Security-definer functions. Auto triggers." },
+            { name: "Edge Functions", desc: "3 Deno serverless functions (auto-deployed): generate-proposal, founder-copilot, platform-testing. Lovable AI gateway." },
+            { name: "Authentication", desc: "Supabase Auth (email/password). Email verification required. AuthContext. Role-based route guards." },
+            { name: "Storage", desc: "5 private buckets. RLS-controlled access." },
+            { name: "Secrets", desc: "SUPABASE_SERVICE_ROLE_KEY, SUPABASE_DB_URL, SUPABASE_PUBLISHABLE_KEY, LOVABLE_API_KEY, SUPABASE_URL, SUPABASE_ANON_KEY" },
+          ].map((s) => (
+            <div key={s.name} className="border-b border-border/30 pb-2 last:border-0">
+              <p className="font-medium text-foreground">{s.name}</p>
+              <p>{s.desc}</p>
+            </div>
+          ))}
+        </div>
+      ),
+    },
+    {
+      id: "s13", title: "13. Platform Build Log", icon: ClipboardList,
+      content: (
+        <div className="space-y-3">
+          <p>Append-only engineering record in <code className="text-xs bg-secondary px-1 rounded">build_log_entries</code>. RLS: founder INSERT + SELECT only (no UPDATE/DELETE). {d.buildLogCount} entries recorded.</p>
+          <div>
+            <p className="font-medium text-foreground">Build Phases (33 steps)</p>
+            <ol className="list-decimal list-inside ml-2 space-y-1 text-xs">
+              <li>Foundation — React + Vite + TypeScript + Tailwind + shadcn/ui</li>
+              <li>Public Website — 9 marketing pages + Navbar/Footer</li>
+              <li>Authentication — Supabase Auth + AuthContext + ProtectedRoute</li>
+              <li>Client Portal — 15 routes + PortalLayout</li>
+              <li>Core Database — profiles, projects, subscriptions, user_roles + RLS</li>
+              <li>Founder Console — FounderLayout (39 nav items) + FounderRoute</li>
+              <li>System Monitoring — MonitoringDashboard + monitored_systems</li>
+              <li>AI Agents — AgentDirectory + ai_agents + 4 related tables</li>
+              <li>Workflow Engine — WorkflowDirectory + 4 execution tables</li>
+              <li>Execution Dashboard — ExecutionDashboard + execution tracking</li>
+              <li>Integrations — IntegrationDirectory + 4 integration tables</li>
+              <li>Architecture — ArchitectureDirectory + 3 architecture tables</li>
+              <li>Deployments — DeploymentDirectory + 4 deployment tables</li>
+              <li>Organisations — OrganisationDirectory + 3 org tables</li>
+              <li>Knowledge Base — KnowledgeDirectory + 2 knowledge tables</li>
+              <li>Templates — TemplateDirectory + system_templates</li>
+              <li>Platform Expansion — PlatformExpansion + 2 expansion tables</li>
+              <li>Analytics — FounderAnalytics dashboard</li>
+              <li>Optimisation — OptimisationDashboard + optimisation_insights</li>
+              <li>Security — AccessControl + SecurityDashboard + 5 security tables</li>
+              <li>Command Center — CommandCenter dashboard</li>
+              <li>AI Proposal — AIProposal + generate-proposal edge function</li>
+              <li>Partner Portal — 7 routes + 5 partner tables</li>
+              <li>AI Brain Core — BrainCore + 3 brain tables</li>
+              <li>Decision Engine — DecisionEngine + decision_recommendations</li>
+              <li>Strategy Engine — StrategyEngine + strategy_insights</li>
+              <li>AI Co-Pilot — FounderCoPilot + founder-copilot edge function</li>
+              <li>Revenue Console — FounderRevenue + revenue_records</li>
+              <li>Global Operations — GlobalOperations dashboard</li>
+              <li>Build Log — BuildLog + build_log_entries (append-only)</li>
+              <li>Manual v1 — FounderManual + manual_pages + manual_versions</li>
+              <li>Platform Testing — PlatformTesting + edge function + 2 test tables</li>
+              <li>Manual v4 — Self-updating 15-section manual + Markdown/PDF export</li>
+            </ol>
+          </div>
+          {d.recentBuildLogs.length > 0 && (
+            <div>
+              <p className="font-medium text-foreground">Recent Entries:</p>
+              {d.recentBuildLogs.slice(0, 5).map((e, i) => (
+                <p key={i} className="text-xs border-b border-border/20 py-1">
+                  <Badge variant="secondary" className="mr-2 text-[10px]">{e.change_type.replace(/_/g, " ")}</Badge>
+                  <strong>{e.title}</strong> — {e.module_affected || "—"} — {e.author} — {format(new Date(e.created_at), "MMM d, HH:mm")}
+                </p>
+              ))}
+            </div>
+          )}
+        </div>
+      ),
+    },
+    {
+      id: "s14", title: "14. Documentation Engine (Self-Updating)", icon: RefreshCw,
+      content: (
+        <div className="space-y-3">
+          <p>This manual is a <strong className="text-foreground">self-updating documentation system</strong> that regenerates from live platform data on every page load.</p>
+          <div><p className="font-medium text-foreground">Data Sources (15 tables queried)</p><p className="text-xs">organisations, automation_workflows, ai_agents, integrations, deployments, system_templates, knowledge_entries, brain_insights, decision_recommendations, platform_test_runs, build_log_entries, manual_pages, monitored_systems, architectures, launched_platforms</p></div>
+          <div><p className="font-medium text-foreground">Update Mechanism</p><p>1. Navigate to /founder/manual → 2. React Query fetches live counts in parallel → 3. ManualLiveData interface aggregates stats → 4. generateManualMarkdown() constructs full docs → 5. UI renders with current data → 6. Export embeds real-time stats</p></div>
+          <p>No manual maintenance required. Adding organisations, agents, workflows, or running tests is immediately reflected.</p>
+        </div>
+      ),
+    },
+    {
+      id: "s15", title: "15. Export System", icon: Download,
+      content: (
+        <div className="space-y-3">
+          <div><p className="font-medium text-foreground">Markdown Export</p><p>Complete 15-section manual as .md file with live data embedded. Click "Export Markdown" above.</p></div>
+          <div><p className="font-medium text-foreground">PDF Export</p><p>Print-optimised HTML opened in new window. Use browser "Save as PDF" from print dialog. Formatted for light/dark printing.</p></div>
+          <div>
+            <p className="font-medium text-foreground">Use Cases</p>
+            <ul className="list-disc list-inside ml-2 space-y-1">
+              <li>Engineering — Technical reference and onboarding</li>
+              <li>Investors — Due diligence documentation</li>
+              <li>Operations — Operational procedures</li>
+              <li>Partners — Platform capability overview</li>
+              <li>Audit — Security and compliance evidence</li>
+            </ul>
+          </div>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <FounderLayout>
@@ -30,430 +498,62 @@ const FounderManual = () => {
               <BookOpenCheck size={24} className="text-primary" /> Liftor AI — Founder Manual
             </h1>
             <p className="text-muted-foreground text-sm mt-1">
-              Complete engineering-level platform documentation — v3.0 · {format(new Date(), "MMMM d, yyyy")}
+              Self-updating engineering documentation — v4.0 · {format(new Date(), "MMMM d, yyyy")}
+              {isLoading && <span className="ml-2 text-primary">Loading live data...</span>}
             </p>
           </div>
-          <Button onClick={handleExport}>
-            <Download size={16} className="mr-2" /> Export Full Manual (.md)
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => refetch()}>
+              <RefreshCw size={14} className="mr-1" /> Refresh
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleExportMarkdown}>
+              <Download size={14} className="mr-1" /> Markdown
+            </Button>
+            <Button size="sm" onClick={handleExportPDF}>
+              <Printer size={14} className="mr-1" /> PDF
+            </Button>
+          </div>
+        </div>
+
+        {/* Live Stats */}
+        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2">
+          {stats.map((s) => (
+            <Card key={s.label} className="bg-card border-border/50">
+              <CardContent className="p-3">
+                <s.icon size={14} className="text-primary mb-1" />
+                <p className="text-lg font-bold">{s.value}</p>
+                <p className="text-[10px] text-muted-foreground">{s.label}</p>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
         {/* TOC */}
         <Card className="bg-card border-border/50">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Table of Contents</CardTitle>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">Table of Contents — 15 Sections</CardTitle>
           </CardHeader>
           <CardContent>
-            <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
-              <li>Platform Overview</li>
-              <li>Full Platform Architecture</li>
-              <li>Platform Modules</li>
-              <li>Database Structure</li>
-              <li>Edge Functions</li>
-              <li>Platform Testing & Validation Suite</li>
-              <li>Platform Build Log</li>
-              <li>Founder Control Systems</li>
-              <li>AI Brain Architecture</li>
-              <li>Navigation & Routes</li>
-              <li>Deployment Architecture</li>
-            </ol>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1">
+              {sections.map((s) => (
+                <p key={s.id} className="text-xs text-muted-foreground">{s.title}</p>
+              ))}
+            </div>
           </CardContent>
         </Card>
 
         {/* All Sections */}
         <Accordion type="multiple" className="space-y-2" defaultValue={["s1"]}>
-          {/* 1. Platform Overview */}
-          <AccordionItem value="s1" className="border border-border/50 rounded-lg bg-card px-4">
-            <AccordionTrigger className="text-sm font-semibold">
-              <span className="flex items-center gap-2"><Layers size={16} className="text-primary" /> 1. Platform Overview</span>
-            </AccordionTrigger>
-            <AccordionContent className="text-sm text-muted-foreground space-y-3">
-              <p>Liftor AI is a full-stack AI engineering platform that designs, builds, deploys, and manages enterprise AI systems. The platform enables end-to-end lifecycle management of AI automation projects — from client proposal generation through to live system monitoring and optimisation.</p>
-              <p><strong>Core Purpose:</strong> To operate as a productised AI studio with founder-level visibility over every system, agent, workflow, deployment, and client organisation managed by the platform.</p>
-              <p><strong>Target Users:</strong></p>
-              <ul className="list-disc list-inside ml-2 space-y-1">
-                <li><strong>Public Visitors</strong> — Prospective clients browsing services</li>
-                <li><strong>Clients</strong> — Organisations with active AI projects in delivery or maintenance</li>
-                <li><strong>Partners</strong> — Referral/agency partners submitting opportunities</li>
-                <li><strong>Founder</strong> — Full platform administrator with command-level access</li>
-              </ul>
-              <p><strong>Technology Stack:</strong> React + Vite + TypeScript + Tailwind CSS + shadcn/ui, Lovable Cloud (Supabase) for backend, Deno edge functions, Lovable AI gateway for AI capabilities.</p>
-            </AccordionContent>
-          </AccordionItem>
-
-          {/* 2. Full Platform Architecture */}
-          <AccordionItem value="s2" className="border border-border/50 rounded-lg bg-card px-4">
-            <AccordionTrigger className="text-sm font-semibold">
-              <span className="flex items-center gap-2"><Network size={16} className="text-primary" /> 2. Full Platform Architecture</span>
-            </AccordionTrigger>
-            <AccordionContent className="text-sm text-muted-foreground space-y-4">
-              <div>
-                <p className="font-medium text-foreground mb-1">Layer 1 — Public Platform</p>
-                <p>Marketing website with 9 public routes: Home, What We Build, Industries, Method, Case Studies, Partners, Project Discovery, About, AI Proposal Generator. No authentication required. SEO-optimised with structured content.</p>
-              </div>
-              <div>
-                <p className="font-medium text-foreground mb-1">Layer 2 — Client Portal (Authenticated)</p>
-                <p>15 protected routes for clients: Dashboard, Projects, Project Detail, Documents, Messages, Support, Maintenance (Dashboard/Schedule/Updates/Features), System Monitoring, Control Panel, System Detail, Analytics, Optimisation. Protected via ProtectedRoute component. Clients see only their own data via RLS policies referencing profiles.user_id.</p>
-              </div>
-              <div>
-                <p className="font-medium text-foreground mb-1">Layer 3 — Partner Portal (Authenticated)</p>
-                <p>7 protected routes for partners: Dashboard, Opportunities, Opportunity Detail, Projects, Project Detail, Documents, Messages. Protected via PartnerRoute component with partner role check.</p>
-              </div>
-              <div>
-                <p className="font-medium text-foreground mb-1">Layer 4 — Founder Console (Founder Role Only)</p>
-                <p>39 protected routes for the founder covering every aspect of platform operations. Protected via FounderRoute component which checks user_roles table for 'founder' role. Includes: Command Center, AI Co-Pilot, AI Brain, Decisions, Strategy, Operations, Organisations, Overview, Revenue, Analytics, Optimisation, Proposals, Pipeline, Projects, Monitoring, Agents, Workflows, Executions, Processes, Architectures, Deployments, Integrations, Activity, Knowledge, Access Control, Security, Templates, Expansion, Manual, Build Log, Documents, Platform Testing.</p>
-              </div>
-              <div>
-                <p className="font-medium text-foreground mb-1">Layer 5 — AI Brain Layer</p>
-                <p>Autonomous intelligence layer comprising: Brain Core (insights + learning records), Decision Engine (recommendations), Strategy Engine (strategic insights), Automation Optimisation Engine, AI Brain Orchestrator (signal flow pipeline), Founder AI Co-Pilot (conversational interface to platform data).</p>
-              </div>
-              <div>
-                <p className="font-medium text-foreground mb-1">Layer 6 — Platform Infrastructure</p>
-                <p>Lovable Cloud (Supabase) provides: PostgreSQL database with 50+ tables, Row-Level Security on every table, Edge Functions for serverless compute, Storage buckets for document management, Authentication via Supabase Auth with email/password.</p>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          {/* 3. Platform Modules */}
-          <AccordionItem value="s3" className="border border-border/50 rounded-lg bg-card px-4">
-            <AccordionTrigger className="text-sm font-semibold">
-              <span className="flex items-center gap-2"><Monitor size={16} className="text-primary" /> 3. Platform Modules</span>
-            </AccordionTrigger>
-            <AccordionContent className="text-sm text-muted-foreground space-y-3">
-              {[
-                { name: "Command Center", desc: "Central operational hub showing real-time platform health: active systems, agents, workflows, recent activity, and quick actions.", route: "/founder/command-center" },
-                { name: "AI Co-Pilot", desc: "Conversational AI assistant powered by Gemini via founder-copilot edge function. Queries real-time platform data (workflows, agents, systems, orgs, insights, revenue, templates) and provides strategic recommendations.", route: "/founder/copilot" },
-                { name: "AI Brain Core", desc: "Central intelligence engine managing brain_insights, brain_recommendations, and brain_learning_records. Tracks performance patterns, anomalies, and platform learning.", route: "/founder/brain" },
-                { name: "Decision Engine", desc: "Manages decision_recommendations with categories (operational, strategic, expansion), priorities, potential benefits/risks, and decision tracking.", route: "/founder/decisions" },
-                { name: "Strategy Engine", desc: "Strategic intelligence module tracking market signals, industry opportunities, and platform expansion strategies via strategy_insights table.", route: "/founder/strategy" },
-                { name: "Global Operations", desc: "High-level operations dashboard aggregating data from all systems, organisations, and deployments.", route: "/founder/operations" },
-                { name: "Organisation Directory", desc: "Manages client organisations with industry classification, status tracking, member management, and document storage.", route: "/founder/organisations" },
-                { name: "System Monitoring", desc: "Real-time monitoring of all deployed client systems (monitored_systems table) with status tracking and health indicators.", route: "/founder/monitoring" },
-                { name: "AI Agent Directory", desc: "Registry of all AI agents deployed across client systems. Tracks agent function, status, task completion, pending tasks, and system assignments.", route: "/founder/agents" },
-                { name: "Workflow Directory", desc: "Manages automation_workflows with execution tracking, success/failure counts, and automation type classification.", route: "/founder/workflows" },
-                { name: "Execution Dashboard", desc: "Tracks workflow_executions and execution_steps with detailed logging via execution_logs table.", route: "/founder/executions" },
-                { name: "Process Directory", desc: "Business process management and documentation.", route: "/founder/processes" },
-                { name: "Architecture Directory", desc: "System architecture management with architecture_components and architecture_relationships for visual system design.", route: "/founder/architectures" },
-                { name: "Deployment Manager", desc: "Manages system deployments with deployment_stages, deployment_checklist, and deployment_logs for staged rollouts.", route: "/founder/deployments" },
-                { name: "Integration Directory", desc: "Manages external integrations (API keys, webhooks, AI models) with activity logging and alert monitoring.", route: "/founder/integrations" },
-                { name: "Analytics Dashboard", desc: "Platform-wide analytics aggregating workflow performance, agent metrics, and system health data.", route: "/founder/analytics" },
-                { name: "Optimisation Engine", desc: "Generates and tracks optimisation_insights with recommended actions, priorities, and entity-level targeting.", route: "/founder/optimisation" },
-                { name: "Knowledge Base", desc: "Platform knowledge management with knowledge_entries and knowledge_documents. Links to agents and workflows.", route: "/founder/knowledge" },
-                { name: "Template Library", desc: "Reusable system_templates for rapid deployment of standardised AI systems.", route: "/founder/templates" },
-                { name: "Platform Expansion", desc: "Manages launched_platforms with launch_checklist for scaling the platform to new organisations and industries.", route: "/founder/expansion" },
-                { name: "Revenue Console", desc: "Financial tracking via revenue_records with source attribution, currency support, and revenue trend analysis.", route: "/founder/revenue" },
-                { name: "Proposal Management", desc: "Manages AI-generated project proposals with the generate-proposal edge function. Tracks proposal lifecycle.", route: "/founder/proposals" },
-                { name: "Lead Pipeline", desc: "Sales pipeline management for tracking proposal-to-project conversion.", route: "/founder/pipeline" },
-                { name: "Access Control", desc: "Platform role management via platform_roles table with access_audit_log and access_anomalies monitoring.", route: "/founder/access-control" },
-                { name: "Security Dashboard", desc: "Security and compliance management via compliance_items and compliance_documents.", route: "/founder/security" },
-                { name: "Build Log", desc: "Append-only engineering log via build_log_entries tracking every platform change with author, module, and change type.", route: "/founder/build-log" },
-                { name: "Founder Manual", desc: "This document. Complete platform documentation with Markdown export.", route: "/founder/manual" },
-                { name: "Platform Testing", desc: "Automated validation suite running 20+ tests across all modules via platform-testing edge function.", route: "/founder/testing" },
-              ].map((m) => (
-                <div key={m.name} className="border-b border-border/30 pb-2 last:border-0">
-                  <p className="font-medium text-foreground">{m.name} <span className="text-xs text-muted-foreground ml-2">{m.route}</span></p>
-                  <p>{m.desc}</p>
-                </div>
-              ))}
-            </AccordionContent>
-          </AccordionItem>
-
-          {/* 4. Database Structure */}
-          <AccordionItem value="s4" className="border border-border/50 rounded-lg bg-card px-4">
-            <AccordionTrigger className="text-sm font-semibold">
-              <span className="flex items-center gap-2"><FileText size={16} className="text-primary" /> 4. Database Structure</span>
-            </AccordionTrigger>
-            <AccordionContent className="text-sm text-muted-foreground space-y-3">
-              <p>The platform uses 50+ PostgreSQL tables with Row-Level Security (RLS) on every table. Key tables grouped by domain:</p>
-              {[
-                { group: "Core Platform", tables: "profiles, projects, subscriptions, user_roles, activity_log" },
-                { group: "Client Systems", tables: "monitored_systems, automation_workflows, ai_agents, agent_system_assignments, agent_task_stats, agent_activity_logs, agent_alerts" },
-                { group: "Workflow Execution", tables: "workflow_executions, workflow_steps, execution_steps, execution_logs" },
-                { group: "AI Brain", tables: "brain_insights, brain_recommendations, brain_learning_records" },
-                { group: "Decision & Strategy", tables: "decision_recommendations, strategy_insights" },
-                { group: "Architecture & Deployment", tables: "architectures, architecture_components, architecture_relationships, deployments, deployment_stages, deployment_checklist, deployment_logs" },
-                { group: "Integrations", tables: "integrations, integration_activity_logs, integration_alerts, integration_linked_systems" },
-                { group: "Knowledge & Documentation", tables: "knowledge_entries, knowledge_documents, manual_pages, manual_versions" },
-                { group: "Organisations", tables: "organisations, organisation_members, organisation_documents" },
-                { group: "Expansion", tables: "launched_platforms, launch_checklist, system_templates" },
-                { group: "Security & Compliance", tables: "platform_roles, access_audit_log, access_anomalies, compliance_items, compliance_documents" },
-                { group: "Partners", tables: "partner_applications, partner_opportunities, partner_deals, partner_documents, partner_messages" },
-                { group: "Revenue", tables: "revenue_records" },
-                { group: "Optimisation", tables: "optimisation_insights" },
-                { group: "Build & Testing", tables: "build_log_entries, platform_test_runs, platform_test_results" },
-                { group: "Client Portal", tables: "feature_requests, maintenance_events, support_tickets, messages, documents" },
-              ].map((g) => (
-                <div key={g.group}>
-                  <p className="font-medium text-foreground">{g.group}</p>
-                  <p className="text-xs font-mono">{g.tables}</p>
-                </div>
-              ))}
-              <div className="mt-2">
-                <p className="font-medium text-foreground">RLS Policy Pattern</p>
-                <p>Every table has founder-level ALL access via <code className="text-xs bg-secondary px-1 rounded">has_role(auth.uid(), 'founder')</code>. Client-facing tables additionally have SELECT policies scoped to the user's profile/subscription/organisation. A security-definer function <code className="text-xs bg-secondary px-1 rounded">has_role(_user_id, _role)</code> prevents recursive RLS checks.</p>
-              </div>
-              <div>
-                <p className="font-medium text-foreground">Key Database Functions</p>
-                <ul className="list-disc list-inside ml-2 space-y-1">
-                  <li><code className="text-xs bg-secondary px-1 rounded">handle_new_user()</code> — Trigger on auth.users insert, creates profiles row</li>
-                  <li><code className="text-xs bg-secondary px-1 rounded">has_role(_user_id, _role)</code> — Security definer role check</li>
-                  <li><code className="text-xs bg-secondary px-1 rounded">update_updated_at_column()</code> — Auto-updates updated_at timestamps</li>
-                  <li><code className="text-xs bg-secondary px-1 rounded">log_new_proposal()</code> — Trigger logging new proposals to activity_log</li>
-                  <li><code className="text-xs bg-secondary px-1 rounded">log_new_support_request()</code> — Trigger logging support requests</li>
-                  <li><code className="text-xs bg-secondary px-1 rounded">log_new_opportunity()</code> — Trigger logging partner opportunities</li>
-                </ul>
-              </div>
-              <div>
-                <p className="font-medium text-foreground">Storage Buckets</p>
-                <p className="text-xs font-mono">project-documents, partner-documents, knowledge-documents, organisation-documents, compliance-documents (all private)</p>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          {/* 5. Edge Functions */}
-          <AccordionItem value="s5" className="border border-border/50 rounded-lg bg-card px-4">
-            <AccordionTrigger className="text-sm font-semibold">
-              <span className="flex items-center gap-2"><Play size={16} className="text-primary" /> 5. Edge Functions</span>
-            </AccordionTrigger>
-            <AccordionContent className="text-sm text-muted-foreground space-y-4">
-              <div>
-                <p className="font-medium text-foreground">generate-proposal</p>
-                <p><strong>Purpose:</strong> AI-powered proposal generation for prospective clients.</p>
-                <p><strong>Model:</strong> google/gemini-3-flash-preview via Lovable AI gateway.</p>
-                <p><strong>Input:</strong> projectTypes, businessProblem, processesToAutomate, projectScale, timeline, industry.</p>
-                <p><strong>Output:</strong> suggested_solution, estimated_scope, estimated_timeline via tool calling.</p>
-                <p><strong>Error handling:</strong> 429 rate limiting, 402 credit exhaustion, general error catch.</p>
-              </div>
-              <div>
-                <p className="font-medium text-foreground">founder-copilot</p>
-                <p><strong>Purpose:</strong> Conversational AI assistant for the founder with real-time platform context.</p>
-                <p><strong>Model:</strong> google/gemini-3-flash-preview with streaming responses.</p>
-                <p><strong>Context injection:</strong> Fetches live data from 9 tables (workflows, agents, systems, organisations, brain_insights, decision_recommendations, strategy_insights, revenue_records, system_templates) and injects into system prompt.</p>
-                <p><strong>Auth:</strong> Uses SUPABASE_SERVICE_ROLE_KEY for unrestricted data access.</p>
-              </div>
-              <div>
-                <p className="font-medium text-foreground">platform-testing</p>
-                <p><strong>Purpose:</strong> Automated platform validation suite running 20+ tests.</p>
-                <p><strong>Test categories:</strong> Organisations, Automations, AI Agents, Systems, Brain, Decisions, Strategy, Deployments, Architectures, Templates, Knowledge, Integrations, Build Log, Optimisation, Security, Data Integrity, Manual, Executions, Expansion, Compliance.</p>
-                <p><strong>Behaviour:</strong> Creates test data → runs validations → records results to platform_test_runs/platform_test_results → cleans up test data (deletes rows with [TEST] prefix).</p>
-                <p><strong>Auth:</strong> Uses SUPABASE_SERVICE_ROLE_KEY to bypass RLS.</p>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          {/* 6. Platform Testing */}
-          <AccordionItem value="s6" className="border border-border/50 rounded-lg bg-card px-4">
-            <AccordionTrigger className="text-sm font-semibold">
-              <span className="flex items-center gap-2"><FlaskConical size={16} className="text-primary" /> 6. Platform Testing & Validation Suite</span>
-            </AccordionTrigger>
-            <AccordionContent className="text-sm text-muted-foreground space-y-3">
-              <p>The platform includes a complete automated testing system accessible at <code className="text-xs bg-secondary px-1 rounded">/founder/testing</code>.</p>
-              <div>
-                <p className="font-medium text-foreground">Database Tables</p>
-                <ul className="list-disc list-inside ml-2 space-y-1">
-                  <li><strong>platform_test_runs</strong> — Stores test run metadata: run_name, status, total_tests, passed, failed, warnings, duration_ms, triggered_by, completed_at</li>
-                  <li><strong>platform_test_results</strong> — Stores individual test results: run_id (FK), module, test_name, status, details, duration_ms</li>
-                </ul>
-              </div>
-              <div>
-                <p className="font-medium text-foreground">Edge Function: platform-testing</p>
-                <p>Runs 20+ validation tests across all platform modules. Creates temporary test records, validates CRUD operations, checks data integrity (orphan references), then cleans up all test data. Results are persisted to the test tables for audit history.</p>
-              </div>
-              <div>
-                <p className="font-medium text-foreground">Dashboard Features</p>
-                <ul className="list-disc list-inside ml-2 space-y-1">
-                  <li>Health overview cards (total/passed/failed/warnings)</li>
-                  <li>Run Full Validation button triggering the edge function</li>
-                  <li>Tabbed results view grouped by module</li>
-                  <li>Test run history with timestamps and duration</li>
-                </ul>
-              </div>
-              <div>
-                <p className="font-medium text-foreground">RLS Policies</p>
-                <p>Both tables use founder-only ALL access policy.</p>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          {/* 7. Platform Build Log */}
-          <AccordionItem value="s7" className="border border-border/50 rounded-lg bg-card px-4">
-            <AccordionTrigger className="text-sm font-semibold">
-              <span className="flex items-center gap-2"><ClipboardList size={16} className="text-primary" /> 7. Platform Build Log</span>
-            </AccordionTrigger>
-            <AccordionContent className="text-sm text-muted-foreground space-y-3">
-              <p>The Build Log is an append-only engineering record stored in the <code className="text-xs bg-secondary px-1 rounded">build_log_entries</code> table. RLS allows founder INSERT and SELECT only — no UPDATE or DELETE — ensuring immutability.</p>
-              <div>
-                <p className="font-medium text-foreground">Reconstructed Build History</p>
-                <p>The following is the chronological build sequence of the Liftor AI platform:</p>
-                <ol className="list-decimal list-inside ml-2 space-y-2 mt-2">
-                  <li><strong>Foundation</strong> — React + Vite + TypeScript project scaffolded. Tailwind CSS + shadcn/ui design system configured. Dark-themed UI with HSL-based semantic tokens.</li>
-                  <li><strong>Public Website</strong> — 9 marketing pages created: Index, WhatWeBuild, Industries, Method, CaseStudies, PartnerProgram, ProjectDiscovery, About, AIProposal. Navbar + Footer layout components.</li>
-                  <li><strong>Authentication System</strong> — Supabase Auth with email/password. Login, Signup, Forgot Password, Reset Password pages. AuthContext provider. ProtectedRoute component. profiles table with handle_new_user trigger.</li>
-                  <li><strong>Client Portal</strong> — 15 portal routes: Dashboard, Projects, ProjectDetail, Documents, Messages, Support, Maintenance suite (Dashboard/Schedule/Updates/Features), System Monitoring, Control Panel, SystemDetail, Analytics, Optimisation. PortalLayout component.</li>
-                  <li><strong>Core Database Schema</strong> — Created: profiles, projects, subscriptions, monitored_systems, automation_workflows, ai_agents, user_roles (with app_role enum: admin, moderator, user, founder, partner). RLS policies on all tables.</li>
-                  <li><strong>Founder Console</strong> — FounderLayout sidebar navigation with 39 routes. FounderRoute guard checking user_roles for 'founder' role. FounderOverview dashboard.</li>
-                  <li><strong>System Monitoring Module</strong> — MonitoringDashboard + MonitoringSystemDetail pages. monitored_systems table with client_id, project_id, organisation_id references.</li>
-                  <li><strong>AI Agent System</strong> — AgentDirectory + AgentProfile pages. ai_agents table with system_id FK. agent_system_assignments, agent_task_stats, agent_activity_logs, agent_alerts tables.</li>
-                  <li><strong>Workflow Engine</strong> — WorkflowDirectory + WorkflowDetail pages. automation_workflows table with execution tracking. workflow_executions, workflow_steps, execution_steps, execution_logs tables.</li>
-                  <li><strong>Execution Dashboard</strong> — ExecutionDashboard + ExecutionDetail pages for monitoring workflow execution lifecycle.</li>
-                  <li><strong>Integration Framework</strong> — IntegrationDirectory + IntegrationDetail pages. integrations table. integration_activity_logs, integration_alerts, integration_linked_systems tables.</li>
-                  <li><strong>Architecture Manager</strong> — ArchitectureDirectory + ArchitectureDetail pages. architectures, architecture_components, architecture_relationships tables for visual system design.</li>
-                  <li><strong>Deployment Manager</strong> — DeploymentDirectory + DeploymentDetail pages. deployments, deployment_stages, deployment_checklist, deployment_logs tables for staged rollout management.</li>
-                  <li><strong>Organisation Management</strong> — OrganisationDirectory + OrganisationProfile pages. organisations, organisation_members, organisation_documents tables.</li>
-                  <li><strong>Knowledge Base</strong> — KnowledgeDirectory + KnowledgeDetail pages. knowledge_entries, knowledge_documents tables with agent/workflow linking.</li>
-                  <li><strong>Template Library</strong> — TemplateDirectory + TemplateDetail pages. system_templates table for reusable system configurations.</li>
-                  <li><strong>Platform Expansion</strong> — PlatformExpansion + PlatformLaunchDetail pages. launched_platforms, launch_checklist tables.</li>
-                  <li><strong>Analytics Dashboard</strong> — FounderAnalytics page aggregating workflow, agent, and system metrics.</li>
-                  <li><strong>Optimisation Engine</strong> — OptimisationDashboard page. optimisation_insights table with entity-level targeting and recommended actions.</li>
-                  <li><strong>Access Control & Security</strong> — AccessControl + SecurityDashboard pages. platform_roles, access_audit_log, access_anomalies, compliance_items, compliance_documents tables.</li>
-                  <li><strong>Command Center</strong> — CommandCenter dashboard providing real-time operational overview across all platform systems.</li>
-                  <li><strong>AI Proposal Generator</strong> — AIProposal public page + generate-proposal edge function using Gemini AI with tool calling for structured proposal output.</li>
-                  <li><strong>Partner Portal</strong> — 7 partner routes: Dashboard, Opportunities, OpportunityDetail, Projects, ProjectDetail, Documents, Messages. PartnerRoute guard. partner_applications, partner_opportunities, partner_deals, partner_documents, partner_messages tables.</li>
-                  <li><strong>AI Brain Core</strong> — BrainCore page. brain_insights, brain_recommendations, brain_learning_records tables. Signal pipeline: Observation → Learning → Optimisation → Decision → Strategy.</li>
-                  <li><strong>Decision Engine</strong> — DecisionEngine page. decision_recommendations table with category, priority, benefits/risks analysis, and decision tracking.</li>
-                  <li><strong>Strategy Engine</strong> — StrategyEngine page. strategy_insights table with market signals, industry targeting, and confidence levels.</li>
-                  <li><strong>Founder AI Co-Pilot</strong> — FounderCoPilot page + founder-copilot edge function. Streaming AI assistant with live platform data injection from 9 tables.</li>
-                  <li><strong>Revenue Console</strong> — FounderRevenue page. revenue_records table with source attribution and currency support.</li>
-                  <li><strong>Global Operations</strong> — GlobalOperations dashboard aggregating cross-system operational data.</li>
-                  <li><strong>Build Log System</strong> — BuildLog page + build_log_entries table. Append-only with CSV and Markdown export. Change types: feature_added, module_created, module_updated, bug_fixed, integration_added, workflow_created, agent_created, system_deployment, template_created.</li>
-                  <li><strong>Founder Manual v1</strong> — FounderManual + ManualPageDetail pages. manual_pages, manual_versions tables. Section-grouped documentation with Markdown export.</li>
-                  <li><strong>Platform Testing Suite</strong> — PlatformTesting page + platform-testing edge function. 20+ automated tests across all modules. platform_test_runs, platform_test_results tables. Test data cleanup after execution.</li>
-                  <li><strong>Founder Manual v3 (Current)</strong> — Complete rebuild with all 11 sections, full build history, engineering-level documentation, and structured Markdown export.</li>
-                </ol>
-              </div>
-              <div>
-                <p className="font-medium text-foreground">Build Log Table Schema</p>
-                <p className="text-xs font-mono">build_log_entries: id, title, description, change_type, module_affected, author, created_at</p>
-                <p>RLS: Founder INSERT + SELECT only. No UPDATE/DELETE (append-only).</p>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          {/* 8. Founder Control Systems */}
-          <AccordionItem value="s8" className="border border-border/50 rounded-lg bg-card px-4">
-            <AccordionTrigger className="text-sm font-semibold">
-              <span className="flex items-center gap-2"><Command size={16} className="text-primary" /> 8. Founder Control Systems</span>
-            </AccordionTrigger>
-            <AccordionContent className="text-sm text-muted-foreground space-y-3">
-              <div>
-                <p className="font-medium text-foreground">Founder Console</p>
-                <p>The central management interface with 39 navigation items. FounderLayout provides a fixed sidebar with grouped navigation. FounderRoute enforces founder-only access by checking user_roles table. All founder pages use the same layout for consistency.</p>
-              </div>
-              <div>
-                <p className="font-medium text-foreground">Revenue Console</p>
-                <p>Financial dashboard at <code className="text-xs bg-secondary px-1 rounded">/founder/revenue</code>. Tracks revenue_records with fields: source_name, source_type, revenue_value, client_organisation, currency, period. Supports GBP and multi-currency display.</p>
-              </div>
-              <div>
-                <p className="font-medium text-foreground">Founder Manual</p>
-                <p>This document at <code className="text-xs bg-secondary px-1 rounded">/founder/manual</code>. Engineering-level platform documentation with 11 sections and full Markdown export. Previously backed by manual_pages + manual_versions tables; now self-contained with comprehensive hardcoded content reflecting the actual platform state.</p>
-              </div>
-              <div>
-                <p className="font-medium text-foreground">Platform Testing Dashboard</p>
-                <p>At <code className="text-xs bg-secondary px-1 rounded">/founder/testing</code>. Triggers the platform-testing edge function, displays results grouped by module, maintains test run history. Validates all platform tables and cross-references.</p>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          {/* 9. AI Brain Architecture */}
-          <AccordionItem value="s9" className="border border-border/50 rounded-lg bg-card px-4">
-            <AccordionTrigger className="text-sm font-semibold">
-              <span className="flex items-center gap-2"><Brain size={16} className="text-primary" /> 9. AI Brain Architecture</span>
-            </AccordionTrigger>
-            <AccordionContent className="text-sm text-muted-foreground space-y-3">
-              <p>The AI Brain is a multi-layer intelligence system that processes platform signals and generates actionable insights.</p>
-              <div>
-                <p className="font-medium text-foreground">AI Brain Core <span className="text-xs">(/founder/brain)</span></p>
-                <p>Tables: brain_insights (type, priority, source_module, system_affected, status), brain_recommendations (priority, affected_system, status), brain_learning_records (category, confidence_level, source_system, pattern_description).</p>
-                <p>Signal flow: Platform data → Observation → Pattern detection → Learning records → Insight generation → Recommendation output.</p>
-              </div>
-              <div>
-                <p className="font-medium text-foreground">AI Decision Engine <span className="text-xs">(/founder/decisions)</span></p>
-                <p>Table: decision_recommendations. Fields: title, description, category (operational/strategic/expansion), priority, status (pending/approved/rejected/implemented), potential_benefits, potential_risks, target_module, decision_maker, decided_at.</p>
-              </div>
-              <div>
-                <p className="font-medium text-foreground">AI Strategy Engine <span className="text-xs">(/founder/strategy)</span></p>
-                <p>Table: strategy_insights. Fields: title, description, category (market_signal/competitive/expansion/operational), confidence_level, target_industry, status.</p>
-              </div>
-              <div>
-                <p className="font-medium text-foreground">Automation Optimisation Engine <span className="text-xs">(/founder/optimisation)</span></p>
-                <p>Table: optimisation_insights. Fields: entity_type (workflow/agent/system), entity_id, entity_name, insight_type (performance/efficiency/reliability), priority, recommended_action, system_id, status.</p>
-              </div>
-              <div>
-                <p className="font-medium text-foreground">AI Brain Orchestrator</p>
-                <p>Coordinates signal flow across brain components: Observation → Learning → Optimisation → Decision → Strategy. Each stage processes and enriches signals before passing to the next layer.</p>
-              </div>
-              <div>
-                <p className="font-medium text-foreground">Founder AI Co-Pilot <span className="text-xs">(/founder/copilot)</span></p>
-                <p>Conversational interface backed by the founder-copilot edge function. Uses google/gemini-3-flash-preview with streaming. Injects real-time data from 9 platform tables into the system prompt. Provides strategic recommendations, data analysis, and operational guidance.</p>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          {/* 10. Navigation & Routes */}
-          <AccordionItem value="s10" className="border border-border/50 rounded-lg bg-card px-4">
-            <AccordionTrigger className="text-sm font-semibold">
-              <span className="flex items-center gap-2"><Globe size={16} className="text-primary" /> 10. Navigation & Routes</span>
-            </AccordionTrigger>
-            <AccordionContent className="text-sm text-muted-foreground space-y-3">
-              <div>
-                <p className="font-medium text-foreground">Public Routes (9)</p>
-                <p className="text-xs font-mono">/ /what-we-build /industries /method /case-studies /partners /project-discovery /about /ai-proposal</p>
-              </div>
-              <div>
-                <p className="font-medium text-foreground">Auth Routes (4)</p>
-                <p className="text-xs font-mono">/portal/login /portal/signup /portal/forgot-password /portal/reset-password</p>
-              </div>
-              <div>
-                <p className="font-medium text-foreground">Client Portal Routes (15)</p>
-                <p className="text-xs font-mono">/portal/dashboard /portal/projects /portal/projects/:id /portal/documents /portal/messages /portal/support /portal/maintenance /portal/maintenance/schedule /portal/maintenance/updates /portal/maintenance/features /portal/monitoring /portal/systems /portal/systems/:id /portal/analytics /portal/optimisation</p>
-              </div>
-              <div>
-                <p className="font-medium text-foreground">Founder Console Routes (39)</p>
-                <p className="text-xs font-mono">/founder /founder/command-center /founder/copilot /founder/brain /founder/decisions /founder/strategy /founder/operations /founder/organisations /founder/organisations/:id /founder/revenue /founder/analytics /founder/optimisation /founder/proposals /founder/proposals/:id /founder/pipeline /founder/projects /founder/projects/:id /founder/monitoring /founder/monitoring/:id /founder/agents /founder/agents/:id /founder/workflows /founder/workflows/:id /founder/executions /founder/executions/:id /founder/processes /founder/processes/:id /founder/architectures /founder/architectures/:id /founder/deployments /founder/deployments/:id /founder/integrations /founder/integrations/:id /founder/activity /founder/knowledge /founder/knowledge/:id /founder/access-control /founder/security /founder/templates /founder/templates/:id /founder/expansion /founder/expansion/:id /founder/manual /founder/manual/:id /founder/build-log /founder/documents /founder/testing</p>
-              </div>
-              <div>
-                <p className="font-medium text-foreground">Partner Portal Routes (7)</p>
-                <p className="text-xs font-mono">/partner /partner/opportunities /partner/opportunities/:id /partner/projects /partner/projects/:id /partner/documents /partner/messages</p>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          {/* 11. Deployment Architecture */}
-          <AccordionItem value="s11" className="border border-border/50 rounded-lg bg-card px-4">
-            <AccordionTrigger className="text-sm font-semibold">
-              <span className="flex items-center gap-2"><Rocket size={16} className="text-primary" /> 11. Deployment Architecture</span>
-            </AccordionTrigger>
-            <AccordionContent className="text-sm text-muted-foreground space-y-3">
-              <div>
-                <p className="font-medium text-foreground">Frontend</p>
-                <p>React 18 + Vite + TypeScript SPA. Deployed via Lovable hosting. Tailwind CSS with HSL-based semantic design tokens. shadcn/ui component library. framer-motion for animations. @tanstack/react-query for server state. react-router-dom v6 for routing. recharts for data visualisation.</p>
-              </div>
-              <div>
-                <p className="font-medium text-foreground">Database</p>
-                <p>PostgreSQL via Lovable Cloud (Supabase). 50+ tables with full RLS. app_role enum (admin, moderator, user, founder, partner). Security-definer functions for role checks. Automatic triggers for profile creation, activity logging, and timestamp updates.</p>
-              </div>
-              <div>
-                <p className="font-medium text-foreground">Edge Functions</p>
-                <p>3 Deno-based serverless functions deployed automatically: generate-proposal, founder-copilot, platform-testing. All use CORS headers. AI functions use Lovable AI gateway (ai.gateway.lovable.dev) with LOVABLE_API_KEY.</p>
-              </div>
-              <div>
-                <p className="font-medium text-foreground">Authentication</p>
-                <p>Supabase Auth with email/password. Email verification required (no auto-confirm). AuthContext provides user state. Role-based routing: ProtectedRoute (any authenticated user), FounderRoute (founder role), PartnerRoute (partner role).</p>
-              </div>
-              <div>
-                <p className="font-medium text-foreground">Storage</p>
-                <p>5 private storage buckets: project-documents, partner-documents, knowledge-documents, organisation-documents, compliance-documents. All access controlled via RLS.</p>
-              </div>
-              <div>
-                <p className="font-medium text-foreground">AI Integration</p>
-                <p>Lovable AI gateway provides access to multiple models without API keys. Currently using google/gemini-3-flash-preview for proposal generation and co-pilot conversations. Tool calling for structured outputs.</p>
-              </div>
-              <div>
-                <p className="font-medium text-foreground">Secrets</p>
-                <p className="text-xs font-mono">SUPABASE_SERVICE_ROLE_KEY, SUPABASE_DB_URL, SUPABASE_PUBLISHABLE_KEY, LOVABLE_API_KEY, SUPABASE_URL, SUPABASE_ANON_KEY</p>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
+          {sections.map((s) => (
+            <AccordionItem key={s.id} value={s.id} className="border border-border/50 rounded-lg bg-card px-4">
+              <AccordionTrigger className="text-sm font-semibold">
+                <span className="flex items-center gap-2"><s.icon size={16} className="text-primary" /> {s.title}</span>
+              </AccordionTrigger>
+              <AccordionContent className="text-sm text-muted-foreground">
+                {s.content}
+              </AccordionContent>
+            </AccordionItem>
+          ))}
         </Accordion>
       </div>
     </FounderLayout>
