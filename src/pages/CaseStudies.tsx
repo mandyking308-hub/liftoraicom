@@ -6,24 +6,33 @@ import { motion } from "framer-motion";
 import { fadeUp } from "@/lib/animations";
 import { ArrowRight, Shield } from "lucide-react";
 
+const labelMap: Record<string, string> = {
+  architecture: "View Architecture",
+  system: "View System",
+  platform: "View Platform",
+};
+
 const caseStudies = [
   {
     category: "Financial Services",
     title: "AI Investment Intelligence Platform",
     desc: "A data intelligence platform combining real-time portfolio monitoring, automated reporting, and AI-assisted investment analysis. The system integrates financial data sources and generates predictive insights to support strategic investment decisions.",
     link: "/platform",
+    linkType: "architecture" as const,
   },
   {
     category: "Enterprise Systems",
     title: "Enterprise Automation Infrastructure",
     desc: "An operational automation platform replacing manual workflows across a large-scale organisation. Intelligent agents process data, coordinate system integrations, and execute automated operational processes.",
     link: "/systems",
+    linkType: "system" as const,
   },
   {
     category: "Family Office",
     title: "Intelligent Client Intelligence Portal",
     desc: "A secure operational platform for wealth management teams providing automated reporting, portfolio insights, and document intelligence through integrated AI workflows.",
     link: "/architecture",
+    linkType: "platform" as const,
   },
 ];
 
@@ -73,7 +82,7 @@ const CaseStudies = () => (
               <p className="text-sm text-muted-foreground leading-relaxed flex-1">{cs.desc}</p>
               <div className="mt-6">
                 <Button variant="ghost" size="sm" className="text-primary gap-1 px-0 hover:gap-2 transition-all" asChild>
-                  <Link to={cs.link}>Explore System <ArrowRight size={14} /></Link>
+                  <Link to={cs.link}>{labelMap[cs.linkType]} <ArrowRight size={14} /></Link>
                 </Button>
               </div>
             </motion.div>
