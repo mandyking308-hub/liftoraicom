@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { fadeUp } from "@/lib/animations";
 import { Bot, Cpu, Workflow, Zap, Layers, Activity, FileSearch, Users, DollarSign, Cog, BarChart3 } from "lucide-react";
+import SystemArchitectureFlow from "@/components/systems/SystemArchitectureFlow";
 
 const systemLayers = [
   { icon: Bot, title: "Intelligent Agents", desc: "Autonomous agents that process data, execute decisions, and coordinate tasks across interconnected systems without manual oversight." },
