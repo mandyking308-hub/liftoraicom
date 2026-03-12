@@ -19,9 +19,9 @@ const useLiveManualData = () => {
   return useQuery<ManualLiveData>({
     queryKey: ["founder-manual-live-data"],
     queryFn: async () => {
-      const cq = async (query: PromiseLike<{ count: number | null }>) => {
+      const cq = async (query: any) => {
         const { count } = await query;
-        return count ?? 0;
+        return (count ?? 0) as number;
       };
 
       const [
@@ -32,21 +32,21 @@ const useLiveManualData = () => {
         { data: recentBuildLogs },
         { data: recentTestRuns },
       ] = await Promise.all([
-        cq(() => supabase.from("organisations").select("id", { count: "exact", head: true })),
-        cq(() => supabase.from("automation_workflows").select("id", { count: "exact", head: true })),
-        cq(() => supabase.from("ai_agents").select("id", { count: "exact", head: true })),
-        cq(() => supabase.from("integrations").select("id", { count: "exact", head: true })),
-        cq(() => supabase.from("deployments").select("id", { count: "exact", head: true })),
-        cq(() => supabase.from("system_templates").select("id", { count: "exact", head: true })),
-        cq(() => supabase.from("knowledge_entries").select("id", { count: "exact", head: true })),
-        cq(() => supabase.from("brain_insights").select("id", { count: "exact", head: true })),
-        cq(() => supabase.from("decision_recommendations").select("id", { count: "exact", head: true })),
-        cq(() => supabase.from("platform_test_runs").select("id", { count: "exact", head: true })),
-        cq(() => supabase.from("build_log_entries").select("id", { count: "exact", head: true })),
-        cq(() => supabase.from("manual_pages").select("id", { count: "exact", head: true })),
-        cq(() => supabase.from("monitored_systems").select("id", { count: "exact", head: true })),
-        cq(() => supabase.from("architectures").select("id", { count: "exact", head: true })),
-        cq(() => supabase.from("launched_platforms").select("id", { count: "exact", head: true })),
+        cq(supabase.from("organisations").select("id", { count: "exact", head: true })),
+        cq(supabase.from("automation_workflows").select("id", { count: "exact", head: true })),
+        cq(supabase.from("ai_agents").select("id", { count: "exact", head: true })),
+        cq(supabase.from("integrations").select("id", { count: "exact", head: true })),
+        cq(supabase.from("deployments").select("id", { count: "exact", head: true })),
+        cq(supabase.from("system_templates").select("id", { count: "exact", head: true })),
+        cq(supabase.from("knowledge_entries").select("id", { count: "exact", head: true })),
+        cq(supabase.from("brain_insights").select("id", { count: "exact", head: true })),
+        cq(supabase.from("decision_recommendations").select("id", { count: "exact", head: true })),
+        cq(supabase.from("platform_test_runs").select("id", { count: "exact", head: true })),
+        cq(supabase.from("build_log_entries").select("id", { count: "exact", head: true })),
+        cq(supabase.from("manual_pages").select("id", { count: "exact", head: true })),
+        cq(supabase.from("monitored_systems").select("id", { count: "exact", head: true })),
+        cq(supabase.from("architectures").select("id", { count: "exact", head: true })),
+        cq(supabase.from("launched_platforms").select("id", { count: "exact", head: true })),
         supabase.from("build_log_entries").select("title, change_type, module_affected, author, created_at, description").order("created_at", { ascending: false }).limit(10),
         supabase.from("platform_test_runs").select("run_name, status, total_tests, passed, failed, created_at").order("created_at", { ascending: false }).limit(5),
       ]);
