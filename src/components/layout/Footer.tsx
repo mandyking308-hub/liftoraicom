@@ -33,8 +33,11 @@ const Footer = () => (
         </div>
 
         <div>
-          <h4 className="text-xs font-semibold uppercase tracking-[0.15em] text-foreground/80 mb-5">Get Started</h4>
+          <h4 className="text-xs font-semibold uppercase tracking-[0.15em] text-foreground/80 mb-5">Platform</h4>
           <div className="flex flex-col gap-3">
+            <Link to="/systems" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Systems</Link>
+            <Link to="/architecture" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Architecture</Link>
+            <Link to="/platform" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Platform Overview</Link>
             <Link to="/project-discovery" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Start a Project</Link>
           </div>
         </div>

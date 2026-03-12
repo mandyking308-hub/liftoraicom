@@ -72,8 +72,8 @@ const CaseStudies = () => (
               <h3 className="text-xl font-semibold mb-3 group-hover:text-foreground transition-colors duration-300">{cs.title}</h3>
               <p className="text-sm text-muted-foreground leading-relaxed flex-1">{cs.desc}</p>
               <div className="mt-6">
-                <Button variant="ghost" size="sm" className="text-primary gap-1 px-0 hover:gap-2 transition-all">
-                  View Architecture <ArrowRight size={14} />
+                <Button variant="ghost" size="sm" className="text-primary gap-1 px-0 hover:gap-2 transition-all" asChild>
+                  <Link to={cs.link}>View Architecture <ArrowRight size={14} /></Link>
                 </Button>
               </div>
             </motion.div>

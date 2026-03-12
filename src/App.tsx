@@ -136,6 +136,9 @@ const App = () => (
             <Route path="/project-discovery" element={<ProjectDiscovery />} />
             <Route path="/about" element={<About />} />
             <Route path="/ai-proposal" element={<AIProposal />} />
+            <Route path="/platform" element={<Platform />} />
+            <Route path="/systems" element={<Systems />} />
+            <Route path="/architecture" element={<Architecture />} />
 
             {/* Legal */}
             <Route path="/legal" element={<LegalHub />} />
