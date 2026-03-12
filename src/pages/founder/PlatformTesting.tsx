@@ -123,6 +123,40 @@ const PlatformTesting = () => {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("validation");
 
+  // Diagnostic runs
+  const { data: diagnosticRuns } = useQuery({
+    queryKey: ["diagnostic-runs"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("platform_diagnostic_runs")
+        .select("*")
+        .order("run_timestamp", { ascending: false })
+        .limit(20);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const runDiagnostics = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke("platform-diagnostics");
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      toast.success("System diagnostics complete");
+      queryClient.invalidateQueries({ queryKey: ["diagnostic-runs"] });
+    },
+    onError: (err) => {
+      toast.error("Diagnostics failed: " + String(err));
+    },
+  });
+
+  const latestDiagnostic = diagnosticRuns?.[0];
+  const diagnosticChecks = (latestDiagnostic?.details as any[]) ?? [];
+  const diagCategories = [...new Set(diagnosticChecks.map((c: any) => c.category))];
+
+
   const { data: runs, isLoading: runsLoading } = useQuery({
     queryKey: ["platform-test-runs"],
     queryFn: async () => {
