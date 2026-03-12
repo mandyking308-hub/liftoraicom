@@ -2494,6 +2494,36 @@ export type Database = {
           },
         ]
       }
+      proposal_rate_limits: {
+        Row: {
+          blocked: boolean
+          created_at: string
+          id: string
+          ip_address: string
+          last_request_at: string
+          request_count: number
+          user_id: string | null
+        }
+        Insert: {
+          blocked?: boolean
+          created_at?: string
+          id?: string
+          ip_address: string
+          last_request_at?: string
+          request_count?: number
+          user_id?: string | null
+        }
+        Update: {
+          blocked?: boolean
+          created_at?: string
+          id?: string
+          ip_address?: string
+          last_request_at?: string
+          request_count?: number
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       proposals: {
         Row: {
           ai_estimated_annual_savings: string | null
