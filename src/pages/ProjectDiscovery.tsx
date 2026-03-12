@@ -25,6 +25,7 @@ const ProjectDiscovery = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="Start a Project | Liftor AI" description="Tell us about your organisation and the intelligent systems you want to build. Liftor AI will generate a structured AI system proposal." />
       <Navbar />
 
       <section className="pt-32 pb-24">
