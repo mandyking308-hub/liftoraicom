@@ -145,7 +145,7 @@ const FounderOverview = () => {
               </div>
 
               {/* Proposal metrics */}
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5 mb-6">
                 <Card>
                   <CardContent className="pt-4 pb-3">
                     <div className="flex items-center gap-2 mb-1">
@@ -184,6 +184,16 @@ const FounderOverview = () => {
                     </div>
                     <p className="text-lg font-bold truncate">{topTimeline}</p>
                     <p className="text-xs text-muted-foreground">Most Common</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-4 pb-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <PoundSterling size={14} className="text-primary" />
+                      <span className="text-xs text-muted-foreground">Pipeline</span>
+                    </div>
+                    <p className="text-lg font-bold truncate">£{(totalPipelineValue / 1000).toFixed(0)}k</p>
+                    <p className="text-xs text-muted-foreground">Total Pipeline Value</p>
                   </CardContent>
                 </Card>
               </div>
