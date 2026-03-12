@@ -28,6 +28,7 @@ import AutomationSafetyPolicy from "./pages/legal/AutomationSafetyPolicy";
 import SecurityPolicy from "./pages/legal/SecurityPolicy";
 import CookiePolicy from "./pages/legal/CookiePolicy";
 import DataProcessingAgreement from "./pages/legal/DataProcessingAgreement";
+import TermsOfService from "./pages/legal/TermsOfService";
 
 // Portal pages
 import PortalLogin from "./pages/portal/PortalLogin";
