@@ -40,10 +40,10 @@ const industries = [
 ];
 
 const pillars = [
-  { icon: Shield, label: "Security" },
-  { icon: TrendingUp, label: "Scalability" },
-  { icon: Server, label: "Operational Reliability" },
-  { icon: RefreshCw, label: "Long-Term Evolution" },
+  { icon: Shield, label: "Security", desc: "Enterprise-grade architecture designed with data protection, access control, and operational integrity." },
+  { icon: TrendingUp, label: "Scalability", desc: "Systems engineered to evolve with your organisation as operations grow and complexity increases." },
+  { icon: Server, label: "Operational Reliability", desc: "Infrastructure built for real-world operational environments with monitoring, resilience, and performance stability." },
+  { icon: RefreshCw, label: "Long-Term Evolution", desc: "AI systems that continuously improve through learning, optimisation, and strategic intelligence." },
 ];
 
 const Industries = () => (
