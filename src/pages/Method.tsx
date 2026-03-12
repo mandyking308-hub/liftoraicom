@@ -1,5 +1,7 @@
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { fadeUp } from "@/lib/animations";
 import { Activity, TrendingUp, Brain } from "lucide-react";
