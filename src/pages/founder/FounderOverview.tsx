@@ -81,6 +81,29 @@ const FounderOverview = () => {
     return timelineData.sort((a, b) => b.value - a.value)[0].name;
   }, [timelineData]);
 
+  // Parse cost range midpoint from strings like "£85,000 – £140,000"
+  const parseMidpoint = (range: string | null): number => {
+    if (!range) return 0;
+    const nums = range.match(/[\d,]+/g);
+    if (!nums || nums.length < 2) return 0;
+    const low = parseInt(nums[0].replace(/,/g, ""), 10);
+    const high = parseInt(nums[1].replace(/,/g, ""), 10);
+    return Math.round((low + high) / 2);
+  };
+
+  const totalPipelineValue = useMemo(() => {
+    return proposals.reduce((sum, p) => sum + parseMidpoint(p.ai_estimated_cost_range), 0);
+  }, [proposals]);
+
+  const pipelineByIndustry = useMemo(() => {
+    const map: Record<string, number> = {};
+    proposals.forEach((p) => {
+      const mid = parseMidpoint(p.ai_estimated_cost_range);
+      if (mid > 0) map[p.industry] = (map[p.industry] || 0) + mid;
+    });
+    return Object.entries(map).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+  }, [proposals]);
+
   return (
     <FounderLayout>
       <div className="max-w-6xl">
