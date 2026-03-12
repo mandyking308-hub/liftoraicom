@@ -10,8 +10,134 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, Sparkles, Cpu, Layers, Clock, ExternalLink, PoundSterling, TrendingUp } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, Sparkles, Cpu, Layers, Clock, ExternalLink, PoundSterling, TrendingUp, Download } from "lucide-react";
 import ArchitectureDiagram from "@/components/proposal/ArchitectureDiagram";
+
+const generateProposalPDF = (form: FormData, proposal: Proposal) => {
+  const date = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+
+  const archList = (proposal.architecture_components || [])
+    .map((c) => `<tr><td style="padding:6px 12px;border:1px solid #e2e8f0;font-size:13px;">${c.name}</td><td style="padding:6px 12px;border:1px solid #e2e8f0;font-size:13px;text-transform:capitalize;">${c.type}</td></tr>`)
+    .join("");
+
+  const costRows = (proposal.estimated_cost_breakdown || [])
+    .map((c) => `<tr><td style="padding:6px 12px;border:1px solid #e2e8f0;font-size:13px;">${c.category}</td><td style="padding:6px 12px;border:1px solid #e2e8f0;font-size:13px;text-align:right;">${c.estimate}</td></tr>`)
+    .join("");
+
+  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>AI System Proposal – ${form.companyName}</title>
+<style>
+  @page { margin: 30mm 20mm; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #1e293b; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 40px; }
+  .cover { text-align: center; padding: 80px 0 60px; page-break-after: always; }
+  .cover h1 { font-size: 32px; font-weight: 700; margin: 0 0 8px; color: #0f172a; }
+  .cover .subtitle { font-size: 16px; color: #64748b; margin: 0 0 40px; }
+  .cover .meta { font-size: 13px; color: #94a3b8; }
+  .cover .meta span { display: block; margin: 4px 0; }
+  .cover .logo { font-size: 20px; font-weight: 800; letter-spacing: 2px; color: #6366f1; margin-bottom: 60px; }
+  h2 { font-size: 18px; font-weight: 700; color: #0f172a; margin: 36px 0 12px; padding-bottom: 6px; border-bottom: 2px solid #e2e8f0; }
+  h3 { font-size: 14px; font-weight: 600; color: #334155; margin: 20px 0 8px; }
+  p, li { font-size: 13px; color: #475569; }
+  ul { padding-left: 20px; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+  th { padding: 8px 12px; border: 1px solid #e2e8f0; background: #f8fafc; font-size: 12px; text-align: left; font-weight: 600; color: #334155; }
+  .highlight-box { background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 20px; margin: 16px 0; }
+  .highlight-box .big { font-size: 24px; font-weight: 700; color: #0f172a; margin: 4px 0; }
+  .roi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+  .roi-card { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 14px; }
+  .roi-card .label { font-size: 11px; color: #64748b; margin: 0 0 4px; }
+  .roi-card .value { font-size: 18px; font-weight: 700; color: #166534; margin: 0; }
+  .disclaimer { background: #fefce8; border: 1px solid #fde68a; border-radius: 8px; padding: 20px; margin: 32px 0; page-break-inside: avoid; }
+  .disclaimer h2 { color: #92400e; border-bottom-color: #fde68a; margin-top: 0; }
+  .disclaimer p { font-size: 12px; color: #78716c; }
+  .next-steps { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 24px 0; }
+  .vs-bar { display: flex; align-items: center; gap: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 16px 0; text-align: center; }
+  .vs-bar > div { flex: 1; }
+  .vs-bar .arrow { flex: 0; color: #94a3b8; font-size: 20px; }
+  @media print { body { padding: 0; } .cover { padding: 120px 0 80px; } }
+</style></head><body>
+
+<div class="cover">
+  <div class="logo">LIFTOR AI</div>
+  <h1>AI System Proposal</h1>
+  <p class="subtitle">Prepared by Liftor AI</p>
+  <div class="meta">
+    <span>${date}</span>
+    <span>${form.industry} · ${form.projectTypes.join(", ")}</span>
+    <span>${form.companyName}</span>
+  </div>
+</div>
+
+<h2>1. Executive Summary</h2>
+<p>${proposal.suggested_solution}</p>
+
+<h2>2. System Architecture Overview</h2>
+<p>The proposed system comprises the following major components:</p>
+${archList ? `<table><thead><tr><th>Component</th><th>Type</th></tr></thead><tbody>${archList}</tbody></table>` : "<p>Architecture details will be defined during technical discovery.</p>"}
+
+<h2>3. Implementation Scope</h2>
+<p>${proposal.estimated_scope}</p>
+
+<h2>4. Implementation Timeline</h2>
+<p><strong>Estimated Timeline:</strong> ${proposal.estimated_timeline}</p>
+<p>The implementation will follow structured phases:</p>
+<ul>
+  <li><strong>Phase 1:</strong> Architecture Design & Technical Discovery</li>
+  <li><strong>Phase 2:</strong> Platform Development & AI Agent Engineering</li>
+  <li><strong>Phase 3:</strong> Integration, Testing & Quality Assurance</li>
+  <li><strong>Phase 4:</strong> Deployment, Optimisation & Handover</li>
+</ul>
+
+${proposal.estimated_cost_range ? `
+<h2>5. Estimated Investment</h2>
+<div class="highlight-box">
+  <p style="font-size:12px;color:#64748b;margin:0;">Total Estimated Investment</p>
+  <p class="big">${proposal.estimated_cost_range}</p>
+</div>
+${costRows ? `<table><thead><tr><th>Category</th><th style="text-align:right;">Estimate</th></tr></thead><tbody>${costRows}</tbody></table>` : ""}
+<p style="font-size:11px;color:#94a3b8;">Investment estimates are indicative and depend on system complexity, integrations, and deployment scale.</p>
+` : ""}
+
+${proposal.estimated_annual_savings ? `
+<h2>6. Projected Business Impact</h2>
+<div class="roi-grid">
+  <div class="roi-card"><p class="label">Annual Operational Savings</p><p class="value">${proposal.estimated_annual_savings}</p></div>
+  <div class="roi-card"><p class="label">Return on Investment</p><p class="value">${proposal.estimated_roi_period}</p></div>
+  <div class="roi-card"><p class="label">Productivity Improvement</p><p class="value">${proposal.estimated_productivity_gain}</p></div>
+</div>
+<h3>Strategic Impact</h3>
+<p>${proposal.estimated_roi_summary}</p>
+${proposal.estimated_cost_range ? `
+<div class="vs-bar">
+  <div><p style="font-size:11px;color:#64748b;margin:0 0 4px;">Investment</p><p style="font-size:14px;font-weight:600;margin:0;">${proposal.estimated_cost_range}</p></div>
+  <div class="arrow">→</div>
+  <div><p style="font-size:11px;color:#64748b;margin:0 0 4px;">Expected Annual Savings</p><p style="font-size:14px;font-weight:600;color:#166534;margin:0;">${proposal.estimated_annual_savings}</p></div>
+</div>` : ""}
+` : ""}
+
+<div class="disclaimer">
+  <h2>Important Notice</h2>
+  <p>This document provides an indicative system proposal generated using automated analysis based on the information provided.</p>
+  <p>All cost estimates, timelines, and potential business impacts are illustrative estimates only and are not legally binding.</p>
+  <p>Actual project scope, implementation costs, timelines, and financial outcomes may vary significantly following detailed technical discovery and requirements analysis.</p>
+  <p>No contractual obligations or commitments are created by this document.</p>
+  <p>A formal statement of work and commercial agreement will be required before any implementation work begins.</p>
+</div>
+
+<div class="next-steps">
+  <h2 style="margin-top:0;">Next Steps</h2>
+  <p>To progress this proposal, a technical discovery session will be conducted to validate system requirements, integrations, and operational goals.</p>
+  <p>Following discovery, a formal architecture specification and implementation proposal will be prepared.</p>
+</div>
+
+</body></html>`;
+
+  const printWindow = window.open("", "_blank");
+  if (!printWindow) { toast.error("Please allow popups to download the PDF"); return; }
+  printWindow.document.write(html);
+  printWindow.document.close();
+  setTimeout(() => printWindow.print(), 500);
+  toast.success("PDF export opened — use 'Save as PDF' in the print dialog");
+};
 
 const TOTAL_STEPS = 7;
 
@@ -753,13 +879,18 @@ const AIProposal = () => {
             )}
 
             {step === 7 && proposal && (
-              <Button variant="glow" onClick={submitProposal} disabled={submitting}>
-                {submitting ? (
-                  <><Loader2 size={16} className="animate-spin" /> Submitting...</>
-                ) : (
-                  <>Submit Proposal Request</>
-                )}
-              </Button>
+              <div className="flex items-center gap-3">
+                <Button variant="outline-light" onClick={() => generateProposalPDF(form, proposal)}>
+                  <Download size={16} /> Download Full Proposal PDF
+                </Button>
+                <Button variant="glow" onClick={submitProposal} disabled={submitting}>
+                  {submitting ? (
+                    <><Loader2 size={16} className="animate-spin" /> Submitting...</>
+                  ) : (
+                    <>Submit Proposal Request</>
+                  )}
+                </Button>
+              </div>
             )}
           </div>
 
