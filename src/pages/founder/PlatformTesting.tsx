@@ -30,6 +30,7 @@ const moduleIcons: Record<string, React.ReactNode> = {
   manual: <Database size={16} />,
   executions: <Workflow size={16} />,
   expansion: <Layers size={16} />,
+  ai_proposal: <FileText size={16} />,
 };
 
 // Architecture verification data

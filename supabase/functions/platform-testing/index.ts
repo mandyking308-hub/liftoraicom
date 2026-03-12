@@ -269,6 +269,64 @@ Deno.serve(async (req) => {
       return { ok: true, detail: `Found ${data?.length ?? 0} compliance items` };
     });
 
+    // ── 21. AI Proposal Generator Test ──
+    await runTest("ai_proposal", "AI Proposal Generator Test", async () => {
+      const t0 = Date.now();
+      const testPayload = {
+        projectTypes: ["automation platform"],
+        businessProblem: "Manual operational processes creating inefficiencies",
+        processesToAutomate: ["document processing", "customer onboarding", "report generation"],
+        projectScale: "mid-size organisation",
+        timeline: "3-6 months",
+        industry: "financial services",
+      };
+
+      const proposalResponse = await fetch(`${supabaseUrl}/functions/v1/generate-proposal`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${serviceRoleKey}`,
+        },
+        body: JSON.stringify(testPayload),
+      });
+
+      const responseTime = (Date.now() - t0) / 1000;
+      const responseText = await proposalResponse.text();
+
+      if (!proposalResponse.ok) {
+        return { ok: false, detail: `HTTP ${proposalResponse.status} — ${responseText.substring(0, 200)}` };
+      }
+
+      let proposalData;
+      try {
+        proposalData = JSON.parse(responseText);
+      } catch {
+        return { ok: false, detail: "Response is not valid JSON" };
+      }
+
+      if (proposalData.error) {
+        return { ok: false, detail: `Edge function error: ${proposalData.error}` };
+      }
+
+      const hasSolution = typeof proposalData.suggested_solution === "string" && proposalData.suggested_solution.length > 0;
+      const hasScope = typeof proposalData.estimated_scope === "string" && proposalData.estimated_scope.length > 0;
+      const hasTimeline = typeof proposalData.estimated_timeline === "string" && proposalData.estimated_timeline.length > 0;
+
+      if (!hasSolution || !hasScope || !hasTimeline) {
+        const missing = [];
+        if (!hasSolution) missing.push("suggested_solution");
+        if (!hasScope) missing.push("estimated_scope");
+        if (!hasTimeline) missing.push("estimated_timeline");
+        return { ok: false, detail: `Missing fields: ${missing.join(", ")}` };
+      }
+
+      if (responseTime > 10) {
+        return { ok: false, detail: `Response time ${responseTime.toFixed(1)}s exceeds 10s limit` };
+      }
+
+      return { ok: true, detail: `Response time: ${responseTime.toFixed(1)}s — All output fields verified` };
+    });
+
     // ── Save run results ──
     const passed = results.filter(r => r.status === "passed").length;
     const failed = results.filter(r => r.status === "failed").length;
