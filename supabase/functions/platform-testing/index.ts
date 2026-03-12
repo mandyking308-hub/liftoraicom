@@ -327,7 +327,84 @@ Deno.serve(async (req) => {
       return { ok: true, detail: `Response time: ${responseTime.toFixed(1)}s — All output fields verified` };
     });
 
-    // ── Save run results ──
+    // ── 22. AI Proposal Schema Integrity Test ──
+    await runTest("ai_proposal", "AI Proposal Schema Integrity Test", async () => {
+      const testPayload = {
+        projectTypes: ["automation platform"],
+        businessProblem: "Manual operational processes creating inefficiencies",
+        processesToAutomate: ["document processing", "customer onboarding", "report generation"],
+        projectScale: "mid-size organisation",
+        timeline: "3-6 months",
+        industry: "financial services",
+      };
+
+      const res = await fetch(`${supabaseUrl}/functions/v1/generate-proposal`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${serviceRoleKey}`,
+        },
+        body: JSON.stringify(testPayload),
+      });
+
+      const rawText = await res.text();
+
+      // 1. Valid JSON
+      let parsed;
+      try {
+        parsed = JSON.parse(rawText);
+      } catch {
+        console.error("[Schema Integrity] Malformed JSON response:", rawText.substring(0, 500));
+        return { ok: false, detail: "Response is not valid JSON" };
+      }
+
+      // 2. Response length
+      if (rawText.length > 10000) {
+        console.error("[Schema Integrity] Response exceeds 10,000 chars:", rawText.length);
+        return { ok: false, detail: `Response too large: ${rawText.length} characters` };
+      }
+
+      const requiredFields = ["suggested_solution", "estimated_scope", "estimated_timeline"] as const;
+      const issues: string[] = [];
+
+      for (const field of requiredFields) {
+        // 3. Field exists
+        if (!(field in parsed)) {
+          issues.push(`${field}: missing`);
+          continue;
+        }
+        // 4. Not null
+        if (parsed[field] === null) {
+          issues.push(`${field}: null`);
+          continue;
+        }
+        // 5. Is string
+        if (typeof parsed[field] !== "string") {
+          issues.push(`${field}: type is ${typeof parsed[field]}, expected string`);
+          continue;
+        }
+        // 6. Not empty
+        if (parsed[field].trim().length === 0) {
+          issues.push(`${field}: empty string`);
+          continue;
+        }
+        // 7. Min length
+        if (parsed[field].length < 10) {
+          issues.push(`${field}: too short (${parsed[field].length} chars)`);
+        }
+      }
+
+      if (issues.length > 0) {
+        console.error("[Schema Integrity] Validation failed:", JSON.stringify(issues), "Response:", rawText.substring(0, 500));
+        return { ok: false, detail: `Schema violations: ${issues.join("; ")}` };
+      }
+
+      // Check no unexpected top-level keys
+      const extraKeys = Object.keys(parsed).filter(k => !requiredFields.includes(k as any));
+
+      return { ok: true, detail: `Fields verified: 3 — Schema valid: Yes${extraKeys.length > 0 ? ` (${extraKeys.length} extra keys ignored)` : ""}` };
+    });
+
     const passed = results.filter(r => r.status === "passed").length;
     const failed = results.filter(r => r.status === "failed").length;
     const warnings = results.filter(r => r.status === "warning").length;

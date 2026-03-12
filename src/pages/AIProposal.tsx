@@ -153,6 +153,17 @@ const AIProposal = () => {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
+      // Schema integrity validation
+      const isValid =
+        typeof data?.suggested_solution === "string" && data.suggested_solution.length > 0 &&
+        typeof data?.estimated_scope === "string" && data.estimated_scope.length > 0 &&
+        typeof data?.estimated_timeline === "string" && data.estimated_timeline.length > 0;
+
+      if (!isValid) {
+        console.error("Schema validation failed:", data);
+        throw new Error("Proposal generation encountered a formatting issue. Please try again.");
+      }
+
       setProposal(data);
       setStep(7);
     } catch (e: any) {
