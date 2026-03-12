@@ -35,6 +35,7 @@ const navItems = [
   { label: "Manual", to: "/founder/manual", icon: BookOpenCheck },
   { label: "Build Log", to: "/founder/build-log", icon: ClipboardList },
   { label: "Documents", to: "/founder/documents", icon: FileText },
+  { label: "Platform Testing", to: "/founder/testing", icon: FlaskConical },
 ];
 
 const FounderLayout = ({ children }: { children: React.ReactNode }) => {

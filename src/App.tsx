@@ -189,6 +189,7 @@ const App = () => (
             <Route path="/founder/decisions" element={<FounderRoute><DecisionEngine /></FounderRoute>} />
             <Route path="/founder/strategy" element={<FounderRoute><StrategyEngine /></FounderRoute>} />
             <Route path="/founder/copilot" element={<FounderRoute><FounderCoPilot /></FounderRoute>} />
+            <Route path="/founder/testing" element={<FounderRoute><PlatformTesting /></FounderRoute>} />
 
             {/* Partner Portal */}
             <Route path="/partner" element={<PartnerRoute><PartnerDashboard /></PartnerRoute>} />
