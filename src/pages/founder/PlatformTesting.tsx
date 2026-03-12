@@ -156,6 +156,58 @@ const PlatformTesting = () => {
   const diagnosticChecks = (latestDiagnostic?.details as any[]) ?? [];
   const diagCategories = [...new Set(diagnosticChecks.map((c: any) => c.category))];
 
+  // Sandbox runs
+  const { data: sandboxRuns } = useQuery({
+    queryKey: ["sandbox-runs"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("platform_test_runs")
+        .select("*")
+        .eq("run_name", "Platform Sandbox Test")
+        .order("created_at", { ascending: false })
+        .limit(10);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const latestSandboxId = sandboxRuns?.[0]?.id;
+
+  const { data: sandboxResults } = useQuery({
+    queryKey: ["sandbox-results", latestSandboxId],
+    queryFn: async () => {
+      if (!latestSandboxId) return [];
+      const { data, error } = await supabase
+        .from("platform_test_results")
+        .select("*")
+        .eq("run_id", latestSandboxId)
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!latestSandboxId,
+  });
+
+  const runSandbox = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke("platform-sandbox");
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      toast.success("Sandbox tests complete — all data cleaned up");
+      queryClient.invalidateQueries({ queryKey: ["sandbox-runs"] });
+      queryClient.invalidateQueries({ queryKey: ["sandbox-results"] });
+      queryClient.invalidateQueries({ queryKey: ["platform-test-runs"] });
+    },
+    onError: (err) => {
+      toast.error("Sandbox failed: " + String(err));
+    },
+  });
+
+  const latestSandbox = sandboxRuns?.[0];
+  const sandboxModules = sandboxResults ? [...new Set(sandboxResults.map((r) => r.module))].sort() : [];
+  const getSandboxModuleResults = (mod: string) => sandboxResults?.filter((r) => r.module === mod) ?? [];
 
   const { data: runs, isLoading: runsLoading } = useQuery({
     queryKey: ["platform-test-runs"],
