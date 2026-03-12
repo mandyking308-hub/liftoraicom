@@ -27,6 +27,7 @@ import AIUsagePolicy from "./pages/legal/AIUsagePolicy";
 import AutomationSafetyPolicy from "./pages/legal/AutomationSafetyPolicy";
 import SecurityPolicy from "./pages/legal/SecurityPolicy";
 import CookiePolicy from "./pages/legal/CookiePolicy";
+import DataProcessingAgreement from "./pages/legal/DataProcessingAgreement";
 
 // Portal pages
 import PortalLogin from "./pages/portal/PortalLogin";
@@ -137,7 +138,7 @@ const App = () => (
             <Route path="/legal/automation-safety-policy" element={<AutomationSafetyPolicy />} />
             <Route path="/legal/security-policy" element={<SecurityPolicy />} />
             <Route path="/legal/cookie-policy" element={<CookiePolicy />} />
-            <Route path="/legal/data-processing-agreement" element={<LegalPagePlaceholder />} />
+            <Route path="/legal/data-processing-agreement" element={<DataProcessingAgreement />} />
             <Route path="/legal/ai-output-disclaimer" element={<LegalPagePlaceholder />} />
             <Route path="/legal/automation-liability-disclaimer" element={<LegalPagePlaceholder />} />
 
