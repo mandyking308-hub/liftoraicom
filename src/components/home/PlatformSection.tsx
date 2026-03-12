@@ -12,7 +12,7 @@ const modules = [
 ];
 
 const PlatformSection = () => (
-  <section className="py-28 relative overflow-hidden" style={{ background: 'hsl(220 18% 9%)' }}>
+  <section className="py-[120px] max-sm:py-20 relative overflow-hidden" style={{ background: 'hsl(220 18% 9%)' }}>
     <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
     <div className="container">
       <motion.div
@@ -21,11 +21,11 @@ const PlatformSection = () => (
         viewport={{ once: true, margin: "-80px" }}
         className="text-center mb-6"
       >
-        <motion.p variants={fadeUp} custom={0} className="text-xs font-medium tracking-[0.3em] uppercase text-primary mb-4">
+        <motion.p variants={fadeUp} custom={0} className="text-xs font-medium tracking-[0.3em] uppercase text-primary/70 mb-4">
           The Platform
         </motion.p>
         <motion.h2 variants={fadeUp} custom={1} className="text-3xl sm:text-4xl lg:text-5xl font-bold">
-          Powered by the Liftor AI Platform
+          Powered by the Liftor <span className="text-gradient">AI Platform</span>
         </motion.h2>
       </motion.div>
       <motion.p
@@ -39,7 +39,7 @@ const PlatformSection = () => (
         Behind every system we build is the Liftor platform — an AI infrastructure environment capable of designing, deploying, and managing intelligent systems at scale.
       </motion.p>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {modules.map((m, i) => (
           <motion.div
             key={m.label}
@@ -48,10 +48,10 @@ const PlatformSection = () => (
             viewport={{ once: true }}
             variants={fadeUp}
             custom={i}
-            className="group flex items-start gap-4 p-5 rounded-lg border border-border/60 bg-card/70 hover:border-primary/30 hover:shadow-[0_0_25px_-5px_hsl(195_100%_50%/0.1)] transition-all duration-500"
+            className="group tech-card flex items-start gap-4"
           >
-            <div className="shrink-0 w-10 h-10 rounded-md bg-primary/10 flex items-center justify-center text-primary">
-              <m.icon size={18} strokeWidth={1.5} />
+            <div className="shrink-0 w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+              <m.icon size={20} strokeWidth={1.5} />
             </div>
             <div>
               <h3 className="text-sm font-semibold mb-1">{m.label}</h3>

@@ -21,24 +21,24 @@ const cards = [
 ];
 
 const WhatWeBuildSection = () => (
-  <section className="py-28 section-dark relative overflow-hidden">
+  <section className="py-[120px] max-sm:py-20 section-dark relative overflow-hidden">
     <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
     <div className="container">
       <motion.div
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-80px" }}
-        className="text-center mb-16"
+        className="text-center mb-8"
       >
-        <motion.p variants={fadeUp} custom={0} className="text-xs font-medium tracking-[0.3em] uppercase text-primary mb-4">
+        <motion.p variants={fadeUp} custom={0} className="text-xs font-medium tracking-[0.3em] uppercase text-primary/70 mb-4">
           What We Build
         </motion.p>
         <motion.h2 variants={fadeUp} custom={1} className="text-3xl sm:text-4xl lg:text-5xl font-bold">
-          Engineering Intelligent Systems
+          Engineering <span className="text-gradient">Intelligent Systems</span>
         </motion.h2>
       </motion.div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-3 mt-12">
         {cards.map((c, i) => (
           <motion.div
             key={c.title}
@@ -47,7 +47,7 @@ const WhatWeBuildSection = () => (
             viewport={{ once: true, margin: "-50px" }}
             variants={fadeUp}
             custom={i}
-            className="group relative p-8 rounded-xl border border-border/60 bg-card/80 backdrop-blur-sm hover:border-primary/30 hover:shadow-[0_0_30px_-5px_hsl(195_100%_50%/0.12)] transition-all duration-500"
+            className="group relative tech-card"
           >
             <div className="mb-5 inline-flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10 text-primary">
               <c.icon size={22} strokeWidth={1.5} />
