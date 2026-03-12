@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, XCircle, AlertTriangle, Play, Loader2, Clock, FlaskConical, Shield, Brain, Workflow, Bot, Database, Layers, BarChart3, FileText, Scale } from "lucide-react";
+import { CheckCircle2, XCircle, AlertTriangle, Play, Loader2, Clock, FlaskConical, Shield, Brain, Workflow, Bot, Database, Layers, BarChart3, FileText, Scale, HeartPulse, Activity } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -123,6 +123,40 @@ const PlatformTesting = () => {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("validation");
 
+  // Diagnostic runs
+  const { data: diagnosticRuns } = useQuery({
+    queryKey: ["diagnostic-runs"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("platform_diagnostic_runs")
+        .select("*")
+        .order("run_timestamp", { ascending: false })
+        .limit(20);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const runDiagnostics = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke("platform-diagnostics");
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      toast.success("System diagnostics complete");
+      queryClient.invalidateQueries({ queryKey: ["diagnostic-runs"] });
+    },
+    onError: (err) => {
+      toast.error("Diagnostics failed: " + String(err));
+    },
+  });
+
+  const latestDiagnostic = diagnosticRuns?.[0];
+  const diagnosticChecks = (latestDiagnostic?.details as any[]) ?? [];
+  const diagCategories = [...new Set(diagnosticChecks.map((c: any) => c.category))];
+
+
   const { data: runs, isLoading: runsLoading } = useQuery({
     queryKey: ["platform-test-runs"],
     queryFn: async () => {
@@ -215,6 +249,7 @@ const PlatformTesting = () => {
           <TabsList>
             <TabsTrigger value="validation" className="gap-1.5"><FlaskConical size={14} /> Module Validation</TabsTrigger>
             <TabsTrigger value="architecture" className="gap-1.5"><Scale size={14} /> Architecture Validation</TabsTrigger>
+            <TabsTrigger value="diagnostics" className="gap-1.5"><HeartPulse size={14} /> System Diagnostics</TabsTrigger>
           </TabsList>
 
           {/* Module Validation Tab (existing) */}
@@ -517,6 +552,162 @@ const PlatformTesting = () => {
             <p className="text-xs text-muted-foreground text-center">
               Architecture verification generated {format(new Date(), "dd MMM yyyy HH:mm")}
             </p>
+          </TabsContent>
+
+          {/* System Diagnostics Tab */}
+          <TabsContent value="diagnostics" className="space-y-6 mt-4">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">Live health checks across all platform systems</p>
+              <Button
+                onClick={() => runDiagnostics.mutate()}
+                disabled={runDiagnostics.isPending}
+                size="sm"
+                className="gap-2"
+              >
+                {runDiagnostics.isPending ? <Loader2 size={14} className="animate-spin" /> : <HeartPulse size={14} />}
+                {runDiagnostics.isPending ? "Running..." : "Run Diagnostics"}
+              </Button>
+            </div>
+
+            {latestDiagnostic && (
+              <>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                  <Card>
+                    <CardContent className="pt-4 pb-3 text-center">
+                      <HeartPulse size={20} className="mx-auto mb-1 text-primary" />
+                      <p className="text-2xl font-bold">{latestDiagnostic.systems_checked}</p>
+                      <p className="text-xs text-muted-foreground">Systems Checked</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="pt-4 pb-3 text-center">
+                      <CheckCircle2 size={20} className="mx-auto mb-1 text-green-500" />
+                      <p className="text-2xl font-bold text-green-500">{latestDiagnostic.systems_checked - latestDiagnostic.failures_detected - latestDiagnostic.warnings}</p>
+                      <p className="text-xs text-muted-foreground">Healthy</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="pt-4 pb-3 text-center">
+                      <XCircle size={20} className="mx-auto mb-1 text-destructive" />
+                      <p className="text-2xl font-bold text-destructive">{latestDiagnostic.failures_detected}</p>
+                      <p className="text-xs text-muted-foreground">Failures</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="pt-4 pb-3 text-center">
+                      <AlertTriangle size={20} className="mx-auto mb-1 text-yellow-500" />
+                      <p className="text-2xl font-bold text-yellow-500">{latestDiagnostic.warnings}</p>
+                      <p className="text-xs text-muted-foreground">Warnings</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="pt-4 pb-3 text-center">
+                      <Clock size={20} className="mx-auto mb-1 text-muted-foreground" />
+                      <p className="text-sm font-medium">{format(new Date(latestDiagnostic.run_timestamp), "dd MMM HH:mm")}</p>
+                      <p className="text-xs text-muted-foreground">Last Run</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <Card>
+                  <CardContent className="py-4 flex items-center gap-3">
+                    {latestDiagnostic.status === "healthy" ? (
+                      <>
+                        <CheckCircle2 size={24} className="text-green-500" />
+                        <div>
+                          <p className="font-semibold text-green-500">Platform Healthy</p>
+                          <p className="text-xs text-muted-foreground">All {latestDiagnostic.systems_checked} systems operational</p>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <AlertTriangle size={24} className="text-yellow-500" />
+                        <div>
+                          <p className="font-semibold text-yellow-500">Platform Degraded</p>
+                          <p className="text-xs text-muted-foreground">{latestDiagnostic.failures_detected} system(s) require attention</p>
+                        </div>
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {diagCategories.map((cat) => {
+                  const items = diagnosticChecks.filter((c: any) => c.category === cat);
+                  const catPass = items.filter((c: any) => c.status === "pass").length;
+                  return (
+                    <Card key={cat}>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-base font-semibold flex items-center gap-2">
+                          <Activity size={16} />
+                          {cat}
+                          <Badge className={`ml-auto text-xs ${catPass === items.length ? "bg-green-500/10 text-green-500 border-green-500/20" : "bg-yellow-500/10 text-yellow-500 border-yellow-500/20"}`}>
+                            {catPass}/{items.length} Passed
+                          </Badge>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="divide-y divide-border">
+                          {items.map((item: any, i: number) => (
+                            <div key={i} className="flex items-center gap-3 py-2.5 text-sm">
+                              {statusIcon(item.status === "pass" ? "passed" : item.status === "fail" ? "failed" : "warning")}
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium">{item.system}</p>
+                                <p className="text-xs text-muted-foreground">{item.detail}</p>
+                              </div>
+                              {statusBadge(item.status === "pass" ? "passed" : item.status === "fail" ? "failed" : "warning")}
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </>
+            )}
+
+            {/* Diagnostic History */}
+            {diagnosticRuns && diagnosticRuns.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm font-semibold">Diagnostic History</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="divide-y divide-border">
+                    {diagnosticRuns.map((run: any) => (
+                      <div key={run.id} className="flex items-center gap-3 py-2.5 text-sm">
+                        {run.status === "healthy" ? (
+                          <CheckCircle2 size={16} className="text-green-500" />
+                        ) : (
+                          <AlertTriangle size={16} className="text-yellow-500" />
+                        )}
+                        <span className="flex-1">Platform Diagnostics</span>
+                        <span className="text-muted-foreground">
+                          {run.systems_checked - run.failures_detected}/{run.systems_checked} healthy
+                        </span>
+                        <Badge variant="secondary" className={`text-xs ${run.status === "healthy" ? "bg-green-500/10 text-green-500" : "bg-yellow-500/10 text-yellow-500"}`}>
+                          {run.status}
+                        </Badge>
+                        <span className="text-xs text-muted-foreground">
+                          {format(new Date(run.run_timestamp), "dd MMM yyyy HH:mm")}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {!diagnosticRuns || diagnosticRuns.length === 0 ? (
+              <Card>
+                <CardContent className="py-12 text-center">
+                  <HeartPulse size={40} className="mx-auto mb-3 text-muted-foreground" />
+                  <p className="text-lg font-semibold">No Diagnostic Runs Yet</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Click "Run Diagnostics" to check all platform systems
+                  </p>
+                </CardContent>
+              </Card>
+            ) : null}
           </TabsContent>
         </Tabs>
       </div>
