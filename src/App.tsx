@@ -18,6 +18,9 @@ import PartnerProgram from "./pages/PartnerProgram";
 import ProjectDiscovery from "./pages/ProjectDiscovery";
 import About from "./pages/About";
 import AIProposal from "./pages/AIProposal";
+import Platform from "./pages/Platform";
+import Systems from "./pages/Systems";
+import Architecture from "./pages/Architecture";
 import NotFound from "./pages/NotFound";
 import LegalHub from "./pages/legal/LegalHub";
 import LegalPagePlaceholder from "./pages/legal/LegalPagePlaceholder";
@@ -133,6 +136,9 @@ const App = () => (
             <Route path="/project-discovery" element={<ProjectDiscovery />} />
             <Route path="/about" element={<About />} />
             <Route path="/ai-proposal" element={<AIProposal />} />
+            <Route path="/platform" element={<Platform />} />
+            <Route path="/systems" element={<Systems />} />
+            <Route path="/architecture" element={<Architecture />} />
 
             {/* Legal */}
             <Route path="/legal" element={<LegalHub />} />
