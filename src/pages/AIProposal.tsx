@@ -571,7 +571,7 @@ const AIProposal = () => {
                 {loading ? (
                   <><Loader2 size={16} className="animate-spin" /> Generating...</>
                 ) : step === 6 ? (
-                  <><Sparkles size={16} /> Generate Proposal</>
+                  <><Sparkles size={16} /> Generate AI Proposal</>
                 ) : (
                   <>Next Step <ArrowRight size={16} /></>
                 )}
