@@ -126,7 +126,7 @@ const App = () => (
             <Route path="/legal" element={<LegalHub />} />
             <Route path="/legal/terms-of-service" element={<LegalPagePlaceholder />} />
             <Route path="/legal/enterprise-services-agreement" element={<LegalPagePlaceholder />} />
-            <Route path="/legal/privacy-policy" element={<LegalPagePlaceholder />} />
+            <Route path="/legal/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/legal/acceptable-use" element={<LegalPagePlaceholder />} />
             <Route path="/legal/ai-usage-policy" element={<LegalPagePlaceholder />} />
             <Route path="/legal/automation-safety-policy" element={<LegalPagePlaceholder />} />
