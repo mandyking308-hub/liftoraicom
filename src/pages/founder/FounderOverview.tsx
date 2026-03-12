@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import FounderLayout from "@/components/founder/FounderLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileInput, FolderKanban, CheckCircle2, Activity, ArrowRight, Sparkles, Globe, Clock, Layers } from "lucide-react";
+import { FileInput, FolderKanban, CheckCircle2, Activity, ArrowRight, Sparkles, Globe, Clock, Layers, PoundSterling } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
 const CHART_COLORS = [
@@ -81,6 +81,29 @@ const FounderOverview = () => {
     return timelineData.sort((a, b) => b.value - a.value)[0].name;
   }, [timelineData]);
 
+  // Parse cost range midpoint from strings like "£85,000 – £140,000"
+  const parseMidpoint = (range: string | null): number => {
+    if (!range) return 0;
+    const nums = range.match(/[\d,]+/g);
+    if (!nums || nums.length < 2) return 0;
+    const low = parseInt(nums[0].replace(/,/g, ""), 10);
+    const high = parseInt(nums[1].replace(/,/g, ""), 10);
+    return Math.round((low + high) / 2);
+  };
+
+  const totalPipelineValue = useMemo(() => {
+    return proposals.reduce((sum, p) => sum + parseMidpoint(p.ai_estimated_cost_range), 0);
+  }, [proposals]);
+
+  const pipelineByIndustry = useMemo(() => {
+    const map: Record<string, number> = {};
+    proposals.forEach((p) => {
+      const mid = parseMidpoint(p.ai_estimated_cost_range);
+      if (mid > 0) map[p.industry] = (map[p.industry] || 0) + mid;
+    });
+    return Object.entries(map).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+  }, [proposals]);
+
   return (
     <FounderLayout>
       <div className="max-w-6xl">
@@ -122,7 +145,7 @@ const FounderOverview = () => {
               </div>
 
               {/* Proposal metrics */}
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5 mb-6">
                 <Card>
                   <CardContent className="pt-4 pb-3">
                     <div className="flex items-center gap-2 mb-1">
@@ -163,10 +186,20 @@ const FounderOverview = () => {
                     <p className="text-xs text-muted-foreground">Most Common</p>
                   </CardContent>
                 </Card>
+                <Card>
+                  <CardContent className="pt-4 pb-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <PoundSterling size={14} className="text-primary" />
+                      <span className="text-xs text-muted-foreground">Pipeline</span>
+                    </div>
+                    <p className="text-lg font-bold truncate">£{(totalPipelineValue / 1000).toFixed(0)}k</p>
+                    <p className="text-xs text-muted-foreground">Total Pipeline Value</p>
+                  </CardContent>
+                </Card>
               </div>
 
               {/* Charts */}
-              <div className="grid gap-6 lg:grid-cols-2 mb-6">
+              <div className="grid gap-6 lg:grid-cols-3 mb-6">
                 <Card>
                   <CardHeader className="pb-2">
                     <CardTitle className="text-sm">Proposals by Industry</CardTitle>
@@ -199,6 +232,26 @@ const FounderOverview = () => {
                           <YAxis type="category" dataKey="name" width={120} tick={{ fontSize: 11 }} />
                           <Tooltip />
                           <Bar dataKey="value" fill="hsl(217, 91%, 60%)" radius={[0, 4, 4, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <p className="text-sm text-muted-foreground text-center py-8">No data yet</p>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm">Pipeline Value by Industry</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {pipelineByIndustry.length > 0 ? (
+                      <ResponsiveContainer width="100%" height={200}>
+                        <BarChart data={pipelineByIndustry} layout="vertical" margin={{ left: 0, right: 10 }}>
+                          <XAxis type="number" hide />
+                          <YAxis type="category" dataKey="name" width={120} tick={{ fontSize: 11 }} />
+                          <Tooltip formatter={(value: number) => `£${(value / 1000).toFixed(0)}k`} />
+                          <Bar dataKey="value" fill="hsl(142, 71%, 45%)" radius={[0, 4, 4, 0]} />
                         </BarChart>
                       </ResponsiveContainer>
                     ) : (

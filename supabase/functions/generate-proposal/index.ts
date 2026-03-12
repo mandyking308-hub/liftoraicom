@@ -14,11 +14,22 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const systemPrompt = `You are an AI systems engineering consultant at Liftor AI, a premium AI engineering studio. 
-Based on the client's project requirements, generate a structured proposal outline. 
+    const systemPrompt = `You are an AI systems engineering consultant at Liftor AI, a premium enterprise AI infrastructure studio.
+Based on the client's project requirements, generate a structured proposal outline.
 You must respond using the suggest_proposal tool. Be specific, professional, and confident.
 Tailor the solution to the client's industry and scale.
-For architecture_components, generate 4-8 components that represent the major building blocks of the proposed system. Each component must have a name and a type from: system, agent, workflow, integration, interface.`;
+
+For architecture_components, generate 4-8 components that represent the major building blocks of the proposed system. Each component must have a name and a type from: system, agent, workflow, integration, interface.
+
+PRICING GUIDELINES — You are pricing enterprise AI infrastructure, NOT freelance work:
+- Small Automation System (small scale): £25,000 – £60,000
+- Mid-Size Intelligent System (department/org-wide): £60,000 – £150,000
+- Enterprise AI Platform (enterprise scale): £150,000 – £500,000+
+
+The estimated_cost_range should reflect the TOTAL project investment as a GBP range.
+The estimated_cost_breakdown should include 3-5 line items covering categories like: Architecture & System Design, Platform Development, AI Agent Engineering, Integration Engineering, Deployment & Optimisation, Data Infrastructure, Testing & QA.
+Each breakdown item must have a category name and a GBP estimate range string.
+All prices must be in GBP (£). Never produce low-cost or freelance-level estimates.`;
 
     const userPrompt = `Generate a proposal outline for this client:
 - Industry: ${industry}
@@ -45,7 +56,7 @@ For architecture_components, generate 4-8 components that represent the major bu
             type: "function",
             function: {
               name: "suggest_proposal",
-              description: "Return a structured proposal outline with suggested solution, scope, timeline, and architecture components.",
+              description: "Return a structured proposal outline with suggested solution, scope, timeline, architecture components, and enterprise cost estimate.",
               parameters: {
                 type: "object",
                 properties: {
@@ -81,8 +92,31 @@ For architecture_components, generate 4-8 components that represent the major bu
                       additionalProperties: false,
                     },
                   },
+                  estimated_cost_range: {
+                    type: "string",
+                    description: "The total estimated investment range in GBP, e.g. '£85,000 – £140,000'. Must reflect enterprise pricing.",
+                  },
+                  estimated_cost_breakdown: {
+                    type: "array",
+                    description: "A breakdown of investment by engineering category, 3-5 items.",
+                    items: {
+                      type: "object",
+                      properties: {
+                        category: {
+                          type: "string",
+                          description: "The name of the cost category, e.g. 'Architecture & System Design'.",
+                        },
+                        estimate: {
+                          type: "string",
+                          description: "The estimated cost range for this category in GBP, e.g. '£15,000 – £25,000'.",
+                        },
+                      },
+                      required: ["category", "estimate"],
+                      additionalProperties: false,
+                    },
+                  },
                 },
-                required: ["suggested_solution", "estimated_scope", "estimated_timeline", "architecture_components"],
+                required: ["suggested_solution", "estimated_scope", "estimated_timeline", "architecture_components", "estimated_cost_range", "estimated_cost_breakdown"],
                 additionalProperties: false,
               },
             },

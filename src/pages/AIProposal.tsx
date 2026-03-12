@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, Sparkles, Cpu, Layers, Clock, ExternalLink } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, Sparkles, Cpu, Layers, Clock, ExternalLink, PoundSterling } from "lucide-react";
 import ArchitectureDiagram from "@/components/proposal/ArchitectureDiagram";
 
 const TOTAL_STEPS = 7;
@@ -77,17 +77,25 @@ interface ArchComponent {
   type: string;
 }
 
+interface CostBreakdownItem {
+  category: string;
+  estimate: string;
+}
+
 interface Proposal {
   suggested_solution: string;
   estimated_scope: string;
   estimated_timeline: string;
   architecture_components?: ArchComponent[];
+  estimated_cost_range?: string;
+  estimated_cost_breakdown?: CostBreakdownItem[];
 }
 
 const featureCards = [
   { icon: Cpu, title: "System Architecture Design", desc: "AI recommends a high-level architecture for your intelligent system." },
   { icon: Layers, title: "Implementation Scope", desc: "Receive a structured breakdown of workflows, integrations, and automation components." },
   { icon: Clock, title: "Project Timeline", desc: "Get an estimated implementation timeline based on system complexity." },
+  { icon: PoundSterling, title: "Investment Estimate", desc: "Receive an enterprise-grade cost estimate with a detailed engineering breakdown." },
 ];
 
 const howItWorksSteps = [
@@ -224,7 +232,9 @@ const AIProposal = () => {
         ai_suggested_solution: proposal.suggested_solution,
         ai_estimated_scope: proposal.estimated_scope,
         ai_estimated_timeline: proposal.estimated_timeline,
-      });
+        ai_estimated_cost_range: proposal.estimated_cost_range || null,
+        ai_estimated_cost_breakdown: (proposal.estimated_cost_breakdown || null) as any,
+      } as any);
 
       if (error) throw error;
 
@@ -337,7 +347,7 @@ const AIProposal = () => {
             </motion.p>
           </motion.div>
 
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid md:grid-cols-3 gap-6">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {featureCards.map((card, i) => (
               <motion.div key={card.title} variants={fadeUp} custom={i} className="tech-card !p-6 flex flex-col">
                 <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 text-primary mb-4">
@@ -610,23 +620,54 @@ const AIProposal = () => {
                       <h3 className="text-xs font-medium text-primary tracking-widest uppercase mb-1">Key Problem Identified</h3>
                       <p className="text-sm text-muted-foreground">{form.businessProblem}</p>
                     </div>
+
+                    {/* Suggested Solution */}
                     <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
                       <h3 className="text-xs font-medium text-primary tracking-widest uppercase mb-2">Suggested AI Solution</h3>
                       <p className="text-sm leading-relaxed">{proposal.suggested_solution}</p>
-                    </div>
-                    <div>
-                      <h3 className="text-xs font-medium text-primary tracking-widest uppercase mb-1">Estimated System Complexity</h3>
-                      <p className="text-sm text-muted-foreground">{proposal.estimated_scope}</p>
-                    </div>
-                    <div>
-                      <h3 className="text-xs font-medium text-primary tracking-widest uppercase mb-1">Estimated Development Timeline</h3>
-                      <p className="text-sm text-muted-foreground">{proposal.estimated_timeline}</p>
                     </div>
 
                     {/* Architecture Diagram */}
                     {proposal.architecture_components && proposal.architecture_components.length > 0 && (
                       <div className="p-5 rounded-lg bg-secondary/50 border border-border/50">
                         <ArchitectureDiagram components={proposal.architecture_components} />
+                      </div>
+                    )}
+
+                    {/* Estimated Scope */}
+                    <div>
+                      <h3 className="text-xs font-medium text-primary tracking-widest uppercase mb-1">Estimated System Complexity</h3>
+                      <p className="text-sm text-muted-foreground">{proposal.estimated_scope}</p>
+                    </div>
+
+                    {/* Estimated Timeline */}
+                    <div>
+                      <h3 className="text-xs font-medium text-primary tracking-widest uppercase mb-1">Estimated Development Timeline</h3>
+                      <p className="text-sm text-muted-foreground">{proposal.estimated_timeline}</p>
+                    </div>
+
+                    {/* Estimated Investment */}
+                    {proposal.estimated_cost_range && (
+                      <div className="p-5 rounded-lg bg-primary/5 border border-primary/20 space-y-4">
+                        <div>
+                          <h3 className="text-xs font-medium text-primary tracking-widest uppercase mb-2">Estimated Investment</h3>
+                          <p className="text-2xl font-bold">{proposal.estimated_cost_range}</p>
+                        </div>
+
+                        {proposal.estimated_cost_breakdown && proposal.estimated_cost_breakdown.length > 0 && (
+                          <div className="grid gap-2">
+                            {proposal.estimated_cost_breakdown.map((item, idx) => (
+                              <div key={idx} className="flex items-center justify-between py-2 px-3 rounded-md bg-background/50 border border-border/30">
+                                <span className="text-sm text-muted-foreground">{item.category}</span>
+                                <span className="text-sm font-medium">{item.estimate}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        <p className="text-xs text-muted-foreground leading-relaxed">
+                          Investment estimates are indicative and depend on system complexity, integrations, and deployment scale. Final pricing is confirmed following technical discovery.
+                        </p>
                       </div>
                     )}
                   </div>
