@@ -72,10 +72,16 @@ interface FormData {
   timeline: string;
 }
 
+interface ArchComponent {
+  name: string;
+  type: string;
+}
+
 interface Proposal {
   suggested_solution: string;
   estimated_scope: string;
   estimated_timeline: string;
+  architecture_components?: ArchComponent[];
 }
 
 const featureCards = [
