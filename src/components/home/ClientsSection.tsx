@@ -21,7 +21,8 @@ const clients = [
 ];
 
 const ClientsSection = () => (
-  <section className="py-28 section-light relative overflow-hidden">
+  <section className="py-28 relative overflow-hidden" style={{ background: 'hsl(220 18% 9%)' }}>
+    <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
     <div className="container">
       <motion.div
         initial="hidden"
