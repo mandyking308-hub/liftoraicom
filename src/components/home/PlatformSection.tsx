@@ -12,7 +12,8 @@ const modules = [
 ];
 
 const PlatformSection = () => (
-  <section className="py-28 section-light relative overflow-hidden">
+  <section className="py-28 relative overflow-hidden" style={{ background: 'hsl(220 18% 9%)' }}>
+    <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
     <div className="container">
       <motion.div
         initial="hidden"
@@ -47,7 +48,7 @@ const PlatformSection = () => (
             viewport={{ once: true }}
             variants={fadeUp}
             custom={i}
-            className="group flex items-start gap-4 p-5 rounded-lg border border-border/40 bg-card/40 hover:border-primary/20 transition-colors duration-300"
+            className="group flex items-start gap-4 p-5 rounded-lg border border-border/60 bg-card/70 hover:border-primary/30 hover:shadow-[0_0_25px_-5px_hsl(195_100%_50%/0.1)] transition-all duration-500"
           >
             <div className="shrink-0 w-10 h-10 rounded-md bg-primary/10 flex items-center justify-center text-primary">
               <m.icon size={18} strokeWidth={1.5} />

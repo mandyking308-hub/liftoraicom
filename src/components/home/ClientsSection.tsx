@@ -21,7 +21,8 @@ const clients = [
 ];
 
 const ClientsSection = () => (
-  <section className="py-28 section-light relative overflow-hidden">
+  <section className="py-28 relative overflow-hidden" style={{ background: 'hsl(220 18% 9%)' }}>
+    <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
     <div className="container">
       <motion.div
         initial="hidden"
@@ -46,7 +47,7 @@ const ClientsSection = () => (
             viewport={{ once: true }}
             variants={fadeUp}
             custom={i}
-            className="text-center p-8 rounded-xl border border-border/40 bg-card/40"
+            className="text-center p-8 rounded-xl border border-border/60 bg-card/70 hover:border-primary/30 hover:shadow-[0_0_30px_-5px_hsl(195_100%_50%/0.12)] transition-all duration-500"
           >
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10 text-primary mb-4">
               <c.icon size={22} strokeWidth={1.5} />
