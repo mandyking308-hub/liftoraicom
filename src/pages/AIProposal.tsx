@@ -77,11 +77,18 @@ interface ArchComponent {
   type: string;
 }
 
+interface CostBreakdownItem {
+  category: string;
+  estimate: string;
+}
+
 interface Proposal {
   suggested_solution: string;
   estimated_scope: string;
   estimated_timeline: string;
   architecture_components?: ArchComponent[];
+  estimated_cost_range?: string;
+  estimated_cost_breakdown?: CostBreakdownItem[];
 }
 
 const featureCards = [
