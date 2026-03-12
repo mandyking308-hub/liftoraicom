@@ -147,6 +147,7 @@ const App = () => (
             <Route path="/legal/data-processing-agreement" element={<DataProcessingAgreement />} />
             <Route path="/legal/ai-output-disclaimer" element={<AIOutputDisclaimer />} />
             <Route path="/legal/automation-liability-disclaimer" element={<AutomationLiabilityDisclaimer />} />
+            <Route path="/legal/security-reporting" element={<SecurityReporting />} />
 
             {/* Auth */}
             <Route path="/portal/login" element={<PortalLogin />} />
