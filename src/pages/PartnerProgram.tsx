@@ -50,7 +50,59 @@ const PartnerProgram = () => {
             <motion.p variants={fadeUp} custom={2} className="text-lg text-muted-foreground leading-relaxed">
               We collaborate with agencies, consultants, venture capital firms, and incubators to deliver intelligent systems at scale.
             </motion.p>
+      </motion.div>
+        </div>
+      </section>
+
+      <section className="pb-24">
+        <div className="container">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-80px" }}
+            className="text-center mb-12"
+          >
+            <motion.p variants={fadeUp} custom={0} className="text-xs font-medium tracking-[0.3em] uppercase text-primary mb-4">
+              Partner Ecosystem
+            </motion.p>
+            <motion.h2 variants={fadeUp} custom={1} className="text-3xl sm:text-4xl font-bold">
+              Who We Partner With
+            </motion.h2>
           </motion.div>
+
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              {
+                title: "Agencies",
+                desc: "Digital agencies and technology consultancies working with clients who need intelligent automation systems, AI infrastructure, or operational intelligence platforms.",
+              },
+              {
+                title: "Venture & Investment Firms",
+                desc: "VC firms, accelerators, and family offices supporting companies that require scalable AI infrastructure and operational automation systems.",
+              },
+              {
+                title: "Strategic Consultants",
+                desc: "Independent consultants and advisory firms helping organisations modernise operations through intelligent systems and AI-driven workflows.",
+              },
+            ].map((card, i) => (
+              <motion.div
+                key={card.title}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={fadeUp}
+                custom={i}
+                className="flex flex-col tech-card !p-8"
+              >
+                <h3 className="text-xl font-semibold mb-3">{card.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{card.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="mt-16 flex justify-center">
+            <div className="w-20 h-px bg-primary/10" />
+          </div>
         </div>
       </section>
 
