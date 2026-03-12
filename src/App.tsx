@@ -88,6 +88,7 @@ import BrainCore from "./pages/founder/BrainCore";
 import DecisionEngine from "./pages/founder/DecisionEngine";
 import StrategyEngine from "./pages/founder/StrategyEngine";
 import FounderCoPilot from "./pages/founder/FounderCoPilot";
+import PlatformTesting from "./pages/founder/PlatformTesting";
 // Partner pages
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import PartnerOpportunities from "./pages/partner/PartnerOpportunities";
