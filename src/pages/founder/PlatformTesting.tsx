@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, XCircle, AlertTriangle, Play, Loader2, Clock, FlaskConical, Shield, Brain, Workflow, Bot, Database, Layers, BarChart3, FileText, Scale, HeartPulse, Activity } from "lucide-react";
+import { CheckCircle2, XCircle, AlertTriangle, Play, Loader2, Clock, FlaskConical, Shield, Brain, Workflow, Bot, Database, Layers, BarChart3, FileText, Scale, HeartPulse, Activity, TestTube2 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -156,6 +156,58 @@ const PlatformTesting = () => {
   const diagnosticChecks = (latestDiagnostic?.details as any[]) ?? [];
   const diagCategories = [...new Set(diagnosticChecks.map((c: any) => c.category))];
 
+  // Sandbox runs
+  const { data: sandboxRuns } = useQuery({
+    queryKey: ["sandbox-runs"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("platform_test_runs")
+        .select("*")
+        .eq("run_name", "Platform Sandbox Test")
+        .order("created_at", { ascending: false })
+        .limit(10);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const latestSandboxId = sandboxRuns?.[0]?.id;
+
+  const { data: sandboxResults } = useQuery({
+    queryKey: ["sandbox-results", latestSandboxId],
+    queryFn: async () => {
+      if (!latestSandboxId) return [];
+      const { data, error } = await supabase
+        .from("platform_test_results")
+        .select("*")
+        .eq("run_id", latestSandboxId)
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!latestSandboxId,
+  });
+
+  const runSandbox = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke("platform-sandbox");
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      toast.success("Sandbox tests complete — all data cleaned up");
+      queryClient.invalidateQueries({ queryKey: ["sandbox-runs"] });
+      queryClient.invalidateQueries({ queryKey: ["sandbox-results"] });
+      queryClient.invalidateQueries({ queryKey: ["platform-test-runs"] });
+    },
+    onError: (err) => {
+      toast.error("Sandbox failed: " + String(err));
+    },
+  });
+
+  const latestSandbox = sandboxRuns?.[0];
+  const sandboxModules = sandboxResults ? [...new Set(sandboxResults.map((r) => r.module))].sort() : [];
+  const getSandboxModuleResults = (mod: string) => sandboxResults?.filter((r) => r.module === mod) ?? [];
 
   const { data: runs, isLoading: runsLoading } = useQuery({
     queryKey: ["platform-test-runs"],
@@ -250,6 +302,7 @@ const PlatformTesting = () => {
             <TabsTrigger value="validation" className="gap-1.5"><FlaskConical size={14} /> Module Validation</TabsTrigger>
             <TabsTrigger value="architecture" className="gap-1.5"><Scale size={14} /> Architecture Validation</TabsTrigger>
             <TabsTrigger value="diagnostics" className="gap-1.5"><HeartPulse size={14} /> System Diagnostics</TabsTrigger>
+            <TabsTrigger value="sandbox" className="gap-1.5"><TestTube2 size={14} /> Sandbox Test Results</TabsTrigger>
           </TabsList>
 
           {/* Module Validation Tab (existing) */}
@@ -708,6 +761,175 @@ const PlatformTesting = () => {
                 </CardContent>
               </Card>
             ) : null}
+          </TabsContent>
+
+          {/* Sandbox Test Results Tab */}
+          <TabsContent value="sandbox" className="space-y-6 mt-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">
+                  Run a full platform simulation — creates temporary organisations, workflows, agents, and deployments, then cleans up automatically.
+                </p>
+              </div>
+              <Button
+                onClick={() => runSandbox.mutate()}
+                disabled={runSandbox.isPending}
+                size="sm"
+                className="gap-2"
+              >
+                {runSandbox.isPending ? <Loader2 size={14} className="animate-spin" /> : <TestTube2 size={14} />}
+                {runSandbox.isPending ? "Running Sandbox..." : "Run Sandbox Tests"}
+              </Button>
+            </div>
+
+            {latestSandbox && (
+              <>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                  <Card>
+                    <CardContent className="pt-4 pb-3 text-center">
+                      <TestTube2 size={20} className="mx-auto mb-1 text-primary" />
+                      <p className="text-2xl font-bold">{latestSandbox.total_tests}</p>
+                      <p className="text-xs text-muted-foreground">Total Tests</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="pt-4 pb-3 text-center">
+                      <CheckCircle2 size={20} className="mx-auto mb-1 text-green-500" />
+                      <p className="text-2xl font-bold text-green-500">{latestSandbox.passed}</p>
+                      <p className="text-xs text-muted-foreground">Passed</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="pt-4 pb-3 text-center">
+                      <XCircle size={20} className="mx-auto mb-1 text-destructive" />
+                      <p className="text-2xl font-bold text-destructive">{latestSandbox.failed}</p>
+                      <p className="text-xs text-muted-foreground">Failed</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="pt-4 pb-3 text-center">
+                      <Shield size={20} className="mx-auto mb-1 text-primary" />
+                      <p className="text-sm font-medium">Clean</p>
+                      <p className="text-xs text-muted-foreground">Data Cleaned</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="pt-4 pb-3 text-center">
+                      <Clock size={20} className="mx-auto mb-1 text-muted-foreground" />
+                      <p className="text-sm font-medium">{latestSandbox.completed_at ? format(new Date(latestSandbox.completed_at), "dd MMM HH:mm") : "—"}</p>
+                      <p className="text-xs text-muted-foreground">Last Run</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <Card>
+                  <CardContent className="py-4 flex items-center gap-3">
+                    {latestSandbox.status === "passed" ? (
+                      <>
+                        <CheckCircle2 size={24} className="text-green-500" />
+                        <div>
+                          <p className="font-semibold text-green-500">Liftor Platform: Operational</p>
+                          <p className="text-xs text-muted-foreground">All sandbox tests passed — platform modules verified, automation engine verified, AI agents verified, deployments verified, security verified</p>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <XCircle size={24} className="text-destructive" />
+                        <div>
+                          <p className="font-semibold text-destructive">Sandbox Issues Detected</p>
+                          <p className="text-xs text-muted-foreground">{latestSandbox.failed} test(s) failed — review results below</p>
+                        </div>
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Results by category */}
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {sandboxModules.map((mod) => {
+                    const modResults = getSandboxModuleResults(mod);
+                    const modFailed = modResults.filter((r) => r.status === "failed").length;
+                    const categoryIcons: Record<string, React.ReactNode> = {
+                      organisation_simulation: <Database size={16} />,
+                      workflow_simulation: <Workflow size={16} />,
+                      ai_agent_simulation: <Bot size={16} />,
+                      deployment_simulation: <Layers size={16} />,
+                      security_validation: <Shield size={16} />,
+                      platform_diagnostics: <HeartPulse size={16} />,
+                      cleanup: <CheckCircle2 size={16} />,
+                    };
+                    return (
+                      <Card key={mod}>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm font-semibold flex items-center gap-2 capitalize">
+                            {categoryIcons[mod] || <FlaskConical size={16} />}
+                            {mod.replace(/_/g, " ")}
+                            {modFailed > 0 ? (
+                              <Badge variant="destructive" className="ml-auto text-xs">{modFailed} Failed</Badge>
+                            ) : (
+                              <Badge className="ml-auto bg-green-500/10 text-green-500 border-green-500/20 text-xs">All Passed</Badge>
+                            )}
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-2">
+                          {modResults.map((r) => (
+                            <div key={r.id} className="flex items-start gap-2 text-sm">
+                              {statusIcon(r.status)}
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium truncate">{r.test_name}</p>
+                                <p className="text-xs text-muted-foreground truncate">{r.details}</p>
+                              </div>
+                              {r.duration_ms != null && (
+                                <span className="text-xs text-muted-foreground whitespace-nowrap">{r.duration_ms}ms</span>
+                              )}
+                            </div>
+                          ))}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+
+            {/* Sandbox History */}
+            {sandboxRuns && sandboxRuns.length > 1 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm font-semibold">Sandbox History</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="divide-y divide-border">
+                    {sandboxRuns.map((run) => (
+                      <div key={run.id} className="flex items-center gap-3 py-2.5 text-sm">
+                        {run.status === "passed" ? (
+                          <CheckCircle2 size={16} className="text-green-500" />
+                        ) : (
+                          <XCircle size={16} className="text-destructive" />
+                        )}
+                        <span className="flex-1">Platform Sandbox Test</span>
+                        <span className="text-muted-foreground">{run.passed}/{run.total_tests} passed</span>
+                        <span className="text-xs text-muted-foreground">
+                          {run.completed_at ? format(new Date(run.completed_at), "dd MMM yyyy HH:mm") : "Running..."}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {(!sandboxRuns || sandboxRuns.length === 0) && (
+              <Card>
+                <CardContent className="py-12 text-center">
+                  <TestTube2 size={40} className="mx-auto mb-3 text-muted-foreground" />
+                  <p className="text-lg font-semibold">No Sandbox Tests Yet</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Click "Run Sandbox Tests" to simulate the full platform environment
+                  </p>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
         </Tabs>
       </div>
