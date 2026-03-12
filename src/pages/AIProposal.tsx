@@ -95,6 +95,7 @@ const featureCards = [
   { icon: Cpu, title: "System Architecture Design", desc: "AI recommends a high-level architecture for your intelligent system." },
   { icon: Layers, title: "Implementation Scope", desc: "Receive a structured breakdown of workflows, integrations, and automation components." },
   { icon: Clock, title: "Project Timeline", desc: "Get an estimated implementation timeline based on system complexity." },
+  { icon: PoundSterling, title: "Investment Estimate", desc: "Receive an enterprise-grade cost estimate with a detailed engineering breakdown." },
 ];
 
 const howItWorksSteps = [
