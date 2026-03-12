@@ -32,6 +32,7 @@ import TermsOfService from "./pages/legal/TermsOfService";
 import EnterpriseServicesAgreement from "./pages/legal/EnterpriseServicesAgreement";
 import AIOutputDisclaimer from "./pages/legal/AIOutputDisclaimer";
 import AutomationLiabilityDisclaimer from "./pages/legal/AutomationLiabilityDisclaimer";
+import SecurityReporting from "./pages/legal/SecurityReporting";
 
 // Portal pages
 import PortalLogin from "./pages/portal/PortalLogin";
