@@ -46,10 +46,10 @@ const HeroSection = () => (
           custom={3}
           className="mt-10 flex flex-col sm:flex-row gap-4 justify-center"
         >
-          <Button variant="glow" size="lg" asChild>
+          <Button variant="glow" size="lg" className="w-full sm:w-auto" asChild>
             <Link to="/ai-proposal">Start a Project</Link>
           </Button>
-          <Button variant="outline-light" size="lg" asChild>
+          <Button variant="outline-light" size="lg" className="w-full sm:w-auto" asChild>
             <Link to="/case-studies">Explore Our Work</Link>
           </Button>
         </motion.div>

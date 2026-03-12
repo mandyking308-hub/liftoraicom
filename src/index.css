@@ -90,6 +90,18 @@
   .section-light .text-muted-foreground {
     color: hsl(var(--surface-light-muted));
   }
+
+  /* Unified technical card style */
+  .tech-card {
+    @apply rounded-xl border bg-card/80 backdrop-blur-sm transition-all duration-500;
+    border-color: hsl(210 30% 40% / 0.15);
+    padding: 28px;
+  }
+
+  .tech-card:hover {
+    border-color: hsl(195 100% 50% / 0.3);
+    box-shadow: 0 0 30px -5px hsl(195 100% 50% / 0.12), 0 8px 24px -8px hsl(220 20% 7% / 0.4);
+  }
 }
 
 /* Grid background pattern */
@@ -97,6 +109,14 @@
   background-image: 
     linear-gradient(hsl(220 15% 18% / 0.5) 1px, transparent 1px),
     linear-gradient(90deg, hsl(220 15% 18% / 0.5) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* Global faint grid overlay */
+.global-grid {
+  background-image: 
+    linear-gradient(hsl(220 15% 18% / 0.25) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(220 15% 18% / 0.25) 1px, transparent 1px);
   background-size: 60px 60px;
 }
 

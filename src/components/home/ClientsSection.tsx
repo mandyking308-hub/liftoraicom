@@ -21,14 +21,14 @@ const clients = [
 ];
 
 const ClientsSection = () => (
-  <section className="py-28 relative overflow-hidden" style={{ background: 'hsl(220 18% 9%)' }}>
+  <section className="py-[120px] max-sm:py-20 relative overflow-hidden" style={{ background: 'hsl(220 18% 9%)' }}>
     <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
     <div className="container">
       <motion.div
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-80px" }}
-        className="text-center mb-16"
+        className="text-center mb-8"
       >
         <motion.p variants={fadeUp} custom={0} className="text-xs font-medium tracking-[0.3em] uppercase text-primary mb-4">
           Our Clients
@@ -38,7 +38,7 @@ const ClientsSection = () => (
         </motion.h2>
       </motion.div>
 
-      <div className="grid gap-6 lg:grid-cols-3 max-w-4xl mx-auto">
+      <div className="grid gap-6 lg:grid-cols-3 max-w-4xl mx-auto mt-12">
         {clients.map((c, i) => (
           <motion.div
             key={c.title}
@@ -47,9 +47,9 @@ const ClientsSection = () => (
             viewport={{ once: true }}
             variants={fadeUp}
             custom={i}
-            className="text-center p-8 rounded-xl border border-border/60 bg-card/70 hover:border-primary/30 hover:shadow-[0_0_30px_-5px_hsl(195_100%_50%/0.12)] transition-all duration-500"
+            className="text-center tech-card"
           >
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10 text-primary mb-4">
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10 text-primary mb-5">
               <c.icon size={22} strokeWidth={1.5} />
             </div>
             <h3 className="text-lg font-semibold mb-2">{c.title}</h3>
