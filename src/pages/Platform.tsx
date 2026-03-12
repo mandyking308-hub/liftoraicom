@@ -24,6 +24,7 @@ const platformComponents = [
 
 const Platform = () => (
   <div className="min-h-screen bg-background">
+    <SEOHead title="Liftor AI Intelligence Platform" description="The Liftor platform is a modular AI intelligence infrastructure powering automation systems, operational analytics, and intelligent decision-making." />
     <Navbar />
 
     {/* Hero */}
