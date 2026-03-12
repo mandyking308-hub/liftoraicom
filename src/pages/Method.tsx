@@ -38,13 +38,18 @@ const Method = () => (
       </div>
     </section>
 
-    <section className="pb-24">
+    <section className="pb-32">
       <div className="container max-w-3xl">
         <div className="relative">
-          {/* Vertical line */}
-          <div className="absolute left-[27px] top-0 bottom-0 w-px bg-border" />
+          {/* Gradient vertical connector */}
+          <div
+            className="absolute left-[27px] top-0 bottom-0 w-px"
+            style={{
+              background: 'linear-gradient(to bottom, hsl(195 100% 50% / 0.1) 0%, hsl(195 100% 50% / 0.4) 40%, hsl(195 100% 50% / 0.4) 60%, hsl(195 100% 50% / 0.08) 100%)',
+            }}
+          />
 
-          <div className="space-y-12">
+          <div className="space-y-16">
             {steps.map((s, i) => (
               <motion.div
                 key={s.num}
@@ -53,14 +58,14 @@ const Method = () => (
                 viewport={{ once: true }}
                 variants={fadeUp}
                 custom={i}
-                className="relative flex gap-6"
+                className="group relative flex gap-6 cursor-default"
               >
-                <div className="relative z-10 flex-shrink-0 w-14 h-14 rounded-full border-2 border-primary bg-background flex items-center justify-center">
+                <div className="relative z-10 flex-shrink-0 w-14 h-14 rounded-full border-2 border-primary/60 bg-background flex items-center justify-center shadow-[0_0_12px_-3px_hsl(195_100%_50%/0.25)] group-hover:border-primary group-hover:shadow-[0_0_20px_-3px_hsl(195_100%_50%/0.45)] transition-all duration-500">
                   <span className="text-primary font-bold text-sm">{s.num}</span>
                 </div>
                 <div className="pt-3">
-                  <h3 className="text-2xl font-semibold mb-2">{s.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed">{s.desc}</p>
+                  <h3 className="text-2xl font-semibold mb-2 text-foreground/90 group-hover:text-foreground transition-colors duration-300">{s.title}</h3>
+                  <p className="text-muted-foreground leading-relaxed group-hover:text-foreground/70 transition-colors duration-300">{s.desc}</p>
                 </div>
               </motion.div>
             ))}
