@@ -29,7 +29,17 @@ PRICING GUIDELINES — You are pricing enterprise AI infrastructure, NOT freelan
 The estimated_cost_range should reflect the TOTAL project investment as a GBP range.
 The estimated_cost_breakdown should include 3-5 line items covering categories like: Architecture & System Design, Platform Development, AI Agent Engineering, Integration Engineering, Deployment & Optimisation, Data Infrastructure, Testing & QA.
 Each breakdown item must have a category name and a GBP estimate range string.
-All prices must be in GBP (£). Never produce low-cost or freelance-level estimates.`;
+All prices must be in GBP (£). Never produce low-cost or freelance-level estimates.
+
+ROI ESTIMATION GUIDELINES — Estimate the financial return based on automation level:
+- Low Automation Impact (single workflow, basic processing): Annual savings £80,000–£150,000, ROI period 12–18 months, Productivity gain 10%–20%
+- Medium Automation Impact (multi-workflow, AI decision support, cross-system): Annual savings £200,000–£600,000, ROI period 8–14 months, Productivity gain 20%–40%
+- High Automation Impact (enterprise platform, multi-agent, AI operations): Annual savings £500,000–£2,000,000+, ROI period 6–12 months, Productivity gain 30%–60%
+
+The estimated_roi_summary should be 2-3 sentences explaining the strategic business impact.
+The estimated_annual_savings should be a GBP range string.
+The estimated_roi_period should be a month range string like "8 – 14 months".
+The estimated_productivity_gain should be a percentage range string like "20% – 40%".`;
 
     const userPrompt = `Generate a proposal outline for this client:
 - Industry: ${industry}
@@ -56,7 +66,7 @@ All prices must be in GBP (£). Never produce low-cost or freelance-level estima
             type: "function",
             function: {
               name: "suggest_proposal",
-              description: "Return a structured proposal outline with suggested solution, scope, timeline, architecture components, and enterprise cost estimate.",
+              description: "Return a structured proposal outline with solution, scope, timeline, architecture, cost estimate, and ROI forecast.",
               parameters: {
                 type: "object",
                 properties: {
@@ -78,15 +88,8 @@ All prices must be in GBP (£). Never produce low-cost or freelance-level estima
                     items: {
                       type: "object",
                       properties: {
-                        name: {
-                          type: "string",
-                          description: "The name of the system component (e.g. 'Workflow Automation Engine').",
-                        },
-                        type: {
-                          type: "string",
-                          enum: ["system", "agent", "workflow", "integration", "interface"],
-                          description: "The type of component.",
-                        },
+                        name: { type: "string", description: "The name of the system component." },
+                        type: { type: "string", enum: ["system", "agent", "workflow", "integration", "interface"], description: "The type of component." },
                       },
                       required: ["name", "type"],
                       additionalProperties: false,
@@ -102,21 +105,35 @@ All prices must be in GBP (£). Never produce low-cost or freelance-level estima
                     items: {
                       type: "object",
                       properties: {
-                        category: {
-                          type: "string",
-                          description: "The name of the cost category, e.g. 'Architecture & System Design'.",
-                        },
-                        estimate: {
-                          type: "string",
-                          description: "The estimated cost range for this category in GBP, e.g. '£15,000 – £25,000'.",
-                        },
+                        category: { type: "string", description: "The cost category name." },
+                        estimate: { type: "string", description: "The estimated cost range in GBP." },
                       },
                       required: ["category", "estimate"],
                       additionalProperties: false,
                     },
                   },
+                  estimated_roi_summary: {
+                    type: "string",
+                    description: "A 2-3 sentence summary of the expected strategic business impact and financial return from implementing this system.",
+                  },
+                  estimated_annual_savings: {
+                    type: "string",
+                    description: "The estimated annual operational savings in GBP range, e.g. '£250,000 – £500,000'.",
+                  },
+                  estimated_roi_period: {
+                    type: "string",
+                    description: "The estimated time to achieve return on investment, e.g. '8 – 14 months'.",
+                  },
+                  estimated_productivity_gain: {
+                    type: "string",
+                    description: "The estimated productivity improvement as a percentage range, e.g. '20% – 40%'.",
+                  },
                 },
-                required: ["suggested_solution", "estimated_scope", "estimated_timeline", "architecture_components", "estimated_cost_range", "estimated_cost_breakdown"],
+                required: [
+                  "suggested_solution", "estimated_scope", "estimated_timeline",
+                  "architecture_components", "estimated_cost_range", "estimated_cost_breakdown",
+                  "estimated_roi_summary", "estimated_annual_savings", "estimated_roi_period", "estimated_productivity_gain"
+                ],
                 additionalProperties: false,
               },
             },

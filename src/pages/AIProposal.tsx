@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, Sparkles, Cpu, Layers, Clock, ExternalLink, PoundSterling } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, Sparkles, Cpu, Layers, Clock, ExternalLink, PoundSterling, TrendingUp } from "lucide-react";
 import ArchitectureDiagram from "@/components/proposal/ArchitectureDiagram";
 
 const TOTAL_STEPS = 7;
@@ -89,6 +89,10 @@ interface Proposal {
   architecture_components?: ArchComponent[];
   estimated_cost_range?: string;
   estimated_cost_breakdown?: CostBreakdownItem[];
+  estimated_roi_summary?: string;
+  estimated_annual_savings?: string;
+  estimated_roi_period?: string;
+  estimated_productivity_gain?: string;
 }
 
 const featureCards = [
@@ -96,6 +100,7 @@ const featureCards = [
   { icon: Layers, title: "Implementation Scope", desc: "Receive a structured breakdown of workflows, integrations, and automation components." },
   { icon: Clock, title: "Project Timeline", desc: "Get an estimated implementation timeline based on system complexity." },
   { icon: PoundSterling, title: "Investment Estimate", desc: "Receive an enterprise-grade cost estimate with a detailed engineering breakdown." },
+  { icon: TrendingUp, title: "ROI Forecast", desc: "See projected annual savings, payback period, and productivity gains." },
 ];
 
 const howItWorksSteps = [
@@ -234,6 +239,10 @@ const AIProposal = () => {
         ai_estimated_timeline: proposal.estimated_timeline,
         ai_estimated_cost_range: proposal.estimated_cost_range || null,
         ai_estimated_cost_breakdown: (proposal.estimated_cost_breakdown || null) as any,
+        ai_estimated_roi_summary: proposal.estimated_roi_summary || null,
+        ai_estimated_annual_savings: proposal.estimated_annual_savings || null,
+        ai_estimated_roi_period: proposal.estimated_roi_period || null,
+        ai_estimated_productivity_gain: proposal.estimated_productivity_gain || null,
       } as any);
 
       if (error) throw error;
@@ -667,6 +676,53 @@ const AIProposal = () => {
 
                         <p className="text-xs text-muted-foreground leading-relaxed">
                           Investment estimates are indicative and depend on system complexity, integrations, and deployment scale. Final pricing is confirmed following technical discovery.
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Projected Business Impact (ROI) */}
+                    {proposal.estimated_annual_savings && (
+                      <div className="space-y-4">
+                        <h3 className="text-xs font-medium text-primary tracking-widest uppercase">Projected Business Impact</h3>
+
+                        <div className="grid sm:grid-cols-2 gap-3">
+                          <div className="p-4 rounded-lg bg-green-500/5 border border-green-500/20">
+                            <p className="text-xs text-muted-foreground mb-1">Annual Operational Savings</p>
+                            <p className="text-lg font-bold text-green-400">{proposal.estimated_annual_savings}</p>
+                          </div>
+                          <div className="p-4 rounded-lg bg-green-500/5 border border-green-500/20">
+                            <p className="text-xs text-muted-foreground mb-1">Return on Investment</p>
+                            <p className="text-lg font-bold text-green-400">{proposal.estimated_roi_period}</p>
+                          </div>
+                          <div className="p-4 rounded-lg bg-green-500/5 border border-green-500/20">
+                            <p className="text-xs text-muted-foreground mb-1">Productivity Improvement</p>
+                            <p className="text-lg font-bold text-green-400">{proposal.estimated_productivity_gain}</p>
+                          </div>
+                          <div className="p-4 rounded-lg bg-secondary/50 border border-border/50">
+                            <p className="text-xs text-muted-foreground mb-1">Strategic Impact</p>
+                            <p className="text-sm leading-relaxed">{proposal.estimated_roi_summary}</p>
+                          </div>
+                        </div>
+
+                        {/* Investment vs Savings visual */}
+                        {proposal.estimated_cost_range && (
+                          <div className="flex items-center gap-4 p-4 rounded-lg bg-secondary/30 border border-border/30">
+                            <div className="flex-1 text-center">
+                              <p className="text-xs text-muted-foreground mb-1">Investment</p>
+                              <p className="text-sm font-semibold">{proposal.estimated_cost_range}</p>
+                            </div>
+                            <div className="text-muted-foreground">
+                              <ArrowRight size={20} />
+                            </div>
+                            <div className="flex-1 text-center">
+                              <p className="text-xs text-muted-foreground mb-1">Expected Annual Savings</p>
+                              <p className="text-sm font-semibold text-green-400">{proposal.estimated_annual_savings}</p>
+                            </div>
+                          </div>
+                        )}
+
+                        <p className="text-xs text-muted-foreground leading-relaxed">
+                          ROI projections are indicative estimates based on comparable enterprise automation deployments. Actual results depend on implementation scope, adoption rate, and operational context.
                         </p>
                       </div>
                     )}
