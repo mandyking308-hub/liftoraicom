@@ -29,6 +29,9 @@ import SecurityPolicy from "./pages/legal/SecurityPolicy";
 import CookiePolicy from "./pages/legal/CookiePolicy";
 import DataProcessingAgreement from "./pages/legal/DataProcessingAgreement";
 import TermsOfService from "./pages/legal/TermsOfService";
+import EnterpriseServicesAgreement from "./pages/legal/EnterpriseServicesAgreement";
+import AIOutputDisclaimer from "./pages/legal/AIOutputDisclaimer";
+import AutomationLiabilityDisclaimer from "./pages/legal/AutomationLiabilityDisclaimer";
 
 // Portal pages
 import PortalLogin from "./pages/portal/PortalLogin";
