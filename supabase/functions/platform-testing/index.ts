@@ -437,9 +437,7 @@ Deno.serve(async (req) => {
 
       if (responseTime > 10) {
         console.warn(`[Timeout Test] Slow response: ${responseTime.toFixed(1)}s`);
-        results.pop(); // remove the auto-added result from runTest so we can push warning manually
-        results.push({ module: "ai_proposal", test_name: "AI Proposal Response Timeout Test", status: "warning", details: `Response time: ${responseTime.toFixed(1)}s — exceeds 10s recommended limit`, duration_ms: Date.now() - t0 });
-        return { ok: true, detail: "" }; // won't be used since we pushed manually
+        return { ok: true, warning: true, detail: `Response time: ${responseTime.toFixed(1)}s — exceeds 10s recommended limit` };
       }
 
       return { ok: true, detail: `Response time: ${responseTime.toFixed(1)}s` };
