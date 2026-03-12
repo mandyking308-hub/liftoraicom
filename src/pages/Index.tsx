@@ -2,6 +2,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import SEOHead from "@/components/SEOHead";
 import HeroSection from "@/components/home/HeroSection";
+import HowItWorksSection from "@/components/home/HowItWorksSection";
 import ProblemSection from "@/components/home/ProblemSection";
 import WhatWeBuildSection from "@/components/home/WhatWeBuildSection";
 import SystemCredibilitySection from "@/components/home/SystemCredibilitySection";
