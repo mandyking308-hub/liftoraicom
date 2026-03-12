@@ -25,6 +25,7 @@ import PrivacyPolicy from "./pages/legal/PrivacyPolicy";
 import AcceptableUse from "./pages/legal/AcceptableUse";
 import AIUsagePolicy from "./pages/legal/AIUsagePolicy";
 import AutomationSafetyPolicy from "./pages/legal/AutomationSafetyPolicy";
+import SecurityPolicy from "./pages/legal/SecurityPolicy";
 
 // Portal pages
 import PortalLogin from "./pages/portal/PortalLogin";
@@ -133,7 +134,7 @@ const App = () => (
             <Route path="/legal/acceptable-use" element={<AcceptableUse />} />
             <Route path="/legal/ai-usage-policy" element={<AIUsagePolicy />} />
             <Route path="/legal/automation-safety-policy" element={<AutomationSafetyPolicy />} />
-            <Route path="/legal/security-policy" element={<LegalPagePlaceholder />} />
+            <Route path="/legal/security-policy" element={<SecurityPolicy />} />
             <Route path="/legal/cookie-policy" element={<LegalPagePlaceholder />} />
             <Route path="/legal/data-processing-agreement" element={<LegalPagePlaceholder />} />
             <Route path="/legal/ai-output-disclaimer" element={<LegalPagePlaceholder />} />
