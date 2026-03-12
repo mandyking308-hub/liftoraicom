@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { fadeUp } from "@/lib/animations";
 import { Workflow, Bot, Layers, Activity, Cpu, FileSearch, Database, Lock } from "lucide-react";
+import PlatformArchitectureFlow from "@/components/architecture/PlatformArchitectureFlow";
 
 const platformLayers = [
   { icon: Workflow, title: "Workflow Orchestration", desc: "Central orchestration engine coordinating workflows, managing dependencies, scheduling tasks, and ensuring reliable execution across automated operations." },
@@ -86,6 +87,9 @@ const Architecture = () => (
         </motion.div>
       </div>
     </section>
+
+    {/* Platform Architecture Flow */}
+    <PlatformArchitectureFlow />
 
     {/* Platform Layers */}
     <section className="py-[120px] max-sm:py-20">
