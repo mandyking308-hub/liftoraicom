@@ -19,6 +19,8 @@ import ProjectDiscovery from "./pages/ProjectDiscovery";
 import About from "./pages/About";
 import AIProposal from "./pages/AIProposal";
 import NotFound from "./pages/NotFound";
+import LegalHub from "./pages/legal/LegalHub";
+import LegalPagePlaceholder from "./pages/legal/LegalPagePlaceholder";
 
 // Portal pages
 import PortalLogin from "./pages/portal/PortalLogin";
