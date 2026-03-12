@@ -314,7 +314,13 @@ const AIProposal = () => {
       }
 
       if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      if (data?.error) {
+        if (typeof data.error === "string" && data.error.toLowerCase().includes("limit")) {
+          toast.error("Proposal generation is temporarily limited to protect the system. Please try again later.");
+          return;
+        }
+        throw new Error(data.error);
+      }
 
       // Schema integrity validation
       const isValid =

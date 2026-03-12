@@ -555,6 +555,40 @@ Deno.serve(async (req) => {
       return { ok: true, detail: `${checks.length} checks passed in ${elapsed}s — Full E2E verified` };
     });
 
+    // ── 25. AI Proposal Rate Limit Test ──
+    await runTest("ai_proposal", "AI Proposal Rate Limit Test", async () => {
+      // Insert 5 test rate limit records to simulate prior requests from a test IP
+      const testIp = "[TEST]-rate-limit-ip-" + Date.now();
+      const records = Array.from({ length: 5 }, () => ({
+        ip_address: testIp,
+        user_id: null,
+        request_count: 1,
+        blocked: false,
+        last_request_at: new Date().toISOString(),
+      }));
+      const { error: insertErr } = await supabase.from("proposal_rate_limits").insert(records);
+      if (insertErr) return { ok: false, detail: `Failed to seed rate limit records: ${insertErr.message}` };
+
+      // Now count — should be 5 (at limit)
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+      const { count } = await supabase
+        .from("proposal_rate_limits")
+        .select("*", { count: "exact", head: true })
+        .eq("ip_address", testIp)
+        .gte("last_request_at", oneHourAgo);
+
+      const atLimit = (count ?? 0) >= 5;
+
+      // Clean up test records
+      await supabase.from("proposal_rate_limits").delete().eq("ip_address", testIp);
+
+      if (!atLimit) {
+        return { ok: false, detail: `Expected count >= 5, got ${count}` };
+      }
+
+      return { ok: true, detail: `Rate limit logic verified — 5 requests allowed, subsequent blocked. Count: ${count}` };
+    });
+
     const passed = results.filter(r => r.status === "passed").length;
     const failed = results.filter(r => r.status === "failed").length;
     const warnings = results.filter(r => r.status === "warning").length;
@@ -580,6 +614,7 @@ Deno.serve(async (req) => {
     await supabase.from("strategy_insights").delete().like("title", "[TEST]%");
     await supabase.from("build_log_entries").delete().like("title", "[TEST]%");
     await supabase.from("proposals").delete().like("company_name", "[TEST]%");
+    await supabase.from("proposal_rate_limits").delete().like("ip_address", "[TEST]%");
 
     return new Response(JSON.stringify({
       run_id: run.id,

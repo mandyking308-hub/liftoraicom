@@ -1,14 +1,95 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
+
+const IP_LIMIT_PER_HOUR = 5;
+const ABUSE_THRESHOLD = 20;
+const ABUSE_WINDOW_MINUTES = 10;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const supabase = createClient(supabaseUrl, serviceRoleKey);
+
   try {
+    // Extract IP from headers
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+      || req.headers.get("x-real-ip")
+      || "unknown";
+
+    // Extract user ID if authenticated
+    let userId: string | null = null;
+    const authHeader = req.headers.get("authorization");
+    if (authHeader?.startsWith("Bearer ")) {
+      try {
+        const { data } = await supabase.auth.getUser(authHeader.replace("Bearer ", ""));
+        userId = data?.user?.id || null;
+      } catch { /* unauthenticated is fine */ }
+    }
+
+    // ── Rate Limit Check ──
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const tenMinAgo = new Date(Date.now() - ABUSE_WINDOW_MINUTES * 60 * 1000).toISOString();
+
+    // Count requests from this IP in the last hour
+    const { count: ipCount } = await supabase
+      .from("proposal_rate_limits")
+      .select("*", { count: "exact", head: true })
+      .eq("ip_address", ip)
+      .gte("last_request_at", oneHourAgo);
+
+    const currentIpCount = ipCount ?? 0;
+
+    // Check for abuse (20+ in 10 minutes)
+    const { count: abuseCount } = await supabase
+      .from("proposal_rate_limits")
+      .select("*", { count: "exact", head: true })
+      .eq("ip_address", ip)
+      .gte("last_request_at", tenMinAgo);
+
+    if ((abuseCount ?? 0) >= ABUSE_THRESHOLD) {
+      // Flag as suspicious in access_anomalies
+      await supabase.from("access_anomalies").insert({
+        anomaly_type: "excessive_proposal_requests",
+        severity: "high",
+        description: `IP ${ip} made ${abuseCount} proposal requests in ${ABUSE_WINDOW_MINUTES} minutes`,
+        user_id: userId,
+        flagged: true,
+      });
+    }
+
+    if (currentIpCount >= IP_LIMIT_PER_HOUR) {
+      // Log the blocked attempt
+      await supabase.from("proposal_rate_limits").insert({
+        ip_address: ip,
+        user_id: userId,
+        request_count: 1,
+        blocked: true,
+        last_request_at: new Date().toISOString(),
+      });
+
+      return new Response(
+        JSON.stringify({ error: "Proposal generation limit reached. Please try again later." }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Log allowed request
+    await supabase.from("proposal_rate_limits").insert({
+      ip_address: ip,
+      user_id: userId,
+      request_count: 1,
+      blocked: false,
+      last_request_at: new Date().toISOString(),
+    });
+
+    // ── Proposal Generation ──
     const { projectTypes, businessProblem, processesToAutomate, projectScale, timeline, industry } = await req.json();
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
