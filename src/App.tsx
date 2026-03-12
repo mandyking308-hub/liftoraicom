@@ -28,6 +28,7 @@ import AutomationSafetyPolicy from "./pages/legal/AutomationSafetyPolicy";
 import SecurityPolicy from "./pages/legal/SecurityPolicy";
 import CookiePolicy from "./pages/legal/CookiePolicy";
 import DataProcessingAgreement from "./pages/legal/DataProcessingAgreement";
+import TermsOfService from "./pages/legal/TermsOfService";
 
 // Portal pages
 import PortalLogin from "./pages/portal/PortalLogin";
@@ -130,7 +131,7 @@ const App = () => (
 
             {/* Legal */}
             <Route path="/legal" element={<LegalHub />} />
-            <Route path="/legal/terms-of-service" element={<LegalPagePlaceholder />} />
+            <Route path="/legal/terms-of-service" element={<TermsOfService />} />
             <Route path="/legal/enterprise-services-agreement" element={<LegalPagePlaceholder />} />
             <Route path="/legal/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/legal/acceptable-use" element={<AcceptableUse />} />
