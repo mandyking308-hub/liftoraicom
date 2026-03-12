@@ -10,7 +10,7 @@ const Footer = () => (
             <span className="text-primary"> AI</span>
           </Link>
           <p className="mt-4 text-sm text-muted-foreground leading-relaxed">
-            AI systems engineering studio. We design, build, and operate intelligent platforms.
+            AI systems engineering company. We design, build, and operate intelligent platforms.
           </p>
         </div>
 
