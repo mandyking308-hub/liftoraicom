@@ -95,10 +95,33 @@ const FounderOverview = () => {
     return proposals.reduce((sum, p) => sum + parseMidpoint(p.ai_estimated_cost_range), 0);
   }, [proposals]);
 
+  const totalSavingsPotential = useMemo(() => {
+    return proposals.reduce((sum, p) => sum + parseMidpoint(p.ai_estimated_annual_savings), 0);
+  }, [proposals]);
+
+  const avgRoiPeriod = useMemo(() => {
+    const periods = proposals
+      .map((p) => p.ai_estimated_roi_period as string | null)
+      .filter(Boolean)
+      .map((r) => parseMidpoint(r));
+    if (periods.length === 0) return "—";
+    const avg = periods.reduce((a, b) => a + b, 0) / periods.length;
+    return `${Math.round(avg)} months`;
+  }, [proposals]);
+
   const pipelineByIndustry = useMemo(() => {
     const map: Record<string, number> = {};
     proposals.forEach((p) => {
       const mid = parseMidpoint(p.ai_estimated_cost_range);
+      if (mid > 0) map[p.industry] = (map[p.industry] || 0) + mid;
+    });
+    return Object.entries(map).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+  }, [proposals]);
+
+  const savingsByIndustry = useMemo(() => {
+    const map: Record<string, number> = {};
+    proposals.forEach((p) => {
+      const mid = parseMidpoint(p.ai_estimated_annual_savings);
       if (mid > 0) map[p.industry] = (map[p.industry] || 0) + mid;
     });
     return Object.entries(map).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
