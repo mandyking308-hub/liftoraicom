@@ -23,6 +23,7 @@ import LegalHub from "./pages/legal/LegalHub";
 import LegalPagePlaceholder from "./pages/legal/LegalPagePlaceholder";
 import PrivacyPolicy from "./pages/legal/PrivacyPolicy";
 import AcceptableUse from "./pages/legal/AcceptableUse";
+import AIUsagePolicy from "./pages/legal/AIUsagePolicy";
 
 // Portal pages
 import PortalLogin from "./pages/portal/PortalLogin";
