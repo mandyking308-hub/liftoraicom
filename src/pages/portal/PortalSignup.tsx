@@ -68,7 +68,21 @@ const PortalSignup = () => {
               <label className="text-sm font-medium mb-1.5 block">Password</label>
               <Input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min 6 characters" minLength={6} className="bg-secondary border-border" />
             </div>
-            <Button type="submit" variant="glow" className="w-full" disabled={loading}>
+            <div className="flex items-start space-x-2">
+              <Checkbox
+                id="terms"
+                checked={agreedToTerms}
+                onCheckedChange={(checked) => setAgreedToTerms(checked === true)}
+                className="mt-0.5"
+              />
+              <label htmlFor="terms" className="text-sm text-muted-foreground leading-snug">
+                I agree to the Liftor{" "}
+                <Link to="/legal/terms-of-service" className="text-primary hover:underline" target="_blank">Terms of Service</Link>
+                {" "}and{" "}
+                <Link to="/legal/privacy-policy" className="text-primary hover:underline" target="_blank">Privacy Policy</Link>
+              </label>
+            </div>
+            <Button type="submit" variant="glow" className="w-full" disabled={loading || !agreedToTerms}>
               {loading ? <Loader2 size={16} className="animate-spin" /> : "Create Account"}
             </Button>
           </form>
