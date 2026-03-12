@@ -443,6 +443,119 @@ Deno.serve(async (req) => {
       return { ok: true, detail: `Response time: ${responseTime.toFixed(1)}s` };
     });
 
+    // ── 24. AI Proposal End-to-End Workflow Test ──
+    await runTest("ai_proposal", "AI Proposal E2E Workflow Test", async () => {
+      const t0 = Date.now();
+      const testPayload = {
+        projectTypes: ["automation platform"],
+        businessProblem: "Manual reporting and compliance workflows creating operational inefficiencies",
+        processesToAutomate: ["financial reporting", "compliance monitoring", "document processing"],
+        projectScale: "enterprise organisation",
+        timeline: "6 months",
+        industry: "financial services",
+      };
+
+      // Step 1 — Call edge function
+      const res = await fetch(`${supabaseUrl}/functions/v1/generate-proposal`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${serviceRoleKey}` },
+        body: JSON.stringify(testPayload),
+      });
+      const rawText = await res.text();
+      if (!res.ok) return { ok: false, detail: `Edge function failed: HTTP ${res.status}` };
+
+      let data: any;
+      try { data = JSON.parse(rawText); } catch { return { ok: false, detail: "Response is not valid JSON" }; }
+      if (data.error) return { ok: false, detail: `Edge function error: ${data.error}` };
+
+      const checks: string[] = [];
+      const failures: string[] = [];
+
+      // Step 1 — Core fields
+      for (const f of ["suggested_solution", "estimated_scope", "estimated_timeline"]) {
+        if (typeof data[f] === "string" && data[f].length > 0) checks.push(f);
+        else failures.push(`Missing: ${f}`);
+      }
+
+      // Step 2 — Architecture validation
+      if (Array.isArray(data.architecture_components) && data.architecture_components.length >= 3) {
+        checks.push(`architecture_components (${data.architecture_components.length})`);
+      } else {
+        failures.push("architecture_components missing or < 3 items");
+      }
+
+      // Step 3 — Cost estimate validation
+      if (typeof data.estimated_cost_range === "string" && data.estimated_cost_range.includes("£")) {
+        checks.push("estimated_cost_range");
+      } else {
+        failures.push("estimated_cost_range missing or invalid format");
+      }
+      if (Array.isArray(data.estimated_cost_breakdown) && data.estimated_cost_breakdown.length > 0) {
+        checks.push(`estimated_cost_breakdown (${data.estimated_cost_breakdown.length} items)`);
+      } else {
+        failures.push("estimated_cost_breakdown missing");
+      }
+
+      // Step 4 — ROI validation
+      for (const f of ["estimated_roi_summary", "estimated_annual_savings", "estimated_roi_period", "estimated_productivity_gain"]) {
+        if (typeof data[f] === "string" && data[f].length > 0) checks.push(f);
+        else failures.push(`Missing: ${f}`);
+      }
+
+      // Step 5 — Database storage
+      const { data: inserted, error: insErr } = await supabase.from("proposals").insert({
+        company_name: "[TEST] Test Financial Group",
+        contact_name: "Test User",
+        contact_email: "test@example.com",
+        industry: "financial services",
+        company_size: "200-1000 employees",
+        project_types: ["automation platform"],
+        business_problem: testPayload.businessProblem,
+        processes_to_automate: testPayload.processesToAutomate,
+        project_scale: testPayload.projectScale,
+        timeline: testPayload.timeline,
+        ai_suggested_solution: data.suggested_solution,
+        ai_estimated_scope: data.estimated_scope,
+        ai_estimated_timeline: data.estimated_timeline,
+        ai_estimated_cost_range: data.estimated_cost_range || null,
+        ai_estimated_cost_breakdown: data.estimated_cost_breakdown || null,
+        ai_estimated_roi_summary: data.estimated_roi_summary || null,
+        ai_estimated_annual_savings: data.estimated_annual_savings || null,
+        ai_estimated_roi_period: data.estimated_roi_period || null,
+        ai_estimated_productivity_gain: data.estimated_productivity_gain || null,
+      } as any).select("id").single();
+
+      if (insErr) {
+        failures.push(`DB insert failed: ${insErr.message}`);
+      } else {
+        checks.push("proposal stored in DB");
+
+        // Step 6 — Verify dashboard read
+        const { data: readBack } = await supabase.from("proposals").select("id, company_name, ai_estimated_cost_range, ai_estimated_roi_period").eq("id", inserted.id).single();
+        if (readBack && readBack.ai_estimated_cost_range) {
+          checks.push("dashboard pipeline metric readable");
+        } else {
+          failures.push("Could not read back proposal for dashboard metrics");
+        }
+      }
+
+      // Step 7 — PDF generation (validate data availability for PDF)
+      const pdfFields = [data.suggested_solution, data.estimated_scope, data.estimated_timeline, data.estimated_cost_range, data.estimated_annual_savings];
+      if (pdfFields.every(f => typeof f === "string" && f.length > 0)) {
+        checks.push("PDF data fields available");
+      } else {
+        failures.push("Incomplete data for PDF generation");
+      }
+
+      const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
+
+      if (failures.length > 0) {
+        return { ok: false, detail: `${failures.length} failures: ${failures.join("; ")} (${elapsed}s)` };
+      }
+      return { ok: true, detail: `${checks.length} checks passed in ${elapsed}s — Full E2E verified` };
+    });
+
+    const passed = results.filter(r => r.status === "passed").length;
     const failed = results.filter(r => r.status === "failed").length;
     const warnings = results.filter(r => r.status === "warning").length;
 
@@ -466,6 +579,7 @@ Deno.serve(async (req) => {
     await supabase.from("decision_recommendations").delete().like("title", "[TEST]%");
     await supabase.from("strategy_insights").delete().like("title", "[TEST]%");
     await supabase.from("build_log_entries").delete().like("title", "[TEST]%");
+    await supabase.from("proposals").delete().like("company_name", "[TEST]%");
 
     return new Response(JSON.stringify({
       run_id: run.id,
