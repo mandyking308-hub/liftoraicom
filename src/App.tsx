@@ -29,6 +29,9 @@ import SecurityPolicy from "./pages/legal/SecurityPolicy";
 import CookiePolicy from "./pages/legal/CookiePolicy";
 import DataProcessingAgreement from "./pages/legal/DataProcessingAgreement";
 import TermsOfService from "./pages/legal/TermsOfService";
+import EnterpriseServicesAgreement from "./pages/legal/EnterpriseServicesAgreement";
+import AIOutputDisclaimer from "./pages/legal/AIOutputDisclaimer";
+import AutomationLiabilityDisclaimer from "./pages/legal/AutomationLiabilityDisclaimer";
 
 // Portal pages
 import PortalLogin from "./pages/portal/PortalLogin";
@@ -132,7 +135,7 @@ const App = () => (
             {/* Legal */}
             <Route path="/legal" element={<LegalHub />} />
             <Route path="/legal/terms-of-service" element={<TermsOfService />} />
-            <Route path="/legal/enterprise-services-agreement" element={<LegalPagePlaceholder />} />
+            <Route path="/legal/enterprise-services-agreement" element={<EnterpriseServicesAgreement />} />
             <Route path="/legal/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/legal/acceptable-use" element={<AcceptableUse />} />
             <Route path="/legal/ai-usage-policy" element={<AIUsagePolicy />} />
@@ -140,8 +143,8 @@ const App = () => (
             <Route path="/legal/security-policy" element={<SecurityPolicy />} />
             <Route path="/legal/cookie-policy" element={<CookiePolicy />} />
             <Route path="/legal/data-processing-agreement" element={<DataProcessingAgreement />} />
-            <Route path="/legal/ai-output-disclaimer" element={<LegalPagePlaceholder />} />
-            <Route path="/legal/automation-liability-disclaimer" element={<LegalPagePlaceholder />} />
+            <Route path="/legal/ai-output-disclaimer" element={<AIOutputDisclaimer />} />
+            <Route path="/legal/automation-liability-disclaimer" element={<AutomationLiabilityDisclaimer />} />
 
             {/* Auth */}
             <Route path="/portal/login" element={<PortalLogin />} />
