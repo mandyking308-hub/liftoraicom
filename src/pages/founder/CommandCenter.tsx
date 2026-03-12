@@ -217,6 +217,47 @@ const CommandCenter = () => {
           </CardContent>
         </Card>
 
+        {/* Platform Diagnostics Summary */}
+        <Card className="bg-card border-border/50">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <HeartPulse size={18} /> Platform Diagnostics
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {latestDiagnostic ? (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {latestDiagnostic.status === "healthy" ? (
+                    <CheckCircle2 size={20} className="text-green-500" />
+                  ) : (
+                    <AlertTriangle size={20} className="text-yellow-500" />
+                  )}
+                  <div>
+                    <p className="font-medium">
+                      {latestDiagnostic.status === "healthy" ? "All Systems Healthy" : "Issues Detected"}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {latestDiagnostic.systems_checked} systems checked · {latestDiagnostic.failures_detected} failures · Last run {format(new Date(latestDiagnostic.run_timestamp), "dd MMM HH:mm")}
+                    </p>
+                  </div>
+                </div>
+                <Link to="/founder/testing">
+                  <Badge variant="secondary" className="cursor-pointer hover:bg-secondary">View Details →</Badge>
+                </Link>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                <HeartPulse size={18} />
+                <span>No diagnostics run yet.</span>
+                <Link to="/founder/testing">
+                  <Badge variant="secondary" className="cursor-pointer">Run Diagnostics →</Badge>
+                </Link>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         <div className="grid lg:grid-cols-2 gap-6">
           {/* Active Automations */}
           <Card className="bg-card border-border/50">
