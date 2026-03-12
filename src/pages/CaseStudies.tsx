@@ -73,7 +73,7 @@ const CaseStudies = () => (
               <p className="text-sm text-muted-foreground leading-relaxed flex-1">{cs.desc}</p>
               <div className="mt-6">
                 <Button variant="ghost" size="sm" className="text-primary gap-1 px-0 hover:gap-2 transition-all" asChild>
-                  <Link to={cs.link}>View Architecture <ArrowRight size={14} /></Link>
+                  <Link to={cs.link}>Explore System <ArrowRight size={14} /></Link>
                 </Button>
               </div>
             </motion.div>
