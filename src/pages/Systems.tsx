@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { fadeUp } from "@/lib/animations";
 import { Bot, Cpu, Workflow, Zap, Layers, Activity, FileSearch, Users, DollarSign, Cog, BarChart3 } from "lucide-react";
+import SystemArchitectureFlow from "@/components/systems/SystemArchitectureFlow";
 
 const systemLayers = [
   { icon: Bot, title: "Intelligent Agents", desc: "Autonomous agents that process data, execute decisions, and coordinate tasks across interconnected systems without manual oversight." },
@@ -48,7 +49,7 @@ const Systems = () => (
             Automation Systems
           </motion.h1>
           <motion.p variants={fadeUp} custom={2} className="text-lg text-muted-foreground leading-relaxed">
-            Enterprise-grade automation infrastructure replacing manual workflows with intelligent agents, orchestrated processes, and seamless system integrations.
+            Enterprise automation infrastructure designed to replace manual workflows with intelligent agents, orchestrated processes, and integrated operational intelligence across the organisation.
           </motion.p>
           <motion.div variants={fadeUp} custom={3} className="mt-8">
             <div className="w-20 h-px bg-primary/10" />
@@ -94,6 +95,9 @@ const Systems = () => (
         </div>
       </div>
     </section>
+
+    {/* System Architecture Flow */}
+    <SystemArchitectureFlow />
 
     {/* System Capabilities */}
     <section className="py-[120px] max-sm:py-20">
