@@ -2,6 +2,13 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { motion } from "framer-motion";
 import { fadeUp } from "@/lib/animations";
+import { Activity, TrendingUp, Brain } from "lucide-react";
+
+const operationCards = [
+  { icon: Activity, title: "System Monitoring", desc: "Real-time monitoring ensures platform stability, operational reliability, and performance visibility across the entire system stack." },
+  { icon: TrendingUp, title: "Adaptive Optimisation", desc: "Operational data is analysed to refine workflows, improve automation efficiency, and optimise system performance." },
+  { icon: Brain, title: "Intelligence Evolution", desc: "AI models and decision systems evolve as new data becomes available, enabling smarter operational outcomes over time." },
+];
 
 const steps = [
   { num: "01", title: "Concept", desc: "Understand workflows, identify automation opportunities, and define the intelligent system roadmap." },
