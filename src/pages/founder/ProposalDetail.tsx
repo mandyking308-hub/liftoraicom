@@ -3,7 +3,8 @@ import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import FounderLayout from "@/components/founder/FounderLayout";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
 const leadStatuses = [
@@ -18,6 +19,7 @@ const ProposalDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [proposal, setProposal] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [converting, setConverting] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -37,6 +39,32 @@ const ProposalDetail = () => {
     }
   };
 
+  const convertToOpportunity = async () => {
+    if (!proposal) return;
+    setConverting(true);
+    try {
+      // Update proposal to confirmed status
+      const { error } = await supabase.from("proposals").update({ lead_status: "confirmed" }).eq("id", id!);
+      if (error) throw error;
+      setProposal((prev: any) => ({ ...prev, lead_status: "confirmed" }));
+
+      // Log activity
+      await supabase.from("activity_log").insert({
+        event_type: "proposal_converted",
+        description: `Proposal from ${proposal.company_name} converted to opportunity`,
+        entity_type: "proposal",
+        entity_id: id,
+      });
+
+      toast.success("Converted to opportunity — visible in Lead Pipeline.");
+    } catch (e: any) {
+      console.error(e);
+      toast.error("Failed to convert. " + (e.message || ""));
+    } finally {
+      setConverting(false);
+    }
+  };
+
   if (loading) return <FounderLayout><p className="text-muted-foreground">Loading...</p></FounderLayout>;
   if (!proposal) return <FounderLayout><p className="text-muted-foreground">Proposal not found.</p></FounderLayout>;
 
@@ -47,22 +75,29 @@ const ProposalDetail = () => {
           <ArrowLeft size={14} /> Back to Proposals
         </Link>
 
-        <div className="flex items-start justify-between mb-8">
+        <div className="flex items-start justify-between mb-8 gap-4 flex-wrap">
           <div>
             <h1 className="text-2xl font-bold">{proposal.company_name}</h1>
             <p className="text-muted-foreground mt-1">{proposal.industry} · {proposal.company_size}</p>
           </div>
-          <div className="w-48">
-            <Select value={proposal.lead_status} onValueChange={updateStatus}>
-              <SelectTrigger className="bg-secondary border-border">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {leadStatuses.map((s) => (
-                  <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="flex items-center gap-3">
+            <div className="w-48">
+              <Select value={proposal.lead_status} onValueChange={updateStatus}>
+                <SelectTrigger className="bg-secondary border-border">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {leadStatuses.map((s) => (
+                    <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {proposal.lead_status !== "confirmed" && (
+              <Button onClick={convertToOpportunity} disabled={converting} className="gap-2">
+                {converting ? "Converting..." : <>Convert to Opportunity <ArrowRight size={14} /></>}
+              </Button>
+            )}
           </div>
         </div>
 
