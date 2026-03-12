@@ -405,7 +405,45 @@ Deno.serve(async (req) => {
       return { ok: true, detail: `Fields verified: 3 — Schema valid: Yes${extraKeys.length > 0 ? ` (${extraKeys.length} extra keys ignored)` : ""}` };
     });
 
-    const passed = results.filter(r => r.status === "passed").length;
+    // ── 23. AI Proposal Response Timeout Test ──
+    await runTest("ai_proposal", "AI Proposal Response Timeout Test", async () => {
+      const t0 = Date.now();
+      const testPayload = {
+        projectTypes: ["automation platform"],
+        businessProblem: "Manual operational processes creating inefficiencies",
+        processesToAutomate: ["document processing", "customer onboarding", "report generation"],
+        projectScale: "mid-size organisation",
+        timeline: "3-6 months",
+        industry: "financial services",
+      };
+
+      const res = await fetch(`${supabaseUrl}/functions/v1/generate-proposal`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${serviceRoleKey}`,
+        },
+        body: JSON.stringify(testPayload),
+      });
+
+      const responseTime = (Date.now() - t0) / 1000;
+      await res.text();
+
+      if (responseTime > 20) {
+        console.error(`[Timeout Test] Response exceeded 20s: ${responseTime.toFixed(1)}s`);
+        return { ok: false, detail: `Response time: ${responseTime.toFixed(1)}s — exceeds 20s limit` };
+      }
+
+      if (responseTime > 10) {
+        console.warn(`[Timeout Test] Slow response: ${responseTime.toFixed(1)}s`);
+        results.pop(); // remove the auto-added result from runTest so we can push warning manually
+        results.push({ module: "ai_proposal", test_name: "AI Proposal Response Timeout Test", status: "warning", details: `Response time: ${responseTime.toFixed(1)}s — exceeds 10s recommended limit`, duration_ms: Date.now() - t0 });
+        return { ok: true, detail: "" }; // won't be used since we pushed manually
+      }
+
+      return { ok: true, detail: `Response time: ${responseTime.toFixed(1)}s` };
+    });
+
     const failed = results.filter(r => r.status === "failed").length;
     const warnings = results.filter(r => r.status === "warning").length;
 

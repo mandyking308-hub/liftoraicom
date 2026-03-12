@@ -139,16 +139,32 @@ const AIProposal = () => {
       const allProcesses = [...form.processesToAutomate];
       if (form.customProcess.trim()) allProcesses.push(form.customProcess.trim());
 
-      const { data, error } = await supabase.functions.invoke("generate-proposal", {
-        body: {
-          projectTypes: form.projectTypes,
-          businessProblem: form.businessProblem,
-          processesToAutomate: allProcesses,
-          projectScale: form.projectScale,
-          timeline: form.timeline,
-          industry: form.industry,
-        },
-      });
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 20000);
+
+      let data;
+      let error;
+      try {
+        const result = await supabase.functions.invoke("generate-proposal", {
+          body: {
+            projectTypes: form.projectTypes,
+            businessProblem: form.businessProblem,
+            processesToAutomate: allProcesses,
+            projectScale: form.projectScale,
+            timeline: form.timeline,
+            industry: form.industry,
+          },
+        });
+        data = result.data;
+        error = result.error;
+      } catch (abortErr: any) {
+        if (abortErr?.name === "AbortError") {
+          throw new Error("Generating your proposal is taking longer than expected. Please try again.");
+        }
+        throw abortErr;
+      } finally {
+        clearTimeout(timeoutId);
+      }
 
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
