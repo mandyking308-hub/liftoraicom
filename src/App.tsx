@@ -32,6 +32,7 @@ import TermsOfService from "./pages/legal/TermsOfService";
 import EnterpriseServicesAgreement from "./pages/legal/EnterpriseServicesAgreement";
 import AIOutputDisclaimer from "./pages/legal/AIOutputDisclaimer";
 import AutomationLiabilityDisclaimer from "./pages/legal/AutomationLiabilityDisclaimer";
+import SecurityReporting from "./pages/legal/SecurityReporting";
 
 // Portal pages
 import PortalLogin from "./pages/portal/PortalLogin";
@@ -146,6 +147,7 @@ const App = () => (
             <Route path="/legal/data-processing-agreement" element={<DataProcessingAgreement />} />
             <Route path="/legal/ai-output-disclaimer" element={<AIOutputDisclaimer />} />
             <Route path="/legal/automation-liability-disclaimer" element={<AutomationLiabilityDisclaimer />} />
+            <Route path="/legal/security-reporting" element={<SecurityReporting />} />
 
             {/* Auth */}
             <Route path="/portal/login" element={<PortalLogin />} />
