@@ -22,6 +22,7 @@ import NotFound from "./pages/NotFound";
 import LegalHub from "./pages/legal/LegalHub";
 import LegalPagePlaceholder from "./pages/legal/LegalPagePlaceholder";
 import PrivacyPolicy from "./pages/legal/PrivacyPolicy";
+import AcceptableUse from "./pages/legal/AcceptableUse";
 
 // Portal pages
 import PortalLogin from "./pages/portal/PortalLogin";
@@ -127,7 +128,7 @@ const App = () => (
             <Route path="/legal/terms-of-service" element={<LegalPagePlaceholder />} />
             <Route path="/legal/enterprise-services-agreement" element={<LegalPagePlaceholder />} />
             <Route path="/legal/privacy-policy" element={<PrivacyPolicy />} />
-            <Route path="/legal/acceptable-use" element={<LegalPagePlaceholder />} />
+            <Route path="/legal/acceptable-use" element={<AcceptableUse />} />
             <Route path="/legal/ai-usage-policy" element={<LegalPagePlaceholder />} />
             <Route path="/legal/automation-safety-policy" element={<LegalPagePlaceholder />} />
             <Route path="/legal/security-policy" element={<LegalPagePlaceholder />} />
