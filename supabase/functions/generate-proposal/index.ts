@@ -17,7 +17,8 @@ serve(async (req) => {
     const systemPrompt = `You are an AI systems engineering consultant at Liftor AI, a premium AI engineering studio. 
 Based on the client's project requirements, generate a structured proposal outline. 
 You must respond using the suggest_proposal tool. Be specific, professional, and confident.
-Tailor the solution to the client's industry and scale.`;
+Tailor the solution to the client's industry and scale.
+For architecture_components, generate 4-8 components that represent the major building blocks of the proposed system. Each component must have a name and a type from: system, agent, workflow, integration, interface.`;
 
     const userPrompt = `Generate a proposal outline for this client:
 - Industry: ${industry}
@@ -44,7 +45,7 @@ Tailor the solution to the client's industry and scale.`;
             type: "function",
             function: {
               name: "suggest_proposal",
-              description: "Return a structured proposal outline with suggested solution, scope, and timeline.",
+              description: "Return a structured proposal outline with suggested solution, scope, timeline, and architecture components.",
               parameters: {
                 type: "object",
                 properties: {
@@ -60,8 +61,28 @@ Tailor the solution to the client's industry and scale.`;
                     type: "string",
                     description: "An estimated development timeline range (e.g. '8-16 weeks').",
                   },
+                  architecture_components: {
+                    type: "array",
+                    description: "A list of 4-8 major system components that make up the proposed architecture.",
+                    items: {
+                      type: "object",
+                      properties: {
+                        name: {
+                          type: "string",
+                          description: "The name of the system component (e.g. 'Workflow Automation Engine').",
+                        },
+                        type: {
+                          type: "string",
+                          enum: ["system", "agent", "workflow", "integration", "interface"],
+                          description: "The type of component.",
+                        },
+                      },
+                      required: ["name", "type"],
+                      additionalProperties: false,
+                    },
+                  },
                 },
-                required: ["suggested_solution", "estimated_scope", "estimated_timeline"],
+                required: ["suggested_solution", "estimated_scope", "estimated_timeline", "architecture_components"],
                 additionalProperties: false,
               },
             },

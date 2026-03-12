@@ -591,6 +591,13 @@ const AIProposal = () => {
                       <h3 className="text-xs font-medium text-primary tracking-widest uppercase mb-1">Estimated Development Timeline</h3>
                       <p className="text-sm text-muted-foreground">{proposal.estimated_timeline}</p>
                     </div>
+
+                    {/* Architecture Diagram */}
+                    {proposal.architecture_components && proposal.architecture_components.length > 0 && (
+                      <div className="p-5 rounded-lg bg-secondary/50 border border-border/50">
+                        <ArchitectureDiagram components={proposal.architecture_components} />
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
