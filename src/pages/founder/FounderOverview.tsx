@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import FounderLayout from "@/components/founder/FounderLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileInput, FolderKanban, CheckCircle2, Activity, ArrowRight, Sparkles, Globe, Clock, Layers } from "lucide-react";
+import { FileInput, FolderKanban, CheckCircle2, Activity, ArrowRight, Sparkles, Globe, Clock, Layers, PoundSterling } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
 const CHART_COLORS = [
