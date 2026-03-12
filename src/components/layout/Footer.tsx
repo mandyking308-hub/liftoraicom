@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 const Footer = () => (
   <footer className="border-t border-border/50 bg-background">
     <div className="container py-16">
-      <div className="grid gap-10 md:grid-cols-4">
+      <div className="grid gap-10 md:grid-cols-5">
         <div>
           <Link to="/" className="text-xl font-bold tracking-tight">
             <span className="text-foreground">Liftor</span>
