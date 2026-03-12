@@ -11,16 +11,19 @@ const caseStudies = [
     category: "Financial Services",
     title: "AI Investment Intelligence Platform",
     desc: "A data intelligence platform combining real-time portfolio monitoring, automated reporting, and AI-assisted investment analysis. The system integrates financial data sources and generates predictive insights to support strategic investment decisions.",
+    link: "/platform",
   },
   {
     category: "Enterprise Systems",
     title: "Enterprise Automation Infrastructure",
     desc: "An operational automation platform replacing manual workflows across a large-scale organisation. Intelligent agents process data, coordinate system integrations, and execute automated operational processes.",
+    link: "/systems",
   },
   {
     category: "Family Office",
     title: "Intelligent Client Intelligence Portal",
     desc: "A secure operational platform for wealth management teams providing automated reporting, portfolio insights, and document intelligence through integrated AI workflows.",
+    link: "/architecture",
   },
 ];
 
