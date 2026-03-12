@@ -1953,6 +1953,39 @@ export type Database = {
           },
         ]
       }
+      platform_diagnostic_runs: {
+        Row: {
+          created_at: string
+          details: Json | null
+          failures_detected: number
+          id: string
+          run_timestamp: string
+          status: string
+          systems_checked: number
+          warnings: number
+        }
+        Insert: {
+          created_at?: string
+          details?: Json | null
+          failures_detected?: number
+          id?: string
+          run_timestamp?: string
+          status?: string
+          systems_checked?: number
+          warnings?: number
+        }
+        Update: {
+          created_at?: string
+          details?: Json | null
+          failures_detected?: number
+          id?: string
+          run_timestamp?: string
+          status?: string
+          systems_checked?: number
+          warnings?: number
+        }
+        Relationships: []
+      }
       platform_roles: {
         Row: {
           access_level: string
