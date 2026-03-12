@@ -37,6 +37,7 @@ const useCases = [
 
 const Systems = () => (
   <div className="min-h-screen bg-background">
+    <SEOHead title="Liftor AI Automation Systems" description="Explore intelligent automation systems built with AI agents, workflow orchestration, and enterprise integrations." />
     <Navbar />
 
     {/* Hero */}

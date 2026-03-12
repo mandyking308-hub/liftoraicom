@@ -46,6 +46,7 @@ const CardGrid = ({ items, cols = "sm:grid-cols-2" }: { items: typeof platformLa
 
 const Architecture = () => (
   <div className="min-h-screen bg-background">
+    <SEOHead title="Liftor AI Platform Architecture" description="Explore the Liftor platform architecture — modular AI infrastructure combining orchestration, intelligent agents, and secure data pipelines." />
     <Navbar />
 
     {/* Hero */}

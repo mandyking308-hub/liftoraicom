@@ -33,6 +33,7 @@ const capabilities = [
 
 const About = () => (
   <div className="min-h-screen bg-background">
+    <SEOHead title="About Liftor AI" description="Liftor AI is an AI systems engineering company building intelligent operational platforms for modern organisations." />
     <Navbar />
 
     {/* Hero */}
