@@ -256,8 +256,7 @@ const FounderOverview = () => {
                 </Card>
               </div>
 
-              {/* Charts */}
-              <div className="grid gap-6 lg:grid-cols-3 mb-6">
+              <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-4 mb-6">
                 <Card>
                   <CardHeader className="pb-2">
                     <CardTitle className="text-sm">Proposals by Industry</CardTitle>
