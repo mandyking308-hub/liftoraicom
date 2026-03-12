@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import {
   Server, Bot, Workflow, Play, AlertTriangle, CheckCircle2, XCircle, Clock,
-  Loader2, Activity, Zap, Shield, Wifi,
+  Loader2, Activity, Zap, Shield, Wifi, HeartPulse,
 } from "lucide-react";
 
 const statusIcon = (s: string) => {
