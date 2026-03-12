@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import SEOHead from "@/components/SEOHead";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,7 @@ const useCases = [
 
 const Systems = () => (
   <div className="min-h-screen bg-background">
+    <SEOHead title="Liftor AI Automation Systems" description="Explore intelligent automation systems built with AI agents, workflow orchestration, and enterprise integrations." />
     <Navbar />
 
     {/* Hero */}
