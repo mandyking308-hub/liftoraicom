@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/portal/ProtectedRoute";
 import FounderRoute from "@/components/founder/FounderRoute";
 import PartnerRoute from "@/components/partner/PartnerRoute";
+import ScrollToTop from "@/components/ScrollToTop";
 
 // Public pages
 import Index from "./pages/Index";
