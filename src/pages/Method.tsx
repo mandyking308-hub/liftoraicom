@@ -69,6 +69,44 @@ const Method = () => (
       </div>
     </section>
 
+    {/* Continuous System Operation */}
+    <section className="py-[120px] max-sm:py-20 relative overflow-hidden" style={{ background: 'hsl(220 18% 9%)' }}>
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+      <div className="container relative z-10">
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} className="max-w-3xl mx-auto text-center mb-12">
+          <motion.p variants={fadeUp} custom={0} className="text-xs font-medium tracking-[0.3em] uppercase text-primary/70 mb-4">
+            Post-Deployment
+          </motion.p>
+          <motion.h2 variants={fadeUp} custom={1} className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6">
+            Continuous System <span className="text-gradient">Operation</span>
+          </motion.h2>
+          <motion.p variants={fadeUp} custom={2} className="text-muted-foreground leading-relaxed">
+            Liftor systems are designed for continuous operation. After deployment, the infrastructure is monitored, refined, and optimised as operational data grows. Automation pipelines, intelligence layers, and decision systems evolve over time, ensuring that the platform continues to improve as the organisation scales.
+          </motion.p>
+        </motion.div>
+
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {operationCards.map((c, i) => (
+            <motion.div
+              key={c.title}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={fadeUp}
+              custom={i}
+              className="group tech-card !p-8 hover:-translate-y-1 transition-all duration-500"
+            >
+              <div className="mb-5 inline-flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10 text-primary group-hover:bg-primary/15 group-hover:shadow-[0_0_16px_-4px_hsl(195_100%_50%/0.3)] transition-all duration-500">
+                <c.icon size={22} strokeWidth={1.5} />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">{c.title}</h3>
+              <p className="text-muted-foreground leading-relaxed text-sm">{c.desc}</p>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+
     <Footer />
   </div>
 );
