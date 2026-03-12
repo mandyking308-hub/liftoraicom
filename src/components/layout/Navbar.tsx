@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import LiftorLogo from "./LiftorLogo";
 
 const navLinks = [
   { label: "Home", to: "/" },
@@ -20,9 +21,12 @@ const Navbar = () => {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
       <div className="container flex h-16 items-center justify-between">
-        <Link to="/" className="text-xl font-bold tracking-tight">
-          <span className="text-foreground">Liftor</span>
-          <span className="text-primary"> AI</span>
+        <Link to="/" className="flex items-center gap-2 text-xl font-bold tracking-tight">
+          <LiftorLogo className="h-7 w-7" />
+          <span>
+            <span className="text-foreground">Liftor</span>
+            <span className="text-primary"> AI</span>
+          </span>
         </Link>
 
         {/* Desktop */}
