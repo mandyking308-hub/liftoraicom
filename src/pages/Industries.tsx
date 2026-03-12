@@ -125,7 +125,8 @@ const Industries = () => (
               <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10 text-primary mb-4">
                 <p.icon size={22} strokeWidth={1.5} />
               </div>
-              <p className="text-sm font-semibold">{p.label}</p>
+              <h3 className="text-sm font-semibold mb-2">{p.label}</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">{p.desc}</p>
             </motion.div>
           ))}
         </div>
