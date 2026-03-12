@@ -316,6 +316,26 @@ const FounderOverview = () => {
                     )}
                   </CardContent>
                 </Card>
+
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm">Savings Potential by Industry</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {savingsByIndustry.length > 0 ? (
+                      <ResponsiveContainer width="100%" height={200}>
+                        <BarChart data={savingsByIndustry} layout="vertical" margin={{ left: 0, right: 10 }}>
+                          <XAxis type="number" hide />
+                          <YAxis type="category" dataKey="name" width={120} tick={{ fontSize: 11 }} />
+                          <Tooltip formatter={(value: number) => `£${(value / 1000).toFixed(0)}k`} />
+                          <Bar dataKey="value" fill="hsl(172, 66%, 50%)" radius={[0, 4, 4, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <p className="text-sm text-muted-foreground text-center py-8">No data yet</p>
+                    )}
+                  </CardContent>
+                </Card>
               </div>
 
               {/* Recent proposals table */}
