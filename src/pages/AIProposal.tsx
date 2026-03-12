@@ -100,6 +100,7 @@ const featureCards = [
   { icon: Layers, title: "Implementation Scope", desc: "Receive a structured breakdown of workflows, integrations, and automation components." },
   { icon: Clock, title: "Project Timeline", desc: "Get an estimated implementation timeline based on system complexity." },
   { icon: PoundSterling, title: "Investment Estimate", desc: "Receive an enterprise-grade cost estimate with a detailed engineering breakdown." },
+  { icon: TrendingUp, title: "ROI Forecast", desc: "See projected annual savings, payback period, and productivity gains." },
 ];
 
 const howItWorksSteps = [

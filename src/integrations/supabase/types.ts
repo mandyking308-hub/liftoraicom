@@ -2496,8 +2496,12 @@ export type Database = {
       }
       proposals: {
         Row: {
+          ai_estimated_annual_savings: string | null
           ai_estimated_cost_breakdown: Json | null
           ai_estimated_cost_range: string | null
+          ai_estimated_productivity_gain: string | null
+          ai_estimated_roi_period: string | null
+          ai_estimated_roi_summary: string | null
           ai_estimated_scope: string | null
           ai_estimated_timeline: string | null
           ai_suggested_solution: string | null
@@ -2519,8 +2523,12 @@ export type Database = {
           website_url: string | null
         }
         Insert: {
+          ai_estimated_annual_savings?: string | null
           ai_estimated_cost_breakdown?: Json | null
           ai_estimated_cost_range?: string | null
+          ai_estimated_productivity_gain?: string | null
+          ai_estimated_roi_period?: string | null
+          ai_estimated_roi_summary?: string | null
           ai_estimated_scope?: string | null
           ai_estimated_timeline?: string | null
           ai_suggested_solution?: string | null
@@ -2542,8 +2550,12 @@ export type Database = {
           website_url?: string | null
         }
         Update: {
+          ai_estimated_annual_savings?: string | null
           ai_estimated_cost_breakdown?: Json | null
           ai_estimated_cost_range?: string | null
+          ai_estimated_productivity_gain?: string | null
+          ai_estimated_roi_period?: string | null
+          ai_estimated_roi_summary?: string | null
           ai_estimated_scope?: string | null
           ai_estimated_timeline?: string | null
           ai_suggested_solution?: string | null
