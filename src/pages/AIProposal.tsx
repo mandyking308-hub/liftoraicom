@@ -227,6 +227,37 @@ const AIProposal = () => {
       });
 
       if (error) throw error;
+
+      // Save architecture to the architectures table
+      if (proposal.architecture_components && proposal.architecture_components.length > 0) {
+        const typeToSystemType: Record<string, string> = {
+          system: "platform",
+          agent: "ai_agent_system",
+          workflow: "automation_system",
+          integration: "integration_layer",
+          interface: "platform",
+        };
+        const primaryType = proposal.architecture_components[0]?.type || "system";
+
+        const { data: archData, error: archError } = await supabase.from("architectures").insert({
+          name: `${form.companyName} – AI Proposed Architecture`,
+          client_organisation: form.companyName,
+          system_type: typeToSystemType[primaryType] || "platform",
+          system_purpose: proposal.suggested_solution,
+          status: "draft",
+        }).select("id").single();
+
+        if (!archError && archData) {
+          const compRows = proposal.architecture_components.map((comp, idx) => ({
+            architecture_id: archData.id,
+            name: comp.name,
+            component_type: comp.type === "system" ? "data_layer" : comp.type,
+            order_index: idx,
+          }));
+          await supabase.from("architecture_components").insert(compRows);
+        }
+      }
+
       setSubmitted(true);
       toast.success("Proposal submitted successfully.");
     } catch (e: any) {
