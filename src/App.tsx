@@ -19,6 +19,8 @@ import ProjectDiscovery from "./pages/ProjectDiscovery";
 import About from "./pages/About";
 import AIProposal from "./pages/AIProposal";
 import NotFound from "./pages/NotFound";
+import LegalHub from "./pages/legal/LegalHub";
+import LegalPagePlaceholder from "./pages/legal/LegalPagePlaceholder";
 
 // Portal pages
 import PortalLogin from "./pages/portal/PortalLogin";
@@ -118,6 +120,20 @@ const App = () => (
             <Route path="/project-discovery" element={<ProjectDiscovery />} />
             <Route path="/about" element={<About />} />
             <Route path="/ai-proposal" element={<AIProposal />} />
+
+            {/* Legal */}
+            <Route path="/legal" element={<LegalHub />} />
+            <Route path="/legal/terms-of-service" element={<LegalPagePlaceholder />} />
+            <Route path="/legal/enterprise-services-agreement" element={<LegalPagePlaceholder />} />
+            <Route path="/legal/privacy-policy" element={<LegalPagePlaceholder />} />
+            <Route path="/legal/acceptable-use" element={<LegalPagePlaceholder />} />
+            <Route path="/legal/ai-usage-policy" element={<LegalPagePlaceholder />} />
+            <Route path="/legal/automation-safety-policy" element={<LegalPagePlaceholder />} />
+            <Route path="/legal/security-policy" element={<LegalPagePlaceholder />} />
+            <Route path="/legal/cookie-policy" element={<LegalPagePlaceholder />} />
+            <Route path="/legal/data-processing-agreement" element={<LegalPagePlaceholder />} />
+            <Route path="/legal/ai-output-disclaimer" element={<LegalPagePlaceholder />} />
+            <Route path="/legal/automation-liability-disclaimer" element={<LegalPagePlaceholder />} />
 
             {/* Auth */}
             <Route path="/portal/login" element={<PortalLogin />} />
