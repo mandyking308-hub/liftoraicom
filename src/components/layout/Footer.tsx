@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import LiftorLogo from "./LiftorLogo";
 
 const Footer = () => (
   <footer className="border-t border-border/40 bg-background">
