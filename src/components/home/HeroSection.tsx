@@ -17,7 +17,7 @@ const HeroSection = () => (
       >
         <motion.div variants={fadeUp} custom={0} className="mb-6">
           <span className="inline-block text-xs font-medium tracking-[0.3em] uppercase text-primary/70 border border-primary/20 rounded-full px-4 py-1.5">
-            AI Infrastructure Studio
+            AI Systems Engineering Company
           </span>
         </motion.div>
 

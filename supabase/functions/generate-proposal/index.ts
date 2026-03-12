@@ -95,7 +95,7 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const systemPrompt = `You are an AI systems engineering consultant at Liftor AI, a premium enterprise AI infrastructure studio.
+    const systemPrompt = `You are an AI systems engineering consultant at Liftor AI, a premium enterprise AI systems engineering company.
 Based on the client's project requirements, generate a structured proposal outline.
 You must respond using the suggest_proposal tool. Be specific, professional, and confident.
 Tailor the solution to the client's industry and scale.
