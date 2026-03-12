@@ -1956,6 +1956,86 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_test_results: {
+        Row: {
+          created_at: string
+          details: string | null
+          duration_ms: number | null
+          id: string
+          module: string
+          run_id: string
+          status: string
+          test_name: string
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          duration_ms?: number | null
+          id?: string
+          module?: string
+          run_id: string
+          status?: string
+          test_name: string
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          duration_ms?: number | null
+          id?: string
+          module?: string
+          run_id?: string
+          status?: string
+          test_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "platform_test_results_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "platform_test_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      platform_test_runs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          failed: number
+          id: string
+          passed: number
+          run_name: string
+          started_at: string
+          status: string
+          total_tests: number
+          warnings: number
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          failed?: number
+          id?: string
+          passed?: number
+          run_name?: string
+          started_at?: string
+          status?: string
+          total_tests?: number
+          warnings?: number
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          failed?: number
+          id?: string
+          passed?: number
+          run_name?: string
+          started_at?: string
+          status?: string
+          total_tests?: number
+          warnings?: number
+        }
+        Relationships: []
+      }
       process_documents: {
         Row: {
           category: string
