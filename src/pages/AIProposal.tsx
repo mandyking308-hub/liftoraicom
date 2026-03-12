@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, Sparkles, Cpu, Layers, Clock, ExternalLink, PoundSterling, TrendingUp, Download } from "lucide-react";
 import ArchitectureDiagram from "@/components/proposal/ArchitectureDiagram";
+import SystemCredibilitySection from "@/components/home/SystemCredibilitySection";
 
 const generateProposalPDF = (form: FormData, proposal: Proposal) => {
   const date = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
@@ -469,6 +470,8 @@ const AIProposal = () => {
           </motion.div>
         </div>
       </section>
+
+      <SystemCredibilitySection />
 
       {/* Generate an AI System Proposal */}
       <section className="pb-16">
