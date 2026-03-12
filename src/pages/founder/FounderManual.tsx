@@ -19,8 +19,8 @@ const useLiveManualData = () => {
   return useQuery<ManualLiveData>({
     queryKey: ["founder-manual-live-data"],
     queryFn: async () => {
-      const countQuery = async (table: string) => {
-        const { count } = await supabase.from(table).select("id", { count: "exact", head: true });
+      const cq = async (fn: () => Promise<{ count: number | null }>) => {
+        const { count } = await fn();
         return count ?? 0;
       };
 
@@ -32,13 +32,13 @@ const useLiveManualData = () => {
         { data: recentBuildLogs },
         { data: recentTestRuns },
       ] = await Promise.all([
-        countQuery("organisations"),
-        countQuery("automation_workflows"),
-        countQuery("ai_agents"),
-        countQuery("integrations"),
-        countQuery("deployments"),
-        countQuery("system_templates"),
-        countQuery("knowledge_entries"),
+        cq(() => supabase.from("organisations").select("id", { count: "exact", head: true })),
+        cq(() => supabase.from("automation_workflows").select("id", { count: "exact", head: true })),
+        cq(() => supabase.from("ai_agents").select("id", { count: "exact", head: true })),
+        cq(() => supabase.from("integrations").select("id", { count: "exact", head: true })),
+        cq(() => supabase.from("deployments").select("id", { count: "exact", head: true })),
+        cq(() => supabase.from("system_templates").select("id", { count: "exact", head: true })),
+        cq(() => supabase.from("knowledge_entries").select("id", { count: "exact", head: true })),
         countQuery("brain_insights"),
         countQuery("decision_recommendations"),
         countQuery("platform_test_runs"),
