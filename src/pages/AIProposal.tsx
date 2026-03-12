@@ -233,8 +233,8 @@ const AIProposal = () => {
         ai_estimated_scope: proposal.estimated_scope,
         ai_estimated_timeline: proposal.estimated_timeline,
         ai_estimated_cost_range: proposal.estimated_cost_range || null,
-        ai_estimated_cost_breakdown: proposal.estimated_cost_breakdown || null,
-      });
+        ai_estimated_cost_breakdown: (proposal.estimated_cost_breakdown || null) as any,
+      } as any);
 
       if (error) throw error;
 
