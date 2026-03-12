@@ -471,6 +471,8 @@ const AIProposal = () => {
         </div>
       </section>
 
+      <SystemCredibilitySection />
+
       {/* Generate an AI System Proposal */}
       <section className="pb-16">
         <div className="container max-w-4xl">
