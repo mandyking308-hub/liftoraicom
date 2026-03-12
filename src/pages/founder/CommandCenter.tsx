@@ -135,6 +135,19 @@ const CommandCenter = () => {
     },
   });
 
+  // Platform diagnostics
+  const { data: latestDiagnostic } = useQuery({
+    queryKey: ["cc-diagnostics"],
+    queryFn: async () => {
+      const { data } = await supabase.from("platform_diagnostic_runs")
+        .select("*")
+        .order("run_timestamp", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      return data;
+    },
+  });
+
   const allAlerts = [
     ...sysAlerts.map((a: any) => ({ ...a, source: a.monitored_systems?.system_name || a.affected_system || "System" })),
     ...wfAlerts.map((a: any) => ({ ...a, source: (a as any).automation_workflows?.name || "Workflow" })),
