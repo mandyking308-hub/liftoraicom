@@ -620,23 +620,54 @@ const AIProposal = () => {
                       <h3 className="text-xs font-medium text-primary tracking-widest uppercase mb-1">Key Problem Identified</h3>
                       <p className="text-sm text-muted-foreground">{form.businessProblem}</p>
                     </div>
+
+                    {/* Suggested Solution */}
                     <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
                       <h3 className="text-xs font-medium text-primary tracking-widest uppercase mb-2">Suggested AI Solution</h3>
                       <p className="text-sm leading-relaxed">{proposal.suggested_solution}</p>
-                    </div>
-                    <div>
-                      <h3 className="text-xs font-medium text-primary tracking-widest uppercase mb-1">Estimated System Complexity</h3>
-                      <p className="text-sm text-muted-foreground">{proposal.estimated_scope}</p>
-                    </div>
-                    <div>
-                      <h3 className="text-xs font-medium text-primary tracking-widest uppercase mb-1">Estimated Development Timeline</h3>
-                      <p className="text-sm text-muted-foreground">{proposal.estimated_timeline}</p>
                     </div>
 
                     {/* Architecture Diagram */}
                     {proposal.architecture_components && proposal.architecture_components.length > 0 && (
                       <div className="p-5 rounded-lg bg-secondary/50 border border-border/50">
                         <ArchitectureDiagram components={proposal.architecture_components} />
+                      </div>
+                    )}
+
+                    {/* Estimated Scope */}
+                    <div>
+                      <h3 className="text-xs font-medium text-primary tracking-widest uppercase mb-1">Estimated System Complexity</h3>
+                      <p className="text-sm text-muted-foreground">{proposal.estimated_scope}</p>
+                    </div>
+
+                    {/* Estimated Timeline */}
+                    <div>
+                      <h3 className="text-xs font-medium text-primary tracking-widest uppercase mb-1">Estimated Development Timeline</h3>
+                      <p className="text-sm text-muted-foreground">{proposal.estimated_timeline}</p>
+                    </div>
+
+                    {/* Estimated Investment */}
+                    {proposal.estimated_cost_range && (
+                      <div className="p-5 rounded-lg bg-primary/5 border border-primary/20 space-y-4">
+                        <div>
+                          <h3 className="text-xs font-medium text-primary tracking-widest uppercase mb-2">Estimated Investment</h3>
+                          <p className="text-2xl font-bold">{proposal.estimated_cost_range}</p>
+                        </div>
+
+                        {proposal.estimated_cost_breakdown && proposal.estimated_cost_breakdown.length > 0 && (
+                          <div className="grid gap-2">
+                            {proposal.estimated_cost_breakdown.map((item, idx) => (
+                              <div key={idx} className="flex items-center justify-between py-2 px-3 rounded-md bg-background/50 border border-border/30">
+                                <span className="text-sm text-muted-foreground">{item.category}</span>
+                                <span className="text-sm font-medium">{item.estimate}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        <p className="text-xs text-muted-foreground leading-relaxed">
+                          Investment estimates are indicative and depend on system complexity, integrations, and deployment scale. Final pricing is confirmed following technical discovery.
+                        </p>
                       </div>
                     )}
                   </div>
