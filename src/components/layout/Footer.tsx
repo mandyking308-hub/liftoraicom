@@ -6,9 +6,12 @@ const Footer = () => (
     <div className="container py-20">
       <div className="grid gap-12 md:grid-cols-5">
         <div>
-          <Link to="/" className="text-xl font-bold tracking-tight">
-            <span className="text-foreground">Liftor</span>
-            <span className="text-primary"> AI</span>
+          <Link to="/" className="flex items-center gap-2 text-xl font-bold tracking-tight">
+            <LiftorLogo className="h-7 w-7" />
+            <span>
+              <span className="text-foreground">Liftor</span>
+              <span className="text-primary"> AI</span>
+            </span>
           </Link>
           <p className="mt-4 text-sm text-muted-foreground leading-relaxed">
             Liftor AI is an AI systems engineering company. We design, build, and operate intelligent operational platforms.
