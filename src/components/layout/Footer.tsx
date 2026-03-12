@@ -38,6 +38,15 @@ const Footer = () => (
             <Link to="/project-discovery" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Start a Project</Link>
           </div>
         </div>
+
+        <div>
+          <h4 className="text-sm font-semibold mb-4">Legal</h4>
+          <div className="flex flex-col gap-2">
+            <Link to="/legal" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Legal Hub</Link>
+            <Link to="/legal/privacy-policy" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</Link>
+            <Link to="/legal/terms-of-service" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Terms of Service</Link>
+          </div>
+        </div>
       </div>
 
       <div className="mt-12 pt-6 border-t border-border/50 flex flex-col sm:flex-row justify-between items-center gap-4">
