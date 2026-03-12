@@ -89,6 +89,10 @@ interface Proposal {
   architecture_components?: ArchComponent[];
   estimated_cost_range?: string;
   estimated_cost_breakdown?: CostBreakdownItem[];
+  estimated_roi_summary?: string;
+  estimated_annual_savings?: string;
+  estimated_roi_period?: string;
+  estimated_productivity_gain?: string;
 }
 
 const featureCards = [
