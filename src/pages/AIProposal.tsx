@@ -226,7 +226,38 @@ const AIProposal = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      <section className="pt-32 pb-24">
+      {/* How It Works */}
+      <section className="pt-32 pb-16">
+        <div className="container max-w-4xl">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center mb-12">
+            <motion.p variants={fadeUp} custom={0} className="text-sm font-medium text-primary tracking-widest uppercase mb-3">
+              How It Works
+            </motion.p>
+            <motion.h2 variants={fadeUp} custom={1} className="text-3xl sm:text-4xl font-bold mb-4">
+              Generate an AI System Proposal
+            </motion.h2>
+            <motion.p variants={fadeUp} custom={2} className="text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+              Tell us about your organisation and the systems you want to build. Our AI engine analyses your requirements and generates a structured proposal including architecture recommendations, project scope, and estimated implementation timeline.
+            </motion.p>
+          </motion.div>
+
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid md:grid-cols-3 gap-6 mb-6">
+            {[
+              { title: "System Architecture Design", desc: "AI recommends a high-level architecture for your intelligent system." },
+              { title: "Implementation Scope", desc: "Receive a structured breakdown of workflows, integrations, and automation components." },
+              { title: "Project Timeline", desc: "Get an estimated implementation timeline based on system complexity." },
+            ].map((card, i) => (
+              <motion.div key={card.title} variants={fadeUp} custom={i} className="tech-card !p-6 flex flex-col">
+                <h3 className="text-base font-semibold mb-2">{card.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{card.desc}</p>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Form */}
+      <section className="pb-24">
         <div className="container max-w-2xl">
           <motion.div initial="hidden" animate="visible" className="mb-10">
             <motion.p variants={fadeUp} custom={0} className="text-sm font-medium text-primary tracking-widest uppercase mb-3">
