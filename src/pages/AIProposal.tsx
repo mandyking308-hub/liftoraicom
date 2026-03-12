@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, Sparkles, Cpu, Layers, Clock } from "lucide-react";
 
 const TOTAL_STEPS = 7;
 
@@ -76,6 +76,18 @@ interface Proposal {
   estimated_scope: string;
   estimated_timeline: string;
 }
+
+const featureCards = [
+  { icon: Cpu, title: "System Architecture Design", desc: "AI recommends a high-level architecture for your intelligent system." },
+  { icon: Layers, title: "Implementation Scope", desc: "Receive a structured breakdown of workflows, integrations, and automation components." },
+  { icon: Clock, title: "Project Timeline", desc: "Get an estimated implementation timeline based on system complexity." },
+];
+
+const howItWorksSteps = [
+  { step: "01", title: "Describe Your Organisation", text: "Tell us about your company, industry, and current operations." },
+  { step: "02", title: "Define Your System Goals", text: "Explain the processes you want to automate or intelligence systems you want to build." },
+  { step: "03", title: "AI Generates Your Proposal", text: "Liftor AI produces a structured system proposal with architecture and delivery estimates." },
+];
 
 const AIProposal = () => {
   const [step, setStep] = useState(1);
@@ -226,28 +238,41 @@ const AIProposal = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      {/* How It Works */}
+      {/* Hero */}
       <section className="pt-32 pb-16">
+        <div className="container max-w-4xl text-center">
+          <motion.div initial="hidden" animate="visible">
+            <motion.p variants={fadeUp} custom={0} className="text-sm font-medium text-primary tracking-widest uppercase mb-4">
+              AI Proposal Generator
+            </motion.p>
+            <motion.h1 variants={fadeUp} custom={1} className="text-4xl sm:text-5xl font-bold mb-5">
+              Design Your AI System
+            </motion.h1>
+            <motion.p variants={fadeUp} custom={2} className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-lg">
+              Tell us about your organisation and the systems you want to build. Our AI will generate a structured proposal including architecture recommendations, automation workflows, and an estimated implementation timeline.
+            </motion.p>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Generate an AI System Proposal */}
+      <section className="pb-16">
         <div className="container max-w-4xl">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center mb-12">
-            <motion.p variants={fadeUp} custom={0} className="text-sm font-medium text-primary tracking-widest uppercase mb-3">
-              How It Works
-            </motion.p>
-            <motion.h2 variants={fadeUp} custom={1} className="text-3xl sm:text-4xl font-bold mb-4">
+            <motion.h2 variants={fadeUp} custom={0} className="text-2xl sm:text-3xl font-bold mb-4">
               Generate an AI System Proposal
             </motion.h2>
-            <motion.p variants={fadeUp} custom={2} className="text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Tell us about your organisation and the systems you want to build. Our AI engine analyses your requirements and generates a structured proposal including architecture recommendations, project scope, and estimated implementation timeline.
+            <motion.p variants={fadeUp} custom={1} className="text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+              Liftor's AI analyses your organisation's requirements and produces a structured proposal for building intelligent systems. The proposal includes recommended architecture, automation workflows, integration points, and a delivery timeline.
             </motion.p>
           </motion.div>
 
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid md:grid-cols-3 gap-6 mb-6">
-            {[
-              { title: "System Architecture Design", desc: "AI recommends a high-level architecture for your intelligent system." },
-              { title: "Implementation Scope", desc: "Receive a structured breakdown of workflows, integrations, and automation components." },
-              { title: "Project Timeline", desc: "Get an estimated implementation timeline based on system complexity." },
-            ].map((card, i) => (
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid md:grid-cols-3 gap-6">
+            {featureCards.map((card, i) => (
               <motion.div key={card.title} variants={fadeUp} custom={i} className="tech-card !p-6 flex flex-col">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 text-primary mb-4">
+                  <card.icon size={20} />
+                </div>
                 <h3 className="text-base font-semibold mb-2">{card.title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{card.desc}</p>
               </motion.div>
@@ -256,16 +281,90 @@ const AIProposal = () => {
         </div>
       </section>
 
+      {/* How It Works */}
+      <section className="pb-16">
+        <div className="container max-w-4xl">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center mb-12">
+            <motion.h2 variants={fadeUp} custom={0} className="text-2xl sm:text-3xl font-bold">
+              How It Works
+            </motion.h2>
+          </motion.div>
+
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid md:grid-cols-3 gap-6">
+            {howItWorksSteps.map((s, i) => (
+              <motion.div key={s.step} variants={fadeUp} custom={i} className="tech-card !p-6 flex flex-col">
+                <span className="text-2xl font-bold text-primary/40 mb-3">{s.step}</span>
+                <h3 className="text-base font-semibold mb-2">{s.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{s.text}</p>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Example AI Output */}
+      <section className="pb-20">
+        <div className="container max-w-3xl">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center mb-8">
+            <motion.h2 variants={fadeUp} custom={0} className="text-2xl sm:text-3xl font-bold">
+              Example AI Output
+            </motion.h2>
+          </motion.div>
+
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }}>
+            <motion.div variants={fadeUp} custom={0} className="tech-card !p-8 space-y-5">
+              <div className="flex items-center gap-2 mb-1">
+                <Sparkles size={18} className="text-primary" />
+                <h3 className="text-lg font-semibold">Example AI System Proposal</h3>
+              </div>
+
+              <div>
+                <h4 className="text-xs font-medium text-primary tracking-widest uppercase mb-1">Suggested Solution</h4>
+                <p className="text-sm">Enterprise Automation Platform with AI Agents</p>
+              </div>
+
+              <div>
+                <h4 className="text-xs font-medium text-primary tracking-widest uppercase mb-2">Estimated Scope</h4>
+                <ul className="text-sm text-muted-foreground space-y-1">
+                  <li>• Workflow automation engine</li>
+                  <li>• AI document processing agents</li>
+                  <li>• Integration with CRM and financial systems</li>
+                  <li>• Real-time operational analytics dashboard</li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="text-xs font-medium text-primary tracking-widest uppercase mb-2">Estimated Timeline</h4>
+                <ul className="text-sm text-muted-foreground space-y-1">
+                  <li>Phase 1 – Architecture Design (2 weeks)</li>
+                  <li>Phase 2 – System Development (6 weeks)</li>
+                  <li>Phase 3 – Deployment & Optimisation (4 weeks)</li>
+                </ul>
+              </div>
+            </motion.div>
+
+            <motion.p variants={fadeUp} custom={1} className="text-xs text-muted-foreground text-center mt-4">
+              This is an example of the structured proposal generated by Liftor AI.
+            </motion.p>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Divider */}
+      <div className="flex justify-center pb-16">
+        <div className="w-20 h-px bg-primary/20" />
+      </div>
+
       {/* Form */}
       <section className="pb-24">
         <div className="container max-w-2xl">
           <motion.div initial="hidden" animate="visible" className="mb-10">
             <motion.p variants={fadeUp} custom={0} className="text-sm font-medium text-primary tracking-widest uppercase mb-3">
-              AI Proposal Generator
+              Start Your Proposal
             </motion.p>
-            <motion.h1 variants={fadeUp} custom={1} className="text-3xl sm:text-4xl font-bold mb-2">
+            <motion.h2 variants={fadeUp} custom={1} className="text-3xl sm:text-4xl font-bold mb-2">
               {step < 7 ? "Tell Us About Your Project" : "Your Proposal Outline"}
-            </motion.h1>
+            </motion.h2>
           </motion.div>
 
           {/* Progress bar */}
@@ -474,7 +573,7 @@ const AIProposal = () => {
                 ) : step === 6 ? (
                   <><Sparkles size={16} /> Generate Proposal</>
                 ) : (
-                  <>Continue <ArrowRight size={16} /></>
+                  <>Next Step <ArrowRight size={16} /></>
                 )}
               </Button>
             )}
@@ -489,6 +588,10 @@ const AIProposal = () => {
               </Button>
             )}
           </div>
+
+          <p className="text-xs text-muted-foreground text-center mt-6">
+            Your responses are used to generate an AI system proposal. No commitment required.
+          </p>
         </div>
       </section>
 
