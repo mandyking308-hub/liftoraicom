@@ -25,6 +25,7 @@ import PrivacyPolicy from "./pages/legal/PrivacyPolicy";
 import AcceptableUse from "./pages/legal/AcceptableUse";
 import AIUsagePolicy from "./pages/legal/AIUsagePolicy";
 import AutomationSafetyPolicy from "./pages/legal/AutomationSafetyPolicy";
+import SecurityPolicy from "./pages/legal/SecurityPolicy";
 
 // Portal pages
 import PortalLogin from "./pages/portal/PortalLogin";
