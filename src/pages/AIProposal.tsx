@@ -879,13 +879,18 @@ const AIProposal = () => {
             )}
 
             {step === 7 && proposal && (
-              <Button variant="glow" onClick={submitProposal} disabled={submitting}>
-                {submitting ? (
-                  <><Loader2 size={16} className="animate-spin" /> Submitting...</>
-                ) : (
-                  <>Submit Proposal Request</>
-                )}
-              </Button>
+              <div className="flex items-center gap-3">
+                <Button variant="outline-light" onClick={() => generateProposalPDF(form, proposal)}>
+                  <Download size={16} /> Download Full Proposal PDF
+                </Button>
+                <Button variant="glow" onClick={submitProposal} disabled={submitting}>
+                  {submitting ? (
+                    <><Loader2 size={16} className="animate-spin" /> Submitting...</>
+                  ) : (
+                    <>Submit Proposal Request</>
+                  )}
+                </Button>
+              </div>
             )}
           </div>
 
