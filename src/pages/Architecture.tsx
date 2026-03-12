@@ -88,6 +88,9 @@ const Architecture = () => (
       </div>
     </section>
 
+    {/* Platform Architecture Flow */}
+    <PlatformArchitectureFlow />
+
     {/* Platform Layers */}
     <section className="py-[120px] max-sm:py-20">
       <div className="container">
