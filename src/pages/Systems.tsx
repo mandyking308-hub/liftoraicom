@@ -96,6 +96,9 @@ const Systems = () => (
       </div>
     </section>
 
+    {/* System Architecture Flow */}
+    <SystemArchitectureFlow />
+
     {/* System Capabilities */}
     <section className="py-[120px] max-sm:py-20">
       <div className="container">
