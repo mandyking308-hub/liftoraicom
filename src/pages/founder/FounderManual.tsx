@@ -19,8 +19,8 @@ const useLiveManualData = () => {
   return useQuery<ManualLiveData>({
     queryKey: ["founder-manual-live-data"],
     queryFn: async () => {
-      const cq = async (fn: () => Promise<{ count: number | null }>) => {
-        const { count } = await fn();
+      const cq = async (query: PromiseLike<{ count: number | null }>) => {
+        const { count } = await query;
         return count ?? 0;
       };
 
