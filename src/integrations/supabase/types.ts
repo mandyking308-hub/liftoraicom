@@ -1383,6 +1383,30 @@ export type Database = {
           },
         ]
       }
+      legal_document_versions: {
+        Row: {
+          change_summary: string | null
+          document_name: string
+          id: string
+          published_at: string
+          version: string
+        }
+        Insert: {
+          change_summary?: string | null
+          document_name: string
+          id?: string
+          published_at?: string
+          version?: string
+        }
+        Update: {
+          change_summary?: string | null
+          document_name?: string
+          id?: string
+          published_at?: string
+          version?: string
+        }
+        Relationships: []
+      }
       maintenance_events: {
         Row: {
           created_at: string
@@ -3056,6 +3080,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_legal_acceptance: {
+        Row: {
+          accepted_at: string
+          id: string
+          ip_address: string | null
+          privacy_version: string
+          terms_version: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          accepted_at?: string
+          id?: string
+          ip_address?: string | null
+          privacy_version?: string
+          terms_version?: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          accepted_at?: string
+          id?: string
+          ip_address?: string | null
+          privacy_version?: string
+          terms_version?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       user_platform_roles: {
         Row: {
