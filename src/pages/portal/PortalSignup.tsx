@@ -20,8 +20,13 @@ const PortalSignup = () => {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!agreedToTerms) {
+      toast.error("You must agree to the Terms of Service and Privacy Policy.");
+      return;
+    }
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
+
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -29,13 +34,31 @@ const PortalSignup = () => {
         emailRedirectTo: window.location.origin,
       },
     });
-    setLoading(false);
+
     if (error) {
+      setLoading(false);
       toast.error(error.message);
-    } else {
-      toast.success("Check your email to confirm your account.");
-      navigate("/portal/login");
+      return;
     }
+
+    // Record legal acceptance
+    if (data.user) {
+      try {
+        await supabase.from("user_legal_acceptance" as any).insert({
+          user_id: data.user.id,
+          terms_version: "1.0",
+          privacy_version: "1.0",
+          ip_address: "",
+          user_agent: navigator.userAgent,
+        });
+      } catch {
+        // Non-blocking — acceptance may fail if email not confirmed yet
+      }
+    }
+
+    setLoading(false);
+    toast.success("Check your email to confirm your account.");
+    navigate("/portal/login");
   };
 
   return (
