@@ -47,7 +47,7 @@ const ClientsSection = () => (
             viewport={{ once: true }}
             variants={fadeUp}
             custom={i}
-            className="text-center p-8 rounded-xl border border-border/40 bg-card/40"
+            className="text-center p-8 rounded-xl border border-border/60 bg-card/70 hover:border-primary/30 hover:shadow-[0_0_30px_-5px_hsl(195_100%_50%/0.12)] transition-all duration-500"
           >
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10 text-primary mb-4">
               <c.icon size={22} strokeWidth={1.5} />
