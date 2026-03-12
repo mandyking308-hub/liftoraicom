@@ -249,6 +249,7 @@ const PlatformTesting = () => {
           <TabsList>
             <TabsTrigger value="validation" className="gap-1.5"><FlaskConical size={14} /> Module Validation</TabsTrigger>
             <TabsTrigger value="architecture" className="gap-1.5"><Scale size={14} /> Architecture Validation</TabsTrigger>
+            <TabsTrigger value="diagnostics" className="gap-1.5"><HeartPulse size={14} /> System Diagnostics</TabsTrigger>
           </TabsList>
 
           {/* Module Validation Tab (existing) */}
