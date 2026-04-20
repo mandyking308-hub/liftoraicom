@@ -15,6 +15,7 @@ import {
   Layers, FileText, Workflow, Shield, Network, Plug, RefreshCw, CheckCircle2,
   AlertTriangle, History, Search, Database, Code2,
 } from "lucide-react";
+import { Download, GitCompare, Activity } from "lucide-react";
 
 const FullSystemMirror = () => {
   const qc = useQueryClient();
@@ -130,6 +131,27 @@ const FullSystemMirror = () => {
     },
   });
 
+  const { data: versions = [] } = useQuery({
+    queryKey: ["mirror-versions"],
+    queryFn: async () => {
+      const { data } = await supabase.from("system_versions")
+        .select("*").order("version_number", { ascending: false }).limit(50);
+      return data ?? [];
+    },
+  });
+
+  const { data: diffs = [] } = useQuery({
+    queryKey: ["mirror-diffs"],
+    queryFn: async () => {
+      const { data } = await supabase.from("system_version_diffs" as never)
+        .select("*").order("created_at", { ascending: false }).limit(20);
+      return (data as any[]) ?? [];
+    },
+  });
+
+  const [versionA, setVersionA] = useState<string>("");
+  const [versionB, setVersionB] = useState<string>("");
+
   const filterFn = (haystack: string) =>
     !search || haystack.toLowerCase().includes(search.toLowerCase());
 
@@ -165,6 +187,54 @@ const FullSystemMirror = () => {
     if (gaps > 0) toast.warning(`Coverage ${score}% — ${gaps} gap${gaps>1?"s":""} flagged`);
     else toast.success(`Coverage ${score}% — no gaps`);
     qc.invalidateQueries();
+  };
+
+  const handleRuntimeCheck = async () => {
+    const t = toast.loading("Checking runtime vs documentation…");
+    const { data, error } = await supabase.rpc("validate_runtime_vs_documentation" as never);
+    toast.dismiss(t);
+    if (error) { toast.error(error.message); return; }
+    const m = (data as any)?.mismatches_found ?? 0;
+    if (m > 0) toast.warning(`${m} runtime mismatch${m>1?"es":""} flagged`);
+    else toast.success("Runtime matches documentation");
+    qc.invalidateQueries();
+  };
+
+  const handleOrphanCheck = async () => {
+    const t = toast.loading("Detecting orphan content…");
+    const { data, error } = await supabase.rpc("detect_orphan_content" as never);
+    toast.dismiss(t);
+    if (error) { toast.error(error.message); return; }
+    const o = (data as any)?.orphans_found ?? 0;
+    if (o > 0) toast.warning(`${o} orphan content entries`);
+    else toast.success("No orphan content");
+    qc.invalidateQueries();
+  };
+
+  const handleCompareVersions = async () => {
+    const a = parseInt(versionA), b = parseInt(versionB);
+    if (!a || !b) { toast.error("Enter both version numbers"); return; }
+    const t = toast.loading(`Comparing v${a} vs v${b}…`);
+    const { error } = await supabase.rpc("compare_system_versions" as never, { _version_a: a, _version_b: b } as never);
+    toast.dismiss(t);
+    if (error) { toast.error(error.message); return; }
+    toast.success(`Diff v${a} ↔ v${b} stored`);
+    qc.invalidateQueries();
+  };
+
+  const handleExport = async () => {
+    const t = toast.loading("Exporting full system snapshot…");
+    const { data, error } = await supabase.rpc("export_full_system_snapshot" as never);
+    toast.dismiss(t);
+    if (error) { toast.error(error.message); return; }
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `liftor-system-snapshot-v${(data as any)?.manual_version ?? "x"}-${new Date().toISOString().slice(0,10)}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    toast.success("Snapshot downloaded");
   };
 
   const sevColor = (s: string) =>
@@ -237,7 +307,7 @@ const FullSystemMirror = () => {
 
         {/* Tabs */}
         <Tabs value={tab} onValueChange={setTab} className="space-y-4">
-          <TabsList className="grid grid-cols-4 md:grid-cols-8 gap-1">
+          <TabsList className="grid grid-cols-4 md:grid-cols-12 gap-1">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="pages">Pages</TabsTrigger>
             <TabsTrigger value="content">Content</TabsTrigger>
@@ -246,6 +316,10 @@ const FullSystemMirror = () => {
             <TabsTrigger value="rules">Rules</TabsTrigger>
             <TabsTrigger value="integrations">Integrations</TabsTrigger>
             <TabsTrigger value="flows">Data Flows</TabsTrigger>
+            <TabsTrigger value="versions">Versions</TabsTrigger>
+            <TabsTrigger value="diffs">Diffs</TabsTrigger>
+            <TabsTrigger value="validation">Validation</TabsTrigger>
+            <TabsTrigger value="export">Export</TabsTrigger>
           </TabsList>
 
           {/* Overview */}
