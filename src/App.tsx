@@ -132,6 +132,10 @@ import AssignmentsDashboard from "./pages/founder/suppliers/AssignmentsDashboard
 import PublicProposalView from "./pages/public/PublicProposalView";
 import PublicProposalAccept from "./pages/public/PublicProposalAccept";
 import PublicDemo from "./pages/public/PublicDemo";
+// Supplier portal
+import SupplierLogin from "./pages/supplier/SupplierLogin";
+import SupplierDashboard from "./pages/supplier/SupplierDashboard";
+import SupplierAssignments from "./pages/supplier/SupplierAssignments";
 // Partner pages
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import PartnerOpportunities from "./pages/partner/PartnerOpportunities";
