@@ -4246,6 +4246,45 @@ export type Database = {
           },
         ]
       }
+      retry_queue: {
+        Row: {
+          action_type: Database["public"]["Enums"]["retry_action_type"]
+          created_at: string
+          entity_id: string
+          entity_type: string
+          id: string
+          last_error: string
+          next_retry_at: string
+          retry_count: number
+          status: Database["public"]["Enums"]["retry_status"]
+          updated_at: string
+        }
+        Insert: {
+          action_type: Database["public"]["Enums"]["retry_action_type"]
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          last_error?: string
+          next_retry_at?: string
+          retry_count?: number
+          status?: Database["public"]["Enums"]["retry_status"]
+          updated_at?: string
+        }
+        Update: {
+          action_type?: Database["public"]["Enums"]["retry_action_type"]
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          last_error?: string
+          next_retry_at?: string
+          retry_count?: number
+          status?: Database["public"]["Enums"]["retry_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       revenue_records: {
         Row: {
           client_organisation: string
@@ -4912,6 +4951,75 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      system_events: {
+        Row: {
+          business_name: string
+          created_at: string
+          entity_id: string | null
+          entity_type: string | null
+          event_type: string
+          id: string
+          message: string
+          metadata: Json
+          resolution_note: string
+          resolved: boolean
+          resolved_at: string | null
+          severity: Database["public"]["Enums"]["system_event_severity"]
+        }
+        Insert: {
+          business_name?: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          event_type: string
+          id?: string
+          message?: string
+          metadata?: Json
+          resolution_note?: string
+          resolved?: boolean
+          resolved_at?: string | null
+          severity?: Database["public"]["Enums"]["system_event_severity"]
+        }
+        Update: {
+          business_name?: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          event_type?: string
+          id?: string
+          message?: string
+          metadata?: Json
+          resolution_note?: string
+          resolved?: boolean
+          resolved_at?: string | null
+          severity?: Database["public"]["Enums"]["system_event_severity"]
+        }
+        Relationships: []
+      }
+      system_health: {
+        Row: {
+          id: string
+          metadata: Json
+          metric_name: string
+          timestamp: string
+          value: number
+        }
+        Insert: {
+          id?: string
+          metadata?: Json
+          metric_name: string
+          timestamp?: string
+          value?: number
+        }
+        Update: {
+          id?: string
+          metadata?: Json
+          metric_name?: string
+          timestamp?: string
+          value?: number
+        }
+        Relationships: []
       }
       system_status: {
         Row: {
@@ -5619,6 +5727,18 @@ export type Database = {
         }
         Relationships: []
       }
+      system_health_score: {
+        Row: {
+          assignment_completion_rate: number | null
+          conversion_rate: number | null
+          emails_sent_per_hour: number | null
+          health_score: number | null
+          open_critical_events: number | null
+          payment_collection_rate: number | null
+          reply_rate: number | null
+        }
+        Relationships: []
+      }
       warmup_progress: {
         Row: {
           business_name: string | null
@@ -5669,6 +5789,7 @@ export type Database = {
         Args: { _contact_id: string }
         Returns: string
       }
+      auto_resolve_system_events: { Args: never; Returns: number }
       check_outreach_allowed: { Args: { _contact_id: string }; Returns: Json }
       check_send_throttle: {
         Args: { _contact_id: string; _inbox_id: string }
@@ -5710,7 +5831,9 @@ export type Database = {
         }
         Returns: Database["public"]["Enums"]["assignment_sla_status"]
       }
+      compute_system_health: { Args: never; Returns: Json }
       country_to_timezone: { Args: { _country: string }; Returns: string }
+      detect_anomalies: { Args: never; Returns: Json }
       domain_for_inbox: { Args: { _inbox_id: string }; Returns: string }
       eligible_suppliers_for_deal: {
         Args: { _deal_id: string }
@@ -5841,6 +5964,18 @@ export type Database = {
         Args: { _event_type: string; _metadata?: Json; _token: string }
         Returns: Json
       }
+      log_system_event: {
+        Args: {
+          _business_name: string
+          _entity_id: string
+          _entity_type: string
+          _event_type: string
+          _message: string
+          _metadata?: Json
+          _severity: Database["public"]["Enums"]["system_event_severity"]
+        }
+        Returns: string
+      }
       mark_send_failure: {
         Args: { _error: string; _queue_id: string }
         Returns: Json
@@ -5870,6 +6005,7 @@ export type Database = {
         Returns: undefined
       }
       priority_score_deal: { Args: { _deal_id: string }; Returns: undefined }
+      process_retry_queue: { Args: never; Returns: Json }
       proposals_needing_followup: {
         Args: never
         Returns: {
@@ -6167,6 +6303,8 @@ export type Database = {
         | "open"
         | "sent"
         | "delivered"
+      retry_action_type: "send_email" | "ai_reply" | "assignment_retry"
+      retry_status: "pending" | "completed" | "failed"
       supplier_availability_status: "available" | "busy" | "unavailable"
       supplier_pipeline_stage:
         | "sourced"
@@ -6182,6 +6320,7 @@ export type Database = {
         | "APPROVED"
         | "REJECTED"
         | "INACTIVE"
+      system_event_severity: "low" | "medium" | "high" | "critical"
       system_task_status: "pending" | "in_progress" | "completed" | "dismissed"
       system_task_type: "follow_up" | "review" | "escalate"
       timezone_confidence_level: "high" | "medium" | "low"
@@ -6405,6 +6544,8 @@ export const Constants = {
         "sent",
         "delivered",
       ],
+      retry_action_type: ["send_email", "ai_reply", "assignment_retry"],
+      retry_status: ["pending", "completed", "failed"],
       supplier_availability_status: ["available", "busy", "unavailable"],
       supplier_pipeline_stage: [
         "sourced",
@@ -6422,6 +6563,7 @@ export const Constants = {
         "REJECTED",
         "INACTIVE",
       ],
+      system_event_severity: ["low", "medium", "high", "critical"],
       system_task_status: ["pending", "in_progress", "completed", "dismissed"],
       system_task_type: ["follow_up", "review", "escalate"],
       timezone_confidence_level: ["high", "medium", "low"],
