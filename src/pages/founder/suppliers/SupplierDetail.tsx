@@ -85,6 +85,39 @@ const SupplierDetail = () => {
     else toast.success("Notes saved");
   }
 
+  async function addPortalUser() {
+    if (!supplier || !newUserEmail.trim()) return;
+    setBusy(true);
+    const { error } = await supabase.from("supplier_users").insert({
+      supplier_id: supplier.id,
+      email: newUserEmail.trim().toLowerCase(),
+    });
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    setNewUserEmail("");
+    toast.success("Portal access created");
+    void load();
+  }
+
+  async function toggleUserActive(u: SupplierUser) {
+    const { error } = await supabase.from("supplier_users").update({ active: !u.active } as never).eq("id", u.id);
+    if (error) toast.error(error.message);
+    else void load();
+  }
+
+  async function deleteUser(u: SupplierUser) {
+    if (!confirm(`Revoke portal access for ${u.email}?`)) return;
+    const { error } = await supabase.from("supplier_users").delete().eq("id", u.id);
+    if (error) toast.error(error.message);
+    else { toast.success("Revoked"); void load(); }
+  }
+
+  function copyLink(token: string) {
+    const url = `${window.location.origin}/supplier/login?token=${encodeURIComponent(token)}`;
+    navigator.clipboard.writeText(url);
+    toast.success("Magic link copied");
+  }
+
   if (loading || !supplier) {
     return <FounderLayout><p className="text-muted-foreground">Loading…</p></FounderLayout>;
   }
@@ -196,6 +229,54 @@ const SupplierDetail = () => {
                       <span className="ml-2 text-xs text-muted-foreground">{a.business_name || "—"}</span>
                     </div>
                     <span className="text-xs text-muted-foreground">{new Date(a.assigned_at).toLocaleString()}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="tech-card">
+          <CardHeader>
+            <CardTitle className="text-sm">Portal access</CardTitle>
+            <p className="text-xs text-muted-foreground">
+              Send the magic link to let this supplier sign in to their portal.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex gap-2">
+              <Input
+                type="email"
+                placeholder="supplier@example.com"
+                value={newUserEmail}
+                onChange={(e) => setNewUserEmail(e.target.value)}
+              />
+              <Button onClick={addPortalUser} disabled={busy || !newUserEmail.trim()}>
+                <Plus className="h-4 w-4 mr-1" /> Grant access
+              </Button>
+            </div>
+            {users.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No portal users yet.</p>
+            ) : (
+              <ul className="divide-y divide-border/50 border border-border/50 rounded-md">
+                {users.map((u) => (
+                  <li key={u.id} className="p-3 flex items-center justify-between gap-2 flex-wrap">
+                    <div className="text-sm">
+                      <p className="font-medium">{u.email}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {u.active ? "Active" : "Disabled"} ·
+                        {u.last_login_at ? ` last login ${new Date(u.last_login_at).toLocaleString()}` : " never logged in"}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button size="sm" variant="outline" onClick={() => copyLink(u.access_token)}>
+                        <Copy className="h-3 w-3 mr-1" /> Magic link
+                      </Button>
+                      <Switch checked={u.active} onCheckedChange={() => toggleUserActive(u)} />
+                      <Button size="icon" variant="ghost" onClick={() => deleteUser(u)}>
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
                   </li>
                 ))}
               </ul>
