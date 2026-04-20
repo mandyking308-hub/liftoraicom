@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus, Loader2, ShieldCheck, Clock, AlertTriangle } from "lucide-react";
 import FounderLayout from "@/components/founder/FounderLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,10 @@ type Assignment = {
   auto_assigned: boolean;
   share_contact_details: boolean;
   supplier_note: string;
+  expected_completion_date: string | null;
+  sla_status: "on_track" | "at_risk" | "overdue" | "n_a";
+  completion_confirmed_by_founder: boolean;
+  requires_finance_action: boolean;
 };
 type Deal = { id: string; deal_name: string; business_name: string; contact_id: string | null; status: string };
 type Supplier = { id: string; name: string; email: string; business_name: string; status: string };
