@@ -918,8 +918,22 @@ export type Database = {
             foreignKeyName: "communications_inbox_id_fkey"
             columns: ["inbox_id"]
             isOneToOne: false
+            referencedRelation: "inbox_health_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "communications_inbox_id_fkey"
+            columns: ["inbox_id"]
+            isOneToOne: false
             referencedRelation: "inboxes"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "communications_inbox_id_fkey"
+            columns: ["inbox_id"]
+            isOneToOne: false
+            referencedRelation: "warmup_progress"
+            referencedColumns: ["inbox_id"]
           },
         ]
       }
@@ -1139,6 +1153,7 @@ export type Database = {
           assigned_inbox_id: string | null
           company: string
           conversation_active: boolean
+          country: string | null
           created_at: string
           email: string
           id: string
@@ -1148,6 +1163,7 @@ export type Database = {
           role: string
           source: string
           status: Database["public"]["Enums"]["contact_status"]
+          timezone: string | null
           updated_at: string
         }
         Insert: {
@@ -1156,6 +1172,7 @@ export type Database = {
           assigned_inbox_id?: string | null
           company?: string
           conversation_active?: boolean
+          country?: string | null
           created_at?: string
           email: string
           id?: string
@@ -1165,6 +1182,7 @@ export type Database = {
           role?: string
           source?: string
           status?: Database["public"]["Enums"]["contact_status"]
+          timezone?: string | null
           updated_at?: string
         }
         Update: {
@@ -1173,6 +1191,7 @@ export type Database = {
           assigned_inbox_id?: string | null
           company?: string
           conversation_active?: boolean
+          country?: string | null
           created_at?: string
           email?: string
           id?: string
@@ -1182,6 +1201,7 @@ export type Database = {
           role?: string
           source?: string
           status?: Database["public"]["Enums"]["contact_status"]
+          timezone?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -1189,8 +1209,22 @@ export type Database = {
             foreignKeyName: "contacts_assigned_inbox_id_fkey"
             columns: ["assigned_inbox_id"]
             isOneToOne: false
+            referencedRelation: "inbox_health_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contacts_assigned_inbox_id_fkey"
+            columns: ["assigned_inbox_id"]
+            isOneToOne: false
             referencedRelation: "inboxes"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contacts_assigned_inbox_id_fkey"
+            columns: ["assigned_inbox_id"]
+            isOneToOne: false
+            referencedRelation: "warmup_progress"
+            referencedColumns: ["inbox_id"]
           },
         ]
       }
@@ -1737,8 +1771,22 @@ export type Database = {
             foreignKeyName: "email_queue_inbox_id_fkey"
             columns: ["inbox_id"]
             isOneToOne: false
+            referencedRelation: "inbox_health_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_queue_inbox_id_fkey"
+            columns: ["inbox_id"]
+            isOneToOne: false
             referencedRelation: "inboxes"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_queue_inbox_id_fkey"
+            columns: ["inbox_id"]
+            isOneToOne: false
+            referencedRelation: "warmup_progress"
+            referencedColumns: ["inbox_id"]
           },
         ]
       }
@@ -1991,8 +2039,15 @@ export type Database = {
           current_send_count: number
           daily_send_limit: number
           email_address: string
+          hourly_send_count: number
+          hourly_send_limit: number
+          hourly_window_start: string
           id: string
+          last_sent_at: string | null
+          paused_reason: string
+          reputation_score: number
           updated_at: string
+          warmup_started_at: string
           warmup_status: Database["public"]["Enums"]["inbox_warmup_status"]
         }
         Insert: {
@@ -2002,8 +2057,15 @@ export type Database = {
           current_send_count?: number
           daily_send_limit?: number
           email_address: string
+          hourly_send_count?: number
+          hourly_send_limit?: number
+          hourly_window_start?: string
           id?: string
+          last_sent_at?: string | null
+          paused_reason?: string
+          reputation_score?: number
           updated_at?: string
+          warmup_started_at?: string
           warmup_status?: Database["public"]["Enums"]["inbox_warmup_status"]
         }
         Update: {
@@ -2013,8 +2075,15 @@ export type Database = {
           current_send_count?: number
           daily_send_limit?: number
           email_address?: string
+          hourly_send_count?: number
+          hourly_send_limit?: number
+          hourly_window_start?: string
           id?: string
+          last_sent_at?: string | null
+          paused_reason?: string
+          reputation_score?: number
           updated_at?: string
+          warmup_started_at?: string
           warmup_status?: Database["public"]["Enums"]["inbox_warmup_status"]
         }
         Relationships: []
@@ -4083,6 +4152,82 @@ export type Database = {
         }
         Relationships: []
       }
+      reputation_events: {
+        Row: {
+          contact_id: string | null
+          created_at: string
+          details: string
+          domain_id: string | null
+          event_type: Database["public"]["Enums"]["reputation_event_type"]
+          id: string
+          impact_score: number
+          inbox_id: string
+        }
+        Insert: {
+          contact_id?: string | null
+          created_at?: string
+          details?: string
+          domain_id?: string | null
+          event_type: Database["public"]["Enums"]["reputation_event_type"]
+          id?: string
+          impact_score?: number
+          inbox_id: string
+        }
+        Update: {
+          contact_id?: string | null
+          created_at?: string
+          details?: string
+          domain_id?: string | null
+          event_type?: Database["public"]["Enums"]["reputation_event_type"]
+          id?: string
+          impact_score?: number
+          inbox_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reputation_events_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reputation_events_domain_id_fkey"
+            columns: ["domain_id"]
+            isOneToOne: false
+            referencedRelation: "domain_usage_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reputation_events_domain_id_fkey"
+            columns: ["domain_id"]
+            isOneToOne: false
+            referencedRelation: "sending_domains"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reputation_events_inbox_id_fkey"
+            columns: ["inbox_id"]
+            isOneToOne: false
+            referencedRelation: "inbox_health_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reputation_events_inbox_id_fkey"
+            columns: ["inbox_id"]
+            isOneToOne: false
+            referencedRelation: "inboxes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reputation_events_inbox_id_fkey"
+            columns: ["inbox_id"]
+            isOneToOne: false
+            referencedRelation: "warmup_progress"
+            referencedColumns: ["inbox_id"]
+          },
+        ]
+      }
       revenue_records: {
         Row: {
           client_organisation: string
@@ -4314,6 +4459,72 @@ export type Database = {
           id?: string
           user_id?: string | null
           user_name?: string | null
+        }
+        Relationships: []
+      }
+      send_windows: {
+        Row: {
+          created_at: string
+          end_hour: number
+          id: string
+          region: string
+          start_hour: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          end_hour?: number
+          id?: string
+          region: string
+          start_hour?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          end_hour?: number
+          id?: string
+          region?: string
+          start_hour?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sending_domains: {
+        Row: {
+          created_at: string
+          current_usage: number
+          daily_limit: number
+          domain_name: string
+          id: string
+          reputation_score: number
+          updated_at: string
+          usage_window_start: string
+          warmup_stage: Database["public"]["Enums"]["warmup_stage"]
+          warmup_started_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_usage?: number
+          daily_limit?: number
+          domain_name: string
+          id?: string
+          reputation_score?: number
+          updated_at?: string
+          usage_window_start?: string
+          warmup_stage?: Database["public"]["Enums"]["warmup_stage"]
+          warmup_started_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_usage?: number
+          daily_limit?: number
+          domain_name?: string
+          id?: string
+          reputation_score?: number
+          updated_at?: string
+          usage_window_start?: string
+          warmup_stage?: Database["public"]["Enums"]["warmup_stage"]
+          warmup_started_at?: string
         }
         Relationships: []
       }
@@ -5202,6 +5413,71 @@ export type Database = {
           },
         ]
       }
+      blocked_sends_24h: {
+        Row: {
+          block_reason: string | null
+          business_name: string | null
+          campaign_id: string | null
+          contact_email: string | null
+          contact_id: string | null
+          created_at: string | null
+          id: string | null
+          scheduled_at: string | null
+          status: Database["public"]["Enums"]["email_queue_status"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_queue_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "outreach_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_queue_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      domain_usage_summary: {
+        Row: {
+          current_usage: number | null
+          daily_limit: number | null
+          domain_name: string | null
+          id: string | null
+          reputation_score: number | null
+          updated_at: string | null
+          usage_pct: number | null
+          usage_window_start: string | null
+          warmup_stage: Database["public"]["Enums"]["warmup_stage"] | null
+        }
+        Insert: {
+          current_usage?: number | null
+          daily_limit?: number | null
+          domain_name?: string | null
+          id?: string | null
+          reputation_score?: number | null
+          updated_at?: string | null
+          usage_pct?: never
+          usage_window_start?: string | null
+          warmup_stage?: Database["public"]["Enums"]["warmup_stage"] | null
+        }
+        Update: {
+          current_usage?: number | null
+          daily_limit?: number | null
+          domain_name?: string | null
+          id?: string | null
+          reputation_score?: number | null
+          updated_at?: string | null
+          usage_pct?: never
+          usage_window_start?: string | null
+          warmup_stage?: Database["public"]["Enums"]["warmup_stage"] | null
+        }
+        Relationships: []
+      }
       high_priority_contacts: {
         Row: {
           business_name: string | null
@@ -5271,15 +5547,109 @@ export type Database = {
         }
         Relationships: []
       }
+      inbox_health_summary: {
+        Row: {
+          active: boolean | null
+          business_name: string | null
+          current_send_count: number | null
+          daily_send_limit: number | null
+          effective_daily_cap: number | null
+          email_address: string | null
+          health_status: string | null
+          hourly_send_count: number | null
+          hourly_send_limit: number | null
+          id: string | null
+          last_sent_at: string | null
+          reputation_score: number | null
+          warmup_days: number | null
+        }
+        Insert: {
+          active?: boolean | null
+          business_name?: string | null
+          current_send_count?: number | null
+          daily_send_limit?: number | null
+          effective_daily_cap?: never
+          email_address?: string | null
+          health_status?: never
+          hourly_send_count?: number | null
+          hourly_send_limit?: number | null
+          id?: string | null
+          last_sent_at?: string | null
+          reputation_score?: number | null
+          warmup_days?: never
+        }
+        Update: {
+          active?: boolean | null
+          business_name?: string | null
+          current_send_count?: number | null
+          daily_send_limit?: number | null
+          effective_daily_cap?: never
+          email_address?: string | null
+          health_status?: never
+          hourly_send_count?: number | null
+          hourly_send_limit?: number | null
+          id?: string | null
+          last_sent_at?: string | null
+          reputation_score?: number | null
+          warmup_days?: never
+        }
+        Relationships: []
+      }
+      warmup_progress: {
+        Row: {
+          business_name: string | null
+          current_cap: number | null
+          days_in_warmup: number | null
+          email_address: string | null
+          inbox_id: string | null
+          progress_pct: number | null
+          target_cap: number | null
+          warmup_started_at: string | null
+        }
+        Insert: {
+          business_name?: string | null
+          current_cap?: never
+          days_in_warmup?: never
+          email_address?: string | null
+          inbox_id?: string | null
+          progress_pct?: never
+          target_cap?: number | null
+          warmup_started_at?: string | null
+        }
+        Update: {
+          business_name?: string | null
+          current_cap?: never
+          days_in_warmup?: never
+          email_address?: string | null
+          inbox_id?: string | null
+          progress_pct?: never
+          target_cap?: number | null
+          warmup_started_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       accept_proposal_by_token: { Args: { _token: string }; Returns: Json }
       ai_actions_today: { Args: { _conversation_id: string }; Returns: number }
+      apply_reputation_event: {
+        Args: {
+          _contact_id: string
+          _details?: string
+          _event: Database["public"]["Enums"]["reputation_event_type"]
+          _inbox_id: string
+        }
+        Returns: undefined
+      }
       assign_inbox_for_contact: {
         Args: { _contact_id: string }
         Returns: string
       }
       check_outreach_allowed: { Args: { _contact_id: string }; Returns: Json }
+      check_send_throttle: {
+        Args: { _contact_id: string; _inbox_id: string }
+        Returns: Json
+      }
       compliance_check_assignment: {
         Args: { _assignment_id: string }
         Returns: undefined
@@ -5316,6 +5686,8 @@ export type Database = {
         }
         Returns: Database["public"]["Enums"]["assignment_sla_status"]
       }
+      country_to_timezone: { Args: { _country: string }; Returns: string }
+      domain_for_inbox: { Args: { _inbox_id: string }; Returns: string }
       eligible_suppliers_for_deal: {
         Args: { _deal_id: string }
         Returns: {
@@ -5427,6 +5799,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      inbox_warmup_limit: { Args: { _inbox_id: string }; Returns: number }
       log_compliance_event: {
         Args: {
           _business_name: string
@@ -5443,6 +5816,10 @@ export type Database = {
       log_demo_event: {
         Args: { _event_type: string; _metadata?: Json; _token: string }
         Returns: Json
+      }
+      next_valid_send_time: {
+        Args: { _contact_id: string; _from?: string }
+        Returns: string
       }
       priority_level_from_score: {
         Args: { _s: number }
@@ -5540,7 +5917,12 @@ export type Database = {
       }
       refresh_all_assignment_sla: { Args: never; Returns: number }
       refresh_all_business_risk_scores: { Args: never; Returns: number }
+      reset_inbox_hourly_counts: { Args: never; Returns: number }
       reset_inbox_send_counts: { Args: never; Returns: number }
+      resolve_contact_timezone: {
+        Args: { _contact_id: string }
+        Returns: string
+      }
       run_compliance_checks: {
         Args: {
           _entity_id: string
@@ -5643,6 +6025,7 @@ export type Database = {
           assigned_inbox_id: string | null
           company: string
           conversation_active: boolean
+          country: string | null
           created_at: string
           email: string
           id: string
@@ -5652,6 +6035,7 @@ export type Database = {
           role: string
           source: string
           status: Database["public"]["Enums"]["contact_status"]
+          timezone: string | null
           updated_at: string
         }
         SetofOptions: {
@@ -5713,7 +6097,13 @@ export type Database = {
         | "clicked"
         | "replied"
         | "bounced"
-      email_queue_status: "pending" | "sent" | "failed" | "blocked"
+      email_queue_status:
+        | "pending"
+        | "sent"
+        | "failed"
+        | "blocked"
+        | "delayed"
+        | "throttled"
       inbox_warmup_status: "new" | "warming" | "active"
       internal_proposal_status:
         | "draft"
@@ -5733,6 +6123,13 @@ export type Database = {
       payment_method: "bank" | "stripe" | "cash" | "other"
       priority_entity_type: "contact" | "conversation" | "deal" | "assignment"
       priority_level: "low" | "medium" | "high" | "critical"
+      reputation_event_type:
+        | "bounce"
+        | "spam"
+        | "reply"
+        | "open"
+        | "sent"
+        | "delivered"
       supplier_availability_status: "available" | "busy" | "unavailable"
       supplier_pipeline_stage:
         | "sourced"
@@ -5750,6 +6147,7 @@ export type Database = {
         | "INACTIVE"
       system_task_status: "pending" | "in_progress" | "completed" | "dismissed"
       system_task_type: "follow_up" | "review" | "escalate"
+      warmup_stage: "new" | "warming" | "stable"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -5932,7 +6330,14 @@ export const Constants = {
         "replied",
         "bounced",
       ],
-      email_queue_status: ["pending", "sent", "failed", "blocked"],
+      email_queue_status: [
+        "pending",
+        "sent",
+        "failed",
+        "blocked",
+        "delayed",
+        "throttled",
+      ],
       inbox_warmup_status: ["new", "warming", "active"],
       internal_proposal_status: [
         "draft",
@@ -5954,6 +6359,14 @@ export const Constants = {
       payment_method: ["bank", "stripe", "cash", "other"],
       priority_entity_type: ["contact", "conversation", "deal", "assignment"],
       priority_level: ["low", "medium", "high", "critical"],
+      reputation_event_type: [
+        "bounce",
+        "spam",
+        "reply",
+        "open",
+        "sent",
+        "delivered",
+      ],
       supplier_availability_status: ["available", "busy", "unavailable"],
       supplier_pipeline_stage: [
         "sourced",
@@ -5973,6 +6386,7 @@ export const Constants = {
       ],
       system_task_status: ["pending", "in_progress", "completed", "dismissed"],
       system_task_type: ["follow_up", "review", "escalate"],
+      warmup_stage: ["new", "warming", "stable"],
     },
   },
 } as const
