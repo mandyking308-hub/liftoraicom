@@ -802,6 +802,7 @@ export type Database = {
       }
       contacts: {
         Row: {
+          active_campaign_id: string | null
           assigned_business: string
           assigned_inbox_id: string | null
           company: string
@@ -818,6 +819,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          active_campaign_id?: string | null
           assigned_business?: string
           assigned_inbox_id?: string | null
           company?: string
@@ -834,6 +836,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          active_campaign_id?: string | null
           assigned_business?: string
           assigned_inbox_id?: string | null
           company?: string
@@ -1169,6 +1172,8 @@ export type Database = {
           sent_at: string | null
           sequence_step: number
           status: Database["public"]["Enums"]["email_queue_status"]
+          tracking_pixel_id: string | null
+          tracking_token: string | null
         }
         Insert: {
           block_reason?: string
@@ -1182,6 +1187,8 @@ export type Database = {
           sent_at?: string | null
           sequence_step: number
           status?: Database["public"]["Enums"]["email_queue_status"]
+          tracking_pixel_id?: string | null
+          tracking_token?: string | null
         }
         Update: {
           block_reason?: string
@@ -1195,6 +1202,8 @@ export type Database = {
           sent_at?: string | null
           sequence_step?: number
           status?: Database["public"]["Enums"]["email_queue_status"]
+          tracking_pixel_id?: string | null
+          tracking_token?: string | null
         }
         Relationships: [
           {
@@ -4218,6 +4227,7 @@ export type Database = {
           _source?: string
         }
         Returns: {
+          active_campaign_id: string | null
           assigned_business: string
           assigned_inbox_id: string | null
           company: string
