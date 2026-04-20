@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, ShieldCheck, ShieldAlert } from "lucide-react";
+import { ArrowLeft, ShieldCheck, ShieldAlert, FileText, Loader2 } from "lucide-react";
 import FounderLayout from "@/components/founder/FounderLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 type Contact = {
   id: string;
@@ -29,12 +30,37 @@ const STATUSES = ["NEW", "CONTACTED", "ENGAGED", "QUALIFIED", "CLIENT", "SUPPLIE
 
 const CRMContactDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [contact, setContact] = useState<Contact | null>(null);
   const [comms, setComms] = useState<{ id: string; channel: string; direction: string; message: string; timestamp: string; ai_generated: boolean }[]>([]);
   const [events, setEvents] = useState<{ id: string; event_type: string; timestamp: string; email_id: string }[]>([]);
   const [inboxes, setInboxes] = useState<{ id: string; email_address: string; business_name: string }[]>([]);
   const [check, setCheck] = useState<{ allowed: boolean; reason?: string } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
+
+  async function generateProposal() {
+    if (!contact) return;
+    if (contact.status !== "QUALIFIED") {
+      toast.error("Contact must be QUALIFIED to generate a proposal.");
+      return;
+    }
+    setGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("internal-proposal-generate", {
+        body: { contact_id: contact.id, include_demo: true },
+      });
+      if (error) throw error;
+      const proposalId = (data as { proposal?: { id?: string } })?.proposal?.id;
+      if (!proposalId) throw new Error("No proposal returned");
+      toast.success("Proposal generated");
+      navigate(`/founder/internal-proposals/${proposalId}`);
+    } catch (e) {
+      toast.error((e as Error).message || "Failed to generate proposal");
+    } finally {
+      setGenerating(false);
+    }
+  }
 
   useEffect(() => {
     if (!id) return;
@@ -93,14 +119,25 @@ const CRMContactDetail = () => {
             <h1 className="text-2xl font-bold tracking-tight">{contact.name || contact.email}</h1>
             <p className="text-sm text-muted-foreground mt-1">{contact.email} · {contact.company || "—"}</p>
           </div>
-          <Card className={`tech-card ${check?.allowed ? "border-primary/40" : "border-destructive/40"}`}>
-            <CardContent className="p-3 flex items-center gap-2 text-sm">
-              {check?.allowed ? <ShieldCheck className="h-4 w-4 text-primary" /> : <ShieldAlert className="h-4 w-4 text-destructive" />}
-              <span>
-                {check?.allowed ? "Outreach allowed" : `Blocked: ${check?.reason ?? "—"}`}
-              </span>
-            </CardContent>
-          </Card>
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              onClick={generateProposal}
+              disabled={generating || contact.status !== "QUALIFIED"}
+              title={contact.status !== "QUALIFIED" ? "Contact must be QUALIFIED" : "Generate AI proposal + demo"}
+            >
+              {generating ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <FileText className="h-4 w-4 mr-1" />}
+              Generate Proposal
+            </Button>
+            <Card className={`tech-card ${check?.allowed ? "border-primary/40" : "border-destructive/40"}`}>
+              <CardContent className="p-3 flex items-center gap-2 text-sm">
+                {check?.allowed ? <ShieldCheck className="h-4 w-4 text-primary" /> : <ShieldAlert className="h-4 w-4 text-destructive" />}
+                <span>
+                  {check?.allowed ? "Outreach allowed" : `Blocked: ${check?.reason ?? "—"}`}
+                </span>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         <div className="grid md:grid-cols-3 gap-4">
