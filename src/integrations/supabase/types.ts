@@ -1164,6 +1164,7 @@ export type Database = {
           source: string
           status: Database["public"]["Enums"]["contact_status"]
           timezone: string | null
+          timezone_confidence: Database["public"]["Enums"]["timezone_confidence_level"]
           updated_at: string
         }
         Insert: {
@@ -1183,6 +1184,7 @@ export type Database = {
           source?: string
           status?: Database["public"]["Enums"]["contact_status"]
           timezone?: string | null
+          timezone_confidence?: Database["public"]["Enums"]["timezone_confidence_level"]
           updated_at?: string
         }
         Update: {
@@ -1202,6 +1204,7 @@ export type Database = {
           source?: string
           status?: Database["public"]["Enums"]["contact_status"]
           timezone?: string | null
+          timezone_confidence?: Database["public"]["Enums"]["timezone_confidence_level"]
           updated_at?: string
         }
         Relationships: [
@@ -1715,6 +1718,9 @@ export type Database = {
           created_at: string
           id: string
           inbox_id: string | null
+          last_attempt_at: string | null
+          priority: number
+          retry_count: number
           scheduled_at: string
           sent_at: string | null
           sequence_step: number
@@ -1730,6 +1736,9 @@ export type Database = {
           created_at?: string
           id?: string
           inbox_id?: string | null
+          last_attempt_at?: string | null
+          priority?: number
+          retry_count?: number
           scheduled_at?: string
           sent_at?: string | null
           sequence_step: number
@@ -1745,6 +1754,9 @@ export type Database = {
           created_at?: string
           id?: string
           inbox_id?: string | null
+          last_attempt_at?: string | null
+          priority?: number
+          retry_count?: number
           scheduled_at?: string
           sent_at?: string | null
           sequence_step?: number
@@ -2035,6 +2047,7 @@ export type Database = {
         Row: {
           active: boolean
           business_name: string
+          consecutive_failures: number
           created_at: string
           current_send_count: number
           daily_send_limit: number
@@ -2044,6 +2057,7 @@ export type Database = {
           hourly_window_start: string
           id: string
           last_sent_at: string | null
+          last_used_sequence_position: number
           paused_reason: string
           reputation_score: number
           updated_at: string
@@ -2053,6 +2067,7 @@ export type Database = {
         Insert: {
           active?: boolean
           business_name?: string
+          consecutive_failures?: number
           created_at?: string
           current_send_count?: number
           daily_send_limit?: number
@@ -2062,6 +2077,7 @@ export type Database = {
           hourly_window_start?: string
           id?: string
           last_sent_at?: string | null
+          last_used_sequence_position?: number
           paused_reason?: string
           reputation_score?: number
           updated_at?: string
@@ -2071,6 +2087,7 @@ export type Database = {
         Update: {
           active?: boolean
           business_name?: string
+          consecutive_failures?: number
           created_at?: string
           current_send_count?: number
           daily_send_limit?: number
@@ -2080,6 +2097,7 @@ export type Database = {
           hourly_window_start?: string
           id?: string
           last_sent_at?: string | null
+          last_used_sequence_position?: number
           paused_reason?: string
           reputation_score?: number
           updated_at?: string
@@ -4495,8 +4513,10 @@ export type Database = {
           current_usage: number
           daily_limit: number
           domain_name: string
+          domain_reputation_score: number
           id: string
           reputation_score: number
+          reputation_updated_at: string
           updated_at: string
           usage_window_start: string
           warmup_stage: Database["public"]["Enums"]["warmup_stage"]
@@ -4507,8 +4527,10 @@ export type Database = {
           current_usage?: number
           daily_limit?: number
           domain_name: string
+          domain_reputation_score?: number
           id?: string
           reputation_score?: number
+          reputation_updated_at?: string
           updated_at?: string
           usage_window_start?: string
           warmup_stage?: Database["public"]["Enums"]["warmup_stage"]
@@ -4519,8 +4541,10 @@ export type Database = {
           current_usage?: number
           daily_limit?: number
           domain_name?: string
+          domain_reputation_score?: number
           id?: string
           reputation_score?: number
+          reputation_updated_at?: string
           updated_at?: string
           usage_window_start?: string
           warmup_stage?: Database["public"]["Enums"]["warmup_stage"]
@@ -5817,8 +5841,16 @@ export type Database = {
         Args: { _event_type: string; _metadata?: Json; _token: string }
         Returns: Json
       }
+      mark_send_failure: {
+        Args: { _error: string; _queue_id: string }
+        Returns: Json
+      }
       next_valid_send_time: {
         Args: { _contact_id: string; _from?: string }
+        Returns: string
+      }
+      pick_inbox_for_business: {
+        Args: { _business_name: string }
         Returns: string
       }
       priority_level_from_score: {
@@ -5906,6 +5938,10 @@ export type Database = {
           _entity_type: Database["public"]["Enums"]["compliance_entity_type"]
         }
         Returns: number
+      }
+      recompute_domain_reputation: {
+        Args: { _domain_name: string }
+        Returns: undefined
       }
       recompute_proposal_score: {
         Args: { _proposal_id: string }
@@ -6036,6 +6072,7 @@ export type Database = {
           source: string
           status: Database["public"]["Enums"]["contact_status"]
           timezone: string | null
+          timezone_confidence: Database["public"]["Enums"]["timezone_confidence_level"]
           updated_at: string
         }
         SetofOptions: {
@@ -6147,6 +6184,7 @@ export type Database = {
         | "INACTIVE"
       system_task_status: "pending" | "in_progress" | "completed" | "dismissed"
       system_task_type: "follow_up" | "review" | "escalate"
+      timezone_confidence_level: "high" | "medium" | "low"
       warmup_stage: "new" | "warming" | "stable"
     }
     CompositeTypes: {
@@ -6386,6 +6424,7 @@ export const Constants = {
       ],
       system_task_status: ["pending", "in_progress", "completed", "dismissed"],
       system_task_type: ["follow_up", "review", "escalate"],
+      timezone_confidence_level: ["high", "medium", "low"],
       warmup_stage: ["new", "warming", "stable"],
     },
   },
