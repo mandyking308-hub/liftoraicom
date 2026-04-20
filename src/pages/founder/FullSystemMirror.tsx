@@ -245,10 +245,16 @@ const FullSystemMirror = () => {
     if (error) { toast.dismiss(t); toast.error(error.message); return; }
     const snap: any = data;
 
-    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    const doc = new jsPDF({ unit: "pt", format: "a4", compress: true });
     const pageW = doc.internal.pageSize.getWidth();
     const margin = 40;
     let y = margin;
+
+    // Helper to truncate long strings to keep file size down
+    const trim = (v: any, n: number) => {
+      const s = (v ?? "").toString();
+      return s.length > n ? s.slice(0, n - 1) + "…" : s;
+    };
 
     // Cover
     doc.setFontSize(22); doc.setFont("helvetica", "bold");
@@ -288,7 +294,7 @@ const FullSystemMirror = () => {
       autoTable(doc, {
         startY: y + 14,
         head: [head], body: rows,
-        theme: "striped", styles: { fontSize: 8, cellPadding: 4, overflow: "linebreak" },
+        theme: "plain", styles: { fontSize: 7.5, cellPadding: 2, overflow: "linebreak", lineWidth: 0 },
         headStyles: { fillColor: [30, 30, 30], textColor: 255 },
         margin: { left: margin, right: margin },
         columnStyles: colWidths ? Object.fromEntries(colWidths.map((w, i) => [i, { cellWidth: w }])) : undefined,
@@ -299,7 +305,7 @@ const FullSystemMirror = () => {
     section("Pages");
     renderTable(
       ["Route", "Name", "Area", "Purpose"],
-      (snap?.pages ?? []).map((p: any) => [p.route_path, p.page_name, p.area, p.purpose ?? ""]),
+      (snap?.pages ?? []).map((p: any) => [trim(p.route_path, 60), trim(p.page_name, 40), trim(p.area, 20), trim(p.purpose, 120)]),
       [140, 110, 60, pageW - margin*2 - 310],
     );
 
@@ -307,7 +313,7 @@ const FullSystemMirror = () => {
     section("Backend Objects");
     renderTable(
       ["Kind", "Name", "Schema", "Purpose"],
-      (snap?.backend ?? []).map((b: any) => [b.object_kind, b.object_name, b.schema_name, b.purpose ?? ""]),
+      (snap?.backend ?? []).map((b: any) => [trim(b.object_kind, 20), trim(b.object_name, 60), trim(b.schema_name, 20), trim(b.purpose, 120)]),
       [60, 180, 60, pageW - margin*2 - 300],
     );
 
@@ -329,7 +335,7 @@ const FullSystemMirror = () => {
       if (steps.length) {
         renderTable(
           ["#", "Step", "Trigger", "Tables", "Failure points"],
-          steps.map((s: any) => [s.step_index, s.step_name, s.trigger_source ?? "", s.linked_tables ?? "", s.failure_points ?? ""]),
+          steps.map((s: any) => [s.step_index, trim(s.step_name, 50), trim(s.trigger_source, 40), trim(s.linked_tables, 60), trim(s.failure_points, 80)]),
           [24, 110, 90, 120, pageW - margin*2 - 344],
         );
         y = (doc as any).lastAutoTable.finalY + 10;
@@ -340,7 +346,7 @@ const FullSystemMirror = () => {
     section("Rules");
     renderTable(
       ["Rule", "Module", "Condition", "Action", "Severity"],
-      (snap?.rules ?? []).map((r: any) => [r.rule_name, r.module, r.condition_text ?? "", r.action_text ?? "", r.severity]),
+      (snap?.rules ?? []).map((r: any) => [trim(r.rule_name, 50), trim(r.module, 30), trim(r.condition_text, 80), trim(r.action_text, 80), r.severity]),
       [110, 70, 130, 130, 50],
     );
 
@@ -348,7 +354,7 @@ const FullSystemMirror = () => {
     section("Integrations");
     renderTable(
       ["Name", "Layer", "Endpoint", "Description"],
-      (snap?.integrations ?? []).map((i: any) => [i.integration_name, i.layer, i.endpoint ?? "", i.description ?? ""]),
+      (snap?.integrations ?? []).map((i: any) => [trim(i.integration_name, 50), trim(i.layer, 30), trim(i.endpoint, 60), trim(i.description, 120)]),
       [120, 80, 150, pageW - margin*2 - 350],
     );
 
@@ -356,23 +362,25 @@ const FullSystemMirror = () => {
     section("Data Flows");
     renderTable(
       ["Source", "Relationship", "Target", "Description"],
-      (snap?.data_flows ?? []).map((f: any) => [f.source_entity, f.relationship, f.target_entity, f.description ?? ""]),
+      (snap?.data_flows ?? []).map((f: any) => [trim(f.source_entity, 50), trim(f.relationship, 30), trim(f.target_entity, 50), trim(f.description, 100)]),
       [120, 80, 120, pageW - margin*2 - 320],
     );
 
-    // Content (limit to keep PDF reasonable)
+    // Content fragments — summary only (full list available in JSON export to keep PDF compact)
     section("Content Fragments");
+    const contentTotal = snap?.content?.length ?? 0;
+    const byPage = new Map<string, number>();
+    (snap?.content ?? []).forEach((c: any) => byPage.set(c.page ?? "—", (byPage.get(c.page ?? "—") ?? 0) + 1));
+    const summary = Array.from(byPage.entries()).sort((a,b) => b[1] - a[1]);
+    doc.setFontSize(9); doc.setTextColor(120);
+    doc.text(`${contentTotal} content fragments across ${summary.length} pages. Full text available in JSON export.`, margin, y + 16);
+    doc.setTextColor(0);
+    y += 8;
     renderTable(
-      ["Page", "Type", "Text", "Feature"],
-      (snap?.content ?? []).slice(0, 400).map((c: any) => [c.page, c.content_type, (c.text_value ?? "").slice(0, 200), c.linked_feature ?? ""]),
-      [140, 60, pageW - margin*2 - 300, 100],
+      ["Page", "Fragments"],
+      summary.map(([p, n]) => [trim(p, 80), n]),
+      [pageW - margin*2 - 80, 80],
     );
-    if ((snap?.content?.length ?? 0) > 400) {
-      const yEnd = (doc as any).lastAutoTable.finalY + 12;
-      doc.setFontSize(9); doc.setTextColor(120);
-      doc.text(`(${snap.content.length - 400} more content fragments truncated — full list in JSON export)`, margin, yEnd);
-      doc.setTextColor(0);
-    }
 
     // Footer page numbers
     const pageCount = doc.getNumberOfPages();
