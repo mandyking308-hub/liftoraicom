@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { ArrowLeft, CheckCircle2, XCircle, Loader2, Copy, Plus, Trash2 } from "lucide-react";
 import FounderLayout from "@/components/founder/FounderLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -20,6 +21,7 @@ type Supplier = {
 type Pipeline = { id: string; stage: string; notes: string; updated_at: string };
 type Availability = { id: string; status: string; manual_override: boolean; capacity: number | null; notes: string };
 type Assignment = { id: string; deal_id: string; status: string; assigned_at: string; completed_at: string | null; business_name: string };
+type SupplierUser = { id: string; email: string; access_token: string; active: boolean; last_login_at: string | null };
 
 const STATUS_OPTIONS = ["NEW","CONTACTED","QUALIFIED","APPROVED","REJECTED","INACTIVE"];
 const AVAIL_OPTIONS = ["available","busy","unavailable"];
@@ -30,6 +32,8 @@ const SupplierDetail = () => {
   const [pipeline, setPipeline] = useState<Pipeline | null>(null);
   const [availability, setAvailability] = useState<Availability | null>(null);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [users, setUsers] = useState<SupplierUser[]>([]);
+  const [newUserEmail, setNewUserEmail] = useState("");
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
 
@@ -37,16 +41,18 @@ const SupplierDetail = () => {
 
   async function load() {
     setLoading(true);
-    const [s, p, a, asg] = await Promise.all([
+    const [s, p, a, asg, su] = await Promise.all([
       supabase.from("suppliers").select("*").eq("id", id!).maybeSingle(),
       supabase.from("supplier_pipeline").select("*").eq("supplier_id", id!).maybeSingle(),
       supabase.from("supplier_availability").select("*").eq("supplier_id", id!).maybeSingle(),
       supabase.from("assignments").select("*").eq("supplier_id", id!).order("assigned_at", { ascending: false }),
+      supabase.from("supplier_users").select("*").eq("supplier_id", id!).order("created_at", { ascending: true }),
     ]);
     setSupplier(s.data as Supplier);
     setPipeline(p.data as Pipeline);
     setAvailability(a.data as Availability);
     setAssignments((asg.data as Assignment[]) ?? []);
+    setUsers((su.data as SupplierUser[]) ?? []);
     setLoading(false);
   }
 

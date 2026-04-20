@@ -284,6 +284,11 @@ const App = () => (
             <Route path="/proposals/accept/:token" element={<PublicProposalAccept />} />
             <Route path="/demo/:token" element={<PublicDemo />} />
 
+            {/* Supplier Portal */}
+            <Route path="/supplier/login" element={<SupplierLogin />} />
+            <Route path="/supplier/dashboard" element={<SupplierDashboard />} />
+            <Route path="/supplier/assignments" element={<SupplierAssignments />} />
+
             {/* Partner Portal */}
             <Route path="/partner" element={<PartnerRoute><PartnerDashboard /></PartnerRoute>} />
             <Route path="/partner/opportunities" element={<PartnerRoute><PartnerOpportunities /></PartnerRoute>} />
