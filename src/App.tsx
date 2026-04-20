@@ -126,6 +126,9 @@ import ConversationDetail from "./pages/founder/conversations/ConversationDetail
 import InternalProposals from "./pages/founder/proposals/InternalProposals";
 import InternalProposalDetail from "./pages/founder/proposals/InternalProposalDetail";
 import DemosDashboard from "./pages/founder/proposals/DemosDashboard";
+import SuppliersDashboard from "./pages/founder/suppliers/SuppliersDashboard";
+import SupplierDetail from "./pages/founder/suppliers/SupplierDetail";
+import AssignmentsDashboard from "./pages/founder/suppliers/AssignmentsDashboard";
 import PublicProposalView from "./pages/public/PublicProposalView";
 import PublicProposalAccept from "./pages/public/PublicProposalAccept";
 import PublicDemo from "./pages/public/PublicDemo";
@@ -268,6 +271,9 @@ const App = () => (
             <Route path="/founder/internal-proposals" element={<FounderRoute><InternalProposals /></FounderRoute>} />
             <Route path="/founder/internal-proposals/:id" element={<FounderRoute><InternalProposalDetail /></FounderRoute>} />
             <Route path="/founder/demos" element={<FounderRoute><DemosDashboard /></FounderRoute>} />
+            <Route path="/founder/suppliers" element={<FounderRoute><SuppliersDashboard /></FounderRoute>} />
+            <Route path="/founder/suppliers/:id" element={<FounderRoute><SupplierDetail /></FounderRoute>} />
+            <Route path="/founder/assignments" element={<FounderRoute><AssignmentsDashboard /></FounderRoute>} />
 
             {/* Public proposal + demo */}
             <Route path="/proposals/view/:token" element={<PublicProposalView />} />
