@@ -112,6 +112,11 @@ import CRMDashboard from "./pages/founder/CRMDashboard";
 import CRMContacts from "./pages/founder/CRMContacts";
 import CRMContactDetail from "./pages/founder/CRMContactDetail";
 import CRMInboxes from "./pages/founder/CRMInboxes";
+import FinanceDashboard from "./pages/founder/finance/FinanceDashboard";
+import FinanceTargets from "./pages/founder/finance/FinanceTargets";
+import FinanceDeals from "./pages/founder/finance/FinanceDeals";
+import FinanceInvoices from "./pages/founder/finance/FinanceInvoices";
+import FinancePayments from "./pages/founder/finance/FinancePayments";
 // Partner pages
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import PartnerOpportunities from "./pages/partner/PartnerOpportunities";
@@ -237,6 +242,11 @@ const App = () => (
             <Route path="/founder/crm/contacts" element={<FounderRoute><CRMContacts /></FounderRoute>} />
             <Route path="/founder/crm/contacts/:id" element={<FounderRoute><CRMContactDetail /></FounderRoute>} />
             <Route path="/founder/crm/inboxes" element={<FounderRoute><CRMInboxes /></FounderRoute>} />
+            <Route path="/founder/finance" element={<FounderRoute><FinanceDashboard /></FounderRoute>} />
+            <Route path="/founder/finance/targets" element={<FounderRoute><FinanceTargets /></FounderRoute>} />
+            <Route path="/founder/finance/deals" element={<FounderRoute><FinanceDeals /></FounderRoute>} />
+            <Route path="/founder/finance/invoices" element={<FounderRoute><FinanceInvoices /></FounderRoute>} />
+            <Route path="/founder/finance/payments" element={<FounderRoute><FinancePayments /></FounderRoute>} />
 
             {/* Partner Portal */}
             <Route path="/partner" element={<PartnerRoute><PartnerDashboard /></PartnerRoute>} />
