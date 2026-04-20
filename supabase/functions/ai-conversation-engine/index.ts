@@ -104,6 +104,7 @@ Deno.serve(async (req) => {
         reply_preview: `Escalation reasons: ${escalationReasons.join(", ")}`,
         tokens_used: 0,
         status: "success",
+        reply_latency_seconds: latencySeconds,
       });
       await supabase.from("conversations").update({
         escalation_pending: true,
