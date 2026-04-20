@@ -9,16 +9,18 @@ Founder-only finance stack covering forecast → pipeline → invoice → cash.
 **Tables (founder-only RLS):**
 - `revenue_targets` — business_name, month (unique together), monthly_target, pipeline_target, conversion_assumption, currency.
 - `deals` — contact_id (FK contacts), business_name, deal_name, estimated_value_min/max, probability 0–100, status (NEW/QUALIFIED/PROPOSAL_SENT/WON/LOST), won_at, lost_at.
-- `invoices` — deal_id, contact_id, business_name, invoice_number (unique, INV-YYYY-NNNNN), amount_min/max, issued_date, due_date (default +14d), status (DRAFT/SENT/PAID/OVERDUE), notes (always carries "non-binding estimate" copy).
-- `payments` — invoice_id (FK), amount_received, received_date, method (bank/stripe/cash/other), reference.
-- `payment_events` — invoice_id (FK), event_type (reminder_sent/escalation_sent/critical_flagged/payment_received).
+- `invoices` — deal_id, contact_id, business_name, invoice_number (unique, INV-YYYY-NNNNN), amount_min/max, **expected_amount** (defaults to midpoint, used for payment comparison + reporting + forecasting), issued_date, due_date (default +14d), status (DRAFT/SENT/PARTIALLY_PAID/PAID/OVERDUE), **payment_risk_flag** (boolean, auto-true when >14d overdue), notes (always carries "non-binding estimate" copy).
+- `payments` — invoice_id (FK), business_name (auto-stamped from invoice), amount_received, received_date, method (bank/stripe/cash/other), reference.
+- `payment_events` — invoice_id (FK), business_name (auto-stamped from invoice), event_type (reminder_sent/escalation_sent/critical_flagged/payment_received).
 
 **Triggers:**
-- `handle_deal_won` (BEFORE UPDATE on deals): when status flips to WON, sets `won_at` and auto-creates a DRAFT invoice using the deal's mid amount + 14-day due date. No-op if an invoice already exists for that deal. Also stamps `lost_at` on LOST.
-- `handle_payment_received` (AFTER INSERT on payments): logs `payment_received` event; if cumulative payments ≥ invoice mid amount, auto-flips invoice to PAID.
+- `handle_deal_won` (BEFORE UPDATE on deals): when status flips to WON, sets `won_at`, auto-creates a DRAFT invoice (with expected_amount = midpoint, 14-day due date), AND **promotes the linked contact to CLIENT status** (which blocks further outreach via the sanity layer). No-op invoice if one already exists. Also stamps `lost_at` on LOST.
+- `handle_payment_received` (AFTER INSERT on payments): logs `payment_received` event; if cumulative payments ≥ invoice expected_amount → PAID; if 0 < total < expected → PARTIALLY_PAID.
+- `set_invoice_expected_amount` (BEFORE INSERT/UPDATE on invoices): defaults expected_amount to midpoint of (amount_min + amount_max) when null.
+- `stamp_business_name_from_invoice` (BEFORE INSERT on payments + payment_events): auto-copies business_name from parent invoice for multi-business safety.
 
 **RPCs:**
-- `finance_mark_overdue_invoices()` → flips SENT past due_date to OVERDUE, returns count.
+- `finance_mark_overdue_invoices()` → flips SENT/PARTIALLY_PAID past due_date to OVERDUE, sets payment_risk_flag=true on invoices >14d overdue, returns count.
 - `finance_target_vs_actual(_business_name?, _month?)` → returns per-business: monthly_target, pipeline_target, pipeline_value, closed_value, collected_value, outstanding_value, overdue_value, progress_pct.
 - `generate_invoice_number()` → INV-YYYY-NNNNN sequenced per calendar year.
 

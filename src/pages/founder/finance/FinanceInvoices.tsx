@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -12,9 +13,11 @@ type Invoice = {
   amount_min: number; amount_max: number; currency: string;
   issued_date: string; due_date: string; status: string; deal_id: string | null;
   notes: string;
+  expected_amount: number | null;
+  payment_risk_flag: boolean;
 };
 
-const STATUSES = ["DRAFT", "SENT", "PAID", "OVERDUE"] as const;
+const STATUSES = ["DRAFT", "SENT", "PARTIALLY_PAID", "PAID", "OVERDUE"] as const;
 
 const fmt = (n: number) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n || 0);
@@ -22,7 +25,7 @@ const fmt = (n: number) =>
 const statusVariant = (s: string): "default" | "destructive" | "secondary" | "outline" => {
   if (s === "PAID") return "default";
   if (s === "OVERDUE") return "destructive";
-  if (s === "SENT") return "outline";
+  if (s === "SENT" || s === "PARTIALLY_PAID") return "outline";
   return "secondary";
 };
 
@@ -41,14 +44,14 @@ const FinanceInvoices = () => {
   }
 
   async function updateStatus(id: string, status: string) {
-    const { error } = await supabase.from("invoices").update({ status: status as "DRAFT" | "SENT" | "PAID" | "OVERDUE" }).eq("id", id);
+    const { error } = await supabase.from("invoices").update({ status: status as "DRAFT" | "SENT" | "PARTIALLY_PAID" | "PAID" | "OVERDUE" }).eq("id", id);
     if (error) { toast.error(error.message); return; }
     toast.success(`Marked ${status}`);
     void load();
   }
 
   const visible = filter === "ALL" ? invoices : invoices.filter((i) => i.status === filter);
-  const total = visible.reduce((sum, i) => sum + (Number(i.amount_min) + Number(i.amount_max)) / 2, 0);
+  const total = visible.reduce((sum, i) => sum + Number(i.expected_amount ?? (Number(i.amount_min) + Number(i.amount_max)) / 2), 0);
 
   return (
     <FounderLayout>
@@ -81,12 +84,19 @@ const FinanceInvoices = () => {
             ) : (
               <div className="divide-y divide-border/50">
                 {visible.map((i) => {
-                  const mid = (Number(i.amount_min) + Number(i.amount_max)) / 2;
+                  const expected = Number(i.expected_amount ?? (Number(i.amount_min) + Number(i.amount_max)) / 2);
                   const overdueDays = Math.floor((Date.now() - new Date(i.due_date).getTime()) / (1000 * 60 * 60 * 24));
                   return (
                     <div key={i.id} className="p-4 flex items-center justify-between gap-4 flex-wrap">
                       <div className="min-w-0 flex-1">
-                        <p className="font-medium font-mono text-sm">{i.invoice_number}</p>
+                        <p className="font-medium font-mono text-sm flex items-center gap-2">
+                          {i.invoice_number}
+                          {i.payment_risk_flag && (
+                            <Badge variant="destructive" className="text-[10px] gap-1">
+                              <AlertTriangle className="h-3 w-3" />Payment Risk
+                            </Badge>
+                          )}
+                        </p>
                         <p className="text-xs text-muted-foreground">
                           {i.business_name || "Unassigned"} · Issued {i.issued_date} · Due {i.due_date}
                           {i.status === "OVERDUE" && overdueDays > 0 && ` · ${overdueDays}d overdue`}
@@ -94,10 +104,10 @@ const FinanceInvoices = () => {
                       </div>
                       <div className="text-sm tabular-nums hidden md:block">
                         {fmt(Number(i.amount_min))}–{fmt(Number(i.amount_max))}
-                        <span className="text-muted-foreground"> · est. {fmt(mid)}</span>
+                        <span className="text-muted-foreground"> · expected {fmt(expected)}</span>
                       </div>
                       <Select value={i.status} onValueChange={(v) => updateStatus(i.id, v)}>
-                        <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
+                        <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           {STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                         </SelectContent>

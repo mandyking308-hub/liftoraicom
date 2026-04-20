@@ -1454,10 +1454,12 @@ export type Database = {
           currency: string
           deal_id: string | null
           due_date: string
+          expected_amount: number | null
           id: string
           invoice_number: string
           issued_date: string
           notes: string
+          payment_risk_flag: boolean
           status: Database["public"]["Enums"]["invoice_status"]
           updated_at: string
         }
@@ -1470,10 +1472,12 @@ export type Database = {
           currency?: string
           deal_id?: string | null
           due_date?: string
+          expected_amount?: number | null
           id?: string
           invoice_number: string
           issued_date?: string
           notes?: string
+          payment_risk_flag?: boolean
           status?: Database["public"]["Enums"]["invoice_status"]
           updated_at?: string
         }
@@ -1486,10 +1490,12 @@ export type Database = {
           currency?: string
           deal_id?: string | null
           due_date?: string
+          expected_amount?: number | null
           id?: string
           invoice_number?: string
           issued_date?: string
           notes?: string
+          payment_risk_flag?: boolean
           status?: Database["public"]["Enums"]["invoice_status"]
           updated_at?: string
         }
@@ -2261,6 +2267,7 @@ export type Database = {
       }
       payment_events: {
         Row: {
+          business_name: string
           details: string
           event_type: Database["public"]["Enums"]["payment_event_type"]
           id: string
@@ -2268,6 +2275,7 @@ export type Database = {
           timestamp: string
         }
         Insert: {
+          business_name?: string
           details?: string
           event_type: Database["public"]["Enums"]["payment_event_type"]
           id?: string
@@ -2275,6 +2283,7 @@ export type Database = {
           timestamp?: string
         }
         Update: {
+          business_name?: string
           details?: string
           event_type?: Database["public"]["Enums"]["payment_event_type"]
           id?: string
@@ -2294,6 +2303,7 @@ export type Database = {
       payments: {
         Row: {
           amount_received: number
+          business_name: string
           created_at: string
           id: string
           invoice_id: string
@@ -2303,6 +2313,7 @@ export type Database = {
         }
         Insert: {
           amount_received?: number
+          business_name?: string
           created_at?: string
           id?: string
           invoice_id: string
@@ -2312,6 +2323,7 @@ export type Database = {
         }
         Update: {
           amount_received?: number
+          business_name?: string
           created_at?: string
           id?: string
           invoice_id?: string
@@ -3927,7 +3939,7 @@ export type Database = {
         | "replied"
         | "bounced"
       inbox_warmup_status: "new" | "warming" | "active"
-      invoice_status: "DRAFT" | "SENT" | "PAID" | "OVERDUE"
+      invoice_status: "DRAFT" | "SENT" | "PAID" | "OVERDUE" | "PARTIALLY_PAID"
       payment_event_type:
         | "reminder_sent"
         | "escalation_sent"
@@ -4083,7 +4095,7 @@ export const Constants = {
         "bounced",
       ],
       inbox_warmup_status: ["new", "warming", "active"],
-      invoice_status: ["DRAFT", "SENT", "PAID", "OVERDUE"],
+      invoice_status: ["DRAFT", "SENT", "PAID", "OVERDUE", "PARTIALLY_PAID"],
       payment_event_type: [
         "reminder_sent",
         "escalation_sent",

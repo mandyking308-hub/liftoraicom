@@ -33,7 +33,7 @@ const FinancePayments = () => {
     setLoading(true);
     const [p, i] = await Promise.all([
       supabase.from("payments").select("*").order("received_date", { ascending: false }),
-      supabase.from("invoices").select("id, invoice_number, business_name, status").in("status", ["SENT", "OVERDUE", "PAID"]).order("issued_date", { ascending: false }),
+      supabase.from("invoices").select("id, invoice_number, business_name, status").in("status", ["SENT", "OVERDUE", "PARTIALLY_PAID", "PAID"]).order("issued_date", { ascending: false }),
     ]);
     setPayments((p.data as Payment[]) ?? []);
     setInvoices((i.data as Invoice[]) ?? []);
@@ -67,7 +67,7 @@ const FinancePayments = () => {
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Payments</h1>
             <p className="text-muted-foreground mt-1 text-sm">
-              Recorded payments. Once cumulative payments cover the invoice mid-amount, the invoice auto-marks as PAID.
+              Recorded payments. Partial payments mark the invoice as PARTIALLY_PAID; once cumulative payments cover the expected amount, the invoice auto-marks as PAID.
             </p>
           </div>
           <div className="flex gap-2 items-center">
