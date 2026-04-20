@@ -263,6 +263,7 @@ export type Database = {
           created_at: string
           error_message: string
           id: string
+          reply_latency_seconds: number | null
           reply_preview: string
           status: Database["public"]["Enums"]["ai_action_status"]
           tokens_used: number
@@ -275,6 +276,7 @@ export type Database = {
           created_at?: string
           error_message?: string
           id?: string
+          reply_latency_seconds?: number | null
           reply_preview?: string
           status?: Database["public"]["Enums"]["ai_action_status"]
           tokens_used?: number
@@ -287,6 +289,7 @@ export type Database = {
           created_at?: string
           error_message?: string
           id?: string
+          reply_latency_seconds?: number | null
           reply_preview?: string
           status?: Database["public"]["Enums"]["ai_action_status"]
           tokens_used?: number
@@ -918,7 +921,11 @@ export type Database = {
           escalation_pending: boolean
           escalation_reason: string
           id: string
+          intent_history: Json
+          last_ai_reply_at: string | null
+          last_intent: string
           last_message_at: string
+          priority_boost: number
           status: Database["public"]["Enums"]["conversation_status"]
           updated_at: string
         }
@@ -930,7 +937,11 @@ export type Database = {
           escalation_pending?: boolean
           escalation_reason?: string
           id?: string
+          intent_history?: Json
+          last_ai_reply_at?: string | null
+          last_intent?: string
           last_message_at?: string
+          priority_boost?: number
           status?: Database["public"]["Enums"]["conversation_status"]
           updated_at?: string
         }
@@ -942,7 +953,11 @@ export type Database = {
           escalation_pending?: boolean
           escalation_reason?: string
           id?: string
+          intent_history?: Json
+          last_ai_reply_at?: string | null
+          last_intent?: string
           last_message_at?: string
+          priority_boost?: number
           status?: Database["public"]["Enums"]["conversation_status"]
           updated_at?: string
         }
