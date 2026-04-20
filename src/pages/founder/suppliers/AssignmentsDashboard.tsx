@@ -279,6 +279,13 @@ const AssignmentsDashboard = () => {
                           {a.requires_finance_action && (
                             <Badge variant="outline" className="text-xs">finance →</Badge>
                           )}
+                          {a.acknowledged_at ? (
+                            <Badge variant="outline" className="text-xs gap-1 border-primary/40 text-primary" title={`Acknowledged ${new Date(a.acknowledged_at).toLocaleString()}`}>
+                              <CheckCheck className="h-3 w-3" /> ack
+                            </Badge>
+                          ) : a.status === "assigned" ? (
+                            <Badge variant="outline" className="text-xs">unacknowledged</Badge>
+                          ) : null}
                         </div>
                         <p className="text-xs text-muted-foreground mt-0.5">
                           {a.business_name || "—"} · {new Date(a.assigned_at).toLocaleString()}
@@ -320,6 +327,11 @@ const AssignmentsDashboard = () => {
                             <ShieldCheck className="h-3 w-3 mr-1" /> Confirm
                           </Button>
                         )}
+                        {(a.status === "failed" || a.sla_status === "at_risk" || a.sla_status === "overdue") && (
+                          <Button size="sm" variant="outline" onClick={() => openSuggestions(a)}>
+                            <RefreshCw className="h-3 w-3 mr-1" /> Suggest
+                          </Button>
+                        )}
                       </div>
                     </li>
                   );
@@ -329,6 +341,32 @@ const AssignmentsDashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={!!suggestFor} onOpenChange={(o) => !o && setSuggestFor(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Suggested replacement suppliers</DialogTitle></DialogHeader>
+          {suggestLoading ? (
+            <p className="text-sm text-muted-foreground">Finding matches…</p>
+          ) : suggestions.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No eligible alternatives found (skills, business pool, or availability mismatch).</p>
+          ) : (
+            <ul className="divide-y divide-border/50 -mx-2">
+              {suggestions.map((s) => (
+                <li key={s.id} className="flex items-center justify-between gap-2 px-2 py-2">
+                  <div className="text-sm">
+                    <p className="font-medium">{s.name || s.email}</p>
+                    <p className="text-xs text-muted-foreground">{s.business_name || "global"} · score {s.supplier_score ?? 50}</p>
+                  </div>
+                  <Button size="sm" disabled={reassigning === s.id} onClick={() => reassignTo(s.id)}>
+                    {reassigning === s.id ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : null}
+                    Reassign
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </DialogContent>
+      </Dialog>
     </FounderLayout>
   );
 };
