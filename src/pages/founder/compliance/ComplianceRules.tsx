@@ -13,6 +13,8 @@ type Rule = {
   severity: "low" | "medium" | "high" | "critical";
   description: string; active: boolean;
   enforcement_mode: "log_only" | "warn" | "block";
+  hit_count: number;
+  last_hit_at: string | null;
 };
 
 const SEV_VARIANT: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
@@ -26,8 +28,8 @@ const ComplianceRules = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("compliance_rules" as never)
-        .select("id, name, category, jurisdiction, severity, description, active, enforcement_mode")
-        .order("category").order("name");
+        .select("id, name, category, jurisdiction, severity, description, active, enforcement_mode, hit_count, last_hit_at")
+        .order("category").order("hit_count", { ascending: false });
       if (error) throw error;
       return (data as unknown as Rule[]) ?? [];
     },
@@ -69,6 +71,7 @@ const ComplianceRules = () => {
                     <TableHead>Rule</TableHead>
                     <TableHead>Jurisdiction</TableHead>
                     <TableHead>Severity</TableHead>
+                    <TableHead>Hits</TableHead>
                     <TableHead>Enforcement</TableHead>
                     <TableHead>Active</TableHead>
                   </TableRow>
@@ -82,6 +85,11 @@ const ComplianceRules = () => {
                       </TableCell>
                       <TableCell><Badge variant="outline" className="text-xs">{r.jurisdiction}</Badge></TableCell>
                       <TableCell><Badge variant={SEV_VARIANT[r.severity]}>{r.severity}</Badge></TableCell>
+                      <TableCell>
+                        <Badge variant={r.hit_count > 50 ? "destructive" : r.hit_count > 10 ? "default" : "outline"} className="font-mono">
+                          {r.hit_count ?? 0}
+                        </Badge>
+                      </TableCell>
                       <TableCell>
                         <Select value={r.enforcement_mode} onValueChange={(v) => setEnforcement(r, v as Rule["enforcement_mode"])}>
                           <SelectTrigger className="h-8 w-32"><SelectValue /></SelectTrigger>
