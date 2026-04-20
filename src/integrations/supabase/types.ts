@@ -254,6 +254,53 @@ export type Database = {
           },
         ]
       }
+      ai_actions: {
+        Row: {
+          action_type: Database["public"]["Enums"]["ai_action_type"]
+          classification: string
+          contact_id: string
+          conversation_id: string
+          created_at: string
+          error_message: string
+          id: string
+          reply_preview: string
+          status: Database["public"]["Enums"]["ai_action_status"]
+          tokens_used: number
+        }
+        Insert: {
+          action_type: Database["public"]["Enums"]["ai_action_type"]
+          classification?: string
+          contact_id: string
+          conversation_id: string
+          created_at?: string
+          error_message?: string
+          id?: string
+          reply_preview?: string
+          status?: Database["public"]["Enums"]["ai_action_status"]
+          tokens_used?: number
+        }
+        Update: {
+          action_type?: Database["public"]["Enums"]["ai_action_type"]
+          classification?: string
+          contact_id?: string
+          conversation_id?: string
+          created_at?: string
+          error_message?: string
+          id?: string
+          reply_preview?: string
+          status?: Database["public"]["Enums"]["ai_action_status"]
+          tokens_used?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_actions_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_agents: {
         Row: {
           agent_function: string
@@ -861,6 +908,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      conversations: {
+        Row: {
+          ai_last_used_at: string | null
+          business_name: string
+          contact_id: string
+          created_at: string
+          escalation_pending: boolean
+          escalation_reason: string
+          id: string
+          last_message_at: string
+          status: Database["public"]["Enums"]["conversation_status"]
+          updated_at: string
+        }
+        Insert: {
+          ai_last_used_at?: string | null
+          business_name?: string
+          contact_id: string
+          created_at?: string
+          escalation_pending?: boolean
+          escalation_reason?: string
+          id?: string
+          last_message_at?: string
+          status?: Database["public"]["Enums"]["conversation_status"]
+          updated_at?: string
+        }
+        Update: {
+          ai_last_used_at?: string | null
+          business_name?: string
+          contact_id?: string
+          created_at?: string
+          escalation_pending?: boolean
+          escalation_reason?: string
+          id?: string
+          last_message_at?: string
+          status?: Database["public"]["Enums"]["conversation_status"]
+          updated_at?: string
+        }
+        Relationships: []
       }
       deals: {
         Row: {
@@ -2072,6 +2158,50 @@ export type Database = {
           version_number?: number
         }
         Relationships: []
+      }
+      messages: {
+        Row: {
+          ai_generated: boolean
+          channel: Database["public"]["Enums"]["communication_channel"]
+          contact_id: string
+          content: string
+          conversation_id: string
+          created_at: string
+          direction: Database["public"]["Enums"]["communication_direction"]
+          id: string
+          inbox_id: string | null
+        }
+        Insert: {
+          ai_generated?: boolean
+          channel?: Database["public"]["Enums"]["communication_channel"]
+          contact_id: string
+          content?: string
+          conversation_id: string
+          created_at?: string
+          direction: Database["public"]["Enums"]["communication_direction"]
+          id?: string
+          inbox_id?: string | null
+        }
+        Update: {
+          ai_generated?: boolean
+          channel?: Database["public"]["Enums"]["communication_channel"]
+          contact_id?: string
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          direction?: Database["public"]["Enums"]["communication_direction"]
+          id?: string
+          inbox_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       monitored_systems: {
         Row: {
@@ -4165,6 +4295,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      ai_actions_today: { Args: { _conversation_id: string }; Returns: number }
       assign_inbox_for_contact: {
         Args: { _contact_id: string }
         Returns: string
@@ -4252,6 +4383,8 @@ export type Database = {
       }
     }
     Enums: {
+      ai_action_status: "success" | "failed"
+      ai_action_type: "classify" | "reply" | "escalate"
       app_role: "admin" | "founder" | "client" | "partner"
       communication_channel: "email" | "whatsapp" | "linkedin"
       communication_direction: "outbound" | "inbound"
@@ -4263,6 +4396,7 @@ export type Database = {
         | "CLIENT"
         | "SUPPLIER"
         | "DO_NOT_CONTACT"
+      conversation_status: "OPEN" | "QUALIFIED" | "CLOSED"
       deal_status: "NEW" | "QUALIFIED" | "PROPOSAL_SENT" | "WON" | "LOST"
       email_event_type:
         | "sent"
@@ -4409,6 +4543,8 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      ai_action_status: ["success", "failed"],
+      ai_action_type: ["classify", "reply", "escalate"],
       app_role: ["admin", "founder", "client", "partner"],
       communication_channel: ["email", "whatsapp", "linkedin"],
       communication_direction: ["outbound", "inbound"],
@@ -4421,6 +4557,7 @@ export const Constants = {
         "SUPPLIER",
         "DO_NOT_CONTACT",
       ],
+      conversation_status: ["OPEN", "QUALIFIED", "CLOSED"],
       deal_status: ["NEW", "QUALIFIED", "PROPOSAL_SENT", "WON", "LOST"],
       email_event_type: [
         "sent",
