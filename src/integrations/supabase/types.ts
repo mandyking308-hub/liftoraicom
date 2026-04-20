@@ -6294,7 +6294,12 @@ export type Database = {
         | "critical_flagged"
         | "payment_received"
       payment_method: "bank" | "stripe" | "cash" | "other"
-      priority_entity_type: "contact" | "conversation" | "deal" | "assignment"
+      priority_entity_type:
+        | "contact"
+        | "conversation"
+        | "deal"
+        | "assignment"
+        | "invoice"
       priority_level: "low" | "medium" | "high" | "critical"
       reputation_event_type:
         | "bounce"
@@ -6534,7 +6539,13 @@ export const Constants = {
         "payment_received",
       ],
       payment_method: ["bank", "stripe", "cash", "other"],
-      priority_entity_type: ["contact", "conversation", "deal", "assignment"],
+      priority_entity_type: [
+        "contact",
+        "conversation",
+        "deal",
+        "assignment",
+        "invoice",
+      ],
       priority_level: ["low", "medium", "high", "critical"],
       reputation_event_type: [
         "bounce",
