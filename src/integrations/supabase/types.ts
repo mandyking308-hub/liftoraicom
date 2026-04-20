@@ -815,6 +815,65 @@ export type Database = {
           },
         ]
       }
+      deals: {
+        Row: {
+          business_name: string
+          contact_id: string | null
+          created_at: string
+          currency: string
+          deal_name: string
+          estimated_value_max: number
+          estimated_value_min: number
+          id: string
+          lost_at: string | null
+          notes: string
+          probability: number
+          status: Database["public"]["Enums"]["deal_status"]
+          updated_at: string
+          won_at: string | null
+        }
+        Insert: {
+          business_name?: string
+          contact_id?: string | null
+          created_at?: string
+          currency?: string
+          deal_name: string
+          estimated_value_max?: number
+          estimated_value_min?: number
+          id?: string
+          lost_at?: string | null
+          notes?: string
+          probability?: number
+          status?: Database["public"]["Enums"]["deal_status"]
+          updated_at?: string
+          won_at?: string | null
+        }
+        Update: {
+          business_name?: string
+          contact_id?: string | null
+          created_at?: string
+          currency?: string
+          deal_name?: string
+          estimated_value_max?: number
+          estimated_value_min?: number
+          id?: string
+          lost_at?: string | null
+          notes?: string
+          probability?: number
+          status?: Database["public"]["Enums"]["deal_status"]
+          updated_at?: string
+          won_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deals_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       decision_recommendations: {
         Row: {
           affected_system: string | null
@@ -1384,6 +1443,72 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      invoices: {
+        Row: {
+          amount_max: number
+          amount_min: number
+          business_name: string
+          contact_id: string | null
+          created_at: string
+          currency: string
+          deal_id: string | null
+          due_date: string
+          id: string
+          invoice_number: string
+          issued_date: string
+          notes: string
+          status: Database["public"]["Enums"]["invoice_status"]
+          updated_at: string
+        }
+        Insert: {
+          amount_max?: number
+          amount_min?: number
+          business_name?: string
+          contact_id?: string | null
+          created_at?: string
+          currency?: string
+          deal_id?: string | null
+          due_date?: string
+          id?: string
+          invoice_number: string
+          issued_date?: string
+          notes?: string
+          status?: Database["public"]["Enums"]["invoice_status"]
+          updated_at?: string
+        }
+        Update: {
+          amount_max?: number
+          amount_min?: number
+          business_name?: string
+          contact_id?: string | null
+          created_at?: string
+          currency?: string
+          deal_id?: string | null
+          due_date?: string
+          id?: string
+          invoice_number?: string
+          issued_date?: string
+          notes?: string
+          status?: Database["public"]["Enums"]["invoice_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       knowledge_documents: {
         Row: {
@@ -2134,6 +2259,76 @@ export type Database = {
           },
         ]
       }
+      payment_events: {
+        Row: {
+          details: string
+          event_type: Database["public"]["Enums"]["payment_event_type"]
+          id: string
+          invoice_id: string
+          timestamp: string
+        }
+        Insert: {
+          details?: string
+          event_type: Database["public"]["Enums"]["payment_event_type"]
+          id?: string
+          invoice_id: string
+          timestamp?: string
+        }
+        Update: {
+          details?: string
+          event_type?: Database["public"]["Enums"]["payment_event_type"]
+          id?: string
+          invoice_id?: string
+          timestamp?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_events_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          amount_received: number
+          created_at: string
+          id: string
+          invoice_id: string
+          method: Database["public"]["Enums"]["payment_method"]
+          received_date: string
+          reference: string
+        }
+        Insert: {
+          amount_received?: number
+          created_at?: string
+          id?: string
+          invoice_id: string
+          method?: Database["public"]["Enums"]["payment_method"]
+          received_date?: string
+          reference?: string
+        }
+        Update: {
+          amount_received?: number
+          created_at?: string
+          id?: string
+          invoice_id?: string
+          method?: Database["public"]["Enums"]["payment_method"]
+          received_date?: string
+          reference?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       platform_diagnostic_runs: {
         Row: {
           created_at: string
@@ -2833,6 +3028,42 @@ export type Database = {
           source_name?: string
           source_type?: string
           status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      revenue_targets: {
+        Row: {
+          business_name: string
+          conversion_assumption: number
+          created_at: string
+          currency: string
+          id: string
+          month: string
+          monthly_target: number
+          pipeline_target: number
+          updated_at: string
+        }
+        Insert: {
+          business_name?: string
+          conversion_assumption?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          month: string
+          monthly_target?: number
+          pipeline_target?: number
+          updated_at?: string
+        }
+        Update: {
+          business_name?: string
+          conversion_assumption?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          month?: string
+          monthly_target?: number
+          pipeline_target?: number
           updated_at?: string
         }
         Relationships: []
@@ -3618,6 +3849,22 @@ export type Database = {
     Functions: {
       check_outreach_allowed: { Args: { _contact_id: string }; Returns: Json }
       expire_inactive_conversations: { Args: never; Returns: number }
+      finance_mark_overdue_invoices: { Args: never; Returns: number }
+      finance_target_vs_actual: {
+        Args: { _business_name?: string; _month?: string }
+        Returns: {
+          business_name: string
+          closed_value: number
+          collected_value: number
+          monthly_target: number
+          outstanding_value: number
+          overdue_value: number
+          pipeline_target: number
+          pipeline_value: number
+          progress_pct: number
+        }[]
+      }
+      generate_invoice_number: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -3671,6 +3918,7 @@ export type Database = {
         | "CLIENT"
         | "SUPPLIER"
         | "DO_NOT_CONTACT"
+      deal_status: "NEW" | "QUALIFIED" | "PROPOSAL_SENT" | "WON" | "LOST"
       email_event_type:
         | "sent"
         | "delivered"
@@ -3679,6 +3927,13 @@ export type Database = {
         | "replied"
         | "bounced"
       inbox_warmup_status: "new" | "warming" | "active"
+      invoice_status: "DRAFT" | "SENT" | "PAID" | "OVERDUE"
+      payment_event_type:
+        | "reminder_sent"
+        | "escalation_sent"
+        | "critical_flagged"
+        | "payment_received"
+      payment_method: "bank" | "stripe" | "cash" | "other"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -3818,6 +4073,7 @@ export const Constants = {
         "SUPPLIER",
         "DO_NOT_CONTACT",
       ],
+      deal_status: ["NEW", "QUALIFIED", "PROPOSAL_SENT", "WON", "LOST"],
       email_event_type: [
         "sent",
         "delivered",
@@ -3827,6 +4083,14 @@ export const Constants = {
         "bounced",
       ],
       inbox_warmup_status: ["new", "warming", "active"],
+      invoice_status: ["DRAFT", "SENT", "PAID", "OVERDUE"],
+      payment_event_type: [
+        "reminder_sent",
+        "escalation_sent",
+        "critical_flagged",
+        "payment_received",
+      ],
+      payment_method: ["bank", "stripe", "cash", "other"],
     },
   },
 } as const
