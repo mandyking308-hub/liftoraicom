@@ -5540,6 +5540,39 @@ export type Database = {
           },
         ]
       }
+      system_version_diffs: {
+        Row: {
+          added_count: number
+          created_at: string
+          diff_summary: Json
+          id: string
+          modified_count: number
+          removed_count: number
+          version_a: number
+          version_b: number
+        }
+        Insert: {
+          added_count?: number
+          created_at?: string
+          diff_summary?: Json
+          id?: string
+          modified_count?: number
+          removed_count?: number
+          version_a: number
+          version_b: number
+        }
+        Update: {
+          added_count?: number
+          created_at?: string
+          diff_summary?: Json
+          id?: string
+          modified_count?: number
+          removed_count?: number
+          version_a?: number
+          version_b?: number
+        }
+        Relationships: []
+      }
       system_versions: {
         Row: {
           backend_count: number
@@ -6324,6 +6357,10 @@ export type Database = {
         Args: { _contact_id: string; _inbox_id: string }
         Returns: Json
       }
+      compare_system_versions: {
+        Args: { _version_a: number; _version_b: number }
+        Returns: Json
+      }
       compliance_check_assignment: {
         Args: { _assignment_id: string }
         Returns: undefined
@@ -6364,6 +6401,7 @@ export type Database = {
       compute_system_health: { Args: never; Returns: undefined }
       country_to_timezone: { Args: { _country: string }; Returns: string }
       detect_anomalies: { Args: never; Returns: Json }
+      detect_orphan_content: { Args: never; Returns: Json }
       domain_for_inbox: { Args: { _inbox_id: string }; Returns: string }
       eligible_suppliers_for_deal: {
         Args: { _deal_id: string }
@@ -6404,6 +6442,7 @@ export type Database = {
       evaluate_ai_reply: { Args: { _text: string }; Returns: Json }
       expire_demos: { Args: never; Returns: number }
       expire_inactive_conversations: { Args: never; Returns: number }
+      export_full_system_snapshot: { Args: never; Returns: Json }
       finance_mark_overdue_invoices: { Args: never; Returns: number }
       finance_target_vs_actual: {
         Args: { _business_name?: string; _month?: string }
@@ -6813,6 +6852,7 @@ export type Database = {
         }
       }
       validate_full_system_coverage: { Args: never; Returns: Json }
+      validate_runtime_vs_documentation: { Args: never; Returns: Json }
       validate_system_integrity: { Args: never; Returns: Json }
     }
     Enums: {
