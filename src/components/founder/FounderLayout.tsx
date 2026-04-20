@@ -48,6 +48,7 @@ const navItems = [
   { label: "Templates", to: "/founder/templates", icon: LayoutTemplate },
   { label: "Expansion", to: "/founder/expansion", icon: Sparkles },
   { label: "Manual", to: "/founder/manual", icon: BookOpenCheck },
+  { label: "System Mirror", to: "/founder/manual/full", icon: Layers },
   { label: "Build Log", to: "/founder/build-log", icon: ClipboardList },
   { label: "Documents", to: "/founder/documents", icon: FileText },
   { label: "Platform Testing", to: "/founder/testing", icon: FlaskConical },
