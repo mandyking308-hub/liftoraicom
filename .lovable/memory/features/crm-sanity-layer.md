@@ -10,7 +10,7 @@ Single source of truth for outreach across all Liftor businesses.
 
 **Triggers:** inbound comm → conversation_active=true + auto-promote NEW/CONTACTED→ENGAGED; outbound → last_contacted_at + NEW→CONTACTED; bounced event → DO_NOT_CONTACT; replied event → reopen conversation. `expire_inactive_conversations()` clears active after 7 days.
 
-**Edge Function `crm-send-check`:** POST {contact_id|email, log_attempt?, channel?, message?}. Calls `check_outreach_allowed` RPC. Blocks when status in (ENGAGED/QUALIFIED/CLIENT/DO_NOT_CONTACT), conversation_active, last_contacted_at <48h, any bounced event, or no inbox assigned.
+**Edge Function `crm-send-check`:** POST {contact_id|email, log_attempt?, channel?, message?}. Calls `check_outreach_allowed` RPC. Blocks when status in (ENGAGED/QUALIFIED/CLIENT/DO_NOT_CONTACT), conversation_active, ANY communication (inbound or outbound) in last 24h, last_contacted_at <48h, any bounced event, or no inbox assigned.
 
 **Inbox assignment:** manual only. No outreach until set.
 
