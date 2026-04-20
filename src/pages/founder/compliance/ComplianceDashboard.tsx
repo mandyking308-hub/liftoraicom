@@ -54,11 +54,24 @@ const ComplianceDashboard = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("compliance_scores" as never)
-        .select("entity_type, entity_id, score, event_count, last_event_at")
+        .select("entity_type, entity_id, score, event_count, last_event_at, risk_trend, high_risk")
         .order("score", { ascending: false })
         .limit(15);
       if (error) throw error;
       return (data as unknown as ScoreRow[]) ?? [];
+    },
+  });
+
+  const { data: businessRisks = [] } = useQuery({
+    queryKey: ["business_risk_scores"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("business_risk_scores" as never)
+        .select("business_name, score, previous_score, risk_trend, high_risk, event_count")
+        .order("score", { ascending: false })
+        .limit(25);
+      if (error) throw error;
+      return (data as unknown as BusinessRisk[]) ?? [];
     },
   });
 
