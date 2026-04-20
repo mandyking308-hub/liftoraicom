@@ -5,7 +5,7 @@ import FounderLayout from "@/components/founder/FounderLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ShieldAlert, AlertTriangle, Globe, Activity } from "lucide-react";
+import { ShieldAlert, AlertTriangle, Globe, Activity, TrendingUp, TrendingDown, Minus, Building2 } from "lucide-react";
 import { format } from "date-fns";
 
 type EventRow = {
@@ -13,11 +13,24 @@ type EventRow = {
   flag_type: string; message: string; entity_type: string; entity_id: string | null;
   business_name: string; jurisdiction: string; created_at: string; resolved: boolean;
 };
-type ScoreRow = { entity_type: string; entity_id: string; score: number; event_count: number; last_event_at: string | null };
+type ScoreRow = {
+  entity_type: string; entity_id: string; score: number; event_count: number;
+  last_event_at: string | null; risk_trend: "up" | "stable" | "down"; high_risk: boolean;
+};
+type BusinessRisk = {
+  business_name: string; score: number; previous_score: number;
+  risk_trend: "up" | "stable" | "down"; high_risk: boolean; event_count: number;
+};
 type Jurisdiction = { country: string; gdpr_applicable: boolean; consent_required: boolean; region: string };
 
 const SEV_VARIANT: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   low: "outline", medium: "secondary", high: "default", critical: "destructive",
+};
+
+const TrendIcon = ({ trend }: { trend: "up" | "stable" | "down" }) => {
+  if (trend === "up") return <TrendingUp className="h-3.5 w-3.5 text-destructive" />;
+  if (trend === "down") return <TrendingDown className="h-3.5 w-3.5 text-primary" />;
+  return <Minus className="h-3.5 w-3.5 text-muted-foreground" />;
 };
 
 const ComplianceDashboard = () => {
