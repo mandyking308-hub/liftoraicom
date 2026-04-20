@@ -8,6 +8,12 @@ const corsHeaders = {
 
 const PER_RUN_LIMIT = 100;
 
+// Send variance: random jitter between sends to avoid pattern detection
+function jitterMs(): number {
+  // 30s → 180s
+  return Math.floor(30_000 + Math.random() * 150_000);
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
@@ -19,12 +25,14 @@ Deno.serve(async (req) => {
 
     const now = new Date();
 
-    // Pull due pending items (include previously delayed/throttled items whose retry time has arrived)
+    // Pull due items ordered by priority FIRST (reply-priority items get priority=10),
+    // then by scheduled_at. Includes previously delayed/throttled items whose retry time has arrived.
     const { data: due, error } = await supabase
       .from("email_queue")
-      .select("id, contact_id, campaign_id, sequence_step, inbox_id, business_name, scheduled_at")
+      .select("id, contact_id, campaign_id, sequence_step, inbox_id, business_name, scheduled_at, priority, retry_count")
       .in("status", ["pending", "delayed", "throttled"])
       .lte("scheduled_at", now.toISOString())
+      .order("priority", { ascending: true })
       .order("scheduled_at", { ascending: true })
       .limit(PER_RUN_LIMIT);
     if (error) return json({ error: error.message }, 500);
@@ -33,7 +41,13 @@ Deno.serve(async (req) => {
     let sent = 0, blocked = 0, failed = 0, delayed = 0;
     const touchedCampaigns = new Set<string>();
 
-    for (const item of due) {
+    for (let idx = 0; idx < due.length; idx++) {
+      const item = due[idx];
+      // Variance between sends (skip jitter on first item)
+      if (idx > 0 && sent > 0) {
+        await new Promise((r) => setTimeout(r, jitterMs()));
+      }
+
       // ===== THROTTLE / WINDOW / REPUTATION CHECK =====
       if (item.inbox_id) {
         const { data: throttle } = await supabase.rpc("check_send_throttle", {
@@ -120,15 +134,46 @@ Deno.serve(async (req) => {
         });
 
         await supabase.from("email_queue")
-          .update({ status: "sent", sent_at: new Date().toISOString() })
+          .update({ status: "sent", sent_at: new Date().toISOString(), last_attempt_at: new Date().toISOString() })
           .eq("id", item.id);
+
+        // Reset consecutive_failures for the inbox on success
+        if (item.inbox_id) {
+          await supabase.from("inboxes")
+            .update({ consecutive_failures: 0 })
+            .eq("id", item.inbox_id);
+        }
+
         sent += 1;
         touchedCampaigns.add(item.campaign_id);
       } catch (err) {
-        await supabase.from("email_queue")
-          .update({ status: "failed", block_reason: (err as Error).message.slice(0, 200) })
-          .eq("id", item.id);
-        failed += 1;
+        // Soft-fail retry: mark_send_failure handles exponential backoff (5/20/60 min)
+        // and only marks as "failed" after 3 attempts.
+        const { data: retryResult } = await supabase.rpc("mark_send_failure", {
+          _queue_id: item.id,
+          _error: (err as Error).message,
+        });
+        const result = retryResult as { status: string } | null;
+        if (result?.status === "failed") {
+          failed += 1;
+        } else {
+          delayed += 1;
+        }
+
+        // Bump consecutive_failures on the inbox
+        if (item.inbox_id) {
+          await supabase.rpc("increment_inbox_failures", { _inbox_id: item.inbox_id }).then(
+            () => {},
+            async () => {
+              // Fallback if RPC doesn't exist yet — just count it as a soft failure
+              const { data: inb } = await supabase.from("inboxes")
+                .select("consecutive_failures").eq("id", item.inbox_id).maybeSingle();
+              await supabase.from("inboxes")
+                .update({ consecutive_failures: (inb?.consecutive_failures ?? 0) + 1 })
+                .eq("id", item.inbox_id);
+            }
+          );
+        }
       }
     }
 
