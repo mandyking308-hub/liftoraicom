@@ -64,7 +64,7 @@ const CRMContactDetail = () => {
 
   async function updateContact(patch: Partial<Contact>) {
     if (!contact) return;
-    const { error } = await supabase.from("contacts").update(patch).eq("id", contact.id);
+    const { error } = await supabase.from("contacts").update(patch as never).eq("id", contact.id);
     if (error) {
       toast.error(error.message);
       return;

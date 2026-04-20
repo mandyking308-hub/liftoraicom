@@ -51,7 +51,7 @@ const CRMContacts = () => {
   async function load() {
     setLoading(true);
     let q = supabase.from("contacts").select("*").order("created_at", { ascending: false }).limit(200);
-    if (statusFilter !== "ALL") q = q.eq("status", statusFilter);
+    if (statusFilter !== "ALL") q = q.eq("status", statusFilter as never);
     const { data, error } = await q;
     if (error) toast.error(error.message);
     setContacts((data as Contact[]) ?? []);
