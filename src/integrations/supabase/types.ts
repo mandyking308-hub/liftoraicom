@@ -792,6 +792,42 @@ export type Database = {
         }
         Relationships: []
       }
+      business_risk_scores: {
+        Row: {
+          business_name: string
+          event_count: number
+          high_risk: boolean
+          id: string
+          last_event_at: string | null
+          previous_score: number
+          risk_trend: string
+          score: number
+          updated_at: string
+        }
+        Insert: {
+          business_name: string
+          event_count?: number
+          high_risk?: boolean
+          id?: string
+          last_event_at?: string | null
+          previous_score?: number
+          risk_trend?: string
+          score?: number
+          updated_at?: string
+        }
+        Update: {
+          business_name?: string
+          event_count?: number
+          high_risk?: boolean
+          id?: string
+          last_event_at?: string | null
+          previous_score?: number
+          risk_trend?: string
+          score?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       campaign_metrics: {
         Row: {
           bounce_rate: number
@@ -928,7 +964,9 @@ export type Database = {
           jurisdiction: string
           message: string
           metadata: Json
+          resolution_note: string
           resolved: boolean
+          resolved_at: string | null
           rule_id: string | null
           severity: Database["public"]["Enums"]["compliance_severity"]
         }
@@ -942,7 +980,9 @@ export type Database = {
           jurisdiction?: string
           message?: string
           metadata?: Json
+          resolution_note?: string
           resolved?: boolean
+          resolved_at?: string | null
           rule_id?: string | null
           severity?: Database["public"]["Enums"]["compliance_severity"]
         }
@@ -956,7 +996,9 @@ export type Database = {
           jurisdiction?: string
           message?: string
           metadata?: Json
+          resolution_note?: string
           resolved?: boolean
+          resolved_at?: string | null
           rule_id?: string | null
           severity?: Database["public"]["Enums"]["compliance_severity"]
         }
@@ -1011,8 +1053,10 @@ export type Database = {
           created_at: string
           description: string
           enforcement_mode: Database["public"]["Enums"]["compliance_enforcement"]
+          hit_count: number
           id: string
           jurisdiction: string
+          last_hit_at: string | null
           name: string
           severity: Database["public"]["Enums"]["compliance_severity"]
           updated_at: string
@@ -1024,8 +1068,10 @@ export type Database = {
           created_at?: string
           description?: string
           enforcement_mode?: Database["public"]["Enums"]["compliance_enforcement"]
+          hit_count?: number
           id?: string
           jurisdiction?: string
+          last_hit_at?: string | null
           name: string
           severity?: Database["public"]["Enums"]["compliance_severity"]
           updated_at?: string
@@ -1037,8 +1083,10 @@ export type Database = {
           created_at?: string
           description?: string
           enforcement_mode?: Database["public"]["Enums"]["compliance_enforcement"]
+          hit_count?: number
           id?: string
           jurisdiction?: string
+          last_hit_at?: string | null
           name?: string
           severity?: Database["public"]["Enums"]["compliance_severity"]
           updated_at?: string
@@ -1050,8 +1098,11 @@ export type Database = {
           entity_id: string
           entity_type: Database["public"]["Enums"]["compliance_entity_type"]
           event_count: number
+          high_risk: boolean
           id: string
           last_event_at: string | null
+          previous_score: number
+          risk_trend: string
           score: number
           updated_at: string
         }
@@ -1059,8 +1110,11 @@ export type Database = {
           entity_id: string
           entity_type: Database["public"]["Enums"]["compliance_entity_type"]
           event_count?: number
+          high_risk?: boolean
           id?: string
           last_event_at?: string | null
+          previous_score?: number
+          risk_trend?: string
           score?: number
           updated_at?: string
         }
@@ -1068,8 +1122,11 @@ export type Database = {
           entity_id?: string
           entity_type?: Database["public"]["Enums"]["compliance_entity_type"]
           event_count?: number
+          high_risk?: boolean
           id?: string
           last_event_at?: string | null
+          previous_score?: number
+          risk_trend?: string
           score?: number
           updated_at?: string
         }
@@ -1227,6 +1284,7 @@ export type Database = {
       deals: {
         Row: {
           business_name: string
+          compliance_score_at_close: number | null
           contact_id: string | null
           created_at: string
           currency: string
@@ -1244,6 +1302,7 @@ export type Database = {
         }
         Insert: {
           business_name?: string
+          compliance_score_at_close?: number | null
           contact_id?: string | null
           created_at?: string
           currency?: string
@@ -1261,6 +1320,7 @@ export type Database = {
         }
         Update: {
           business_name?: string
+          compliance_score_at_close?: number | null
           contact_id?: string | null
           created_at?: string
           currency?: string
@@ -5234,6 +5294,10 @@ export type Database = {
         }
       }
       recompute_all_supplier_scores: { Args: never; Returns: number }
+      recompute_business_risk_score: {
+        Args: { _business_name: string }
+        Returns: number
+      }
       recompute_campaign_metrics: {
         Args: { _campaign_id: string }
         Returns: undefined
@@ -5254,6 +5318,7 @@ export type Database = {
         Returns: number
       }
       refresh_all_assignment_sla: { Args: never; Returns: number }
+      refresh_all_business_risk_scores: { Args: never; Returns: number }
       reset_inbox_send_counts: { Args: never; Returns: number }
       run_compliance_checks: {
         Args: {
