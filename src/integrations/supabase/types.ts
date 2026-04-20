@@ -917,6 +917,59 @@ export type Database = {
         }
         Relationships: []
       }
+      compliance_events: {
+        Row: {
+          business_name: string
+          created_at: string
+          entity_id: string | null
+          entity_type: Database["public"]["Enums"]["compliance_entity_type"]
+          flag_type: string
+          id: string
+          jurisdiction: string
+          message: string
+          metadata: Json
+          resolved: boolean
+          rule_id: string | null
+          severity: Database["public"]["Enums"]["compliance_severity"]
+        }
+        Insert: {
+          business_name?: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type: Database["public"]["Enums"]["compliance_entity_type"]
+          flag_type?: string
+          id?: string
+          jurisdiction?: string
+          message?: string
+          metadata?: Json
+          resolved?: boolean
+          rule_id?: string | null
+          severity?: Database["public"]["Enums"]["compliance_severity"]
+        }
+        Update: {
+          business_name?: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: Database["public"]["Enums"]["compliance_entity_type"]
+          flag_type?: string
+          id?: string
+          jurisdiction?: string
+          message?: string
+          metadata?: Json
+          resolved?: boolean
+          rule_id?: string | null
+          severity?: Database["public"]["Enums"]["compliance_severity"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_events_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "compliance_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       compliance_items: {
         Row: {
           area: string
@@ -946,6 +999,78 @@ export type Database = {
           last_review_date?: string | null
           next_review_date?: string | null
           status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      compliance_rules: {
+        Row: {
+          active: boolean
+          category: Database["public"]["Enums"]["compliance_category"]
+          conditions: Json
+          created_at: string
+          description: string
+          enforcement_mode: Database["public"]["Enums"]["compliance_enforcement"]
+          id: string
+          jurisdiction: string
+          name: string
+          severity: Database["public"]["Enums"]["compliance_severity"]
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          category: Database["public"]["Enums"]["compliance_category"]
+          conditions?: Json
+          created_at?: string
+          description?: string
+          enforcement_mode?: Database["public"]["Enums"]["compliance_enforcement"]
+          id?: string
+          jurisdiction?: string
+          name: string
+          severity?: Database["public"]["Enums"]["compliance_severity"]
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          category?: Database["public"]["Enums"]["compliance_category"]
+          conditions?: Json
+          created_at?: string
+          description?: string
+          enforcement_mode?: Database["public"]["Enums"]["compliance_enforcement"]
+          id?: string
+          jurisdiction?: string
+          name?: string
+          severity?: Database["public"]["Enums"]["compliance_severity"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      compliance_scores: {
+        Row: {
+          entity_id: string
+          entity_type: Database["public"]["Enums"]["compliance_entity_type"]
+          event_count: number
+          id: string
+          last_event_at: string | null
+          score: number
+          updated_at: string
+        }
+        Insert: {
+          entity_id: string
+          entity_type: Database["public"]["Enums"]["compliance_entity_type"]
+          event_count?: number
+          id?: string
+          last_event_at?: string | null
+          score?: number
+          updated_at?: string
+        }
+        Update: {
+          entity_id?: string
+          entity_type?: Database["public"]["Enums"]["compliance_entity_type"]
+          event_count?: number
+          id?: string
+          last_event_at?: string | null
+          score?: number
           updated_at?: string
         }
         Relationships: []
@@ -1011,6 +1136,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      contract_templates: {
+        Row: {
+          active: boolean
+          business_name: string
+          created_at: string
+          id: string
+          jurisdiction: string
+          template_name: string
+          template_text: string
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          active?: boolean
+          business_name?: string
+          created_at?: string
+          id?: string
+          jurisdiction?: string
+          template_name: string
+          template_text?: string
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          active?: boolean
+          business_name?: string
+          created_at?: string
+          id?: string
+          jurisdiction?: string
+          template_name?: string
+          template_text?: string
+          updated_at?: string
+          version?: number
+        }
+        Relationships: []
       }
       conversations: {
         Row: {
@@ -2162,6 +2323,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      jurisdiction_profiles: {
+        Row: {
+          consent_required: boolean
+          country: string
+          created_at: string
+          data_transfer_restrictions: string
+          email_marketing_allowed: boolean
+          gdpr_applicable: boolean
+          id: string
+          notes: string
+          region: string
+          updated_at: string
+        }
+        Insert: {
+          consent_required?: boolean
+          country: string
+          created_at?: string
+          data_transfer_restrictions?: string
+          email_marketing_allowed?: boolean
+          gdpr_applicable?: boolean
+          id?: string
+          notes?: string
+          region?: string
+          updated_at?: string
+        }
+        Update: {
+          consent_required?: boolean
+          country?: string
+          created_at?: string
+          data_transfer_restrictions?: string
+          email_marketing_allowed?: boolean
+          gdpr_applicable?: boolean
+          id?: string
+          notes?: string
+          region?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       knowledge_documents: {
         Row: {
@@ -4834,6 +5034,31 @@ export type Database = {
         Returns: string
       }
       check_outreach_allowed: { Args: { _contact_id: string }; Returns: Json }
+      compliance_check_assignment: {
+        Args: { _assignment_id: string }
+        Returns: undefined
+      }
+      compliance_check_contact: {
+        Args: { _contact_id: string }
+        Returns: undefined
+      }
+      compliance_check_demo: { Args: { _demo_id: string }; Returns: undefined }
+      compliance_check_invoice: {
+        Args: { _invoice_id: string }
+        Returns: undefined
+      }
+      compliance_check_outbound_communication: {
+        Args: { _comm_id: string }
+        Returns: undefined
+      }
+      compliance_check_payment: {
+        Args: { _payment_id: string }
+        Returns: undefined
+      }
+      compliance_check_proposal: {
+        Args: { _proposal_id: string }
+        Returns: undefined
+      }
       compute_assignment_sla: {
         Args: {
           _expected: string
@@ -4945,6 +5170,19 @@ export type Database = {
         }
         Returns: boolean
       }
+      log_compliance_event: {
+        Args: {
+          _business_name: string
+          _entity_id: string
+          _entity_type: Database["public"]["Enums"]["compliance_entity_type"]
+          _flag_type: string
+          _jurisdiction: string
+          _message: string
+          _metadata?: Json
+          _rule_name: string
+        }
+        Returns: string
+      }
       log_demo_event: {
         Args: { _event_type: string; _metadata?: Json; _token: string }
         Returns: Json
@@ -5000,6 +5238,13 @@ export type Database = {
         Args: { _campaign_id: string }
         Returns: undefined
       }
+      recompute_compliance_score: {
+        Args: {
+          _entity_id: string
+          _entity_type: Database["public"]["Enums"]["compliance_entity_type"]
+        }
+        Returns: number
+      }
       recompute_proposal_score: {
         Args: { _proposal_id: string }
         Returns: number
@@ -5010,6 +5255,13 @@ export type Database = {
       }
       refresh_all_assignment_sla: { Args: never; Returns: number }
       reset_inbox_send_counts: { Args: never; Returns: number }
+      run_compliance_checks: {
+        Args: {
+          _entity_id: string
+          _entity_type: Database["public"]["Enums"]["compliance_entity_type"]
+        }
+        Returns: undefined
+      }
       score_contact: {
         Args: { _business_name?: string; _contact_id: string }
         Returns: {
@@ -5026,6 +5278,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      severity_weight: {
+        Args: { _s: Database["public"]["Enums"]["compliance_severity"] }
+        Returns: number
       }
       suggest_replacement_supplier: {
         Args: { _assignment_id: string }
@@ -5128,6 +5384,25 @@ export type Database = {
       assignment_status: "assigned" | "in_progress" | "completed" | "failed"
       communication_channel: "email" | "whatsapp" | "linkedin"
       communication_direction: "outbound" | "inbound"
+      compliance_category:
+        | "outreach"
+        | "data_privacy"
+        | "contracts"
+        | "delivery"
+        | "payments"
+      compliance_enforcement: "log_only" | "warn" | "block"
+      compliance_entity_type:
+        | "contact"
+        | "campaign"
+        | "message"
+        | "proposal"
+        | "demo"
+        | "deal"
+        | "assignment"
+        | "supplier"
+        | "invoice"
+        | "payment"
+      compliance_severity: "low" | "medium" | "high" | "critical"
       contact_status:
         | "NEW"
         | "CONTACTED"
@@ -5319,6 +5594,27 @@ export const Constants = {
       assignment_status: ["assigned", "in_progress", "completed", "failed"],
       communication_channel: ["email", "whatsapp", "linkedin"],
       communication_direction: ["outbound", "inbound"],
+      compliance_category: [
+        "outreach",
+        "data_privacy",
+        "contracts",
+        "delivery",
+        "payments",
+      ],
+      compliance_enforcement: ["log_only", "warn", "block"],
+      compliance_entity_type: [
+        "contact",
+        "campaign",
+        "message",
+        "proposal",
+        "demo",
+        "deal",
+        "assignment",
+        "supplier",
+        "invoice",
+        "payment",
+      ],
+      compliance_severity: ["low", "medium", "high", "critical"],
       contact_status: [
         "NEW",
         "CONTACTED",
