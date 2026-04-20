@@ -21,6 +21,8 @@ type Supplier = {
   status: string;
   source: string;
   created_at: string;
+  supplier_score: number;
+  last_activity_at: string | null;
 };
 
 type AvailabilityRow = { supplier_id: string; status: string };
@@ -174,6 +176,18 @@ const SuppliersDashboard = () => {
                       <div className="flex items-center gap-2">
                         <Badge variant={STATUS_VARIANT[s.status] as never}>{s.status}</Badge>
                         <Badge variant="outline" className="text-xs">{availabilityMap[s.id] || "—"}</Badge>
+                        <Badge
+                          variant="outline"
+                          className={`text-xs ${s.supplier_score >= 75 ? "border-primary/50 text-primary" : s.supplier_score < 40 ? "border-destructive/50 text-destructive" : ""}`}
+                          title="Supplier performance score (0–100)"
+                        >
+                          score {s.supplier_score ?? 50}
+                        </Badge>
+                        {s.last_activity_at && (
+                          <span className="text-[10px] text-muted-foreground hidden md:inline">
+                            active {new Date(s.last_activity_at).toLocaleDateString()}
+                          </span>
+                        )}
                       </div>
                     </Link>
                   </li>

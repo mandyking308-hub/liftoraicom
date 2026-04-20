@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Loader2, ShieldCheck, Clock, AlertTriangle } from "lucide-react";
+import { Plus, Loader2, ShieldCheck, Clock, AlertTriangle, RefreshCw, CheckCheck } from "lucide-react";
 import FounderLayout from "@/components/founder/FounderLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,9 +28,10 @@ type Assignment = {
   sla_status: "on_track" | "at_risk" | "overdue" | "n_a";
   completion_confirmed_by_founder: boolean;
   requires_finance_action: boolean;
+  acknowledged_at: string | null;
 };
 type Deal = { id: string; deal_name: string; business_name: string; contact_id: string | null; status: string };
-type Supplier = { id: string; name: string; email: string; business_name: string; status: string };
+type Supplier = { id: string; name: string; email: string; business_name: string; status: string; supplier_score?: number };
 
 const STATUS_TABS = ["all","assigned","in_progress","completed","failed"] as const;
 
