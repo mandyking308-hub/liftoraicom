@@ -846,6 +846,9 @@ const FullSystemMirror = () => {
                 <Button onClick={handleExport} className="w-full md:w-auto">
                   <Download size={16} className="mr-2" /> Download JSON Snapshot
                 </Button>
+                <Button onClick={handleExportPDF} variant="outline" className="w-full md:w-auto md:ml-2">
+                  <FileText size={16} className="mr-2" /> Download PDF Manual
+                </Button>
               </CardContent>
             </Card>
           </TabsContent>
