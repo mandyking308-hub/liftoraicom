@@ -201,6 +201,14 @@ Use the classify_and_reply tool. Classifications:
     const words = replyText.trim().split(/\s+/);
     if (words.length > MAX_REPLY_WORDS) replyText = words.slice(0, MAX_REPLY_WORDS).join(" ");
 
+    // Neutral follow-up loop guard:
+    // If prospect's reply is neutral AND we already sent an AI reply as the
+    // most recent outbound, do not reply again — prevents "ok / thanks" loops.
+    const lastOutbound = [...ordered].reverse().find((m) => m.direction === "outbound");
+    const lastWasAiReply = !!(lastOutbound && lastOutbound.ai_generated);
+    const suppressNeutralLoop = classification === "neutral" && lastWasAiReply;
+    if (suppressNeutralLoop) replyText = "";
+
     // Status updates from classification
     let newContactStatus: string | null = null;
     if (classification === "interested") newContactStatus = "QUALIFIED";
