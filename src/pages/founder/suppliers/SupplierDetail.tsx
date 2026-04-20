@@ -216,6 +216,62 @@ const SupplierDetail = () => {
           </CardContent>
         </Card>
 
+        <div className="grid md:grid-cols-2 gap-4">
+          <Card className="tech-card">
+            <CardHeader><CardTitle className="text-sm">Skills & tags</CardTitle></CardHeader>
+            <CardContent className="space-y-3">
+              <div>
+                <Label className="text-xs">Skills (comma-separated)</Label>
+                <Input
+                  defaultValue={(supplier.skills ?? []).join(", ")}
+                  placeholder="e.g. cardiology, frontend, luxury-jewellery"
+                  onBlur={(e) => {
+                    const next = e.target.value.split(",").map((s) => s.trim()).filter(Boolean);
+                    if (JSON.stringify(next) !== JSON.stringify(supplier.skills ?? [])) {
+                      void updateSupplier({ skills: next });
+                    }
+                  }}
+                />
+              </div>
+              <div>
+                <Label className="text-xs">Tags (comma-separated)</Label>
+                <Input
+                  defaultValue={(supplier.tags ?? []).join(", ")}
+                  placeholder="e.g. premium, eu-only"
+                  onBlur={(e) => {
+                    const next = e.target.value.split(",").map((s) => s.trim()).filter(Boolean);
+                    if (JSON.stringify(next) !== JSON.stringify(supplier.tags ?? [])) {
+                      void updateSupplier({ tags: next });
+                    }
+                  }}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">Used by skill-aware deal matching. Saves on blur.</p>
+            </CardContent>
+          </Card>
+
+          <Card className="tech-card">
+            <CardHeader><CardTitle className="text-sm">Capacity</CardTitle></CardHeader>
+            <CardContent className="space-y-2">
+              <Label className="text-xs">Max concurrent active assignments</Label>
+              <Input
+                type="number"
+                min={1}
+                defaultValue={availability?.capacity ?? 1}
+                onBlur={(e) => {
+                  const v = parseInt(e.target.value, 10);
+                  if (Number.isFinite(v) && v !== availability?.capacity) {
+                    void updateAvailability({ capacity: v });
+                  }
+                }}
+              />
+              <p className="text-xs text-muted-foreground">
+                Supplier auto-flips to <span className="font-medium">busy</span> when active assignments ≥ capacity.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
         <Card className="tech-card">
           <CardHeader><CardTitle className="text-sm">Assignments ({assignments.length})</CardTitle></CardHeader>
           <CardContent className="p-0">
