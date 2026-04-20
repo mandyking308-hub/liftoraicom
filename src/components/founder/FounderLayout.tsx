@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { LayoutDashboard, FileInput, GitBranch, FolderKanban, Activity, FileText, LogOut, Menu, X, Monitor, Bot, Workflow, Plug, Play, Command, Network, Layers, Rocket, BarChart3, Zap, BookOpen, Globe, Building2, Shield, ShieldAlert, LayoutTemplate, Sparkles, BookOpenCheck, ClipboardList, PoundSterling, Brain, Scale, Compass, MessageSquare, FlaskConical, Users, Banknote, Send, MessagesSquare, FileSignature, MonitorPlay, Briefcase, ClipboardCheck } from "lucide-react";
+import { LayoutDashboard, FileInput, GitBranch, FolderKanban, Activity, FileText, LogOut, Menu, X, Monitor, Bot, Workflow, Plug, Play, Command, Network, Layers, Rocket, BarChart3, Zap, BookOpen, Globe, Building2, Shield, ShieldAlert, ShieldCheck, LayoutTemplate, Sparkles, BookOpenCheck, ClipboardList, PoundSterling, Brain, Scale, Compass, MessageSquare, FlaskConical, Users, Banknote, Send, MessagesSquare, FileSignature, MonitorPlay, Briefcase, ClipboardCheck, Gavel } from "lucide-react";
 import { useState } from "react";
 
 const navItems = [
@@ -25,6 +25,8 @@ const navItems = [
   { label: "Demos", to: "/founder/demos", icon: MonitorPlay },
   { label: "Suppliers", to: "/founder/suppliers", icon: Briefcase },
   { label: "Assignments", to: "/founder/assignments", icon: ClipboardCheck },
+  { label: "Compliance", to: "/founder/compliance", icon: ShieldCheck },
+  { label: "Legal Console", to: "/founder/legal", icon: Gavel },
   { label: "Projects", to: "/founder/projects", icon: FolderKanban },
   { label: "Monitoring", to: "/founder/monitoring", icon: Monitor },
   { label: "Agents", to: "/founder/agents", icon: Bot },

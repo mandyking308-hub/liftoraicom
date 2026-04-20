@@ -108,6 +108,9 @@ import StrategyEngine from "./pages/founder/StrategyEngine";
 import FounderCoPilot from "./pages/founder/FounderCoPilot";
 import PlatformTesting from "./pages/founder/PlatformTesting";
 import FounderLegalConsole from "./pages/founder/FounderLegalConsole";
+import ComplianceDashboard from "./pages/founder/compliance/ComplianceDashboard";
+import ComplianceEvents from "./pages/founder/compliance/ComplianceEvents";
+import ComplianceRules from "./pages/founder/compliance/ComplianceRules";
 import CRMDashboard from "./pages/founder/CRMDashboard";
 import CRMContacts from "./pages/founder/CRMContacts";
 import CRMContactDetail from "./pages/founder/CRMContactDetail";
@@ -257,6 +260,9 @@ const App = () => (
             <Route path="/founder/copilot" element={<FounderRoute><FounderCoPilot /></FounderRoute>} />
             <Route path="/founder/testing" element={<FounderRoute><PlatformTesting /></FounderRoute>} />
             <Route path="/founder/legal" element={<FounderRoute><FounderLegalConsole /></FounderRoute>} />
+            <Route path="/founder/compliance" element={<FounderRoute><ComplianceDashboard /></FounderRoute>} />
+            <Route path="/founder/compliance/events" element={<FounderRoute><ComplianceEvents /></FounderRoute>} />
+            <Route path="/founder/compliance/rules" element={<FounderRoute><ComplianceRules /></FounderRoute>} />
             <Route path="/founder/crm" element={<FounderRoute><CRMDashboard /></FounderRoute>} />
             <Route path="/founder/crm/contacts" element={<FounderRoute><CRMContacts /></FounderRoute>} />
             <Route path="/founder/crm/contacts/:id" element={<FounderRoute><CRMContactDetail /></FounderRoute>} />
