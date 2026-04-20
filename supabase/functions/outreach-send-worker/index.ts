@@ -6,8 +6,6 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const SEND_WINDOW_START_UTC = 8;
-const SEND_WINDOW_END_UTC = 17;
 const PER_RUN_LIMIT = 100;
 
 Deno.serve(async (req) => {
@@ -20,26 +18,48 @@ Deno.serve(async (req) => {
     );
 
     const now = new Date();
-    const hourUtc = now.getUTCHours();
-    const inWindow = hourUtc >= SEND_WINDOW_START_UTC && hourUtc < SEND_WINDOW_END_UTC;
 
-    // Pull due pending items
+    // Pull due pending items (include previously delayed/throttled items whose retry time has arrived)
     const { data: due, error } = await supabase
       .from("email_queue")
       .select("id, contact_id, campaign_id, sequence_step, inbox_id, business_name, scheduled_at")
-      .eq("status", "pending")
+      .in("status", ["pending", "delayed", "throttled"])
       .lte("scheduled_at", now.toISOString())
       .order("scheduled_at", { ascending: true })
       .limit(PER_RUN_LIMIT);
     if (error) return json({ error: error.message }, 500);
-    if (!due?.length) return json({ processed: 0, sent: 0, blocked: 0, skipped_window: 0 }, 200);
+    if (!due?.length) return json({ processed: 0, sent: 0, blocked: 0, delayed: 0 }, 200);
 
-    let sent = 0, blocked = 0, failed = 0, skipped_window = 0;
+    let sent = 0, blocked = 0, failed = 0, delayed = 0;
     const touchedCampaigns = new Set<string>();
 
     for (const item of due) {
-      // Window check (use UTC; per spec contact country could refine — kept simple)
-      if (!inWindow) { skipped_window += 1; continue; }
+      // ===== THROTTLE / WINDOW / REPUTATION CHECK =====
+      if (item.inbox_id) {
+        const { data: throttle } = await supabase.rpc("check_send_throttle", {
+          _inbox_id: item.inbox_id,
+          _contact_id: item.contact_id,
+        });
+        const decision = throttle as { allowed: boolean; reason: string; retry_at: string | null } | null;
+        if (decision && !decision.allowed) {
+          const retryAt = decision.retry_at ?? new Date(Date.now() + 60 * 60 * 1000).toISOString();
+          const newStatus = decision.reason === "REPUTATION_PAUSE" || decision.reason === "DOMAIN_REPUTATION_PAUSE"
+            ? "throttled" : "delayed";
+          await supabase.from("email_queue").update({
+            status: newStatus,
+            block_reason: decision.reason,
+            scheduled_at: retryAt,
+          }).eq("id", item.id);
+          await supabase.from("activity_log").insert({
+            event_type: newStatus === "throttled" ? "send_blocked" : "send_delayed",
+            description: `Queue ${item.id} ${newStatus}: ${decision.reason}`,
+            entity_type: "email_queue",
+            entity_id: item.id,
+          });
+          delayed += 1;
+          continue;
+        }
+      }
 
       // Fetch sequence step content
       const { data: seq } = await supabase
@@ -116,7 +136,7 @@ Deno.serve(async (req) => {
       await supabase.rpc("recompute_campaign_metrics", { _campaign_id: cid });
     }
 
-    return json({ processed: due.length, sent, blocked, failed, skipped_window }, 200);
+    return json({ processed: due.length, sent, blocked, failed, delayed }, 200);
   } catch (err) {
     return json({ error: (err as Error).message }, 500);
   }
