@@ -15,6 +15,7 @@ import {
   Layers, FileText, Workflow, Shield, Network, Plug, RefreshCw, CheckCircle2,
   AlertTriangle, History, Search, Database, Code2,
 } from "lucide-react";
+import { Download, GitCompare, Activity } from "lucide-react";
 
 const FullSystemMirror = () => {
   const qc = useQueryClient();
@@ -130,6 +131,27 @@ const FullSystemMirror = () => {
     },
   });
 
+  const { data: versions = [] } = useQuery({
+    queryKey: ["mirror-versions"],
+    queryFn: async () => {
+      const { data } = await supabase.from("system_versions")
+        .select("*").order("version_number", { ascending: false }).limit(50);
+      return data ?? [];
+    },
+  });
+
+  const { data: diffs = [] } = useQuery({
+    queryKey: ["mirror-diffs"],
+    queryFn: async () => {
+      const { data } = await supabase.from("system_version_diffs" as never)
+        .select("*").order("created_at", { ascending: false }).limit(20);
+      return (data as any[]) ?? [];
+    },
+  });
+
+  const [versionA, setVersionA] = useState<string>("");
+  const [versionB, setVersionB] = useState<string>("");
+
   const filterFn = (haystack: string) =>
     !search || haystack.toLowerCase().includes(search.toLowerCase());
 
@@ -165,6 +187,54 @@ const FullSystemMirror = () => {
     if (gaps > 0) toast.warning(`Coverage ${score}% — ${gaps} gap${gaps>1?"s":""} flagged`);
     else toast.success(`Coverage ${score}% — no gaps`);
     qc.invalidateQueries();
+  };
+
+  const handleRuntimeCheck = async () => {
+    const t = toast.loading("Checking runtime vs documentation…");
+    const { data, error } = await supabase.rpc("validate_runtime_vs_documentation" as never);
+    toast.dismiss(t);
+    if (error) { toast.error(error.message); return; }
+    const m = (data as any)?.mismatches_found ?? 0;
+    if (m > 0) toast.warning(`${m} runtime mismatch${m>1?"es":""} flagged`);
+    else toast.success("Runtime matches documentation");
+    qc.invalidateQueries();
+  };
+
+  const handleOrphanCheck = async () => {
+    const t = toast.loading("Detecting orphan content…");
+    const { data, error } = await supabase.rpc("detect_orphan_content" as never);
+    toast.dismiss(t);
+    if (error) { toast.error(error.message); return; }
+    const o = (data as any)?.orphans_found ?? 0;
+    if (o > 0) toast.warning(`${o} orphan content entries`);
+    else toast.success("No orphan content");
+    qc.invalidateQueries();
+  };
+
+  const handleCompareVersions = async () => {
+    const a = parseInt(versionA), b = parseInt(versionB);
+    if (!a || !b) { toast.error("Enter both version numbers"); return; }
+    const t = toast.loading(`Comparing v${a} vs v${b}…`);
+    const { error } = await supabase.rpc("compare_system_versions" as never, { _version_a: a, _version_b: b } as never);
+    toast.dismiss(t);
+    if (error) { toast.error(error.message); return; }
+    toast.success(`Diff v${a} ↔ v${b} stored`);
+    qc.invalidateQueries();
+  };
+
+  const handleExport = async () => {
+    const t = toast.loading("Exporting full system snapshot…");
+    const { data, error } = await supabase.rpc("export_full_system_snapshot" as never);
+    toast.dismiss(t);
+    if (error) { toast.error(error.message); return; }
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `liftor-system-snapshot-v${(data as any)?.manual_version ?? "x"}-${new Date().toISOString().slice(0,10)}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    toast.success("Snapshot downloaded");
   };
 
   const sevColor = (s: string) =>
@@ -237,7 +307,7 @@ const FullSystemMirror = () => {
 
         {/* Tabs */}
         <Tabs value={tab} onValueChange={setTab} className="space-y-4">
-          <TabsList className="grid grid-cols-4 md:grid-cols-8 gap-1">
+          <TabsList className="grid grid-cols-4 md:grid-cols-12 gap-1">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="pages">Pages</TabsTrigger>
             <TabsTrigger value="content">Content</TabsTrigger>
@@ -246,6 +316,10 @@ const FullSystemMirror = () => {
             <TabsTrigger value="rules">Rules</TabsTrigger>
             <TabsTrigger value="integrations">Integrations</TabsTrigger>
             <TabsTrigger value="flows">Data Flows</TabsTrigger>
+            <TabsTrigger value="versions">Versions</TabsTrigger>
+            <TabsTrigger value="diffs">Diffs</TabsTrigger>
+            <TabsTrigger value="validation">Validation</TabsTrigger>
+            <TabsTrigger value="export">Export</TabsTrigger>
           </TabsList>
 
           {/* Overview */}
@@ -488,6 +562,139 @@ const FullSystemMirror = () => {
                     </TableBody>
                   </Table>
                 </ScrollArea>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Versions */}
+          <TabsContent value="versions">
+            <Card className="bg-card border-border/50">
+              <CardHeader><CardTitle className="text-lg flex items-center gap-2"><History size={18} /> Manual Versions ({versions.length})</CardTitle></CardHeader>
+              <CardContent>
+                <ScrollArea className="h-[600px]">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Version</TableHead><TableHead>Pages</TableHead><TableHead>Backend</TableHead>
+                        <TableHead>Workflows</TableHead><TableHead>Rules</TableHead>
+                        <TableHead>Coverage</TableHead><TableHead>Created</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {versions.map((v: any) => (
+                        <TableRow key={v.id}>
+                          <TableCell className="font-mono text-sm font-medium">v{v.version_number}</TableCell>
+                          <TableCell className="text-xs">{v.pages_count}</TableCell>
+                          <TableCell className="text-xs">{v.backend_count}</TableCell>
+                          <TableCell className="text-xs">{v.workflow_count}</TableCell>
+                          <TableCell className="text-xs">{v.rule_count}</TableCell>
+                          <TableCell><Badge variant={v.coverage_score >= 100 ? "default" : "secondary"} className="text-xs">{v.coverage_score}%</Badge></TableCell>
+                          <TableCell className="text-xs text-muted-foreground">{format(new Date(v.created_at), "MMM d HH:mm")}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Diffs */}
+          <TabsContent value="diffs">
+            <div className="space-y-4">
+              <Card className="bg-card border-border/50">
+                <CardHeader><CardTitle className="text-lg flex items-center gap-2"><GitCompare size={18} /> Compare Versions</CardTitle></CardHeader>
+                <CardContent className="flex flex-wrap gap-2 items-end">
+                  <div className="flex-1 min-w-[140px]">
+                    <label className="text-xs text-muted-foreground">Version A</label>
+                    <Input type="number" value={versionA} onChange={(e) => setVersionA(e.target.value)} placeholder="e.g. 1" />
+                  </div>
+                  <div className="flex-1 min-w-[140px]">
+                    <label className="text-xs text-muted-foreground">Version B</label>
+                    <Input type="number" value={versionB} onChange={(e) => setVersionB(e.target.value)} placeholder="e.g. 2" />
+                  </div>
+                  <Button onClick={handleCompareVersions}><GitCompare size={16} className="mr-2" /> Compare</Button>
+                </CardContent>
+              </Card>
+              <Card className="bg-card border-border/50">
+                <CardHeader><CardTitle className="text-lg">Diff History ({diffs.length})</CardTitle></CardHeader>
+                <CardContent>
+                  {diffs.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">No diffs computed yet.</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {diffs.map((d: any) => (
+                        <div key={d.id} className="p-3 rounded border border-border/50 bg-secondary/20">
+                          <div className="flex items-center justify-between mb-2">
+                            <p className="text-sm font-medium">v{d.version_a} → v{d.version_b}</p>
+                            <p className="text-xs text-muted-foreground">{format(new Date(d.created_at), "MMM d HH:mm")}</p>
+                          </div>
+                          <div className="flex gap-2 mb-2">
+                            <Badge variant="default" className="text-xs">+{d.added_count} added</Badge>
+                            <Badge variant="destructive" className="text-xs">-{d.removed_count} removed</Badge>
+                            <Badge variant="secondary" className="text-xs">~{d.modified_count} modified</Badge>
+                          </div>
+                          <pre className="text-xs bg-background/40 p-2 rounded overflow-auto max-h-48">{JSON.stringify(d.diff_summary, null, 2)}</pre>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Validation */}
+          <TabsContent value="validation">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card className="bg-card border-border/50">
+                <CardHeader><CardTitle className="text-base flex items-center gap-2"><CheckCircle2 size={16} /> Coverage</CardTitle></CardHeader>
+                <CardContent className="space-y-3">
+                  <p className="text-3xl font-bold text-primary">{latestCoverage?.coverage_score ?? "—"}%</p>
+                  <p className="text-xs text-muted-foreground">{latestCoverage?.gaps_found ?? 0} gap(s) found</p>
+                  <Button size="sm" variant="outline" onClick={handleValidate} className="w-full">Run Coverage Check</Button>
+                </CardContent>
+              </Card>
+              <Card className="bg-card border-border/50">
+                <CardHeader><CardTitle className="text-base flex items-center gap-2"><Activity size={16} /> Runtime vs Docs</CardTitle></CardHeader>
+                <CardContent className="space-y-3">
+                  <p className="text-sm text-muted-foreground">Verifies workflow steps reference real tables.</p>
+                  <Button size="sm" variant="outline" onClick={handleRuntimeCheck} className="w-full">Run Runtime Check</Button>
+                </CardContent>
+              </Card>
+              <Card className="bg-card border-border/50">
+                <CardHeader><CardTitle className="text-base flex items-center gap-2"><AlertTriangle size={16} /> Orphan Content</CardTitle></CardHeader>
+                <CardContent className="space-y-3">
+                  <p className="text-sm text-muted-foreground">Detects unlinked content fragments.</p>
+                  <Button size="sm" variant="outline" onClick={handleOrphanCheck} className="w-full">Detect Orphans</Button>
+                </CardContent>
+              </Card>
+              <Card className="bg-card border-border/50 md:col-span-3">
+                <CardHeader><CardTitle className="text-base">Latest Coverage Detail</CardTitle></CardHeader>
+                <CardContent>
+                  <pre className="text-xs bg-background/40 p-3 rounded overflow-auto max-h-96">{JSON.stringify(latestCoverage?.details ?? {}, null, 2)}</pre>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Export */}
+          <TabsContent value="export">
+            <Card className="bg-card border-border/50">
+              <CardHeader><CardTitle className="text-lg flex items-center gap-2"><Download size={18} /> Full System Snapshot Export</CardTitle></CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Download a complete JSON snapshot of every page, table, function, workflow, rule, integration, data flow, version history, and recent change log.
+                </p>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
+                  <div className="p-3 rounded bg-secondary/30"><p className="text-xs text-muted-foreground">Pages</p><p className="text-xl font-bold">{counts?.system_pages_index ?? 0}</p></div>
+                  <div className="p-3 rounded bg-secondary/30"><p className="text-xs text-muted-foreground">Backend</p><p className="text-xl font-bold">{counts?.system_backend_objects ?? 0}</p></div>
+                  <div className="p-3 rounded bg-secondary/30"><p className="text-xs text-muted-foreground">Workflows</p><p className="text-xl font-bold">{counts?.system_workflows_full ?? 0}</p></div>
+                  <div className="p-3 rounded bg-secondary/30"><p className="text-xs text-muted-foreground">Rules</p><p className="text-xl font-bold">{counts?.system_rules ?? 0}</p></div>
+                </div>
+                <Button onClick={handleExport} className="w-full md:w-auto">
+                  <Download size={16} className="mr-2" /> Download JSON Snapshot
+                </Button>
               </CardContent>
             </Card>
           </TabsContent>

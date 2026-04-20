@@ -24,3 +24,11 @@ type: feature
 **Founder UI:** `/founder/manual/full` — `FullSystemMirror.tsx` with tabs Overview, Pages, Content, Backend, Workflows, Rules, Integrations, Data Flows. Coverage strip (score, gaps, version, counts). Search across all tabs. Buttons: Rebuild Manual, Validate Coverage. Sidebar entry "System Mirror" (Layers icon).
 
 **Initial run:** 100% coverage, 0 gaps — 97 pages, 138 tables, 136 functions, 10 workflows, 19 rules.
+
+**Hardening (final):**
+- `system_version_diffs` table stores compare_system_versions outputs (added/removed/modified counts + diff_summary jsonb).
+- Functions: `compare_system_versions(a,b)`, `validate_runtime_vs_documentation()` (workflow steps reference real tables; mismatch → critical event), `detect_orphan_content()` (system_content not linked to page/feature → medium event), `export_full_system_snapshot()` (full JSON dump), `auto_partial_rebuild()` (DDL event trigger handler).
+- Coverage hardened: any score <100% or gaps>0 → critical `coverage_below_100` event + activity_log alert. Each undocumented table/function emits its own critical event. Coverage score now uses 7-component weighting (pages/tables/functions = 20 each, workflows/rules/integrations/flows = 10 each).
+- Event trigger `auto_mirror_rebuild_trigger` fires on CREATE/ALTER/DROP TABLE|FUNCTION|TRIGGER → logs to system_changes + runs rebuild_full_manual.
+- Cron jobs: `mirror-coverage-6h` (every 6h), `mirror-runtime-12h` (every 12h), `mirror-orphan-daily` (daily 03:00).
+- UI tabs added at /founder/manual/full: Versions, Diffs (compare form + history), Validation (3 manual triggers + latest detail), Export (JSON download).
