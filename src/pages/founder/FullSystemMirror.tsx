@@ -16,6 +16,8 @@ import {
   AlertTriangle, History, Search, Database, Code2,
 } from "lucide-react";
 import { Download, GitCompare, Activity } from "lucide-react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const FullSystemMirror = () => {
   const qc = useQueryClient();
@@ -235,6 +237,155 @@ const FullSystemMirror = () => {
     link.click();
     URL.revokeObjectURL(url);
     toast.success("Snapshot downloaded");
+  };
+
+  const handleExportPDF = async () => {
+    const t = toast.loading("Generating PDF manual…");
+    const { data, error } = await supabase.rpc("export_full_system_snapshot" as never);
+    if (error) { toast.dismiss(t); toast.error(error.message); return; }
+    const snap: any = data;
+
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    const pageW = doc.internal.pageSize.getWidth();
+    const margin = 40;
+    let y = margin;
+
+    // Cover
+    doc.setFontSize(22); doc.setFont("helvetica", "bold");
+    doc.text("Liftor — Full System Manual", margin, y); y += 28;
+    doc.setFontSize(11); doc.setFont("helvetica", "normal"); doc.setTextColor(100);
+    doc.text(`Manual version: v${snap?.manual_version ?? "?"}`, margin, y); y += 14;
+    doc.text(`Exported: ${new Date(snap?.exported_at ?? Date.now()).toLocaleString()}`, margin, y); y += 14;
+    doc.text(`Coverage: ${latestCoverage?.coverage_score ?? "?"}% • Gaps: ${latestCoverage?.gaps_found ?? 0}`, margin, y); y += 24;
+    doc.setTextColor(0);
+
+    const counts = [
+      ["Pages", snap?.pages?.length ?? 0],
+      ["Content fragments", snap?.content?.length ?? 0],
+      ["Backend objects", snap?.backend?.length ?? 0],
+      ["Workflows", snap?.workflows?.length ?? 0],
+      ["Workflow steps", snap?.workflow_steps?.length ?? 0],
+      ["Rules", snap?.rules?.length ?? 0],
+      ["Integrations", snap?.integrations?.length ?? 0],
+      ["Data flows", snap?.data_flows?.length ?? 0],
+      ["Versions", snap?.versions?.length ?? 0],
+      ["Recent changes", snap?.changes?.length ?? 0],
+    ];
+    autoTable(doc, {
+      startY: y,
+      head: [["Module", "Count"]],
+      body: counts.map(r => [String(r[0]), String(r[1])]),
+      theme: "grid", styles: { fontSize: 10 }, headStyles: { fillColor: [30, 30, 30] },
+      margin: { left: margin, right: margin },
+    });
+
+    const section = (title: string) => {
+      doc.addPage(); y = margin;
+      doc.setFontSize(16); doc.setFont("helvetica", "bold"); doc.text(title, margin, y); y += 8;
+    };
+
+    const renderTable = (head: string[], rows: any[][], colWidths?: number[]) => {
+      autoTable(doc, {
+        startY: y + 14,
+        head: [head], body: rows,
+        theme: "striped", styles: { fontSize: 8, cellPadding: 4, overflow: "linebreak" },
+        headStyles: { fillColor: [30, 30, 30], textColor: 255 },
+        margin: { left: margin, right: margin },
+        columnStyles: colWidths ? Object.fromEntries(colWidths.map((w, i) => [i, { cellWidth: w }])) : undefined,
+      });
+    };
+
+    // Pages
+    section("Pages");
+    renderTable(
+      ["Route", "Name", "Area", "Purpose"],
+      (snap?.pages ?? []).map((p: any) => [p.route_path, p.page_name, p.area, p.purpose ?? ""]),
+      [140, 110, 60, pageW - margin*2 - 310],
+    );
+
+    // Backend
+    section("Backend Objects");
+    renderTable(
+      ["Kind", "Name", "Schema", "Purpose"],
+      (snap?.backend ?? []).map((b: any) => [b.object_kind, b.object_name, b.schema_name, b.purpose ?? ""]),
+      [60, 180, 60, pageW - margin*2 - 300],
+    );
+
+    // Workflows
+    section("Workflows");
+    const stepsByWf = new Map<string, any[]>();
+    (snap?.workflow_steps ?? []).forEach((s: any) => {
+      const arr = stepsByWf.get(s.workflow_id) ?? []; arr.push(s); stepsByWf.set(s.workflow_id, arr);
+    });
+    (snap?.workflows ?? []).forEach((w: any, idx: number) => {
+      if (idx > 0) { doc.addPage(); y = margin; }
+      doc.setFontSize(13); doc.setFont("helvetica", "bold");
+      doc.text(`${w.workflow_name}`, margin, y); y += 16;
+      doc.setFontSize(9); doc.setFont("helvetica", "normal"); doc.setTextColor(100);
+      doc.text(`${w.start_module || ""} → ${w.end_module || ""}`, margin, y); y += 12;
+      const desc = doc.splitTextToSize(w.description ?? "", pageW - margin*2);
+      doc.text(desc, margin, y); y += desc.length * 11; doc.setTextColor(0);
+      const steps = (stepsByWf.get(w.id) ?? []).sort((a,b) => a.step_index - b.step_index);
+      if (steps.length) {
+        renderTable(
+          ["#", "Step", "Trigger", "Tables", "Failure points"],
+          steps.map((s: any) => [s.step_index, s.step_name, s.trigger_source ?? "", s.linked_tables ?? "", s.failure_points ?? ""]),
+          [24, 110, 90, 120, pageW - margin*2 - 344],
+        );
+        y = (doc as any).lastAutoTable.finalY + 10;
+      }
+    });
+
+    // Rules
+    section("Rules");
+    renderTable(
+      ["Rule", "Module", "Condition", "Action", "Severity"],
+      (snap?.rules ?? []).map((r: any) => [r.rule_name, r.module, r.condition_text ?? "", r.action_text ?? "", r.severity]),
+      [110, 70, 130, 130, 50],
+    );
+
+    // Integrations
+    section("Integrations");
+    renderTable(
+      ["Name", "Layer", "Endpoint", "Description"],
+      (snap?.integrations ?? []).map((i: any) => [i.integration_name, i.layer, i.endpoint ?? "", i.description ?? ""]),
+      [120, 80, 150, pageW - margin*2 - 350],
+    );
+
+    // Data flows
+    section("Data Flows");
+    renderTable(
+      ["Source", "Relationship", "Target", "Description"],
+      (snap?.data_flows ?? []).map((f: any) => [f.source_entity, f.relationship, f.target_entity, f.description ?? ""]),
+      [120, 80, 120, pageW - margin*2 - 320],
+    );
+
+    // Content (limit to keep PDF reasonable)
+    section("Content Fragments");
+    renderTable(
+      ["Page", "Type", "Text", "Feature"],
+      (snap?.content ?? []).slice(0, 400).map((c: any) => [c.page, c.content_type, (c.text_value ?? "").slice(0, 200), c.linked_feature ?? ""]),
+      [140, 60, pageW - margin*2 - 300, 100],
+    );
+    if ((snap?.content?.length ?? 0) > 400) {
+      const yEnd = (doc as any).lastAutoTable.finalY + 12;
+      doc.setFontSize(9); doc.setTextColor(120);
+      doc.text(`(${snap.content.length - 400} more content fragments truncated — full list in JSON export)`, margin, yEnd);
+      doc.setTextColor(0);
+    }
+
+    // Footer page numbers
+    const pageCount = doc.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8); doc.setTextColor(140);
+      doc.text(`Liftor System Manual v${snap?.manual_version ?? "?"} • Page ${i} of ${pageCount}`,
+        pageW / 2, doc.internal.pageSize.getHeight() - 20, { align: "center" });
+    }
+
+    doc.save(`liftor-system-manual-v${snap?.manual_version ?? "x"}-${new Date().toISOString().slice(0,10)}.pdf`);
+    toast.dismiss(t);
+    toast.success("PDF manual downloaded");
   };
 
   const sevColor = (s: string) =>
@@ -694,6 +845,9 @@ const FullSystemMirror = () => {
                 </div>
                 <Button onClick={handleExport} className="w-full md:w-auto">
                   <Download size={16} className="mr-2" /> Download JSON Snapshot
+                </Button>
+                <Button onClick={handleExportPDF} variant="outline" className="w-full md:w-auto md:ml-2">
+                  <FileText size={16} className="mr-2" /> Download PDF Manual
                 </Button>
               </CardContent>
             </Card>
