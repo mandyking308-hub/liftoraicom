@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { LayoutDashboard, FileInput, GitBranch, FolderKanban, Activity, FileText, LogOut, Menu, X, Monitor, Bot, Workflow, Plug, Play, Command, Network, Layers, Rocket, BarChart3, Zap, BookOpen, Globe, Building2, Shield, ShieldAlert, ShieldCheck, LayoutTemplate, Sparkles, BookOpenCheck, ClipboardList, PoundSterling, Brain, Scale, Compass, MessageSquare, FlaskConical, Users, Banknote, Send, MessagesSquare, FileSignature, MonitorPlay, Briefcase, ClipboardCheck, Gavel, TrendingUp, Radar } from "lucide-react";
+import { LayoutDashboard, FileInput, GitBranch, FolderKanban, Activity, FileText, LogOut, Menu, X, Monitor, Bot, Workflow, Plug, Play, Command, Network, Layers, Rocket, BarChart3, Zap, BookOpen, Globe, Building2, Shield, ShieldAlert, ShieldCheck, LayoutTemplate, Sparkles, BookOpenCheck, ClipboardList, PoundSterling, Brain, Scale, Compass, MessageSquare, FlaskConical, Users, Banknote, Send, MessagesSquare, FileSignature, MonitorPlay, Briefcase, ClipboardCheck, Gavel, TrendingUp, Radar, Siren } from "lucide-react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,6 +24,7 @@ const navItems = [
   { label: "Outreach", to: "/founder/outreach", icon: Send },
   { label: "Sending Health", to: "/founder/sending", icon: Radar },
   { label: "Priority", to: "/founder/priority", icon: TrendingUp },
+  { label: "System Oversight", to: "/founder/system", icon: Siren },
   { label: "Conversations", to: "/founder/conversations", icon: MessagesSquare },
   { label: "Internal Proposals", to: "/founder/internal-proposals", icon: FileSignature },
   { label: "Demos", to: "/founder/demos", icon: MonitorPlay },
@@ -71,6 +72,20 @@ const FounderLayout = ({ children }: { children: React.ReactNode }) => {
     refetchInterval: 30000,
   });
 
+  const { data: systemCriticalCount = 0 } = useQuery({
+    queryKey: ["sidebar_system_critical_count"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("system_events" as never)
+        .select("id", { count: "exact", head: true })
+        .eq("resolved", false)
+        .in("severity", ["critical", "high"]);
+      if (error) return 0;
+      return count ?? 0;
+    },
+    refetchInterval: 30000,
+  });
+
   const handleSignOut = async () => {
     await signOut();
     navigate("/portal/login");
@@ -108,6 +123,11 @@ const FounderLayout = ({ children }: { children: React.ReactNode }) => {
             {item.to === "/founder/priority" && criticalCount > 0 && (
               <span className="ml-auto inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-destructive text-destructive-foreground text-[10px] font-semibold">
                 {criticalCount}
+              </span>
+            )}
+            {item.to === "/founder/system" && systemCriticalCount > 0 && (
+              <span className="ml-auto inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-destructive text-destructive-foreground text-[10px] font-semibold">
+                {systemCriticalCount}
               </span>
             )}
           </Link>
