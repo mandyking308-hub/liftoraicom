@@ -507,6 +507,79 @@ export type Database = {
         }
         Relationships: []
       }
+      assignments: {
+        Row: {
+          assigned_at: string
+          auto_assigned: boolean
+          business_name: string
+          completed_at: string | null
+          contact_id: string | null
+          created_at: string
+          deal_id: string
+          failed_at: string | null
+          id: string
+          notes: string
+          started_at: string | null
+          status: Database["public"]["Enums"]["assignment_status"]
+          supplier_id: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_at?: string
+          auto_assigned?: boolean
+          business_name?: string
+          completed_at?: string | null
+          contact_id?: string | null
+          created_at?: string
+          deal_id: string
+          failed_at?: string | null
+          id?: string
+          notes?: string
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["assignment_status"]
+          supplier_id: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_at?: string
+          auto_assigned?: boolean
+          business_name?: string
+          completed_at?: string | null
+          contact_id?: string | null
+          created_at?: string
+          deal_id?: string
+          failed_at?: string | null
+          id?: string
+          notes?: string
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["assignment_status"]
+          supplier_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignments_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignments_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignments_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       automation_workflows: {
         Row: {
           automation_type: string
@@ -4014,6 +4087,127 @@ export type Database = {
           },
         ]
       }
+      supplier_availability: {
+        Row: {
+          capacity: number | null
+          id: string
+          manual_override: boolean
+          notes: string
+          status: Database["public"]["Enums"]["supplier_availability_status"]
+          supplier_id: string
+          updated_at: string
+        }
+        Insert: {
+          capacity?: number | null
+          id?: string
+          manual_override?: boolean
+          notes?: string
+          status?: Database["public"]["Enums"]["supplier_availability_status"]
+          supplier_id: string
+          updated_at?: string
+        }
+        Update: {
+          capacity?: number | null
+          id?: string
+          manual_override?: boolean
+          notes?: string
+          status?: Database["public"]["Enums"]["supplier_availability_status"]
+          supplier_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_availability_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: true
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      supplier_pipeline: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string
+          stage: Database["public"]["Enums"]["supplier_pipeline_stage"]
+          supplier_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string
+          stage?: Database["public"]["Enums"]["supplier_pipeline_stage"]
+          supplier_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string
+          stage?: Database["public"]["Enums"]["supplier_pipeline_stage"]
+          supplier_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_pipeline_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suppliers: {
+        Row: {
+          approved_at: string | null
+          business_name: string
+          company: string
+          created_at: string
+          email: string
+          id: string
+          name: string
+          notes: string
+          rejected_at: string | null
+          role: string
+          source: string
+          status: Database["public"]["Enums"]["supplier_status"]
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          business_name?: string
+          company?: string
+          created_at?: string
+          email: string
+          id?: string
+          name?: string
+          notes?: string
+          rejected_at?: string | null
+          role?: string
+          source?: string
+          status?: Database["public"]["Enums"]["supplier_status"]
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          business_name?: string
+          company?: string
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          notes?: string
+          rejected_at?: string | null
+          role?: string
+          source?: string
+          status?: Database["public"]["Enums"]["supplier_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       support_requests: {
         Row: {
           created_at: string
@@ -4554,6 +4748,30 @@ export type Database = {
         Returns: string
       }
       check_outreach_allowed: { Args: { _contact_id: string }; Returns: Json }
+      eligible_suppliers_for_deal: {
+        Args: { _deal_id: string }
+        Returns: {
+          approved_at: string | null
+          business_name: string
+          company: string
+          created_at: string
+          email: string
+          id: string
+          name: string
+          notes: string
+          rejected_at: string | null
+          role: string
+          source: string
+          status: Database["public"]["Enums"]["supplier_status"]
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "suppliers"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       expire_demos: { Args: never; Returns: number }
       expire_inactive_conversations: { Args: never; Returns: number }
       finance_mark_overdue_invoices: { Args: never; Returns: number }
@@ -4740,6 +4958,7 @@ export type Database = {
       ai_action_status: "success" | "failed"
       ai_action_type: "classify" | "reply" | "escalate"
       app_role: "admin" | "founder" | "client" | "partner"
+      assignment_status: "assigned" | "in_progress" | "completed" | "failed"
       communication_channel: "email" | "whatsapp" | "linkedin"
       communication_direction: "outbound" | "inbound"
       contact_status:
@@ -4784,6 +5003,21 @@ export type Database = {
         | "critical_flagged"
         | "payment_received"
       payment_method: "bank" | "stripe" | "cash" | "other"
+      supplier_availability_status: "available" | "busy" | "unavailable"
+      supplier_pipeline_stage:
+        | "sourced"
+        | "contacted"
+        | "responded"
+        | "evaluated"
+        | "approved"
+        | "rejected"
+      supplier_status:
+        | "NEW"
+        | "CONTACTED"
+        | "QUALIFIED"
+        | "APPROVED"
+        | "REJECTED"
+        | "INACTIVE"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -4914,6 +5148,7 @@ export const Constants = {
       ai_action_status: ["success", "failed"],
       ai_action_type: ["classify", "reply", "escalate"],
       app_role: ["admin", "founder", "client", "partner"],
+      assignment_status: ["assigned", "in_progress", "completed", "failed"],
       communication_channel: ["email", "whatsapp", "linkedin"],
       communication_direction: ["outbound", "inbound"],
       contact_status: [
@@ -4963,6 +5198,23 @@ export const Constants = {
         "payment_received",
       ],
       payment_method: ["bank", "stripe", "cash", "other"],
+      supplier_availability_status: ["available", "busy", "unavailable"],
+      supplier_pipeline_stage: [
+        "sourced",
+        "contacted",
+        "responded",
+        "evaluated",
+        "approved",
+        "rejected",
+      ],
+      supplier_status: [
+        "NEW",
+        "CONTACTED",
+        "QUALIFIED",
+        "APPROVED",
+        "REJECTED",
+        "INACTIVE",
+      ],
     },
   },
 } as const
