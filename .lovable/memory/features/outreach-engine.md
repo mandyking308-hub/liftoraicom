@@ -39,5 +39,10 @@ type: feature
 **Hard rules enforced:**
 - ALL sends pass through `crm-send-check` (which also checks recent communication < 24h, status, conversation_active, last_contacted_at < 48h, bounces, inbox assignment).
 - Same inbox sticks to a contact for life (assigned_inbox_id is set once and reused).
-- Daily 100/inbox cap enforced via `inboxes.daily_send_limit` + `current_send_count` + reset cron.
+- Daily 80/inbox cap (safety buffer below 100) enforced via `inboxes.daily_send_limit` + `current_send_count` + reset cron.
 - No AI in sending — content comes verbatim from outreach_sequences.
+- **Single active campaign per contact**: `contacts.active_campaign_id` is locked on first enqueue. Trigger `guard_email_queue_single_campaign` rejects inserts that would queue a contact in a second campaign.
+- **Reply = sequence exit**: trigger `cancel_queue_on_reply` (on `email_events.replied`) and `cancel_queue_on_inbound_comm` (on `communications.direction='inbound'`) flip all that contact's pending queue rows to `blocked / REPLY_RECEIVED` and clear `active_campaign_id`. Send worker also re-checks for a `replied` event before each send.
+- **Bounce = global block**: trigger `cancel_queue_on_reply` (on `email_events.bounced`) sets contact → DO_NOT_CONTACT and blocks all pending rows.
+- **Tracking placeholders**: `email_queue.tracking_pixel_id` (uuid) + `tracking_token` (text) are pre-allocated. `email_event_type` enum now includes `opened` and `clicked` for future SMTP/relay wiring. Send worker injects `<!-- tracking_pixel:{queue_id} -->` placeholder into the simulated send body.
+- **Reply routing**: `outreach-inbound-webhook` writes the inbound communication with `inbox_id = contact.assigned_inbox_id`, guaranteeing replies are routed to the same sticky inbox the outbound used.

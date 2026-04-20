@@ -49,6 +49,18 @@ Deno.serve(async (req) => {
         .eq("step_number", item.sequence_step)
         .maybeSingle();
 
+      // Re-check: skip if a reply has already arrived for this contact
+      const { data: replyEvt } = await supabase.from("email_events")
+        .select("id").eq("contact_id", item.contact_id).eq("event_type", "replied").limit(1);
+      if (replyEvt && replyEvt.length) {
+        await supabase.from("email_queue")
+          .update({ status: "blocked", block_reason: "REPLY_RECEIVED" })
+          .eq("id", item.id);
+        blocked += 1;
+        touchedCampaigns.add(item.campaign_id);
+        continue;
+      }
+
       // Sanity check via shared edge function
       const checkRes = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/crm-send-check`, {
         method: "POST",
@@ -60,7 +72,7 @@ Deno.serve(async (req) => {
           contact_id: item.contact_id,
           log_attempt: true,
           channel: "email",
-          message: seq ? `[${seq.subject}] ${seq.body}` : `Step ${item.sequence_step}`,
+          message: seq ? `[${seq.subject}] ${seq.body}\n\n<!-- tracking_pixel:${item.id} -->` : `Step ${item.sequence_step}`,
           ai_generated: false,
         }),
       });
