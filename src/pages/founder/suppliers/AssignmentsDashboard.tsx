@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -21,6 +22,8 @@ type Assignment = {
   assigned_at: string;
   completed_at: string | null;
   auto_assigned: boolean;
+  share_contact_details: boolean;
+  supplier_note: string;
 };
 type Deal = { id: string; deal_name: string; business_name: string; contact_id: string | null; status: string };
 type Supplier = { id: string; name: string; email: string; business_name: string; status: string };
@@ -92,6 +95,15 @@ const AssignmentsDashboard = () => {
     const { error } = await supabase.from("assignments").update({ status } as never).eq("id", id);
     if (error) { toast.error(error.message); return; }
     toast.success("Status updated");
+    void load();
+  }
+
+  async function toggleShareContact(a: Assignment) {
+    const { error } = await supabase
+      .from("assignments")
+      .update({ share_contact_details: !a.share_contact_details } as never)
+      .eq("id", a.id);
+    if (error) { toast.error(error.message); return; }
     void load();
   }
 
@@ -203,6 +215,13 @@ const AssignmentsDashboard = () => {
                             <SelectItem value="failed">failed</SelectItem>
                           </SelectContent>
                         </Select>
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground" title="Share client contact email with supplier">
+                          <Switch
+                            checked={a.share_contact_details}
+                            onCheckedChange={() => toggleShareContact(a)}
+                          />
+                          <span>share contact</span>
+                        </div>
                       </div>
                     </li>
                   );

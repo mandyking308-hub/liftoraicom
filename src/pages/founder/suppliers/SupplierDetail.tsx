@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { ArrowLeft, CheckCircle2, XCircle, Loader2, Copy, Plus, Trash2 } from "lucide-react";
 import FounderLayout from "@/components/founder/FounderLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -20,6 +21,7 @@ type Supplier = {
 type Pipeline = { id: string; stage: string; notes: string; updated_at: string };
 type Availability = { id: string; status: string; manual_override: boolean; capacity: number | null; notes: string };
 type Assignment = { id: string; deal_id: string; status: string; assigned_at: string; completed_at: string | null; business_name: string };
+type SupplierUser = { id: string; email: string; access_token: string; active: boolean; last_login_at: string | null };
 
 const STATUS_OPTIONS = ["NEW","CONTACTED","QUALIFIED","APPROVED","REJECTED","INACTIVE"];
 const AVAIL_OPTIONS = ["available","busy","unavailable"];
@@ -30,6 +32,8 @@ const SupplierDetail = () => {
   const [pipeline, setPipeline] = useState<Pipeline | null>(null);
   const [availability, setAvailability] = useState<Availability | null>(null);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [users, setUsers] = useState<SupplierUser[]>([]);
+  const [newUserEmail, setNewUserEmail] = useState("");
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
 
@@ -37,16 +41,18 @@ const SupplierDetail = () => {
 
   async function load() {
     setLoading(true);
-    const [s, p, a, asg] = await Promise.all([
+    const [s, p, a, asg, su] = await Promise.all([
       supabase.from("suppliers").select("*").eq("id", id!).maybeSingle(),
       supabase.from("supplier_pipeline").select("*").eq("supplier_id", id!).maybeSingle(),
       supabase.from("supplier_availability").select("*").eq("supplier_id", id!).maybeSingle(),
       supabase.from("assignments").select("*").eq("supplier_id", id!).order("assigned_at", { ascending: false }),
+      supabase.from("supplier_users").select("*").eq("supplier_id", id!).order("created_at", { ascending: true }),
     ]);
     setSupplier(s.data as Supplier);
     setPipeline(p.data as Pipeline);
     setAvailability(a.data as Availability);
     setAssignments((asg.data as Assignment[]) ?? []);
+    setUsers((su.data as SupplierUser[]) ?? []);
     setLoading(false);
   }
 
@@ -77,6 +83,39 @@ const SupplierDetail = () => {
     const { error } = await supabase.from("supplier_pipeline").update({ notes } as never).eq("id", pipeline.id);
     if (error) toast.error(error.message);
     else toast.success("Notes saved");
+  }
+
+  async function addPortalUser() {
+    if (!supplier || !newUserEmail.trim()) return;
+    setBusy(true);
+    const { error } = await supabase.from("supplier_users").insert({
+      supplier_id: supplier.id,
+      email: newUserEmail.trim().toLowerCase(),
+    });
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    setNewUserEmail("");
+    toast.success("Portal access created");
+    void load();
+  }
+
+  async function toggleUserActive(u: SupplierUser) {
+    const { error } = await supabase.from("supplier_users").update({ active: !u.active } as never).eq("id", u.id);
+    if (error) toast.error(error.message);
+    else void load();
+  }
+
+  async function deleteUser(u: SupplierUser) {
+    if (!confirm(`Revoke portal access for ${u.email}?`)) return;
+    const { error } = await supabase.from("supplier_users").delete().eq("id", u.id);
+    if (error) toast.error(error.message);
+    else { toast.success("Revoked"); void load(); }
+  }
+
+  function copyLink(token: string) {
+    const url = `${window.location.origin}/supplier/login?token=${encodeURIComponent(token)}`;
+    navigator.clipboard.writeText(url);
+    toast.success("Magic link copied");
   }
 
   if (loading || !supplier) {
@@ -190,6 +229,54 @@ const SupplierDetail = () => {
                       <span className="ml-2 text-xs text-muted-foreground">{a.business_name || "—"}</span>
                     </div>
                     <span className="text-xs text-muted-foreground">{new Date(a.assigned_at).toLocaleString()}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="tech-card">
+          <CardHeader>
+            <CardTitle className="text-sm">Portal access</CardTitle>
+            <p className="text-xs text-muted-foreground">
+              Send the magic link to let this supplier sign in to their portal.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex gap-2">
+              <Input
+                type="email"
+                placeholder="supplier@example.com"
+                value={newUserEmail}
+                onChange={(e) => setNewUserEmail(e.target.value)}
+              />
+              <Button onClick={addPortalUser} disabled={busy || !newUserEmail.trim()}>
+                <Plus className="h-4 w-4 mr-1" /> Grant access
+              </Button>
+            </div>
+            {users.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No portal users yet.</p>
+            ) : (
+              <ul className="divide-y divide-border/50 border border-border/50 rounded-md">
+                {users.map((u) => (
+                  <li key={u.id} className="p-3 flex items-center justify-between gap-2 flex-wrap">
+                    <div className="text-sm">
+                      <p className="font-medium">{u.email}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {u.active ? "Active" : "Disabled"} ·
+                        {u.last_login_at ? ` last login ${new Date(u.last_login_at).toLocaleString()}` : " never logged in"}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button size="sm" variant="outline" onClick={() => copyLink(u.access_token)}>
+                        <Copy className="h-3 w-3 mr-1" /> Magic link
+                      </Button>
+                      <Switch checked={u.active} onCheckedChange={() => toggleUserActive(u)} />
+                      <Button size="icon" variant="ghost" onClick={() => deleteUser(u)}>
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
                   </li>
                 ))}
               </ul>
