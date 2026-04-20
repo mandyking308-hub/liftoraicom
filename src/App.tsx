@@ -108,6 +108,10 @@ import StrategyEngine from "./pages/founder/StrategyEngine";
 import FounderCoPilot from "./pages/founder/FounderCoPilot";
 import PlatformTesting from "./pages/founder/PlatformTesting";
 import FounderLegalConsole from "./pages/founder/FounderLegalConsole";
+import CRMDashboard from "./pages/founder/CRMDashboard";
+import CRMContacts from "./pages/founder/CRMContacts";
+import CRMContactDetail from "./pages/founder/CRMContactDetail";
+import CRMInboxes from "./pages/founder/CRMInboxes";
 // Partner pages
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import PartnerOpportunities from "./pages/partner/PartnerOpportunities";
@@ -229,6 +233,10 @@ const App = () => (
             <Route path="/founder/copilot" element={<FounderRoute><FounderCoPilot /></FounderRoute>} />
             <Route path="/founder/testing" element={<FounderRoute><PlatformTesting /></FounderRoute>} />
             <Route path="/founder/legal" element={<FounderRoute><FounderLegalConsole /></FounderRoute>} />
+            <Route path="/founder/crm" element={<FounderRoute><CRMDashboard /></FounderRoute>} />
+            <Route path="/founder/crm/contacts" element={<FounderRoute><CRMContacts /></FounderRoute>} />
+            <Route path="/founder/crm/contacts/:id" element={<FounderRoute><CRMContactDetail /></FounderRoute>} />
+            <Route path="/founder/crm/inboxes" element={<FounderRoute><CRMInboxes /></FounderRoute>} />
 
             {/* Partner Portal */}
             <Route path="/partner" element={<PartnerRoute><PartnerDashboard /></PartnerRoute>} />

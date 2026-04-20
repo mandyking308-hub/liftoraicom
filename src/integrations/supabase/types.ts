@@ -642,6 +642,57 @@ export type Database = {
         }
         Relationships: []
       }
+      communications: {
+        Row: {
+          ai_generated: boolean
+          channel: Database["public"]["Enums"]["communication_channel"]
+          contact_id: string
+          created_at: string
+          direction: Database["public"]["Enums"]["communication_direction"]
+          id: string
+          inbox_id: string | null
+          message: string
+          timestamp: string
+        }
+        Insert: {
+          ai_generated?: boolean
+          channel?: Database["public"]["Enums"]["communication_channel"]
+          contact_id: string
+          created_at?: string
+          direction: Database["public"]["Enums"]["communication_direction"]
+          id?: string
+          inbox_id?: string | null
+          message?: string
+          timestamp?: string
+        }
+        Update: {
+          ai_generated?: boolean
+          channel?: Database["public"]["Enums"]["communication_channel"]
+          contact_id?: string
+          created_at?: string
+          direction?: Database["public"]["Enums"]["communication_direction"]
+          id?: string
+          inbox_id?: string | null
+          message?: string
+          timestamp?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "communications_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "communications_inbox_id_fkey"
+            columns: ["inbox_id"]
+            isOneToOne: false
+            referencedRelation: "inboxes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       compliance_documents: {
         Row: {
           category: string
@@ -704,6 +755,65 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      contacts: {
+        Row: {
+          assigned_business: string
+          assigned_inbox_id: string | null
+          company: string
+          conversation_active: boolean
+          created_at: string
+          email: string
+          id: string
+          last_contacted_at: string | null
+          last_replied_at: string | null
+          name: string
+          role: string
+          source: string
+          status: Database["public"]["Enums"]["contact_status"]
+          updated_at: string
+        }
+        Insert: {
+          assigned_business?: string
+          assigned_inbox_id?: string | null
+          company?: string
+          conversation_active?: boolean
+          created_at?: string
+          email: string
+          id?: string
+          last_contacted_at?: string | null
+          last_replied_at?: string | null
+          name?: string
+          role?: string
+          source?: string
+          status?: Database["public"]["Enums"]["contact_status"]
+          updated_at?: string
+        }
+        Update: {
+          assigned_business?: string
+          assigned_inbox_id?: string | null
+          company?: string
+          conversation_active?: boolean
+          created_at?: string
+          email?: string
+          id?: string
+          last_contacted_at?: string | null
+          last_replied_at?: string | null
+          name?: string
+          role?: string
+          source?: string
+          status?: Database["public"]["Enums"]["contact_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contacts_assigned_inbox_id_fkey"
+            columns: ["assigned_inbox_id"]
+            isOneToOne: false
+            referencedRelation: "inboxes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       decision_recommendations: {
         Row: {
@@ -908,6 +1018,41 @@ export type Database = {
           },
         ]
       }
+      email_events: {
+        Row: {
+          contact_id: string
+          created_at: string
+          email_id: string
+          event_type: Database["public"]["Enums"]["email_event_type"]
+          id: string
+          timestamp: string
+        }
+        Insert: {
+          contact_id: string
+          created_at?: string
+          email_id?: string
+          event_type: Database["public"]["Enums"]["email_event_type"]
+          id?: string
+          timestamp?: string
+        }
+        Update: {
+          contact_id?: string
+          created_at?: string
+          email_id?: string
+          event_type?: Database["public"]["Enums"]["email_event_type"]
+          id?: string
+          timestamp?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_events_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       execution_logs: {
         Row: {
           created_at: string
@@ -1059,6 +1204,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      inboxes: {
+        Row: {
+          active: boolean
+          business_name: string
+          created_at: string
+          current_send_count: number
+          daily_send_limit: number
+          email_address: string
+          id: string
+          updated_at: string
+          warmup_status: Database["public"]["Enums"]["inbox_warmup_status"]
+        }
+        Insert: {
+          active?: boolean
+          business_name?: string
+          created_at?: string
+          current_send_count?: number
+          daily_send_limit?: number
+          email_address: string
+          id?: string
+          updated_at?: string
+          warmup_status?: Database["public"]["Enums"]["inbox_warmup_status"]
+        }
+        Update: {
+          active?: boolean
+          business_name?: string
+          created_at?: string
+          current_send_count?: number
+          daily_send_limit?: number
+          email_address?: string
+          id?: string
+          updated_at?: string
+          warmup_status?: Database["public"]["Enums"]["inbox_warmup_status"]
+        }
+        Relationships: []
       }
       integration_activity_logs: {
         Row: {
@@ -3435,6 +3616,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_outreach_allowed: { Args: { _contact_id: string }; Returns: Json }
+      expire_inactive_conversations: { Args: never; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -3442,9 +3625,60 @@ export type Database = {
         }
         Returns: boolean
       }
+      upsert_contact: {
+        Args: {
+          _assigned_business?: string
+          _assigned_inbox_id?: string
+          _company?: string
+          _email: string
+          _name?: string
+          _role?: string
+          _source?: string
+        }
+        Returns: {
+          assigned_business: string
+          assigned_inbox_id: string | null
+          company: string
+          conversation_active: boolean
+          created_at: string
+          email: string
+          id: string
+          last_contacted_at: string | null
+          last_replied_at: string | null
+          name: string
+          role: string
+          source: string
+          status: Database["public"]["Enums"]["contact_status"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "contacts"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       app_role: "admin" | "founder" | "client" | "partner"
+      communication_channel: "email" | "whatsapp" | "linkedin"
+      communication_direction: "outbound" | "inbound"
+      contact_status:
+        | "NEW"
+        | "CONTACTED"
+        | "ENGAGED"
+        | "QUALIFIED"
+        | "CLIENT"
+        | "SUPPLIER"
+        | "DO_NOT_CONTACT"
+      email_event_type:
+        | "sent"
+        | "delivered"
+        | "opened"
+        | "clicked"
+        | "replied"
+        | "bounced"
+      inbox_warmup_status: "new" | "warming" | "active"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -3573,6 +3807,26 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "founder", "client", "partner"],
+      communication_channel: ["email", "whatsapp", "linkedin"],
+      communication_direction: ["outbound", "inbound"],
+      contact_status: [
+        "NEW",
+        "CONTACTED",
+        "ENGAGED",
+        "QUALIFIED",
+        "CLIENT",
+        "SUPPLIER",
+        "DO_NOT_CONTACT",
+      ],
+      email_event_type: [
+        "sent",
+        "delivered",
+        "opened",
+        "clicked",
+        "replied",
+        "bounced",
+      ],
+      inbox_warmup_status: ["new", "warming", "active"],
     },
   },
 } as const
