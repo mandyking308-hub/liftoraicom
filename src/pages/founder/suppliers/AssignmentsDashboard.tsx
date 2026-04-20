@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus, Loader2, ShieldCheck, Clock, AlertTriangle } from "lucide-react";
 import FounderLayout from "@/components/founder/FounderLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,10 @@ type Assignment = {
   auto_assigned: boolean;
   share_contact_details: boolean;
   supplier_note: string;
+  expected_completion_date: string | null;
+  sla_status: "on_track" | "at_risk" | "overdue" | "n_a";
+  completion_confirmed_by_founder: boolean;
+  requires_finance_action: boolean;
 };
 type Deal = { id: string; deal_name: string; business_name: string; contact_id: string | null; status: string };
 type Supplier = { id: string; name: string; email: string; business_name: string; status: string };
@@ -102,6 +106,26 @@ const AssignmentsDashboard = () => {
     const { error } = await supabase
       .from("assignments")
       .update({ share_contact_details: !a.share_contact_details } as never)
+      .eq("id", a.id);
+    if (error) { toast.error(error.message); return; }
+    void load();
+  }
+
+  async function confirmCompletion(a: Assignment) {
+    const { data, error } = await supabase.rpc("founder_confirm_assignment", { _assignment_id: a.id });
+    const r = data as { ok: boolean; error?: string } | null;
+    if (error || !r?.ok) {
+      toast.error(r?.error?.replace(/_/g, " ").toLowerCase() || error?.message || "Confirm failed");
+      return;
+    }
+    toast.success("Confirmed — finance flagged for billing");
+    void load();
+  }
+
+  async function setExpectedDate(a: Assignment, date: string) {
+    const { error } = await supabase
+      .from("assignments")
+      .update({ expected_completion_date: date || null } as never)
       .eq("id", a.id);
     if (error) { toast.error(error.message); return; }
     void load();
@@ -199,10 +223,41 @@ const AssignmentsDashboard = () => {
                           <span className="text-muted-foreground">→</span>
                           <span>{deal?.deal_name || a.deal_id.slice(0,8)}</span>
                           {a.auto_assigned && <Badge variant="outline" className="text-xs">auto</Badge>}
+                          {a.sla_status === "overdue" && (
+                            <Badge variant="destructive" className="text-xs gap-1">
+                              <AlertTriangle className="h-3 w-3" /> overdue
+                            </Badge>
+                          )}
+                          {a.sla_status === "at_risk" && (
+                            <Badge variant="outline" className="text-xs gap-1">
+                              <Clock className="h-3 w-3" /> at risk
+                            </Badge>
+                          )}
+                          {a.completion_confirmed_by_founder && (
+                            <Badge variant="outline" className="text-xs gap-1 border-primary/50 text-primary">
+                              <ShieldCheck className="h-3 w-3" /> confirmed
+                            </Badge>
+                          )}
+                          {a.requires_finance_action && (
+                            <Badge variant="outline" className="text-xs">finance →</Badge>
+                          )}
                         </div>
                         <p className="text-xs text-muted-foreground mt-0.5">
                           {a.business_name || "—"} · {new Date(a.assigned_at).toLocaleString()}
                         </p>
+                        <div className="flex items-center gap-2 mt-1.5">
+                          <Label className="text-xs text-muted-foreground">SLA:</Label>
+                          <input
+                            type="date"
+                            className="bg-background border border-border/60 rounded px-2 py-0.5 text-xs"
+                            defaultValue={a.expected_completion_date ?? ""}
+                            onBlur={(e) => {
+                              if ((e.target.value || null) !== a.expected_completion_date) {
+                                void setExpectedDate(a, e.target.value);
+                              }
+                            }}
+                          />
+                        </div>
                       </div>
                       <div className="flex items-center gap-2">
                         <Badge variant="outline" className="capitalize">{a.status.replace("_"," ")}</Badge>
@@ -222,6 +277,11 @@ const AssignmentsDashboard = () => {
                           />
                           <span>share contact</span>
                         </div>
+                        {a.status === "completed" && !a.completion_confirmed_by_founder && (
+                          <Button size="sm" variant="outline" onClick={() => confirmCompletion(a)}>
+                            <ShieldCheck className="h-3 w-3 mr-1" /> Confirm
+                          </Button>
+                        )}
                       </div>
                     </li>
                   );

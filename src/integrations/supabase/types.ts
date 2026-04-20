@@ -513,13 +513,19 @@ export type Database = {
           auto_assigned: boolean
           business_name: string
           completed_at: string | null
+          completion_confirmed_by_founder: boolean
+          confirmed_at: string | null
           contact_id: string | null
           created_at: string
           deal_id: string
+          expected_completion_date: string | null
           failed_at: string | null
           id: string
           notes: string
+          required_skills: string[]
+          requires_finance_action: boolean
           share_contact_details: boolean
+          sla_status: Database["public"]["Enums"]["assignment_sla_status"]
           started_at: string | null
           status: Database["public"]["Enums"]["assignment_status"]
           supplier_id: string
@@ -531,13 +537,19 @@ export type Database = {
           auto_assigned?: boolean
           business_name?: string
           completed_at?: string | null
+          completion_confirmed_by_founder?: boolean
+          confirmed_at?: string | null
           contact_id?: string | null
           created_at?: string
           deal_id: string
+          expected_completion_date?: string | null
           failed_at?: string | null
           id?: string
           notes?: string
+          required_skills?: string[]
+          requires_finance_action?: boolean
           share_contact_details?: boolean
+          sla_status?: Database["public"]["Enums"]["assignment_sla_status"]
           started_at?: string | null
           status?: Database["public"]["Enums"]["assignment_status"]
           supplier_id: string
@@ -549,13 +561,19 @@ export type Database = {
           auto_assigned?: boolean
           business_name?: string
           completed_at?: string | null
+          completion_confirmed_by_founder?: boolean
+          confirmed_at?: string | null
           contact_id?: string | null
           created_at?: string
           deal_id?: string
+          expected_completion_date?: string | null
           failed_at?: string | null
           id?: string
           notes?: string
+          required_skills?: string[]
+          requires_finance_action?: boolean
           share_contact_details?: boolean
+          sla_status?: Database["public"]["Enums"]["assignment_sla_status"]
           started_at?: string | null
           status?: Database["public"]["Enums"]["assignment_status"]
           supplier_id?: string
@@ -1055,6 +1073,7 @@ export type Database = {
           lost_at: string | null
           notes: string
           probability: number
+          required_skills: string[]
           status: Database["public"]["Enums"]["deal_status"]
           updated_at: string
           won_at: string | null
@@ -1071,6 +1090,7 @@ export type Database = {
           lost_at?: string | null
           notes?: string
           probability?: number
+          required_skills?: string[]
           status?: Database["public"]["Enums"]["deal_status"]
           updated_at?: string
           won_at?: string | null
@@ -1087,6 +1107,7 @@ export type Database = {
           lost_at?: string | null
           notes?: string
           probability?: number
+          required_skills?: string[]
           status?: Database["public"]["Enums"]["deal_status"]
           updated_at?: string
           won_at?: string | null
@@ -4222,8 +4243,10 @@ export type Database = {
           notes: string
           rejected_at: string | null
           role: string
+          skills: string[]
           source: string
           status: Database["public"]["Enums"]["supplier_status"]
+          tags: string[]
           updated_at: string
         }
         Insert: {
@@ -4237,8 +4260,10 @@ export type Database = {
           notes?: string
           rejected_at?: string | null
           role?: string
+          skills?: string[]
           source?: string
           status?: Database["public"]["Enums"]["supplier_status"]
+          tags?: string[]
           updated_at?: string
         }
         Update: {
@@ -4252,8 +4277,10 @@ export type Database = {
           notes?: string
           rejected_at?: string | null
           role?: string
+          skills?: string[]
           source?: string
           status?: Database["public"]["Enums"]["supplier_status"]
+          tags?: string[]
           updated_at?: string
         }
         Relationships: []
@@ -4798,6 +4825,13 @@ export type Database = {
         Returns: string
       }
       check_outreach_allowed: { Args: { _contact_id: string }; Returns: Json }
+      compute_assignment_sla: {
+        Args: {
+          _expected: string
+          _status: Database["public"]["Enums"]["assignment_status"]
+        }
+        Returns: Database["public"]["Enums"]["assignment_sla_status"]
+      }
       eligible_suppliers_for_deal: {
         Args: { _deal_id: string }
         Returns: {
@@ -4811,8 +4845,10 @@ export type Database = {
           notes: string
           rejected_at: string | null
           role: string
+          skills: string[]
           source: string
           status: Database["public"]["Enums"]["supplier_status"]
+          tags: string[]
           updated_at: string
         }[]
         SetofOptions: {
@@ -4838,6 +4874,10 @@ export type Database = {
           pipeline_value: number
           progress_pct: number
         }[]
+      }
+      founder_confirm_assignment: {
+        Args: { _assignment_id: string }
+        Returns: Json
       }
       generate_invoice_number: { Args: never; Returns: string }
       get_proposal_by_token: {
@@ -4951,6 +4991,7 @@ export type Database = {
         Args: { _proposal_id: string }
         Returns: number
       }
+      refresh_all_assignment_sla: { Args: never; Returns: number }
       reset_inbox_send_counts: { Args: never; Returns: number }
       score_contact: {
         Args: { _business_name?: string; _contact_id: string }
@@ -5038,6 +5079,7 @@ export type Database = {
       ai_action_status: "success" | "failed"
       ai_action_type: "classify" | "reply" | "escalate"
       app_role: "admin" | "founder" | "client" | "partner"
+      assignment_sla_status: "on_track" | "at_risk" | "overdue" | "n_a"
       assignment_status: "assigned" | "in_progress" | "completed" | "failed"
       communication_channel: "email" | "whatsapp" | "linkedin"
       communication_direction: "outbound" | "inbound"
@@ -5228,6 +5270,7 @@ export const Constants = {
       ai_action_status: ["success", "failed"],
       ai_action_type: ["classify", "reply", "escalate"],
       app_role: ["admin", "founder", "client", "partner"],
+      assignment_sla_status: ["on_track", "at_risk", "overdue", "n_a"],
       assignment_status: ["assigned", "in_progress", "completed", "failed"],
       communication_channel: ["email", "whatsapp", "linkedin"],
       communication_direction: ["outbound", "inbound"],

@@ -16,11 +16,12 @@ import { toast } from "sonner";
 type Supplier = {
   id: string; name: string; email: string; company: string; role: string;
   business_name: string; status: string; source: string; notes: string;
+  skills: string[]; tags: string[];
   approved_at: string | null; rejected_at: string | null; created_at: string;
 };
 type Pipeline = { id: string; stage: string; notes: string; updated_at: string };
 type Availability = { id: string; status: string; manual_override: boolean; capacity: number | null; notes: string };
-type Assignment = { id: string; deal_id: string; status: string; assigned_at: string; completed_at: string | null; business_name: string };
+type Assignment = { id: string; deal_id: string; status: string; assigned_at: string; completed_at: string | null; business_name: string; sla_status: string };
 type SupplierUser = { id: string; email: string; access_token: string; active: boolean; last_login_at: string | null };
 
 const STATUS_OPTIONS = ["NEW","CONTACTED","QUALIFIED","APPROVED","REJECTED","INACTIVE"];
@@ -214,6 +215,62 @@ const SupplierDetail = () => {
             <p className="text-xs text-muted-foreground">Saves on blur.</p>
           </CardContent>
         </Card>
+
+        <div className="grid md:grid-cols-2 gap-4">
+          <Card className="tech-card">
+            <CardHeader><CardTitle className="text-sm">Skills & tags</CardTitle></CardHeader>
+            <CardContent className="space-y-3">
+              <div>
+                <Label className="text-xs">Skills (comma-separated)</Label>
+                <Input
+                  defaultValue={(supplier.skills ?? []).join(", ")}
+                  placeholder="e.g. cardiology, frontend, luxury-jewellery"
+                  onBlur={(e) => {
+                    const next = e.target.value.split(",").map((s) => s.trim()).filter(Boolean);
+                    if (JSON.stringify(next) !== JSON.stringify(supplier.skills ?? [])) {
+                      void updateSupplier({ skills: next });
+                    }
+                  }}
+                />
+              </div>
+              <div>
+                <Label className="text-xs">Tags (comma-separated)</Label>
+                <Input
+                  defaultValue={(supplier.tags ?? []).join(", ")}
+                  placeholder="e.g. premium, eu-only"
+                  onBlur={(e) => {
+                    const next = e.target.value.split(",").map((s) => s.trim()).filter(Boolean);
+                    if (JSON.stringify(next) !== JSON.stringify(supplier.tags ?? [])) {
+                      void updateSupplier({ tags: next });
+                    }
+                  }}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">Used by skill-aware deal matching. Saves on blur.</p>
+            </CardContent>
+          </Card>
+
+          <Card className="tech-card">
+            <CardHeader><CardTitle className="text-sm">Capacity</CardTitle></CardHeader>
+            <CardContent className="space-y-2">
+              <Label className="text-xs">Max concurrent active assignments</Label>
+              <Input
+                type="number"
+                min={1}
+                defaultValue={availability?.capacity ?? 1}
+                onBlur={(e) => {
+                  const v = parseInt(e.target.value, 10);
+                  if (Number.isFinite(v) && v !== availability?.capacity) {
+                    void updateAvailability({ capacity: v });
+                  }
+                }}
+              />
+              <p className="text-xs text-muted-foreground">
+                Supplier auto-flips to <span className="font-medium">busy</span> when active assignments ≥ capacity.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
 
         <Card className="tech-card">
           <CardHeader><CardTitle className="text-sm">Assignments ({assignments.length})</CardTitle></CardHeader>
