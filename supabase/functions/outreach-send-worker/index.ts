@@ -25,6 +25,16 @@ Deno.serve(async (req) => {
 
     const now = new Date();
 
+    // ===== SYSTEM MODE GUARD =====
+    const { data: modeRow } = await supabase
+      .from("system_settings")
+      .select("value")
+      .eq("key", "system_mode")
+      .maybeSingle();
+    const systemMode: string =
+      typeof modeRow?.value === "string" ? modeRow.value : (modeRow?.value ?? "test");
+    const isLive = systemMode === "live";
+
     // Pull due items ordered by priority FIRST (reply-priority items get priority=10),
     // then by scheduled_at. Includes previously delayed/throttled items whose retry time has arrived.
     const { data: due, error } = await supabase
@@ -36,7 +46,7 @@ Deno.serve(async (req) => {
       .order("scheduled_at", { ascending: true })
       .limit(PER_RUN_LIMIT);
     if (error) return json({ error: error.message }, 500);
-    if (!due?.length) return json({ processed: 0, sent: 0, blocked: 0, delayed: 0 }, 200);
+    if (!due?.length) return json({ processed: 0, sent: 0, blocked: 0, delayed: 0, mode: systemMode }, 200);
 
     let sent = 0, blocked = 0, failed = 0, delayed = 0;
     const touchedCampaigns = new Set<string>();
@@ -50,6 +60,19 @@ Deno.serve(async (req) => {
 
       // ===== THROTTLE / WINDOW / REPUTATION CHECK =====
       if (item.inbox_id) {
+        // Ramp enforcement (day 1-3 = 20, day 4-7 = 40, day 8+ = 80)
+        const { data: ramp } = await supabase.rpc("enforce_inbox_ramp", { _inbox_id: item.inbox_id });
+        const rampDecision = ramp as { allowed: boolean; reason?: string } | null;
+        if (rampDecision && !rampDecision.allowed) {
+          await supabase.from("email_queue").update({
+            status: "delayed",
+            block_reason: rampDecision.reason ?? "RAMP_LIMIT_REACHED",
+            scheduled_at: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+          }).eq("id", item.id);
+          delayed += 1;
+          continue;
+        }
+
         const { data: throttle } = await supabase.rpc("check_send_throttle", {
           _inbox_id: item.inbox_id,
           _contact_id: item.contact_id,
@@ -122,10 +145,19 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      // SIMULATED SEND: real SMTP wiring will replace this block.
+      // SIMULATED SEND in test mode; real SMTP wiring will replace this block in live.
       // The communication row + last_contacted_at update are already handled by crm-send-check (log_attempt)
       // and the contacts trigger handle_new_communication.
       try {
+        if (!isLive) {
+          // TEST MODE: do not call SMTP. Mark as sent (simulated) for analytics continuity.
+          await supabase.from("activity_log").insert({
+            event_type: "send_simulated",
+            description: `TEST MODE — simulated send for queue ${item.id}`,
+            entity_type: "email_queue",
+            entity_id: item.id,
+          });
+        }
         // Log a synthetic "sent" email_event tagged with the queue id
         await supabase.from("email_events").insert({
           contact_id: item.contact_id,
@@ -181,7 +213,7 @@ Deno.serve(async (req) => {
       await supabase.rpc("recompute_campaign_metrics", { _campaign_id: cid });
     }
 
-    return json({ processed: due.length, sent, blocked, failed, delayed }, 200);
+    return json({ processed: due.length, sent, blocked, failed, delayed, mode: systemMode }, 200);
   } catch (err) {
     return json({ error: (err as Error).message }, 500);
   }

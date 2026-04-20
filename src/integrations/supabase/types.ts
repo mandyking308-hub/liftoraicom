@@ -604,6 +604,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "assignments_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+          {
             foreignKeyName: "assignments_deal_id_fkey"
             columns: ["deal_id"]
             isOneToOne: false
@@ -927,6 +934,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "communications_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+          {
             foreignKeyName: "communications_inbox_id_fkey"
             columns: ["inbox_id"]
             isOneToOne: false
@@ -1170,6 +1184,8 @@ export type Database = {
           created_at: string
           email: string
           enriched_at: string | null
+          founder_review_note: string
+          founder_review_requested_at: string | null
           id: string
           industry: string | null
           intent_score: number
@@ -1196,6 +1212,8 @@ export type Database = {
           created_at?: string
           email: string
           enriched_at?: string | null
+          founder_review_note?: string
+          founder_review_requested_at?: string | null
           id?: string
           industry?: string | null
           intent_score?: number
@@ -1222,6 +1240,8 @@ export type Database = {
           created_at?: string
           email?: string
           enriched_at?: string | null
+          founder_review_note?: string
+          founder_review_requested_at?: string | null
           id?: string
           industry?: string | null
           intent_score?: number
@@ -1413,6 +1433,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "contacts"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
           },
         ]
       }
@@ -1707,6 +1734,94 @@ export type Database = {
           },
         ]
       }
+      domain_protection_alerts: {
+        Row: {
+          alert_type: string
+          campaign_id: string | null
+          created_at: string
+          id: string
+          inbox_id: string | null
+          message: string
+          metric_value: number
+          resolved: boolean
+          resolved_at: string | null
+          sending_domain_id: string | null
+          severity: Database["public"]["Enums"]["system_event_severity"]
+          threshold_value: number
+        }
+        Insert: {
+          alert_type: string
+          campaign_id?: string | null
+          created_at?: string
+          id?: string
+          inbox_id?: string | null
+          message?: string
+          metric_value?: number
+          resolved?: boolean
+          resolved_at?: string | null
+          sending_domain_id?: string | null
+          severity?: Database["public"]["Enums"]["system_event_severity"]
+          threshold_value?: number
+        }
+        Update: {
+          alert_type?: string
+          campaign_id?: string | null
+          created_at?: string
+          id?: string
+          inbox_id?: string | null
+          message?: string
+          metric_value?: number
+          resolved?: boolean
+          resolved_at?: string | null
+          sending_domain_id?: string | null
+          severity?: Database["public"]["Enums"]["system_event_severity"]
+          threshold_value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "domain_protection_alerts_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "outreach_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "domain_protection_alerts_inbox_id_fkey"
+            columns: ["inbox_id"]
+            isOneToOne: false
+            referencedRelation: "inbox_health_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "domain_protection_alerts_inbox_id_fkey"
+            columns: ["inbox_id"]
+            isOneToOne: false
+            referencedRelation: "inboxes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "domain_protection_alerts_inbox_id_fkey"
+            columns: ["inbox_id"]
+            isOneToOne: false
+            referencedRelation: "warmup_progress"
+            referencedColumns: ["inbox_id"]
+          },
+          {
+            foreignKeyName: "domain_protection_alerts_sending_domain_id_fkey"
+            columns: ["sending_domain_id"]
+            isOneToOne: false
+            referencedRelation: "domain_usage_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "domain_protection_alerts_sending_domain_id_fkey"
+            columns: ["sending_domain_id"]
+            isOneToOne: false
+            referencedRelation: "sending_domains"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_events: {
         Row: {
           contact_id: string
@@ -1739,6 +1854,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "contacts"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_events_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
           },
         ]
       }
@@ -1811,6 +1933,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "contacts"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_queue_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
           },
           {
             foreignKeyName: "email_queue_inbox_id_fkey"
@@ -2091,12 +2220,15 @@ export type Database = {
           hourly_send_limit: number
           hourly_window_start: string
           id: string
+          inbound_webhook_url: string
+          inbound_webhook_verified_at: string | null
           last_sent_at: string | null
           last_used_sequence_position: number
           paused_reason: string
           performance_score: number
           reply_rate_per_inbox: number
           reputation_score: number
+          sending_domain_id: string | null
           updated_at: string
           warmup_started_at: string
           warmup_status: Database["public"]["Enums"]["inbox_warmup_status"]
@@ -2115,12 +2247,15 @@ export type Database = {
           hourly_send_limit?: number
           hourly_window_start?: string
           id?: string
+          inbound_webhook_url?: string
+          inbound_webhook_verified_at?: string | null
           last_sent_at?: string | null
           last_used_sequence_position?: number
           paused_reason?: string
           performance_score?: number
           reply_rate_per_inbox?: number
           reputation_score?: number
+          sending_domain_id?: string | null
           updated_at?: string
           warmup_started_at?: string
           warmup_status?: Database["public"]["Enums"]["inbox_warmup_status"]
@@ -2139,17 +2274,35 @@ export type Database = {
           hourly_send_limit?: number
           hourly_window_start?: string
           id?: string
+          inbound_webhook_url?: string
+          inbound_webhook_verified_at?: string | null
           last_sent_at?: string | null
           last_used_sequence_position?: number
           paused_reason?: string
           performance_score?: number
           reply_rate_per_inbox?: number
           reputation_score?: number
+          sending_domain_id?: string | null
           updated_at?: string
           warmup_started_at?: string
           warmup_status?: Database["public"]["Enums"]["inbox_warmup_status"]
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "inboxes_sending_domain_id_fkey"
+            columns: ["sending_domain_id"]
+            isOneToOne: false
+            referencedRelation: "domain_usage_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inboxes_sending_domain_id_fkey"
+            columns: ["sending_domain_id"]
+            isOneToOne: false
+            referencedRelation: "sending_domains"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       integration_activity_logs: {
         Row: {
@@ -2514,6 +2667,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "invoices_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+          {
             foreignKeyName: "invoices_deal_id_fkey"
             columns: ["deal_id"]
             isOneToOne: false
@@ -2772,6 +2932,13 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "contacts"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_scores_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: true
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
           },
         ]
       }
@@ -4259,6 +4426,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "contacts"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reputation_events_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
           },
           {
             foreignKeyName: "reputation_events_domain_id_fkey"
@@ -6134,6 +6308,13 @@ export type Database = {
             referencedRelation: "contacts"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "email_queue_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
         ]
       }
       domain_usage_summary: {
@@ -6169,6 +6350,51 @@ export type Database = {
           usage_pct?: never
           usage_window_start?: string | null
           warmup_stage?: Database["public"]["Enums"]["warmup_stage"] | null
+        }
+        Relationships: []
+      }
+      high_intent_review_queue: {
+        Row: {
+          assigned_business: string | null
+          company: string | null
+          contact_id: string | null
+          demo_views: number | null
+          email: string | null
+          founder_review_requested_at: string | null
+          intent_score: number | null
+          last_reply_at: string | null
+          name: string | null
+          proposal_viewed: boolean | null
+          status: Database["public"]["Enums"]["contact_status"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_business?: string | null
+          company?: string | null
+          contact_id?: string | null
+          demo_views?: never
+          email?: string | null
+          founder_review_requested_at?: string | null
+          intent_score?: number | null
+          last_reply_at?: never
+          name?: string | null
+          proposal_viewed?: never
+          status?: Database["public"]["Enums"]["contact_status"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_business?: string | null
+          company?: string | null
+          contact_id?: string | null
+          demo_views?: never
+          email?: string | null
+          founder_review_requested_at?: string | null
+          intent_score?: number | null
+          last_reply_at?: never
+          name?: string | null
+          proposal_viewed?: never
+          status?: Database["public"]["Enums"]["contact_status"] | null
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -6218,6 +6444,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "contacts"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
           },
         ]
       }
@@ -6433,6 +6666,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      enforce_inbox_ramp: { Args: { _inbox_id: string }; Returns: Json }
       enrich_all_contacts: { Args: never; Returns: number }
       enrich_contact: { Args: { _contact_id: string }; Returns: Json }
       escalate_retry_failure: {
@@ -6565,6 +6799,10 @@ export type Database = {
           _metadata?: Json
           _severity: Database["public"]["Enums"]["system_event_severity"]
         }
+        Returns: string
+      }
+      mark_contact_for_founder_review: {
+        Args: { _contact_id: string; _note?: string }
         Returns: string
       }
       mark_send_failure: {
@@ -6726,6 +6964,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      run_domain_protection_check: { Args: never; Returns: Json }
       score_contact: {
         Args: { _business_name?: string; _contact_id: string }
         Returns: {
@@ -6744,6 +6983,7 @@ export type Database = {
         }
       }
       score_proposal_quality: { Args: { _proposal_id: string }; Returns: Json }
+      set_system_mode: { Args: { _mode: string }; Returns: string }
       severity_weight: {
         Args: { _s: Database["public"]["Enums"]["compliance_severity"] }
         Returns: number
@@ -6829,6 +7069,8 @@ export type Database = {
           created_at: string
           email: string
           enriched_at: string | null
+          founder_review_note: string
+          founder_review_requested_at: string | null
           id: string
           industry: string | null
           intent_score: number
@@ -6851,7 +7093,13 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      validate_campaign_activation: {
+        Args: { _campaign_id: string }
+        Returns: Json
+      }
       validate_full_system_coverage: { Args: never; Returns: Json }
+      validate_go_live_readiness: { Args: never; Returns: Json }
+      validate_inbox_mapping: { Args: { _inbox_id: string }; Returns: Json }
       validate_runtime_vs_documentation: { Args: never; Returns: Json }
       validate_system_integrity: { Args: never; Returns: Json }
     }

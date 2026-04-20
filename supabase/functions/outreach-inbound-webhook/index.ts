@@ -29,7 +29,33 @@ Deno.serve(async (req) => {
 
     const { data: contact } = await supabase
       .from("contacts").select("id, assigned_inbox_id").eq("email", fromEmail).maybeSingle();
-    if (!contact) return json({ error: "contact not found", from_email: fromEmail }, 404);
+    if (!contact) {
+      await supabase.from("system_events").insert({
+        event_type: "inbound_orphan",
+        severity: "high",
+        message: `Inbound from unknown contact ${fromEmail}`,
+        metadata: { from_email: fromEmail },
+      });
+      return json({ error: "contact not found", from_email: fromEmail }, 404);
+    }
+
+    // Validate inbox mapping if assigned
+    if (contact.assigned_inbox_id) {
+      const { data: mapping } = await supabase.rpc("validate_inbox_mapping", {
+        _inbox_id: contact.assigned_inbox_id,
+      });
+      const m = mapping as { valid: boolean; issues: string[] } | null;
+      if (m && !m.valid) {
+        await supabase.from("system_events").insert({
+          event_type: "inbound_mapping_invalid",
+          severity: "high",
+          message: `Inbound for ${fromEmail} hit invalid inbox mapping`,
+          entity_type: "inbox",
+          entity_id: contact.assigned_inbox_id,
+          metadata: m as unknown as Record<string, unknown>,
+        });
+      }
+    }
 
     if (body.is_bounce) {
       await supabase.from("email_events").insert({
