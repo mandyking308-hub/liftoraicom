@@ -5919,7 +5919,7 @@ export type Database = {
         Returns: Database["public"]["Enums"]["assignment_sla_status"]
       }
       compute_intent_score: { Args: { _contact_id: string }; Returns: number }
-      compute_system_health: { Args: never; Returns: Json }
+      compute_system_health: { Args: never; Returns: undefined }
       country_to_timezone: { Args: { _country: string }; Returns: string }
       detect_anomalies: { Args: never; Returns: Json }
       domain_for_inbox: { Args: { _inbox_id: string }; Returns: string }
