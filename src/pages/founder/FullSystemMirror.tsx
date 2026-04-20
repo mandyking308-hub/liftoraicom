@@ -245,10 +245,16 @@ const FullSystemMirror = () => {
     if (error) { toast.dismiss(t); toast.error(error.message); return; }
     const snap: any = data;
 
-    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    const doc = new jsPDF({ unit: "pt", format: "a4", compress: true });
     const pageW = doc.internal.pageSize.getWidth();
     const margin = 40;
     let y = margin;
+
+    // Helper to truncate long strings to keep file size down
+    const trim = (v: any, n: number) => {
+      const s = (v ?? "").toString();
+      return s.length > n ? s.slice(0, n - 1) + "…" : s;
+    };
 
     // Cover
     doc.setFontSize(22); doc.setFont("helvetica", "bold");
