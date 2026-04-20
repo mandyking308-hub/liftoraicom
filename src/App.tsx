@@ -113,6 +113,7 @@ import ComplianceEvents from "./pages/founder/compliance/ComplianceEvents";
 import ComplianceRules from "./pages/founder/compliance/ComplianceRules";
 import CRMDashboard from "./pages/founder/CRMDashboard";
 import PriorityDashboard from "./pages/founder/priority/PriorityDashboard";
+import SendingHealth from "./pages/founder/sending/SendingHealth";
 import CRMContacts from "./pages/founder/CRMContacts";
 import CRMContactDetail from "./pages/founder/CRMContactDetail";
 import CRMInboxes from "./pages/founder/CRMInboxes";
@@ -286,6 +287,7 @@ const App = () => (
             <Route path="/founder/suppliers/:id" element={<FounderRoute><SupplierDetail /></FounderRoute>} />
             <Route path="/founder/assignments" element={<FounderRoute><AssignmentsDashboard /></FounderRoute>} />
             <Route path="/founder/priority" element={<FounderRoute><PriorityDashboard /></FounderRoute>} />
+            <Route path="/founder/sending" element={<FounderRoute><SendingHealth /></FounderRoute>} />
 
             {/* Public proposal + demo */}
             <Route path="/proposals/view/:token" element={<PublicProposalView />} />
