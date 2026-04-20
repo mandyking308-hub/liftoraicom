@@ -1073,6 +1073,91 @@ export type Database = {
         }
         Relationships: []
       }
+      demo_access: {
+        Row: {
+          access_count: number
+          business_name: string
+          contact_id: string
+          created_at: string
+          demo_token: string
+          expires_at: string
+          high_intent: boolean
+          id: string
+          last_accessed_at: string | null
+          proposal_id: string | null
+          status: Database["public"]["Enums"]["demo_access_status"]
+          updated_at: string
+        }
+        Insert: {
+          access_count?: number
+          business_name?: string
+          contact_id: string
+          created_at?: string
+          demo_token?: string
+          expires_at?: string
+          high_intent?: boolean
+          id?: string
+          last_accessed_at?: string | null
+          proposal_id?: string | null
+          status?: Database["public"]["Enums"]["demo_access_status"]
+          updated_at?: string
+        }
+        Update: {
+          access_count?: number
+          business_name?: string
+          contact_id?: string
+          created_at?: string
+          demo_token?: string
+          expires_at?: string
+          high_intent?: boolean
+          id?: string
+          last_accessed_at?: string | null
+          proposal_id?: string | null
+          status?: Database["public"]["Enums"]["demo_access_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demo_access_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "internal_proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      demo_events: {
+        Row: {
+          demo_id: string
+          event_type: Database["public"]["Enums"]["demo_event_type"]
+          id: string
+          metadata: Json
+          timestamp: string
+        }
+        Insert: {
+          demo_id: string
+          event_type: Database["public"]["Enums"]["demo_event_type"]
+          id?: string
+          metadata?: Json
+          timestamp?: string
+        }
+        Update: {
+          demo_id?: string
+          event_type?: Database["public"]["Enums"]["demo_event_type"]
+          id?: string
+          metadata?: Json
+          timestamp?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demo_events_demo_id_fkey"
+            columns: ["demo_id"]
+            isOneToOne: false
+            referencedRelation: "demo_access"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deployment_checklist: {
         Row: {
           completed: boolean
@@ -1748,6 +1833,146 @@ export type Database = {
           service_type?: string
           status?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      internal_proposal_versions: {
+        Row: {
+          changed_by: string
+          created_at: string
+          id: string
+          proposal_id: string
+          snapshot: Json
+          version: number
+        }
+        Insert: {
+          changed_by?: string
+          created_at?: string
+          id?: string
+          proposal_id: string
+          snapshot?: Json
+          version: number
+        }
+        Update: {
+          changed_by?: string
+          created_at?: string
+          id?: string
+          proposal_id?: string
+          snapshot?: Json
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "internal_proposal_versions_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "internal_proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      internal_proposals: {
+        Row: {
+          accept_token: string
+          accepted_at: string | null
+          architecture_components: Json
+          business_name: string
+          business_problem: string
+          contact_id: string
+          created_at: string
+          deal_id: string | null
+          estimated_annual_savings: string
+          estimated_cost_breakdown: Json
+          estimated_cost_range: string
+          estimated_productivity_gain: string
+          estimated_roi_period: string
+          estimated_roi_summary: string
+          estimated_scope: string
+          estimated_timeline: string
+          id: string
+          include_demo: boolean
+          industry: string
+          processes_to_automate: string[]
+          project_scale: string
+          project_types: string[]
+          rejected_at: string | null
+          sent_at: string | null
+          status: Database["public"]["Enums"]["internal_proposal_status"]
+          suggested_solution: string
+          timeline: string
+          title: string
+          updated_at: string
+          version: number
+          view_token: string
+          viewed_at: string | null
+        }
+        Insert: {
+          accept_token?: string
+          accepted_at?: string | null
+          architecture_components?: Json
+          business_name?: string
+          business_problem?: string
+          contact_id: string
+          created_at?: string
+          deal_id?: string | null
+          estimated_annual_savings?: string
+          estimated_cost_breakdown?: Json
+          estimated_cost_range?: string
+          estimated_productivity_gain?: string
+          estimated_roi_period?: string
+          estimated_roi_summary?: string
+          estimated_scope?: string
+          estimated_timeline?: string
+          id?: string
+          include_demo?: boolean
+          industry?: string
+          processes_to_automate?: string[]
+          project_scale?: string
+          project_types?: string[]
+          rejected_at?: string | null
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["internal_proposal_status"]
+          suggested_solution?: string
+          timeline?: string
+          title?: string
+          updated_at?: string
+          version?: number
+          view_token?: string
+          viewed_at?: string | null
+        }
+        Update: {
+          accept_token?: string
+          accepted_at?: string | null
+          architecture_components?: Json
+          business_name?: string
+          business_problem?: string
+          contact_id?: string
+          created_at?: string
+          deal_id?: string | null
+          estimated_annual_savings?: string
+          estimated_cost_breakdown?: Json
+          estimated_cost_range?: string
+          estimated_productivity_gain?: string
+          estimated_roi_period?: string
+          estimated_roi_summary?: string
+          estimated_scope?: string
+          estimated_timeline?: string
+          id?: string
+          include_demo?: boolean
+          industry?: string
+          processes_to_automate?: string[]
+          project_scale?: string
+          project_types?: string[]
+          rejected_at?: string | null
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["internal_proposal_status"]
+          suggested_solution?: string
+          timeline?: string
+          title?: string
+          updated_at?: string
+          version?: number
+          view_token?: string
+          viewed_at?: string | null
         }
         Relationships: []
       }
@@ -4310,12 +4535,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_proposal_by_token: { Args: { _token: string }; Returns: Json }
       ai_actions_today: { Args: { _conversation_id: string }; Returns: number }
       assign_inbox_for_contact: {
         Args: { _contact_id: string }
         Returns: string
       }
       check_outreach_allowed: { Args: { _contact_id: string }; Returns: Json }
+      expire_demos: { Args: never; Returns: number }
       expire_inactive_conversations: { Args: never; Returns: number }
       finance_mark_overdue_invoices: { Args: never; Returns: number }
       finance_target_vs_actual: {
@@ -4333,12 +4560,59 @@ export type Database = {
         }[]
       }
       generate_invoice_number: { Args: never; Returns: string }
+      get_proposal_by_token: {
+        Args: { _token: string }
+        Returns: {
+          accept_token: string
+          accepted_at: string | null
+          architecture_components: Json
+          business_name: string
+          business_problem: string
+          contact_id: string
+          created_at: string
+          deal_id: string | null
+          estimated_annual_savings: string
+          estimated_cost_breakdown: Json
+          estimated_cost_range: string
+          estimated_productivity_gain: string
+          estimated_roi_period: string
+          estimated_roi_summary: string
+          estimated_scope: string
+          estimated_timeline: string
+          id: string
+          include_demo: boolean
+          industry: string
+          processes_to_automate: string[]
+          project_scale: string
+          project_types: string[]
+          rejected_at: string | null
+          sent_at: string | null
+          status: Database["public"]["Enums"]["internal_proposal_status"]
+          suggested_solution: string
+          timeline: string
+          title: string
+          updated_at: string
+          version: number
+          view_token: string
+          viewed_at: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "internal_proposals"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      log_demo_event: {
+        Args: { _event_type: string; _metadata?: Json; _token: string }
+        Returns: Json
       }
       recompute_campaign_metrics: {
         Args: { _campaign_id: string }
@@ -4413,6 +4687,13 @@ export type Database = {
         | "DO_NOT_CONTACT"
       conversation_status: "OPEN" | "QUALIFIED" | "CLOSED"
       deal_status: "NEW" | "QUALIFIED" | "PROPOSAL_SENT" | "WON" | "LOST"
+      demo_access_status: "active" | "expired" | "revoked"
+      demo_event_type:
+        | "view"
+        | "login"
+        | "feature_used"
+        | "session_start"
+        | "session_end"
       email_event_type:
         | "sent"
         | "delivered"
@@ -4422,6 +4703,13 @@ export type Database = {
         | "bounced"
       email_queue_status: "pending" | "sent" | "failed" | "blocked"
       inbox_warmup_status: "new" | "warming" | "active"
+      internal_proposal_status:
+        | "draft"
+        | "sent"
+        | "viewed"
+        | "accepted"
+        | "rejected"
+        | "expired"
       invoice_status: "DRAFT" | "SENT" | "PAID" | "OVERDUE" | "PARTIALLY_PAID"
       lead_validation_status: "valid" | "invalid" | "duplicate"
       outreach_campaign_status: "active" | "paused"
@@ -4574,6 +4862,14 @@ export const Constants = {
       ],
       conversation_status: ["OPEN", "QUALIFIED", "CLOSED"],
       deal_status: ["NEW", "QUALIFIED", "PROPOSAL_SENT", "WON", "LOST"],
+      demo_access_status: ["active", "expired", "revoked"],
+      demo_event_type: [
+        "view",
+        "login",
+        "feature_used",
+        "session_start",
+        "session_end",
+      ],
       email_event_type: [
         "sent",
         "delivered",
@@ -4584,6 +4880,14 @@ export const Constants = {
       ],
       email_queue_status: ["pending", "sent", "failed", "blocked"],
       inbox_warmup_status: ["new", "warming", "active"],
+      internal_proposal_status: [
+        "draft",
+        "sent",
+        "viewed",
+        "accepted",
+        "rejected",
+        "expired",
+      ],
       invoice_status: ["DRAFT", "SENT", "PAID", "OVERDUE", "PARTIALLY_PAID"],
       lead_validation_status: ["valid", "invalid", "duplicate"],
       outreach_campaign_status: ["active", "paused"],

@@ -123,6 +123,12 @@ import OutreachCampaigns from "./pages/founder/outreach/OutreachCampaigns";
 import OutreachQueue from "./pages/founder/outreach/OutreachQueue";
 import ConversationsDashboard from "./pages/founder/conversations/ConversationsDashboard";
 import ConversationDetail from "./pages/founder/conversations/ConversationDetail";
+import InternalProposals from "./pages/founder/proposals/InternalProposals";
+import InternalProposalDetail from "./pages/founder/proposals/InternalProposalDetail";
+import DemosDashboard from "./pages/founder/proposals/DemosDashboard";
+import PublicProposalView from "./pages/public/PublicProposalView";
+import PublicProposalAccept from "./pages/public/PublicProposalAccept";
+import PublicDemo from "./pages/public/PublicDemo";
 // Partner pages
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import PartnerOpportunities from "./pages/partner/PartnerOpportunities";
@@ -259,6 +265,14 @@ const App = () => (
             <Route path="/founder/outreach/queue" element={<FounderRoute><OutreachQueue /></FounderRoute>} />
             <Route path="/founder/conversations" element={<FounderRoute><ConversationsDashboard /></FounderRoute>} />
             <Route path="/founder/conversations/:id" element={<FounderRoute><ConversationDetail /></FounderRoute>} />
+            <Route path="/founder/internal-proposals" element={<FounderRoute><InternalProposals /></FounderRoute>} />
+            <Route path="/founder/internal-proposals/:id" element={<FounderRoute><InternalProposalDetail /></FounderRoute>} />
+            <Route path="/founder/demos" element={<FounderRoute><DemosDashboard /></FounderRoute>} />
+
+            {/* Public proposal + demo */}
+            <Route path="/proposals/view/:token" element={<PublicProposalView />} />
+            <Route path="/proposals/accept/:token" element={<PublicProposalAccept />} />
+            <Route path="/demo/:token" element={<PublicDemo />} />
 
             {/* Partner Portal */}
             <Route path="/partner" element={<PartnerRoute><PartnerDashboard /></PartnerRoute>} />
