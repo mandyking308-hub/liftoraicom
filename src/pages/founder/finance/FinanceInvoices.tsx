@@ -41,7 +41,7 @@ const FinanceInvoices = () => {
   }
 
   async function updateStatus(id: string, status: string) {
-    const { error } = await supabase.from("invoices").update({ status: status as Invoice["status"] }).eq("id", id);
+    const { error } = await supabase.from("invoices").update({ status: status as "DRAFT" | "SENT" | "PAID" | "OVERDUE" }).eq("id", id);
     if (error) { toast.error(error.message); return; }
     toast.success(`Marked ${status}`);
     void load();

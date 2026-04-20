@@ -44,11 +44,12 @@ const FinancePayments = () => {
     if (!form.invoice_id) { toast.error("Select an invoice"); return; }
     const amt = Number(form.amount_received);
     if (!amt || amt <= 0) { toast.error("Amount must be greater than 0"); return; }
-    const { error } = await supabase.from("payments").insert({
+    const { error } = await supabase.from("payments").insert([{
       invoice_id: form.invoice_id,
       amount_received: amt,
-      method: form.method as Payment["method"],
+      method: form.method as "bank" | "stripe" | "cash" | "other",
       reference: form.reference,
+    }]);
     });
     if (error) { toast.error(error.message); return; }
     setOpen(false);

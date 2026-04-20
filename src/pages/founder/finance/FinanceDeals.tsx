@@ -66,7 +66,7 @@ const FinanceDeals = () => {
   }
 
   async function updateStatus(id: string, status: string) {
-    const { error } = await supabase.from("deals").update({ status: status as Deal["status"] }).eq("id", id);
+    const { error } = await supabase.from("deals").update({ status: status as "NEW" | "QUALIFIED" | "PROPOSAL_SENT" | "WON" | "LOST" }).eq("id", id);
     if (error) { toast.error(error.message); return; }
     toast.success(status === "WON" ? "Deal won — draft invoice created" : `Status updated to ${status}`);
     void load();
