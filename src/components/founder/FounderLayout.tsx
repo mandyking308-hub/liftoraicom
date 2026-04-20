@@ -2,6 +2,8 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { LayoutDashboard, FileInput, GitBranch, FolderKanban, Activity, FileText, LogOut, Menu, X, Monitor, Bot, Workflow, Plug, Play, Command, Network, Layers, Rocket, BarChart3, Zap, BookOpen, Globe, Building2, Shield, ShieldAlert, ShieldCheck, LayoutTemplate, Sparkles, BookOpenCheck, ClipboardList, PoundSterling, Brain, Scale, Compass, MessageSquare, FlaskConical, Users, Banknote, Send, MessagesSquare, FileSignature, MonitorPlay, Briefcase, ClipboardCheck, Gavel, TrendingUp } from "lucide-react";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const navItems = [
   { label: "Command Center", to: "/founder/command-center", icon: Command },
@@ -55,6 +57,19 @@ const FounderLayout = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const { data: criticalCount = 0 } = useQuery({
+    queryKey: ["sidebar_priority_critical_count"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("priority_scores" as never)
+        .select("id", { count: "exact", head: true })
+        .eq("priority_level", "critical");
+      if (error) return 0;
+      return count ?? 0;
+    },
+    refetchInterval: 30000,
+  });
+
   const handleSignOut = async () => {
     await signOut();
     navigate("/portal/login");
@@ -88,7 +103,12 @@ const FounderLayout = ({ children }: { children: React.ReactNode }) => {
             }`}
           >
             <item.icon size={18} />
-            {item.label}
+            <span className="flex-1">{item.label}</span>
+            {item.to === "/founder/priority" && criticalCount > 0 && (
+              <span className="ml-auto inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-destructive text-destructive-foreground text-[10px] font-semibold">
+                {criticalCount}
+              </span>
+            )}
           </Link>
         ))}
       </nav>
