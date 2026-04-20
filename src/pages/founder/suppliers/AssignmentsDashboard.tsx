@@ -111,6 +111,26 @@ const AssignmentsDashboard = () => {
     void load();
   }
 
+  async function confirmCompletion(a: Assignment) {
+    const { data, error } = await supabase.rpc("founder_confirm_assignment", { _assignment_id: a.id });
+    const r = data as { ok: boolean; error?: string } | null;
+    if (error || !r?.ok) {
+      toast.error(r?.error?.replace(/_/g, " ").toLowerCase() || error?.message || "Confirm failed");
+      return;
+    }
+    toast.success("Confirmed — finance flagged for billing");
+    void load();
+  }
+
+  async function setExpectedDate(a: Assignment, date: string) {
+    const { error } = await supabase
+      .from("assignments")
+      .update({ expected_completion_date: date || null } as never)
+      .eq("id", a.id);
+    if (error) { toast.error(error.message); return; }
+    void load();
+  }
+
   const filtered = filter === "all" ? assignments : assignments.filter((a) => a.status === filter);
 
   const counts = {
