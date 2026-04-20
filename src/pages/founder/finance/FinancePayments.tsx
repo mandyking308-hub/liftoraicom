@@ -50,7 +50,6 @@ const FinancePayments = () => {
       method: form.method as "bank" | "stripe" | "cash" | "other",
       reference: form.reference,
     }]);
-    });
     if (error) { toast.error(error.message); return; }
     setOpen(false);
     setForm({ invoice_id: "", amount_received: "0", method: "bank", reference: "" });
