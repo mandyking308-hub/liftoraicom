@@ -80,6 +80,11 @@ Deno.serve(async (req) => {
     const lastInbound = [...ordered].reverse().find((m) => m.direction === "inbound");
     if (!lastInbound) return json({ skipped: "NO_INBOUND" }, 200);
 
+    // Latency = time from last inbound message to now
+    const latencySeconds = lastInbound.created_at
+      ? (Date.now() - new Date(lastInbound.created_at).getTime()) / 1000
+      : null;
+
     // Escalation rules — short-circuit before AI
     const text = (lastInbound.content || "").toLowerCase();
     const escalationReasons: string[] = [];
@@ -99,6 +104,7 @@ Deno.serve(async (req) => {
         reply_preview: `Escalation reasons: ${escalationReasons.join(", ")}`,
         tokens_used: 0,
         status: "success",
+        reply_latency_seconds: latencySeconds,
       });
       await supabase.from("conversations").update({
         escalation_pending: true,
@@ -195,6 +201,14 @@ Use the classify_and_reply tool. Classifications:
     const words = replyText.trim().split(/\s+/);
     if (words.length > MAX_REPLY_WORDS) replyText = words.slice(0, MAX_REPLY_WORDS).join(" ");
 
+    // Neutral follow-up loop guard:
+    // If prospect's reply is neutral AND we already sent an AI reply as the
+    // most recent outbound, do not reply again — prevents "ok / thanks" loops.
+    const lastOutbound = [...ordered].reverse().find((m) => m.direction === "outbound");
+    const lastWasAiReply = !!(lastOutbound && lastOutbound.ai_generated);
+    const suppressNeutralLoop = classification === "neutral" && lastWasAiReply;
+    if (suppressNeutralLoop) replyText = "";
+
     // Status updates from classification
     let newContactStatus: string | null = null;
     if (classification === "interested") newContactStatus = "QUALIFIED";
@@ -217,6 +231,7 @@ Use the classify_and_reply tool. Classifications:
       classification,
       tokens_used: 0,
       status: "success",
+      reply_latency_seconds: latencySeconds,
     });
 
     // Log outbound reply via communications (the mirror trigger will create the message row)
@@ -238,14 +253,28 @@ Use the classify_and_reply tool. Classifications:
         reply_preview: replyText.slice(0, 280),
         tokens_used: tokensUsed,
         status: "success",
+        reply_latency_seconds: latencySeconds,
       });
     }
 
     // Update conversation status if qualified
+    // Build intent history (cap at last 20 entries)
+    const prevHistory: Array<{ intent: string; at: string }> =
+      Array.isArray(conv.intent_history) ? conv.intent_history : [];
+    const nextHistory = [...prevHistory, { intent: classification, at: new Date().toISOString() }].slice(-20);
+
     const convPatch: Record<string, unknown> = {
       ai_last_used_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
+      last_intent: classification,
+      intent_history: nextHistory,
     };
+    if (replyText.trim()) convPatch.last_ai_reply_at = new Date().toISOString();
+    // Question priority boost: +20 (capped at 100)
+    if (classification === "question") {
+      const currentBoost = Number(conv.priority_boost ?? 0);
+      convPatch.priority_boost = Math.min(currentBoost + 20, 100);
+    }
     if (classification === "interested") convPatch.status = "QUALIFIED";
     if (classification === "unsubscribe" || classification === "not_interested") convPatch.status = "CLOSED";
     await supabase.from("conversations").update(convPatch).eq("id", conv.id);
@@ -253,6 +282,8 @@ Use the classify_and_reply tool. Classifications:
     return json({
       ok: true, classification, reply_words: replyText.trim().split(/\s+/).length,
       contact_status: newContactStatus,
+      suppressed_neutral_loop: suppressNeutralLoop,
+      reply_latency_seconds: latencySeconds,
     }, 200);
   } catch (err) {
     return json({ error: (err as Error).message }, 500);

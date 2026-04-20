@@ -5,9 +5,9 @@ type: feature
 ---
 
 **Tables (founder-only RLS):**
-- `conversations` — one row per contact (UNIQUE contact_id). Fields: business_name, status (OPEN/QUALIFIED/CLOSED), last_message_at, ai_last_used_at, escalation_pending, escalation_reason.
+- `conversations` — one row per contact (UNIQUE contact_id). Fields: business_name, status (OPEN/QUALIFIED/CLOSED), last_message_at, ai_last_used_at, last_ai_reply_at, escalation_pending, escalation_reason, last_intent, intent_history (jsonb, last 20), priority_boost (int, +20 per question, cap 100).
 - `messages` — mirror of communications scoped to AI engine. Fields: conversation_id, contact_id, direction, content, channel, inbox_id, ai_generated.
-- `ai_actions` — audit trail. Fields: conversation_id, contact_id, action_type (classify/reply/escalate), classification, reply_preview, tokens_used, status, error_message.
+- `ai_actions` — audit trail. Fields: conversation_id, contact_id, action_type (classify/reply/escalate), classification, reply_preview, tokens_used, status, error_message, reply_latency_seconds (time from inbound msg to AI action).
 
 **Triggers:**
 - `mirror_comm_to_messages_and_invoke_ai` (AFTER INSERT on `communications`) — finds/creates a conversation, mirrors the row into `messages`, and on inbound calls `ai-conversation-engine` via `net.http_post`.
@@ -22,6 +22,10 @@ type: feature
 - **AI call**: Lovable AI Gateway model `google/gemini-2.5-flash` with `classify_and_reply` tool (forced tool_choice). Context = last 10 messages + contact name/role/company + business_name. Reply hard-truncated to 120 words.
 - **Auto-send**: outbound reply inserted into `communications` (ai_generated=true, channel=email, inbox_id=contact.assigned_inbox_id). The existing `handle_new_communication` trigger updates `last_contacted_at`. The mirror trigger creates the corresponding `messages` row.
 - **Status updates from classification**: interested → contact QUALIFIED + conversation QUALIFIED. not_interested OR unsubscribe → contact DO_NOT_CONTACT (also clears `active_campaign_id`) + conversation CLOSED.
+- **Neutral follow-up loop guard**: if classification = `neutral` AND the most recent outbound message in the thread was AI-generated, the engine suppresses the new reply (still logs classify + intent history). Prevents "ok / thanks" chatter loops.
+- **Question priority boost**: classification = `question` adds +20 to `conversations.priority_boost` (capped at 100) for downstream prioritisation.
+- **Intent history**: every classification appended to `conversations.intent_history` (capped to last 20) and mirrored into `last_intent`.
+- **Reply latency**: every `ai_actions` row stores `reply_latency_seconds` measured from the inbound message timestamp to the AI action.
 - **Existing safety still applies**: inbound communication trigger `cancel_queue_on_inbound_comm` already cancels all pending email_queue rows for the contact and clears `active_campaign_id`. Replies from this engine are routed via the contact's sticky `assigned_inbox_id`.
 
 **Founder UI:**
