@@ -6005,6 +6005,10 @@ export type Database = {
         Returns: undefined
       }
       priority_score_deal: { Args: { _deal_id: string }; Returns: undefined }
+      priority_score_invoice: {
+        Args: { _invoice_id: string }
+        Returns: undefined
+      }
       process_retry_queue: { Args: never; Returns: Json }
       proposals_needing_followup: {
         Args: never
@@ -6093,6 +6097,10 @@ export type Database = {
       reset_inbox_send_counts: { Args: never; Returns: number }
       resolve_contact_timezone: {
         Args: { _contact_id: string }
+        Returns: string
+      }
+      resolve_entity_country: {
+        Args: { _business?: string; _contact_id: string }
         Returns: string
       }
       run_compliance_checks: {
