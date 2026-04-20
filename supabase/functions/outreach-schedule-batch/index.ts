@@ -41,6 +41,7 @@ Deno.serve(async (req) => {
         .select("id")
         .eq("assigned_business", campaign.business_name)
         .eq("status", "NEW")
+        .is("active_campaign_id", null)
         .limit(body.max_contacts ?? 50);
       contactIds = (contacts ?? []).map((c) => c.id);
     }
@@ -52,6 +53,16 @@ Deno.serve(async (req) => {
 
     let scheduled = 0;
     for (const cid of contactIds) {
+      // Hard stop: skip contacts already in another active campaign or already queued anywhere
+      const { data: existing } = await supabase.from("email_queue")
+        .select("id, campaign_id")
+        .eq("contact_id", cid)
+        .in("status", ["pending", "sent"])
+        .limit(1);
+      if (existing && existing.length && existing[0].campaign_id !== body.campaign_id) {
+        continue;
+      }
+
       // Assign inbox if missing
       const { data: inboxId } = await supabase.rpc("assign_inbox_for_contact", { _contact_id: cid });
       if (!inboxId) continue;
