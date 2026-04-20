@@ -509,6 +509,7 @@ export type Database = {
       }
       assignments: {
         Row: {
+          acknowledged_at: string | null
           assigned_at: string
           auto_assigned: boolean
           business_name: string
@@ -533,6 +534,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          acknowledged_at?: string | null
           assigned_at?: string
           auto_assigned?: boolean
           business_name?: string
@@ -557,6 +559,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          acknowledged_at?: string | null
           assigned_at?: string
           auto_assigned?: boolean
           business_name?: string
@@ -4239,6 +4242,7 @@ export type Database = {
           created_at: string
           email: string
           id: string
+          last_activity_at: string | null
           name: string
           notes: string
           rejected_at: string | null
@@ -4246,6 +4250,7 @@ export type Database = {
           skills: string[]
           source: string
           status: Database["public"]["Enums"]["supplier_status"]
+          supplier_score: number
           tags: string[]
           updated_at: string
         }
@@ -4256,6 +4261,7 @@ export type Database = {
           created_at?: string
           email: string
           id?: string
+          last_activity_at?: string | null
           name?: string
           notes?: string
           rejected_at?: string | null
@@ -4263,6 +4269,7 @@ export type Database = {
           skills?: string[]
           source?: string
           status?: Database["public"]["Enums"]["supplier_status"]
+          supplier_score?: number
           tags?: string[]
           updated_at?: string
         }
@@ -4273,6 +4280,7 @@ export type Database = {
           created_at?: string
           email?: string
           id?: string
+          last_activity_at?: string | null
           name?: string
           notes?: string
           rejected_at?: string | null
@@ -4280,6 +4288,7 @@ export type Database = {
           skills?: string[]
           source?: string
           status?: Database["public"]["Enums"]["supplier_status"]
+          supplier_score?: number
           tags?: string[]
           updated_at?: string
         }
@@ -4841,6 +4850,7 @@ export type Database = {
           created_at: string
           email: string
           id: string
+          last_activity_at: string | null
           name: string
           notes: string
           rejected_at: string | null
@@ -4848,6 +4858,7 @@ export type Database = {
           skills: string[]
           source: string
           status: Database["public"]["Enums"]["supplier_status"]
+          supplier_score: number
           tags: string[]
           updated_at: string
         }[]
@@ -4875,6 +4886,7 @@ export type Database = {
           progress_pct: number
         }[]
       }
+      flag_idle_assignments: { Args: never; Returns: number }
       founder_confirm_assignment: {
         Args: { _assignment_id: string }
         Returns: Json
@@ -4983,12 +4995,17 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      recompute_all_supplier_scores: { Args: never; Returns: number }
       recompute_campaign_metrics: {
         Args: { _campaign_id: string }
         Returns: undefined
       }
       recompute_proposal_score: {
         Args: { _proposal_id: string }
+        Returns: number
+      }
+      recompute_supplier_score: {
+        Args: { _supplier_id: string }
         Returns: number
       }
       refresh_all_assignment_sla: { Args: never; Returns: number }
@@ -5008,6 +5025,34 @@ export type Database = {
           to: "lead_scores"
           isOneToOne: true
           isSetofReturn: false
+        }
+      }
+      suggest_replacement_supplier: {
+        Args: { _assignment_id: string }
+        Returns: {
+          approved_at: string | null
+          business_name: string
+          company: string
+          created_at: string
+          email: string
+          id: string
+          last_activity_at: string | null
+          name: string
+          notes: string
+          rejected_at: string | null
+          role: string
+          skills: string[]
+          source: string
+          status: Database["public"]["Enums"]["supplier_status"]
+          supplier_score: number
+          tags: string[]
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "suppliers"
+          isOneToOne: false
+          isSetofReturn: true
         }
       }
       supplier_list_assignments: {

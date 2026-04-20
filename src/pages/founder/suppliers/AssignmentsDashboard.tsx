@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Loader2, ShieldCheck, Clock, AlertTriangle } from "lucide-react";
+import { Plus, Loader2, ShieldCheck, Clock, AlertTriangle, RefreshCw, CheckCheck } from "lucide-react";
 import FounderLayout from "@/components/founder/FounderLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,9 +28,10 @@ type Assignment = {
   sla_status: "on_track" | "at_risk" | "overdue" | "n_a";
   completion_confirmed_by_founder: boolean;
   requires_finance_action: boolean;
+  acknowledged_at: string | null;
 };
 type Deal = { id: string; deal_name: string; business_name: string; contact_id: string | null; status: string };
-type Supplier = { id: string; name: string; email: string; business_name: string; status: string };
+type Supplier = { id: string; name: string; email: string; business_name: string; status: string; supplier_score?: number };
 
 const STATUS_TABS = ["all","assigned","in_progress","completed","failed"] as const;
 
@@ -128,6 +129,43 @@ const AssignmentsDashboard = () => {
       .update({ expected_completion_date: date || null } as never)
       .eq("id", a.id);
     if (error) { toast.error(error.message); return; }
+    void load();
+  }
+
+  // Reassignment suggestion dialog
+  const [suggestFor, setSuggestFor] = useState<Assignment | null>(null);
+  const [suggestions, setSuggestions] = useState<Supplier[]>([]);
+  const [suggestLoading, setSuggestLoading] = useState(false);
+  const [reassigning, setReassigning] = useState<string | null>(null);
+
+  async function openSuggestions(a: Assignment) {
+    setSuggestFor(a);
+    setSuggestions([]);
+    setSuggestLoading(true);
+    const { data, error } = await supabase.rpc("suggest_replacement_supplier", { _assignment_id: a.id });
+    setSuggestLoading(false);
+    if (error) { toast.error(error.message); return; }
+    setSuggestions((data as Supplier[]) ?? []);
+  }
+
+  async function reassignTo(supplierId: string) {
+    if (!suggestFor) return;
+    setReassigning(supplierId);
+    // Mark current as failed if not already, then create a fresh assignment
+    if (suggestFor.status !== "failed") {
+      await supabase.from("assignments").update({ status: "failed" } as never).eq("id", suggestFor.id);
+    }
+    const { error } = await supabase.from("assignments").insert({
+      supplier_id: supplierId,
+      deal_id: suggestFor.deal_id,
+      business_name: suggestFor.business_name,
+      status: "assigned",
+      auto_assigned: false,
+    });
+    setReassigning(null);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Reassigned");
+    setSuggestFor(null);
     void load();
   }
 
@@ -241,6 +279,13 @@ const AssignmentsDashboard = () => {
                           {a.requires_finance_action && (
                             <Badge variant="outline" className="text-xs">finance →</Badge>
                           )}
+                          {a.acknowledged_at ? (
+                            <Badge variant="outline" className="text-xs gap-1 border-primary/40 text-primary" title={`Acknowledged ${new Date(a.acknowledged_at).toLocaleString()}`}>
+                              <CheckCheck className="h-3 w-3" /> ack
+                            </Badge>
+                          ) : a.status === "assigned" ? (
+                            <Badge variant="outline" className="text-xs">unacknowledged</Badge>
+                          ) : null}
                         </div>
                         <p className="text-xs text-muted-foreground mt-0.5">
                           {a.business_name || "—"} · {new Date(a.assigned_at).toLocaleString()}
@@ -282,6 +327,11 @@ const AssignmentsDashboard = () => {
                             <ShieldCheck className="h-3 w-3 mr-1" /> Confirm
                           </Button>
                         )}
+                        {(a.status === "failed" || a.sla_status === "at_risk" || a.sla_status === "overdue") && (
+                          <Button size="sm" variant="outline" onClick={() => openSuggestions(a)}>
+                            <RefreshCw className="h-3 w-3 mr-1" /> Suggest
+                          </Button>
+                        )}
                       </div>
                     </li>
                   );
@@ -291,6 +341,32 @@ const AssignmentsDashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={!!suggestFor} onOpenChange={(o) => !o && setSuggestFor(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Suggested replacement suppliers</DialogTitle></DialogHeader>
+          {suggestLoading ? (
+            <p className="text-sm text-muted-foreground">Finding matches…</p>
+          ) : suggestions.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No eligible alternatives found (skills, business pool, or availability mismatch).</p>
+          ) : (
+            <ul className="divide-y divide-border/50 -mx-2">
+              {suggestions.map((s) => (
+                <li key={s.id} className="flex items-center justify-between gap-2 px-2 py-2">
+                  <div className="text-sm">
+                    <p className="font-medium">{s.name || s.email}</p>
+                    <p className="text-xs text-muted-foreground">{s.business_name || "global"} · score {s.supplier_score ?? 50}</p>
+                  </div>
+                  <Button size="sm" disabled={reassigning === s.id} onClick={() => reassignTo(s.id)}>
+                    {reassigning === s.id ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : null}
+                    Reassign
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </DialogContent>
+      </Dialog>
     </FounderLayout>
   );
 };
