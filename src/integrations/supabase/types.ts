@@ -5021,6 +5021,192 @@ export type Database = {
           },
         ]
       }
+      system_backend_objects: {
+        Row: {
+          dependencies: string | null
+          documented: boolean
+          id: string
+          inputs: string | null
+          object_kind: string
+          object_name: string
+          outputs: string | null
+          purpose: string | null
+          schema_name: string
+          updated_at: string
+        }
+        Insert: {
+          dependencies?: string | null
+          documented?: boolean
+          id?: string
+          inputs?: string | null
+          object_kind: string
+          object_name: string
+          outputs?: string | null
+          purpose?: string | null
+          schema_name?: string
+          updated_at?: string
+        }
+        Update: {
+          dependencies?: string | null
+          documented?: boolean
+          id?: string
+          inputs?: string | null
+          object_kind?: string
+          object_name?: string
+          outputs?: string | null
+          purpose?: string | null
+          schema_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      system_changes: {
+        Row: {
+          change_type: string
+          created_at: string
+          entity_id: string | null
+          entity_key: string | null
+          entity_type: string
+          id: string
+          manual_version: number | null
+          summary: string | null
+        }
+        Insert: {
+          change_type?: string
+          created_at?: string
+          entity_id?: string | null
+          entity_key?: string | null
+          entity_type: string
+          id?: string
+          manual_version?: number | null
+          summary?: string | null
+        }
+        Update: {
+          change_type?: string
+          created_at?: string
+          entity_id?: string | null
+          entity_key?: string | null
+          entity_type?: string
+          id?: string
+          manual_version?: number | null
+          summary?: string | null
+        }
+        Relationships: []
+      }
+      system_content: {
+        Row: {
+          content_type: string
+          created_at: string
+          id: string
+          last_updated: string
+          linked_feature: string | null
+          page: string
+          source_path: string | null
+          text_value: string
+        }
+        Insert: {
+          content_type?: string
+          created_at?: string
+          id?: string
+          last_updated?: string
+          linked_feature?: string | null
+          page: string
+          source_path?: string | null
+          text_value: string
+        }
+        Update: {
+          content_type?: string
+          created_at?: string
+          id?: string
+          last_updated?: string
+          linked_feature?: string | null
+          page?: string
+          source_path?: string | null
+          text_value?: string
+        }
+        Relationships: []
+      }
+      system_coverage_reports: {
+        Row: {
+          coverage_score: number
+          created_at: string
+          details: Json
+          documented_functions: number
+          documented_pages: number
+          documented_rules: number
+          documented_tables: number
+          documented_workflows: number
+          gaps_found: number
+          id: string
+          total_functions: number
+          total_pages: number
+          total_rules: number
+          total_tables: number
+          total_workflows: number
+        }
+        Insert: {
+          coverage_score?: number
+          created_at?: string
+          details?: Json
+          documented_functions?: number
+          documented_pages?: number
+          documented_rules?: number
+          documented_tables?: number
+          documented_workflows?: number
+          gaps_found?: number
+          id?: string
+          total_functions?: number
+          total_pages?: number
+          total_rules?: number
+          total_tables?: number
+          total_workflows?: number
+        }
+        Update: {
+          coverage_score?: number
+          created_at?: string
+          details?: Json
+          documented_functions?: number
+          documented_pages?: number
+          documented_rules?: number
+          documented_tables?: number
+          documented_workflows?: number
+          gaps_found?: number
+          id?: string
+          total_functions?: number
+          total_pages?: number
+          total_rules?: number
+          total_tables?: number
+          total_workflows?: number
+        }
+        Relationships: []
+      }
+      system_data_flows: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          relationship: string
+          source_entity: string
+          target_entity: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          relationship?: string
+          source_entity: string
+          target_entity: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          relationship?: string
+          source_entity?: string
+          target_entity?: string
+        }
+        Relationships: []
+      }
       system_events: {
         Row: {
           business_name: string
@@ -5087,6 +5273,134 @@ export type Database = {
           metric_name?: string
           timestamp?: string
           value?: number
+        }
+        Relationships: []
+      }
+      system_integrations_full: {
+        Row: {
+          description: string | null
+          documented: boolean
+          endpoint: string | null
+          id: string
+          integration_key: string
+          integration_name: string
+          layer: string
+          related_objects: string | null
+          updated_at: string
+        }
+        Insert: {
+          description?: string | null
+          documented?: boolean
+          endpoint?: string | null
+          id?: string
+          integration_key: string
+          integration_name: string
+          layer: string
+          related_objects?: string | null
+          updated_at?: string
+        }
+        Update: {
+          description?: string | null
+          documented?: boolean
+          endpoint?: string | null
+          id?: string
+          integration_key?: string
+          integration_name?: string
+          layer?: string
+          related_objects?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      system_pages_index: {
+        Row: {
+          actions: string | null
+          area: string
+          data_sources: string | null
+          documented: boolean
+          id: string
+          linked_backend: string | null
+          manual_page_id: string | null
+          page_name: string
+          purpose: string | null
+          route_path: string
+          ui_elements: string | null
+          updated_at: string
+        }
+        Insert: {
+          actions?: string | null
+          area?: string
+          data_sources?: string | null
+          documented?: boolean
+          id?: string
+          linked_backend?: string | null
+          manual_page_id?: string | null
+          page_name: string
+          purpose?: string | null
+          route_path: string
+          ui_elements?: string | null
+          updated_at?: string
+        }
+        Update: {
+          actions?: string | null
+          area?: string
+          data_sources?: string | null
+          documented?: boolean
+          id?: string
+          linked_backend?: string | null
+          manual_page_id?: string | null
+          page_name?: string
+          purpose?: string | null
+          route_path?: string
+          ui_elements?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "system_pages_index_manual_page_id_fkey"
+            columns: ["manual_page_id"]
+            isOneToOne: false
+            referencedRelation: "manual_pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      system_rules: {
+        Row: {
+          action_text: string
+          condition_text: string
+          documented: boolean
+          id: string
+          module: string
+          rule_key: string
+          rule_name: string
+          severity: string
+          source_function: string | null
+          updated_at: string
+        }
+        Insert: {
+          action_text?: string
+          condition_text?: string
+          documented?: boolean
+          id?: string
+          module: string
+          rule_key: string
+          rule_name: string
+          severity?: string
+          source_function?: string | null
+          updated_at?: string
+        }
+        Update: {
+          action_text?: string
+          condition_text?: string
+          documented?: boolean
+          id?: string
+          module?: string
+          rule_key?: string
+          rule_name?: string
+          severity?: string
+          source_function?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -5225,6 +5539,134 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      system_versions: {
+        Row: {
+          backend_count: number
+          content_count: number
+          coverage_score: number
+          created_at: string
+          data_flow_count: number
+          id: string
+          integration_count: number
+          notes: string | null
+          pages_count: number
+          rule_count: number
+          version_number: number
+          workflow_count: number
+        }
+        Insert: {
+          backend_count?: number
+          content_count?: number
+          coverage_score?: number
+          created_at?: string
+          data_flow_count?: number
+          id?: string
+          integration_count?: number
+          notes?: string | null
+          pages_count?: number
+          rule_count?: number
+          version_number: number
+          workflow_count?: number
+        }
+        Update: {
+          backend_count?: number
+          content_count?: number
+          coverage_score?: number
+          created_at?: string
+          data_flow_count?: number
+          id?: string
+          integration_count?: number
+          notes?: string | null
+          pages_count?: number
+          rule_count?: number
+          version_number?: number
+          workflow_count?: number
+        }
+        Relationships: []
+      }
+      system_workflow_steps: {
+        Row: {
+          created_at: string
+          data_input: string | null
+          data_output: string | null
+          failure_points: string | null
+          id: string
+          linked_tables: string | null
+          step_index: number
+          step_name: string
+          trigger_source: string | null
+          workflow_id: string
+        }
+        Insert: {
+          created_at?: string
+          data_input?: string | null
+          data_output?: string | null
+          failure_points?: string | null
+          id?: string
+          linked_tables?: string | null
+          step_index: number
+          step_name: string
+          trigger_source?: string | null
+          workflow_id: string
+        }
+        Update: {
+          created_at?: string
+          data_input?: string | null
+          data_output?: string | null
+          failure_points?: string | null
+          id?: string
+          linked_tables?: string | null
+          step_index?: number
+          step_name?: string
+          trigger_source?: string | null
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "system_workflow_steps_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "system_workflows_full"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      system_workflows_full: {
+        Row: {
+          description: string | null
+          documented: boolean
+          end_module: string | null
+          id: string
+          start_module: string | null
+          step_count: number
+          updated_at: string
+          workflow_key: string
+          workflow_name: string
+        }
+        Insert: {
+          description?: string | null
+          documented?: boolean
+          end_module?: string | null
+          id?: string
+          start_module?: string | null
+          step_count?: number
+          updated_at?: string
+          workflow_key: string
+          workflow_name: string
+        }
+        Update: {
+          description?: string | null
+          documented?: boolean
+          end_module?: string | null
+          id?: string
+          start_module?: string | null
+          step_count?: number
+          updated_at?: string
+          workflow_key?: string
+          workflow_name?: string
+        }
+        Relationships: []
       }
       template_components: {
         Row: {
@@ -6169,6 +6611,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      rebuild_full_manual: { Args: never; Returns: Json }
       recalculate_priority: {
         Args: {
           _entity_id: string
@@ -6213,6 +6656,17 @@ export type Database = {
       recompute_supplier_score: {
         Args: { _supplier_id: string }
         Returns: number
+      }
+      record_system_change: {
+        Args: {
+          _change_type: string
+          _entity_id: string
+          _entity_key: string
+          _entity_type: string
+          _manual_version?: number
+          _summary: string
+        }
+        Returns: string
       }
       refresh_all_assignment_sla: { Args: never; Returns: number }
       refresh_all_business_risk_scores: { Args: never; Returns: number }
@@ -6358,6 +6812,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      validate_full_system_coverage: { Args: never; Returns: Json }
       validate_system_integrity: { Args: never; Returns: Json }
     }
     Enums: {
