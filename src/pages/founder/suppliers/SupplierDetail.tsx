@@ -16,11 +16,12 @@ import { toast } from "sonner";
 type Supplier = {
   id: string; name: string; email: string; company: string; role: string;
   business_name: string; status: string; source: string; notes: string;
+  skills: string[]; tags: string[];
   approved_at: string | null; rejected_at: string | null; created_at: string;
 };
 type Pipeline = { id: string; stage: string; notes: string; updated_at: string };
 type Availability = { id: string; status: string; manual_override: boolean; capacity: number | null; notes: string };
-type Assignment = { id: string; deal_id: string; status: string; assigned_at: string; completed_at: string | null; business_name: string };
+type Assignment = { id: string; deal_id: string; status: string; assigned_at: string; completed_at: string | null; business_name: string; sla_status: string };
 type SupplierUser = { id: string; email: string; access_token: string; active: boolean; last_login_at: string | null };
 
 const STATUS_OPTIONS = ["NEW","CONTACTED","QUALIFIED","APPROVED","REJECTED","INACTIVE"];
