@@ -20,6 +20,7 @@ const navItems = [
   { label: "CRM", to: "/founder/crm", icon: Users },
   { label: "Finance", to: "/founder/finance", icon: Banknote },
   { label: "Outreach", to: "/founder/outreach", icon: Send },
+  { label: "Priority", to: "/founder/priority", icon: TrendingUp },
   { label: "Conversations", to: "/founder/conversations", icon: MessagesSquare },
   { label: "Internal Proposals", to: "/founder/internal-proposals", icon: FileSignature },
   { label: "Demos", to: "/founder/demos", icon: MonitorPlay },
