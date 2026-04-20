@@ -132,6 +132,43 @@ const AssignmentsDashboard = () => {
     void load();
   }
 
+  // Reassignment suggestion dialog
+  const [suggestFor, setSuggestFor] = useState<Assignment | null>(null);
+  const [suggestions, setSuggestions] = useState<Supplier[]>([]);
+  const [suggestLoading, setSuggestLoading] = useState(false);
+  const [reassigning, setReassigning] = useState<string | null>(null);
+
+  async function openSuggestions(a: Assignment) {
+    setSuggestFor(a);
+    setSuggestions([]);
+    setSuggestLoading(true);
+    const { data, error } = await supabase.rpc("suggest_replacement_supplier", { _assignment_id: a.id });
+    setSuggestLoading(false);
+    if (error) { toast.error(error.message); return; }
+    setSuggestions((data as Supplier[]) ?? []);
+  }
+
+  async function reassignTo(supplierId: string) {
+    if (!suggestFor) return;
+    setReassigning(supplierId);
+    // Mark current as failed if not already, then create a fresh assignment
+    if (suggestFor.status !== "failed") {
+      await supabase.from("assignments").update({ status: "failed" } as never).eq("id", suggestFor.id);
+    }
+    const { error } = await supabase.from("assignments").insert({
+      supplier_id: supplierId,
+      deal_id: suggestFor.deal_id,
+      business_name: suggestFor.business_name,
+      status: "assigned",
+      auto_assigned: false,
+    });
+    setReassigning(null);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Reassigned");
+    setSuggestFor(null);
+    void load();
+  }
+
   const filtered = filter === "all" ? assignments : assignments.filter((a) => a.status === filter);
 
   const counts = {
