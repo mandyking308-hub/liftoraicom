@@ -80,6 +80,11 @@ Deno.serve(async (req) => {
     const lastInbound = [...ordered].reverse().find((m) => m.direction === "inbound");
     if (!lastInbound) return json({ skipped: "NO_INBOUND" }, 200);
 
+    // Latency = time from last inbound message to now
+    const latencySeconds = lastInbound.created_at
+      ? (Date.now() - new Date(lastInbound.created_at).getTime()) / 1000
+      : null;
+
     // Escalation rules — short-circuit before AI
     const text = (lastInbound.content || "").toLowerCase();
     const escalationReasons: string[] = [];
