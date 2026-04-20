@@ -519,9 +519,11 @@ export type Database = {
           failed_at: string | null
           id: string
           notes: string
+          share_contact_details: boolean
           started_at: string | null
           status: Database["public"]["Enums"]["assignment_status"]
           supplier_id: string
+          supplier_note: string
           updated_at: string
         }
         Insert: {
@@ -535,9 +537,11 @@ export type Database = {
           failed_at?: string | null
           id?: string
           notes?: string
+          share_contact_details?: boolean
           started_at?: string | null
           status?: Database["public"]["Enums"]["assignment_status"]
           supplier_id: string
+          supplier_note?: string
           updated_at?: string
         }
         Update: {
@@ -551,9 +555,11 @@ export type Database = {
           failed_at?: string | null
           id?: string
           notes?: string
+          share_contact_details?: boolean
           started_at?: string | null
           status?: Database["public"]["Enums"]["assignment_status"]
           supplier_id?: string
+          supplier_note?: string
           updated_at?: string
         }
         Relationships: [
@@ -4160,6 +4166,50 @@ export type Database = {
           },
         ]
       }
+      supplier_users: {
+        Row: {
+          access_token: string
+          active: boolean
+          auth_user_id: string | null
+          created_at: string
+          email: string
+          id: string
+          last_login_at: string | null
+          supplier_id: string
+          updated_at: string
+        }
+        Insert: {
+          access_token?: string
+          active?: boolean
+          auth_user_id?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          last_login_at?: string | null
+          supplier_id: string
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string
+          active?: boolean
+          auth_user_id?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          last_login_at?: string | null
+          supplier_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_users_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suppliers: {
         Row: {
           approved_at: string | null
@@ -4918,6 +4968,36 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      supplier_list_assignments: {
+        Args: { _token: string }
+        Returns: {
+          assigned_at: string
+          business_name: string
+          completed_at: string
+          contact_company: string
+          contact_email: string
+          contact_name: string
+          deal_id: string
+          deal_name: string
+          id: string
+          notes: string
+          share_contact_details: boolean
+          started_at: string
+          status: Database["public"]["Enums"]["assignment_status"]
+          supplier_note: string
+        }[]
+      }
+      supplier_login_with_token: { Args: { _token: string }; Returns: Json }
+      supplier_portal_stats: { Args: never; Returns: Json }
+      supplier_update_assignment_status: {
+        Args: {
+          _assignment_id: string
+          _new_status: string
+          _note?: string
+          _token: string
+        }
+        Returns: Json
       }
       upsert_contact: {
         Args: {
