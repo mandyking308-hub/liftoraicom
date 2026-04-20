@@ -40,17 +40,15 @@ export default function InternalProposalDetail() {
     load();
   };
 
-  const setStatus = async (status: string) => {
+  const setStatus = async (status: "accepted" | "rejected") => {
     setBusy(true);
-    await supabase.from("internal_proposals").update({
-      status, updated_at: new Date().toISOString(),
-      ...(status === "accepted" ? { accepted_at: new Date().toISOString() } : {}),
-      ...(status === "rejected" ? { rejected_at: new Date().toISOString() } : {}),
-    }).eq("id", id!);
     if (status === "accepted") {
       const { data } = await supabase.rpc("accept_proposal_by_token", { _token: p.accept_token });
       toast({ title: "Marked accepted", description: `Deal: ${(data as any)?.deal_id || "created"}` });
     } else {
+      await supabase.from("internal_proposals").update({
+        status: "rejected", rejected_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+      }).eq("id", id!);
       toast({ title: `Marked ${status}` });
     }
     setBusy(false);
