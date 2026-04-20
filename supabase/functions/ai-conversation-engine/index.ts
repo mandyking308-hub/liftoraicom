@@ -231,6 +231,7 @@ Use the classify_and_reply tool. Classifications:
       classification,
       tokens_used: 0,
       status: "success",
+      reply_latency_seconds: latencySeconds,
     });
 
     // Log outbound reply via communications (the mirror trigger will create the message row)
@@ -252,14 +253,28 @@ Use the classify_and_reply tool. Classifications:
         reply_preview: replyText.slice(0, 280),
         tokens_used: tokensUsed,
         status: "success",
+        reply_latency_seconds: latencySeconds,
       });
     }
 
     // Update conversation status if qualified
+    // Build intent history (cap at last 20 entries)
+    const prevHistory: Array<{ intent: string; at: string }> =
+      Array.isArray(conv.intent_history) ? conv.intent_history : [];
+    const nextHistory = [...prevHistory, { intent: classification, at: new Date().toISOString() }].slice(-20);
+
     const convPatch: Record<string, unknown> = {
       ai_last_used_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
+      last_intent: classification,
+      intent_history: nextHistory,
     };
+    if (replyText.trim()) convPatch.last_ai_reply_at = new Date().toISOString();
+    // Question priority boost: +20 (capped at 100)
+    if (classification === "question") {
+      const currentBoost = Number(conv.priority_boost ?? 0);
+      convPatch.priority_boost = Math.min(currentBoost + 20, 100);
+    }
     if (classification === "interested") convPatch.status = "QUALIFIED";
     if (classification === "unsubscribe" || classification === "not_interested") convPatch.status = "CLOSED";
     await supabase.from("conversations").update(convPatch).eq("id", conv.id);
@@ -267,6 +282,8 @@ Use the classify_and_reply tool. Classifications:
     return json({
       ok: true, classification, reply_words: replyText.trim().split(/\s+/).length,
       contact_status: newContactStatus,
+      suppressed_neutral_loop: suppressNeutralLoop,
+      reply_latency_seconds: latencySeconds,
     }, 200);
   } catch (err) {
     return json({ error: (err as Error).message }, 500);
