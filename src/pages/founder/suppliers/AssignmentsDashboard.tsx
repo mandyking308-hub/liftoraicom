@@ -229,7 +229,7 @@ const AssignmentsDashboard = () => {
                             </Badge>
                           )}
                           {a.sla_status === "at_risk" && (
-                            <Badge variant="outline" className="text-xs gap-1 border-amber-500/50 text-amber-500">
+                            <Badge variant="outline" className="text-xs gap-1">
                               <Clock className="h-3 w-3" /> at risk
                             </Badge>
                           )}
