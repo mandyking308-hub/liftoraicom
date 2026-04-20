@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { LayoutDashboard, FileInput, GitBranch, FolderKanban, Activity, FileText, LogOut, Menu, X, Monitor, Bot, Workflow, Plug, Play, Command, Network, Layers, Rocket, BarChart3, Zap, BookOpen, Globe, Building2, Shield, ShieldAlert, LayoutTemplate, Sparkles, BookOpenCheck, ClipboardList, PoundSterling, Brain, Scale, Compass, MessageSquare, FlaskConical, Users, Banknote } from "lucide-react";
+import { LayoutDashboard, FileInput, GitBranch, FolderKanban, Activity, FileText, LogOut, Menu, X, Monitor, Bot, Workflow, Plug, Play, Command, Network, Layers, Rocket, BarChart3, Zap, BookOpen, Globe, Building2, Shield, ShieldAlert, LayoutTemplate, Sparkles, BookOpenCheck, ClipboardList, PoundSterling, Brain, Scale, Compass, MessageSquare, FlaskConical, Users, Banknote, Send } from "lucide-react";
 import { useState } from "react";
 
 const navItems = [
@@ -19,6 +19,7 @@ const navItems = [
   { label: "Lead Pipeline", to: "/founder/pipeline", icon: GitBranch },
   { label: "CRM", to: "/founder/crm", icon: Users },
   { label: "Finance", to: "/founder/finance", icon: Banknote },
+  { label: "Outreach", to: "/founder/outreach", icon: Send },
   { label: "Projects", to: "/founder/projects", icon: FolderKanban },
   { label: "Monitoring", to: "/founder/monitoring", icon: Monitor },
   { label: "Agents", to: "/founder/agents", icon: Bot },

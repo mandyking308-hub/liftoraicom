@@ -642,6 +642,50 @@ export type Database = {
         }
         Relationships: []
       }
+      campaign_metrics: {
+        Row: {
+          bounce_rate: number
+          campaign_id: string
+          id: string
+          reply_rate: number
+          total_bounces: number
+          total_opens: number
+          total_replies: number
+          total_sent: number
+          updated_at: string
+        }
+        Insert: {
+          bounce_rate?: number
+          campaign_id: string
+          id?: string
+          reply_rate?: number
+          total_bounces?: number
+          total_opens?: number
+          total_replies?: number
+          total_sent?: number
+          updated_at?: string
+        }
+        Update: {
+          bounce_rate?: number
+          campaign_id?: string
+          id?: string
+          reply_rate?: number
+          total_bounces?: number
+          total_opens?: number
+          total_replies?: number
+          total_sent?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_metrics_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: true
+            referencedRelation: "outreach_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       communications: {
         Row: {
           ai_generated: boolean
@@ -1112,6 +1156,70 @@ export type Database = {
           },
         ]
       }
+      email_queue: {
+        Row: {
+          block_reason: string
+          business_name: string
+          campaign_id: string
+          contact_id: string
+          created_at: string
+          id: string
+          inbox_id: string | null
+          scheduled_at: string
+          sent_at: string | null
+          sequence_step: number
+          status: Database["public"]["Enums"]["email_queue_status"]
+        }
+        Insert: {
+          block_reason?: string
+          business_name?: string
+          campaign_id: string
+          contact_id: string
+          created_at?: string
+          id?: string
+          inbox_id?: string | null
+          scheduled_at?: string
+          sent_at?: string | null
+          sequence_step: number
+          status?: Database["public"]["Enums"]["email_queue_status"]
+        }
+        Update: {
+          block_reason?: string
+          business_name?: string
+          campaign_id?: string
+          contact_id?: string
+          created_at?: string
+          id?: string
+          inbox_id?: string | null
+          scheduled_at?: string
+          sent_at?: string | null
+          sequence_step?: number
+          status?: Database["public"]["Enums"]["email_queue_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_queue_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "outreach_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_queue_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_queue_inbox_id_fkey"
+            columns: ["inbox_id"]
+            isOneToOne: false
+            referencedRelation: "inboxes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       execution_logs: {
         Row: {
           created_at: string
@@ -1260,6 +1368,95 @@ export type Database = {
             columns: ["subscription_id"]
             isOneToOne: false
             referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      import_batches: {
+        Row: {
+          business_name: string
+          created_at: string
+          duplicate_rows: number
+          file_name: string
+          id: string
+          invalid_rows: number
+          source_name: string
+          total_rows: number
+          valid_rows: number
+        }
+        Insert: {
+          business_name?: string
+          created_at?: string
+          duplicate_rows?: number
+          file_name?: string
+          id?: string
+          invalid_rows?: number
+          source_name?: string
+          total_rows?: number
+          valid_rows?: number
+        }
+        Update: {
+          business_name?: string
+          created_at?: string
+          duplicate_rows?: number
+          file_name?: string
+          id?: string
+          invalid_rows?: number
+          source_name?: string
+          total_rows?: number
+          valid_rows?: number
+        }
+        Relationships: []
+      }
+      imported_leads: {
+        Row: {
+          batch_id: string
+          company: string
+          contact_id: string | null
+          country: string
+          created_at: string
+          email: string
+          id: string
+          name: string
+          processed: boolean
+          raw_data: Json
+          role: string
+          validation_status: Database["public"]["Enums"]["lead_validation_status"]
+        }
+        Insert: {
+          batch_id: string
+          company?: string
+          contact_id?: string | null
+          country?: string
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          processed?: boolean
+          raw_data?: Json
+          role?: string
+          validation_status?: Database["public"]["Enums"]["lead_validation_status"]
+        }
+        Update: {
+          batch_id?: string
+          company?: string
+          contact_id?: string | null
+          country?: string
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          processed?: boolean
+          raw_data?: Json
+          role?: string
+          validation_status?: Database["public"]["Enums"]["lead_validation_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "imported_leads_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "import_batches"
             referencedColumns: ["id"]
           },
         ]
@@ -1695,6 +1892,41 @@ export type Database = {
           },
         ]
       }
+      lead_scores: {
+        Row: {
+          contact_id: string
+          created_at: string
+          id: string
+          reason: string
+          score: number
+          updated_at: string
+        }
+        Insert: {
+          contact_id: string
+          created_at?: string
+          id?: string
+          reason?: string
+          score?: number
+          updated_at?: string
+        }
+        Update: {
+          contact_id?: string
+          created_at?: string
+          id?: string
+          reason?: string
+          score?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_scores_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: true
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       legal_document_versions: {
         Row: {
           change_summary: string | null
@@ -2048,6 +2280,71 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      outreach_campaigns: {
+        Row: {
+          business_name: string
+          campaign_name: string
+          created_at: string
+          id: string
+          status: Database["public"]["Enums"]["outreach_campaign_status"]
+          updated_at: string
+        }
+        Insert: {
+          business_name?: string
+          campaign_name: string
+          created_at?: string
+          id?: string
+          status?: Database["public"]["Enums"]["outreach_campaign_status"]
+          updated_at?: string
+        }
+        Update: {
+          business_name?: string
+          campaign_name?: string
+          created_at?: string
+          id?: string
+          status?: Database["public"]["Enums"]["outreach_campaign_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      outreach_sequences: {
+        Row: {
+          body: string
+          campaign_id: string
+          created_at: string
+          delay_days: number
+          id: string
+          step_number: number
+          subject: string
+        }
+        Insert: {
+          body?: string
+          campaign_id: string
+          created_at?: string
+          delay_days?: number
+          id?: string
+          step_number: number
+          subject?: string
+        }
+        Update: {
+          body?: string
+          campaign_id?: string
+          created_at?: string
+          delay_days?: number
+          id?: string
+          step_number?: number
+          subject?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outreach_sequences_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "outreach_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       partner_applications: {
         Row: {
@@ -3859,6 +4156,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      assign_inbox_for_contact: {
+        Args: { _contact_id: string }
+        Returns: string
+      }
       check_outreach_allowed: { Args: { _contact_id: string }; Returns: Json }
       expire_inactive_conversations: { Args: never; Returns: number }
       finance_mark_overdue_invoices: { Args: never; Returns: number }
@@ -3883,6 +4184,28 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      recompute_campaign_metrics: {
+        Args: { _campaign_id: string }
+        Returns: undefined
+      }
+      reset_inbox_send_counts: { Args: never; Returns: number }
+      score_contact: {
+        Args: { _business_name?: string; _contact_id: string }
+        Returns: {
+          contact_id: string
+          created_at: string
+          id: string
+          reason: string
+          score: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "lead_scores"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       upsert_contact: {
         Args: {
@@ -3938,8 +4261,11 @@ export type Database = {
         | "clicked"
         | "replied"
         | "bounced"
+      email_queue_status: "pending" | "sent" | "failed" | "blocked"
       inbox_warmup_status: "new" | "warming" | "active"
       invoice_status: "DRAFT" | "SENT" | "PAID" | "OVERDUE" | "PARTIALLY_PAID"
+      lead_validation_status: "valid" | "invalid" | "duplicate"
+      outreach_campaign_status: "active" | "paused"
       payment_event_type:
         | "reminder_sent"
         | "escalation_sent"
@@ -4094,8 +4420,11 @@ export const Constants = {
         "replied",
         "bounced",
       ],
+      email_queue_status: ["pending", "sent", "failed", "blocked"],
       inbox_warmup_status: ["new", "warming", "active"],
       invoice_status: ["DRAFT", "SENT", "PAID", "OVERDUE", "PARTIALLY_PAID"],
+      lead_validation_status: ["valid", "invalid", "duplicate"],
+      outreach_campaign_status: ["active", "paused"],
       payment_event_type: [
         "reminder_sent",
         "escalation_sent",

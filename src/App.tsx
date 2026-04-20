@@ -117,6 +117,10 @@ import FinanceTargets from "./pages/founder/finance/FinanceTargets";
 import FinanceDeals from "./pages/founder/finance/FinanceDeals";
 import FinanceInvoices from "./pages/founder/finance/FinanceInvoices";
 import FinancePayments from "./pages/founder/finance/FinancePayments";
+import OutreachDashboard from "./pages/founder/outreach/OutreachDashboard";
+import OutreachImports from "./pages/founder/outreach/OutreachImports";
+import OutreachCampaigns from "./pages/founder/outreach/OutreachCampaigns";
+import OutreachQueue from "./pages/founder/outreach/OutreachQueue";
 // Partner pages
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import PartnerOpportunities from "./pages/partner/PartnerOpportunities";
@@ -247,6 +251,10 @@ const App = () => (
             <Route path="/founder/finance/deals" element={<FounderRoute><FinanceDeals /></FounderRoute>} />
             <Route path="/founder/finance/invoices" element={<FounderRoute><FinanceInvoices /></FounderRoute>} />
             <Route path="/founder/finance/payments" element={<FounderRoute><FinancePayments /></FounderRoute>} />
+            <Route path="/founder/outreach" element={<FounderRoute><OutreachDashboard /></FounderRoute>} />
+            <Route path="/founder/outreach/imports" element={<FounderRoute><OutreachImports /></FounderRoute>} />
+            <Route path="/founder/outreach/campaigns" element={<FounderRoute><OutreachCampaigns /></FounderRoute>} />
+            <Route path="/founder/outreach/queue" element={<FounderRoute><OutreachQueue /></FounderRoute>} />
 
             {/* Partner Portal */}
             <Route path="/partner" element={<PartnerRoute><PartnerDashboard /></PartnerRoute>} />
