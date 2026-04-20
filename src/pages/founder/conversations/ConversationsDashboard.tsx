@@ -78,7 +78,7 @@ const ConversationsDashboard = () => {
           <StatCard icon={<MessageSquare className="h-4 w-4" />} label="Active conversations" value={stats.active} />
           <StatCard icon={<Bot className="h-4 w-4" />} label="AI replies (24h)" value={stats.replies24} />
           <StatCard icon={<CheckCircle2 className="h-4 w-4" />} label="Qualified" value={stats.qualified} accent="text-green-500" />
-          <StatCard icon={<AlertTriangle className="h-4 w-4" />} label="Escalations" value={stats.escalations} accent="text-yellow-500" />
+          <StatCard icon={<AlertTriangle className="h-4 w-4" />} label="Escalations" value={stats.escalations} accent="text-destructive" />
         </div>
 
         <Card className="tech-card p-0 overflow-hidden">
@@ -109,7 +109,7 @@ const ConversationsDashboard = () => {
                 {new Date(c.last_message_at).toLocaleString()}
               </div>
               <div className="col-span-1 text-right">
-                {c.escalation_pending && <Badge className="bg-yellow-500/10 text-yellow-500 border-yellow-500/30">!</Badge>}
+                {c.escalation_pending && <Badge variant="destructive">!</Badge>}
               </div>
             </Link>
           ))}

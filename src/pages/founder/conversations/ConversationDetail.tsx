@@ -67,10 +67,10 @@ const ConversationDetail = () => {
         </div>
 
         {conv.escalation_pending && (
-          <Card className="tech-card p-4 border-yellow-500/40 bg-yellow-500/5">
+          <Card className="tech-card p-4 border-destructive/40 bg-destructive/5">
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-start gap-3">
-                <AlertTriangle className="h-5 w-5 text-yellow-500 mt-0.5" />
+                <AlertTriangle className="h-5 w-5 text-destructive mt-0.5" />
                 <div>
                   <div className="font-medium">Escalation pending</div>
                   <div className="text-sm text-muted-foreground">Reasons: {conv.escalation_reason || "—"}</div>
