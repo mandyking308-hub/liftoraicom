@@ -111,8 +111,8 @@ const ComplianceDashboard = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <StatCard icon={<ShieldAlert className="h-5 w-5" />} label="Events (7d)" value={events.length} />
           <StatCard icon={<AlertTriangle className="h-5 w-5 text-destructive" />} label="Critical" value={sevCounts.critical ?? 0} />
-          <StatCard icon={<Activity className="h-5 w-5" />} label="High risk entities" value={scores.filter((s) => s.score >= 50).length} />
-          <StatCard icon={<Globe className="h-5 w-5" />} label="Jurisdictions" value={jurisdictions.length} />
+          <StatCard icon={<Activity className="h-5 w-5 text-destructive" />} label="HIGH_RISK entities" value={scores.filter((s) => s.high_risk).length} />
+          <StatCard icon={<Building2 className="h-5 w-5" />} label="HIGH_RISK businesses" value={businessRisks.filter((b) => b.high_risk).length} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -163,6 +163,7 @@ const ComplianceDashboard = () => {
                     <TableHead>Entity</TableHead>
                     <TableHead>ID</TableHead>
                     <TableHead>Score</TableHead>
+                    <TableHead>Trend</TableHead>
                     <TableHead>Events</TableHead>
                     <TableHead>Last event</TableHead>
                   </TableRow>
@@ -173,14 +174,51 @@ const ComplianceDashboard = () => {
                       <TableCell><Badge variant="outline">{s.entity_type}</Badge></TableCell>
                       <TableCell className="font-mono text-xs">{s.entity_id?.slice(0, 8)}…</TableCell>
                       <TableCell>
-                        <Badge variant={s.score >= 70 ? "destructive" : s.score >= 40 ? "default" : "outline"}>
-                          {s.score}
+                        <Badge variant={s.high_risk ? "destructive" : s.score >= 40 ? "default" : "outline"}>
+                          {s.score}{s.high_risk ? " · HIGH_RISK" : ""}
                         </Badge>
                       </TableCell>
+                      <TableCell><TrendIcon trend={s.risk_trend} /></TableCell>
                       <TableCell>{s.event_count}</TableCell>
                       <TableCell className="text-muted-foreground text-xs">
                         {s.last_event_at ? format(new Date(s.last_event_at), "dd MMM HH:mm") : "—"}
                       </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader><CardTitle>Business-level risk</CardTitle></CardHeader>
+          <CardContent>
+            {businessRisks.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No business-level risk yet.</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Business</TableHead>
+                    <TableHead>Score</TableHead>
+                    <TableHead>Previous</TableHead>
+                    <TableHead>Trend</TableHead>
+                    <TableHead>Events (7d)</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {businessRisks.map((b) => (
+                    <TableRow key={b.business_name}>
+                      <TableCell className="font-medium">{b.business_name || "—"}</TableCell>
+                      <TableCell>
+                        <Badge variant={b.high_risk ? "destructive" : b.score >= 40 ? "default" : "outline"}>
+                          {b.score}{b.high_risk ? " · HIGH_RISK" : ""}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">{b.previous_score}</TableCell>
+                      <TableCell><TrendIcon trend={b.risk_trend} /></TableCell>
+                      <TableCell>{b.event_count}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
