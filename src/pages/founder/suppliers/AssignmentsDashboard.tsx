@@ -223,10 +223,41 @@ const AssignmentsDashboard = () => {
                           <span className="text-muted-foreground">→</span>
                           <span>{deal?.deal_name || a.deal_id.slice(0,8)}</span>
                           {a.auto_assigned && <Badge variant="outline" className="text-xs">auto</Badge>}
+                          {a.sla_status === "overdue" && (
+                            <Badge variant="destructive" className="text-xs gap-1">
+                              <AlertTriangle className="h-3 w-3" /> overdue
+                            </Badge>
+                          )}
+                          {a.sla_status === "at_risk" && (
+                            <Badge variant="outline" className="text-xs gap-1 border-amber-500/50 text-amber-500">
+                              <Clock className="h-3 w-3" /> at risk
+                            </Badge>
+                          )}
+                          {a.completion_confirmed_by_founder && (
+                            <Badge variant="outline" className="text-xs gap-1 border-primary/50 text-primary">
+                              <ShieldCheck className="h-3 w-3" /> confirmed
+                            </Badge>
+                          )}
+                          {a.requires_finance_action && (
+                            <Badge variant="outline" className="text-xs">finance →</Badge>
+                          )}
                         </div>
                         <p className="text-xs text-muted-foreground mt-0.5">
                           {a.business_name || "—"} · {new Date(a.assigned_at).toLocaleString()}
                         </p>
+                        <div className="flex items-center gap-2 mt-1.5">
+                          <Label className="text-xs text-muted-foreground">SLA:</Label>
+                          <input
+                            type="date"
+                            className="bg-background border border-border/60 rounded px-2 py-0.5 text-xs"
+                            defaultValue={a.expected_completion_date ?? ""}
+                            onBlur={(e) => {
+                              if ((e.target.value || null) !== a.expected_completion_date) {
+                                void setExpectedDate(a, e.target.value);
+                              }
+                            }}
+                          />
+                        </div>
                       </div>
                       <div className="flex items-center gap-2">
                         <Badge variant="outline" className="capitalize">{a.status.replace("_"," ")}</Badge>
@@ -246,6 +277,11 @@ const AssignmentsDashboard = () => {
                           />
                           <span>share contact</span>
                         </div>
+                        {a.status === "completed" && !a.completion_confirmed_by_founder && (
+                          <Button size="sm" variant="outline" onClick={() => confirmCompletion(a)}>
+                            <ShieldCheck className="h-3 w-3 mr-1" /> Confirm
+                          </Button>
+                        )}
                       </div>
                     </li>
                   );
