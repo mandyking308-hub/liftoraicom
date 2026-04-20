@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Loader2, Users, ShieldCheck, CheckCircle2, Clock, XCircle } from "lucide-react";
+import { Plus, Loader2, Users, ShieldCheck, CheckCircle2, Clock, XCircle, Activity, RefreshCw, Percent } from "lucide-react";
 import FounderLayout from "@/components/founder/FounderLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -39,6 +39,7 @@ const SuppliersDashboard = () => {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [availability, setAvailability] = useState<AvailabilityRow[]>([]);
   const [assignments, setAssignments] = useState<AssignmentRow[]>([]);
+  const [portalStats, setPortalStats] = useState<{ active_suppliers_24h: number; updates_24h: number; completion_rate: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -48,14 +49,16 @@ const SuppliersDashboard = () => {
 
   async function load() {
     setLoading(true);
-    const [s, a, asg] = await Promise.all([
+    const [s, a, asg, ps] = await Promise.all([
       supabase.from("suppliers").select("*").order("created_at", { ascending: false }).limit(200),
       supabase.from("supplier_availability").select("supplier_id, status"),
       supabase.from("assignments").select("id, status"),
+      supabase.rpc("supplier_portal_stats"),
     ]);
     setSuppliers((s.data as Supplier[]) ?? []);
     setAvailability((a.data as AvailabilityRow[]) ?? []);
     setAssignments((asg.data as AssignmentRow[]) ?? []);
+    setPortalStats(ps.data as never);
     setLoading(false);
   }
 
@@ -144,6 +147,12 @@ const SuppliersDashboard = () => {
           <StatCard icon={<XCircle className="h-4 w-4 text-destructive" />} label="Failed" value={failedAsg} />
         </div>
 
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <StatCard icon={<Activity className="h-4 w-4 text-primary" />} label="Supplier logins (24h)" value={portalStats?.active_suppliers_24h ?? 0} />
+          <StatCard icon={<RefreshCw className="h-4 w-4 text-primary" />} label="Status updates (24h)" value={portalStats?.updates_24h ?? 0} />
+          <StatCard icon={<Percent className="h-4 w-4 text-primary" />} label="Completion rate" value={`${portalStats?.completion_rate ?? 0}%` as never} />
+        </div>
+
         <Card className="tech-card">
           <CardHeader><CardTitle className="text-sm">All suppliers</CardTitle></CardHeader>
           <CardContent className="p-0">
@@ -178,7 +187,7 @@ const SuppliersDashboard = () => {
   );
 };
 
-const StatCard = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) => (
+const StatCard = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: number | string }) => (
   <Card className="tech-card">
     <CardContent className="p-4">
       <div className="flex items-center gap-2 text-xs text-muted-foreground">{icon}<span>{label}</span></div>
