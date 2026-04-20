@@ -79,6 +79,7 @@ export type Database = {
       }
       activity_log: {
         Row: {
+          business_name: string
           created_at: string
           description: string
           entity_id: string | null
@@ -87,6 +88,7 @@ export type Database = {
           id: string
         }
         Insert: {
+          business_name?: string
           created_at?: string
           description: string
           entity_id?: string | null
@@ -95,6 +97,7 @@ export type Database = {
           id?: string
         }
         Update: {
+          business_name?: string
           created_at?: string
           description?: string
           entity_id?: string | null
@@ -257,12 +260,15 @@ export type Database = {
       ai_actions: {
         Row: {
           action_type: Database["public"]["Enums"]["ai_action_type"]
+          ai_quality_flag: Database["public"]["Enums"]["ai_quality_flag"]
           classification: string
           contact_id: string
           conversation_id: string
           created_at: string
           error_message: string
           id: string
+          quality_reason: string
+          regenerated: boolean
           reply_latency_seconds: number | null
           reply_preview: string
           status: Database["public"]["Enums"]["ai_action_status"]
@@ -270,12 +276,15 @@ export type Database = {
         }
         Insert: {
           action_type: Database["public"]["Enums"]["ai_action_type"]
+          ai_quality_flag?: Database["public"]["Enums"]["ai_quality_flag"]
           classification?: string
           contact_id: string
           conversation_id: string
           created_at?: string
           error_message?: string
           id?: string
+          quality_reason?: string
+          regenerated?: boolean
           reply_latency_seconds?: number | null
           reply_preview?: string
           status?: Database["public"]["Enums"]["ai_action_status"]
@@ -283,12 +292,15 @@ export type Database = {
         }
         Update: {
           action_type?: Database["public"]["Enums"]["ai_action_type"]
+          ai_quality_flag?: Database["public"]["Enums"]["ai_quality_flag"]
           classification?: string
           contact_id?: string
           conversation_id?: string
           created_at?: string
           error_message?: string
           id?: string
+          quality_reason?: string
+          regenerated?: boolean
           reply_latency_seconds?: number | null
           reply_preview?: string
           status?: Database["public"]["Enums"]["ai_action_status"]
@@ -1152,15 +1164,21 @@ export type Database = {
           assigned_business: string
           assigned_inbox_id: string | null
           company: string
+          company_size: Database["public"]["Enums"]["company_size_tier"] | null
           conversation_active: boolean
           country: string | null
           created_at: string
           email: string
+          enriched_at: string | null
           id: string
+          industry: string | null
+          intent_score: number
           last_contacted_at: string | null
           last_replied_at: string | null
+          linkedin_url: string | null
           name: string
           role: string
+          seniority: Database["public"]["Enums"]["seniority_level"] | null
           source: string
           status: Database["public"]["Enums"]["contact_status"]
           timezone: string | null
@@ -1172,15 +1190,21 @@ export type Database = {
           assigned_business?: string
           assigned_inbox_id?: string | null
           company?: string
+          company_size?: Database["public"]["Enums"]["company_size_tier"] | null
           conversation_active?: boolean
           country?: string | null
           created_at?: string
           email: string
+          enriched_at?: string | null
           id?: string
+          industry?: string | null
+          intent_score?: number
           last_contacted_at?: string | null
           last_replied_at?: string | null
+          linkedin_url?: string | null
           name?: string
           role?: string
+          seniority?: Database["public"]["Enums"]["seniority_level"] | null
           source?: string
           status?: Database["public"]["Enums"]["contact_status"]
           timezone?: string | null
@@ -1192,15 +1216,21 @@ export type Database = {
           assigned_business?: string
           assigned_inbox_id?: string | null
           company?: string
+          company_size?: Database["public"]["Enums"]["company_size_tier"] | null
           conversation_active?: boolean
           country?: string | null
           created_at?: string
           email?: string
+          enriched_at?: string | null
           id?: string
+          industry?: string | null
+          intent_score?: number
           last_contacted_at?: string | null
           last_replied_at?: string | null
+          linkedin_url?: string | null
           name?: string
           role?: string
+          seniority?: Database["public"]["Enums"]["seniority_level"] | null
           source?: string
           status?: Database["public"]["Enums"]["contact_status"]
           timezone?: string | null
@@ -1277,6 +1307,7 @@ export type Database = {
           escalation_reason: string
           id: string
           intent_history: Json
+          intent_score: number
           last_ai_reply_at: string | null
           last_intent: string
           last_message_at: string
@@ -1293,6 +1324,7 @@ export type Database = {
           escalation_reason?: string
           id?: string
           intent_history?: Json
+          intent_score?: number
           last_ai_reply_at?: string | null
           last_intent?: string
           last_message_at?: string
@@ -1309,6 +1341,7 @@ export type Database = {
           escalation_reason?: string
           id?: string
           intent_history?: Json
+          intent_score?: number
           last_ai_reply_at?: string | null
           last_intent?: string
           last_message_at?: string
@@ -2046,12 +2079,14 @@ export type Database = {
       inboxes: {
         Row: {
           active: boolean
+          bounce_rate_per_inbox: number
           business_name: string
           consecutive_failures: number
           created_at: string
           current_send_count: number
           daily_send_limit: number
           email_address: string
+          emails_sent_today: number
           hourly_send_count: number
           hourly_send_limit: number
           hourly_window_start: string
@@ -2059,6 +2094,8 @@ export type Database = {
           last_sent_at: string | null
           last_used_sequence_position: number
           paused_reason: string
+          performance_score: number
+          reply_rate_per_inbox: number
           reputation_score: number
           updated_at: string
           warmup_started_at: string
@@ -2066,12 +2103,14 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          bounce_rate_per_inbox?: number
           business_name?: string
           consecutive_failures?: number
           created_at?: string
           current_send_count?: number
           daily_send_limit?: number
           email_address: string
+          emails_sent_today?: number
           hourly_send_count?: number
           hourly_send_limit?: number
           hourly_window_start?: string
@@ -2079,6 +2118,8 @@ export type Database = {
           last_sent_at?: string | null
           last_used_sequence_position?: number
           paused_reason?: string
+          performance_score?: number
+          reply_rate_per_inbox?: number
           reputation_score?: number
           updated_at?: string
           warmup_started_at?: string
@@ -2086,12 +2127,14 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          bounce_rate_per_inbox?: number
           business_name?: string
           consecutive_failures?: number
           created_at?: string
           current_send_count?: number
           daily_send_limit?: number
           email_address?: string
+          emails_sent_today?: number
           hourly_send_count?: number
           hourly_send_limit?: number
           hourly_window_start?: string
@@ -2099,6 +2142,8 @@ export type Database = {
           last_sent_at?: string | null
           last_used_sequence_position?: number
           paused_reason?: string
+          performance_score?: number
+          reply_rate_per_inbox?: number
           reputation_score?: number
           updated_at?: string
           warmup_started_at?: string
@@ -2311,7 +2356,9 @@ export type Database = {
           processes_to_automate: string[]
           project_scale: string
           project_types: string[]
+          proposal_quality_score: number
           proposal_score: number
+          quality_flags: Json
           rejected_at: string | null
           sent_at: string | null
           status: Database["public"]["Enums"]["internal_proposal_status"]
@@ -2348,7 +2395,9 @@ export type Database = {
           processes_to_automate?: string[]
           project_scale?: string
           project_types?: string[]
+          proposal_quality_score?: number
           proposal_score?: number
+          quality_flags?: Json
           rejected_at?: string | null
           sent_at?: string | null
           status?: Database["public"]["Enums"]["internal_proposal_status"]
@@ -2385,7 +2434,9 @@ export type Database = {
           processes_to_automate?: string[]
           project_scale?: string
           project_types?: string[]
+          proposal_quality_score?: number
           proposal_score?: number
+          quality_flags?: Json
           rejected_at?: string | null
           sent_at?: string | null
           status?: Database["public"]["Enums"]["internal_proposal_status"]
@@ -4249,37 +4300,49 @@ export type Database = {
       retry_queue: {
         Row: {
           action_type: Database["public"]["Enums"]["retry_action_type"]
+          business_name: string
           created_at: string
           entity_id: string
           entity_type: string
+          escalated: boolean
           id: string
           last_error: string
+          last_error_message: string
           next_retry_at: string
           retry_count: number
+          retry_reason: string
           status: Database["public"]["Enums"]["retry_status"]
           updated_at: string
         }
         Insert: {
           action_type: Database["public"]["Enums"]["retry_action_type"]
+          business_name?: string
           created_at?: string
           entity_id: string
           entity_type: string
+          escalated?: boolean
           id?: string
           last_error?: string
+          last_error_message?: string
           next_retry_at?: string
           retry_count?: number
+          retry_reason?: string
           status?: Database["public"]["Enums"]["retry_status"]
           updated_at?: string
         }
         Update: {
           action_type?: Database["public"]["Enums"]["retry_action_type"]
+          business_name?: string
           created_at?: string
           entity_id?: string
           entity_type?: string
+          escalated?: boolean
           id?: string
           last_error?: string
+          last_error_message?: string
           next_retry_at?: string
           retry_count?: number
+          retry_reason?: string
           status?: Database["public"]["Enums"]["retry_status"]
           updated_at?: string
         }
@@ -4806,6 +4869,7 @@ export type Database = {
       }
       suppliers: {
         Row: {
+          active_assignment_count: number
           approved_at: string | null
           business_name: string
           company: string
@@ -4813,6 +4877,7 @@ export type Database = {
           email: string
           id: string
           last_activity_at: string | null
+          max_concurrent_assignments: number
           name: string
           notes: string
           rejected_at: string | null
@@ -4825,6 +4890,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          active_assignment_count?: number
           approved_at?: string | null
           business_name?: string
           company?: string
@@ -4832,6 +4898,7 @@ export type Database = {
           email: string
           id?: string
           last_activity_at?: string | null
+          max_concurrent_assignments?: number
           name?: string
           notes?: string
           rejected_at?: string | null
@@ -4844,6 +4911,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          active_assignment_count?: number
           approved_at?: string | null
           business_name?: string
           company?: string
@@ -4851,6 +4919,7 @@ export type Database = {
           email?: string
           id?: string
           last_activity_at?: string | null
+          max_concurrent_assignments?: number
           name?: string
           notes?: string
           rejected_at?: string | null
@@ -5018,6 +5087,24 @@ export type Database = {
           metric_name?: string
           timestamp?: string
           value?: number
+        }
+        Relationships: []
+      }
+      system_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value?: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: Json
         }
         Relationships: []
       }
@@ -5831,6 +5918,7 @@ export type Database = {
         }
         Returns: Database["public"]["Enums"]["assignment_sla_status"]
       }
+      compute_intent_score: { Args: { _contact_id: string }; Returns: number }
       compute_system_health: { Args: never; Returns: Json }
       country_to_timezone: { Args: { _country: string }; Returns: string }
       detect_anomalies: { Args: never; Returns: Json }
@@ -5838,6 +5926,7 @@ export type Database = {
       eligible_suppliers_for_deal: {
         Args: { _deal_id: string }
         Returns: {
+          active_assignment_count: number
           approved_at: string | null
           business_name: string
           company: string
@@ -5845,6 +5934,7 @@ export type Database = {
           email: string
           id: string
           last_activity_at: string | null
+          max_concurrent_assignments: number
           name: string
           notes: string
           rejected_at: string | null
@@ -5863,6 +5953,13 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      enrich_all_contacts: { Args: never; Returns: number }
+      enrich_contact: { Args: { _contact_id: string }; Returns: Json }
+      escalate_retry_failure: {
+        Args: { _retry_id: string }
+        Returns: undefined
+      }
+      evaluate_ai_reply: { Args: { _text: string }; Returns: Json }
       expire_demos: { Args: never; Returns: number }
       expire_inactive_conversations: { Args: never; Returns: number }
       finance_mark_overdue_invoices: { Args: never; Returns: number }
@@ -5920,7 +6017,9 @@ export type Database = {
           processes_to_automate: string[]
           project_scale: string
           project_types: string[]
+          proposal_quality_score: number
           proposal_score: number
+          quality_flags: Json
           rejected_at: string | null
           sent_at: string | null
           status: Database["public"]["Enums"]["internal_proposal_status"]
@@ -5939,6 +6038,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      get_system_mode: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -5947,6 +6047,16 @@ export type Database = {
         Returns: boolean
       }
       inbox_warmup_limit: { Args: { _inbox_id: string }; Returns: number }
+      log_activity: {
+        Args: {
+          _business_name?: string
+          _description: string
+          _entity_id?: string
+          _entity_type?: string
+          _event_type: string
+        }
+        Returns: string
+      }
       log_compliance_event: {
         Args: {
           _business_name: string
@@ -5988,6 +6098,7 @@ export type Database = {
         Args: { _business_name: string }
         Returns: string
       }
+      pick_supplier_for_deal: { Args: { _deal_id: string }; Returns: string }
       priority_level_from_score: {
         Args: { _s: number }
         Returns: Database["public"]["Enums"]["priority_level"]
@@ -6037,7 +6148,9 @@ export type Database = {
           processes_to_automate: string[]
           project_scale: string
           project_types: string[]
+          proposal_quality_score: number
           proposal_score: number
+          quality_flags: Json
           rejected_at: string | null
           sent_at: string | null
           status: Database["public"]["Enums"]["internal_proposal_status"]
@@ -6063,6 +6176,8 @@ export type Database = {
         }
         Returns: undefined
       }
+      recompute_all_inbox_performance: { Args: never; Returns: number }
+      recompute_all_intent_scores: { Args: never; Returns: number }
       recompute_all_supplier_scores: { Args: never; Returns: number }
       recompute_business_risk_score: {
         Args: { _business_name: string }
@@ -6083,9 +6198,17 @@ export type Database = {
         Args: { _domain_name: string }
         Returns: undefined
       }
+      recompute_inbox_performance: {
+        Args: { _inbox_id: string }
+        Returns: undefined
+      }
       recompute_proposal_score: {
         Args: { _proposal_id: string }
         Returns: number
+      }
+      recompute_supplier_load: {
+        Args: { _supplier_id: string }
+        Returns: undefined
       }
       recompute_supplier_score: {
         Args: { _supplier_id: string }
@@ -6127,6 +6250,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      score_proposal_quality: { Args: { _proposal_id: string }; Returns: Json }
       severity_weight: {
         Args: { _s: Database["public"]["Enums"]["compliance_severity"] }
         Returns: number
@@ -6134,6 +6258,7 @@ export type Database = {
       suggest_replacement_supplier: {
         Args: { _assignment_id: string }
         Returns: {
+          active_assignment_count: number
           approved_at: string | null
           business_name: string
           company: string
@@ -6141,6 +6266,7 @@ export type Database = {
           email: string
           id: string
           last_activity_at: string | null
+          max_concurrent_assignments: number
           name: string
           notes: string
           rejected_at: string | null
@@ -6204,15 +6330,21 @@ export type Database = {
           assigned_business: string
           assigned_inbox_id: string | null
           company: string
+          company_size: Database["public"]["Enums"]["company_size_tier"] | null
           conversation_active: boolean
           country: string | null
           created_at: string
           email: string
+          enriched_at: string | null
           id: string
+          industry: string | null
+          intent_score: number
           last_contacted_at: string | null
           last_replied_at: string | null
+          linkedin_url: string | null
           name: string
           role: string
+          seniority: Database["public"]["Enums"]["seniority_level"] | null
           source: string
           status: Database["public"]["Enums"]["contact_status"]
           timezone: string | null
@@ -6226,15 +6358,18 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      validate_system_integrity: { Args: never; Returns: Json }
     }
     Enums: {
       ai_action_status: "success" | "failed"
       ai_action_type: "classify" | "reply" | "escalate"
+      ai_quality_flag: "pass" | "fail" | "regenerated"
       app_role: "admin" | "founder" | "client" | "partner"
       assignment_sla_status: "on_track" | "at_risk" | "overdue" | "n_a"
       assignment_status: "assigned" | "in_progress" | "completed" | "failed"
       communication_channel: "email" | "whatsapp" | "linkedin"
       communication_direction: "outbound" | "inbound"
+      company_size_tier: "small" | "medium" | "large"
       compliance_category:
         | "outreach"
         | "data_privacy"
@@ -6318,6 +6453,7 @@ export type Database = {
         | "delivered"
       retry_action_type: "send_email" | "ai_reply" | "assignment_retry"
       retry_status: "pending" | "completed" | "failed"
+      seniority_level: "junior" | "manager" | "director" | "c-level"
       supplier_availability_status: "available" | "busy" | "unavailable"
       supplier_pipeline_stage:
         | "sourced"
@@ -6467,11 +6603,13 @@ export const Constants = {
     Enums: {
       ai_action_status: ["success", "failed"],
       ai_action_type: ["classify", "reply", "escalate"],
+      ai_quality_flag: ["pass", "fail", "regenerated"],
       app_role: ["admin", "founder", "client", "partner"],
       assignment_sla_status: ["on_track", "at_risk", "overdue", "n_a"],
       assignment_status: ["assigned", "in_progress", "completed", "failed"],
       communication_channel: ["email", "whatsapp", "linkedin"],
       communication_direction: ["outbound", "inbound"],
+      company_size_tier: ["small", "medium", "large"],
       compliance_category: [
         "outreach",
         "data_privacy",
@@ -6565,6 +6703,7 @@ export const Constants = {
       ],
       retry_action_type: ["send_email", "ai_reply", "assignment_retry"],
       retry_status: ["pending", "completed", "failed"],
+      seniority_level: ["junior", "manager", "director", "c-level"],
       supplier_availability_status: ["available", "busy", "unavailable"],
       supplier_pipeline_stage: [
         "sourced",
