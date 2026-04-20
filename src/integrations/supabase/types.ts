@@ -3532,6 +3532,42 @@ export type Database = {
         }
         Relationships: []
       }
+      priority_scores: {
+        Row: {
+          business_name: string
+          created_at: string
+          entity_id: string
+          entity_type: Database["public"]["Enums"]["priority_entity_type"]
+          factors: Json
+          id: string
+          last_updated: string
+          priority_level: Database["public"]["Enums"]["priority_level"]
+          score: number
+        }
+        Insert: {
+          business_name?: string
+          created_at?: string
+          entity_id: string
+          entity_type: Database["public"]["Enums"]["priority_entity_type"]
+          factors?: Json
+          id?: string
+          last_updated?: string
+          priority_level?: Database["public"]["Enums"]["priority_level"]
+          score?: number
+        }
+        Update: {
+          business_name?: string
+          created_at?: string
+          entity_id?: string
+          entity_type?: Database["public"]["Enums"]["priority_entity_type"]
+          factors?: Json
+          id?: string
+          last_updated?: string
+          priority_level?: Database["public"]["Enums"]["priority_level"]
+          score?: number
+        }
+        Relationships: []
+      }
       process_documents: {
         Row: {
           category: string
@@ -4677,6 +4713,48 @@ export type Database = {
           },
         ]
       }
+      system_tasks: {
+        Row: {
+          business_name: string
+          completed_at: string | null
+          created_at: string
+          entity_id: string
+          entity_type: Database["public"]["Enums"]["priority_entity_type"]
+          id: string
+          priority_score: number
+          reason: string
+          status: Database["public"]["Enums"]["system_task_status"]
+          task_type: Database["public"]["Enums"]["system_task_type"]
+          updated_at: string
+        }
+        Insert: {
+          business_name?: string
+          completed_at?: string | null
+          created_at?: string
+          entity_id: string
+          entity_type: Database["public"]["Enums"]["priority_entity_type"]
+          id?: string
+          priority_score?: number
+          reason?: string
+          status?: Database["public"]["Enums"]["system_task_status"]
+          task_type: Database["public"]["Enums"]["system_task_type"]
+          updated_at?: string
+        }
+        Update: {
+          business_name?: string
+          completed_at?: string | null
+          created_at?: string
+          entity_id?: string
+          entity_type?: Database["public"]["Enums"]["priority_entity_type"]
+          id?: string
+          priority_score?: number
+          reason?: string
+          status?: Database["public"]["Enums"]["system_task_status"]
+          task_type?: Database["public"]["Enums"]["system_task_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       system_templates: {
         Row: {
           architecture_id: string | null
@@ -5084,7 +5162,115 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      at_risk_assignments: {
+        Row: {
+          assignment_status:
+            | Database["public"]["Enums"]["assignment_status"]
+            | null
+          business_name: string | null
+          created_at: string | null
+          deal_id: string | null
+          entity_id: string | null
+          entity_type:
+            | Database["public"]["Enums"]["priority_entity_type"]
+            | null
+          expected_completion_date: string | null
+          factors: Json | null
+          id: string | null
+          last_updated: string | null
+          priority_level: Database["public"]["Enums"]["priority_level"] | null
+          score: number | null
+          sla_status:
+            | Database["public"]["Enums"]["assignment_sla_status"]
+            | null
+          supplier_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignments_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignments_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      high_priority_contacts: {
+        Row: {
+          business_name: string | null
+          company: string | null
+          contact_name: string | null
+          contact_status: Database["public"]["Enums"]["contact_status"] | null
+          created_at: string | null
+          email: string | null
+          entity_id: string | null
+          entity_type:
+            | Database["public"]["Enums"]["priority_entity_type"]
+            | null
+          factors: Json | null
+          id: string | null
+          last_updated: string | null
+          priority_level: Database["public"]["Enums"]["priority_level"] | null
+          score: number | null
+        }
+        Relationships: []
+      }
+      high_priority_deals: {
+        Row: {
+          business_name: string | null
+          contact_id: string | null
+          created_at: string | null
+          deal_name: string | null
+          deal_status: Database["public"]["Enums"]["deal_status"] | null
+          entity_id: string | null
+          entity_type:
+            | Database["public"]["Enums"]["priority_entity_type"]
+            | null
+          estimated_value_max: number | null
+          estimated_value_min: number | null
+          factors: Json | null
+          id: string | null
+          last_updated: string | null
+          priority_level: Database["public"]["Enums"]["priority_level"] | null
+          score: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deals_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hot_conversations: {
+        Row: {
+          business_name: string | null
+          contact_id: string | null
+          conv_status: Database["public"]["Enums"]["conversation_status"] | null
+          created_at: string | null
+          entity_id: string | null
+          entity_type:
+            | Database["public"]["Enums"]["priority_entity_type"]
+            | null
+          factors: Json | null
+          id: string | null
+          last_intent: string | null
+          last_message_at: string | null
+          last_updated: string | null
+          priority_level: Database["public"]["Enums"]["priority_level"] | null
+          score: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       accept_proposal_by_token: { Args: { _token: string }; Returns: Json }
@@ -5118,6 +5304,10 @@ export type Database = {
       compliance_check_proposal: {
         Args: { _proposal_id: string }
         Returns: undefined
+      }
+      compliance_score_for: {
+        Args: { _eid: string; _etype: string }
+        Returns: number
       }
       compute_assignment_sla: {
         Args: {
@@ -5177,6 +5367,13 @@ export type Database = {
         Returns: Json
       }
       generate_invoice_number: { Args: never; Returns: string }
+      generate_system_tasks_from_priority: {
+        Args: {
+          _entity_id: string
+          _entity_type: Database["public"]["Enums"]["priority_entity_type"]
+        }
+        Returns: undefined
+      }
       get_proposal_by_token: {
         Args: { _token: string }
         Returns: {
@@ -5247,6 +5444,23 @@ export type Database = {
         Args: { _event_type: string; _metadata?: Json; _token: string }
         Returns: Json
       }
+      priority_level_from_score: {
+        Args: { _s: number }
+        Returns: Database["public"]["Enums"]["priority_level"]
+      }
+      priority_score_assignment: {
+        Args: { _assignment_id: string }
+        Returns: undefined
+      }
+      priority_score_contact: {
+        Args: { _contact_id: string }
+        Returns: undefined
+      }
+      priority_score_conversation: {
+        Args: { _conversation_id: string }
+        Returns: undefined
+      }
+      priority_score_deal: { Args: { _deal_id: string }; Returns: undefined }
       proposals_needing_followup: {
         Args: never
         Returns: {
@@ -5292,6 +5506,13 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      recalculate_priority: {
+        Args: {
+          _entity_id: string
+          _entity_type: Database["public"]["Enums"]["priority_entity_type"]
+        }
+        Returns: undefined
       }
       recompute_all_supplier_scores: { Args: never; Returns: number }
       recompute_business_risk_score: {
@@ -5510,6 +5731,8 @@ export type Database = {
         | "critical_flagged"
         | "payment_received"
       payment_method: "bank" | "stripe" | "cash" | "other"
+      priority_entity_type: "contact" | "conversation" | "deal" | "assignment"
+      priority_level: "low" | "medium" | "high" | "critical"
       supplier_availability_status: "available" | "busy" | "unavailable"
       supplier_pipeline_stage:
         | "sourced"
@@ -5525,6 +5748,8 @@ export type Database = {
         | "APPROVED"
         | "REJECTED"
         | "INACTIVE"
+      system_task_status: "pending" | "in_progress" | "completed" | "dismissed"
+      system_task_type: "follow_up" | "review" | "escalate"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -5727,6 +5952,8 @@ export const Constants = {
         "payment_received",
       ],
       payment_method: ["bank", "stripe", "cash", "other"],
+      priority_entity_type: ["contact", "conversation", "deal", "assignment"],
+      priority_level: ["low", "medium", "high", "critical"],
       supplier_availability_status: ["available", "busy", "unavailable"],
       supplier_pipeline_stage: [
         "sourced",
@@ -5744,6 +5971,8 @@ export const Constants = {
         "REJECTED",
         "INACTIVE",
       ],
+      system_task_status: ["pending", "in_progress", "completed", "dismissed"],
+      system_task_type: ["follow_up", "review", "escalate"],
     },
   },
 } as const
