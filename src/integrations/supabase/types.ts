@@ -1132,6 +1132,7 @@ export type Database = {
           event_type: Database["public"]["Enums"]["demo_event_type"]
           id: string
           metadata: Json
+          session_duration_seconds: number
           timestamp: string
         }
         Insert: {
@@ -1139,6 +1140,7 @@ export type Database = {
           event_type: Database["public"]["Enums"]["demo_event_type"]
           id?: string
           metadata?: Json
+          session_duration_seconds?: number
           timestamp?: string
         }
         Update: {
@@ -1146,6 +1148,7 @@ export type Database = {
           event_type?: Database["public"]["Enums"]["demo_event_type"]
           id?: string
           metadata?: Json
+          session_duration_seconds?: number
           timestamp?: string
         }
         Relationships: [
@@ -1889,12 +1892,15 @@ export type Database = {
           estimated_roi_summary: string
           estimated_scope: string
           estimated_timeline: string
+          follow_up_completed_at: string | null
+          follow_up_due_at: string | null
           id: string
           include_demo: boolean
           industry: string
           processes_to_automate: string[]
           project_scale: string
           project_types: string[]
+          proposal_score: number
           rejected_at: string | null
           sent_at: string | null
           status: Database["public"]["Enums"]["internal_proposal_status"]
@@ -1923,12 +1929,15 @@ export type Database = {
           estimated_roi_summary?: string
           estimated_scope?: string
           estimated_timeline?: string
+          follow_up_completed_at?: string | null
+          follow_up_due_at?: string | null
           id?: string
           include_demo?: boolean
           industry?: string
           processes_to_automate?: string[]
           project_scale?: string
           project_types?: string[]
+          proposal_score?: number
           rejected_at?: string | null
           sent_at?: string | null
           status?: Database["public"]["Enums"]["internal_proposal_status"]
@@ -1957,12 +1966,15 @@ export type Database = {
           estimated_roi_summary?: string
           estimated_scope?: string
           estimated_timeline?: string
+          follow_up_completed_at?: string | null
+          follow_up_due_at?: string | null
           id?: string
           include_demo?: boolean
           industry?: string
           processes_to_automate?: string[]
           project_scale?: string
           project_types?: string[]
+          proposal_score?: number
           rejected_at?: string | null
           sent_at?: string | null
           status?: Database["public"]["Enums"]["internal_proposal_status"]
@@ -4579,12 +4591,15 @@ export type Database = {
           estimated_roi_summary: string
           estimated_scope: string
           estimated_timeline: string
+          follow_up_completed_at: string | null
+          follow_up_due_at: string | null
           id: string
           include_demo: boolean
           industry: string
           processes_to_automate: string[]
           project_scale: string
           project_types: string[]
+          proposal_score: number
           rejected_at: string | null
           sent_at: string | null
           status: Database["public"]["Enums"]["internal_proposal_status"]
@@ -4614,9 +4629,59 @@ export type Database = {
         Args: { _event_type: string; _metadata?: Json; _token: string }
         Returns: Json
       }
+      proposals_needing_followup: {
+        Args: never
+        Returns: {
+          accept_token: string
+          accepted_at: string | null
+          architecture_components: Json
+          business_name: string
+          business_problem: string
+          contact_id: string
+          created_at: string
+          deal_id: string | null
+          estimated_annual_savings: string
+          estimated_cost_breakdown: Json
+          estimated_cost_range: string
+          estimated_productivity_gain: string
+          estimated_roi_period: string
+          estimated_roi_summary: string
+          estimated_scope: string
+          estimated_timeline: string
+          follow_up_completed_at: string | null
+          follow_up_due_at: string | null
+          id: string
+          include_demo: boolean
+          industry: string
+          processes_to_automate: string[]
+          project_scale: string
+          project_types: string[]
+          proposal_score: number
+          rejected_at: string | null
+          sent_at: string | null
+          status: Database["public"]["Enums"]["internal_proposal_status"]
+          suggested_solution: string
+          timeline: string
+          title: string
+          updated_at: string
+          version: number
+          view_token: string
+          viewed_at: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "internal_proposals"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       recompute_campaign_metrics: {
         Args: { _campaign_id: string }
         Returns: undefined
+      }
+      recompute_proposal_score: {
+        Args: { _proposal_id: string }
+        Returns: number
       }
       reset_inbox_send_counts: { Args: never; Returns: number }
       score_contact: {
