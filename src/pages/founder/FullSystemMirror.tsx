@@ -843,12 +843,14 @@ const FullSystemMirror = () => {
                   <div className="p-3 rounded bg-secondary/30"><p className="text-xs text-muted-foreground">Workflows</p><p className="text-xl font-bold">{counts?.system_workflows_full ?? 0}</p></div>
                   <div className="p-3 rounded bg-secondary/30"><p className="text-xs text-muted-foreground">Rules</p><p className="text-xl font-bold">{counts?.system_rules ?? 0}</p></div>
                 </div>
-                <Button onClick={handleExport} className="w-full md:w-auto">
-                  <Download size={16} className="mr-2" /> Download JSON Snapshot
-                </Button>
-                <Button onClick={handleExportPDF} variant="outline" className="w-full md:w-auto md:ml-2">
-                  <FileText size={16} className="mr-2" /> Download PDF Manual
-                </Button>
+                <div className="flex flex-col md:flex-row gap-2">
+                  <Button onClick={handleExport} className="w-full md:w-auto">
+                    <Download size={16} className="mr-2" /> Download JSON Snapshot
+                  </Button>
+                  <Button onClick={handleExportPDF} variant="default" className="w-full md:w-auto bg-primary/90 hover:bg-primary">
+                    <FileText size={16} className="mr-2" /> Download PDF Manual
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
