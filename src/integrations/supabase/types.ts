@@ -847,6 +847,38 @@ export type Database = {
         }
         Relationships: []
       }
+      businesses: {
+        Row: {
+          created_at: string
+          execution_mode_id: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          execution_mode_id?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          execution_mode_id?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "businesses_execution_mode_id_fkey"
+            columns: ["execution_mode_id"]
+            isOneToOne: false
+            referencedRelation: "system_execution_modes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaign_metrics: {
         Row: {
           bounce_rate: number
@@ -5426,6 +5458,62 @@ export type Database = {
         }
         Relationships: []
       }
+      system_execution_modes: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          is_default: boolean
+          mode_name: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          id?: string
+          is_default?: boolean
+          mode_name: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          is_default?: boolean
+          mode_name?: string
+        }
+        Relationships: []
+      }
+      system_feature_flags: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          execution_mode_id: string
+          feature_name: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          execution_mode_id: string
+          feature_name: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          execution_mode_id?: string
+          feature_name?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "system_feature_flags_execution_mode_id_fkey"
+            columns: ["execution_mode_id"]
+            isOneToOne: false
+            referencedRelation: "system_execution_modes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       system_health: {
         Row: {
           id: string
@@ -6705,6 +6793,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      get_active_execution_mode: {
+        Args: { _business_name?: string }
+        Returns: string
+      }
       get_proposal_by_token: {
         Args: { _token: string }
         Returns: {
@@ -6762,6 +6854,10 @@ export type Database = {
         Returns: boolean
       }
       inbox_warmup_limit: { Args: { _inbox_id: string }; Returns: number }
+      is_feature_enabled: {
+        Args: { _business_name?: string; _feature_name: string }
+        Returns: boolean
+      }
       log_activity: {
         Args: {
           _business_name?: string
@@ -6788,6 +6884,15 @@ export type Database = {
       log_demo_event: {
         Args: { _event_type: string; _metadata?: Json; _token: string }
         Returns: Json
+      }
+      log_feature_skip: {
+        Args: {
+          _business_name: string
+          _entity_id?: string
+          _entity_type?: string
+          _feature_name: string
+        }
+        Returns: undefined
       }
       log_system_event: {
         Args: {

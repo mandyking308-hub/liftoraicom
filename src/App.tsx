@@ -118,6 +118,7 @@ import SendingHealth from "./pages/founder/sending/SendingHealth";
 import SystemDashboard from "./pages/founder/system/SystemDashboard";
 import SystemEvents from "./pages/founder/system/SystemEvents";
 import SystemHealth from "./pages/founder/system/SystemHealth";
+import ExecutionModes from "./pages/founder/system/ExecutionModes";
 import CRMContacts from "./pages/founder/CRMContacts";
 import CRMContactDetail from "./pages/founder/CRMContactDetail";
 import CRMInboxes from "./pages/founder/CRMInboxes";
@@ -296,6 +297,7 @@ const App = () => (
             <Route path="/founder/system" element={<FounderRoute><SystemDashboard /></FounderRoute>} />
             <Route path="/founder/system/events" element={<FounderRoute><SystemEvents /></FounderRoute>} />
             <Route path="/founder/system/health" element={<FounderRoute><SystemHealth /></FounderRoute>} />
+            <Route path="/founder/system/modes" element={<FounderRoute><ExecutionModes /></FounderRoute>} />
 
             {/* Public proposal + demo */}
             <Route path="/proposals/view/:token" element={<PublicProposalView />} />
