@@ -297,6 +297,7 @@ const App = () => (
             <Route path="/founder/system" element={<FounderRoute><SystemDashboard /></FounderRoute>} />
             <Route path="/founder/system/events" element={<FounderRoute><SystemEvents /></FounderRoute>} />
             <Route path="/founder/system/health" element={<FounderRoute><SystemHealth /></FounderRoute>} />
+            <Route path="/founder/system/modes" element={<FounderRoute><ExecutionModes /></FounderRoute>} />
 
             {/* Public proposal + demo */}
             <Route path="/proposals/view/:token" element={<PublicProposalView />} />
