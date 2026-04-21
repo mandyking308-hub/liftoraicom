@@ -19,3 +19,4 @@ System runs in `system_mode='test'` by default — no real outbound sends until 
 - [Outreach Engine](mem://features/outreach-engine) — Campaigns, queue, sending health.
 - [Procurement Engine](mem://features/procurement-engine) — Suppliers, assignments, load balancing.
 - [Proposal & Demo Engine](mem://features/proposal-demo-engine) — Internal proposals, demo access, intent.
+- [Execution Modes](mem://features/execution-modes) — Per-business gating of proposals/deals/invoicing/suppliers/outreach/demos via sales/outreach/hybrid modes.
