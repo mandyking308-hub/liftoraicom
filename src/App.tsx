@@ -118,6 +118,7 @@ import SendingHealth from "./pages/founder/sending/SendingHealth";
 import SystemDashboard from "./pages/founder/system/SystemDashboard";
 import SystemEvents from "./pages/founder/system/SystemEvents";
 import SystemHealth from "./pages/founder/system/SystemHealth";
+import ExecutionModes from "./pages/founder/system/ExecutionModes";
 import CRMContacts from "./pages/founder/CRMContacts";
 import CRMContactDetail from "./pages/founder/CRMContactDetail";
 import CRMInboxes from "./pages/founder/CRMInboxes";
