@@ -25,6 +25,7 @@ const navItems = [
   { label: "Sending Health", to: "/founder/sending", icon: Radar },
   { label: "Priority", to: "/founder/priority", icon: TrendingUp },
   { label: "System Oversight", to: "/founder/system", icon: Siren },
+  { label: "Execution Modes", to: "/founder/system/modes", icon: Workflow },
   { label: "Conversations", to: "/founder/conversations", icon: MessagesSquare },
   { label: "Internal Proposals", to: "/founder/internal-proposals", icon: FileSignature },
   { label: "Demos", to: "/founder/demos", icon: MonitorPlay },
