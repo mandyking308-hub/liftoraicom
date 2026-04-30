@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Mail, Reply, AlertTriangle, Activity, Users, Inbox, Upload, Megaphone, Database } from "lucide-react";
+import SimulatedSendingBanner from "@/components/outreach/SimulatedSendingBanner";
 
 const OutreachDashboard = () => {
   const [stats, setStats] = useState({
@@ -75,6 +76,8 @@ const OutreachDashboard = () => {
             <Button asChild variant="outline" size="sm"><Link to="/founder/outreach/queue"><Database className="h-4 w-4 mr-2" />Queue</Link></Button>
           </div>
         </div>
+
+        <SimulatedSendingBanner />
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {panels.map((p) => (
