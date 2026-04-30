@@ -16,6 +16,8 @@ type QueueItem = {
   inbox_id: string | null; business_name: string; block_reason: string; sent_at: string | null;
 };
 
+type ContactLite = { id: string; name: string | null; email: string | null };
+
 const STATUSES = ["ALL", "pending", "sent", "blocked", "failed"] as const;
 
 const variant = (s: string): "default" | "destructive" | "secondary" | "outline" => {
@@ -27,16 +29,27 @@ const variant = (s: string): "default" | "destructive" | "secondary" | "outline"
 
 const OutreachQueue = () => {
   const [items, setItems] = useState<QueueItem[]>([]);
-  const [filter, setFilter] = useState<typeof STATUSES[number]>("ALL");
+  const [filter, setFilter] = useState<typeof STATUSES[number]>("pending");
+  const [contacts, setContacts] = useState<Record<string, ContactLite>>({});
   const [running, setRunning] = useState(false);
 
   useEffect(() => { void load(); }, []);
 
   async function load() {
-    let q = supabase.from("email_queue").select("*").order("scheduled_at", { ascending: false }).limit(200);
+    let q = supabase.from("email_queue").select("*").order("scheduled_at", { ascending: true }).limit(200);
     if (filter !== "ALL") q = q.eq("status", filter);
     const { data } = await q;
-    setItems((data as QueueItem[]) ?? []);
+    const rows = (data as QueueItem[]) ?? [];
+    setItems(rows);
+    const ids = Array.from(new Set(rows.map((r) => r.contact_id).filter(Boolean)));
+    if (ids.length > 0) {
+      const { data: cs } = await supabase.from("contacts").select("id,name,email").in("id", ids);
+      const map: Record<string, ContactLite> = {};
+      (cs ?? []).forEach((c) => { map[(c as ContactLite).id] = c as ContactLite; });
+      setContacts(map);
+    } else {
+      setContacts({});
+    }
   }
   useEffect(() => { void load(); }, [filter]);
 
@@ -80,21 +93,25 @@ const OutreachQueue = () => {
           <CardContent className="p-0">
             <div className="divide-y divide-border">
               {items.length === 0 ? <p className="p-4 text-sm text-muted-foreground">Nothing here yet.</p> :
-                items.map((i) => (
-                  <div key={i.id} className="p-3 flex items-center justify-between gap-3 flex-wrap text-sm">
-                    <div className="min-w-0 flex-1">
-                      <p className="font-mono text-xs truncate">Step {i.sequence_step} · {i.business_name || "—"}</p>
-                      <p className="text-xs text-muted-foreground">
-                        Scheduled {new Date(i.scheduled_at).toLocaleString()}
-                        {i.sent_at && ` · Sent ${new Date(i.sent_at).toLocaleString()}`}
-                      </p>
-                      {i.block_reason && <p className="text-[11px] text-destructive mt-0.5">{i.block_reason}</p>}
+                items.map((i) => {
+                  const c = contacts[i.contact_id];
+                  const name = c?.name || "—";
+                  const email = c?.email || "—";
+                  return (
+                    <div key={i.id} className="p-3 flex items-center justify-between gap-3 flex-wrap text-sm">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium truncate">{name} <span className="text-muted-foreground font-normal">· {email}</span></p>
+                        <p className="font-mono text-xs truncate text-muted-foreground">Step {i.sequence_step} · {i.business_name || "—"}</p>
+                        <p className="text-xs text-muted-foreground">
+                          Scheduled {new Date(i.scheduled_at).toLocaleString()}
+                          {i.sent_at && ` · Sent ${new Date(i.sent_at).toLocaleString()}`}
+                        </p>
+                        {i.block_reason && <p className="text-[11px] text-destructive mt-0.5">{i.block_reason}</p>}
+                      </div>
+                      <Badge variant={variant(i.status)}>{i.status}</Badge>
                     </div>
-                    <Badge variant={variant(i.status)}>
-                      {i.status === "sent" ? "sent (simulated)" : i.status}
-                    </Badge>
-                  </div>
-                ))}
+                  );
+                })}
             </div>
           </CardContent>
         </Card>
