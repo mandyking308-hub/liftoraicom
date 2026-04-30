@@ -7157,6 +7157,10 @@ export type Database = {
         Args: { _business_name?: string }
         Returns: string
       }
+      get_business_outbound_status: {
+        Args: { _business_name: string }
+        Returns: Json
+      }
       get_inbox_credentials_for_send: {
         Args: { _enc_key: string; _inbox_id: string }
         Returns: Json
@@ -7215,6 +7219,10 @@ export type Database = {
         }
       }
       get_system_mode: { Args: never; Returns: string }
+      has_live_ready_inbox: {
+        Args: { _business_name: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

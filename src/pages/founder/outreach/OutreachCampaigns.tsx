@@ -61,6 +61,8 @@ const OutreachCampaigns = () => {
       const mode = (data as { mode?: string } | null)?.mode;
       if (mode === "live") {
         toast.success("Campaign activated in LIVE mode — real sends will go out via the assigned inbox.");
+      } else if (mode === "business_live") {
+        toast.success(`Campaign activated in BUSINESS-LIVE mode for ${c.business_name} — real sends will go out via the Live Ready inbox.`);
       } else {
         toast.success("Campaign activated in SIMULATED mode — no real email will leave Liftor.");
       }
