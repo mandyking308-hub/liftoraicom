@@ -211,15 +211,14 @@ Deno.serve(async (req) => {
         .from("contacts").select("email").eq("id", item.contact_id).maybeSingle();
       const recipient = (contactRow?.email as string | undefined) ?? null;
 
-      // Determine effective send mode: simulated unless live + ionos + live_ready
-      const useReal = isLive
-        && inboxRow?.provider_type === "ionos_smtp"
-        && inboxRow?.live_readiness === "live_ready"
-        && !!recipient;
+      // Per-inbox live: real send whenever inbox itself is Live Ready (ionos_smtp + live_ready),
+      // regardless of global system_mode. This enables business-by-business go-live.
+      const inboxLiveReady = inboxRow?.provider_type === "ionos_smtp"
+        && inboxRow?.live_readiness === "live_ready";
+      const useReal = inboxLiveReady && !!recipient;
 
-      // Block if live mode requested but inbox is not Live Ready
-      if (isLive && inboxRow && inboxRow.provider_type !== "simulated"
-          && inboxRow.live_readiness !== "live_ready") {
+      // Block if global mode is live but inbox is partially configured (ionos but not ready)
+      if (isLive && inboxRow && inboxRow.provider_type !== "simulated" && !inboxLiveReady) {
         await supabase.from("email_queue")
           .update({ status: "blocked", block_reason: "INBOX_NOT_LIVE_READY" })
           .eq("id", item.id);
