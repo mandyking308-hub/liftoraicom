@@ -122,6 +122,7 @@ import ExecutionModes from "./pages/founder/system/ExecutionModes";
 import CRMContacts from "./pages/founder/CRMContacts";
 import CRMContactDetail from "./pages/founder/CRMContactDetail";
 import CRMInboxes from "./pages/founder/CRMInboxes";
+import CRMInboxConfigure from "./pages/founder/CRMInboxConfigure";
 import FinanceDashboard from "./pages/founder/finance/FinanceDashboard";
 import FinanceTargets from "./pages/founder/finance/FinanceTargets";
 import FinanceDeals from "./pages/founder/finance/FinanceDeals";
@@ -275,6 +276,7 @@ const App = () => (
             <Route path="/founder/crm/contacts" element={<FounderRoute><CRMContacts /></FounderRoute>} />
             <Route path="/founder/crm/contacts/:id" element={<FounderRoute><CRMContactDetail /></FounderRoute>} />
             <Route path="/founder/crm/inboxes" element={<FounderRoute><CRMInboxes /></FounderRoute>} />
+            <Route path="/founder/crm/inboxes/:id/configure" element={<FounderRoute><CRMInboxConfigure /></FounderRoute>} />
             <Route path="/founder/finance" element={<FounderRoute><FinanceDashboard /></FounderRoute>} />
             <Route path="/founder/finance/targets" element={<FounderRoute><FinanceTargets /></FounderRoute>} />
             <Route path="/founder/finance/deals" element={<FounderRoute><FinanceDeals /></FounderRoute>} />

@@ -52,16 +52,22 @@ const OutreachCampaigns = () => {
 
   async function setStatus(c: Campaign, status: "active" | "paused") {
     if (status === "active") {
-      const confirmed = window.confirm(
-        "⚠️ Outbound sending is currently in SIMULATED mode.\n\n" +
-        "Activating this campaign will queue messages and mark them as 'sent' inside Liftor, " +
-        "but no real email will leave the system until outbound sending is properly wired and tested.\n\n" +
-        "Continue and activate in simulated mode?"
-      );
-      if (!confirmed) return;
+      // Use server-side guard. Blocks live activation unless inbox is Live Ready.
+      const { data, error } = await supabase.rpc("activate_outreach_campaign", { _campaign_id: c.id });
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+      const mode = (data as { mode?: string } | null)?.mode;
+      if (mode === "live") {
+        toast.success("Campaign activated in LIVE mode — real sends will go out via the assigned inbox.");
+      } else {
+        toast.success("Campaign activated in SIMULATED mode — no real email will leave Liftor.");
+      }
+    } else {
+      const { error } = await supabase.from("outreach_campaigns").update({ status }).eq("id", c.id);
+      if (error) { toast.error(error.message); return; }
     }
-    const { error } = await supabase.from("outreach_campaigns").update({ status }).eq("id", c.id);
-    if (error) { toast.error(error.message); return; }
     void load();
   }
 

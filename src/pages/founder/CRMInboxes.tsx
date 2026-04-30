@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Plus, Copy } from "lucide-react";
+import { Plus, Copy, Settings } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import FounderLayout from "@/components/founder/FounderLayout";
 import SimulatedSendingBanner from "@/components/outreach/SimulatedSendingBanner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,13 +24,27 @@ type Inbox = {
   active: boolean;
   sending_domain_id: string | null;
   inbound_webhook_url: string;
+  provider_type?: "simulated" | "ionos_smtp";
+  live_readiness?: string;
 };
 
 type SendingDomain = { id: string; domain_name: string; reputation_score: number };
 
 const DEFAULT_INBOUND_WEBHOOK = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/outreach-inbound-webhook`;
 
+const READINESS_BADGE: Record<string, { label: string; tone: "default" | "secondary" | "destructive" | "outline" }> = {
+  simulated_only: { label: "Simulated only", tone: "outline" },
+  not_configured: { label: "Not configured", tone: "secondary" },
+  configured_not_tested: { label: "Configured, not tested", tone: "secondary" },
+  test_failed: { label: "Test failed", tone: "destructive" },
+  test_passed: { label: "Test passed", tone: "default" },
+  live_ready: { label: "Live ready", tone: "default" },
+  paused: { label: "Paused", tone: "outline" },
+  error: { label: "Error", tone: "destructive" },
+};
+
 const CRMInboxes = () => {
+  const nav = useNavigate();
   const [inboxes, setInboxes] = useState<Inbox[]>([]);
   const [domains, setDomains] = useState<SendingDomain[]>([]);
   const [loading, setLoading] = useState(true);
@@ -97,7 +112,7 @@ const CRMInboxes = () => {
   }
 
   async function update(id: string, patch: Partial<Inbox>) {
-    const { error } = await supabase.from("inboxes").update(patch).eq("id", id);
+    const { error } = await supabase.from("inboxes").update(patch as never).eq("id", id);
     if (error) return toast.error(error.message);
     void load();
   }
@@ -179,8 +194,17 @@ const CRMInboxes = () => {
                       <div>
                         <CardTitle className="text-base">{i.email_address}</CardTitle>
                         <p className="text-xs text-muted-foreground mt-0.5">{i.business_name || "Unassigned business"}</p>
+                        <div className="mt-2 flex items-center gap-2 flex-wrap">
+                          <Badge variant={(READINESS_BADGE[i.live_readiness ?? "simulated_only"]?.tone) ?? "outline"}>
+                            {READINESS_BADGE[i.live_readiness ?? "simulated_only"]?.label ?? i.live_readiness}
+                          </Badge>
+                          <Badge variant="outline">{i.provider_type === "ionos_smtp" ? "IONOS SMTP" : "Simulated"}</Badge>
+                        </div>
                       </div>
                       <div className="flex items-center gap-3">
+                        <Button size="sm" variant="outline" onClick={() => nav(`/founder/crm/inboxes/${i.id}/configure`)}>
+                          <Settings className="h-3.5 w-3.5 mr-1" /> Configure
+                        </Button>
                         <Select value={i.warmup_status} onValueChange={(v) => update(i.id, { warmup_status: v as Inbox["warmup_status"] })}>
                           <SelectTrigger className="h-8 w-[120px]"><SelectValue /></SelectTrigger>
                           <SelectContent>
@@ -201,6 +225,11 @@ const CRMInboxes = () => {
                       <div className="h-full bg-primary" style={{ width: `${pct}%` }} />
                     </div>
                     <p className="mt-1 text-xs text-muted-foreground tabular-nums">{i.current_send_count} / {i.daily_send_limit} sent today</p>
+                    {(i.live_readiness ?? "simulated_only") !== "live_ready" && (
+                      <p className="mt-2 text-[11px] text-destructive">
+                        This inbox is not live-ready until IONOS SMTP credentials are added and a real test email passes.
+                      </p>
+                    )}
                   </CardContent>
                 </Card>
               );
