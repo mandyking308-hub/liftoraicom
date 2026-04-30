@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Plus, Copy } from "lucide-react";
 import FounderLayout from "@/components/founder/FounderLayout";
+import SimulatedSendingBanner from "@/components/outreach/SimulatedSendingBanner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
