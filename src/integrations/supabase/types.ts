@@ -6650,70 +6650,6 @@ export type Database = {
         }
         Relationships: []
       }
-      inbox_credentials_public: {
-        Row: {
-          inbox_id: string | null
-          password_is_set: boolean | null
-          password_set_at: string | null
-          provider_type:
-            | Database["public"]["Enums"]["inbox_provider_type"]
-            | null
-          smtp_encryption: string | null
-          smtp_host: string | null
-          smtp_port: number | null
-          smtp_username: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          inbox_id?: string | null
-          password_is_set?: never
-          password_set_at?: string | null
-          provider_type?:
-            | Database["public"]["Enums"]["inbox_provider_type"]
-            | null
-          smtp_encryption?: string | null
-          smtp_host?: string | null
-          smtp_port?: number | null
-          smtp_username?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          inbox_id?: string | null
-          password_is_set?: never
-          password_set_at?: string | null
-          provider_type?:
-            | Database["public"]["Enums"]["inbox_provider_type"]
-            | null
-          smtp_encryption?: string | null
-          smtp_host?: string | null
-          smtp_port?: number | null
-          smtp_username?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "inbox_credentials_inbox_id_fkey"
-            columns: ["inbox_id"]
-            isOneToOne: true
-            referencedRelation: "inbox_health_summary"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "inbox_credentials_inbox_id_fkey"
-            columns: ["inbox_id"]
-            isOneToOne: true
-            referencedRelation: "inboxes"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "inbox_credentials_inbox_id_fkey"
-            columns: ["inbox_id"]
-            isOneToOne: true
-            referencedRelation: "warmup_progress"
-            referencedColumns: ["inbox_id"]
-          },
-        ]
-      }
       inbox_health_summary: {
         Row: {
           active: boolean | null
@@ -7015,6 +6951,20 @@ export type Database = {
       is_feature_enabled: {
         Args: { _business_name?: string; _feature_name: string }
         Returns: boolean
+      }
+      list_inbox_credentials_public: {
+        Args: { _inbox_id?: string }
+        Returns: {
+          inbox_id: string
+          password_is_set: boolean
+          password_set_at: string
+          provider_type: Database["public"]["Enums"]["inbox_provider_type"]
+          smtp_encryption: string
+          smtp_host: string
+          smtp_port: number
+          smtp_username: string
+          updated_at: string
+        }[]
       }
       log_activity: {
         Args: {
