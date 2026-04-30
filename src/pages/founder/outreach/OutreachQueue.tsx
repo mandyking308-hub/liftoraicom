@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { RefreshCw, Play } from "lucide-react";
+import SimulatedSendingBanner from "@/components/outreach/SimulatedSendingBanner";
 
 type QueueItem = {
   id: string; contact_id: string; campaign_id: string; sequence_step: number;
@@ -68,6 +69,8 @@ const OutreachQueue = () => {
           </div>
         </div>
 
+        <SimulatedSendingBanner />
+
         <Card>
           <CardHeader><CardTitle className="text-base">Recent Queue Items ({items.length})</CardTitle></CardHeader>
           <CardContent className="p-0">
@@ -83,7 +86,9 @@ const OutreachQueue = () => {
                       </p>
                       {i.block_reason && <p className="text-[11px] text-destructive mt-0.5">{i.block_reason}</p>}
                     </div>
-                    <Badge variant={variant(i.status)}>{i.status}</Badge>
+                    <Badge variant={variant(i.status)}>
+                      {i.status === "sent" ? "sent (simulated)" : i.status}
+                    </Badge>
                   </div>
                 ))}
             </div>
