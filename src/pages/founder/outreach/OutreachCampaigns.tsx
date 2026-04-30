@@ -55,7 +55,11 @@ const OutreachCampaigns = () => {
       // Use server-side guard. Blocks live activation unless inbox is Live Ready.
       const { data, error } = await supabase.rpc("activate_outreach_campaign", { _campaign_id: c.id });
       if (error) {
-        toast.error(error.message);
+        // Try to surface a friendlier message from validate_campaign_activation
+        const { data: check } = await supabase.rpc("validate_campaign_activation", { _campaign_id: c.id });
+        const messages = (check as { messages?: Record<string, string>; issues?: string[] } | null);
+        const friendly = messages?.issues?.map((k) => messages?.messages?.[k]).filter(Boolean).join(" • ");
+        toast.error(friendly || error.message);
         return;
       }
       const mode = (data as { mode?: string } | null)?.mode;
