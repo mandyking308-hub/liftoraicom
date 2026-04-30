@@ -6746,6 +6746,10 @@ export type Database = {
     }
     Functions: {
       accept_proposal_by_token: { Args: { _token: string }; Returns: Json }
+      activate_outreach_campaign: {
+        Args: { _campaign_id: string }
+        Returns: Json
+      }
       ai_actions_today: { Args: { _conversation_id: string }; Returns: number }
       apply_reputation_event: {
         Args: {
