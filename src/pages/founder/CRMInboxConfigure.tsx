@@ -41,6 +41,41 @@ type CredsPublic = {
   imap_username: string | null; imap_password_is_set: boolean; imap_password_set_at: string | null;
 };
 
+type EdgeFunctionErrorPayload = {
+  error?: string | {
+    code?: string;
+    message?: string;
+    providerError?: {
+      name?: string;
+      message?: string;
+    };
+    suggestedAction?: string;
+  };
+  ok?: boolean;
+  messages?: number;
+  unseen?: number;
+};
+
+function formatEdgeFunctionError(payload: EdgeFunctionErrorPayload | null | undefined, fallback?: string) {
+  if (typeof payload?.error === "string") return payload.error;
+
+  if (payload?.error && typeof payload.error === "object") {
+    const parts = [
+      payload.error.code ? `[${payload.error.code}]` : null,
+      payload.error.message ?? fallback ?? "Request failed",
+      payload.error.providerError?.message
+        ? `Provider: ${payload.error.providerError.name ? `${payload.error.providerError.name}: ` : ""}${payload.error.providerError.message}`
+        : null,
+      payload.error.suggestedAction ? `Next: ${payload.error.suggestedAction}` : null,
+    ].filter(Boolean);
+
+    return parts.join("
+");
+  }
+
+  return fallback ?? "Request failed";
+}
+
 const READINESS_LABELS: Record<string, { label: string; tone: "default" | "secondary" | "destructive" | "outline" }> = {
   simulated_only: { label: "Simulated only", tone: "outline" },
   not_configured: { label: "Not configured", tone: "secondary" },
@@ -249,9 +284,12 @@ const CRMInboxConfigure = () => {
       body: { inbox_id: id },
     });
     setTestingImap(false);
-    const p = (data ?? {}) as { ok?: boolean; error?: string; messages?: number; unseen?: number };
-    if (error || !p.ok) toast.error(p.error ?? error?.message ?? "IMAP test failed");
-    else toast.success(`IMAP connected — ${p.messages ?? 0} messages, ${p.unseen ?? 0} unseen`);
+    const p = (data ?? {}) as EdgeFunctionErrorPayload;
+    if (error || !p.ok) {
+      toast.error(formatEdgeFunctionError(p, error?.message ?? "IMAP test failed"), { duration: 12000 });
+    } else {
+      toast.success(`IMAP connected — ${p.messages ?? 0} messages, ${p.unseen ?? 0} unseen`);
+    }
     void load(id);
   }
 
