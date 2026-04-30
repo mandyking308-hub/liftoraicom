@@ -69,8 +69,7 @@ function formatEdgeFunctionError(payload: EdgeFunctionErrorPayload | null | unde
       payload.error.suggestedAction ? `Next: ${payload.error.suggestedAction}` : null,
     ].filter(Boolean);
 
-    return parts.join("
-");
+    return parts.join("\n");
   }
 
   return fallback ?? "Request failed";
