@@ -112,7 +112,7 @@ const CRMInboxes = () => {
   }
 
   async function update(id: string, patch: Partial<Inbox>) {
-    const { error } = await supabase.from("inboxes").update(patch).eq("id", id);
+    const { error } = await supabase.from("inboxes").update(patch as never).eq("id", id);
     if (error) return toast.error(error.message);
     void load();
   }
