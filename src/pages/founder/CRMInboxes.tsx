@@ -162,6 +162,8 @@ const CRMInboxes = () => {
           </Dialog>
         </div>
 
+        <SimulatedSendingBanner />
+
         {loading ? (
           <p className="text-muted-foreground text-sm">Loading…</p>
         ) : inboxes.length === 0 ? (
