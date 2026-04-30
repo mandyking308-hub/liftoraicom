@@ -6,7 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { RefreshCw, Play } from "lucide-react";
+import { RefreshCw, Play, Activity } from "lucide-react";
+import { Link } from "react-router-dom";
 import SimulatedSendingBanner from "@/components/outreach/SimulatedSendingBanner";
 
 type QueueItem = {
@@ -66,6 +67,9 @@ const OutreachQueue = () => {
             </Select>
             <Button variant="outline" size="sm" onClick={() => void load()}><RefreshCw className="h-4 w-4 mr-2" />Refresh</Button>
             <Button size="sm" onClick={runWorker} disabled={running}><Play className="h-4 w-4 mr-2" />{running ? "Running…" : "Run worker now"}</Button>
+            <Button size="sm" variant="outline" asChild>
+              <Link to="/founder/outreach/live-monitor"><Activity className="h-4 w-4 mr-2" />View Live Monitor</Link>
+            </Button>
           </div>
         </div>
 
