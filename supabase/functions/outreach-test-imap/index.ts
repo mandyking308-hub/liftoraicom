@@ -1,4 +1,4 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.95.0";
 import { ImapFlow } from "npm:imapflow@1.0.164";
 
 const corsHeaders = {
@@ -17,8 +17,8 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_ANON_KEY")!,
       { global: { headers: { Authorization: authHeader } } },
     );
-    const { data: claims, error: cErr } = await userClient.auth.getClaims(authHeader.replace("Bearer ", ""));
-    if (cErr || !claims?.claims) return json({ error: "Unauthorized" }, 401);
+    const { data: userData, error: cErr } = await userClient.auth.getUser(authHeader.replace("Bearer ", ""));
+    if (cErr || !userData?.user) return json({ error: "Unauthorized" }, 401);
 
     const { inbox_id } = (await req.json().catch(() => ({}))) as { inbox_id?: string };
     if (!inbox_id) return json({ error: "inbox_id required" }, 400);
