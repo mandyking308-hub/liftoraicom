@@ -113,7 +113,7 @@ const CampaignLiveMonitor = () => {
           "current_send_count,emails_sent_today,last_sent_at,last_test_send_at," +
           "last_test_send_status,last_error_message,reply_to_email")
         .eq("business_name", businessName);
-      const inboxList = (ix as InboxRow[] | null) ?? [];
+      const inboxList = ((ix as unknown) as InboxRow[] | null) ?? [];
       setAllInboxes(inboxList);
       const liveReady = inboxList.find(
         (i) => i.active && i.provider_type === "ionos_smtp" && i.live_readiness === "live_ready",
@@ -253,7 +253,7 @@ const CampaignLiveMonitor = () => {
   const today = (ts: string | null | undefined) => !!ts && new Date(ts) >= new Date(startOfDayIso);
   const sentToday = queue.filter((q) => q.status === "sent" && today(q.sent_at));
   const queuedToday = queue.filter((q) => ["pending", "delayed", "throttled"].includes(q.status) && today(q.scheduled_at));
-  const failedToday = queue.filter((q) => (q.status === "failed" || q.status === "blocked") && today(q.last_attempt_at as unknown as string ?? q.scheduled_at));
+  const failedToday = queue.filter((q) => (q.status === "failed" || q.status === "blocked") && today(q.scheduled_at));
   const repliesToday = inbound.filter((i) => today(i.received_at) && !i.is_bounce);
   const bouncesToday = inbound.filter((i) => today(i.received_at) && i.is_bounce);
   const pendingDrafts = drafts.filter((d) => d.status === "pending");
