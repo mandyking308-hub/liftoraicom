@@ -299,33 +299,94 @@ const CRMInboxConfigure = () => {
   async function pollNow() {
     if (!id) return;
     setPollingNow(true);
-    const { data, error } = await supabase.functions.invoke("outreach-inbound-poll", {
-      body: { inbox_id: id },
-    });
-    setPollingNow(false);
-    type R = {
+    const loadingToast = toast.loading("Polling inbox… (may take up to 60s)");
+    type Counts = {
       messages_scanned?: number; new_messages?: number; imported?: number;
       duplicates?: number; matched?: number; unmatched?: number;
       conversations_created?: number; ai_drafts_created?: number;
-      bounces?: number; errors?: string[];
+      bounces?: number; remaining_unseen?: number;
     };
-    const p = (data ?? {}) as { ok?: boolean; results?: R[] };
-    if (error || !p.ok) {
-      toast.error(error?.message ?? "Poll failed", { duration: 10000 });
-    } else {
-      const r: R = p.results?.[0] ?? {};
-      const errs = (r.errors ?? []).filter(Boolean);
-      const summary = [
-        `Scanned ${r.messages_scanned ?? 0}`,
-        `Imported ${r.imported ?? 0}`,
-        `Matched ${r.matched ?? 0}`,
-        `Unmatched ${r.unmatched ?? 0}`,
-        `Duplicates ${r.duplicates ?? 0}`,
-        `Conversations +${r.conversations_created ?? 0}`,
-        `Bounces ${r.bounces ?? 0}`,
+    type R = Counts & {
+      ok?: boolean;
+      code?: string;
+      message?: string;
+      stage?: string;
+      providerError?: { name?: string; message?: string };
+      suggestedAction?: string;
+      partial_counts?: Counts;
+      errors?: string[];
+      email_address?: string;
+    };
+    type Top = {
+      ok?: boolean; results?: R[];
+      code?: string; message?: string; stage?: string;
+      partial_counts?: Counts;
+    };
+    let data: Top | null = null;
+    let invokeError: Error | null = null;
+    try {
+      const res = await supabase.functions.invoke("outreach-inbound-poll", {
+        body: { inbox_id: id },
+      });
+      data = (res.data ?? null) as Top | null;
+      invokeError = res.error ?? null;
+    } catch (e) {
+      invokeError = e instanceof Error ? e : new Error(String(e));
+    }
+    setPollingNow(false);
+    toast.dismiss(loadingToast);
+
+    const fmtCounts = (c: Counts | undefined) => {
+      const x = c ?? {};
+      return [
+        `Scanned ${x.messages_scanned ?? 0}`,
+        `Imported ${x.imported ?? 0}`,
+        `Matched ${x.matched ?? 0}`,
+        `Unmatched ${x.unmatched ?? 0}`,
+        `Duplicates ${x.duplicates ?? 0}`,
+        `Conversations +${x.conversations_created ?? 0}`,
+        `AI drafts +${x.ai_drafts_created ?? 0}`,
+        `Bounces ${x.bounces ?? 0}`,
       ].join(" · ");
+    };
+    const fmtErr = (code?: string, message?: string, stage?: string, provider?: { name?: string; message?: string }, action?: string) => {
+      const parts = [
+        code ? `[${code}]` : null,
+        stage ? `(stage: ${stage})` : null,
+        message ?? "Poll failed",
+        provider?.message ? `Provider: ${provider.name ? provider.name + ": " : ""}${provider.message}` : null,
+        action ? `Next: ${action}` : null,
+      ].filter(Boolean);
+      return parts.join("\n");
+    };
+
+    // Hard network/runtime error from invoke (e.g. 504 IDLE_TIMEOUT)
+    if (invokeError && !data) {
+      toast.error(`[EDGE_ERROR]\n${invokeError.message}\nNext: Retry in a moment; if it persists, check Edge Function logs.`, { duration: 14000 });
+      void load(id);
+      return;
+    }
+
+    // Top-level structured error (no results array)
+    if (data && data.ok === false && (!data.results || data.results.length === 0)) {
+      toast.error(`${fmtErr(data.code, data.message, data.stage)}\n${fmtCounts(data.partial_counts)}`, { duration: 14000 });
+      void load(id);
+      return;
+    }
+
+    const r: R = data?.results?.[0] ?? {};
+    const counts = r.ok === false ? (r.partial_counts ?? r) : r;
+    const summary = fmtCounts(counts);
+
+    if (r.ok === false) {
+      toast.error(
+        `${fmtErr(r.code, r.message, r.stage, r.providerError, r.suggestedAction)}\n${summary}`,
+        { duration: 16000 },
+      );
+    } else {
+      const errs = (r.errors ?? []).filter(Boolean);
       if (errs.length) {
-        toast.error(`${summary}\nErrors: ${errs.join("; ")}`, { duration: 14000 });
+        toast.warning(`${summary}\nNotes: ${errs.join("; ")}`, { duration: 12000 });
       } else {
         toast.success(summary, { duration: 10000 });
       }
