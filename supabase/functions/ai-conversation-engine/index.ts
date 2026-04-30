@@ -96,10 +96,12 @@ Deno.serve(async (req) => {
 
     // Resolve AI reply mode from the contact's assigned inbox.
     let aiReplyMode: "disabled" | "draft_only" | "approval_required" | "auto_send" = "approval_required";
+    let inboxPromptInstructions = "";
     if (contact.assigned_inbox_id) {
       const { data: ib } = await supabase.from("inboxes")
-        .select("ai_reply_mode").eq("id", contact.assigned_inbox_id).maybeSingle();
+        .select("ai_reply_mode, ai_prompt_instructions").eq("id", contact.assigned_inbox_id).maybeSingle();
       if (ib?.ai_reply_mode) aiReplyMode = ib.ai_reply_mode as typeof aiReplyMode;
+      if (ib?.ai_prompt_instructions) inboxPromptInstructions = String(ib.ai_prompt_instructions);
     }
     if (aiReplyMode === "disabled") {
       return json({ skipped: "AI_DISABLED" }, 200);
@@ -155,6 +157,10 @@ Deno.serve(async (req) => {
       `${m.direction === "inbound" ? "PROSPECT" : "US"}: ${m.content}`
     ).join("\n");
 
+    const brandInstructionsBlock = inboxPromptInstructions
+      ? `\n\nBRAND-SPECIFIC INSTRUCTIONS (highest priority — must be followed exactly):\n${inboxPromptInstructions}\n`
+      : "";
+
     const systemPrompt = `You are the AI conversation assistant for ${conv.business_name || "our company"} replying to ${contact.name || "a prospect"} (${contact.role || "unknown role"}, ${contact.company || "unknown company"}).
 
 RULES — never break:
@@ -165,13 +171,14 @@ RULES — never break:
 - If the message is unclear, ask exactly ONE clarifying question.
 - If they want to unsubscribe, confirm removal in one sentence.
 - Tone: human, direct, no fluff, no apologies.
-
+${brandInstructionsBlock}
 Use the classify_and_reply tool. Classifications:
 - interested: positive engagement, asking about scope/fit/next steps
 - not_interested: declining or saying no
 - neutral: factual / informational with no clear signal
 - unsubscribe: explicit opt-out request
-- question: needs more info before deciding`;
+- question: needs more info before deciding
+- escalate: strong partnership / licensing / fashion / beauty / TV / high-value opportunity that needs founder review`;
 
     const userPrompt = `Conversation so far (oldest → newest):\n${history}\n\nThe LAST message from the prospect is what you must respond to.`;
 
@@ -198,7 +205,7 @@ Use the classify_and_reply tool. Classifications:
               properties: {
                 classification: {
                   type: "string",
-                  enum: ["interested","not_interested","neutral","unsubscribe","question"],
+                  enum: ["interested","not_interested","neutral","unsubscribe","question","escalate"],
                 },
                 reply: { type: "string", description: `Reply text, max ${MAX_REPLY_WORDS} words` },
               },
@@ -335,6 +342,10 @@ Use the classify_and_reply tool. Classifications:
     }
     if (classification === "interested") convPatch.status = "QUALIFIED";
     if (classification === "unsubscribe" || classification === "not_interested") convPatch.status = "CLOSED";
+    if (classification === "escalate") {
+      convPatch.escalation_pending = true;
+      convPatch.escalation_reason = "AI flagged high-value/partnership opportunity for founder review";
+    }
     await supabase.from("conversations").update(convPatch).eq("id", conv.id);
 
     return json({

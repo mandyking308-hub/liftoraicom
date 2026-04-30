@@ -2539,6 +2539,8 @@ export type Database = {
       inboxes: {
         Row: {
           active: boolean
+          ai_prompt_instructions: string | null
+          ai_prompt_updated_at: string | null
           ai_reply_mode: Database["public"]["Enums"]["ai_reply_mode"]
           bounce_rate_per_inbox: number
           business_name: string
@@ -2583,6 +2585,8 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          ai_prompt_instructions?: string | null
+          ai_prompt_updated_at?: string | null
           ai_reply_mode?: Database["public"]["Enums"]["ai_reply_mode"]
           bounce_rate_per_inbox?: number
           business_name?: string
@@ -2627,6 +2631,8 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          ai_prompt_instructions?: string | null
+          ai_prompt_updated_at?: string | null
           ai_reply_mode?: Database["public"]["Enums"]["ai_reply_mode"]
           bounce_rate_per_inbox?: number
           business_name?: string
