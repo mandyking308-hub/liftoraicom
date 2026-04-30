@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,6 +13,54 @@ const PER_RUN_LIMIT = 100;
 function jitterMs(): number {
   // 30s → 180s
   return Math.floor(30_000 + Math.random() * 150_000);
+}
+
+type InboxRow = {
+  id: string;
+  email_address: string;
+  provider_type: "simulated" | "ionos_smtp";
+  live_readiness: string;
+  from_name: string | null;
+  from_email: string | null;
+  reply_to_email: string | null;
+};
+
+async function sendViaIonosSmtp(
+  admin: ReturnType<typeof createClient>,
+  inboxId: string,
+  to: string,
+  subject: string,
+  body: string,
+): Promise<{ ok: boolean; error?: string; messageId?: string }> {
+  const encKey = Deno.env.get("INBOX_CREDENTIALS_KEY");
+  if (!encKey) return { ok: false, error: "encryption key not configured" };
+  const { data: creds, error } = await admin.rpc("get_inbox_credentials_for_send", {
+    _inbox_id: inboxId, _enc_key: encKey,
+  });
+  if (error || !creds) return { ok: false, error: error?.message ?? "credentials missing" };
+  const c = creds as Record<string, unknown>;
+  const port = Number(c.smtp_port);
+  const isSSL = c.smtp_encryption === "ssl";
+  const fromEmail = (c.from_email as string) || (c.smtp_username as string);
+  const fromName = (c.from_name as string) || "";
+  const replyTo = (c.reply_to_email as string) || fromEmail;
+  try {
+    const client = new SMTPClient({
+      connection: {
+        hostname: c.smtp_host as string,
+        port, tls: isSSL,
+        auth: { username: c.smtp_username as string, password: c.smtp_password as string },
+      },
+    });
+    await client.send({
+      from: fromName ? `${fromName} <${fromEmail}>` : fromEmail,
+      to, replyTo, subject, content: body,
+    });
+    await client.close();
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: (e as Error).message };
+  }
 }
 
 Deno.serve(async (req) => {
@@ -145,20 +194,71 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      // SIMULATED SEND in test mode; real SMTP wiring will replace this block in live.
-      // The communication row + last_contacted_at update are already handled by crm-send-check (log_attempt)
-      // and the contacts trigger handle_new_communication.
+      // ===== PROVIDER-AWARE DISPATCH =====
+      // Resolve inbox + provider info
+      let inboxRow: InboxRow | null = null;
+      if (item.inbox_id) {
+        const { data: ix } = await supabase
+          .from("inboxes")
+          .select("id,email_address,provider_type,live_readiness,from_name,from_email,reply_to_email")
+          .eq("id", item.inbox_id)
+          .maybeSingle();
+        inboxRow = (ix as InboxRow | null) ?? null;
+      }
+
+      // Resolve recipient email from contact
+      const { data: contactRow } = await supabase
+        .from("contacts").select("email").eq("id", item.contact_id).maybeSingle();
+      const recipient = (contactRow?.email as string | undefined) ?? null;
+
+      // Determine effective send mode: simulated unless live + ionos + live_ready
+      const useReal = isLive
+        && inboxRow?.provider_type === "ionos_smtp"
+        && inboxRow?.live_readiness === "live_ready"
+        && !!recipient;
+
+      // Block if live mode requested but inbox is not Live Ready
+      if (isLive && inboxRow && inboxRow.provider_type !== "simulated"
+          && inboxRow.live_readiness !== "live_ready") {
+        await supabase.from("email_queue")
+          .update({ status: "blocked", block_reason: "INBOX_NOT_LIVE_READY" })
+          .eq("id", item.id);
+        await supabase.from("activity_log").insert({
+          event_type: "send_blocked",
+          description: `Queue ${item.id} blocked: inbox ${inboxRow.email_address} is not live-ready (${inboxRow.live_readiness})`,
+          entity_type: "email_queue", entity_id: item.id,
+        });
+        blocked += 1;
+        touchedCampaigns.add(item.campaign_id);
+        continue;
+      }
+
       try {
-        if (!isLive) {
-          // TEST MODE: do not call SMTP. Mark as sent (simulated) for analytics continuity.
+        let realSendOk = false;
+        let providerError: string | null = null;
+
+        if (useReal && inboxRow && recipient) {
+          const subj = seq?.subject ?? `Step ${item.sequence_step}`;
+          const body = (seq?.body ?? "") + `\n\n<!-- queue:${item.id} -->`;
+          const r = await sendViaIonosSmtp(supabase, inboxRow.id, recipient, subj, body);
+          realSendOk = r.ok;
+          providerError = r.error ?? null;
+        } else {
+          // Simulated path — do NOT contact SMTP.
           await supabase.from("activity_log").insert({
             event_type: "send_simulated",
-            description: `TEST MODE — simulated send for queue ${item.id}`,
-            entity_type: "email_queue",
-            entity_id: item.id,
+            description: isLive
+              ? `SIMULATED — inbox not live-ready or provider=simulated, queue ${item.id}`
+              : `TEST MODE — simulated send for queue ${item.id}`,
+            entity_type: "email_queue", entity_id: item.id,
           });
         }
-        // Log a synthetic "sent" email_event tagged with the queue id
+
+        // Decide success/failure for the queue row
+        if (useReal && !realSendOk) {
+          throw new Error(providerError ?? "SMTP send failed");
+        }
+
         await supabase.from("email_events").insert({
           contact_id: item.contact_id,
           event_type: "sent",
@@ -169,7 +269,6 @@ Deno.serve(async (req) => {
           .update({ status: "sent", sent_at: new Date().toISOString(), last_attempt_at: new Date().toISOString() })
           .eq("id", item.id);
 
-        // Reset consecutive_failures for the inbox on success
         if (item.inbox_id) {
           await supabase.from("inboxes")
             .update({ consecutive_failures: 0 })
