@@ -4,6 +4,7 @@ import FounderLayout from "@/components/founder/FounderLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -132,6 +133,8 @@ const CRMInboxConfigure = () => {
   });
 
   const [aiMode, setAiMode] = useState<"disabled" | "draft_only" | "approval_required" | "auto_send">("approval_required");
+  const [aiPrompt, setAiPrompt] = useState<string>("");
+  const [savingPrompt, setSavingPrompt] = useState(false);
 
   useEffect(() => { if (id) void load(id); }, [id]);
 
@@ -174,6 +177,7 @@ const CRMInboxConfigure = () => {
       polling_enabled: inboxRow.inbound_polling_enabled ?? true,
     }));
     setAiMode(inboxRow.ai_reply_mode ?? "approval_required");
+    setAiPrompt(((inboxRow as unknown) as { ai_prompt_instructions?: string | null }).ai_prompt_instructions ?? "");
     setTestTo(inboxRow.reply_to_email ?? inboxRow.email_address);
     setLoading(false);
   }
@@ -597,6 +601,40 @@ const CRMInboxConfigure = () => {
               <p className="text-[11px] text-muted-foreground">
                 In approval mode the AI classifies and drafts a reply but never sends without you approving in the conversation view.
               </p>
+            </div>
+
+            <div className="space-y-1.5 pt-2 border-t border-border/40">
+              <Label className="text-xs flex items-center gap-2"><Bot className="h-3.5 w-3.5" /> Brand AI reply instructions</Label>
+              <Textarea
+                rows={10}
+                value={aiPrompt}
+                onChange={(e) => setAiPrompt(e.target.value)}
+                placeholder="Brand tone, positioning, do/don't rules, draft templates the AI must follow when drafting replies for this inbox."
+                className="font-mono text-xs"
+              />
+              <div className="flex items-center justify-between">
+                <p className="text-[11px] text-muted-foreground">
+                  Injected as highest-priority instructions into every AI draft for this inbox.
+                </p>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={savingPrompt || !id}
+                  onClick={async () => {
+                    if (!id) return;
+                    setSavingPrompt(true);
+                    const { error } = await supabase
+                      .from("inboxes")
+                      .update({ ai_prompt_instructions: aiPrompt || null, ai_prompt_updated_at: new Date().toISOString() })
+                      .eq("id", id);
+                    setSavingPrompt(false);
+                    if (error) toast.error(error.message);
+                    else toast.success("AI instructions saved");
+                  }}
+                >
+                  {savingPrompt ? "Saving…" : "Save AI instructions"}
+                </Button>
+              </div>
             </div>
 
             <div className="flex gap-2 flex-wrap pt-2">
