@@ -2237,6 +2237,67 @@ export type Database = {
           },
         ]
       }
+      inbox_credentials: {
+        Row: {
+          created_at: string
+          inbox_id: string
+          password_set_at: string | null
+          provider_type: Database["public"]["Enums"]["inbox_provider_type"]
+          smtp_encryption: string | null
+          smtp_host: string | null
+          smtp_password_enc: string | null
+          smtp_port: number | null
+          smtp_username: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          inbox_id: string
+          password_set_at?: string | null
+          provider_type: Database["public"]["Enums"]["inbox_provider_type"]
+          smtp_encryption?: string | null
+          smtp_host?: string | null
+          smtp_password_enc?: string | null
+          smtp_port?: number | null
+          smtp_username?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          inbox_id?: string
+          password_set_at?: string | null
+          provider_type?: Database["public"]["Enums"]["inbox_provider_type"]
+          smtp_encryption?: string | null
+          smtp_host?: string | null
+          smtp_password_enc?: string | null
+          smtp_port?: number | null
+          smtp_username?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inbox_credentials_inbox_id_fkey"
+            columns: ["inbox_id"]
+            isOneToOne: true
+            referencedRelation: "inbox_health_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inbox_credentials_inbox_id_fkey"
+            columns: ["inbox_id"]
+            isOneToOne: true
+            referencedRelation: "inboxes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inbox_credentials_inbox_id_fkey"
+            columns: ["inbox_id"]
+            isOneToOne: true
+            referencedRelation: "warmup_progress"
+            referencedColumns: ["inbox_id"]
+          },
+        ]
+      }
       inboxes: {
         Row: {
           active: boolean
@@ -2248,17 +2309,26 @@ export type Database = {
           daily_send_limit: number
           email_address: string
           emails_sent_today: number
+          from_email: string | null
+          from_name: string | null
           hourly_send_count: number
           hourly_send_limit: number
           hourly_window_start: string
           id: string
           inbound_webhook_url: string
           inbound_webhook_verified_at: string | null
+          last_error_message: string | null
           last_sent_at: string | null
+          last_test_send_at: string | null
+          last_test_send_status: string | null
+          last_test_send_to: string | null
           last_used_sequence_position: number
+          live_readiness: Database["public"]["Enums"]["inbox_live_readiness"]
           paused_reason: string
           performance_score: number
+          provider_type: Database["public"]["Enums"]["inbox_provider_type"]
           reply_rate_per_inbox: number
+          reply_to_email: string | null
           reputation_score: number
           sending_domain_id: string | null
           updated_at: string
@@ -2275,17 +2345,26 @@ export type Database = {
           daily_send_limit?: number
           email_address: string
           emails_sent_today?: number
+          from_email?: string | null
+          from_name?: string | null
           hourly_send_count?: number
           hourly_send_limit?: number
           hourly_window_start?: string
           id?: string
           inbound_webhook_url?: string
           inbound_webhook_verified_at?: string | null
+          last_error_message?: string | null
           last_sent_at?: string | null
+          last_test_send_at?: string | null
+          last_test_send_status?: string | null
+          last_test_send_to?: string | null
           last_used_sequence_position?: number
+          live_readiness?: Database["public"]["Enums"]["inbox_live_readiness"]
           paused_reason?: string
           performance_score?: number
+          provider_type?: Database["public"]["Enums"]["inbox_provider_type"]
           reply_rate_per_inbox?: number
+          reply_to_email?: string | null
           reputation_score?: number
           sending_domain_id?: string | null
           updated_at?: string
@@ -2302,17 +2381,26 @@ export type Database = {
           daily_send_limit?: number
           email_address?: string
           emails_sent_today?: number
+          from_email?: string | null
+          from_name?: string | null
           hourly_send_count?: number
           hourly_send_limit?: number
           hourly_window_start?: string
           id?: string
           inbound_webhook_url?: string
           inbound_webhook_verified_at?: string | null
+          last_error_message?: string | null
           last_sent_at?: string | null
+          last_test_send_at?: string | null
+          last_test_send_status?: string | null
+          last_test_send_to?: string | null
           last_used_sequence_position?: number
+          live_readiness?: Database["public"]["Enums"]["inbox_live_readiness"]
           paused_reason?: string
           performance_score?: number
+          provider_type?: Database["public"]["Enums"]["inbox_provider_type"]
           reply_rate_per_inbox?: number
+          reply_to_email?: string | null
           reputation_score?: number
           sending_domain_id?: string | null
           updated_at?: string
@@ -6562,6 +6650,70 @@ export type Database = {
         }
         Relationships: []
       }
+      inbox_credentials_public: {
+        Row: {
+          inbox_id: string | null
+          password_is_set: boolean | null
+          password_set_at: string | null
+          provider_type:
+            | Database["public"]["Enums"]["inbox_provider_type"]
+            | null
+          smtp_encryption: string | null
+          smtp_host: string | null
+          smtp_port: number | null
+          smtp_username: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          inbox_id?: string | null
+          password_is_set?: never
+          password_set_at?: string | null
+          provider_type?:
+            | Database["public"]["Enums"]["inbox_provider_type"]
+            | null
+          smtp_encryption?: string | null
+          smtp_host?: string | null
+          smtp_port?: number | null
+          smtp_username?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          inbox_id?: string | null
+          password_is_set?: never
+          password_set_at?: string | null
+          provider_type?:
+            | Database["public"]["Enums"]["inbox_provider_type"]
+            | null
+          smtp_encryption?: string | null
+          smtp_host?: string | null
+          smtp_port?: number | null
+          smtp_username?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inbox_credentials_inbox_id_fkey"
+            columns: ["inbox_id"]
+            isOneToOne: true
+            referencedRelation: "inbox_health_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inbox_credentials_inbox_id_fkey"
+            columns: ["inbox_id"]
+            isOneToOne: true
+            referencedRelation: "inboxes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inbox_credentials_inbox_id_fkey"
+            columns: ["inbox_id"]
+            isOneToOne: true
+            referencedRelation: "warmup_progress"
+            referencedColumns: ["inbox_id"]
+          },
+        ]
+      }
       inbox_health_summary: {
         Row: {
           active: boolean | null
@@ -6797,6 +6949,10 @@ export type Database = {
         Args: { _business_name?: string }
         Returns: string
       }
+      get_inbox_credentials_for_send: {
+        Args: { _enc_key: string; _inbox_id: string }
+        Returns: Json
+      }
       get_outbound_status: { Args: never; Returns: Json }
       get_proposal_by_token: {
         Args: { _token: string }
@@ -6854,6 +7010,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      inbox_is_live_ready: { Args: { _inbox_id: string }; Returns: boolean }
       inbox_warmup_limit: { Args: { _inbox_id: string }; Returns: number }
       is_feature_enabled: {
         Args: { _business_name?: string; _feature_name: string }
@@ -7040,6 +7197,15 @@ export type Database = {
         Args: { _supplier_id: string }
         Returns: number
       }
+      record_inbox_test_send: {
+        Args: {
+          _error: string
+          _inbox_id: string
+          _success: boolean
+          _to: string
+        }
+        Returns: undefined
+      }
       record_system_change: {
         Args: {
           _change_type: string
@@ -7071,6 +7237,22 @@ export type Database = {
         Returns: undefined
       }
       run_domain_protection_check: { Args: never; Returns: Json }
+      save_inbox_credentials: {
+        Args: {
+          _enc_key: string
+          _from_email: string
+          _from_name: string
+          _inbox_id: string
+          _provider_type: string
+          _reply_to_email: string
+          _smtp_encryption: string
+          _smtp_host: string
+          _smtp_password: string
+          _smtp_port: number
+          _smtp_username: string
+        }
+        Returns: Json
+      }
       score_contact: {
         Args: { _business_name?: string; _contact_id: string }
         Returns: {
@@ -7269,6 +7451,16 @@ export type Database = {
         | "blocked"
         | "delayed"
         | "throttled"
+      inbox_live_readiness:
+        | "simulated_only"
+        | "not_configured"
+        | "configured_not_tested"
+        | "test_failed"
+        | "test_passed"
+        | "live_ready"
+        | "paused"
+        | "error"
+      inbox_provider_type: "simulated" | "ionos_smtp"
       inbox_warmup_status: "new" | "warming" | "active"
       internal_proposal_status:
         | "draft"
@@ -7515,6 +7707,17 @@ export const Constants = {
         "delayed",
         "throttled",
       ],
+      inbox_live_readiness: [
+        "simulated_only",
+        "not_configured",
+        "configured_not_tested",
+        "test_failed",
+        "test_passed",
+        "live_ready",
+        "paused",
+        "error",
+      ],
+      inbox_provider_type: ["simulated", "ionos_smtp"],
       inbox_warmup_status: ["new", "warming", "active"],
       internal_proposal_status: [
         "draft",
