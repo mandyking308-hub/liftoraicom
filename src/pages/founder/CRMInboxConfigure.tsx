@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ArrowLeft, Send, ShieldCheck, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Send, ShieldCheck, AlertTriangle, CheckCircle2, Inbox as InboxIcon, RefreshCw, Bot } from "lucide-react";
 
 type Inbox = {
   id: string; email_address: string; business_name: string;
@@ -21,6 +21,15 @@ type Inbox = {
   active: boolean; sending_domain_id: string | null; inbound_webhook_url: string;
   last_test_send_status: string | null; last_test_send_at: string | null;
   last_test_send_to: string | null; last_error_message: string | null;
+  // Inbound + AI
+  ai_reply_mode: "disabled" | "draft_only" | "approval_required" | "auto_send";
+  inbound_provider: "none" | "ionos_imap";
+  inbound_status: "not_configured" | "forwarding_required" | "configured_not_tested" | "inbound_test_passed" | "live_ready" | "error";
+  inbound_polling_enabled: boolean;
+  monitored_mailbox: string | null;
+  last_poll_at: string | null;
+  last_inbound_message_at: string | null;
+  last_inbound_error: string | null;
 };
 
 type CredsPublic = {
@@ -28,6 +37,8 @@ type CredsPublic = {
   smtp_host: string | null; smtp_port: number | null;
   smtp_username: string | null; smtp_encryption: string | null;
   password_is_set: boolean; password_set_at: string | null;
+  imap_host: string | null; imap_port: number | null; imap_ssl: boolean | null;
+  imap_username: string | null; imap_password_is_set: boolean; imap_password_set_at: string | null;
 };
 
 const READINESS_LABELS: Record<string, { label: string; tone: "default" | "secondary" | "destructive" | "outline" }> = {
@@ -41,6 +52,15 @@ const READINESS_LABELS: Record<string, { label: string; tone: "default" | "secon
   error: { label: "Error", tone: "destructive" },
 };
 
+const INBOUND_BADGE: Record<string, { label: string; tone: "default" | "secondary" | "destructive" | "outline" }> = {
+  not_configured: { label: "Not configured", tone: "secondary" },
+  forwarding_required: { label: "Forwarding required", tone: "outline" },
+  configured_not_tested: { label: "Configured, not tested", tone: "secondary" },
+  inbound_test_passed: { label: "Inbound test passed", tone: "default" },
+  live_ready: { label: "Inbound live", tone: "default" },
+  error: { label: "Inbound error", tone: "destructive" },
+};
+
 const CRMInboxConfigure = () => {
   const { id } = useParams<{ id: string }>();
   const nav = useNavigate();
@@ -49,6 +69,9 @@ const CRMInboxConfigure = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
+  const [savingInbound, setSavingInbound] = useState(false);
+  const [testingImap, setTestingImap] = useState(false);
+  const [pollingNow, setPollingNow] = useState(false);
   const [testOpen, setTestOpen] = useState(false);
   const [testTo, setTestTo] = useState("");
 
@@ -61,6 +84,20 @@ const CRMInboxConfigure = () => {
     daily_send_limit: 10, warmup_status: "new" as "new" | "warming" | "active",
     active: true,
   });
+
+  const [inboundForm, setInboundForm] = useState({
+    inbound_provider: "ionos_imap" as "none" | "ionos_imap",
+    monitored_mailbox: "",
+    imap_host: "imap.ionos.co.uk",
+    imap_port: 993,
+    imap_ssl: true,
+    imap_username: "",
+    imap_password: "",
+    reuse_smtp_password: true,
+    polling_enabled: true,
+  });
+
+  const [aiMode, setAiMode] = useState<"disabled" | "draft_only" | "approval_required" | "auto_send">("approval_required");
 
   useEffect(() => { if (id) void load(id); }, [id]);
 
@@ -90,6 +127,19 @@ const CRMInboxConfigure = () => {
       warmup_status: inboxRow.warmup_status ?? "new",
       active: inboxRow.active,
     }));
+    setInboundForm((f) => ({
+      ...f,
+      inbound_provider: (inboxRow.inbound_provider as "none" | "ionos_imap") ?? "ionos_imap",
+      monitored_mailbox: inboxRow.monitored_mailbox ?? inboxRow.email_address,
+      imap_host: credsRow?.imap_host ?? f.imap_host,
+      imap_port: credsRow?.imap_port ?? f.imap_port,
+      imap_ssl: credsRow?.imap_ssl ?? f.imap_ssl,
+      imap_username: credsRow?.imap_username ?? inboxRow.email_address,
+      imap_password: "",
+      reuse_smtp_password: !credsRow?.imap_password_is_set,
+      polling_enabled: inboxRow.inbound_polling_enabled ?? true,
+    }));
+    setAiMode(inboxRow.ai_reply_mode ?? "approval_required");
     setTestTo(inboxRow.reply_to_email ?? inboxRow.email_address);
     setLoading(false);
   }
@@ -157,12 +207,80 @@ const CRMInboxConfigure = () => {
     void load(id);
   }
 
+  async function saveInbound() {
+    if (!id) return;
+    if (inboundForm.inbound_provider === "ionos_imap") {
+      if (!inboundForm.imap_host || !inboundForm.imap_port || !inboundForm.imap_username) {
+        toast.error("IMAP host, port and username are required"); return;
+      }
+      if (!inboundForm.reuse_smtp_password && !creds?.imap_password_is_set && !inboundForm.imap_password) {
+        toast.error("IMAP password required (or reuse the SMTP password)"); return;
+      }
+    }
+    setSavingInbound(true);
+    const { data, error } = await supabase.functions.invoke("outreach-save-inbound-config", {
+      body: {
+        inbox_id: id,
+        inbound_provider: inboundForm.inbound_provider,
+        imap_host: inboundForm.imap_host,
+        imap_port: Number(inboundForm.imap_port),
+        imap_ssl: inboundForm.imap_ssl,
+        imap_username: inboundForm.imap_username,
+        imap_password: inboundForm.imap_password || null,
+        reuse_smtp_password: inboundForm.reuse_smtp_password,
+        polling_enabled: inboundForm.polling_enabled,
+        monitored_mailbox: inboundForm.monitored_mailbox || null,
+      },
+    });
+    setSavingInbound(false);
+    const payload = (data ?? {}) as { ok?: boolean; error?: string };
+    if (error || payload.error) { toast.error(payload.error ?? error!.message); return; }
+    // Persist AI mode at inbox level
+    await supabase.from("inboxes").update({ ai_reply_mode: aiMode }).eq("id", id);
+    toast.success("Inbound config saved");
+    setInboundForm((f) => ({ ...f, imap_password: "" }));
+    void load(id);
+  }
+
+  async function testImap() {
+    if (!id) return;
+    setTestingImap(true);
+    const { data, error } = await supabase.functions.invoke("outreach-test-imap", {
+      body: { inbox_id: id },
+    });
+    setTestingImap(false);
+    const p = (data ?? {}) as { ok?: boolean; error?: string; messages?: number; unseen?: number };
+    if (error || !p.ok) toast.error(p.error ?? error?.message ?? "IMAP test failed");
+    else toast.success(`IMAP connected — ${p.messages ?? 0} messages, ${p.unseen ?? 0} unseen`);
+    void load(id);
+  }
+
+  async function pollNow() {
+    if (!id) return;
+    setPollingNow(true);
+    const { data, error } = await supabase.functions.invoke("outreach-inbound-poll", {
+      body: { inbox_id: id },
+    });
+    setPollingNow(false);
+    const p = (data ?? {}) as { ok?: boolean; results?: Array<{ new_messages: number; errors: string[] }> };
+    if (error || !p.ok) toast.error(error?.message ?? "Poll failed");
+    else {
+      const r = p.results?.[0];
+      const errs = r?.errors?.filter(Boolean) ?? [];
+      if (errs.length) toast.error(errs.join("; "));
+      else toast.success(`Poll done — ${r?.new_messages ?? 0} new message(s)`);
+    }
+    void load(id);
+  }
+
   if (loading || !inbox) {
     return <FounderLayout><p className="text-muted-foreground text-sm p-6">Loading…</p></FounderLayout>;
   }
 
   const readiness = READINESS_LABELS[inbox.live_readiness] ?? { label: inbox.live_readiness, tone: "outline" as const };
   const passwordKnown = creds?.password_is_set ?? false;
+  const inboundBadge = INBOUND_BADGE[inbox.inbound_status] ?? { label: inbox.inbound_status, tone: "outline" as const };
+  const inboundLive = inbox.inbound_status === "live_ready" || inbox.inbound_status === "inbound_test_passed";
 
   return (
     <FounderLayout>
@@ -315,14 +433,125 @@ const CRMInboxConfigure = () => {
         </Card>
 
         <Card className="tech-card">
-          <CardHeader><CardTitle className="text-base">Inbound replies</CardTitle></CardHeader>
-          <CardContent className="space-y-2">
-            <p className="text-xs text-muted-foreground">Webhook URL: <code className="font-mono">{inbox.inbound_webhook_url}</code></p>
-            <p className="text-xs text-muted-foreground">
-              Configure inbound forwarding or reply handling at the mailbox/provider so replies can be routed back to Liftor when inbound processing is implemented.
-            </p>
-            <Badge variant="outline">Inbound reply capture not yet live</Badge>
-            <p className="text-[11px] text-muted-foreground">AI reply handling is not yet connected to real inbound email replies.</p>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <InboxIcon className="h-4 w-4" /> Inbound reply capture
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-2 flex-wrap">
+              <Badge variant={inboundBadge.tone}>{inboundBadge.label}</Badge>
+              {inbox.monitored_mailbox && (
+                <span className="text-xs text-muted-foreground">Monitoring <code className="font-mono">{inbox.monitored_mailbox}</code></span>
+              )}
+              {inbox.last_poll_at && (
+                <span className="text-xs text-muted-foreground">Last poll {new Date(inbox.last_poll_at).toLocaleString()}</span>
+              )}
+            </div>
+            {!inboundLive ? (
+              <p className="text-[11px] text-destructive">
+                Inbound reply capture is not live. Replies will not automatically enter Liftor.
+              </p>
+            ) : (
+              <p className="text-[11px] text-primary">
+                Inbound reply capture is live. Replies are being routed into Liftor.
+              </p>
+            )}
+            {inbox.last_inbound_error && (
+              <p className="text-[11px] text-destructive whitespace-pre-wrap">Last error: {inbox.last_inbound_error}</p>
+            )}
+
+            <div className="space-y-1.5">
+              <Label className="text-xs">Inbound provider</Label>
+              <Select value={inboundForm.inbound_provider} onValueChange={(v) => setInboundForm({ ...inboundForm, inbound_provider: v as "none" | "ionos_imap" })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">None (no inbound capture)</SelectItem>
+                  <SelectItem value="ionos_imap">IONOS IMAP polling</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-[11px] text-muted-foreground">
+                IONOS does not push inbound emails to webhooks. Liftor polls the mailbox over IMAP every ~2 minutes.
+              </p>
+            </div>
+
+            {inboundForm.inbound_provider === "ionos_imap" && (
+              <>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <div className="space-y-1.5"><Label className="text-xs">Monitored mailbox</Label>
+                    <Input value={inboundForm.monitored_mailbox} onChange={(e) => setInboundForm({ ...inboundForm, monitored_mailbox: e.target.value })} placeholder="hello@neoncandy.online" /></div>
+                  <div className="space-y-1.5"><Label className="text-xs">IMAP host</Label>
+                    <Input value={inboundForm.imap_host} onChange={(e) => setInboundForm({ ...inboundForm, imap_host: e.target.value })} /></div>
+                  <div className="space-y-1.5"><Label className="text-xs">IMAP port</Label>
+                    <Input type="number" value={inboundForm.imap_port} onChange={(e) => setInboundForm({ ...inboundForm, imap_port: Number(e.target.value) })} /></div>
+                  <div className="space-y-1.5"><Label className="text-xs">SSL</Label>
+                    <Select value={inboundForm.imap_ssl ? "true" : "false"} onValueChange={(v) => setInboundForm({ ...inboundForm, imap_ssl: v === "true" })}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="true">SSL (port 993)</SelectItem>
+                        <SelectItem value="false">No SSL</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5"><Label className="text-xs">IMAP username</Label>
+                    <Input value={inboundForm.imap_username} onChange={(e) => setInboundForm({ ...inboundForm, imap_username: e.target.value })} /></div>
+                  <div className="space-y-1.5"><Label className="text-xs">Polling enabled</Label>
+                    <Select value={inboundForm.polling_enabled ? "true" : "false"} onValueChange={(v) => setInboundForm({ ...inboundForm, polling_enabled: v === "true" })}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="true">Enabled</SelectItem>
+                        <SelectItem value="false">Disabled</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs flex items-center gap-2">
+                    <input type="checkbox" checked={inboundForm.reuse_smtp_password}
+                      onChange={(e) => setInboundForm({ ...inboundForm, reuse_smtp_password: e.target.checked })} />
+                    Reuse SMTP password (recommended for IONOS — same mailbox = same password)
+                  </Label>
+                </div>
+                {!inboundForm.reuse_smtp_password && (
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">
+                      IMAP password {creds?.imap_password_is_set && <span className="text-muted-foreground">(stored — leave blank to keep)</span>}
+                    </Label>
+                    <Input type="password" autoComplete="new-password"
+                      value={inboundForm.imap_password}
+                      onChange={(e) => setInboundForm({ ...inboundForm, imap_password: e.target.value })}
+                      placeholder={creds?.imap_password_is_set ? "••••••••" : "Enter IMAP mailbox password"} />
+                    <p className="text-[11px] text-muted-foreground">Encrypted at rest. Never returned to the browser.</p>
+                  </div>
+                )}
+              </>
+            )}
+
+            <div className="space-y-1.5 pt-2 border-t border-border/40">
+              <Label className="text-xs flex items-center gap-2"><Bot className="h-3.5 w-3.5" /> AI reply mode</Label>
+              <Select value={aiMode} onValueChange={(v) => setAiMode(v as typeof aiMode)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="disabled">Disabled</SelectItem>
+                  <SelectItem value="draft_only">Draft only</SelectItem>
+                  <SelectItem value="approval_required">Founder approval required (recommended)</SelectItem>
+                  <SelectItem value="auto_send">Auto-send allowed</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-[11px] text-muted-foreground">
+                In approval mode the AI classifies and drafts a reply but never sends without you approving in the conversation view.
+              </p>
+            </div>
+
+            <div className="flex gap-2 flex-wrap pt-2">
+              <Button onClick={saveInbound} disabled={savingInbound}>{savingInbound ? "Saving…" : "Save inbound config"}</Button>
+              <Button variant="outline" onClick={testImap} disabled={testingImap || inboundForm.inbound_provider !== "ionos_imap"}>
+                <ShieldCheck className="h-3.5 w-3.5 mr-1" /> {testingImap ? "Testing…" : "Test IMAP connection"}
+              </Button>
+              <Button variant="outline" onClick={pollNow} disabled={pollingNow || inboundForm.inbound_provider !== "ionos_imap"}>
+                <RefreshCw className="h-3.5 w-3.5 mr-1" /> {pollingNow ? "Polling…" : "Poll now"}
+              </Button>
+            </div>
           </CardContent>
         </Card>
 

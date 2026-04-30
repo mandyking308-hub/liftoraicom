@@ -366,6 +366,113 @@ export type Database = {
           },
         ]
       }
+      ai_drafts: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          classification: string | null
+          contact_id: string
+          conversation_id: string
+          created_at: string
+          draft_body: string
+          edited_body: string | null
+          id: string
+          inbox_id: string | null
+          rejection_reason: string | null
+          sent_at: string | null
+          status: Database["public"]["Enums"]["ai_draft_status"]
+          suggested_tags: string[] | null
+          triggered_by_inbound_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          classification?: string | null
+          contact_id: string
+          conversation_id: string
+          created_at?: string
+          draft_body: string
+          edited_body?: string | null
+          id?: string
+          inbox_id?: string | null
+          rejection_reason?: string | null
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["ai_draft_status"]
+          suggested_tags?: string[] | null
+          triggered_by_inbound_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          classification?: string | null
+          contact_id?: string
+          conversation_id?: string
+          created_at?: string
+          draft_body?: string
+          edited_body?: string | null
+          id?: string
+          inbox_id?: string | null
+          rejection_reason?: string | null
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["ai_draft_status"]
+          suggested_tags?: string[] | null
+          triggered_by_inbound_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_drafts_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_drafts_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+          {
+            foreignKeyName: "ai_drafts_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_drafts_inbox_id_fkey"
+            columns: ["inbox_id"]
+            isOneToOne: false
+            referencedRelation: "inbox_health_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_drafts_inbox_id_fkey"
+            columns: ["inbox_id"]
+            isOneToOne: false
+            referencedRelation: "inboxes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_drafts_inbox_id_fkey"
+            columns: ["inbox_id"]
+            isOneToOne: false
+            referencedRelation: "warmup_progress"
+            referencedColumns: ["inbox_id"]
+          },
+          {
+            foreignKeyName: "ai_drafts_triggered_by_inbound_id_fkey"
+            columns: ["triggered_by_inbound_id"]
+            isOneToOne: false
+            referencedRelation: "inbound_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       architecture_components: {
         Row: {
           agent_id: string | null
@@ -2237,9 +2344,128 @@ export type Database = {
           },
         ]
       }
+      inbound_messages: {
+        Row: {
+          body_html: string | null
+          body_text: string | null
+          campaign_id: string | null
+          contact_id: string | null
+          conversation_id: string | null
+          created_at: string
+          from_email: string
+          id: string
+          in_reply_to: string | null
+          inbox_id: string
+          is_bounce: boolean
+          message_id: string
+          processing_error: string | null
+          processing_status: string
+          received_at: string
+          references_header: string | null
+          subject: string | null
+          to_email: string | null
+        }
+        Insert: {
+          body_html?: string | null
+          body_text?: string | null
+          campaign_id?: string | null
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          from_email: string
+          id?: string
+          in_reply_to?: string | null
+          inbox_id: string
+          is_bounce?: boolean
+          message_id: string
+          processing_error?: string | null
+          processing_status?: string
+          received_at?: string
+          references_header?: string | null
+          subject?: string | null
+          to_email?: string | null
+        }
+        Update: {
+          body_html?: string | null
+          body_text?: string | null
+          campaign_id?: string | null
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          from_email?: string
+          id?: string
+          in_reply_to?: string | null
+          inbox_id?: string
+          is_bounce?: boolean
+          message_id?: string
+          processing_error?: string | null
+          processing_status?: string
+          received_at?: string
+          references_header?: string | null
+          subject?: string | null
+          to_email?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inbound_messages_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "outreach_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inbound_messages_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inbound_messages_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+          {
+            foreignKeyName: "inbound_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inbound_messages_inbox_id_fkey"
+            columns: ["inbox_id"]
+            isOneToOne: false
+            referencedRelation: "inbox_health_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inbound_messages_inbox_id_fkey"
+            columns: ["inbox_id"]
+            isOneToOne: false
+            referencedRelation: "inboxes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inbound_messages_inbox_id_fkey"
+            columns: ["inbox_id"]
+            isOneToOne: false
+            referencedRelation: "warmup_progress"
+            referencedColumns: ["inbox_id"]
+          },
+        ]
+      }
       inbox_credentials: {
         Row: {
           created_at: string
+          imap_host: string | null
+          imap_password_enc: string | null
+          imap_password_set_at: string | null
+          imap_port: number | null
+          imap_ssl: boolean | null
+          imap_username: string | null
           inbox_id: string
           password_set_at: string | null
           provider_type: Database["public"]["Enums"]["inbox_provider_type"]
@@ -2252,6 +2478,12 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          imap_host?: string | null
+          imap_password_enc?: string | null
+          imap_password_set_at?: string | null
+          imap_port?: number | null
+          imap_ssl?: boolean | null
+          imap_username?: string | null
           inbox_id: string
           password_set_at?: string | null
           provider_type: Database["public"]["Enums"]["inbox_provider_type"]
@@ -2264,6 +2496,12 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          imap_host?: string | null
+          imap_password_enc?: string | null
+          imap_password_set_at?: string | null
+          imap_port?: number | null
+          imap_ssl?: boolean | null
+          imap_username?: string | null
           inbox_id?: string
           password_set_at?: string | null
           provider_type?: Database["public"]["Enums"]["inbox_provider_type"]
@@ -2301,6 +2539,7 @@ export type Database = {
       inboxes: {
         Row: {
           active: boolean
+          ai_reply_mode: Database["public"]["Enums"]["ai_reply_mode"]
           bounce_rate_per_inbox: number
           business_name: string
           consecutive_failures: number
@@ -2315,15 +2554,22 @@ export type Database = {
           hourly_send_limit: number
           hourly_window_start: string
           id: string
+          inbound_polling_enabled: boolean
+          inbound_provider: Database["public"]["Enums"]["inbound_provider_type"]
+          inbound_status: Database["public"]["Enums"]["inbound_status_type"]
           inbound_webhook_url: string
           inbound_webhook_verified_at: string | null
           last_error_message: string | null
+          last_inbound_error: string | null
+          last_inbound_message_at: string | null
+          last_poll_at: string | null
           last_sent_at: string | null
           last_test_send_at: string | null
           last_test_send_status: string | null
           last_test_send_to: string | null
           last_used_sequence_position: number
           live_readiness: Database["public"]["Enums"]["inbox_live_readiness"]
+          monitored_mailbox: string | null
           paused_reason: string
           performance_score: number
           provider_type: Database["public"]["Enums"]["inbox_provider_type"]
@@ -2337,6 +2583,7 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          ai_reply_mode?: Database["public"]["Enums"]["ai_reply_mode"]
           bounce_rate_per_inbox?: number
           business_name?: string
           consecutive_failures?: number
@@ -2351,15 +2598,22 @@ export type Database = {
           hourly_send_limit?: number
           hourly_window_start?: string
           id?: string
+          inbound_polling_enabled?: boolean
+          inbound_provider?: Database["public"]["Enums"]["inbound_provider_type"]
+          inbound_status?: Database["public"]["Enums"]["inbound_status_type"]
           inbound_webhook_url?: string
           inbound_webhook_verified_at?: string | null
           last_error_message?: string | null
+          last_inbound_error?: string | null
+          last_inbound_message_at?: string | null
+          last_poll_at?: string | null
           last_sent_at?: string | null
           last_test_send_at?: string | null
           last_test_send_status?: string | null
           last_test_send_to?: string | null
           last_used_sequence_position?: number
           live_readiness?: Database["public"]["Enums"]["inbox_live_readiness"]
+          monitored_mailbox?: string | null
           paused_reason?: string
           performance_score?: number
           provider_type?: Database["public"]["Enums"]["inbox_provider_type"]
@@ -2373,6 +2627,7 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          ai_reply_mode?: Database["public"]["Enums"]["ai_reply_mode"]
           bounce_rate_per_inbox?: number
           business_name?: string
           consecutive_failures?: number
@@ -2387,15 +2642,22 @@ export type Database = {
           hourly_send_limit?: number
           hourly_window_start?: string
           id?: string
+          inbound_polling_enabled?: boolean
+          inbound_provider?: Database["public"]["Enums"]["inbound_provider_type"]
+          inbound_status?: Database["public"]["Enums"]["inbound_status_type"]
           inbound_webhook_url?: string
           inbound_webhook_verified_at?: string | null
           last_error_message?: string | null
+          last_inbound_error?: string | null
+          last_inbound_message_at?: string | null
+          last_poll_at?: string | null
           last_sent_at?: string | null
           last_test_send_at?: string | null
           last_test_send_status?: string | null
           last_test_send_to?: string | null
           last_used_sequence_position?: number
           live_readiness?: Database["public"]["Enums"]["inbox_live_readiness"]
+          monitored_mailbox?: string | null
           paused_reason?: string
           performance_score?: number
           provider_type?: Database["public"]["Enums"]["inbox_provider_type"]
@@ -6893,6 +7155,10 @@ export type Database = {
         Args: { _enc_key: string; _inbox_id: string }
         Returns: Json
       }
+      get_inbox_imap_credentials: {
+        Args: { _enc_key: string; _inbox_id: string }
+        Returns: Json
+      }
       get_outbound_status: { Args: never; Returns: Json }
       get_proposal_by_token: {
         Args: { _token: string }
@@ -6957,17 +7223,22 @@ export type Database = {
         Returns: boolean
       }
       list_inbox_credentials_public: {
-        Args: { _inbox_id?: string }
+        Args: { _inbox_id: string }
         Returns: {
+          imap_host: string
+          imap_password_is_set: boolean
+          imap_password_set_at: string
+          imap_port: number
+          imap_ssl: boolean
+          imap_username: string
           inbox_id: string
           password_is_set: boolean
           password_set_at: string
-          provider_type: Database["public"]["Enums"]["inbox_provider_type"]
+          provider_type: string
           smtp_encryption: string
           smtp_host: string
           smtp_port: number
           smtp_username: string
-          updated_at: string
         }[]
       }
       log_activity: {
@@ -7151,6 +7422,15 @@ export type Database = {
         Args: { _supplier_id: string }
         Returns: number
       }
+      record_inbound_poll: {
+        Args: {
+          _error: string
+          _inbox_id: string
+          _new_messages: number
+          _ok: boolean
+        }
+        Returns: undefined
+      }
       record_inbox_test_send: {
         Args: {
           _error: string
@@ -7204,6 +7484,22 @@ export type Database = {
           _smtp_password: string
           _smtp_port: number
           _smtp_username: string
+        }
+        Returns: Json
+      }
+      save_inbox_inbound_config: {
+        Args: {
+          _enc_key: string
+          _imap_host: string
+          _imap_password: string
+          _imap_port: number
+          _imap_ssl: boolean
+          _imap_username: string
+          _inbound_provider: string
+          _inbox_id: string
+          _monitored_mailbox: string
+          _polling_enabled: boolean
+          _reuse_smtp_password: boolean
         }
         Returns: Json
       }
@@ -7348,7 +7644,18 @@ export type Database = {
     Enums: {
       ai_action_status: "success" | "failed"
       ai_action_type: "classify" | "reply" | "escalate"
+      ai_draft_status:
+        | "pending"
+        | "approved"
+        | "rejected"
+        | "sent"
+        | "superseded"
       ai_quality_flag: "pass" | "fail" | "regenerated"
+      ai_reply_mode:
+        | "disabled"
+        | "draft_only"
+        | "approval_required"
+        | "auto_send"
       app_role: "admin" | "founder" | "client" | "partner"
       assignment_sla_status: "on_track" | "at_risk" | "overdue" | "n_a"
       assignment_status: "assigned" | "in_progress" | "completed" | "failed"
@@ -7405,6 +7712,14 @@ export type Database = {
         | "blocked"
         | "delayed"
         | "throttled"
+      inbound_provider_type: "none" | "ionos_imap"
+      inbound_status_type:
+        | "not_configured"
+        | "forwarding_required"
+        | "configured_not_tested"
+        | "inbound_test_passed"
+        | "live_ready"
+        | "error"
       inbox_live_readiness:
         | "simulated_only"
         | "not_configured"
@@ -7598,7 +7913,20 @@ export const Constants = {
     Enums: {
       ai_action_status: ["success", "failed"],
       ai_action_type: ["classify", "reply", "escalate"],
+      ai_draft_status: [
+        "pending",
+        "approved",
+        "rejected",
+        "sent",
+        "superseded",
+      ],
       ai_quality_flag: ["pass", "fail", "regenerated"],
+      ai_reply_mode: [
+        "disabled",
+        "draft_only",
+        "approval_required",
+        "auto_send",
+      ],
       app_role: ["admin", "founder", "client", "partner"],
       assignment_sla_status: ["on_track", "at_risk", "overdue", "n_a"],
       assignment_status: ["assigned", "in_progress", "completed", "failed"],
@@ -7660,6 +7988,15 @@ export const Constants = {
         "blocked",
         "delayed",
         "throttled",
+      ],
+      inbound_provider_type: ["none", "ionos_imap"],
+      inbound_status_type: [
+        "not_configured",
+        "forwarding_required",
+        "configured_not_tested",
+        "inbound_test_passed",
+        "live_ready",
+        "error",
       ],
       inbox_live_readiness: [
         "simulated_only",

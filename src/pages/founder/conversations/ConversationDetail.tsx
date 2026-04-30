@@ -5,10 +5,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, AlertTriangle, Bot, User } from "lucide-react";
+import { ArrowLeft, AlertTriangle, Bot, User, Send, X } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
 type Conv = any; type Msg = any; type Action = any; type Contact = any;
+type Draft = any;
 
 const ConversationDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -16,6 +18,9 @@ const ConversationDetail = () => {
   const [contact, setContact] = useState<Contact | null>(null);
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [actions, setActions] = useState<Action[]>([]);
+  const [drafts, setDrafts] = useState<Draft[]>([]);
+  const [editing, setEditing] = useState<Record<string, string>>({});
+  const [busy, setBusy] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
@@ -24,12 +29,13 @@ const ConversationDetail = () => {
     const { data: c } = await supabase.from("conversations").select("*").eq("id", id).maybeSingle();
     setConv(c);
     if (c) {
-      const [{ data: ct }, { data: m }, { data: a }] = await Promise.all([
+      const [{ data: ct }, { data: m }, { data: a }, { data: d }] = await Promise.all([
         supabase.from("contacts").select("*").eq("id", c.contact_id).maybeSingle(),
         supabase.from("messages").select("*").eq("conversation_id", id).order("created_at", { ascending: true }),
         supabase.from("ai_actions").select("*").eq("conversation_id", id).order("created_at", { ascending: false }).limit(20),
+        supabase.from("ai_drafts").select("*").eq("conversation_id", id).order("created_at", { ascending: false }),
       ]);
-      setContact(ct); setMsgs(m ?? []); setActions(a ?? []);
+      setContact(ct); setMsgs(m ?? []); setActions(a ?? []); setDrafts(d ?? []);
     }
     setLoading(false);
   };
@@ -43,8 +49,28 @@ const ConversationDetail = () => {
     load();
   };
 
+  const sendDraft = async (draft: Draft) => {
+    setBusy(draft.id);
+    const edited = editing[draft.id];
+    const { data, error } = await supabase.functions.invoke("outreach-send-draft", {
+      body: { draft_id: draft.id, edited_body: edited ?? null },
+    });
+    setBusy(null);
+    const p = (data ?? {}) as { ok?: boolean; error?: string };
+    if (error || !p.ok) toast.error(p.error ?? error?.message ?? "Send failed");
+    else { toast.success("Reply sent"); load(); }
+  };
+
+  const rejectDraft = async (draft: Draft) => {
+    setBusy(draft.id);
+    await supabase.from("ai_drafts").update({ status: "rejected" }).eq("id", draft.id);
+    setBusy(null); toast.success("Draft rejected"); load();
+  };
+
   if (loading) return <FounderLayout><div className="p-6 text-sm text-muted-foreground">Loading…</div></FounderLayout>;
   if (!conv) return <FounderLayout><div className="p-6 text-sm">Not found.</div></FounderLayout>;
+
+  const pendingDrafts = drafts.filter((d) => d.status === "pending");
 
   return (
     <FounderLayout>
@@ -79,6 +105,39 @@ const ConversationDetail = () => {
               </div>
               <Button size="sm" onClick={clearEscalation}>Clear escalation</Button>
             </div>
+          </Card>
+        )}
+
+        {pendingDrafts.length > 0 && (
+          <Card className="tech-card p-4 border-primary/40 bg-primary/5 space-y-4">
+            <div className="flex items-center gap-2">
+              <Bot className="h-4 w-4 text-primary" />
+              <div className="font-medium">AI suggested {pendingDrafts.length === 1 ? "reply" : "replies"} — approval required</div>
+            </div>
+            {pendingDrafts.map((d) => (
+              <div key={d.id} className="space-y-2 border-t border-border/40 pt-3 first:border-0 first:pt-0">
+                <div className="flex flex-wrap items-center gap-2 text-xs">
+                  {d.classification && <Badge variant="outline">{d.classification}</Badge>}
+                  {(d.suggested_tags ?? []).map((t: string) => (
+                    <Badge key={t} variant="secondary">{t}</Badge>
+                  ))}
+                  <span className="text-muted-foreground">{new Date(d.created_at).toLocaleString()}</span>
+                </div>
+                <Textarea
+                  className="min-h-[120px] text-sm"
+                  defaultValue={d.draft_body}
+                  onChange={(e) => setEditing({ ...editing, [d.id]: e.target.value })}
+                />
+                <div className="flex gap-2">
+                  <Button size="sm" onClick={() => sendDraft(d)} disabled={busy === d.id}>
+                    <Send className="h-3.5 w-3.5 mr-1" /> {busy === d.id ? "Sending…" : "Approve & send"}
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => rejectDraft(d)} disabled={busy === d.id}>
+                    <X className="h-3.5 w-3.5 mr-1" /> Reject
+                  </Button>
+                </div>
+              </div>
+            ))}
           </Card>
         )}
 

@@ -25,6 +25,30 @@ const NEGATIVE_KEYWORDS = [
   "appalling","scam","fraud","report you",
 ];
 
+// Tag suggestions derived from inbound message content.
+const TAG_KEYWORDS: Array<{ tag: string; words: string[] }> = [
+  { tag: "Interested", words: ["interested","keen","love to","sounds great","tell me more","yes please"] },
+  { tag: "Early Access Requested", words: ["early access","beta","sign me up","try it","first batch"] },
+  { tag: "Collaboration Potential", words: ["collab","collaboration","partner","work together","feature me"] },
+  { tag: "Creator", words: ["creator","artist","producer","content creator"] },
+  { tag: "DJ", words: ["dj","mix","set","resident"] },
+  { tag: "Curator", words: ["curator","playlist","selector"] },
+  { tag: "Media", words: ["press","journalist","magazine","podcast","interview","blog"] },
+  { tag: "Brand Partnership", words: ["brand","partnership","sponsor","sponsorship"] },
+  { tag: "Not Relevant", words: ["wrong person","not relevant","no thanks"] },
+  { tag: "Unsubscribe / Do Not Contact", words: ["unsubscribe","stop emailing","remove me","do not contact","opt out","take me off"] },
+  { tag: "Bounce", words: ["delivery failed","undeliverable","mailer-daemon"] },
+];
+
+function suggestTags(text: string): string[] {
+  const t = (text || "").toLowerCase();
+  const out: string[] = [];
+  for (const { tag, words } of TAG_KEYWORDS) {
+    if (words.some((w) => t.includes(w))) out.push(tag);
+  }
+  return out;
+}
+
 interface Body { conversation_id?: string; contact_id?: string; }
 
 Deno.serve(async (req) => {
@@ -68,6 +92,17 @@ Deno.serve(async (req) => {
     // Don't reply if contact is DO_NOT_CONTACT or already QUALIFIED/CLIENT
     if (["DO_NOT_CONTACT","CLIENT","SUPPLIER"].includes(contact.status)) {
       return json({ skipped: "STATUS_BLOCKED", status: contact.status }, 200);
+    }
+
+    // Resolve AI reply mode from the contact's assigned inbox.
+    let aiReplyMode: "disabled" | "draft_only" | "approval_required" | "auto_send" = "approval_required";
+    if (contact.assigned_inbox_id) {
+      const { data: ib } = await supabase.from("inboxes")
+        .select("ai_reply_mode").eq("id", contact.assigned_inbox_id).maybeSingle();
+      if (ib?.ai_reply_mode) aiReplyMode = ib.ai_reply_mode as typeof aiReplyMode;
+    }
+    if (aiReplyMode === "disabled") {
+      return json({ skipped: "AI_DISABLED" }, 200);
     }
 
     // Pull last 10 messages
@@ -209,6 +244,13 @@ Use the classify_and_reply tool. Classifications:
     const suppressNeutralLoop = classification === "neutral" && lastWasAiReply;
     if (suppressNeutralLoop) replyText = "";
 
+    // Compute suggested tags from inbound text.
+    const tags = suggestTags(lastInbound.content || "");
+    if (classification === "unsubscribe" && !tags.includes("Unsubscribe / Do Not Contact")) {
+      tags.push("Unsubscribe / Do Not Contact");
+    }
+    if (classification === "interested" && !tags.includes("Interested")) tags.push("Interested");
+
     // Status updates from classification
     let newContactStatus: string | null = null;
     if (classification === "interested") newContactStatus = "QUALIFIED";
@@ -234,17 +276,33 @@ Use the classify_and_reply tool. Classifications:
       reply_latency_seconds: latencySeconds,
     });
 
-    // Log outbound reply via communications (the mirror trigger will create the message row)
+    // Mode-aware delivery:
+    // - auto_send: insert outbound communication immediately (existing behaviour)
+    // - approval_required / draft_only: store an ai_draft for founder review; do NOT auto-send
+    let deliveryMode: "auto_sent" | "drafted" | "skipped" = "skipped";
     if (replyText.trim()) {
-      await supabase.from("communications").insert({
-        contact_id: contact.id,
-        channel: "email",
-        direction: "outbound",
-        message: replyText,
-        inbox_id: contact.assigned_inbox_id,
-        ai_generated: true,
-      });
-
+      if (aiReplyMode === "auto_send") {
+        await supabase.from("communications").insert({
+          contact_id: contact.id,
+          channel: "email",
+          direction: "outbound",
+          message: replyText,
+          inbox_id: contact.assigned_inbox_id,
+          ai_generated: true,
+        });
+        deliveryMode = "auto_sent";
+      } else {
+        await supabase.from("ai_drafts").insert({
+          conversation_id: conv.id,
+          contact_id: contact.id,
+          inbox_id: contact.assigned_inbox_id,
+          classification,
+          suggested_tags: tags,
+          draft_body: replyText,
+          status: "pending",
+        });
+        deliveryMode = "drafted";
+      }
       await supabase.from("ai_actions").insert({
         conversation_id: conv.id,
         contact_id: contact.id,
@@ -269,7 +327,7 @@ Use the classify_and_reply tool. Classifications:
       last_intent: classification,
       intent_history: nextHistory,
     };
-    if (replyText.trim()) convPatch.last_ai_reply_at = new Date().toISOString();
+    if (replyText.trim() && deliveryMode === "auto_sent") convPatch.last_ai_reply_at = new Date().toISOString();
     // Question priority boost: +20 (capped at 100)
     if (classification === "question") {
       const currentBoost = Number(conv.priority_boost ?? 0);
@@ -282,6 +340,9 @@ Use the classify_and_reply tool. Classifications:
     return json({
       ok: true, classification, reply_words: replyText.trim().split(/\s+/).length,
       contact_status: newContactStatus,
+      ai_reply_mode: aiReplyMode,
+      delivery: deliveryMode,
+      suggested_tags: tags,
       suppressed_neutral_loop: suppressNeutralLoop,
       reply_latency_seconds: latencySeconds,
     }, 200);
