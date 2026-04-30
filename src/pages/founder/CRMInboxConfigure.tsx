@@ -299,13 +299,32 @@ const CRMInboxConfigure = () => {
       body: { inbox_id: id },
     });
     setPollingNow(false);
-    const p = (data ?? {}) as { ok?: boolean; results?: Array<{ new_messages: number; errors: string[] }> };
-    if (error || !p.ok) toast.error(error?.message ?? "Poll failed");
-    else {
-      const r = p.results?.[0];
-      const errs = r?.errors?.filter(Boolean) ?? [];
-      if (errs.length) toast.error(errs.join("; "));
-      else toast.success(`Poll done — ${r?.new_messages ?? 0} new message(s)`);
+    type R = {
+      messages_scanned?: number; new_messages?: number; imported?: number;
+      duplicates?: number; matched?: number; unmatched?: number;
+      conversations_created?: number; ai_drafts_created?: number;
+      bounces?: number; errors?: string[];
+    };
+    const p = (data ?? {}) as { ok?: boolean; results?: R[] };
+    if (error || !p.ok) {
+      toast.error(error?.message ?? "Poll failed", { duration: 10000 });
+    } else {
+      const r: R = p.results?.[0] ?? {};
+      const errs = (r.errors ?? []).filter(Boolean);
+      const summary = [
+        `Scanned ${r.messages_scanned ?? 0}`,
+        `Imported ${r.imported ?? 0}`,
+        `Matched ${r.matched ?? 0}`,
+        `Unmatched ${r.unmatched ?? 0}`,
+        `Duplicates ${r.duplicates ?? 0}`,
+        `Conversations +${r.conversations_created ?? 0}`,
+        `Bounces ${r.bounces ?? 0}`,
+      ].join(" · ");
+      if (errs.length) {
+        toast.error(`${summary}\nErrors: ${errs.join("; ")}`, { duration: 14000 });
+      } else {
+        toast.success(summary, { duration: 10000 });
+      }
     }
     void load(id);
   }

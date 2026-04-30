@@ -32,8 +32,15 @@ interface PollResult {
   inbox_id: string;
   email_address: string;
   ok: boolean;
+  messages_scanned: number;
   new_messages: number;
+  imported: number;
   duplicates: number;
+  matched: number;
+  unmatched: number;
+  conversations_created: number;
+  ai_drafts_created: number;
+  bounces: number;
   errors: string[];
 }
 
@@ -82,7 +89,8 @@ async function pollInbox(
 ): Promise<PollResult> {
   const result: PollResult = {
     inbox_id: ib.id, email_address: ib.email_address,
-    ok: false, new_messages: 0, duplicates: 0, errors: [],
+    ok: false, messages_scanned: 0, new_messages: 0, imported: 0, duplicates: 0,
+    matched: 0, unmatched: 0, conversations_created: 0, ai_drafts_created: 0, bounces: 0, errors: [],
   };
 
   let creds: {
@@ -133,6 +141,8 @@ async function pollInbox(
       for await (const msg of (client as any).fetch({ seen: false }, { source: true, envelope: true, uid: true })) {
         if (count >= 50) break;
         count++;
+        result.messages_scanned++;
+        let storedOk = false;
         try {
           const parsed = await simpleParser(msg.source);
           const messageId = parsed.messageId || `imap-${ib.id}-${msg.uid}`;
@@ -154,18 +164,48 @@ async function pollInbox(
             .maybeSingle();
           if (existing) {
             result.duplicates++;
-            // Mark as seen and continue
-            // deno-lint-ignore no-explicit-any
-            await (client as any).messageFlagsAdd(msg.uid, ["\\Seen"], { uid: true }).catch(() => {});
+            storedOk = true;
             continue;
           }
 
-          // Match contact
-          const { data: contact } = await admin
+          // Match contact by sender email (primary)
+          let { data: contact } = await admin
             .from("contacts")
             .select("id, assigned_inbox_id, active_campaign_id, status")
             .eq("email", fromEmail)
             .maybeSingle();
+
+          // Auto-create a placeholder contact so the reply is never lost.
+          // This guarantees the inbound surfaces in /founder/conversations.
+          let autoCreatedContact = false;
+          if (!contact && fromEmail && !isBounce) {
+            const { data: newContact, error: nErr } = await admin
+              .from("contacts")
+              .insert({
+                email: fromEmail,
+                name: parsed.from?.value?.[0]?.name ?? "",
+                source: "inbound_reply",
+                status: "ENGAGED",
+                assigned_inbox_id: ib.id,
+                assigned_business: ib.business_name ?? "",
+                conversation_active: true,
+                last_replied_at: new Date().toISOString(),
+              })
+              .select("id, assigned_inbox_id, active_campaign_id, status")
+              .single();
+            if (nErr) {
+              // race: another poll may have created it; refetch
+              const { data: refetched } = await admin
+                .from("contacts")
+                .select("id, assigned_inbox_id, active_campaign_id, status")
+                .eq("email", fromEmail)
+                .maybeSingle();
+              contact = refetched;
+            } else {
+              contact = newContact;
+              autoCreatedContact = true;
+            }
+          }
 
           // Insert raw inbound message
           const { data: inbRow, error: inbErr } = await admin
@@ -183,7 +223,7 @@ async function pollInbox(
               is_bounce: isBounce,
               contact_id: contact?.id ?? null,
               campaign_id: contact?.active_campaign_id ?? null,
-              processing_status: contact ? "matched" : "unmatched",
+              processing_status: contact ? (autoCreatedContact ? "auto_matched" : "matched") : "unmatched",
             })
             .select("id")
             .single();
@@ -191,22 +231,24 @@ async function pollInbox(
             result.errors.push(`insert ${messageId}: ${inbErr.message}`);
             continue;
           }
+          result.imported++;
 
           if (!contact) {
+            result.unmatched++;
             await admin.from("system_events").insert({
               event_type: "inbound_orphan",
               severity: "high",
               message: `Inbound from unknown contact ${fromEmail}`,
               metadata: { inbox_id: ib.id, message_id: messageId, subject },
             });
-            // Mark seen
-            // deno-lint-ignore no-explicit-any
-            await (client as any).messageFlagsAdd(msg.uid, ["\\Seen"], { uid: true }).catch(() => {});
+            storedOk = true;
             result.new_messages++;
             continue;
           }
+          result.matched++;
 
           if (isBounce) {
+            result.bounces++;
             await admin.from("email_events").insert({ contact_id: contact.id, event_type: "bounced" });
             await admin.from("contacts").update({
               status: "DO_NOT_CONTACT", active_campaign_id: null, updated_at: new Date().toISOString(),
@@ -228,9 +270,30 @@ async function pollInbox(
               conversation_active: true,
               updated_at: new Date().toISOString(),
             }).eq("id", contact.id);
-            // Link conversation back into the inbound row (best-effort, after trigger runs)
-            const { data: conv } = await admin.from("conversations")
-              .select("id").eq("contact_id", contact.id).maybeSingle();
+            // The mirror_comm_to_messages_and_invoke_ai trigger creates/uses a conversation.
+            // Link it back into the inbound row.
+            let conv: { id: string } | null = null;
+            for (let i = 0; i < 3; i++) {
+              const { data } = await admin.from("conversations")
+                .select("id, created_at").eq("contact_id", contact.id).maybeSingle();
+              if (data) { conv = data; break; }
+              await new Promise((r) => setTimeout(r, 200));
+            }
+            if (!conv) {
+              // Fallback: create the conversation ourselves so it never disappears.
+              const { data: created } = await admin.from("conversations")
+                .insert({
+                  contact_id: contact.id,
+                  business_name: ib.business_name ?? "",
+                  status: "OPEN",
+                  last_message_at: new Date().toISOString(),
+                })
+                .select("id").single();
+              conv = created;
+              if (conv) result.conversations_created++;
+            } else if (autoCreatedContact) {
+              result.conversations_created++;
+            }
             if (conv) {
               await admin.from("inbound_messages").update({
                 conversation_id: conv.id, processing_status: "routed",
@@ -238,12 +301,18 @@ async function pollInbox(
             }
           }
 
-          // Mark message seen
-          // deno-lint-ignore no-explicit-any
-          await (client as any).messageFlagsAdd(msg.uid, ["\\Seen"], { uid: true }).catch(() => {});
+          storedOk = true;
           result.new_messages++;
         } catch (e) {
           result.errors.push(`parse: ${(e as Error).message}`);
+        } finally {
+          // Only mark Seen AFTER successful storage in Liftor.
+          if (storedOk) {
+            try {
+              // deno-lint-ignore no-explicit-any
+              await (client as any).messageFlagsAdd(msg.uid, ["\\Seen"], { uid: true });
+            } catch { /* ignore */ }
+          }
         }
       }
     } finally {
