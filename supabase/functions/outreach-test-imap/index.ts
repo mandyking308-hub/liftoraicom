@@ -283,12 +283,16 @@ async function recordInboundPoll(
   ok: boolean,
   error: string | null,
 ) {
-  await admin.rpc("record_inbound_poll", {
-    _inbox_id: inboxId,
-    _ok: ok,
-    _error: error,
-    _new_messages: 0,
-  }).catch(() => undefined);
+  try {
+    await admin.rpc("record_inbound_poll", {
+      _inbox_id: inboxId,
+      _ok: ok,
+      _error: error,
+      _new_messages: 0,
+    });
+  } catch {
+    // ignore poll recording failures
+  }
 }
 
 function mapCredentialError(error: unknown): { status: number } & ErrorResponse {
