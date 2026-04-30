@@ -73,11 +73,9 @@ Deno.serve(async (req) => {
   const { data: inboxes, error: ixErr } = await q;
   if (ixErr) return json({ error: ixErr.message }, 500);
 
-  const results: PollResult[] = [];
-  for (const ib of inboxes ?? []) {
-    const result = await pollInbox(admin, encKey, ib);
-    results.push(result);
-  }
+  const results: PollResult[] = await Promise.all(
+    (inboxes ?? []).map((ib) => pollInbox(admin, encKey, ib)),
+  );
 
   return json({ ok: true, polled: results.length, results }, 200);
 });
