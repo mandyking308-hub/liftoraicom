@@ -73,11 +73,9 @@ Deno.serve(async (req) => {
   const { data: inboxes, error: ixErr } = await q;
   if (ixErr) return json({ error: ixErr.message }, 500);
 
-  const results: PollResult[] = [];
-  for (const ib of inboxes ?? []) {
-    const result = await pollInbox(admin, encKey, ib);
-    results.push(result);
-  }
+  const results: PollResult[] = await Promise.all(
+    (inboxes ?? []).map((ib) => pollInbox(admin, encKey, ib)),
+  );
 
   return json({ ok: true, polled: results.length, results }, 200);
 });
@@ -124,7 +122,7 @@ async function pollInbox(
   });
 
   try {
-    await client.connect();
+    await withTimeout(client.connect(), 15000, "imap_connect_timeout");
   } catch (e) {
     const msg = (e as Error).message;
     result.errors.push(`imap_connect: ${msg}`);
@@ -133,13 +131,18 @@ async function pollInbox(
   }
 
   try {
-    const lock = await client.getMailboxLock("INBOX");
+    const lock = await withTimeout(client.getMailboxLock("INBOX"), 10000, "mailbox_lock_timeout");
     try {
-      // Fetch UNSEEN; cap at 50 to avoid runaway
+      // Fetch UNSEEN; cap at 25 to fit safely under 150s edge timeout
       let count = 0;
+      const deadline = Date.now() + 110_000; // hard stop well before 150s
       // deno-lint-ignore no-explicit-any
       for await (const msg of (client as any).fetch({ seen: false }, { source: true, envelope: true, uid: true })) {
-        if (count >= 50) break;
+        if (count >= 25) break;
+        if (Date.now() > deadline) {
+          result.errors.push("deadline_reached: stopped early to avoid edge timeout");
+          break;
+        }
         count++;
         result.messages_scanned++;
         let storedOk = false;
@@ -273,12 +276,9 @@ async function pollInbox(
             // The mirror_comm_to_messages_and_invoke_ai trigger creates/uses a conversation.
             // Link it back into the inbound row.
             let conv: { id: string } | null = null;
-            for (let i = 0; i < 3; i++) {
-              const { data } = await admin.from("conversations")
-                .select("id, created_at").eq("contact_id", contact.id).maybeSingle();
-              if (data) { conv = data; break; }
-              await new Promise((r) => setTimeout(r, 200));
-            }
+            const { data: existingConv } = await admin.from("conversations")
+              .select("id, created_at").eq("contact_id", contact.id).maybeSingle();
+            if (existingConv) conv = existingConv;
             if (!conv) {
               // Fallback: create the conversation ourselves so it never disappears.
               const { data: created } = await admin.from("conversations")
@@ -322,7 +322,7 @@ async function pollInbox(
   } catch (e) {
     result.errors.push(`imap: ${(e as Error).message}`);
   } finally {
-    try { await client.logout(); } catch { /* ignore */ }
+    try { await withTimeout(client.logout(), 5000, "logout_timeout"); } catch { /* ignore */ }
   }
 
   await admin.rpc("record_inbound_poll", {
@@ -336,4 +336,12 @@ async function pollInbox(
 
 function json(b: unknown, status: number) {
   return new Response(JSON.stringify(b), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+}
+
+function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const t = setTimeout(() => reject(new Error(label)), ms);
+    p.then((v) => { clearTimeout(t); resolve(v); },
+           (e) => { clearTimeout(t); reject(e); });
+  });
 }
