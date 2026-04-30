@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Plus, Play, Pause, Send, Megaphone } from "lucide-react";
+import SimulatedSendingBanner from "@/components/outreach/SimulatedSendingBanner";
 
 type Campaign = { id: string; business_name: string; campaign_name: string; status: "active" | "paused"; created_at: string };
 type Sequence = { id: string; campaign_id: string; step_number: number; subject: string; body: string; delay_days: number };
@@ -50,6 +51,15 @@ const OutreachCampaigns = () => {
   }
 
   async function setStatus(c: Campaign, status: "active" | "paused") {
+    if (status === "active") {
+      const confirmed = window.confirm(
+        "⚠️ Outbound sending is currently in SIMULATED mode.\n\n" +
+        "Activating this campaign will queue messages and mark them as 'sent' inside Liftor, " +
+        "but no real email will leave the system until outbound sending is properly wired and tested.\n\n" +
+        "Continue and activate in simulated mode?"
+      );
+      if (!confirmed) return;
+    }
     const { error } = await supabase.from("outreach_campaigns").update({ status }).eq("id", c.id);
     if (error) { toast.error(error.message); return; }
     void load();
@@ -95,6 +105,8 @@ const OutreachCampaigns = () => {
           <h1 className="text-2xl font-bold">Outreach Campaigns</h1>
           <p className="text-sm text-muted-foreground">Define 4-step sequences and schedule sends. Sanity layer enforces blocks automatically.</p>
         </div>
+
+        <SimulatedSendingBanner />
 
         <Card>
           <CardHeader><CardTitle className="text-base flex items-center gap-2"><Plus className="h-4 w-4" />New Campaign</CardTitle></CardHeader>
