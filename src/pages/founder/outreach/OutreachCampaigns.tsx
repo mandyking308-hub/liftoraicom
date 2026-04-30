@@ -42,10 +42,10 @@ const OutreachCampaigns = () => {
 
   async function createCampaign() {
     if (!newName.trim() || !newBiz.trim()) { toast.error("Name and business required"); return; }
-    const { error } = await supabase.from("outreach_campaigns").insert({ campaign_name: newName.trim(), business_name: newBiz.trim() });
+    const { error } = await supabase.from("outreach_campaigns").insert({ campaign_name: newName.trim(), business_name: newBiz.trim(), status: "paused" });
     if (error) { toast.error(error.message); return; }
     setNewName(""); setNewBiz("");
-    toast.success("Campaign created");
+    toast.success("Campaign created (paused). Add sequences & inboxes, then activate.");
     void load();
   }
 
