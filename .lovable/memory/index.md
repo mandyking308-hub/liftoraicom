@@ -14,6 +14,7 @@ System runs in `system_mode='test'` by default — no real outbound sends until 
 - [CRM & Sanity Layer](mem://features/crm-sanity-layer) — Contacts, inboxes, communications, email events, outreach sanity gate.
 - [Validation Suite](mem://features/validation-suite) — Platform Sandbox Mode and automated end-to-end diagnostics.
 - [AI Conversation Engine](mem://features/ai-conversation-engine) — AI reply generation for inbound conversations.
+- [Inbox AI Instructions](mem://features/inbox-ai-instructions) — Per-inbox brand AI reply instructions (NeonCandy seeded) injected into the AI engine system prompt with `escalate` classification.
 - [Compliance Engine](mem://features/compliance-engine) — Compliance rules, events, scoring.
 - [Finance System](mem://features/finance-system) — Deals, invoices, payments, targets.
 - [Outreach Engine](mem://features/outreach-engine) — Campaigns, queue, sending health.
