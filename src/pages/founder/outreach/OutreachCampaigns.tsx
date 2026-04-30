@@ -10,7 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plus, Play, Pause, Send, Megaphone } from "lucide-react";
+import { Plus, Play, Pause, Send, Megaphone, Activity } from "lucide-react";
+import { Link } from "react-router-dom";
 import SimulatedSendingBanner from "@/components/outreach/SimulatedSendingBanner";
 
 type Campaign = { id: string; business_name: string; campaign_name: string; status: "active" | "paused"; created_at: string };
@@ -116,6 +117,11 @@ const OutreachCampaigns = () => {
         <div>
           <h1 className="text-2xl font-bold">Outreach Campaigns</h1>
           <p className="text-sm text-muted-foreground">Define 4-step sequences and schedule sends. Sanity layer enforces blocks automatically.</p>
+        </div>
+        <div>
+          <Button size="sm" variant="outline" asChild>
+            <Link to="/founder/outreach/live-monitor"><Activity className="h-3 w-3 mr-1" />View Live Monitor</Link>
+          </Button>
         </div>
 
         <SimulatedSendingBanner />
