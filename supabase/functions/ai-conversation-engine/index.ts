@@ -342,6 +342,10 @@ Use the classify_and_reply tool. Classifications:
     }
     if (classification === "interested") convPatch.status = "QUALIFIED";
     if (classification === "unsubscribe" || classification === "not_interested") convPatch.status = "CLOSED";
+    if (classification === "escalate") {
+      convPatch.escalation_pending = true;
+      convPatch.escalation_reason = "AI flagged high-value/partnership opportunity for founder review";
+    }
     await supabase.from("conversations").update(convPatch).eq("id", conv.id);
 
     return json({
