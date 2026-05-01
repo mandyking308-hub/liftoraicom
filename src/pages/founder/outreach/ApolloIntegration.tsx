@@ -387,12 +387,55 @@ export default function ApolloIntegration() {
     const { data, error } = await supabase.functions.invoke("apollo-sync-enrich", { body: { run_id: runId } });
     setBusy(null);
     if (error) {
-      toast({ title: "Enrichment failed", description: error.message, variant: "destructive" });
+      const message = error.message || "Enrichment failed";
+      const isPoorFit = message.includes("segment_fit_poor") || message.toLowerCase().includes("does not match");
+      if (isPoorFit && confirm("Apollo blocked enrichment because the search results do not match the segment taxonomy. Force enrichment anyway and spend credits?")) {
+        setBusy(`enrich-${runId}`);
+        const retry = await supabase.functions.invoke("apollo-sync-enrich", { body: { run_id: runId, force: true } });
+        setBusy(null);
+        if (retry.error) {
+          toast({ title: "Enrichment failed", description: retry.error.message, variant: "destructive" });
+          return;
+        }
+        const r = (retry.data as EnrichmentRunResponse) ?? {};
+        toast({ title: "Enrichment complete (forced)", description: `Imported ${r.imported ?? 0} • emails ${r.emails_returned ?? 0}` });
+        loadAll();
+        return;
+      }
+      toast({ title: "Enrichment failed", description: message, variant: "destructive" });
       return;
     }
     const result = (data as EnrichmentRunResponse) ?? {};
     toast({ title: "Enrichment complete", description: `Imported ${result.imported ?? 0} • emails returned ${result.emails_returned ?? 0} • skipped no-email ${result.skipped_no_email ?? 0} • duplicates ${result.duplicate ?? 0} • suppressed ${result.suppressed ?? 0}` });
     loadAll();
+  }
+
+  async function cancelRun(runId: string) {
+    if (!confirm("Discard this sync run? Leads will remain in the table for review but no enrichment credits will be spent.")) return;
+    const { error } = await supabase
+      .from("apollo_sync_runs")
+      .update({ status: "cancelled", completed_at: new Date().toISOString() })
+      .eq("id", runId);
+    if (error) {
+      toast({ title: "Cancel failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Sync run cancelled" });
+    loadAll();
+  }
+
+  async function saveSegmentEdits(segment: Segment, updates: Partial<Segment>) {
+    const { error } = await supabase
+      .from("apollo_sync_segments")
+      .update(updates)
+      .eq("id", segment.id);
+    if (error) {
+      toast({ title: "Update failed", description: error.message, variant: "destructive" });
+      return false;
+    }
+    toast({ title: "Segment updated" });
+    loadAll();
+    return true;
   }
 
   const selectedDiagnostics = diagnosticsByBusiness[selectedBusiness];
