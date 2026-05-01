@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
+import nodemailer from "npm:nodemailer@6.9.14";
 import { ImapFlow } from "npm:imapflow@1.0.164";
 
 const corsHeaders = {
@@ -189,48 +189,38 @@ async function sendViaIonosSmtp(
     `Content-Transfer-Encoding: 8bit\r\n` +
     `\r\n` +
     body;
-  let client: SMTPClient | null = null;
-  let sendOk = false;
+  // Use nodemailer (matches outreach-send-test). nodemailer cleanly handles
+  // IONOS SMTP including STARTTLS on 587 and implicit TLS on 465.
+  let transporter: ReturnType<typeof nodemailer.createTransport> | null = null;
   try {
-    client = new SMTPClient({
-      connection: {
-        hostname: c.smtp_host as string,
-        port, tls: isSSL,
-        auth: { username: c.smtp_username as string, password: c.smtp_password as string },
-      },
+    transporter = nodemailer.createTransport({
+      host: c.smtp_host as string,
+      port,
+      secure: isSSL,           // true => implicit TLS (465)
+      requireTLS: !isSSL,      // force STARTTLS on 587
+      auth: { user: c.smtp_username as string, pass: c.smtp_password as string },
+      connectionTimeout: 15000,
+      greetingTimeout: 15000,
+      socketTimeout: 20000,
     });
-    await withTimeout(
-      client.send({
+    const info = await withTimeout(
+      transporter.sendMail({
         from: fromHeader,
-        to, replyTo, subject, content: body,
+        to,
+        replyTo,
+        subject,
+        text: body,
         headers: { "Message-ID": messageId },
       }),
       PER_SEND_BUDGET_MS,
       "SMTP_SEND",
     );
-    sendOk = true;
-    return { ok: true, messageId, rfc822, fromAddress: fromEmail };
+    const finalMessageId = (info?.messageId as string | undefined) ?? messageId;
+    return { ok: true, messageId: finalMessageId, rfc822, fromAddress: fromEmail };
   } catch (e) {
-    const msg = (e as Error).message;
-    // If denomailer throws AFTER the message was already accepted (typically
-    // an "invalid cmd" during QUIT), do not falsely mark the send as failed.
-    if (sendOk) {
-      console.warn("[outreach-send-worker] post-send smtp error ignored:", msg);
-      return { ok: true, messageId, rfc822, fromAddress: fromEmail };
-    }
-    return { ok: false, error: msg };
+    return { ok: false, error: (e as Error).message };
   } finally {
-    if (client) {
-      try {
-        // denomailer's close() is sync in some versions and returns undefined.
-        const maybe = client.close() as unknown;
-        if (maybe && typeof (maybe as Promise<void>).then === "function") {
-          await withTimeout(maybe as Promise<void>, 3_000, "SMTP_CLOSE");
-        }
-      } catch (closeErr) {
-        console.warn("[outreach-send-worker] smtp close error ignored:", (closeErr as Error).message);
-      }
-    }
+    try { transporter?.close(); } catch { /* ignore */ }
   }
 }
 
