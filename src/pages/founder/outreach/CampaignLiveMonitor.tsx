@@ -33,6 +33,12 @@ type QueueItem = {
   id: string; contact_id: string; campaign_id: string; sequence_step: number;
   scheduled_at: string; status: string; inbox_id: string | null;
   block_reason: string | null; sent_at: string | null; retry_count: number | null;
+  smtp_accepted_at?: string | null;
+  saved_to_sent_at?: string | null;
+  provider_message_id?: string | null;
+  provider_response?: string | null;
+  send_error?: string | null;
+  delivery_kind?: string | null;
 };
 type Inbound = {
   id: string; from_email: string; subject: string | null; received_at: string;
@@ -124,7 +130,7 @@ const CampaignLiveMonitor = () => {
         // Queue for the campaign
         const { data: q } = await supabase
           .from("email_queue")
-          .select("id,contact_id,campaign_id,sequence_step,scheduled_at,status,inbox_id,block_reason,sent_at,retry_count")
+          .select("id,contact_id,campaign_id,sequence_step,scheduled_at,status,inbox_id,block_reason,sent_at,retry_count,smtp_accepted_at,saved_to_sent_at,provider_message_id,provider_response,send_error,delivery_kind")
           .eq("campaign_id", camp.id)
           .order("scheduled_at", { ascending: false }).limit(100);
         const qItems = (q as QueueItem[] | null) ?? [];
