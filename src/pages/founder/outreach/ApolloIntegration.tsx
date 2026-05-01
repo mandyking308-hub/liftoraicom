@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "@/hooks/use-toast";
 import FounderLayout from "@/components/founder/FounderLayout";
-import { AlertTriangle, CheckCircle2, KeyRound, Loader2, Play, RefreshCw, ShieldAlert, Trash2, Wand2, Info } from "lucide-react";
+import { AlertTriangle, CalendarClock, CheckCircle2, KeyRound, Loader2, Play, RefreshCw, ShieldAlert, Trash2, Wand2, Info } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
