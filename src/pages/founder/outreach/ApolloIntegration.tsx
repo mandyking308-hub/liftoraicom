@@ -763,6 +763,12 @@ export default function ApolloIntegration() {
     loadAll();
   }, [loadAll]);
 
+  useEffect(() => {
+    const onRefresh = () => loadAll();
+    window.addEventListener("apollo:refresh", onRefresh);
+    return () => window.removeEventListener("apollo:refresh", onRefresh);
+  }, [loadAll]);
+
   const connectionByBusiness = useMemo(
     () => Object.fromEntries(connections.map((connection) => [connection.business_name, connection])),
     [connections],
