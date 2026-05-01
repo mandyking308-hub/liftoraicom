@@ -613,15 +613,28 @@ export default function ApolloIntegration() {
                             <TableCell>{segment.business_name}</TableCell>
                             <TableCell className="font-medium">{segment.segment_name}</TableCell>
                             <TableCell><Badge variant="outline">{segment.mode}</Badge></TableCell>
-                            <TableCell><code className="text-xs">{segment.saved_list_id ?? "—"}</code></TableCell>
+                            <TableCell>
+                              {segment.mode === "saved_list" ? (
+                                <code className="text-xs">{segment.saved_list_id ?? "⚠ none — segment will return generic results"}</code>
+                              ) : (
+                                <code className="text-xs break-all">
+                                  {Object.keys(segment.search_criteria ?? {}).length === 0
+                                    ? "⚠ empty criteria"
+                                    : `${Object.keys(segment.search_criteria).length} filter(s)`}
+                                </code>
+                              )}
+                            </TableCell>
                             <TableCell>{segment.max_contacts_per_run}</TableCell>
                             <TableCell>{segment.hold_for_approval ? "✓" : "—"}</TableCell>
                             <TableCell>
                               <div className="space-y-2">
-                                <Button size="sm" onClick={() => runSearch(segment.id)} disabled={!canRun || busy === `run-${segment.id}`}>
-                                  {busy === `run-${segment.id}` ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <Play className="mr-1 h-3 w-3" />}
-                                  Run search
-                                </Button>
+                                <div className="flex flex-wrap gap-2">
+                                  <Button size="sm" onClick={() => runSearch(segment.id)} disabled={!canRun || busy === `run-${segment.id}`}>
+                                    {busy === `run-${segment.id}` ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <Play className="mr-1 h-3 w-3" />}
+                                    Run search
+                                  </Button>
+                                  <EditSegmentDialog segment={segment} onSave={(u) => saveSegmentEdits(segment, u)} />
+                                </div>
                                 {!canRun && (
                                   <div className="flex items-start gap-2 text-xs text-muted-foreground">
                                     <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
