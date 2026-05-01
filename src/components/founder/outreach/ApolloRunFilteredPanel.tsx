@@ -8,6 +8,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { Loader2, X } from "lucide-react";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { CheckCircle2, AlertTriangle } from "lucide-react";
 
 type Stage =
   | "ready_to_stage"
@@ -37,6 +39,17 @@ type Row = {
 
 type Campaign = { id: string; campaign_name: string; business_name: string; status: string };
 
+type SenderStatus = {
+  hello_active: boolean;
+  hello_ready: string | null;
+  hello_paused: string | null;
+  hello_daily_limit: number | null;
+  hello_sent_today: number | null;
+  music_active: boolean | null;
+  campaign_status: string | null;
+  sequence_steps: number;
+};
+
 type Props = {
   /** When provided, restricts to BCRs currently in this stage. */
   requiredStage?: Stage;
@@ -60,6 +73,8 @@ export default function ApolloRunFilteredPanel({ requiredStage, heading, subtitl
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [campaignId, setCampaignId] = useState<string>("");
   const [staging, setStaging] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [senderStatus, setSenderStatus] = useState<SenderStatus | null>(null);
 
   const load = useCallback(async () => {
     if (!runId) return;
@@ -190,7 +205,7 @@ export default function ApolloRunFilteredPanel({ requiredStage, heading, subtitl
     setSearchParams(next, { replace: true });
   }
 
-  async function stageSelected() {
+  async function openStageConfirm() {
     if (!campaignId) {
       toast({ title: "Pick a campaign", description: "Choose a campaign before staging.", variant: "destructive" });
       return;
@@ -200,12 +215,33 @@ export default function ApolloRunFilteredPanel({ requiredStage, heading, subtitl
       toast({ title: "Nothing to stage", description: "Select at least one contact with a relationship row.", variant: "destructive" });
       return;
     }
-    if (
-      !confirm(
-        `Stage ${targetIds.length} contact(s) to campaign? This only marks them as staged with hold-for-approval. No emails are sent.`,
-      )
-    )
-      return;
+
+    // Load sender + campaign + sequence status for the confirmation panel.
+    const business = businessName ?? rows[0]?.business_name ?? "Neon Candy";
+    const [{ data: hello }, { data: music }, { data: camp }, { data: seq }] = await Promise.all([
+      supabase.from("inboxes").select("active,live_readiness,paused_reason,daily_send_limit,emails_sent_today").eq("business_name", business).eq("email_address", "hello@neoncandy.online").maybeSingle(),
+      supabase.from("inboxes").select("active").eq("business_name", business).eq("email_address", "music@neoncandy.net").maybeSingle(),
+      supabase.from("outreach_campaigns").select("status").eq("id", campaignId).maybeSingle(),
+      supabase.from("outreach_sequences").select("step_number").eq("campaign_id", campaignId),
+    ]);
+    const h = hello as any | null;
+    setSenderStatus({
+      hello_active: !!h?.active,
+      hello_ready: h?.live_readiness ?? null,
+      hello_paused: h?.paused_reason ?? null,
+      hello_daily_limit: h?.daily_send_limit ?? null,
+      hello_sent_today: h?.emails_sent_today ?? null,
+      music_active: (music as any)?.active ?? null,
+      campaign_status: (camp as any)?.status ?? null,
+      sequence_steps: (seq ?? []).length,
+    });
+    setConfirmOpen(true);
+  }
+
+  async function confirmStage() {
+    if (!campaignId) return;
+    const targetIds = rows.filter((r) => selected[r.contact_id] && r.bcr_id).map((r) => r.bcr_id!) as string[];
+    if (targetIds.length === 0) return;
     setStaging(true);
     const { error } = await supabase
       .from("business_contact_relationships")
@@ -216,6 +252,7 @@ export default function ApolloRunFilteredPanel({ requiredStage, heading, subtitl
       } as never)
       .in("id", targetIds);
     setStaging(false);
+    setConfirmOpen(false);
     if (error) {
       toast({ title: "Stage failed", description: error.message, variant: "destructive" });
       return;
@@ -270,7 +307,7 @@ export default function ApolloRunFilteredPanel({ requiredStage, heading, subtitl
                 ))}
               </SelectContent>
             </Select>
-            <Button size="sm" onClick={stageSelected} disabled={staging || selectedIds.length === 0 || !campaignId}>
+            <Button size="sm" onClick={openStageConfirm} disabled={staging || selectedIds.length === 0 || !campaignId}>
               {staging ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : null}
               Stage selected to campaign ({selectedIds.length})
             </Button>
@@ -352,7 +389,113 @@ export default function ApolloRunFilteredPanel({ requiredStage, heading, subtitl
           Looking for the source run? <Link to="/founder/outreach/apollo" className="text-primary underline">Open Apollo Integration</Link>
         </p>
       </CardContent>
+
+      <StageConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        count={selectedIds.length}
+        businessName={businessName ?? rows[0]?.business_name ?? "Neon Candy"}
+        campaignName={campaigns.find((c) => c.id === campaignId)?.campaign_name ?? "—"}
+        sender={senderStatus}
+        onConfirm={confirmStage}
+        staging={staging}
+      />
     </Card>
+  );
+}
+
+function StageConfirmDialog({
+  open,
+  onOpenChange,
+  count,
+  businessName,
+  campaignName,
+  sender,
+  onConfirm,
+  staging,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  count: number;
+  businessName: string;
+  campaignName: string;
+  sender: SenderStatus | null;
+  onConfirm: () => void;
+  staging: boolean;
+}) {
+  const helloOk = !!sender?.hello_active && sender?.hello_ready === "live_ready" && !sender?.hello_paused;
+  const musicOk = sender?.music_active === false || sender?.music_active === null;
+  const seqOk = sender?.sequence_steps === 4;
+  const campaignOk = sender?.campaign_status === "active";
+  const allOk = helloOk && musicOk && seqOk && campaignOk;
+
+  const Row = ({ ok, children }: { ok: boolean; children: React.ReactNode }) => (
+    <div className="flex items-start gap-2 py-1 text-sm">
+      {ok ? (
+        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
+      ) : (
+        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+      )}
+      <div className="flex-1">{children}</div>
+    </div>
+  );
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Confirm staging — {count} contact{count === 1 ? "" : "s"}</DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          <div className="rounded-md border bg-muted/30 p-3">
+            <div className="text-xs uppercase text-muted-foreground">Staging summary</div>
+            <ul className="mt-2 space-y-1 text-sm">
+              <li>Number of contacts being staged: <strong>{count}</strong></li>
+              <li>Business: <strong>{businessName}</strong></li>
+              <li>Campaign: <strong>{campaignName}</strong></li>
+              <li>Sender: <strong>hello@neoncandy.online</strong></li>
+              <li>Sequence steps: <strong>Day 0, Day 3, Day 7, Day 14</strong></li>
+            </ul>
+          </div>
+
+          <div className="rounded-md border p-3">
+            <div className="mb-1 text-xs uppercase text-muted-foreground">Sender & guardrails</div>
+            <Row ok={helloOk}>
+              Inbox status: <strong>{sender?.hello_ready ?? "unknown"}</strong>
+              {sender?.hello_paused ? <span className="text-destructive"> · paused: {sender.hello_paused}</span> : null}
+              {sender ? <span className="text-muted-foreground"> · {sender.hello_sent_today ?? 0}/{sender.hello_daily_limit ?? "?"} sent today</span> : null}
+            </Row>
+            <Row ok={musicOk}>
+              <strong>music@neoncandy.net</strong> inactive
+              {sender?.music_active ? <span className="text-destructive"> — currently still active, fix before staging</span> : null}
+            </Row>
+            <Row ok={true}>Real SMTP only — no simulated sending</Row>
+            <Row ok={true}>Sending will obey ramp / daily / send-window limits</Row>
+            <Row ok={true}>Contacts will not all necessarily send immediately</Row>
+            <Row ok={true}>Replies will stop follow-ups automatically</Row>
+            <Row ok={true}>Bounces and unsubscribes will suppress contacts</Row>
+            <Row ok={true}>AI replies require Founder approval</Row>
+            <Row ok={seqOk}>4-step sequence configured ({sender?.sequence_steps ?? 0}/4)</Row>
+            <Row ok={campaignOk}>Campaign status: <strong>{sender?.campaign_status ?? "unknown"}</strong></Row>
+          </div>
+
+          {!allOk && (
+            <div className="rounded-md border border-amber-500/40 bg-amber-500/5 p-3 text-xs">
+              One or more guardrails are not green. You can still stage, but review the warnings above first.
+            </div>
+          )}
+        </div>
+
+        <DialogFooter>
+          <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={staging}>Cancel</Button>
+          <Button onClick={onConfirm} disabled={staging || count === 0}>
+            {staging ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : null}
+            Stage selected contacts into campaign
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
