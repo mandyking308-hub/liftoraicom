@@ -360,12 +360,12 @@ export default function ApolloRunFilteredPanel({ requiredStage, heading, subtitl
             </Select>
             <Button size="sm" onClick={openStageConfirm} disabled={staging || selectedIds.length === 0 || !campaignId}>
               {staging ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : null}
-              Stage selected to campaign ({selectedIds.length})
+              Stage into campaign queue ({selectedIds.length})
             </Button>
           </div>
         </div>
         <p className="text-[11px] text-muted-foreground">
-          Staging only updates the contact's pipeline stage and links the chosen campaign. Hold-for-approval remains on. No emails are queued or sent.
+          Staging flips the contacts to <strong>staged + campaign_eligible</strong> AND creates Step 1–4 queue rows against the campaign sender. Step 1 anchors at the next 09:00 UTC; Step 2/3/4 are scheduled follow-ups that still require a real SMTP parent before sending.
         </p>
 
         <div className="overflow-hidden rounded-md border">
