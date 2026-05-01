@@ -1558,6 +1558,8 @@ export type Database = {
           created_at: string
           direction: Database["public"]["Enums"]["communication_direction"]
           id: string
+          ignored_for_send_check: boolean
+          ignored_reason: string | null
           inbox_id: string | null
           message: string
           timestamp: string
@@ -1569,6 +1571,8 @@ export type Database = {
           created_at?: string
           direction: Database["public"]["Enums"]["communication_direction"]
           id?: string
+          ignored_for_send_check?: boolean
+          ignored_reason?: string | null
           inbox_id?: string | null
           message?: string
           timestamp?: string
@@ -1580,6 +1584,8 @@ export type Database = {
           created_at?: string
           direction?: Database["public"]["Enums"]["communication_direction"]
           id?: string
+          ignored_for_send_check?: boolean
+          ignored_reason?: string | null
           inbox_id?: string | null
           message?: string
           timestamp?: string
