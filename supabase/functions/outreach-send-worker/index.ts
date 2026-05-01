@@ -677,6 +677,41 @@ Deno.serve(async (req) => {
       } catch (err) {
         // Persist error on the queue row so operators can see it
         const errMsg = (err as Error).message;
+
+        // ===== PROVIDER DAILY-LIMIT INTERCEPT =====
+        // Treat IONOS "450 Mail send limit exceeded" as a clean reschedule,
+        // NOT a failure. Stop sending from this inbox for the rest of the day.
+        if (isProviderDailyLimitError(errMsg)) {
+          const retryAt = nextSendWindowIso();
+          if (item.inbox_id) {
+            await supabase.rpc("inbox_set_provider_blocked", {
+              _inbox_id: item.inbox_id,
+              _blocked_until: retryAt,
+              _reason: "PROVIDER_DAILY_LIMIT_REACHED",
+            }).then(() => {}, () => {});
+            providerBlockedInboxes.set(item.inbox_id, {
+              until: retryAt,
+              reason: "PROVIDER_DAILY_LIMIT_REACHED",
+            });
+          }
+          await supabase.from("email_queue").update({
+            status: "delayed",
+            block_reason: "PROVIDER_DAILY_LIMIT_REACHED",
+            scheduled_at: retryAt,
+            last_attempt_at: new Date().toISOString(),
+            send_error: null,
+            provider_response: `Delayed: IONOS daily limit reached at attempt time, retry at ${retryAt}`,
+          }).eq("id", item.id);
+          await supabase.from("activity_log").insert({
+            event_type: "send_delayed",
+            description: `Queue ${item.id} delayed: PROVIDER_DAILY_LIMIT_REACHED until ${retryAt}`,
+            entity_type: "email_queue", entity_id: item.id,
+          });
+          delayed += 1;
+          providerLimitReachedAny = true;
+          continue;
+        }
+
         if (firstErrors.length < 5) firstErrors.push({ queue_id: item.id, error: errMsg });
         await supabase.from("email_queue")
           .update({
