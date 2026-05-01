@@ -440,6 +440,24 @@ Deno.serve(async (req) => {
           throw new Error(providerError ?? "SMTP send failed");
         }
 
+        // ===== LIVE-MODE INTEGRITY GATE =====
+        // For live mode, refuse to mark sent unless we have proof of SMTP transmission.
+        if (isLive) {
+          const okSmtp = useReal && realSendOk && !!providerMessageId;
+          if (!okSmtp) {
+            await supabase.from("email_queue")
+              .update({
+                status: "blocked",
+                block_reason: "LIVE_CAMPAIGN_SIMULATED_INBOX_BLOCKED",
+                delivery_kind: useReal ? "smtp_real" : "simulated",
+                send_error: "Live mode requires smtp_real + smtp_accepted_at + provider_message_id",
+                last_attempt_at: new Date().toISOString(),
+              })
+              .eq("id", item.id);
+            blocked += 1; touchedCampaigns.add(item.campaign_id); continue;
+          }
+        }
+
         await supabase.from("email_events").insert({
           contact_id: item.contact_id,
           event_type: "sent",
