@@ -336,11 +336,14 @@ Deno.serve(async (req) => {
         // Only finalized statuses are imported/skipped_no_email/suppressed/error; others should revert.
       }
     }
-    await supabase.from("apollo_leads")
-      .update({ status: "has_email" })
-      .eq("run_id", run.id)
-      .eq("status", "enriching")
-      .catch(() => {});
+    try {
+      await supabase.from("apollo_leads")
+        .update({ status: "has_email" })
+        .eq("run_id", run.id)
+        .eq("status", "enriching");
+    } catch (_) {
+      // ignore reset errors
+    }
 
     // Increment cumulative counters across resumes.
     const newAttempted = (run.enrichment_attempted ?? 0) + attempted;
