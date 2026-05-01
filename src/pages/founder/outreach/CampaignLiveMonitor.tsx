@@ -121,7 +121,8 @@ const CampaignLiveMonitor = () => {
           "id,email_address,business_name,active,provider_type,live_readiness," +
           "inbound_status,inbound_polling_enabled,monitored_mailbox,daily_send_limit," +
           "current_send_count,emails_sent_today,last_sent_at,last_test_send_at," +
-          "last_test_send_status,last_error_message,reply_to_email")
+          "last_test_send_status,last_error_message,reply_to_email," +
+          "provider_blocked_until,provider_blocked_reason")
         .eq("business_name", businessName);
       const inboxList = ((ix as unknown) as InboxRow[] | null) ?? [];
       setAllInboxes(inboxList);
