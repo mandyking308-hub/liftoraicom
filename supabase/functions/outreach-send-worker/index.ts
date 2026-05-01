@@ -222,7 +222,11 @@ async function sendViaIonosSmtp(
   } finally {
     if (client) {
       try {
-        await withTimeout(client.close(), 3_000, "SMTP_CLOSE");
+        // denomailer's close() is sync in some versions and returns undefined.
+        const maybe = client.close() as unknown;
+        if (maybe && typeof (maybe as Promise<void>).then === "function") {
+          await withTimeout(maybe as Promise<void>, 3_000, "SMTP_CLOSE");
+        }
       } catch (closeErr) {
         console.warn("[outreach-send-worker] smtp close error ignored:", (closeErr as Error).message);
       }
