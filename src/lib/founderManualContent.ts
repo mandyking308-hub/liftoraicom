@@ -198,24 +198,57 @@ legitimate first-touch emails.
 
 ### 0.15 Current Send-Worker Status
 
-- The earlier \`outreach-send-worker\` crash from \`denomailer\`'s
-  *invalid cmd* during SMTP \`QUIT\` has been fixed (swapped to
-  \`nodemailer\`, added unhandledrejection/error shields, and only
-  records communications after a successful SMTP accept).
-- The worker now boots and completes its run cleanly.
-- **16 real SMTP sends were delivered today via \`hello@neoncandy.online\`**
-  with \`delivery_kind=smtp_real\`, \`smtp_accepted_at\` populated, and a
-  valid IONOS \`provider_message_id\`.
-- **Outstanding issues:**
-  1. **IONOS provider rate limit** — IONOS returned
-     \`450 Mail send limit exceeded\` on subsequent sends. This is the
-     new-mailbox 24h rolling cap, not a Liftor bug. Resolves on its own
-     as the rolling window slides; can be raised via IONOS support.
-  2. **IMAP APPEND to Sent folder** — \`saved_to_sent_at\` is null on all
-     16 sends. Emails are delivered to recipients but copies are not yet
-     appearing in the IONOS webmail "Sent" view. Cosmetic, not a
-     deliverability issue. Needs a fix in the worker's IMAP APPEND code
-     path.
+### 0.15 Current Send-Worker Status — **FINAL SEND PROOF ACHIEVED (1 May 2026)**
+
+**Real SMTP campaign send is now proven end-to-end.**
+
+- **9 real campaign emails sent today via \`hello@neoncandy.online\`.**
+  Every successful send recorded:
+  - \`delivery_kind = smtp_real\`
+  - \`smtp_accepted_at\` populated
+  - \`provider_message_id\` populated (valid IONOS id)
+  - No \`music@neoncandy.net\` involvement
+  - No simulated send path
+- IONOS then enforced its provider-side daily ramp limit and returned
+  \`450 Mail send limit exceeded\`, which stopped the 10th attempt.
+  Remaining Step 1 rows are delayed for retry after the provider reset.
+
+**Fixes completed to reach this proof:**
+
+- \`crm-send-check\` now ignores simulated / failed / no-SMTP
+  communications for the \`RECENT_COMMUNICATION_24H\` check.
+- New \`communications.ignored_for_send_check\` boolean column added
+  (with \`ignored_reason\` text).
+- **25** false outbound communication rows marked
+  \`ignored_for_send_check = true\`.
+- Ghost \`contacts.last_contacted_at\` values cleared where no real SMTP
+  backed them.
+- **65** falsely-blocked Step 1 rows reset to \`pending\`.
+- \`outreach-send-worker\` replaced \`denomailer\` with \`nodemailer\`.
+- The *invalid cmd* / *Bad resource ID* crash during SMTP \`QUIT\` is
+  resolved; the worker boots and completes its run cleanly.
+- Communications are only logged **after** a successful SMTP accept, so
+  failed attempts can no longer create new ghost 24h blocks.
+
+**Remaining known issue (cosmetic, non-blocking):**
+
+- **IMAP APPEND to IONOS Sent folder failed**, so sent emails may not
+  yet appear in the IONOS Webmail "Sent Items" view.
+  - Deliverability is unaffected — SMTP acceptance is recorded with a
+    valid \`provider_message_id\`.
+  - To fix later for audit visibility: rework the worker's IMAP APPEND
+    code path so each accepted send is appended to the IONOS Sent folder
+    and \`saved_to_sent_at\` (or \`append_error\`) is populated.
+
+**Current operational state:**
+
+- Real sending works.
+- Today's IONOS quota is exhausted.
+- Remaining Step 1 emails will continue tomorrow after the IONOS rolling
+  window resets.
+- **Tuesday review:** open Live Monitor and Daily Monitor and verify
+  sent count, replies, bounces, AI drafts awaiting approval, and the
+  remaining Step 1/2/3/4 queue depth.
 
 ### 0.16 Immediate Next Operational Target
 
