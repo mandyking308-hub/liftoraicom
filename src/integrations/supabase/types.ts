@@ -2010,14 +2010,20 @@ export type Database = {
           campaign_id: string
           contact_id: string
           created_at: string
+          delivery_kind: string | null
           id: string
           inbox_id: string | null
           last_attempt_at: string | null
           priority: number
+          provider_message_id: string | null
+          provider_response: string | null
           retry_count: number
+          saved_to_sent_at: string | null
           scheduled_at: string
+          send_error: string | null
           sent_at: string | null
           sequence_step: number
+          smtp_accepted_at: string | null
           status: Database["public"]["Enums"]["email_queue_status"]
           tracking_pixel_id: string | null
           tracking_token: string | null
@@ -2028,14 +2034,20 @@ export type Database = {
           campaign_id: string
           contact_id: string
           created_at?: string
+          delivery_kind?: string | null
           id?: string
           inbox_id?: string | null
           last_attempt_at?: string | null
           priority?: number
+          provider_message_id?: string | null
+          provider_response?: string | null
           retry_count?: number
+          saved_to_sent_at?: string | null
           scheduled_at?: string
+          send_error?: string | null
           sent_at?: string | null
           sequence_step: number
+          smtp_accepted_at?: string | null
           status?: Database["public"]["Enums"]["email_queue_status"]
           tracking_pixel_id?: string | null
           tracking_token?: string | null
@@ -2046,14 +2058,20 @@ export type Database = {
           campaign_id?: string
           contact_id?: string
           created_at?: string
+          delivery_kind?: string | null
           id?: string
           inbox_id?: string | null
           last_attempt_at?: string | null
           priority?: number
+          provider_message_id?: string | null
+          provider_response?: string | null
           retry_count?: number
+          saved_to_sent_at?: string | null
           scheduled_at?: string
+          send_error?: string | null
           sent_at?: string | null
           sequence_step?: number
+          smtp_accepted_at?: string | null
           status?: Database["public"]["Enums"]["email_queue_status"]
           tracking_pixel_id?: string | null
           tracking_token?: string | null
