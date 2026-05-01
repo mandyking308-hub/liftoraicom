@@ -166,6 +166,38 @@ const OutreachQueue = () => {
 
         <SimulatedSendingBanner />
 
+        {lastResult && (
+          <Card className="border-primary/30">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Last worker run</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm">
+              <p className="text-foreground">{lastResult.note}</p>
+              <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+                <div><div className="text-xs text-muted-foreground">Invoked</div><div className="font-medium">{lastResult.invoked ? "Yes" : "No"}</div></div>
+                <div><div className="text-xs text-muted-foreground">Processed</div><div className="font-medium">{lastResult.processed}</div></div>
+                <div><div className="text-xs text-muted-foreground">Sent</div><div className="font-medium text-primary">{lastResult.sent}</div></div>
+                <div><div className="text-xs text-muted-foreground">Blocked</div><div className="font-medium">{lastResult.blocked}</div></div>
+                <div><div className="text-xs text-muted-foreground">Delayed</div><div className="font-medium">{lastResult.delayed}</div></div>
+                <div><div className="text-xs text-muted-foreground">Daily remaining</div><div className="font-medium">{lastResult.dailyRemaining ?? "—"}</div></div>
+              </div>
+              {lastResult.blockReasons.length > 0 && (
+                <div>
+                  <div className="text-xs text-muted-foreground mb-1">Top block / delay reasons</div>
+                  <div className="flex flex-wrap gap-2">
+                    {lastResult.blockReasons.map((b) => (
+                      <Badge key={b.reason} variant="secondary">{b.reason} · {b.count}</Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {lastResult.nextSendAt && (
+                <p className="text-xs text-muted-foreground">Next scheduled send: {new Date(lastResult.nextSendAt).toLocaleString()}</p>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
         <Card>
           <CardHeader><CardTitle className="text-base">Recent Queue Items ({items.length})</CardTitle></CardHeader>
           <CardContent className="p-0">
