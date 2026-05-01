@@ -69,8 +69,8 @@ Deno.serve(async (req) => {
       apiKey = dec as string;
     }
 
-    // 1) Search API probe — minimal mixed_people search, page 1, 1 per page
-    const search = await probe(apiKey, "/mixed_people/search", { page: 1, per_page: 1 });
+    // 1) Search API probe — minimal mixed_people api_search, page 1, 1 per page
+    const search = await probe(apiKey, "/mixed_people/api_search", { page: 1, per_page: 1 });
     let searchStatus = "ok";
     let searchError = "";
     if (search.status === 403) {
