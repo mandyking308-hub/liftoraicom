@@ -32,6 +32,15 @@ const OutreachQueue = () => {
   const [filter, setFilter] = useState<typeof STATUSES[number]>("pending");
   const [contacts, setContacts] = useState<Record<string, ContactLite>>({});
   const [running, setRunning] = useState(false);
+  const [lastResult, setLastResult] = useState<null | {
+    invoked: boolean;
+    processed: number; sent: number; blocked: number; delayed: number; deferred?: number; failed?: number;
+    chained?: boolean;
+    dailyRemaining: number | null;
+    blockReasons: { reason: string; count: number }[];
+    nextSendAt: string | null;
+    note: string;
+  }>(null);
 
   useEffect(() => { void load(); }, []);
 
@@ -58,9 +67,78 @@ const OutreachQueue = () => {
     try {
       const { data, error } = await supabase.functions.invoke("outreach-send-worker", { body: {} });
       if (error) throw error;
-      toast.success(`Processed ${data?.processed ?? 0} · sent ${data?.sent ?? 0} · blocked ${data?.blocked ?? 0}`);
+
+      // Pull diagnostics: due items, today's sends, top block reasons, next send time
+      const nowIso = new Date().toISOString();
+      const [{ count: dueCount }, { data: inboxRows }, { data: nextRow }, { data: recentBlocks }] = await Promise.all([
+        supabase.from("email_queue").select("id", { count: "exact", head: true })
+          .in("status", ["pending", "delayed", "throttled"]).lte("scheduled_at", nowIso),
+        supabase.from("inboxes").select("daily_send_limit,current_send_count")
+          .eq("live_readiness", "live_ready"),
+        supabase.from("email_queue").select("scheduled_at")
+          .in("status", ["pending", "delayed"]).order("scheduled_at", { ascending: true }).limit(1).maybeSingle(),
+        supabase.from("email_queue").select("block_reason")
+          .in("status", ["blocked", "delayed"]).not("block_reason", "is", null).order("scheduled_at", { ascending: false }).limit(50),
+      ]);
+
+      let dailyRemaining: number | null = null;
+      if (inboxRows && inboxRows.length > 0) {
+        dailyRemaining = inboxRows.reduce((acc, r: { daily_send_limit: number; current_send_count: number }) =>
+          acc + Math.max(0, (r.daily_send_limit ?? 0) - (r.current_send_count ?? 0)), 0);
+      }
+
+      const reasonMap: Record<string, number> = {};
+      (recentBlocks ?? []).forEach((r: { block_reason: string }) => {
+        if (!r.block_reason) return;
+        reasonMap[r.block_reason] = (reasonMap[r.block_reason] ?? 0) + 1;
+      });
+      const blockReasons = Object.entries(reasonMap)
+        .map(([reason, count]) => ({ reason, count }))
+        .sort((a, b) => b.count - a.count).slice(0, 5);
+
+      const nextSendAt = (nextRow as { scheduled_at: string } | null)?.scheduled_at ?? null;
+
+      // Build a human note
+      let note = "";
+      const sent = data?.sent ?? 0;
+      const processed = data?.processed ?? 0;
+      if ((dueCount ?? 0) === 0) {
+        note = nextSendAt
+          ? `No due items yet. Next send scheduled for ${new Date(nextSendAt).toLocaleString()}.`
+          : "No due items in the queue.";
+      } else if (dailyRemaining === 0) {
+        note = "Daily limit reached. Sends resume tomorrow at 08:00 UTC.";
+      } else if (sent === 0 && processed === 0) {
+        note = "Worker invoked but no items were processed in this run. Check block reasons below.";
+      } else {
+        note = `Worker invoked. Sent ${sent} of ${processed} processed.${data?.deferred ? ` ${data.deferred} deferred to next chain.` : ""}`;
+      }
+
+      setLastResult({
+        invoked: true,
+        processed,
+        sent,
+        blocked: data?.blocked ?? 0,
+        delayed: data?.delayed ?? 0,
+        deferred: data?.deferred ?? 0,
+        failed: data?.failed ?? 0,
+        chained: !!data?.chained,
+        dailyRemaining,
+        blockReasons,
+        nextSendAt,
+        note,
+      });
+
+      if (sent > 0) toast.success(`Sent ${sent} · processed ${processed}`);
+      else toast(note);
+
       void load();
     } catch (err) {
+      setLastResult({
+        invoked: false, processed: 0, sent: 0, blocked: 0, delayed: 0,
+        dailyRemaining: null, blockReasons: [], nextSendAt: null,
+        note: `Worker invocation failed: ${(err as Error).message}`,
+      });
       toast.error((err as Error).message);
     } finally { setRunning(false); }
   }
