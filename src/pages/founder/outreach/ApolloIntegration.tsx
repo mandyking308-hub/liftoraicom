@@ -10,6 +10,25 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { toast } from "@/hooks/use-toast";
 import FounderLayout from "@/components/founder/FounderLayout";
 import { AlertTriangle, CheckCircle2, KeyRound, Loader2, Play, RefreshCw, ShieldAlert, Trash2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+const NEONCANDY_MONTH1_CRITERIA = {
+  person_titles: [
+    "DJ",
+    "music curator",
+    "playlist curator",
+    "music editor",
+    "music programmer",
+    "music blogger",
+    "music supervisor",
+    "A&R",
+    "music marketing",
+    "label manager",
+  ],
+  contact_email_status: ["verified"],
+};
 
 type Connection = {
   id: string;
@@ -56,6 +75,46 @@ type Run = {
   started_at: string;
   completed_at: string | null;
 };
+
+type RunDiagnostics = {
+  raw_people_found?: number;
+  has_email_true?: number;
+  has_email_false?: number;
+  has_email_missing?: number;
+  email_status_verified?: number;
+  email_status_unavailable?: number;
+  sample_titles?: Array<{ title: string | null; company: string | null }>;
+  detected_tags?: string[];
+  fit_matched?: number;
+  fit_ratio?: number;
+  segment_fit?: "good" | "weak" | "poor";
+  enrichment_skip_reason?: string | null;
+  search_filter_contact_email_status?: string[] | null;
+  search_mode?: string;
+  saved_list_id?: string | null;
+};
+
+function extractDiagnostics(errors: unknown): RunDiagnostics | null {
+  if (!Array.isArray(errors)) return null;
+  for (const entry of errors) {
+    if (typeof entry !== "string") continue;
+    const trimmed = entry.trim();
+    if (!trimmed.startsWith("{")) continue;
+    try {
+      return JSON.parse(trimmed) as RunDiagnostics;
+    } catch {
+      // ignore
+    }
+  }
+  return null;
+}
+
+function fitBadgeVariant(fit?: string): "default" | "secondary" | "destructive" | "outline" {
+  if (fit === "good") return "default";
+  if (fit === "weak") return "secondary";
+  if (fit === "poor") return "destructive";
+  return "outline";
+}
 
 type DiagnosticCategory =
   | "ok"
