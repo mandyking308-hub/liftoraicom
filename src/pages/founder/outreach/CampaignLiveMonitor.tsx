@@ -392,6 +392,26 @@ const CampaignLiveMonitor = () => {
           <StatCard label="Next scheduled send" value={nextScheduled ? relTime(nextScheduled.scheduled_at) : "—"} sub={nextScheduled ? fmtTime(nextScheduled.scheduled_at) : ""} />
         </div>
 
+        {/* Provider daily-limit banner */}
+        {(() => {
+          const until = inbox?.provider_blocked_until ? new Date(inbox.provider_blocked_until) : null;
+          const isBlocked = !!until && until.getTime() > Date.now();
+          if (!isBlocked || !inbox) return null;
+          return (
+            <div className="rounded-lg border border-amber-500/40 bg-amber-500/5 p-3 text-sm">
+              <p className="font-medium text-amber-500">
+                IONOS daily provider limit reached for{" "}
+                <code className="font-mono">{inbox.email_address}</code>.
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Remaining sends are delayed until {fmtTime(inbox.provider_blocked_until)} ({relTime(inbox.provider_blocked_until)}).
+                The worker will not retry this inbox today unless an admin manually overrides.
+                Reason: <code className="font-mono">{inbox.provider_blocked_reason ?? "PROVIDER_DAILY_LIMIT_REACHED"}</code>.
+              </p>
+            </div>
+          );
+        })()}
+
         {/* Active campaign movement */}
         {(() => {
           const activeStep1Pending = queue.filter(
