@@ -8,6 +8,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { Loader2, X } from "lucide-react";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { CheckCircle2, AlertTriangle } from "lucide-react";
 
 type Stage =
   | "ready_to_stage"
@@ -36,6 +38,17 @@ type Row = {
 };
 
 type Campaign = { id: string; campaign_name: string; business_name: string; status: string };
+
+type SenderStatus = {
+  hello_active: boolean;
+  hello_ready: string | null;
+  hello_paused: string | null;
+  hello_daily_limit: number | null;
+  hello_sent_today: number | null;
+  music_active: boolean | null;
+  campaign_status: string | null;
+  sequence_steps: number;
+};
 
 type Props = {
   /** When provided, restricts to BCRs currently in this stage. */
