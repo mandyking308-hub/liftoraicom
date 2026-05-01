@@ -373,6 +373,56 @@ const CampaignLiveMonitor = () => {
           </div>
         )}
 
+        {/* NeonCandy inbox sanity */}
+        {businessName.trim().toLowerCase() === "neon candy" && (
+          (() => {
+            const VALID = "hello@neoncandy.online";
+            const INVALID = "music@neoncandy.net";
+            const invalidQueue = queue.filter((q) => {
+              const ix = allInboxes.find((i) => i.id === q.inbox_id);
+              return ix && ix.email_address.toLowerCase() === INVALID;
+            });
+            const validInbox = allInboxes.find((i) => i.email_address.toLowerCase() === VALID);
+            const invalidInbox = allInboxes.find((i) => i.email_address.toLowerCase() === INVALID);
+            const ok = invalidQueue.length === 0 && (!invalidInbox || !invalidInbox.active);
+            return (
+              <Card className={ok ? "" : "border-destructive/40"}>
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    {ok ? <CheckCircle2 className="h-4 w-4 text-primary" /> : <XCircle className="h-4 w-4 text-destructive" />}
+                    Neon Candy inbox sanity
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="text-sm space-y-2">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded border p-2">
+                      <p className="text-xs text-muted-foreground">Valid sender</p>
+                      <p className="font-mono">{VALID}</p>
+                      <p className="text-xs">{validInbox ? `${validInbox.live_readiness} · ${validInbox.active ? "active" : "inactive"}` : "missing"}</p>
+                    </div>
+                    <div className="rounded border p-2">
+                      <p className="text-xs text-muted-foreground">Disabled sender</p>
+                      <p className="font-mono">{INVALID}</p>
+                      <p className="text-xs">
+                        {invalidInbox
+                          ? `${invalidInbox.live_readiness} · ${invalidInbox.active ? "ACTIVE — must be disabled" : "disabled ✓"}`
+                          : "not present ✓"}
+                      </p>
+                    </div>
+                  </div>
+                  {invalidQueue.length > 0 ? (
+                    <div className="rounded border border-destructive/40 bg-destructive/5 p-2 text-xs">
+                      <strong>{invalidQueue.length}</strong> queue row(s) still attached to {INVALID}. These will be hard-blocked by the worker (NEONCANDY_INVALID_INBOX) until reassigned.
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">No queue rows still attached to the disabled inbox.</p>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })()
+        )}
+
         {/* Verify sent mail */}
         <Card>
           <CardHeader>
