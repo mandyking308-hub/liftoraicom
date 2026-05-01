@@ -13,6 +13,219 @@ import { AlertTriangle, CheckCircle2, KeyRound, Loader2, Play, RefreshCw, Shield
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+
+const MUSIC_TARGET_KEYWORDS = [
+  "playlist curator", "music curator", "independent curator", "music programmer",
+  "music editor", "editorial curator", "music discovery", "music blogger",
+  "music influencer", "music journalist", "music supervisor", "a&r", "dj",
+  "radio", "label manager", "music marketing", "dance creator", "reaction creator", "ai music",
+];
+
+type LeadRow = {
+  id: string;
+  apollo_person_id: string;
+  first_name: string | null;
+  last_name: string | null;
+  title: string | null;
+  company: string | null;
+  country: string | null;
+  has_email_flag: boolean;
+  search_payload: any;
+};
+
+function obfuscateLast(last: string | null): string {
+  if (!last) return "—";
+  const trimmed = last.trim();
+  if (trimmed.length <= 1) return trimmed;
+  return `${trimmed[0]}${"•".repeat(Math.min(trimmed.length - 1, 5))}`;
+}
+
+function fitTagsFor(lead: LeadRow): string[] {
+  const hay = `${lead.title ?? ""} ${lead.company ?? ""}`.toLowerCase();
+  return MUSIC_TARGET_KEYWORDS.filter((kw) => hay.includes(kw));
+}
+
+function CandidatePreview({
+  runId,
+  onCountsReady,
+}: {
+  runId: string;
+  onCountsReady?: (counts: { total: number; toEnrich: number; matched: number; unmatched: number }) => void;
+}) {
+  const [open, setOpen] = useState(true);
+  const [leads, setLeads] = useState<LeadRow[] | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [filter, setFilter] = useState("");
+  const [tagFilter, setTagFilter] = useState<string>("all");
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("apollo_leads")
+        .select("id, apollo_person_id, first_name, last_name, title, company, country, has_email_flag, search_payload")
+        .eq("run_id", runId)
+        .order("created_at", { ascending: true });
+      if (cancelled) return;
+      if (error) {
+        toast({ title: "Could not load preview", description: error.message, variant: "destructive" });
+        setLeads([]);
+      } else {
+        setLeads((data as LeadRow[]) ?? []);
+      }
+      setLoading(false);
+    }
+    load();
+    return () => { cancelled = true; };
+  }, [runId]);
+
+  const enriched = useMemo(() => (leads ?? []).map((l) => ({ lead: l, tags: fitTagsFor(l) })), [leads]);
+
+  const counts = useMemo(() => {
+    const total = enriched.length;
+    const toEnrich = enriched.filter((e) => e.lead.has_email_flag).length;
+    const matched = enriched.filter((e) => e.tags.length > 0).length;
+    return { total, toEnrich, matched, unmatched: total - matched };
+  }, [enriched]);
+
+  useEffect(() => {
+    if (leads !== null) onCountsReady?.(counts);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [counts.total, counts.toEnrich, counts.matched, leads]);
+
+  const filtered = useMemo(() => {
+    const q = filter.trim().toLowerCase();
+    return enriched.filter(({ lead, tags }) => {
+      if (tagFilter !== "all" && !tags.includes(tagFilter)) return false;
+      if (!q) return true;
+      return (
+        (lead.title ?? "").toLowerCase().includes(q) ||
+        (lead.company ?? "").toLowerCase().includes(q) ||
+        (lead.first_name ?? "").toLowerCase().includes(q)
+      );
+    });
+  }, [enriched, filter, tagFilter]);
+
+  const availableTags = useMemo(() => {
+    const set = new Set<string>();
+    enriched.forEach((e) => e.tags.forEach((t) => set.add(t)));
+    return Array.from(set).sort();
+  }, [enriched]);
+
+  return (
+    <Collapsible open={open} onOpenChange={setOpen} className="rounded-md border">
+      <CollapsibleTrigger asChild>
+        <button type="button" className="flex w-full items-center justify-between px-3 py-2 text-left text-sm font-medium hover:bg-muted/40">
+          <span>Preview candidates before enrichment ({counts.total})</span>
+          <span className="text-xs text-muted-foreground">{open ? "Hide" : "Show"}</span>
+        </button>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="space-y-3 border-t p-3">
+        <div className="rounded-md border border-primary/30 bg-primary/5 p-2 text-xs">
+          Review these candidates before spending Apollo enrichment credits.
+        </div>
+        <div className="grid grid-cols-2 gap-2 text-xs md:grid-cols-4">
+          <Stat label="Total found" value={counts.total} />
+          <Stat label="has_email=true" value={counts.toEnrich} />
+          <Stat label="Will enrich" value={counts.toEnrich} />
+          <Stat label="Est. credits" value={counts.toEnrich} />
+          <Stat label="Fit matched" value={counts.matched} />
+          <Stat label="Unmatched" value={counts.unmatched} />
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Input
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            placeholder="Filter by title / company / first name (e.g. DJ, curator, music)"
+            className="h-8 max-w-sm text-xs"
+          />
+          <div className="flex flex-wrap gap-1">
+            {["DJ", "curator", "music"].map((q) => (
+              <Button key={q} type="button" size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={() => setFilter(q)}>
+                title: {q}
+              </Button>
+            ))}
+            <Button type="button" size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => { setFilter(""); setTagFilter("all"); }}>
+              Clear
+            </Button>
+          </div>
+          {availableTags.length > 0 && (
+            <Select value={tagFilter} onValueChange={setTagFilter}>
+              <SelectTrigger className="h-8 w-[180px] text-xs"><SelectValue placeholder="Fit tag" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All fit tags</SelectItem>
+                {availableTags.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          )}
+        </div>
+        {loading ? (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground"><Loader2 className="h-3 w-3 animate-spin" /> Loading candidates…</div>
+        ) : filtered.length === 0 ? (
+          <div className="text-xs text-muted-foreground">No candidates match these filters.</div>
+        ) : (
+          <div className="max-h-96 overflow-auto rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-xs">Person ID</TableHead>
+                  <TableHead className="text-xs">First</TableHead>
+                  <TableHead className="text-xs">Last</TableHead>
+                  <TableHead className="text-xs">Title</TableHead>
+                  <TableHead className="text-xs">Company</TableHead>
+                  <TableHead className="text-xs">Location</TableHead>
+                  <TableHead className="text-xs">Fit tags</TableHead>
+                  <TableHead className="text-xs">has_email</TableHead>
+                  <TableHead className="text-xs">Enrich?</TableHead>
+                  <TableHead className="text-xs">Credits</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filtered.map(({ lead, tags }) => {
+                  const willEnrich = lead.has_email_flag;
+                  const location = lead.country
+                    ?? (lead.search_payload?.city ? `${lead.search_payload.city}${lead.search_payload?.country ? ", " + lead.search_payload.country : ""}` : null)
+                    ?? lead.search_payload?.state
+                    ?? null;
+                  return (
+                    <TableRow key={lead.id}>
+                      <TableCell className="font-mono text-[10px]">{lead.apollo_person_id.slice(0, 10)}…</TableCell>
+                      <TableCell className="text-xs">{lead.first_name ?? "—"}</TableCell>
+                      <TableCell className="text-xs">{obfuscateLast(lead.last_name)}</TableCell>
+                      <TableCell className="text-xs">{lead.title ?? "—"}</TableCell>
+                      <TableCell className="text-xs">{lead.company ?? "—"}</TableCell>
+                      <TableCell className="text-xs">{location ?? "—"}</TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {tags.length > 0
+                            ? tags.map((t) => <Badge key={t} variant="secondary" className="text-[10px]">{t}</Badge>)
+                            : <span className="text-xs text-muted-foreground">none</span>}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={lead.has_email_flag ? "default" : "outline"} className="text-[10px]">
+                          {lead.has_email_flag ? "yes" : "no"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={willEnrich ? "default" : "outline"} className="text-[10px]">
+                          {willEnrich ? "yes" : "skip"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-xs">{willEnrich ? 1 : 0}</TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </CollapsibleContent>
+    </Collapsible>
+  );
+}
 
 const NEONCANDY_MONTH1_CRITERIA = {
   person_titles: [
@@ -704,31 +917,16 @@ export default function ApolloIntegration() {
                       const fit = diag?.segment_fit;
                       const showFitWarning = run.status === "awaiting_enrichment_approval" && fit && fit !== "good";
                       return (
-                      <div key={run.id} className="space-y-2 rounded-md border p-4">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <div className="flex items-center gap-2 font-medium">
-                              {run.business_name}
-                              {fit && <Badge variant={fitBadgeVariant(fit)}>fit: {fit}</Badge>}
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              {new Date(run.started_at).toLocaleString()} • <Badge variant="outline">{run.status}</Badge>
-                              {diag?.search_mode && <> • mode: <code>{diag.search_mode}</code></>}
-                              {diag?.saved_list_id && <> • list: <code>{diag.saved_list_id}</code></>}
-                            </div>
-                          </div>
-                          {run.status === "awaiting_enrichment_approval" && (
-                            <div className="flex gap-2">
-                              <Button size="sm" variant="outline" onClick={() => cancelRun(run.id)}>
-                                <Trash2 className="mr-1 h-3 w-3" /> Discard
-                              </Button>
-                              <Button size="sm" onClick={() => approveEnrichment(run.id)} disabled={busy === `enrich-${run.id}` || fit === "poor"}>
-                                {busy === `enrich-${run.id}` ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : null}
-                                Approve enrichment ({run.people_with_email_flag} credits)
-                              </Button>
-                            </div>
-                          )}
-                        </div>
+                      <RunCard
+                        key={run.id}
+                        run={run}
+                        diag={diag}
+                        fit={fit}
+                        showFitWarning={!!showFitWarning}
+                        busy={busy}
+                        onCancel={() => cancelRun(run.id)}
+                        onApprove={() => approveEnrichment(run.id)}
+                      >
                         {showFitWarning && (
                           <div className="flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm">
                             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
@@ -795,7 +993,7 @@ export default function ApolloIntegration() {
                             <pre className="mt-1 overflow-auto rounded bg-muted p-2">{JSON.stringify(run.errors, null, 2)}</pre>
                           </details>
                         )}
-                      </div>
+                      </RunCard>
                       );
                     })}
                   </div>
@@ -814,6 +1012,74 @@ function Stat({ label, value }: { label: string; value: number }) {
     <div className="rounded-md border p-2">
       <div className="text-xs text-muted-foreground">{label}</div>
       <div className="text-lg font-semibold">{value}</div>
+    </div>
+  );
+}
+
+function RunCard({
+  run,
+  diag,
+  fit,
+  showFitWarning,
+  busy,
+  onCancel,
+  onApprove,
+  children,
+}: {
+  run: Run;
+  diag: RunDiagnostics | null;
+  fit: string | undefined;
+  showFitWarning: boolean;
+  busy: string | null;
+  onCancel: () => void;
+  onApprove: () => void;
+  children: React.ReactNode;
+}) {
+  const [previewCounts, setPreviewCounts] = useState<{ total: number; toEnrich: number; matched: number; unmatched: number } | null>(null);
+  const isAwaiting = run.status === "awaiting_enrichment_approval";
+  const previewReady = previewCounts !== null && previewCounts.total > 0;
+  const credits = previewCounts?.toEnrich ?? run.people_with_email_flag;
+  const approveDisabled = busy === `enrich-${run.id}` || fit === "poor" || !previewReady || credits === 0;
+
+  return (
+    <div className="space-y-2 rounded-md border p-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="flex items-center gap-2 font-medium">
+            {run.business_name}
+            {fit && <Badge variant={fitBadgeVariant(fit)}>fit: {fit}</Badge>}
+          </div>
+          <div className="text-xs text-muted-foreground">
+            {new Date(run.started_at).toLocaleString()} • <Badge variant="outline">{run.status}</Badge>
+            {diag?.search_mode && <> • mode: <code>{diag.search_mode}</code></>}
+            {diag?.saved_list_id && <> • list: <code>{diag.saved_list_id}</code></>}
+          </div>
+        </div>
+        {isAwaiting && (
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={onCancel}>
+              <Trash2 className="mr-1 h-3 w-3" /> Discard
+            </Button>
+          </div>
+        )}
+      </div>
+      {children}
+      {isAwaiting && (
+        <div className="space-y-2 border-t pt-3">
+          <CandidatePreview runId={run.id} onCountsReady={setPreviewCounts} />
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-xs text-muted-foreground">
+              {previewReady
+                ? "Review the candidates above before spending Apollo credits."
+                : "Candidate preview required before enrichment."}
+            </p>
+            <Button size="sm" onClick={onApprove} disabled={approveDisabled}>
+              {busy === `enrich-${run.id}` ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : null}
+              Approve enrichment ({credits} credits)
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
