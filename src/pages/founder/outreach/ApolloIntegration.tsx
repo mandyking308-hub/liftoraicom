@@ -1173,7 +1173,7 @@ export default function ApolloIntegration() {
                       const fit = diag?.segment_fit;
                       const showFitWarning = run.status === "awaiting_enrichment_approval" && fit && fit !== "good";
                       return (
-                      <RunCard
+                       <RunCard
                         key={run.id}
                         run={run}
                         diag={diag}
@@ -1181,7 +1181,7 @@ export default function ApolloIntegration() {
                         showFitWarning={!!showFitWarning}
                         busy={busy}
                         onCancel={() => cancelRun(run.id)}
-                        onApprove={() => approveEnrichment(run.id)}
+                        onApprove={(ids) => approveEnrichment(run.id, ids)}
                       >
                         {showFitWarning && (
                           <div className="flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm">
@@ -1288,13 +1288,14 @@ function RunCard({
   showFitWarning: boolean;
   busy: string | null;
   onCancel: () => void;
-  onApprove: () => void;
+  onApprove: (selectedIds: string[]) => void;
   children: React.ReactNode;
 }) {
-  const [previewCounts, setPreviewCounts] = useState<{ total: number; toEnrich: number; matched: number; unmatched: number } | null>(null);
+  const [preview, setPreview] = useState<PreviewSelection | null>(null);
   const isAwaiting = run.status === "awaiting_enrichment_approval";
-  const previewReady = previewCounts !== null && previewCounts.total > 0;
-  const credits = previewCounts?.toEnrich ?? run.people_with_email_flag;
+  const previewReady = preview !== null && preview.total > 0;
+  const credits = preview?.creditsToSpend ?? 0;
+  const selectedIds = preview?.selectedIds ?? [];
   const approveDisabled = busy === `enrich-${run.id}` || fit === "poor" || !previewReady || credits === 0;
 
   return (
@@ -1322,14 +1323,16 @@ function RunCard({
       {children}
       {isAwaiting && (
         <div className="space-y-2 border-t pt-3">
-          <CandidatePreview runId={run.id} onCountsReady={setPreviewCounts} />
+          <CandidatePreview runId={run.id} onSelectionReady={setPreview} />
           <div className="flex items-center justify-between gap-2">
             <p className="text-xs text-muted-foreground">
-              {previewReady
-                ? "Review the candidates above before spending Apollo credits."
-                : "Candidate preview required before enrichment."}
+              {!previewReady
+                ? "Candidate preview required before enrichment."
+                : credits === 0
+                ? "All candidates already exist in the CRM with known emails — no enrichment needed."
+                : `Will enrich ${credits} new candidate(s); ${preview?.existingSkipped ?? 0} existing skipped, ${preview?.possibleHeld ?? 0} possible held, ${preview?.creditsSaved ?? 0} credits saved.`}
             </p>
-            <Button size="sm" onClick={onApprove} disabled={approveDisabled}>
+            <Button size="sm" onClick={() => onApprove(selectedIds)} disabled={approveDisabled}>
               {busy === `enrich-${run.id}` ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : null}
               Approve enrichment ({credits} credits)
             </Button>
