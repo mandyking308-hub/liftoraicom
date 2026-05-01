@@ -121,7 +121,7 @@ export function NeonCandyMonitor() {
         : Promise.resolve({ count: 0 } as any),
       supabase.from("email_events").select("id,contact_id,event_type,timestamp").eq("event_type", "replied").gte("timestamp", todayStart),
       supabase.from("email_events").select("id,contact_id,event_type,timestamp").eq("event_type", "bounced").gte("timestamp", todayStart),
-      supabase.from("email_events").select("id,contact_id,event_type,timestamp").eq("event_type", "unsubscribed").gte("timestamp", todayStart),
+      supabase.from("contacts").select("id,global_suppression_at,global_suppression_reason").eq("is_globally_suppressed", true).gte("global_suppression_at", todayStart),
       supabase.from("ai_drafts").select("id", { count: "exact", head: true }).eq("status", "pending"),
     ] as const);
 
@@ -142,7 +142,7 @@ export function NeonCandyMonitor() {
       { label: "Replies today", value: (replyEventsToday ?? []).length },
       { label: "AI drafts waiting", value: aiDraftsPending ?? 0, tone: (aiDraftsPending ?? 0) > 0 ? "warn" : undefined },
       { label: "Bounces today", value: (bounceEventsToday ?? []).length, tone: (bounceEventsToday ?? []).length > 0 ? "warn" : undefined },
-      { label: "Unsubscribes today", value: (unsubEventsToday ?? []).length },
+      { label: "Suppressed today", value: (unsubEventsToday ?? []).length },
     ]);
 
     // ----- WEEK summary (last 7 days incl. today) -----
@@ -163,7 +163,7 @@ export function NeonCandyMonitor() {
       supabase.from("apollo_automation_runs").select("status,enrichment_credits_used,contacts_new,contacts_updated,qualified,errors,run_date").eq("business_name", BUSINESS).gte("run_date", weekStartIso.slice(0, 10)),
       supabase.from("business_contact_relationships").select("id", { count: "exact", head: true }).eq("business_name", BUSINESS).gte("created_at", weekStartIso),
       supabase.from("business_contact_relationships").select("id", { count: "exact", head: true }).eq("business_name", BUSINESS).gte("updated_at", weekStartIso),
-      supabase.from("business_contact_relationships").select("id", { count: "exact", head: true }).eq("business_name", BUSINESS).eq("current_stage", "qualified"),
+      supabase.from("business_contact_relationships").select("id", { count: "exact", head: true }).eq("business_name", BUSINESS).in("current_stage", ["ready_to_stage", "staged"]),
       supabase.from("business_contact_relationships").select("id", { count: "exact", head: true }).eq("business_name", BUSINESS).eq("current_stage", "staged"),
       campaignId
         ? supabase.from("email_queue").select("id", { count: "exact", head: true }).eq("campaign_id", campaignId).eq("status", "sent").gte("sent_at", weekStartIso)
@@ -176,7 +176,7 @@ export function NeonCandyMonitor() {
         : Promise.resolve({ count: 0 } as any),
       supabase.from("email_events").select("id").eq("event_type", "replied").gte("timestamp", weekStartIso),
       supabase.from("email_events").select("id").eq("event_type", "bounced").gte("timestamp", weekStartIso),
-      supabase.from("email_events").select("id").eq("event_type", "unsubscribed").gte("timestamp", weekStartIso),
+      supabase.from("contacts").select("id").eq("is_globally_suppressed", true).gte("global_suppression_at", weekStartIso),
       supabase.from("apollo_automation_runs").select("id,errors,status,run_date").eq("business_name", BUSINESS).eq("status", "failed").gte("run_date", weekStartIso.slice(0, 10)),
     ] as const);
 
@@ -188,14 +188,14 @@ export function NeonCandyMonitor() {
       { label: "Credits spent (7d)", value: weekCredits },
       { label: "Contacts imported", value: weekImports ?? 0 },
       { label: "Contacts updated", value: weekUpdates ?? 0 },
-      { label: "Qualified (current)", value: weekQualified ?? 0 },
+      { label: "Qualified pipeline", value: weekQualified ?? 0 },
       { label: "Staged (current)", value: weekStaged ?? 0 },
       { label: "Sent via " + SENDER, value: weekSent ?? 0, tone: "ok" },
       { label: "Pending in queue", value: weekPending ?? 0 },
       { label: "Follow-ups scheduled", value: weekFollowups ?? 0 },
       { label: "Replies (7d)", value: (weekReplies ?? []).length },
       { label: "Bounces (7d)", value: (weekBounces ?? []).length, tone: (weekBounces ?? []).length > 0 ? "warn" : undefined },
-      { label: "Unsubscribes (7d)", value: (weekUnsubs ?? []).length },
+      { label: "Suppressed (7d)", value: (weekUnsubs ?? []).length },
       { label: "Errors / failed runs", value: (weekErrors ?? []).length, tone: (weekErrors ?? []).length > 0 ? "bad" : "ok" },
     ]);
 
