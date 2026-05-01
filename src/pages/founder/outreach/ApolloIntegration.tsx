@@ -935,13 +935,18 @@ export default function ApolloIntegration() {
           </p>
         </div>
 
-        <Tabs defaultValue="connections">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
+            <TabsTrigger value="weekend">Weekend Pool</TabsTrigger>
             <TabsTrigger value="connections">Connections</TabsTrigger>
             <TabsTrigger value="segments">Sync Segments</TabsTrigger>
             <TabsTrigger value="runs">Sync Runs</TabsTrigger>
             <TabsTrigger value="monitor">Daily Monitor</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="weekend" className="space-y-4">
+            <WeekendPool onOpenRuns={() => setActiveTab("runs")} />
+          </TabsContent>
 
           <TabsContent value="connections" className="space-y-4">
             <Card>
