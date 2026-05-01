@@ -270,7 +270,12 @@ const CampaignLiveMonitor = () => {
   const usedToday = inbox?.emails_sent_today ?? inbox?.current_send_count ?? sentToday.length;
   const remaining = Math.max(0, dailyLimit - usedToday);
 
-  const filteredQueue = queue.filter((q) => queueFilter === "ALL" ? true : q.status === queueFilter).slice(0, 10);
+  const filteredQueue = queue.filter((q) => {
+    if (queueFilter === "ALL") return true;
+    if (queueFilter === "sent_real") return q.status === "sent" && q.delivery_kind === "smtp_real" && !!q.smtp_accepted_at;
+    if (queueFilter === "sent_sim") return q.status === "sent" && (q.delivery_kind !== "smtp_real" || !q.smtp_accepted_at);
+    return q.status === queueFilter;
+  }).slice(0, 10);
 
   const issues = useMemo(() => {
     const out: Array<{ type: string; severity: "high" | "med"; ts: string; what: string; suggest: string }> = [];
@@ -366,6 +371,56 @@ const CampaignLiveMonitor = () => {
               <span className="text-destructive font-medium">Daily send limit reached. Remaining sends will wait until the next send window.</span>
             )}
           </div>
+        )}
+
+        {/* NeonCandy inbox sanity */}
+        {businessName.trim().toLowerCase() === "neon candy" && (
+          (() => {
+            const VALID = "hello@neoncandy.online";
+            const INVALID = "music@neoncandy.net";
+            const invalidQueue = queue.filter((q) => {
+              const ix = allInboxes.find((i) => i.id === q.inbox_id);
+              return ix && ix.email_address.toLowerCase() === INVALID;
+            });
+            const validInbox = allInboxes.find((i) => i.email_address.toLowerCase() === VALID);
+            const invalidInbox = allInboxes.find((i) => i.email_address.toLowerCase() === INVALID);
+            const ok = invalidQueue.length === 0 && (!invalidInbox || !invalidInbox.active);
+            return (
+              <Card className={ok ? "" : "border-destructive/40"}>
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    {ok ? <CheckCircle2 className="h-4 w-4 text-primary" /> : <XCircle className="h-4 w-4 text-destructive" />}
+                    Neon Candy inbox sanity
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="text-sm space-y-2">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded border p-2">
+                      <p className="text-xs text-muted-foreground">Valid sender</p>
+                      <p className="font-mono">{VALID}</p>
+                      <p className="text-xs">{validInbox ? `${validInbox.live_readiness} · ${validInbox.active ? "active" : "inactive"}` : "missing"}</p>
+                    </div>
+                    <div className="rounded border p-2">
+                      <p className="text-xs text-muted-foreground">Disabled sender</p>
+                      <p className="font-mono">{INVALID}</p>
+                      <p className="text-xs">
+                        {invalidInbox
+                          ? `${invalidInbox.live_readiness} · ${invalidInbox.active ? "ACTIVE — must be disabled" : "disabled ✓"}`
+                          : "not present ✓"}
+                      </p>
+                    </div>
+                  </div>
+                  {invalidQueue.length > 0 ? (
+                    <div className="rounded border border-destructive/40 bg-destructive/5 p-2 text-xs">
+                      <strong>{invalidQueue.length}</strong> queue row(s) still attached to {INVALID}. These will be hard-blocked by the worker (NEONCANDY_INVALID_INBOX) until reassigned.
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">No queue rows still attached to the disabled inbox.</p>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })()
         )}
 
         {/* Verify sent mail */}
@@ -502,7 +557,7 @@ const CampaignLiveMonitor = () => {
             <Select value={queueFilter} onValueChange={setQueueFilter}>
               <SelectTrigger className="w-36 h-8"><SelectValue /></SelectTrigger>
               <SelectContent>
-                {["ALL", "pending", "sent", "failed", "blocked", "delayed"].map((s) => (
+                {["ALL", "pending", "sent_real", "sent_sim", "blocked", "delayed", "failed"].map((s) => (
                   <SelectItem key={s} value={s}>{s}</SelectItem>
                 ))}
               </SelectContent>
@@ -531,7 +586,19 @@ const CampaignLiveMonitor = () => {
                       </td>
                       <td className="p-2">{q.sequence_step}</td>
                       <td className="p-2 text-xs">{fmtTime(q.scheduled_at)}</td>
-                      <td className="p-2"><Badge variant={q.status === "sent" ? "default" : (q.status === "failed" || q.status === "blocked") ? "destructive" : "outline"}>{q.status}</Badge></td>
+                     <td className="p-2">
+                       {q.status === "sent" ? (
+                         q.delivery_kind === "smtp_real" && q.smtp_accepted_at ? (
+                           <Badge variant="default">sent (real)</Badge>
+                         ) : (
+                           <Badge variant="destructive">sent (sim)</Badge>
+                         )
+                       ) : (q.status === "failed" || q.status === "blocked") ? (
+                         <Badge variant="destructive">{q.status}</Badge>
+                       ) : (
+                         <Badge variant="outline">{q.status}</Badge>
+                       )}
+                     </td>
                       <td className="p-2 text-xs text-muted-foreground">{q.block_reason ?? "—"}</td>
                     </tr>
                   ))}

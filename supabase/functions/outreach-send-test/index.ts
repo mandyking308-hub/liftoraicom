@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import nodemailer from "npm:nodemailer@6.9.14";
+import { ImapFlow } from "npm:imapflow@1.0.164";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -96,6 +97,60 @@ Deno.serve(async (req) => {
       });
       console.log("[send-test] sendMail response messageId=", info.messageId, " response=", info.response);
       result = { ok: true, messageId: info.messageId };
+
+      // Best-effort APPEND copy to IONOS Sent folder (mirror worker behavior)
+      let sentFolder: string | null = null;
+      let appendError: string | null = null;
+      try {
+        const { data: imap } = await admin.rpc("get_inbox_imap_credentials", {
+          _inbox_id: inbox_id, _enc_key: encKey,
+        });
+        const ic = imap as Record<string, unknown> | null;
+        if (ic?.imap_host && ic?.imap_username && ic?.imap_password) {
+          const client = new ImapFlow({
+            host: ic.imap_host as string,
+            port: (ic.imap_port as number) ?? 993,
+            secure: ic.imap_ssl !== false,
+            auth: { user: ic.imap_username as string, pass: ic.imap_password as string },
+            logger: false,
+          });
+          await client.connect();
+          const list = await client.list();
+          for (const m of list as Array<{ path: string; specialUse?: string; flags?: any }>) {
+            const flags = Array.isArray(m.flags) ? m.flags : Array.from(m.flags ?? []);
+            if (m.specialUse === "\\Sent" || flags.includes("\\Sent")) { sentFolder = m.path; break; }
+          }
+          if (!sentFolder) {
+            for (const cand of ["Sent","Sent Items","INBOX.Sent","INBOX/Sent","Gesendet","Gesendete Objekte"]) {
+              const hit = (list as Array<{ path: string }>).find((m) => m.path.toLowerCase() === cand.toLowerCase());
+              if (hit) { sentFolder = hit.path; break; }
+            }
+          }
+          if (sentFolder) {
+            const rfc822 =
+              `From: ${fromName ? `${fromName} <${fromEmail}>` : fromEmail}\r\n` +
+              `To: ${to}\r\nReply-To: ${replyTo}\r\n` +
+              `Subject: NeonCandy Liftor SMTP test\r\n` +
+              `Message-ID: ${info.messageId}\r\nDate: ${new Date().toUTCString()}\r\n` +
+              `MIME-Version: 1.0\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n` +
+              `Real SMTP test from Liftor using ${fromEmail}.`;
+            await client.append(sentFolder, rfc822, ["\\Seen"], new Date());
+          } else {
+            appendError = "sent folder not found";
+          }
+          try { await client.logout(); } catch { /* ignore */ }
+        } else {
+          appendError = "imap creds incomplete";
+        }
+      } catch (e) {
+        appendError = (e as Error).message;
+      }
+      (result as any).delivery_kind = "smtp_real";
+      (result as any).smtp_accepted_at = new Date().toISOString();
+      (result as any).provider_message_id = info.messageId ?? null;
+      (result as any).saved_to_sent_folder = sentFolder;
+      (result as any).saved_to_sent_at = sentFolder && !appendError ? new Date().toISOString() : null;
+      (result as any).append_error = appendError;
     } catch (e) {
       const err = e as { message?: string; code?: string; responseCode?: number; command?: string };
       const raw = err.message ?? String(e);
