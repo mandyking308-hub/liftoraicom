@@ -522,6 +522,7 @@ type Segment = {
 
 type Run = {
   id: string;
+  segment_id: string;
   business_name: string;
   status: string;
   people_found: number;
@@ -529,6 +530,8 @@ type Run = {
   enrichment_attempted: number;
   emails_returned: number;
   contacts_imported: number;
+  contacts_new: number;
+  contacts_updated: number;
   contacts_skipped_no_email: number;
   contacts_duplicate: number;
   contacts_suppressed: number;
