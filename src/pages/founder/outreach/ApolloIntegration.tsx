@@ -1183,6 +1183,14 @@ export default function ApolloIntegration() {
                         onCancel={() => cancelRun(run.id)}
                         onApprove={(ids) => approveEnrichment(run.id, ids)}
                       >
+                        {run.status === "awaiting_enrichment_approval" && fit === "good" && (
+                          <div className="flex items-start gap-2 rounded-md border border-emerald-500/40 bg-emerald-500/10 p-3 text-sm">
+                            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
+                            <div className="font-medium">
+                              Good fit — candidates match {run.business_name === "Neon Candy" ? "NeonCandy Month 1" : "the segment"} music discovery criteria.
+                            </div>
+                          </div>
+                        )}
                         {showFitWarning && (
                           <div className="flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm">
                             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
@@ -1200,55 +1208,60 @@ export default function ApolloIntegration() {
                             </div>
                           </div>
                         )}
-                        <div className="grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
-                          <Stat label="Found" value={run.people_found} />
-                          <Stat label="Has email flag" value={run.people_with_email_flag} />
-                          <Stat label="Enriched" value={run.enrichment_attempted} />
-                          <Stat label="Emails returned" value={run.emails_returned} />
-                          <Stat label="Imported" value={run.contacts_imported} />
-                          <Stat label="Skipped no-email" value={run.contacts_skipped_no_email} />
-                          <Stat label="Duplicates" value={run.contacts_duplicate} />
-                          <Stat label="Suppressed" value={run.contacts_suppressed} />
-                          <Stat label="Qualified" value={run.qualified_count} />
-                          <Stat label="Maybe" value={run.maybe_count} />
-                          <Stat label="Not qualified" value={run.not_qualified_count} />
-                          <Stat label="Needs review" value={run.needs_review_count} />
-                        </div>
-                        {diag && (
-                          <div className="rounded-md border bg-muted/30 p-3 text-xs space-y-2">
-                            <div className="font-medium text-sm">Segment-fit diagnostics</div>
-                            <div className="grid gap-2 sm:grid-cols-2">
-                              <div>
-                                <div className="text-muted-foreground">Fit ratio</div>
-                                <div>{diag.fit_matched ?? 0} / {diag.raw_people_found ?? 0} ({Math.round(((diag.fit_ratio ?? 0) * 100))}%)</div>
-                              </div>
-                              <div>
-                                <div className="text-muted-foreground">Detected tags</div>
-                                <div className="flex flex-wrap gap-1">
-                                  {(diag.detected_tags && diag.detected_tags.length > 0)
-                                    ? diag.detected_tags.map((t) => <Badge key={t} variant="secondary">{t}</Badge>)
-                                    : <span className="text-muted-foreground">none</span>}
-                                </div>
-                              </div>
-                            </div>
-                            {diag.sample_titles && diag.sample_titles.length > 0 && (
-                              <div>
-                                <div className="text-muted-foreground">Sample (first 5)</div>
-                                <ul className="mt-1 list-disc pl-5">
-                                  {diag.sample_titles.map((s, idx) => (
-                                    <li key={idx}>{s.title ?? "—"} <span className="text-muted-foreground">@ {s.company ?? "—"}</span></li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
+                        {run.status !== "awaiting_enrichment_approval" && (
+                          <div className="grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
+                            <Stat label="Found" value={run.people_found} />
+                            <Stat label="Has email flag" value={run.people_with_email_flag} />
+                            <Stat label="Enriched" value={run.enrichment_attempted} />
+                            <Stat label="Emails returned" value={run.emails_returned} />
+                            <Stat label="Imported" value={run.contacts_imported} />
+                            <Stat label="Skipped no-email" value={run.contacts_skipped_no_email} />
+                            <Stat label="Duplicates" value={run.contacts_duplicate} />
+                            <Stat label="Suppressed" value={run.contacts_suppressed} />
+                            <Stat label="Qualified" value={run.qualified_count} />
+                            <Stat label="Maybe" value={run.maybe_count} />
+                            <Stat label="Not qualified" value={run.not_qualified_count} />
+                            <Stat label="Needs review" value={run.needs_review_count} />
                           </div>
                         )}
-                        {Array.isArray(run.errors) && run.errors.length > 0 && (
-                          <details className="text-xs">
-                            <summary className="cursor-pointer text-destructive">{run.errors.length} error(s)</summary>
-                            <pre className="mt-1 overflow-auto rounded bg-muted p-2">{JSON.stringify(run.errors, null, 2)}</pre>
-                          </details>
-                        )}
+                        <details className="rounded-md border bg-muted/20 px-3 py-2 text-xs">
+                          <summary className="cursor-pointer text-muted-foreground">Developer diagnostics</summary>
+                          <div className="mt-2 space-y-2">
+                            {diag ? (
+                              <div className="space-y-2">
+                                <div className="grid gap-2 sm:grid-cols-2">
+                                  <div>
+                                    <div className="text-muted-foreground">Fit ratio</div>
+                                    <div>{diag.fit_matched ?? 0} / {diag.raw_people_found ?? 0} ({Math.round(((diag.fit_ratio ?? 0) * 100))}%)</div>
+                                  </div>
+                                  <div>
+                                    <div className="text-muted-foreground">Detected tags</div>
+                                    <div className="flex flex-wrap gap-1">
+                                      {(diag.detected_tags && diag.detected_tags.length > 0)
+                                        ? diag.detected_tags.map((t) => <Badge key={t} variant="secondary">{t}</Badge>)
+                                        : <span className="text-muted-foreground">none</span>}
+                                    </div>
+                                  </div>
+                                </div>
+                                {diag.sample_titles && diag.sample_titles.length > 0 && (
+                                  <div>
+                                    <div className="text-muted-foreground">Sample (first 5)</div>
+                                    <ul className="mt-1 list-disc pl-5">
+                                      {diag.sample_titles.map((s, idx) => (
+                                        <li key={idx}>{s.title ?? "—"} <span className="text-muted-foreground">@ {s.company ?? "—"}</span></li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <div className="text-muted-foreground">No diagnostics captured.</div>
+                            )}
+                            {Array.isArray(run.errors) && run.errors.length > 0 && (
+                              <pre className="overflow-auto rounded bg-muted p-2">{JSON.stringify(run.errors, null, 2)}</pre>
+                            )}
+                          </div>
+                        </details>
                       </RunCard>
                       );
                     })}
@@ -1263,7 +1276,7 @@ export default function ApolloIntegration() {
   );
 }
 
-function Stat({ label, value }: { label: string; value: number }) {
+function Stat({ label, value }: { label: string; value: number | string }) {
   return (
     <div className="rounded-md border p-2">
       <div className="text-xs text-muted-foreground">{label}</div>
@@ -1322,7 +1335,27 @@ function RunCard({
       </div>
       {children}
       {isAwaiting && (
-        <div className="space-y-2 border-t pt-3">
+        <div className="space-y-3 border-t pt-3">
+          <div>
+            <h3 className="text-sm font-semibold">Review candidates before enrichment</h3>
+            <p className="text-xs text-muted-foreground">Review these Apollo candidates before spending enrichment credits.</p>
+          </div>
+          <div className="grid grid-cols-2 gap-2 text-xs md:grid-cols-4">
+            <Stat label="Found" value={run.people_found ?? 0} />
+            <Stat label="Has email" value={run.people_with_email_flag ?? 0} />
+            <Stat label="Segment fit" value={fit ?? "—"} />
+            <Stat label="New" value={preview?.newCount ?? 0} />
+            <Stat label="Existing in CRM" value={preview?.existingSkipped ?? 0} />
+            <Stat label="Possible duplicates" value={preview?.possibleHeld ?? 0} />
+            <Stat label="Selected" value={preview?.creditsToSpend ?? 0} />
+            <Stat label="Est. credits" value={preview?.creditsToSpend ?? 0} />
+          </div>
+          {!previewReady && (
+            <div className="flex items-start gap-2 rounded-md border border-amber-500/40 bg-amber-500/10 p-2 text-xs">
+              <Loader2 className="mt-0.5 h-3 w-3 shrink-0 animate-spin text-amber-500" />
+              <span>Duplicate check pending — enrichment approval disabled.</span>
+            </div>
+          )}
           <CandidatePreview runId={run.id} onSelectionReady={setPreview} />
           <div className="flex items-center justify-between gap-2">
             <p className="text-xs text-muted-foreground">
