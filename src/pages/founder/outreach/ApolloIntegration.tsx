@@ -518,6 +518,15 @@ type Segment = {
   max_contacts_per_run: number;
   hold_for_approval: boolean;
   is_active: boolean;
+  automation_enabled?: boolean;
+  schedule_cron?: string;
+  daily_search_cap?: number;
+  daily_enrichment_cap?: number;
+  auto_enrich?: boolean;
+  require_good_fit?: boolean;
+  email_only?: boolean;
+  skip_suppressed?: boolean;
+  last_scheduled_run_at?: string | null;
 };
 
 type Run = {
