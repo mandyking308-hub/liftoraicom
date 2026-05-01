@@ -350,9 +350,38 @@ Deno.serve(async (req) => {
       await supabase.rpc("recompute_campaign_metrics", { _campaign_id: cid });
     }
 
+    // ===== SELF-CHAIN =====
+    // If we deferred items OR there is still due work in the queue, fire a
+    // follow-up invocation (fire-and-forget) so the queue drains continuously
+    // within one logical "run" instead of waiting for the next cron tick.
+    let chained = false;
+    try {
+      let stillDue = deferred > 0;
+      if (!stillDue) {
+        const { count } = await supabase
+          .from("email_queue")
+          .select("id", { count: "exact", head: true })
+          .in("status", ["pending", "delayed", "throttled"])
+          .lte("scheduled_at", new Date().toISOString());
+        stillDue = (count ?? 0) > 0;
+      }
+      if (stillDue) {
+        // Fire-and-forget — do NOT await. The new invocation runs independently.
+        fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/outreach-send-worker`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+          },
+          body: JSON.stringify({ chained: true }),
+        }).catch(() => { /* ignore */ });
+        chained = true;
+      }
+    } catch { /* ignore chaining errors */ }
+
     return json({
       processed: due.length - deferred,
-      sent, blocked, failed, delayed, deferred,
+      sent, blocked, failed, delayed, deferred, chained,
       mode: systemMode,
       duration_ms: Date.now() - runStart,
     }, 200);
