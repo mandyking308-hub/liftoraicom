@@ -734,15 +734,18 @@ export type Database = {
           maybe_count: number
           needs_review_count: number
           not_qualified_count: number
+          page_fetched: number | null
           people_found: number
           people_with_email_flag: number
           qualified_count: number
           ready_to_stage_count: number
           search_pages_fetched: number
           segment_id: string
+          skipped_already_seen: number | null
           started_at: string
           status: Database["public"]["Enums"]["apollo_run_status"]
           triggered_by: string | null
+          unseen_in_batch: number | null
           updated_at: string
         }
         Insert: {
@@ -763,15 +766,18 @@ export type Database = {
           maybe_count?: number
           needs_review_count?: number
           not_qualified_count?: number
+          page_fetched?: number | null
           people_found?: number
           people_with_email_flag?: number
           qualified_count?: number
           ready_to_stage_count?: number
           search_pages_fetched?: number
           segment_id: string
+          skipped_already_seen?: number | null
           started_at?: string
           status?: Database["public"]["Enums"]["apollo_run_status"]
           triggered_by?: string | null
+          unseen_in_batch?: number | null
           updated_at?: string
         }
         Update: {
@@ -792,15 +798,18 @@ export type Database = {
           maybe_count?: number
           needs_review_count?: number
           not_qualified_count?: number
+          page_fetched?: number | null
           people_found?: number
           people_with_email_flag?: number
           qualified_count?: number
           ready_to_stage_count?: number
           search_pages_fetched?: number
           segment_id?: string
+          skipped_already_seen?: number | null
           started_at?: string
           status?: Database["public"]["Enums"]["apollo_run_status"]
           triggered_by?: string | null
+          unseen_in_batch?: number | null
           updated_at?: string
         }
         Relationships: [
@@ -815,11 +824,17 @@ export type Database = {
       }
       apollo_sync_segments: {
         Row: {
+          apollo_person_ids_enriched: string[]
+          apollo_person_ids_imported: string[]
+          apollo_person_ids_seen: string[]
+          apollo_person_ids_skipped_existing: string[]
+          apollo_person_ids_skipped_no_email: string[]
           auto_enrich: boolean
           auto_qualify: boolean
           automation_enabled: boolean
           business_name: string
           created_at: string
+          current_page: number
           daily_enrichment_cap: number
           daily_search_cap: number
           default_relevance_category: string | null
@@ -828,9 +843,11 @@ export type Database = {
           hold_for_approval: boolean
           id: string
           is_active: boolean
+          last_page_processed: number | null
           last_scheduled_run_at: string | null
           max_contacts_per_run: number
           mode: Database["public"]["Enums"]["apollo_segment_mode"]
+          next_page: number
           require_good_fit: boolean
           saved_list_id: string | null
           schedule_cron: string
@@ -840,11 +857,17 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          apollo_person_ids_enriched?: string[]
+          apollo_person_ids_imported?: string[]
+          apollo_person_ids_seen?: string[]
+          apollo_person_ids_skipped_existing?: string[]
+          apollo_person_ids_skipped_no_email?: string[]
           auto_enrich?: boolean
           auto_qualify?: boolean
           automation_enabled?: boolean
           business_name: string
           created_at?: string
+          current_page?: number
           daily_enrichment_cap?: number
           daily_search_cap?: number
           default_relevance_category?: string | null
@@ -853,9 +876,11 @@ export type Database = {
           hold_for_approval?: boolean
           id?: string
           is_active?: boolean
+          last_page_processed?: number | null
           last_scheduled_run_at?: string | null
           max_contacts_per_run?: number
           mode?: Database["public"]["Enums"]["apollo_segment_mode"]
+          next_page?: number
           require_good_fit?: boolean
           saved_list_id?: string | null
           schedule_cron?: string
@@ -865,11 +890,17 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          apollo_person_ids_enriched?: string[]
+          apollo_person_ids_imported?: string[]
+          apollo_person_ids_seen?: string[]
+          apollo_person_ids_skipped_existing?: string[]
+          apollo_person_ids_skipped_no_email?: string[]
           auto_enrich?: boolean
           auto_qualify?: boolean
           automation_enabled?: boolean
           business_name?: string
           created_at?: string
+          current_page?: number
           daily_enrichment_cap?: number
           daily_search_cap?: number
           default_relevance_category?: string | null
@@ -878,9 +909,11 @@ export type Database = {
           hold_for_approval?: boolean
           id?: string
           is_active?: boolean
+          last_page_processed?: number | null
           last_scheduled_run_at?: string | null
           max_contacts_per_run?: number
           mode?: Database["public"]["Enums"]["apollo_segment_mode"]
+          next_page?: number
           require_good_fit?: boolean
           saved_list_id?: string | null
           schedule_cron?: string
