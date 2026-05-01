@@ -341,7 +341,7 @@ export function NeonCandyMonitor() {
       { label: "Ready-to-stage queue exists", ok: (readyToStage ?? 0) >= 0, detail: `${readyToStage ?? 0} contacts ready` },
       { label: "Campaign staging: OK", ok: !!campaignId && (campaign as any)?.status === "active", detail: campaignId ? `Campaign active: ${CAMPAIGN_NAME}` : "Campaign missing or inactive" },
       { label: `Sender: ${SENDER} only`, ok: senderOk, detail: inbox ? `active=${inbox.active}, readiness=${inbox.live_readiness}` : "Inbox not found" },
-      { label: `${FORBIDDEN_SENDER} disabled`, ok: forbiddenOk, detail: forbidden ? `active=${(forbidden as any).active}` : "Not present" },
+      { label: `${FORBIDDEN_SENDER} — historical only (disabled sender)`, ok: forbiddenOk, detail: forbidden ? `active=${(forbidden as any).active} · audit-only, never used for sending` : "Not present" },
       { label: "Real SMTP only (no simulated sends)", ok: true, detail: "Confirmed: queue uses provider_message_id from real SMTP" },
       { label: "Follow-up sequence: OK (4 steps, Day 0/3/7/14)", ok: true, detail: "Verified in outreach_sequences" },
       { label: "Reply / bounce / unsubscribe protection", ok: true, detail: "Triggers cancel_queue_on_reply + handle_email_bounce active" },
