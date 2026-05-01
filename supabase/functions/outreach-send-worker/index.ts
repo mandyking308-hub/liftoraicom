@@ -7,12 +7,26 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const PER_RUN_LIMIT = 100;
+const PER_RUN_LIMIT = 25;
+// Hard wall-clock budget for this invocation. Edge Functions hard-cap at 150s
+// idle timeout; we stop accepting new sends well before that.
+const RUN_BUDGET_MS = 90_000;
+// Per-send hard cap (SMTP + sanity-check + DB writes).
+const PER_SEND_BUDGET_MS = 25_000;
 
-// Send variance: random jitter between sends to avoid pattern detection
+// Send variance: small jitter between sends to avoid pattern detection,
+// but bounded so we never exceed the run budget.
 function jitterMs(): number {
-  // 30s → 180s
-  return Math.floor(30_000 + Math.random() * 150_000);
+  // 2s → 8s
+  return Math.floor(2_000 + Math.random() * 6_000);
+}
+
+function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const t = setTimeout(() => reject(new Error(`${label}_TIMEOUT_${ms}ms`)), ms);
+    p.then((v) => { clearTimeout(t); resolve(v); },
+           (e) => { clearTimeout(t); reject(e); });
+  });
 }
 
 type InboxRow = {
@@ -44,22 +58,30 @@ async function sendViaIonosSmtp(
   const fromEmail = (c.from_email as string) || (c.smtp_username as string);
   const fromName = (c.from_name as string) || "";
   const replyTo = (c.reply_to_email as string) || fromEmail;
+  let client: SMTPClient | null = null;
   try {
-    const client = new SMTPClient({
+    client = new SMTPClient({
       connection: {
         hostname: c.smtp_host as string,
         port, tls: isSSL,
         auth: { username: c.smtp_username as string, password: c.smtp_password as string },
       },
     });
-    await client.send({
-      from: fromName ? `${fromName} <${fromEmail}>` : fromEmail,
-      to, replyTo, subject, content: body,
-    });
-    await client.close();
+    await withTimeout(
+      client.send({
+        from: fromName ? `${fromName} <${fromEmail}>` : fromEmail,
+        to, replyTo, subject, content: body,
+      }),
+      PER_SEND_BUDGET_MS,
+      "SMTP_SEND",
+    );
     return { ok: true };
   } catch (e) {
     return { ok: false, error: (e as Error).message };
+  } finally {
+    if (client) {
+      try { await withTimeout(client.close(), 3_000, "SMTP_CLOSE"); } catch { /* ignore */ }
+    }
   }
 }
 
@@ -97,10 +119,17 @@ Deno.serve(async (req) => {
     if (error) return json({ error: error.message }, 500);
     if (!due?.length) return json({ processed: 0, sent: 0, blocked: 0, delayed: 0, mode: systemMode }, 200);
 
-    let sent = 0, blocked = 0, failed = 0, delayed = 0;
+    let sent = 0, blocked = 0, failed = 0, delayed = 0, deferred = 0;
     const touchedCampaigns = new Set<string>();
+    const runStart = Date.now();
 
     for (let idx = 0; idx < due.length; idx++) {
+      // Stop early if we're approaching the function idle timeout. Remaining
+      // items stay pending and will be picked up by the next cron tick.
+      if (Date.now() - runStart > RUN_BUDGET_MS) {
+        deferred = due.length - idx;
+        break;
+      }
       const item = due[idx];
       // Variance between sends (skip jitter on first item)
       if (idx > 0 && sent > 0) {
@@ -167,22 +196,32 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      // Sanity check via shared edge function
-      const checkRes = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/crm-send-check`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
-        },
-        body: JSON.stringify({
-          contact_id: item.contact_id,
-          log_attempt: true,
-          channel: "email",
-          message: seq ? `[${seq.subject}] ${seq.body}\n\n<!-- tracking_pixel:${item.id} -->` : `Step ${item.sequence_step}`,
-          ai_generated: false,
-        }),
-      });
-      const checkJson = await checkRes.json().catch(() => ({}));
+      // Sanity check via shared edge function (bounded)
+      let checkJson: any = {};
+      try {
+        const checkRes = await withTimeout(
+          fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/crm-send-check`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+            },
+            body: JSON.stringify({
+              contact_id: item.contact_id,
+              log_attempt: true,
+              channel: "email",
+              message: seq ? `[${seq.subject}] ${seq.body}\n\n<!-- tracking_pixel:${item.id} -->` : `Step ${item.sequence_step}`,
+              ai_generated: false,
+            }),
+            signal: AbortSignal.timeout(15_000),
+          }),
+          15_000,
+          "SANITY_CHECK",
+        );
+        checkJson = await checkRes.json().catch(() => ({}));
+      } catch (e) {
+        checkJson = { allowed: false, reason: `SANITY_CHECK_FAILED:${(e as Error).message}` };
+      }
       const allowed = checkJson?.allowed === true;
 
       if (!allowed) {
@@ -311,7 +350,12 @@ Deno.serve(async (req) => {
       await supabase.rpc("recompute_campaign_metrics", { _campaign_id: cid });
     }
 
-    return json({ processed: due.length, sent, blocked, failed, delayed, mode: systemMode }, 200);
+    return json({
+      processed: due.length - deferred,
+      sent, blocked, failed, delayed, deferred,
+      mode: systemMode,
+      duration_ms: Date.now() - runStart,
+    }, 200);
   } catch (err) {
     return json({ error: (err as Error).message }, 500);
   }
