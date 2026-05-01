@@ -895,7 +895,31 @@ export default function ApolloIntegration() {
       return;
     }
     const result = (data as EnrichmentRunResponse) ?? {};
-    toast({ title: "Enrichment complete", description: `Imported ${result.imported ?? 0} • emails returned ${result.emails_returned ?? 0} • skipped no-email ${result.skipped_no_email ?? 0} • duplicates ${result.duplicate ?? 0} • suppressed ${result.suppressed ?? 0}` });
+    if (result.status === "partial" || result.resume_available) {
+      toast({
+        title: "Enrichment partially completed",
+        description: `Processed ${result.processed_count ?? result.imported ?? 0}, ${result.remaining_count ?? 0} remaining. Click Resume on the run to continue (no duplicate credits).`,
+      });
+    } else {
+      toast({ title: "Enrichment complete", description: `Imported ${result.imported ?? 0} • emails returned ${result.emails_returned ?? 0} • skipped no-email ${result.skipped_no_email ?? 0} • duplicates ${result.duplicate ?? 0} • suppressed ${result.suppressed ?? 0}` });
+    }
+    loadAll();
+  }
+
+  async function resumeEnrichment(runId: string) {
+    setBusy(`enrich-${runId}`);
+    const { data, error } = await supabase.functions.invoke("apollo-sync-enrich", { body: { run_id: runId } });
+    setBusy(null);
+    if (error) {
+      toast({ title: "Resume failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    const result = (data as EnrichmentRunResponse) ?? {};
+    if (result.status === "partial" || result.resume_available) {
+      toast({ title: "Resumed — more remaining", description: `Processed ${result.processed_count ?? 0}, ${result.remaining_count ?? 0} still pending. Click Resume again.` });
+    } else {
+      toast({ title: "Enrichment complete", description: `Final batch processed ${result.processed_count ?? result.imported ?? 0}.` });
+    }
     loadAll();
   }
 
