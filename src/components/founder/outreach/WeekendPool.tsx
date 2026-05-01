@@ -247,12 +247,21 @@ export function WeekendPool({ onOpenRuns }: { onOpenRuns?: () => void }) {
     if (segId) {
       const { data: runs } = await supabase
         .from("apollo_sync_runs")
-        .select("id,started_at,status,people_found,people_with_email_flag,enrichment_attempted,emails_returned,contacts_imported,contacts_new,contacts_updated,qualified_count,ready_to_stage_count,apollo_credits_used")
+        .select("id,started_at,status,people_found,people_with_email_flag,enrichment_attempted,emails_returned,contacts_imported,contacts_new,contacts_updated,qualified_count,ready_to_stage_count,apollo_credits_used,page_fetched,unseen_in_batch,skipped_already_seen")
         .eq("segment_id", segId)
         .gte("started_at", todayStart)
         .order("started_at", { ascending: false });
       const list = (runs ?? []) as BatchRow[];
       setBatches(list);
+
+      const latest = list.find((r: any) => r.page_fetched != null) as any;
+      if (latest) {
+        setLastBatchPage({
+          page: Number(latest.page_fetched ?? 0),
+          unseen: Number(latest.unseen_in_batch ?? 0),
+          skippedSeen: Number(latest.skipped_already_seen ?? 0),
+        });
+      }
 
       const COUNTED_STATUSES = new Set(["completed", "partial", "enriching"]);
       const AUDIT_STATUSES = new Set(["awaiting_enrichment_approval", "search_running", "cancelled", "failed", "search_failed", "enrichment_failed"]);
