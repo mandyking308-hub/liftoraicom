@@ -498,7 +498,7 @@ const FounderManual = () => {
               <BookOpenCheck size={24} className="text-primary" /> Liftor AI — Founder Manual
             </h1>
             <p className="text-muted-foreground text-sm mt-1">
-              Self-updating engineering documentation — v4.0 · {format(new Date(), "MMMM d, yyyy")}
+              Self-updating engineering documentation — v4.1 (NeonCandy Operational Handover, 1 May 2026) · {format(new Date(), "MMMM d, yyyy")}
               {isLoading && <span className="ml-2 text-primary">Loading live data...</span>}
             </p>
           </div>

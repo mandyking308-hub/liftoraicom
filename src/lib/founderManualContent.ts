@@ -26,7 +26,7 @@ export const generateManualMarkdown = (data: ManualLiveData): string => {
   return `# Liftor AI — Founder Manual
 ## Complete Engineering-Level Platform Documentation
 
-**Version:** 4.0 (Self-Updating)
+**Version:** 4.1 — NeonCandy Operational Handover (1 May 2026)
 **Generated:** ${now}
 **Classification:** Founder / Internal Engineering / Investor Documentation
 **Status:** Live — Auto-generated from platform state
@@ -35,6 +35,8 @@ export const generateManualMarkdown = (data: ManualLiveData): string => {
 
 ## Table of Contents
 
+0. Operational Handover — NeonCandy / Outreach (1 May 2026)
+0a. Credentials & Secrets Register
 1. Platform Overview
 2. Full Platform Architecture
 3. Platform Infrastructure Modules
@@ -50,6 +52,313 @@ export const generateManualMarkdown = (data: ManualLiveData): string => {
 13. Platform Build Log
 14. Documentation Engine
 15. Export System
+
+---
+
+## SECTION 0 — OPERATIONAL HANDOVER — NEONCANDY / OUTREACH (1 MAY 2026)
+
+> This section is the single source of truth for the current live state of the
+> only operational outreach pipeline. It supersedes any earlier wording in
+> later sections where there is conflict.
+
+### 0.1 NeonCandy Business Context
+
+- **NeonCandy is the only live operational account currently being worked.**
+- All other businesses (GloBlast, Liftor AI demo tenant, Health Access, etc.)
+  have been archived as simulation/test data and removed from active operations.
+- **Mode:** \`BUSINESS-LIVE\`.
+- **Campaign:** \`Early Access Collaboration Test\`.
+- **Sequence:** Day 0 (Step 1) → Day 3 (Step 2) → Day 7 (Step 3) → Day 14 (Step 4).
+- **Sender daily cap:** 10 (provider-side IONOS new-mailbox limit; will increase as the mailbox warms).
+
+### 0.2 Valid Sender / Inbox Rule
+
+- The **only** valid live NeonCandy outbound and reply inbox is:
+  - \`hello@neoncandy.online\` (IONOS)
+- All sending, all replies, all queue creation, all AI drafts, and all
+  inbound polling for NeonCandy MUST be routed through this inbox only.
+
+### 0.3 Disabled music@neoncandy.net Rule
+
+- \`music@neoncandy.net\` is **historical only / disabled**.
+- It must NOT be used for: sending, fallback sender, campaign sender,
+  staging, queue creation, inbound routing, AI replies, or business
+  default sender.
+- For NeonCandy, any inbox other than \`hello@neoncandy.online\` must be
+  blocked at the sanity layer with the reason code:
+  - \`NEONCANDY_INVALID_INBOX\`
+- Manual rule: *"music@neoncandy.net must remain historical only.
+  Operational use is forbidden."*
+
+### 0.4 Apollo Integration
+
+- Apollo connection is working end-to-end for NeonCandy.
+- People Search and Person Enrichment both succeed.
+- Endpoint corrected to \`/api/v1/mixed_people/api_search\`
+  (the previous \`/people/search\` path was wrong and removed).
+- Apollo People Search does **not** return raw emails; enrichment is
+  required to obtain a deliverable address.
+- Enrichment now has timeout/resume protection so partial batches recover.
+- Pagination was fixed to stop repeating the first 25 results on every page.
+
+### 0.5 Apollo Month 1 Segment
+
+- Active segment: **NeonCandy Month 1**.
+- Purpose: feed the Weekend Pool from a curated Apollo audience.
+- Imported via Apollo Search → Bulk Enrichment → central \`contacts\` table
+  → \`business_contact_relationships\` (BCR) attached to NeonCandy.
+
+### 0.6 Weekend Pool
+
+- Target size: **100 contacts**.
+- Current pool reached **47 ready/staged** contacts before the final send fix.
+- Pool feeds directly into the Early Access Collaboration Test campaign
+  via the staging action.
+
+### 0.7 Daily Monitor & Live Monitor
+
+- **Daily Monitor** — founder-facing day view: today's due Step 1/2/3/4,
+  reply backlog, sender cap remaining, AI drafts awaiting approval.
+- **Live Monitor** — real-time card "Active campaign movement" showing:
+  Ready to stage, Staged contacts, Active Step 1 pending, Real SMTP sent
+  today, Valid follow-ups scheduled, Next due send, Queue integrity,
+  Sender (\`hello@neoncandy.online\`).
+
+### 0.8 Campaign Sequence
+
+| Step | Day offset | Purpose |
+|------|------------|---------|
+| 1 | 0 | First touch — collaboration intro |
+| 2 | +3 | Soft follow-up |
+| 3 | +7 | Value reinforcement |
+| 4 | +14 | Final follow-up / breakup |
+
+### 0.9 CRM / Contact Pool & business_contact_relationships
+
+- \`contacts\` is the central, business-agnostic pool of every person
+  imported across all sources (Apollo, manual, etc.).
+- \`business_contact_relationships\` (BCR) attaches a contact to a
+  specific business with: \`qualification\`, \`campaign_eligible\`,
+  \`current_stage\`, \`last_campaign_id\`, \`do_not_contact\`.
+- A NeonCandy contact is "live" only when the BCR has
+  \`business_name='Neon Candy'\` AND \`campaign_eligible=true\` AND
+  \`current_stage='staged'\` AND \`last_campaign_id\` = Early Access
+  Collaboration Test campaign id.
+
+### 0.10 Suppression Rules
+
+Always-suppress (never sendable, never overrideable by cleanup):
+- \`contacts.is_globally_suppressed = true\`
+- \`contacts.hard_bounced = true\`
+- Any inbound STOP / unsubscribe event
+- Bounce events
+- Legal / privacy / GDPR-deletion request
+- Founder-marked DNC on the BCR
+
+### 0.11 AI Drafts / Founder Approval
+
+- All AI-generated reply drafts are **human-in-the-loop**.
+- Drafts are created by the AI agent and queued; nothing is sent until
+  the founder explicitly approves and clicks send.
+- Auto-send of AI drafts is **forbidden**.
+
+### 0.12 Known Historical Simulated-Row Issue
+
+Earlier in the build, the system created a large volume of simulated /
+test outbound rows that were later mistaken for real sends. These
+polluted the sanity layer's RECENT_COMMUNICATION_24H check and blocked
+legitimate first-touch emails.
+
+### 0.13 Queue Cleanup (Completed)
+
+- **19 legacy simulated Step 1 rows quarantined** with reason code:
+  \`SIMULATED_LEGACY_QUARANTINED\`
+- **75 invalid follow-ups cancelled** with reason code:
+  \`SIMULATED_PARENT_NOT_SENT\`
+- **Active simulated rows after cleanup: 0**
+- **Active invalid-parent follow-ups after cleanup: 0**
+- All non-NeonCandy test businesses (GloBlast, Liftor AI demo, Health
+  Access) were archived to \`cleanup_archive\` and removed from the
+  active queue, contacts, BCR, and inboxes tables.
+
+### 0.14 Staging Bug & Fix
+
+- **Old behaviour:** the staging action only flipped contact stage flags
+  but did not actually create email_queue rows, so contacts appeared
+  "staged" while no Step 1/2/3/4 jobs existed.
+- **Fix applied:** the staging action now invokes
+  \`outreach-schedule-batch\` with the campaign id and the contact ids,
+  guarantees creation of all 4 sequence rows per contact, and fails
+  loudly if queue rows are not created.
+- One-shot data fix executed for the 47 NeonCandy BCRs created **160
+  sequence rows for 40 contacts** (Step 1 due immediately, Steps 2-4
+  scheduled at the correct offsets).
+- UI wording updated: the action label now reads
+  *"Stage into campaign queue"* — never just "Stage".
+
+### 0.15 Current Send-Worker Status
+
+- The earlier \`outreach-send-worker\` crash from \`denomailer\`'s
+  *invalid cmd* during SMTP \`QUIT\` has been fixed (swapped to
+  \`nodemailer\`, added unhandledrejection/error shields, and only
+  records communications after a successful SMTP accept).
+- The worker now boots and completes its run cleanly.
+- **16 real SMTP sends were delivered today via \`hello@neoncandy.online\`**
+  with \`delivery_kind=smtp_real\`, \`smtp_accepted_at\` populated, and a
+  valid IONOS \`provider_message_id\`.
+- **Outstanding issues:**
+  1. **IONOS provider rate limit** — IONOS returned
+     \`450 Mail send limit exceeded\` on subsequent sends. This is the
+     new-mailbox 24h rolling cap, not a Liftor bug. Resolves on its own
+     as the rolling window slides; can be raised via IONOS support.
+  2. **IMAP APPEND to Sent folder** — \`saved_to_sent_at\` is null on all
+     16 sends. Emails are delivered to recipients but copies are not yet
+     appearing in the IONOS webmail "Sent" view. Cosmetic, not a
+     deliverability issue. Needs a fix in the worker's IMAP APPEND code
+     path.
+
+### 0.16 Immediate Next Operational Target
+
+1. Run \`crm-send-check\` for a due Step 1 contact.
+2. Identify whether \`RECENT_COMMUNICATION_24H\` is false (created by a
+   simulated/blocked/non-SMTP/test row).
+3. Mark only those false communications as
+   \`ignored_for_send_check = true\` (with \`ignored_reason\`).
+4. Run worker with \`?max=1\` for a single proof send.
+5. Confirm on the queue row:
+   - \`delivery_kind = smtp_real\`
+   - \`smtp_accepted_at\` populated
+   - \`provider_message_id\` populated
+   - \`saved_to_sent_at\` populated **or** an \`append_error\` recorded
+   - Email visible in IONOS Sent Items
+6. If proof succeeds, run remaining safe capacity today, **max 9 more**.
+7. Stop and review Tuesday once the IONOS rolling window resets.
+
+### 0.17 Do Not Do Next
+
+- Do not rebuild Apollo.
+- Do not add more dashboards.
+- Do not add more Apollo batches until the proof send works.
+- Do not re-enable \`music@neoncandy.net\`.
+- Do not treat simulated rows as live.
+- Do not auto-send AI drafts.
+- Do not stage future contacts without confirming queue rows were created.
+
+---
+
+## SECTION 0a — CREDENTIALS & SECRETS REGISTER
+
+> **Raw passwords and API keys are not stored in this manual.**
+> See the secure password manager / Lovable secrets / encrypted
+> server-side storage for the actual values. This register only records
+> *what exists, where it lives, who owns it, and how to recover it.*
+
+### A. Liftor / Lovable
+
+| Field | Value |
+|-------|-------|
+| System | Liftor AI |
+| Manual paths | \`/founder/manual\`, \`/founder/manual/full\` |
+| Purpose | Central portfolio CRM / outreach / AI operations engine |
+| Login email | mandyking308@gmail.com (founder/admin) |
+| Secret name(s) | \`INBOX_CREDENTIALS_KEY\`, \`APOLLO_ENCRYPTION_KEY\` |
+| Storage | Lovable secure secrets / encrypted server-side storage |
+| Owner | Mandy King |
+| Status | active |
+| Last 4 | n/a (managed secrets) |
+| Recovery | Lovable account password reset → re-issue secret via Lovable secrets UI |
+| Notes | Raw values must NEVER appear in code, logs, or this manual. |
+
+### B. NeonCandy Sender — hello@neoncandy.online
+
+| Field | Value |
+|-------|-------|
+| System | IONOS hosted mailbox |
+| Email | hello@neoncandy.online |
+| Purpose | Only valid live NeonCandy outbound send + reply inbox |
+| SMTP host / port / security | smtp.ionos.co.uk / 587 / TLS (STARTTLS) |
+| SMTP username | hello@neoncandy.online |
+| IMAP host / port / SSL | imap.ionos.co.uk / 993 / SSL enabled |
+| IMAP username | hello@neoncandy.online |
+| Monitored folder | INBOX |
+| Storage of password | Encrypted in Liftor \`inbox_credentials\` (encrypted with \`INBOX_CREDENTIALS_KEY\`) + Mandy's password manager |
+| Owner | Mandy King |
+| Status | active / live_ready |
+| Last 4 | not displayed |
+| Recovery | IONOS control panel → mailbox password reset → update encrypted credential in Liftor |
+| Notes | Daily send cap currently 10 (IONOS new-mailbox warm-up limit). |
+
+### C. Disabled NeonCandy Sender — music@neoncandy.net
+
+| Field | Value |
+|-------|-------|
+| System | Legacy mailbox |
+| Email | music@neoncandy.net |
+| Purpose | Old / test / simulated path only |
+| Storage of password | Historical only (do not surface) |
+| Owner | Mandy King |
+| Status | **disabled / historical** |
+| Last 4 | not displayed |
+| Recovery | n/a — do not restore for operational use |
+| Notes | Forbidden for sending, fallback, campaign, staging, queue creation, inbound routing, AI replies, or business default sender. Sanity reason code: \`NEONCANDY_INVALID_INBOX\`. |
+
+### D. Apollo
+
+| Field | Value |
+|-------|-------|
+| System | Apollo.io |
+| Login | Mandy's Apollo account |
+| Plan | Basic monthly · 1 seat · 2,500 credits/month |
+| API key name | \`Liftor - NeonCandy\` |
+| Key type | Master API key |
+| Used for | People API Search, Person Enrichment, Bulk Person Enrichment |
+| Endpoints | \`/api/v1/mixed_people/api_search\`, \`/api/v1/people/bulk_match\`, \`/api/v1/people/match\`, \`/api/v1/people/show\` |
+| Storage of API key | Encrypted in Liftor Apollo connection settings (encrypted with \`APOLLO_ENCRYPTION_KEY\`) |
+| Owner | Mandy King |
+| Status | active |
+| Last 4 | not displayed |
+| Recovery | Apollo dashboard → Settings → API → revoke + regenerate → re-paste into Liftor connection (will be re-encrypted) |
+| Notes | People Search does not return emails — enrichment is required for deliverable addresses. |
+
+### E. IONOS Account
+
+| Field | Value |
+|-------|-------|
+| System | IONOS hosting / mail |
+| Domain | neoncandy.online |
+| Email | hello@neoncandy.online |
+| Purpose | Real SMTP / IMAP for NeonCandy outreach |
+| Storage | IONOS account credentials in Mandy's password manager; mailbox SMTP/IMAP password encrypted in Liftor |
+| Owner | Mandy King |
+| Status | active |
+| Last 4 | not displayed |
+| Recovery | IONOS account recovery → reset mailbox password → update encrypted credential in Liftor |
+| Notes | Provider enforces a 24h rolling new-mailbox sending cap; can be raised via IONOS support after warm-up. |
+
+### F. Social / Music Account Access Map
+
+> Login routes only — no raw passwords. All passwords live in Mandy's
+> password manager.
+
+| Account | Login route | Owner | Status |
+|---------|-------------|-------|--------|
+| Neural Frames | Google login | Mandy | active |
+| MusicHero | Username + Google login | Mandy | active |
+| Facebook (NeonCandy page) | Meta / mobile-number route | Mandy | active |
+| Instagram \`@neoncandyofficial\` | Linked through Meta route | Mandy | active |
+| YouTube \`@neoncandyofficial\` | Google / new music-related email | Mandy | active |
+| Metricool | NeonCandy / music-related email | Mandy | active |
+| ManyChat | Meta / Google route — connected to Instagram + Facebook | Mandy | active |
+| DistroKid | Mandy's personal Gmail login | Mandy | active |
+| Lorca | Mandy's Gmail login | Mandy | active |
+
+### G. PPL / PRS / Distribution Paperwork
+
+- Track paperwork status separately from this manual.
+- Confirm which PPL / PRS / distribution registrations are complete.
+- Do **not** assume all registrations are done.
+- When confirmed, add a row per registration here with: registry name,
+  artist/track ID, date submitted, date confirmed, owner.
 
 ---
 
@@ -1155,7 +1464,7 @@ The manual can be exported as a formatted PDF document using the browser's nativ
 
 ---
 
-*End of Liftor AI Founder Manual v4.0*
+*End of Liftor AI Founder Manual v4.1 — NeonCandy Operational Handover (1 May 2026)*
 *Self-updating documentation generated from live platform state.*
 *${now}*
 `;
