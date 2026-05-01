@@ -705,3 +705,101 @@ function Stat({ label, value }: { label: string; value: number }) {
     </div>
   );
 }
+
+function EditSegmentDialog({
+  segment,
+  onSave,
+}: {
+  segment: Segment;
+  onSave: (updates: Record<string, unknown>) => Promise<boolean>;
+}) {
+  const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState<Segment["mode"]>(segment.mode);
+  const [savedListId, setSavedListId] = useState(segment.saved_list_id ?? "");
+  const [criteriaText, setCriteriaText] = useState(JSON.stringify(segment.search_criteria ?? {}, null, 2));
+  const [saving, setSaving] = useState(false);
+
+  function applyMusicPreset() {
+    setMode("people_search");
+    setCriteriaText(JSON.stringify(NEONCANDY_MONTH1_CRITERIA, null, 2));
+  }
+
+  async function handleSave() {
+    let parsedCriteria: Record<string, unknown> = {};
+    if (mode === "people_search") {
+      try {
+        parsedCriteria = JSON.parse(criteriaText || "{}");
+      } catch {
+        toast({ title: "Invalid JSON", description: "Search criteria must be valid JSON.", variant: "destructive" });
+        return;
+      }
+    }
+    setSaving(true);
+    const ok = await onSave({
+      mode,
+      saved_list_id: mode === "saved_list" ? (savedListId.trim() || null) : null,
+      search_criteria: mode === "people_search" ? parsedCriteria : {},
+    });
+    setSaving(false);
+    if (ok) setOpen(false);
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="outline">Edit</Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-xl">
+        <DialogHeader>
+          <DialogTitle>Edit segment — {segment.segment_name}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3">
+          <div>
+            <Label>Mode</Label>
+            <Select value={mode} onValueChange={(v) => setMode(v as Segment["mode"])}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="saved_list">Apollo saved list (label_id)</SelectItem>
+                <SelectItem value="people_search">Criteria search</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          {mode === "saved_list" ? (
+            <div>
+              <Label>Saved list ID (label_id)</Label>
+              <Input value={savedListId} onChange={(e) => setSavedListId(e.target.value)} placeholder="label_xxx" />
+              <p className="mt-1 text-xs text-muted-foreground">
+                Find this in Apollo → People → Lists → list URL ends with the label_id.
+              </p>
+            </div>
+          ) : (
+            <div>
+              <div className="flex items-center justify-between">
+                <Label>Search criteria (JSON)</Label>
+                <Button type="button" variant="ghost" size="sm" onClick={applyMusicPreset}>
+                  Use NeonCandy Month 1 preset
+                </Button>
+              </div>
+              <Textarea
+                rows={10}
+                className="font-mono text-xs"
+                value={criteriaText}
+                onChange={(e) => setCriteriaText(e.target.value)}
+              />
+              <p className="mt-1 text-xs text-muted-foreground">
+                Apollo people-search payload. The sync always enforces contact_email_status = verified.
+              </p>
+            </div>
+          )}
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
+          <Button onClick={handleSave} disabled={saving}>
+            {saving ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : null}
+            Save
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
