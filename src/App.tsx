@@ -133,6 +133,7 @@ import OutreachImports from "./pages/founder/outreach/OutreachImports";
 import OutreachCampaigns from "./pages/founder/outreach/OutreachCampaigns";
 import OutreachQueue from "./pages/founder/outreach/OutreachQueue";
 import CampaignLiveMonitor from "./pages/founder/outreach/CampaignLiveMonitor";
+import ApolloIntegration from "./pages/founder/outreach/ApolloIntegration";
 import ConversationsDashboard from "./pages/founder/conversations/ConversationsDashboard";
 import ConversationDetail from "./pages/founder/conversations/ConversationDetail";
 import InternalProposals from "./pages/founder/proposals/InternalProposals";
@@ -288,6 +289,7 @@ const App = () => (
             <Route path="/founder/outreach/campaigns" element={<FounderRoute><OutreachCampaigns /></FounderRoute>} />
             <Route path="/founder/outreach/queue" element={<FounderRoute><OutreachQueue /></FounderRoute>} />
             <Route path="/founder/outreach/live-monitor" element={<FounderRoute><CampaignLiveMonitor /></FounderRoute>} />
+            <Route path="/founder/outreach/apollo" element={<FounderRoute><ApolloIntegration /></FounderRoute>} />
             <Route path="/founder/conversations" element={<FounderRoute><ConversationsDashboard /></FounderRoute>} />
             <Route path="/founder/conversations/:id" element={<FounderRoute><ConversationDetail /></FounderRoute>} />
             <Route path="/founder/internal-proposals" element={<FounderRoute><InternalProposals /></FounderRoute>} />
