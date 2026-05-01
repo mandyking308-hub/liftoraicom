@@ -1233,6 +1233,568 @@ function CompletedRunSummary({ run }: { run: Run }) {
   );
 }
 
+type RunGroups = {
+  primary: Run | null;          // the single run worth showing expanded
+  superseded: Run[];            // older awaiting runs (newer completed exists)
+  staleAwaiting: Run[];         // older awaiting runs (multiple awaiting, not newest)
+  completed: Run[];             // completed runs other than the primary
+  poorFit: Run[];
+  cancelled: Run[];
+  failed: Run[];
+  newestCompletedBySegment: Map<string, Run>;
+};
+
+function classifyRuns(runs: Run[]): RunGroups {
+  const newestCompletedBySegment = new Map<string, Run>();
+  for (const r of runs) {
+    if (r.status === "completed") {
+      const existing = newestCompletedBySegment.get(r.segment_id);
+      if (!existing || new Date(r.started_at) > new Date(existing.started_at)) {
+        newestCompletedBySegment.set(r.segment_id, r);
+      }
+    }
+  }
+  const newestAwaitingBySegment = new Map<string, string>();
+  for (const r of runs) {
+    if (r.status === "awaiting_enrichment_approval" && !newestAwaitingBySegment.has(r.segment_id)) {
+      newestAwaitingBySegment.set(r.segment_id, r.id);
+    }
+  }
+
+  const completed: Run[] = [];
+  const poorFit: Run[] = [];
+  const cancelled: Run[] = [];
+  const failed: Run[] = [];
+  const superseded: Run[] = [];
+  const staleAwaiting: Run[] = [];
+  const validAwaiting: Run[] = [];
+
+  for (const r of runs) {
+    const diag = extractDiagnostics(r.errors);
+    const fit = diag?.segment_fit;
+    if (r.status === "cancelled") {
+      cancelled.push(r);
+      continue;
+    }
+    if (r.status === "failed" || r.status === "search_failed" || r.status === "enrichment_failed") {
+      failed.push(r);
+      continue;
+    }
+    if (r.status === "awaiting_enrichment_approval") {
+      const newerCompleted = newestCompletedBySegment.get(r.segment_id);
+      if (newerCompleted && new Date(newerCompleted.started_at) > new Date(r.started_at)) {
+        superseded.push(r);
+        continue;
+      }
+      if (fit === "poor") {
+        poorFit.push(r);
+        continue;
+      }
+      if (newestAwaitingBySegment.get(r.segment_id) !== r.id) {
+        staleAwaiting.push(r);
+        continue;
+      }
+      validAwaiting.push(r);
+      continue;
+    }
+    if (r.status === "completed") {
+      completed.push(r);
+    }
+  }
+
+  // Pick primary: latest valid awaiting, else latest completed, else latest failed
+  let primary: Run | null = null;
+  if (validAwaiting.length > 0) primary = validAwaiting[0];
+  else if (completed.length > 0) primary = completed[0];
+  else if (failed.length > 0) primary = failed[0];
+
+  const completedOthers = completed.filter((r) => r.id !== primary?.id);
+
+  return {
+    primary,
+    superseded,
+    staleAwaiting,
+    completed: completedOthers,
+    poorFit,
+    cancelled,
+    failed: failed.filter((r) => r.id !== primary?.id),
+    newestCompletedBySegment,
+  };
+}
+
+function CurrentActionHero({
+  groups,
+  connections,
+  onCleanup,
+  cleanupBusy,
+  cleanupCount,
+}: {
+  groups: RunGroups;
+  connections: Connection[];
+  onCleanup: () => void;
+  cleanupBusy: boolean;
+  cleanupCount: number;
+}) {
+  const connBlocked = connections.length === 0
+    || connections.some((c) => c.search_api_status !== "ok" || c.enrichment_api_status !== "ok");
+
+  const primary = groups.primary;
+  const diag = primary ? extractDiagnostics(primary.errors) : null;
+  const fit = diag?.segment_fit;
+
+  type Action = {
+    title: string;
+    description: string;
+    tone: "neutral" | "info" | "good" | "warn" | "bad";
+    buttons: Array<{ label: string; href?: string; onClick?: () => void; variant?: "default" | "outline" | "secondary" | "destructive" }>;
+  };
+
+  let action: Action;
+  if (connBlocked) {
+    action = {
+      title: "Connection / API issue",
+      description: "Apollo connection diagnostics are not green. Resolve before running new searches.",
+      tone: "bad",
+      buttons: [{ label: "Open Connections", href: "#connections", variant: "outline" }],
+    };
+  } else if (!primary) {
+    action = {
+      title: "No action needed",
+      description: "There are no active Apollo runs. Run a new search from the Sync Segments tab.",
+      tone: "neutral",
+      buttons: [{ label: "Go to Sync Segments", onClick: () => (document.querySelector('[data-state][value="segments"]') as HTMLElement | null)?.click(), variant: "outline" }],
+    };
+  } else if (primary.status === "awaiting_enrichment_approval" && fit === "poor") {
+    action = {
+      title: "Fix poor-fit segment",
+      description: "The latest run does not match the segment taxonomy. Edit the segment and re-run before spending credits.",
+      tone: "bad",
+      buttons: [{ label: "Open segments", onClick: () => (document.querySelector('[data-state][value="segments"]') as HTMLElement | null)?.click(), variant: "outline" }],
+    };
+  } else if (primary.status === "awaiting_enrichment_approval") {
+    action = {
+      title: "Review candidates before enrichment",
+      description: `Latest run for ${primary.business_name} is awaiting your approval. Review the candidate preview, then approve enrichment for the contacts that match.`,
+      tone: "info",
+      buttons: [],
+    };
+  } else if (primary.status === "completed") {
+    const stageHref = `/founder/outreach/queue?run_id=${primary.id}&stage=ready_to_stage`;
+    const importsHref = `/founder/outreach/imports?run_id=${primary.id}`;
+    action = {
+      title: primary.qualified_count > 0 ? "View Ready to stage" : "View imported contacts",
+      description: `Latest run completed: ${primary.contacts_imported} saved to CRM, ${primary.qualified_count} qualified and held for approval.`,
+      tone: "good",
+      buttons: [
+        { label: `View Ready to stage (${primary.qualified_count})`, href: stageHref },
+        { label: `View imported contacts (${primary.contacts_imported})`, href: importsHref, variant: "outline" },
+      ],
+    };
+  } else {
+    action = {
+      title: "Run failed — review and retry",
+      description: "The latest run did not complete. Check details below or run a new search.",
+      tone: "bad",
+      buttons: [],
+    };
+  }
+
+  const toneCls = {
+    neutral: "border-border bg-muted/20",
+    info: "border-blue-500/40 bg-blue-500/10",
+    good: "border-emerald-500/40 bg-emerald-500/10",
+    warn: "border-amber-500/40 bg-amber-500/10",
+    bad: "border-destructive/40 bg-destructive/10",
+  }[action.tone];
+
+  return (
+    <Card className={`border ${toneCls}`}>
+      <CardHeader className="pb-3">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">Current Apollo action</p>
+            <CardTitle className="mt-1 text-xl">{action.title}</CardTitle>
+            <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{action.description}</p>
+          </div>
+          <Button size="sm" variant="outline" onClick={onCleanup} disabled={cleanupBusy || cleanupCount === 0}>
+            {cleanupBusy ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <Wand2 className="mr-1 h-3 w-3" />}
+            Clean up this view{cleanupCount > 0 ? ` (${cleanupCount})` : ""}
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent className="flex flex-wrap gap-2 pt-0">
+        {action.buttons.map((b, i) =>
+          b.href ? (
+            b.href.startsWith("#") ? (
+              <Button
+                key={i}
+                size="sm"
+                variant={b.variant ?? "default"}
+                onClick={() => {
+                  const tab = b.href!.replace("#", "");
+                  (document.querySelector(`[data-state][value="${tab}"]`) as HTMLElement | null)?.click();
+                }}
+              >
+                {b.label}
+              </Button>
+            ) : (
+              <Button key={i} asChild size="sm" variant={b.variant ?? "default"}>
+                <Link to={b.href}>{b.label}</Link>
+              </Button>
+            )
+          ) : (
+            <Button key={i} size="sm" variant={b.variant ?? "default"} onClick={b.onClick}>
+              {b.label}
+            </Button>
+          ),
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function RunHistoryRow({
+  run,
+  badge,
+  badgeVariant = "secondary",
+  onCancel,
+  onApprove,
+  busy,
+  reopenable = false,
+}: {
+  run: Run;
+  badge: string;
+  badgeVariant?: "default" | "secondary" | "outline" | "destructive";
+  onCancel: (id: string) => void;
+  onApprove: (id: string, ids: string[]) => void;
+  busy: string | null;
+  reopenable?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const diag = extractDiagnostics(run.errors);
+  const fit = diag?.segment_fit;
+  const subtitle =
+    run.status === "completed"
+      ? `${run.contacts_imported} saved • ${run.qualified_count} qualified`
+      : run.status === "cancelled"
+      ? "Cancelled"
+      : run.status === "awaiting_enrichment_approval"
+      ? `Found ${run.people_found}, awaiting approval`
+      : `${run.people_found} found`;
+
+  return (
+    <div className="rounded-md border bg-background/40">
+      <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 text-xs">
+        <div className="flex items-center gap-2">
+          <Badge variant={badgeVariant}>{badge}</Badge>
+          <span className="font-medium">{run.business_name}</span>
+          <span className="text-muted-foreground">
+            {new Date(run.started_at).toLocaleString()} • {subtitle}
+          </span>
+          {fit && fit !== "good" && <Badge variant={fitBadgeVariant(fit)}>fit: {fit}</Badge>}
+        </div>
+        <Button size="sm" variant="ghost" onClick={() => setOpen((v) => !v)}>
+          {open ? "Hide details" : "View details"}
+        </Button>
+      </div>
+      {open && (
+        <div className="border-t p-3">
+          <RunCard
+            run={run}
+            diag={diag}
+            fit={fit}
+            showFitWarning={false}
+            busy={busy}
+            onCancel={() => onCancel(run.id)}
+            onApprove={(ids) => onApprove(run.id, ids)}
+            disableApprove={!reopenable && run.status === "awaiting_enrichment_approval"}
+            superseded={run.status === "awaiting_enrichment_approval" && !reopenable}
+          >
+            {run.status !== "awaiting_enrichment_approval" && <CompletedRunSummary run={run} />}
+            <RunDeveloperDiagnostics run={run} diag={diag} />
+          </RunCard>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function RunDeveloperDiagnostics({ run, diag }: { run: Run; diag: RunDiagnostics | null }) {
+  return (
+    <details className="rounded-md border bg-muted/20 px-3 py-2 text-xs">
+      <summary className="cursor-pointer text-muted-foreground">Developer diagnostics</summary>
+      <div className="mt-2 space-y-2">
+        {diag ? (
+          <div className="space-y-2">
+            <div className="grid gap-2 sm:grid-cols-2">
+              <div>
+                <div className="text-muted-foreground">Fit ratio</div>
+                <div>{diag.fit_matched ?? 0} / {diag.raw_people_found ?? 0} ({Math.round(((diag.fit_ratio ?? 0) * 100))}%)</div>
+              </div>
+              <div>
+                <div className="text-muted-foreground">Detected tags</div>
+                <div className="flex flex-wrap gap-1">
+                  {(diag.detected_tags && diag.detected_tags.length > 0)
+                    ? diag.detected_tags.map((t) => <Badge key={t} variant="secondary">{t}</Badge>)
+                    : <span className="text-muted-foreground">none</span>}
+                </div>
+              </div>
+            </div>
+            {diag.sample_titles && diag.sample_titles.length > 0 && (
+              <div>
+                <div className="text-muted-foreground">Sample (first 5)</div>
+                <ul className="mt-1 list-disc pl-5">
+                  {diag.sample_titles.map((s, idx) => (
+                    <li key={idx}>{s.title ?? "—"} <span className="text-muted-foreground">@ {s.company ?? "—"}</span></li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="text-muted-foreground">No diagnostics captured.</div>
+        )}
+        {Array.isArray(run.errors) && run.errors.length > 0 && (
+          <pre className="overflow-auto rounded bg-muted p-2">{JSON.stringify(run.errors, null, 2)}</pre>
+        )}
+      </div>
+    </details>
+  );
+}
+
+function HistoryGroup({
+  title,
+  runs,
+  badge,
+  badgeVariant = "secondary",
+  onCancel,
+  onApprove,
+  busy,
+  reopenable = false,
+}: {
+  title: string;
+  runs: Run[];
+  badge: string;
+  badgeVariant?: "default" | "secondary" | "outline" | "destructive";
+  onCancel: (id: string) => void;
+  onApprove: (id: string, ids: string[]) => void;
+  busy: string | null;
+  reopenable?: boolean;
+}) {
+  if (runs.length === 0) return null;
+  return (
+    <details className="rounded-md border bg-muted/10 px-3 py-2">
+      <summary className="cursor-pointer text-sm">
+        <span className="font-medium">{title}</span>{" "}
+        <span className="text-muted-foreground">({runs.length})</span>
+      </summary>
+      <div className="mt-2 space-y-2">
+        {runs.map((r) => (
+          <RunHistoryRow
+            key={r.id}
+            run={r}
+            badge={badge}
+            badgeVariant={badgeVariant}
+            onCancel={onCancel}
+            onApprove={onApprove}
+            busy={busy}
+            reopenable={reopenable}
+          />
+        ))}
+      </div>
+    </details>
+  );
+}
+
+function RunsTab({
+  runs,
+  connections,
+  busy,
+  setBusy,
+  onReload,
+  onCancel,
+  onApprove,
+}: {
+  runs: Run[];
+  connections: Connection[];
+  busy: string | null;
+  setBusy: (s: string | null) => void;
+  onReload: () => Promise<void> | void;
+  onCancel: (id: string) => Promise<void> | void;
+  onApprove: (runId: string, ids: string[]) => Promise<void> | void;
+}) {
+  const groups = useMemo(() => classifyRuns(runs), [runs]);
+
+  // Cleanup target = stale awaiting + superseded awaiting (cancel them in DB)
+  const cleanupTargets = useMemo(
+    () => [...groups.staleAwaiting, ...groups.superseded].map((r) => r.id),
+    [groups.staleAwaiting, groups.superseded],
+  );
+
+  async function cleanupView() {
+    if (cleanupTargets.length === 0) {
+      toast({ title: "Already clean", description: "No stale or superseded awaiting runs." });
+      return;
+    }
+    if (!confirm(`Discard ${cleanupTargets.length} stale / superseded awaiting run(s)? Audit history is preserved in the database. No credits are spent.`)) return;
+    setBusy("cleanup");
+    const { error } = await supabase
+      .from("apollo_sync_runs")
+      .update({ status: "cancelled", completed_at: new Date().toISOString() })
+      .in("id", cleanupTargets);
+    setBusy(null);
+    if (error) {
+      toast({ title: "Cleanup failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: `Cleaned up ${cleanupTargets.length} run(s)`, description: "Old records remain in Run history." });
+    await onReload();
+  }
+
+  const primary = groups.primary;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-start gap-2 rounded-md border bg-muted/10 p-3 text-xs text-muted-foreground">
+        <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+        <p>
+          Each Apollo sync creates a run record for audit. Only the latest valid run needs action. Older, poor-fit or cancelled runs are stored in history and can be ignored.
+        </p>
+      </div>
+
+      <CurrentActionHero
+        groups={groups}
+        connections={connections}
+        onCleanup={cleanupView}
+        cleanupBusy={busy === "cleanup"}
+        cleanupCount={cleanupTargets.length}
+      />
+
+      {primary ? (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Latest run</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {(() => {
+              const diag = extractDiagnostics(primary.errors);
+              const fit = diag?.segment_fit;
+              const showFitWarning = primary.status === "awaiting_enrichment_approval" && fit && fit !== "good";
+              return (
+                <RunCard
+                  run={primary}
+                  diag={diag}
+                  fit={fit}
+                  showFitWarning={!!showFitWarning}
+                  busy={busy}
+                  onCancel={() => onCancel(primary.id)}
+                  onApprove={(ids) => onApprove(primary.id, ids)}
+                >
+                  {primary.status === "awaiting_enrichment_approval" && fit === "good" && (
+                    <div className="flex items-start gap-2 rounded-md border border-emerald-500/40 bg-emerald-500/10 p-3 text-sm">
+                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
+                      <div className="font-medium">
+                        Good fit — candidates match {primary.business_name === "Neon Candy" ? "NeonCandy Month 1" : "the segment"} criteria.
+                      </div>
+                    </div>
+                  )}
+                  {showFitWarning && (
+                    <div className="flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm">
+                      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+                      <div className="font-medium">
+                        {fit === "poor"
+                          ? "This Apollo source does not match the segment target. Discard and fix the segment before enriching."
+                          : "This Apollo source may not match the segment target. Review samples below before enriching."}
+                      </div>
+                    </div>
+                  )}
+                  {primary.status !== "awaiting_enrichment_approval" && <CompletedRunSummary run={primary} />}
+                  <RunDeveloperDiagnostics run={primary} diag={diag} />
+                </RunCard>
+              );
+            })()}
+          </CardContent>
+        </Card>
+      ) : null}
+
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base">Run history</CardTitle>
+            <span className="text-xs text-muted-foreground">
+              Audit-only — full records remain in the database.
+            </span>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          <HistoryGroup
+            title="Completed"
+            runs={groups.completed}
+            badge="completed"
+            badgeVariant="default"
+            onCancel={onCancel}
+            onApprove={onApprove}
+            busy={busy}
+          />
+          <HistoryGroup
+            title="Superseded — no action needed"
+            runs={groups.superseded}
+            badge="superseded"
+            badgeVariant="outline"
+            onCancel={onCancel}
+            onApprove={onApprove}
+            busy={busy}
+          />
+          <HistoryGroup
+            title="Stale awaiting"
+            runs={groups.staleAwaiting}
+            badge="stale"
+            badgeVariant="outline"
+            onCancel={onCancel}
+            onApprove={onApprove}
+            busy={busy}
+          />
+          <HistoryGroup
+            title="Poor fit"
+            runs={groups.poorFit}
+            badge="poor fit"
+            badgeVariant="destructive"
+            onCancel={onCancel}
+            onApprove={onApprove}
+            busy={busy}
+          />
+          <HistoryGroup
+            title="Cancelled"
+            runs={groups.cancelled}
+            badge="cancelled"
+            badgeVariant="secondary"
+            onCancel={onCancel}
+            onApprove={onApprove}
+            busy={busy}
+          />
+          <HistoryGroup
+            title="Failed"
+            runs={groups.failed}
+            badge="failed"
+            badgeVariant="destructive"
+            onCancel={onCancel}
+            onApprove={onApprove}
+            busy={busy}
+          />
+          {groups.completed.length === 0 &&
+            groups.superseded.length === 0 &&
+            groups.staleAwaiting.length === 0 &&
+            groups.poorFit.length === 0 &&
+            groups.cancelled.length === 0 &&
+            groups.failed.length === 0 && (
+              <p className="text-sm text-muted-foreground">No history yet.</p>
+            )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 function RunCard({
   run,
   diag,
