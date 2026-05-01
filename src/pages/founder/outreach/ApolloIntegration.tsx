@@ -17,6 +17,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "react-router-dom";
 import { NeonCandyMonitor } from "@/components/founder/outreach/NeonCandyMonitor";
+import { WeekendPool } from "@/components/founder/outreach/WeekendPool";
 
 const MUSIC_TARGET_KEYWORDS = [
   "playlist curator", "music curator", "independent curator", "music programmer",
