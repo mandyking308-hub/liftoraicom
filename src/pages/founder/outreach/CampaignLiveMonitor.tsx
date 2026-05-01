@@ -192,6 +192,19 @@ const CampaignLiveMonitor = () => {
           .order("created_at", { ascending: false }).limit(40);
         setActivity((act as Activity[] | null) ?? []);
       }
+
+      // BCR stage counts for this business
+      const { data: bcrRows } = await supabase
+        .from("business_contact_relationships")
+        .select("current_stage")
+        .eq("business_name", businessName);
+      const bcrList = (bcrRows as { current_stage: string }[] | null) ?? [];
+      setBcrCounts({
+        ready_to_stage: bcrList.filter((r) => r.current_stage === "ready_to_stage").length,
+        staged: bcrList.filter((r) => r.current_stage === "staged").length,
+        total: bcrList.length,
+      });
+
       setLastRefresh(new Date());
     } finally {
       setLoading(false);
