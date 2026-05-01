@@ -490,13 +490,15 @@ export function WeekendPool({ onOpenRuns }: { onOpenRuns?: () => void }) {
         <CardContent className="space-y-3">
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-7">
             {[
-              { label: "Runs today", value: cumulative.runs },
-              { label: "Found", value: cumulative.found },
-              { label: "Emails returned", value: cumulative.emails },
-              { label: "New contacts", value: cumulative.new },
-              { label: "Updated", value: cumulative.updated },
-              { label: "Qualified pool today", value: cumulative.qualified },
-              { label: "Credits spent today", value: cumulative.credits },
+              { label: "Counted runs", value: counted.runs },
+              { label: "Search candidates found", value: counted.searchFound },
+              { label: "Selected for enrichment", value: counted.selectedForEnrichment },
+              { label: "Usable emails returned", value: counted.usableEmails },
+              { label: "New contacts", value: counted.newCreated },
+              { label: "Updated contacts", value: counted.existingUpdated },
+              { label: "Qualified", value: counted.qualified },
+              { label: "Credits spent today", value: counted.creditsSpent },
+              { label: "Audit-only runs", value: auditOnly.runs },
             ].map((s) => (
               <div key={s.label} className="rounded-md border p-3 text-sm">
                 <div className="text-xs text-muted-foreground">{s.label}</div>
