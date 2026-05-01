@@ -1248,9 +1248,42 @@ function CompletedRunSummary({ run }: { run: Run }) {
   const totalSaved = run.contacts_imported;
   const importsHref = `/founder/outreach/imports?run_id=${run.id}`;
   const stageHref = `/founder/outreach/queue?run_id=${run.id}&stage=ready_to_stage`;
+  const isPartial = run.status === "partial" || run.status === "enriching";
+  const [resuming, setResuming] = useState(false);
+
+  async function handleResume() {
+    setResuming(true);
+    const { data, error } = await supabase.functions.invoke("apollo-sync-enrich", { body: { run_id: run.id } });
+    setResuming(false);
+    if (error) {
+      toast({ title: "Resume failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    const r = (data as EnrichmentRunResponse) ?? {};
+    if (r.status === "partial" || r.resume_available) {
+      toast({ title: "Chunk processed — more remaining", description: `Processed ${r.processed_count ?? 0} • Remaining ${r.remaining_count ?? 0}. Click Resume again.` });
+    } else {
+      toast({ title: "Enrichment complete" });
+    }
+    // Soft refresh — parent will re-pull on next loadAll cycle; trigger via custom event.
+    window.dispatchEvent(new CustomEvent("apollo:refresh"));
+  }
 
   return (
     <div className="space-y-3">
+      {isPartial && (
+        <div className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-xs">
+          <div className="font-semibold text-foreground">Enrichment partially completed.</div>
+          <div className="mt-1 text-muted-foreground">
+            Processed so far: {run.enrichment_attempted ?? 0} • Imported: {totalSaved}. Remaining leads still need enrichment. No duplicate Apollo credits will be spent on resume.
+          </div>
+          <div className="mt-2">
+            <Button size="sm" onClick={handleResume} disabled={resuming}>
+              {resuming ? "Resuming…" : "Resume enrichment"}
+            </Button>
+          </div>
+        </div>
+      )}
       <div className="grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
         <Stat label="Found" value={run.people_found} />
         <Stat label="Has email flag" value={run.people_with_email_flag} />
