@@ -473,6 +473,86 @@ export type Database = {
           },
         ]
       }
+      apollo_automation_runs: {
+        Row: {
+          business_name: string
+          contacts_new: number
+          contacts_updated: number
+          created_at: string
+          enrichment_credits_used: number
+          enrichment_skipped_reason: string | null
+          errors: Json
+          found: number
+          id: string
+          notes: string | null
+          qualified: number
+          run_date: string
+          search_run_id: string | null
+          searched: number
+          segment_fit: string | null
+          segment_id: string
+          skipped_duplicates: number
+          skipped_suppressed: number
+          staged: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          business_name: string
+          contacts_new?: number
+          contacts_updated?: number
+          created_at?: string
+          enrichment_credits_used?: number
+          enrichment_skipped_reason?: string | null
+          errors?: Json
+          found?: number
+          id?: string
+          notes?: string | null
+          qualified?: number
+          run_date?: string
+          search_run_id?: string | null
+          searched?: number
+          segment_fit?: string | null
+          segment_id: string
+          skipped_duplicates?: number
+          skipped_suppressed?: number
+          staged?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          business_name?: string
+          contacts_new?: number
+          contacts_updated?: number
+          created_at?: string
+          enrichment_credits_used?: number
+          enrichment_skipped_reason?: string | null
+          errors?: Json
+          found?: number
+          id?: string
+          notes?: string | null
+          qualified?: number
+          run_date?: string
+          search_run_id?: string | null
+          searched?: number
+          segment_fit?: string | null
+          segment_id?: string
+          skipped_duplicates?: number
+          skipped_suppressed?: number
+          staged?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "apollo_automation_runs_segment_id_fkey"
+            columns: ["segment_id"]
+            isOneToOne: false
+            referencedRelation: "apollo_sync_segments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       apollo_connections: {
         Row: {
           api_key_cipher: string
@@ -735,51 +815,78 @@ export type Database = {
       }
       apollo_sync_segments: {
         Row: {
+          auto_enrich: boolean
           auto_qualify: boolean
+          automation_enabled: boolean
           business_name: string
           created_at: string
+          daily_enrichment_cap: number
+          daily_search_cap: number
           default_relevance_category: string | null
           default_tags: string[]
+          email_only: boolean
           hold_for_approval: boolean
           id: string
           is_active: boolean
+          last_scheduled_run_at: string | null
           max_contacts_per_run: number
           mode: Database["public"]["Enums"]["apollo_segment_mode"]
+          require_good_fit: boolean
           saved_list_id: string | null
+          schedule_cron: string
           search_criteria: Json
           segment_name: string
+          skip_suppressed: boolean
           updated_at: string
         }
         Insert: {
+          auto_enrich?: boolean
           auto_qualify?: boolean
+          automation_enabled?: boolean
           business_name: string
           created_at?: string
+          daily_enrichment_cap?: number
+          daily_search_cap?: number
           default_relevance_category?: string | null
           default_tags?: string[]
+          email_only?: boolean
           hold_for_approval?: boolean
           id?: string
           is_active?: boolean
+          last_scheduled_run_at?: string | null
           max_contacts_per_run?: number
           mode?: Database["public"]["Enums"]["apollo_segment_mode"]
+          require_good_fit?: boolean
           saved_list_id?: string | null
+          schedule_cron?: string
           search_criteria?: Json
           segment_name: string
+          skip_suppressed?: boolean
           updated_at?: string
         }
         Update: {
+          auto_enrich?: boolean
           auto_qualify?: boolean
+          automation_enabled?: boolean
           business_name?: string
           created_at?: string
+          daily_enrichment_cap?: number
+          daily_search_cap?: number
           default_relevance_category?: string | null
           default_tags?: string[]
+          email_only?: boolean
           hold_for_approval?: boolean
           id?: string
           is_active?: boolean
+          last_scheduled_run_at?: string | null
           max_contacts_per_run?: number
           mode?: Database["public"]["Enums"]["apollo_segment_mode"]
+          require_good_fit?: boolean
           saved_list_id?: string | null
+          schedule_cron?: string
           search_criteria?: Json
           segment_name?: string
+          skip_suppressed?: boolean
           updated_at?: string
         }
         Relationships: []

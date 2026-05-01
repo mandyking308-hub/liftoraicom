@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "@/hooks/use-toast";
 import FounderLayout from "@/components/founder/FounderLayout";
-import { AlertTriangle, CheckCircle2, KeyRound, Loader2, Play, RefreshCw, ShieldAlert, Trash2, Wand2, Info } from "lucide-react";
+import { AlertTriangle, CalendarClock, CheckCircle2, KeyRound, Loader2, Play, RefreshCw, ShieldAlert, Trash2, Wand2, Info } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -518,6 +518,15 @@ type Segment = {
   max_contacts_per_run: number;
   hold_for_approval: boolean;
   is_active: boolean;
+  automation_enabled?: boolean;
+  schedule_cron?: string;
+  daily_search_cap?: number;
+  daily_enrichment_cap?: number;
+  auto_enrich?: boolean;
+  require_good_fit?: boolean;
+  email_only?: boolean;
+  skip_suppressed?: boolean;
+  last_scheduled_run_at?: string | null;
 };
 
 type Run = {
@@ -1123,6 +1132,7 @@ export default function ApolloIntegration() {
                                     Run search
                                   </Button>
                                   <EditSegmentDialog segment={segment} onSave={(u) => saveSegmentEdits(segment, u)} />
+                                  <DailyAutomationDialog segment={segment} onSave={(u) => saveSegmentEdits(segment, u)} />
                                 </div>
                                 {isNeonCandyMonth1 && (
                                   <Button
@@ -1990,6 +2000,188 @@ function EditSegmentDialog({
             {saving ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : null}
             Save
           </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function DailyAutomationDialog({
+  segment,
+  onSave,
+}: {
+  segment: Segment;
+  onSave: (updates: Record<string, unknown>) => Promise<boolean>;
+}) {
+  const [open, setOpen] = useState(false);
+  const [enabled, setEnabled] = useState(!!segment.automation_enabled);
+  const [searchCap, setSearchCap] = useState(segment.daily_search_cap ?? 25);
+  const [enrichCap, setEnrichCap] = useState(segment.daily_enrichment_cap ?? 25);
+  const [autoEnrich, setAutoEnrich] = useState(segment.auto_enrich ?? true);
+  const [requireGoodFit, setRequireGoodFit] = useState(segment.require_good_fit ?? true);
+  const [emailOnly, setEmailOnly] = useState(segment.email_only ?? true);
+  const [skipSuppressed, setSkipSuppressed] = useState(segment.skip_suppressed ?? true);
+  const [confirming, setConfirming] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const willEnable = enabled && !segment.automation_enabled;
+
+  async function commit() {
+    setSaving(true);
+    const ok = await onSave({
+      automation_enabled: enabled,
+      daily_search_cap: searchCap,
+      daily_enrichment_cap: enrichCap,
+      auto_enrich: autoEnrich,
+      require_good_fit: requireGoodFit,
+      email_only: emailOnly,
+      skip_suppressed: skipSuppressed,
+    });
+    setSaving(false);
+    setConfirming(false);
+    if (ok) setOpen(false);
+  }
+
+  function handleSaveClicked() {
+    if (willEnable) {
+      setConfirming(true);
+    } else {
+      void commit();
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setConfirming(false); }}>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="outline">
+          <CalendarClock className="mr-1 h-3 w-3" />
+          {segment.automation_enabled ? "Daily ON" : "Daily OFF"}
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Daily automation — {segment.segment_name}</DialogTitle>
+        </DialogHeader>
+
+        {!confirming ? (
+          <div className="space-y-4">
+            <div className="rounded-md border p-3 text-xs text-muted-foreground">
+              Runs daily at <strong>06:00 UTC</strong>. Apollo will search for new candidates,
+              skip duplicates and suppressed contacts, and (if enabled) enrich up to the daily
+              credit cap. No emails are sent by this job — sending follows the campaign's own
+              ramp/daily limits.
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Checkbox id={`auto-${segment.id}`} checked={enabled} onCheckedChange={(v) => setEnabled(!!v)} />
+              <Label htmlFor={`auto-${segment.id}`} className="cursor-pointer font-medium">
+                Enable daily automation for this segment
+              </Label>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs">Daily search cap</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  max={100}
+                  value={searchCap}
+                  onChange={(e) => setSearchCap(Math.max(1, Math.min(100, Number(e.target.value) || 25)))}
+                />
+              </div>
+              <div>
+                <Label className="text-xs">Daily enrichment cap (credits)</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  max={500}
+                  value={enrichCap}
+                  onChange={(e) => setEnrichCap(Math.max(0, Math.min(500, Number(e.target.value) || 25)))}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Checkbox id={`ae-${segment.id}`} checked={autoEnrich} onCheckedChange={(v) => setAutoEnrich(!!v)} />
+                <Label htmlFor={`ae-${segment.id}`} className="cursor-pointer text-sm">
+                  Auto-enrich (within cap)
+                </Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox id={`gf-${segment.id}`} checked={requireGoodFit} onCheckedChange={(v) => setRequireGoodFit(!!v)} />
+                <Label htmlFor={`gf-${segment.id}`} className="cursor-pointer text-sm">
+                  Only enrich if segment fit is <strong>good</strong>
+                </Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox id={`eo-${segment.id}`} checked={emailOnly} onCheckedChange={(v) => setEmailOnly(!!v)} />
+                <Label htmlFor={`eo-${segment.id}`} className="cursor-pointer text-sm">
+                  Email enrichment only (no phone, no AI Research)
+                </Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox id={`ss-${segment.id}`} checked={skipSuppressed} onCheckedChange={(v) => setSkipSuppressed(!!v)} />
+                <Label htmlFor={`ss-${segment.id}`} className="cursor-pointer text-sm">
+                  Skip suppressed / duplicate / already-in-CRM contacts
+                </Label>
+              </div>
+            </div>
+
+            {segment.last_scheduled_run_at && (
+              <p className="text-xs text-muted-foreground">
+                Last scheduled run: {new Date(segment.last_scheduled_run_at).toLocaleString()}
+              </p>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div className="rounded-md border border-amber-500/40 bg-amber-500/5 p-3 text-sm">
+              <div className="mb-2 flex items-center gap-2 font-semibold">
+                <ShieldAlert className="h-4 w-4 text-amber-500" />
+                Confirm daily automation settings
+              </div>
+              <ul className="space-y-1 text-xs">
+                <li>Business: <strong>{segment.business_name}</strong></li>
+                <li>Segment: <strong>{segment.segment_name}</strong></li>
+                <li>Schedule: <strong>06:00 UTC daily</strong></li>
+                <li>Daily Apollo contacts: <strong>{searchCap}</strong></li>
+                <li>Daily enrichment cap: <strong>{enrichCap} credits</strong></li>
+                <li>Auto-enrich: <strong>{autoEnrich ? "ON" : "OFF"}</strong></li>
+                <li>Require good segment fit: <strong>{requireGoodFit ? "ON" : "OFF"}</strong></li>
+                <li>Email only (no phone / no AI Research): <strong>{emailOnly ? "ON" : "OFF"}</strong></li>
+                <li>Skip suppressed / duplicates: <strong>{skipSuppressed ? "ON" : "OFF"}</strong></li>
+                <li>Sending: <strong>limited by inbox ramp/daily cap</strong></li>
+                <li>Founder approval required for replies</li>
+                <li>No simulated sending</li>
+              </ul>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Enabling will start the daily job at the next 06:00 UTC tick. You can disable it
+              again at any time. Caps apply per UTC day, per segment.
+            </p>
+          </div>
+        )}
+
+        <DialogFooter>
+          {confirming ? (
+            <>
+              <Button variant="ghost" onClick={() => setConfirming(false)}>Back</Button>
+              <Button onClick={commit} disabled={saving}>
+                {saving ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : null}
+                Confirm and enable
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
+              <Button onClick={handleSaveClicked} disabled={saving}>
+                {saving ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : null}
+                {willEnable ? "Review & enable…" : "Save"}
+              </Button>
+            </>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
