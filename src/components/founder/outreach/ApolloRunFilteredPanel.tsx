@@ -240,9 +240,12 @@ export default function ApolloRunFilteredPanel({ requiredStage, heading, subtitl
 
   async function confirmStage() {
     if (!campaignId) return;
-    const targetIds = rows.filter((r) => selected[r.contact_id] && r.bcr_id).map((r) => r.bcr_id!) as string[];
+    const selectedRows = rows.filter((r) => selected[r.contact_id] && r.bcr_id);
+    const targetIds = selectedRows.map((r) => r.bcr_id!) as string[];
+    const contactIds = selectedRows.map((r) => r.contact_id);
     if (targetIds.length === 0) return;
     setStaging(true);
+    // 1. Flip BCR pipeline labels + eligibility
     const { error } = await supabase
       .from("business_contact_relationships")
       .update({
@@ -251,14 +254,62 @@ export default function ApolloRunFilteredPanel({ requiredStage, heading, subtitl
         campaign_eligible: true,
       } as never)
       .in("id", targetIds);
-    setStaging(false);
-    setConfirmOpen(false);
     if (error) {
+      setStaging(false);
+      setConfirmOpen(false);
       toast({ title: "Stage failed", description: error.message, variant: "destructive" });
       return;
     }
-    toast({ title: `Staged ${targetIds.length} contact(s)`, description: "They are now in the campaign's staged pool. Nothing has been sent." });
+
+    // 2. Invoke scheduler — actually create queue rows
+    const queueBefore = await countCampaignQueueRows(campaignId);
+    const { data: schedRes, error: schedErr } = await supabase.functions.invoke(
+      "outreach-schedule-batch",
+      { body: { campaign_id: campaignId, contact_ids: contactIds } },
+    );
+    setStaging(false);
+    setConfirmOpen(false);
+    if (schedErr) {
+      toast({
+        title: "Staging labels saved BUT queue creation failed",
+        description: `${schedErr.message}. The contacts are marked staged but no emails will send. Re-run staging or invoke outreach-schedule-batch.`,
+        variant: "destructive",
+      });
+      void load();
+      return;
+    }
+    const scheduled = (schedRes as { scheduled?: number; contacts?: number } | null)?.scheduled ?? 0;
+    const queueAfter = await countCampaignQueueRows(campaignId);
+    const newRows = queueAfter.total - queueBefore.total;
+    if (scheduled === 0 || newRows === 0) {
+      toast({
+        title: "Staging did not enqueue any rows",
+        description:
+          "Labels were updated but the scheduler created 0 queue rows. " +
+          "Likely cause: contacts already have queue rows in another campaign, or no live_ready inbox is available. Check Live Monitor.",
+        variant: "destructive",
+      });
+      void load();
+      return;
+    }
+    const step1Pending = queueAfter.step1_pending - queueBefore.step1_pending;
+    toast({
+      title: `${contactIds.length} contacts staged into campaign queue`,
+      description: `${scheduled} sequence rows created; ${step1Pending} Step 1 pending; sender hello@neoncandy.online.`,
+    });
     void load();
+  }
+
+  async function countCampaignQueueRows(cid: string) {
+    const { data } = await supabase
+      .from("email_queue")
+      .select("sequence_step,status")
+      .eq("campaign_id", cid);
+    const rows = (data as { sequence_step: number; status: string }[] | null) ?? [];
+    return {
+      total: rows.length,
+      step1_pending: rows.filter((r) => r.sequence_step === 1 && r.status === "pending").length,
+    };
   }
 
   if (!runId) return null;
@@ -309,12 +360,12 @@ export default function ApolloRunFilteredPanel({ requiredStage, heading, subtitl
             </Select>
             <Button size="sm" onClick={openStageConfirm} disabled={staging || selectedIds.length === 0 || !campaignId}>
               {staging ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : null}
-              Stage selected to campaign ({selectedIds.length})
+              Stage into campaign queue ({selectedIds.length})
             </Button>
           </div>
         </div>
         <p className="text-[11px] text-muted-foreground">
-          Staging only updates the contact's pipeline stage and links the chosen campaign. Hold-for-approval remains on. No emails are queued or sent.
+          Staging flips the contacts to <strong>staged + campaign_eligible</strong> AND creates Step 1–4 queue rows against the campaign sender. Step 1 anchors at the next 09:00 UTC; Step 2/3/4 are scheduled follow-ups that still require a real SMTP parent before sending.
         </p>
 
         <div className="overflow-hidden rounded-md border">
@@ -491,7 +542,7 @@ function StageConfirmDialog({
           <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={staging}>Cancel</Button>
           <Button onClick={onConfirm} disabled={staging || count === 0}>
             {staging ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : null}
-            Stage selected contacts into campaign
+            Stage into campaign queue
           </Button>
         </DialogFooter>
       </DialogContent>
