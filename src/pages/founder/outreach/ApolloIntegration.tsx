@@ -846,17 +846,21 @@ export default function ApolloIntegration() {
     loadAll();
   }
 
-  async function approveEnrichment(runId: string) {
-    if (!confirm("Approve enrichment? This will spend Apollo credits (1 per email revealed, max 25).")) return;
+  async function approveEnrichment(runId: string, selectedIds: string[]) {
+    if (!selectedIds.length) {
+      toast({ title: "Nothing to enrich", description: "No new candidates are selected.", variant: "destructive" });
+      return;
+    }
+    if (!confirm(`Approve enrichment for ${selectedIds.length} new candidate(s)? Existing CRM contacts and possible duplicates have been excluded.`)) return;
     setBusy(`enrich-${runId}`);
-    const { data, error } = await supabase.functions.invoke("apollo-sync-enrich", { body: { run_id: runId } });
+    const { data, error } = await supabase.functions.invoke("apollo-sync-enrich", { body: { run_id: runId, selected_apollo_person_ids: selectedIds } });
     setBusy(null);
     if (error) {
       const message = error.message || "Enrichment failed";
       const isPoorFit = message.includes("segment_fit_poor") || message.toLowerCase().includes("does not match");
       if (isPoorFit && confirm("Apollo blocked enrichment because the search results do not match the segment taxonomy. Force enrichment anyway and spend credits?")) {
         setBusy(`enrich-${runId}`);
-        const retry = await supabase.functions.invoke("apollo-sync-enrich", { body: { run_id: runId, force: true } });
+        const retry = await supabase.functions.invoke("apollo-sync-enrich", { body: { run_id: runId, force: true, selected_apollo_person_ids: selectedIds } });
         setBusy(null);
         if (retry.error) {
           toast({ title: "Enrichment failed", description: retry.error.message, variant: "destructive" });
