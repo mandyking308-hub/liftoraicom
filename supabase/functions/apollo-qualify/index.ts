@@ -7,6 +7,19 @@ const corsHeaders = {
 };
 
 const LOVABLE_AI = "https://ai.gateway.lovable.dev/v1/chat/completions";
+const AI_TIMEOUT_MS = 20_000;
+const DB_TIMEOUT_MS = 8_000;
+const TOTAL_BUDGET_MS = 110_000;
+
+function withTimeout<T>(p: PromiseLike<T>, ms: number, label: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const t = setTimeout(() => reject(new Error(`timeout:${label}`)), ms);
+    Promise.resolve(p).then(
+      (v) => { clearTimeout(t); resolve(v); },
+      (e) => { clearTimeout(t); reject(e); },
+    );
+  });
+}
 
 interface Body { run_id: string; }
 
@@ -69,6 +82,7 @@ async function aiClassify(items: { id: string; title: string | null; company: st
     const resp = await fetch(LOVABLE_AI, {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      signal: AbortSignal.timeout(AI_TIMEOUT_MS),
       body: JSON.stringify({
         model: "google/gemini-2.5-flash-lite",
         messages: [
@@ -127,6 +141,8 @@ Deno.serve(async (req) => {
     );
     const body: Body = await req.json();
     if (!body?.run_id) return json({ error: "run_id required" }, 400);
+    const startedAt = Date.now();
+    const budgetExceeded = () => Date.now() - startedAt > TOTAL_BUDGET_MS;
 
     const { data: leads, error } = await supabase
       .from("apollo_leads")
@@ -151,6 +167,7 @@ Deno.serve(async (req) => {
 
     let qualified = 0, maybe = 0, notQualified = 0, needsReview = 0;
     for (const r of ruleResults) {
+      if (budgetExceeded()) break;
       const ai = aiMap.get(r.leadId);
       const finalQualification = (ai?.qualification ?? r.qualification) as "qualified" | "maybe" | "not_qualified" | "needs_review";
       const finalTags = Array.from(new Set([...(r.tags || []), ...((ai?.tags as string[]) || [])]));
@@ -161,24 +178,26 @@ Deno.serve(async (req) => {
       else if (finalQualification === "not_qualified") notQualified += 1;
       else needsReview += 1;
 
-      await supabase.from("apollo_leads").update({
+      await withTimeout(supabase.from("apollo_leads").update({
         qualification: finalQualification,
         qualification_reason: finalReason,
         ai_tags: finalTags,
-      }).eq("id", r.leadId);
+      }).eq("id", r.leadId), DB_TIMEOUT_MS, "lead_update").catch(() => {});
 
       if (r.contactId) {
         // Merge tags into contact
-        const { data: c } = await supabase
-          .from("contacts").select("tags").eq("id", r.contactId).maybeSingle();
+        const { data: c } = await withTimeout(
+          supabase.from("contacts").select("tags").eq("id", r.contactId).maybeSingle(),
+          DB_TIMEOUT_MS, "contact_lookup",
+        ).catch(() => ({ data: null }));
         const merged = Array.from(new Set([...(c?.tags ?? []), ...finalTags]));
-        await supabase.from("contacts").update({ tags: merged }).eq("id", r.contactId);
+        await withTimeout(supabase.from("contacts").update({ tags: merged }).eq("id", r.contactId), DB_TIMEOUT_MS, "contact_update").catch(() => {});
 
         // Update business relationship
-        await supabase.from("business_contact_relationships").update({
+        await withTimeout(supabase.from("business_contact_relationships").update({
           qualification: finalQualification,
           qualification_reason: finalReason,
-        }).eq("contact_id", r.contactId);
+        }).eq("contact_id", r.contactId), DB_TIMEOUT_MS, "bcr_update").catch(() => {});
       }
     }
 
