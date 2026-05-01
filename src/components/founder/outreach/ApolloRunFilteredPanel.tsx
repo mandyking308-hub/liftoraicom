@@ -205,7 +205,7 @@ export default function ApolloRunFilteredPanel({ requiredStage, heading, subtitl
     setSearchParams(next, { replace: true });
   }
 
-  async function stageSelected() {
+  async function openStageConfirm() {
     if (!campaignId) {
       toast({ title: "Pick a campaign", description: "Choose a campaign before staging.", variant: "destructive" });
       return;
@@ -215,12 +215,33 @@ export default function ApolloRunFilteredPanel({ requiredStage, heading, subtitl
       toast({ title: "Nothing to stage", description: "Select at least one contact with a relationship row.", variant: "destructive" });
       return;
     }
-    if (
-      !confirm(
-        `Stage ${targetIds.length} contact(s) to campaign? This only marks them as staged with hold-for-approval. No emails are sent.`,
-      )
-    )
-      return;
+
+    // Load sender + campaign + sequence status for the confirmation panel.
+    const business = businessName ?? rows[0]?.business_name ?? "Neon Candy";
+    const [{ data: hello }, { data: music }, { data: camp }, { data: seq }] = await Promise.all([
+      supabase.from("inboxes").select("active,live_readiness,paused_reason,daily_send_limit,emails_sent_today").eq("business_name", business).eq("email_address", "hello@neoncandy.online").maybeSingle(),
+      supabase.from("inboxes").select("active").eq("business_name", business).eq("email_address", "music@neoncandy.net").maybeSingle(),
+      supabase.from("outreach_campaigns").select("status").eq("id", campaignId).maybeSingle(),
+      supabase.from("outreach_sequences").select("step_number").eq("campaign_id", campaignId),
+    ]);
+    const h = hello as any | null;
+    setSenderStatus({
+      hello_active: !!h?.active,
+      hello_ready: h?.live_readiness ?? null,
+      hello_paused: h?.paused_reason ?? null,
+      hello_daily_limit: h?.daily_send_limit ?? null,
+      hello_sent_today: h?.emails_sent_today ?? null,
+      music_active: (music as any)?.active ?? null,
+      campaign_status: (camp as any)?.status ?? null,
+      sequence_steps: (seq ?? []).length,
+    });
+    setConfirmOpen(true);
+  }
+
+  async function confirmStage() {
+    if (!campaignId) return;
+    const targetIds = rows.filter((r) => selected[r.contact_id] && r.bcr_id).map((r) => r.bcr_id!) as string[];
+    if (targetIds.length === 0) return;
     setStaging(true);
     const { error } = await supabase
       .from("business_contact_relationships")
@@ -231,6 +252,7 @@ export default function ApolloRunFilteredPanel({ requiredStage, heading, subtitl
       } as never)
       .in("id", targetIds);
     setStaging(false);
+    setConfirmOpen(false);
     if (error) {
       toast({ title: "Stage failed", description: error.message, variant: "destructive" });
       return;
