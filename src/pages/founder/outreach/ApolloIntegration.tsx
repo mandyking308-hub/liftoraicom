@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -199,7 +199,7 @@ export default function ApolloIntegration() {
   const [segName, setSegName] = useState("Month 1");
   const [segListId, setSegListId] = useState("");
 
-  async function loadAll() {
+  const loadAll = useCallback(async () => {
     setLoading(true);
     const [c, s, r] = await Promise.all([
       supabase.from("apollo_connections").select("*").order("created_at"),
@@ -212,7 +212,7 @@ export default function ApolloIntegration() {
     setRuns((r.data as Run[]) ?? []);
     setSelectedBusiness((current) => current || nextConnections[0]?.business_name || businessName);
     setLoading(false);
-  }
+  }, [businessName]);
 
   useEffect(() => {
     loadAll();
