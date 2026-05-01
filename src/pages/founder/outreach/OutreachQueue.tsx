@@ -18,6 +18,22 @@ type QueueItem = {
 
 type ContactLite = { id: string; name: string | null; email: string | null };
 
+type InboxCapacity = {
+  id: string;
+  email_address: string;
+  provider_type: string;
+  live_readiness: string;
+  daily_send_limit: number;
+  current_send_count: number;
+  warmup_started_at: string | null;
+  sent_today_utc: number;     // calculated from email_queue.sent_at (today UTC)
+  sent_last_24h: number;      // calculated from email_queue.sent_at (rolling)
+  warmup_max: number;         // ramp limit derived from age_days
+  effective_cap: number;      // max(warmup_max, daily_send_limit) — matches enforce_inbox_ramp
+  remaining: number;          // effective_cap - max(current_send_count, sent_today_utc)
+  guard_uses: "current_send_count";
+};
+
 const STATUSES = ["ALL", "pending", "sent", "blocked", "failed"] as const;
 
 const variant = (s: string): "default" | "destructive" | "secondary" | "outline" => {
@@ -32,6 +48,7 @@ const OutreachQueue = () => {
   const [filter, setFilter] = useState<typeof STATUSES[number]>("pending");
   const [contacts, setContacts] = useState<Record<string, ContactLite>>({});
   const [running, setRunning] = useState(false);
+  const [inboxCaps, setInboxCaps] = useState<InboxCapacity[]>([]);
   const [lastResult, setLastResult] = useState<null | {
     invoked: boolean;
     processed: number; sent: number; blocked: number; delayed: number; deferred?: number; failed?: number;
@@ -43,6 +60,7 @@ const OutreachQueue = () => {
   }>(null);
 
   useEffect(() => { void load(); }, []);
+  useEffect(() => { void loadInboxCaps(); }, []);
 
   async function load() {
     let q = supabase.from("email_queue").select("*").order("scheduled_at", { ascending: true }).limit(200);
@@ -61,6 +79,46 @@ const OutreachQueue = () => {
     }
   }
   useEffect(() => { void load(); }, [filter]);
+
+  async function loadInboxCaps() {
+    const { data: inboxes } = await supabase
+      .from("inboxes")
+      .select("id,email_address,provider_type,live_readiness,daily_send_limit,current_send_count,warmup_started_at")
+      .eq("active", true);
+    if (!inboxes) return;
+    const todayStartUtc = new Date();
+    todayStartUtc.setUTCHours(0, 0, 0, 0);
+    const last24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+    const caps: InboxCapacity[] = await Promise.all(
+      inboxes.map(async (ix: any) => {
+        const [{ count: todayCount }, { count: rolling24h }] = await Promise.all([
+          supabase.from("email_queue").select("id", { count: "exact", head: true })
+            .eq("inbox_id", ix.id).eq("status", "sent")
+            .gte("sent_at", todayStartUtc.toISOString()),
+          supabase.from("email_queue").select("id", { count: "exact", head: true })
+            .eq("inbox_id", ix.id).eq("status", "sent")
+            .gte("sent_at", last24h.toISOString()),
+        ]);
+        const ageDays = ix.warmup_started_at
+          ? Math.max(0, Math.floor((Date.now() - new Date(ix.warmup_started_at).getTime()) / 86400000))
+          : 0;
+        const warmupMax = ageDays < 3 ? 20 : ageDays < 7 ? 40 : 80;
+        const effectiveCap = Math.max(warmupMax, ix.daily_send_limit ?? 0);
+        const usedForGuard = Math.max(ix.current_send_count ?? 0, todayCount ?? 0);
+        return {
+          ...ix,
+          sent_today_utc: todayCount ?? 0,
+          sent_last_24h: rolling24h ?? 0,
+          warmup_max: warmupMax,
+          effective_cap: effectiveCap,
+          remaining: Math.max(0, effectiveCap - usedForGuard),
+          guard_uses: "current_send_count" as const,
+        };
+      }),
+    );
+    setInboxCaps(caps);
+  }
 
   async function runWorker() {
     setRunning(true);
@@ -165,6 +223,42 @@ const OutreachQueue = () => {
         </div>
 
         <SimulatedSendingBanner />
+
+        {inboxCaps.length > 0 && (
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Inbox capacity (guard source of truth)</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="divide-y divide-border">
+                {inboxCaps.map((ix) => {
+                  const drift = (ix.current_send_count ?? 0) !== ix.sent_today_utc;
+                  return (
+                    <div key={ix.id} className="p-4 grid grid-cols-2 md:grid-cols-7 gap-3 text-sm">
+                      <div className="md:col-span-2">
+                        <div className="font-medium">{ix.email_address}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {ix.provider_type} · {ix.live_readiness}
+                        </div>
+                      </div>
+                      <div><div className="text-xs text-muted-foreground">Sent today (UTC)</div><div className="font-medium">{ix.sent_today_utc}</div></div>
+                      <div><div className="text-xs text-muted-foreground">Last 24h</div><div className="font-medium">{ix.sent_last_24h}</div></div>
+                      <div>
+                        <div className="text-xs text-muted-foreground">Stored counter</div>
+                        <div className={`font-medium ${drift ? "text-destructive" : ""}`}>{ix.current_send_count}</div>
+                      </div>
+                      <div><div className="text-xs text-muted-foreground">Daily limit / ramp</div><div className="font-medium">{ix.daily_send_limit} / {ix.warmup_max}</div></div>
+                      <div><div className="text-xs text-muted-foreground">Remaining</div><div className="font-medium text-primary">{ix.remaining}</div></div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="p-3 text-xs text-muted-foreground border-t">
+                The ramp guard reads the stored counter. Drift highlighted in red means the trigger missed an update — the calculated "Sent today" is the source of truth.
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {lastResult && (
           <Card className="border-primary/30">
