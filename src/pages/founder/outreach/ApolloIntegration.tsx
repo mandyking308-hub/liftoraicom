@@ -1567,6 +1567,8 @@ function RunHistoryRow({
   const subtitle =
     run.status === "completed"
       ? `${run.contacts_imported} saved • ${run.qualified_count} qualified`
+      : run.status === "partial" || run.status === "enriching"
+      ? `${run.contacts_imported} saved so far • resume available`
       : run.status === "cancelled"
       ? "Cancelled"
       : run.status === "awaiting_enrichment_approval"
