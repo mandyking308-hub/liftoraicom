@@ -10,7 +10,7 @@ const APOLLO_BASE = "https://api.apollo.io/api/v1";
 const HARD_CAP = 25;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-interface Body { run_id: string; force?: boolean; }
+interface Body { run_id: string; force?: boolean; selected_apollo_person_ids?: string[]; }
 
 function json(b: unknown, status: number) {
   return new Response(JSON.stringify(b), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -103,12 +103,19 @@ Deno.serve(async (req) => {
     const apiKey = dec as string;
 
     // Pull leads with has_email_flag = true, capped
-    const { data: leads, error: leadErr } = await supabase
+    let leadsQuery = supabase
       .from("apollo_leads")
       .select("*")
       .eq("run_id", run.id)
       .eq("has_email_flag", true)
       .limit(HARD_CAP);
+    const selectedIds = Array.isArray(body.selected_apollo_person_ids)
+      ? body.selected_apollo_person_ids.filter((s) => typeof s === "string" && s.length > 0)
+      : null;
+    if (selectedIds && selectedIds.length > 0) {
+      leadsQuery = leadsQuery.in("apollo_person_id", selectedIds);
+    }
+    const { data: leads, error: leadErr } = await leadsQuery;
     if (leadErr) return json({ error: leadErr.message }, 500);
 
     await supabase.from("apollo_sync_runs").update({ status: "enriching" }).eq("id", run.id);
