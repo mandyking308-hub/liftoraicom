@@ -1335,7 +1335,27 @@ function RunCard({
       </div>
       {children}
       {isAwaiting && (
-        <div className="space-y-2 border-t pt-3">
+        <div className="space-y-3 border-t pt-3">
+          <div>
+            <h3 className="text-sm font-semibold">Review candidates before enrichment</h3>
+            <p className="text-xs text-muted-foreground">Review these Apollo candidates before spending enrichment credits.</p>
+          </div>
+          <div className="grid grid-cols-2 gap-2 text-xs md:grid-cols-4">
+            <Stat label="Found" value={run.people_found ?? 0} />
+            <Stat label="Has email" value={run.people_with_email_flag ?? 0} />
+            <Stat label="Segment fit" value={fit ?? "—"} />
+            <Stat label="New" value={preview?.newCount ?? 0} />
+            <Stat label="Existing in CRM" value={preview?.existingSkipped ?? 0} />
+            <Stat label="Possible duplicates" value={preview?.possibleHeld ?? 0} />
+            <Stat label="Selected" value={preview?.creditsToSpend ?? 0} />
+            <Stat label="Est. credits" value={preview?.creditsToSpend ?? 0} />
+          </div>
+          {!previewReady && (
+            <div className="flex items-start gap-2 rounded-md border border-amber-500/40 bg-amber-500/10 p-2 text-xs">
+              <Loader2 className="mt-0.5 h-3 w-3 shrink-0 animate-spin text-amber-500" />
+              <span>Duplicate check pending — enrichment approval disabled.</span>
+            </div>
+          )}
           <CandidatePreview runId={run.id} onSelectionReady={setPreview} />
           <div className="flex items-center justify-between gap-2">
             <p className="text-xs text-muted-foreground">
