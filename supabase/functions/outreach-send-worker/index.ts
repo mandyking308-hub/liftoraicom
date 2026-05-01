@@ -581,6 +581,21 @@ Deno.serve(async (req) => {
           email_id: item.id,
         });
 
+        // Log communications row ONLY after a real SMTP accept, so failed
+        // retries do not poison RECENT_COMMUNICATION_24H.
+        if (useReal && realSendOk) {
+          const { data: contactRow2 } = await supabase
+            .from("contacts").select("assigned_inbox_id").eq("id", item.contact_id).maybeSingle();
+          await supabase.from("communications").insert({
+            contact_id: item.contact_id,
+            channel: "email",
+            direction: "outbound",
+            message: seq ? `[${seq.subject}] ${seq.body}` : `Step ${item.sequence_step}`,
+            inbox_id: contactRow2?.assigned_inbox_id ?? item.inbox_id ?? null,
+            ai_generated: false,
+          });
+        }
+
         const nowIso = new Date().toISOString();
         await supabase.from("email_queue")
           .update({
