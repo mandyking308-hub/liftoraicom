@@ -61,6 +61,10 @@ export function NeonCandyMonitor() {
   const [weekStats, setWeekStats] = useState<Stat[]>([]);
   const [checks, setChecks] = useState<Check[]>([]);
   const [actions, setActions] = useState<string[]>([]);
+  const [queueBreakdown, setQueueBreakdown] = useState<Stat[] | null>(null);
+  const [queueExplain, setQueueExplain] = useState<string>("");
+  const [queueRows, setQueueRows] = useState<Array<{ email: string; sequence_step: number; status: string; delivery_kind: string | null; scheduled_utc: string | null }>>([]);
+  const [queueWarn, setQueueWarn] = useState<string[]>([]);
 
   const load = useCallback(async () => {
     setLoading(true);
