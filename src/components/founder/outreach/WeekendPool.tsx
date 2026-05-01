@@ -335,6 +335,201 @@ export function WeekendPool({ onOpenRuns }: { onOpenRuns?: () => void }) {
     void load();
   }
 
+  // -------- Auto-builder: build pool to TARGET_POOL --------
+  function appendLog(line: string) {
+    setBuildLog((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ${line}`]);
+  }
+
+  /**
+   * Read currently-available unenriched, good-fit candidates today.
+   * Returns [{ run_id, apollo_person_ids[] }, ...] in oldest-first order so
+   * existing awaiting-approval runs are consumed before new searches.
+   */
+  async function gatherAvailableCandidates(): Promise<{ runId: string; ids: string[] }[]> {
+    if (!segmentId) return [];
+    const todayStart = new Date(); todayStart.setUTCHours(0, 0, 0, 0);
+    const { data: runs } = await supabase
+      .from("apollo_sync_runs")
+      .select("id,status,errors,created_at")
+      .eq("segment_id", segmentId)
+      .gte("started_at", todayStart.toISOString())
+      .in("status", ["awaiting_enrichment_approval", "partial", "enriching", "completed"])
+      .order("created_at", { ascending: true });
+    const out: { runId: string; ids: string[] }[] = [];
+    for (const r of (runs ?? []) as any[]) {
+      // Confirm good fit from diagnostics blob
+      let good = false;
+      try {
+        const errs = (r.errors ?? []) as any[];
+        for (const e of errs) {
+          const parsed = typeof e === "string" ? JSON.parse(e) : e;
+          if (parsed?.segment_fit === "good") { good = true; break; }
+        }
+      } catch (_) { /* ignore */ }
+      if (!good) continue;
+      const { data: leads } = await supabase
+        .from("apollo_leads")
+        .select("apollo_person_id,status,has_email_flag")
+        .eq("run_id", r.id)
+        .eq("has_email_flag", true)
+        .eq("status", "has_email");      // unenriched only
+      const ids = ((leads ?? []) as any[]).map((l) => l.apollo_person_id).filter(Boolean);
+      if (ids.length) out.push({ runId: r.id as string, ids });
+    }
+    return out;
+  }
+
+  async function buildPoolToTarget() {
+    if (!segmentId) {
+      toast({ title: "Segment not found", variant: "destructive" });
+      return;
+    }
+    if (queueBlock.length) {
+      toast({ title: "Queue not clean", description: queueBlock[0], variant: "destructive" });
+      return;
+    }
+    if (!senderOk) {
+      toast({ title: "Sender not live-ready", variant: "destructive" });
+      return;
+    }
+    if (!forbiddenOk) {
+      toast({ title: "Forbidden sender active", variant: "destructive" });
+      return;
+    }
+
+    const currentPool = poolReady + poolStaged;
+    const need = TARGET_POOL - currentPool;
+    if (need <= 0) {
+      toast({ title: "Target reached", description: `Pool already at ${currentPool}/${TARGET_POOL}.` });
+      return;
+    }
+
+    setBuildLog([]);
+    setBuildAbort(false);
+    setBuilding(true);
+    appendLog(`Need ${need} more Ready-to-stage contacts to reach ${TARGET_POOL}.`);
+
+    try {
+      // Step 1: gather already-found, good-fit, unenriched candidates
+      const buckets = await gatherAvailableCandidates();
+      const availableCount = buckets.reduce((n, b) => n + b.ids.length, 0);
+      appendLog(`Found ${availableCount} unenriched good-fit candidate(s) across ${buckets.length} existing run(s).`);
+
+      // Step 2: estimate credits
+      const creditsAvailable = Math.max(DAILY_CREDIT_CAP - counted.creditsSpent, 0);
+      // Heuristic: ~85% conversion candidate→ready-to-stage based on today's runs
+      const conversion = counted.selectedForEnrichment > 0
+        ? Math.max(counted.readyToStage / counted.selectedForEnrichment, 0.5)
+        : 0.85;
+      const estCandidatesNeeded = Math.ceil(need / conversion);
+      const willEnrich = Math.min(estCandidatesNeeded, availableCount, creditsAvailable);
+      const extraSearchesNeeded = Math.max(0, estCandidatesNeeded - availableCount);
+      const additionalSearchPages = Math.ceil(extraSearchesNeeded / BATCH_SIZE);
+      const totalEstCredits = Math.min(estCandidatesNeeded, creditsAvailable);
+
+      const ok = confirm(
+        `Build pool to ${TARGET_POOL}\n\n` +
+        `Current pool: ${currentPool}\nNeed: ${need} more Ready-to-stage contacts\n\n` +
+        `Plan:\n` +
+        `• Use ${Math.min(availableCount, willEnrich)} already-found candidate(s) first (no new search credits)\n` +
+        (additionalSearchPages > 0
+          ? `• Then run up to ${additionalSearchPages} additional search page(s) of ${BATCH_SIZE}\n`
+          : `• No additional search needed\n`) +
+        `• Estimated Apollo enrichment credits: ~${totalEstCredits}\n` +
+        `• Daily cap remaining: ${creditsAvailable} credit(s) (cap ${DAILY_CREDIT_CAP})\n\n` +
+        `Filters still applied: segment_fit=good · skip existing CRM · skip suppressed · email-only · no phone · no AI Research · weak/poor fit blocked.\n\n` +
+        `Continue?`
+      );
+      if (!ok) {
+        appendLog("Cancelled by user.");
+        setBuilding(false);
+        return;
+      }
+
+      // Step 3: process loop
+      let safety = 20; // max iterations
+      while (safety-- > 0) {
+        if (buildAbort) { appendLog("Aborted."); break; }
+
+        // Refresh current pool & credits each iteration
+        const [{ count: rNow }, { count: sNow }] = await Promise.all([
+          supabase.from("business_contact_relationships").select("id", { count: "exact", head: true }).eq("business_name", BUSINESS).eq("current_stage", "ready_to_stage"),
+          supabase.from("business_contact_relationships").select("id", { count: "exact", head: true }).eq("business_name", BUSINESS).eq("current_stage", "staged"),
+        ]);
+        const poolNow = Number(rNow ?? 0) + Number(sNow ?? 0);
+        if (poolNow >= TARGET_POOL) { appendLog(`✅ Target reached (${poolNow}/${TARGET_POOL}).`); break; }
+
+        // Recompute credits spent today
+        const todayStartIso = (() => { const d = new Date(); d.setUTCHours(0,0,0,0); return d.toISOString(); })();
+        const { data: runsToday } = await supabase
+          .from("apollo_sync_runs")
+          .select("apollo_credits_used")
+          .eq("segment_id", segmentId)
+          .gte("started_at", todayStartIso);
+        const creditsToday = (runsToday ?? []).reduce((n, r: any) => n + Number(r.apollo_credits_used ?? 0), 0);
+        const creditsLeft = Math.max(DAILY_CREDIT_CAP - creditsToday, 0);
+        if (creditsLeft <= 0) {
+          appendLog(`Stopped: daily Apollo credit cap reached (${creditsToday}/${DAILY_CREDIT_CAP}).`);
+          break;
+        }
+
+        // Re-check queue integrity
+        const { data: campaign } = await supabase.from("outreach_campaigns").select("id").eq("business_name", BUSINESS).eq("campaign_name", CAMPAIGN_NAME).maybeSingle();
+        const cId = (campaign as any)?.id;
+        if (cId) {
+          const { count: simCount } = await supabase
+            .from("email_queue").select("id", { count: "exact", head: true })
+            .eq("campaign_id", cId).eq("delivery_kind", "simulated").in("status", ["pending","delayed","throttled"]);
+          if (Number(simCount ?? 0) > 0) {
+            appendLog(`Stopped: queue integrity unsafe (${simCount} simulated row(s) active).`);
+            break;
+          }
+        }
+
+        // Find next bucket
+        const fresh = await gatherAvailableCandidates();
+        let nextBucket = fresh.find((b) => b.ids.length > 0);
+
+        if (!nextBucket) {
+          // Need to run a new search page
+          appendLog(`No unenriched candidates left. Running new search page (cap ${BATCH_SIZE})...`);
+          const { data: sData, error: sErr } = await supabase.functions.invoke("apollo-sync-search", { body: { segment_id: segmentId } });
+          if (sErr) { appendLog(`Search failed: ${sErr.message}. Stopping.`); break; }
+          const sr = (sData as any) ?? {};
+          const fit = sr?.diagnostics?.segment_fit ?? "unknown";
+          appendLog(`Search returned ${sr.people_found ?? 0} (with-email ${sr.people_with_email_flag ?? 0}, fit=${fit}).`);
+          if (fit !== "good") { appendLog(`Stopped: latest search fit=${fit}, not good. No enrichment performed.`); break; }
+          if ((sr.people_with_email_flag ?? 0) === 0) { appendLog("Stopped: no candidates with email flag returned."); break; }
+          // loop will pick this run on next iter
+          continue;
+        }
+
+        const chunk = nextBucket.ids.slice(0, Math.min(ENRICH_CHUNK, creditsLeft));
+        appendLog(`Enriching ${chunk.length} candidate(s) from run ${nextBucket.runId.slice(0,8)}…`);
+        const { data: eData, error: eErr } = await supabase.functions.invoke("apollo-sync-enrich", {
+          body: { run_id: nextBucket.runId, selected_apollo_person_ids: chunk },
+        });
+        if (eErr) {
+          appendLog(`Enrichment error: ${eErr.message}. Stopping (no duplicate credits will be spent — safe to resume).`);
+          break;
+        }
+        const er = (eData as any) ?? {};
+        appendLog(`Chunk done · enriched=${er.enriched ?? "?"} · usable_emails=${er.emails_returned ?? "?"} · ready=${er.ready_to_stage ?? "?"} · credits=${er.credits_used ?? chunk.length}.`);
+
+        // brief pause so DB counters update before next iteration
+        await new Promise((r) => setTimeout(r, 800));
+      }
+
+      await load();
+      toast({ title: "Build pool finished", description: "Open the log card below for details." });
+    } catch (err) {
+      appendLog(`Fatal: ${(err as Error).message}`);
+      toast({ title: "Build pool failed", description: (err as Error).message, variant: "destructive" });
+    } finally {
+      setBuilding(false);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-2">
