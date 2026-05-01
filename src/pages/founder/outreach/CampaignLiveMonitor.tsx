@@ -270,7 +270,12 @@ const CampaignLiveMonitor = () => {
   const usedToday = inbox?.emails_sent_today ?? inbox?.current_send_count ?? sentToday.length;
   const remaining = Math.max(0, dailyLimit - usedToday);
 
-  const filteredQueue = queue.filter((q) => queueFilter === "ALL" ? true : q.status === queueFilter).slice(0, 10);
+  const filteredQueue = queue.filter((q) => {
+    if (queueFilter === "ALL") return true;
+    if (queueFilter === "sent_real") return q.status === "sent" && q.delivery_kind === "smtp_real" && !!q.smtp_accepted_at;
+    if (queueFilter === "sent_sim") return q.status === "sent" && (q.delivery_kind !== "smtp_real" || !q.smtp_accepted_at);
+    return q.status === queueFilter;
+  }).slice(0, 10);
 
   const issues = useMemo(() => {
     const out: Array<{ type: string; severity: "high" | "med"; ts: string; what: string; suggest: string }> = [];
