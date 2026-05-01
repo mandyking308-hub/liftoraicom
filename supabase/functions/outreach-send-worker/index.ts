@@ -353,6 +353,34 @@ Deno.serve(async (req) => {
         && inboxRow?.live_readiness === "live_ready";
       const useReal = inboxLiveReady && !!recipient;
 
+      // ===== NEONCANDY HARD GUARD =====
+      // Neon Candy may only send through hello@neoncandy.online.
+      const isNeonCandy =
+        (item.business_name ?? "").trim().toLowerCase() === "neon candy";
+      if (isNeonCandy && (inboxRow?.email_address ?? "").toLowerCase() !== "hello@neoncandy.online") {
+        await supabase.from("email_queue")
+          .update({ status: "blocked", block_reason: "NEONCANDY_INVALID_INBOX",
+                    send_error: `Neon Candy must send via hello@neoncandy.online (got: ${inboxRow?.email_address ?? "none"})` })
+          .eq("id", item.id);
+        blocked += 1; touchedCampaigns.add(item.campaign_id); continue;
+      }
+
+      // ===== LIVE-CAMPAIGN SIMULATED INBOX GUARD =====
+      // In live mode, never let a simulated/non-ready inbox be silently used.
+      if (isLive && !useReal) {
+        await supabase.from("email_queue")
+          .update({ status: "blocked", block_reason: "LIVE_CAMPAIGN_SIMULATED_INBOX_BLOCKED",
+                    delivery_kind: "simulated",
+                    send_error: `Live campaign attempted to use non-live inbox ${inboxRow?.email_address ?? "(unset)"} (${inboxRow?.live_readiness ?? "unknown"})` })
+          .eq("id", item.id);
+        await supabase.from("activity_log").insert({
+          event_type: "send_blocked",
+          description: `Queue ${item.id} blocked: LIVE_CAMPAIGN_SIMULATED_INBOX_BLOCKED`,
+          entity_type: "email_queue", entity_id: item.id,
+        });
+        blocked += 1; touchedCampaigns.add(item.campaign_id); continue;
+      }
+
       // Block if global mode is live but inbox is partially configured (ionos but not ready)
       if (isLive && inboxRow && inboxRow.provider_type !== "simulated" && !inboxLiveReady) {
         await supabase.from("email_queue")
