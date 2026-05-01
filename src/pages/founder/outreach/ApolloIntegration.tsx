@@ -1132,6 +1132,7 @@ export default function ApolloIntegration() {
                                     Run search
                                   </Button>
                                   <EditSegmentDialog segment={segment} onSave={(u) => saveSegmentEdits(segment, u)} />
+                                  <DailyAutomationDialog segment={segment} onSave={(u) => saveSegmentEdits(segment, u)} />
                                 </div>
                                 {isNeonCandyMonth1 && (
                                   <Button
