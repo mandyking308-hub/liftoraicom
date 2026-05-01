@@ -113,7 +113,7 @@ export function WeekendPool({ onOpenRuns }: { onOpenRuns?: () => void }) {
     const todayDate = new Date().toISOString().slice(0, 10);
 
     const [{ data: segment }, { data: campaign }, { data: inbox }, { data: forbidden }] = await Promise.all([
-      supabase.from("apollo_sync_segments").select("id,segment_name,max_contacts_per_run").eq("business_name", BUSINESS).maybeSingle(),
+      supabase.from("apollo_sync_segments").select("id,segment_name,max_contacts_per_run,current_page,next_page,last_page_processed,apollo_person_ids_seen").eq("business_name", BUSINESS).maybeSingle(),
       supabase.from("outreach_campaigns").select("id,status").eq("business_name", BUSINESS).eq("campaign_name", CAMPAIGN_NAME).maybeSingle(),
       supabase.from("inboxes").select("id,active,daily_send_limit,emails_sent_today,paused_reason,live_readiness").eq("business_name", BUSINESS).eq("email_address", SENDER).maybeSingle(),
       supabase.from("inboxes").select("id,active").eq("business_name", BUSINESS).eq("email_address", FORBIDDEN_SENDER).maybeSingle(),
@@ -121,6 +121,13 @@ export function WeekendPool({ onOpenRuns }: { onOpenRuns?: () => void }) {
 
     const segId = (segment as any)?.id ?? null;
     setSegmentId(segId);
+    const segRow = segment as any;
+    setPagination({
+      currentPage: Number(segRow?.current_page ?? 1),
+      nextPage: Number(segRow?.next_page ?? 1),
+      lastPageProcessed: segRow?.last_page_processed ?? null,
+      seenCount: Array.isArray(segRow?.apollo_person_ids_seen) ? segRow.apollo_person_ids_seen.length : 0,
+    });
     const campaignId = (campaign as any)?.id ?? null;
     const inb = inbox as any;
     setSenderOk(!!inb?.active && inb?.live_readiness === "live_ready" && !inb?.paused_reason);
