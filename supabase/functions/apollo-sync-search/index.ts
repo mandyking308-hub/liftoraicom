@@ -316,7 +316,7 @@ Deno.serve(async (req) => {
       fit_ratio: Number(fitRatio.toFixed(2)),
       segment_fit: segmentFit,
       enrichment_skip_reason: enrichmentSkipReason,
-      search_filter_contact_email_status: searchBody["contact_email_status"] ?? null,
+      search_filter_contact_email_status: buildSearchBody(pageFetched)["contact_email_status"] ?? null,
       search_mode: segment.mode,
       saved_list_id: segment.saved_list_id ?? null,
     };
