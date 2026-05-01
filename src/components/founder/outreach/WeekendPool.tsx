@@ -81,6 +81,7 @@ export function WeekendPool({ onOpenRuns }: { onOpenRuns?: () => void }) {
   const [poolStaged, setPoolStaged] = useState(0);
   const [senderOk, setSenderOk] = useState(false);
   const [forbiddenOk, setForbiddenOk] = useState(false);
+  const [queueBlock, setQueueBlock] = useState<string[]>([]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -101,6 +102,24 @@ export function WeekendPool({ onOpenRuns }: { onOpenRuns?: () => void }) {
     const inb = inbox as any;
     setSenderOk(!!inb?.active && inb?.live_readiness === "live_ready" && !inb?.paused_reason);
     setForbiddenOk(!forbidden || (forbidden as any).active === false);
+
+    // ---- Queue sanity (block staging-more if simulated rows or zero Step 1 vs follow-ups) ----
+    const blocks: string[] = [];
+    if (campaignId) {
+      const { data: qrows } = await supabase
+        .from("email_queue")
+        .select("status,sequence_step,delivery_kind")
+        .eq("campaign_id", campaignId);
+      const q = (qrows ?? []) as any[];
+      const sim = q.filter((r) => r.delivery_kind === "simulated").length;
+      const pStep1 = q.filter((r) => r.status === "pending" && r.sequence_step === 1).length;
+      const pFollow = q.filter((r) => r.status === "pending" && r.sequence_step > 1).length;
+      const blocked = q.filter((r) => r.status === "blocked").length;
+      if (sim > 0) blocks.push(`${sim} simulated row(s) in queue — clean up before staging more.`);
+      if (pStep1 === 0 && pFollow > 0) blocks.push(`${pFollow} follow-ups queued but 0 pending Step 1 — verify Step 1 actually sent first.`);
+      if (blocked > 0) blocks.push(`${blocked} blocked row(s) — review before adding more contacts.`);
+    }
+    setQueueBlock(blocks);
 
     const dailyLimit = Number(inb?.daily_send_limit ?? 0);
     const sentToday = Number(inb?.emails_sent_today ?? 0);
