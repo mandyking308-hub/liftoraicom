@@ -55,6 +55,7 @@ type Activity = {
   id: string; event_type: string; description: string;
   entity_type: string | null; entity_id: string | null; created_at: string;
 };
+type BcrCounts = { ready_to_stage: number; staged: number; total: number };
 
 function fmtTime(ts: string | null | undefined) {
   if (!ts) return "—";
@@ -86,6 +87,7 @@ const CampaignLiveMonitor = () => {
   const [inbound, setInbound] = useState<Inbound[]>([]);
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [activity, setActivity] = useState<Activity[]>([]);
+  const [bcrCounts, setBcrCounts] = useState<BcrCounts>({ ready_to_stage: 0, staged: 0, total: 0 });
   const [loading, setLoading] = useState(true);
   const [polling, setPolling] = useState(false);
   const [testing, setTesting] = useState(false);
@@ -190,6 +192,19 @@ const CampaignLiveMonitor = () => {
           .order("created_at", { ascending: false }).limit(40);
         setActivity((act as Activity[] | null) ?? []);
       }
+
+      // BCR stage counts for this business
+      const { data: bcrRows } = await supabase
+        .from("business_contact_relationships")
+        .select("current_stage")
+        .eq("business_name", businessName);
+      const bcrList = (bcrRows as { current_stage: string }[] | null) ?? [];
+      setBcrCounts({
+        ready_to_stage: bcrList.filter((r) => r.current_stage === "ready_to_stage").length,
+        staged: bcrList.filter((r) => r.current_stage === "staged").length,
+        total: bcrList.length,
+      });
+
       setLastRefresh(new Date());
     } finally {
       setLoading(false);
@@ -373,6 +388,65 @@ const CampaignLiveMonitor = () => {
           <StatCard label="Last IMAP test" value={relTime(inbox?.last_test_send_at)} sub={inbox?.last_test_send_status ?? "—"} />
           <StatCard label="Next scheduled send" value={nextScheduled ? relTime(nextScheduled.scheduled_at) : "—"} sub={nextScheduled ? fmtTime(nextScheduled.scheduled_at) : ""} />
         </div>
+
+        {/* Active campaign movement */}
+        {(() => {
+          const activeStep1Pending = queue.filter(
+            (q) => q.sequence_step === 1 && ["pending", "delayed", "throttled"].includes(q.status) && !isLegacyCleanup(q),
+          ).length;
+          const followupsScheduled = queue.filter(
+            (q) => q.sequence_step > 1 && ["pending", "delayed", "throttled"].includes(q.status) && !isLegacyCleanup(q),
+          ).length;
+          const sentRealToday = queue.filter(
+            (q) => q.status === "sent" && !!q.smtp_accepted_at && q.delivery_kind === "smtp_real" && today(q.smtp_accepted_at),
+          ).length;
+          const nextDue = queue
+            .filter((q) => ["pending", "delayed", "throttled"].includes(q.status) && !isLegacyCleanup(q))
+            .sort((a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime())[0];
+          const integrityClean =
+            queue.filter((q) => (q.status === "failed" || q.status === "blocked") && !isLegacyCleanup(q) && today(q.scheduled_at)).length === 0;
+          const movementSummary =
+            bcrCounts.staged === 0
+              ? `${bcrCounts.ready_to_stage} contacts are still ready-to-stage and have not entered the queue yet.`
+              : activeStep1Pending === 0 && sentRealToday === 0
+                ? `${bcrCounts.staged} contacts are marked staged but no Step 1 rows are queued yet — staging did not enqueue. Click "Stage selected contacts into campaign" on the Apollo run page to enqueue.`
+                : `${bcrCounts.staged} contacts staged; ${activeStep1Pending} Step 1 pending; ${sentRealToday} real SMTP sent today; sender hello@neoncandy.online.`;
+          return (
+            <Card className="border-primary/30">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Activity className="h-4 w-4" />Active campaign movement
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <p className="text-sm">{movementSummary}</p>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <StatCard label="Ready to stage" value={String(bcrCounts.ready_to_stage)} tone={bcrCounts.ready_to_stage > 0 ? "warn" : undefined} />
+                  <StatCard label="Staged contacts" value={String(bcrCounts.staged)} />
+                  <StatCard label="Active Step 1 pending" value={String(activeStep1Pending)} tone={activeStep1Pending > 0 ? "good" : undefined} />
+                  <StatCard label="Real SMTP sent today" value={String(sentRealToday)} tone={sentRealToday > 0 ? "good" : undefined} />
+                  <StatCard label="Valid follow-ups scheduled" value={String(followupsScheduled)} />
+                  <StatCard label="Next due send" value={nextDue ? relTime(nextDue.scheduled_at) : "—"} sub={nextDue ? fmtTime(nextDue.scheduled_at) : "no items due"} />
+                  <StatCard label="Queue integrity" value={integrityClean ? "Clean" : "Issues"} tone={integrityClean ? "good" : "warn"} />
+                  <StatCard label="Sender" value="hello@neoncandy.online" sub={`${remaining}/${dailyLimit} remaining`} />
+                </div>
+                {bcrCounts.ready_to_stage > 0 && (
+                  <div className="rounded border border-amber-500/40 bg-amber-500/5 p-3 text-xs space-y-1">
+                    <p className="font-medium text-amber-500">{bcrCounts.ready_to_stage} contacts still need staging</p>
+                    <p className="text-muted-foreground">
+                      Open the Apollo run page → select the Ready-to-stage rows → click <strong>"Stage selected contacts into campaign"</strong>.
+                    </p>
+                    <Button size="sm" variant="outline" asChild>
+                      <Link to={`/founder/outreach/queue?stage=ready_to_stage&business=${encodeURIComponent(businessName)}`}>
+                        Open Ready-to-stage list
+                      </Link>
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          );
+        })()}
 
         {/* Live banner */}
         {campaign?.status === "active" && (
