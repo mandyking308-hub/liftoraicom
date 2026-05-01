@@ -299,8 +299,21 @@ export function WeekendPool({ onOpenRuns }: { onOpenRuns?: () => void }) {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
+          {queueBlock.length > 0 && (
+            <div className="rounded-md border border-amber-500/40 bg-amber-500/5 p-3 text-sm">
+              <div className="mb-1 flex items-center gap-2 font-medium text-amber-700">
+                <AlertTriangle className="h-4 w-4" /> Hold staging until queue is clean
+              </div>
+              <ul className="ml-5 list-disc text-xs">
+                {queueBlock.map((b) => <li key={b}>{b}</li>)}
+              </ul>
+              <div className="mt-2 text-xs text-muted-foreground">
+                Open the Daily Monitor → Email queue breakdown for the full per-row view.
+              </div>
+            </div>
+          )}
           <div className="flex flex-wrap items-center gap-2">
-            <Button onClick={runNextBatch} disabled={running || !segmentId}>
+            <Button onClick={runNextBatch} disabled={running || !segmentId || queueBlock.length > 0}>
               {running ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PlayCircle className="mr-2 h-4 w-4" />}
               Run next 25-contact Apollo batch
             </Button>
