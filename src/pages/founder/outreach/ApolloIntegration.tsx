@@ -917,31 +917,16 @@ export default function ApolloIntegration() {
                       const fit = diag?.segment_fit;
                       const showFitWarning = run.status === "awaiting_enrichment_approval" && fit && fit !== "good";
                       return (
-                      <div key={run.id} className="space-y-2 rounded-md border p-4">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <div className="flex items-center gap-2 font-medium">
-                              {run.business_name}
-                              {fit && <Badge variant={fitBadgeVariant(fit)}>fit: {fit}</Badge>}
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              {new Date(run.started_at).toLocaleString()} • <Badge variant="outline">{run.status}</Badge>
-                              {diag?.search_mode && <> • mode: <code>{diag.search_mode}</code></>}
-                              {diag?.saved_list_id && <> • list: <code>{diag.saved_list_id}</code></>}
-                            </div>
-                          </div>
-                          {run.status === "awaiting_enrichment_approval" && (
-                            <div className="flex gap-2">
-                              <Button size="sm" variant="outline" onClick={() => cancelRun(run.id)}>
-                                <Trash2 className="mr-1 h-3 w-3" /> Discard
-                              </Button>
-                              <Button size="sm" onClick={() => approveEnrichment(run.id)} disabled={busy === `enrich-${run.id}` || fit === "poor"}>
-                                {busy === `enrich-${run.id}` ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : null}
-                                Approve enrichment ({run.people_with_email_flag} credits)
-                              </Button>
-                            </div>
-                          )}
-                        </div>
+                      <RunCard
+                        key={run.id}
+                        run={run}
+                        diag={diag}
+                        fit={fit}
+                        showFitWarning={!!showFitWarning}
+                        busy={busy}
+                        onCancel={() => cancelRun(run.id)}
+                        onApprove={() => approveEnrichment(run.id)}
+                      >
                         {showFitWarning && (
                           <div className="flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm">
                             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
@@ -1008,7 +993,7 @@ export default function ApolloIntegration() {
                             <pre className="mt-1 overflow-auto rounded bg-muted p-2">{JSON.stringify(run.errors, null, 2)}</pre>
                           </details>
                         )}
-                      </div>
+                      </RunCard>
                       );
                     })}
                   </div>
