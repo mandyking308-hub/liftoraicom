@@ -111,8 +111,8 @@ export function WeekendPool({ onOpenRuns }: { onOpenRuns?: () => void }) {
         .select("contact_id,status,sequence_step,delivery_kind,block_reason,smtp_accepted_at,provider_message_id")
         .eq("campaign_id", campaignId);
       const q = (qrows ?? []) as any[];
-      const sim = q.filter((r) => r.delivery_kind === "simulated").length;
       const activeStatuses = new Set(["pending", "delayed", "throttled"]);
+      const activeSim = q.filter((r) => r.delivery_kind === "simulated" && activeStatuses.has(r.status)).length;
       const byStep = new Map(q.map((r) => [`${r.contact_id}:${r.sequence_step}`, r]));
       const pStep1 = q.filter((r) => activeStatuses.has(r.status) && r.sequence_step === 1).length;
       const pFollow = q.filter((r) => activeStatuses.has(r.status) && r.sequence_step > 1).length;
@@ -121,17 +121,17 @@ export function WeekendPool({ onOpenRuns }: { onOpenRuns?: () => void }) {
         const parent = byStep.get(`${r.contact_id}:${r.sequence_step - 1}`);
         return !(parent && parent.status === "sent" && parent.delivery_kind === "smtp_real" && parent.smtp_accepted_at && parent.provider_message_id);
       }).length;
-      const blocked = q.filter((r) => r.status === "blocked").length;
       const unresolvedBlocked = q.filter((r) => r.status === "blocked" && ![
         "SIMULATED_NOT_TRANSMITTED",
+        "SIMULATED_LEGACY_QUARANTINED",
         "SIMULATED_PARENT_NOT_SENT",
         "RECENT_COMMUNICATION_24H",
         "REPLY_RECEIVED",
         "BOUNCED",
       ].includes(r.block_reason ?? "")).length;
-      if (sim > 0) blocks.push(`${sim} simulated row(s) in queue — clean up before staging more.`);
+      if (activeSim > 0) blocks.push(`${activeSim} active simulated row(s) in queue — clean up before staging more.`);
       if (parentIntegrity > 0) blocks.push(`${parentIntegrity} active follow-up row(s) do not have a real SMTP parent send.`);
-      if (pStep1 === 0 && pFollow > 0) blocks.push(`${pFollow} follow-ups queued but 0 active Step 1 sends — verify Step 1 actually sent first.`);
+      if (pStep1 === 0 && pFollow > 0) blocks.push(`${pFollow} active follow-ups queued but 0 active Step 1 sends — verify Step 1 actually sent first.`);
       if (unresolvedBlocked > 0) blocks.push(`${unresolvedBlocked} blocked row(s) still need correction before adding more contacts.`);
     }
     setQueueBlock(blocks);
