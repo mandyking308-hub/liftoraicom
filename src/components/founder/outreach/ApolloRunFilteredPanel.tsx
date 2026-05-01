@@ -73,6 +73,8 @@ export default function ApolloRunFilteredPanel({ requiredStage, heading, subtitl
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [campaignId, setCampaignId] = useState<string>("");
   const [staging, setStaging] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [senderStatus, setSenderStatus] = useState<SenderStatus | null>(null);
 
   const load = useCallback(async () => {
     if (!runId) return;
