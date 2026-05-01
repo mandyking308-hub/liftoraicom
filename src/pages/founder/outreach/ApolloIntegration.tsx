@@ -730,6 +730,7 @@ export default function ApolloIntegration() {
   const [busy, setBusy] = useState<string | null>(null);
   const [diagnosticsByBusiness, setDiagnosticsByBusiness] = useState<Record<string, DiagnosticResult>>({});
   const [selectedBusiness, setSelectedBusiness] = useState<string>("Neon Candy");
+  const [activeTab, setActiveTab] = useState<string>("weekend");
 
   const [businessName, setBusinessName] = useState("Neon Candy");
   const [apiKeyInput, setApiKeyInput] = useState("");
