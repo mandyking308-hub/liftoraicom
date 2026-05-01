@@ -50,6 +50,27 @@ const RUN_BUDGET_MS = 90_000;
 // Per-send hard cap (SMTP + sanity-check + DB writes).
 const PER_SEND_BUDGET_MS = 25_000;
 
+// ===== PROVIDER DAILY-LIMIT DETECTION =====
+// IONOS (and other shared SMTP providers) returns this on the new-mailbox
+// 24h rolling cap. Once we see it for an inbox, we MUST stop sending from
+// that inbox for the rest of the day instead of hammering 49 more 450s.
+function isProviderDailyLimitError(msg: string | null | undefined): boolean {
+  if (!msg) return false;
+  const m = msg.toLowerCase();
+  return (
+    m.includes("450") &&
+    (m.includes("mail send limit exceeded") || m.includes("send limit exceeded"))
+  );
+}
+
+// Next valid send window: tomorrow at 09:00 UTC.
+function nextSendWindowIso(): string {
+  const d = new Date();
+  d.setUTCDate(d.getUTCDate() + 1);
+  d.setUTCHours(9, 0, 0, 0);
+  return d.toISOString();
+}
+
 // Send variance: small jitter between sends to avoid pattern detection,
 // but bounded so we never exceed the run budget.
 function jitterMs(): number {
