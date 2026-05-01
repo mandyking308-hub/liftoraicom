@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Upload, FileText } from "lucide-react";
+import ApolloRunFilteredPanel from "@/components/founder/outreach/ApolloRunFilteredPanel";
 
 type Batch = {
   id: string; business_name: string; source_name: string; file_name: string;
@@ -77,6 +78,11 @@ const OutreachImports = () => {
           <h1 className="text-2xl font-bold">Lead Imports</h1>
           <p className="text-sm text-muted-foreground">Upload a CSV with columns: <code className="text-xs bg-secondary px-1 rounded">email,name,company,role,country</code></p>
         </div>
+
+        <ApolloRunFilteredPanel
+          heading="Imported contacts from Apollo run"
+          subtitle="Contacts created or updated in the central CRM by this Apollo sync run."
+        />
 
         <Card>
           <CardHeader><CardTitle className="text-base flex items-center gap-2"><Upload className="h-4 w-4" />New Import</CardTitle></CardHeader>

@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { RefreshCw, Play, Activity } from "lucide-react";
 import { Link } from "react-router-dom";
 import SimulatedSendingBanner from "@/components/outreach/SimulatedSendingBanner";
+import ApolloRunFilteredPanel from "@/components/founder/outreach/ApolloRunFilteredPanel";
 
 type QueueItem = {
   id: string; contact_id: string; campaign_id: string; sequence_step: number;
@@ -223,6 +224,12 @@ const OutreachQueue = () => {
         </div>
 
         <SimulatedSendingBanner />
+
+        <ApolloRunFilteredPanel
+          requiredStage="ready_to_stage"
+          heading="Ready to stage from Apollo run"
+          subtitle="Qualified contacts from this Apollo sync run that are held for approval. Nothing is queued or sent until you stage them to a campaign."
+        />
 
         {inboxCaps.length > 0 && (
           <Card>
