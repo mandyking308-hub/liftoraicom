@@ -773,6 +773,35 @@ const CampaignLiveMonitor = () => {
           </CardContent>
         </Card>
 
+        {/* Historical cleanup / legacy blocked rows */}
+        {legacyCleanupRows.length > 0 && (
+          <Card>
+            <CardHeader className="pb-2">
+              <details>
+                <summary className="cursor-pointer text-sm font-medium text-muted-foreground hover:text-foreground">
+                  Historical cleanup / legacy blocked rows ({legacyCleanupRows.length}) — not counted as live failures
+                </summary>
+                <div className="mt-3 space-y-1 max-h-64 overflow-auto">
+                  {legacyCleanupRows.slice(0, 100).map((q) => (
+                    <div key={q.id} className="text-xs flex justify-between gap-3 border-b border-border/50 py-1">
+                      <span className="truncate">
+                        Step {q.sequence_step} · {contacts[q.contact_id]?.email ?? q.contact_id}
+                      </span>
+                      <span className="text-muted-foreground whitespace-nowrap">{q.block_reason}</span>
+                    </div>
+                  ))}
+                  {legacyCleanupRows.length > 100 && (
+                    <p className="text-[11px] text-muted-foreground pt-1">…and {legacyCleanupRows.length - 100} more.</p>
+                  )}
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-2">
+                  Queue integrity remains Clean — these are historical simulated/legacy rows from prior cleanup, not active campaign failures.
+                </p>
+              </details>
+            </CardHeader>
+          </Card>
+        )}
+
         {/* Activity */}
         <Card>
           <CardHeader><CardTitle className="text-base">Recent activity</CardTitle></CardHeader>
