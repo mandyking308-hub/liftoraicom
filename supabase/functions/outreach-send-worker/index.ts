@@ -801,6 +801,12 @@ Deno.serve(async (req) => {
         stillDue = (count ?? 0) > 0;
       }
       if (stillDue) {
+        // If a provider daily limit was reached this run, every remaining
+        // due item for that inbox has already been pushed to the next send
+        // window. Don't self-chain just to re-process them immediately.
+        if (providerLimitReachedAny) {
+          // skip self-chain
+        } else {
         // Fire-and-forget — do NOT await. The new invocation runs independently.
         fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/outreach-send-worker`, {
           method: "POST",
@@ -811,6 +817,7 @@ Deno.serve(async (req) => {
           body: JSON.stringify({ chained: true }),
         }).catch(() => { /* ignore */ });
         chained = true;
+        }
       }
     } catch { /* ignore chaining errors */ }
 
