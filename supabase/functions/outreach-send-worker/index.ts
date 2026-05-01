@@ -371,6 +371,10 @@ Deno.serve(async (req) => {
       try {
         let realSendOk = false;
         let providerError: string | null = null;
+        let providerMessageId: string | null = null;
+        let savedToSentAt: string | null = null;
+        let savedFolder: string | null = null;
+        let appendError: string | null = null;
 
         if (useReal && inboxRow && recipient) {
           const subj = seq?.subject ?? `Step ${item.sequence_step}`;
@@ -378,6 +382,20 @@ Deno.serve(async (req) => {
           const r = await sendViaIonosSmtp(supabase, inboxRow.id, recipient, subj, body);
           realSendOk = r.ok;
           providerError = r.error ?? null;
+          providerMessageId = r.messageId ?? null;
+
+          // Best-effort APPEND copy to IONOS Sent folder so the message
+          // appears in the user's webmail "Sent" view. IONOS SMTP does NOT
+          // automatically save sent mail to the IMAP Sent folder.
+          if (r.ok && r.rfc822) {
+            const ap = await appendToSentFolder(supabase, inboxRow.id, r.rfc822);
+            if (ap.ok) {
+              savedToSentAt = new Date().toISOString();
+              savedFolder = ap.folder ?? null;
+            } else {
+              appendError = ap.error ?? "append failed";
+            }
+          }
         } else {
           // Simulated path — do NOT contact SMTP.
           await supabase.from("activity_log").insert({
@@ -400,8 +418,21 @@ Deno.serve(async (req) => {
           email_id: item.id,
         });
 
+        const nowIso = new Date().toISOString();
         await supabase.from("email_queue")
-          .update({ status: "sent", sent_at: new Date().toISOString(), last_attempt_at: new Date().toISOString() })
+          .update({
+            status: "sent",
+            sent_at: nowIso,
+            last_attempt_at: nowIso,
+            smtp_accepted_at: useReal ? nowIso : null,
+            provider_message_id: providerMessageId,
+            provider_response: useReal
+              ? `SMTP accepted${savedFolder ? ` · saved to ${savedFolder}` : appendError ? ` · APPEND failed: ${appendError}` : ""}`
+              : "SIMULATED (inbox not live-ready)",
+            saved_to_sent_at: savedToSentAt,
+            send_error: null,
+            delivery_kind: useReal ? "smtp_real" : "simulated",
+          })
           .eq("id", item.id);
 
         if (item.inbox_id) {
@@ -413,6 +444,16 @@ Deno.serve(async (req) => {
         sent += 1;
         touchedCampaigns.add(item.campaign_id);
       } catch (err) {
+        // Persist error on the queue row so operators can see it
+        await supabase.from("email_queue")
+          .update({
+            send_error: (err as Error).message,
+            last_attempt_at: new Date().toISOString(),
+            provider_response: `SMTP failed: ${(err as Error).message}`,
+            delivery_kind: "smtp_real",
+          })
+          .eq("id", item.id);
+
         // Soft-fail retry: mark_send_failure handles exponential backoff (5/20/60 min)
         // and only marks as "failed" after 3 attempts.
         const { data: retryResult } = await supabase.rpc("mark_send_failure", {
