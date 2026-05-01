@@ -65,6 +65,9 @@ export function NeonCandyMonitor() {
   const [queueExplain, setQueueExplain] = useState<string>("");
   const [queueRows, setQueueRows] = useState<Array<{ email: string; sequence_step: number; status: string; delivery_kind: string | null; scheduled_utc: string | null }>>([]);
   const [queueWarn, setQueueWarn] = useState<string[]>([]);
+  const [legacyBreakdown, setLegacyBreakdown] = useState<Stat[]>([]);
+  const [integrityClean, setIntegrityClean] = useState<boolean>(false);
+  const [integrityReasons, setIntegrityReasons] = useState<string[]>([]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -172,7 +175,29 @@ export function NeonCandyMonitor() {
       const sentReal = all.filter(
         (r) => r.status === "sent" && r.delivery_kind !== "simulated" && !!r.provider_message_id,
       ).length;
-      const simulated = all.filter((r) => r.delivery_kind === "simulated").length;
+      const activeStatuses = new Set(["pending", "delayed", "throttled"]);
+      const activeSimulated = all.filter(
+        (r) => r.delivery_kind === "simulated" && activeStatuses.has(r.status),
+      ).length;
+      const byStep = new Map(all.map((r) => [`${r.contact_id}:${r.sequence_step}`, r]));
+      const activeFollowupsNoParent = all.filter((r) => {
+        if (!activeStatuses.has(r.status) || r.sequence_step <= 1) return false;
+        const parent = byStep.get(`${r.contact_id}:${r.sequence_step - 1}`);
+        return !(parent && parent.status === "sent" && parent.delivery_kind === "smtp_real" && parent.smtp_accepted_at && parent.provider_message_id);
+      }).length;
+
+      // Legacy / quarantined buckets (NOT counted as active queue)
+      const legacyQuarantined = all.filter(
+        (r) => r.status === "blocked" && (r.block_reason === "SIMULATED_LEGACY_QUARANTINED" || r.block_reason === "SIMULATED_NOT_TRANSMITTED"),
+      ).length;
+      const legacyOrphanFollowups = all.filter(
+        (r) => r.status === "blocked" && r.block_reason === "SIMULATED_PARENT_NOT_SENT",
+      ).length;
+      const safeBlocked = all.filter(
+        (r) =>
+          r.status === "blocked" &&
+          ["RECENT_COMMUNICATION_24H", "REPLY_RECEIVED", "BOUNCED"].includes(r.block_reason ?? ""),
+      ).length;
 
       const step1 = stepCount(1);
       const step2 = stepCount(2);
@@ -180,24 +205,38 @@ export function NeonCandyMonitor() {
       const step4 = stepCount(4);
 
       setQueueBreakdown([
-        { label: "Pending Step 1 (new outreach)", value: step1, tone: step1 > 0 ? "info" : undefined },
-        { label: "Pending Step 2 follow-up", value: step2 },
-        { label: "Pending Step 3 follow-up", value: step3 },
-        { label: "Pending Step 4 follow-up", value: step4 },
+        { label: "Active pending Step 1", value: step1, tone: step1 > 0 ? "info" : undefined },
+        { label: "Active Step 2 follow-up", value: step2 },
+        { label: "Active Step 3 follow-up", value: step3 },
+        { label: "Active Step 4 follow-up", value: step4 },
         { label: "Delayed (scheduled in future)", value: delayed, tone: "info" },
         { label: "Due now (within sender limits)", value: dueNow, tone: dueNow > 0 ? "warn" : undefined },
-        { label: "Blocked", value: blocked, tone: blocked > 0 ? "warn" : undefined },
         { label: "Failed", value: failed, tone: failed > 0 ? "bad" : undefined },
         { label: "Sent (real SMTP, all-time)", value: sentReal, tone: "ok" },
-        { label: "Simulated rows (should be 0)", value: simulated, tone: simulated > 0 ? "bad" : "ok" },
+        { label: "Active simulated rows", value: activeSimulated, tone: activeSimulated > 0 ? "bad" : "ok" },
+        { label: "Active follow-ups without real parent", value: activeFollowupsNoParent, tone: activeFollowupsNoParent > 0 ? "bad" : "ok" },
       ]);
+
+      setLegacyBreakdown([
+        { label: "Quarantined simulated Step 1 (legacy)", value: legacyQuarantined, tone: "info" },
+        { label: "Cancelled follow-ups (no real parent)", value: legacyOrphanFollowups, tone: "info" },
+        { label: "Safe blocks (recent contact / reply / bounce)", value: safeBlocked, tone: "info" },
+      ]);
+
+      // ---- Queue integrity verdict ----
+      const integrityIssues: string[] = [];
+      if (activeSimulated > 0) integrityIssues.push(`${activeSimulated} active simulated row(s)`);
+      if (activeFollowupsNoParent > 0) integrityIssues.push(`${activeFollowupsNoParent} active follow-up(s) without real SMTP parent`);
+      if (failed > 0) integrityIssues.push(`${failed} failed row(s) need review`);
+      setIntegrityReasons(integrityIssues);
+      setIntegrityClean(integrityIssues.length === 0);
 
       const totalPending = step1 + step2 + step3 + step4;
       const followups = step2 + step3 + step4;
       const explain =
         totalPending === 0
-          ? "Queue is empty — no pending Step 1 or follow-up sends scheduled."
-          : `${totalPending} queued = ${step1} Step 1 send${step1 === 1 ? "" : "s"} + ${followups} follow-up${followups === 1 ? "" : "s"} (Step 2/3/4). They will send only when due and within sender ramp / daily cap / send-window limits.`;
+          ? "Active queue is empty — no pending Step 1 or follow-up sends scheduled. Legacy quarantined rows are listed separately below and do not affect sending."
+          : `${totalPending} active = ${step1} Step 1 send${step1 === 1 ? "" : "s"} + ${followups} follow-up${followups === 1 ? "" : "s"} (Step 2/3/4). They will send only when due and within sender ramp / daily cap / send-window limits. Legacy quarantined rows are excluded from this count.`;
       setQueueExplain(explain);
 
       // Pull contact emails for the rows for transparency
@@ -220,10 +259,9 @@ export function NeonCandyMonitor() {
       );
 
       const warns: string[] = [];
-      if (simulated > 0) warns.push(`${simulated} simulated row(s) detected — these are stale/legacy and should be cleaned up before staging more contacts.`);
-      if (step1 === 0 && followups > 0) warns.push(`${followups} follow-up(s) are queued but 0 Step 1 sends are pending — verify Step 1 was actually sent before relying on follow-up coverage.`);
-      if (sentReal === 0 && (step2 + step3 + step4) > 0) warns.push("No real SMTP Step 1 sends recorded yet — follow-ups will fire on schedule even though the initial email may not have been delivered.");
-      if (blocked > 0) warns.push(`${blocked} blocked row(s) — review block_reason before staging more.`);
+      if (activeSimulated > 0) warns.push(`${activeSimulated} active simulated row(s) detected — clean up before staging more contacts.`);
+      if (activeFollowupsNoParent > 0) warns.push(`${activeFollowupsNoParent} active follow-up(s) lack a real SMTP parent — these should be cancelled.`);
+      if (step1 === 0 && followups > 0) warns.push(`${followups} active follow-up(s) queued but 0 Step 1 sends are active — verify Step 1 will run first.`);
       setQueueWarn(warns);
     } else {
       setQueueBreakdown([]);
@@ -373,6 +411,40 @@ export function NeonCandyMonitor() {
           <CardContent className="space-y-3">
             <StatGrid stats={queueBreakdown} />
             <div className="rounded-md border bg-muted/30 p-3 text-sm">{queueExplain}</div>
+            <Card className={integrityClean ? "border-emerald-500/40" : "border-destructive/40"}>
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-sm">
+                  {integrityClean ? (
+                    <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                  ) : (
+                    <XCircle className="h-4 w-4 text-destructive" />
+                  )}
+                  Queue integrity: {integrityClean ? "Clean" : "Needs cleanup"}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-xs">
+                {integrityClean ? (
+                  <span className="text-emerald-600">All active queue rows are real SMTP-only with valid parent integrity. Weekend Pool can stage more contacts.</span>
+                ) : (
+                  <ul className="ml-4 list-disc text-destructive">
+                    {integrityReasons.map((r) => <li key={r}>{r}</li>)}
+                  </ul>
+                )}
+              </CardContent>
+            </Card>
+            {legacyBreakdown.length > 0 && legacyBreakdown.some((s) => Number(s.value) > 0) && (
+              <details className="rounded-md border bg-muted/20 p-3 text-sm">
+                <summary className="cursor-pointer select-none font-medium">
+                  Historical cleanup buckets (excluded from active queue)
+                </summary>
+                <div className="mt-3">
+                  <StatGrid stats={legacyBreakdown} />
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    These rows are quarantined or blocked for a known safe reason. They are NOT part of the active live queue and do not consume sender capacity.
+                  </p>
+                </div>
+              </details>
+            )}
             {queueWarn.length > 0 && (
               <div className="rounded-md border border-amber-500/40 bg-amber-500/5 p-3 text-sm">
                 <div className="mb-1 font-medium text-amber-700">Hold staging until resolved:</div>
