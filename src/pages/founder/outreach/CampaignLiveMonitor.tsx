@@ -28,6 +28,8 @@ type InboxRow = {
   last_sent_at: string | null; last_test_send_at: string | null;
   last_test_send_status: string | null; last_error_message: string | null;
   reply_to_email: string | null;
+  provider_blocked_until: string | null;
+  provider_blocked_reason: string | null;
 };
 type QueueItem = {
   id: string; contact_id: string; campaign_id: string; sequence_step: number;
