@@ -216,7 +216,7 @@ export default function ApolloIntegration() {
 
   useEffect(() => {
     loadAll();
-  }, []);
+  }, [loadAll]);
 
   const connectionByBusiness = useMemo(
     () => Object.fromEntries(connections.map((connection) => [connection.business_name, connection])),
