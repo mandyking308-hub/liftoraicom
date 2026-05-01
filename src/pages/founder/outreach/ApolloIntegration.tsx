@@ -424,10 +424,10 @@ export default function ApolloIntegration() {
     loadAll();
   }
 
-  async function saveSegmentEdits(segment: Segment, updates: Partial<Segment>) {
+  async function saveSegmentEdits(segment: Segment, updates: Record<string, unknown>) {
     const { error } = await supabase
       .from("apollo_sync_segments")
-      .update(updates)
+      .update(updates as never)
       .eq("id", segment.id);
     if (error) {
       toast({ title: "Update failed", description: error.message, variant: "destructive" });
