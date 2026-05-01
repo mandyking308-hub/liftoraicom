@@ -632,8 +632,8 @@ export function WeekendPool({ onOpenRuns }: { onOpenRuns?: () => void }) {
             </div>
             <StatGrid
               stats={[
-                { label: "Existing staged contacts", value: poolStaged, tone: poolStaged > 0 ? "info" : undefined },
-                { label: "Ready to stage", value: poolReady, tone: poolReady > 0 ? "info" : undefined },
+                { label: "Already staged (CRM)", value: poolStaged, tone: poolStaged > 0 ? "info" : undefined },
+                { label: "Ready to stage (CRM, all-time)", value: poolReady, tone: poolReady > 0 ? "info" : undefined },
                 { label: "1. Search candidates found", value: counted.searchFound },
                 { label: "2. Has-email flag candidates", value: counted.hasEmailFlag },
                 { label: "3. Selected for enrichment", value: counted.selectedForEnrichment },
@@ -642,9 +642,10 @@ export function WeekendPool({ onOpenRuns }: { onOpenRuns?: () => void }) {
                 { label: "6. Contacts saved to CRM", value: counted.importedTotal },
                 { label: "7. New contacts created", value: counted.newCreated },
                 { label: "8. Existing contacts updated", value: counted.existingUpdated },
-                { label: "9. Qualified contacts", value: counted.qualified, tone: "ok" },
-                { label: "10. Ready to stage (this run)", value: counted.readyToStage },
-                { label: "Total pool built today", value: poolReady + poolStaged, tone: "info" },
+                { label: "9. Qualified from today's runs", value: counted.qualified, tone: "ok" },
+                { label: "10. Ready to stage (today's runs)", value: counted.readyToStage },
+                { label: "Not stageable today", value: Math.max(counted.qualified - counted.readyToStage, 0), tone: counted.qualified > counted.readyToStage ? "warn" : undefined },
+                { label: "Total pool (ready + staged)", value: poolReady + poolStaged, tone: "info" },
                 { label: "Coverage until Tuesday", value: coverage?.daysCoverage ?? "n/a", tone: coverage?.covered ? "ok" : "warn" },
                 {
                   label: "Active Step 1 pending",
@@ -661,6 +662,12 @@ export function WeekendPool({ onOpenRuns }: { onOpenRuns?: () => void }) {
                 },
               ]}
             />
+            <div className="mt-2 rounded border bg-background/60 p-2 text-xs text-muted-foreground">
+              <strong>Why "Qualified" can be higher than "Ready to stage":</strong> a contact is counted as
+              <em> qualified</em> when its enrichment passes scoring, but only becomes
+              <em> ready to stage</em> after CRM dedupe, suppression checks, and the per-business stage transition.
+              The difference (<strong>{Math.max(counted.qualified - counted.readyToStage, 0)}</strong> today) is held back as duplicates, suppressed, or pending review.
+            </div>
           </div>
 
           <div className="rounded-md border border-amber-500/40 bg-amber-500/5 p-3">
