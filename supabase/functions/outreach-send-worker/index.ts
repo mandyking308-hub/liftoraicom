@@ -350,7 +350,12 @@ Deno.serve(async (req) => {
       await supabase.rpc("recompute_campaign_metrics", { _campaign_id: cid });
     }
 
-    return json({ processed: due.length, sent, blocked, failed, delayed, mode: systemMode }, 200);
+    return json({
+      processed: due.length - deferred,
+      sent, blocked, failed, delayed, deferred,
+      mode: systemMode,
+      duration_ms: Date.now() - runStart,
+    }, 200);
   } catch (err) {
     return json({ error: (err as Error).message }, 500);
   }
