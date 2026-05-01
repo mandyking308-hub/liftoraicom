@@ -1186,6 +1186,10 @@ export default function ApolloIntegration() {
               onApprove={approveEnrichment}
             />
           </TabsContent>
+
+          <TabsContent value="monitor" className="space-y-4">
+            <NeonCandyMonitor />
+          </TabsContent>
         </Tabs>
       </div>
     </FounderLayout>
