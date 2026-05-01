@@ -1338,7 +1338,7 @@ type RunGroups = {
 function classifyRuns(runs: Run[]): RunGroups {
   const newestCompletedBySegment = new Map<string, Run>();
   for (const r of runs) {
-    if (r.status === "completed") {
+    if (r.status === "completed" || r.status === "partial" || r.status === "enriching") {
       const existing = newestCompletedBySegment.get(r.segment_id);
       if (!existing || new Date(r.started_at) > new Date(existing.started_at)) {
         newestCompletedBySegment.set(r.segment_id, r);
@@ -1388,7 +1388,7 @@ function classifyRuns(runs: Run[]): RunGroups {
       validAwaiting.push(r);
       continue;
     }
-    if (r.status === "completed") {
+    if (r.status === "completed" || r.status === "partial" || r.status === "enriching") {
       completed.push(r);
     }
   }
