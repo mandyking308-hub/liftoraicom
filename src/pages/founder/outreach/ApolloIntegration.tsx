@@ -17,6 +17,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "react-router-dom";
 import { NeonCandyMonitor } from "@/components/founder/outreach/NeonCandyMonitor";
+import { WeekendPool } from "@/components/founder/outreach/WeekendPool";
 
 const MUSIC_TARGET_KEYWORDS = [
   "playlist curator", "music curator", "independent curator", "music programmer",
@@ -729,6 +730,7 @@ export default function ApolloIntegration() {
   const [busy, setBusy] = useState<string | null>(null);
   const [diagnosticsByBusiness, setDiagnosticsByBusiness] = useState<Record<string, DiagnosticResult>>({});
   const [selectedBusiness, setSelectedBusiness] = useState<string>("Neon Candy");
+  const [activeTab, setActiveTab] = useState<string>("weekend");
 
   const [businessName, setBusinessName] = useState("Neon Candy");
   const [apiKeyInput, setApiKeyInput] = useState("");
@@ -933,13 +935,18 @@ export default function ApolloIntegration() {
           </p>
         </div>
 
-        <Tabs defaultValue="connections">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
+            <TabsTrigger value="weekend">Weekend Pool</TabsTrigger>
             <TabsTrigger value="connections">Connections</TabsTrigger>
             <TabsTrigger value="segments">Sync Segments</TabsTrigger>
             <TabsTrigger value="runs">Sync Runs</TabsTrigger>
             <TabsTrigger value="monitor">Daily Monitor</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="weekend" className="space-y-4">
+            <WeekendPool onOpenRuns={() => setActiveTab("runs")} />
+          </TabsContent>
 
           <TabsContent value="connections" className="space-y-4">
             <Card>
