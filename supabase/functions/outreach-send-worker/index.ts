@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
+import { ImapFlow } from "npm:imapflow@1.0.164";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -39,13 +40,92 @@ type InboxRow = {
   reply_to_email: string | null;
 };
 
+function buildMessageId(host: string): string {
+  const rand = crypto.randomUUID().replace(/-/g, "");
+  const domain = host.split("@").pop() || "liftor.local";
+  return `<${rand}@${domain}>`;
+}
+
+/**
+ * Append a copy of the just-sent RFC822 message to the IONOS "Sent" folder
+ * via IMAP. Folder name is auto-discovered (Sent / Sent Items / INBOX.Sent /
+ * the SPECIAL-USE \Sent flagged mailbox). Best-effort — never throws.
+ */
+async function appendToSentFolder(
+  admin: ReturnType<typeof createClient>,
+  inboxId: string,
+  rfc822: string,
+): Promise<{ ok: boolean; folder?: string; error?: string }> {
+  const encKey = Deno.env.get("INBOX_CREDENTIALS_KEY");
+  if (!encKey) return { ok: false, error: "encryption key not configured" };
+  const { data, error } = await admin.rpc("get_inbox_imap_credentials", {
+    _inbox_id: inboxId, _enc_key: encKey,
+  });
+  if (error || !data) return { ok: false, error: error?.message ?? "imap creds missing" };
+  const c = data as Record<string, unknown>;
+  const host = c.imap_host as string | null;
+  const username = c.imap_username as string | null;
+  const password = c.imap_password as string | null;
+  if (!host || !username || !password) return { ok: false, error: "imap creds incomplete" };
+
+  const client = new ImapFlow({
+    host,
+    port: (c.imap_port as number) ?? 993,
+    secure: c.imap_ssl !== false,
+    auth: { user: username, pass: password },
+    logger: false,
+  });
+
+  try {
+    await withTimeout(client.connect(), 12_000, "IMAP_CONNECT");
+    // Discover Sent folder
+    let sentFolder: string | null = null;
+    try {
+      const list = await withTimeout(client.list(), 8_000, "IMAP_LIST") as Array<{
+        path: string; specialUse?: string; flags?: Set<string> | string[];
+      }>;
+      // Prefer SPECIAL-USE \Sent
+      for (const m of list) {
+        const flags = Array.isArray(m.flags) ? m.flags : Array.from(m.flags ?? []);
+        if (m.specialUse === "\\Sent" || flags.includes("\\Sent")) { sentFolder = m.path; break; }
+      }
+      if (!sentFolder) {
+        const candidates = ["Sent", "Sent Items", "INBOX.Sent", "INBOX/Sent", "Gesendet", "Gesendete Objekte"];
+        for (const cand of candidates) {
+          const hit = list.find((m) => m.path.toLowerCase() === cand.toLowerCase());
+          if (hit) { sentFolder = hit.path; break; }
+        }
+      }
+    } catch { /* ignore listing errors */ }
+
+    if (!sentFolder) return { ok: false, error: "sent folder not found" };
+
+    await withTimeout(
+      client.append(sentFolder, rfc822, ["\\Seen"], new Date()),
+      15_000,
+      "IMAP_APPEND",
+    );
+    return { ok: true, folder: sentFolder };
+  } catch (e) {
+    return { ok: false, error: (e as Error).message };
+  } finally {
+    try { await withTimeout(client.logout(), 4_000, "IMAP_LOGOUT"); } catch { /* ignore */ }
+  }
+}
+
 async function sendViaIonosSmtp(
   admin: ReturnType<typeof createClient>,
   inboxId: string,
   to: string,
   subject: string,
   body: string,
-): Promise<{ ok: boolean; error?: string; messageId?: string }> {
+): Promise<{
+  ok: boolean;
+  error?: string;
+  messageId?: string;
+  rfc822?: string;
+  fromAddress?: string;
+}> {
   const encKey = Deno.env.get("INBOX_CREDENTIALS_KEY");
   if (!encKey) return { ok: false, error: "encryption key not configured" };
   const { data: creds, error } = await admin.rpc("get_inbox_credentials_for_send", {
@@ -58,6 +138,22 @@ async function sendViaIonosSmtp(
   const fromEmail = (c.from_email as string) || (c.smtp_username as string);
   const fromName = (c.from_name as string) || "";
   const replyTo = (c.reply_to_email as string) || fromEmail;
+  const messageId = buildMessageId(fromEmail);
+  const fromHeader = fromName ? `${fromName} <${fromEmail}>` : fromEmail;
+  // Pre-build a minimal RFC822 representation for IMAP APPEND. SMTP server
+  // may rewrite headers but this captures what we sent.
+  const rfc822 =
+    `From: ${fromHeader}\r\n` +
+    `To: ${to}\r\n` +
+    `Reply-To: ${replyTo}\r\n` +
+    `Subject: ${subject}\r\n` +
+    `Message-ID: ${messageId}\r\n` +
+    `Date: ${new Date().toUTCString()}\r\n` +
+    `MIME-Version: 1.0\r\n` +
+    `Content-Type: text/plain; charset=utf-8\r\n` +
+    `Content-Transfer-Encoding: 8bit\r\n` +
+    `\r\n` +
+    body;
   let client: SMTPClient | null = null;
   try {
     client = new SMTPClient({
@@ -69,13 +165,14 @@ async function sendViaIonosSmtp(
     });
     await withTimeout(
       client.send({
-        from: fromName ? `${fromName} <${fromEmail}>` : fromEmail,
+        from: fromHeader,
         to, replyTo, subject, content: body,
+        headers: { "Message-ID": messageId },
       }),
       PER_SEND_BUDGET_MS,
       "SMTP_SEND",
     );
-    return { ok: true };
+    return { ok: true, messageId, rfc822, fromAddress: fromEmail };
   } catch (e) {
     return { ok: false, error: (e as Error).message };
   } finally {
