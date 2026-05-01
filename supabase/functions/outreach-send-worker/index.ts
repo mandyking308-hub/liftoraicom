@@ -119,10 +119,17 @@ Deno.serve(async (req) => {
     if (error) return json({ error: error.message }, 500);
     if (!due?.length) return json({ processed: 0, sent: 0, blocked: 0, delayed: 0, mode: systemMode }, 200);
 
-    let sent = 0, blocked = 0, failed = 0, delayed = 0;
+    let sent = 0, blocked = 0, failed = 0, delayed = 0, deferred = 0;
     const touchedCampaigns = new Set<string>();
+    const runStart = Date.now();
 
     for (let idx = 0; idx < due.length; idx++) {
+      // Stop early if we're approaching the function idle timeout. Remaining
+      // items stay pending and will be picked up by the next cron tick.
+      if (Date.now() - runStart > RUN_BUDGET_MS) {
+        deferred = due.length - idx;
+        break;
+      }
       const item = due[idx];
       // Variance between sends (skip jitter on first item)
       if (idx > 0 && sent > 0) {
@@ -189,22 +196,32 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      // Sanity check via shared edge function
-      const checkRes = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/crm-send-check`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
-        },
-        body: JSON.stringify({
-          contact_id: item.contact_id,
-          log_attempt: true,
-          channel: "email",
-          message: seq ? `[${seq.subject}] ${seq.body}\n\n<!-- tracking_pixel:${item.id} -->` : `Step ${item.sequence_step}`,
-          ai_generated: false,
-        }),
-      });
-      const checkJson = await checkRes.json().catch(() => ({}));
+      // Sanity check via shared edge function (bounded)
+      let checkJson: any = {};
+      try {
+        const checkRes = await withTimeout(
+          fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/crm-send-check`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+            },
+            body: JSON.stringify({
+              contact_id: item.contact_id,
+              log_attempt: true,
+              channel: "email",
+              message: seq ? `[${seq.subject}] ${seq.body}\n\n<!-- tracking_pixel:${item.id} -->` : `Step ${item.sequence_step}`,
+              ai_generated: false,
+            }),
+            signal: AbortSignal.timeout(15_000),
+          }),
+          15_000,
+          "SANITY_CHECK",
+        );
+        checkJson = await checkRes.json().catch(() => ({}));
+      } catch (e) {
+        checkJson = { allowed: false, reason: `SANITY_CHECK_FAILED:${(e as Error).message}` };
+      }
       const allowed = checkJson?.allowed === true;
 
       if (!allowed) {
