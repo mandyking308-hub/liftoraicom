@@ -306,6 +306,63 @@ export function WeekendPool({ onOpenRuns }: { onOpenRuns?: () => void }) {
         </CardContent>
       </Card>
 
+      <Card className={queueBlock.length === 0 ? "border-emerald-500/40" : "border-destructive/40"}>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            {queueBlock.length === 0 ? (
+              <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+            ) : (
+              <AlertTriangle className="h-4 w-4 text-destructive" />
+            )}
+            Weekend pool progress
+            <Badge
+              variant={queueBlock.length === 0 ? "default" : "destructive"}
+              className="ml-2"
+            >
+              Queue integrity: {queueBlock.length === 0 ? "Clean" : "Needs cleanup"}
+            </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <StatGrid
+            stats={[
+              { label: "Existing staged contacts", value: poolStaged, tone: poolStaged > 0 ? "info" : undefined },
+              { label: "Ready to stage", value: poolReady, tone: poolReady > 0 ? "info" : undefined },
+              { label: "New batch contacts found (today)", value: cumulative.found },
+              { label: "New batch enriched (new+updated)", value: cumulative.new + cumulative.updated },
+              { label: "New batch emails returned", value: cumulative.emails },
+              { label: "New batch qualified", value: cumulative.qualified, tone: "ok" },
+              { label: "Total pool built today", value: poolReady + poolStaged, tone: "info" },
+              { label: "Apollo credits spent today", value: cumulative.credits },
+              { label: "Coverage until Tuesday", value: coverage?.daysCoverage ?? "n/a", tone: coverage?.covered ? "ok" : "warn" },
+              {
+                label: "Active Step 1 pending",
+                value: pool.find((p) => p.label === "Pending Step 1 sends")?.value ?? 0,
+              },
+              {
+                label: "Follow-ups scheduled",
+                value: pool.find((p) => p.label === "Follow-ups scheduled")?.value ?? 0,
+              },
+              {
+                label: "Queue integrity",
+                value: queueBlock.length === 0 ? "Clean" : `${queueBlock.length} issue(s)`,
+                tone: queueBlock.length === 0 ? "ok" : "bad",
+              },
+            ]}
+          />
+          <div className="rounded-md border bg-muted/30 p-3 text-xs">
+            <div className="font-medium">
+              Pool progress: <strong>{poolReady + poolStaged}</strong> / {TARGET_POOL} approved contacts
+              {poolReady + poolStaged >= TARGET_POOL ? " ✅ target reached" : ""}
+            </div>
+            <div className="mt-1 text-muted-foreground">
+              The "Run next 25-contact Apollo batch" button is disabled whenever Queue integrity ≠ Clean.
+              Resolve the items in the warning panel below before continuing.
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between text-base">
