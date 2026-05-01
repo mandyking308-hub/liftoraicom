@@ -519,20 +519,26 @@ export function WeekendPool({ onOpenRuns }: { onOpenRuns?: () => void }) {
 
         if (!nextBucket) {
           // Need to run a new search page
-          appendLog(`No unenriched candidates left. Running new search page (cap ${BATCH_SIZE})...`);
+          appendLog(`No unenriched candidates left. Fetching next Apollo page (per_page ${BATCH_SIZE})...`);
           const { data: sData, error: sErr } = await supabase.functions.invoke("apollo-sync-search", { body: { segment_id: segmentId } });
           if (sErr) { appendLog(`Search failed: ${sErr.message}. Stopping.`); break; }
           const sr = (sData as any) ?? {};
           const fit = sr?.diagnostics?.segment_fit ?? "unknown";
-          appendLog(`Search returned ${sr.people_found ?? 0} (with-email ${sr.people_with_email_flag ?? 0}, fit=${fit}).`);
+          appendLog(
+            `Search · page_fetched=${sr.page_fetched ?? "?"} · ` +
+            `found=${sr.people_found ?? 0} · with-email=${sr.people_with_email_flag ?? 0} · ` +
+            `unseen_in_batch=${sr.unseen_in_batch ?? 0} · skipped_already_seen=${sr.skipped_already_seen ?? 0} · ` +
+            `next_page=${sr.next_page ?? "?"} · fit=${fit}.`
+          );
           if (fit !== "good") { appendLog(`Stopped: latest search fit=${fit}, not good. No enrichment performed.`); break; }
           if ((sr.people_with_email_flag ?? 0) === 0) { appendLog("Stopped: no candidates with email flag returned."); break; }
+          if ((sr.unseen_in_batch ?? 0) === 0) { appendLog("Stopped: no unseen candidates returned (Apollo result list exhausted at this fit)."); break; }
           // loop will pick this run on next iter
           continue;
         }
 
         const chunk = nextBucket.ids.slice(0, Math.min(ENRICH_CHUNK, creditsLeft));
-        appendLog(`Enriching ${chunk.length} candidate(s) from run ${nextBucket.runId.slice(0,8)}…`);
+        appendLog(`Selected for enrichment: ${chunk.length} candidate(s) from run ${nextBucket.runId.slice(0,8)} (credits_left=${creditsLeft}).`);
         const { data: eData, error: eErr } = await supabase.functions.invoke("apollo-sync-enrich", {
           body: { run_id: nextBucket.runId, selected_apollo_person_ids: chunk },
         });
@@ -541,7 +547,12 @@ export function WeekendPool({ onOpenRuns }: { onOpenRuns?: () => void }) {
           break;
         }
         const er = (eData as any) ?? {};
-        appendLog(`Chunk done · enriched=${er.enriched ?? "?"} · usable_emails=${er.emails_returned ?? "?"} · ready=${er.ready_to_stage ?? "?"} · credits=${er.credits_used ?? chunk.length}.`);
+        appendLog(
+          `Chunk done · enriched=${er.enriched ?? "?"} · ` +
+          `usable_emails=${er.emails_returned ?? "?"} · ` +
+          `ready_to_stage_added=${er.ready_to_stage ?? "?"} · ` +
+          `credits_used=${er.credits_used ?? chunk.length}.`
+        );
 
         // brief pause so DB counters update before next iteration
         await new Promise((r) => setTimeout(r, 800));
