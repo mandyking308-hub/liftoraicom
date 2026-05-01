@@ -451,7 +451,20 @@ const CampaignLiveMonitor = () => {
                   <StatCard label="Valid follow-ups scheduled" value={String(followupsScheduled)} />
                   <StatCard label="Next due send" value={nextDue ? relTime(nextDue.scheduled_at) : "—"} sub={nextDue ? fmtTime(nextDue.scheduled_at) : "no items due"} />
                   <StatCard label="Queue integrity" value={integrityClean ? "Clean" : "Issues"} tone={integrityClean ? "good" : "warn"} />
-                  <StatCard label="Sender" value="hello@neoncandy.online" sub={`${remaining}/${dailyLimit} remaining`} />
+                  <StatCard
+                    label="Sender"
+                    value="hello@neoncandy.online"
+                    sub={
+                      inbox?.provider_blocked_until && new Date(inbox.provider_blocked_until).getTime() > Date.now()
+                        ? `Provider cap reached · resumes ${relTime(inbox.provider_blocked_until)}`
+                        : `${remaining}/${dailyLimit} remaining`
+                    }
+                    tone={
+                      inbox?.provider_blocked_until && new Date(inbox.provider_blocked_until).getTime() > Date.now()
+                        ? "warn"
+                        : undefined
+                    }
+                  />
                 </div>
                 {bcrCounts.ready_to_stage > 0 && (
                   <div className="rounded border border-amber-500/40 bg-amber-500/5 p-3 text-xs space-y-1">
