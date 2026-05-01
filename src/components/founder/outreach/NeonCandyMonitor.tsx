@@ -411,6 +411,40 @@ export function NeonCandyMonitor() {
           <CardContent className="space-y-3">
             <StatGrid stats={queueBreakdown} />
             <div className="rounded-md border bg-muted/30 p-3 text-sm">{queueExplain}</div>
+            <Card className={integrityClean ? "border-emerald-500/40" : "border-destructive/40"}>
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-sm">
+                  {integrityClean ? (
+                    <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                  ) : (
+                    <XCircle className="h-4 w-4 text-destructive" />
+                  )}
+                  Queue integrity: {integrityClean ? "Clean" : "Needs cleanup"}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-xs">
+                {integrityClean ? (
+                  <span className="text-emerald-600">All active queue rows are real SMTP-only with valid parent integrity. Weekend Pool can stage more contacts.</span>
+                ) : (
+                  <ul className="ml-4 list-disc text-destructive">
+                    {integrityReasons.map((r) => <li key={r}>{r}</li>)}
+                  </ul>
+                )}
+              </CardContent>
+            </Card>
+            {legacyBreakdown.length > 0 && legacyBreakdown.some((s) => Number(s.value) > 0) && (
+              <details className="rounded-md border bg-muted/20 p-3 text-sm">
+                <summary className="cursor-pointer select-none font-medium">
+                  Historical cleanup buckets (excluded from active queue)
+                </summary>
+                <div className="mt-3">
+                  <StatGrid stats={legacyBreakdown} />
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    These rows are quarantined or blocked for a known safe reason. They are NOT part of the active live queue and do not consume sender capacity.
+                  </p>
+                </div>
+              </details>
+            )}
             {queueWarn.length > 0 && (
               <div className="rounded-md border border-amber-500/40 bg-amber-500/5 p-3 text-sm">
                 <div className="mb-1 font-medium text-amber-700">Hold staging until resolved:</div>
