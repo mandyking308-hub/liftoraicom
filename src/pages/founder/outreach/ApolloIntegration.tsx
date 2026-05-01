@@ -643,6 +643,11 @@ type EnrichmentRunResponse = {
   skipped_no_email?: number;
   duplicate?: number;
   suppressed?: number;
+  status?: "completed" | "partial" | string;
+  processed_count?: number;
+  remaining_count?: number;
+  resume_available?: boolean;
+  last_successful?: string | null;
 };
 
 const statusLabels: Record<string, string> = {
