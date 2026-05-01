@@ -48,18 +48,144 @@ function fitTagsFor(lead: LeadRow): string[] {
   return MUSIC_TARGET_KEYWORDS.filter((kw) => hay.includes(kw));
 }
 
+type ContactRow = {
+  id: string;
+  email: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  name: string | null;
+  company: string | null;
+  role: string | null;
+  linkedin_url: string | null;
+  apollo_person_id: string | null;
+  apollo_organization_id: string | null;
+  is_globally_suppressed: boolean;
+  hard_bounced: boolean;
+  tags: string[] | null;
+  last_contacted_at: string | null;
+  active_campaign_id: string | null;
+};
+
+type DupeStatus = "new" | "existing" | "possible";
+
+type DupeMatch = {
+  status: DupeStatus;
+  contact: ContactRow | null;
+  reason: string;
+  hasKnownEmail: boolean;
+  isSuppressed: boolean;
+};
+
+type PreviewSelection = {
+  total: number;
+  selectedIds: string[];
+  newCount: number;
+  existingSkipped: number;
+  possibleHeld: number;
+  creditsToSpend: number;
+  creditsSaved: number;
+  suppressedCount: number;
+  matched: number;
+  ready: boolean;
+};
+
+function normalize(s: string | null | undefined): string {
+  return (s ?? "").trim().toLowerCase();
+}
+
+function tokenSimilar(a: string | null | undefined, b: string | null | undefined): boolean {
+  const na = normalize(a);
+  const nb = normalize(b);
+  if (!na || !nb) return false;
+  if (na === nb) return true;
+  return na.includes(nb) || nb.includes(na);
+}
+
+function matchLead(lead: LeadRow, contacts: ContactRow[]): DupeMatch {
+  const linkedin = normalize(lead.search_payload?.linkedin_url);
+  const byPerson = contacts.find((c) => c.apollo_person_id && c.apollo_person_id === lead.apollo_person_id);
+  if (byPerson) {
+    return {
+      status: "existing",
+      contact: byPerson,
+      reason: "Apollo person ID matches existing contact",
+      hasKnownEmail: !!byPerson.email,
+      isSuppressed: byPerson.is_globally_suppressed || byPerson.hard_bounced,
+    };
+  }
+  if (linkedin) {
+    const byLi = contacts.find((c) => normalize(c.linkedin_url) === linkedin);
+    if (byLi) {
+      return {
+        status: "existing",
+        contact: byLi,
+        reason: "LinkedIn URL matches existing contact",
+        hasKnownEmail: !!byLi.email,
+        isSuppressed: byLi.is_globally_suppressed || byLi.hard_bounced,
+      };
+    }
+  }
+  const fn = normalize(lead.first_name);
+  const co = normalize(lead.company);
+  const ti = normalize(lead.title);
+  if (fn && co) {
+    const exact = contacts.find((c) => normalize(c.first_name) === fn && normalize(c.company) === co);
+    if (exact) {
+      const titleSim = tokenSimilar(ti, exact.role);
+      return {
+        status: titleSim ? "existing" : "possible",
+        contact: exact,
+        reason: titleSim
+          ? "First name + company + similar title match"
+          : "First name + company match (title differs)",
+        hasKnownEmail: !!exact.email,
+        isSuppressed: exact.is_globally_suppressed || exact.hard_bounced,
+      };
+    }
+  }
+  const orgId = lead.search_payload?.organization?.id ?? lead.search_payload?.organization_id ?? null;
+  if (orgId && fn) {
+    const byOrg = contacts.find((c) => c.apollo_organization_id === orgId && normalize(c.first_name) === fn);
+    if (byOrg) {
+      return {
+        status: "possible",
+        contact: byOrg,
+        reason: "Same Apollo organization + first name",
+        hasKnownEmail: !!byOrg.email,
+        isSuppressed: byOrg.is_globally_suppressed || byOrg.hard_bounced,
+      };
+    }
+  }
+  if (fn && (co || ti)) {
+    const possible = contacts.find((c) => normalize(c.first_name) === fn && (tokenSimilar(co, c.company) || tokenSimilar(ti, c.role)));
+    if (possible) {
+      return {
+        status: "possible",
+        contact: possible,
+        reason: "First name + similar company/title overlap",
+        hasKnownEmail: !!possible.email,
+        isSuppressed: possible.is_globally_suppressed || possible.hard_bounced,
+      };
+    }
+  }
+  return { status: "new", contact: null, reason: "No CRM match", hasKnownEmail: false, isSuppressed: false };
+}
+
 function CandidatePreview({
   runId,
-  onCountsReady,
+  onSelectionReady,
 }: {
   runId: string;
-  onCountsReady?: (counts: { total: number; toEnrich: number; matched: number; unmatched: number }) => void;
+  onSelectionReady?: (info: PreviewSelection) => void;
 }) {
   const [open, setOpen] = useState(true);
   const [leads, setLeads] = useState<LeadRow[] | null>(null);
+  const [contacts, setContacts] = useState<ContactRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState("");
   const [tagFilter, setTagFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [overrides, setOverrides] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     let cancelled = false;
@@ -74,33 +200,104 @@ function CandidatePreview({
       if (error) {
         toast({ title: "Could not load preview", description: error.message, variant: "destructive" });
         setLeads([]);
-      } else {
-        setLeads((data as LeadRow[]) ?? []);
+        setContacts([]);
+        setLoading(false);
+        return;
       }
+      const leadRows = (data as LeadRow[]) ?? [];
+      setLeads(leadRows);
+
+      const personIds = leadRows.map((l) => l.apollo_person_id).filter(Boolean);
+      const linkedinUrls = leadRows.map((l) => l.search_payload?.linkedin_url).filter(Boolean) as string[];
+      const firstNames = Array.from(new Set(leadRows.map((l) => l.first_name).filter(Boolean) as string[]));
+      const companies = Array.from(new Set(leadRows.map((l) => l.company).filter(Boolean) as string[]));
+      const orgIds = Array.from(new Set(leadRows.map((l) => l.search_payload?.organization?.id ?? l.search_payload?.organization_id).filter(Boolean) as string[]));
+
+      const quote = (s: string) => `"${s.replace(/"/g, "")}"`;
+      const orParts: string[] = [];
+      if (personIds.length) orParts.push(`apollo_person_id.in.(${personIds.map(quote).join(",")})`);
+      if (linkedinUrls.length) orParts.push(`linkedin_url.in.(${linkedinUrls.map(quote).join(",")})`);
+      if (orgIds.length) orParts.push(`apollo_organization_id.in.(${orgIds.map(quote).join(",")})`);
+      if (firstNames.length) orParts.push(`first_name.in.(${firstNames.map(quote).join(",")})`);
+      if (companies.length) orParts.push(`company.in.(${companies.map(quote).join(",")})`);
+
+      let contactRows: ContactRow[] = [];
+      if (orParts.length > 0) {
+        const { data: cdata, error: cErr } = await supabase
+          .from("contacts")
+          .select("id, email, first_name, last_name, name, company, role, linkedin_url, apollo_person_id, apollo_organization_id, is_globally_suppressed, hard_bounced, tags, last_contacted_at, active_campaign_id")
+          .or(orParts.join(","))
+          .limit(500);
+        if (!cErr && cdata) contactRows = cdata as ContactRow[];
+      }
+      if (cancelled) return;
+      setContacts(contactRows);
       setLoading(false);
     }
     load();
     return () => { cancelled = true; };
   }, [runId]);
 
-  const enriched = useMemo(() => (leads ?? []).map((l) => ({ lead: l, tags: fitTagsFor(l) })), [leads]);
+  const enriched = useMemo(() => {
+    return (leads ?? []).map((lead) => {
+      const tags = fitTagsFor(lead);
+      const dupe = matchLead(lead, contacts);
+      const defaultSelected =
+        lead.has_email_flag &&
+        dupe.status === "new" &&
+        !dupe.isSuppressed;
+      const selected = overrides[lead.id] ?? defaultSelected;
+      return { lead, tags, dupe, selected, defaultSelected };
+    });
+  }, [leads, contacts, overrides]);
 
-  const counts = useMemo(() => {
+  const counts = useMemo<PreviewSelection>(() => {
     const total = enriched.length;
-    const toEnrich = enriched.filter((e) => e.lead.has_email_flag).length;
+    const newCount = enriched.filter((e) => e.dupe.status === "new").length;
+    const existing = enriched.filter((e) => e.dupe.status === "existing");
+    const possibleHeld = enriched.filter((e) => e.dupe.status === "possible").length;
+    const existingSkipped = existing.filter((e) => e.dupe.hasKnownEmail).length;
+    const suppressedCount = enriched.filter((e) => e.dupe.isSuppressed).length;
     const matched = enriched.filter((e) => e.tags.length > 0).length;
-    return { total, toEnrich, matched, unmatched: total - matched };
-  }, [enriched]);
+    const selectedIds = enriched.filter((e) => e.selected).map((e) => e.lead.apollo_person_id);
+    const creditsToSpend = selectedIds.length;
+    const hasEmailTotal = enriched.filter((e) => e.lead.has_email_flag).length;
+    const creditsSaved = Math.max(0, hasEmailTotal - creditsToSpend);
+    return { total, newCount, existingSkipped, possibleHeld, suppressedCount, matched, selectedIds, creditsToSpend, creditsSaved, ready: leads !== null && total > 0 };
+  }, [enriched, leads]);
 
   useEffect(() => {
-    if (leads !== null) onCountsReady?.(counts);
+    if (leads !== null) onSelectionReady?.(counts);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [counts.total, counts.toEnrich, counts.matched, leads]);
+  }, [counts.total, counts.creditsToSpend, counts.newCount, counts.existingSkipped, counts.possibleHeld, leads]);
 
   const filtered = useMemo(() => {
     const q = filter.trim().toLowerCase();
-    return enriched.filter(({ lead, tags }) => {
+    return enriched.filter(({ lead, tags, dupe }) => {
       if (tagFilter !== "all" && !tags.includes(tagFilter)) return false;
+      switch (statusFilter) {
+        case "new":
+          if (dupe.status !== "new") return false;
+          break;
+        case "existing":
+          if (dupe.status !== "existing") return false;
+          break;
+        case "possible":
+          if (dupe.status !== "possible") return false;
+          break;
+        case "contacted":
+          if (!dupe.contact?.last_contacted_at) return false;
+          break;
+        case "suppressed":
+          if (!dupe.isSuppressed) return false;
+          break;
+        case "has_email":
+          if (!dupe.hasKnownEmail) return false;
+          break;
+        case "needs_enrichment":
+          if (dupe.hasKnownEmail || !lead.has_email_flag) return false;
+          break;
+      }
       if (!q) return true;
       return (
         (lead.title ?? "").toLowerCase().includes(q) ||
@@ -108,13 +305,17 @@ function CandidatePreview({
         (lead.first_name ?? "").toLowerCase().includes(q)
       );
     });
-  }, [enriched, filter, tagFilter]);
+  }, [enriched, filter, tagFilter, statusFilter]);
 
   const availableTags = useMemo(() => {
     const set = new Set<string>();
     enriched.forEach((e) => e.tags.forEach((t) => set.add(t)));
     return Array.from(set).sort();
   }, [enriched]);
+
+  function toggle(leadId: string, current: boolean) {
+    setOverrides((prev) => ({ ...prev, [leadId]: !current }));
+  }
 
   return (
     <Collapsible open={open} onOpenChange={setOpen} className="rounded-md border">
@@ -128,13 +329,23 @@ function CandidatePreview({
         <div className="rounded-md border border-primary/30 bg-primary/5 p-2 text-xs">
           Review these candidates before spending Apollo enrichment credits.
         </div>
+        {(counts.existingSkipped > 0 || counts.possibleHeld > 0) && (
+          <div className="flex items-start gap-2 rounded-md border border-amber-500/40 bg-amber-500/10 p-2 text-xs">
+            <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0 text-amber-500" />
+            <span>
+              Some Apollo candidates already exist in Liftor. Existing contacts with known emails have been excluded from enrichment to avoid wasting Apollo credits.
+            </span>
+          </div>
+        )}
         <div className="grid grid-cols-2 gap-2 text-xs md:grid-cols-4">
           <Stat label="Total found" value={counts.total} />
-          <Stat label="has_email=true" value={counts.toEnrich} />
-          <Stat label="Will enrich" value={counts.toEnrich} />
-          <Stat label="Est. credits" value={counts.toEnrich} />
+          <Stat label="New (selected)" value={counts.newCount} />
+          <Stat label="Existing skipped" value={counts.existingSkipped} />
+          <Stat label="Possible held" value={counts.possibleHeld} />
+          <Stat label="Will enrich" value={counts.creditsToSpend} />
+          <Stat label="Est. credits" value={counts.creditsToSpend} />
+          <Stat label="Credits saved" value={counts.creditsSaved} />
           <Stat label="Fit matched" value={counts.matched} />
-          <Stat label="Unmatched" value={counts.unmatched} />
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Input
@@ -149,13 +360,26 @@ function CandidatePreview({
                 title: {q}
               </Button>
             ))}
-            <Button type="button" size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => { setFilter(""); setTagFilter("all"); }}>
+            <Button type="button" size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => { setFilter(""); setTagFilter("all"); setStatusFilter("all"); }}>
               Clear
             </Button>
           </div>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="h-8 w-[180px] text-xs"><SelectValue placeholder="CRM status" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All CRM status</SelectItem>
+              <SelectItem value="new">New only</SelectItem>
+              <SelectItem value="existing">Existing</SelectItem>
+              <SelectItem value="possible">Possible duplicate</SelectItem>
+              <SelectItem value="contacted">Already contacted</SelectItem>
+              <SelectItem value="suppressed">Suppressed</SelectItem>
+              <SelectItem value="has_email">Has known email</SelectItem>
+              <SelectItem value="needs_enrichment">Needs enrichment</SelectItem>
+            </SelectContent>
+          </Select>
           {availableTags.length > 0 && (
             <Select value={tagFilter} onValueChange={setTagFilter}>
-              <SelectTrigger className="h-8 w-[180px] text-xs"><SelectValue placeholder="Fit tag" /></SelectTrigger>
+              <SelectTrigger className="h-8 w-[160px] text-xs"><SelectValue placeholder="Fit tag" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All fit tags</SelectItem>
                 {availableTags.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
@@ -172,33 +396,51 @@ function CandidatePreview({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-xs">Person ID</TableHead>
+                  <TableHead className="text-xs">Enrich</TableHead>
+                  <TableHead className="text-xs">CRM</TableHead>
                   <TableHead className="text-xs">First</TableHead>
                   <TableHead className="text-xs">Last</TableHead>
                   <TableHead className="text-xs">Title</TableHead>
                   <TableHead className="text-xs">Company</TableHead>
-                  <TableHead className="text-xs">Location</TableHead>
                   <TableHead className="text-xs">Fit tags</TableHead>
-                  <TableHead className="text-xs">has_email</TableHead>
-                  <TableHead className="text-xs">Enrich?</TableHead>
-                  <TableHead className="text-xs">Credits</TableHead>
+                  <TableHead className="text-xs">Email known</TableHead>
+                  <TableHead className="text-xs">Last contacted</TableHead>
+                  <TableHead className="text-xs">Existing tags</TableHead>
+                  <TableHead className="text-xs">Suppressed</TableHead>
+                  <TableHead className="text-xs">Match reason</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filtered.map(({ lead, tags }) => {
-                  const willEnrich = lead.has_email_flag;
-                  const location = lead.country
-                    ?? (lead.search_payload?.city ? `${lead.search_payload.city}${lead.search_payload?.country ? ", " + lead.search_payload.country : ""}` : null)
-                    ?? lead.search_payload?.state
-                    ?? null;
+                {filtered.map(({ lead, tags, dupe, selected }) => {
+                  const statusBadge =
+                    dupe.status === "new" ? <Badge className="text-[10px]">New</Badge>
+                    : dupe.status === "existing" ? <Badge variant="secondary" className="text-[10px]">Existing</Badge>
+                    : <Badge variant="destructive" className="text-[10px]">Possible</Badge>;
+                  const checkboxDisabled = !lead.has_email_flag || dupe.isSuppressed;
                   return (
                     <TableRow key={lead.id}>
-                      <TableCell className="font-mono text-[10px]">{lead.apollo_person_id.slice(0, 10)}…</TableCell>
+                      <TableCell>
+                        <Checkbox
+                          checked={selected}
+                          disabled={checkboxDisabled}
+                          onCheckedChange={() => toggle(lead.id, selected)}
+                          aria-label="Enrich this candidate"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col gap-1">
+                          {statusBadge}
+                          {dupe.contact && (
+                            <Link to={`/founder/crm/contacts/${dupe.contact.id}`} className="text-[10px] text-primary underline">
+                              Open contact
+                            </Link>
+                          )}
+                        </div>
+                      </TableCell>
                       <TableCell className="text-xs">{lead.first_name ?? "—"}</TableCell>
                       <TableCell className="text-xs">{obfuscateLast(lead.last_name)}</TableCell>
                       <TableCell className="text-xs">{lead.title ?? "—"}</TableCell>
                       <TableCell className="text-xs">{lead.company ?? "—"}</TableCell>
-                      <TableCell className="text-xs">{location ?? "—"}</TableCell>
                       <TableCell>
                         <div className="flex flex-wrap gap-1">
                           {tags.length > 0
@@ -207,16 +449,24 @@ function CandidatePreview({
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={lead.has_email_flag ? "default" : "outline"} className="text-[10px]">
-                          {lead.has_email_flag ? "yes" : "no"}
+                        <Badge variant={dupe.hasKnownEmail ? "default" : "outline"} className="text-[10px]">
+                          {dupe.hasKnownEmail ? "yes" : "no"}
                         </Badge>
+                      </TableCell>
+                      <TableCell className="text-[10px] text-muted-foreground">
+                        {dupe.contact?.last_contacted_at ? new Date(dupe.contact.last_contacted_at).toLocaleDateString() : "—"}
+                      </TableCell>
+                      <TableCell className="text-[10px]">
+                        {dupe.contact?.tags && dupe.contact.tags.length > 0
+                          ? dupe.contact.tags.slice(0, 3).join(", ")
+                          : <span className="text-muted-foreground">—</span>}
                       </TableCell>
                       <TableCell>
-                        <Badge variant={willEnrich ? "default" : "outline"} className="text-[10px]">
-                          {willEnrich ? "yes" : "skip"}
-                        </Badge>
+                        {dupe.isSuppressed
+                          ? <Badge variant="destructive" className="text-[10px]">yes</Badge>
+                          : <span className="text-xs text-muted-foreground">no</span>}
                       </TableCell>
-                      <TableCell className="text-xs">{willEnrich ? 1 : 0}</TableCell>
+                      <TableCell className="text-[10px] text-muted-foreground max-w-[180px]">{dupe.reason}</TableCell>
                     </TableRow>
                   );
                 })}
