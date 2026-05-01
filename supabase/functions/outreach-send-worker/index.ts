@@ -8,6 +8,41 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+// ===== GLOBAL SMTP/IMAP ERROR SHIELD =====
+// denomailer (and occasionally imapflow) raise async errors AFTER the
+// awaited send() has already resolved successfully — typically when the
+// server closes the connection during QUIT with a non-standard reply
+// ("invalid cmd"). Without this shield those errors surface as
+// "event loop error: Error: invalid cmd" and abort the whole worker
+// invocation, stranding rows in pending and never marking them sent.
+// We swallow them globally; per-send errors are still captured by the
+// awaited try/catch inside sendViaIonosSmtp().
+let __smtpShieldInstalled = false;
+function installSmtpShield() {
+  if (__smtpShieldInstalled) return;
+  __smtpShieldInstalled = true;
+  globalThis.addEventListener("unhandledrejection", (ev) => {
+    const msg = String((ev as PromiseRejectionEvent).reason ?? "");
+    if (
+      msg.includes("invalid cmd") ||
+      msg.includes("SMTP") ||
+      msg.includes("denomailer") ||
+      msg.includes("ImapFlow") ||
+      msg.includes("imap")
+    ) {
+      console.warn("[outreach-send-worker] swallowed async smtp/imap rejection:", msg);
+      ev.preventDefault();
+    }
+  });
+  globalThis.addEventListener("error", (ev) => {
+    const msg = String((ev as ErrorEvent).message ?? "");
+    if (msg.includes("invalid cmd") || msg.includes("SMTP") || msg.includes("denomailer")) {
+      console.warn("[outreach-send-worker] swallowed async smtp error:", msg);
+      ev.preventDefault();
+    }
+  });
+}
+
 const PER_RUN_LIMIT = 25;
 // Hard wall-clock budget for this invocation. Edge Functions hard-cap at 150s
 // idle timeout; we stop accepting new sends well before that.
@@ -155,6 +190,7 @@ async function sendViaIonosSmtp(
     `\r\n` +
     body;
   let client: SMTPClient | null = null;
+  let sendOk = false;
   try {
     client = new SMTPClient({
       connection: {
@@ -172,18 +208,35 @@ async function sendViaIonosSmtp(
       PER_SEND_BUDGET_MS,
       "SMTP_SEND",
     );
+    sendOk = true;
     return { ok: true, messageId, rfc822, fromAddress: fromEmail };
   } catch (e) {
-    return { ok: false, error: (e as Error).message };
+    const msg = (e as Error).message;
+    // If denomailer throws AFTER the message was already accepted (typically
+    // an "invalid cmd" during QUIT), do not falsely mark the send as failed.
+    if (sendOk) {
+      console.warn("[outreach-send-worker] post-send smtp error ignored:", msg);
+      return { ok: true, messageId, rfc822, fromAddress: fromEmail };
+    }
+    return { ok: false, error: msg };
   } finally {
     if (client) {
-      try { await withTimeout(client.close(), 3_000, "SMTP_CLOSE"); } catch { /* ignore */ }
+      try {
+        // denomailer's close() is sync in some versions and returns undefined.
+        const maybe = client.close() as unknown;
+        if (maybe && typeof (maybe as Promise<void>).then === "function") {
+          await withTimeout(maybe as Promise<void>, 3_000, "SMTP_CLOSE");
+        }
+      } catch (closeErr) {
+        console.warn("[outreach-send-worker] smtp close error ignored:", (closeErr as Error).message);
+      }
     }
   }
 }
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  installSmtpShield();
   try {
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -192,6 +245,21 @@ Deno.serve(async (req) => {
     );
 
     const now = new Date();
+
+    // Optional max override for safe one-shot proof runs.
+    let maxOverride: number | null = null;
+    try {
+      const url = new URL(req.url);
+      const q = url.searchParams.get("max");
+      if (q) maxOverride = Math.max(1, Math.min(PER_RUN_LIMIT, parseInt(q, 10) || 0));
+      if (req.method === "POST") {
+        const body = await req.clone().json().catch(() => null);
+        if (body && typeof body.max === "number") {
+          maxOverride = Math.max(1, Math.min(PER_RUN_LIMIT, body.max));
+        }
+      }
+    } catch { /* ignore */ }
+    const runLimit = maxOverride ?? PER_RUN_LIMIT;
 
     // ===== SYSTEM MODE GUARD =====
     const { data: modeRow } = await supabase
@@ -212,12 +280,20 @@ Deno.serve(async (req) => {
       .lte("scheduled_at", now.toISOString())
       .order("priority", { ascending: true })
       .order("scheduled_at", { ascending: true })
-      .limit(PER_RUN_LIMIT);
+      .limit(runLimit);
     if (error) return json({ error: error.message }, 500);
-    if (!due?.length) return json({ processed: 0, sent: 0, blocked: 0, delayed: 0, mode: systemMode }, 200);
+    if (!due?.length) {
+      return json({
+        processed: 0, sent: 0, blocked: 0, delayed: 0, failed: 0, deferred: 0,
+        due_found: 0, first_5_errors: [], next_due_send: null,
+        mode: systemMode,
+      }, 200);
+    }
 
     let sent = 0, blocked = 0, failed = 0, delayed = 0, deferred = 0;
     const touchedCampaigns = new Set<string>();
+    const firstErrors: Array<{ queue_id: string; error: string }> = [];
+    const dueFound = due.length;
     const runStart = Date.now();
 
     for (let idx = 0; idx < due.length; idx++) {
@@ -331,7 +407,10 @@ Deno.serve(async (req) => {
         }
       }
 
-      // Sanity check via shared edge function (bounded)
+      // Sanity check via shared edge function (bounded).
+      // log_attempt is FALSE here: we only log a `communications` row AFTER
+      // SMTP actually accepts the send. Otherwise a failed retry permanently
+      // blocks the contact via RECENT_COMMUNICATION_24H.
       let checkJson: any = {};
       try {
         const checkRes = await withTimeout(
@@ -343,7 +422,7 @@ Deno.serve(async (req) => {
             },
             body: JSON.stringify({
               contact_id: item.contact_id,
-              log_attempt: true,
+              log_attempt: false,
               channel: "email",
               message: seq ? `[${seq.subject}] ${seq.body}\n\n<!-- tracking_pixel:${item.id} -->` : `Step ${item.sequence_step}`,
               ai_generated: false,
@@ -502,6 +581,21 @@ Deno.serve(async (req) => {
           email_id: item.id,
         });
 
+        // Log communications row ONLY after a real SMTP accept, so failed
+        // retries do not poison RECENT_COMMUNICATION_24H.
+        if (useReal && realSendOk) {
+          const { data: contactRow2 } = await supabase
+            .from("contacts").select("assigned_inbox_id").eq("id", item.contact_id).maybeSingle();
+          await supabase.from("communications").insert({
+            contact_id: item.contact_id,
+            channel: "email",
+            direction: "outbound",
+            message: seq ? `[${seq.subject}] ${seq.body}` : `Step ${item.sequence_step}`,
+            inbox_id: contactRow2?.assigned_inbox_id ?? item.inbox_id ?? null,
+            ai_generated: false,
+          });
+        }
+
         const nowIso = new Date().toISOString();
         await supabase.from("email_queue")
           .update({
@@ -529,11 +623,13 @@ Deno.serve(async (req) => {
         touchedCampaigns.add(item.campaign_id);
       } catch (err) {
         // Persist error on the queue row so operators can see it
+        const errMsg = (err as Error).message;
+        if (firstErrors.length < 5) firstErrors.push({ queue_id: item.id, error: errMsg });
         await supabase.from("email_queue")
           .update({
-            send_error: (err as Error).message,
+            send_error: errMsg,
             last_attempt_at: new Date().toISOString(),
-            provider_response: `SMTP failed: ${(err as Error).message}`,
+            provider_response: `SMTP failed: ${errMsg}`,
             delivery_kind: "smtp_real",
           })
           .eq("id", item.id);
@@ -572,6 +668,35 @@ Deno.serve(async (req) => {
       await supabase.rpc("recompute_campaign_metrics", { _campaign_id: cid });
     }
 
+    // Compute next due send + daily capacity remaining for the result panel.
+    let nextDueSend: string | null = null;
+    let dailyCapacityRemaining: Record<string, number> = {};
+    try {
+      const { data: nd } = await supabase
+        .from("email_queue")
+        .select("scheduled_at")
+        .in("status", ["pending", "delayed", "throttled"])
+        .order("scheduled_at", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+      nextDueSend = (nd?.scheduled_at as string | undefined) ?? null;
+
+      const inboxIds = Array.from(new Set(due.map((d) => d.inbox_id).filter(Boolean))) as string[];
+      if (inboxIds.length) {
+        const { data: inboxes } = await supabase
+          .from("inboxes")
+          .select("id,email_address,daily_send_limit,current_send_count")
+          .in("id", inboxIds);
+        for (const ib of inboxes ?? []) {
+          const remaining = Math.max(
+            0,
+            (ib.daily_send_limit as number) - (ib.current_send_count as number ?? 0),
+          );
+          dailyCapacityRemaining[ib.email_address as string] = remaining;
+        }
+      }
+    } catch { /* ignore */ }
+
     // ===== SELF-CHAIN =====
     // If we deferred items OR there is still due work in the queue, fire a
     // follow-up invocation (fire-and-forget) so the queue drains continuously
@@ -604,6 +729,10 @@ Deno.serve(async (req) => {
     return json({
       processed: due.length - deferred,
       sent, blocked, failed, delayed, deferred, chained,
+      due_found: dueFound,
+      first_5_errors: firstErrors,
+      next_due_send: nextDueSend,
+      daily_capacity_remaining: dailyCapacityRemaining,
       mode: systemMode,
       duration_ms: Date.now() - runStart,
     }, 200);
