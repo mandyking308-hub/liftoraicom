@@ -307,7 +307,7 @@ export default function ApolloRunFilteredPanel({ requiredStage, heading, subtitl
                 ))}
               </SelectContent>
             </Select>
-            <Button size="sm" onClick={stageSelected} disabled={staging || selectedIds.length === 0 || !campaignId}>
+            <Button size="sm" onClick={openStageConfirm} disabled={staging || selectedIds.length === 0 || !campaignId}>
               {staging ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : null}
               Stage selected to campaign ({selectedIds.length})
             </Button>
