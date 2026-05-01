@@ -264,7 +264,7 @@ const CampaignLiveMonitor = () => {
     "SIMULATED_PARENT_NOT_SENT",
     "SIMULATED_LEGACY_QUARANTINED",
   ]);
-  const isLegacyCleanup = (q: QueueRow) =>
+  const isLegacyCleanup = (q: QueueItem) =>
     (q.status === "blocked" || q.status === "failed") &&
     !!q.block_reason &&
     LEGACY_BLOCK_REASONS.has(q.block_reason);
