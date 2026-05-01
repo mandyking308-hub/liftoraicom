@@ -407,7 +407,10 @@ Deno.serve(async (req) => {
         }
       }
 
-      // Sanity check via shared edge function (bounded)
+      // Sanity check via shared edge function (bounded).
+      // log_attempt is FALSE here: we only log a `communications` row AFTER
+      // SMTP actually accepts the send. Otherwise a failed retry permanently
+      // blocks the contact via RECENT_COMMUNICATION_24H.
       let checkJson: any = {};
       try {
         const checkRes = await withTimeout(
@@ -419,7 +422,7 @@ Deno.serve(async (req) => {
             },
             body: JSON.stringify({
               contact_id: item.contact_id,
-              log_attempt: true,
+              log_attempt: false,
               channel: "email",
               message: seq ? `[${seq.subject}] ${seq.body}\n\n<!-- tracking_pixel:${item.id} -->` : `Step ${item.sequence_step}`,
               ai_generated: false,
