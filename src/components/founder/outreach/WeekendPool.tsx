@@ -101,6 +101,10 @@ export function WeekendPool({ onOpenRuns }: { onOpenRuns?: () => void }) {
   const [senderOk, setSenderOk] = useState(false);
   const [forbiddenOk, setForbiddenOk] = useState(false);
   const [queueBlock, setQueueBlock] = useState<string[]>([]);
+  // ---- Auto-builder state (Build pool to 100) ----
+  const [building, setBuilding] = useState(false);
+  const [buildLog, setBuildLog] = useState<string[]>([]);
+  const [buildAbort, setBuildAbort] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
