@@ -53,6 +53,9 @@ type BatchRow = {
   status: string;
   people_found: number;
   people_with_email_flag: number;
+  enrichment_attempted: number;
+  emails_returned: number;
+  contacts_imported: number;
   contacts_new: number;
   contacts_updated: number;
   qualified_count: number;
@@ -68,15 +71,27 @@ export function WeekendPool({ onOpenRuns }: { onOpenRuns?: () => void }) {
   const [pool, setPool] = useState<Stat[]>([]);
   const [coverage, setCoverage] = useState<{ daysCoverage: string; covered: boolean; detail: string } | null>(null);
   const [batches, setBatches] = useState<BatchRow[]>([]);
-  const [cumulative, setCumulative] = useState({
+  // Counted runs = completed/partial/enriching only. Audit-only runs do NOT inflate pool totals.
+  const [counted, setCounted] = useState({
     runs: 0,
-    credits: 0,
+    searchFound: 0,
+    hasEmailFlag: 0,
+    selectedForEnrichment: 0,
+    creditsSpent: 0,
+    usableEmails: 0,
+    importedTotal: 0,
+    newCreated: 0,
+    existingUpdated: 0,
     qualified: 0,
-    new: 0,
-    updated: 0,
-    found: 0,
-    emails: 0,
+    readyToStage: 0,
   });
+  const [auditOnly, setAuditOnly] = useState({
+    runs: 0,
+    searchFound: 0,
+    hasEmailFlag: 0,
+  });
+  const [staleAwaiting, setStaleAwaiting] = useState<BatchRow[]>([]);
+  const [discarding, setDiscarding] = useState(false);
   const [poolReady, setPoolReady] = useState(0);
   const [poolStaged, setPoolStaged] = useState(0);
   const [senderOk, setSenderOk] = useState(false);
@@ -209,29 +224,66 @@ export function WeekendPool({ onOpenRuns }: { onOpenRuns?: () => void }) {
     if (segId) {
       const { data: runs } = await supabase
         .from("apollo_sync_runs")
-        .select("id,started_at,status,people_found,people_with_email_flag,contacts_new,contacts_updated,qualified_count,ready_to_stage_count,apollo_credits_used")
+        .select("id,started_at,status,people_found,people_with_email_flag,enrichment_attempted,emails_returned,contacts_imported,contacts_new,contacts_updated,qualified_count,ready_to_stage_count,apollo_credits_used")
         .eq("segment_id", segId)
         .gte("started_at", todayStart)
         .order("started_at", { ascending: false });
       const list = (runs ?? []) as BatchRow[];
       setBatches(list);
-      const cum = list.reduce(
+
+      const COUNTED_STATUSES = new Set(["completed", "partial", "enriching"]);
+      const AUDIT_STATUSES = new Set(["awaiting_enrichment_approval", "search_running", "cancelled", "failed", "search_failed", "enrichment_failed"]);
+
+      const countedRuns = list.filter((r) => COUNTED_STATUSES.has(r.status));
+      const auditRuns = list.filter((r) => AUDIT_STATUSES.has(r.status));
+      const stale = list.filter((r) => r.status === "awaiting_enrichment_approval");
+      setStaleAwaiting(stale);
+
+      setCounted(countedRuns.reduce(
         (acc, r) => ({
           runs: acc.runs + 1,
-          credits: acc.credits + Number(r.apollo_credits_used ?? 0),
+          searchFound: acc.searchFound + Number(r.people_found ?? 0),
+          hasEmailFlag: acc.hasEmailFlag + Number(r.people_with_email_flag ?? 0),
+          selectedForEnrichment: acc.selectedForEnrichment + Number(r.enrichment_attempted ?? 0),
+          creditsSpent: acc.creditsSpent + Number(r.apollo_credits_used ?? r.enrichment_attempted ?? 0),
+          usableEmails: acc.usableEmails + Number(r.emails_returned ?? 0),
+          importedTotal: acc.importedTotal + Number(r.contacts_imported ?? 0),
+          newCreated: acc.newCreated + Number(r.contacts_new ?? 0),
+          existingUpdated: acc.existingUpdated + Number(r.contacts_updated ?? 0),
           qualified: acc.qualified + Number(r.qualified_count ?? 0),
-          new: acc.new + Number(r.contacts_new ?? 0),
-          updated: acc.updated + Number(r.contacts_updated ?? 0),
-          found: acc.found + Number(r.people_found ?? 0),
-          emails: acc.emails + Number(r.people_with_email_flag ?? 0),
+          readyToStage: acc.readyToStage + Number(r.ready_to_stage_count ?? 0),
         }),
-        { runs: 0, credits: 0, qualified: 0, new: 0, updated: 0, found: 0, emails: 0 },
-      );
-      setCumulative(cum);
+        { runs: 0, searchFound: 0, hasEmailFlag: 0, selectedForEnrichment: 0, creditsSpent: 0, usableEmails: 0, importedTotal: 0, newCreated: 0, existingUpdated: 0, qualified: 0, readyToStage: 0 },
+      ));
+      setAuditOnly(auditRuns.reduce(
+        (acc, r) => ({
+          runs: acc.runs + 1,
+          searchFound: acc.searchFound + Number(r.people_found ?? 0),
+          hasEmailFlag: acc.hasEmailFlag + Number(r.people_with_email_flag ?? 0),
+        }),
+        { runs: 0, searchFound: 0, hasEmailFlag: 0 },
+      ));
     }
 
     setLoading(false);
   }, []);
+
+  async function discardStaleAwaiting() {
+    if (staleAwaiting.length === 0) return;
+    if (!confirm(`Discard ${staleAwaiting.length} unapproved awaiting search run(s)? They will be marked cancelled and removed from pool totals. No Apollo credits are spent.`)) return;
+    setDiscarding(true);
+    const { error } = await supabase
+      .from("apollo_sync_runs")
+      .update({ status: "cancelled", completed_at: new Date().toISOString() })
+      .in("id", staleAwaiting.map((r) => r.id));
+    setDiscarding(false);
+    if (error) {
+      toast({ title: "Discard failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Stale awaiting runs discarded", description: `${staleAwaiting.length} unapproved search run(s) marked cancelled.` });
+    void load();
+  }
 
   useEffect(() => { void load(); }, [load]);
 
@@ -324,32 +376,61 @@ export function WeekendPool({ onOpenRuns }: { onOpenRuns?: () => void }) {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <StatGrid
-            stats={[
-              { label: "Existing staged contacts", value: poolStaged, tone: poolStaged > 0 ? "info" : undefined },
-              { label: "Ready to stage", value: poolReady, tone: poolReady > 0 ? "info" : undefined },
-              { label: "New batch contacts found (today)", value: cumulative.found },
-              { label: "New batch enriched (new+updated)", value: cumulative.new + cumulative.updated },
-              { label: "New batch emails returned", value: cumulative.emails },
-              { label: "New batch qualified", value: cumulative.qualified, tone: "ok" },
-              { label: "Total pool built today", value: poolReady + poolStaged, tone: "info" },
-              { label: "Apollo credits spent today", value: cumulative.credits },
-              { label: "Coverage until Tuesday", value: coverage?.daysCoverage ?? "n/a", tone: coverage?.covered ? "ok" : "warn" },
-              {
-                label: "Active Step 1 pending",
-                value: pool.find((p) => p.label === "Pending Step 1 sends")?.value ?? 0,
-              },
-              {
-                label: "Follow-ups scheduled",
-                value: pool.find((p) => p.label === "Follow-ups scheduled")?.value ?? 0,
-              },
-              {
-                label: "Queue integrity",
-                value: queueBlock.length === 0 ? "Clean" : `${queueBlock.length} issue(s)`,
-                tone: queueBlock.length === 0 ? "ok" : "bad",
-              },
-            ]}
-          />
+          <div className="rounded-md border border-emerald-500/30 bg-emerald-500/5 p-3">
+            <div className="mb-2 text-sm font-semibold text-foreground">
+              A. Counted toward pool — completed / enriched runs ({counted.runs})
+            </div>
+            <StatGrid
+              stats={[
+                { label: "Existing staged contacts", value: poolStaged, tone: poolStaged > 0 ? "info" : undefined },
+                { label: "Ready to stage", value: poolReady, tone: poolReady > 0 ? "info" : undefined },
+                { label: "1. Search candidates found", value: counted.searchFound },
+                { label: "2. Has-email flag candidates", value: counted.hasEmailFlag },
+                { label: "3. Selected for enrichment", value: counted.selectedForEnrichment },
+                { label: "4. Apollo credits spent today", value: counted.creditsSpent, tone: counted.creditsSpent > 0 ? "info" : undefined },
+                { label: "5. Usable emails returned", value: counted.usableEmails, tone: "ok" },
+                { label: "6. Contacts saved to CRM", value: counted.importedTotal },
+                { label: "7. New contacts created", value: counted.newCreated },
+                { label: "8. Existing contacts updated", value: counted.existingUpdated },
+                { label: "9. Qualified contacts", value: counted.qualified, tone: "ok" },
+                { label: "10. Ready to stage (this run)", value: counted.readyToStage },
+                { label: "Total pool built today", value: poolReady + poolStaged, tone: "info" },
+                { label: "Coverage until Tuesday", value: coverage?.daysCoverage ?? "n/a", tone: coverage?.covered ? "ok" : "warn" },
+                {
+                  label: "Active Step 1 pending",
+                  value: pool.find((p) => p.label === "Pending Step 1 sends")?.value ?? 0,
+                },
+                {
+                  label: "Follow-ups scheduled",
+                  value: pool.find((p) => p.label === "Follow-ups scheduled")?.value ?? 0,
+                },
+                {
+                  label: "Queue integrity",
+                  value: queueBlock.length === 0 ? "Clean" : `${queueBlock.length} issue(s)`,
+                  tone: queueBlock.length === 0 ? "ok" : "bad",
+                },
+              ]}
+            />
+          </div>
+
+          <div className="rounded-md border border-amber-500/40 bg-amber-500/5 p-3">
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+              <div className="text-sm font-semibold text-foreground">
+                B. Audit only — awaiting / cancelled / failed search previews ({auditOnly.runs})
+              </div>
+              {staleAwaiting.length > 0 && (
+                <Button size="sm" variant="outline" onClick={discardStaleAwaiting} disabled={discarding}>
+                  {discarding ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : null}
+                  Discard {staleAwaiting.length} stale awaiting run{staleAwaiting.length === 1 ? "" : "s"}
+                </Button>
+              )}
+            </div>
+            <div className="text-xs text-muted-foreground">
+              These search-preview runs were never approved for enrichment. They do not count toward the weekend pool or credit spend.
+              Found across audit runs: {auditOnly.searchFound} candidates · {auditOnly.hasEmailFlag} with email flag.
+            </div>
+          </div>
+
           <div className="rounded-md border bg-muted/30 p-3 text-xs">
             <div className="font-medium">
               Pool progress: <strong>{poolReady + poolStaged}</strong> / {TARGET_POOL} approved contacts
@@ -409,13 +490,15 @@ export function WeekendPool({ onOpenRuns }: { onOpenRuns?: () => void }) {
         <CardContent className="space-y-3">
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-7">
             {[
-              { label: "Runs today", value: cumulative.runs },
-              { label: "Found", value: cumulative.found },
-              { label: "Emails returned", value: cumulative.emails },
-              { label: "New contacts", value: cumulative.new },
-              { label: "Updated", value: cumulative.updated },
-              { label: "Qualified pool today", value: cumulative.qualified },
-              { label: "Credits spent today", value: cumulative.credits },
+              { label: "Counted runs", value: counted.runs },
+              { label: "Search candidates found", value: counted.searchFound },
+              { label: "Selected for enrichment", value: counted.selectedForEnrichment },
+              { label: "Usable emails returned", value: counted.usableEmails },
+              { label: "New contacts", value: counted.newCreated },
+              { label: "Updated contacts", value: counted.existingUpdated },
+              { label: "Qualified", value: counted.qualified },
+              { label: "Credits spent today", value: counted.creditsSpent },
+              { label: "Audit-only runs", value: auditOnly.runs },
             ].map((s) => (
               <div key={s.label} className="rounded-md border p-3 text-sm">
                 <div className="text-xs text-muted-foreground">{s.label}</div>

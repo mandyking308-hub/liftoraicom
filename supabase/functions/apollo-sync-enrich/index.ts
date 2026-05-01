@@ -367,6 +367,7 @@ Deno.serve(async (req) => {
       contacts_skipped_no_email: newSkipped,
       contacts_duplicate: newDup,
       contacts_suppressed: newSup,
+      apollo_credits_used: newAttempted,
       errors: [...(Array.isArray(run.errors) ? run.errors : []), ...errors],
       completed_at: isPartial ? null : new Date().toISOString(),
     }).eq("id", run.id);
