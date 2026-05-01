@@ -502,7 +502,7 @@ const CampaignLiveMonitor = () => {
             <Select value={queueFilter} onValueChange={setQueueFilter}>
               <SelectTrigger className="w-36 h-8"><SelectValue /></SelectTrigger>
               <SelectContent>
-                {["ALL", "pending", "sent", "failed", "blocked", "delayed"].map((s) => (
+                {["ALL", "pending", "sent_real", "sent_sim", "blocked", "delayed", "failed"].map((s) => (
                   <SelectItem key={s} value={s}>{s}</SelectItem>
                 ))}
               </SelectContent>
@@ -531,7 +531,19 @@ const CampaignLiveMonitor = () => {
                       </td>
                       <td className="p-2">{q.sequence_step}</td>
                       <td className="p-2 text-xs">{fmtTime(q.scheduled_at)}</td>
-                      <td className="p-2"><Badge variant={q.status === "sent" ? "default" : (q.status === "failed" || q.status === "blocked") ? "destructive" : "outline"}>{q.status}</Badge></td>
+                     <td className="p-2">
+                       {q.status === "sent" ? (
+                         q.delivery_kind === "smtp_real" && q.smtp_accepted_at ? (
+                           <Badge variant="default">sent (real)</Badge>
+                         ) : (
+                           <Badge variant="destructive">sent (sim)</Badge>
+                         )
+                       ) : (q.status === "failed" || q.status === "blocked") ? (
+                         <Badge variant="destructive">{q.status}</Badge>
+                       ) : (
+                         <Badge variant="outline">{q.status}</Badge>
+                       )}
+                     </td>
                       <td className="p-2 text-xs text-muted-foreground">{q.block_reason ?? "—"}</td>
                     </tr>
                   ))}
