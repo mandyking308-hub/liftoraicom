@@ -1016,6 +1016,74 @@ function Stat({ label, value }: { label: string; value: number }) {
   );
 }
 
+function RunCard({
+  run,
+  diag,
+  fit,
+  showFitWarning,
+  busy,
+  onCancel,
+  onApprove,
+  children,
+}: {
+  run: Run;
+  diag: RunDiagnostics | null;
+  fit: string | undefined;
+  showFitWarning: boolean;
+  busy: string | null;
+  onCancel: () => void;
+  onApprove: () => void;
+  children: React.ReactNode;
+}) {
+  const [previewCounts, setPreviewCounts] = useState<{ total: number; toEnrich: number; matched: number; unmatched: number } | null>(null);
+  const isAwaiting = run.status === "awaiting_enrichment_approval";
+  const previewReady = previewCounts !== null && previewCounts.total > 0;
+  const credits = previewCounts?.toEnrich ?? run.people_with_email_flag;
+  const approveDisabled = busy === `enrich-${run.id}` || fit === "poor" || !previewReady || credits === 0;
+
+  return (
+    <div className="space-y-2 rounded-md border p-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="flex items-center gap-2 font-medium">
+            {run.business_name}
+            {fit && <Badge variant={fitBadgeVariant(fit)}>fit: {fit}</Badge>}
+          </div>
+          <div className="text-xs text-muted-foreground">
+            {new Date(run.started_at).toLocaleString()} • <Badge variant="outline">{run.status}</Badge>
+            {diag?.search_mode && <> • mode: <code>{diag.search_mode}</code></>}
+            {diag?.saved_list_id && <> • list: <code>{diag.saved_list_id}</code></>}
+          </div>
+        </div>
+        {isAwaiting && (
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={onCancel}>
+              <Trash2 className="mr-1 h-3 w-3" /> Discard
+            </Button>
+          </div>
+        )}
+      </div>
+      {children}
+      {isAwaiting && (
+        <div className="space-y-2 border-t pt-3">
+          <CandidatePreview runId={run.id} onCountsReady={setPreviewCounts} />
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-xs text-muted-foreground">
+              {previewReady
+                ? "Review the candidates above before spending Apollo credits."
+                : "Candidate preview required before enrichment."}
+            </p>
+            <Button size="sm" onClick={onApprove} disabled={approveDisabled}>
+              {busy === `enrich-${run.id}` ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : null}
+              Approve enrichment ({credits} credits)
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function EditSegmentDialog({
   segment,
   onSave,
