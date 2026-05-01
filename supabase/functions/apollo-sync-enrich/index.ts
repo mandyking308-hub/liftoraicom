@@ -10,7 +10,7 @@ const APOLLO_BASE = "https://api.apollo.io/api/v1";
 const HARD_CAP = 25;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-interface Body { run_id: string; }
+interface Body { run_id: string; force?: boolean; }
 
 function json(b: unknown, status: number) {
   return new Response(JSON.stringify(b), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -69,8 +69,24 @@ Deno.serve(async (req) => {
       .eq("id", body.run_id)
       .maybeSingle();
     if (runErr || !run) return json({ error: "run_not_found" }, 404);
+    if (run.status === "cancelled") {
+      return json({ error: "run_cancelled", detail: "This sync run was cancelled before enrichment." }, 412);
+    }
     if (!["awaiting_enrichment_approval", "search_running"].includes(run.status)) {
       return json({ error: "run_not_in_enrichable_state", state: run.status }, 412);
+    }
+
+    // Block enrichment when the search produced a poor-fit batch unless the founder forces it.
+    if (!body.force && Array.isArray(run.errors)) {
+      const hasPoorFitFlag = (run.errors as unknown[]).some((entry) =>
+        typeof entry === "string" && entry.includes("segment_fit_poor_blocking_enrichment"),
+      );
+      if (hasPoorFitFlag) {
+        return json({
+          error: "segment_fit_poor",
+          detail: "Search results do not match the segment taxonomy. Cancel this run and fix the segment, or re-run with force=true.",
+        }, 412);
+      }
     }
 
     const { data: conn } = await supabase

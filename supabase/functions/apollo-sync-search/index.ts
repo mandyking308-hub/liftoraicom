@@ -9,6 +9,35 @@ const corsHeaders = {
 const APOLLO_BASE = "https://api.apollo.io/api/v1";
 const HARD_CAP = 25;
 
+// Music-discovery taxonomy used for segment-fit scoring on Neon Candy and similar music targets.
+const MUSIC_TARGET_KEYWORDS = [
+  "playlist curator",
+  "music curator",
+  "independent curator",
+  "music programmer",
+  "music editor",
+  "editorial curator",
+  "music discovery",
+  "music blogger",
+  "music influencer",
+  "music journalist",
+  "music supervisor",
+  "a&r",
+  "dj",
+  "radio",
+  "label manager",
+  "music marketing",
+  "dance creator",
+  "reaction creator",
+  "ai music",
+];
+
+function scoreFit(p: any): { match: boolean; matched_terms: string[] } {
+  const haystack = `${p.title ?? ""} ${p.headline ?? ""} ${p.organization?.name ?? ""} ${p.organization?.industry ?? ""}`.toLowerCase();
+  const matched = MUSIC_TARGET_KEYWORDS.filter((kw) => haystack.includes(kw));
+  return { match: matched.length > 0, matched_terms: matched };
+}
+
 interface Body {
   segment_id: string;
 }
@@ -111,6 +140,8 @@ Deno.serve(async (req) => {
     let emailStatusVerified = 0;
     let emailStatusUnavailable = 0;
     const sampleTitles: Array<{ title: string | null; company: string | null }> = [];
+    let fitMatched = 0;
+    const detectedTags = new Set<string>();
 
     // Insert apollo_leads (idempotent on (run_id, apollo_person_id))
     const leadRows = people.slice(0, cap).map((p) => {
@@ -130,6 +161,9 @@ Deno.serve(async (req) => {
         (typeof emailStatus === "string" && emailStatus !== "no_email" && emailStatus.length > 0);
 
       if (hasEmail) withEmailFlag += 1;
+      const fit = scoreFit(p);
+      if (fit.match) fitMatched += 1;
+      fit.matched_terms.forEach((t) => detectedTags.add(t));
       if (sampleTitles.length < 5) {
         sampleTitles.push({
           title: p.title ?? null,
@@ -159,8 +193,16 @@ Deno.serve(async (req) => {
       if (insErr) errors.push(`lead_insert: ${insErr.message}`);
     }
 
+    // Fit scoring: ratio of music-target matches over leads with email flag (or total)
+    const denom = leadRows.length || 1;
+    const fitRatio = fitMatched / denom;
+    const segmentFit: "good" | "weak" | "poor" =
+      fitRatio >= 0.5 ? "good" : fitRatio >= 0.2 ? "weak" : "poor";
+
     const enrichmentSkipReason = withEmailFlag === 0
       ? "no_candidates_with_email_flag"
+      : segmentFit === "poor"
+      ? "segment_fit_poor_blocking_enrichment"
       : null;
 
     const diagnostics = {
@@ -171,9 +213,14 @@ Deno.serve(async (req) => {
       email_status_verified: emailStatusVerified,
       email_status_unavailable: emailStatusUnavailable,
       sample_titles: sampleTitles,
+      detected_tags: Array.from(detectedTags),
+      fit_matched: fitMatched,
+      fit_ratio: Number(fitRatio.toFixed(2)),
+      segment_fit: segmentFit,
       enrichment_skip_reason: enrichmentSkipReason,
       search_filter_contact_email_status: searchBody["contact_email_status"] ?? null,
       search_mode: segment.mode,
+      saved_list_id: segment.saved_list_id ?? null,
     };
 
     await supabase.from("apollo_sync_runs").update({

@@ -10,6 +10,25 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { toast } from "@/hooks/use-toast";
 import FounderLayout from "@/components/founder/FounderLayout";
 import { AlertTriangle, CheckCircle2, KeyRound, Loader2, Play, RefreshCw, ShieldAlert, Trash2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+const NEONCANDY_MONTH1_CRITERIA = {
+  person_titles: [
+    "DJ",
+    "music curator",
+    "playlist curator",
+    "music editor",
+    "music programmer",
+    "music blogger",
+    "music supervisor",
+    "A&R",
+    "music marketing",
+    "label manager",
+  ],
+  contact_email_status: ["verified"],
+};
 
 type Connection = {
   id: string;
@@ -56,6 +75,46 @@ type Run = {
   started_at: string;
   completed_at: string | null;
 };
+
+type RunDiagnostics = {
+  raw_people_found?: number;
+  has_email_true?: number;
+  has_email_false?: number;
+  has_email_missing?: number;
+  email_status_verified?: number;
+  email_status_unavailable?: number;
+  sample_titles?: Array<{ title: string | null; company: string | null }>;
+  detected_tags?: string[];
+  fit_matched?: number;
+  fit_ratio?: number;
+  segment_fit?: "good" | "weak" | "poor";
+  enrichment_skip_reason?: string | null;
+  search_filter_contact_email_status?: string[] | null;
+  search_mode?: string;
+  saved_list_id?: string | null;
+};
+
+function extractDiagnostics(errors: unknown): RunDiagnostics | null {
+  if (!Array.isArray(errors)) return null;
+  for (const entry of errors) {
+    if (typeof entry !== "string") continue;
+    const trimmed = entry.trim();
+    if (!trimmed.startsWith("{")) continue;
+    try {
+      return JSON.parse(trimmed) as RunDiagnostics;
+    } catch {
+      // ignore
+    }
+  }
+  return null;
+}
+
+function fitBadgeVariant(fit?: string): "default" | "secondary" | "destructive" | "outline" {
+  if (fit === "good") return "default";
+  if (fit === "weak") return "secondary";
+  if (fit === "poor") return "destructive";
+  return "outline";
+}
 
 type DiagnosticCategory =
   | "ok"
@@ -328,12 +387,55 @@ export default function ApolloIntegration() {
     const { data, error } = await supabase.functions.invoke("apollo-sync-enrich", { body: { run_id: runId } });
     setBusy(null);
     if (error) {
-      toast({ title: "Enrichment failed", description: error.message, variant: "destructive" });
+      const message = error.message || "Enrichment failed";
+      const isPoorFit = message.includes("segment_fit_poor") || message.toLowerCase().includes("does not match");
+      if (isPoorFit && confirm("Apollo blocked enrichment because the search results do not match the segment taxonomy. Force enrichment anyway and spend credits?")) {
+        setBusy(`enrich-${runId}`);
+        const retry = await supabase.functions.invoke("apollo-sync-enrich", { body: { run_id: runId, force: true } });
+        setBusy(null);
+        if (retry.error) {
+          toast({ title: "Enrichment failed", description: retry.error.message, variant: "destructive" });
+          return;
+        }
+        const r = (retry.data as EnrichmentRunResponse) ?? {};
+        toast({ title: "Enrichment complete (forced)", description: `Imported ${r.imported ?? 0} • emails ${r.emails_returned ?? 0}` });
+        loadAll();
+        return;
+      }
+      toast({ title: "Enrichment failed", description: message, variant: "destructive" });
       return;
     }
     const result = (data as EnrichmentRunResponse) ?? {};
     toast({ title: "Enrichment complete", description: `Imported ${result.imported ?? 0} • emails returned ${result.emails_returned ?? 0} • skipped no-email ${result.skipped_no_email ?? 0} • duplicates ${result.duplicate ?? 0} • suppressed ${result.suppressed ?? 0}` });
     loadAll();
+  }
+
+  async function cancelRun(runId: string) {
+    if (!confirm("Discard this sync run? Leads will remain in the table for review but no enrichment credits will be spent.")) return;
+    const { error } = await supabase
+      .from("apollo_sync_runs")
+      .update({ status: "cancelled", completed_at: new Date().toISOString() })
+      .eq("id", runId);
+    if (error) {
+      toast({ title: "Cancel failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Sync run cancelled" });
+    loadAll();
+  }
+
+  async function saveSegmentEdits(segment: Segment, updates: Record<string, unknown>) {
+    const { error } = await supabase
+      .from("apollo_sync_segments")
+      .update(updates as never)
+      .eq("id", segment.id);
+    if (error) {
+      toast({ title: "Update failed", description: error.message, variant: "destructive" });
+      return false;
+    }
+    toast({ title: "Segment updated" });
+    loadAll();
+    return true;
   }
 
   const selectedDiagnostics = diagnosticsByBusiness[selectedBusiness];
@@ -511,15 +613,28 @@ export default function ApolloIntegration() {
                             <TableCell>{segment.business_name}</TableCell>
                             <TableCell className="font-medium">{segment.segment_name}</TableCell>
                             <TableCell><Badge variant="outline">{segment.mode}</Badge></TableCell>
-                            <TableCell><code className="text-xs">{segment.saved_list_id ?? "—"}</code></TableCell>
+                            <TableCell>
+                              {segment.mode === "saved_list" ? (
+                                <code className="text-xs">{segment.saved_list_id ?? "⚠ none — segment will return generic results"}</code>
+                              ) : (
+                                <code className="text-xs break-all">
+                                  {Object.keys(segment.search_criteria ?? {}).length === 0
+                                    ? "⚠ empty criteria"
+                                    : `${Object.keys(segment.search_criteria).length} filter(s)`}
+                                </code>
+                              )}
+                            </TableCell>
                             <TableCell>{segment.max_contacts_per_run}</TableCell>
                             <TableCell>{segment.hold_for_approval ? "✓" : "—"}</TableCell>
                             <TableCell>
                               <div className="space-y-2">
-                                <Button size="sm" onClick={() => runSearch(segment.id)} disabled={!canRun || busy === `run-${segment.id}`}>
-                                  {busy === `run-${segment.id}` ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <Play className="mr-1 h-3 w-3" />}
-                                  Run search
-                                </Button>
+                                <div className="flex flex-wrap gap-2">
+                                  <Button size="sm" onClick={() => runSearch(segment.id)} disabled={!canRun || busy === `run-${segment.id}`}>
+                                    {busy === `run-${segment.id}` ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <Play className="mr-1 h-3 w-3" />}
+                                    Run search
+                                  </Button>
+                                  <EditSegmentDialog segment={segment} onSave={(u) => saveSegmentEdits(segment, u)} />
+                                </div>
                                 {!canRun && (
                                   <div className="flex items-start gap-2 text-xs text-muted-foreground">
                                     <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
@@ -546,22 +661,53 @@ export default function ApolloIntegration() {
                   <p className="text-sm text-muted-foreground">No syncs run yet.</p>
                 ) : (
                   <div className="space-y-3">
-                    {runs.map((run) => (
+                    {runs.map((run) => {
+                      const diag = extractDiagnostics(run.errors);
+                      const fit = diag?.segment_fit;
+                      const showFitWarning = run.status === "awaiting_enrichment_approval" && fit && fit !== "good";
+                      return (
                       <div key={run.id} className="space-y-2 rounded-md border p-4">
                         <div className="flex items-center justify-between">
                           <div>
-                            <div className="font-medium">{run.business_name}</div>
+                            <div className="flex items-center gap-2 font-medium">
+                              {run.business_name}
+                              {fit && <Badge variant={fitBadgeVariant(fit)}>fit: {fit}</Badge>}
+                            </div>
                             <div className="text-xs text-muted-foreground">
                               {new Date(run.started_at).toLocaleString()} • <Badge variant="outline">{run.status}</Badge>
+                              {diag?.search_mode && <> • mode: <code>{diag.search_mode}</code></>}
+                              {diag?.saved_list_id && <> • list: <code>{diag.saved_list_id}</code></>}
                             </div>
                           </div>
                           {run.status === "awaiting_enrichment_approval" && (
-                            <Button size="sm" onClick={() => approveEnrichment(run.id)} disabled={busy === `enrich-${run.id}`}>
-                              {busy === `enrich-${run.id}` ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : null}
-                              Approve enrichment ({run.people_with_email_flag} credits)
-                            </Button>
+                            <div className="flex gap-2">
+                              <Button size="sm" variant="outline" onClick={() => cancelRun(run.id)}>
+                                <Trash2 className="mr-1 h-3 w-3" /> Discard
+                              </Button>
+                              <Button size="sm" onClick={() => approveEnrichment(run.id)} disabled={busy === `enrich-${run.id}` || fit === "poor"}>
+                                {busy === `enrich-${run.id}` ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : null}
+                                Approve enrichment ({run.people_with_email_flag} credits)
+                              </Button>
+                            </div>
                           )}
                         </div>
+                        {showFitWarning && (
+                          <div className="flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm">
+                            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+                            <div>
+                              <div className="font-medium">
+                                {fit === "poor"
+                                  ? "This Apollo source does not match the segment target. Discard and fix the segment before enriching."
+                                  : "This Apollo source may not match the segment target. Review samples below before enriching."}
+                              </div>
+                              {fit === "poor" && (
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                  Enrichment is blocked. Edit the segment (set the correct saved-list ID or switch to criteria search), then re-run.
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        )}
                         <div className="grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
                           <Stat label="Found" value={run.people_found} />
                           <Stat label="Has email flag" value={run.people_with_email_flag} />
@@ -576,6 +722,35 @@ export default function ApolloIntegration() {
                           <Stat label="Not qualified" value={run.not_qualified_count} />
                           <Stat label="Needs review" value={run.needs_review_count} />
                         </div>
+                        {diag && (
+                          <div className="rounded-md border bg-muted/30 p-3 text-xs space-y-2">
+                            <div className="font-medium text-sm">Segment-fit diagnostics</div>
+                            <div className="grid gap-2 sm:grid-cols-2">
+                              <div>
+                                <div className="text-muted-foreground">Fit ratio</div>
+                                <div>{diag.fit_matched ?? 0} / {diag.raw_people_found ?? 0} ({Math.round(((diag.fit_ratio ?? 0) * 100))}%)</div>
+                              </div>
+                              <div>
+                                <div className="text-muted-foreground">Detected tags</div>
+                                <div className="flex flex-wrap gap-1">
+                                  {(diag.detected_tags && diag.detected_tags.length > 0)
+                                    ? diag.detected_tags.map((t) => <Badge key={t} variant="secondary">{t}</Badge>)
+                                    : <span className="text-muted-foreground">none</span>}
+                                </div>
+                              </div>
+                            </div>
+                            {diag.sample_titles && diag.sample_titles.length > 0 && (
+                              <div>
+                                <div className="text-muted-foreground">Sample (first 5)</div>
+                                <ul className="mt-1 list-disc pl-5">
+                                  {diag.sample_titles.map((s, idx) => (
+                                    <li key={idx}>{s.title ?? "—"} <span className="text-muted-foreground">@ {s.company ?? "—"}</span></li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+                        )}
                         {Array.isArray(run.errors) && run.errors.length > 0 && (
                           <details className="text-xs">
                             <summary className="cursor-pointer text-destructive">{run.errors.length} error(s)</summary>
@@ -583,7 +758,8 @@ export default function ApolloIntegration() {
                           </details>
                         )}
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </CardContent>
@@ -601,5 +777,103 @@ function Stat({ label, value }: { label: string; value: number }) {
       <div className="text-xs text-muted-foreground">{label}</div>
       <div className="text-lg font-semibold">{value}</div>
     </div>
+  );
+}
+
+function EditSegmentDialog({
+  segment,
+  onSave,
+}: {
+  segment: Segment;
+  onSave: (updates: Record<string, unknown>) => Promise<boolean>;
+}) {
+  const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState<Segment["mode"]>(segment.mode);
+  const [savedListId, setSavedListId] = useState(segment.saved_list_id ?? "");
+  const [criteriaText, setCriteriaText] = useState(JSON.stringify(segment.search_criteria ?? {}, null, 2));
+  const [saving, setSaving] = useState(false);
+
+  function applyMusicPreset() {
+    setMode("people_search");
+    setCriteriaText(JSON.stringify(NEONCANDY_MONTH1_CRITERIA, null, 2));
+  }
+
+  async function handleSave() {
+    let parsedCriteria: Record<string, unknown> = {};
+    if (mode === "people_search") {
+      try {
+        parsedCriteria = JSON.parse(criteriaText || "{}");
+      } catch {
+        toast({ title: "Invalid JSON", description: "Search criteria must be valid JSON.", variant: "destructive" });
+        return;
+      }
+    }
+    setSaving(true);
+    const ok = await onSave({
+      mode,
+      saved_list_id: mode === "saved_list" ? (savedListId.trim() || null) : null,
+      search_criteria: mode === "people_search" ? parsedCriteria : {},
+    });
+    setSaving(false);
+    if (ok) setOpen(false);
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="outline">Edit</Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-xl">
+        <DialogHeader>
+          <DialogTitle>Edit segment — {segment.segment_name}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3">
+          <div>
+            <Label>Mode</Label>
+            <Select value={mode} onValueChange={(v) => setMode(v as Segment["mode"])}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="saved_list">Apollo saved list (label_id)</SelectItem>
+                <SelectItem value="people_search">Criteria search</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          {mode === "saved_list" ? (
+            <div>
+              <Label>Saved list ID (label_id)</Label>
+              <Input value={savedListId} onChange={(e) => setSavedListId(e.target.value)} placeholder="label_xxx" />
+              <p className="mt-1 text-xs text-muted-foreground">
+                Find this in Apollo → People → Lists → list URL ends with the label_id.
+              </p>
+            </div>
+          ) : (
+            <div>
+              <div className="flex items-center justify-between">
+                <Label>Search criteria (JSON)</Label>
+                <Button type="button" variant="ghost" size="sm" onClick={applyMusicPreset}>
+                  Use NeonCandy Month 1 preset
+                </Button>
+              </div>
+              <Textarea
+                rows={10}
+                className="font-mono text-xs"
+                value={criteriaText}
+                onChange={(e) => setCriteriaText(e.target.value)}
+              />
+              <p className="mt-1 text-xs text-muted-foreground">
+                Apollo people-search payload. The sync always enforces contact_email_status = verified.
+              </p>
+            </div>
+          )}
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
+          <Button onClick={handleSave} disabled={saving}>
+            {saving ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : null}
+            Save
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
