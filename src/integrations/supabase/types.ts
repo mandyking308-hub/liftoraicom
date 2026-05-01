@@ -3232,6 +3232,8 @@ export type Database = {
           monitored_mailbox: string | null
           paused_reason: string
           performance_score: number
+          provider_blocked_reason: string | null
+          provider_blocked_until: string | null
           provider_type: Database["public"]["Enums"]["inbox_provider_type"]
           reply_rate_per_inbox: number
           reply_to_email: string | null
@@ -3278,6 +3280,8 @@ export type Database = {
           monitored_mailbox?: string | null
           paused_reason?: string
           performance_score?: number
+          provider_blocked_reason?: string | null
+          provider_blocked_until?: string | null
           provider_type?: Database["public"]["Enums"]["inbox_provider_type"]
           reply_rate_per_inbox?: number
           reply_to_email?: string | null
@@ -3324,6 +3328,8 @@ export type Database = {
           monitored_mailbox?: string | null
           paused_reason?: string
           performance_score?: number
+          provider_blocked_reason?: string | null
+          provider_blocked_until?: string | null
           provider_type?: Database["public"]["Enums"]["inbox_provider_type"]
           reply_rate_per_inbox?: number
           reply_to_email?: string | null
@@ -7897,6 +7903,10 @@ export type Database = {
         Returns: boolean
       }
       inbox_is_live_ready: { Args: { _inbox_id: string }; Returns: boolean }
+      inbox_set_provider_blocked: {
+        Args: { _blocked_until: string; _inbox_id: string; _reason: string }
+        Returns: undefined
+      }
       inbox_warmup_limit: { Args: { _inbox_id: string }; Returns: number }
       is_feature_enabled: {
         Args: { _business_name?: string; _feature_name: string }
