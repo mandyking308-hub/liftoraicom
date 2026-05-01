@@ -362,6 +362,70 @@ export function NeonCandyMonitor() {
         <CardContent><StatGrid stats={today} /></CardContent>
       </Card>
 
+      {queueBreakdown && (
+        <Card className={queueWarn.length ? "border-amber-500/40" : ""}>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              {queueWarn.length ? <AlertTriangle className="h-4 w-4 text-amber-500" /> : <CheckCircle2 className="h-4 w-4 text-emerald-500" />}
+              Email queue breakdown — {CAMPAIGN_NAME}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <StatGrid stats={queueBreakdown} />
+            <div className="rounded-md border bg-muted/30 p-3 text-sm">{queueExplain}</div>
+            {queueWarn.length > 0 && (
+              <div className="rounded-md border border-amber-500/40 bg-amber-500/5 p-3 text-sm">
+                <div className="mb-1 font-medium text-amber-700">Hold staging until resolved:</div>
+                <ul className="ml-5 list-disc text-xs">
+                  {queueWarn.map((w) => <li key={w}>{w}</li>)}
+                </ul>
+              </div>
+            )}
+            {queueRows.length > 0 && (
+              <details className="rounded-md border bg-muted/20 p-2 text-sm">
+                <summary className="cursor-pointer select-none px-1 py-0.5 font-medium">
+                  Show all {queueRows.length} queue row(s) with contact + step + schedule
+                </summary>
+                <div className="mt-2 max-h-72 overflow-auto">
+                  <table className="w-full text-xs">
+                    <thead className="sticky top-0 bg-muted/60 text-left uppercase">
+                      <tr>
+                        <th className="p-1.5">Email</th>
+                        <th className="p-1.5">Step</th>
+                        <th className="p-1.5">Status</th>
+                        <th className="p-1.5">Delivery</th>
+                        <th className="p-1.5">Scheduled</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {queueRows.map((r, i) => (
+                        <tr key={i} className="border-t">
+                          <td className="p-1.5">{r.email}</td>
+                          <td className="p-1.5">{r.sequence_step}</td>
+                          <td className="p-1.5">
+                            <Badge variant={r.status === "sent" ? "default" : r.status === "failed" ? "destructive" : "outline"}>
+                              {r.status}
+                            </Badge>
+                          </td>
+                          <td className="p-1.5">
+                            {r.delivery_kind === "simulated" ? (
+                              <Badge variant="destructive">simulated</Badge>
+                            ) : (
+                              <span className="text-muted-foreground">{r.delivery_kind ?? "real"}</span>
+                            )}
+                          </td>
+                          <td className="p-1.5">{r.scheduled_utc ?? "—"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </details>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Weekend / Monday review — last 7 days</CardTitle>
