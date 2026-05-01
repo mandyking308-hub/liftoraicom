@@ -65,6 +65,9 @@ type BatchRow = {
   qualified_count: number;
   ready_to_stage_count: number;
   apollo_credits_used: number | null;
+  page_fetched?: number | null;
+  unseen_in_batch?: number | null;
+  skipped_already_seen?: number | null;
 };
 
 export function WeekendPool({ onOpenRuns }: { onOpenRuns?: () => void }) {
