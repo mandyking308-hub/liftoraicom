@@ -821,6 +821,10 @@ Deno.serve(async (req) => {
       first_5_errors: firstErrors,
       next_due_send: nextDueSend,
       daily_capacity_remaining: dailyCapacityRemaining,
+      provider_limit_reached: providerLimitReachedAny,
+      provider_blocked_inboxes: Array.from(providerBlockedInboxes.entries()).map(
+        ([inbox_id, v]) => ({ inbox_id, blocked_until: v.until, reason: v.reason }),
+      ),
       mode: systemMode,
       duration_ms: Date.now() - runStart,
     }, 200);
