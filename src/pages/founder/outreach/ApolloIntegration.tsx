@@ -522,6 +522,7 @@ type Segment = {
 
 type Run = {
   id: string;
+  segment_id: string;
   business_name: string;
   status: string;
   people_found: number;
@@ -529,6 +530,8 @@ type Run = {
   enrichment_attempted: number;
   emails_returned: number;
   contacts_imported: number;
+  contacts_new: number;
+  contacts_updated: number;
   contacts_skipped_no_email: number;
   contacts_duplicate: number;
   contacts_suppressed: number;
@@ -1162,16 +1165,95 @@ export default function ApolloIntegration() {
 
           <TabsContent value="runs" className="space-y-4">
             <Card>
-              <CardHeader><CardTitle>Recent sync runs</CardTitle></CardHeader>
+              <CardHeader>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <CardTitle>Recent sync runs</CardTitle>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={busy === "discard-old" || runs.filter((r) => r.status === "awaiting_enrichment_approval").length === 0}
+                    onClick={async () => {
+                      const awaiting = runs.filter((r) => r.status === "awaiting_enrichment_approval");
+                      // newest awaiting per segment is preserved; everything older is discarded
+                      const newestPerSegment = new Map<string, string>();
+                      for (const r of awaiting) {
+                        if (!newestPerSegment.has(r.segment_id)) newestPerSegment.set(r.segment_id, r.id);
+                      }
+                      const toDiscard = awaiting.filter((r) => newestPerSegment.get(r.segment_id) !== r.id);
+                      if (toDiscard.length === 0) {
+                        toast({ title: "Nothing to discard", description: "Only the newest awaiting run per segment exists." });
+                        return;
+                      }
+                      if (!confirm(`Discard ${toDiscard.length} older awaiting run(s)? The newest awaiting run per segment is kept. No enrichment credits are spent.`)) return;
+                      setBusy("discard-old");
+                      const { error } = await supabase
+                        .from("apollo_sync_runs")
+                        .update({ status: "cancelled", completed_at: new Date().toISOString() })
+                        .in("id", toDiscard.map((r) => r.id));
+                      setBusy(null);
+                      if (error) {
+                        toast({ title: "Discard failed", description: error.message, variant: "destructive" });
+                        return;
+                      }
+                      toast({ title: `Discarded ${toDiscard.length} old awaiting run(s)` });
+                      loadAll();
+                    }}
+                  >
+                    <Trash2 className="mr-1 h-3 w-3" /> Discard old awaiting runs
+                  </Button>
+                </div>
+              </CardHeader>
               <CardContent>
                 {runs.length === 0 ? (
                   <p className="text-sm text-muted-foreground">No syncs run yet.</p>
                 ) : (
-                  <div className="space-y-3">
-                    {runs.map((run) => {
+                  (() => {
+                    // Group runs into Active (running / awaiting / recently completed) vs Older/cancelled/poor-fit
+                    const active: Run[] = [];
+                    const older: Run[] = [];
+                    // Track newest completed run per segment for "newer run exists" warning
+                    const newestCompletedBySegment = new Map<string, Run>();
+                    for (const r of runs) {
+                      if (r.status === "completed") {
+                        const existing = newestCompletedBySegment.get(r.segment_id);
+                        if (!existing || new Date(r.started_at) > new Date(existing.started_at)) {
+                          newestCompletedBySegment.set(r.segment_id, r);
+                        }
+                      }
+                    }
+                    // Newest awaiting per segment stays active; older awaiting collapses
+                    const newestAwaitingBySegment = new Map<string, string>();
+                    for (const r of runs) {
+                      if (r.status === "awaiting_enrichment_approval" && !newestAwaitingBySegment.has(r.segment_id)) {
+                        newestAwaitingBySegment.set(r.segment_id, r.id);
+                      }
+                    }
+                    for (const r of runs) {
+                      const diag = extractDiagnostics(r.errors);
+                      const fit = diag?.segment_fit;
+                      const isCancelled = r.status === "cancelled";
+                      const isPoorFit = fit === "poor";
+                      const isStaleAwaiting =
+                        r.status === "awaiting_enrichment_approval" &&
+                        newestAwaitingBySegment.get(r.segment_id) !== r.id;
+                      const isOldCompleted =
+                        r.status === "completed" && newestCompletedBySegment.get(r.segment_id)?.id !== r.id;
+                      if (isCancelled || isPoorFit || isStaleAwaiting || isOldCompleted) {
+                        older.push(r);
+                      } else {
+                        active.push(r);
+                      }
+                    }
+
+                    const renderRun = (run: Run) => {
                       const diag = extractDiagnostics(run.errors);
                       const fit = diag?.segment_fit;
                       const showFitWarning = run.status === "awaiting_enrichment_approval" && fit && fit !== "good";
+                      const newerCompleted = newestCompletedBySegment.get(run.segment_id);
+                      const hasNewerCompleted =
+                        run.status === "awaiting_enrichment_approval" &&
+                        newerCompleted &&
+                        new Date(newerCompleted.started_at) > new Date(run.started_at);
                       return (
                        <RunCard
                         key={run.id}
@@ -1183,6 +1265,14 @@ export default function ApolloIntegration() {
                         onCancel={() => cancelRun(run.id)}
                         onApprove={(ids) => approveEnrichment(run.id, ids)}
                       >
+                        {hasNewerCompleted && (
+                          <div className="flex items-start gap-2 rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
+                            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+                            <div className="font-medium">
+                              This segment already has a newer completed run. Do not approve older duplicate runs unless intentionally re-running.
+                            </div>
+                          </div>
+                        )}
                         {run.status === "awaiting_enrichment_approval" && fit === "good" && (
                           <div className="flex items-start gap-2 rounded-md border border-emerald-500/40 bg-emerald-500/10 p-3 text-sm">
                             <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
@@ -1209,20 +1299,7 @@ export default function ApolloIntegration() {
                           </div>
                         )}
                         {run.status !== "awaiting_enrichment_approval" && (
-                          <div className="grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
-                            <Stat label="Found" value={run.people_found} />
-                            <Stat label="Has email flag" value={run.people_with_email_flag} />
-                            <Stat label="Enriched" value={run.enrichment_attempted} />
-                            <Stat label="Emails returned" value={run.emails_returned} />
-                            <Stat label="Imported" value={run.contacts_imported} />
-                            <Stat label="Skipped no-email" value={run.contacts_skipped_no_email} />
-                            <Stat label="Duplicates" value={run.contacts_duplicate} />
-                            <Stat label="Suppressed" value={run.contacts_suppressed} />
-                            <Stat label="Qualified" value={run.qualified_count} />
-                            <Stat label="Maybe" value={run.maybe_count} />
-                            <Stat label="Not qualified" value={run.not_qualified_count} />
-                            <Stat label="Needs review" value={run.needs_review_count} />
-                          </div>
+                          <CompletedRunSummary run={run} />
                         )}
                         <details className="rounded-md border bg-muted/20 px-3 py-2 text-xs">
                           <summary className="cursor-pointer text-muted-foreground">Developer diagnostics</summary>
@@ -1264,8 +1341,28 @@ export default function ApolloIntegration() {
                         </details>
                       </RunCard>
                       );
-                    })}
-                  </div>
+                    };
+
+                    return (
+                      <div className="space-y-4">
+                        <div className="space-y-3">
+                          {active.length === 0 ? (
+                            <p className="text-sm text-muted-foreground">No active runs. Older runs are collapsed below.</p>
+                          ) : (
+                            active.map(renderRun)
+                          )}
+                        </div>
+                        {older.length > 0 && (
+                          <details className="rounded-md border bg-muted/10 px-3 py-2">
+                            <summary className="cursor-pointer text-sm text-muted-foreground">
+                              Older / cancelled / poor-fit runs ({older.length})
+                            </summary>
+                            <div className="mt-3 space-y-3">{older.map(renderRun)}</div>
+                          </details>
+                        )}
+                      </div>
+                    );
+                  })()
                 )}
               </CardContent>
             </Card>
@@ -1281,6 +1378,50 @@ function Stat({ label, value }: { label: string; value: number | string }) {
     <div className="rounded-md border p-2">
       <div className="text-xs text-muted-foreground">{label}</div>
       <div className="text-lg font-semibold">{value}</div>
+    </div>
+  );
+}
+
+function CompletedRunSummary({ run }: { run: Run }) {
+  // Backfill display when older rows have 0 in the new columns
+  const newCount = run.contacts_new || Math.max(run.contacts_imported - run.contacts_duplicate, 0);
+  const updatedCount = run.contacts_updated || run.contacts_duplicate;
+  const totalSaved = run.contacts_imported;
+  const importsHref = `/founder/outreach/imports?run_id=${run.id}`;
+  const stageHref = `/founder/outreach/queue?run_id=${run.id}&stage=ready_to_stage`;
+
+  return (
+    <div className="space-y-3">
+      <div className="grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
+        <Stat label="Found" value={run.people_found} />
+        <Stat label="Has email flag" value={run.people_with_email_flag} />
+        <Stat label="Enriched" value={run.enrichment_attempted} />
+        <Stat label="Emails returned" value={run.emails_returned} />
+        <Stat label="New contacts created" value={newCount} />
+        <Stat label="Existing contacts updated" value={updatedCount} />
+        <Stat label="Duplicates skipped (no-email)" value={run.contacts_skipped_no_email} />
+        <Stat label="Total saved to CRM" value={totalSaved} />
+        <Stat label="Suppressed" value={run.contacts_suppressed} />
+        <Stat label="Qualified" value={run.qualified_count} />
+        <Stat label="Maybe" value={run.maybe_count} />
+        <Stat label="Not qualified" value={run.not_qualified_count} />
+      </div>
+      <div className="rounded-md border border-emerald-500/30 bg-emerald-500/5 p-3 text-xs text-muted-foreground">
+        <strong className="text-foreground">What “Imported” means:</strong>{" "}
+        {totalSaved} contact(s) were saved to the central CRM in this run — {newCount} brand new and {updatedCount} matched an existing CRM contact (by email) and were updated in place.
+      </div>
+      <div className="rounded-md border border-blue-500/30 bg-blue-500/5 p-3 text-xs text-muted-foreground">
+        <strong className="text-foreground">Hold-for-approval is on.</strong>{" "}
+        The {run.qualified_count} qualified contact(s) are <em>not</em> in the email queue. They sit in <em>Ready to stage</em> and will only be added to a campaign queue after you stage them.
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <Button asChild size="sm" variant="outline">
+          <Link to={importsHref}>View imported contacts ({totalSaved})</Link>
+        </Button>
+        <Button asChild size="sm" variant="outline">
+          <Link to={stageHref}>View Ready to stage ({run.qualified_count})</Link>
+        </Button>
+      </div>
     </div>
   );
 }

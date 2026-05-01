@@ -165,6 +165,8 @@ Deno.serve(async (req) => {
     let attempted = ids.length;
     let returned = 0;
     let imported = 0;
+    let newCount = 0;
+    let updatedCount = 0;
     let skippedNoEmail = 0;
     let duplicate = 0;
     let suppressed = 0;
@@ -249,6 +251,7 @@ Deno.serve(async (req) => {
 
       if (isDupe) duplicate += 1;
       imported += 1;
+      if (isDupe) updatedCount += 1; else newCount += 1;
 
       // Upsert business_contact_relationships row (one per (contact, business))
       await supabase.from("business_contact_relationships").upsert({
@@ -273,6 +276,8 @@ Deno.serve(async (req) => {
       enrichment_attempted: attempted,
       emails_returned: returned,
       contacts_imported: imported,
+      contacts_new: newCount,
+      contacts_updated: updatedCount,
       contacts_skipped_no_email: skippedNoEmail,
       contacts_duplicate: duplicate,
       contacts_suppressed: suppressed,
@@ -292,6 +297,8 @@ Deno.serve(async (req) => {
       attempted,
       emails_returned: returned,
       imported,
+      new_contacts: newCount,
+      updated_contacts: updatedCount,
       skipped_no_email: skippedNoEmail,
       duplicate,
       suppressed,

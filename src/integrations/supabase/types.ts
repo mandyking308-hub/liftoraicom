@@ -642,8 +642,10 @@ export type Database = {
           completed_at: string | null
           contacts_duplicate: number
           contacts_imported: number
+          contacts_new: number
           contacts_skipped_no_email: number
           contacts_suppressed: number
+          contacts_updated: number
           created_at: string
           emails_returned: number
           enrichment_attempted: number
@@ -669,8 +671,10 @@ export type Database = {
           completed_at?: string | null
           contacts_duplicate?: number
           contacts_imported?: number
+          contacts_new?: number
           contacts_skipped_no_email?: number
           contacts_suppressed?: number
+          contacts_updated?: number
           created_at?: string
           emails_returned?: number
           enrichment_attempted?: number
@@ -696,8 +700,10 @@ export type Database = {
           completed_at?: string | null
           contacts_duplicate?: number
           contacts_imported?: number
+          contacts_new?: number
           contacts_skipped_no_email?: number
           contacts_suppressed?: number
+          contacts_updated?: number
           created_at?: string
           emails_returned?: number
           enrichment_attempted?: number
