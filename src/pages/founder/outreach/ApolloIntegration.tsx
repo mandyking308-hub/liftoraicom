@@ -605,8 +605,23 @@ export default function ApolloIntegration() {
                     <TableBody>
                       {segments.map((segment) => {
                         const connection = connectionByBusiness[segment.business_name];
-                        const canRun = !!connection && connection.search_api_status === "ok" && connection.enrichment_api_status === "ok";
-                        const blockReason = connection ? formatCapabilityError(connection) : "Add and verify an Apollo connection before syncing.";
+                        const apiOk = !!connection && connection.search_api_status === "ok" && connection.enrichment_api_status === "ok";
+                        const missingSavedList = segment.mode === "saved_list" && !segment.saved_list_id;
+                        const missingCriteria = segment.mode === "people_search" && Object.keys(segment.search_criteria ?? {}).length === 0;
+                        const sourceMissing = missingSavedList || missingCriteria;
+                        const canRun = apiOk && !sourceMissing;
+                        const blockReason = !connection
+                          ? "Add and verify an Apollo connection before syncing."
+                          : !apiOk
+                          ? formatCapabilityError(connection)
+                          : missingSavedList
+                          ? "Add a saved-list ID or switch to criteria search before running."
+                          : missingCriteria
+                          ? "Add search criteria or switch to a saved list before running."
+                          : "";
+                        const isNeonCandyMonth1 =
+                          segment.business_name.toLowerCase().includes("neon candy") &&
+                          segment.segment_name.toLowerCase().includes("month 1");
 
                         return (
                           <TableRow key={segment.id}>
@@ -615,7 +630,9 @@ export default function ApolloIntegration() {
                             <TableCell><Badge variant="outline">{segment.mode}</Badge></TableCell>
                             <TableCell>
                               {segment.mode === "saved_list" ? (
-                                <code className="text-xs">{segment.saved_list_id ?? "⚠ none — segment will return generic results"}</code>
+                                <code className={`text-xs ${missingSavedList ? "text-destructive" : ""}`}>
+                                  {segment.saved_list_id ?? "⚠ none — segment will return generic results"}
+                                </code>
                               ) : (
                                 <code className="text-xs break-all">
                                   {Object.keys(segment.search_criteria ?? {}).length === 0
@@ -627,7 +644,7 @@ export default function ApolloIntegration() {
                             <TableCell>{segment.max_contacts_per_run}</TableCell>
                             <TableCell>{segment.hold_for_approval ? "✓" : "—"}</TableCell>
                             <TableCell>
-                              <div className="space-y-2">
+                              <div className="space-y-2 min-w-[260px]">
                                 <div className="flex flex-wrap gap-2">
                                   <Button size="sm" onClick={() => runSearch(segment.id)} disabled={!canRun || busy === `run-${segment.id}`}>
                                     {busy === `run-${segment.id}` ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <Play className="mr-1 h-3 w-3" />}
@@ -635,8 +652,29 @@ export default function ApolloIntegration() {
                                   </Button>
                                   <EditSegmentDialog segment={segment} onSave={(u) => saveSegmentEdits(segment, u)} />
                                 </div>
-                                {!canRun && (
-                                  <div className="flex items-start gap-2 text-xs text-muted-foreground">
+                                {isNeonCandyMonth1 && (
+                                  <Button
+                                    size="sm"
+                                    variant="secondary"
+                                    className="w-full"
+                                    disabled={busy === `preset-${segment.id}`}
+                                    onClick={async () => {
+                                      if (!confirm("Switch this segment to criteria search and apply the NeonCandy Month 1 preset (DJ, music curator, playlist curator, etc. + verified emails)?")) return;
+                                      setBusy(`preset-${segment.id}`);
+                                      await saveSegmentEdits(segment, {
+                                        mode: "people_search",
+                                        saved_list_id: null,
+                                        search_criteria: NEONCANDY_MONTH1_CRITERIA,
+                                      });
+                                      setBusy(null);
+                                    }}
+                                  >
+                                    {busy === `preset-${segment.id}` ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : null}
+                                    Use NeonCandy Month 1 preset
+                                  </Button>
+                                )}
+                                {!canRun && blockReason && (
+                                  <div className="flex items-start gap-2 text-xs text-destructive">
                                     <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                                     <span>{blockReason}</span>
                                   </div>
