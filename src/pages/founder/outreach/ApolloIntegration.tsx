@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "react-router-dom";
+import { NeonCandyMonitor } from "@/components/founder/outreach/NeonCandyMonitor";
 
 const MUSIC_TARGET_KEYWORDS = [
   "playlist curator", "music curator", "independent curator", "music programmer",
@@ -937,6 +938,7 @@ export default function ApolloIntegration() {
             <TabsTrigger value="connections">Connections</TabsTrigger>
             <TabsTrigger value="segments">Sync Segments</TabsTrigger>
             <TabsTrigger value="runs">Sync Runs</TabsTrigger>
+            <TabsTrigger value="monitor">Daily Monitor</TabsTrigger>
           </TabsList>
 
           <TabsContent value="connections" className="space-y-4">
