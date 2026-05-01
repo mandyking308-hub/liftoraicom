@@ -473,6 +473,311 @@ export type Database = {
           },
         ]
       }
+      apollo_connections: {
+        Row: {
+          api_key_cipher: string
+          api_key_last4: string
+          business_name: string
+          created_at: string
+          enrichment_api_error: string
+          enrichment_api_status: string
+          enrichment_api_verified_at: string | null
+          id: string
+          is_active: boolean
+          search_api_error: string
+          search_api_status: string
+          search_api_verified_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          api_key_cipher: string
+          api_key_last4: string
+          business_name: string
+          created_at?: string
+          enrichment_api_error?: string
+          enrichment_api_status?: string
+          enrichment_api_verified_at?: string | null
+          id?: string
+          is_active?: boolean
+          search_api_error?: string
+          search_api_status?: string
+          search_api_verified_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          api_key_cipher?: string
+          api_key_last4?: string
+          business_name?: string
+          created_at?: string
+          enrichment_api_error?: string
+          enrichment_api_status?: string
+          enrichment_api_verified_at?: string | null
+          id?: string
+          is_active?: boolean
+          search_api_error?: string
+          search_api_status?: string
+          search_api_verified_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      apollo_leads: {
+        Row: {
+          ai_tags: string[]
+          apollo_org_id: string | null
+          apollo_person_id: string
+          business_name: string
+          company: string | null
+          contact_id: string | null
+          country: string | null
+          created_at: string
+          email: string | null
+          enrichment_payload: Json | null
+          error: string
+          first_name: string | null
+          has_email_flag: boolean
+          id: string
+          last_name: string | null
+          linkedin_url: string | null
+          qualification: Database["public"]["Enums"]["bcr_qualification"] | null
+          qualification_reason: string
+          run_id: string
+          search_payload: Json
+          segment_id: string
+          status: Database["public"]["Enums"]["apollo_lead_status"]
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          ai_tags?: string[]
+          apollo_org_id?: string | null
+          apollo_person_id: string
+          business_name: string
+          company?: string | null
+          contact_id?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          enrichment_payload?: Json | null
+          error?: string
+          first_name?: string | null
+          has_email_flag?: boolean
+          id?: string
+          last_name?: string | null
+          linkedin_url?: string | null
+          qualification?:
+            | Database["public"]["Enums"]["bcr_qualification"]
+            | null
+          qualification_reason?: string
+          run_id: string
+          search_payload?: Json
+          segment_id: string
+          status?: Database["public"]["Enums"]["apollo_lead_status"]
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ai_tags?: string[]
+          apollo_org_id?: string | null
+          apollo_person_id?: string
+          business_name?: string
+          company?: string | null
+          contact_id?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          enrichment_payload?: Json | null
+          error?: string
+          first_name?: string | null
+          has_email_flag?: boolean
+          id?: string
+          last_name?: string | null
+          linkedin_url?: string | null
+          qualification?:
+            | Database["public"]["Enums"]["bcr_qualification"]
+            | null
+          qualification_reason?: string
+          run_id?: string
+          search_payload?: Json
+          segment_id?: string
+          status?: Database["public"]["Enums"]["apollo_lead_status"]
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "apollo_leads_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "apollo_leads_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+          {
+            foreignKeyName: "apollo_leads_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "apollo_sync_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "apollo_leads_segment_id_fkey"
+            columns: ["segment_id"]
+            isOneToOne: false
+            referencedRelation: "apollo_sync_segments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      apollo_sync_runs: {
+        Row: {
+          apollo_credits_used: number | null
+          business_name: string
+          completed_at: string | null
+          contacts_duplicate: number
+          contacts_imported: number
+          contacts_skipped_no_email: number
+          contacts_suppressed: number
+          created_at: string
+          emails_returned: number
+          enrichment_attempted: number
+          errors: Json
+          id: string
+          maybe_count: number
+          needs_review_count: number
+          not_qualified_count: number
+          people_found: number
+          people_with_email_flag: number
+          qualified_count: number
+          ready_to_stage_count: number
+          search_pages_fetched: number
+          segment_id: string
+          started_at: string
+          status: Database["public"]["Enums"]["apollo_run_status"]
+          triggered_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          apollo_credits_used?: number | null
+          business_name: string
+          completed_at?: string | null
+          contacts_duplicate?: number
+          contacts_imported?: number
+          contacts_skipped_no_email?: number
+          contacts_suppressed?: number
+          created_at?: string
+          emails_returned?: number
+          enrichment_attempted?: number
+          errors?: Json
+          id?: string
+          maybe_count?: number
+          needs_review_count?: number
+          not_qualified_count?: number
+          people_found?: number
+          people_with_email_flag?: number
+          qualified_count?: number
+          ready_to_stage_count?: number
+          search_pages_fetched?: number
+          segment_id: string
+          started_at?: string
+          status?: Database["public"]["Enums"]["apollo_run_status"]
+          triggered_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          apollo_credits_used?: number | null
+          business_name?: string
+          completed_at?: string | null
+          contacts_duplicate?: number
+          contacts_imported?: number
+          contacts_skipped_no_email?: number
+          contacts_suppressed?: number
+          created_at?: string
+          emails_returned?: number
+          enrichment_attempted?: number
+          errors?: Json
+          id?: string
+          maybe_count?: number
+          needs_review_count?: number
+          not_qualified_count?: number
+          people_found?: number
+          people_with_email_flag?: number
+          qualified_count?: number
+          ready_to_stage_count?: number
+          search_pages_fetched?: number
+          segment_id?: string
+          started_at?: string
+          status?: Database["public"]["Enums"]["apollo_run_status"]
+          triggered_by?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "apollo_sync_runs_segment_id_fkey"
+            columns: ["segment_id"]
+            isOneToOne: false
+            referencedRelation: "apollo_sync_segments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      apollo_sync_segments: {
+        Row: {
+          auto_qualify: boolean
+          business_name: string
+          created_at: string
+          default_relevance_category: string | null
+          default_tags: string[]
+          hold_for_approval: boolean
+          id: string
+          is_active: boolean
+          max_contacts_per_run: number
+          mode: Database["public"]["Enums"]["apollo_segment_mode"]
+          saved_list_id: string | null
+          search_criteria: Json
+          segment_name: string
+          updated_at: string
+        }
+        Insert: {
+          auto_qualify?: boolean
+          business_name: string
+          created_at?: string
+          default_relevance_category?: string | null
+          default_tags?: string[]
+          hold_for_approval?: boolean
+          id?: string
+          is_active?: boolean
+          max_contacts_per_run?: number
+          mode?: Database["public"]["Enums"]["apollo_segment_mode"]
+          saved_list_id?: string | null
+          search_criteria?: Json
+          segment_name: string
+          updated_at?: string
+        }
+        Update: {
+          auto_qualify?: boolean
+          business_name?: string
+          created_at?: string
+          default_relevance_category?: string | null
+          default_tags?: string[]
+          hold_for_approval?: boolean
+          id?: string
+          is_active?: boolean
+          max_contacts_per_run?: number
+          mode?: Database["public"]["Enums"]["apollo_segment_mode"]
+          saved_list_id?: string | null
+          search_criteria?: Json
+          segment_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       architecture_components: {
         Row: {
           agent_id: string | null
@@ -918,6 +1223,75 @@ export type Database = {
         }
         Relationships: []
       }
+      business_contact_relationships: {
+        Row: {
+          business_name: string
+          campaign_eligible: boolean
+          contact_id: string
+          created_at: string
+          current_stage: Database["public"]["Enums"]["bcr_stage"]
+          do_not_contact: boolean
+          do_not_contact_reason: string
+          id: string
+          last_campaign_id: string | null
+          notes: string
+          qualification: Database["public"]["Enums"]["bcr_qualification"]
+          qualification_reason: string
+          relevance_category: string | null
+          source_segment_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_name: string
+          campaign_eligible?: boolean
+          contact_id: string
+          created_at?: string
+          current_stage?: Database["public"]["Enums"]["bcr_stage"]
+          do_not_contact?: boolean
+          do_not_contact_reason?: string
+          id?: string
+          last_campaign_id?: string | null
+          notes?: string
+          qualification?: Database["public"]["Enums"]["bcr_qualification"]
+          qualification_reason?: string
+          relevance_category?: string | null
+          source_segment_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_name?: string
+          campaign_eligible?: boolean
+          contact_id?: string
+          created_at?: string
+          current_stage?: Database["public"]["Enums"]["bcr_stage"]
+          do_not_contact?: boolean
+          do_not_contact_reason?: string
+          id?: string
+          last_campaign_id?: string | null
+          notes?: string
+          qualification?: Database["public"]["Enums"]["bcr_qualification"]
+          qualification_reason?: string
+          relevance_category?: string | null
+          source_segment_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_contact_relationships_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_contact_relationships_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+        ]
+      }
       business_risk_scores: {
         Row: {
           business_name: string
@@ -1314,6 +1688,10 @@ export type Database = {
       contacts: {
         Row: {
           active_campaign_id: string | null
+          apollo_enrichment_status: Database["public"]["Enums"]["apollo_enrichment_status"]
+          apollo_last_enriched_at: string | null
+          apollo_organization_id: string | null
+          apollo_person_id: string | null
           assigned_business: string
           assigned_inbox_id: string | null
           company: string
@@ -1322,26 +1700,43 @@ export type Database = {
           country: string | null
           created_at: string
           email: string
+          email_verified_status: string
           enriched_at: string | null
+          first_imported_business: string | null
+          first_imported_campaign: string | null
+          first_name: string | null
           founder_review_note: string
           founder_review_requested_at: string | null
+          global_suppression_at: string | null
+          global_suppression_reason: string | null
+          hard_bounced: boolean
           id: string
           industry: string | null
           intent_score: number
+          is_globally_suppressed: boolean
           last_contacted_at: string | null
+          last_name: string | null
           last_replied_at: string | null
           linkedin_url: string | null
           name: string
+          notes: string
+          phone: string | null
           role: string
+          sendable_status: Database["public"]["Enums"]["contact_sendable_status"]
           seniority: Database["public"]["Enums"]["seniority_level"] | null
           source: string
           status: Database["public"]["Enums"]["contact_status"]
+          tags: string[]
           timezone: string | null
           timezone_confidence: Database["public"]["Enums"]["timezone_confidence_level"]
           updated_at: string
         }
         Insert: {
           active_campaign_id?: string | null
+          apollo_enrichment_status?: Database["public"]["Enums"]["apollo_enrichment_status"]
+          apollo_last_enriched_at?: string | null
+          apollo_organization_id?: string | null
+          apollo_person_id?: string | null
           assigned_business?: string
           assigned_inbox_id?: string | null
           company?: string
@@ -1350,26 +1745,43 @@ export type Database = {
           country?: string | null
           created_at?: string
           email: string
+          email_verified_status?: string
           enriched_at?: string | null
+          first_imported_business?: string | null
+          first_imported_campaign?: string | null
+          first_name?: string | null
           founder_review_note?: string
           founder_review_requested_at?: string | null
+          global_suppression_at?: string | null
+          global_suppression_reason?: string | null
+          hard_bounced?: boolean
           id?: string
           industry?: string | null
           intent_score?: number
+          is_globally_suppressed?: boolean
           last_contacted_at?: string | null
+          last_name?: string | null
           last_replied_at?: string | null
           linkedin_url?: string | null
           name?: string
+          notes?: string
+          phone?: string | null
           role?: string
+          sendable_status?: Database["public"]["Enums"]["contact_sendable_status"]
           seniority?: Database["public"]["Enums"]["seniority_level"] | null
           source?: string
           status?: Database["public"]["Enums"]["contact_status"]
+          tags?: string[]
           timezone?: string | null
           timezone_confidence?: Database["public"]["Enums"]["timezone_confidence_level"]
           updated_at?: string
         }
         Update: {
           active_campaign_id?: string | null
+          apollo_enrichment_status?: Database["public"]["Enums"]["apollo_enrichment_status"]
+          apollo_last_enriched_at?: string | null
+          apollo_organization_id?: string | null
+          apollo_person_id?: string | null
           assigned_business?: string
           assigned_inbox_id?: string | null
           company?: string
@@ -1378,20 +1790,33 @@ export type Database = {
           country?: string | null
           created_at?: string
           email?: string
+          email_verified_status?: string
           enriched_at?: string | null
+          first_imported_business?: string | null
+          first_imported_campaign?: string | null
+          first_name?: string | null
           founder_review_note?: string
           founder_review_requested_at?: string | null
+          global_suppression_at?: string | null
+          global_suppression_reason?: string | null
+          hard_bounced?: boolean
           id?: string
           industry?: string | null
           intent_score?: number
+          is_globally_suppressed?: boolean
           last_contacted_at?: string | null
+          last_name?: string | null
           last_replied_at?: string | null
           linkedin_url?: string | null
           name?: string
+          notes?: string
+          phone?: string | null
           role?: string
+          sendable_status?: Database["public"]["Enums"]["contact_sendable_status"]
           seniority?: Database["public"]["Enums"]["seniority_level"] | null
           source?: string
           status?: Database["public"]["Enums"]["contact_status"]
+          tags?: string[]
           timezone?: string | null
           timezone_confidence?: Database["public"]["Enums"]["timezone_confidence_level"]
           updated_at?: string
@@ -7037,6 +7462,14 @@ export type Database = {
         Returns: Json
       }
       ai_actions_today: { Args: { _conversation_id: string }; Returns: number }
+      apollo_decrypt_key: {
+        Args: { cipher: string; enc_key: string }
+        Returns: string
+      }
+      apollo_encrypt_key: {
+        Args: { enc_key: string; plain: string }
+        Returns: string
+      }
       apply_reputation_event: {
         Args: {
           _contact_id: string
@@ -7630,6 +8063,10 @@ export type Database = {
         }
         Returns: {
           active_campaign_id: string | null
+          apollo_enrichment_status: Database["public"]["Enums"]["apollo_enrichment_status"]
+          apollo_last_enriched_at: string | null
+          apollo_organization_id: string | null
+          apollo_person_id: string | null
           assigned_business: string
           assigned_inbox_id: string | null
           company: string
@@ -7638,20 +8075,33 @@ export type Database = {
           country: string | null
           created_at: string
           email: string
+          email_verified_status: string
           enriched_at: string | null
+          first_imported_business: string | null
+          first_imported_campaign: string | null
+          first_name: string | null
           founder_review_note: string
           founder_review_requested_at: string | null
+          global_suppression_at: string | null
+          global_suppression_reason: string | null
+          hard_bounced: boolean
           id: string
           industry: string | null
           intent_score: number
+          is_globally_suppressed: boolean
           last_contacted_at: string | null
+          last_name: string | null
           last_replied_at: string | null
           linkedin_url: string | null
           name: string
+          notes: string
+          phone: string | null
           role: string
+          sendable_status: Database["public"]["Enums"]["contact_sendable_status"]
           seniority: Database["public"]["Enums"]["seniority_level"] | null
           source: string
           status: Database["public"]["Enums"]["contact_status"]
+          tags: string[]
           timezone: string | null
           timezone_confidence: Database["public"]["Enums"]["timezone_confidence_level"]
           updated_at: string
@@ -7688,9 +8138,52 @@ export type Database = {
         | "draft_only"
         | "approval_required"
         | "auto_send"
+      apollo_enrichment_status:
+        | "pending"
+        | "attempted"
+        | "succeeded"
+        | "failed"
+        | "no_email"
+        | "skipped"
+      apollo_lead_status:
+        | "found"
+        | "has_email"
+        | "enrichment_pending"
+        | "enriched"
+        | "imported"
+        | "skipped_no_email"
+        | "duplicate"
+        | "suppressed"
+        | "error"
+        | "not_qualified"
+        | "maybe"
+        | "qualified"
+      apollo_run_status:
+        | "pending"
+        | "search_running"
+        | "awaiting_enrichment_approval"
+        | "enriching"
+        | "importing"
+        | "completed"
+        | "failed"
+        | "cancelled"
+      apollo_segment_mode: "saved_list" | "people_search"
       app_role: "admin" | "founder" | "client" | "partner"
       assignment_sla_status: "on_track" | "at_risk" | "overdue" | "n_a"
       assignment_status: "assigned" | "in_progress" | "completed" | "failed"
+      bcr_qualification:
+        | "qualified"
+        | "maybe"
+        | "not_qualified"
+        | "needs_review"
+      bcr_stage:
+        | "ready_to_stage"
+        | "staged"
+        | "contacted"
+        | "engaged"
+        | "client"
+        | "do_not_contact"
+        | "archived"
       communication_channel: "email" | "whatsapp" | "linkedin"
       communication_direction: "outbound" | "inbound"
       company_size_tier: "small" | "medium" | "large"
@@ -7713,6 +8206,14 @@ export type Database = {
         | "invoice"
         | "payment"
       compliance_severity: "low" | "medium" | "high" | "critical"
+      contact_sendable_status:
+        | "sendable"
+        | "not_sendable"
+        | "needs_review"
+        | "suppressed"
+        | "duplicate"
+        | "enrichment_failed"
+        | "no_email"
       contact_status:
         | "NEW"
         | "CONTACTED"
@@ -7959,9 +8460,57 @@ export const Constants = {
         "approval_required",
         "auto_send",
       ],
+      apollo_enrichment_status: [
+        "pending",
+        "attempted",
+        "succeeded",
+        "failed",
+        "no_email",
+        "skipped",
+      ],
+      apollo_lead_status: [
+        "found",
+        "has_email",
+        "enrichment_pending",
+        "enriched",
+        "imported",
+        "skipped_no_email",
+        "duplicate",
+        "suppressed",
+        "error",
+        "not_qualified",
+        "maybe",
+        "qualified",
+      ],
+      apollo_run_status: [
+        "pending",
+        "search_running",
+        "awaiting_enrichment_approval",
+        "enriching",
+        "importing",
+        "completed",
+        "failed",
+        "cancelled",
+      ],
+      apollo_segment_mode: ["saved_list", "people_search"],
       app_role: ["admin", "founder", "client", "partner"],
       assignment_sla_status: ["on_track", "at_risk", "overdue", "n_a"],
       assignment_status: ["assigned", "in_progress", "completed", "failed"],
+      bcr_qualification: [
+        "qualified",
+        "maybe",
+        "not_qualified",
+        "needs_review",
+      ],
+      bcr_stage: [
+        "ready_to_stage",
+        "staged",
+        "contacted",
+        "engaged",
+        "client",
+        "do_not_contact",
+        "archived",
+      ],
       communication_channel: ["email", "whatsapp", "linkedin"],
       communication_direction: ["outbound", "inbound"],
       company_size_tier: ["small", "medium", "large"],
@@ -7986,6 +8535,15 @@ export const Constants = {
         "payment",
       ],
       compliance_severity: ["low", "medium", "high", "critical"],
+      contact_sendable_status: [
+        "sendable",
+        "not_sendable",
+        "needs_review",
+        "suppressed",
+        "duplicate",
+        "enrichment_failed",
+        "no_email",
+      ],
       contact_status: [
         "NEW",
         "CONTACTED",

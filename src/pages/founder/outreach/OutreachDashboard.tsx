@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Mail, Reply, AlertTriangle, Activity, Users, Inbox, Upload, Megaphone, Database } from "lucide-react";
+import { Mail, Reply, AlertTriangle, Activity, Users, Inbox, Upload, Megaphone, Database, Sparkles } from "lucide-react";
 import SimulatedSendingBanner from "@/components/outreach/SimulatedSendingBanner";
 
 const OutreachDashboard = () => {
@@ -74,6 +74,7 @@ const OutreachDashboard = () => {
             <Button asChild variant="outline" size="sm"><Link to="/founder/outreach/imports"><Upload className="h-4 w-4 mr-2" />Imports</Link></Button>
             <Button asChild variant="outline" size="sm"><Link to="/founder/outreach/campaigns"><Megaphone className="h-4 w-4 mr-2" />Campaigns</Link></Button>
             <Button asChild variant="outline" size="sm"><Link to="/founder/outreach/queue"><Database className="h-4 w-4 mr-2" />Queue</Link></Button>
+            <Button asChild variant="outline" size="sm"><Link to="/founder/outreach/apollo"><Sparkles className="h-4 w-4 mr-2" />Apollo</Link></Button>
           </div>
         </div>
 
