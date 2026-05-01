@@ -1382,6 +1382,50 @@ function Stat({ label, value }: { label: string; value: number | string }) {
   );
 }
 
+function CompletedRunSummary({ run }: { run: Run }) {
+  // Backfill display when older rows have 0 in the new columns
+  const newCount = run.contacts_new || Math.max(run.contacts_imported - run.contacts_duplicate, 0);
+  const updatedCount = run.contacts_updated || run.contacts_duplicate;
+  const totalSaved = run.contacts_imported;
+  const importsHref = `/founder/outreach/imports?run_id=${run.id}`;
+  const stageHref = `/founder/outreach/queue?run_id=${run.id}&stage=ready_to_stage`;
+
+  return (
+    <div className="space-y-3">
+      <div className="grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
+        <Stat label="Found" value={run.people_found} />
+        <Stat label="Has email flag" value={run.people_with_email_flag} />
+        <Stat label="Enriched" value={run.enrichment_attempted} />
+        <Stat label="Emails returned" value={run.emails_returned} />
+        <Stat label="New contacts created" value={newCount} />
+        <Stat label="Existing contacts updated" value={updatedCount} />
+        <Stat label="Duplicates skipped (no-email)" value={run.contacts_skipped_no_email} />
+        <Stat label="Total saved to CRM" value={totalSaved} />
+        <Stat label="Suppressed" value={run.contacts_suppressed} />
+        <Stat label="Qualified" value={run.qualified_count} />
+        <Stat label="Maybe" value={run.maybe_count} />
+        <Stat label="Not qualified" value={run.not_qualified_count} />
+      </div>
+      <div className="rounded-md border border-emerald-500/30 bg-emerald-500/5 p-3 text-xs text-muted-foreground">
+        <strong className="text-foreground">What “Imported” means:</strong>{" "}
+        {totalSaved} contact(s) were saved to the central CRM in this run — {newCount} brand new and {updatedCount} matched an existing CRM contact (by email) and were updated in place.
+      </div>
+      <div className="rounded-md border border-blue-500/30 bg-blue-500/5 p-3 text-xs text-muted-foreground">
+        <strong className="text-foreground">Hold-for-approval is on.</strong>{" "}
+        The {run.qualified_count} qualified contact(s) are <em>not</em> in the email queue. They sit in <em>Ready to stage</em> and will only be added to a campaign queue after you stage them.
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <Button asChild size="sm" variant="outline">
+          <Link to={importsHref}>View imported contacts ({totalSaved})</Link>
+        </Button>
+        <Button asChild size="sm" variant="outline">
+          <Link to={stageHref}>View Ready to stage ({run.qualified_count})</Link>
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 function RunCard({
   run,
   diag,
