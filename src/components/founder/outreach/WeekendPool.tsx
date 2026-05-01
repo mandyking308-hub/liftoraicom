@@ -108,16 +108,31 @@ export function WeekendPool({ onOpenRuns }: { onOpenRuns?: () => void }) {
     if (campaignId) {
       const { data: qrows } = await supabase
         .from("email_queue")
-        .select("status,sequence_step,delivery_kind")
+        .select("contact_id,status,sequence_step,delivery_kind,block_reason,smtp_accepted_at,provider_message_id")
         .eq("campaign_id", campaignId);
       const q = (qrows ?? []) as any[];
       const sim = q.filter((r) => r.delivery_kind === "simulated").length;
-      const pStep1 = q.filter((r) => r.status === "pending" && r.sequence_step === 1).length;
-      const pFollow = q.filter((r) => r.status === "pending" && r.sequence_step > 1).length;
+      const activeStatuses = new Set(["pending", "delayed", "throttled"]);
+      const byStep = new Map(q.map((r) => [`${r.contact_id}:${r.sequence_step}`, r]));
+      const pStep1 = q.filter((r) => activeStatuses.has(r.status) && r.sequence_step === 1).length;
+      const pFollow = q.filter((r) => activeStatuses.has(r.status) && r.sequence_step > 1).length;
+      const parentIntegrity = q.filter((r) => {
+        if (!activeStatuses.has(r.status) || r.sequence_step <= 1) return false;
+        const parent = byStep.get(`${r.contact_id}:${r.sequence_step - 1}`);
+        return !(parent && parent.status === "sent" && parent.delivery_kind === "smtp_real" && parent.smtp_accepted_at && parent.provider_message_id);
+      }).length;
       const blocked = q.filter((r) => r.status === "blocked").length;
+      const unresolvedBlocked = q.filter((r) => r.status === "blocked" && ![
+        "SIMULATED_NOT_TRANSMITTED",
+        "SIMULATED_PARENT_NOT_SENT",
+        "RECENT_COMMUNICATION_24H",
+        "REPLY_RECEIVED",
+        "BOUNCED",
+      ].includes(r.block_reason ?? "")).length;
       if (sim > 0) blocks.push(`${sim} simulated row(s) in queue — clean up before staging more.`);
-      if (pStep1 === 0 && pFollow > 0) blocks.push(`${pFollow} follow-ups queued but 0 pending Step 1 — verify Step 1 actually sent first.`);
-      if (blocked > 0) blocks.push(`${blocked} blocked row(s) — review before adding more contacts.`);
+      if (parentIntegrity > 0) blocks.push(`${parentIntegrity} active follow-up row(s) do not have a real SMTP parent send.`);
+      if (pStep1 === 0 && pFollow > 0) blocks.push(`${pFollow} follow-ups queued but 0 active Step 1 sends — verify Step 1 actually sent first.`);
+      if (unresolvedBlocked > 0) blocks.push(`${unresolvedBlocked} blocked row(s) still need correction before adding more contacts.`);
     }
     setQueueBlock(blocks);
 

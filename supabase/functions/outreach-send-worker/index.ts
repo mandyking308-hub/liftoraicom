@@ -293,6 +293,44 @@ Deno.serve(async (req) => {
         continue;
       }
 
+      // Parent-send integrity: a follow-up may only send if the prior step was
+      // actually accepted by real SMTP.
+      if (item.sequence_step > 1) {
+        const { data: parentRow } = await supabase.from("email_queue")
+          .select("id,status,delivery_kind,smtp_accepted_at,provider_message_id,block_reason")
+          .eq("contact_id", item.contact_id)
+          .eq("campaign_id", item.campaign_id)
+          .eq("sequence_step", item.sequence_step - 1)
+          .maybeSingle();
+
+        const parentReal = !!parentRow
+          && parentRow.status === "sent"
+          && parentRow.delivery_kind === "smtp_real"
+          && !!parentRow.smtp_accepted_at
+          && !!parentRow.provider_message_id;
+
+        if (!parentReal) {
+          await supabase.from("email_queue")
+            .update({
+              status: "blocked",
+              block_reason: "SIMULATED_PARENT_NOT_SENT",
+              delivery_kind: "simulated_parent_not_sent",
+              send_error: `Blocked follow-up because step ${item.sequence_step - 1} was not sent via real SMTP${parentRow?.block_reason ? ` (${parentRow.block_reason})` : ""}`,
+              last_attempt_at: new Date().toISOString(),
+            })
+            .eq("id", item.id);
+          await supabase.from("activity_log").insert({
+            event_type: "send_blocked",
+            description: `Queue ${item.id} blocked: SIMULATED_PARENT_NOT_SENT`,
+            entity_type: "email_queue",
+            entity_id: item.id,
+          });
+          blocked += 1;
+          touchedCampaigns.add(item.campaign_id);
+          continue;
+        }
+      }
+
       // Sanity check via shared edge function (bounded)
       let checkJson: any = {};
       try {
