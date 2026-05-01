@@ -28,6 +28,8 @@ type InboxRow = {
   last_sent_at: string | null; last_test_send_at: string | null;
   last_test_send_status: string | null; last_error_message: string | null;
   reply_to_email: string | null;
+  provider_blocked_until: string | null;
+  provider_blocked_reason: string | null;
 };
 type QueueItem = {
   id: string; contact_id: string; campaign_id: string; sequence_step: number;
@@ -119,7 +121,8 @@ const CampaignLiveMonitor = () => {
           "id,email_address,business_name,active,provider_type,live_readiness," +
           "inbound_status,inbound_polling_enabled,monitored_mailbox,daily_send_limit," +
           "current_send_count,emails_sent_today,last_sent_at,last_test_send_at," +
-          "last_test_send_status,last_error_message,reply_to_email")
+          "last_test_send_status,last_error_message,reply_to_email," +
+          "provider_blocked_until,provider_blocked_reason")
         .eq("business_name", businessName);
       const inboxList = ((ix as unknown) as InboxRow[] | null) ?? [];
       setAllInboxes(inboxList);
@@ -389,6 +392,26 @@ const CampaignLiveMonitor = () => {
           <StatCard label="Next scheduled send" value={nextScheduled ? relTime(nextScheduled.scheduled_at) : "—"} sub={nextScheduled ? fmtTime(nextScheduled.scheduled_at) : ""} />
         </div>
 
+        {/* Provider daily-limit banner */}
+        {(() => {
+          const until = inbox?.provider_blocked_until ? new Date(inbox.provider_blocked_until) : null;
+          const isBlocked = !!until && until.getTime() > Date.now();
+          if (!isBlocked || !inbox) return null;
+          return (
+            <div className="rounded-lg border border-amber-500/40 bg-amber-500/5 p-3 text-sm">
+              <p className="font-medium text-amber-500">
+                IONOS daily provider limit reached for{" "}
+                <code className="font-mono">{inbox.email_address}</code>.
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Remaining sends are delayed until {fmtTime(inbox.provider_blocked_until)} ({relTime(inbox.provider_blocked_until)}).
+                The worker will not retry this inbox today unless an admin manually overrides.
+                Reason: <code className="font-mono">{inbox.provider_blocked_reason ?? "PROVIDER_DAILY_LIMIT_REACHED"}</code>.
+              </p>
+            </div>
+          );
+        })()}
+
         {/* Active campaign movement */}
         {(() => {
           const activeStep1Pending = queue.filter(
@@ -428,7 +451,20 @@ const CampaignLiveMonitor = () => {
                   <StatCard label="Valid follow-ups scheduled" value={String(followupsScheduled)} />
                   <StatCard label="Next due send" value={nextDue ? relTime(nextDue.scheduled_at) : "—"} sub={nextDue ? fmtTime(nextDue.scheduled_at) : "no items due"} />
                   <StatCard label="Queue integrity" value={integrityClean ? "Clean" : "Issues"} tone={integrityClean ? "good" : "warn"} />
-                  <StatCard label="Sender" value="hello@neoncandy.online" sub={`${remaining}/${dailyLimit} remaining`} />
+                  <StatCard
+                    label="Sender"
+                    value="hello@neoncandy.online"
+                    sub={
+                      inbox?.provider_blocked_until && new Date(inbox.provider_blocked_until).getTime() > Date.now()
+                        ? `Provider cap reached · resumes ${relTime(inbox.provider_blocked_until)}`
+                        : `${remaining}/${dailyLimit} remaining`
+                    }
+                    tone={
+                      inbox?.provider_blocked_until && new Date(inbox.provider_blocked_until).getTime() > Date.now()
+                        ? "warn"
+                        : undefined
+                    }
+                  />
                 </div>
                 {bcrCounts.ready_to_stage > 0 && (
                   <div className="rounded border border-amber-500/40 bg-amber-500/5 p-3 text-xs space-y-1">

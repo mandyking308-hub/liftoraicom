@@ -50,6 +50,27 @@ const RUN_BUDGET_MS = 90_000;
 // Per-send hard cap (SMTP + sanity-check + DB writes).
 const PER_SEND_BUDGET_MS = 25_000;
 
+// ===== PROVIDER DAILY-LIMIT DETECTION =====
+// IONOS (and other shared SMTP providers) returns this on the new-mailbox
+// 24h rolling cap. Once we see it for an inbox, we MUST stop sending from
+// that inbox for the rest of the day instead of hammering 49 more 450s.
+function isProviderDailyLimitError(msg: string | null | undefined): boolean {
+  if (!msg) return false;
+  const m = msg.toLowerCase();
+  return (
+    m.includes("450") &&
+    (m.includes("mail send limit exceeded") || m.includes("send limit exceeded"))
+  );
+}
+
+// Next valid send window: tomorrow at 09:00 UTC.
+function nextSendWindowIso(): string {
+  const d = new Date();
+  d.setUTCDate(d.getUTCDate() + 1);
+  d.setUTCHours(9, 0, 0, 0);
+  return d.toISOString();
+}
+
 // Send variance: small jitter between sends to avoid pattern detection,
 // but bounded so we never exceed the run budget.
 function jitterMs(): number {
@@ -286,6 +307,11 @@ Deno.serve(async (req) => {
     const dueFound = due.length;
     const runStart = Date.now();
 
+    // Inboxes that hit a provider daily limit during THIS run. Subsequent
+    // due rows for the same inbox are immediately rescheduled, not attempted.
+    const providerBlockedInboxes = new Map<string, { until: string; reason: string }>();
+    let providerLimitReachedAny = false;
+
     for (let idx = 0; idx < due.length; idx++) {
       // Stop early if we're approaching the function idle timeout. Remaining
       // items stay pending and will be picked up by the next cron tick.
@@ -297,6 +323,43 @@ Deno.serve(async (req) => {
       // Variance between sends (skip jitter on first item)
       if (idx > 0 && sent > 0) {
         await new Promise((r) => setTimeout(r, jitterMs()));
+      }
+
+      // ===== PROVIDER DAILY-LIMIT GUARD (pre-flight) =====
+      // 1) If this inbox already hit the provider cap earlier in THIS run,
+      //    requeue immediately without contacting SMTP.
+      // 2) Otherwise check the persisted inbox.provider_blocked_until in case
+      //    a previous worker invocation set it.
+      if (item.inbox_id) {
+        const inRun = providerBlockedInboxes.get(item.inbox_id);
+        let blockedUntil: string | null = inRun?.until ?? null;
+        let blockReason: string = inRun?.reason ?? "PROVIDER_DAILY_LIMIT_REACHED";
+        if (!blockedUntil) {
+          const { data: ibChk } = await supabase
+            .from("inboxes")
+            .select("provider_blocked_until, provider_blocked_reason")
+            .eq("id", item.inbox_id)
+            .maybeSingle();
+          const until = (ibChk?.provider_blocked_until as string | null) ?? null;
+          if (until && new Date(until).getTime() > Date.now()) {
+            blockedUntil = until;
+            blockReason = (ibChk?.provider_blocked_reason as string | null)
+              ?? "PROVIDER_DAILY_LIMIT_REACHED";
+            providerBlockedInboxes.set(item.inbox_id, { until: blockedUntil, reason: blockReason });
+          }
+        }
+        if (blockedUntil) {
+          await supabase.from("email_queue").update({
+            status: "delayed",
+            block_reason: blockReason,
+            scheduled_at: blockedUntil,
+            send_error: null,
+            provider_response: `Delayed: provider daily limit reached, retry at ${blockedUntil}`,
+          }).eq("id", item.id);
+          delayed += 1;
+          providerLimitReachedAny = true;
+          continue;
+        }
       }
 
       // ===== THROTTLE / WINDOW / REPUTATION CHECK =====
@@ -614,6 +677,41 @@ Deno.serve(async (req) => {
       } catch (err) {
         // Persist error on the queue row so operators can see it
         const errMsg = (err as Error).message;
+
+        // ===== PROVIDER DAILY-LIMIT INTERCEPT =====
+        // Treat IONOS "450 Mail send limit exceeded" as a clean reschedule,
+        // NOT a failure. Stop sending from this inbox for the rest of the day.
+        if (isProviderDailyLimitError(errMsg)) {
+          const retryAt = nextSendWindowIso();
+          if (item.inbox_id) {
+            await supabase.rpc("inbox_set_provider_blocked", {
+              _inbox_id: item.inbox_id,
+              _blocked_until: retryAt,
+              _reason: "PROVIDER_DAILY_LIMIT_REACHED",
+            }).then(() => {}, () => {});
+            providerBlockedInboxes.set(item.inbox_id, {
+              until: retryAt,
+              reason: "PROVIDER_DAILY_LIMIT_REACHED",
+            });
+          }
+          await supabase.from("email_queue").update({
+            status: "delayed",
+            block_reason: "PROVIDER_DAILY_LIMIT_REACHED",
+            scheduled_at: retryAt,
+            last_attempt_at: new Date().toISOString(),
+            send_error: null,
+            provider_response: `Delayed: IONOS daily limit reached at attempt time, retry at ${retryAt}`,
+          }).eq("id", item.id);
+          await supabase.from("activity_log").insert({
+            event_type: "send_delayed",
+            description: `Queue ${item.id} delayed: PROVIDER_DAILY_LIMIT_REACHED until ${retryAt}`,
+            entity_type: "email_queue", entity_id: item.id,
+          });
+          delayed += 1;
+          providerLimitReachedAny = true;
+          continue;
+        }
+
         if (firstErrors.length < 5) firstErrors.push({ queue_id: item.id, error: errMsg });
         await supabase.from("email_queue")
           .update({
@@ -703,6 +801,12 @@ Deno.serve(async (req) => {
         stillDue = (count ?? 0) > 0;
       }
       if (stillDue) {
+        // If a provider daily limit was reached this run, every remaining
+        // due item for that inbox has already been pushed to the next send
+        // window. Don't self-chain just to re-process them immediately.
+        if (providerLimitReachedAny) {
+          // skip self-chain
+        } else {
         // Fire-and-forget — do NOT await. The new invocation runs independently.
         fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/outreach-send-worker`, {
           method: "POST",
@@ -713,6 +817,7 @@ Deno.serve(async (req) => {
           body: JSON.stringify({ chained: true }),
         }).catch(() => { /* ignore */ });
         chained = true;
+        }
       }
     } catch { /* ignore chaining errors */ }
 
@@ -723,6 +828,10 @@ Deno.serve(async (req) => {
       first_5_errors: firstErrors,
       next_due_send: nextDueSend,
       daily_capacity_remaining: dailyCapacityRemaining,
+      provider_limit_reached: providerLimitReachedAny,
+      provider_blocked_inboxes: Array.from(providerBlockedInboxes.entries()).map(
+        ([inbox_id, v]) => ({ inbox_id, blocked_until: v.until, reason: v.reason }),
+      ),
       mode: systemMode,
       duration_ms: Date.now() - runStart,
     }, 200);
