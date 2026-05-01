@@ -1804,6 +1804,8 @@ function RunCard({
   onCancel,
   onApprove,
   children,
+  disableApprove = false,
+  superseded = false,
 }: {
   run: Run;
   diag: RunDiagnostics | null;
@@ -1813,13 +1815,15 @@ function RunCard({
   onCancel: () => void;
   onApprove: (selectedIds: string[]) => void;
   children: React.ReactNode;
+  disableApprove?: boolean;
+  superseded?: boolean;
 }) {
   const [preview, setPreview] = useState<PreviewSelection | null>(null);
   const isAwaiting = run.status === "awaiting_enrichment_approval";
   const previewReady = preview !== null && preview.total > 0;
   const credits = preview?.creditsToSpend ?? 0;
   const selectedIds = preview?.selectedIds ?? [];
-  const approveDisabled = busy === `enrich-${run.id}` || fit === "poor" || !previewReady || credits === 0;
+  const approveDisabled = busy === `enrich-${run.id}` || fit === "poor" || !previewReady || credits === 0 || disableApprove;
 
   return (
     <div className="space-y-2 rounded-md border p-4">
@@ -1846,6 +1850,14 @@ function RunCard({
       {children}
       {isAwaiting && (
         <div className="space-y-3 border-t pt-3">
+          {superseded && (
+            <div className="flex items-start gap-2 rounded-md border border-muted bg-muted/30 p-2 text-xs text-muted-foreground">
+              <Info className="mt-0.5 h-3 w-3 shrink-0" />
+              <span>
+                Superseded — no action needed. A newer completed run for this segment exists. Approve disabled by default; an admin can reopen this run if intentional.
+              </span>
+            </div>
+          )}
           <div>
             <h3 className="text-sm font-semibold">Review candidates before enrichment</h3>
             <p className="text-xs text-muted-foreground">Review these Apollo candidates before spending enrichment credits.</p>
