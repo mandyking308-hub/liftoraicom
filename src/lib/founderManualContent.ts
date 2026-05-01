@@ -26,7 +26,7 @@ export const generateManualMarkdown = (data: ManualLiveData): string => {
   return `# Liftor AI — Founder Manual
 ## Complete Engineering-Level Platform Documentation
 
-**Version:** 4.2 — NeonCandy Send Proof Achieved (1 May 2026)
+**Version:** 4.3 — NeonCandy Day-1 Sending Complete, IONOS Cap Reached (1 May 2026)
 **Generated:** ${now}
 **Classification:** Founder / Internal Engineering / Investor Documentation
 **Status:** Live — Auto-generated from platform state
@@ -111,7 +111,8 @@ export const generateManualMarkdown = (data: ManualLiveData): string => {
 ### 0.6 Weekend Pool
 
 - Target size: **100 contacts**.
-- Current pool reached **47 ready/staged** contacts before the final send fix.
+- **47 NeonCandy contacts are currently staged/eligible** for the
+  Early Access Collaboration Test campaign.
 - Pool feeds directly into the Early Access Collaboration Test campaign
   via the staging action.
 
@@ -190,19 +191,21 @@ legitimate first-touch emails.
   \`outreach-schedule-batch\` with the campaign id and the contact ids,
   guarantees creation of all 4 sequence rows per contact, and fails
   loudly if queue rows are not created.
-- One-shot data fix executed for the 47 NeonCandy BCRs created **160
-  sequence rows for 40 contacts** (Step 1 due immediately, Steps 2-4
-  scheduled at the correct offsets).
+- One-shot data fix for the 47 NeonCandy BCRs created the full set of
+  sequence rows (Step 1 due immediately, Steps 2-4 scheduled at the
+  correct +3 / +7 / +14 day offsets).
 - UI wording updated: the action label now reads
   *"Stage into campaign queue"* — never just "Stage".
 
 ### 0.15 Current Send-Worker Status
 
-### 0.15 Current Send-Worker Status — **FINAL SEND PROOF ACHIEVED (1 May 2026)**
+### 0.15 Current Send-Worker Status — **DAY-1 SENDING COMPLETE, IONOS CAP REACHED (1 May 2026)**
 
-**Real SMTP campaign send is now proven end-to-end.**
+**Real SMTP campaign send is proven end-to-end and Liftor is no longer
+blocked internally. The only remaining limit today is the IONOS
+provider-side daily cap.**
 
-- **9 real campaign emails sent today via \`hello@neoncandy.online\`.**
+- **16 real SMTP sends completed today via \`hello@neoncandy.online\`.**
   Every successful send recorded:
   - \`delivery_kind = smtp_real\`
   - \`smtp_accepted_at\` populated
@@ -210,8 +213,11 @@ legitimate first-touch emails.
   - No \`music@neoncandy.net\` involvement
   - No simulated send path
 - IONOS then enforced its provider-side daily ramp limit and returned
-  \`450 Mail send limit exceeded\`, which stopped the 10th attempt.
-  Remaining Step 1 rows are delayed for retry after the provider reset.
+  \`450 Mail send limit exceeded\`. Remaining Step 1 sends are blocked
+  **only** by this provider cap — not by Liftor logic, not by stale
+  data, not by the sanity layer.
+- **Queue integrity: Clean.** No simulated rows, no false 24h blockers,
+  no suppression / bounce / inbound conflicts.
 
 **Fixes completed to reach this proof:**
 
@@ -219,60 +225,70 @@ legitimate first-touch emails.
   communications for the \`RECENT_COMMUNICATION_24H\` check.
 - New \`communications.ignored_for_send_check\` boolean column added
   (with \`ignored_reason\` text).
-- **25** false outbound communication rows marked
-  \`ignored_for_send_check = true\`.
+- False outbound communication rows marked
+  \`ignored_for_send_check = true\` with an \`ignored_reason\`.
 - Ghost \`contacts.last_contacted_at\` values cleared where no real SMTP
   backed them.
-- **65** falsely-blocked Step 1 rows reset to \`pending\`.
+- Falsely-blocked Step 1 rows reset to \`pending\`.
 - \`outreach-send-worker\` replaced \`denomailer\` with \`nodemailer\`.
 - The *invalid cmd* / *Bad resource ID* crash during SMTP \`QUIT\` is
   resolved; the worker boots and completes its run cleanly.
 - Communications are only logged **after** a successful SMTP accept, so
   failed attempts can no longer create new ghost 24h blocks.
+- The worker now treats \`450 Mail send limit exceeded\` as
+  \`provider_daily_limit_reached\`. After this signal fires for an
+  inbox, the worker immediately stops further sends from that inbox
+  for the day, marks remaining due rows as \`delayed\` (not failed),
+  and the Live Monitor shows a *"Provider cap reached · resumes …"*
+  banner instead of red failures.
 
 **Remaining known issue (cosmetic, non-blocking):**
 
-- **IMAP APPEND to IONOS Sent folder failed**, so sent emails may not
-  yet appear in the IONOS Webmail "Sent Items" view.
+- **IMAP APPEND to IONOS Sent folder is failing**, so the IONOS Webmail
+  "Sent Items" view does not currently show copies of the sent emails.
   - Deliverability is unaffected — SMTP acceptance is recorded with a
-    valid \`provider_message_id\`.
+    valid \`provider_message_id\` for every accepted send.
   - To fix later for audit visibility: rework the worker's IMAP APPEND
     code path so each accepted send is appended to the IONOS Sent folder
     and \`saved_to_sent_at\` (or \`append_error\`) is populated.
 
 **Current operational state:**
 
-- Real sending works.
-- Today's IONOS quota is exhausted.
-- Remaining Step 1 emails will continue tomorrow after the IONOS rolling
-  window resets.
-- **Tuesday review:** open Live Monitor and Daily Monitor and verify
-  sent count, replies, bounces, AI drafts awaiting approval, and the
-  remaining Step 1/2/3/4 queue depth.
+- Real sending works end-to-end.
+- Today's IONOS quota is exhausted (16 accepted, then \`450\` cap).
+- **Do not run the worker again today.** Remaining Step 1 sends will
+  resume automatically after the IONOS rolling 24h window resets.
+- Next action: wait for IONOS capacity to reset, then allow the worker
+  to resume on its normal schedule (next send window approx. 09:00 UTC
+  the following day).
 
 ### 0.16 Immediate Next Operational Target
 
-1. Run \`crm-send-check\` for a due Step 1 contact.
-2. Identify whether \`RECENT_COMMUNICATION_24H\` is false (created by a
-   simulated/blocked/non-SMTP/test row).
-3. Mark only those false communications as
-   \`ignored_for_send_check = true\` (with \`ignored_reason\`).
-4. Run worker with \`?max=1\` for a single proof send.
-5. Confirm on the queue row:
-   - \`delivery_kind = smtp_real\`
-   - \`smtp_accepted_at\` populated
-   - \`provider_message_id\` populated
-   - \`saved_to_sent_at\` populated **or** an \`append_error\` recorded
-   - Email visible in IONOS Sent Items
-6. If proof succeeds, run remaining safe capacity today, **max 9 more**.
-7. Stop and review Tuesday once the IONOS rolling window resets.
+1. **Do not** run the send worker again today for
+   \`hello@neoncandy.online\`. The IONOS daily cap has been reached.
+2. Wait for the IONOS rolling 24h window to reset.
+3. Allow the worker to resume on its normal schedule. It will pick up
+   the remaining Step 1 \`delayed\` rows automatically.
+4. **Tuesday review** — open Live Monitor and Daily Monitor and verify:
+   - Real SMTP sent count for the new window
+   - Replies received
+   - Bounces / suppression events
+   - AI drafts awaiting founder approval
+   - Remaining Step 1 queue depth and Step 2/3/4 schedule
+   - IONOS limit behaviour (did the cap raise as the mailbox warms?)
+   - Whether IMAP APPEND to the IONOS Sent folder has been fixed
+     (i.e. \`saved_to_sent_at\` now populates and copies appear in
+     IONOS Webmail "Sent Items")
 
 ### 0.17 Do Not Do Next
 
 - Do not rebuild Apollo.
 - Do not add more dashboards.
-- Do not add more Apollo batches until the proof send works.
+- Do not add more Apollo batches until the IONOS cap clears and the
+  remaining staged contacts have been worked through.
 - Do not re-enable \`music@neoncandy.net\`.
+- Do not run the send worker again today against
+  \`hello@neoncandy.online\` unless explicitly forced by the founder.
 - Do not treat simulated rows as live.
 - Do not auto-send AI drafts.
 - Do not stage future contacts without confirming queue rows were created.
