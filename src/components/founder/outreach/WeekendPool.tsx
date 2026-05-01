@@ -536,14 +536,61 @@ export function WeekendPool({ onOpenRuns }: { onOpenRuns?: () => void }) {
         <div>
           <h2 className="text-xl font-semibold">Build weekend pool</h2>
           <p className="text-sm text-muted-foreground">
-            Build ~{TARGET_POOL} approved NeonCandy contacts in 25-at-a-time Apollo batches so Liftor can work the pool through Tuesday.
+            One-click build to {TARGET_POOL} approved NeonCandy contacts. Liftor reuses already-found candidates first, then fetches more pages only if needed.
           </p>
         </div>
-        <Button size="sm" variant="outline" onClick={load} disabled={loading}>
-          {loading ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <RefreshCw className="mr-1 h-3 w-3" />}
-          Refresh
-        </Button>
+        <div className="flex gap-2">
+          {building ? (
+            <Button size="sm" variant="destructive" onClick={() => setBuildAbort(true)}>
+              <StopCircle className="mr-1 h-3 w-3" /> Stop after current chunk
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              onClick={buildPoolToTarget}
+              disabled={loading || !segmentId || queueBlock.length > 0 || (poolReady + poolStaged) >= TARGET_POOL}
+            >
+              <Rocket className="mr-1 h-3 w-3" /> Build pool to {TARGET_POOL} now
+            </Button>
+          )}
+          <Button size="sm" variant="outline" onClick={load} disabled={loading || building}>
+            {loading ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <RefreshCw className="mr-1 h-3 w-3" />}
+            Refresh
+          </Button>
+        </div>
       </div>
+
+      <Card className="border-primary/40 bg-primary/5">
+        <CardContent className="space-y-2 p-4 text-sm">
+          <div className="font-medium">
+            {(() => {
+              const cur = poolReady + poolStaged;
+              const need = Math.max(TARGET_POOL - cur, 0);
+              return need === 0
+                ? `✅ Target reached: ${cur}/${TARGET_POOL} approved contacts.`
+                : `Need ${need} more Ready-to-stage contact${need === 1 ? "" : "s"} to reach ${TARGET_POOL}. (Current pool: ${cur})`;
+            })()}
+          </div>
+          <div className="text-xs text-muted-foreground">
+            "Build pool to {TARGET_POOL} now" will: (1) use already-found good-fit candidates first,
+            (2) only fetch additional Apollo pages if needed, (3) stop on credit cap / queue issue / no good-fit candidates,
+            (4) require credit-spend confirmation before any enrichment.
+          </div>
+          {building && buildLog.length > 0 && (
+            <div className="mt-2 max-h-48 overflow-auto rounded border bg-background/60 p-2 text-xs font-mono">
+              {buildLog.map((l, i) => <div key={i}>{l}</div>)}
+            </div>
+          )}
+          {!building && buildLog.length > 0 && (
+            <details className="mt-2">
+              <summary className="cursor-pointer text-xs text-muted-foreground">Show last build log ({buildLog.length} lines)</summary>
+              <div className="mt-1 max-h-48 overflow-auto rounded border bg-background/60 p-2 text-xs font-mono">
+                {buildLog.map((l, i) => <div key={i}>{l}</div>)}
+              </div>
+            </details>
+          )}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader><CardTitle className="text-base">Current pool status</CardTitle></CardHeader>
