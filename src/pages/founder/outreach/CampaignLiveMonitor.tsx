@@ -33,6 +33,12 @@ type QueueItem = {
   id: string; contact_id: string; campaign_id: string; sequence_step: number;
   scheduled_at: string; status: string; inbox_id: string | null;
   block_reason: string | null; sent_at: string | null; retry_count: number | null;
+  smtp_accepted_at?: string | null;
+  saved_to_sent_at?: string | null;
+  provider_message_id?: string | null;
+  provider_response?: string | null;
+  send_error?: string | null;
+  delivery_kind?: string | null;
 };
 type Inbound = {
   id: string; from_email: string; subject: string | null; received_at: string;
@@ -124,7 +130,7 @@ const CampaignLiveMonitor = () => {
         // Queue for the campaign
         const { data: q } = await supabase
           .from("email_queue")
-          .select("id,contact_id,campaign_id,sequence_step,scheduled_at,status,inbox_id,block_reason,sent_at,retry_count")
+          .select("id,contact_id,campaign_id,sequence_step,scheduled_at,status,inbox_id,block_reason,sent_at,retry_count,smtp_accepted_at,saved_to_sent_at,provider_message_id,provider_response,send_error,delivery_kind")
           .eq("campaign_id", camp.id)
           .order("scheduled_at", { ascending: false }).limit(100);
         const qItems = (q as QueueItem[] | null) ?? [];
@@ -361,6 +367,80 @@ const CampaignLiveMonitor = () => {
             )}
           </div>
         )}
+
+        {/* Verify sent mail */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4" />Verify sent mail (today)
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm">
+            {(() => {
+              const sentTodayRows = sentToday;
+              const smtpAccepted = sentTodayRows.filter((q) => !!q.smtp_accepted_at && q.delivery_kind === "smtp_real");
+              const savedToSent = sentTodayRows.filter((q) => !!q.saved_to_sent_at);
+              const simulated = sentTodayRows.filter((q) => q.delivery_kind === "simulated" || (!q.smtp_accepted_at && !q.delivery_kind));
+              const failedRows = queue.filter((q) => today(q.scheduled_at) && (q.status === "failed" || q.status === "blocked") && q.send_error);
+              const last5 = smtpAccepted.slice(0, 5);
+              const lastResp = sentTodayRows.find((q) => q.provider_response)?.provider_response ?? "—";
+              return (
+                <>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <StatCard label="Queue marked sent" value={String(sentTodayRows.length)} />
+                    <StatCard label="SMTP accepted" value={String(smtpAccepted.length)} tone={smtpAccepted.length ? "good" : "warn"} />
+                    <StatCard label="Saved to Sent folder" value={String(savedToSent.length)} tone={savedToSent.length ? "good" : "warn"} />
+                    <StatCard label="Simulated only" value={String(simulated.length)} tone={simulated.length ? "warn" : undefined} />
+                  </div>
+                  {simulated.length > 0 && (
+                    <div className="rounded border border-destructive/40 bg-destructive/5 p-2 text-xs">
+                      <strong>{simulated.length}</strong> row(s) marked sent without SMTP confirmation. These were not transmitted to recipients.
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground mb-1">Last 5 SMTP-accepted recipients</p>
+                    {last5.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">No SMTP-confirmed sends today.</p>
+                    ) : (
+                      <ul className="text-xs space-y-1 font-mono">
+                        {last5.map((q) => (
+                          <li key={q.id} className="flex flex-wrap gap-x-3">
+                            <span>{contacts[q.contact_id]?.email ?? q.contact_id}</span>
+                            <span className="text-muted-foreground">{fmtTime(q.smtp_accepted_at)}</span>
+                            <span className="text-muted-foreground truncate max-w-[18rem]" title={q.provider_message_id ?? ""}>
+                              {q.provider_message_id ?? "(no message-id)"}
+                            </span>
+                            {q.saved_to_sent_at ? (
+                              <Badge variant="outline" className="text-[10px]">in Sent folder</Badge>
+                            ) : (
+                              <Badge variant="outline" className="text-[10px] text-muted-foreground">not in Sent folder</Badge>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                  <div className="text-xs">
+                    <span className="font-medium text-muted-foreground">Last SMTP response: </span>
+                    <span className="font-mono">{lastResp}</span>
+                  </div>
+                  {failedRows.length > 0 && (
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground mb-1">Recent send errors</p>
+                      <ul className="text-xs space-y-1">
+                        {failedRows.slice(0, 3).map((q) => (
+                          <li key={q.id} className="font-mono text-destructive truncate" title={q.send_error ?? ""}>
+                            {contacts[q.contact_id]?.email ?? q.contact_id}: {q.send_error}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
+          </CardContent>
+        </Card>
 
         {/* Controls grid */}
         <div className="grid md:grid-cols-2 gap-4">
