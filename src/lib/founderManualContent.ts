@@ -26,7 +26,7 @@ export const generateManualMarkdown = (data: ManualLiveData): string => {
   return `# Liftor AI — Founder Manual
 ## Complete Engineering-Level Platform Documentation
 
-**Version:** 4.2 — NeonCandy Operational Handover (1 May 2026)
+**Version:** 4.2 — NeonCandy Send Proof Achieved (1 May 2026)
 **Generated:** ${now}
 **Classification:** Founder / Internal Engineering / Investor Documentation
 **Status:** Live — Auto-generated from platform state
