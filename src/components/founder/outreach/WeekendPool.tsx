@@ -12,6 +12,8 @@ import {
   CheckCircle2,
   AlertTriangle,
   ArrowRight,
+  Rocket,
+  StopCircle,
 } from "lucide-react";
 
 const BUSINESS = "Neon Candy";
@@ -20,6 +22,8 @@ const SENDER = "hello@neoncandy.online";
 const FORBIDDEN_SENDER = "music@neoncandy.net";
 const TARGET_POOL = 100;
 const BATCH_SIZE = 25;
+const ENRICH_CHUNK = 25;            // per apollo-sync-enrich invocation
+const DAILY_CREDIT_CAP = 200;       // hard ceiling for the auto-builder per UTC day
 
 type Stat = { label: string; value: number | string; tone?: "ok" | "warn" | "bad" | "info" };
 
@@ -97,6 +101,10 @@ export function WeekendPool({ onOpenRuns }: { onOpenRuns?: () => void }) {
   const [senderOk, setSenderOk] = useState(false);
   const [forbiddenOk, setForbiddenOk] = useState(false);
   const [queueBlock, setQueueBlock] = useState<string[]>([]);
+  // ---- Auto-builder state (Build pool to 100) ----
+  const [building, setBuilding] = useState(false);
+  const [buildLog, setBuildLog] = useState<string[]>([]);
+  const [buildAbort, setBuildAbort] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -327,20 +335,262 @@ export function WeekendPool({ onOpenRuns }: { onOpenRuns?: () => void }) {
     void load();
   }
 
+  // -------- Auto-builder: build pool to TARGET_POOL --------
+  function appendLog(line: string) {
+    setBuildLog((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ${line}`]);
+  }
+
+  /**
+   * Read currently-available unenriched, good-fit candidates today.
+   * Returns [{ run_id, apollo_person_ids[] }, ...] in oldest-first order so
+   * existing awaiting-approval runs are consumed before new searches.
+   */
+  async function gatherAvailableCandidates(): Promise<{ runId: string; ids: string[] }[]> {
+    if (!segmentId) return [];
+    const todayStart = new Date(); todayStart.setUTCHours(0, 0, 0, 0);
+    const { data: runs } = await supabase
+      .from("apollo_sync_runs")
+      .select("id,status,errors,created_at")
+      .eq("segment_id", segmentId)
+      .gte("started_at", todayStart.toISOString())
+      .in("status", ["awaiting_enrichment_approval", "enriching", "completed"])
+      .order("created_at", { ascending: true });
+    const out: { runId: string; ids: string[] }[] = [];
+    for (const r of (runs ?? []) as any[]) {
+      // Confirm good fit from diagnostics blob
+      let good = false;
+      try {
+        const errs = (r.errors ?? []) as any[];
+        for (const e of errs) {
+          const parsed = typeof e === "string" ? JSON.parse(e) : e;
+          if (parsed?.segment_fit === "good") { good = true; break; }
+        }
+      } catch (_) { /* ignore */ }
+      if (!good) continue;
+      const { data: leads } = await supabase
+        .from("apollo_leads")
+        .select("apollo_person_id,status,has_email_flag")
+        .eq("run_id", r.id)
+        .eq("has_email_flag", true)
+        .eq("status", "has_email");      // unenriched only
+      const ids = ((leads ?? []) as any[]).map((l) => l.apollo_person_id).filter(Boolean);
+      if (ids.length) out.push({ runId: r.id as string, ids });
+    }
+    return out;
+  }
+
+  async function buildPoolToTarget() {
+    if (!segmentId) {
+      toast({ title: "Segment not found", variant: "destructive" });
+      return;
+    }
+    if (queueBlock.length) {
+      toast({ title: "Queue not clean", description: queueBlock[0], variant: "destructive" });
+      return;
+    }
+    if (!senderOk) {
+      toast({ title: "Sender not live-ready", variant: "destructive" });
+      return;
+    }
+    if (!forbiddenOk) {
+      toast({ title: "Forbidden sender active", variant: "destructive" });
+      return;
+    }
+
+    const currentPool = poolReady + poolStaged;
+    const need = TARGET_POOL - currentPool;
+    if (need <= 0) {
+      toast({ title: "Target reached", description: `Pool already at ${currentPool}/${TARGET_POOL}.` });
+      return;
+    }
+
+    setBuildLog([]);
+    setBuildAbort(false);
+    setBuilding(true);
+    appendLog(`Need ${need} more Ready-to-stage contacts to reach ${TARGET_POOL}.`);
+
+    try {
+      // Step 1: gather already-found, good-fit, unenriched candidates
+      const buckets = await gatherAvailableCandidates();
+      const availableCount = buckets.reduce((n, b) => n + b.ids.length, 0);
+      appendLog(`Found ${availableCount} unenriched good-fit candidate(s) across ${buckets.length} existing run(s).`);
+
+      // Step 2: estimate credits
+      const creditsAvailable = Math.max(DAILY_CREDIT_CAP - counted.creditsSpent, 0);
+      // Heuristic: ~85% conversion candidate→ready-to-stage based on today's runs
+      const conversion = counted.selectedForEnrichment > 0
+        ? Math.max(counted.readyToStage / counted.selectedForEnrichment, 0.5)
+        : 0.85;
+      const estCandidatesNeeded = Math.ceil(need / conversion);
+      const willEnrich = Math.min(estCandidatesNeeded, availableCount, creditsAvailable);
+      const extraSearchesNeeded = Math.max(0, estCandidatesNeeded - availableCount);
+      const additionalSearchPages = Math.ceil(extraSearchesNeeded / BATCH_SIZE);
+      const totalEstCredits = Math.min(estCandidatesNeeded, creditsAvailable);
+
+      const ok = confirm(
+        `Build pool to ${TARGET_POOL}\n\n` +
+        `Current pool: ${currentPool}\nNeed: ${need} more Ready-to-stage contacts\n\n` +
+        `Plan:\n` +
+        `• Use ${Math.min(availableCount, willEnrich)} already-found candidate(s) first (no new search credits)\n` +
+        (additionalSearchPages > 0
+          ? `• Then run up to ${additionalSearchPages} additional search page(s) of ${BATCH_SIZE}\n`
+          : `• No additional search needed\n`) +
+        `• Estimated Apollo enrichment credits: ~${totalEstCredits}\n` +
+        `• Daily cap remaining: ${creditsAvailable} credit(s) (cap ${DAILY_CREDIT_CAP})\n\n` +
+        `Filters still applied: segment_fit=good · skip existing CRM · skip suppressed · email-only · no phone · no AI Research · weak/poor fit blocked.\n\n` +
+        `Continue?`
+      );
+      if (!ok) {
+        appendLog("Cancelled by user.");
+        setBuilding(false);
+        return;
+      }
+
+      // Step 3: process loop
+      let safety = 20; // max iterations
+      while (safety-- > 0) {
+        if (buildAbort) { appendLog("Aborted."); break; }
+
+        // Refresh current pool & credits each iteration
+        const [{ count: rNow }, { count: sNow }] = await Promise.all([
+          supabase.from("business_contact_relationships").select("id", { count: "exact", head: true }).eq("business_name", BUSINESS).eq("current_stage", "ready_to_stage"),
+          supabase.from("business_contact_relationships").select("id", { count: "exact", head: true }).eq("business_name", BUSINESS).eq("current_stage", "staged"),
+        ]);
+        const poolNow = Number(rNow ?? 0) + Number(sNow ?? 0);
+        if (poolNow >= TARGET_POOL) { appendLog(`✅ Target reached (${poolNow}/${TARGET_POOL}).`); break; }
+
+        // Recompute credits spent today
+        const todayStartIso = (() => { const d = new Date(); d.setUTCHours(0,0,0,0); return d.toISOString(); })();
+        const { data: runsToday } = await supabase
+          .from("apollo_sync_runs")
+          .select("apollo_credits_used")
+          .eq("segment_id", segmentId)
+          .gte("started_at", todayStartIso);
+        const creditsToday = (runsToday ?? []).reduce((n, r: any) => n + Number(r.apollo_credits_used ?? 0), 0);
+        const creditsLeft = Math.max(DAILY_CREDIT_CAP - creditsToday, 0);
+        if (creditsLeft <= 0) {
+          appendLog(`Stopped: daily Apollo credit cap reached (${creditsToday}/${DAILY_CREDIT_CAP}).`);
+          break;
+        }
+
+        // Re-check queue integrity
+        const { data: campaign } = await supabase.from("outreach_campaigns").select("id").eq("business_name", BUSINESS).eq("campaign_name", CAMPAIGN_NAME).maybeSingle();
+        const cId = (campaign as any)?.id;
+        if (cId) {
+          const { count: simCount } = await supabase
+            .from("email_queue").select("id", { count: "exact", head: true })
+            .eq("campaign_id", cId).eq("delivery_kind", "simulated").in("status", ["pending","delayed","throttled"]);
+          if (Number(simCount ?? 0) > 0) {
+            appendLog(`Stopped: queue integrity unsafe (${simCount} simulated row(s) active).`);
+            break;
+          }
+        }
+
+        // Find next bucket
+        const fresh = await gatherAvailableCandidates();
+        let nextBucket = fresh.find((b) => b.ids.length > 0);
+
+        if (!nextBucket) {
+          // Need to run a new search page
+          appendLog(`No unenriched candidates left. Running new search page (cap ${BATCH_SIZE})...`);
+          const { data: sData, error: sErr } = await supabase.functions.invoke("apollo-sync-search", { body: { segment_id: segmentId } });
+          if (sErr) { appendLog(`Search failed: ${sErr.message}. Stopping.`); break; }
+          const sr = (sData as any) ?? {};
+          const fit = sr?.diagnostics?.segment_fit ?? "unknown";
+          appendLog(`Search returned ${sr.people_found ?? 0} (with-email ${sr.people_with_email_flag ?? 0}, fit=${fit}).`);
+          if (fit !== "good") { appendLog(`Stopped: latest search fit=${fit}, not good. No enrichment performed.`); break; }
+          if ((sr.people_with_email_flag ?? 0) === 0) { appendLog("Stopped: no candidates with email flag returned."); break; }
+          // loop will pick this run on next iter
+          continue;
+        }
+
+        const chunk = nextBucket.ids.slice(0, Math.min(ENRICH_CHUNK, creditsLeft));
+        appendLog(`Enriching ${chunk.length} candidate(s) from run ${nextBucket.runId.slice(0,8)}…`);
+        const { data: eData, error: eErr } = await supabase.functions.invoke("apollo-sync-enrich", {
+          body: { run_id: nextBucket.runId, selected_apollo_person_ids: chunk },
+        });
+        if (eErr) {
+          appendLog(`Enrichment error: ${eErr.message}. Stopping (no duplicate credits will be spent — safe to resume).`);
+          break;
+        }
+        const er = (eData as any) ?? {};
+        appendLog(`Chunk done · enriched=${er.enriched ?? "?"} · usable_emails=${er.emails_returned ?? "?"} · ready=${er.ready_to_stage ?? "?"} · credits=${er.credits_used ?? chunk.length}.`);
+
+        // brief pause so DB counters update before next iteration
+        await new Promise((r) => setTimeout(r, 800));
+      }
+
+      await load();
+      toast({ title: "Build pool finished", description: "Open the log card below for details." });
+    } catch (err) {
+      appendLog(`Fatal: ${(err as Error).message}`);
+      toast({ title: "Build pool failed", description: (err as Error).message, variant: "destructive" });
+    } finally {
+      setBuilding(false);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <h2 className="text-xl font-semibold">Build weekend pool</h2>
           <p className="text-sm text-muted-foreground">
-            Build ~{TARGET_POOL} approved NeonCandy contacts in 25-at-a-time Apollo batches so Liftor can work the pool through Tuesday.
+            One-click build to {TARGET_POOL} approved NeonCandy contacts. Liftor reuses already-found candidates first, then fetches more pages only if needed.
           </p>
         </div>
-        <Button size="sm" variant="outline" onClick={load} disabled={loading}>
-          {loading ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <RefreshCw className="mr-1 h-3 w-3" />}
-          Refresh
-        </Button>
+        <div className="flex gap-2">
+          {building ? (
+            <Button size="sm" variant="destructive" onClick={() => setBuildAbort(true)}>
+              <StopCircle className="mr-1 h-3 w-3" /> Stop after current chunk
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              onClick={buildPoolToTarget}
+              disabled={loading || !segmentId || queueBlock.length > 0 || (poolReady + poolStaged) >= TARGET_POOL}
+            >
+              <Rocket className="mr-1 h-3 w-3" /> Build pool to {TARGET_POOL} now
+            </Button>
+          )}
+          <Button size="sm" variant="outline" onClick={load} disabled={loading || building}>
+            {loading ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <RefreshCw className="mr-1 h-3 w-3" />}
+            Refresh
+          </Button>
+        </div>
       </div>
+
+      <Card className="border-primary/40 bg-primary/5">
+        <CardContent className="space-y-2 p-4 text-sm">
+          <div className="font-medium">
+            {(() => {
+              const cur = poolReady + poolStaged;
+              const need = Math.max(TARGET_POOL - cur, 0);
+              return need === 0
+                ? `✅ Target reached: ${cur}/${TARGET_POOL} approved contacts.`
+                : `Need ${need} more Ready-to-stage contact${need === 1 ? "" : "s"} to reach ${TARGET_POOL}. (Current pool: ${cur})`;
+            })()}
+          </div>
+          <div className="text-xs text-muted-foreground">
+            "Build pool to {TARGET_POOL} now" will: (1) use already-found good-fit candidates first,
+            (2) only fetch additional Apollo pages if needed, (3) stop on credit cap / queue issue / no good-fit candidates,
+            (4) require credit-spend confirmation before any enrichment.
+          </div>
+          {building && buildLog.length > 0 && (
+            <div className="mt-2 max-h-48 overflow-auto rounded border bg-background/60 p-2 text-xs font-mono">
+              {buildLog.map((l, i) => <div key={i}>{l}</div>)}
+            </div>
+          )}
+          {!building && buildLog.length > 0 && (
+            <details className="mt-2">
+              <summary className="cursor-pointer text-xs text-muted-foreground">Show last build log ({buildLog.length} lines)</summary>
+              <div className="mt-1 max-h-48 overflow-auto rounded border bg-background/60 p-2 text-xs font-mono">
+                {buildLog.map((l, i) => <div key={i}>{l}</div>)}
+              </div>
+            </details>
+          )}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader><CardTitle className="text-base">Current pool status</CardTitle></CardHeader>
@@ -382,8 +632,8 @@ export function WeekendPool({ onOpenRuns }: { onOpenRuns?: () => void }) {
             </div>
             <StatGrid
               stats={[
-                { label: "Existing staged contacts", value: poolStaged, tone: poolStaged > 0 ? "info" : undefined },
-                { label: "Ready to stage", value: poolReady, tone: poolReady > 0 ? "info" : undefined },
+                { label: "Already staged (CRM)", value: poolStaged, tone: poolStaged > 0 ? "info" : undefined },
+                { label: "Ready to stage (CRM, all-time)", value: poolReady, tone: poolReady > 0 ? "info" : undefined },
                 { label: "1. Search candidates found", value: counted.searchFound },
                 { label: "2. Has-email flag candidates", value: counted.hasEmailFlag },
                 { label: "3. Selected for enrichment", value: counted.selectedForEnrichment },
@@ -392,9 +642,10 @@ export function WeekendPool({ onOpenRuns }: { onOpenRuns?: () => void }) {
                 { label: "6. Contacts saved to CRM", value: counted.importedTotal },
                 { label: "7. New contacts created", value: counted.newCreated },
                 { label: "8. Existing contacts updated", value: counted.existingUpdated },
-                { label: "9. Qualified contacts", value: counted.qualified, tone: "ok" },
-                { label: "10. Ready to stage (this run)", value: counted.readyToStage },
-                { label: "Total pool built today", value: poolReady + poolStaged, tone: "info" },
+                { label: "9. Qualified from today's runs", value: counted.qualified, tone: "ok" },
+                { label: "10. Ready to stage (today's runs)", value: counted.readyToStage },
+                { label: "Not stageable today", value: Math.max(counted.qualified - counted.readyToStage, 0), tone: counted.qualified > counted.readyToStage ? "warn" : undefined },
+                { label: "Total pool (ready + staged)", value: poolReady + poolStaged, tone: "info" },
                 { label: "Coverage until Tuesday", value: coverage?.daysCoverage ?? "n/a", tone: coverage?.covered ? "ok" : "warn" },
                 {
                   label: "Active Step 1 pending",
@@ -411,6 +662,12 @@ export function WeekendPool({ onOpenRuns }: { onOpenRuns?: () => void }) {
                 },
               ]}
             />
+            <div className="mt-2 rounded border bg-background/60 p-2 text-xs text-muted-foreground">
+              <strong>Why "Qualified" can be higher than "Ready to stage":</strong> a contact is counted as
+              <em> qualified</em> when its enrichment passes scoring, but only becomes
+              <em> ready to stage</em> after CRM dedupe, suppression checks, and the per-business stage transition.
+              The difference (<strong>{Math.max(counted.qualified - counted.readyToStage, 0)}</strong> today) is held back as duplicates, suppressed, or pending review.
+            </div>
           </div>
 
           <div className="rounded-md border border-amber-500/40 bg-amber-500/5 p-3">
