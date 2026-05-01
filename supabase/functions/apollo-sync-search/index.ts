@@ -80,7 +80,7 @@ Deno.serve(async (req) => {
     }
 
     const errors: any[] = [];
-    const resp = await fetch(`${APOLLO_BASE}/mixed_people/search`, {
+    const resp = await fetch(`${APOLLO_BASE}/mixed_people/api_search`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "Cache-Control": "no-cache", "X-Api-Key": apiKey },
       body: JSON.stringify(searchBody),
