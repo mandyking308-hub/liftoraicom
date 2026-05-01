@@ -353,7 +353,7 @@ export function WeekendPool({ onOpenRuns }: { onOpenRuns?: () => void }) {
       .select("id,status,errors,created_at")
       .eq("segment_id", segmentId)
       .gte("started_at", todayStart.toISOString())
-      .in("status", ["awaiting_enrichment_approval", "partial", "enriching", "completed"])
+      .in("status", ["awaiting_enrichment_approval", "enriching", "completed"])
       .order("created_at", { ascending: true });
     const out: { runId: string; ids: string[] }[] = [];
     for (const r of (runs ?? []) as any[]) {
