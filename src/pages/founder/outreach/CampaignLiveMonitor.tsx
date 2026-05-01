@@ -55,6 +55,7 @@ type Activity = {
   id: string; event_type: string; description: string;
   entity_type: string | null; entity_id: string | null; created_at: string;
 };
+type BcrCounts = { ready_to_stage: number; staged: number; total: number };
 
 function fmtTime(ts: string | null | undefined) {
   if (!ts) return "—";
@@ -86,6 +87,7 @@ const CampaignLiveMonitor = () => {
   const [inbound, setInbound] = useState<Inbound[]>([]);
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [activity, setActivity] = useState<Activity[]>([]);
+  const [bcrCounts, setBcrCounts] = useState<BcrCounts>({ ready_to_stage: 0, staged: 0, total: 0 });
   const [loading, setLoading] = useState(true);
   const [polling, setPolling] = useState(false);
   const [testing, setTesting] = useState(false);
