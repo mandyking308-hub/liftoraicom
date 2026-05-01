@@ -259,7 +259,19 @@ const CampaignLiveMonitor = () => {
   const today = (ts: string | null | undefined) => !!ts && new Date(ts) >= new Date(startOfDayIso);
   const sentToday = queue.filter((q) => q.status === "sent" && today(q.sent_at));
   const queuedToday = queue.filter((q) => ["pending", "delayed", "throttled"].includes(q.status) && today(q.scheduled_at));
-  const failedToday = queue.filter((q) => (q.status === "failed" || q.status === "blocked") && today(q.scheduled_at));
+  // Historical cleanup / legacy blocked rows — exclude from live failure counts
+  const LEGACY_BLOCK_REASONS = new Set([
+    "SIMULATED_PARENT_NOT_SENT",
+    "SIMULATED_LEGACY_QUARANTINED",
+  ]);
+  const isLegacyCleanup = (q: QueueRow) =>
+    (q.status === "blocked" || q.status === "failed") &&
+    !!q.block_reason &&
+    LEGACY_BLOCK_REASONS.has(q.block_reason);
+  const failedToday = queue.filter(
+    (q) => (q.status === "failed" || q.status === "blocked") && today(q.scheduled_at) && !isLegacyCleanup(q),
+  );
+  const legacyCleanupRows = queue.filter(isLegacyCleanup);
   const repliesToday = inbound.filter((i) => today(i.received_at) && !i.is_bounce);
   const bouncesToday = inbound.filter((i) => today(i.received_at) && i.is_bounce);
   const pendingDrafts = drafts.filter((d) => d.status === "pending");
@@ -279,7 +291,7 @@ const CampaignLiveMonitor = () => {
 
   const issues = useMemo(() => {
     const out: Array<{ type: string; severity: "high" | "med"; ts: string; what: string; suggest: string }> = [];
-    queue.filter((q) => q.status === "failed" || q.status === "blocked").slice(0, 10).forEach((q) => {
+    queue.filter((q) => (q.status === "failed" || q.status === "blocked") && !isLegacyCleanup(q)).slice(0, 10).forEach((q) => {
       out.push({
         type: q.status === "blocked" ? "Send blocked" : "Send failed",
         severity: "high",
