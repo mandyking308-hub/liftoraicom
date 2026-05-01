@@ -67,6 +67,21 @@ Deno.serve(async (req) => {
       const { data: inboxId } = await supabase.rpc("assign_inbox_for_contact", { _contact_id: cid });
       if (!inboxId) continue;
 
+      // ---- HARD GUARD: Neon Candy must use hello@neoncandy.online only ----
+      if ((campaign.business_name ?? "").trim().toLowerCase() === "neon candy") {
+        const { data: ix } = await supabase
+          .from("inboxes")
+          .select("email_address, active")
+          .eq("id", inboxId as string)
+          .maybeSingle();
+        const email = (ix as any)?.email_address?.toLowerCase() ?? "";
+        const active = (ix as any)?.active === true;
+        if (email !== "hello@neoncandy.online" || !active) {
+          console.error("NEONCANDY_INVALID_INBOX", { contact: cid, resolved: email, active });
+          continue; // skip this contact entirely
+        }
+      }
+
       for (const seq of sequences) {
         const delay = STEP_DELAYS[seq.step_number] ?? seq.delay_days ?? 0;
         const sched = new Date(baseDate.getTime() + delay * 86_400_000);
