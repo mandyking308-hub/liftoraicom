@@ -307,6 +307,11 @@ Deno.serve(async (req) => {
     const dueFound = due.length;
     const runStart = Date.now();
 
+    // Inboxes that hit a provider daily limit during THIS run. Subsequent
+    // due rows for the same inbox are immediately rescheduled, not attempted.
+    const providerBlockedInboxes = new Map<string, { until: string; reason: string }>();
+    let providerLimitReachedAny = false;
+
     for (let idx = 0; idx < due.length; idx++) {
       // Stop early if we're approaching the function idle timeout. Remaining
       // items stay pending and will be picked up by the next cron tick.
@@ -318,6 +323,43 @@ Deno.serve(async (req) => {
       // Variance between sends (skip jitter on first item)
       if (idx > 0 && sent > 0) {
         await new Promise((r) => setTimeout(r, jitterMs()));
+      }
+
+      // ===== PROVIDER DAILY-LIMIT GUARD (pre-flight) =====
+      // 1) If this inbox already hit the provider cap earlier in THIS run,
+      //    requeue immediately without contacting SMTP.
+      // 2) Otherwise check the persisted inbox.provider_blocked_until in case
+      //    a previous worker invocation set it.
+      if (item.inbox_id) {
+        const inRun = providerBlockedInboxes.get(item.inbox_id);
+        let blockedUntil: string | null = inRun?.until ?? null;
+        let blockReason: string = inRun?.reason ?? "PROVIDER_DAILY_LIMIT_REACHED";
+        if (!blockedUntil) {
+          const { data: ibChk } = await supabase
+            .from("inboxes")
+            .select("provider_blocked_until, provider_blocked_reason")
+            .eq("id", item.inbox_id)
+            .maybeSingle();
+          const until = (ibChk?.provider_blocked_until as string | null) ?? null;
+          if (until && new Date(until).getTime() > Date.now()) {
+            blockedUntil = until;
+            blockReason = (ibChk?.provider_blocked_reason as string | null)
+              ?? "PROVIDER_DAILY_LIMIT_REACHED";
+            providerBlockedInboxes.set(item.inbox_id, { until: blockedUntil, reason: blockReason });
+          }
+        }
+        if (blockedUntil) {
+          await supabase.from("email_queue").update({
+            status: "delayed",
+            block_reason: blockReason,
+            scheduled_at: blockedUntil,
+            send_error: null,
+            provider_response: `Delayed: provider daily limit reached, retry at ${blockedUntil}`,
+          }).eq("id", item.id);
+          delayed += 1;
+          providerLimitReachedAny = true;
+          continue;
+        }
       }
 
       // ===== THROTTLE / WINDOW / REPUTATION CHECK =====
