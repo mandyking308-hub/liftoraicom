@@ -94,6 +94,19 @@ type DiagnosticResult = {
   enrichment?: DiagnosticProbe;
 };
 
+type SearchRunResponse = {
+  people_found?: number;
+  people_with_email_flag?: number;
+};
+
+type EnrichmentRunResponse = {
+  imported?: number;
+  emails_returned?: number;
+  skipped_no_email?: number;
+  duplicate?: number;
+  suppressed?: number;
+};
+
 const statusLabels: Record<string, string> = {
   ok: "ok",
   unverified: "unverified",
@@ -303,7 +316,8 @@ export default function ApolloIntegration() {
       toast({ title: "Search failed", description: error.message, variant: "destructive" });
       return;
     }
-    toast({ title: "Apollo search complete", description: `Found ${(data as any)?.people_found} • with email: ${(data as any)?.people_with_email_flag}. Approve enrichment in Sync Runs tab.` });
+    const result = (data as SearchRunResponse) ?? {};
+    toast({ title: "Apollo search complete", description: `Found ${result.people_found ?? 0} • with email: ${result.people_with_email_flag ?? 0}. Approve enrichment in Sync Runs tab.` });
     loadAll();
   }
 
@@ -316,8 +330,8 @@ export default function ApolloIntegration() {
       toast({ title: "Enrichment failed", description: error.message, variant: "destructive" });
       return;
     }
-    const d = data as any;
-    toast({ title: "Enrichment complete", description: `Imported ${d.imported} • emails returned ${d.emails_returned} • skipped no-email ${d.skipped_no_email} • duplicates ${d.duplicate} • suppressed ${d.suppressed}` });
+    const result = (data as EnrichmentRunResponse) ?? {};
+    toast({ title: "Enrichment complete", description: `Imported ${result.imported ?? 0} • emails returned ${result.emails_returned ?? 0} • skipped no-email ${result.skipped_no_email ?? 0} • duplicates ${result.duplicate ?? 0} • suppressed ${result.suppressed ?? 0}` });
     loadAll();
   }
 
