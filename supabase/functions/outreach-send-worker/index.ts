@@ -58,22 +58,30 @@ async function sendViaIonosSmtp(
   const fromEmail = (c.from_email as string) || (c.smtp_username as string);
   const fromName = (c.from_name as string) || "";
   const replyTo = (c.reply_to_email as string) || fromEmail;
+  let client: SMTPClient | null = null;
   try {
-    const client = new SMTPClient({
+    client = new SMTPClient({
       connection: {
         hostname: c.smtp_host as string,
         port, tls: isSSL,
         auth: { username: c.smtp_username as string, password: c.smtp_password as string },
       },
     });
-    await client.send({
-      from: fromName ? `${fromName} <${fromEmail}>` : fromEmail,
-      to, replyTo, subject, content: body,
-    });
-    await client.close();
+    await withTimeout(
+      client.send({
+        from: fromName ? `${fromName} <${fromEmail}>` : fromEmail,
+        to, replyTo, subject, content: body,
+      }),
+      PER_SEND_BUDGET_MS,
+      "SMTP_SEND",
+    );
     return { ok: true };
   } catch (e) {
     return { ok: false, error: (e as Error).message };
+  } finally {
+    if (client) {
+      try { await withTimeout(client.close(), 3_000, "SMTP_CLOSE"); } catch { /* ignore */ }
+    }
   }
 }
 
