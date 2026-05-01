@@ -542,7 +542,7 @@ function StageConfirmDialog({
           <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={staging}>Cancel</Button>
           <Button onClick={onConfirm} disabled={staging || count === 0}>
             {staging ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : null}
-            Stage selected contacts into campaign
+            Stage into campaign queue
           </Button>
         </DialogFooter>
       </DialogContent>
