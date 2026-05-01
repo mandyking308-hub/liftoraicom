@@ -1276,7 +1276,7 @@ export default function ApolloIntegration() {
   );
 }
 
-function Stat({ label, value }: { label: string; value: number }) {
+function Stat({ label, value }: { label: string; value: number | string }) {
   return (
     <div className="rounded-md border p-2">
       <div className="text-xs text-muted-foreground">{label}</div>
