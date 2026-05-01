@@ -7,12 +7,26 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const PER_RUN_LIMIT = 100;
+const PER_RUN_LIMIT = 25;
+// Hard wall-clock budget for this invocation. Edge Functions hard-cap at 150s
+// idle timeout; we stop accepting new sends well before that.
+const RUN_BUDGET_MS = 90_000;
+// Per-send hard cap (SMTP + sanity-check + DB writes).
+const PER_SEND_BUDGET_MS = 25_000;
 
-// Send variance: random jitter between sends to avoid pattern detection
+// Send variance: small jitter between sends to avoid pattern detection,
+// but bounded so we never exceed the run budget.
 function jitterMs(): number {
-  // 30s → 180s
-  return Math.floor(30_000 + Math.random() * 150_000);
+  // 2s → 8s
+  return Math.floor(2_000 + Math.random() * 6_000);
+}
+
+function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const t = setTimeout(() => reject(new Error(`${label}_TIMEOUT_${ms}ms`)), ms);
+    p.then((v) => { clearTimeout(t); resolve(v); },
+           (e) => { clearTimeout(t); reject(e); });
+  });
 }
 
 type InboxRow = {
