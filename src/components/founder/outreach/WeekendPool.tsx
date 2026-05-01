@@ -225,6 +225,10 @@ export function WeekendPool({ onOpenRuns }: { onOpenRuns?: () => void }) {
       toast({ title: "Segment not found", description: "No NeonCandy Apollo segment exists.", variant: "destructive" });
       return;
     }
+    if (queueBlock.length) {
+      toast({ title: "Queue not clean", description: queueBlock[0], variant: "destructive" });
+      return;
+    }
     if (!senderOk) {
       toast({ title: "Sender not live-ready", description: `${SENDER} is not active/live-ready. Fix before pulling more leads.`, variant: "destructive" });
       return;
