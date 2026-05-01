@@ -61,6 +61,10 @@ export function NeonCandyMonitor() {
   const [weekStats, setWeekStats] = useState<Stat[]>([]);
   const [checks, setChecks] = useState<Check[]>([]);
   const [actions, setActions] = useState<string[]>([]);
+  const [queueBreakdown, setQueueBreakdown] = useState<Stat[] | null>(null);
+  const [queueExplain, setQueueExplain] = useState<string>("");
+  const [queueRows, setQueueRows] = useState<Array<{ email: string; sequence_step: number; status: string; delivery_kind: string | null; scheduled_utc: string | null }>>([]);
+  const [queueWarn, setQueueWarn] = useState<string[]>([]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -144,6 +148,89 @@ export function NeonCandyMonitor() {
       { label: "Bounces today", value: (bounceEventsToday ?? []).length, tone: (bounceEventsToday ?? []).length > 0 ? "warn" : undefined },
       { label: "Suppressed today", value: (unsubEventsToday ?? []).length },
     ]);
+
+    // ----- Queue breakdown (campaign-scoped, by step + status + delivery_kind) -----
+    if (campaignId) {
+      const { data: rows } = await supabase
+        .from("email_queue")
+        .select("id,contact_id,sequence_step,status,delivery_kind,scheduled_at,sent_at,send_error,block_reason,provider_message_id")
+        .eq("campaign_id", campaignId);
+      const all = (rows ?? []) as any[];
+      const now = Date.now();
+
+      const isPending = (r: any) => r.status === "pending";
+      const stepCount = (step: number) =>
+        all.filter((r) => isPending(r) && r.sequence_step === step).length;
+      const delayed = all.filter((r) =>
+        isPending(r) && r.scheduled_at && new Date(r.scheduled_at).getTime() > now,
+      ).length;
+      const dueNow = all.filter((r) =>
+        isPending(r) && (!r.scheduled_at || new Date(r.scheduled_at).getTime() <= now),
+      ).length;
+      const blocked = all.filter((r) => r.status === "blocked").length;
+      const failed = all.filter((r) => r.status === "failed").length;
+      const sentReal = all.filter(
+        (r) => r.status === "sent" && r.delivery_kind !== "simulated" && !!r.provider_message_id,
+      ).length;
+      const simulated = all.filter((r) => r.delivery_kind === "simulated").length;
+
+      const step1 = stepCount(1);
+      const step2 = stepCount(2);
+      const step3 = stepCount(3);
+      const step4 = stepCount(4);
+
+      setQueueBreakdown([
+        { label: "Pending Step 1 (new outreach)", value: step1, tone: step1 > 0 ? "info" : undefined },
+        { label: "Pending Step 2 follow-up", value: step2 },
+        { label: "Pending Step 3 follow-up", value: step3 },
+        { label: "Pending Step 4 follow-up", value: step4 },
+        { label: "Delayed (scheduled in future)", value: delayed, tone: "info" },
+        { label: "Due now (within sender limits)", value: dueNow, tone: dueNow > 0 ? "warn" : undefined },
+        { label: "Blocked", value: blocked, tone: blocked > 0 ? "warn" : undefined },
+        { label: "Failed", value: failed, tone: failed > 0 ? "bad" : undefined },
+        { label: "Sent (real SMTP, all-time)", value: sentReal, tone: "ok" },
+        { label: "Simulated rows (should be 0)", value: simulated, tone: simulated > 0 ? "bad" : "ok" },
+      ]);
+
+      const totalPending = step1 + step2 + step3 + step4;
+      const followups = step2 + step3 + step4;
+      const explain =
+        totalPending === 0
+          ? "Queue is empty — no pending Step 1 or follow-up sends scheduled."
+          : `${totalPending} queued = ${step1} Step 1 send${step1 === 1 ? "" : "s"} + ${followups} follow-up${followups === 1 ? "" : "s"} (Step 2/3/4). They will send only when due and within sender ramp / daily cap / send-window limits.`;
+      setQueueExplain(explain);
+
+      // Pull contact emails for the rows for transparency
+      const contactIds = Array.from(new Set(all.map((r) => r.contact_id).filter(Boolean)));
+      let emailById = new Map<string, string>();
+      if (contactIds.length) {
+        const { data: cts } = await supabase.from("contacts").select("id,email").in("id", contactIds);
+        emailById = new Map((cts ?? []).map((c: any) => [c.id, c.email]));
+      }
+      setQueueRows(
+        all
+          .sort((a, b) => (a.sequence_step ?? 0) - (b.sequence_step ?? 0) || (a.scheduled_at ?? "").localeCompare(b.scheduled_at ?? ""))
+          .map((r) => ({
+            email: emailById.get(r.contact_id) ?? "(unknown)",
+            sequence_step: r.sequence_step,
+            status: r.status,
+            delivery_kind: r.delivery_kind,
+            scheduled_utc: r.scheduled_at ? new Date(r.scheduled_at).toISOString().replace("T", " ").slice(0, 16) + " UTC" : null,
+          })),
+      );
+
+      const warns: string[] = [];
+      if (simulated > 0) warns.push(`${simulated} simulated row(s) detected — these are stale/legacy and should be cleaned up before staging more contacts.`);
+      if (step1 === 0 && followups > 0) warns.push(`${followups} follow-up(s) are queued but 0 Step 1 sends are pending — verify Step 1 was actually sent before relying on follow-up coverage.`);
+      if (sentReal === 0 && (step2 + step3 + step4) > 0) warns.push("No real SMTP Step 1 sends recorded yet — follow-ups will fire on schedule even though the initial email may not have been delivered.");
+      if (blocked > 0) warns.push(`${blocked} blocked row(s) — review block_reason before staging more.`);
+      setQueueWarn(warns);
+    } else {
+      setQueueBreakdown([]);
+      setQueueExplain("Campaign not found — cannot read queue.");
+      setQueueRows([]);
+      setQueueWarn([]);
+    }
 
     // ----- WEEK summary (last 7 days incl. today) -----
     const [
@@ -274,6 +361,70 @@ export function NeonCandyMonitor() {
         <CardHeader><CardTitle className="text-base">Today (UTC)</CardTitle></CardHeader>
         <CardContent><StatGrid stats={today} /></CardContent>
       </Card>
+
+      {queueBreakdown && (
+        <Card className={queueWarn.length ? "border-amber-500/40" : ""}>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              {queueWarn.length ? <AlertTriangle className="h-4 w-4 text-amber-500" /> : <CheckCircle2 className="h-4 w-4 text-emerald-500" />}
+              Email queue breakdown — {CAMPAIGN_NAME}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <StatGrid stats={queueBreakdown} />
+            <div className="rounded-md border bg-muted/30 p-3 text-sm">{queueExplain}</div>
+            {queueWarn.length > 0 && (
+              <div className="rounded-md border border-amber-500/40 bg-amber-500/5 p-3 text-sm">
+                <div className="mb-1 font-medium text-amber-700">Hold staging until resolved:</div>
+                <ul className="ml-5 list-disc text-xs">
+                  {queueWarn.map((w) => <li key={w}>{w}</li>)}
+                </ul>
+              </div>
+            )}
+            {queueRows.length > 0 && (
+              <details className="rounded-md border bg-muted/20 p-2 text-sm">
+                <summary className="cursor-pointer select-none px-1 py-0.5 font-medium">
+                  Show all {queueRows.length} queue row(s) with contact + step + schedule
+                </summary>
+                <div className="mt-2 max-h-72 overflow-auto">
+                  <table className="w-full text-xs">
+                    <thead className="sticky top-0 bg-muted/60 text-left uppercase">
+                      <tr>
+                        <th className="p-1.5">Email</th>
+                        <th className="p-1.5">Step</th>
+                        <th className="p-1.5">Status</th>
+                        <th className="p-1.5">Delivery</th>
+                        <th className="p-1.5">Scheduled</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {queueRows.map((r, i) => (
+                        <tr key={i} className="border-t">
+                          <td className="p-1.5">{r.email}</td>
+                          <td className="p-1.5">{r.sequence_step}</td>
+                          <td className="p-1.5">
+                            <Badge variant={r.status === "sent" ? "default" : r.status === "failed" ? "destructive" : "outline"}>
+                              {r.status}
+                            </Badge>
+                          </td>
+                          <td className="p-1.5">
+                            {r.delivery_kind === "simulated" ? (
+                              <Badge variant="destructive">simulated</Badge>
+                            ) : (
+                              <span className="text-muted-foreground">{r.delivery_kind ?? "real"}</span>
+                            )}
+                          </td>
+                          <td className="p-1.5">{r.scheduled_utc ?? "—"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </details>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>
