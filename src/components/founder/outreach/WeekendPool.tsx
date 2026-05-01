@@ -12,6 +12,8 @@ import {
   CheckCircle2,
   AlertTriangle,
   ArrowRight,
+  Rocket,
+  StopCircle,
 } from "lucide-react";
 
 const BUSINESS = "Neon Candy";
@@ -20,6 +22,8 @@ const SENDER = "hello@neoncandy.online";
 const FORBIDDEN_SENDER = "music@neoncandy.net";
 const TARGET_POOL = 100;
 const BATCH_SIZE = 25;
+const ENRICH_CHUNK = 25;            // per apollo-sync-enrich invocation
+const DAILY_CREDIT_CAP = 200;       // hard ceiling for the auto-builder per UTC day
 
 type Stat = { label: string; value: number | string; tone?: "ok" | "warn" | "bad" | "info" };
 
