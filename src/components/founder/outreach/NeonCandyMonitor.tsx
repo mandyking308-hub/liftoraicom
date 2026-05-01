@@ -149,6 +149,89 @@ export function NeonCandyMonitor() {
       { label: "Suppressed today", value: (unsubEventsToday ?? []).length },
     ]);
 
+    // ----- Queue breakdown (campaign-scoped, by step + status + delivery_kind) -----
+    if (campaignId) {
+      const { data: rows } = await supabase
+        .from("email_queue")
+        .select("id,contact_id,sequence_step,status,delivery_kind,scheduled_at,sent_at,send_error,block_reason,provider_message_id")
+        .eq("campaign_id", campaignId);
+      const all = (rows ?? []) as any[];
+      const now = Date.now();
+
+      const isPending = (r: any) => r.status === "pending";
+      const stepCount = (step: number) =>
+        all.filter((r) => isPending(r) && r.sequence_step === step).length;
+      const delayed = all.filter((r) =>
+        isPending(r) && r.scheduled_at && new Date(r.scheduled_at).getTime() > now,
+      ).length;
+      const dueNow = all.filter((r) =>
+        isPending(r) && (!r.scheduled_at || new Date(r.scheduled_at).getTime() <= now),
+      ).length;
+      const blocked = all.filter((r) => r.status === "blocked").length;
+      const failed = all.filter((r) => r.status === "failed").length;
+      const sentReal = all.filter(
+        (r) => r.status === "sent" && r.delivery_kind !== "simulated" && !!r.provider_message_id,
+      ).length;
+      const simulated = all.filter((r) => r.delivery_kind === "simulated").length;
+
+      const step1 = stepCount(1);
+      const step2 = stepCount(2);
+      const step3 = stepCount(3);
+      const step4 = stepCount(4);
+
+      setQueueBreakdown([
+        { label: "Pending Step 1 (new outreach)", value: step1, tone: step1 > 0 ? "info" : undefined },
+        { label: "Pending Step 2 follow-up", value: step2 },
+        { label: "Pending Step 3 follow-up", value: step3 },
+        { label: "Pending Step 4 follow-up", value: step4 },
+        { label: "Delayed (scheduled in future)", value: delayed, tone: "info" },
+        { label: "Due now (within sender limits)", value: dueNow, tone: dueNow > 0 ? "warn" : undefined },
+        { label: "Blocked", value: blocked, tone: blocked > 0 ? "warn" : undefined },
+        { label: "Failed", value: failed, tone: failed > 0 ? "bad" : undefined },
+        { label: "Sent (real SMTP, all-time)", value: sentReal, tone: "ok" },
+        { label: "Simulated rows (should be 0)", value: simulated, tone: simulated > 0 ? "bad" : "ok" },
+      ]);
+
+      const totalPending = step1 + step2 + step3 + step4;
+      const followups = step2 + step3 + step4;
+      const explain =
+        totalPending === 0
+          ? "Queue is empty — no pending Step 1 or follow-up sends scheduled."
+          : `${totalPending} queued = ${step1} Step 1 send${step1 === 1 ? "" : "s"} + ${followups} follow-up${followups === 1 ? "" : "s"} (Step 2/3/4). They will send only when due and within sender ramp / daily cap / send-window limits.`;
+      setQueueExplain(explain);
+
+      // Pull contact emails for the rows for transparency
+      const contactIds = Array.from(new Set(all.map((r) => r.contact_id).filter(Boolean)));
+      let emailById = new Map<string, string>();
+      if (contactIds.length) {
+        const { data: cts } = await supabase.from("contacts").select("id,email").in("id", contactIds);
+        emailById = new Map((cts ?? []).map((c: any) => [c.id, c.email]));
+      }
+      setQueueRows(
+        all
+          .sort((a, b) => (a.sequence_step ?? 0) - (b.sequence_step ?? 0) || (a.scheduled_at ?? "").localeCompare(b.scheduled_at ?? ""))
+          .map((r) => ({
+            email: emailById.get(r.contact_id) ?? "(unknown)",
+            sequence_step: r.sequence_step,
+            status: r.status,
+            delivery_kind: r.delivery_kind,
+            scheduled_utc: r.scheduled_at ? new Date(r.scheduled_at).toISOString().replace("T", " ").slice(0, 16) + " UTC" : null,
+          })),
+      );
+
+      const warns: string[] = [];
+      if (simulated > 0) warns.push(`${simulated} simulated row(s) detected — these are stale/legacy and should be cleaned up before staging more contacts.`);
+      if (step1 === 0 && followups > 0) warns.push(`${followups} follow-up(s) are queued but 0 Step 1 sends are pending — verify Step 1 was actually sent before relying on follow-up coverage.`);
+      if (sentReal === 0 && (step2 + step3 + step4) > 0) warns.push("No real SMTP Step 1 sends recorded yet — follow-ups will fire on schedule even though the initial email may not have been delivered.");
+      if (blocked > 0) warns.push(`${blocked} blocked row(s) — review block_reason before staging more.`);
+      setQueueWarn(warns);
+    } else {
+      setQueueBreakdown([]);
+      setQueueExplain("Campaign not found — cannot read queue.");
+      setQueueRows([]);
+      setQueueWarn([]);
+    }
+
     // ----- WEEK summary (last 7 days incl. today) -----
     const [
       { data: weekAuto },
