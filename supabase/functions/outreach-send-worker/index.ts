@@ -190,6 +190,7 @@ async function sendViaIonosSmtp(
     `\r\n` +
     body;
   let client: SMTPClient | null = null;
+  let sendOk = false;
   try {
     client = new SMTPClient({
       connection: {
@@ -207,12 +208,24 @@ async function sendViaIonosSmtp(
       PER_SEND_BUDGET_MS,
       "SMTP_SEND",
     );
+    sendOk = true;
     return { ok: true, messageId, rfc822, fromAddress: fromEmail };
   } catch (e) {
-    return { ok: false, error: (e as Error).message };
+    const msg = (e as Error).message;
+    // If denomailer throws AFTER the message was already accepted (typically
+    // an "invalid cmd" during QUIT), do not falsely mark the send as failed.
+    if (sendOk) {
+      console.warn("[outreach-send-worker] post-send smtp error ignored:", msg);
+      return { ok: true, messageId, rfc822, fromAddress: fromEmail };
+    }
+    return { ok: false, error: msg };
   } finally {
     if (client) {
-      try { await withTimeout(client.close(), 3_000, "SMTP_CLOSE"); } catch { /* ignore */ }
+      try {
+        await withTimeout(client.close(), 3_000, "SMTP_CLOSE");
+      } catch (closeErr) {
+        console.warn("[outreach-send-worker] smtp close error ignored:", (closeErr as Error).message);
+      }
     }
   }
 }
