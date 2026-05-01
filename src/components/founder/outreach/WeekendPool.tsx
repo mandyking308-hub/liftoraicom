@@ -736,6 +736,18 @@ export function WeekendPool({ onOpenRuns }: { onOpenRuns?: () => void }) {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
+          <div className="rounded-md border border-primary/30 bg-primary/5 p-3 text-xs">
+            <div className="mb-1 font-medium text-foreground">Apollo pagination state</div>
+            <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+              <div><span className="text-muted-foreground">Last page processed:</span> <strong>{pagination.lastPageProcessed ?? "—"}</strong></div>
+              <div><span className="text-muted-foreground">Next page to fetch:</span> <strong>{pagination.nextPage}</strong></div>
+              <div><span className="text-muted-foreground">Seen Apollo candidates:</span> <strong>{pagination.seenCount}</strong></div>
+              <div><span className="text-muted-foreground">Last batch unseen / skipped seen:</span> <strong>{lastBatchPage ? `${lastBatchPage.unseen} / ${lastBatchPage.skippedSeen}` : "—"}</strong></div>
+            </div>
+            <div className="mt-2 text-muted-foreground">
+              Each new batch fetches <strong>page {pagination.nextPage}</strong> with per_page {BATCH_SIZE}. If a page is mostly already-seen candidates, the search auto-advances to the next page (up to 6 pages) before charging any enrichment credits.
+            </div>
+          </div>
           {queueBlock.length > 0 && (
             <div className="rounded-md border border-amber-500/40 bg-amber-500/5 p-3 text-sm">
               <div className="mb-1 flex items-center gap-2 font-medium text-amber-700">
