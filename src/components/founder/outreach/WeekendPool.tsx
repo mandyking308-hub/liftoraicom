@@ -65,6 +65,9 @@ type BatchRow = {
   qualified_count: number;
   ready_to_stage_count: number;
   apollo_credits_used: number | null;
+  page_fetched?: number | null;
+  unseen_in_batch?: number | null;
+  skipped_already_seen?: number | null;
 };
 
 export function WeekendPool({ onOpenRuns }: { onOpenRuns?: () => void }) {
@@ -105,6 +108,14 @@ export function WeekendPool({ onOpenRuns }: { onOpenRuns?: () => void }) {
   const [building, setBuilding] = useState(false);
   const [buildLog, setBuildLog] = useState<string[]>([]);
   const [buildAbort, setBuildAbort] = useState(false);
+  // ---- Pagination state mirrored from the segment ----
+  const [pagination, setPagination] = useState<{
+    currentPage: number;
+    nextPage: number;
+    lastPageProcessed: number | null;
+    seenCount: number;
+  }>({ currentPage: 1, nextPage: 1, lastPageProcessed: null, seenCount: 0 });
+  const [lastBatchPage, setLastBatchPage] = useState<{ page: number; unseen: number; skippedSeen: number } | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -113,7 +124,7 @@ export function WeekendPool({ onOpenRuns }: { onOpenRuns?: () => void }) {
     const todayDate = new Date().toISOString().slice(0, 10);
 
     const [{ data: segment }, { data: campaign }, { data: inbox }, { data: forbidden }] = await Promise.all([
-      supabase.from("apollo_sync_segments").select("id,segment_name,max_contacts_per_run").eq("business_name", BUSINESS).maybeSingle(),
+      supabase.from("apollo_sync_segments").select("id,segment_name,max_contacts_per_run,current_page,next_page,last_page_processed,apollo_person_ids_seen").eq("business_name", BUSINESS).maybeSingle(),
       supabase.from("outreach_campaigns").select("id,status").eq("business_name", BUSINESS).eq("campaign_name", CAMPAIGN_NAME).maybeSingle(),
       supabase.from("inboxes").select("id,active,daily_send_limit,emails_sent_today,paused_reason,live_readiness").eq("business_name", BUSINESS).eq("email_address", SENDER).maybeSingle(),
       supabase.from("inboxes").select("id,active").eq("business_name", BUSINESS).eq("email_address", FORBIDDEN_SENDER).maybeSingle(),
@@ -121,6 +132,13 @@ export function WeekendPool({ onOpenRuns }: { onOpenRuns?: () => void }) {
 
     const segId = (segment as any)?.id ?? null;
     setSegmentId(segId);
+    const segRow = segment as any;
+    setPagination({
+      currentPage: Number(segRow?.current_page ?? 1),
+      nextPage: Number(segRow?.next_page ?? 1),
+      lastPageProcessed: segRow?.last_page_processed ?? null,
+      seenCount: Array.isArray(segRow?.apollo_person_ids_seen) ? segRow.apollo_person_ids_seen.length : 0,
+    });
     const campaignId = (campaign as any)?.id ?? null;
     const inb = inbox as any;
     setSenderOk(!!inb?.active && inb?.live_readiness === "live_ready" && !inb?.paused_reason);
@@ -232,12 +250,21 @@ export function WeekendPool({ onOpenRuns }: { onOpenRuns?: () => void }) {
     if (segId) {
       const { data: runs } = await supabase
         .from("apollo_sync_runs")
-        .select("id,started_at,status,people_found,people_with_email_flag,enrichment_attempted,emails_returned,contacts_imported,contacts_new,contacts_updated,qualified_count,ready_to_stage_count,apollo_credits_used")
+        .select("id,started_at,status,people_found,people_with_email_flag,enrichment_attempted,emails_returned,contacts_imported,contacts_new,contacts_updated,qualified_count,ready_to_stage_count,apollo_credits_used,page_fetched,unseen_in_batch,skipped_already_seen")
         .eq("segment_id", segId)
         .gte("started_at", todayStart)
         .order("started_at", { ascending: false });
       const list = (runs ?? []) as BatchRow[];
       setBatches(list);
+
+      const latest = list.find((r: any) => r.page_fetched != null) as any;
+      if (latest) {
+        setLastBatchPage({
+          page: Number(latest.page_fetched ?? 0),
+          unseen: Number(latest.unseen_in_batch ?? 0),
+          skippedSeen: Number(latest.skipped_already_seen ?? 0),
+        });
+      }
 
       const COUNTED_STATUSES = new Set(["completed", "partial", "enriching"]);
       const AUDIT_STATUSES = new Set(["awaiting_enrichment_approval", "search_running", "cancelled", "failed", "search_failed", "enrichment_failed"]);
@@ -709,6 +736,18 @@ export function WeekendPool({ onOpenRuns }: { onOpenRuns?: () => void }) {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
+          <div className="rounded-md border border-primary/30 bg-primary/5 p-3 text-xs">
+            <div className="mb-1 font-medium text-foreground">Apollo pagination state</div>
+            <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+              <div><span className="text-muted-foreground">Last page processed:</span> <strong>{pagination.lastPageProcessed ?? "—"}</strong></div>
+              <div><span className="text-muted-foreground">Next page to fetch:</span> <strong>{pagination.nextPage}</strong></div>
+              <div><span className="text-muted-foreground">Seen Apollo candidates:</span> <strong>{pagination.seenCount}</strong></div>
+              <div><span className="text-muted-foreground">Last batch unseen / skipped seen:</span> <strong>{lastBatchPage ? `${lastBatchPage.unseen} / ${lastBatchPage.skippedSeen}` : "—"}</strong></div>
+            </div>
+            <div className="mt-2 text-muted-foreground">
+              Each new batch fetches <strong>page {pagination.nextPage}</strong> with per_page {BATCH_SIZE}. If a page is mostly already-seen candidates, the search auto-advances to the next page (up to 6 pages) before charging any enrichment credits.
+            </div>
+          </div>
           {queueBlock.length > 0 && (
             <div className="rounded-md border border-amber-500/40 bg-amber-500/5 p-3 text-sm">
               <div className="mb-1 flex items-center gap-2 font-medium text-amber-700">
