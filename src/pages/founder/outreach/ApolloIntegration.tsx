@@ -661,22 +661,53 @@ export default function ApolloIntegration() {
                   <p className="text-sm text-muted-foreground">No syncs run yet.</p>
                 ) : (
                   <div className="space-y-3">
-                    {runs.map((run) => (
+                    {runs.map((run) => {
+                      const diag = extractDiagnostics(run.errors);
+                      const fit = diag?.segment_fit;
+                      const showFitWarning = run.status === "awaiting_enrichment_approval" && fit && fit !== "good";
+                      return (
                       <div key={run.id} className="space-y-2 rounded-md border p-4">
                         <div className="flex items-center justify-between">
                           <div>
-                            <div className="font-medium">{run.business_name}</div>
+                            <div className="flex items-center gap-2 font-medium">
+                              {run.business_name}
+                              {fit && <Badge variant={fitBadgeVariant(fit)}>fit: {fit}</Badge>}
+                            </div>
                             <div className="text-xs text-muted-foreground">
                               {new Date(run.started_at).toLocaleString()} • <Badge variant="outline">{run.status}</Badge>
+                              {diag?.search_mode && <> • mode: <code>{diag.search_mode}</code></>}
+                              {diag?.saved_list_id && <> • list: <code>{diag.saved_list_id}</code></>}
                             </div>
                           </div>
                           {run.status === "awaiting_enrichment_approval" && (
-                            <Button size="sm" onClick={() => approveEnrichment(run.id)} disabled={busy === `enrich-${run.id}`}>
-                              {busy === `enrich-${run.id}` ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : null}
-                              Approve enrichment ({run.people_with_email_flag} credits)
-                            </Button>
+                            <div className="flex gap-2">
+                              <Button size="sm" variant="outline" onClick={() => cancelRun(run.id)}>
+                                <Trash2 className="mr-1 h-3 w-3" /> Discard
+                              </Button>
+                              <Button size="sm" onClick={() => approveEnrichment(run.id)} disabled={busy === `enrich-${run.id}` || fit === "poor"}>
+                                {busy === `enrich-${run.id}` ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : null}
+                                Approve enrichment ({run.people_with_email_flag} credits)
+                              </Button>
+                            </div>
                           )}
                         </div>
+                        {showFitWarning && (
+                          <div className="flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm">
+                            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+                            <div>
+                              <div className="font-medium">
+                                {fit === "poor"
+                                  ? "This Apollo source does not match the segment target. Discard and fix the segment before enriching."
+                                  : "This Apollo source may not match the segment target. Review samples below before enriching."}
+                              </div>
+                              {fit === "poor" && (
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                  Enrichment is blocked. Edit the segment (set the correct saved-list ID or switch to criteria search), then re-run.
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        )}
                         <div className="grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
                           <Stat label="Found" value={run.people_found} />
                           <Stat label="Has email flag" value={run.people_with_email_flag} />
@@ -691,6 +722,35 @@ export default function ApolloIntegration() {
                           <Stat label="Not qualified" value={run.not_qualified_count} />
                           <Stat label="Needs review" value={run.needs_review_count} />
                         </div>
+                        {diag && (
+                          <div className="rounded-md border bg-muted/30 p-3 text-xs space-y-2">
+                            <div className="font-medium text-sm">Segment-fit diagnostics</div>
+                            <div className="grid gap-2 sm:grid-cols-2">
+                              <div>
+                                <div className="text-muted-foreground">Fit ratio</div>
+                                <div>{diag.fit_matched ?? 0} / {diag.raw_people_found ?? 0} ({Math.round(((diag.fit_ratio ?? 0) * 100))}%)</div>
+                              </div>
+                              <div>
+                                <div className="text-muted-foreground">Detected tags</div>
+                                <div className="flex flex-wrap gap-1">
+                                  {(diag.detected_tags && diag.detected_tags.length > 0)
+                                    ? diag.detected_tags.map((t) => <Badge key={t} variant="secondary">{t}</Badge>)
+                                    : <span className="text-muted-foreground">none</span>}
+                                </div>
+                              </div>
+                            </div>
+                            {diag.sample_titles && diag.sample_titles.length > 0 && (
+                              <div>
+                                <div className="text-muted-foreground">Sample (first 5)</div>
+                                <ul className="mt-1 list-disc pl-5">
+                                  {diag.sample_titles.map((s, idx) => (
+                                    <li key={idx}>{s.title ?? "—"} <span className="text-muted-foreground">@ {s.company ?? "—"}</span></li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+                        )}
                         {Array.isArray(run.errors) && run.errors.length > 0 && (
                           <details className="text-xs">
                             <summary className="cursor-pointer text-destructive">{run.errors.length} error(s)</summary>
@@ -698,7 +758,8 @@ export default function ApolloIntegration() {
                           </details>
                         )}
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </CardContent>
