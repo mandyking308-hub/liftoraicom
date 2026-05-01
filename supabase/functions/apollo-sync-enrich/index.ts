@@ -8,6 +8,11 @@ const corsHeaders = {
 
 const APOLLO_BASE = "https://api.apollo.io/api/v1";
 const HARD_CAP = 25;
+const CHUNK_SIZE = 5;                       // process at most N leads per invocation
+const EXECUTION_BUDGET_MS = 100_000;        // stop safely before the 150s platform idle timeout
+const APOLLO_BULK_TIMEOUT_MS = 25_000;
+const APOLLO_SINGLE_TIMEOUT_MS = 15_000;
+const DB_OP_TIMEOUT_MS = 10_000;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 interface Body { run_id: string; force?: boolean; selected_apollo_person_ids?: string[]; }
@@ -17,26 +22,46 @@ function json(b: unknown, status: number) {
 }
 
 async function bulkMatch(apiKey: string, ids: string[]) {
-  const resp = await fetch(`${APOLLO_BASE}/people/bulk_match`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "Cache-Control": "no-cache", "X-Api-Key": apiKey },
-    body: JSON.stringify({
-      reveal_personal_emails: false,
-      details: ids.map((id) => ({ id })),
-    }),
-  });
-  const data = await resp.json().catch(() => null);
-  return { ok: resp.ok, status: resp.status, data };
+  try {
+    const resp = await fetch(`${APOLLO_BASE}/people/bulk_match`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Cache-Control": "no-cache", "X-Api-Key": apiKey },
+      body: JSON.stringify({
+        reveal_personal_emails: false,
+        details: ids.map((id) => ({ id })),
+      }),
+      signal: AbortSignal.timeout(APOLLO_BULK_TIMEOUT_MS),
+    });
+    const data = await resp.json().catch(() => null);
+    return { ok: resp.ok, status: resp.status, data };
+  } catch (err) {
+    return { ok: false, status: 0, data: null, error: (err as Error).message };
+  }
 }
 
 async function singleMatch(apiKey: string, id: string) {
-  const resp = await fetch(`${APOLLO_BASE}/people/match?id=${encodeURIComponent(id)}&reveal_personal_emails=false`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "Cache-Control": "no-cache", "X-Api-Key": apiKey },
-    body: JSON.stringify({}),
+  try {
+    const resp = await fetch(`${APOLLO_BASE}/people/match?id=${encodeURIComponent(id)}&reveal_personal_emails=false`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Cache-Control": "no-cache", "X-Api-Key": apiKey },
+      body: JSON.stringify({}),
+      signal: AbortSignal.timeout(APOLLO_SINGLE_TIMEOUT_MS),
+    });
+    const data = await resp.json().catch(() => null);
+    return { ok: resp.ok, status: resp.status, data };
+  } catch (err) {
+    return { ok: false, status: 0, data: null, error: (err as Error).message };
+  }
+}
+
+function withTimeout<T>(p: PromiseLike<T>, ms: number, label: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const t = setTimeout(() => reject(new Error(`timeout:${label}`)), ms);
+    Promise.resolve(p).then(
+      (v) => { clearTimeout(t); resolve(v); },
+      (e) => { clearTimeout(t); reject(e); },
+    );
   });
-  const data = await resp.json().catch(() => null);
-  return { ok: resp.ok, status: resp.status, data };
 }
 
 function isLikelySendable(email: string | null | undefined, status: string | null | undefined): boolean {
@@ -72,7 +97,8 @@ Deno.serve(async (req) => {
     if (run.status === "cancelled") {
       return json({ error: "run_cancelled", detail: "This sync run was cancelled before enrichment." }, 412);
     }
-    if (!["awaiting_enrichment_approval", "search_running"].includes(run.status)) {
+    // Allow resume from "enriching" (previous invocation hit budget) and "completed" (manual top-up).
+    if (!["awaiting_enrichment_approval", "search_running", "enriching", "partial"].includes(run.status)) {
       return json({ error: "run_not_in_enrichable_state", state: run.status }, 412);
     }
 
@@ -102,12 +128,14 @@ Deno.serve(async (req) => {
     const { data: dec } = await supabase.rpc("apollo_decrypt_key", { cipher: conn.api_key_cipher, enc_key: enc });
     const apiKey = dec as string;
 
-    // Pull leads with has_email_flag = true, capped
+    // Pull leads with has_email_flag = true, capped. Skip ones already finalized so resume is credit-safe.
     let leadsQuery = supabase
       .from("apollo_leads")
       .select("*")
       .eq("run_id", run.id)
       .eq("has_email_flag", true)
+      // Skip already-processed states so resume never re-spends Apollo credits.
+      .not("status", "in", "(imported,skipped_no_email,suppressed,error)")
       .limit(HARD_CAP);
     const selectedIds = Array.isArray(body.selected_apollo_person_ids)
       ? body.selected_apollo_person_ids.filter((s) => typeof s === "string" && s.length > 0)
@@ -115,12 +143,18 @@ Deno.serve(async (req) => {
     if (selectedIds && selectedIds.length > 0) {
       leadsQuery = leadsQuery.in("apollo_person_id", selectedIds);
     }
-    const { data: leads, error: leadErr } = await leadsQuery;
+    const { data: allLeads, error: leadErr } = await leadsQuery;
     if (leadErr) return json({ error: leadErr.message }, 500);
 
-    await supabase.from("apollo_sync_runs").update({ status: "enriching" }).eq("id", run.id);
+    // Process at most CHUNK_SIZE per invocation; remainder is resumable.
+    const leads = (allLeads ?? []).slice(0, CHUNK_SIZE);
+    const remainingFromQuery = Math.max(0, (allLeads ?? []).length - leads.length);
 
-    const ids = (leads ?? []).map((l) => l.apollo_person_id);
+    await supabase.from("apollo_sync_runs").update({ status: "enriching" }).eq("id", run.id);
+    const startedAt = Date.now();
+    const budgetExceeded = () => Date.now() - startedAt > EXECUTION_BUDGET_MS;
+
+    const ids = leads.map((l) => l.apollo_person_id);
     if (!ids.length) {
       await supabase.from("apollo_sync_runs").update({
         status: "completed", completed_at: new Date().toISOString(),
@@ -131,14 +165,18 @@ Deno.serve(async (req) => {
     const errors: any[] = [];
     const enrichedById = new Map<string, any>();
 
-    // Try bulk first (batch of up to 10)
+    // Mark this chunk as enriching so UI shows in-flight rows
+    await supabase.from("apollo_leads").update({ status: "enriching" }).in("id", leads.map((l) => l.id));
+
+    // Try bulk first (batch of up to 10) — short timeout so we fall back fast.
     let bulkSucceeded = true;
     for (let i = 0; i < ids.length; i += 10) {
+      if (budgetExceeded()) { bulkSucceeded = false; errors.push({ stage: "bulk_match", reason: "budget_exceeded_before_bulk" }); break; }
       const batch = ids.slice(i, i + 10);
       const r = await bulkMatch(apiKey, batch);
       if (!r.ok) {
         bulkSucceeded = false;
-        errors.push({ stage: "bulk_match", http: r.status, batch_start: i });
+        errors.push({ stage: "bulk_match", http: r.status, batch_start: i, error: (r as any).error });
         break;
       }
       const matches = (r.data?.matches ?? []) as any[];
@@ -152,9 +190,10 @@ Deno.serve(async (req) => {
     if (!bulkSucceeded || enrichedById.size < ids.length) {
       for (const id of ids) {
         if (enrichedById.has(id)) continue;
+        if (budgetExceeded()) { errors.push({ stage: "single_match", reason: "budget_exceeded", id }); break; }
         const r = await singleMatch(apiKey, id);
         if (!r.ok) {
-          errors.push({ stage: "single_match", id, http: r.status });
+          errors.push({ stage: "single_match", id, http: r.status, error: (r as any).error });
           continue;
         }
         const person = r.data?.person ?? r.data;
@@ -162,7 +201,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    let attempted = ids.length;
+    const attempted = ids.length;
     let returned = 0;
     let imported = 0;
     let newCount = 0;
@@ -170,8 +209,14 @@ Deno.serve(async (req) => {
     let skippedNoEmail = 0;
     let duplicate = 0;
     let suppressed = 0;
+    let processed = 0;
+    let lastSuccessful: string | null = null;
 
-    for (const lead of leads ?? []) {
+    for (const lead of leads) {
+      if (budgetExceeded()) {
+        errors.push({ stage: "persist", reason: "budget_exceeded", lead_id: lead.id });
+        break;
+      }
       const person = enrichedById.get(lead.apollo_person_id);
       const email = (person?.email ?? "").trim().toLowerCase();
       const emailStatus = person?.email_status ?? null;
@@ -179,21 +224,28 @@ Deno.serve(async (req) => {
 
       if (!sendable) {
         skippedNoEmail += 1;
-        await supabase.from("apollo_leads").update({
-          enrichment_payload: person ?? {},
-          email: email || null,
-          status: "skipped_no_email",
-        }).eq("id", lead.id);
+        await withTimeout(
+          supabase.from("apollo_leads").update({
+            enrichment_payload: person ?? {},
+            email: email || null,
+            status: "skipped_no_email",
+          }).eq("id", lead.id),
+          DB_OP_TIMEOUT_MS, "lead_skip_update",
+        ).catch((e) => errors.push({ stage: "lead_skip_update", id: lead.apollo_person_id, error: (e as Error).message }));
+        processed += 1;
         continue;
       }
       returned += 1;
 
       // Check for global suppression / dedupe by email
-      const { data: existing } = await supabase
+      const { data: existing } = await withTimeout(
+        supabase
         .from("contacts")
         .select("id, is_globally_suppressed, hard_bounced")
         .eq("email", email)
-        .maybeSingle();
+        .maybeSingle(),
+        DB_OP_TIMEOUT_MS, "contact_lookup",
+      ).catch(() => ({ data: null }));
 
       let contactId: string | null = existing?.id ?? null;
       let isDupe = false;
@@ -206,7 +258,8 @@ Deno.serve(async (req) => {
         }
       } else {
         // Insert new central contact
-        const { data: ins, error: insErr } = await supabase
+        const { data: ins, error: insErr } = await withTimeout(
+          supabase
           .from("contacts")
           .insert({
             email,
@@ -230,22 +283,25 @@ Deno.serve(async (req) => {
             industry: person?.organization?.industry ?? null,
           })
           .select("id")
-          .single();
+          .single(),
+          DB_OP_TIMEOUT_MS, "contact_insert",
+        ).catch((e) => ({ data: null, error: { message: (e as Error).message } as any }));
         if (insErr) {
           errors.push({ stage: "contact_insert", id: lead.apollo_person_id, msg: insErr.message });
-          await supabase.from("apollo_leads").update({
+          await withTimeout(supabase.from("apollo_leads").update({
             enrichment_payload: person, email, status: "error", error: insErr.message,
-          }).eq("id", lead.id);
+          }).eq("id", lead.id), DB_OP_TIMEOUT_MS, "lead_error_update").catch(() => {});
           continue;
         }
-        contactId = ins.id;
+        contactId = ins?.id ?? null;
       }
 
       if (isSuppressed) {
         suppressed += 1;
-        await supabase.from("apollo_leads").update({
+        await withTimeout(supabase.from("apollo_leads").update({
           enrichment_payload: person, email, contact_id: contactId, status: "suppressed",
-        }).eq("id", lead.id);
+        }).eq("id", lead.id), DB_OP_TIMEOUT_MS, "lead_suppressed_update").catch(() => {});
+        processed += 1;
         continue;
       }
 
@@ -254,46 +310,81 @@ Deno.serve(async (req) => {
       if (isDupe) updatedCount += 1; else newCount += 1;
 
       // Upsert business_contact_relationships row (one per (contact, business))
-      await supabase.from("business_contact_relationships").upsert({
+      await withTimeout(supabase.from("business_contact_relationships").upsert({
         contact_id: contactId,
         business_name: run.business_name,
         source_segment_id: run.segment_id,
         qualification: "needs_review",
         current_stage: "ready_to_stage",
         campaign_eligible: false,
-      }, { onConflict: "contact_id,business_name" });
+      }, { onConflict: "contact_id,business_name" }), DB_OP_TIMEOUT_MS, "bcr_upsert").catch((e) => errors.push({ stage: "bcr_upsert", error: (e as Error).message }));
 
-      await supabase.from("apollo_leads").update({
+      await withTimeout(supabase.from("apollo_leads").update({
         enrichment_payload: person,
         email,
         contact_id: contactId,
         status: "imported",
-      }).eq("id", lead.id);
+      }).eq("id", lead.id), DB_OP_TIMEOUT_MS, "lead_imported_update").catch(() => {});
+      processed += 1;
+      lastSuccessful = email;
     }
 
+    // Reset any leads we marked "enriching" but didn't finish back to has_email so resume picks them up.
+    const finishedIds = new Set<string>();
+    for (const lead of leads) {
+      if (enrichedById.has(lead.apollo_person_id) || lead.id /* always */) {
+        // Only finalized statuses are imported/skipped_no_email/suppressed/error; others should revert.
+      }
+    }
+    await supabase.from("apollo_leads")
+      .update({ status: "has_email" })
+      .eq("run_id", run.id)
+      .eq("status", "enriching")
+      .catch(() => {});
+
+    // Increment cumulative counters across resumes.
+    const newAttempted = (run.enrichment_attempted ?? 0) + attempted;
+    const newReturned = (run.emails_returned ?? 0) + returned;
+    const newImported = (run.contacts_imported ?? 0) + imported;
+    const newNew = (run.contacts_new ?? 0) + newCount;
+    const newUpdated = (run.contacts_updated ?? 0) + updatedCount;
+    const newSkipped = (run.contacts_skipped_no_email ?? 0) + skippedNoEmail;
+    const newDup = (run.contacts_duplicate ?? 0) + duplicate;
+    const newSup = (run.contacts_suppressed ?? 0) + suppressed;
+
+    // Determine if more work remains (either chunk leftovers or budget-cut leads).
+    const remainingCount = remainingFromQuery + Math.max(0, leads.length - processed);
+    const isPartial = remainingCount > 0;
+    const finalStatus = isPartial ? "partial" : "completed";
+
     await supabase.from("apollo_sync_runs").update({
-      status: "completed",
-      enrichment_attempted: attempted,
-      emails_returned: returned,
-      contacts_imported: imported,
-      contacts_new: newCount,
-      contacts_updated: updatedCount,
-      contacts_skipped_no_email: skippedNoEmail,
-      contacts_duplicate: duplicate,
-      contacts_suppressed: suppressed,
-      errors,
-      completed_at: new Date().toISOString(),
+      status: finalStatus,
+      enrichment_attempted: newAttempted,
+      emails_returned: newReturned,
+      contacts_imported: newImported,
+      contacts_new: newNew,
+      contacts_updated: newUpdated,
+      contacts_skipped_no_email: newSkipped,
+      contacts_duplicate: newDup,
+      contacts_suppressed: newSup,
+      errors: [...(Array.isArray(run.errors) ? run.errors : []), ...errors],
+      completed_at: isPartial ? null : new Date().toISOString(),
     }).eq("id", run.id);
 
-    // Trigger qualification asynchronously (best-effort)
-    try {
-      await supabase.functions.invoke("apollo-qualify", { body: { run_id: run.id } });
-    } catch (e) {
-      // ignore — qualification is best-effort
+    // Fire-and-forget qualification on completion only — DO NOT await (caused 504 on enrich response).
+    if (!isPartial) {
+      try {
+        // Detached; we don't care about the response.
+        supabase.functions.invoke("apollo-qualify", { body: { run_id: run.id } }).catch(() => {});
+      } catch (_) { /* ignore */ }
     }
 
     return json({
       ok: true,
+      status: finalStatus,
+      processed_count: processed,
+      remaining_count: remainingCount,
+      resume_available: isPartial,
       attempted,
       emails_returned: returned,
       imported,
@@ -302,6 +393,7 @@ Deno.serve(async (req) => {
       skipped_no_email: skippedNoEmail,
       duplicate,
       suppressed,
+      last_successful: lastSuccessful,
       errors,
     }, 200);
   } catch (err) {

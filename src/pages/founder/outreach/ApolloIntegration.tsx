@@ -643,6 +643,11 @@ type EnrichmentRunResponse = {
   skipped_no_email?: number;
   duplicate?: number;
   suppressed?: number;
+  status?: "completed" | "partial" | string;
+  processed_count?: number;
+  remaining_count?: number;
+  resume_available?: boolean;
+  last_successful?: string | null;
 };
 
 const statusLabels: Record<string, string> = {
@@ -756,6 +761,12 @@ export default function ApolloIntegration() {
 
   useEffect(() => {
     loadAll();
+  }, [loadAll]);
+
+  useEffect(() => {
+    const onRefresh = () => loadAll();
+    window.addEventListener("apollo:refresh", onRefresh);
+    return () => window.removeEventListener("apollo:refresh", onRefresh);
   }, [loadAll]);
 
   const connectionByBusiness = useMemo(
@@ -890,7 +901,31 @@ export default function ApolloIntegration() {
       return;
     }
     const result = (data as EnrichmentRunResponse) ?? {};
-    toast({ title: "Enrichment complete", description: `Imported ${result.imported ?? 0} • emails returned ${result.emails_returned ?? 0} • skipped no-email ${result.skipped_no_email ?? 0} • duplicates ${result.duplicate ?? 0} • suppressed ${result.suppressed ?? 0}` });
+    if (result.status === "partial" || result.resume_available) {
+      toast({
+        title: "Enrichment partially completed",
+        description: `Processed ${result.processed_count ?? result.imported ?? 0}, ${result.remaining_count ?? 0} remaining. Click Resume on the run to continue (no duplicate credits).`,
+      });
+    } else {
+      toast({ title: "Enrichment complete", description: `Imported ${result.imported ?? 0} • emails returned ${result.emails_returned ?? 0} • skipped no-email ${result.skipped_no_email ?? 0} • duplicates ${result.duplicate ?? 0} • suppressed ${result.suppressed ?? 0}` });
+    }
+    loadAll();
+  }
+
+  async function resumeEnrichment(runId: string) {
+    setBusy(`enrich-${runId}`);
+    const { data, error } = await supabase.functions.invoke("apollo-sync-enrich", { body: { run_id: runId } });
+    setBusy(null);
+    if (error) {
+      toast({ title: "Resume failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    const result = (data as EnrichmentRunResponse) ?? {};
+    if (result.status === "partial" || result.resume_available) {
+      toast({ title: "Resumed — more remaining", description: `Processed ${result.processed_count ?? 0}, ${result.remaining_count ?? 0} still pending. Click Resume again.` });
+    } else {
+      toast({ title: "Enrichment complete", description: `Final batch processed ${result.processed_count ?? result.imported ?? 0}.` });
+    }
     loadAll();
   }
 
@@ -1219,9 +1254,42 @@ function CompletedRunSummary({ run }: { run: Run }) {
   const totalSaved = run.contacts_imported;
   const importsHref = `/founder/outreach/imports?run_id=${run.id}`;
   const stageHref = `/founder/outreach/queue?run_id=${run.id}&stage=ready_to_stage`;
+  const isPartial = run.status === "partial" || run.status === "enriching";
+  const [resuming, setResuming] = useState(false);
+
+  async function handleResume() {
+    setResuming(true);
+    const { data, error } = await supabase.functions.invoke("apollo-sync-enrich", { body: { run_id: run.id } });
+    setResuming(false);
+    if (error) {
+      toast({ title: "Resume failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    const r = (data as EnrichmentRunResponse) ?? {};
+    if (r.status === "partial" || r.resume_available) {
+      toast({ title: "Chunk processed — more remaining", description: `Processed ${r.processed_count ?? 0} • Remaining ${r.remaining_count ?? 0}. Click Resume again.` });
+    } else {
+      toast({ title: "Enrichment complete" });
+    }
+    // Soft refresh — parent will re-pull on next loadAll cycle; trigger via custom event.
+    window.dispatchEvent(new CustomEvent("apollo:refresh"));
+  }
 
   return (
     <div className="space-y-3">
+      {isPartial && (
+        <div className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-xs">
+          <div className="font-semibold text-foreground">Enrichment partially completed.</div>
+          <div className="mt-1 text-muted-foreground">
+            Processed so far: {run.enrichment_attempted ?? 0} • Imported: {totalSaved}. Remaining leads still need enrichment. No duplicate Apollo credits will be spent on resume.
+          </div>
+          <div className="mt-2">
+            <Button size="sm" onClick={handleResume} disabled={resuming}>
+              {resuming ? "Resuming…" : "Resume enrichment"}
+            </Button>
+          </div>
+        </div>
+      )}
       <div className="grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
         <Stat label="Found" value={run.people_found} />
         <Stat label="Has email flag" value={run.people_with_email_flag} />
@@ -1270,7 +1338,7 @@ type RunGroups = {
 function classifyRuns(runs: Run[]): RunGroups {
   const newestCompletedBySegment = new Map<string, Run>();
   for (const r of runs) {
-    if (r.status === "completed") {
+    if (r.status === "completed" || r.status === "partial" || r.status === "enriching") {
       const existing = newestCompletedBySegment.get(r.segment_id);
       if (!existing || new Date(r.started_at) > new Date(existing.started_at)) {
         newestCompletedBySegment.set(r.segment_id, r);
@@ -1320,7 +1388,7 @@ function classifyRuns(runs: Run[]): RunGroups {
       validAwaiting.push(r);
       continue;
     }
-    if (r.status === "completed") {
+    if (r.status === "completed" || r.status === "partial" || r.status === "enriching") {
       completed.push(r);
     }
   }
@@ -1499,6 +1567,8 @@ function RunHistoryRow({
   const subtitle =
     run.status === "completed"
       ? `${run.contacts_imported} saved • ${run.qualified_count} qualified`
+      : run.status === "partial" || run.status === "enriching"
+      ? `${run.contacts_imported} saved so far • resume available`
       : run.status === "cancelled"
       ? "Cancelled"
       : run.status === "awaiting_enrichment_approval"
