@@ -138,6 +138,7 @@ function formatCapabilityError(connection: Connection) {
 }
 
 function ProbeCard({ probe }: { probe: DiagnosticProbe }) {
+  const request = probe.request ?? ({} as NonNullable<DiagnosticProbe["request"]>);
   return (
     <div className="rounded-md border p-3 space-y-2">
       <div className="flex items-center justify-between gap-2">
@@ -156,23 +157,23 @@ function ProbeCard({ probe }: { probe: DiagnosticProbe }) {
         </div>
         <div>
           <div className="text-muted-foreground">Base URL</div>
-          <div className="break-all">{probe.request.base_url}</div>
+          <div className="break-all">{request.base_url ?? "—"}</div>
         </div>
         <div>
           <div className="text-muted-foreground">Endpoint</div>
-          <div className="break-all">{probe.request.endpoint_path}</div>
+          <div className="break-all">{request.endpoint_path ?? "—"}</div>
         </div>
         <div>
           <div className="text-muted-foreground">Method</div>
-          <div>{probe.request.method}</div>
+          <div>{request.method ?? "—"}</div>
         </div>
         <div>
           <div className="text-muted-foreground">x-api-key header</div>
-          <div>{probe.request.x_api_key_header_present ? "yes" : "no"}</div>
+          <div>{request.x_api_key_header_present ? "yes" : "no"}</div>
         </div>
         <div>
           <div className="text-muted-foreground">Key last4</div>
-          <div>{probe.request.key_last4 || "—"}</div>
+          <div>{request.key_last4 || "—"}</div>
         </div>
       </div>
       <details className="text-xs">
