@@ -1550,6 +1550,69 @@ export type Database = {
           },
         ]
       }
+      cleanup_archive: {
+        Row: {
+          archived_at: string
+          business_name: string | null
+          cleanup_batch_id: string
+          cleanup_reason: string
+          id: string
+          payload: Json
+          source_row_id: string | null
+          source_table: string
+        }
+        Insert: {
+          archived_at?: string
+          business_name?: string | null
+          cleanup_batch_id: string
+          cleanup_reason: string
+          id?: string
+          payload: Json
+          source_row_id?: string | null
+          source_table: string
+        }
+        Update: {
+          archived_at?: string
+          business_name?: string | null
+          cleanup_batch_id?: string
+          cleanup_reason?: string
+          id?: string
+          payload?: Json
+          source_row_id?: string | null
+          source_table?: string
+        }
+        Relationships: []
+      }
+      cleanup_audit_log: {
+        Row: {
+          cleanup_batch_id: string
+          id: string
+          notes: string | null
+          per_table_counts: Json
+          preserved_summary: Json
+          ran_at: string
+          reason: string
+        }
+        Insert: {
+          cleanup_batch_id: string
+          id?: string
+          notes?: string | null
+          per_table_counts: Json
+          preserved_summary: Json
+          ran_at?: string
+          reason: string
+        }
+        Update: {
+          cleanup_batch_id?: string
+          id?: string
+          notes?: string | null
+          per_table_counts?: Json
+          preserved_summary?: Json
+          ran_at?: string
+          reason?: string
+        }
+        Relationships: []
+      }
       communications: {
         Row: {
           ai_generated: boolean
