@@ -105,6 +105,14 @@ export function WeekendPool({ onOpenRuns }: { onOpenRuns?: () => void }) {
   const [building, setBuilding] = useState(false);
   const [buildLog, setBuildLog] = useState<string[]>([]);
   const [buildAbort, setBuildAbort] = useState(false);
+  // ---- Pagination state mirrored from the segment ----
+  const [pagination, setPagination] = useState<{
+    currentPage: number;
+    nextPage: number;
+    lastPageProcessed: number | null;
+    seenCount: number;
+  }>({ currentPage: 1, nextPage: 1, lastPageProcessed: null, seenCount: 0 });
+  const [lastBatchPage, setLastBatchPage] = useState<{ page: number; unseen: number; skippedSeen: number } | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
