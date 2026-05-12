@@ -91,6 +91,13 @@ const AgentOrchestration = () => {
         head("system_events"),
         head("retry_queue"),
       ]);
+      const [systemEventsOpen, retryPending, retryCompleted, aiDraftsTotal, demoNeon] = await Promise.all([
+        head("system_events", (q: any) => q.eq("resolved", false)),
+        head("retry_queue", (q: any) => q.eq("status", "pending")),
+        head("retry_queue", (q: any) => q.eq("status", "completed")),
+        head("ai_drafts"),
+        head("demo_access", (q: any) => q.eq("business_name", "Neon Candy")),
+      ]);
 
       const [
         lastImport, lastContact, lastCampaign, lastQueueSent, lastInbound,
