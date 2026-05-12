@@ -468,6 +468,9 @@ const CommandCentre = () => {
           <StatTile label="Failed sends" value={totals.failedSends} icon={AlertTriangle} tone={totals.failedSends ? "danger" : "good"} to="/founder/outreach/queue" />
           <StatTile label={`System warnings (open / logged)`} value={`${totals.systemWarningsOpen} / ${totals.systemWarningsTotal}`} icon={AlertTriangle} tone={totals.systemWarningsOpen ? "danger" : "good"} to="/founder/system" />
           <StatTile label="Open deals" value={deals.filter((d: any) => d.status !== "won" && d.status !== "lost").length} icon={Banknote} to="/founder/finance" />
+          <StatTile label="Raw leads needing verification" value={leadQualityCounts?.needsVerification ?? 0} icon={Search} tone={(leadQualityCounts?.needsVerification ?? 0) > 0 ? "warn" : "good"} />
+          <StatTile label="Apollo unlock shortlist" value={leadQualityCounts?.unlockShortlist ?? 0} icon={Sparkles} tone={(leadQualityCounts?.unlockShortlist ?? 0) > 0 ? "warn" : "default"} />
+          <StatTile label="Leads promoted to contacts" value={leadQualityCounts?.promoted ?? 0} icon={CheckCircle2} tone="good" />
         </div>
 
         {/* 8. Recommended Actions */}
