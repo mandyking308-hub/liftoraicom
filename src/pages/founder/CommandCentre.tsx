@@ -183,14 +183,15 @@ const CommandCentre = () => {
     const approvalsTotal = drafts.length + proposals.length + hotConvos.length + highIntent.length;
     const activeCampaigns = campaigns.filter((c: any) => c.status === "active").length;
     const systemWarnings = sysEvents.length;
-    const inboxCapped = inboxes.filter((i: any) =>
-      i.active && (
-        (i.provider_blocked_until && new Date(i.provider_blocked_until) > new Date()) ||
-        (i.provider_blocked_reason) ||
-        ((i.daily_send_limit ?? 0) > 0 && (i.emails_sent_today ?? 0) >= (i.daily_send_limit ?? 0)) ||
-        ((i.hourly_send_limit ?? 0) > 0 && (i.hourly_send_count ?? 0) >= (i.hourly_send_limit ?? 0))
-      )
-    ).length;
+    // Provider truth: an inbox is ONLY "Capped" while a provider block window
+    // is currently in the future. Stale `provider_blocked_reason` values and
+    // expired `provider_blocked_until` timestamps must not flip the badge.
+    // Internal hourly/daily caps are informational only (handled by the worker).
+    const inboxCapped = inboxes.filter((i: any) => {
+      if (!i.active) return false;
+      const until = i.provider_blocked_until ? new Date(i.provider_blocked_until) : null;
+      return !!(until && until > new Date());
+    }).length;
     const businessesNeedingAttention = businessStats.filter((b) => b.failedSends > 0 || b.systemWarnings > 0 || b.pendingApprovals > 0).length;
     const systemWarningsOpen = sysCounts?.open ?? sysEvents.length;
     const systemWarningsTotal = sysCounts?.total ?? sysEvents.length;
