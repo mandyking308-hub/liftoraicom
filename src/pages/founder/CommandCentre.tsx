@@ -70,11 +70,11 @@ const CommandCentre = () => {
   });
   const { data: drafts = [] } = useQuery({
     queryKey: ["cc2-drafts"],
-    queryFn: async () => (await supabase.from("ai_drafts").select("id,status,classification,created_at,contact_id,inbox_id").eq("status", "pending_approval").order("created_at", { ascending: false }).limit(20)).data ?? [],
+    queryFn: async () => (await supabase.from("ai_drafts").select("id,status,classification,created_at,contact_id,inbox_id").eq("status", "pending").order("created_at", { ascending: false }).limit(20)).data ?? [],
   });
   const { data: proposals = [] } = useQuery({
     queryKey: ["cc2-internal-proposals"],
-    queryFn: async () => (await supabase.from("internal_proposals").select("id,title,status,business_name,created_at").in("status", ["draft", "ready_to_send"]).order("created_at", { ascending: false }).limit(15)).data ?? [],
+    queryFn: async () => (await supabase.from("internal_proposals").select("id,title,status,business_name,created_at").eq("status", "draft").order("created_at", { ascending: false }).limit(15)).data ?? [],
   });
   const { data: hotConvos = [] } = useQuery({
     queryKey: ["cc2-hot"],
