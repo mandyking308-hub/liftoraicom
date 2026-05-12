@@ -1415,6 +1415,41 @@ export type Database = {
         }
         Relationships: []
       }
+      brief_audit_log: {
+        Row: {
+          brief_id: string
+          changed_fields: Json
+          created_at: string
+          id: string
+          previous_summary: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          brief_id: string
+          changed_fields?: Json
+          created_at?: string
+          id?: string
+          previous_summary?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          brief_id?: string
+          changed_fields?: Json
+          created_at?: string
+          id?: string
+          previous_summary?: string | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brief_audit_log_brief_id_fkey"
+            columns: ["brief_id"]
+            isOneToOne: false
+            referencedRelation: "business_sourcing_briefs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       build_log_entries: {
         Row: {
           author: string
@@ -1651,6 +1686,7 @@ export type Database = {
           suggested_unlock_strategy: string | null
           target_audience: string | null
           updated_at: string
+          updated_by: string | null
         }
         Insert: {
           apollo_credit_protection?: Json
@@ -1676,6 +1712,7 @@ export type Database = {
           suggested_unlock_strategy?: string | null
           target_audience?: string | null
           updated_at?: string
+          updated_by?: string | null
         }
         Update: {
           apollo_credit_protection?: Json
@@ -1701,6 +1738,7 @@ export type Database = {
           suggested_unlock_strategy?: string | null
           target_audience?: string | null
           updated_at?: string
+          updated_by?: string | null
         }
         Relationships: [
           {
