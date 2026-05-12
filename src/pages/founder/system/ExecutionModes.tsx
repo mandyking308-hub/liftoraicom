@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Loader2, Star } from "lucide-react";
+import ControlledLiveActivation from "@/components/founder/ControlledLiveActivation";
 
 type Mode = { id: string; mode_name: string; description: string; is_default: boolean };
 type Flag = { id: string; feature_name: string; enabled: boolean; execution_mode_id: string };
@@ -78,11 +79,13 @@ export default function ExecutionModes() {
     <FounderLayout>
       <div className="space-y-6 p-6">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Execution Modes</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">System Modes</h1>
           <p className="text-sm text-muted-foreground">
-            Control which workflows are active per business. Outreach is the global default.
+            Switch Liftor between TEST and CONTROLLED LIVE, and control which workflows are active per business.
           </p>
         </div>
+
+        <ControlledLiveActivation />
 
         <Card className="p-6 space-y-4">
           <h2 className="text-lg font-medium">Modes & Feature Flags</h2>
