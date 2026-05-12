@@ -80,6 +80,13 @@ const CommandCentre = () => {
     queryKey: ["cc2-active-inboxes-view"],
     queryFn: async () => (await (supabase as any).from("command_centre_active_inboxes").select("*")).data ?? [],
   });
+  const { data: internalEmails = [] } = useQuery({
+    queryKey: ["cc2-internal-emails"],
+    queryFn: async () => {
+      const { data } = await (supabase as any).from("internal_email_identities").select("email");
+      return ((data as any[]) ?? []).map((r) => String(r.email).toLowerCase());
+    },
+  });
   const { data: leadQualityCounts } = useQuery({
     queryKey: ["cc2-lead-quality-counts"],
     queryFn: async () => {
