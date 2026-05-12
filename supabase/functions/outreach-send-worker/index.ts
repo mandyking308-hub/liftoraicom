@@ -156,12 +156,28 @@ async function appendToSentFolder(
 
     if (!sentFolder) return { ok: false, error: "sent folder not found" };
 
-    await withTimeout(
-      client.append(sentFolder, rfc822, ["\\Seen"], new Date()),
-      15_000,
-      "IMAP_APPEND",
-    );
-    return { ok: true, folder: sentFolder };
+    // Try the discovered folder first, then a small set of well-known IONOS
+    // fallbacks. Some IONOS mailboxes accept APPEND only on the locale-named
+    // folder even when LIST advertises another path.
+    const tryOrder = Array.from(new Set([
+      sentFolder,
+      "Sent", "Sent Items", "INBOX.Sent", "INBOX/Sent",
+      "Gesendet", "Gesendete Objekte",
+    ]));
+    let lastErr: string | null = null;
+    for (const folder of tryOrder) {
+      try {
+        await withTimeout(
+          client.append(folder, rfc822, ["\\Seen"], new Date()),
+          15_000,
+          "IMAP_APPEND",
+        );
+        return { ok: true, folder };
+      } catch (e) {
+        lastErr = `${folder}: ${(e as Error).message}`;
+      }
+    }
+    return { ok: false, error: lastErr ?? "append failed on all candidates" };
   } catch (e) {
     return { ok: false, error: (e as Error).message };
   } finally {
