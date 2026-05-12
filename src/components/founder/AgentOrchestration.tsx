@@ -91,6 +91,13 @@ const AgentOrchestration = () => {
         head("system_events"),
         head("retry_queue"),
       ]);
+      const [systemEventsOpen, retryPending, retryCompleted, aiDraftsTotal, demoNeon] = await Promise.all([
+        head("system_events", (q: any) => q.eq("resolved", false)),
+        head("retry_queue", (q: any) => q.eq("status", "pending")),
+        head("retry_queue", (q: any) => q.eq("status", "completed")),
+        head("ai_drafts"),
+        head("demo_access", (q: any) => q.eq("business_name", "Neon Candy")),
+      ]);
 
       const [
         lastImport, lastContact, lastCampaign, lastQueueSent, lastInbound,
@@ -123,6 +130,7 @@ const AgentOrchestration = () => {
           invoicesTotal, invoicesUnpaid, paymentsTotal,
           suppliersTotal, assignmentsTotal,
           complianceEvents, systemEvents, retryQueue,
+          systemEventsOpen, retryPending, retryCompleted, aiDraftsTotal, demoNeon,
         },
         last: {
           lastImport, lastContact, lastCampaign, lastQueueSent, lastInbound,
@@ -295,7 +303,7 @@ const AgentOrchestration = () => {
     {
       name: "CRM hygiene",
       status: (c?.contacts ?? 0) > 0 ? "green" : "amber",
-      reason: `${c?.contacts ?? 0} contacts (${c?.contactsActive ?? 0} active)`,
+      reason: `${c?.contacts ?? 0} contacts · ${c?.contactsActive ?? 0} with status='active' (note: live statuses are CONTACTED / ENGAGED / QUALIFIED)`,
       next: "Spot-check duplicates + business assignment",
       to: "/founder/crm/contacts",
     },
@@ -309,8 +317,8 @@ const AgentOrchestration = () => {
     {
       name: "Inbox / replies",
       status: (c?.draftsPending ?? 0) > 0 ? "amber" : "green",
-      reason: `${c?.inboundCount ?? 0} inbound · ${c?.draftsPending ?? 0} drafts pending`,
-      next: (c?.draftsPending ?? 0) > 0 ? "Approve AI drafts" : "Healthy",
+      reason: `${c?.inboundCount ?? 0} inbound · ${c?.aiDraftsTotal ?? 0} AI drafts total · ${c?.draftsPending ?? 0} pending approval`,
+      next: (c?.draftsPending ?? 0) > 0 ? `Approve ${c?.draftsPending} pending draft${c?.draftsPending === 1 ? "" : "s"}` : "Healthy",
       to: "/founder/conversations",
     },
     {
@@ -323,7 +331,7 @@ const AgentOrchestration = () => {
     {
       name: "Demo / deal",
       status: (c?.dealsOpen ?? 0) > 0 ? "green" : "amber",
-      reason: `${c?.demoAccessTotal ?? 0} demo accesses · ${c?.dealsOpen ?? 0} open deals · ${c?.dealsWon ?? 0} won`,
+      reason: `${c?.demoNeon ?? 0} NeonCandy demos · ${c?.demoAccessTotal ?? 0} total (incl. legacy) · ${c?.dealsOpen ?? 0} open deals · ${c?.dealsWon ?? 0} won`,
       next: (c?.dealsOpen ?? 0) > 0 ? "Move deals forward" : "Awaiting opportunity",
       to: "/founder/finance/deals",
     },
@@ -350,9 +358,9 @@ const AgentOrchestration = () => {
     },
     {
       name: "System",
-      status: (c?.retryQueue ?? 0) > 0 ? "amber" : "green",
-      reason: `${c?.systemEvents ?? 0} system events · ${c?.retryQueue ?? 0} retries pending`,
-      next: (c?.retryQueue ?? 0) > 0 ? "Review retry queue" : "Healthy",
+      status: (c?.systemEventsOpen ?? 0) > 0 || (c?.retryPending ?? 0) > 0 ? "amber" : "green",
+      reason: `${c?.systemEventsOpen ?? 0} open / ${c?.systemEvents ?? 0} logged total system events · ${c?.retryPending ?? 0} retries pending (${c?.retryCompleted ?? 0} historical)`,
+      next: (c?.systemEventsOpen ?? 0) > 0 ? `Triage ${c?.systemEventsOpen} open warning${c?.systemEventsOpen === 1 ? "" : "s"}` : (c?.retryPending ?? 0) > 0 ? "Review pending retries" : "Healthy",
       to: "/founder/system",
     },
   ];
