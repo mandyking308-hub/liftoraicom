@@ -175,12 +175,12 @@ Deno.serve(async (req) => {
   await admin.from("activity_log").insert([
     {
       event_type: "agent_handoff",
-      description: `Outreach Agent selected ${eligibleSample?.length ?? 0} eligible queue rows; handing off to Email Agent.`,
+      description: `Outreach Agent: ${candidates?.length ?? 0} candidates considered, ${selectedIds.length} structurally eligible (${orphanRejected.length} rejected as orphan follow-ups). Handing off to Email Agent.`,
       entity_type: "email_queue",
     },
     {
       event_type: "controlled_live_batch_start",
-      description: `Email Agent dispatching controlled live batch of up to ${batchSize}.`,
+      description: `Email Agent dispatching ${selectedIds.length}/${batchSize} structurally eligible row(s).`,
       entity_type: "email_queue",
     },
   ]);
@@ -226,7 +226,9 @@ Deno.serve(async (req) => {
   const sentDelta = (sentAfter ?? 0) - (sentBefore ?? 0);
   const summary = {
     batch_size_requested: batchSize,
-    eligible_selected: eligibleSample?.length ?? 0,
+    candidates_considered: candidates?.length ?? 0,
+    structurally_eligible: selectedIds.length,
+    orphan_rejected_preselect: orphanRejected.length,
     rescheduled_to_now: rescheduledCount,
     future_scheduled_count: futureRows.length,
     sent: sentDelta,
@@ -267,15 +269,20 @@ Deno.serve(async (req) => {
       : `Batch complete — ${sentDelta} sent, ${pendingAfter} queued, ${blockedAfter} blocked.`,
     summary,
     recent_rows: recentSent ?? [],
+    orphan_rejected_preselect: orphanRejected,
     note: selectedIds.length === 0
-      ? "No pending rows found. All queue items may be blocked, sent, suppressed, replied, or cancelled."
+      ? orphanRejected.length > 0
+        ? `${orphanRejected.length} pending follow-up rows cannot send because the earlier sequence step was never sent. Use 'Resolve orphan follow-ups' to classify them.`
+        : "No pending rows found. All queue items may be blocked, sent, suppressed, replied, or cancelled."
       : futureRows.length > 0
         ? `Selected ${selectedIds.length} pending row(s); ${futureRows.length} were scheduled for the future and were moved to now under founder authorisation.`
-        : undefined,
+        : `Selected ${selectedIds.length} structurally eligible row(s). ${orphanRejected.length} orphan follow-up(s) skipped.`,
     next_recommended_action: workerError
       ? "Review system_events and worker response."
       : sentDelta === 0
-        ? "No rows were eligible. Check guardrails / inbox live-readiness."
+        ? orphanRejected.length > 0
+          ? "Most pending rows are orphan follow-ups. Run 'Resolve orphan follow-ups' to cancel them and optionally restart safe contacts at Step 1."
+          : "No rows were eligible. Check guardrails / inbox live-readiness."
         : "Inbox Agent will poll for replies. Conversation Agent will draft AI replies for founder approval.",
   });
 });
