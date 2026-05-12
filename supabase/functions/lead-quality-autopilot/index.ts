@@ -311,8 +311,8 @@ Deno.serve(async (req) => {
       // NEW: verified email available but locked (Apollo says verified, no address revealed yet)
       async () => {
         const { data } = await admin.from("lead_quality_profiles").update({
-          lifecycle_stage: "verified_email_available_locked",
-          lifecycle_reason: "Apollo reports verified email available; actual address is locked behind unlock credits",
+          lifecycle_stage: "email_reveal_required",
+          lifecycle_reason: "Apollo reports verified email available; actual address requires founder-approved reveal credits",
           lifecycle_classified_at: new Date().toISOString(),
         }).is("lifecycle_stage", null).eq("quality_status", "needs_verification")
           .contains("risk_flags", ["verified_email_locked"]).select("id");
@@ -344,6 +344,9 @@ Deno.serve(async (req) => {
   counters.safe_to_unlock = (summary as any)?.safe_to_unlock ?? 0;
   counters.safe_to_promote = (summary as any)?.safe_to_promote ?? 0;
   counters.safe_to_queue = (summary as any)?.safe_to_queue ?? 0;
+  counters.unlock_required = (summary as any)?.unlock_required ?? counters.unlock_required;
+  counters.verified_email_available_locked =
+    ((summary as any)?.email_reveal_required ?? 0) + ((summary as any)?.verified_email_available_locked ?? 0);
 
   // STEP 4 — Source quality score using NeonCandy brief.
   const { data: brief } = await admin.from("business_sourcing_briefs").select("*").eq("business_id", businessId).maybeSingle();
@@ -352,12 +355,14 @@ Deno.serve(async (req) => {
     const total = (summary as any)?.total_leads ?? 0;
     const good = ((summary as any)?.promoted_to_contact ?? 0) + ((summary as any)?.active_working_leads ?? 0)
                + ((summary as any)?.legacy_optional_unlock_candidates ?? 0)
-               + ((summary as any)?.verified_email_available_locked ?? 0);
+               + ((summary as any)?.verified_email_available_locked ?? 0)
+               + ((summary as any)?.email_reveal_required ?? 0);
     const bad = ((summary as any)?.duplicates_archived ?? 0) + ((summary as any)?.poor_fit_archived ?? 0)
               + ((summary as any)?.attempted_no_email ?? 0) + ((summary as any)?.missing_contact_archived ?? 0);
     sourceScore = total ? Number(((good / Math.max(1, good + bad)) * 10).toFixed(2)) : null;
     (details.steps as any[]).push({
       step: "source_quality", score: sourceScore, total, good, bad,
+      email_reveal_required: (summary as any)?.email_reveal_required ?? 0,
       verified_email_available_locked: (summary as any)?.verified_email_available_locked ?? 0,
       note: "Verified-locked candidates count as positive signal; locked status is an Apollo unlock-credit gate, not a quality issue.",
     });
@@ -394,8 +399,9 @@ Deno.serve(async (req) => {
     });
   } else if (((summary as any)?.active_working_leads ?? 0) > 0) {
     nextAction = "Build Apollo unlock shortlist for active working leads (no credits spent until founder approves)";
-  } else if (((summary as any)?.verified_email_available_locked ?? 0) > 0) {
-    nextAction = `Review Apollo verified-locked shortlist and approve unlock for the strongest unique leads (${(summary as any).verified_email_available_locked} candidates pending reveal)`;
+  } else if ((((summary as any)?.email_reveal_required ?? 0) + ((summary as any)?.verified_email_available_locked ?? 0)) > 0) {
+    const pending = ((summary as any)?.email_reveal_required ?? 0) + ((summary as any)?.verified_email_available_locked ?? 0);
+    nextAction = `Build email reveal shortlist and approve credit spend for the strongest unique candidates (${pending} pending reveal)`;
   } else if (((summary as any)?.legacy_optional_unlock_candidates ?? 0) > 0) {
     nextAction = "Run fresh Apollo verified-email search using NeonCandy Source Quality Brief (legacy hold pool not recommended)";
   } else {
