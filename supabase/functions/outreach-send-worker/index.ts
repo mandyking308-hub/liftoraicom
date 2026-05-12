@@ -557,10 +557,38 @@ Deno.serve(async (req) => {
         inboxRow = (ix as InboxRow | null) ?? null;
       }
 
-      // Resolve recipient email from contact
+      // Resolve recipient + suppression flags from contact (CRM spine guard)
       const { data: contactRow } = await supabase
-        .from("contacts").select("email").eq("id", item.contact_id).maybeSingle();
+        .from("contacts")
+        .select("email,is_internal,sendable_status,hard_bounced,is_globally_suppressed,archived_at")
+        .eq("id", item.contact_id)
+        .maybeSingle();
       const recipient = (contactRow?.email as string | undefined) ?? null;
+
+      // ===== CRM SPINE GUARD =====
+      // Refuse to send to internal/system identities, suppressed/bounced contacts, or archived rows.
+      if (contactRow) {
+        const blockReason =
+          contactRow.is_internal ? "CRM_INTERNAL_IDENTITY" :
+          contactRow.archived_at ? "CRM_CONTACT_ARCHIVED" :
+          contactRow.hard_bounced ? "CRM_HARD_BOUNCED" :
+          contactRow.is_globally_suppressed ? "CRM_GLOBALLY_SUPPRESSED" :
+          (contactRow.sendable_status && contactRow.sendable_status !== "sendable")
+            ? `CRM_NOT_SENDABLE_${String(contactRow.sendable_status).toUpperCase()}`
+            : null;
+        if (blockReason) {
+          await supabase.from("email_queue")
+            .update({ status: "blocked", block_reason: blockReason,
+                      send_error: `Blocked by CRM spine guard: ${blockReason}` })
+            .eq("id", item.id);
+          await supabase.from("activity_log").insert({
+            event_type: "send_blocked",
+            description: `Queue ${item.id} blocked by CRM spine: ${blockReason}`,
+            entity_type: "email_queue", entity_id: item.id,
+          });
+          blocked += 1; touchedCampaigns.add(item.campaign_id); continue;
+        }
+      }
 
       // Per-inbox live: real send whenever inbox itself is Live Ready (ionos_smtp + live_ready),
       // regardless of global system_mode. This enables business-by-business go-live.
