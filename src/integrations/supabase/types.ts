@@ -4050,6 +4050,8 @@ export type Database = {
           reviewed_by: string | null
           risk_flags: string[]
           scanned_at: string | null
+          unlock_recommendation: string | null
+          unlock_shortlist_rank: number | null
           updated_at: string
           verification_status: Database["public"]["Enums"]["lead_verification_status"]
         }
@@ -4074,6 +4076,8 @@ export type Database = {
           reviewed_by?: string | null
           risk_flags?: string[]
           scanned_at?: string | null
+          unlock_recommendation?: string | null
+          unlock_shortlist_rank?: number | null
           updated_at?: string
           verification_status?: Database["public"]["Enums"]["lead_verification_status"]
         }
@@ -4098,6 +4102,8 @@ export type Database = {
           reviewed_by?: string | null
           risk_flags?: string[]
           scanned_at?: string | null
+          unlock_recommendation?: string | null
+          unlock_shortlist_rank?: number | null
           updated_at?: string
           verification_status?: Database["public"]["Enums"]["lead_verification_status"]
         }
