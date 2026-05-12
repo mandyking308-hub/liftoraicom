@@ -1,5 +1,7 @@
 import { useMemo } from "react";
 import FounderLayout from "@/components/founder/FounderLayout";
+import LiftorCapabilities from "@/components/founder/LiftorCapabilities";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -334,6 +336,12 @@ const CommandCentre = () => {
           </div>
         </div>
 
+        <Tabs defaultValue="today" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="today">Today</TabsTrigger>
+            <TabsTrigger value="capabilities">Liftor Capabilities</TabsTrigger>
+          </TabsList>
+          <TabsContent value="today" className="space-y-6 mt-0">
         {/* 1. Today across all businesses */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
           <StatTile label="Active businesses" value={businesses.length} icon={Building2} to="/founder/organisations" />
@@ -511,6 +519,11 @@ const CommandCentre = () => {
             <p className="text-[11px] text-muted-foreground mt-3">Source of truth: <span className="text-foreground/80">email_queue</span> (sent/blocked/failed). Replies from <span className="text-foreground/80">email_events</span>.</p>
           </Section>
         </div>
+          </TabsContent>
+          <TabsContent value="capabilities" className="mt-0">
+            <LiftorCapabilities />
+          </TabsContent>
+        </Tabs>
       </div>
     </FounderLayout>
   );
