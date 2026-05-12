@@ -110,10 +110,12 @@ const CommandCentre = () => {
     queryKey: ["cc2-system-mode"],
     queryFn: async () => {
       const { data } = await supabase.from("system_settings").select("value").eq("key", "system_mode").maybeSingle();
-      return String((data as any)?.value ?? "test").toLowerCase();
+      return String((data as any)?.value ?? "live").toLowerCase();
     },
   });
-  const isLiveMode = systemMode === "live";
+  // TEST MODE removed as operational gate — anything other than explicit
+  // admin-only "sandbox" is treated as LIVE OPERATING MODE.
+  const isLiveMode = systemMode !== "sandbox";
   const { data: events = [] } = useQuery({
     queryKey: ["cc2-email-events"],
     queryFn: async () => (await supabase.from("email_events").select("event_type").gte("timestamp", new Date(Date.now() - 7 * 86400000).toISOString())).data ?? [],
