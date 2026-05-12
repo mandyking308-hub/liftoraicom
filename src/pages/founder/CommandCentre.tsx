@@ -454,12 +454,15 @@ const CommandCentre = () => {
 
           <Section title="Campaign snapshot" icon={Send} action={<Link to="/founder/outreach/live-monitor"><Button size="sm" variant="ghost">Live <ArrowRight size={12} /></Button></Link>}>
             <div className="grid grid-cols-3 gap-2 mb-3 text-center text-xs">
-              <div className="p-2 rounded bg-secondary/40"><p className="text-base font-semibold">{totals.activeCampaigns}</p><p className="text-muted-foreground">Active</p></div>
+              <div className="p-2 rounded bg-secondary/40"><p className="text-base font-semibold">{totals.activeCampaigns}</p><p className="text-muted-foreground">Active campaigns</p></div>
+              <div className="p-2 rounded bg-secondary/40"><p className="text-base font-semibold">{totals.sentTotal}</p><p className="text-muted-foreground">Sent total</p></div>
               <div className="p-2 rounded bg-secondary/40"><p className="text-base font-semibold">{totals.sentToday}</p><p className="text-muted-foreground">Sent today</p></div>
               <div className="p-2 rounded bg-secondary/40"><p className="text-base font-semibold">{totals.pendingQueue}</p><p className="text-muted-foreground">Queued</p></div>
-              <div className="p-2 rounded bg-secondary/40"><p className="text-base font-semibold">{totals.repliesAll}</p><p className="text-muted-foreground">Replies 7d</p></div>
-              <div className="p-2 rounded bg-secondary/40"><p className="text-base font-semibold">{totals.opensAll}</p><p className="text-muted-foreground">Opens 7d</p></div>
-              <div className="p-2 rounded bg-secondary/40"><p className={`text-base font-semibold ${totals.bouncesAll ? "text-destructive" : ""}`}>{totals.bouncesAll}</p><p className="text-muted-foreground">Bounces 7d</p></div>
+              <div className="p-2 rounded bg-secondary/40"><p className={`text-base font-semibold ${totals.blockedQueue ? "text-yellow-400" : ""}`}>{totals.blockedQueue}</p><p className="text-muted-foreground">Blocked</p></div>
+              <div className="p-2 rounded bg-secondary/40"><p className={`text-base font-semibold ${totals.failedSends ? "text-destructive" : ""}`}>{totals.failedSends}</p><p className="text-muted-foreground">Failed</p></div>
+              <div className="p-2 rounded bg-secondary/40"><p className="text-base font-semibold">{totals.repliesAll}</p><p className="text-muted-foreground">Replies (7d)</p></div>
+              <div className="p-2 rounded bg-secondary/40"><p className="text-base font-semibold">{drafts.length}</p><p className="text-muted-foreground">AI drafts</p></div>
+              <div className="p-2 rounded bg-secondary/40"><p className={`text-base font-semibold ${totals.inboxCapped ? "text-yellow-400" : "text-green-400"}`}>{totals.inboxCapped ? "Capped" : "OK"}</p><p className="text-muted-foreground">Inbox cap</p></div>
             </div>
             <div className="space-y-2">
               {campaigns.filter((c: any) => c.status === "active").slice(0, 4).map((c: any) => (
@@ -494,14 +497,18 @@ const CommandCentre = () => {
           <Section title="Results snapshot (7-day)" icon={Activity} action={<Link to="/founder/analytics"><Button size="sm" variant="ghost">Analytics <ArrowRight size={12} /></Button></Link>}>
             <div className="grid grid-cols-2 gap-2 text-sm">
               <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Leads in CRM</p><p className="text-xl font-semibold">{contacts.length}</p></div>
-              <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Emails sent today</p><p className="text-xl font-semibold">{totals.sentToday}</p></div>
+              <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Sent today</p><p className="text-xl font-semibold">{totals.sentToday}</p></div>
+              <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Sent (total)</p><p className="text-xl font-semibold">{totals.sentTotal}</p></div>
+              <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Queued</p><p className="text-xl font-semibold">{totals.pendingQueue}</p></div>
+              <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Blocked queue</p><p className={`text-xl font-semibold ${totals.blockedQueue ? "text-yellow-400" : ""}`}>{totals.blockedQueue}</p></div>
+              <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Failed sends</p><p className={`text-xl font-semibold ${totals.failedSends ? "text-destructive" : ""}`}>{totals.failedSends}</p></div>
               <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Replies (7d)</p><p className="text-xl font-semibold">{totals.repliesAll}</p></div>
-              <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Failed sends</p><p className={`text-xl font-semibold ${totals.blockedQueue ? "text-destructive" : ""}`}>{totals.blockedQueue}</p></div>
-              <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">AI drafts</p><p className="text-xl font-semibold">{drafts.length}</p></div>
+              <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">AI drafts pending</p><p className="text-xl font-semibold">{drafts.length}</p></div>
               <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Proposals in flight</p><p className="text-xl font-semibold">{proposals.length}</p></div>
               <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Open deals</p><p className="text-xl font-semibold">{deals.filter((d: any) => d.status !== "won" && d.status !== "lost").length}</p></div>
               <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Invoices outstanding</p><p className="text-xl font-semibold">{invoices.filter((i: any) => i.status !== "paid" && i.status !== "void").length}</p></div>
             </div>
+            <p className="text-[11px] text-muted-foreground mt-3">Source of truth: <span className="text-foreground/80">email_queue</span> (sent/blocked/failed). Replies from <span className="text-foreground/80">email_events</span>.</p>
           </Section>
         </div>
       </div>
