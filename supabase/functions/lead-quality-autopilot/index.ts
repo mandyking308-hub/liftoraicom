@@ -71,9 +71,23 @@ Deno.serve(async (req) => {
     const ids = (orphanLeads ?? []).map((r) => r.id);
     let backfilled = 0;
     if (ids.length) {
-      const { data: existing } = await admin
-        .from("lead_quality_profiles").select("apollo_lead_id").in("apollo_lead_id", ids);
-      const have = new Set((existing ?? []).map((r: any) => r.apollo_lead_id));
+      // Fetch the full set of apollo_lead_ids that already have profiles in
+      // chunks so we never run into URL-length limits on the `.in()` filter.
+      const have = new Set<string>();
+      let from = 0;
+      const PAGE = 1000;
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const { data, error } = await admin
+          .from("lead_quality_profiles")
+          .select("apollo_lead_id")
+          .not("apollo_lead_id", "is", null)
+          .range(from, from + PAGE - 1);
+        if (error || !data || data.length === 0) break;
+        for (const r of data) if ((r as any).apollo_lead_id) have.add((r as any).apollo_lead_id);
+        if (data.length < PAGE) break;
+        from += PAGE;
+      }
       const toInsert = (orphanLeads ?? []).filter((r) => !have.has(r.id)).map((r) => {
         const ep: any = r.enrichment_payload ?? r.search_payload ?? {};
         const email = (r.email ?? ep?.email ?? "").toString().trim();
