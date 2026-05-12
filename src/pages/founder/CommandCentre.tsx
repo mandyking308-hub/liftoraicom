@@ -343,8 +343,11 @@ const CommandCentre = () => {
           <StatTile label="Active campaigns" value={totals.activeCampaigns} icon={Send} to="/founder/outreach/campaigns" />
           <StatTile label="Warm leads" value={totals.warmLeads} icon={TrendingUp} to="/founder/priority" />
           <StatTile label="Sent today" value={totals.sentToday} icon={Mail} tone="good" to="/founder/sending" />
+          <StatTile label="Sent (total)" value={totals.sentTotal} icon={CheckCircle2} tone="good" to="/founder/sending" />
+          <StatTile label="Queued" value={totals.pendingQueue} icon={Clock} to="/founder/outreach/queue" />
           <StatTile label="Blocked queue" value={totals.blockedQueue} icon={Clock} tone={totals.blockedQueue ? "warn" : "good"} to="/founder/outreach/queue" />
-          <StatTile label="System warnings" value={totals.blockersCount} icon={AlertTriangle} tone={totals.blockersCount ? "danger" : "good"} to="/founder/system" />
+          <StatTile label="Failed sends" value={totals.failedSends} icon={AlertTriangle} tone={totals.failedSends ? "danger" : "good"} to="/founder/outreach/queue" />
+          <StatTile label="System warnings" value={totals.systemWarnings} icon={AlertTriangle} tone={totals.systemWarnings ? "danger" : "good"} to="/founder/system" />
           <StatTile label="Open deals" value={deals.filter((d: any) => d.status !== "won" && d.status !== "lost").length} icon={Banknote} to="/founder/finance" />
         </div>
 
@@ -376,16 +379,19 @@ const CommandCentre = () => {
                     <div>
                       <p className="font-medium">{b.name}</p>
                       <p className="text-xs text-muted-foreground">
-                        {b.lastActivity ? `Last activity ${formatDistanceToNow(new Date(b.lastActivity), { addSuffix: true })}` : "No activity yet"}
+                        {b.lastSend ? `Last send ${formatDistanceToNow(new Date(b.lastSend), { addSuffix: true })}` :
+                         b.lastContactReply ? `Last reply ${formatDistanceToNow(new Date(b.lastContactReply), { addSuffix: true })}` :
+                         "No send activity yet"}
                       </p>
                     </div>
                     <Badge variant="secondary" className={`text-xs ${businessStatusColor(b.status)}`}>{b.status.replace("_", " ")}</Badge>
                   </div>
-                  <div className="grid grid-cols-4 gap-2 text-center text-xs mb-3">
+                  <div className="grid grid-cols-5 gap-2 text-center text-[11px] mb-3">
                     <div><p className="font-semibold text-base">{b.activeCampaigns}</p><p className="text-muted-foreground">Camp.</p></div>
                     <div><p className="font-semibold text-base">{b.warm}</p><p className="text-muted-foreground">Warm</p></div>
                     <div><p className={`font-semibold text-base ${b.pendingApprovals ? "text-yellow-400" : ""}`}>{b.pendingApprovals}</p><p className="text-muted-foreground">Approve</p></div>
-                    <div><p className={`font-semibold text-base ${b.blocked ? "text-destructive" : ""}`}>{b.blocked}</p><p className="text-muted-foreground">Blocked</p></div>
+                    <div><p className={`font-semibold text-base ${b.blockedQueue ? "text-yellow-400" : ""}`}>{b.blockedQueue}</p><p className="text-muted-foreground">Blocked</p></div>
+                    <div><p className={`font-semibold text-base ${(b.failedSends + b.systemWarnings) ? "text-destructive" : ""}`}>{b.failedSends + b.systemWarnings}</p><p className="text-muted-foreground">Issues</p></div>
                   </div>
                   <Link to={`/founder/organisations`}><Button size="sm" variant="outline" className="w-full">Open workspace</Button></Link>
                 </div>
