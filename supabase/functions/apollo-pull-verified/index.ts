@@ -206,21 +206,31 @@ Deno.serve(async (req) => {
     segment_id: segment!.id,
     pulled_pages: pagesScanned,
     apollo_results_scanned: pulled,
+    apollo_candidate_profiles_staged: pulled,
+    /** @deprecated kept for backward compat — use apollo_candidate_profiles_staged */
     leads_pulled_into_staging: pulled,
     // Apollo people_search returns has_email_flag=true with NO actual address.
     // The address requires unlock credits to reveal — treat these as
     // "verified-email available but locked" candidates, not "imported emails".
+    verified_email_available_candidates_pulled: verifiedEmails,
+    /** @deprecated kept for backward compat */
     verified_email_available_locked: verifiedEmails,
     actual_emails_revealed: 0,
+    email_reveal_required: verifiedEmails,
+    /** @deprecated kept for backward compat */
     unlock_required: verifiedEmails,
-    /** @deprecated misleading label — kept for backward compat */
+    /** @deprecated misleading label — Apollo did NOT return actual emails */
     verified_emails_imported: verifiedEmails,
     duplicates_collapsed: counters.duplicates_collapsed ?? 0,
     already_in_crm: counters.already_in_crm_matched ?? 0,
     poor_fit_archived: counters.poor_fit_archived ?? 0,
     active_candidates: lifecycle?.active_working_leads ?? 0,
-    verified_email_available_locked_total: lifecycle?.verified_email_available_locked ?? 0,
-    safe_to_promote: lifecycle?.safe_to_promote ?? 0,
+    email_reveal_required_total: lifecycle?.email_reveal_required ?? 0,
+    verified_email_available_locked_total:
+      (lifecycle?.email_reveal_required ?? 0) + (lifecycle?.verified_email_available_locked ?? 0),
+    safe_to_promote_after_reveal: lifecycle?.safe_to_promote ?? 0,
+    /** @deprecated — promotion only valid AFTER reveal + post-reveal CRM check */
+    safe_to_promote: 0,
     safe_to_queue: lifecycle?.safe_to_queue ?? 0,
     safe_to_unlock: lifecycle?.safe_to_unlock ?? 0,
     decisions_waiting: counters.decisions_created ?? 0,
@@ -229,6 +239,6 @@ Deno.serve(async (req) => {
     pulls,
     last_diagnostics: lastDiagnostics,
     errors,
-    note: "Verified-email-available pull only. Apollo confirms emails exist but does NOT release the address; reveal requires founder-approved unlock. No credits spent, no promotions, no queue rows, no sends.",
+    note: "Apollo candidate profiles staged (search stage only). Apollo confirms emails exist for these candidates but does NOT release the actual address. Email reveal requires founder-approved credit spend. Promotion is impossible until after reveal and post-reveal CRM check. No credits spent, no promotions, no queue rows, no sends.",
   });
 });
