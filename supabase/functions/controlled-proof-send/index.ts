@@ -36,10 +36,21 @@ Deno.serve(async (req) => {
     auth: { persistSession: false },
   });
   const token = authHeader.replace("Bearer ", "");
-  const { data: claimsData, error: claimsErr } = await userClient.auth.getClaims(token);
-  if (claimsErr || !claimsData?.claims) return json({ error: "Unauthorized" }, 401);
-  const userId = claimsData.claims.sub as string;
-  const userEmail = (claimsData.claims as Record<string, unknown>).email as string | undefined;
+  const { data: userData, error: userErr } = await userClient.auth.getUser(token);
+  if (userErr || !userData?.user) {
+    return json(
+      {
+        ok: false,
+        error_code: "auth_invalid",
+        message: "Proof-send preview failed: founder session/auth could not be verified.",
+        details: userErr?.message ?? "No user from token",
+        next_action: "Sign out and back in, then retry.",
+      },
+      401,
+    );
+  }
+  const userId = userData.user.id;
+  const userEmail = userData.user.email ?? undefined;
 
   const admin = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
 
