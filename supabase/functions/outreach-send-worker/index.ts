@@ -513,8 +513,32 @@ Deno.serve(async (req) => {
       const allowed = checkJson?.allowed === true;
 
       if (!allowed) {
+        const reason = String(checkJson?.reason ?? "BLOCKED");
+        const isCoolingGate = /RECENT_COMMUNICATION_24H|RECENTLY_CONTACTED/i.test(reason);
+        if (isCoolingGate) {
+          // Pause this step; reschedule past the 24h cooling window so the
+          // cadence resumes rather than orphaning downstream steps.
+          const retryAt = new Date(Date.now() + 24 * 60 * 60 * 1000 + 5 * 60 * 1000).toISOString();
+          await supabase.from("email_queue").update({
+            status: "delayed",
+            block_reason: "paused_by_contact_gate",
+            scheduled_at: retryAt,
+            send_error: null,
+            provider_response: `Paused by contact gate (${reason}); cadence will resume at ${retryAt}.`,
+            last_attempt_at: new Date().toISOString(),
+          }).eq("id", item.id);
+          await supabase.from("activity_log").insert({
+            event_type: "cadence_paused",
+            description: `Queue ${item.id} paused_by_contact_gate (${reason}); rescheduled to ${retryAt}`,
+            entity_type: "email_queue",
+            entity_id: item.id,
+          });
+          delayed += 1;
+          touchedCampaigns.add(item.campaign_id);
+          continue;
+        }
         await supabase.from("email_queue")
-          .update({ status: "blocked", block_reason: checkJson?.reason ?? "BLOCKED" })
+          .update({ status: "blocked", block_reason: reason })
           .eq("id", item.id);
         blocked += 1;
         touchedCampaigns.add(item.campaign_id);
