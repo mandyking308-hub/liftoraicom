@@ -67,6 +67,12 @@ type LifecycleSummary = {
   archived_not_working: number;
   legacy_optional_unlock_candidates: number;
   verified_email_available_locked: number;
+  email_reveal_required?: number;
+  reveal_shortlisted?: number;
+  safe_to_promote_after_reveal?: number;
+  already_in_crm_after_reveal?: number;
+  reveal_attempted_no_email?: number;
+  reveal_invalid_email?: number;
   unlock_required: number;
   safe_to_unlock: number;
   safe_to_promote: number;
@@ -398,15 +404,16 @@ export default function LeadQualityPanel() {
           <>
           {lifecycle && (
             <div className="space-y-2">
-              <p className="text-xs font-medium text-foreground">Apollo lead lifecycle (active vs archive)</p>
+              <p className="text-xs font-medium text-foreground">Apollo lead lifecycle (search → reveal → promote)</p>
               <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
                 <Tile label="Apollo total" value={lifecycle.total_leads} />
                 <Tile label="Active working" value={lifecycle.active_working_leads} tone={lifecycle.active_working_leads > 0 ? "good" : "default"} />
-                <Tile label="Safe to unlock" value={lifecycle.safe_to_unlock} tone="good" />
-                <Tile label="Safe to promote" value={lifecycle.safe_to_promote} tone="good" />
+                <Tile label="Email reveal required" value={(lifecycle.email_reveal_required ?? 0) + (lifecycle.verified_email_available_locked ?? 0)} tone="warn" />
+                <Tile label="Reveal shortlisted" value={lifecycle.reveal_shortlisted ?? 0} tone="warn" />
+                <Tile label="Safe to promote (post-reveal)" value={lifecycle.safe_to_promote_after_reveal ?? lifecycle.safe_to_promote ?? 0} tone="good" />
                 <Tile label="Safe to queue" value={lifecycle.safe_to_queue} tone="good" />
-                <Tile label="Verified-email available (locked)" value={lifecycle.verified_email_available_locked ?? 0} tone="warn" />
-                <Tile label="Email reveal required" value={lifecycle.unlock_required ?? 0} tone="warn" />
+                <Tile label="Reveal attempted — no email" value={lifecycle.reveal_attempted_no_email ?? 0} />
+                <Tile label="Already in CRM after reveal" value={lifecycle.already_in_crm_after_reveal ?? 0} />
                 <Tile label="Legacy optional unlock candidates" value={lifecycle.legacy_optional_unlock_candidates} />
                 <Tile label="Duplicates archived" value={lifecycle.duplicates_archived} />
                 <Tile label="Poor fit archived" value={lifecycle.poor_fit_archived} />
@@ -415,7 +422,10 @@ export default function LeadQualityPanel() {
                 <Tile label="Promoted contacts" value={lifecycle.promoted_to_contact} tone="good" />
               </div>
               <p className="text-[11px] text-muted-foreground">
-                Source of truth = autopilot lifecycle. Archive buckets are retained for learning so Liftor never re-spends Apollo credits on the same bad/no-email/duplicate leads. Hard delete requires founder approval.
+                Apollo search and Apollo email reveal are <strong>separate stages</strong>. Search returns
+                candidate profiles + email-availability signal only. The actual address is only returned
+                after a founder-approved reveal/enrichment, which is what spends Apollo credits.
+                Promotion is impossible until <em>after</em> reveal and the post-reveal CRM check.
               </p>
             </div>
           )}
@@ -508,9 +518,9 @@ export default function LeadQualityPanel() {
 
           <div className="flex flex-wrap gap-2 items-center">
             <p className="text-xs text-muted-foreground w-full flex items-center gap-1">
-              <KeyRound size={12} /> 3. Apollo Unlock Shortlist (cheap rules ranking — NO Apollo calls)
+              <KeyRound size={12} /> 3. Apollo Email Reveal Shortlist (deterministic ranking — NO Apollo calls, NO credits)
             </p>
-            <span className="text-xs text-muted-foreground">Suggested unlock batch:</span>
+            <span className="text-xs text-muted-foreground">Recommended reveal batch (max 25, no padding):</span>
             {[25, 50, 200].map((n) => (
               <Button key={n} size="sm" variant={unlockBatchSize === n ? "default" : "outline"} disabled={!!busy}
                 onClick={() => setUnlockBatchSize(n)}>
@@ -519,19 +529,21 @@ export default function LeadQualityPanel() {
             ))}
             <Button size="sm" variant="outline" disabled={!!busy}
               onClick={() => call("apollo-unlock-shortlist", { batch_size: unlockBatchSize, min_score: 4 }, "Unlock shortlist")}>
-              {busy === "Unlock shortlist" ? <Loader2 className="animate-spin" size={14} /> : `Build shortlist (${unlockBatchSize === 200 ? "all" : unlockBatchSize})`}
+              {busy === "Unlock shortlist" ? <Loader2 className="animate-spin" size={14} /> : `Build reveal shortlist (${unlockBatchSize === 200 ? "all" : unlockBatchSize})`}
             </Button>
             <span className="text-xs text-yellow-300 w-full">
-              No Apollo credits spent until founder approves unlock/enrichment. Shortlist is generated from local data only.
+              No Apollo credits spent until founder approves the reveal/enrichment. Shortlist is generated from local data only — search results plus CRM/dedupe/bounce checks. Credit estimate counts unique recommended candidates only.
             </span>
             {shortlistResult && (
               <div className="w-full mt-2 rounded border border-border/50 bg-card/40 p-3 space-y-2">
                 <div className="flex flex-wrap gap-3 text-xs">
-                  <span><span className="text-muted-foreground">Top unique unlock candidates:</span> <strong>{shortlistResult.shortlist_count}</strong></span>
+                  <span><span className="text-muted-foreground">Recommended reveal candidates (unique):</span> <strong>{shortlistResult.shortlist_count}</strong></span>
                   <span><span className="text-muted-foreground">Deprioritised:</span> <strong>{shortlistResult.deprioritised_count}</strong></span>
-                  <span><span className="text-muted-foreground">Pool rows:</span> <strong>{shortlistResult.total_needs_verification}</strong></span>
+                  <span><span className="text-muted-foreground">Candidate pool:</span> <strong>{shortlistResult.total_needs_verification}</strong></span>
                   <span><span className="text-muted-foreground">Unique persons:</span> <strong>{shortlistResult.unique_persons ?? "—"}</strong></span>
-                  <span><span className="text-muted-foreground">Dup rows removed:</span> <strong>{shortlistResult.duplicate_rows_collapsed ?? 0}</strong></span>
+                  <span><span className="text-muted-foreground">Duplicates collapsed:</span> <strong>{shortlistResult.duplicate_rows_collapsed ?? 0}</strong></span>
+                  <span><span className="text-muted-foreground">Excluded by CRM:</span> <strong>{shortlistResult.blocked_by_crm ?? 0}</strong></span>
+                  <span><span className="text-muted-foreground">Est. Apollo reveal credits:</span> <strong>{shortlistResult.apollo_credit_estimate ?? shortlistResult.shortlist_count}</strong></span>
                   <span><span className="text-muted-foreground">Min score:</span> <strong>{shortlistResult.min_score}</strong></span>
                 </div>
                 {shortlistResult.fit_breakdown && (
@@ -546,24 +558,66 @@ export default function LeadQualityPanel() {
                       ))}
                   </div>
                 )}
+                {Array.isArray(shortlistResult.shortlist) && shortlistResult.shortlist.length > 0 && (
+                  <div className="overflow-x-auto rounded border border-border/40">
+                    <table className="w-full text-[11px]">
+                      <thead className="bg-muted/30 text-muted-foreground">
+                        <tr>
+                          <th className="text-left px-2 py-1">#</th>
+                          <th className="text-left px-2 py-1">Name</th>
+                          <th className="text-left px-2 py-1">Title</th>
+                          <th className="text-left px-2 py-1">Company</th>
+                          <th className="text-left px-2 py-1">Geo</th>
+                          <th className="text-left px-2 py-1">Apollo person</th>
+                          <th className="text-left px-2 py-1">Fit</th>
+                          <th className="text-left px-2 py-1">Score</th>
+                          <th className="text-left px-2 py-1">Reasons</th>
+                          <th className="text-left px-2 py-1">Recommendation</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {shortlistResult.shortlist.slice(0, 25).map((r: any, idx: number) => (
+                          <tr key={r.apollo_person_id ?? r.apollo_lead_id ?? idx} className="border-t border-border/30">
+                            <td className="px-2 py-1">{idx + 1}</td>
+                            <td className="px-2 py-1">{r.name || "—"}</td>
+                            <td className="px-2 py-1">{r.title || "—"}</td>
+                            <td className="px-2 py-1">{r.company || "—"}</td>
+                            <td className="px-2 py-1">{r.country || "—"}</td>
+                            <td className="px-2 py-1 font-mono text-[10px]">{r.apollo_person_id?.slice?.(0, 8) ?? "—"}</td>
+                            <td className="px-2 py-1">{r.fit}</td>
+                            <td className="px-2 py-1">{r.score}</td>
+                            <td className="px-2 py-1">{(r.reasons ?? []).slice(0, 3).join(", ")}</td>
+                            <td className="px-2 py-1">
+                              {r.crm_safe_to_unlock && !r.previously_attempted_no_email
+                                ? <span className="text-green-300">reveal</span>
+                                : r.previously_attempted_no_email
+                                  ? <span className="text-muted-foreground">skip</span>
+                                  : <span className="text-yellow-300">hold</span>}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
                 <p className="text-[11px] text-muted-foreground">
                   Risk notes: domain de-dup against existing contacts, missing-title penalty, hospitality/generic-corporate negative weights applied.
                 </p>
                 <div className="flex flex-wrap gap-2 items-center pt-2 border-t border-border/40 mt-2">
                   <span className="text-[11px] text-yellow-300 w-full">
-                    Founder action: spend Apollo credits to unlock the {shortlistResult.shortlist_count} canonical unique leads. Duplicates ({shortlistResult.duplicate_rows_collapsed ?? 0}) are NOT charged.
+                    Founder approval gate: spend approximately {shortlistResult.apollo_credit_estimate ?? shortlistResult.shortlist_count} Apollo credits to reveal emails for the {shortlistResult.shortlist_count} canonical unique candidates. Duplicates ({shortlistResult.duplicate_rows_collapsed ?? 0}) are NOT charged. Promotion and queueing remain separate, manual steps.
                   </span>
                   <Button size="sm" variant="outline" disabled={!!busy}
                     onClick={() => call("apollo-unlock-selected", { dry_run: true }, "Unlock preview")}>
-                    {busy === "Unlock preview" ? <Loader2 className="animate-spin" size={14} /> : "Preview unlock (no credits)"}
+                    {busy === "Unlock preview" ? <Loader2 className="animate-spin" size={14} /> : "Preview reveal (no credits)"}
                   </Button>
                   <Button size="sm" disabled={!!busy}
                     onClick={() => {
                       const n = shortlistResult.shortlist_count ?? 0;
-                      if (!confirm(`Spend ${n} Apollo credits to unlock ${n} emails?\n\nThis calls Apollo /people/match for the ${n} canonical unique leads only. Duplicates will NOT be charged. Contacts will NOT be promoted or enqueued automatically.`)) return;
+                      if (!confirm(`Reveal emails for ${n} selected Apollo candidates?\n\nEstimated cost: ${n} Apollo credits.\nApollo /people/match will be called for the ${n} canonical unique candidates only.\nDuplicates and CRM-known leads are excluded and will NOT be charged.\nContacts will NOT be promoted, enqueued, or sent automatically.`)) return;
                       call("apollo-unlock-selected", { confirm: true }, "Unlock execute");
                     }}>
-                    {busy === "Unlock execute" ? <Loader2 className="animate-spin" size={14} /> : `Unlock ${shortlistResult.shortlist_count ?? 0} Apollo emails (founder confirm)`}
+                    {busy === "Unlock execute" ? <Loader2 className="animate-spin" size={14} /> : `Reveal emails for ${shortlistResult.shortlist_count ?? 0} selected Apollo candidates`}
                   </Button>
                 </div>
               </div>

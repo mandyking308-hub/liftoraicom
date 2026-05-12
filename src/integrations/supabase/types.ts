@@ -8363,24 +8363,30 @@ export type Database = {
       }
       lead_lifecycle_summary: {
         Row: {
-          active_candidates: number | null
+          active_candidate: number | null
           active_working_leads: number | null
           already_in_crm: number | null
+          already_in_crm_after_reveal: number | null
           archived_learning_only: number | null
           archived_not_working: number | null
           attempted_no_email: number | null
-          duplicates_archived: number | null
+          duplicate_collapsed: number | null
+          email_reveal_required: number | null
           founder_review_required: number | null
           legacy_optional_unlock_candidates: number | null
-          missing_contact_archived: number | null
-          needs_verification_active: number | null
-          poor_fit_archived: number | null
+          needs_founder_review: number | null
+          needs_verification: number | null
           promoted_to_contact: number | null
           qualified_for_promotion: number | null
+          rejected_missing_contact_details: number | null
+          rejected_poor_fit: number | null
+          reveal_attempted_no_email: number | null
+          reveal_invalid_email: number | null
+          reveal_shortlisted: number | null
           safe_to_promote: number | null
+          safe_to_promote_after_reveal: number | null
           safe_to_queue: number | null
           safe_to_unlock: number | null
-          total_leads: number | null
           unlock_required: number | null
           verified_email_available_locked: number | null
           verified_ready_for_review: number | null
