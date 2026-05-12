@@ -308,6 +308,18 @@ Deno.serve(async (req) => {
           .contains("risk_flags", ["missing_email"]).select("id");
         counters.missing_email_held += data?.length ?? 0; return data?.length ?? 0;
       },
+      // NEW: verified email available but locked (Apollo says verified, no address revealed yet)
+      async () => {
+        const { data } = await admin.from("lead_quality_profiles").update({
+          lifecycle_stage: "verified_email_available_locked",
+          lifecycle_reason: "Apollo reports verified email available; actual address is locked behind unlock credits",
+          lifecycle_classified_at: new Date().toISOString(),
+        }).is("lifecycle_stage", null).eq("quality_status", "needs_verification")
+          .contains("risk_flags", ["verified_email_locked"]).select("id");
+        counters.verified_email_available_locked += data?.length ?? 0;
+        counters.unlock_required += data?.length ?? 0;
+        return data?.length ?? 0;
+      },
       async () => {
         const { data } = await admin.from("lead_quality_profiles").update({ lifecycle_stage: "rejected_missing_contact_details", lifecycle_reason: "no email and not high-fit; archived not_working", lifecycle_classified_at: new Date().toISOString() })
           .is("lifecycle_stage", null).eq("quality_status", "needs_verification").contains("risk_flags", ["missing_email"]).select("id");
@@ -320,7 +332,7 @@ Deno.serve(async (req) => {
       },
     ];
     const moved: Record<string, number> = {};
-    const labels = ["promoted","already_in_crm","attempted_no_email","duplicate_collapsed","poor_fit","verified_ready_for_review","already_in_crm_dup","archived_not_working","missing_email_hold","missing_contact_archived","founder_review_fallback"];
+    const labels = ["promoted","already_in_crm","attempted_no_email","duplicate_collapsed","poor_fit","verified_ready_for_review","already_in_crm_dup","archived_not_working","missing_email_hold","verified_email_available_locked","missing_contact_archived","founder_review_fallback"];
     for (let i = 0; i < updates.length; i++) {
       moved[labels[i]] = await updates[i]();
     }
