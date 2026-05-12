@@ -20,6 +20,8 @@ import { toast } from "sonner";
 type BatchSummary = {
   batch_size_requested: number;
   eligible_selected: number;
+  rescheduled_to_now?: number;
+  future_scheduled_count?: number;
   sent: number;
   pending_before: number | null;
   pending_after: number | null;
@@ -32,6 +34,7 @@ type BatchSummary = {
 type BatchResult = {
   ok: boolean;
   message: string;
+  note?: string;
   summary?: BatchSummary;
   recent_rows?: Array<{
     id: string;
@@ -157,10 +160,15 @@ const ControlledLiveBatch = () => {
             <div>Sent before → after: {result.summary.sent_before ?? "—"} → {result.summary.sent_after ?? "—"}</div>
             <div>Queued before → after: {result.summary.pending_before ?? "—"} → {result.summary.pending_after ?? "—"}</div>
             <div>Eligible selected: {result.summary.eligible_selected}</div>
+            <div>Rescheduled to now: {result.summary.rescheduled_to_now ?? 0}</div>
+            <div>Future-scheduled in batch: {result.summary.future_scheduled_count ?? 0}</div>
             <div>Blocked total: {result.summary.blocked_after ?? "—"}</div>
             <div>Elapsed: {result.summary.elapsed_ms} ms</div>
             <div>Worker error: {result.summary.worker_error ?? "none"}</div>
           </div>
+          {result.note && (
+            <div className="text-xs text-foreground/80">{result.note}</div>
+          )}
           {result.next_recommended_action && (
             <div className="text-xs text-muted-foreground">
               Next: {result.next_recommended_action}
