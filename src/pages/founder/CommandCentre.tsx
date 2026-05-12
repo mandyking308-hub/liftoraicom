@@ -335,7 +335,13 @@ const CommandCentre = () => {
     const campaignPerfRe = /Campaign\s+"([^"]+)"\s+has\s+(\d+)\s+sends?\s+and\s+(\d+)\s+repl/i;
     const campaignPerf: Record<string, { campaign: string; sends: number; replies: number; events: number; business_name?: string }> = {};
     const otherGrouped: Record<string, { count: number; severity: string; business_name?: string }> = {};
+    const isInternalMsg = (msg: string) => {
+      const lower = (msg ?? "").toLowerCase();
+      return internalEmails.some((em) => em && lower.includes(em));
+    };
     sysEvents.forEach((e: any) => {
+      // Founder/internal email activity must never appear as a campaign blocker.
+      if (isInternalMsg(e.message)) return;
       const m = (e.message ?? "").match(campaignPerfRe);
       if (m) {
         const [, name, sends, replies] = m;
@@ -369,7 +375,7 @@ const CommandCentre = () => {
       });
     });
     return { current, safetyGates, completed, observations };
-  }, [inboxes, campaigns, sysEvents, queue, isLiveMode]);
+  }, [inboxes, campaigns, sysEvents, queue, isLiveMode, internalEmails]);
 
   const allDangerBlockers = useMemo(
     () => [...blockerSections.current, ...blockerSections.observations].filter((b) => b.severity === "danger"),
