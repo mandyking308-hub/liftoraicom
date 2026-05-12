@@ -414,6 +414,43 @@ async function persistMessage(
     subject,
   });
 
+  // Internal/founder/admin/test addresses must never become prospects, warm
+  // leads, replies, or orphan blockers. Log to activity_log + record the
+  // inbound row as internal_ignored so it stays auditable.
+  if (fromEmail) {
+    const { data: isInternal } = await admin.rpc("is_internal_email", { _email: fromEmail });
+    if (isInternal === true) {
+      await admin.from("activity_log").insert({
+        event_type: "internal_inbound_ignored",
+        description: `Internal/founder inbound from ${fromEmail} polled by inbox ${ib.email_address ?? ib.id} — not treated as a campaign reply.`,
+        entity_type: "internal_email",
+      });
+      // Best-effort: record the inbound row but mark it internal_ignored so
+      // it never appears in prospect/blocker views.
+      await admin.from("inbound_messages").insert({
+        inbox_id: ib.id,
+        message_id: messageId,
+        in_reply_to: inReplyTo,
+        references_header: refs,
+        from_email: fromEmail,
+        to_email: toEmail,
+        subject,
+        body_text: bodyText.slice(0, 100000),
+        body_html: bodyHtml?.slice(0, 200000) ?? null,
+        is_bounce: isBounce,
+        contact_id: null,
+        campaign_id: null,
+        processing_status: "internal_ignored",
+        processing_error: null,
+      });
+      return {
+        markSeen: true,
+        messageId,
+        counts: { internal_ignored: 1 },
+      };
+    }
+  }
+
   const { data: existing, error: existingError } = await admin
     .from("inbound_messages")
     .select("id, processing_status, conversation_id")
