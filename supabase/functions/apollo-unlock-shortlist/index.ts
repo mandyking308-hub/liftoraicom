@@ -94,6 +94,9 @@ Deno.serve(async (req) => {
     "verified_ready_for_review",
     "qualified_for_promotion",
     "founder_review_required",
+    "email_reveal_required",
+    "reveal_shortlisted",
+    "verified_email_available_locked",
   ]);
   const idsAll = (rows ?? []).map((r: any) => r.apollo_lead_id);
   const stageMap = new Map<string, string | null>();
