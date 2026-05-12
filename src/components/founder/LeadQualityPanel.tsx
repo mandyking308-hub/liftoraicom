@@ -254,6 +254,32 @@ export default function LeadQualityPanel() {
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Loading…</p>
         ) : (
+          <>
+          {lifecycle && (
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-foreground">Apollo lead lifecycle (active vs archive)</p>
+              <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
+                <Tile label="Apollo total" value={lifecycle.total_leads} />
+                <Tile label="Active working" value={lifecycle.active_working_leads} tone={lifecycle.active_working_leads > 0 ? "good" : "default"} />
+                <Tile label="Needs verify (worth action)" value={lifecycle.needs_verification_active} tone="warn" />
+                <Tile label="Safe to unlock" value={lifecycle.safe_to_unlock} tone="good" />
+                <Tile label="Safe to promote" value={lifecycle.safe_to_promote} tone="good" />
+                <Tile label="Safe to queue" value={lifecycle.safe_to_queue} tone="good" />
+                <Tile label="Promoted contacts" value={lifecycle.promoted_to_contact} tone="good" />
+                <Tile label="Already in CRM" value={lifecycle.already_in_crm} />
+                <Tile label="Duplicates archived" value={lifecycle.duplicates_archived} />
+                <Tile label="Poor fit archived" value={lifecycle.poor_fit_archived} />
+                <Tile label="Missing contact archived" value={lifecycle.missing_contact_archived} />
+                <Tile label="Attempted no-email" value={lifecycle.attempted_no_email} tone="warn" />
+                <Tile label="Founder review required" value={lifecycle.founder_review_required} tone={lifecycle.founder_review_required > 0 ? "warn" : "default"} />
+                <Tile label="Archived (learning)" value={lifecycle.archived_learning_only} />
+                <Tile label="Archived (not working)" value={lifecycle.archived_not_working} />
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                Active = candidates worth founder action. Everything else is retained as learning so Liftor never re-spends Apollo credits on the same bad/no-email/duplicate leads. Hard delete requires founder approval.
+              </p>
+            </div>
+          )}
           <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
             <Tile label="Apollo total" value={overview?.total_leads ?? 0} />
             <Tile label="Raw" value={overview?.raw_leads ?? 0} />
@@ -271,6 +297,7 @@ export default function LeadQualityPanel() {
             <Tile label="Duplicate rows collapsed" value={shortlistResult?.duplicate_rows_collapsed ?? "—"} tone="warn" />
             <Tile label="Unique persons in pool" value={shortlistResult?.unique_persons ?? "—"} tone="default" />
           </div>
+          </>
         )}
 
         <div className="rounded-md border border-primary/30 bg-primary/5 p-3 text-xs flex items-start gap-2">
