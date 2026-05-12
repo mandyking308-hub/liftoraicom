@@ -164,6 +164,7 @@ Deno.serve(async (req) => {
 
   const results: any[] = [];
   let unlocked = 0, failed = 0;
+  let already_in_crm_after_unlock = 0;
   for (const t of targets) {
     const pid = t.lead!.apollo_person_id as string;
     const r = await singleMatch(apiKey, pid);
@@ -171,24 +172,70 @@ Deno.serve(async (req) => {
     const email: string | null = person?.email && EMAIL_RE.test(person.email) ? person.email : null;
     if (r.ok && email) {
       const domain = email.split("@")[1]?.toLowerCase() ?? null;
+      // Permanent post-unlock CRM cross-check: if the unlocked email already
+      // exists in contacts, link to it instead of creating a duplicate.
+      const { data: existingContact } = await admin
+        .from("contacts")
+        .select("id, email, sendable_status, hard_bounced, is_globally_suppressed, is_internal, status")
+        .ilike("email", email)
+        .maybeSingle();
       await admin.from("apollo_leads")
-        .update({ email, status: "enriched", enrichment_payload: person })
+        .update({
+          email,
+          status: existingContact ? "duplicate" : "enriched",
+          enrichment_payload: person,
+          contact_id: existingContact?.id ?? null,
+        })
         .eq("id", t.apollo_lead_id);
       await admin.from("apollo_raw_leads")
         .update({ email, email_domain: domain })
         .eq("apollo_lead_id", t.apollo_lead_id);
-      const newFlags = (t.risk_flags ?? []).filter((f: string) =>
+      const baseFlags = (t.risk_flags ?? []).filter((f: string) =>
         f !== "missing_email" && f !== "needs_apollo_unlock" && f !== "apollo_email_unavailable");
+      const newFlags = existingContact
+        ? Array.from(new Set([...baseFlags, "already_in_crm_after_unlock", "existing_contact_needs_review"]))
+        : baseFlags;
       await admin.from("lead_quality_profiles")
-        .update({ risk_flags: newFlags, unlock_recommendation: "unlocked" })
+        .update({
+          risk_flags: newFlags,
+          unlock_recommendation: existingContact ? "already_in_crm_after_unlock" : "unlocked",
+          dup_of_contact_id: existingContact?.id ?? null,
+          needs_founder_review: !!existingContact,
+          founder_review_reason: existingContact
+            ? `Apollo unlock returned email already in CRM (sendable_status=${existingContact.sendable_status}). Founder must reconcile.`
+            : null,
+        })
         .eq("id", t.id);
-      unlocked++;
-      results.push({ rank: t.unlock_shortlist_rank, apollo_person_id: pid, status: "unlocked" });
+      if (existingContact) {
+        already_in_crm_after_unlock++;
+        await admin.from("activity_log").insert({
+          event_type: "apollo_unlock_already_in_crm",
+          description: `Apollo unlock for person ${pid} matched existing contact ${existingContact.id}. No duplicate created.`,
+          entity_type: "contact",
+          entity_id: existingContact.id,
+        });
+        results.push({ rank: t.unlock_shortlist_rank, apollo_person_id: pid, status: "already_in_crm_after_unlock", contact_id: existingContact.id });
+      } else {
+        unlocked++;
+        results.push({ rank: t.unlock_shortlist_rank, apollo_person_id: pid, status: "unlocked" });
+      }
     } else {
       failed++;
       const newFlags = Array.from(new Set([...(t.risk_flags ?? []), "apollo_email_unavailable"]));
       await admin.from("lead_quality_profiles")
-        .update({ risk_flags: newFlags }).eq("id", t.id);
+        .update({
+          risk_flags: Array.from(new Set([...newFlags, "unlock_attempt_no_email"])),
+          unlock_recommendation: "attempted_no_email",
+        }).eq("id", t.id);
+      await admin.from("apollo_leads")
+        .update({ status: "skipped_no_email" })
+        .eq("id", t.apollo_lead_id);
+      await admin.from("activity_log").insert({
+        event_type: "apollo_unlock_no_email",
+        description: `Apollo unlock for person ${pid} returned 200 but no email. Excluded from future credit estimates.`,
+        entity_type: "apollo_lead",
+        entity_id: t.apollo_lead_id,
+      });
       results.push({
         rank: t.unlock_shortlist_rank, apollo_person_id: pid,
         status: "no_email", apollo_status: r.status, error: (r as any).error ?? null,
@@ -202,7 +249,7 @@ Deno.serve(async (req) => {
       enrichment_credits_used: targets.length,
       contacts_new: 0,
       contacts_updated: unlocked,
-      notes: `unlock_selected complete: unlocked=${unlocked} failed=${failed} attempted=${targets.length}`,
+      notes: `unlock_selected complete: unlocked=${unlocked} already_in_crm_after_unlock=${already_in_crm_after_unlock} no_email=${failed} attempted=${targets.length}`,
       errors: failed > 0 ? { failed_results: results.filter((r) => r.status !== "unlocked") } : null,
     }).eq("id", runRow.id);
   }
@@ -214,9 +261,10 @@ Deno.serve(async (req) => {
     skipped_by_crm: skippedByCrm.length,
     attempted: targets.length,
     unlocked,
+    already_in_crm_after_unlock,
     failed,
     apollo_credits_spent_estimate: targets.length,
     results,
-    note: "Unlock complete. Promotion to contacts and enqueue still require separate founder actions.",
+    note: "Unlock complete. Promotion and enqueue still require separate founder actions. Emails already in CRM are linked to existing contacts (no duplicates). Person IDs returning no email are flagged unlock_attempt_no_email and excluded from future credit estimates.",
   });
 });
