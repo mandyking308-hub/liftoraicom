@@ -427,7 +427,7 @@ const FounderManual = () => {
               <li>Analytics — FounderAnalytics dashboard</li>
               <li>Optimisation — OptimisationDashboard + optimisation_insights</li>
               <li>Security — AccessControl + SecurityDashboard + 5 security tables</li>
-              <li>Command Center — CommandCenter dashboard</li>
+              <li>Command Centre — CommandCentre cockpit (canonical at /founder/command-centre)</li>
               <li>AI Proposal — AIProposal + generate-proposal edge function</li>
               <li>Partner Portal — 7 routes + 5 partner tables</li>
               <li>AI Brain Core — BrainCore + 3 brain tables</li>
