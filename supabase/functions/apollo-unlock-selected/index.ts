@@ -116,9 +116,8 @@ Deno.serve(async (req) => {
   // Log run start
   const { data: runRow } = await admin.from("apollo_automation_runs").insert({
     business_name: businessName,
-    kind: "unlock_selected",
     status: "running",
-    payload: { shortlist_count: rows.length, target_count: targets.length, requested_by: u.user.id },
+    notes: `unlock_selected: requested by ${u.user.id} · shortlist=${rows.length} · targets=${targets.length}`,
   }).select("id").maybeSingle();
 
   const results: any[] = [];
@@ -158,8 +157,11 @@ Deno.serve(async (req) => {
   if (runRow?.id) {
     await admin.from("apollo_automation_runs").update({
       status: "completed",
-      completed_at: new Date().toISOString(),
-      payload: { shortlist_count: rows.length, attempted: targets.length, unlocked, failed, results },
+      enrichment_credits_used: targets.length,
+      contacts_new: 0,
+      contacts_updated: unlocked,
+      notes: `unlock_selected complete: unlocked=${unlocked} failed=${failed} attempted=${targets.length}`,
+      errors: failed > 0 ? { failed_results: results.filter((r) => r.status !== "unlocked") } : null,
     }).eq("id", runRow.id);
   }
 
