@@ -1,55 +1,79 @@
-# Liftor Activation Plan — Sliced Rollout
+# Central CRM Gap Closure — Implementation Plan
 
-This is too large to ship safely in one pass. Proposing controlled slices that keep real guardrails intact while removing artificial restrictions. Each slice lands independently and is verifiable in the Command Centre before the next begins.
+## Goal
+Harden the Liftor central CRM spine so every lead, contact, conversation, proposal, deal and send reconciles to `contacts`. No live sends, no Apollo credits, no AI, no new dashboard.
 
-## Already shipped
-- Slice 1: Controlled LIVE activation + 12 readiness checks (with corrected send-cap detection).
-- Slice 2: Proof-send edge function (`controlled-proof-send`) — auth bug fixed, structured errors, redeployed.
+## Approach
+One additive migration → data backfill via insert tool → edge function hardening → UI summary tile in existing Lead Quality panel → re-audit report.
 
-## Slice 3 — LIVE Execution Unlock (next, recommended)
-Make Controlled LIVE actually flip the execution switch.
-- Audit `outreach-send-worker`, `outreach-inbound-poll`, `process-email-queue` and any other workers for `system_mode === 'live'` gates.
-- Remove "TEST mode" early-exits, but keep all compliance/throttle/cap RPCs (`check_outreach_allowed`, `check_send_throttle`, suppression/reply-stop/duplicate triggers).
-- Ensure inbound polling, AI draft creation, and follow-up scheduling are not extra-gated by anything beyond `system_mode`.
-- Add a single "Execution status" panel on the Command Centre showing: mode, worker last-run, inbound last-run, AI drafts queue depth, follow-ups scheduled.
+---
 
-Acceptance: in LIVE, scheduled cron worker drains eligible queue rows respecting only real guardrails. In TEST, sends are still blocked.
+## PART 1 — Migration (additive, safe)
 
-## Slice 4 — Capacity Model (replaces hardcoded caps)
-- Build a `get_business_capacity(business_id)` SQL function returning per-inbox + summed business hourly/daily capacity, current usage, provider-block state, warmup state, reputation state.
-- Rip out any hardcoded "10/day" or "1-send" constants in the worker / UI that are not read from `inboxes.hourly_send_limit` / `daily_send_limit` / warmup / `provider_blocked_until`.
-- Capacity card on Command Centre: live numbers + bottleneck message ("Capacity bottleneck: only one active inbox is available").
-- Worker stops on real provider cap; rotates to other live-ready inboxes if available.
+`supabase/migrations/<ts>_crm_spine_hardening.sql`:
 
-Acceptance: raising/lowering `daily_send_limit` on an inbox immediately changes effective capacity; nothing else artificially caps it.
+1. **`internal_email_identities`** — ensure unique index on `lower(email)`; add columns if missing: `kind` (founder|system|sender|test), `notes`, `created_by`.
+2. **`contacts`** — add columns if missing: `is_internal boolean default false`, `sendable_status text default 'sendable'` (sendable|suppressed|hard_bounced|review), `archived_at timestamptz`, `archive_reason text`. Index on `(is_internal)`, `(sendable_status)`.
+3. **`business_contact_relationships`** — add nullable `business_id uuid` referencing `businesses(id)`; index `(business_id)`. Keep `business_name` text as legacy/display.
+4. **`proposals`** — add nullable `contact_id uuid` referencing `contacts(id)`, nullable `business_id uuid` referencing `businesses(id)`, `crm_reconciliation_status text default 'pending'` (matched|unmatched|needs_review|pending). Indexes.
+5. **View `crm_spine_summary`** — single-row counts: total contacts, with BCR, missing BCR, internal identities, suppressed/bounced, apollo promoted, apollo needs verification, duplicates collapsed, proposals needing reconciliation, safe-to-unlock count.
+6. **View `proposal_crm_reconciliation`** — proposal_id, contact_email, matched contact_id, matched business_id, status.
+7. **Function `resolve_contact_by_email(text) returns uuid`** — case-insensitive lookup.
+8. **Trigger `proposals_reconcile_trg`** — on insert/update of `contact_email`, set `contact_id`/`business_id`/`crm_reconciliation_status` automatically (no contact creation).
+9. **Function `is_internal_identity(text) returns boolean`** — checks `internal_email_identities`.
 
-## Slice 5 — Proof-only Restriction Removal
-- After Slice 3 is verified, the `controlled-proof-send` function stays for founder-initiated single sends, but `outreach-send-worker` is no longer artificially limited to `max=1`. Worker batch size returns to existing `email_send_state.batch_size` (or capacity-derived value).
-- Add explicit founder toggle: "Proof-only mode" (default OFF after first successful proof) so this is an audit-traceable choice, not a hidden block.
+---
 
-## Slice 6 — Agent Workstream Wiring
-Each agent gets a real edge function trigger / scheduled run + activity logging. Order:
-1. Lead Source → CRM → Outreach (lead pipeline)
-2. Email + Inbox + Conversation (send/reply loop) — most already wired, just verify and surface
-3. Proposal → Demo → Deal → Finance → Supplier (revenue pipeline)
-4. Compliance + Oversight + Revenue (cross-cutting reporters)
+## PART 2 — Data backfill (insert tool, after migration approved)
 
-Each agent card on Command Centre: status, last run, last action, current blocker, next action — pulled from `agent_activity_logs` / `system_events`. AI replies/proposals stay in approval queue.
+1. Seed `internal_email_identities`: `mandyking308@gmail.com` (founder), `hello@neoncandy.online` (system/sender), any `from_email` found on `outreach_queue`/`communications`.
+2. Reclassify `hello@neoncandy.online` contact → `is_internal=true`, `sendable_status='suppressed'`, cancel any pending queue rows.
+3. Audit 20 BCR-less contacts:
+   - If email matches `internal_email_identities` → mark internal/suppressed, no BCR.
+   - Match `mailer-daemon`, `postmaster`, `no-reply`, `notifications@` patterns → archive as `stale/system`.
+   - Real prospects (have `apollo_person_id` or `imported_leads` source) → create BCR row linked to NeonCandy `business_id`.
+   - Else → mark `archived_at` with `archive_reason='needs_founder_review'`.
+4. Backfill NDR contacts: parse 8 NDR inbound rows for original recipient → set those contacts `sendable_status='hard_bounced'`, cancel pending queue rows.
+5. Backfill `business_contact_relationships.business_id` for all rows where `business_name ilike 'neon candy'` → NeonCandy `businesses.id`.
+6. Run proposal trigger: `UPDATE proposals SET contact_email = contact_email` to populate `contact_id`/`business_id`/`crm_reconciliation_status`.
 
-## Slice 7 — Stale Blocker Cleanup in UI
-- Filter the 109 already-cancelled simulated follow-up rows out of "current blockers" views; keep them visible only under "History / Repair completed".
-- Current-blocker list pulls only: unresolved `system_events`, failed readiness checks, generic contacts needing review, capacity exhausted, provider blocks.
+---
 
-## Slice 8 — Revenue Workstream Tab
-- New tab on Command Centre: Lead Pool → Contacts → Outreach → Sent → Replies → AI Drafts → Approved → Proposals → Demos → Deals → Invoices → Payments → Revenue.
-- Each stage: count, agent owner, blocker, next action, revenue potential where present.
-- Empty states show plain English ("No revenue yet — next profit action is to convert warm replies into proposal-ready leads.") — no fake numbers.
+## PART 3 — Edge function hardening
 
-## Technical notes
-- All gating lives in DB triggers + RPCs; Slice 3+ keeps them in place. Removal is only of `if (mode !== 'live') return early;` style early-exits and hardcoded numeric constants in worker/UI.
-- Service-role key paths unchanged; founder JWT continues to authorise UI actions.
-- No schema changes in Slice 3; Slice 4 adds one read-only function. Later slices may add a `proof_only_mode` row in `system_settings` (no schema change).
-- Every removal will be paired with a logged `system_events` audit row so the change itself is traceable.
+- **`outreach-inbound-poll`** & **`outreach-inbound-webhook`**: detect NDR (subject contains `Undelivered`/`Mail Delivery`/`failure notice`, or from `mailer-daemon`/`postmaster`), parse original recipient, mark contact suppressed, cancel queue rows. Detect internal-identity senders → tag, do not create prospect.
+- **`apollo-unlock-shortlist`** & **`apollo-unlock-selected`**: pre-check `contacts` (by email/apollo_person_id), `business_contact_relationships`, `email_queue`, `communications`, `conversations`, `proposals`, `internal_email_identities`, `sendable_status`. Adjust credit estimate to count only safe new leads. Add `crm_check` to response payload.
+- **`outreach-send-worker`**: refuse to send when contact `is_internal=true` or `sendable_status != 'sendable'`.
 
-## What I need from you
-Confirm this slicing, and tell me to start with **Slice 3 — LIVE Execution Unlock**. I will not touch Slices 4–8 until 3 is verified in your Command Centre.
+---
+
+## PART 4 — UI
+
+`src/components/founder/LeadQualityPanel.tsx`: add a compact `CRM Spine Summary` card (above existing content) reading from `crm_spine_summary` view. Tiles: Contacts / With BCR / Missing BCR / Internal / Suppressed / Apollo Promoted / Needs Verification / Duplicates Collapsed / Proposals Needing Recon / Safe-to-Unlock. No new route.
+
+---
+
+## PART 5 — Re-audit report
+
+After data backfill, generate `/mnt/documents/central_crm_audit_v2.md` with:
+- contacts total, duplicates, missing BCR
+- internal identities count
+- NDR handling status (suppressed counts)
+- proposal reconciliation matched/unmatched
+- BCR business_id coverage
+- Apollo safe-to-unlock count
+- All 10 acceptance tests pass/fail
+
+---
+
+## Out of scope
+- No live sends, no Apollo credits, no AI, no auto-promote, no new dashboard, no contact auto-creation from proposals, no fake/demo data, TEST mode stays off.
+
+## Deployment order
+1. Migration (await user approval)
+2. Data backfills via insert tool
+3. Edge function deploys
+4. UI panel update
+5. Re-audit report
+
+Ready to proceed with the migration on your approval.
