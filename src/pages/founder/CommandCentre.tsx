@@ -61,7 +61,7 @@ const CommandCentre = () => {
   });
   const { data: contacts = [] } = useQuery({
     queryKey: ["cc2-contacts"],
-    queryFn: async () => (await supabase.from("contacts").select("id,assigned_business,status,intent_score,last_replied_at,conversation_active")).data ?? [],
+    queryFn: async () => (await supabase.from("contacts").select("id,assigned_business,status,intent_score,last_replied_at,conversation_active").neq("status", "INTERNAL")).data ?? [],
   });
   const { data: campaigns = [] } = useQuery({
     queryKey: ["cc2-campaigns"],
@@ -75,6 +75,28 @@ const CommandCentre = () => {
   const { data: inboxes = [] } = useQuery({
     queryKey: ["cc2-inboxes"],
     queryFn: async () => (await supabase.from("inboxes").select("*")).data ?? [],
+  });
+  const { data: activeInboxes = [] } = useQuery({
+    queryKey: ["cc2-active-inboxes-view"],
+    queryFn: async () => (await (supabase as any).from("command_centre_active_inboxes").select("*")).data ?? [],
+  });
+  const { data: leadQualityCounts } = useQuery({
+    queryKey: ["cc2-lead-quality-counts"],
+    queryFn: async () => {
+      const [needsVer, raw, promoted, shortlist] = await Promise.all([
+        supabase.from("lead_quality_profiles").select("id", { count: "exact", head: true }).eq("quality_status", "needs_verification"),
+        supabase.from("lead_quality_profiles").select("id", { count: "exact", head: true }).eq("quality_status", "raw"),
+        supabase.from("lead_quality_profiles").select("id", { count: "exact", head: true }).not("promoted_contact_id", "is", null),
+        supabase.from("lead_quality_profiles").select("id", { count: "exact", head: true }).eq("quality_status", "needs_verification").contains("risk_flags", ["needs_apollo_unlock"]),
+      ]);
+      return {
+        needsVerification: needsVer.count ?? 0,
+        raw: raw.count ?? 0,
+        promoted: promoted.count ?? 0,
+        unlockShortlist: shortlist.count ?? 0,
+      };
+    },
+    refetchInterval: 60000,
   });
   const { data: drafts = [] } = useQuery({
     queryKey: ["cc2-drafts"],
