@@ -13,7 +13,10 @@ type PullResult = {
   ok: boolean;
   apollo_results_scanned: number;
   leads_pulled_into_staging: number;
-  verified_emails_imported: number;
+  verified_email_available_locked: number;
+  actual_emails_revealed: number;
+  unlock_required: number;
+  verified_email_available_locked_total?: number;
   duplicates_collapsed: number;
   already_in_crm: number;
   poor_fit_archived: number;
@@ -52,8 +55,9 @@ export default function ApolloPullPanel() {
         toast.error("Apollo pull failed", { description: (data as any).message ?? (data as any).error });
       } else {
         setResult(data as PullResult);
+        const r = data as PullResult;
         toast.success("Apollo pull complete", {
-          description: `${(data as PullResult).verified_emails_imported} verified-email leads in staging.`,
+          description: `${r.verified_email_available_locked} verified-email-available candidates pulled — email reveal requires Apollo unlock.`,
         });
       }
     } catch (e: any) {
@@ -80,9 +84,10 @@ export default function ApolloPullPanel() {
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-xs text-muted-foreground">
-          Pulls verified-email leads directly from Apollo using the NeonCandy Source Quality Brief
-          into staging, then runs Lead Quality Autopilot. No unlock credits spent. No locked / no-email
-          profiles imported. No promotions, no queue rows, no sends.
+          Pulls verified-email-available candidates from Apollo using the NeonCandy Source Quality Brief
+          into staging, then runs Lead Quality Autopilot. Apollo confirms an email exists but does NOT
+          release the address — reveal requires a founder-approved unlock. No credits spent on this pull.
+          No promotions, no queue rows, no sends.
         </p>
 
         <div className="grid md:grid-cols-3 gap-3">
@@ -149,9 +154,10 @@ export default function ApolloPullPanel() {
           <div className="space-y-2">
             <p className="text-xs uppercase tracking-wide text-muted-foreground">Apollo pull result</p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
-              <Tile label="Apollo results scanned" value={result.apollo_results_scanned} />
-              <Tile label="Leads pulled into staging" value={result.leads_pulled_into_staging} />
-              <Tile label="Verified emails imported" value={result.verified_emails_imported} tone="good" />
+              <Tile label="Apollo candidates pulled" value={result.apollo_results_scanned} />
+              <Tile label="Verified-email available (locked)" value={result.verified_email_available_locked} tone="good" />
+              <Tile label="Actual emails revealed" value={result.actual_emails_revealed} />
+              <Tile label="Unlock required" value={result.unlock_required} tone="warn" />
               <Tile label="Duplicates collapsed" value={result.duplicates_collapsed} />
               <Tile label="Already in CRM" value={result.already_in_crm} />
               <Tile label="Poor fit archived" value={result.poor_fit_archived} />
@@ -161,6 +167,11 @@ export default function ApolloPullPanel() {
               <Tile label="Decisions waiting" value={result.decisions_waiting} tone="warn" />
               <Tile label="Source quality score" value={result.source_quality_score ?? "—"} />
             </div>
+            <p className="text-[11px] text-muted-foreground">
+              Apollo people_search returns <code>has_email_flag=true</code> but withholds the actual
+              address until unlock credits are spent. These candidates are not "imported emails" — they
+              are verified-email-available leads awaiting founder-approved reveal.
+            </p>
             {result.next_recommended_action && (
               <div className="rounded-md border border-primary/40 bg-primary/10 p-2 text-xs">
                 <span className="text-muted-foreground">Next recommended action: </span>

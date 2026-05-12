@@ -56,6 +56,7 @@ Deno.serve(async (req) => {
     missing_email_held: 0, already_in_crm_matched: 0,
     no_email_attempts_excluded: 0, safe_to_unlock: 0, safe_to_promote: 0,
     safe_to_queue: 0, decisions_created: 0,
+    verified_email_available_locked: 0, unlock_required: 0,
   };
   const decisionsToCreate: any[] = [];
 
@@ -65,7 +66,7 @@ Deno.serve(async (req) => {
   {
     const { data: orphanLeads } = await admin
       .from("apollo_leads")
-      .select("id,email,enrichment_payload,search_payload")
+      .select("id,email,has_email_flag,enrichment_payload,search_payload")
       .eq("business_name", "Neon Candy")
       .limit(5000);
     const ids = (orphanLeads ?? []).map((r) => r.id);
@@ -92,13 +93,19 @@ Deno.serve(async (req) => {
         const ep: any = r.enrichment_payload ?? r.search_payload ?? {};
         const email = (r.email ?? ep?.email ?? "").toString().trim();
         const apolloEmailStatus = ep?.email_status ?? null;
+        const hasEmailFlag = !!(ep?.has_email_flag ?? (r as any)?.has_email_flag);
         const hasEmail = !!email;
+        // Apollo people_search returns has_email_flag=true with no email value;
+        // these are verified-email-available BUT locked behind unlock credits.
+        const verifiedLocked = !hasEmail && hasEmailFlag;
         return {
           apollo_lead_id: r.id,
           quality_status: hasEmail ? "raw" : "needs_verification",
           risk_flags: hasEmail
             ? []
-            : ["missing_email", apolloEmailStatus ? `apollo_email_${apolloEmailStatus}` : null].filter(Boolean),
+            : (verifiedLocked
+                ? ["verified_email_locked", "needs_apollo_unlock"]
+                : ["missing_email", apolloEmailStatus ? `apollo_email_${apolloEmailStatus}` : null].filter(Boolean) as string[]),
         };
       });
       if (toInsert.length) {
@@ -301,6 +308,18 @@ Deno.serve(async (req) => {
           .contains("risk_flags", ["missing_email"]).select("id");
         counters.missing_email_held += data?.length ?? 0; return data?.length ?? 0;
       },
+      // NEW: verified email available but locked (Apollo says verified, no address revealed yet)
+      async () => {
+        const { data } = await admin.from("lead_quality_profiles").update({
+          lifecycle_stage: "verified_email_available_locked",
+          lifecycle_reason: "Apollo reports verified email available; actual address is locked behind unlock credits",
+          lifecycle_classified_at: new Date().toISOString(),
+        }).is("lifecycle_stage", null).eq("quality_status", "needs_verification")
+          .contains("risk_flags", ["verified_email_locked"]).select("id");
+        counters.verified_email_available_locked += data?.length ?? 0;
+        counters.unlock_required += data?.length ?? 0;
+        return data?.length ?? 0;
+      },
       async () => {
         const { data } = await admin.from("lead_quality_profiles").update({ lifecycle_stage: "rejected_missing_contact_details", lifecycle_reason: "no email and not high-fit; archived not_working", lifecycle_classified_at: new Date().toISOString() })
           .is("lifecycle_stage", null).eq("quality_status", "needs_verification").contains("risk_flags", ["missing_email"]).select("id");
@@ -313,7 +332,7 @@ Deno.serve(async (req) => {
       },
     ];
     const moved: Record<string, number> = {};
-    const labels = ["promoted","already_in_crm","attempted_no_email","duplicate_collapsed","poor_fit","verified_ready_for_review","already_in_crm_dup","archived_not_working","missing_email_hold","missing_contact_archived","founder_review_fallback"];
+    const labels = ["promoted","already_in_crm","attempted_no_email","duplicate_collapsed","poor_fit","verified_ready_for_review","already_in_crm_dup","archived_not_working","missing_email_hold","verified_email_available_locked","missing_contact_archived","founder_review_fallback"];
     for (let i = 0; i < updates.length; i++) {
       moved[labels[i]] = await updates[i]();
     }
@@ -332,11 +351,16 @@ Deno.serve(async (req) => {
   if (brief) {
     const total = (summary as any)?.total_leads ?? 0;
     const good = ((summary as any)?.promoted_to_contact ?? 0) + ((summary as any)?.active_working_leads ?? 0)
-               + ((summary as any)?.legacy_optional_unlock_candidates ?? 0);
+               + ((summary as any)?.legacy_optional_unlock_candidates ?? 0)
+               + ((summary as any)?.verified_email_available_locked ?? 0);
     const bad = ((summary as any)?.duplicates_archived ?? 0) + ((summary as any)?.poor_fit_archived ?? 0)
               + ((summary as any)?.attempted_no_email ?? 0) + ((summary as any)?.missing_contact_archived ?? 0);
     sourceScore = total ? Number(((good / Math.max(1, good + bad)) * 10).toFixed(2)) : null;
-    (details.steps as any[]).push({ step: "source_quality", score: sourceScore, total, good, bad });
+    (details.steps as any[]).push({
+      step: "source_quality", score: sourceScore, total, good, bad,
+      verified_email_available_locked: (summary as any)?.verified_email_available_locked ?? 0,
+      note: "Verified-locked candidates count as positive signal; locked status is an Apollo unlock-credit gate, not a quality issue.",
+    });
   }
 
   // STEP 5 — Build unlock shortlist (preview only, no Apollo).
@@ -370,6 +394,8 @@ Deno.serve(async (req) => {
     });
   } else if (((summary as any)?.active_working_leads ?? 0) > 0) {
     nextAction = "Build Apollo unlock shortlist for active working leads (no credits spent until founder approves)";
+  } else if (((summary as any)?.verified_email_available_locked ?? 0) > 0) {
+    nextAction = `Review Apollo verified-locked shortlist and approve unlock for the strongest unique leads (${(summary as any).verified_email_available_locked} candidates pending reveal)`;
   } else if (((summary as any)?.legacy_optional_unlock_candidates ?? 0) > 0) {
     nextAction = "Run fresh Apollo verified-email search using NeonCandy Source Quality Brief (legacy hold pool not recommended)";
   } else {

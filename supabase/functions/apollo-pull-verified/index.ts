@@ -207,11 +207,19 @@ Deno.serve(async (req) => {
     pulled_pages: pagesScanned,
     apollo_results_scanned: pulled,
     leads_pulled_into_staging: pulled,
+    // Apollo people_search returns has_email_flag=true with NO actual address.
+    // The address requires unlock credits to reveal — treat these as
+    // "verified-email available but locked" candidates, not "imported emails".
+    verified_email_available_locked: verifiedEmails,
+    actual_emails_revealed: 0,
+    unlock_required: verifiedEmails,
+    /** @deprecated misleading label — kept for backward compat */
     verified_emails_imported: verifiedEmails,
     duplicates_collapsed: counters.duplicates_collapsed ?? 0,
     already_in_crm: counters.already_in_crm_matched ?? 0,
     poor_fit_archived: counters.poor_fit_archived ?? 0,
     active_candidates: lifecycle?.active_working_leads ?? 0,
+    verified_email_available_locked_total: lifecycle?.verified_email_available_locked ?? 0,
     safe_to_promote: lifecycle?.safe_to_promote ?? 0,
     safe_to_queue: lifecycle?.safe_to_queue ?? 0,
     safe_to_unlock: lifecycle?.safe_to_unlock ?? 0,
@@ -221,6 +229,6 @@ Deno.serve(async (req) => {
     pulls,
     last_diagnostics: lastDiagnostics,
     errors,
-    note: "Verified-email pull only. No unlock credits spent. No promotions, no queue rows, no sends.",
+    note: "Verified-email-available pull only. Apollo confirms emails exist but does NOT release the address; reveal requires founder-approved unlock. No credits spent, no promotions, no queue rows, no sends.",
   });
 });

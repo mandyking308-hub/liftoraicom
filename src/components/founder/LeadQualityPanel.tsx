@@ -66,6 +66,8 @@ type LifecycleSummary = {
   archived_learning_only: number;
   archived_not_working: number;
   legacy_optional_unlock_candidates: number;
+  verified_email_available_locked: number;
+  unlock_required: number;
   safe_to_unlock: number;
   safe_to_promote: number;
   safe_to_queue: number;
@@ -403,6 +405,8 @@ export default function LeadQualityPanel() {
                 <Tile label="Safe to unlock" value={lifecycle.safe_to_unlock} tone="good" />
                 <Tile label="Safe to promote" value={lifecycle.safe_to_promote} tone="good" />
                 <Tile label="Safe to queue" value={lifecycle.safe_to_queue} tone="good" />
+                <Tile label="Verified-email available (locked)" value={lifecycle.verified_email_available_locked ?? 0} tone="warn" />
+                <Tile label="Email reveal required" value={lifecycle.unlock_required ?? 0} tone="warn" />
                 <Tile label="Legacy optional unlock candidates" value={lifecycle.legacy_optional_unlock_candidates} />
                 <Tile label="Duplicates archived" value={lifecycle.duplicates_archived} />
                 <Tile label="Poor fit archived" value={lifecycle.poor_fit_archived} />
