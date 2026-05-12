@@ -85,8 +85,40 @@ Deno.serve(async (req) => {
     .limit(2000);
   if (error) return json({ error: error.message }, 500);
 
+  // Lifecycle gate: only keep leads classified as still actionable.
+  // Anything archived (duplicate_collapsed, rejected_*, attempted_no_email,
+  // already_in_crm, archived_*) is excluded from the shortlist + credit estimate.
+  const ACTIVE_STAGES = new Set([
+    "active_candidate",
+    "needs_verification",
+    "verified_ready_for_review",
+    "qualified_for_promotion",
+    "founder_review_required",
+  ]);
+  const idsAll = (rows ?? []).map((r: any) => r.apollo_lead_id);
+  const stageMap = new Map<string, string | null>();
+  if (idsAll.length) {
+    const { data: stages } = await admin
+      .from("lead_quality_profiles")
+      .select("apollo_lead_id,lifecycle_stage,founder_lifecycle_override")
+      .in("apollo_lead_id", idsAll);
+    for (const s of stages ?? []) {
+      const stage = (s as any).lifecycle_stage as string | null;
+      const override = !!(s as any).founder_lifecycle_override;
+      stageMap.set((s as any).apollo_lead_id, override ? "active_candidate" : stage);
+    }
+  }
+  const lifecycleExcluded = (rows ?? []).filter((r: any) => {
+    const st = stageMap.get(r.apollo_lead_id);
+    return st && !ACTIVE_STAGES.has(st);
+  }).length;
+  const activeRows = (rows ?? []).filter((r: any) => {
+    const st = stageMap.get(r.apollo_lead_id);
+    return !st || ACTIVE_STAGES.has(st);
+  });
+
   // Pull apollo_person_id + email for dedup and CRM spine cross-check.
-  const ids = (rows ?? []).map((r: any) => r.apollo_lead_id);
+  const ids = activeRows.map((r: any) => r.apollo_lead_id);
   const personMap = new Map<string, string>();
   const emailMap = new Map<string, string | null>();
   if (ids.length) {
@@ -119,7 +151,7 @@ Deno.serve(async (req) => {
   const seenPersons = new Set<string>();
   const uniqueRows: any[] = [];
   let duplicateRows = 0;
-  for (const r of rows ?? []) {
+  for (const r of activeRows) {
     const pid = personMap.get(r.apollo_lead_id) ?? r.apollo_lead_id;
     if (seenPersons.has(pid)) { duplicateRows++; continue; }
     seenPersons.add(pid);
@@ -202,6 +234,8 @@ Deno.serve(async (req) => {
   return json({
     ok: true,
     total_needs_verification: rows?.length ?? 0,
+    lifecycle_excluded: lifecycleExcluded,
+    active_after_lifecycle: activeRows.length,
     unique_persons: uniqueRows.length,
     duplicate_rows_collapsed: duplicateRows,
     blocked_by_crm,

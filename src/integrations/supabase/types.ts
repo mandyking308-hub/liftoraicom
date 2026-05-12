@@ -4144,8 +4144,12 @@ export type Database = {
           fit_confidence: number | null
           fit_method: string | null
           fit_reason: string | null
+          founder_lifecycle_override: boolean
           founder_review_reason: string | null
           id: string
+          lifecycle_classified_at: string | null
+          lifecycle_reason: string | null
+          lifecycle_stage: string | null
           needs_founder_review: boolean
           notes: string | null
           promoted_at: string | null
@@ -4170,8 +4174,12 @@ export type Database = {
           fit_confidence?: number | null
           fit_method?: string | null
           fit_reason?: string | null
+          founder_lifecycle_override?: boolean
           founder_review_reason?: string | null
           id?: string
+          lifecycle_classified_at?: string | null
+          lifecycle_reason?: string | null
+          lifecycle_stage?: string | null
           needs_founder_review?: boolean
           notes?: string | null
           promoted_at?: string | null
@@ -4196,8 +4204,12 @@ export type Database = {
           fit_confidence?: number | null
           fit_method?: string | null
           fit_reason?: string | null
+          founder_lifecycle_override?: boolean
           founder_review_reason?: string | null
           id?: string
+          lifecycle_classified_at?: string | null
+          lifecycle_reason?: string | null
+          lifecycle_stage?: string | null
           needs_founder_review?: boolean
           notes?: string | null
           promoted_at?: string | null
@@ -8108,6 +8120,29 @@ export type Database = {
           last_sent_at?: string | null
           reputation_score?: number | null
           warmup_days?: never
+        }
+        Relationships: []
+      }
+      lead_lifecycle_summary: {
+        Row: {
+          active_candidates: number | null
+          active_working_leads: number | null
+          already_in_crm: number | null
+          archived_learning_only: number | null
+          archived_not_working: number | null
+          attempted_no_email: number | null
+          duplicates_archived: number | null
+          founder_review_required: number | null
+          missing_contact_archived: number | null
+          needs_verification_active: number | null
+          poor_fit_archived: number | null
+          promoted_to_contact: number | null
+          qualified_for_promotion: number | null
+          safe_to_promote: number | null
+          safe_to_queue: number | null
+          safe_to_unlock: number | null
+          total_leads: number | null
+          verified_ready_for_review: number | null
         }
         Relationships: []
       }
