@@ -62,7 +62,7 @@ export default function LeadQualityPanel() {
   });
 
   const call = async (
-    fn: "lead-quality-scan" | "lead-fit-classify" | "promote-leads-to-contacts" | "enqueue-eligible-contacts" | "apollo-unlock-shortlist",
+    fn: "lead-quality-scan" | "lead-fit-classify" | "promote-leads-to-contacts" | "enqueue-eligible-contacts" | "apollo-unlock-shortlist" | "apollo-unlock-selected",
     body: any,
     label: string,
   ) => {
@@ -221,6 +221,23 @@ export default function LeadQualityPanel() {
                 <p className="text-[11px] text-muted-foreground">
                   Risk notes: domain de-dup against existing contacts, missing-title penalty, hospitality/generic-corporate negative weights applied.
                 </p>
+                <div className="flex flex-wrap gap-2 items-center pt-2 border-t border-border/40 mt-2">
+                  <span className="text-[11px] text-yellow-300 w-full">
+                    Founder action: spend Apollo credits to unlock the {shortlistResult.shortlist_count} canonical unique leads. Duplicates ({shortlistResult.duplicate_rows_collapsed ?? 0}) are NOT charged.
+                  </span>
+                  <Button size="sm" variant="outline" disabled={!!busy}
+                    onClick={() => call("apollo-unlock-selected", { dry_run: true }, "Unlock preview")}>
+                    {busy === "Unlock preview" ? <Loader2 className="animate-spin" size={14} /> : "Preview unlock (no credits)"}
+                  </Button>
+                  <Button size="sm" disabled={!!busy}
+                    onClick={() => {
+                      const n = shortlistResult.shortlist_count ?? 0;
+                      if (!confirm(`Spend ${n} Apollo credits to unlock ${n} emails?\n\nThis calls Apollo /people/match for the ${n} canonical unique leads only. Duplicates will NOT be charged. Contacts will NOT be promoted or enqueued automatically.`)) return;
+                      call("apollo-unlock-selected", { confirm: true }, "Unlock execute");
+                    }}>
+                    {busy === "Unlock execute" ? <Loader2 className="animate-spin" size={14} /> : `Unlock ${shortlistResult.shortlist_count ?? 0} Apollo emails (founder confirm)`}
+                  </Button>
+                </div>
               </div>
             )}
           </div>
