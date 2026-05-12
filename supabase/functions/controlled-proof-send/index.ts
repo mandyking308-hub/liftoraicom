@@ -232,34 +232,19 @@ Deno.serve(async (req) => {
     pass("provider_cap", "Provider cap allows send", "No active provider block");
   }
 
-  // Daily/hourly caps
+  // Daily/hourly caps — INTERNAL CAPS BYPASSED for activation phase.
+  // Provider-level caps (provider_blocked_until) and compliance gates remain enforced above/below.
   if (inbox) {
-    const dailyOk = (inbox.emails_sent_today ?? 0) < (inbox.daily_send_limit ?? 0);
-    const hourlyOk = (inbox.hourly_send_count ?? 0) < (inbox.hourly_send_limit ?? 0);
-    if (!dailyOk)
-      fail(
-        "daily_cap",
-        "Daily cap allows send",
-        `${inbox.emails_sent_today}/${inbox.daily_send_limit} sent today`,
-      );
-    else
-      pass(
-        "daily_cap",
-        "Daily cap allows send",
-        `${inbox.emails_sent_today}/${inbox.daily_send_limit} sent today`,
-      );
-    if (!hourlyOk)
-      fail(
-        "hourly_cap",
-        "Hourly cap allows send",
-        `${inbox.hourly_send_count}/${inbox.hourly_send_limit} sent this hour`,
-      );
-    else
-      pass(
-        "hourly_cap",
-        "Hourly cap allows send",
-        `${inbox.hourly_send_count}/${inbox.hourly_send_limit} sent this hour`,
-      );
+    pass(
+      "daily_cap",
+      "Daily cap (internal — bypassed for activation)",
+      `Informational only: ${inbox.emails_sent_today ?? 0}/${inbox.daily_send_limit ?? 0} sent today. Internal Liftor daily cap is disabled during activation; only provider-level limits and compliance gates apply.`,
+    );
+    pass(
+      "hourly_cap",
+      "Hourly cap (internal — bypassed for activation)",
+      `Informational only: ${inbox.hourly_send_count ?? 0}/${inbox.hourly_send_limit ?? 0} sent this hour. Internal Liftor hourly cap is disabled during activation; only provider-level limits and compliance gates apply.`,
+    );
   }
 
   // Reply / bounce / suppression / recent-contact gates via existing RPC
