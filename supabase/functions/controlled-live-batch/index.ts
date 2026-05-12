@@ -69,18 +69,65 @@ Deno.serve(async (req) => {
   const { count: sentBefore } = await admin
     .from("email_queue").select("id", { count: "exact", head: true }).eq("status", "sent");
 
-  // Outreach Agent: snapshot the eligible pool the worker will consider.
-  const { data: eligibleSample } = await admin
+  // Outreach Agent: pull a wider candidate pool, then preselect ONLY rows
+  // that pass parent-step integrity. We pull up to batchSize * 8 candidates
+  // (capped at 200) so we can skip orphan follow-ups and still find N
+  // genuinely sendable rows. Worker still re-validates everything else
+  // (suppressed/bounced/unsubscribed, reply-stop, duplicate-step,
+  // inactive inbox/campaign, provider rejection, live-readiness).
+  const candidatePoolSize = Math.min(200, Math.max(batchSize * 8, batchSize));
+  const { data: candidates } = await admin
     .from("email_queue")
-    .select("id, contact_id, campaign_id, inbox_id, business_name, scheduled_at, priority")
+    .select("id, contact_id, campaign_id, inbox_id, sequence_step, business_name, scheduled_at, priority")
     .eq("status", "pending")
     .order("priority", { ascending: true })
     .order("scheduled_at", { ascending: true })
-    .limit(batchSize);
+    .limit(candidatePoolSize);
 
   const nowIso = new Date().toISOString();
-  const futureRows = (eligibleSample ?? []).filter((r) => r.scheduled_at > nowIso);
-  const selectedIds = (eligibleSample ?? []).map((r) => r.id);
+  type Cand = NonNullable<typeof candidates>[number];
+
+  const isParentRealSend = async (row: Cand): Promise<{ ok: boolean; reason?: string }> => {
+    if (row.sequence_step <= 1) return { ok: true };
+    const { data: parent } = await admin
+      .from("email_queue")
+      .select("status,delivery_kind,smtp_accepted_at,provider_message_id,block_reason")
+      .eq("contact_id", row.contact_id)
+      .eq("campaign_id", row.campaign_id)
+      .eq("sequence_step", row.sequence_step - 1)
+      .maybeSingle();
+    const ok = !!parent
+      && parent.status === "sent"
+      && parent.delivery_kind === "smtp_real"
+      && !!parent.smtp_accepted_at
+      && !!parent.provider_message_id;
+    return ok
+      ? { ok: true }
+      : { ok: false, reason: parent
+          ? `parent step ${row.sequence_step - 1} not real-sent (${parent.status}/${parent.delivery_kind ?? "-"})`
+          : `no parent row for step ${row.sequence_step - 1}` };
+  };
+
+  const eligible: Cand[] = [];
+  const orphanRejected: Array<{ id: string; contact_id: string; campaign_id: string; sequence_step: number; reason: string }> = [];
+  for (const row of candidates ?? []) {
+    if (eligible.length >= batchSize) break;
+    const parentCheck = await isParentRealSend(row);
+    if (parentCheck.ok) {
+      eligible.push(row);
+    } else {
+      orphanRejected.push({
+        id: row.id,
+        contact_id: row.contact_id,
+        campaign_id: row.campaign_id,
+        sequence_step: row.sequence_step,
+        reason: parentCheck.reason ?? "parent missing",
+      });
+    }
+  }
+
+  const selectedIds = eligible.map((r) => r.id);
+  const futureRows = eligible.filter((r) => r.scheduled_at > nowIso);
 
   // Founder-authorised immediate batch: bump ONLY the selected rows to now()
   // and priority=1 so the worker picks exactly these rows. All real guardrails
@@ -104,10 +151,14 @@ Deno.serve(async (req) => {
     event_type: "controlled_live_batch_start",
     severity: "high",
     business_name: "",
-    message: `Founder ${userEmail} starting controlled live batch (size=${batchSize}, selected=${selectedIds.length}, future_scheduled=${futureRows.length})`,
+    message: `Founder ${userEmail} starting controlled live batch (size=${batchSize}, structurally_eligible=${selectedIds.length}, orphan_rejected=${orphanRejected.length}, future_scheduled=${futureRows.length})`,
     metadata: {
       actor: userEmail,
       batch_size: batchSize,
+      candidates_considered: candidates?.length ?? 0,
+      structurally_eligible: selectedIds.length,
+      orphan_rejected_preselect: orphanRejected.length,
+      orphan_rejected_sample: orphanRejected.slice(0, 10),
       eligible_preview: selectedIds,
       future_scheduled_count: futureRows.length,
       rescheduled_to_now: rescheduledCount,
