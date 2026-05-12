@@ -778,3 +778,45 @@ const CommandCentre = () => {
 };
 
 export default CommandCentre;
+
+function ApolloRevealStageStrip({ lifecycle }: { lifecycle: any }) {
+  const reveal_required =
+    (lifecycle?.email_reveal_required ?? 0) +
+    (lifecycle?.verified_email_available_locked ?? 0);
+  const stages = [
+    { n: 1, label: "Candidate profiles pulled", value: (lifecycle?.total_leads ?? lifecycle?.active_working_leads ?? 0) },
+    { n: 2, label: "Email reveal required", value: reveal_required, tone: reveal_required > 0 ? "warn" : "default" },
+    { n: 3, label: "Reveal shortlist built", value: lifecycle?.reveal_shortlisted ?? 0 },
+    { n: 4, label: "Founder approves reveal credits", value: "manual", tone: "default" },
+    { n: 5, label: "Emails returned", value: lifecycle?.safe_to_promote_after_reveal ?? 0 },
+    { n: 6, label: "Post-reveal CRM check", value: lifecycle?.already_in_crm_after_reveal ?? 0 },
+    { n: 7, label: "Safe to promote", value: lifecycle?.safe_to_promote_after_reveal ?? lifecycle?.safe_to_promote ?? 0, tone: "good" },
+    { n: 8, label: "Safe to queue", value: lifecycle?.safe_to_queue ?? 0, tone: "good" },
+    { n: 9, label: "Send", value: "controlled", tone: "default" },
+  ] as const;
+  return (
+    <div className="rounded-lg border border-border/60 bg-card/30 p-3">
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-xs font-medium text-foreground">Apollo reveal workflow — search → shortlist → reveal → promote</p>
+        <span className="text-[10px] text-muted-foreground">
+          No credits spent until founder approves reveal at stage 4.
+        </span>
+      </div>
+      <div className="grid grid-cols-3 md:grid-cols-9 gap-1.5 text-center">
+        {stages.map((s) => {
+          const tone =
+            s.tone === "good" ? "border-green-500/30 text-green-200" :
+            s.tone === "warn" ? "border-yellow-500/40 text-yellow-200" :
+            "border-border/50 text-muted-foreground";
+          return (
+            <div key={s.n} className={`rounded border ${tone} bg-background/40 p-2`}>
+              <div className="text-[10px] opacity-70">Stage {s.n}</div>
+              <div className="text-sm font-semibold text-foreground">{s.value}</div>
+              <div className="text-[10px] leading-tight mt-1">{s.label}</div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
