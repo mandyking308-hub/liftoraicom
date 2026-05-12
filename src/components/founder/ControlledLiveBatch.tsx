@@ -19,7 +19,9 @@ import { toast } from "sonner";
 
 type BatchSummary = {
   batch_size_requested: number;
-  eligible_selected: number;
+  candidates_considered?: number;
+  structurally_eligible?: number;
+  orphan_rejected_preselect?: number;
   rescheduled_to_now?: number;
   future_scheduled_count?: number;
   sent: number;
@@ -36,6 +38,7 @@ type BatchResult = {
   message: string;
   note?: string;
   summary?: BatchSummary;
+  orphan_rejected_preselect?: Array<{ id: string; contact_id: string; sequence_step: number; reason: string }>;
   recent_rows?: Array<{
     id: string;
     status: string;
@@ -47,6 +50,19 @@ type BatchResult = {
   next_recommended_action?: string;
 };
 
+type OrphanResult = {
+  ok: boolean;
+  dry_run: boolean;
+  message: string;
+  summary?: {
+    orphans_found: number;
+    contacts_affected: number;
+    safe_to_restart: number;
+    cancelled: number;
+    restart_created: number;
+  };
+};
+
 const PRESETS = [1, 5, 10] as const;
 
 const ControlledLiveBatch = () => {
@@ -55,6 +71,8 @@ const ControlledLiveBatch = () => {
   const [running, setRunning] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [result, setResult] = useState<BatchResult | null>(null);
+  const [orphanRunning, setOrphanRunning] = useState<false | "preview" | "apply">(false);
+  const [orphanResult, setOrphanResult] = useState<OrphanResult | null>(null);
 
   const effectiveSize = (() => {
     if (custom.trim()) {
@@ -86,6 +104,27 @@ const ControlledLiveBatch = () => {
     } finally {
       setRunning(false);
       setConfirmOpen(false);
+    }
+  };
+
+  const runOrphan = async (apply: boolean) => {
+    setOrphanRunning(apply ? "apply" : "preview");
+    setOrphanResult(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("resolve-orphan-followups", {
+        body: { dry_run: !apply, restart_step1: apply },
+      });
+      if (error) {
+        toast.error(`Orphan resolver error: ${error.message}`);
+        setOrphanResult({ ok: false, dry_run: !apply, message: error.message });
+      } else {
+        setOrphanResult(data as OrphanResult);
+        toast.success((data as OrphanResult).message);
+      }
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setOrphanRunning(false);
     }
   };
 
