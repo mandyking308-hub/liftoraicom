@@ -1378,6 +1378,7 @@ export type Database = {
       }
       business_contact_relationships: {
         Row: {
+          business_id: string | null
           business_name: string
           campaign_eligible: boolean
           contact_id: string
@@ -1395,6 +1396,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          business_id?: string | null
           business_name: string
           campaign_eligible?: boolean
           contact_id: string
@@ -1412,6 +1414,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          business_id?: string | null
           business_name?: string
           campaign_eligible?: boolean
           contact_id?: string
@@ -1429,6 +1432,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "business_contact_relationships_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "business_contact_relationships_contact_id_fkey"
             columns: ["contact_id"]
@@ -1921,6 +1931,8 @@ export type Database = {
           apollo_last_enriched_at: string | null
           apollo_organization_id: string | null
           apollo_person_id: string | null
+          archive_reason: string | null
+          archived_at: string | null
           assigned_business: string
           assigned_inbox_id: string | null
           company: string
@@ -1943,6 +1955,7 @@ export type Database = {
           industry: string | null
           intent_score: number
           is_globally_suppressed: boolean
+          is_internal: boolean
           last_contacted_at: string | null
           last_name: string | null
           last_replied_at: string | null
@@ -1966,6 +1979,8 @@ export type Database = {
           apollo_last_enriched_at?: string | null
           apollo_organization_id?: string | null
           apollo_person_id?: string | null
+          archive_reason?: string | null
+          archived_at?: string | null
           assigned_business?: string
           assigned_inbox_id?: string | null
           company?: string
@@ -1988,6 +2003,7 @@ export type Database = {
           industry?: string | null
           intent_score?: number
           is_globally_suppressed?: boolean
+          is_internal?: boolean
           last_contacted_at?: string | null
           last_name?: string | null
           last_replied_at?: string | null
@@ -2011,6 +2027,8 @@ export type Database = {
           apollo_last_enriched_at?: string | null
           apollo_organization_id?: string | null
           apollo_person_id?: string | null
+          archive_reason?: string | null
+          archived_at?: string | null
           assigned_business?: string
           assigned_inbox_id?: string | null
           company?: string
@@ -2033,6 +2051,7 @@ export type Database = {
           industry?: string | null
           intent_score?: number
           is_globally_suppressed?: boolean
+          is_internal?: boolean
           last_contacted_at?: string | null
           last_name?: string | null
           last_replied_at?: string | null
@@ -5539,12 +5558,15 @@ export type Database = {
           ai_estimated_scope: string | null
           ai_estimated_timeline: string | null
           ai_suggested_solution: string | null
+          business_id: string | null
           business_problem: string
           company_name: string
           company_size: string
           contact_email: string | null
+          contact_id: string | null
           contact_name: string | null
           created_at: string
+          crm_reconciliation_status: string
           id: string
           industry: string
           lead_status: string
@@ -5566,12 +5588,15 @@ export type Database = {
           ai_estimated_scope?: string | null
           ai_estimated_timeline?: string | null
           ai_suggested_solution?: string | null
+          business_id?: string | null
           business_problem: string
           company_name: string
           company_size: string
           contact_email?: string | null
+          contact_id?: string | null
           contact_name?: string | null
           created_at?: string
+          crm_reconciliation_status?: string
           id?: string
           industry: string
           lead_status?: string
@@ -5593,12 +5618,15 @@ export type Database = {
           ai_estimated_scope?: string | null
           ai_estimated_timeline?: string | null
           ai_suggested_solution?: string | null
+          business_id?: string | null
           business_problem?: string
           company_name?: string
           company_size?: string
           contact_email?: string | null
+          contact_id?: string | null
           contact_name?: string | null
           created_at?: string
+          crm_reconciliation_status?: string
           id?: string
           industry?: string
           lead_status?: string
@@ -5610,7 +5638,29 @@ export type Database = {
           updated_at?: string
           website_url?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "proposals_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposals_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposals_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+        ]
       }
       reputation_events: {
         Row: {
@@ -7752,6 +7802,24 @@ export type Database = {
         }
         Relationships: []
       }
+      crm_spine_summary: {
+        Row: {
+          apollo_duplicates_collapsed: number | null
+          apollo_needs_verification: number | null
+          apollo_promoted: number | null
+          bcr_missing_business_id: number | null
+          bcr_with_business_id: number | null
+          contacts_missing_bcr: number | null
+          contacts_total: number | null
+          contacts_with_bcr: number | null
+          internal_contacts: number | null
+          internal_identities: number | null
+          proposals_needing_reconciliation: number | null
+          safe_to_unlock_count: number | null
+          suppressed_contacts: number | null
+        }
+        Relationships: []
+      }
       domain_usage_summary: {
         Row: {
           current_usage: number | null
@@ -7972,6 +8040,41 @@ export type Database = {
           total_leads: number | null
         }
         Relationships: []
+      }
+      proposal_crm_reconciliation: {
+        Row: {
+          business_id: string | null
+          business_name: string | null
+          contact_email: string | null
+          contact_id: string | null
+          contact_name: string | null
+          created_at: string | null
+          crm_reconciliation_status: string | null
+          proposal_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposals_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposals_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposals_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+        ]
       }
       system_health_score: {
         Row: {
@@ -8256,6 +8359,7 @@ export type Database = {
         Returns: boolean
       }
       is_internal_email: { Args: { _email: string }; Returns: boolean }
+      is_internal_identity: { Args: { _email: string }; Returns: boolean }
       list_inbox_credentials_public: {
         Args: { _inbox_id: string }
         Returns: {
@@ -8489,6 +8593,7 @@ export type Database = {
       refresh_all_business_risk_scores: { Args: never; Returns: number }
       reset_inbox_hourly_counts: { Args: never; Returns: number }
       reset_inbox_send_counts: { Args: never; Returns: number }
+      resolve_contact_by_email: { Args: { _email: string }; Returns: string }
       resolve_contact_timezone: {
         Args: { _contact_id: string }
         Returns: string
@@ -8636,6 +8741,8 @@ export type Database = {
           apollo_last_enriched_at: string | null
           apollo_organization_id: string | null
           apollo_person_id: string | null
+          archive_reason: string | null
+          archived_at: string | null
           assigned_business: string
           assigned_inbox_id: string | null
           company: string
@@ -8658,6 +8765,7 @@ export type Database = {
           industry: string | null
           intent_score: number
           is_globally_suppressed: boolean
+          is_internal: boolean
           last_contacted_at: string | null
           last_name: string | null
           last_replied_at: string | null
