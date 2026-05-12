@@ -443,6 +443,21 @@ Deno.serve(async (req) => {
     postRow?.delivery_kind === "smtp_real" &&
     !!postRow?.smtp_accepted_at;
 
+  // SMTP success vs. sent-folder (IMAP APPEND) copy success are independent.
+  // SMTP accept = email delivered. APPEND failure = sent-folder copy missing,
+  // which is a secondary warning and NEVER triggers a resend.
+  const appendFailed =
+    success &&
+    typeof postRow?.provider_response === "string" &&
+    postRow.provider_response.includes("APPEND failed");
+  const founderMessage = success
+    ? appendFailed
+      ? "Sent successfully — SMTP accepted. Sent-folder copy failed; no resend needed."
+      : "Sent successfully — SMTP accepted and copied to Sent folder."
+    : `Proof send ended in status ${postRow?.status ?? "unknown"} — ${
+        postRow?.send_error ?? postRow?.block_reason ?? "see provider response"
+      }`;
+
   // Audit: result
   await admin.from("system_events").insert({
     event_type: success ? "controlled_proof_send_success" : "controlled_proof_send_result",
