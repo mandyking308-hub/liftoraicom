@@ -8470,6 +8470,7 @@ export type Database = {
         | "blocked"
         | "delayed"
         | "throttled"
+        | "cancelled"
       inbound_provider_type: "none" | "ionos_imap"
       inbound_status_type:
         | "not_configured"
@@ -8803,6 +8804,7 @@ export const Constants = {
         "blocked",
         "delayed",
         "throttled",
+        "cancelled",
       ],
       inbound_provider_type: ["none", "ionos_imap"],
       inbound_status_type: [
