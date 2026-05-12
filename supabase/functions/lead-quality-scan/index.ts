@@ -52,6 +52,21 @@ Deno.serve(async (req) => {
     .limit(limit);
   if (error) return json({ error: error.message }, 500);
 
+  // Fallback: pull enrichment_payload.email for rows whose primary email is missing.
+  const missingIds = (rows ?? []).filter((r) => !r.email).map((r) => r.apollo_lead_id);
+  const enrichEmail = new Map<string, { email: string | null; status: string | null }>();
+  if (missingIds.length) {
+    const { data: alRows } = await admin
+      .from("apollo_leads")
+      .select("id,enrichment_payload")
+      .in("id", missingIds);
+    for (const a of alRows ?? []) {
+      const ep: any = a.enrichment_payload ?? {};
+      const e = (ep?.email ?? "").toString().trim();
+      enrichEmail.set(a.id, { email: e || null, status: ep?.email_status ?? null });
+    }
+  }
+
   // Build batch lookups
   const emails = Array.from(new Set((rows ?? []).map((r) => (r.email ?? "").toLowerCase()).filter(Boolean)));
   const personIds = Array.from(new Set((rows ?? []).map((r) => r.apollo_person_id).filter(Boolean)));
@@ -112,9 +127,23 @@ Deno.serve(async (req) => {
 
   for (const r of rows ?? []) {
     const flags = new Set<string>(r.risk_flags ?? []);
-    const email = (r.email ?? "").toLowerCase();
-    const validEmail = !!email && EMAIL_RE.test(email);
-    if (!validEmail) flags.add("invalid_email");
+    let email = (r.email ?? "").toLowerCase();
+    let emailRecovered = false;
+    let apolloEmailStatus: string | null = null;
+    if (!email) {
+      const fb = enrichEmail.get(r.apollo_lead_id);
+      if (fb?.email) { email = fb.email.toLowerCase(); emailRecovered = true; }
+      apolloEmailStatus = fb?.status ?? null;
+    }
+    const hasEmail = !!email;
+    const validEmail = hasEmail && EMAIL_RE.test(email);
+    if (!hasEmail) {
+      flags.add("missing_email");
+      if (apolloEmailStatus) flags.add(`apollo_email_${apolloEmailStatus}`);
+    } else if (!validEmail) {
+      flags.add("invalid_email");
+    }
+    if (emailRecovered) flags.add("email_recovered_from_enrichment");
     if (!r.title) flags.add("missing_title");
 
     const c = email ? contactByEmail.get(email) : null;
@@ -140,11 +169,25 @@ Deno.serve(async (req) => {
 
     // Decision
     let next = "reviewed";
+    let reviewReason: string | undefined;
     if (flags.has("bounced")) next = "bounced";
     else if (flags.has("suppressed")) next = "suppressed";
     else if (flags.has("already_sent") || flags.has("already_queued") || flags.has("already_contacted")) next = "already_contacted";
-    else if (flags.has("invalid_email") || flags.has("missing_title") || flags.has("duplicate_email") || flags.has("duplicate_person_id")) next = "rejected";
-    else if (flags.has("duplicate_domain")) next = "needs_founder_review";
+    else if (flags.has("invalid_email") || flags.has("duplicate_email") || flags.has("duplicate_person_id")) {
+      next = "rejected";
+    } else if (flags.has("missing_email")) {
+      // Recoverable via Apollo enrichment / unlock — do NOT reject.
+      next = "needs_verification";
+      reviewReason = apolloEmailStatus
+        ? `apollo email_status=${apolloEmailStatus}`
+        : "no email present; needs Apollo enrichment / unlock";
+    } else if (flags.has("missing_title")) {
+      next = "needs_founder_review";
+      reviewReason = "missing title";
+    } else if (flags.has("duplicate_domain")) {
+      next = "needs_founder_review";
+      reviewReason = "domain over-represented in raw pool";
+    }
 
     summary.scanned++;
     summary[next] = (summary[next] ?? 0) + 1;
@@ -155,7 +198,7 @@ Deno.serve(async (req) => {
       next_status: next,
       risk_flags: Array.from(flags),
       needs_founder_review: next === "needs_founder_review",
-      founder_review_reason: next === "needs_founder_review" ? "domain over-represented in raw pool" : undefined,
+      founder_review_reason: reviewReason,
       dup_of_contact_id: dupContact,
     });
   }
