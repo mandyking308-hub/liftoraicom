@@ -443,6 +443,21 @@ Deno.serve(async (req) => {
     postRow?.delivery_kind === "smtp_real" &&
     !!postRow?.smtp_accepted_at;
 
+  // SMTP success vs. sent-folder (IMAP APPEND) copy success are independent.
+  // SMTP accept = email delivered. APPEND failure = sent-folder copy missing,
+  // which is a secondary warning and NEVER triggers a resend.
+  const appendFailed =
+    success &&
+    typeof postRow?.provider_response === "string" &&
+    postRow.provider_response.includes("APPEND failed");
+  const founderMessage = success
+    ? appendFailed
+      ? "Sent successfully — SMTP accepted. Sent-folder copy failed; no resend needed."
+      : "Sent successfully — SMTP accepted and copied to Sent folder."
+    : `Proof send ended in status ${postRow?.status ?? "unknown"} — ${
+        postRow?.send_error ?? postRow?.block_reason ?? "see provider response"
+      }`;
+
   // Audit: result
   await admin.from("system_events").insert({
     event_type: success ? "controlled_proof_send_success" : "controlled_proof_send_result",
@@ -497,10 +512,18 @@ Deno.serve(async (req) => {
     inbox_email: inbox?.email_address,
     queue_after: postRow,
     email_event: emailEvent,
+    message: founderMessage,
+    sent_folder_copy: success
+      ? appendFailed
+        ? { ok: false, note: "Secondary warning only. Email was delivered. No resend." }
+        : { ok: true }
+      : null,
     worker_summary: workerResult,
     worker_error: workerError,
     next_recommended_action: success
-      ? "Watch the inbox for any reply. The Conversation Agent will draft a response for founder approval."
+      ? appendFailed
+        ? "Email delivered. Investigate IMAP Sent-folder name/permissions for this inbox when convenient. No resend."
+        : "Watch the inbox for any reply. The Conversation Agent will draft a response for founder approval."
       : `Review send_error / block_reason and rerun preview. Status: ${postRow?.status ?? "unknown"}.`,
   });
 });
