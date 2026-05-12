@@ -85,14 +85,17 @@ Deno.serve(async (req) => {
     .limit(2000);
   if (error) return json({ error: error.message }, 500);
 
-  // Pull apollo_person_id for dedup (the view exposes lead identity, not the
-  // join key Apollo uses for the same person across runs/segments).
+  // Pull apollo_person_id + email for dedup and CRM spine cross-check.
   const ids = (rows ?? []).map((r: any) => r.apollo_lead_id);
-  let personMap = new Map<string, string>();
+  const personMap = new Map<string, string>();
+  const emailMap = new Map<string, string | null>();
   if (ids.length) {
     const { data: persons } = await admin
-      .from("apollo_leads").select("id,apollo_person_id").in("id", ids);
-    for (const p of persons ?? []) personMap.set(p.id as string, (p as any).apollo_person_id ?? p.id);
+      .from("apollo_leads").select("id,apollo_person_id,email").in("id", ids);
+    for (const p of persons ?? []) {
+      personMap.set(p.id as string, (p as any).apollo_person_id ?? p.id);
+      emailMap.set(p.id as string, ((p as any).email ?? null));
+    }
   }
 
   // Dedup by apollo_person_id (fall back to lead id) — keep the first row.
@@ -106,14 +109,26 @@ Deno.serve(async (req) => {
     uniqueRows.push({ ...r, apollo_person_id: pid });
   }
 
-  // Domain de-dup signal: any domain already represented in promoted contacts
+  // CRM spine cross-check: pull existing contacts (by email + apollo_person_id)
+  // so we never recommend unlocking a lead that's already in the central CRM.
   const { data: contactRows } = await admin
-    .from("contacts").select("email").not("email","is",null).limit(2000);
+    .from("contacts")
+    .select("email,apollo_person_id,is_internal,sendable_status,hard_bounced,is_globally_suppressed")
+    .limit(5000);
+  const contactByEmail = new Map<string, any>();
+  const contactByPersonId = new Map<string, any>();
+  for (const c of contactRows ?? []) {
+    if (c.email) contactByEmail.set(String(c.email).toLowerCase(), c);
+    if ((c as any).apollo_person_id) contactByPersonId.set((c as any).apollo_person_id, c);
+  }
   const usedDomains = new Set(
     (contactRows ?? [])
       .map((c: any) => (c.email ?? "").toLowerCase().split("@")[1])
       .filter(Boolean),
   );
+  const { data: internalIds } = await admin
+    .from("internal_email_identities").select("email");
+  const internalSet = new Set((internalIds ?? []).map((i: any) => String(i.email).toLowerCase()));
 
   const ranked = uniqueRows
     .map((r) => {
@@ -123,6 +138,20 @@ Deno.serve(async (req) => {
       if (r.email_domain && usedDomains.has(r.email_domain)) {
         score -= 3; reasons.push("-domain_already_contacted");
       }
+      // CRM spine flags (do not unlock if already in CRM or internal)
+      const leadEmail = (emailMap.get(r.apollo_lead_id) ?? "").toLowerCase();
+      const crmContact =
+        (r.apollo_person_id && contactByPersonId.get(r.apollo_person_id)) ||
+        (leadEmail && contactByEmail.get(leadEmail)) || null;
+      const crmFlags: string[] = [];
+      if (crmContact) crmFlags.push("already_in_crm");
+      if (crmContact?.is_internal) crmFlags.push("internal_identity");
+      if (crmContact?.hard_bounced) crmFlags.push("hard_bounced");
+      if (crmContact?.is_globally_suppressed) crmFlags.push("globally_suppressed");
+      if (crmContact?.sendable_status && crmContact.sendable_status !== "sendable")
+        crmFlags.push(`not_sendable:${crmContact.sendable_status}`);
+      if (leadEmail && internalSet.has(leadEmail)) crmFlags.push("internal_identity");
+      if (crmFlags.length) { score -= 100; reasons.push(...crmFlags.map((f) => `-${f}`)); }
       return {
         apollo_lead_id: r.apollo_lead_id,
         apollo_person_id: r.apollo_person_id,
@@ -134,12 +163,15 @@ Deno.serve(async (req) => {
         score,
         fit: s.fit,
         reasons,
+        crm_flags: crmFlags,
+        crm_safe_to_unlock: crmFlags.length === 0,
       };
     })
     .sort((a, b) => b.score - a.score);
 
-  const shortlist = ranked.filter((r) => r.score >= minScore).slice(0, batchSize);
+  const shortlist = ranked.filter((r) => r.score >= minScore && r.crm_safe_to_unlock).slice(0, batchSize);
   const deprioritised = ranked.filter((r) => r.score < minScore);
+  const blocked_by_crm = ranked.filter((r) => !r.crm_safe_to_unlock).length;
   const fitBreakdown = ranked.reduce<Record<string, number>>((acc, r) => {
     acc[r.fit] = (acc[r.fit] ?? 0) + 1; return acc;
   }, {});
@@ -149,6 +181,8 @@ Deno.serve(async (req) => {
     total_needs_verification: rows?.length ?? 0,
     unique_persons: uniqueRows.length,
     duplicate_rows_collapsed: duplicateRows,
+    blocked_by_crm,
+    apollo_credit_estimate: shortlist.length,
     batch_size: batchSize,
     min_score: minScore,
     shortlist_count: shortlist.length,
@@ -156,6 +190,6 @@ Deno.serve(async (req) => {
     fit_breakdown: fitBreakdown,
     shortlist,
     deprioritised_sample: deprioritised.slice(0, 10),
-    note: "Unique persons only (deduped by apollo_person_id). No Apollo unlock or enrichment performed. Founder approval required for any unlock spend.",
+    note: "CRM-safe unique persons only. Leads already present in contacts, internal identities, suppressed, or bounced are excluded. Apollo credit estimate equals shortlist size. No unlock or enrichment performed.",
   });
 });
