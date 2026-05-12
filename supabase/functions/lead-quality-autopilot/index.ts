@@ -56,6 +56,7 @@ Deno.serve(async (req) => {
     missing_email_held: 0, already_in_crm_matched: 0,
     no_email_attempts_excluded: 0, safe_to_unlock: 0, safe_to_promote: 0,
     safe_to_queue: 0, decisions_created: 0,
+    verified_email_available_locked: 0, unlock_required: 0,
   };
   const decisionsToCreate: any[] = [];
 
@@ -92,13 +93,19 @@ Deno.serve(async (req) => {
         const ep: any = r.enrichment_payload ?? r.search_payload ?? {};
         const email = (r.email ?? ep?.email ?? "").toString().trim();
         const apolloEmailStatus = ep?.email_status ?? null;
+        const hasEmailFlag = !!(ep?.has_email_flag ?? (r as any)?.has_email_flag);
         const hasEmail = !!email;
+        // Apollo people_search returns has_email_flag=true with no email value;
+        // these are verified-email-available BUT locked behind unlock credits.
+        const verifiedLocked = !hasEmail && hasEmailFlag;
         return {
           apollo_lead_id: r.id,
           quality_status: hasEmail ? "raw" : "needs_verification",
           risk_flags: hasEmail
             ? []
-            : ["missing_email", apolloEmailStatus ? `apollo_email_${apolloEmailStatus}` : null].filter(Boolean),
+            : (verifiedLocked
+                ? ["verified_email_locked", "needs_apollo_unlock"]
+                : ["missing_email", apolloEmailStatus ? `apollo_email_${apolloEmailStatus}` : null].filter(Boolean) as string[]),
         };
       });
       if (toInsert.length) {
