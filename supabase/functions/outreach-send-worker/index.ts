@@ -272,15 +272,20 @@ Deno.serve(async (req) => {
     } catch { /* ignore */ }
     const runLimit = maxOverride ?? PER_RUN_LIMIT;
 
-    // ===== SYSTEM MODE GUARD =====
+    // ===== SYSTEM MODE =====
+    // TEST MODE has been removed as an operational blocker (founder decision).
+    // Worker always runs in LIVE execution mode. Only real per-inbox / per-contact
+    // / per-campaign / provider guardrails (below) can stop a send. We still read
+    // system_settings.system_mode for telemetry/audit purposes only.
     const { data: modeRow } = await supabase
       .from("system_settings")
       .select("value")
       .eq("key", "system_mode")
       .maybeSingle();
-    const systemMode: string =
-      typeof modeRow?.value === "string" ? modeRow.value : (modeRow?.value ?? "test");
-    const isLive = systemMode === "live";
+    const rawMode: string =
+      typeof modeRow?.value === "string" ? modeRow.value : (modeRow?.value ?? "live");
+    const systemMode: string = rawMode === "sandbox" ? "sandbox" : "live";
+    const isLive = true;
 
     // Pull due items ordered by priority FIRST (reply-priority items get priority=10),
     // then by scheduled_at. Includes previously delayed/throttled items whose retry time has arrived.

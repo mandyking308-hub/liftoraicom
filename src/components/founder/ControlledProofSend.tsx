@@ -93,8 +93,6 @@ const ControlledProofSend = () => {
       const result = data as SendResult;
       setSendResult(result);
       if (result.success) toast.success("Proof send delivered");
-      else if (result.reason === "TEST_MODE_ACTIVE")
-        toast.warning("System is in TEST MODE — switch to LIVE first");
       else toast.warning(result.message ?? `Result: ${result.queue_after?.status ?? "unknown"}`);
     } catch (e: any) {
       toast.error("Send failed: " + (e.message ?? "unknown"));
@@ -103,7 +101,8 @@ const ControlledProofSend = () => {
     }
   };
 
-  const isLive = preview?.system_mode === "live";
+  // TEST MODE removed as a gate — proof send may proceed when real guardrails pass.
+  const isLive = preview?.system_mode !== "sandbox";
 
   return (
     <Card className="p-5 space-y-4 border-2 border-primary/20">
@@ -112,16 +111,11 @@ const ControlledProofSend = () => {
           <div className="flex items-center gap-2">
             <Mailbox className="h-4 w-4 text-primary" />
             <h3 className="text-base font-semibold">Controlled LIVE Proof Send</h3>
-            {preview &&
-              (isLive ? (
-                <Badge variant="destructive" className="gap-1 text-[10px]">
-                  <ShieldAlert size={10} /> LIVE
-                </Badge>
-              ) : (
-                <Badge variant="outline" className="gap-1 text-[10px] border-yellow-500/40 text-yellow-400">
-                  <ShieldCheck size={10} /> TEST
-                </Badge>
-              ))}
+            {preview && (
+              <Badge className="gap-1 text-[10px] bg-emerald-500/15 text-emerald-400 border border-emerald-500/40">
+                <ShieldCheck size={10} /> LIVE
+              </Badge>
+            )}
           </div>
           <p className="text-xs text-muted-foreground max-w-2xl">
             One real outbound email through the existing campaign engine. All compliance, cap, throttle and
@@ -200,13 +194,8 @@ const ControlledProofSend = () => {
 
           <div className="rounded-md border p-3 flex items-start justify-between gap-3 flex-wrap">
             <div className="text-xs space-y-1 min-w-0">
-              {preview.all_pass && isLive && (
+              {preview.all_pass && (
                 <p className="font-medium text-emerald-500">All checks pass — ready to send 1 real email.</p>
-              )}
-              {preview.all_pass && !isLive && (
-                <p className="font-medium text-yellow-400">
-                  All checks pass, but system is in TEST MODE. Switch to CONTROLLED LIVE first.
-                </p>
               )}
               {!preview.all_pass && (
                 <>

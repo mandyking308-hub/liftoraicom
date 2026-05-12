@@ -110,10 +110,12 @@ const CommandCentre = () => {
     queryKey: ["cc2-system-mode"],
     queryFn: async () => {
       const { data } = await supabase.from("system_settings").select("value").eq("key", "system_mode").maybeSingle();
-      return String((data as any)?.value ?? "test").toLowerCase();
+      return String((data as any)?.value ?? "live").toLowerCase();
     },
   });
-  const isLiveMode = systemMode === "live";
+  // TEST MODE removed as operational gate — anything other than explicit
+  // admin-only "sandbox" is treated as LIVE OPERATING MODE.
+  const isLiveMode = systemMode !== "sandbox";
   const { data: events = [] } = useQuery({
     queryKey: ["cc2-email-events"],
     queryFn: async () => (await supabase.from("email_events").select("event_type").gte("timestamp", new Date(Date.now() - 7 * 86400000).toISOString())).data ?? [],
@@ -205,9 +207,9 @@ const CommandCentre = () => {
     const orphan = totals.orphanArchived;
     const outreachNext =
       totals.failedSends > 0 ? `Investigate ${totals.failedSends} failed send${totals.failedSends === 1 ? "" : "s"}` :
-      (isLiveMode && totals.inboxCapped > 0) ? "Wait for inbox provider cap to reset" :
+      (totals.inboxCapped > 0) ? "Wait for inbox provider cap to reset" :
       totals.blockedQueue > 0 ? `Wait for ${totals.blockedQueue} safety-gated contact${totals.blockedQueue === 1 ? "" : "s"} to cool down` :
-      totals.pendingQueue > 0 ? (isLiveMode ? "Continue scheduled sends" : "Confirm TEST/LIVE mode before any real sending") : "Launch a new campaign";
+      totals.pendingQueue > 0 ? "Continue scheduled sends" : "Launch a new campaign";
     return [
       { key: "outreach", name: "Outreach Agent", icon: Send, status: totals.activeCampaigns > 0 ? "active" : activeInbox ? "idle" : "needs_setup",
         recent: `${totals.pendingQueue} queued · ${totals.blockedQueue} blocked · ${totals.failedSends} failed`, pending: totals.pendingQueue, blocked: totals.blockedQueue,
@@ -253,9 +255,7 @@ const CommandCentre = () => {
     if (orphanArchived > 0) {
       completed.push({ msg: `${orphanArchived} orphan follow-up rows archived — no action needed.`, severity: "good", to: "/founder/outreach/queue" });
     }
-    if (!isLiveMode) {
-      current.push({ msg: "TEST MODE active — live sends are gated. Provider caps are informational until LIVE mode is enabled.", severity: "warn", to: "/founder/system/modes" });
-    }
+    // TEST MODE removed as operational gate — no informational TEST blocker emitted.
     const reasonMap: Record<string, { label: string; severity: string; bucket: "current" | "safety" }> = {
       SIMULATED_PARENT_NOT_SENT: { label: "waiting on an earlier sequence step that never sent (legacy/test sim)", severity: "warn", recoverable: true },
       RECENTLY_CONTACTED: { label: "cooling down under the recent-contact rule", severity: "warn", recoverable: true },
@@ -284,16 +284,11 @@ const CommandCentre = () => {
     inboxes.forEach((i: any) => {
       if (!i.active) return;
       if (i.provider_blocked_until && new Date(i.provider_blocked_until) > new Date()) {
-        const tgt = isLiveMode ? current : safetyGates;
-        tgt.push({ msg: `${i.email_address}: provider daily limit reached${isLiveMode ? "" : " (informational — TEST MODE)"} (${i.paused_reason ?? i.provider_blocked_reason ?? "throttled"}) — resumes ${format(new Date(i.provider_blocked_until), "dd MMM HH:mm")}`, severity: "warn", to: "/founder/sending" });
+        current.push({ msg: `${i.email_address}: provider daily limit reached (${i.paused_reason ?? i.provider_blocked_reason ?? "throttled"}) — resumes ${format(new Date(i.provider_blocked_until), "dd MMM HH:mm")}`, severity: "warn", to: "/founder/sending" });
       }
-      if (i.active && (i.emails_sent_today ?? 0) >= (i.daily_send_limit ?? 0) && (i.daily_send_limit ?? 0) > 0) {
-        (isLiveMode ? current : safetyGates).push({ msg: `${i.email_address}: daily send limit reached (${i.emails_sent_today}/${i.daily_send_limit})${isLiveMode ? " — pending sends will resume tomorrow" : " — informational in TEST MODE"}`, severity: "warn", to: "/founder/sending" });
-      } else if (i.active && (i.hourly_send_count ?? 0) >= (i.hourly_send_limit ?? 0) && (i.hourly_send_limit ?? 0) > 0) {
-        (isLiveMode ? current : safetyGates).push({ msg: `${i.email_address}: hourly send limit reached (${i.hourly_send_count}/${i.hourly_send_limit})${isLiveMode ? " — pending sends will resume next hour" : " — informational in TEST MODE"}`, severity: "warn", to: "/founder/sending" });
-      }
+      // Internal hourly/daily caps are informational only (cap blocking removed for activation).
       if (i.provider_blocked_reason && !i.provider_blocked_until) {
-        (isLiveMode ? current : safetyGates).push({ msg: `${i.email_address}: capped by email provider (${i.provider_blocked_reason})${isLiveMode ? ". Pending sends will resume on the next provider window." : " — informational in TEST MODE"}`, severity: "warn", to: "/founder/sending" });
+        current.push({ msg: `${i.email_address}: capped by email provider (${i.provider_blocked_reason}). Pending sends will resume on the next provider window.`, severity: "warn", to: "/founder/sending" });
       }
       if ((i.reputation_score ?? 100) < 40) current.push({ msg: `${i.email_address}: low inbox reputation (${i.reputation_score})`, severity: "warn", to: "/founder/sending" });
       if (i.last_test_send_status === "failed") current.push({ msg: `${i.email_address}: last test send failed — ${i.last_error_message ?? "see logs"}`, severity: "danger", to: `/founder/crm/inboxes/${i.id}/configure` });
@@ -361,8 +356,7 @@ const CommandCentre = () => {
     const safetyGated = (queue ?? []).filter((q: any) => q.status === "blocked" && (q.block_reason === "RECENTLY_CONTACTED" || q.block_reason === "RECENT_COMMUNICATION_24H")).length;
     if (safetyGated > 0) recs.push({ msg: `Wait for ${safetyGated} safety-gated contact${safetyGated === 1 ? "" : "s"} to cool down`, to: "/founder/outreach/queue", tone: "default" });
     if (totals.failedSends > 0) recs.push({ msg: `Investigate ${totals.failedSends} failed send${totals.failedSends === 1 ? "" : "s"}`, to: "/founder/outreach/queue", tone: "danger" });
-    if (!isLiveMode) recs.push({ msg: "Confirm TEST/LIVE mode before any real sending", to: "/founder/system/modes", tone: "warn" });
-    else if (totals.inboxCapped > 0) recs.push({ msg: `Wait for inbox provider cap to reset before sending queued emails`, to: "/founder/sending", tone: "warn" });
+    if (totals.inboxCapped > 0) recs.push({ msg: `Wait for inbox provider cap to reset before sending queued emails`, to: "/founder/sending", tone: "warn" });
     if (totals.activeCampaigns > 0 && totals.repliesAll === 0 && totals.sentTotal > 0) recs.push({ msg: "Review campaign performance — reply rate is zero across the reporting window", to: "/founder/outreach/campaigns", tone: "warn" });
     allDangerBlockers.slice(0, 2).forEach((b) => recs.push({ msg: `Fix: ${b.msg}`, to: b.to ?? "/founder/system", tone: "danger" }));
     businessStats.filter((b) => b.contacts === 0).slice(0, 2).forEach((b) => recs.push({ msg: `Import leads for ${b.name}`, to: "/founder/outreach/imports", tone: "default" }));
@@ -537,7 +531,7 @@ const CommandCentre = () => {
               <div className="p-2 rounded bg-secondary/40"><p className={`text-base font-semibold ${totals.failedSends ? "text-destructive" : ""}`}>{totals.failedSends}</p><p className="text-muted-foreground">Failed</p></div>
               <div className="p-2 rounded bg-secondary/40"><p className="text-base font-semibold">{totals.repliesAll}</p><p className="text-muted-foreground">Replies (7d)</p></div>
               <div className="p-2 rounded bg-secondary/40"><p className="text-base font-semibold">{drafts.length}</p><p className="text-muted-foreground">AI drafts</p></div>
-              <div className="p-2 rounded bg-secondary/40"><p className={`text-base font-semibold ${totals.inboxCapped ? (isLiveMode ? "text-yellow-400" : "text-muted-foreground") : "text-green-400"}`}>{totals.inboxCapped ? (isLiveMode ? "Capped" : "Informational") : "OK"}</p><p className="text-muted-foreground">Inbox cap{!isLiveMode ? " (TEST)" : ""}</p></div>
+              <div className="p-2 rounded bg-secondary/40"><p className={`text-base font-semibold ${totals.inboxCapped ? "text-yellow-400" : "text-green-400"}`}>{totals.inboxCapped ? "Capped" : "OK"}</p><p className="text-muted-foreground">Inbox cap</p></div>
             </div>
             <div className="space-y-2">
               {campaigns.filter((c: any) => c.status === "active").slice(0, 4).map((c: any) => (
