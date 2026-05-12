@@ -1185,7 +1185,7 @@ automation_workflows, ai_agents, monitored_systems, organisations, brain_insight
 | Route | Page | Category |
 |-------|------|----------|
 | \`/founder\` | FounderOverview | Overview |
-| \`/founder/command-center\` | CommandCenter | Operations |
+| \`/founder/command-centre\` | CommandCentre | Operations (canonical founder cockpit; \`/founder/command-center\` redirects here, legacy view at \`/founder/command-center/legacy\`) |
 | \`/founder/copilot\` | FounderCoPilot | AI Brain |
 | \`/founder/brain\` | BrainCore | AI Brain |
 | \`/founder/decisions\` | DecisionEngine | AI Brain |

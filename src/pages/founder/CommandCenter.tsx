@@ -171,9 +171,16 @@ const CommandCenter = () => {
   return (
     <FounderLayout>
       <div className="space-y-8">
+        <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-4 flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <p className="text-sm font-semibold text-yellow-400">Legacy Command Centre</p>
+            <p className="text-xs text-muted-foreground mt-1">This is the old operations view, kept temporarily as a fallback. The active founder cockpit lives at <code className="text-foreground">/founder/command-centre</code>.</p>
+          </div>
+          <a href="/founder/command-centre" className="text-xs px-3 py-1.5 rounded bg-primary text-primary-foreground hover:bg-primary/90">Open new Command Centre →</a>
+        </div>
         <div>
-          <h1 className="text-2xl font-bold">Operations Command Center</h1>
-          <p className="text-muted-foreground text-sm mt-1">Real-time platform operational overview</p>
+          <h1 className="text-2xl font-bold">Legacy Command Centre</h1>
+          <p className="text-muted-foreground text-sm mt-1">Archived operations overview · read-only fallback</p>
         </div>
 
         {/* Top-level stats */}
