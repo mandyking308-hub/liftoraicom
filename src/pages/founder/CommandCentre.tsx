@@ -578,6 +578,7 @@ const CommandCentre = () => {
 
             {/* SECTION 4 — Source Leads / Apollo */}
             <div id="sec-source" className="space-y-4 scroll-mt-24">
+              <ApolloRevealStageStrip lifecycle={leadLifecycle} />
               <ApolloPullPanel />
               <SourceQualityBrief />
             </div>
