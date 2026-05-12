@@ -263,9 +263,11 @@ export default function LeadQualityPanel() {
   const nextAction =
     (lifecycle?.safe_to_queue ?? 0) > 0
       ? `Enqueue up to ${lifecycle?.safe_to_queue} eligible contact(s) — preview first`
+      : (lifecycle?.safe_to_promote ?? 0) > 0
+      ? `Promote ${lifecycle?.safe_to_promote} qualified lead(s) to contacts — preview first`
       : (lifecycle?.active_working_leads ?? 0) > 0
-      ? "Build Apollo unlock shortlist for active working leads (no credits spent)"
-      : "Run fresh Apollo verified-email search using NeonCandy Source Quality Brief";
+      ? "Review active working leads — autopilot has no recommended unlock work"
+      : "Run fresh Apollo verified-email search using NeonCandy Source Quality Brief — do not spend credits on the legacy pool";
 
   return (
     <Card className="bg-card border-border/50">
@@ -398,43 +400,21 @@ export default function LeadQualityPanel() {
               <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
                 <Tile label="Apollo total" value={lifecycle.total_leads} />
                 <Tile label="Active working" value={lifecycle.active_working_leads} tone={lifecycle.active_working_leads > 0 ? "good" : "default"} />
-                <Tile label="Needs verify (worth action)" value={lifecycle.needs_verification_active} tone="warn" />
                 <Tile label="Safe to unlock" value={lifecycle.safe_to_unlock} tone="good" />
                 <Tile label="Safe to promote" value={lifecycle.safe_to_promote} tone="good" />
                 <Tile label="Safe to queue" value={lifecycle.safe_to_queue} tone="good" />
-                <Tile label="Promoted contacts" value={lifecycle.promoted_to_contact} tone="good" />
-                <Tile label="Already in CRM" value={lifecycle.already_in_crm} />
+                <Tile label="Legacy optional unlock candidates" value={lifecycle.legacy_optional_unlock_candidates} />
                 <Tile label="Duplicates archived" value={lifecycle.duplicates_archived} />
                 <Tile label="Poor fit archived" value={lifecycle.poor_fit_archived} />
-                <Tile label="Missing contact archived" value={lifecycle.missing_contact_archived} />
                 <Tile label="Attempted no-email" value={lifecycle.attempted_no_email} tone="warn" />
-                <Tile label="Founder review required" value={lifecycle.founder_review_required} tone={lifecycle.founder_review_required > 0 ? "warn" : "default"} />
-                <Tile label="Archived (learning)" value={lifecycle.archived_learning_only} />
-                <Tile label="Archived (not working)" value={lifecycle.archived_not_working} />
-                <Tile label="Legacy optional unlock candidates" value={lifecycle.legacy_optional_unlock_candidates} />
+                <Tile label="Already in CRM" value={lifecycle.already_in_crm} />
+                <Tile label="Promoted contacts" value={lifecycle.promoted_to_contact} tone="good" />
               </div>
               <p className="text-[11px] text-muted-foreground">
-                Active = candidates worth founder action. Everything else is retained as learning so Liftor never re-spends Apollo credits on the same bad/no-email/duplicate leads. Hard delete requires founder approval.
+                Source of truth = autopilot lifecycle. Archive buckets are retained for learning so Liftor never re-spends Apollo credits on the same bad/no-email/duplicate leads. Hard delete requires founder approval.
               </p>
             </div>
           )}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-            <Tile label="Apollo total" value={overview?.total_leads ?? 0} />
-            <Tile label="Raw" value={overview?.raw_leads ?? 0} />
-            <Tile label="Reviewed" value={overview?.reviewed_leads ?? 0} />
-            <Tile label="Qualified" value={overview?.qualified_leads ?? 0} tone="good" />
-            <Tile label="Promoted contacts" value={overview?.promoted_contacts ?? 0} tone="good" />
-            <Tile label="Needs verification" value={overview?.needs_verification ?? 0} tone="warn" />
-            <Tile label="Needs founder review" value={overview?.needs_founder_review ?? 0} tone="warn" />
-            <Tile label="Rejected" value={overview?.rejected_leads ?? 0} tone="danger" />
-            <Tile label="Terminal blocked" value={overview?.terminal_blocked ?? 0} tone="danger" />
-            <Tile label="Duplicate / risky" value={overview?.duplicate_or_risky ?? 0} tone="warn" />
-            <Tile label="Safe to queue" value={overview?.safe_to_queue ?? 0} tone="good" />
-            <Tile label="Unlock shortlist (last run)" value={shortlistResult?.shortlist_count ?? "—"} tone="default" />
-            <Tile label="Est. unlock credits (unique only)" value={shortlistResult?.shortlist_count ?? "—"} tone="default" />
-            <Tile label="Duplicate rows collapsed" value={shortlistResult?.duplicate_rows_collapsed ?? "—"} tone="warn" />
-            <Tile label="Unique persons in pool" value={shortlistResult?.unique_persons ?? "—"} tone="default" />
-          </div>
           </>
         )}
 
@@ -451,7 +431,37 @@ export default function LeadQualityPanel() {
           </div>
         </div>
 
-        <div className="space-y-3 pt-2 border-t border-border/40">
+        <details className="rounded-md border border-border/50 bg-muted/20 p-3 group">
+          <summary className="cursor-pointer text-xs font-medium text-foreground flex items-center gap-2">
+            <AlertTriangle size={12} className="text-yellow-400" />
+            Legacy Apollo Pool — optional / not recommended
+            <Badge variant="outline" className="text-[10px]">collapsed by default</Badge>
+          </summary>
+          <p className="text-[11px] text-muted-foreground mt-2">
+            Legacy pool is retained for learning only. Autopilot does not recommend spending credits here.
+            These controls operate on the old 150-lead pool (raw / needs-verification / unlock shortlist / AI classification).
+            Use only if the founder explicitly overrides the verified-email-first sourcing rule.
+          </p>
+          {overview && (
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2 mt-3">
+              <Tile label="Apollo total" value={overview?.total_leads ?? 0} />
+              <Tile label="Raw" value={overview?.raw_leads ?? 0} />
+              <Tile label="Reviewed" value={overview?.reviewed_leads ?? 0} />
+              <Tile label="Qualified" value={overview?.qualified_leads ?? 0} tone="good" />
+              <Tile label="Promoted contacts" value={overview?.promoted_contacts ?? 0} tone="good" />
+              <Tile label="Needs verification" value={overview?.needs_verification ?? 0} tone="warn" />
+              <Tile label="Needs founder review" value={overview?.needs_founder_review ?? 0} tone="warn" />
+              <Tile label="Rejected" value={overview?.rejected_leads ?? 0} tone="danger" />
+              <Tile label="Terminal blocked" value={overview?.terminal_blocked ?? 0} tone="danger" />
+              <Tile label="Duplicate / risky" value={overview?.duplicate_or_risky ?? 0} tone="warn" />
+              <Tile label="Safe to queue" value={overview?.safe_to_queue ?? 0} tone="good" />
+              <Tile label="Unlock shortlist (last run)" value={shortlistResult?.shortlist_count ?? "—"} tone="default" />
+              <Tile label="Est. unlock credits (unique only)" value={shortlistResult?.shortlist_count ?? "—"} tone="default" />
+              <Tile label="Duplicate rows collapsed" value={shortlistResult?.duplicate_rows_collapsed ?? "—"} tone="warn" />
+              <Tile label="Unique persons in pool" value={shortlistResult?.unique_persons ?? "—"} tone="default" />
+            </div>
+          )}
+          <div className="space-y-3 pt-3 mt-3 border-t border-border/40">
           <div className="flex flex-wrap gap-2 items-center">
             <p className="text-xs text-muted-foreground w-full">1. Cheap quality scan (no AI)</p>
             <Button size="sm" variant="outline" disabled={!!busy}
@@ -585,7 +595,8 @@ export default function LeadQualityPanel() {
               {busy === "Enqueue apply" ? <Loader2 className="animate-spin" size={14} /> : "Apply enqueue"}
             </Button>
           </div>
-        </div>
+          </div>
+        </details>
 
         <div className="rounded-md border border-yellow-500/30 bg-yellow-500/5 p-3 text-xs flex gap-2">
           <AlertTriangle size={14} className="text-yellow-400 mt-0.5" />
