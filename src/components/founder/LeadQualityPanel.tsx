@@ -273,6 +273,7 @@ export default function LeadQualityPanel() {
                 <Tile label="Founder review required" value={lifecycle.founder_review_required} tone={lifecycle.founder_review_required > 0 ? "warn" : "default"} />
                 <Tile label="Archived (learning)" value={lifecycle.archived_learning_only} />
                 <Tile label="Archived (not working)" value={lifecycle.archived_not_working} />
+                <Tile label="Legacy optional unlock candidates" value={lifecycle.legacy_optional_unlock_candidates} />
               </div>
               <p className="text-[11px] text-muted-foreground">
                 Active = candidates worth founder action. Everything else is retained as learning so Liftor never re-spends Apollo credits on the same bad/no-email/duplicate leads. Hard delete requires founder approval.
