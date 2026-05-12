@@ -499,6 +499,28 @@ async function persistMessage(
     contact = existingContact;
   }
 
+  // ===== NDR / BOUNCE RESOLUTION =====
+  // Bounces come from mailer-daemon/postmaster — they never match by from_email.
+  // Try to extract the original recipient from subject/body and suppress that contact.
+  if (!contact && isBounce) {
+    const haystack = `${subject}\n${bodyText}`;
+    const candidates = [
+      /\[([^\]\s@]+@[^\]\s]+)\]/.exec(subject)?.[1],
+      /<([^>\s@]+@[^>\s]+)>/.exec(subject)?.[1],
+      /To:\s*<?([^\s<>]+@[^\s<>]+)/i.exec(haystack)?.[1],
+      /Original-Recipient:[^\n]*?<?([^\s<>;]+@[^\s<>;]+)/i.exec(haystack)?.[1],
+      /Final-Recipient:[^\n]*?<?([^\s<>;]+@[^\s<>;]+)/i.exec(haystack)?.[1],
+    ].filter((x): x is string => Boolean(x)).map(lower);
+    for (const candidate of candidates) {
+      const { data: bounceContact } = await admin
+        .from("contacts")
+        .select("id, assigned_inbox_id, active_campaign_id, status")
+        .eq("email", candidate)
+        .maybeSingle();
+      if (bounceContact) { contact = bounceContact; break; }
+    }
+  }
+
   let autoCreatedContact = false;
   if (!contact && fromEmail && !isBounce) {
     const { data: newContact, error: createContactError } = await admin
@@ -591,22 +613,32 @@ async function persistMessage(
     }
 
     if (isBounce) {
-      const [emailEventRes, contactUpdateRes, inboundUpdateRes] = await Promise.all([
+      const [emailEventRes, contactUpdateRes, inboundUpdateRes, queueCancel] = await Promise.all([
         admin.from("email_events").insert({ contact_id: contact.id, event_type: "bounced" }),
         admin.from("contacts").update({
           status: "DO_NOT_CONTACT",
           active_campaign_id: null,
+          hard_bounced: true,
+          sendable_status: "suppressed",
+          is_globally_suppressed: true,
+          global_suppression_reason: "hard_bounced_ndr",
+          global_suppression_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         }).eq("id", contact.id),
         admin.from("inbound_messages").update({
           processing_status: "bounce_handled",
           processing_error: null,
         }).eq("id", inboundRow.id),
+        admin.from("email_queue").update({
+          status: "cancelled",
+          block_reason: "ndr_suppressed",
+        }).eq("contact_id", contact.id).in("status", ["pending","delayed","throttled","scheduled"]),
       ]);
 
       if (emailEventRes.error) throw emailEventRes.error;
       if (contactUpdateRes.error) throw contactUpdateRes.error;
       if (inboundUpdateRes.error) throw inboundUpdateRes.error;
+      if (queueCancel.error) throw queueCancel.error;
 
       return {
         markSeen: true,
