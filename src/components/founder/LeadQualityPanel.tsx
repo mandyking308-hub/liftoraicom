@@ -118,7 +118,9 @@ export default function LeadQualityPanel() {
             <Tile label="Duplicate / risky" value={overview?.duplicate_or_risky ?? 0} tone="warn" />
             <Tile label="Safe to queue" value={overview?.safe_to_queue ?? 0} tone="good" />
             <Tile label="Unlock shortlist (last run)" value={shortlistResult?.shortlist_count ?? "—"} tone="default" />
-            <Tile label="Est. unlock credits" value={shortlistResult?.shortlist_count ?? "—"} tone="default" />
+            <Tile label="Est. unlock credits (unique only)" value={shortlistResult?.shortlist_count ?? "—"} tone="default" />
+            <Tile label="Duplicate rows collapsed" value={shortlistResult?.duplicate_rows_collapsed ?? "—"} tone="warn" />
+            <Tile label="Unique persons in pool" value={shortlistResult?.unique_persons ?? "—"} tone="default" />
           </div>
         )}
 
@@ -197,9 +199,11 @@ export default function LeadQualityPanel() {
             {shortlistResult && (
               <div className="w-full mt-2 rounded border border-border/50 bg-card/40 p-3 space-y-2">
                 <div className="flex flex-wrap gap-3 text-xs">
-                  <span><span className="text-muted-foreground">Shortlisted:</span> <strong>{shortlistResult.shortlist_count}</strong></span>
+                  <span><span className="text-muted-foreground">Top unique unlock candidates:</span> <strong>{shortlistResult.shortlist_count}</strong></span>
                   <span><span className="text-muted-foreground">Deprioritised:</span> <strong>{shortlistResult.deprioritised_count}</strong></span>
-                  <span><span className="text-muted-foreground">Pool scanned:</span> <strong>{shortlistResult.total_needs_verification}</strong></span>
+                  <span><span className="text-muted-foreground">Pool rows:</span> <strong>{shortlistResult.total_needs_verification}</strong></span>
+                  <span><span className="text-muted-foreground">Unique persons:</span> <strong>{shortlistResult.unique_persons ?? "—"}</strong></span>
+                  <span><span className="text-muted-foreground">Dup rows removed:</span> <strong>{shortlistResult.duplicate_rows_collapsed ?? 0}</strong></span>
                   <span><span className="text-muted-foreground">Min score:</span> <strong>{shortlistResult.min_score}</strong></span>
                 </div>
                 {shortlistResult.fit_breakdown && (
