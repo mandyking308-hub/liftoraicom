@@ -54,7 +54,7 @@ const ExecutionStatusPanel = () => {
           .limit(1)
           .maybeSingle(),
       ]);
-      const m = (mode.data?.value as string) ?? "test";
+      const m = (mode.data?.value as string) ?? "live";
       return {
         mode: String(m).toLowerCase(),
         lastSentAt: (lastSent.data as any)?.sent_at as string | null,
@@ -66,7 +66,7 @@ const ExecutionStatusPanel = () => {
     },
   });
 
-  const isLive = data?.mode === "live";
+  const isLive = data?.mode !== "sandbox";
 
   return (
     <Card className="bg-card border-border/50">
@@ -75,7 +75,7 @@ const ExecutionStatusPanel = () => {
           <Activity size={16} className="text-primary" /> Execution Status
         </CardTitle>
         <Badge variant={isLive ? "destructive" : "outline"} className="uppercase">
-          {isLive ? "Controlled Live" : "Test mode"}
+          {isLive ? "Controlled Live" : "Sandbox"}
         </Badge>
       </CardHeader>
       <CardContent>
@@ -94,7 +94,7 @@ const ExecutionStatusPanel = () => {
         <p className="text-xs text-muted-foreground mt-3">
           {isLive
             ? "Controlled LIVE: workers process eligible queue rows respecting compliance, caps, suppression, reply-stop and provider limits. No artificial global cap is applied."
-            : "TEST mode: real sends are blocked. Switch to Controlled LIVE in System → Modes to allow execution."}
+            : "SANDBOX mode: live execution is paused. Switch back to Controlled LIVE in System → Modes to resume real sends."}
         </p>
       </CardContent>
     </Card>
