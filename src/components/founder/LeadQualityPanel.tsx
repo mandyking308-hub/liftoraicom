@@ -160,6 +160,46 @@ export default function LeadQualityPanel() {
     },
   });
 
+  const { data: autopilotRun, refetch: refetchAutopilot } = useQuery({
+    queryKey: ["autopilot-last-run"],
+    queryFn: async () => {
+      const { data } = await (supabase as any).from("autopilot_runs")
+        .select("*").order("created_at", { ascending: false }).limit(1).maybeSingle();
+      return data as AutopilotRun | null;
+    },
+  });
+
+  const { data: pendingDecisions, refetch: refetchDecisions } = useQuery({
+    queryKey: ["founder-decisions-pending"],
+    queryFn: async () => {
+      const { data } = await (supabase as any).from("founder_decisions")
+        .select("*").eq("status","pending").order("created_at", { ascending: false }).limit(20);
+      return (data ?? []) as FounderDecision[];
+    },
+  });
+
+  const runAutopilot = async () => {
+    try {
+      setBusy("Autopilot");
+      const { data, error } = await supabase.functions.invoke("lead-quality-autopilot", {
+        body: { trigger: "manual_founder" },
+      });
+      if (error) throw error;
+      toast.success("Autopilot run complete", { description: data?.next_recommended_action ?? "" });
+      refetchAutopilot(); refetchDecisions();
+      qc.invalidateQueries({ queryKey: ["lead-lifecycle-summary"] });
+    } catch (e: any) {
+      toast.error("Autopilot failed", { description: e?.message ?? String(e) });
+    } finally { setBusy(null); }
+  };
+
+  const decideOn = async (id: string, status: "approved"|"rejected"|"hold") => {
+    const { error } = await (supabase as any).from("founder_decisions")
+      .update({ status, decided_at: new Date().toISOString() }).eq("id", id);
+    if (error) toast.error("Failed", { description: error.message });
+    else { toast.success(`Decision ${status}`); refetchDecisions(); }
+  };
+
   // Last Apollo unlock run + previously-attempted-no-email count
   const { data: lastUnlockRun } = useQuery({
     queryKey: ["apollo-last-unlock-run"],
