@@ -81,8 +81,13 @@ const LiftorCapabilities = () => {
       const realSent = (await supabase.from("email_queue").select("id", { count: "exact", head: true }).eq("status", "sent").eq("delivery_kind", "smtp_real")).count ?? 0;
       const blocked = (await supabase.from("email_queue").select("id", { count: "exact", head: true }).eq("status", "blocked")).count ?? 0;
       const liveInbox = (await supabase.from("inboxes").select("id", { count: "exact", head: true }).eq("active", true)).count ?? 0;
+      const aiDraftsPending = (await supabase.from("ai_drafts").select("id", { count: "exact", head: true }).eq("status", "pending")).count ?? 0;
+      const sysEventsOpen = (await supabase.from("system_events").select("id", { count: "exact", head: true }).eq("resolved", false)).count ?? 0;
+      const retryPending = (await supabase.from("retry_queue").select("id", { count: "exact", head: true }).eq("status", "pending")).count ?? 0;
+      const retryCompleted = (await supabase.from("retry_queue").select("id", { count: "exact", head: true }).eq("status", "completed")).count ?? 0;
+      const demoNeon = (await supabase.from("demo_access").select("id", { count: "exact", head: true }).eq("business_name", "Neon Candy")).count ?? 0;
 
-      return { counts, lastSend, lastInbound, lastSysEvent, lastDemo, realSent, blocked, liveInbox };
+      return { counts, lastSend, lastInbound, lastSysEvent, lastDemo, realSent, blocked, liveInbox, aiDraftsPending, sysEventsOpen, retryPending, retryCompleted, demoNeon };
     },
     refetchInterval: 60000,
   });
@@ -135,7 +140,8 @@ const LiftorCapabilities = () => {
         { key: "convos", name: "Conversations", agent: "Inbox Agent", icon: MessageSquare, route: "/founder/conversations",
           table: "conversations", count: c.conversations,
           status: c.conversations > 0 ? "active" : "dormant",
-          next: c.ai_drafts ? `Approve ${c.ai_drafts} AI draft${c.ai_drafts === 1 ? "" : "s"}` : "Open conversations" },
+          recent: `${c.ai_drafts ?? 0} drafts total · ${data?.aiDraftsPending ?? 0} pending`,
+          next: (data?.aiDraftsPending ?? 0) > 0 ? `Approve ${data?.aiDraftsPending} pending draft${data?.aiDraftsPending === 1 ? "" : "s"}` : "Open conversations" },
         { key: "crm", name: "CRM Contacts", agent: "CRM Agent", icon: Users, route: "/founder/crm/contacts",
           table: "contacts", count: c.contacts,
           status: c.contacts > 0 ? "active" : "dormant",
@@ -150,9 +156,12 @@ const LiftorCapabilities = () => {
           next: "Open proposals" },
         { key: "demos", name: "Demos", agent: "Demo Agent", icon: Presentation, route: "/founder/demos",
           table: "demo_access", count: c.demo_access,
-          status: (c.demo_events ?? 0) > 0 ? "active" : (c.demo_access > 0 ? "idle" : "dormant"),
-          recent: data?.lastDemo ? `Last view ${ago(data.lastDemo)}` : undefined,
-          next: "Open demos dashboard" },
+          status: (data?.demoNeon ?? 0) > 0 ? "active" : ((c.demo_access ?? 0) > 0 ? "needs_attention" : "dormant"),
+          recent: (data?.demoNeon ?? 0) > 0
+            ? `${data?.demoNeon} NeonCandy demo${data?.demoNeon === 1 ? "" : "s"} · ${c.demo_access ?? 0} total`
+            : `${c.demo_access ?? 0} historical demos (GloBlast/Health Access/Liftor AI) — needs review`,
+          blocker: (data?.demoNeon ?? 0) === 0 && (c.demo_access ?? 0) > 0 ? "Historical data — not part of current NeonCandy flow" : undefined,
+          next: (data?.demoNeon ?? 0) > 0 ? "Open demos dashboard" : "Review legacy demo records before next cleanup" },
         { key: "deals", name: "Deals", agent: "Deal Agent", icon: Banknote, route: "/founder/finance/deals",
           table: "deals", count: c.deals,
           status: c.deals > 0 ? "active" : "dormant",
@@ -221,9 +230,11 @@ const LiftorCapabilities = () => {
           status: (c.security_alerts ?? 0) > 0 ? "needs_attention" : "idle",
           next: c.security_alerts ? "Triage alerts" : "Open security dashboard" },
         { key: "oversight", name: "System Oversight", agent: "Oversight Agent", icon: Eye, route: "/founder/system",
-          table: "system_alerts", count: c.system_alerts,
-          status: (c.system_alerts ?? 0) > 0 ? "needs_attention" : "active",
-          next: "Open oversight" },
+          table: "system_events / retry_queue / system_alerts", count: data?.sysEventsOpen ?? 0,
+          status: (data?.sysEventsOpen ?? 0) > 0 || (data?.retryPending ?? 0) > 0 || (c.system_alerts ?? 0) > 0 ? "needs_attention" : "idle",
+          recent: `${data?.sysEventsOpen ?? 0} open / ${c.system_events ?? 0} logged total · ${data?.retryPending ?? 0} retries pending (${data?.retryCompleted ?? 0} historical) · ${c.system_alerts ?? 0} alerts`,
+          blocker: (data?.sysEventsOpen ?? 0) > 0 ? `${data?.sysEventsOpen} open warnings` : undefined,
+          next: (data?.sysEventsOpen ?? 0) > 0 ? `Triage ${data?.sysEventsOpen} open warning${data?.sysEventsOpen === 1 ? "" : "s"}` : "Open oversight" },
         { key: "system-health", name: "System Health", agent: "Oversight Agent", icon: Activity, route: "/founder/system/health",
           table: "system_health_score", count: c.system_health_score,
           status: c.system_health_score > 0 ? "active" : "dormant",
@@ -298,12 +309,14 @@ const LiftorCapabilities = () => {
           next: "Review AI actions" },
         { key: "knowledge", name: "Knowledge Base", agent: "Knowledge Agent", icon: BookOpen, route: "/founder/knowledge",
           table: "knowledge_documents", count: c.knowledge_documents,
-          status: (c.knowledge_documents ?? 0) + (c.knowledge_entries ?? 0) > 0 ? "active" : "dormant",
-          next: c.knowledge_documents ? "Browse knowledge" : "Add first document" },
+          status: (c.knowledge_documents ?? 0) + (c.knowledge_entries ?? 0) > 0 ? "active" : "needs_setup",
+          recent: `${c.knowledge_documents ?? 0} documents · ${c.knowledge_entries ?? 0} entries`,
+          next: (c.knowledge_documents ?? 0) + (c.knowledge_entries ?? 0) > 0 ? "Browse knowledge" : "Add first document" },
         { key: "copilot", name: "Founder Co-Pilot", agent: "Co-Pilot Agent", icon: Bot, route: "/founder/copilot",
           table: "ai_drafts", count: c.ai_drafts,
-          status: c.ai_drafts > 0 ? "active" : "idle",
-          next: c.ai_drafts ? `Approve ${c.ai_drafts} draft${c.ai_drafts === 1 ? "" : "s"}` : "Open Co-Pilot" },
+          status: (data?.aiDraftsPending ?? 0) > 0 ? "needs_attention" : (c.ai_drafts > 0 ? "active" : "idle"),
+          recent: `${c.ai_drafts ?? 0} total · ${data?.aiDraftsPending ?? 0} pending approval`,
+          next: (data?.aiDraftsPending ?? 0) > 0 ? `Approve ${data?.aiDraftsPending} pending draft${data?.aiDraftsPending === 1 ? "" : "s"}` : "Open Co-Pilot" },
       ],
     },
     {
@@ -316,11 +329,13 @@ const LiftorCapabilities = () => {
           recent: data?.lastSend ? `Last send ${ago(data.lastSend)}` : undefined,
           next: "Open sending health" },
         { key: "social", name: "Social Channel", agent: "Social Agent", icon: Share2, route: "/founder/integrations",
-          table: "integrations", status: "hidden",
-          next: "Plan social channel" },
+          table: "integrations", status: "needs_setup",
+          recent: "Visible — no provider connected",
+          next: "Connect a social provider" },
         { key: "voice", name: "Voice Channel", agent: "Voice Agent", icon: Phone, route: "/founder/integrations",
-          table: "integrations", status: "hidden",
-          next: "Plan voice channel" },
+          table: "integrations", status: "needs_setup",
+          recent: "Visible — no provider connected",
+          next: "Connect a voice provider" },
         { key: "client-portal", name: "Client Portal", agent: "Client Portal Agent", icon: UserCheck, route: "/portal/dashboard",
           table: "organisation_members", count: c.organisation_members,
           status: c.organisation_members > 0 ? "active" : "dormant",
@@ -415,10 +430,11 @@ const LiftorCapabilities = () => {
 
       <p className="text-[11px] text-muted-foreground">
         Status logic: a capability is <span className="text-green-400">Active</span> when its primary table has live rows;
+        <span className="text-blue-300"> Idle</span> when wired and ready with no current work;
         <span className="text-zinc-300"> Dormant</span> when built but empty;
         <span className="text-yellow-400"> Needs setup</span> when configuration is required;
-        <span className="text-destructive"> Needs attention</span> when alerts are open;
-        <span className="text-purple-300"> Hidden</span> when planned but not yet wired.
+        <span className="text-destructive"> Needs attention</span> when warnings, retries, or unresolved issues exist;
+        <span className="text-purple-300"> Hidden</span> reserved for capabilities not yet surfaced (none today).
       </p>
     </div>
   );
