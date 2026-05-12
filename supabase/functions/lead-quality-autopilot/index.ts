@@ -351,11 +351,16 @@ Deno.serve(async (req) => {
   if (brief) {
     const total = (summary as any)?.total_leads ?? 0;
     const good = ((summary as any)?.promoted_to_contact ?? 0) + ((summary as any)?.active_working_leads ?? 0)
-               + ((summary as any)?.legacy_optional_unlock_candidates ?? 0);
+               + ((summary as any)?.legacy_optional_unlock_candidates ?? 0)
+               + ((summary as any)?.verified_email_available_locked ?? 0);
     const bad = ((summary as any)?.duplicates_archived ?? 0) + ((summary as any)?.poor_fit_archived ?? 0)
               + ((summary as any)?.attempted_no_email ?? 0) + ((summary as any)?.missing_contact_archived ?? 0);
     sourceScore = total ? Number(((good / Math.max(1, good + bad)) * 10).toFixed(2)) : null;
-    (details.steps as any[]).push({ step: "source_quality", score: sourceScore, total, good, bad });
+    (details.steps as any[]).push({
+      step: "source_quality", score: sourceScore, total, good, bad,
+      verified_email_available_locked: (summary as any)?.verified_email_available_locked ?? 0,
+      note: "Verified-locked candidates count as positive signal; locked status is an Apollo unlock-credit gate, not a quality issue.",
+    });
   }
 
   // STEP 5 — Build unlock shortlist (preview only, no Apollo).
@@ -389,6 +394,8 @@ Deno.serve(async (req) => {
     });
   } else if (((summary as any)?.active_working_leads ?? 0) > 0) {
     nextAction = "Build Apollo unlock shortlist for active working leads (no credits spent until founder approves)";
+  } else if (((summary as any)?.verified_email_available_locked ?? 0) > 0) {
+    nextAction = `Review Apollo verified-locked shortlist and approve unlock for the strongest unique leads (${(summary as any).verified_email_available_locked} candidates pending reveal)`;
   } else if (((summary as any)?.legacy_optional_unlock_candidates ?? 0) > 0) {
     nextAction = "Run fresh Apollo verified-email search using NeonCandy Source Quality Brief (legacy hold pool not recommended)";
   } else {
