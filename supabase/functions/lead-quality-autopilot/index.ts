@@ -66,7 +66,7 @@ Deno.serve(async (req) => {
   {
     const { data: orphanLeads } = await admin
       .from("apollo_leads")
-      .select("id,email,enrichment_payload,search_payload")
+      .select("id,email,has_email_flag,enrichment_payload,search_payload")
       .eq("business_name", "Neon Candy")
       .limit(5000);
     const ids = (orphanLeads ?? []).map((r) => r.id);
