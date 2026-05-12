@@ -38,6 +38,17 @@ type CrmSpine = {
   safe_to_unlock_count: number;
 };
 
+type LastUnlockRun = {
+  enrichment_credits_used: number | null;
+  contacts_updated: number | null;
+  notes: string | null;
+  created_at: string | null;
+  attempted: number;
+  no_email: number;
+  already_in_crm: number;
+  unlocked_new: number;
+};
+
 const Tile = ({ label, value, tone = "default" }: { label: string; value: number | string; tone?: "default" | "good" | "warn" | "danger" }) => {
   const cls =
     tone === "good" ? "text-green-400" :
@@ -83,6 +94,43 @@ export default function LeadQualityPanel() {
       const { data, error } = await (supabase as any).from("crm_spine_summary").select("*").maybeSingle();
       if (error) throw error;
       return data as CrmSpine | null;
+    },
+  });
+
+  // Last Apollo unlock run + previously-attempted-no-email count
+  const { data: lastUnlockRun } = useQuery({
+    queryKey: ["apollo-last-unlock-run"],
+    queryFn: async () => {
+      const { data: run } = await (supabase as any)
+        .from("apollo_automation_runs")
+        .select("enrichment_credits_used,contacts_updated,notes,created_at")
+        .ilike("notes", "unlock_selected complete%")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (!run) return null;
+      const parse = (k: string) => {
+        const m = (run.notes ?? "").match(new RegExp(`${k}=(\\d+)`));
+        return m ? Number(m[1]) : 0;
+      };
+      return {
+        ...run,
+        attempted: parse("attempted"),
+        no_email: parse("no_email") || parse("failed"),
+        already_in_crm: parse("already_in_crm_after_unlock"),
+        unlocked_new: parse("unlocked"),
+      } as LastUnlockRun;
+    },
+  });
+
+  const { data: attemptedNoEmail } = useQuery({
+    queryKey: ["apollo-attempted-no-email-count"],
+    queryFn: async () => {
+      const { count } = await (supabase as any)
+        .from("lead_quality_profiles")
+        .select("id", { count: "exact", head: true })
+        .eq("unlock_recommendation", "attempted_no_email");
+      return count ?? 0;
     },
   });
 
@@ -145,6 +193,31 @@ export default function LeadQualityPanel() {
               <Tile label="Proposals to reconcile" value={crmSpine.proposals_needing_reconciliation} tone={crmSpine.proposals_needing_reconciliation > 0 ? "warn" : "good"} />
               <Tile label="Safe-to-unlock (CRM-checked)" value={crmSpine.safe_to_unlock_count} tone="good" />
             </div>
+            {lastUnlockRun && (
+              <>
+                <p className="text-xs font-medium text-foreground flex items-center gap-1.5 pt-1">
+                  <KeyRound size={12} className="text-primary" />
+                  Last Apollo unlock run
+                  {lastUnlockRun.created_at && (
+                    <span className="text-muted-foreground font-normal">
+                      · {new Date(lastUnlockRun.created_at).toLocaleString()}
+                    </span>
+                  )}
+                </p>
+                <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
+                  <Tile label="Credits used" value={lastUnlockRun.enrichment_credits_used ?? 0} tone="warn" />
+                  <Tile label="Attempts" value={lastUnlockRun.attempted} />
+                  <Tile label="Emails returned" value={(lastUnlockRun.attempted ?? 0) - (lastUnlockRun.no_email ?? 0)} tone="good" />
+                  <Tile label="No email returned" value={lastUnlockRun.no_email ?? 0} tone="warn" />
+                  <Tile label="Already in CRM" value={lastUnlockRun.already_in_crm ?? 0} tone="warn" />
+                  <Tile label="Promotion-ready" value={lastUnlockRun.unlocked_new ?? 0} tone={(lastUnlockRun.unlocked_new ?? 0) > 0 ? "good" : "default"} />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <Tile label="Previously attempted — Apollo no email (excluded from estimates)" value={attemptedNoEmail ?? 0} tone="warn" />
+                  <Tile label="Next action" value={(lastUnlockRun.unlocked_new ?? 0) === 0 ? "Review existing CRM matches; do not unlock more until filters improved" : "Review unlocked leads"} />
+                </div>
+              </>
+            )}
           </div>
         )}
 
