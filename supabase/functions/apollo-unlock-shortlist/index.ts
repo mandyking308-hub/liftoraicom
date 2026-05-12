@@ -98,6 +98,23 @@ Deno.serve(async (req) => {
     }
   }
 
+  // Previously-attempted-no-email protection.
+  // Apollo charges per match call even when no email is returned, so we never
+  // re-attempt the same person without an explicit founder override.
+  const attemptedNoEmail = new Set<string>();
+  if (ids.length) {
+    const { data: lqpFlags } = await admin
+      .from("lead_quality_profiles")
+      .select("apollo_lead_id,risk_flags,unlock_recommendation")
+      .in("apollo_lead_id", ids);
+    for (const l of lqpFlags ?? []) {
+      const flags = (l as any).risk_flags ?? [];
+      if (flags.includes("unlock_attempt_no_email") || (l as any).unlock_recommendation === "attempted_no_email") {
+        attemptedNoEmail.add((l as any).apollo_lead_id);
+      }
+    }
+  }
+
   // Dedup by apollo_person_id (fall back to lead id) — keep the first row.
   const seenPersons = new Set<string>();
   const uniqueRows: any[] = [];
@@ -152,6 +169,8 @@ Deno.serve(async (req) => {
         crmFlags.push(`not_sendable:${crmContact.sendable_status}`);
       if (leadEmail && internalSet.has(leadEmail)) crmFlags.push("internal_identity");
       if (crmFlags.length) { score -= 100; reasons.push(...crmFlags.map((f) => `-${f}`)); }
+      const attemptedFlag = attemptedNoEmail.has(r.apollo_lead_id);
+      if (attemptedFlag) { reasons.push("-previously_attempted_no_email"); }
       return {
         apollo_lead_id: r.apollo_lead_id,
         apollo_person_id: r.apollo_person_id,
@@ -165,13 +184,17 @@ Deno.serve(async (req) => {
         reasons,
         crm_flags: crmFlags,
         crm_safe_to_unlock: crmFlags.length === 0,
+        previously_attempted_no_email: attemptedFlag,
       };
     })
     .sort((a, b) => b.score - a.score);
 
-  const shortlist = ranked.filter((r) => r.score >= minScore && r.crm_safe_to_unlock).slice(0, batchSize);
+  const shortlist = ranked
+    .filter((r) => r.score >= minScore && r.crm_safe_to_unlock && !r.previously_attempted_no_email)
+    .slice(0, batchSize);
   const deprioritised = ranked.filter((r) => r.score < minScore);
   const blocked_by_crm = ranked.filter((r) => !r.crm_safe_to_unlock).length;
+  const previously_attempted_no_email = ranked.filter((r) => r.previously_attempted_no_email);
   const fitBreakdown = ranked.reduce<Record<string, number>>((acc, r) => {
     acc[r.fit] = (acc[r.fit] ?? 0) + 1; return acc;
   }, {});
@@ -182,6 +205,8 @@ Deno.serve(async (req) => {
     unique_persons: uniqueRows.length,
     duplicate_rows_collapsed: duplicateRows,
     blocked_by_crm,
+    previously_attempted_no_email_count: previously_attempted_no_email.length,
+    previously_attempted_no_email_sample: previously_attempted_no_email.slice(0, 10),
     apollo_credit_estimate: shortlist.length,
     batch_size: batchSize,
     min_score: minScore,
@@ -190,6 +215,6 @@ Deno.serve(async (req) => {
     fit_breakdown: fitBreakdown,
     shortlist,
     deprioritised_sample: deprioritised.slice(0, 10),
-    note: "CRM-safe unique persons only. Leads already present in contacts, internal identities, suppressed, or bounced are excluded. Apollo credit estimate equals shortlist size. No unlock or enrichment performed.",
+    note: "CRM-safe unique persons only. Leads already in contacts/internal/suppressed/bounced are excluded. Leads previously attempted where Apollo returned no email are excluded from the credit estimate (separate bucket). Apollo credit estimate equals shortlist size. No unlock or enrichment performed.",
   });
 });
