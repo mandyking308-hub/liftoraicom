@@ -50,7 +50,11 @@ const ControlledLiveActivation = () => {
         supabase.from("system_settings").select("key,value"),
         supabase.from("businesses").select("id,name"),
         supabase.from("outreach_campaigns").select("id,campaign_name,status,business_name"),
-        supabase.from("inboxes").select("id,email_address,active,live_readiness"),
+        supabase
+          .from("inboxes")
+          .select(
+            "id,email_address,active,live_readiness,hourly_send_limit,daily_send_limit,hourly_send_count,emails_sent_today,warmup_status,warmup_started_at,provider_blocked_until,provider_blocked_reason"
+          ),
         supabase.from("outreach_sequences").select("id,campaign_id"),
         supabase.from("email_queue").select("id", { count: "exact", head: true }).eq("status", "pending"),
         supabase.from("system_feature_flags" as never).select("feature_name,enabled,execution_mode_id"),
@@ -141,14 +145,40 @@ const ControlledLiveActivation = () => {
           pass: true,
           detail: "Suppression, DNC, reply-stop, generic-block triggers are installed at DB level",
         },
-        {
-          id: "send_caps",
-          label: "Send caps active",
-          pass: inboxRows.some((i) => i.daily_send_limit > 0 && i.hourly_send_limit > 0),
-          detail: liveInboxes
-            .map((i: any) => `${i.email_address}: ${i.hourly_send_limit ?? "?"}/h, ${i.daily_send_limit ?? "?"}/d`)
-            .join(" · ") || "Caps configured at inbox level",
-        },
+        (() => {
+          const target = liveInboxes.length > 0 ? liveInboxes : inboxRows.filter((i) => i.active);
+          const now = Date.now();
+          const lines: string[] = [];
+          let anyEnforceable = false;
+          for (const i of target as any[]) {
+            const hourly = Number.isFinite(i.hourly_send_limit) ? i.hourly_send_limit : null;
+            const daily = Number.isFinite(i.daily_send_limit) ? i.daily_send_limit : null;
+            const hUsed = i.hourly_send_count ?? 0;
+            const dUsed = i.emails_sent_today ?? 0;
+            const providerBlocked =
+              i.provider_blocked_until && new Date(i.provider_blocked_until).getTime() > now;
+            const warmupActive = i.warmup_status && i.warmup_status !== "complete";
+            const parts: string[] = [];
+            if (hourly && hourly > 0) parts.push(`hourly ${hUsed}/${hourly}`);
+            else parts.push("no hourly cap column value");
+            if (daily && daily > 0) parts.push(`daily ${dUsed}/${daily}`);
+            else parts.push("no daily cap column value");
+            if (warmupActive && daily && daily > 0) parts.push(`warmup cap ${daily}/day`);
+            if (providerBlocked) parts.push(`provider cap active (${i.provider_blocked_reason ?? "blocked"})`);
+            if ((hourly && hourly > 0) || (daily && daily > 0) || warmupActive || providerBlocked) {
+              anyEnforceable = true;
+            }
+            lines.push(`${i.email_address}: ${parts.join(", ")}`);
+          }
+          return {
+            id: "send_caps",
+            label: "Send caps active",
+            pass: anyEnforceable,
+            detail:
+              lines.join(" · ") ||
+              "No active inbox to evaluate caps for",
+          };
+        })(),
         {
           id: "reply_stop",
           label: "Reply-stop logic active",
