@@ -71,6 +71,38 @@ type LifecycleSummary = {
   safe_to_queue: number;
 };
 
+type AutopilotRun = {
+  id: string;
+  trigger: string;
+  status: string;
+  finished_at: string | null;
+  scanned_count: number;
+  duplicates_collapsed: number;
+  poor_fit_archived: number;
+  missing_email_held: number;
+  already_in_crm_matched: number;
+  no_email_attempts_excluded: number;
+  safe_to_unlock: number;
+  safe_to_promote: number;
+  safe_to_queue: number;
+  decisions_created: number;
+  source_quality_score: number | null;
+  next_recommended_action: string | null;
+  created_at: string;
+};
+
+type FounderDecision = {
+  id: string;
+  decision_type: string;
+  title: string;
+  finding: string | null;
+  recommendation: string | null;
+  cost_credit_impact: string | null;
+  risk: string | null;
+  status: string;
+  created_at: string;
+};
+
 const Tile = ({ label, value, tone = "default" }: { label: string; value: number | string; tone?: "default" | "good" | "warn" | "danger" }) => {
   const cls =
     tone === "good" ? "text-green-400" :
@@ -127,6 +159,46 @@ export default function LeadQualityPanel() {
       return data as LifecycleSummary | null;
     },
   });
+
+  const { data: autopilotRun, refetch: refetchAutopilot } = useQuery({
+    queryKey: ["autopilot-last-run"],
+    queryFn: async () => {
+      const { data } = await (supabase as any).from("autopilot_runs")
+        .select("*").order("created_at", { ascending: false }).limit(1).maybeSingle();
+      return data as AutopilotRun | null;
+    },
+  });
+
+  const { data: pendingDecisions, refetch: refetchDecisions } = useQuery({
+    queryKey: ["founder-decisions-pending"],
+    queryFn: async () => {
+      const { data } = await (supabase as any).from("founder_decisions")
+        .select("*").eq("status","pending").order("created_at", { ascending: false }).limit(20);
+      return (data ?? []) as FounderDecision[];
+    },
+  });
+
+  const runAutopilot = async () => {
+    try {
+      setBusy("Autopilot");
+      const { data, error } = await supabase.functions.invoke("lead-quality-autopilot", {
+        body: { trigger: "manual_founder" },
+      });
+      if (error) throw error;
+      toast.success("Autopilot run complete", { description: data?.next_recommended_action ?? "" });
+      refetchAutopilot(); refetchDecisions();
+      qc.invalidateQueries({ queryKey: ["lead-lifecycle-summary"] });
+    } catch (e: any) {
+      toast.error("Autopilot failed", { description: e?.message ?? String(e) });
+    } finally { setBusy(null); }
+  };
+
+  const decideOn = async (id: string, status: "approved"|"rejected"|"hold") => {
+    const { error } = await (supabase as any).from("founder_decisions")
+      .update({ status, decided_at: new Date().toISOString() }).eq("id", id);
+    if (error) toast.error("Failed", { description: error.message });
+    else { toast.success(`Decision ${status}`); refetchDecisions(); }
+  };
 
   // Last Apollo unlock run + previously-attempted-no-email count
   const { data: lastUnlockRun } = useQuery({
@@ -204,6 +276,72 @@ export default function LeadQualityPanel() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* === Lead Quality Autopilot === */}
+        <div className="rounded-md border border-primary/30 bg-primary/5 p-3 space-y-2">
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <p className="text-xs font-medium text-foreground flex items-center gap-1.5">
+              <Sparkles size={12} className="text-primary" /> Lead Quality Autopilot
+              <Badge variant="outline" className="text-[10px]">Daily 06:00 UTC · runs after Apollo import</Badge>
+              <Badge variant="outline" className="text-[10px]">No AI · No credits · No sends</Badge>
+            </p>
+            <Button size="sm" variant="outline" disabled={!!busy} onClick={runAutopilot}>
+              {busy === "Autopilot" ? <Loader2 className="animate-spin" size={14} /> : "Run autopilot now"}
+            </Button>
+          </div>
+          {autopilotRun ? (
+            <>
+              <p className="text-[11px] text-muted-foreground">
+                Last run: {new Date(autopilotRun.created_at).toLocaleString()} · trigger: {autopilotRun.trigger} · status: {autopilotRun.status}
+              </p>
+              <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
+                <Tile label="Scanned" value={autopilotRun.scanned_count} />
+                <Tile label="Duplicates collapsed" value={autopilotRun.duplicates_collapsed} />
+                <Tile label="Poor-fit archived" value={autopilotRun.poor_fit_archived} />
+                <Tile label="Missing-email → hold" value={autopilotRun.missing_email_held} />
+                <Tile label="Already in CRM matched" value={autopilotRun.already_in_crm_matched} />
+                <Tile label="No-email excluded" value={autopilotRun.no_email_attempts_excluded} />
+                <Tile label="Safe to unlock" value={autopilotRun.safe_to_unlock} tone="good" />
+                <Tile label="Safe to promote" value={autopilotRun.safe_to_promote} tone="good" />
+                <Tile label="Safe to queue" value={autopilotRun.safe_to_queue} tone="good" />
+                <Tile label="Source quality /10" value={autopilotRun.source_quality_score ?? "—"} />
+                <Tile label="Decisions waiting" value={pendingDecisions?.length ?? 0} tone={(pendingDecisions?.length ?? 0) > 0 ? "warn" : "default"} />
+                <Tile label="Decisions created (last run)" value={autopilotRun.decisions_created} />
+              </div>
+              <p className="text-[11px] text-foreground">
+                Next recommended action: <span className="text-primary">{autopilotRun.next_recommended_action ?? "—"}</span>
+              </p>
+            </>
+          ) : (
+            <p className="text-xs text-muted-foreground">No autopilot runs yet — click “Run autopilot now”.</p>
+          )}
+          {(pendingDecisions?.length ?? 0) > 0 && (
+            <div className="space-y-2 pt-2 border-t border-border/40">
+              <p className="text-xs font-medium text-foreground">Founder decisions waiting</p>
+              {pendingDecisions!.map((d) => (
+                <div key={d.id} className="rounded border border-border/50 bg-card/40 p-2 text-xs space-y-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-medium">{d.title}</span>
+                    <Badge variant="outline" className="text-[10px]">{d.decision_type}</Badge>
+                  </div>
+                  {d.finding && <p className="text-muted-foreground">Finding: {d.finding}</p>}
+                  {d.recommendation && <p>Recommendation: {d.recommendation}</p>}
+                  {(d.cost_credit_impact || d.risk) && (
+                    <p className="text-muted-foreground">
+                      {d.cost_credit_impact && <>Cost: {d.cost_credit_impact} · </>}
+                      {d.risk && <>Risk: {d.risk}</>}
+                    </p>
+                  )}
+                  <div className="flex gap-2 pt-1">
+                    <Button size="sm" variant="default" onClick={() => decideOn(d.id, "approved")}>Approve</Button>
+                    <Button size="sm" variant="outline" onClick={() => decideOn(d.id, "hold")}>Hold</Button>
+                    <Button size="sm" variant="outline" onClick={() => decideOn(d.id, "rejected")}>Reject</Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         {crmSpine && (
           <div className="space-y-2">
             <p className="text-xs font-medium text-foreground flex items-center gap-1.5">
