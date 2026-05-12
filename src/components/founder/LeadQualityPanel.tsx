@@ -49,6 +49,8 @@ export default function LeadQualityPanel() {
   const [aiBatchSize, setAiBatchSize] = useState(150);
   const [unlockBatchSize, setUnlockBatchSize] = useState(25);
   const [lastResult, setLastResult] = useState<any>(null);
+  const [shortlistResult, setShortlistResult] = useState<any>(null);
+  const [shortlistRunAt, setShortlistRunAt] = useState<string | null>(null);
 
   const { data: overview, isLoading } = useQuery({
     queryKey: ["lead-quality-overview"],
@@ -69,6 +71,10 @@ export default function LeadQualityPanel() {
       const { data, error } = await supabase.functions.invoke(fn, { body });
       if (error) throw error;
       setLastResult(data);
+      if (fn === "apollo-unlock-shortlist") {
+        setShortlistResult(data);
+        setShortlistRunAt(new Date().toISOString());
+      }
       toast.success(`${label} complete`, { description: data?.dry_run ? "Dry-run preview" : "Applied" });
       qc.invalidateQueries({ queryKey: ["lead-quality-overview"] });
     } catch (e: any) {
@@ -77,6 +83,15 @@ export default function LeadQualityPanel() {
       setBusy(null);
     }
   };
+
+  const nextAction =
+    (overview?.needs_verification ?? 0) > 0 && !shortlistResult
+      ? "Build Apollo unlock shortlist (rules-only — no credits spent)"
+      : (overview?.safe_to_queue ?? 0) > 0
+      ? `Enqueue up to ${overview?.safe_to_queue} eligible contact(s) — preview first`
+      : (overview?.promoted_contacts ?? 0) > 0
+      ? "Run Controlled Live Batch with founder confirmation"
+      : "Apply quality scan to raw Apollo leads";
 
   return (
     <Card className="bg-card border-border/50">
@@ -102,8 +117,23 @@ export default function LeadQualityPanel() {
             <Tile label="Terminal blocked" value={overview?.terminal_blocked ?? 0} tone="danger" />
             <Tile label="Duplicate / risky" value={overview?.duplicate_or_risky ?? 0} tone="warn" />
             <Tile label="Safe to queue" value={overview?.safe_to_queue ?? 0} tone="good" />
+            <Tile label="Unlock shortlist (last run)" value={shortlistResult?.shortlist_count ?? "—"} tone="default" />
+            <Tile label="Est. unlock credits" value={shortlistResult?.shortlist_count ?? "—"} tone="default" />
           </div>
         )}
+
+        <div className="rounded-md border border-primary/30 bg-primary/5 p-3 text-xs flex items-start gap-2">
+          <Sparkles size={14} className="text-primary mt-0.5" />
+          <div>
+            <span className="font-medium text-foreground">Next recommended action:</span>{" "}
+            {nextAction}
+            {shortlistRunAt && (
+              <span className="block mt-0.5 text-muted-foreground">
+                Last shortlist run: {new Date(shortlistRunAt).toLocaleString()}
+              </span>
+            )}
+          </div>
+        </div>
 
         <div className="space-y-3 pt-2 border-t border-border/40">
           <div className="flex flex-wrap gap-2 items-center">
@@ -150,14 +180,45 @@ export default function LeadQualityPanel() {
             <p className="text-xs text-muted-foreground w-full flex items-center gap-1">
               <KeyRound size={12} /> 3. Apollo Unlock Shortlist (cheap rules ranking — NO Apollo calls)
             </p>
-            <Input type="number" className="w-24 h-8" value={unlockBatchSize} min={1} max={200}
-              onChange={(e) => setUnlockBatchSize(Math.min(200, Math.max(1, Number(e.target.value) || 25)))} />
-            <span className="text-xs text-muted-foreground">suggested first unlock batch</span>
+            <span className="text-xs text-muted-foreground">Suggested unlock batch:</span>
+            {[25, 50, 200].map((n) => (
+              <Button key={n} size="sm" variant={unlockBatchSize === n ? "default" : "outline"} disabled={!!busy}
+                onClick={() => setUnlockBatchSize(n)}>
+                {n === 200 ? "All" : n}
+              </Button>
+            ))}
             <Button size="sm" variant="outline" disabled={!!busy}
               onClick={() => call("apollo-unlock-shortlist", { batch_size: unlockBatchSize, min_score: 4 }, "Unlock shortlist")}>
-              {busy === "Unlock shortlist" ? <Loader2 className="animate-spin" size={14} /> : "Build unlock shortlist"}
+              {busy === "Unlock shortlist" ? <Loader2 className="animate-spin" size={14} /> : `Build shortlist (${unlockBatchSize === 200 ? "all" : unlockBatchSize})`}
             </Button>
-            <span className="text-xs text-muted-foreground w-full">Founder approval required before any Apollo unlock/enrichment spend.</span>
+            <span className="text-xs text-yellow-300 w-full">
+              No Apollo credits spent until founder approves unlock/enrichment. Shortlist is generated from local data only.
+            </span>
+            {shortlistResult && (
+              <div className="w-full mt-2 rounded border border-border/50 bg-card/40 p-3 space-y-2">
+                <div className="flex flex-wrap gap-3 text-xs">
+                  <span><span className="text-muted-foreground">Shortlisted:</span> <strong>{shortlistResult.shortlist_count}</strong></span>
+                  <span><span className="text-muted-foreground">Deprioritised:</span> <strong>{shortlistResult.deprioritised_count}</strong></span>
+                  <span><span className="text-muted-foreground">Pool scanned:</span> <strong>{shortlistResult.total_needs_verification}</strong></span>
+                  <span><span className="text-muted-foreground">Min score:</span> <strong>{shortlistResult.min_score}</strong></span>
+                </div>
+                {shortlistResult.fit_breakdown && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {Object.entries(shortlistResult.fit_breakdown)
+                      .sort((a: any, b: any) => b[1] - a[1])
+                      .slice(0, 6)
+                      .map(([fit, n]: any) => (
+                        <Badge key={fit} variant="secondary" className="text-[10px]">
+                          {fit}: {n}
+                        </Badge>
+                      ))}
+                  </div>
+                )}
+                <p className="text-[11px] text-muted-foreground">
+                  Risk notes: domain de-dup against existing contacts, missing-title penalty, hospitality/generic-corporate negative weights applied.
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="flex flex-wrap gap-2 items-center">
