@@ -183,13 +183,18 @@ const CommandCentre = () => {
   // Blockers in plain English
   const blockers = useMemo(() => {
     const list: { msg: string; severity: string; to?: string }[] = [];
-    // Grouped queue block reasons (140 blocked items rolled up to founder English)
+    // Grouped queue block reasons rolled up to founder English
     const blockedRows = (queue ?? []).filter((q: any) => q.status === "blocked");
+    const cancelledRows = (queue ?? []).filter((q: any) => q.status === "cancelled");
+    const orphanArchived = cancelledRows.filter((q: any) => q.block_reason === "CANCELLED_ORPHAN_SIMULATED_PARENT").length;
+    if (orphanArchived > 0) {
+      list.push({ msg: `${orphanArchived} orphan follow-up queue rows were archived because they came from simulated sends (no real Step 1 was ever sent).`, severity: "good", to: "/founder/outreach/queue" });
+    }
     const reasonMap: Record<string, { label: string; severity: string; recoverable: boolean }> = {
       SIMULATED_PARENT_NOT_SENT: { label: "waiting on an earlier sequence step that never sent (legacy/test sim)", severity: "warn", recoverable: true },
-      RECENTLY_CONTACTED: { label: "contact was contacted recently — re-contact gate active", severity: "warn", recoverable: true },
+      RECENTLY_CONTACTED: { label: "cooling down under the recent-contact rule", severity: "warn", recoverable: true },
       RECENT_COMMUNICATION_24H: { label: "blocked by the 24h re-contact rule", severity: "warn", recoverable: true },
-      BLOCKED: { label: "generic block — needs review", severity: "warn", recoverable: false },
+      BLOCKED: { label: "generic block — needs human review", severity: "warn", recoverable: false },
       INBOX_DAILY_LIMIT: { label: "inbox daily limit reached — resumes tomorrow", severity: "warn", recoverable: true },
       NO_ACTIVE_INBOX: { label: "no active inbox available for this business", severity: "danger", recoverable: false },
       CONTACT_SUPPRESSED: { label: "contact is suppressed (bounce / unsubscribe)", severity: "warn", recoverable: false },
@@ -219,7 +224,7 @@ const CommandCentre = () => {
         list.push({ msg: `${i.email_address}: hourly send limit reached (${i.hourly_send_count}/${i.hourly_send_limit}) — pending sends will resume next hour`, severity: "warn", to: "/founder/sending" });
       }
       if (i.provider_blocked_reason && !i.provider_blocked_until) {
-        list.push({ msg: `${i.email_address}: provider reports "${i.provider_blocked_reason}"`, severity: "warn", to: "/founder/sending" });
+        list.push({ msg: `${i.email_address} is live-ready but currently capped by the email provider (${i.provider_blocked_reason}). Pending sends will resume on the next provider window.`, severity: "warn", to: "/founder/sending" });
       }
       if ((i.reputation_score ?? 100) < 40) list.push({ msg: `${i.email_address}: low inbox reputation (${i.reputation_score})`, severity: "warn", to: "/founder/sending" });
       if (i.last_test_send_status === "failed") list.push({ msg: `${i.email_address}: last test send failed — ${i.last_error_message ?? "see logs"}`, severity: "danger", to: `/founder/crm/inboxes/${i.id}/configure` });
