@@ -86,7 +86,7 @@ Deno.serve(async (req) => {
     typeof modeRow?.value === "string" ? modeRow.value : (modeRow?.value as string) ?? "live";
   // Treat anything other than an explicit admin-only "sandbox" as live.
   const systemMode: string = rawMode === "sandbox" ? "sandbox" : "live";
-  const isLive = true;
+  const isLive = systemMode !== "sandbox";
 
   // ----- Resolve target queue row -----
   // If queue_id provided, use it. Otherwise pick the next pending row by
@@ -272,12 +272,19 @@ Deno.serve(async (req) => {
     }
   }
 
-  // Mode check — TEST MODE removed as a gate. System defaults to LIVE.
-  pass(
-    "mode",
-    "System mode",
-    "LIVE OPERATING MODE — real execution enabled. Guardrails active.",
-  );
+  if (isLive) {
+    pass(
+      "mode",
+      "System mode",
+      "LIVE OPERATING MODE — real execution enabled. Guardrails active.",
+    );
+  } else {
+    fail(
+      "mode",
+      "System mode",
+      "SANDBOX mode is active. Switch back to CONTROLLED LIVE to send a real proof email.",
+    );
+  }
 
   const allPass = checks.every((c) => c.pass);
   const blockers = checks.filter((c) => !c.pass);

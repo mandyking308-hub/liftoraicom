@@ -25,9 +25,11 @@ type CheckResult = {
   detail: string;
 };
 
+const SANDBOX_MODE = "sandbox";
+
 const ControlledLiveActivation = () => {
   const queryClient = useQueryClient();
-  const [systemMode, setSystemMode] = useState<string>("test");
+  const [systemMode, setSystemMode] = useState<string>("live");
   const [checks, setChecks] = useState<CheckResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [switching, setSwitching] = useState(false);
@@ -64,7 +66,7 @@ const ControlledLiveActivation = () => {
       ]);
 
       const settingsMap = Object.fromEntries((settings.data ?? []).map((r: any) => [r.key, r.value]));
-      const mode = String(settingsMap.system_mode ?? "test").toLowerCase();
+      const mode = String(settingsMap.system_mode ?? "live").toLowerCase();
       setSystemMode(mode);
 
       const businessRows = (businesses.data ?? []) as any[];
@@ -242,7 +244,7 @@ const ControlledLiveActivation = () => {
   const allPass = checks.length > 0 && checks.every((c) => c.pass);
   const failed = checks.filter((c) => !c.pass);
 
-  const switchMode = async (target: "live" | "test") => {
+  const switchMode = async (target: "live" | "sandbox") => {
     setSwitching(true);
     try {
       const { error: upsertErr } = await supabase
@@ -257,7 +259,7 @@ const ControlledLiveActivation = () => {
         message:
           target === "live"
             ? "Founder switched system to CONTROLLED LIVE MODE"
-            : "Founder switched system back to TEST MODE",
+            : "Founder switched system into SANDBOX MODE",
         metadata: {
           previous_mode: systemMode,
           new_mode: target,
@@ -271,7 +273,8 @@ const ControlledLiveActivation = () => {
 
       setSystemMode(target);
       queryClient.invalidateQueries({ queryKey: ["system-mode-banner"] });
-      toast.success(target === "live" ? "Now in CONTROLLED LIVE MODE" : "Reverted to TEST MODE");
+      queryClient.invalidateQueries({ queryKey: ["execution-status"] });
+      toast.success(target === "live" ? "Now in CONTROLLED LIVE MODE" : "Now in SANDBOX MODE");
     } catch (err: any) {
       toast.error("Failed to switch mode: " + (err.message ?? "unknown"));
     } finally {
@@ -279,7 +282,7 @@ const ControlledLiveActivation = () => {
     }
   };
 
-  const isLive = systemMode === "live";
+  const isLive = systemMode !== SANDBOX_MODE;
 
   return (
     <Card className="p-6 space-y-5 border-2">
@@ -293,14 +296,14 @@ const ControlledLiveActivation = () => {
               </Badge>
             ) : (
               <Badge variant="outline" className="gap-1 border-yellow-500/40 text-yellow-400">
-                <ShieldCheck size={12} /> TEST MODE
+                <ShieldCheck size={12} /> SANDBOX
               </Badge>
             )}
           </div>
           <p className="text-sm text-muted-foreground max-w-2xl">
-            Liftor stays in TEST MODE until every readiness check passes and the founder explicitly confirms the
-            switch. CONTROLLED LIVE enables real outbound sends through existing safety gates. No bulk send
-            happens automatically — proof sends are still triggered manually.
+            Liftor now defaults to CONTROLLED LIVE. SANDBOX remains an admin-only fallback for development work.
+            CONTROLLED LIVE enables real outbound sends through existing safety gates. No bulk send happens
+            automatically — proof sends are still triggered manually.
           </p>
         </div>
         <Button variant="outline" size="sm" onClick={runChecks} disabled={loading}>
@@ -376,7 +379,7 @@ const ControlledLiveActivation = () => {
                   <AlertDialogDescription>
                     This enables real outbound email sending via existing inboxes. No bulk send will happen
                     automatically — every send still requires a manual founder action and passes through compliance,
-                    cap, and approval gates. You can revert to TEST MODE at any time.
+                    cap, and approval gates. You can switch to SANDBOX at any time for admin-only testing.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -391,19 +394,19 @@ const ControlledLiveActivation = () => {
               <AlertDialogTrigger asChild>
                 <Button variant="outline" disabled={switching}>
                   {switching ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ShieldCheck className="h-4 w-4 mr-2" />}
-                  Revert to TEST MODE
+                  Switch to SANDBOX
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Revert to TEST MODE?</AlertDialogTitle>
+                  <AlertDialogTitle>Switch to SANDBOX MODE?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    All outbound sends will be blocked again until you switch back. Existing queue items remain.
+                    Live execution will pause until you switch back to CONTROLLED LIVE. Existing queue items remain.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => switchMode("test")}>Revert</AlertDialogAction>
+                  <AlertDialogAction onClick={() => switchMode("sandbox")}>Switch to SANDBOX</AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>

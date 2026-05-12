@@ -81,7 +81,7 @@ export default function ExecutionModes() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">System Modes</h1>
           <p className="text-sm text-muted-foreground">
-            Switch Liftor between TEST and CONTROLLED LIVE, and control which workflows are active per business.
+            Liftor now defaults to CONTROLLED LIVE. SANDBOX remains available only as an admin/development fallback, while execution modes and business overrides stay configurable here.
           </p>
         </div>
 

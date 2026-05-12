@@ -18,11 +18,8 @@ type BusinessOutboundStatus = {
 };
 
 /**
- * Hard warning shown anywhere outreach send activity is surfaced.
- * The outreach-send-worker currently only logs `send_simulated` events —
- * no real outbound email is transmitted. This banner makes that explicit
- * to the operator so simulated queue activity is never mistaken for live
- * outreach.
+ * Warning shown only when the system is explicitly in admin-only sandbox mode
+ * or a business has no live-ready inbox. Live is now the default operating path.
  */
 export const SimulatedSendingBanner = ({
   compact = false,
@@ -79,7 +76,7 @@ export const SimulatedSendingBanner = ({
       <div role="status" className="rounded-lg border border-primary/30 bg-primary/5 text-foreground p-3 flex gap-2 items-start text-xs">
         <Info className="h-4 w-4 mt-0.5 text-primary shrink-0" />
         <p>
-          System mode is still <strong>test</strong>, but at least one inbox is <strong>Live Ready</strong>. Campaigns assigned to that inbox will send <strong>real email</strong>. Other inboxes remain simulated.
+          SANDBOX mode is enabled, but at least one inbox is <strong>Live Ready</strong>. Campaigns assigned to that inbox can use real email once you switch back to <strong>CONTROLLED LIVE</strong>. Other inboxes remain simulated.
         </p>
       </div>
     );
@@ -97,15 +94,14 @@ export const SimulatedSendingBanner = ({
       <AlertTriangle className="h-5 w-5 mt-0.5 text-destructive shrink-0" />
       <div className="space-y-1">
         <p className="text-sm font-semibold text-destructive">
-          ⚠️ Outbound sending is currently in simulated mode
+          ⚠️ SANDBOX mode is active — outbound sending is simulated
         </p>
         {!compact && (
           <p className="text-xs text-destructive/90 leading-relaxed">
             Campaigns may queue and mark messages as <strong>sent</strong> inside Liftor,
             but <strong>no real email leaves the system</strong>. Do not treat campaign
-            activity as live outreach until outbound email sending is properly wired and
-            tested. The system can only be flipped to <code>live</code> mode after a real
-            outbound provider is configured and a verified test send has succeeded.
+            activity as live outreach while <code>sandbox</code> mode is enabled. Switch back
+            to <code>live</code> to resume real sending through configured live-ready inboxes.
           </p>
         )}
       </div>

@@ -21,7 +21,7 @@ const SystemModeBanner = () => {
 
       const settingsMap = Object.fromEntries((settings.data ?? []).map((r: any) => [r.key, r.value]));
       return {
-        systemMode: String(settingsMap.system_mode ?? "unknown").toLowerCase(),
+        systemMode: String(settingsMap.system_mode ?? "live").toLowerCase(),
         executionMode: (modes.data ?? []).find((m: any) => m.is_default)?.mode_name ?? null,
         flagsEnabled: (flags.data ?? []).filter((f: any) => f.enabled).length,
         flagsTotal: (flags.data ?? []).length,
@@ -52,8 +52,8 @@ const SystemModeBanner = () => {
     banners.push({ icon: AlertTriangle, cls: "bg-yellow-500/10 border-yellow-500/30 text-yellow-400", title: "No live inbox configured", detail: "Email Agent cannot send until an inbox is active", to: "/founder/crm/inboxes" });
   } else {
     const capDetail = data.providerCapped
-      ? (isLive ? "Provider daily cap reached — sends paused until reset" : "Provider cap is informational — TEST MODE blocks sends regardless")
-      : (isLive ? "Provider OK" : "Provider OK · informational only in TEST MODE");
+      ? "Provider daily cap reached — sends paused until reset"
+      : "Provider OK";
     banners.push({ icon: ShieldCheck, cls: "bg-secondary/40 border-border/40 text-foreground/80", title: `Active inbox: ${data.liveInbox}`, detail: capDetail, to: "/founder/sending" });
   }
 
