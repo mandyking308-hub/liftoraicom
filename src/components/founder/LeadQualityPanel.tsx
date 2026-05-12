@@ -65,6 +65,7 @@ type LifecycleSummary = {
   attempted_no_email: number;
   archived_learning_only: number;
   archived_not_working: number;
+  legacy_optional_unlock_candidates: number;
   safe_to_unlock: number;
   safe_to_promote: number;
   safe_to_queue: number;
@@ -188,13 +189,11 @@ export default function LeadQualityPanel() {
   };
 
   const nextAction =
-    (overview?.needs_verification ?? 0) > 0 && !shortlistResult
-      ? "Build Apollo unlock shortlist (rules-only — no credits spent)"
-      : (overview?.safe_to_queue ?? 0) > 0
-      ? `Enqueue up to ${overview?.safe_to_queue} eligible contact(s) — preview first`
-      : (overview?.promoted_contacts ?? 0) > 0
-      ? "Run Controlled Live Batch with founder confirmation"
-      : "Apply quality scan to raw Apollo leads";
+    (lifecycle?.safe_to_queue ?? 0) > 0
+      ? `Enqueue up to ${lifecycle?.safe_to_queue} eligible contact(s) — preview first`
+      : (lifecycle?.active_working_leads ?? 0) > 0
+      ? "Build Apollo unlock shortlist for active working leads (no credits spent)"
+      : "Run fresh Apollo verified-email search using NeonCandy Source Quality Brief";
 
   return (
     <Card className="bg-card border-border/50">
@@ -274,6 +273,7 @@ export default function LeadQualityPanel() {
                 <Tile label="Founder review required" value={lifecycle.founder_review_required} tone={lifecycle.founder_review_required > 0 ? "warn" : "default"} />
                 <Tile label="Archived (learning)" value={lifecycle.archived_learning_only} />
                 <Tile label="Archived (not working)" value={lifecycle.archived_not_working} />
+                <Tile label="Legacy optional unlock candidates" value={lifecycle.legacy_optional_unlock_candidates} />
               </div>
               <p className="text-[11px] text-muted-foreground">
                 Active = candidates worth founder action. Everything else is retained as learning so Liftor never re-spends Apollo credits on the same bad/no-email/duplicate leads. Hard delete requires founder approval.

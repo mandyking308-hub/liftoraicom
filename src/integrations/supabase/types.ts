@@ -8133,6 +8133,7 @@ export type Database = {
           attempted_no_email: number | null
           duplicates_archived: number | null
           founder_review_required: number | null
+          legacy_optional_unlock_candidates: number | null
           missing_contact_archived: number | null
           needs_verification_active: number | null
           poor_fit_archived: number | null
