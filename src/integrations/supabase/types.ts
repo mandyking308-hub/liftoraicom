@@ -8785,6 +8785,7 @@ export type Database = {
         | "CLIENT"
         | "SUPPLIER"
         | "DO_NOT_CONTACT"
+        | "INTERNAL"
       conversation_status: "OPEN" | "QUALIFIED" | "CLOSED"
       deal_status: "NEW" | "QUALIFIED" | "PROPOSAL_SENT" | "WON" | "LOST"
       demo_access_status: "active" | "expired" | "revoked"
@@ -9141,6 +9142,7 @@ export const Constants = {
         "CLIENT",
         "SUPPLIER",
         "DO_NOT_CONTACT",
+        "INTERNAL",
       ],
       conversation_status: ["OPEN", "QUALIFIED", "CLOSED"],
       deal_status: ["NEW", "QUALIFIED", "PROPOSAL_SENT", "WON", "LOST"],
