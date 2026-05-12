@@ -7,6 +7,7 @@ import ControlledProofSend from "@/components/founder/ControlledProofSend";
 import ControlledLiveBatch from "@/components/founder/ControlledLiveBatch";
 import ExecutionStatusPanel from "@/components/founder/ExecutionStatusPanel";
 import LeadQualityPanel from "@/components/founder/LeadQualityPanel";
+import SourceQualityBrief from "@/components/founder/SourceQualityBrief";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -458,6 +459,7 @@ const CommandCentre = () => {
         )}
 
         <LeadQualityPanel />
+        <SourceQualityBrief />
 
         <Tabs defaultValue="today" className="space-y-6">
           <TabsList>
