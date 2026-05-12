@@ -61,7 +61,7 @@ const CommandCentre = () => {
   });
   const { data: queue = [] } = useQuery({
     queryKey: ["cc2-queue"],
-    queryFn: async () => (await supabase.from("email_queue").select("id,status,business_name,scheduled_at,block_reason,send_error,delivery_kind,sent_at").order("scheduled_at", { ascending: true }).limit(500)).data ?? [],
+    queryFn: async () => (await supabase.from("email_queue").select("id,status,business_name,campaign_id,scheduled_at,block_reason,send_error,delivery_kind,sent_at,sequence_step").order("scheduled_at", { ascending: true }).limit(1000)).data ?? [],
     refetchInterval: 30000,
   });
   const { data: inboxes = [] } = useQuery({
@@ -103,6 +103,15 @@ const CommandCentre = () => {
   });
 
   // ===== Aggregations =====
+  // SOURCE OF TRUTH (Command Centre):
+  //   sent total       = email_queue.status='sent' AND delivery_kind='smtp_real'
+  //   sent today       = email_queue.sent_at >= today (smtp_real only)
+  //   queued/pending   = email_queue.status='pending'
+  //   blocked queue    = email_queue.status='blocked'    (NOT failed, NOT cancelled, NOT system warnings)
+  //   failed sends     = email_queue.status='failed'     (real send attempts that errored)
+  //   cancelled        = email_queue.status='cancelled'  (orphans/admin-archived; not active blockers)
+  //   system warnings  = system_events where resolved=false (separate from queue)
+  //   replies          = email_events.event_type='replied' (last 7 days)
   const businessStats = useMemo(() => {
     return businesses.map((b: any) => {
       const bn = b.name;
@@ -113,22 +122,29 @@ const CommandCentre = () => {
         drafts.filter((d: any) => bContacts.some((c: any) => c.id === d.contact_id)).length +
         proposals.filter((p: any) => p.business_name === bn).length +
         hotConvos.filter((h: any) => h.business_name === bn).length;
-      const blocked = sysEvents.filter((e: any) => e.business_name === bn).length +
-        queue.filter((q: any) => q.business_name === bn && (q.status === "blocked" || q.status === "failed")).length;
-      const lastActivity = [...bContacts.map((c: any) => c.last_replied_at), ...campaigns.filter((c: any) => c.business_name === bn).map((c: any) => c.updated_at)]
-        .filter(Boolean).sort().reverse()[0];
+      const bQueue = queue.filter((q: any) => q.business_name === bn);
+      const blockedQueue = bQueue.filter((q: any) => q.status === "blocked").length;
+      const failedSends = bQueue.filter((q: any) => q.status === "failed").length;
+      const systemWarnings = sysEvents.filter((e: any) => e.business_name === bn).length;
+      const lastContactReply = bContacts.map((c: any) => c.last_replied_at).filter(Boolean).sort().reverse()[0];
+      const lastSend = bQueue.filter((q: any) => q.sent_at).map((q: any) => q.sent_at).sort().reverse()[0];
       let status: "active" | "needs_setup" | "blocked" | "paused" = "needs_setup";
-      if (blocked > 0) status = "blocked";
+      if (failedSends > 0 || systemWarnings > 0) status = "blocked";
       else if (activeCampaigns > 0 || warm > 0) status = "active";
       else if (bContacts.length > 0) status = "paused";
-      return { id: b.id, name: bn, status, contacts: bContacts.length, warm, activeCampaigns, pendingApprovals, blocked, lastActivity };
+      return { id: b.id, name: bn, status, contacts: bContacts.length, warm, activeCampaigns, pendingApprovals, blockedQueue, failedSends, systemWarnings, lastContactReply, lastSend };
     });
   }, [businesses, contacts, campaigns, drafts, proposals, hotConvos, sysEvents, queue]);
 
   const totals = useMemo(() => {
-    const sentToday = queue.filter((q: any) => q.sent_at && new Date(q.sent_at).toDateString() === new Date().toDateString()).length;
+    const isSmtpReal = (q: any) => q.delivery_kind === "smtp_real" || q.delivery_kind == null;
+    const sentTotal = queue.filter((q: any) => q.status === "sent" && isSmtpReal(q)).length;
+    const sentToday = queue.filter((q: any) => q.status === "sent" && isSmtpReal(q) && q.sent_at && new Date(q.sent_at).toDateString() === new Date().toDateString()).length;
     const pendingQueue = queue.filter((q: any) => q.status === "pending").length;
-    const blockedQueue = queue.filter((q: any) => q.status === "blocked" || q.status === "failed" || q.status === "throttled" || q.status === "delayed").length;
+    const blockedQueue = queue.filter((q: any) => q.status === "blocked").length;
+    const failedSends = queue.filter((q: any) => q.status === "failed").length;
+    const cancelledQueue = queue.filter((q: any) => q.status === "cancelled").length;
+    const orphanArchived = queue.filter((q: any) => q.status === "cancelled" && q.block_reason === "CANCELLED_ORPHAN_SIMULATED_PARENT").length;
     const repliesAll = events.filter((e: any) => e.event_type === "replied").length;
     const opensAll = events.filter((e: any) => e.event_type === "opened").length;
     const clicksAll = events.filter((e: any) => e.event_type === "clicked").length;
@@ -137,11 +153,21 @@ const CommandCentre = () => {
     const urgentReplies = hotConvos.length;
     const approvalsTotal = drafts.length + proposals.length + hotConvos.length + highIntent.length;
     const activeCampaigns = campaigns.filter((c: any) => c.status === "active").length;
-    const blockersCount = sysEvents.length + inboxes.filter((i: any) => i.provider_blocked_until && new Date(i.provider_blocked_until) > new Date()).length;
-    const businessesNeedingAttention = businessStats.filter((b) => b.blocked > 0 || b.pendingApprovals > 0).length;
+    const systemWarnings = sysEvents.length;
+    const inboxCapped = inboxes.filter((i: any) =>
+      i.active && (
+        (i.provider_blocked_until && new Date(i.provider_blocked_until) > new Date()) ||
+        (i.provider_blocked_reason) ||
+        ((i.daily_send_limit ?? 0) > 0 && (i.emails_sent_today ?? 0) >= (i.daily_send_limit ?? 0)) ||
+        ((i.hourly_send_limit ?? 0) > 0 && (i.hourly_send_count ?? 0) >= (i.hourly_send_limit ?? 0))
+      )
+    ).length;
+    const businessesNeedingAttention = businessStats.filter((b) => b.failedSends > 0 || b.systemWarnings > 0 || b.pendingApprovals > 0).length;
     return {
-      sentToday, pendingQueue, blockedQueue, repliesAll, opensAll, clicksAll, bouncesAll,
-      warmLeads, urgentReplies, approvalsTotal, activeCampaigns, blockersCount, businessesNeedingAttention,
+      sentTotal, sentToday, pendingQueue, blockedQueue, failedSends, cancelledQueue, orphanArchived,
+      repliesAll, opensAll, clicksAll, bouncesAll,
+      warmLeads, urgentReplies, approvalsTotal, activeCampaigns,
+      systemWarnings, inboxCapped, businessesNeedingAttention,
     };
   }, [queue, events, contacts, hotConvos, drafts, proposals, highIntent, campaigns, sysEvents, inboxes, businessStats]);
 
@@ -149,13 +175,20 @@ const CommandCentre = () => {
   const workers = useMemo(() => {
     const activeInbox = inboxes.some((i: any) => i.active);
     const inboundOk = inboxes.some((i: any) => i.inbound_polling_enabled || i.inbound_status === "active");
+    const orphan = totals.orphanArchived;
+    const outreachNext =
+      orphan > 0 ? `Repair ${orphan} legacy simulated follow-up rows` :
+      totals.failedSends > 0 ? `Investigate ${totals.failedSends} failed send${totals.failedSends === 1 ? "" : "s"}` :
+      totals.inboxCapped > 0 ? "Wait for inbox provider cap to reset" :
+      totals.blockedQueue > 0 ? `Wait for ${totals.blockedQueue} safety-gated contact${totals.blockedQueue === 1 ? "" : "s"} to cool down` :
+      totals.pendingQueue > 0 ? "Continue scheduled sends" : "Launch a new campaign";
     return [
       { key: "outreach", name: "Outreach Agent", icon: Send, status: totals.activeCampaigns > 0 ? "active" : activeInbox ? "idle" : "needs_setup",
-        recent: `${totals.sentToday} sent today · ${totals.pendingQueue} queued`, pending: drafts.length, blocked: totals.blockedQueue,
-        next: totals.blockedQueue ? "Resolve blocked queue items" : totals.pendingQueue ? "Continue scheduled sends" : "Launch a new campaign", to: "/founder/outreach" },
+        recent: `${totals.pendingQueue} queued · ${totals.blockedQueue} blocked · ${totals.failedSends} failed`, pending: totals.pendingQueue, blocked: totals.blockedQueue,
+        next: outreachNext, to: "/founder/outreach" },
       { key: "inbox", name: "Inbox Agent", icon: InboxIcon, status: inboundOk ? "active" : "needs_setup",
-        recent: `${drafts.length} AI drafts pending`, pending: drafts.length, blocked: 0,
-        next: drafts.length ? "Approve AI reply drafts" : "Monitor inbound mailboxes", to: "/founder/conversations" },
+        recent: `${drafts.length} AI draft${drafts.length === 1 ? "" : "s"} pending · ${totals.repliesAll} replies (7d)`, pending: drafts.length, blocked: 0,
+        next: drafts.length ? `Approve ${drafts.length} AI reply draft${drafts.length === 1 ? "" : "s"}` : "Monitor inbound mailboxes", to: "/founder/conversations" },
       { key: "social", name: "Social Agent", icon: MessageSquare, status: "needs_setup", recent: "Not yet configured", pending: 0, blocked: 0,
         next: "Connect a social channel", to: "/founder/integrations" },
       { key: "research", name: "Research Agent", icon: Search, status: highIntent.length ? "active" : "idle",
@@ -170,11 +203,11 @@ const CommandCentre = () => {
       { key: "finance", name: "Finance Agent", icon: Banknote, status: deals.length ? "active" : "idle",
         recent: `${deals.length} deals · ${invoices.length} invoices`, pending: invoices.filter((i: any) => i.status === "overdue").length, blocked: 0,
         next: "Review pipeline & invoices", to: "/founder/finance" },
-      { key: "compliance", name: "Compliance Agent", icon: ShieldCheck, status: "active", recent: "Monitoring rules", pending: 0, blocked: 0,
+      { key: "compliance", name: "Compliance Agent", icon: ShieldCheck, status: "idle", recent: "Passive monitoring only", pending: 0, blocked: 0,
         next: "Review compliance events", to: "/founder/compliance" },
       { key: "ops", name: "Ops Agent", icon: WorkflowIcon, status: sysEvents.length ? "needs_attention" : "active",
-        recent: `${sysEvents.length} open system events`, pending: 0, blocked: sysEvents.filter((e: any) => e.severity === "critical").length,
-        next: sysEvents.length ? "Triage system oversight events" : "Run platform diagnostics", to: "/founder/system" },
+        recent: `${sysEvents.length} open system event${sysEvents.length === 1 ? "" : "s"}`, pending: 0, blocked: sysEvents.filter((e: any) => e.severity === "critical").length,
+        next: sysEvents.length ? `Triage ${sysEvents.length} system event${sysEvents.length === 1 ? "" : "s"}` : "Run platform diagnostics", to: "/founder/system" },
       { key: "voice", name: "Voice Agent", icon: Phone, status: "needs_setup", recent: "Not yet configured", pending: 0, blocked: 0,
         next: "Connect voice provider", to: "/founder/integrations" },
     ];
@@ -235,7 +268,23 @@ const CommandCentre = () => {
       const hasInbox = inboxes.some((i: any) => i.business_name === c.business_name && i.active);
       if (!hasInbox) list.push({ msg: `Campaign "${c.campaign_name}" (${c.business_name}) has no active sender inbox`, severity: "danger", to: "/founder/outreach/campaigns" });
     });
-    sysEvents.slice(0, 10).forEach((e: any) => list.push({ msg: `${e.business_name ? `[${e.business_name}] ` : ""}${e.message}`, severity: e.severity === "critical" ? "danger" : "warn", to: "/founder/system" }));
+    // Group duplicate system event messages — show once with a count
+    const sysGrouped = sysEvents.reduce((acc: Record<string, { count: number; severity: string; business_name?: string }>, e: any) => {
+      const key = `${e.business_name ?? ""}|${e.message ?? ""}`;
+      if (!acc[key]) acc[key] = { count: 0, severity: e.severity, business_name: e.business_name };
+      acc[key].count += 1;
+      if (e.severity === "critical") acc[key].severity = "critical";
+      return acc;
+    }, {});
+    Object.entries(sysGrouped).slice(0, 8).forEach(([key, meta]) => {
+      const [, message] = key.split("|");
+      const repeated = meta.count > 1 ? ` — repeated ${meta.count} times` : "";
+      list.push({
+        msg: `${meta.business_name ? `[${meta.business_name}] ` : ""}${message}${repeated}`,
+        severity: meta.severity === "critical" ? "danger" : "warn",
+        to: "/founder/system",
+      });
+    });
     return list.slice(0, 16);
   }, [inboxes, campaigns, sysEvents, queue]);
 
@@ -243,15 +292,21 @@ const CommandCentre = () => {
   const recommendations = useMemo(() => {
     const recs: { msg: string; to: string; tone: string }[] = [];
     if (totals.urgentReplies) recs.push({ msg: `Review ${totals.urgentReplies} warm reply${totals.urgentReplies === 1 ? "" : "s"}`, to: "/founder/conversations", tone: "primary" });
-    if (drafts.length) recs.push({ msg: `Approve ${drafts.length} outreach/inbox draft${drafts.length === 1 ? "" : "s"}`, to: "/founder/conversations", tone: "primary" });
+    if (drafts.length) recs.push({ msg: `Approve ${drafts.length} AI reply draft${drafts.length === 1 ? "" : "s"}`, to: "/founder/conversations", tone: "primary" });
     if (proposals.length) recs.push({ msg: `Send ${proposals.length} ready proposal${proposals.length === 1 ? "" : "s"}`, to: "/founder/internal-proposals", tone: "primary" });
     if (highIntent.length) recs.push({ msg: `Action ${highIntent.length} high-intent lead${highIntent.length === 1 ? "" : "s"}`, to: "/founder/priority", tone: "primary" });
-    if (totals.blockedQueue) recs.push({ msg: `Resolve ${totals.blockedQueue} blocked send${totals.blockedQueue === 1 ? "" : "s"}`, to: "/founder/outreach/queue", tone: "warn" });
-    blockers.filter((b) => b.severity === "danger").slice(0, 3).forEach((b) => recs.push({ msg: `Fix: ${b.msg}`, to: b.to ?? "/founder/system", tone: "danger" }));
+    if (totals.orphanArchived > 0) recs.push({ msg: `Repair ${totals.orphanArchived} legacy simulated follow-up row${totals.orphanArchived === 1 ? "" : "s"}`, to: "/founder/outreach/queue", tone: "warn" });
+    const genericBlocked = (queue ?? []).filter((q: any) => q.status === "blocked" && q.block_reason === "BLOCKED").length;
+    if (genericBlocked > 0) recs.push({ msg: `Review ${genericBlocked} generic blocked contact${genericBlocked === 1 ? "" : "s"}`, to: "/founder/outreach/queue", tone: "warn" });
+    const safetyGated = (queue ?? []).filter((q: any) => q.status === "blocked" && (q.block_reason === "RECENTLY_CONTACTED" || q.block_reason === "RECENT_COMMUNICATION_24H")).length;
+    if (safetyGated > 0) recs.push({ msg: `Wait for ${safetyGated} safety-gated contact${safetyGated === 1 ? "" : "s"} to cool down`, to: "/founder/outreach/queue", tone: "default" });
+    if (totals.failedSends > 0) recs.push({ msg: `Investigate ${totals.failedSends} failed send${totals.failedSends === 1 ? "" : "s"}`, to: "/founder/outreach/queue", tone: "danger" });
+    if (totals.inboxCapped > 0) recs.push({ msg: `Wait for inbox provider cap to reset before sending queued emails`, to: "/founder/sending", tone: "warn" });
+    blockers.filter((b) => b.severity === "danger").slice(0, 2).forEach((b) => recs.push({ msg: `Fix: ${b.msg}`, to: b.to ?? "/founder/system", tone: "danger" }));
     businessStats.filter((b) => b.contacts === 0).slice(0, 2).forEach((b) => recs.push({ msg: `Import leads for ${b.name}`, to: "/founder/outreach/imports", tone: "default" }));
     if (recs.length === 0) recs.push({ msg: "Nothing urgent — review weekly results pack", to: "/founder/analytics", tone: "good" });
     return recs.slice(0, 8);
-  }, [totals, drafts, proposals, highIntent, blockers, businessStats]);
+  }, [totals, drafts, proposals, highIntent, blockers, businessStats, queue]);
 
   const businessStatusColor = (s: string) =>
     s === "active" ? "bg-green-500/20 text-green-400" :
