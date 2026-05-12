@@ -255,9 +255,7 @@ const CommandCentre = () => {
     if (orphanArchived > 0) {
       completed.push({ msg: `${orphanArchived} orphan follow-up rows archived — no action needed.`, severity: "good", to: "/founder/outreach/queue" });
     }
-    if (!isLiveMode) {
-      current.push({ msg: "TEST MODE active — live sends are gated. Provider caps are informational until LIVE mode is enabled.", severity: "warn", to: "/founder/system/modes" });
-    }
+    // TEST MODE removed as operational gate — no informational TEST blocker emitted.
     const reasonMap: Record<string, { label: string; severity: string; bucket: "current" | "safety" }> = {
       SIMULATED_PARENT_NOT_SENT: { label: "waiting on an earlier sequence step that never sent (legacy/test sim)", severity: "warn", recoverable: true },
       RECENTLY_CONTACTED: { label: "cooling down under the recent-contact rule", severity: "warn", recoverable: true },
@@ -286,16 +284,11 @@ const CommandCentre = () => {
     inboxes.forEach((i: any) => {
       if (!i.active) return;
       if (i.provider_blocked_until && new Date(i.provider_blocked_until) > new Date()) {
-        const tgt = isLiveMode ? current : safetyGates;
-        tgt.push({ msg: `${i.email_address}: provider daily limit reached${isLiveMode ? "" : " (informational — TEST MODE)"} (${i.paused_reason ?? i.provider_blocked_reason ?? "throttled"}) — resumes ${format(new Date(i.provider_blocked_until), "dd MMM HH:mm")}`, severity: "warn", to: "/founder/sending" });
+        current.push({ msg: `${i.email_address}: provider daily limit reached (${i.paused_reason ?? i.provider_blocked_reason ?? "throttled"}) — resumes ${format(new Date(i.provider_blocked_until), "dd MMM HH:mm")}`, severity: "warn", to: "/founder/sending" });
       }
-      if (i.active && (i.emails_sent_today ?? 0) >= (i.daily_send_limit ?? 0) && (i.daily_send_limit ?? 0) > 0) {
-        (isLiveMode ? current : safetyGates).push({ msg: `${i.email_address}: daily send limit reached (${i.emails_sent_today}/${i.daily_send_limit})${isLiveMode ? " — pending sends will resume tomorrow" : " — informational in TEST MODE"}`, severity: "warn", to: "/founder/sending" });
-      } else if (i.active && (i.hourly_send_count ?? 0) >= (i.hourly_send_limit ?? 0) && (i.hourly_send_limit ?? 0) > 0) {
-        (isLiveMode ? current : safetyGates).push({ msg: `${i.email_address}: hourly send limit reached (${i.hourly_send_count}/${i.hourly_send_limit})${isLiveMode ? " — pending sends will resume next hour" : " — informational in TEST MODE"}`, severity: "warn", to: "/founder/sending" });
-      }
+      // Internal hourly/daily caps are informational only (cap blocking removed for activation).
       if (i.provider_blocked_reason && !i.provider_blocked_until) {
-        (isLiveMode ? current : safetyGates).push({ msg: `${i.email_address}: capped by email provider (${i.provider_blocked_reason})${isLiveMode ? ". Pending sends will resume on the next provider window." : " — informational in TEST MODE"}`, severity: "warn", to: "/founder/sending" });
+        current.push({ msg: `${i.email_address}: capped by email provider (${i.provider_blocked_reason}). Pending sends will resume on the next provider window.`, severity: "warn", to: "/founder/sending" });
       }
       if ((i.reputation_score ?? 100) < 40) current.push({ msg: `${i.email_address}: low inbox reputation (${i.reputation_score})`, severity: "warn", to: "/founder/sending" });
       if (i.last_test_send_status === "failed") current.push({ msg: `${i.email_address}: last test send failed — ${i.last_error_message ?? "see logs"}`, severity: "danger", to: `/founder/crm/inboxes/${i.id}/configure` });
