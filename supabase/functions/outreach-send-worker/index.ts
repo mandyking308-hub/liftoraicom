@@ -285,7 +285,7 @@ Deno.serve(async (req) => {
     const rawMode: string =
       typeof modeRow?.value === "string" ? modeRow.value : (modeRow?.value ?? "live");
     const systemMode: string = rawMode === "sandbox" ? "sandbox" : "live";
-    const isLive = true;
+    const isLive = systemMode !== "sandbox";
 
     // Pull due items ordered by priority FIRST (reply-priority items get priority=10),
     // then by scheduled_at. Includes previously delayed/throttled items whose retry time has arrived.
@@ -599,13 +599,13 @@ Deno.serve(async (req) => {
               appendError = ap.error ?? "append failed";
             }
           }
-        } else {
+      } else {
           // Simulated path — do NOT contact SMTP.
           await supabase.from("activity_log").insert({
             event_type: "send_simulated",
             description: isLive
               ? `SIMULATED — inbox not live-ready or provider=simulated, queue ${item.id}`
-              : `TEST MODE — simulated send for queue ${item.id}`,
+              : `SANDBOX MODE — simulated send for queue ${item.id}`,
             entity_type: "email_queue", entity_id: item.id,
           });
         }
