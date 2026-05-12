@@ -74,22 +74,48 @@ Deno.serve(async (req) => {
     .from("email_queue")
     .select("id, contact_id, campaign_id, inbox_id, business_name, scheduled_at, priority")
     .eq("status", "pending")
-    .lte("scheduled_at", new Date().toISOString())
     .order("priority", { ascending: true })
     .order("scheduled_at", { ascending: true })
     .limit(batchSize);
+
+  const nowIso = new Date().toISOString();
+  const futureRows = (eligibleSample ?? []).filter((r) => r.scheduled_at > nowIso);
+  const selectedIds = (eligibleSample ?? []).map((r) => r.id);
+
+  // Founder-authorised immediate batch: bump ONLY the selected rows to now()
+  // and priority=1 so the worker picks exactly these rows. All real guardrails
+  // inside outreach-send-worker still apply (suppressed/bounced/unsubscribed,
+  // reply-stop, duplicate-step, inactive inbox/campaign, provider rejection,
+  // live-readiness). No other rows are touched.
+  let rescheduledCount = 0;
+  if (selectedIds.length > 0) {
+    const { error: bumpErr, count } = await admin
+      .from("email_queue")
+      .update({ scheduled_at: nowIso, priority: 1 }, { count: "exact" })
+      .in("id", selectedIds)
+      .eq("status", "pending");
+    if (bumpErr) {
+      return json({ error: `Failed to prioritise selected rows: ${bumpErr.message}` }, 500);
+    }
+    rescheduledCount = count ?? 0;
+  }
 
   await admin.from("system_events").insert({
     event_type: "controlled_live_batch_start",
     severity: "high",
     business_name: "",
-    message: `Founder ${userEmail} starting controlled live batch (size=${batchSize})`,
+    message: `Founder ${userEmail} starting controlled live batch (size=${batchSize}, selected=${selectedIds.length}, future_scheduled=${futureRows.length})`,
     metadata: {
       actor: userEmail,
       batch_size: batchSize,
-      eligible_preview: (eligibleSample ?? []).map((r) => r.id),
+      eligible_preview: selectedIds,
+      future_scheduled_count: futureRows.length,
+      rescheduled_to_now: rescheduledCount,
       pending_before: pendingBefore,
       sent_before: sentBefore,
+      note: futureRows.length > 0
+        ? "Selected rows were scheduled for the future. Founder-authorised batch will run them now."
+        : undefined,
     },
     resolved: true,
     resolution_note: "Outreach Agent -> Email Agent handoff.",
@@ -150,6 +176,8 @@ Deno.serve(async (req) => {
   const summary = {
     batch_size_requested: batchSize,
     eligible_selected: eligibleSample?.length ?? 0,
+    rescheduled_to_now: rescheduledCount,
+    future_scheduled_count: futureRows.length,
     sent: sentDelta,
     pending_before: pendingBefore,
     pending_after: pendingAfter,
@@ -188,6 +216,11 @@ Deno.serve(async (req) => {
       : `Batch complete — ${sentDelta} sent, ${pendingAfter} queued, ${blockedAfter} blocked.`,
     summary,
     recent_rows: recentSent ?? [],
+    note: selectedIds.length === 0
+      ? "No pending rows found. All queue items may be blocked, sent, suppressed, replied, or cancelled."
+      : futureRows.length > 0
+        ? `Selected ${selectedIds.length} pending row(s); ${futureRows.length} were scheduled for the future and were moved to now under founder authorisation.`
+        : undefined,
     next_recommended_action: workerError
       ? "Review system_events and worker response."
       : sentDelta === 0
