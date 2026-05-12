@@ -3952,6 +3952,96 @@ export type Database = {
           },
         ]
       }
+      lead_quality_profiles: {
+        Row: {
+          apollo_lead_id: string
+          campaign_fit: Database["public"]["Enums"]["lead_campaign_fit"] | null
+          classified_at: string | null
+          created_at: string
+          dup_of_contact_id: string | null
+          dup_of_lead_id: string | null
+          fit_confidence: number | null
+          fit_method: string | null
+          fit_reason: string | null
+          founder_review_reason: string | null
+          id: string
+          needs_founder_review: boolean
+          notes: string | null
+          promoted_at: string | null
+          promoted_contact_id: string | null
+          quality_status: Database["public"]["Enums"]["lead_quality_status"]
+          reviewed_at: string | null
+          reviewed_by: string | null
+          risk_flags: string[]
+          scanned_at: string | null
+          updated_at: string
+          verification_status: Database["public"]["Enums"]["lead_verification_status"]
+        }
+        Insert: {
+          apollo_lead_id: string
+          campaign_fit?: Database["public"]["Enums"]["lead_campaign_fit"] | null
+          classified_at?: string | null
+          created_at?: string
+          dup_of_contact_id?: string | null
+          dup_of_lead_id?: string | null
+          fit_confidence?: number | null
+          fit_method?: string | null
+          fit_reason?: string | null
+          founder_review_reason?: string | null
+          id?: string
+          needs_founder_review?: boolean
+          notes?: string | null
+          promoted_at?: string | null
+          promoted_contact_id?: string | null
+          quality_status?: Database["public"]["Enums"]["lead_quality_status"]
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          risk_flags?: string[]
+          scanned_at?: string | null
+          updated_at?: string
+          verification_status?: Database["public"]["Enums"]["lead_verification_status"]
+        }
+        Update: {
+          apollo_lead_id?: string
+          campaign_fit?: Database["public"]["Enums"]["lead_campaign_fit"] | null
+          classified_at?: string | null
+          created_at?: string
+          dup_of_contact_id?: string | null
+          dup_of_lead_id?: string | null
+          fit_confidence?: number | null
+          fit_method?: string | null
+          fit_reason?: string | null
+          founder_review_reason?: string | null
+          id?: string
+          needs_founder_review?: boolean
+          notes?: string | null
+          promoted_at?: string | null
+          promoted_contact_id?: string | null
+          quality_status?: Database["public"]["Enums"]["lead_quality_status"]
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          risk_flags?: string[]
+          scanned_at?: string | null
+          updated_at?: string
+          verification_status?: Database["public"]["Enums"]["lead_verification_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_quality_profiles_apollo_lead_id_fkey"
+            columns: ["apollo_lead_id"]
+            isOneToOne: true
+            referencedRelation: "apollo_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_quality_profiles_apollo_lead_id_fkey"
+            columns: ["apollo_lead_id"]
+            isOneToOne: true
+            referencedRelation: "apollo_raw_leads"
+            referencedColumns: ["apollo_lead_id"]
+          },
+        ]
+      }
       lead_scores: {
         Row: {
           contact_id: string
@@ -7349,6 +7439,67 @@ export type Database = {
       }
     }
     Views: {
+      apollo_raw_leads: {
+        Row: {
+          apollo_lead_id: string | null
+          apollo_org_id: string | null
+          apollo_person_id: string | null
+          apollo_qualification:
+            | Database["public"]["Enums"]["bcr_qualification"]
+            | null
+          apollo_status:
+            | Database["public"]["Enums"]["apollo_lead_status"]
+            | null
+          business_name: string | null
+          campaign_fit: Database["public"]["Enums"]["lead_campaign_fit"] | null
+          classified_at: string | null
+          company: string | null
+          contact_id: string | null
+          country: string | null
+          dup_of_contact_id: string | null
+          dup_of_lead_id: string | null
+          email: string | null
+          email_domain: string | null
+          first_name: string | null
+          fit_confidence: number | null
+          fit_method: string | null
+          fit_reason: string | null
+          founder_review_reason: string | null
+          last_name: string | null
+          lead_created_at: string | null
+          linkedin_url: string | null
+          needs_founder_review: boolean | null
+          profile_updated_at: string | null
+          promoted_at: string | null
+          promoted_contact_id: string | null
+          quality_profile_id: string | null
+          quality_status:
+            | Database["public"]["Enums"]["lead_quality_status"]
+            | null
+          risk_flags: string[] | null
+          scanned_at: string | null
+          title: string | null
+          verification_status:
+            | Database["public"]["Enums"]["lead_verification_status"]
+            | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "apollo_leads_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "apollo_leads_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+        ]
+      }
       at_risk_assignments: {
         Row: {
           assignment_status:
@@ -7627,6 +7778,22 @@ export type Database = {
           last_sent_at?: string | null
           reputation_score?: number | null
           warmup_days?: never
+        }
+        Relationships: []
+      }
+      lead_quality_overview: {
+        Row: {
+          duplicate_or_risky: number | null
+          needs_founder_review: number | null
+          needs_verification: number | null
+          promoted_contacts: number | null
+          qualified_leads: number | null
+          raw_leads: number | null
+          rejected_leads: number | null
+          reviewed_leads: number | null
+          safe_to_queue: number | null
+          terminal_blocked: number | null
+          total_leads: number | null
         }
         Relationships: []
       }
@@ -8498,7 +8665,32 @@ export type Database = {
         | "rejected"
         | "expired"
       invoice_status: "DRAFT" | "SENT" | "PAID" | "OVERDUE" | "PARTIALLY_PAID"
+      lead_campaign_fit:
+        | "dj"
+        | "playlist_curator"
+        | "music_blog"
+        | "radio"
+        | "event_promoter"
+        | "creator_influencer"
+        | "poor_fit"
+      lead_quality_status:
+        | "raw"
+        | "reviewed"
+        | "qualified"
+        | "needs_verification"
+        | "needs_founder_review"
+        | "promoted_to_contact"
+        | "rejected"
+        | "suppressed"
+        | "bounced"
+        | "already_contacted"
       lead_validation_status: "valid" | "invalid" | "duplicate"
+      lead_verification_status:
+        | "unknown"
+        | "valid"
+        | "risky"
+        | "invalid"
+        | "catch_all"
       outreach_campaign_status: "active" | "paused"
       payment_event_type:
         | "reminder_sent"
@@ -8836,7 +9028,35 @@ export const Constants = {
         "expired",
       ],
       invoice_status: ["DRAFT", "SENT", "PAID", "OVERDUE", "PARTIALLY_PAID"],
+      lead_campaign_fit: [
+        "dj",
+        "playlist_curator",
+        "music_blog",
+        "radio",
+        "event_promoter",
+        "creator_influencer",
+        "poor_fit",
+      ],
+      lead_quality_status: [
+        "raw",
+        "reviewed",
+        "qualified",
+        "needs_verification",
+        "needs_founder_review",
+        "promoted_to_contact",
+        "rejected",
+        "suppressed",
+        "bounced",
+        "already_contacted",
+      ],
       lead_validation_status: ["valid", "invalid", "duplicate"],
+      lead_verification_status: [
+        "unknown",
+        "valid",
+        "risky",
+        "invalid",
+        "catch_all",
+      ],
       outreach_campaign_status: ["active", "paused"],
       payment_event_type: [
         "reminder_sent",
