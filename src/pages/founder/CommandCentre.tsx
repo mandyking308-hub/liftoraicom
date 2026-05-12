@@ -9,7 +9,7 @@ import ExecutionStatusPanel from "@/components/founder/ExecutionStatusPanel";
 import LeadQualityPanel from "@/components/founder/LeadQualityPanel";
 import SourceQualityBrief from "@/components/founder/SourceQualityBrief";
 import ApolloPullPanel from "@/components/founder/ApolloPullPanel";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,6 +21,7 @@ import {
   Building2, Bot, Send, Mail, Inbox as InboxIcon, MessageSquare, FileSignature,
   Search, Banknote, ShieldCheck, Workflow as WorkflowIcon, Phone, AlertTriangle,
   CheckCircle2, Clock, ArrowRight, Sparkles, Activity, TrendingUp, Users, FlaskConical,
+  Database, ListChecks, Filter,
 } from "lucide-react";
 
 const StatTile = ({ label, value, icon: Icon, tone = "default", to }: any) => {
@@ -426,272 +427,351 @@ const CommandCentre = () => {
 
   return (
     <FounderLayout>
-      <div className="space-y-6">
-        <div className="flex items-end justify-between flex-wrap gap-3">
-          <div>
-            <h1 className="text-2xl font-bold">Founder Command Centre</h1>
-            <p className="text-muted-foreground text-sm mt-1">One cockpit for every Liftor business — what's happening, what needs you, what's blocked.</p>
-          </div>
-          <div className="flex gap-2">
-            <Link to="/founder/copilot"><Button size="sm" variant="outline"><Sparkles size={14} /> Co-Pilot</Button></Link>
-            <Link to="/founder/testing"><Button size="sm" variant="outline"><FlaskConical size={14} /> Diagnostics</Button></Link>
-          </div>
-        </div>
+      {(() => {
+        const activeBusinessName = activeInboxes[0]?.business_name ?? businesses[0]?.name ?? "Neon Candy";
+        const activeSender = activeInboxes[0]?.email_address ?? "hello@neoncandy.online";
+        const providerOk = inboxes.some((i: any) => i.active) && totals.inboxCapped === 0;
+        const nextRecommended = recommendations[0]?.msg ?? "All clear.";
+        const nextRecommendedTo = recommendations[0]?.to ?? "/founder/analytics";
+        const founderActions = recommendations.filter((r) => r.tone === "primary" || r.tone === "danger" || r.tone === "warn");
 
-        <SystemModeBanner />
+        const stages = [
+          {
+            key: "source", label: "Source Leads", icon: Search, count: leadQualityCounts?.raw ?? 0,
+            status: (leadLifecycle?.active_working_leads ?? 0) === 0 ? "blocked" : "active",
+            blocker: (leadLifecycle?.active_working_leads ?? 0) === 0 ? "Need fresh verified-email Apollo pull" : null,
+            next: "Pull verified Apollo leads",
+            anchor: "#sec-source",
+          },
+          {
+            key: "quality", label: "Quality Scan", icon: Filter, count: leadQualityCounts?.needsVerification ?? 0,
+            status: (leadQualityCounts?.needsVerification ?? 0) > 0 ? "active" : "complete",
+            blocker: null, next: "Run autopilot scan", anchor: "#sec-autopilot",
+          },
+          {
+            key: "crm", label: "CRM Check", icon: Database, count: contacts.length,
+            status: contacts.length > 0 ? "active" : "not_started",
+            blocker: null, next: "Cross-check against CRM", anchor: "#sec-crm",
+          },
+          {
+            key: "promote", label: "Promote to Contact", icon: CheckCircle2, count: leadLifecycle?.safe_to_promote ?? 0,
+            status: (leadLifecycle?.safe_to_promote ?? 0) > 0 ? "active" : "not_started",
+            blocker: (leadLifecycle?.safe_to_promote ?? 0) === 0 ? "Nothing safe to promote" : null,
+            next: "Approve promotion", anchor: "#sec-autopilot",
+          },
+          {
+            key: "queue", label: "Queue Campaign", icon: ListChecks, count: leadLifecycle?.safe_to_queue ?? 0,
+            status: (leadLifecycle?.safe_to_queue ?? 0) > 0 ? "active" : "not_started",
+            blocker: (leadLifecycle?.safe_to_queue ?? 0) === 0 ? "Nothing safe to queue" : null,
+            next: "Approve queue", anchor: "#sec-queue",
+          },
+          {
+            key: "send", label: "Send", icon: Send, count: totals.sentToday,
+            status: totals.failedSends > 0 ? "blocked" : totals.pendingQueue > 0 ? "active" : "not_started",
+            blocker: totals.failedSends > 0 ? `${totals.failedSends} failed sends` : null,
+            next: "Run controlled live batch", anchor: "#sec-queue",
+          },
+          {
+            key: "replies", label: "Replies", icon: InboxIcon, count: totals.repliesAll,
+            status: totals.urgentReplies > 0 ? "active" : "not_started",
+            blocker: null, next: drafts.length ? `Approve ${drafts.length} draft(s)` : "Monitor inbox", anchor: "#sec-inbox",
+          },
+          {
+            key: "proposals", label: "Proposals", icon: FileSignature, count: proposals.length,
+            status: proposals.length > 0 ? "active" : "not_started",
+            blocker: null, next: proposals.length ? "Send proposals" : "—", anchor: "#sec-inbox",
+          },
+          {
+            key: "deals", label: "Deals", icon: TrendingUp, count: deals.filter((d: any) => d.status !== "won" && d.status !== "lost").length,
+            status: deals.length > 0 ? "active" : "not_started",
+            blocker: null, next: "Review pipeline", anchor: "#sec-results",
+          },
+          {
+            key: "finance", label: "Finance", icon: Banknote, count: invoices.filter((i: any) => i.status !== "paid" && i.status !== "void").length,
+            status: invoices.length > 0 ? "active" : "not_started",
+            blocker: null, next: "Review invoices", anchor: "#sec-results",
+          },
+        ];
 
-        <ExecutionStatusPanel />
+        const stageStatusCls = (s: string) =>
+          s === "active" ? "bg-green-500/15 text-green-300 border-green-500/30" :
+          s === "blocked" ? "bg-destructive/15 text-destructive border-destructive/30" :
+          s === "complete" ? "bg-primary/15 text-primary border-primary/30" :
+          "bg-muted/40 text-muted-foreground border-border/40";
 
-        <ControlledProofSend />
-
-        <ControlledLiveBatch />
-
-        <div className="rounded-lg border border-border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
-          <span className="font-medium text-foreground">Cadence integrity:</span>{" "}
-          Cadence paused when prior step is blocked. Downstream steps will not be
-          created until the prior step is successfully sent (real SMTP, accepted,
-          with a provider message ID).
-        </div>
-
-        {activeInboxes.length > 0 && (
-          <div className="rounded-lg border border-border bg-muted/30 px-4 py-3 text-sm">
-            <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1.5">Active sender identity</p>
-            <div className="flex flex-wrap gap-2">
-              {activeInboxes.map((i: any) => (
-                <Badge key={i.id} variant="secondary" className={`text-xs ${i.status_label === "ok" ? "bg-green-500/15 text-green-300" : "bg-yellow-500/15 text-yellow-300"}`}>
-                  {i.from_name ? `${i.from_name} · ` : ""}{i.email_address} <span className="text-muted-foreground ml-1">({i.business_name})</span>
+        return (
+          <div className="space-y-6">
+            {/* SECTION 1 — Sticky System Status Header */}
+            <div className="sticky top-0 z-30 -mx-2 px-2 py-2 bg-background/95 backdrop-blur border-b border-border">
+              <div className="rounded-lg border border-border bg-card/80 px-3 py-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs">
+                <Badge variant="secondary" className={isLiveMode ? "bg-green-500/15 text-green-300" : "bg-yellow-500/15 text-yellow-300"}>
+                  {isLiveMode ? "LIVE" : "SANDBOX"}
                 </Badge>
-              ))}
-            </div>
-            <p className="text-[11px] text-muted-foreground mt-1.5">Outbound sends use these inboxes only. Founder/internal addresses (e.g. mandyking308@gmail.com) are suppressed from prospect flows.</p>
-          </div>
-        )}
-
-        <LeadQualityPanel />
-        <ApolloPullPanel />
-        <SourceQualityBrief />
-
-        <Tabs defaultValue="today" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="today">Today</TabsTrigger>
-            <TabsTrigger value="orchestration">Agent Orchestration</TabsTrigger>
-            <TabsTrigger value="capabilities">Liftor Capabilities</TabsTrigger>
-          </TabsList>
-          <TabsContent value="today" className="space-y-6 mt-0">
-        {/* 1. Today across all businesses */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
-          <StatTile label="Active businesses" value={businesses.length} icon={Building2} to="/founder/organisations" />
-          <StatTile label="Need attention" value={totals.businessesNeedingAttention} icon={AlertTriangle} tone={totals.businessesNeedingAttention ? "warn" : "good"} />
-          <StatTile label="Urgent replies" value={totals.urgentReplies} icon={MessageSquare} tone={totals.urgentReplies ? "warn" : "good"} to="/founder/conversations" />
-          <StatTile label="Approvals waiting" value={totals.approvalsTotal} icon={CheckCircle2} tone={totals.approvalsTotal ? "warn" : "good"} />
-          <StatTile label="Active campaigns" value={totals.activeCampaigns} icon={Send} to="/founder/outreach/campaigns" />
-          <StatTile label="Warm leads (intent ≥60 / engaged)" value={totals.warmLeads} icon={TrendingUp} to="/founder/priority" />
-          <StatTile label="Sent today" value={totals.sentToday} icon={Mail} tone="good" to="/founder/sending" />
-          <StatTile label="Sent (total)" value={totals.sentTotal} icon={CheckCircle2} tone="good" to="/founder/sending" />
-          <StatTile label="Queued" value={totals.pendingQueue} icon={Clock} to="/founder/outreach/queue" />
-          <StatTile label="Blocked queue" value={totals.blockedQueue} icon={Clock} tone={totals.blockedQueue ? "warn" : "good"} to="/founder/outreach/queue" />
-          <StatTile label="Failed sends" value={totals.failedSends} icon={AlertTriangle} tone={totals.failedSends ? "danger" : "good"} to="/founder/outreach/queue" />
-          <StatTile label={`System warnings (open / logged)`} value={`${totals.systemWarningsOpen} / ${totals.systemWarningsTotal}`} icon={AlertTriangle} tone={totals.systemWarningsOpen ? "danger" : "good"} to="/founder/system" />
-          <StatTile label="Open deals" value={deals.filter((d: any) => d.status !== "won" && d.status !== "lost").length} icon={Banknote} to="/founder/finance" />
-          <StatTile
-            label={(leadLifecycle?.active_working_leads ?? 0) === 0 ? "Fresh Apollo search required" : "Active working leads"}
-            value={(leadLifecycle?.active_working_leads ?? 0) === 0 ? "Use NeonCandy brief" : (leadLifecycle?.active_working_leads ?? 0)}
-            icon={Sparkles}
-            tone={(leadLifecycle?.active_working_leads ?? 0) === 0 ? "warn" : "good"}
-          />
-          <StatTile label="Safe to unlock" value={leadLifecycle?.safe_to_unlock ?? 0} icon={Search} tone={(leadLifecycle?.safe_to_unlock ?? 0) > 0 ? "good" : "default"} />
-          <StatTile label="Safe to promote" value={leadLifecycle?.safe_to_promote ?? 0} icon={CheckCircle2} tone={(leadLifecycle?.safe_to_promote ?? 0) > 0 ? "good" : "default"} />
-          <StatTile label="Legacy optional unlock candidates" value={leadLifecycle?.legacy_optional_unlock_candidates ?? 0} icon={Clock} tone="default" />
-          <StatTile label="Leads promoted to contacts" value={leadQualityCounts?.promoted ?? 0} icon={CheckCircle2} tone="good" />
-        </div>
-
-        {/* 8. Recommended Actions */}
-        <Section title="What should you do today?" icon={Sparkles}>
-          {recommendations.length === 0 ? (
-            <p className="text-sm text-muted-foreground">All clear.</p>
-          ) : (
-            <div className="grid sm:grid-cols-2 gap-2">
-              {recommendations.map((r, idx) => (
-                <Link key={idx} to={r.to} className="flex items-center justify-between p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors">
-                  <span className="text-sm">{r.msg}</span>
-                  <ArrowRight size={14} className="text-muted-foreground" />
+                <span className="text-muted-foreground">Business: <span className="text-foreground">{activeBusinessName}</span></span>
+                <span className="text-muted-foreground">Sender: <span className="text-foreground">{activeSender}</span></span>
+                <span className="text-muted-foreground flex items-center gap-1">
+                  Provider: <span className={providerOk ? "text-green-400" : "text-yellow-400"}>{providerOk ? "OK" : (totals.inboxCapped ? "Capped" : "Setup")}</span>
+                </span>
+                <span className="text-muted-foreground">Warnings: <span className={totals.systemWarningsOpen ? "text-destructive" : "text-green-400"}>{totals.systemWarningsOpen}</span></span>
+                <span className="text-muted-foreground">Approvals: <span className={totals.approvalsTotal ? "text-yellow-400" : "text-green-400"}>{totals.approvalsTotal}</span></span>
+                <span className="text-muted-foreground">Safe→promote: <span className="text-foreground">{leadLifecycle?.safe_to_promote ?? 0}</span></span>
+                <span className="text-muted-foreground">Safe→queue: <span className="text-foreground">{leadLifecycle?.safe_to_queue ?? 0}</span></span>
+                <Link to={nextRecommendedTo} className="ml-auto flex items-center gap-1 text-primary hover:underline">
+                  Next: {nextRecommended} <ArrowRight size={12} />
                 </Link>
-              ))}
-            </div>
-          )}
-        </Section>
-
-        {/* 2. Business overview */}
-        <Section title="Businesses" icon={Building2} action={<Link to="/founder/organisations"><Button size="sm" variant="ghost">Manage <ArrowRight size={12} /></Button></Link>}>
-          {businessStats.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No businesses yet. <Link to="/founder/organisations" className="text-primary">Create one →</Link></p>
-          ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {businessStats.map((b) => (
-                <div key={b.id} className="p-4 rounded-lg bg-secondary/30 border border-border/40 hover:border-primary/40 transition-colors">
-                  <div className="flex items-start justify-between gap-2 mb-3">
-                    <div>
-                      <p className="font-medium">{b.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {b.lastSend ? `Last send ${formatDistanceToNow(new Date(b.lastSend), { addSuffix: true })}` :
-                         b.lastContactReply ? `Last reply ${formatDistanceToNow(new Date(b.lastContactReply), { addSuffix: true })}` :
-                         "No send activity yet"}
-                      </p>
-                    </div>
-                    <Badge variant="secondary" className={`text-xs ${businessStatusColor(b.status)}`}>{b.status.replace("_", " ")}</Badge>
-                  </div>
-                  <div className="grid grid-cols-5 gap-2 text-center text-[11px] mb-3">
-                    <div><p className="font-semibold text-base">{b.activeCampaigns}</p><p className="text-muted-foreground">Camp.</p></div>
-                    <div><p className="font-semibold text-base">{b.warm}</p><p className="text-muted-foreground">Warm</p></div>
-                    <div><p className={`font-semibold text-base ${b.pendingApprovals ? "text-yellow-400" : ""}`}>{b.pendingApprovals}</p><p className="text-muted-foreground">Approve</p></div>
-                    <div><p className={`font-semibold text-base ${b.blockedQueue ? "text-yellow-400" : ""}`}>{b.blockedQueue}</p><p className="text-muted-foreground">Blocked</p></div>
-                    <div><p className={`font-semibold text-base ${(b.failedSends + b.systemWarnings) ? "text-destructive" : ""}`}>{b.failedSends + b.systemWarnings}</p><p className="text-muted-foreground">Issues</p></div>
-                  </div>
-                  <Link to={`/founder/organisations`}><Button size="sm" variant="outline" className="w-full">Open workspace</Button></Link>
-                </div>
-              ))}
-            </div>
-          )}
-        </Section>
-
-        {/* 3. AI Worker Activity */}
-        <Section title="AI Workers" icon={Bot}>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
-            {workers.map((w) => (
-              <Link key={w.key} to={w.to} className="p-3 rounded-lg bg-secondary/30 border border-border/40 hover:border-primary/40 transition-colors block">
-                <div className="flex items-center justify-between mb-2">
-                  <w.icon size={16} className="text-primary" />
-                  <Badge variant="secondary" className={`text-[10px] ${workerStatusColor(w.status)}`}>{w.status.replace("_", " ")}</Badge>
-                </div>
-                <p className="text-sm font-medium">{w.name}</p>
-                <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{w.recent}</p>
-                <p className="text-xs mt-2 text-foreground/80 line-clamp-2"><span className="text-muted-foreground">Next:</span> {w.next}</p>
-              </Link>
-            ))}
-          </div>
-        </Section>
-
-        {/* 4. Approvals + 5. Campaign snapshot */}
-        <div className="grid lg:grid-cols-2 gap-6">
-          <Section title="Approvals snapshot" icon={CheckCircle2} action={<Link to="/founder/conversations"><Button size="sm" variant="ghost">All <ArrowRight size={12} /></Button></Link>}>
-            {totals.approvalsTotal === 0 ? (
-              <p className="text-sm text-muted-foreground">No items waiting for approval.</p>
-            ) : (
-              <div className="space-y-2">
-                {drafts.slice(0, 4).map((d: any) => (
-                  <Link key={d.id} to="/founder/conversations" className="flex items-center justify-between p-2.5 rounded bg-secondary/40 hover:bg-secondary text-sm">
-                    <div><span className="text-muted-foreground text-xs">AI draft · </span>{d.classification ?? "reply"}</div>
-                    <span className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(d.created_at), { addSuffix: true })}</span>
-                  </Link>
-                ))}
-                {proposals.slice(0, 3).map((p: any) => (
-                  <Link key={p.id} to={`/founder/internal-proposals`} className="flex items-center justify-between p-2.5 rounded bg-secondary/40 hover:bg-secondary text-sm">
-                    <div><span className="text-muted-foreground text-xs">Proposal · </span>{p.title} <span className="text-xs text-muted-foreground">({p.business_name})</span></div>
-                    <Badge variant="secondary" className="text-[10px]">{p.status}</Badge>
-                  </Link>
-                ))}
-                {hotConvos.slice(0, 3).map((h: any) => (
-                  <Link key={h.id} to={`/founder/conversations/${h.id}`} className="flex items-center justify-between p-2.5 rounded bg-secondary/40 hover:bg-secondary text-sm">
-                    <div><span className="text-muted-foreground text-xs">Escalation · </span>{h.escalation_reason ?? "needs review"}</div>
-                    <span className="text-xs text-muted-foreground">{h.business_name}</span>
-                  </Link>
-                ))}
-                {highIntent.slice(0, 3).map((h: any) => (
-                  <Link key={h.contact_id} to={`/founder/crm/contacts/${h.contact_id}`} className="flex items-center justify-between p-2.5 rounded bg-secondary/40 hover:bg-secondary text-sm">
-                    <div><span className="text-muted-foreground text-xs">High-intent · </span>{h.name ?? h.email}</div>
-                    <Badge variant="secondary" className="text-[10px]">score {h.intent_score ?? "—"}</Badge>
-                  </Link>
-                ))}
               </div>
-            )}
-          </Section>
-
-          <Section title="Campaign snapshot" icon={Send} action={<Link to="/founder/outreach/live-monitor"><Button size="sm" variant="ghost">Live <ArrowRight size={12} /></Button></Link>}>
-            <div className="grid grid-cols-3 gap-2 mb-3 text-center text-xs">
-              <div className="p-2 rounded bg-secondary/40"><p className="text-base font-semibold">{totals.activeCampaigns}</p><p className="text-muted-foreground">Active campaigns</p></div>
-              <div className="p-2 rounded bg-secondary/40"><p className="text-base font-semibold">{totals.sentTotal}</p><p className="text-muted-foreground">Sent total</p></div>
-              <div className="p-2 rounded bg-secondary/40"><p className="text-base font-semibold">{totals.sentToday}</p><p className="text-muted-foreground">Sent today</p></div>
-              <div className="p-2 rounded bg-secondary/40"><p className="text-base font-semibold">{totals.pendingQueue}</p><p className="text-muted-foreground">Queued</p></div>
-              <div className="p-2 rounded bg-secondary/40"><p className={`text-base font-semibold ${totals.blockedQueue ? "text-yellow-400" : ""}`}>{totals.blockedQueue}</p><p className="text-muted-foreground">Blocked</p></div>
-              <div className="p-2 rounded bg-secondary/40"><p className={`text-base font-semibold ${totals.failedSends ? "text-destructive" : ""}`}>{totals.failedSends}</p><p className="text-muted-foreground">Failed</p></div>
-              <div className="p-2 rounded bg-secondary/40"><p className="text-base font-semibold">{totals.repliesAll}</p><p className="text-muted-foreground">Replies (7d)</p></div>
-              <div className="p-2 rounded bg-secondary/40"><p className="text-base font-semibold">{drafts.length}</p><p className="text-muted-foreground">AI drafts</p></div>
-              <div className="p-2 rounded bg-secondary/40"><p className={`text-base font-semibold ${totals.inboxCapped ? "text-yellow-400" : "text-green-400"}`}>{totals.inboxCapped ? "Capped" : "OK"}</p><p className="text-muted-foreground">Inbox cap</p></div>
             </div>
-            <div className="space-y-2">
-              {campaigns.filter((c: any) => c.status === "active").slice(0, 4).map((c: any) => (
-                <Link key={c.id} to="/founder/outreach/campaigns" className="flex items-center justify-between p-2.5 rounded bg-secondary/40 hover:bg-secondary text-sm">
-                  <div>{c.campaign_name} <span className="text-xs text-muted-foreground">· {c.business_name}</span></div>
-                  <Badge variant="secondary" className="text-[10px] bg-green-500/20 text-green-400">{c.status}</Badge>
-                </Link>
-              ))}
-              {campaigns.filter((c: any) => c.status === "active").length === 0 && (
-                <p className="text-xs text-muted-foreground">No active campaigns.</p>
+
+            <div className="flex items-end justify-between flex-wrap gap-3">
+              <div>
+                <h1 className="text-2xl font-bold">Founder Command Centre</h1>
+                <p className="text-muted-foreground text-sm mt-1">Sequence-led cockpit — sourcing → quality → CRM → queue → send → reply → close.</p>
+              </div>
+              <div className="flex gap-2">
+                <Link to="/founder/copilot"><Button size="sm" variant="outline"><Sparkles size={14} /> Co-Pilot</Button></Link>
+                <Link to="/founder/testing"><Button size="sm" variant="outline"><FlaskConical size={14} /> Diagnostics</Button></Link>
+              </div>
+            </div>
+
+            <SystemModeBanner />
+
+            {/* SECTION 2 — Today's Founder Actions */}
+            <Section title="Today's founder actions" icon={Sparkles}>
+              {founderActions.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No founder decision required right now.</p>
+              ) : (
+                <div className="grid sm:grid-cols-2 gap-2">
+                  {founderActions.map((r, idx) => (
+                    <Link key={idx} to={r.to} className={`flex items-center justify-between p-3 rounded-lg border transition-colors ${
+                      r.tone === "danger" ? "bg-destructive/10 border-destructive/30 hover:bg-destructive/15" :
+                      r.tone === "warn" ? "bg-yellow-500/10 border-yellow-500/30 hover:bg-yellow-500/15" :
+                      "bg-secondary/50 border-border/50 hover:bg-secondary"
+                    }`}>
+                      <span className="text-sm">{r.msg}</span>
+                      <ArrowRight size={14} className="text-muted-foreground" />
+                    </Link>
+                  ))}
+                </div>
               )}
-            </div>
-          </Section>
-        </div>
+            </Section>
 
-        {/* 7. Blockers + 6. Results */}
-        <div className="grid lg:grid-cols-2 gap-6">
-          <Section title="Blockers & truth panel" icon={AlertTriangle} action={<Link to="/founder/system"><Button size="sm" variant="ghost">System <ArrowRight size={12} /></Button></Link>}>
-            {(blockerSections.current.length + blockerSections.safetyGates.length + blockerSections.completed.length + blockerSections.observations.length) === 0 ? (
-              <div className="flex items-center gap-2 text-sm text-green-400"><CheckCircle2 size={14} /> No active blockers.</div>
-            ) : (
-              <div className="space-y-4">
-                {[
-                  { key: "current", title: "Current blockers", items: blockerSections.current, empty: "No current blockers." },
-                  { key: "safety", title: "Safety gates", items: blockerSections.safetyGates, empty: "No safety gates active." },
-                  { key: "completed", title: "Completed repairs", items: blockerSections.completed, empty: null },
-                  { key: "observations", title: "Campaign observations", items: blockerSections.observations, empty: null },
-                ].map((g) => (
-                  (g.items.length === 0 && !g.empty) ? null : (
-                    <div key={g.key}>
-                      <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1.5">{g.title}</p>
-                      {g.items.length === 0 ? (
-                        <p className="text-xs text-muted-foreground">{g.empty}</p>
-                      ) : (
-                        <div className="space-y-2">
-                          {g.items.map((b, idx) => (
-                            <Link key={idx} to={b.to ?? "/founder/system"} className={`block p-2.5 rounded text-sm ${b.severity === "danger" ? "bg-destructive/10 border border-destructive/30" : b.severity === "good" ? "bg-green-500/10 border border-green-500/20 text-green-300" : "bg-yellow-500/5 border border-yellow-500/20"}`}>
-                              {b.msg}
-                            </Link>
-                          ))}
-                        </div>
-                      )}
+            {/* SECTION 3 — Business Workflow Rail */}
+            <Section title="Business workflow" icon={WorkflowIcon}>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+                {stages.map((s, idx) => (
+                  <a key={s.key} href={s.anchor} className={`p-3 rounded-lg border transition-colors hover:border-primary/50 ${stageStatusCls(s.status)}`}>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] opacity-60">{idx + 1}.</span>
+                        <s.icon size={14} />
+                      </div>
+                      <span className="text-[10px] uppercase tracking-wide opacity-70">{s.status.replace("_", " ")}</span>
                     </div>
-                  )
+                    <p className="text-sm font-medium leading-tight">{s.label}</p>
+                    <p className="text-lg font-bold mt-1">{s.count}</p>
+                    {s.blocker && <p className="text-[10px] mt-1 opacity-80">⚠ {s.blocker}</p>}
+                    <p className="text-[10px] mt-1 opacity-70 line-clamp-1">→ {s.next}</p>
+                  </a>
                 ))}
               </div>
-            )}
-          </Section>
+            </Section>
 
-          <Section title="Results snapshot (7-day)" icon={Activity} action={<Link to="/founder/analytics"><Button size="sm" variant="ghost">Analytics <ArrowRight size={12} /></Button></Link>}>
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Leads in CRM</p><p className="text-xl font-semibold">{contacts.length}</p></div>
-              <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Sent today</p><p className="text-xl font-semibold">{totals.sentToday}</p></div>
-              <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Sent (total)</p><p className="text-xl font-semibold">{totals.sentTotal}</p></div>
-              <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Queued</p><p className="text-xl font-semibold">{totals.pendingQueue}</p></div>
-              <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Blocked queue</p><p className={`text-xl font-semibold ${totals.blockedQueue ? "text-yellow-400" : ""}`}>{totals.blockedQueue}</p></div>
-              <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Failed sends</p><p className={`text-xl font-semibold ${totals.failedSends ? "text-destructive" : ""}`}>{totals.failedSends}</p></div>
-              <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Replies (7d)</p><p className="text-xl font-semibold">{totals.repliesAll}</p></div>
-              <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">AI drafts pending</p><p className="text-xl font-semibold">{drafts.length}</p></div>
-              <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Proposals in flight</p><p className="text-xl font-semibold">{proposals.length}</p></div>
-              <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Open deals</p><p className="text-xl font-semibold">{deals.filter((d: any) => d.status !== "won" && d.status !== "lost").length}</p></div>
-              <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Invoices outstanding</p><p className="text-xl font-semibold">{invoices.filter((i: any) => i.status !== "paid" && i.status !== "void").length}</p></div>
+            {/* SECTION 4 — Source Leads / Apollo */}
+            <div id="sec-source" className="space-y-4 scroll-mt-24">
+              <ApolloPullPanel />
+              <SourceQualityBrief />
             </div>
-            <p className="text-[11px] text-muted-foreground mt-3">Source of truth: <span className="text-foreground/80">email_queue</span> (sent/blocked/failed). Replies from <span className="text-foreground/80">email_events</span>.</p>
-          </Section>
-        </div>
-          </TabsContent>
-          <TabsContent value="capabilities" className="mt-0">
-            <LiftorCapabilities />
-          </TabsContent>
-          <TabsContent value="orchestration" className="mt-0">
-            <AgentOrchestration />
-          </TabsContent>
-        </Tabs>
-      </div>
+
+            {/* SECTION 5 — Lead Quality Autopilot */}
+            <div id="sec-autopilot" className="scroll-mt-24">
+              <LeadQualityPanel />
+            </div>
+
+            {/* SECTION 6 — CRM Spine (compact health card) */}
+            <Section title="CRM spine" icon={Database} action={<Link to="/founder/crm"><Button size="sm" variant="ghost">Open CRM <ArrowRight size={12} /></Button></Link>}>
+              <div id="sec-crm" className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm scroll-mt-24">
+                <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Central contacts</p><p className="text-xl font-semibold">{contacts.length}</p></div>
+                <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">With business link</p><p className="text-xl font-semibold">{contacts.filter((c: any) => c.assigned_business).length}</p></div>
+                <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Missing business link</p><p className="text-xl font-semibold">{contacts.filter((c: any) => !c.assigned_business).length}</p></div>
+                <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Internal identities</p><p className="text-xl font-semibold">{internalEmails.length}</p></div>
+                <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Apollo → contacts</p><p className="text-xl font-semibold">{leadQualityCounts?.promoted ?? 0}</p></div>
+                <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Proposals to reconcile</p><p className="text-xl font-semibold">{proposals.length}</p></div>
+                <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Active conversations</p><p className="text-xl font-semibold">{contacts.filter((c: any) => c.conversation_active).length}</p></div>
+                <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Warm leads</p><p className="text-xl font-semibold">{totals.warmLeads}</p></div>
+              </div>
+            </Section>
+
+            {/* SECTION 7 — Campaign Queue */}
+            <Section title="Campaign queue" icon={Send} action={<Link to="/founder/outreach/queue"><Button size="sm" variant="ghost">Open queue <ArrowRight size={12} /></Button></Link>}>
+              <div id="sec-queue" className="space-y-4 scroll-mt-24">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
+                  <div className="p-2 rounded bg-secondary/40"><p className="text-base font-semibold">{totals.pendingQueue}</p><p className="text-muted-foreground">Queued</p></div>
+                  <div className="p-2 rounded bg-secondary/40"><p className={`text-base font-semibold ${totals.blockedQueue ? "text-yellow-400" : ""}`}>{totals.blockedQueue}</p><p className="text-muted-foreground">Blocked</p></div>
+                  <div className="p-2 rounded bg-secondary/40"><p className={`text-base font-semibold ${totals.failedSends ? "text-destructive" : ""}`}>{totals.failedSends}</p><p className="text-muted-foreground">Failed</p></div>
+                  <div className="p-2 rounded bg-secondary/40"><p className={`text-base font-semibold ${totals.inboxCapped ? "text-yellow-400" : "text-green-400"}`}>{totals.inboxCapped ? "Capped" : "OK"}</p><p className="text-muted-foreground">Provider</p></div>
+                  <div className="p-2 rounded bg-secondary/40"><p className="text-base font-semibold">{totals.activeCampaigns}</p><p className="text-muted-foreground">Active campaigns</p></div>
+                  <div className="p-2 rounded bg-secondary/40"><p className="text-base font-semibold">{totals.sentToday}</p><p className="text-muted-foreground">Sent today</p></div>
+                  <div className="p-2 rounded bg-secondary/40"><p className="text-base font-semibold">{totals.sentTotal}</p><p className="text-muted-foreground">Sent total</p></div>
+                  <div className="p-2 rounded bg-secondary/40"><p className="text-base font-semibold">{queue.find((q: any) => q.status === "pending" && q.scheduled_at) ? format(new Date(queue.find((q: any) => q.status === "pending" && q.scheduled_at)!.scheduled_at), "dd MMM HH:mm") : "—"}</p><p className="text-muted-foreground">Next send</p></div>
+                </div>
+                <div className="text-[11px] text-muted-foreground border-t border-border/40 pt-2">
+                  <span className="font-medium text-foreground">Cadence integrity:</span> downstream steps wait until prior step sent (real SMTP, accepted, provider message ID).
+                </div>
+                <ControlledLiveBatch />
+              </div>
+            </Section>
+
+            {/* SECTION 8 — Inbox / Approvals */}
+            <Section title="Inbox & approvals" icon={InboxIcon} action={<Link to="/founder/conversations"><Button size="sm" variant="ghost">Open inbox <ArrowRight size={12} /></Button></Link>}>
+              <div id="sec-inbox" className="space-y-3 scroll-mt-24">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
+                  <div className="p-2 rounded bg-secondary/40"><p className="text-base font-semibold">{totals.repliesAll}</p><p className="text-muted-foreground">Replies (7d)</p></div>
+                  <div className="p-2 rounded bg-secondary/40"><p className={`text-base font-semibold ${totals.urgentReplies ? "text-yellow-400" : ""}`}>{totals.urgentReplies}</p><p className="text-muted-foreground">Urgent</p></div>
+                  <div className="p-2 rounded bg-secondary/40"><p className={`text-base font-semibold ${drafts.length ? "text-yellow-400" : ""}`}>{drafts.length}</p><p className="text-muted-foreground">AI drafts pending</p></div>
+                  <div className="p-2 rounded bg-secondary/40"><p className="text-base font-semibold">{proposals.length}</p><p className="text-muted-foreground">Proposals draft</p></div>
+                </div>
+                {totals.approvalsTotal === 0 ? (
+                  <p className="text-sm text-muted-foreground">No items waiting for approval.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {drafts.slice(0, 4).map((d: any) => (
+                      <Link key={d.id} to="/founder/conversations" className="flex items-center justify-between p-2.5 rounded bg-secondary/40 hover:bg-secondary text-sm">
+                        <div><span className="text-muted-foreground text-xs">AI draft · </span>{d.classification ?? "reply"}</div>
+                        <span className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(d.created_at), { addSuffix: true })}</span>
+                      </Link>
+                    ))}
+                    {hotConvos.slice(0, 3).map((h: any) => (
+                      <Link key={h.id} to={`/founder/conversations/${h.id}`} className="flex items-center justify-between p-2.5 rounded bg-secondary/40 hover:bg-secondary text-sm">
+                        <div><span className="text-muted-foreground text-xs">Escalation · </span>{h.escalation_reason ?? "needs review"}</div>
+                        <span className="text-xs text-muted-foreground">{h.business_name}</span>
+                      </Link>
+                    ))}
+                    {proposals.slice(0, 3).map((p: any) => (
+                      <Link key={p.id} to={`/founder/internal-proposals`} className="flex items-center justify-between p-2.5 rounded bg-secondary/40 hover:bg-secondary text-sm">
+                        <div><span className="text-muted-foreground text-xs">Proposal · </span>{p.title} <span className="text-xs text-muted-foreground">({p.business_name})</span></div>
+                        <Badge variant="secondary" className="text-[10px]">{p.status}</Badge>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </Section>
+
+            {/* SECTION 9 — Results */}
+            <Section title="Results (7-day)" icon={Activity} action={<Link to="/founder/analytics"><Button size="sm" variant="ghost">Analytics <ArrowRight size={12} /></Button></Link>}>
+              <div id="sec-results" className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm scroll-mt-24">
+                <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Sent total</p><p className="text-xl font-semibold">{totals.sentTotal}</p></div>
+                <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Sent today</p><p className="text-xl font-semibold">{totals.sentToday}</p></div>
+                <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Replies</p><p className="text-xl font-semibold">{totals.repliesAll}</p></div>
+                <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Bounces</p><p className="text-xl font-semibold">{totals.bouncesAll}</p></div>
+                <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Reply rate</p><p className="text-xl font-semibold">{totals.sentTotal ? `${Math.round((totals.repliesAll / totals.sentTotal) * 100)}%` : "—"}</p></div>
+                <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Warm leads</p><p className="text-xl font-semibold">{totals.warmLeads}</p></div>
+                <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Open deals</p><p className="text-xl font-semibold">{deals.filter((d: any) => d.status !== "won" && d.status !== "lost").length}</p></div>
+                <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Invoices outstanding</p><p className="text-xl font-semibold">{invoices.filter((i: any) => i.status !== "paid" && i.status !== "void").length}</p></div>
+              </div>
+            </Section>
+
+            {/* SECTION 10 — Advanced / Legacy / Diagnostics */}
+            <Section title="Advanced · Legacy · Diagnostics" icon={FlaskConical}>
+              <Accordion type="multiple" className="w-full">
+                <AccordionItem value="legacy-apollo">
+                  <AccordionTrigger className="text-sm">Legacy Apollo Pool — optional / not recommended</AccordionTrigger>
+                  <AccordionContent>
+                    <div className="text-xs text-muted-foreground space-y-1">
+                      <p>Old 150-lead Apollo pool with {leadLifecycle?.legacy_optional_unlock_candidates ?? 0} legacy optional unlock candidates held on ice.</p>
+                      <p>Do not unlock unless founder explicitly overrides. Source of truth is Lead Quality Autopilot above.</p>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="businesses">
+                  <AccordionTrigger className="text-sm">All businesses</AccordionTrigger>
+                  <AccordionContent>
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {businessStats.map((b) => (
+                        <div key={b.id} className="p-3 rounded-lg bg-secondary/30 border border-border/40">
+                          <div className="flex items-start justify-between gap-2 mb-2">
+                            <p className="font-medium text-sm">{b.name}</p>
+                            <Badge variant="secondary" className={`text-[10px] ${businessStatusColor(b.status)}`}>{b.status.replace("_", " ")}</Badge>
+                          </div>
+                          <div className="grid grid-cols-5 gap-1 text-center text-[10px]">
+                            <div><p className="font-semibold text-sm">{b.activeCampaigns}</p><p className="text-muted-foreground">Camp.</p></div>
+                            <div><p className="font-semibold text-sm">{b.warm}</p><p className="text-muted-foreground">Warm</p></div>
+                            <div><p className={`font-semibold text-sm ${b.pendingApprovals ? "text-yellow-400" : ""}`}>{b.pendingApprovals}</p><p className="text-muted-foreground">Approve</p></div>
+                            <div><p className={`font-semibold text-sm ${b.blockedQueue ? "text-yellow-400" : ""}`}>{b.blockedQueue}</p><p className="text-muted-foreground">Block</p></div>
+                            <div><p className={`font-semibold text-sm ${(b.failedSends + b.systemWarnings) ? "text-destructive" : ""}`}>{b.failedSends + b.systemWarnings}</p><p className="text-muted-foreground">Issues</p></div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="workers">
+                  <AccordionTrigger className="text-sm">AI Workers</AccordionTrigger>
+                  <AccordionContent>
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2">
+                      {workers.map((w) => (
+                        <Link key={w.key} to={w.to} className="p-2.5 rounded-lg bg-secondary/30 border border-border/40 hover:border-primary/40 transition-colors block">
+                          <div className="flex items-center justify-between mb-1.5">
+                            <w.icon size={14} className="text-primary" />
+                            <Badge variant="secondary" className={`text-[9px] ${workerStatusColor(w.status)}`}>{w.status.replace("_", " ")}</Badge>
+                          </div>
+                          <p className="text-xs font-medium">{w.name}</p>
+                          <p className="text-[10px] text-muted-foreground line-clamp-1">{w.recent}</p>
+                        </Link>
+                      ))}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="blockers">
+                  <AccordionTrigger className="text-sm">Blockers & truth panel</AccordionTrigger>
+                  <AccordionContent>
+                    {(blockerSections.current.length + blockerSections.safetyGates.length + blockerSections.completed.length + blockerSections.observations.length) === 0 ? (
+                      <div className="flex items-center gap-2 text-sm text-green-400"><CheckCircle2 size={14} /> No active blockers.</div>
+                    ) : (
+                      <div className="space-y-3">
+                        {[
+                          { key: "current", title: "Current blockers", items: blockerSections.current },
+                          { key: "safety", title: "Safety gates", items: blockerSections.safetyGates },
+                          { key: "completed", title: "Completed repairs", items: blockerSections.completed },
+                          { key: "observations", title: "Campaign observations", items: blockerSections.observations },
+                        ].map((g) => g.items.length === 0 ? null : (
+                          <div key={g.key}>
+                            <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">{g.title}</p>
+                            <div className="space-y-1.5">
+                              {g.items.map((b, idx) => (
+                                <Link key={idx} to={b.to ?? "/founder/system"} className={`block p-2 rounded text-xs ${b.severity === "danger" ? "bg-destructive/10 border border-destructive/30" : b.severity === "good" ? "bg-green-500/10 border border-green-500/20 text-green-300" : "bg-yellow-500/5 border border-yellow-500/20"}`}>
+                                  {b.msg}
+                                </Link>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="diagnostics">
+                  <AccordionTrigger className="text-sm">Raw diagnostics & execution status</AccordionTrigger>
+                  <AccordionContent>
+                    <div className="space-y-4">
+                      <ExecutionStatusPanel />
+                      <ControlledProofSend />
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="orchestration">
+                  <AccordionTrigger className="text-sm">Agent orchestration</AccordionTrigger>
+                  <AccordionContent><AgentOrchestration /></AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="capabilities">
+                  <AccordionTrigger className="text-sm">Liftor capabilities</AccordionTrigger>
+                  <AccordionContent><LiftorCapabilities /></AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </Section>
+          </div>
+        );
+      })()}
     </FounderLayout>
   );
 };
