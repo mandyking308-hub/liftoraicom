@@ -49,6 +49,27 @@ type LastUnlockRun = {
   unlocked_new: number;
 };
 
+type LifecycleSummary = {
+  total_leads: number;
+  active_working_leads: number;
+  active_candidates: number;
+  needs_verification_active: number;
+  verified_ready_for_review: number;
+  qualified_for_promotion: number;
+  founder_review_required: number;
+  promoted_to_contact: number;
+  already_in_crm: number;
+  duplicates_archived: number;
+  poor_fit_archived: number;
+  missing_contact_archived: number;
+  attempted_no_email: number;
+  archived_learning_only: number;
+  archived_not_working: number;
+  safe_to_unlock: number;
+  safe_to_promote: number;
+  safe_to_queue: number;
+};
+
 const Tile = ({ label, value, tone = "default" }: { label: string; value: number | string; tone?: "default" | "good" | "warn" | "danger" }) => {
   const cls =
     tone === "good" ? "text-green-400" :
@@ -94,6 +115,15 @@ export default function LeadQualityPanel() {
       const { data, error } = await (supabase as any).from("crm_spine_summary").select("*").maybeSingle();
       if (error) throw error;
       return data as CrmSpine | null;
+    },
+  });
+
+  const { data: lifecycle } = useQuery({
+    queryKey: ["lead-lifecycle-summary"],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any).from("lead_lifecycle_summary").select("*").maybeSingle();
+      if (error) throw error;
+      return data as LifecycleSummary | null;
     },
   });
 
