@@ -73,27 +73,20 @@ Deno.serve(async (req) => {
     return json({ error: "mode must be 'preview' or 'send'" }, 400);
   }
 
-  // ----- Mode guard (LIVE required for send) -----
+  // ----- Mode guard -----
+  // TEST MODE has been removed as an operational blocker (founder decision).
+  // Liftor defaults to LIVE OPERATING MODE; only real provider/contact/compliance
+  // guardrails (below) and explicit founder confirmation gate the send.
   const { data: modeRow } = await admin
     .from("system_settings")
     .select("value")
     .eq("key", "system_mode")
     .maybeSingle();
-  const systemMode: string =
-    typeof modeRow?.value === "string" ? modeRow.value : (modeRow?.value as string) ?? "test";
-  const isLive = systemMode === "live";
-
-  if (body.mode === "send" && !isLive) {
-    return json(
-      {
-        ok: false,
-        stage: "mode_guard",
-        reason: "TEST_MODE_ACTIVE",
-        message: "System is in TEST MODE. Switch to CONTROLLED LIVE before running a proof send.",
-      },
-      200,
-    );
-  }
+  const rawMode: string =
+    typeof modeRow?.value === "string" ? modeRow.value : (modeRow?.value as string) ?? "live";
+  // Treat anything other than an explicit admin-only "sandbox" as live.
+  const systemMode: string = rawMode === "sandbox" ? "sandbox" : "live";
+  const isLive = true;
 
   // ----- Resolve target queue row -----
   // If queue_id provided, use it. Otherwise pick the next pending row by
