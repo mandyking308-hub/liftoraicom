@@ -65,6 +65,7 @@ type LifecycleSummary = {
   attempted_no_email: number;
   archived_learning_only: number;
   archived_not_working: number;
+  legacy_optional_unlock_candidates: number;
   safe_to_unlock: number;
   safe_to_promote: number;
   safe_to_queue: number;
