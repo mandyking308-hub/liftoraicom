@@ -8,14 +8,15 @@ const SystemModeBanner = () => {
     queryKey: ["system-mode-banner"],
     refetchInterval: 60000,
     queryFn: async () => {
-      const [settings, modes, flags, blocked, capQueue, liveInbox, recentSysWarn] = await Promise.all([
+      const [settings, modes, flags, blocked, capQueue, liveInbox, openSysWarn, totalSysWarn] = await Promise.all([
         supabase.from("system_settings").select("key,value"),
         supabase.from("system_execution_modes").select("mode_name,is_default"),
         supabase.from("system_feature_flags").select("feature_name,enabled,execution_mode_id"),
         supabase.from("email_queue").select("id", { count: "exact", head: true }).eq("status", "blocked"),
         supabase.from("email_queue").select("id", { count: "exact", head: true }).eq("status", "blocked").eq("block_reason", "PROVIDER_DAILY_LIMIT_REACHED"),
         supabase.from("inboxes").select("id,email_address", { count: "exact" }).eq("active", true),
-        supabase.from("system_events").select("id", { count: "exact", head: true }).in("severity", ["high", "critical"]),
+        supabase.from("system_events").select("id", { count: "exact", head: true }).eq("resolved", false),
+        supabase.from("system_events").select("id", { count: "exact", head: true }),
       ]);
 
       const settingsMap = Object.fromEntries((settings.data ?? []).map((r: any) => [r.key, r.value]));
@@ -28,7 +29,8 @@ const SystemModeBanner = () => {
         providerCapped: (capQueue.count ?? 0) > 0,
         liveInbox: (liveInbox.data?.[0] as any)?.email_address ?? null,
         liveInboxCount: liveInbox.count ?? 0,
-        sysWarnings: recentSysWarn.count ?? 0,
+        sysWarningsOpen: openSysWarn.count ?? 0,
+        sysWarningsTotal: totalSysWarn.count ?? 0,
       };
     },
   });
@@ -41,21 +43,31 @@ const SystemModeBanner = () => {
   banners.push(
     isLive
       ? { icon: ShieldAlert, cls: "bg-destructive/10 border-destructive/40 text-destructive", title: "LIVE MODE — outbound sends can run", detail: `Execution mode: ${data.executionMode ?? "default"} · ${data.flagsEnabled}/${data.flagsTotal} feature flags on`, to: "/founder/system/modes" }
-      : { icon: ShieldCheck, cls: "bg-yellow-500/10 border-yellow-500/30 text-yellow-400", title: "TEST MODE — outbound sends are simulated", detail: `Execution mode: ${data.executionMode ?? "default"} · live sends are gated`, to: "/founder/system/modes" }
+      : { icon: ShieldCheck, cls: "bg-yellow-500/10 border-yellow-500/30 text-yellow-400", title: "TEST MODE — live sends will not run", detail: "TEST MODE is the primary send gate. Switch to LIVE only after founder confirms.", to: "/founder/system/modes" }
   );
 
   if (data.liveInboxCount === 0) {
     banners.push({ icon: AlertTriangle, cls: "bg-yellow-500/10 border-yellow-500/30 text-yellow-400", title: "No live inbox configured", detail: "Email Agent cannot send until an inbox is active", to: "/founder/crm/inboxes" });
   } else {
-    banners.push({ icon: ShieldCheck, cls: "bg-secondary/40 border-border/40 text-foreground/80", title: `Active inbox: ${data.liveInbox}`, detail: data.providerCapped ? "Provider daily cap reached — sends paused until reset" : "Provider OK", to: "/founder/sending" });
+    const capDetail = data.providerCapped
+      ? (isLive ? "Provider daily cap reached — sends paused until reset" : "Provider cap is informational — TEST MODE blocks sends regardless")
+      : (isLive ? "Provider OK" : "Provider OK · informational only in TEST MODE");
+    banners.push({ icon: ShieldCheck, cls: "bg-secondary/40 border-border/40 text-foreground/80", title: `Active inbox: ${data.liveInbox}`, detail: capDetail, to: "/founder/sending" });
   }
 
   if (data.blocked > 0) {
     banners.push({ icon: AlertTriangle, cls: "bg-yellow-500/10 border-yellow-500/30 text-yellow-400", title: `${data.blocked} queue items blocked by safety gates`, detail: "Compliance/Outreach gates are holding sends", to: "/founder/outreach/queue" });
   }
 
-  if (data.sysWarnings > 0) {
-    banners.push({ icon: AlertTriangle, cls: "bg-destructive/10 border-destructive/40 text-destructive", title: `${data.sysWarnings} system warning${data.sysWarnings === 1 ? "" : "s"} logged`, detail: "Oversight Agent has open warnings", to: "/founder/system/events" });
+  if (data.sysWarningsTotal > 0) {
+    const open = data.sysWarningsOpen;
+    banners.push({
+      icon: AlertTriangle,
+      cls: open > 0 ? "bg-destructive/10 border-destructive/40 text-destructive" : "bg-secondary/40 border-border/40 text-foreground/80",
+      title: `System warnings: ${open} open / ${data.sysWarningsTotal} logged total`,
+      detail: open > 0 ? "Oversight Agent has open warnings" : "All logged warnings resolved",
+      to: "/founder/system/events",
+    });
   }
 
   return (
