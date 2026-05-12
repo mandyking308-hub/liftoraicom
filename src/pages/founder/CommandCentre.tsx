@@ -3,6 +3,7 @@ import FounderLayout from "@/components/founder/FounderLayout";
 import LiftorCapabilities from "@/components/founder/LiftorCapabilities";
 import AgentOrchestration from "@/components/founder/AgentOrchestration";
 import SystemModeBanner from "@/components/founder/SystemModeBanner";
+import ControlledProofSend from "@/components/founder/ControlledProofSend";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -395,6 +396,8 @@ const CommandCentre = () => {
         </div>
 
         <SystemModeBanner />
+
+        <ControlledProofSend />
 
         <Tabs defaultValue="today" className="space-y-6">
           <TabsList>
