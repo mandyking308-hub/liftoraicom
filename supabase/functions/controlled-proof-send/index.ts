@@ -512,10 +512,18 @@ Deno.serve(async (req) => {
     inbox_email: inbox?.email_address,
     queue_after: postRow,
     email_event: emailEvent,
+    message: founderMessage,
+    sent_folder_copy: success
+      ? appendFailed
+        ? { ok: false, note: "Secondary warning only. Email was delivered. No resend." }
+        : { ok: true }
+      : null,
     worker_summary: workerResult,
     worker_error: workerError,
     next_recommended_action: success
-      ? "Watch the inbox for any reply. The Conversation Agent will draft a response for founder approval."
+      ? appendFailed
+        ? "Email delivered. Investigate IMAP Sent-folder name/permissions for this inbox when convenient. No resend."
+        : "Watch the inbox for any reply. The Conversation Agent will draft a response for founder approval."
       : `Review send_error / block_reason and rerun preview. Status: ${postRow?.status ?? "unknown"}.`,
   });
 });
