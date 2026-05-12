@@ -207,9 +207,9 @@ const CommandCentre = () => {
     const orphan = totals.orphanArchived;
     const outreachNext =
       totals.failedSends > 0 ? `Investigate ${totals.failedSends} failed send${totals.failedSends === 1 ? "" : "s"}` :
-      (isLiveMode && totals.inboxCapped > 0) ? "Wait for inbox provider cap to reset" :
+      (totals.inboxCapped > 0) ? "Wait for inbox provider cap to reset" :
       totals.blockedQueue > 0 ? `Wait for ${totals.blockedQueue} safety-gated contact${totals.blockedQueue === 1 ? "" : "s"} to cool down` :
-      totals.pendingQueue > 0 ? (isLiveMode ? "Continue scheduled sends" : "Confirm TEST/LIVE mode before any real sending") : "Launch a new campaign";
+      totals.pendingQueue > 0 ? "Continue scheduled sends" : "Launch a new campaign";
     return [
       { key: "outreach", name: "Outreach Agent", icon: Send, status: totals.activeCampaigns > 0 ? "active" : activeInbox ? "idle" : "needs_setup",
         recent: `${totals.pendingQueue} queued · ${totals.blockedQueue} blocked · ${totals.failedSends} failed`, pending: totals.pendingQueue, blocked: totals.blockedQueue,
