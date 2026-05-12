@@ -67,6 +67,12 @@ type LifecycleSummary = {
   archived_not_working: number;
   legacy_optional_unlock_candidates: number;
   verified_email_available_locked: number;
+  email_reveal_required?: number;
+  reveal_shortlisted?: number;
+  safe_to_promote_after_reveal?: number;
+  already_in_crm_after_reveal?: number;
+  reveal_attempted_no_email?: number;
+  reveal_invalid_email?: number;
   unlock_required: number;
   safe_to_unlock: number;
   safe_to_promote: number;
