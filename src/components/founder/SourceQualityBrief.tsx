@@ -1,10 +1,13 @@
-import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMemo, useState, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ClipboardCopy, FileText, ScanSearch, Inbox, ShieldAlert } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { ClipboardCopy, FileText, ScanSearch, Inbox, ShieldAlert, Pencil, X, Save, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 type Brief = {
@@ -76,8 +79,30 @@ function buildCopyText(b: Brief): string {
   return lines.join("\n");
 }
 
+function arrToLines(arr: string[]) { return arr.join("\n"); }
+function linesToArr(text: string) { return text.split("\n").map(s => s.trim()).filter(Boolean); }
+
 export default function SourceQualityBrief() {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  const [isEditing, setIsEditing] = useState(false);
+  const [isFounder, setIsFounder] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [showFull, setShowFull] = useState(false);
+
+  const [form, setForm] = useState<Partial<Brief>>({});
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .then(({ data }) => {
+        const hasFounder = data?.some((r: any) => r.role === "founder" || r.role === "admin") ?? false;
+        setIsFounder(hasFounder);
+      });
+  }, [user]);
 
   const { data: brief, isLoading } = useQuery({
     queryKey: ["sourcing-brief", NEONCANDY_BUSINESS_ID],
@@ -94,6 +119,12 @@ export default function SourceQualityBrief() {
       return data as unknown as Brief | null;
     },
   });
+
+  useEffect(() => {
+    if (brief && !isEditing) {
+      setForm({ ...brief });
+    }
+  }, [brief]);
 
   const copyText = useMemo(() => (brief ? buildCopyText(brief) : ""), [brief]);
 
@@ -115,23 +146,244 @@ export default function SourceQualityBrief() {
     });
   };
 
+  const startEdit = () => {
+    if (!brief) return;
+    setForm({ ...brief });
+    setIsEditing(true);
+  };
+
+  const cancelEdit = () => {
+    setIsEditing(false);
+    if (brief) setForm({ ...brief });
+  };
+
+  const saveEdit = async () => {
+    if (!brief || !user) return;
+    setSaving(true);
+
+    const payload = {
+      name: form.name ?? brief.name,
+      target_audience: form.target_audience ?? brief.target_audience,
+      priority_segments: {
+        tier_1: linesToArr((form.priority_segments as any)?.tier_1 ?? arrToLines(brief.priority_segments?.tier_1 ?? [])),
+        tier_2: linesToArr((form.priority_segments as any)?.tier_2 ?? arrToLines(brief.priority_segments?.tier_2 ?? [])),
+        tier_3: linesToArr((form.priority_segments as any)?.tier_3 ?? arrToLines(brief.priority_segments?.tier_3 ?? [])),
+      },
+      include_titles: linesToArr(form.include_titles ? arrToLines(form.include_titles as string[]) : arrToLines(brief.include_titles)),
+      exclude_titles: linesToArr(form.exclude_titles ? arrToLines(form.exclude_titles as string[]) : arrToLines(brief.exclude_titles)),
+      include_company_types: linesToArr(form.include_company_types ? arrToLines(form.include_company_types as string[]) : arrToLines(brief.include_company_types)),
+      exclude_company_types: linesToArr(form.exclude_company_types ? arrToLines(form.exclude_company_types as string[]) : arrToLines(brief.exclude_company_types)),
+      apollo_search_keywords: linesToArr(form.apollo_search_keywords ? arrToLines(form.apollo_search_keywords as string[]) : arrToLines(brief.apollo_search_keywords)),
+      suggested_first_search_size: form.suggested_first_search_size ?? brief.suggested_first_search_size,
+      suggested_first_export_size: form.suggested_first_export_size ?? brief.suggested_first_export_size,
+      suggested_unlock_strategy: form.suggested_unlock_strategy ?? brief.suggested_unlock_strategy,
+      notes: form.notes ?? brief.notes,
+      updated_by: user.id,
+    };
+
+    try {
+      const { error: updError } = await supabase
+        .from("business_sourcing_briefs" as any)
+        .update(payload as any)
+        .eq("id", brief.id);
+
+      if (updError) throw updError;
+
+      // Log audit
+      await supabase.from("brief_audit_log" as any).insert({
+        brief_id: brief.id,
+        updated_by: user.id,
+        changed_fields: Object.keys(payload).reduce((acc, k) => {
+          (acc as any)[k] = true;
+          return acc;
+        }, {}),
+        previous_summary: `Updated by ${user.email ?? user.id} via Command Centre UI`,
+      } as any);
+
+      toast.success("Brief updated");
+      setIsEditing(false);
+      qc.invalidateQueries({ queryKey: ["sourcing-brief", NEONCANDY_BUSINESS_ID] });
+    } catch (e: any) {
+      toast.error("Failed to update brief", { description: e?.message ?? String(e) });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const updateForm = (field: keyof Brief, value: any) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const updateTier = (tier: string, value: string) => {
+    setForm((prev) => ({
+      ...prev,
+      priority_segments: { ...(prev.priority_segments as any), [tier]: linesToArr(value) },
+    }));
+  };
+
+  if (isLoading) {
+    return (
+      <Card className="tech-card">
+        <CardContent className="py-8">
+          <p className="text-xs text-muted-foreground">Loading brief…</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!brief) {
+    return (
+      <Card className="tech-card">
+        <CardContent className="py-8">
+          <p className="text-xs text-muted-foreground">No active sourcing brief found for NeonCandy.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="tech-card">
       <CardHeader className="pb-2">
-        <CardTitle className="text-base flex items-center gap-2">
+        <CardTitle className="text-base flex items-center gap-2 flex-wrap">
           <FileText size={16} /> Source Quality Brief — NeonCandy
           <Badge variant="outline" className="ml-2 text-[10px]">business-specific</Badge>
           <Badge variant="outline" className="ml-1 text-[10px] border-green-500/40 text-green-300">
             no credits spent
           </Badge>
+          {isFounder && !isEditing && (
+            <Button size="sm" variant="ghost" className="ml-auto" onClick={startEdit}>
+              <Pencil size={14} className="mr-1" /> Edit brief
+            </Button>
+          )}
+          {isEditing && (
+            <div className="ml-auto flex gap-2">
+              <Button size="sm" variant="outline" onClick={cancelEdit}>
+                <X size={14} className="mr-1" /> Cancel
+              </Button>
+              <Button size="sm" onClick={saveEdit} disabled={saving}>
+                {saving ? <Loader2 size={14} className="animate-spin mr-1" /> : <Save size={14} className="mr-1" />}
+                Save
+              </Button>
+            </div>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {isLoading && <p className="text-xs text-muted-foreground">Loading brief…</p>}
-        {!isLoading && !brief && (
-          <p className="text-xs text-muted-foreground">No active sourcing brief found for NeonCandy.</p>
-        )}
-        {brief && (
+        {isEditing ? (
+          <div className="space-y-4">
+            <div className="rounded-md border border-primary/40 bg-primary/10 p-3 text-xs">
+              <p className="font-medium text-foreground">Editing mode — founder only</p>
+              <p className="text-muted-foreground mt-0.5">Changes update the existing brief in place. No duplicate is created.</p>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs uppercase tracking-wide text-muted-foreground">Brief name</label>
+              <Input value={form.name ?? ""} onChange={(e) => updateForm("name", e.target.value)} />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs uppercase tracking-wide text-muted-foreground">Target audience</label>
+              <Textarea value={form.target_audience ?? ""} onChange={(e) => updateForm("target_audience", e.target.value)} rows={3} />
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-3">
+              {["tier_1", "tier_2", "tier_3"].map((tier) => (
+                <div key={tier} className="space-y-1">
+                  <label className="text-xs uppercase tracking-wide text-muted-foreground">
+                    {tier === "tier_1" ? "Tier 1 — Highest" : tier === "tier_2" ? "Tier 2 — Strong" : "Tier 3 — Selective"}
+                  </label>
+                  <Textarea
+                    value={arrToLines((form.priority_segments as any)?.[tier] ?? brief.priority_segments?.[tier] ?? [])}
+                    onChange={(e) => updateTier(tier, e.target.value)}
+                    rows={5}
+                  />
+                </div>
+              ))}
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-xs uppercase tracking-wide text-muted-foreground">Include titles (one per line)</label>
+                <Textarea
+                  value={arrToLines(form.include_titles as string[] ?? brief.include_titles)}
+                  onChange={(e) => updateForm("include_titles", linesToArr(e.target.value))}
+                  rows={6}
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs uppercase tracking-wide text-muted-foreground">Exclude titles (one per line)</label>
+                <Textarea
+                  value={arrToLines(form.exclude_titles as string[] ?? brief.exclude_titles)}
+                  onChange={(e) => updateForm("exclude_titles", linesToArr(e.target.value))}
+                  rows={6}
+                />
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-xs uppercase tracking-wide text-muted-foreground">Include company types (one per line)</label>
+                <Textarea
+                  value={arrToLines(form.include_company_types as string[] ?? brief.include_company_types)}
+                  onChange={(e) => updateForm("include_company_types", linesToArr(e.target.value))}
+                  rows={5}
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs uppercase tracking-wide text-muted-foreground">Exclude company types (one per line)</label>
+                <Textarea
+                  value={arrToLines(form.exclude_company_types as string[] ?? brief.exclude_company_types)}
+                  onChange={(e) => updateForm("exclude_company_types", linesToArr(e.target.value))}
+                  rows={5}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs uppercase tracking-wide text-muted-foreground">Apollo search keywords (one per line)</label>
+              <Textarea
+                value={arrToLines(form.apollo_search_keywords as string[] ?? brief.apollo_search_keywords)}
+                onChange={(e) => updateForm("apollo_search_keywords", linesToArr(e.target.value))}
+                rows={4}
+              />
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-3">
+              <div className="space-y-1">
+                <label className="text-xs uppercase tracking-wide text-muted-foreground">Suggested first search size</label>
+                <Input
+                  type="number"
+                  value={form.suggested_first_search_size ?? ""}
+                  onChange={(e) => updateForm("suggested_first_search_size", e.target.value ? Number(e.target.value) : null)}
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs uppercase tracking-wide text-muted-foreground">Suggested first export size</label>
+                <Input
+                  type="number"
+                  value={form.suggested_first_export_size ?? ""}
+                  onChange={(e) => updateForm("suggested_first_export_size", e.target.value ? Number(e.target.value) : null)}
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs uppercase tracking-wide text-muted-foreground">Unlock strategy</label>
+                <Input
+                  value={form.suggested_unlock_strategy ?? ""}
+                  onChange={(e) => updateForm("suggested_unlock_strategy", e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs uppercase tracking-wide text-muted-foreground">Notes</label>
+              <Textarea value={form.notes ?? ""} onChange={(e) => updateForm("notes", e.target.value)} rows={3} />
+            </div>
+
+            <p className="text-[10px] text-muted-foreground">
+              Email requirements, CRM exclusion rules, and Apollo credit protection are controlled via structured JSON and are not editable in this simplified form. Contact engineering to adjust those rules.
+            </p>
+          </div>
+        ) : (
           <>
             <div className="rounded-md border border-primary/40 bg-primary/10 p-3 text-xs">
               <p className="font-medium text-foreground">
@@ -144,6 +396,7 @@ export default function SourceQualityBrief() {
                 <li>Do not spend unlock credits on the legacy pool unless founder overrides.</li>
               </ul>
             </div>
+
             {brief.target_audience && (
               <p className="text-sm text-foreground/90">{brief.target_audience}</p>
             )}
