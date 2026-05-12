@@ -183,10 +183,43 @@ const CommandCentre = () => {
   // Blockers in plain English
   const blockers = useMemo(() => {
     const list: { msg: string; severity: string; to?: string }[] = [];
+    // Grouped queue block reasons (140 blocked items rolled up to founder English)
+    const blockedRows = (queue ?? []).filter((q: any) => q.status === "blocked");
+    const reasonMap: Record<string, { label: string; severity: string; recoverable: boolean }> = {
+      SIMULATED_PARENT_NOT_SENT: { label: "waiting on an earlier sequence step that never sent (legacy/test sim)", severity: "warn", recoverable: true },
+      RECENTLY_CONTACTED: { label: "contact was contacted recently — re-contact gate active", severity: "warn", recoverable: true },
+      RECENT_COMMUNICATION_24H: { label: "blocked by the 24h re-contact rule", severity: "warn", recoverable: true },
+      BLOCKED: { label: "generic block — needs review", severity: "warn", recoverable: false },
+      INBOX_DAILY_LIMIT: { label: "inbox daily limit reached — resumes tomorrow", severity: "warn", recoverable: true },
+      NO_ACTIVE_INBOX: { label: "no active inbox available for this business", severity: "danger", recoverable: false },
+      CONTACT_SUPPRESSED: { label: "contact is suppressed (bounce / unsubscribe)", severity: "warn", recoverable: false },
+      CONTACT_REPLIED: { label: "contact already replied", severity: "warn", recoverable: false },
+      CONTACT_BOUNCED: { label: "contact previously bounced", severity: "warn", recoverable: false },
+      DO_NOT_CONTACT: { label: "contact marked do-not-contact", severity: "warn", recoverable: false },
+    };
+    const grouped = blockedRows.reduce((acc: Record<string, number>, r: any) => {
+      const k = r.block_reason || "UNKNOWN";
+      acc[k] = (acc[k] ?? 0) + 1;
+      return acc;
+    }, {});
+    Object.entries(grouped)
+      .sort((a, b) => (b[1] as number) - (a[1] as number))
+      .forEach(([reason, count]) => {
+        const meta = reasonMap[reason] ?? { label: `unmapped reason: ${reason}`, severity: "warn", recoverable: false };
+        list.push({ msg: `${count} contact${count === 1 ? "" : "s"} blocked — ${meta.label}`, severity: meta.severity, to: "/founder/outreach/queue" });
+      });
     inboxes.forEach((i: any) => {
       if (!i.active) return;
       if (i.provider_blocked_until && new Date(i.provider_blocked_until) > new Date()) {
         list.push({ msg: `${i.email_address}: provider daily limit reached (${i.paused_reason ?? i.provider_blocked_reason ?? "throttled"}) — resumes ${format(new Date(i.provider_blocked_until), "dd MMM HH:mm")}`, severity: "warn", to: "/founder/sending" });
+      }
+      if (i.active && (i.emails_sent_today ?? 0) >= (i.daily_send_limit ?? 0) && (i.daily_send_limit ?? 0) > 0) {
+        list.push({ msg: `${i.email_address}: daily send limit reached (${i.emails_sent_today}/${i.daily_send_limit}) — pending sends will resume tomorrow`, severity: "warn", to: "/founder/sending" });
+      } else if (i.active && (i.hourly_send_count ?? 0) >= (i.hourly_send_limit ?? 0) && (i.hourly_send_limit ?? 0) > 0) {
+        list.push({ msg: `${i.email_address}: hourly send limit reached (${i.hourly_send_count}/${i.hourly_send_limit}) — pending sends will resume next hour`, severity: "warn", to: "/founder/sending" });
+      }
+      if (i.provider_blocked_reason && !i.provider_blocked_until) {
+        list.push({ msg: `${i.email_address}: provider reports "${i.provider_blocked_reason}"`, severity: "warn", to: "/founder/sending" });
       }
       if ((i.reputation_score ?? 100) < 40) list.push({ msg: `${i.email_address}: low inbox reputation (${i.reputation_score})`, severity: "warn", to: "/founder/sending" });
       if (i.last_test_send_status === "failed") list.push({ msg: `${i.email_address}: last test send failed — ${i.last_error_message ?? "see logs"}`, severity: "danger", to: `/founder/crm/inboxes/${i.id}/configure` });
@@ -198,8 +231,8 @@ const CommandCentre = () => {
       if (!hasInbox) list.push({ msg: `Campaign "${c.campaign_name}" (${c.business_name}) has no active sender inbox`, severity: "danger", to: "/founder/outreach/campaigns" });
     });
     sysEvents.slice(0, 10).forEach((e: any) => list.push({ msg: `${e.business_name ? `[${e.business_name}] ` : ""}${e.message}`, severity: e.severity === "critical" ? "danger" : "warn", to: "/founder/system" }));
-    return list.slice(0, 12);
-  }, [inboxes, campaigns, sysEvents]);
+    return list.slice(0, 16);
+  }, [inboxes, campaigns, sysEvents, queue]);
 
   // Recommended actions
   const recommendations = useMemo(() => {
