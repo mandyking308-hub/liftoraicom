@@ -237,6 +237,57 @@ const ControlledLiveBatch = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <div className="border-t border-border/40 pt-4 space-y-2">
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <h4 className="text-sm font-semibold">Resolve orphan follow-ups</h4>
+            <p className="text-xs text-muted-foreground mt-1">
+              Pending step 2/3/4 rows whose earlier sequence step never sent
+              via real SMTP. Preview safely; apply to cancel them and
+              optionally restart safe contacts at Step 1.
+            </p>
+          </div>
+          <div className="flex gap-2 shrink-0">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => runOrphan(false)}
+              disabled={!!orphanRunning}
+            >
+              {orphanRunning === "preview" ? (
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Previewing…</>
+              ) : "Preview"}
+            </Button>
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={() => runOrphan(true)}
+              disabled={!!orphanRunning}
+            >
+              {orphanRunning === "apply" ? (
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Applying…</>
+              ) : "Cancel orphans + restart safe Step 1"}
+            </Button>
+          </div>
+        </div>
+        {orphanResult && (
+          <div className="rounded-md border border-border/50 bg-muted/20 p-3 text-xs space-y-1">
+            <div className="font-medium text-sm">
+              {orphanResult.dry_run ? "Preview" : "Applied"}: {orphanResult.message}
+            </div>
+            {orphanResult.summary && (
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1 font-mono">
+                <div>Orphans found: {orphanResult.summary.orphans_found}</div>
+                <div>Contacts affected: {orphanResult.summary.contacts_affected}</div>
+                <div>Safe to restart: {orphanResult.summary.safe_to_restart}</div>
+                <div>Cancelled: {orphanResult.summary.cancelled}</div>
+                <div>Step 1 restarts created: {orphanResult.summary.restart_created}</div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </Card>
   );
 };
