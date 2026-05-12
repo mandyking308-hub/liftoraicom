@@ -1491,6 +1491,92 @@ export type Database = {
         }
         Relationships: []
       }
+      business_sourcing_briefs: {
+        Row: {
+          apollo_credit_protection: Json
+          apollo_search_keywords: string[]
+          business_id: string
+          campaign_id: string | null
+          created_at: string
+          crm_exclusion_rules: Json
+          email_requirements: Json
+          exclude_company_types: string[]
+          exclude_titles: string[]
+          geography_preferences: Json
+          id: string
+          include_company_types: string[]
+          include_titles: string[]
+          is_active: boolean
+          last_updated_at: string
+          name: string
+          notes: string | null
+          priority_segments: Json
+          suggested_first_export_size: number | null
+          suggested_first_search_size: number | null
+          suggested_unlock_strategy: string | null
+          target_audience: string | null
+          updated_at: string
+        }
+        Insert: {
+          apollo_credit_protection?: Json
+          apollo_search_keywords?: string[]
+          business_id: string
+          campaign_id?: string | null
+          created_at?: string
+          crm_exclusion_rules?: Json
+          email_requirements?: Json
+          exclude_company_types?: string[]
+          exclude_titles?: string[]
+          geography_preferences?: Json
+          id?: string
+          include_company_types?: string[]
+          include_titles?: string[]
+          is_active?: boolean
+          last_updated_at?: string
+          name: string
+          notes?: string | null
+          priority_segments?: Json
+          suggested_first_export_size?: number | null
+          suggested_first_search_size?: number | null
+          suggested_unlock_strategy?: string | null
+          target_audience?: string | null
+          updated_at?: string
+        }
+        Update: {
+          apollo_credit_protection?: Json
+          apollo_search_keywords?: string[]
+          business_id?: string
+          campaign_id?: string | null
+          created_at?: string
+          crm_exclusion_rules?: Json
+          email_requirements?: Json
+          exclude_company_types?: string[]
+          exclude_titles?: string[]
+          geography_preferences?: Json
+          id?: string
+          include_company_types?: string[]
+          include_titles?: string[]
+          is_active?: boolean
+          last_updated_at?: string
+          name?: string
+          notes?: string | null
+          priority_segments?: Json
+          suggested_first_export_size?: number | null
+          suggested_first_search_size?: number | null
+          suggested_unlock_strategy?: string | null
+          target_audience?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_sourcing_briefs_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       businesses: {
         Row: {
           created_at: string
