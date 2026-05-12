@@ -531,7 +531,7 @@ const CommandCentre = () => {
               <div className="p-2 rounded bg-secondary/40"><p className={`text-base font-semibold ${totals.failedSends ? "text-destructive" : ""}`}>{totals.failedSends}</p><p className="text-muted-foreground">Failed</p></div>
               <div className="p-2 rounded bg-secondary/40"><p className="text-base font-semibold">{totals.repliesAll}</p><p className="text-muted-foreground">Replies (7d)</p></div>
               <div className="p-2 rounded bg-secondary/40"><p className="text-base font-semibold">{drafts.length}</p><p className="text-muted-foreground">AI drafts</p></div>
-              <div className="p-2 rounded bg-secondary/40"><p className={`text-base font-semibold ${totals.inboxCapped ? (isLiveMode ? "text-yellow-400" : "text-muted-foreground") : "text-green-400"}`}>{totals.inboxCapped ? (isLiveMode ? "Capped" : "Informational") : "OK"}</p><p className="text-muted-foreground">Inbox cap{!isLiveMode ? " (TEST)" : ""}</p></div>
+              <div className="p-2 rounded bg-secondary/40"><p className={`text-base font-semibold ${totals.inboxCapped ? "text-yellow-400" : "text-green-400"}`}>{totals.inboxCapped ? "Capped" : "OK"}</p><p className="text-muted-foreground">Inbox cap</p></div>
             </div>
             <div className="space-y-2">
               {campaigns.filter((c: any) => c.status === "active").slice(0, 4).map((c: any) => (
