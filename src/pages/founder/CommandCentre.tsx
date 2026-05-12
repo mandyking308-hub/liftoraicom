@@ -430,6 +430,20 @@ const CommandCentre = () => {
           with a provider message ID).
         </div>
 
+        {activeInboxes.length > 0 && (
+          <div className="rounded-lg border border-border bg-muted/30 px-4 py-3 text-sm">
+            <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1.5">Active sender identity</p>
+            <div className="flex flex-wrap gap-2">
+              {activeInboxes.map((i: any) => (
+                <Badge key={i.id} variant="secondary" className={`text-xs ${i.status_label === "ok" ? "bg-green-500/15 text-green-300" : "bg-yellow-500/15 text-yellow-300"}`}>
+                  {i.from_name ? `${i.from_name} · ` : ""}{i.email_address} <span className="text-muted-foreground ml-1">({i.business_name})</span>
+                </Badge>
+              ))}
+            </div>
+            <p className="text-[11px] text-muted-foreground mt-1.5">Outbound sends use these inboxes only. Founder/internal addresses (e.g. mandyking308@gmail.com) are suppressed from prospect flows.</p>
+          </div>
+        )}
+
         <LeadQualityPanel />
 
         <Tabs defaultValue="today" className="space-y-6">
