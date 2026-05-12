@@ -133,6 +133,17 @@ export default function SourceQualityBrief() {
         )}
         {brief && (
           <>
+            <div className="rounded-md border border-primary/40 bg-primary/10 p-3 text-xs">
+              <p className="font-medium text-foreground">
+                Next step: use this brief in Apollo to search for 50–75 verified-email leads.
+              </p>
+              <ul className="mt-1 space-y-0.5 text-muted-foreground list-disc pl-4">
+                <li>Verified business email required for normal import.</li>
+                <li>Locked / no-email profiles excluded by default.</li>
+                <li>Apollo unlock only for exceptional founder-approved leads.</li>
+                <li>Do not spend unlock credits on the legacy pool unless founder overrides.</li>
+              </ul>
+            </div>
             {brief.target_audience && (
               <p className="text-sm text-foreground/90">{brief.target_audience}</p>
             )}
