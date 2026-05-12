@@ -8381,6 +8381,8 @@ export type Database = {
           safe_to_queue: number | null
           safe_to_unlock: number | null
           total_leads: number | null
+          unlock_required: number | null
+          verified_email_available_locked: number | null
           verified_ready_for_review: number | null
         }
         Relationships: []
