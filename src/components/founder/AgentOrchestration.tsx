@@ -130,6 +130,7 @@ const AgentOrchestration = () => {
           invoicesTotal, invoicesUnpaid, paymentsTotal,
           suppliersTotal, assignmentsTotal,
           complianceEvents, systemEvents, retryQueue,
+          systemEventsOpen, retryPending, retryCompleted, aiDraftsTotal, demoNeon,
         },
         last: {
           lastImport, lastContact, lastCampaign, lastQueueSent, lastInbound,
