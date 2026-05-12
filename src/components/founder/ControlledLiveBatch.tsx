@@ -198,7 +198,9 @@ const ControlledLiveBatch = () => {
           <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs font-mono">
             <div>Sent before → after: {result.summary.sent_before ?? "—"} → {result.summary.sent_after ?? "—"}</div>
             <div>Queued before → after: {result.summary.pending_before ?? "—"} → {result.summary.pending_after ?? "—"}</div>
-            <div>Eligible selected: {result.summary.eligible_selected}</div>
+            <div>Candidates considered: {result.summary.candidates_considered ?? 0}</div>
+            <div>Structurally eligible: {result.summary.structurally_eligible ?? 0}</div>
+            <div>Orphan rejected (preselect): {result.summary.orphan_rejected_preselect ?? 0}</div>
             <div>Rescheduled to now: {result.summary.rescheduled_to_now ?? 0}</div>
             <div>Future-scheduled in batch: {result.summary.future_scheduled_count ?? 0}</div>
             <div>Blocked total: {result.summary.blocked_after ?? "—"}</div>
