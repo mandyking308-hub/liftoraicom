@@ -404,15 +404,16 @@ export default function LeadQualityPanel() {
           <>
           {lifecycle && (
             <div className="space-y-2">
-              <p className="text-xs font-medium text-foreground">Apollo lead lifecycle (active vs archive)</p>
+              <p className="text-xs font-medium text-foreground">Apollo lead lifecycle (search → reveal → promote)</p>
               <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
                 <Tile label="Apollo total" value={lifecycle.total_leads} />
                 <Tile label="Active working" value={lifecycle.active_working_leads} tone={lifecycle.active_working_leads > 0 ? "good" : "default"} />
-                <Tile label="Safe to unlock" value={lifecycle.safe_to_unlock} tone="good" />
-                <Tile label="Safe to promote" value={lifecycle.safe_to_promote} tone="good" />
+                <Tile label="Email reveal required" value={(lifecycle.email_reveal_required ?? 0) + (lifecycle.verified_email_available_locked ?? 0)} tone="warn" />
+                <Tile label="Reveal shortlisted" value={lifecycle.reveal_shortlisted ?? 0} tone="warn" />
+                <Tile label="Safe to promote (post-reveal)" value={lifecycle.safe_to_promote_after_reveal ?? lifecycle.safe_to_promote ?? 0} tone="good" />
                 <Tile label="Safe to queue" value={lifecycle.safe_to_queue} tone="good" />
-                <Tile label="Verified-email available (locked)" value={lifecycle.verified_email_available_locked ?? 0} tone="warn" />
-                <Tile label="Email reveal required" value={lifecycle.unlock_required ?? 0} tone="warn" />
+                <Tile label="Reveal attempted — no email" value={lifecycle.reveal_attempted_no_email ?? 0} />
+                <Tile label="Already in CRM after reveal" value={lifecycle.already_in_crm_after_reveal ?? 0} />
                 <Tile label="Legacy optional unlock candidates" value={lifecycle.legacy_optional_unlock_candidates} />
                 <Tile label="Duplicates archived" value={lifecycle.duplicates_archived} />
                 <Tile label="Poor fit archived" value={lifecycle.poor_fit_archived} />
@@ -421,7 +422,10 @@ export default function LeadQualityPanel() {
                 <Tile label="Promoted contacts" value={lifecycle.promoted_to_contact} tone="good" />
               </div>
               <p className="text-[11px] text-muted-foreground">
-                Source of truth = autopilot lifecycle. Archive buckets are retained for learning so Liftor never re-spends Apollo credits on the same bad/no-email/duplicate leads. Hard delete requires founder approval.
+                Apollo search and Apollo email reveal are <strong>separate stages</strong>. Search returns
+                candidate profiles + email-availability signal only. The actual address is only returned
+                after a founder-approved reveal/enrichment, which is what spends Apollo credits.
+                Promotion is impossible until <em>after</em> reveal and the post-reveal CRM check.
               </p>
             </div>
           )}
