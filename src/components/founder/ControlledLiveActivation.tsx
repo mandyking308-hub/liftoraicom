@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +26,7 @@ type CheckResult = {
 };
 
 const ControlledLiveActivation = () => {
+  const queryClient = useQueryClient();
   const [systemMode, setSystemMode] = useState<string>("test");
   const [checks, setChecks] = useState<CheckResult[]>([]);
   const [loading, setLoading] = useState(true);
@@ -238,6 +240,7 @@ const ControlledLiveActivation = () => {
       });
 
       setSystemMode(target);
+      queryClient.invalidateQueries({ queryKey: ["system-mode-banner"] });
       toast.success(target === "live" ? "Now in CONTROLLED LIVE MODE" : "Reverted to TEST MODE");
     } catch (err: any) {
       toast.error("Failed to switch mode: " + (err.message ?? "unknown"));
