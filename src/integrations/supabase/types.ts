@@ -1247,6 +1247,75 @@ export type Database = {
           },
         ]
       }
+      autopilot_runs: {
+        Row: {
+          already_in_crm_matched: number
+          business_id: string | null
+          created_at: string
+          decisions_created: number
+          details: Json
+          duplicates_collapsed: number
+          finished_at: string | null
+          id: string
+          missing_email_held: number
+          next_recommended_action: string | null
+          no_email_attempts_excluded: number
+          poor_fit_archived: number
+          safe_to_promote: number
+          safe_to_queue: number
+          safe_to_unlock: number
+          scanned_count: number
+          source_quality_score: number | null
+          started_at: string
+          status: string
+          trigger: string
+        }
+        Insert: {
+          already_in_crm_matched?: number
+          business_id?: string | null
+          created_at?: string
+          decisions_created?: number
+          details?: Json
+          duplicates_collapsed?: number
+          finished_at?: string | null
+          id?: string
+          missing_email_held?: number
+          next_recommended_action?: string | null
+          no_email_attempts_excluded?: number
+          poor_fit_archived?: number
+          safe_to_promote?: number
+          safe_to_queue?: number
+          safe_to_unlock?: number
+          scanned_count?: number
+          source_quality_score?: number | null
+          started_at?: string
+          status?: string
+          trigger: string
+        }
+        Update: {
+          already_in_crm_matched?: number
+          business_id?: string | null
+          created_at?: string
+          decisions_created?: number
+          details?: Json
+          duplicates_collapsed?: number
+          finished_at?: string | null
+          id?: string
+          missing_email_held?: number
+          next_recommended_action?: string | null
+          no_email_attempts_excluded?: number
+          poor_fit_archived?: number
+          safe_to_promote?: number
+          safe_to_queue?: number
+          safe_to_unlock?: number
+          scanned_count?: number
+          source_quality_score?: number | null
+          started_at?: string
+          status?: string
+          trigger?: string
+        }
+        Relationships: []
+      }
       brain_insights: {
         Row: {
           created_at: string
@@ -1373,6 +1442,72 @@ export type Database = {
           id?: string
           module_affected?: string
           title?: string
+        }
+        Relationships: []
+      }
+      business_autopilot_settings: {
+        Row: {
+          ai_classification_allowed: boolean
+          auto_archive_duplicates: boolean
+          auto_archive_poor_fit: boolean
+          auto_build_unlock_shortlist: boolean
+          auto_crm_cross_check: boolean
+          auto_dedupe_apollo_leads: boolean
+          auto_enqueue_contacts: boolean
+          auto_hold_missing_email_old_pool: boolean
+          auto_lifecycle_classify: boolean
+          auto_promote_verified_qualified_leads: boolean
+          auto_scan_imported_leads: boolean
+          auto_send_live_batches: boolean
+          auto_unlock_apollo_emails: boolean
+          business_id: string
+          created_at: string
+          id: string
+          max_apollo_unlock_credits_without_founder_approval: number
+          stale_needs_verification_days: number
+          updated_at: string
+        }
+        Insert: {
+          ai_classification_allowed?: boolean
+          auto_archive_duplicates?: boolean
+          auto_archive_poor_fit?: boolean
+          auto_build_unlock_shortlist?: boolean
+          auto_crm_cross_check?: boolean
+          auto_dedupe_apollo_leads?: boolean
+          auto_enqueue_contacts?: boolean
+          auto_hold_missing_email_old_pool?: boolean
+          auto_lifecycle_classify?: boolean
+          auto_promote_verified_qualified_leads?: boolean
+          auto_scan_imported_leads?: boolean
+          auto_send_live_batches?: boolean
+          auto_unlock_apollo_emails?: boolean
+          business_id: string
+          created_at?: string
+          id?: string
+          max_apollo_unlock_credits_without_founder_approval?: number
+          stale_needs_verification_days?: number
+          updated_at?: string
+        }
+        Update: {
+          ai_classification_allowed?: boolean
+          auto_archive_duplicates?: boolean
+          auto_archive_poor_fit?: boolean
+          auto_build_unlock_shortlist?: boolean
+          auto_crm_cross_check?: boolean
+          auto_dedupe_apollo_leads?: boolean
+          auto_enqueue_contacts?: boolean
+          auto_hold_missing_email_old_pool?: boolean
+          auto_lifecycle_classify?: boolean
+          auto_promote_verified_qualified_leads?: boolean
+          auto_scan_imported_leads?: boolean
+          auto_send_live_batches?: boolean
+          auto_unlock_apollo_emails?: boolean
+          business_id?: string
+          created_at?: string
+          id?: string
+          max_apollo_unlock_credits_without_founder_approval?: number
+          stale_needs_verification_days?: number
+          updated_at?: string
         }
         Relationships: []
       }
@@ -3049,6 +3184,71 @@ export type Database = {
             columns: ["subscription_id"]
             isOneToOne: false
             referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      founder_decisions: {
+        Row: {
+          business_id: string | null
+          cost_credit_impact: string | null
+          created_at: string
+          created_by_run: string | null
+          decided_at: string | null
+          decided_by: string | null
+          decision_type: string
+          finding: string | null
+          id: string
+          recommendation: string | null
+          related_ids: Json
+          resolution_note: string | null
+          risk: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          cost_credit_impact?: string | null
+          created_at?: string
+          created_by_run?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_type: string
+          finding?: string | null
+          id?: string
+          recommendation?: string | null
+          related_ids?: Json
+          resolution_note?: string | null
+          risk?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          cost_credit_impact?: string | null
+          created_at?: string
+          created_by_run?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_type?: string
+          finding?: string | null
+          id?: string
+          recommendation?: string | null
+          related_ids?: Json
+          resolution_note?: string | null
+          risk?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "founder_decisions_created_by_run_fkey"
+            columns: ["created_by_run"]
+            isOneToOne: false
+            referencedRelation: "autopilot_runs"
             referencedColumns: ["id"]
           },
         ]
