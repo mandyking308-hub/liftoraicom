@@ -106,6 +106,14 @@ const CommandCentre = () => {
     },
     refetchInterval: 60000,
   });
+  const { data: leadLifecycle } = useQuery({
+    queryKey: ["cc2-lead-lifecycle"],
+    queryFn: async () => {
+      const { data } = await (supabase as any).from("lead_lifecycle_summary").select("*").maybeSingle();
+      return data as { active_working_leads: number; safe_to_unlock: number; safe_to_promote: number; safe_to_queue: number; legacy_optional_unlock_candidates: number } | null;
+    },
+    refetchInterval: 60000,
+  });
   const { data: drafts = [] } = useQuery({
     queryKey: ["cc2-drafts"],
     queryFn: async () => (await supabase.from("ai_drafts").select("id,status,classification,created_at,contact_id,inbox_id").eq("status", "pending").order("created_at", { ascending: false }).limit(20)).data ?? [],
@@ -483,8 +491,15 @@ const CommandCentre = () => {
           <StatTile label="Failed sends" value={totals.failedSends} icon={AlertTriangle} tone={totals.failedSends ? "danger" : "good"} to="/founder/outreach/queue" />
           <StatTile label={`System warnings (open / logged)`} value={`${totals.systemWarningsOpen} / ${totals.systemWarningsTotal}`} icon={AlertTriangle} tone={totals.systemWarningsOpen ? "danger" : "good"} to="/founder/system" />
           <StatTile label="Open deals" value={deals.filter((d: any) => d.status !== "won" && d.status !== "lost").length} icon={Banknote} to="/founder/finance" />
-          <StatTile label="Raw leads needing verification" value={leadQualityCounts?.needsVerification ?? 0} icon={Search} tone={(leadQualityCounts?.needsVerification ?? 0) > 0 ? "warn" : "good"} />
-          <StatTile label="Apollo unlock shortlist" value={leadQualityCounts?.unlockShortlist ?? 0} icon={Sparkles} tone={(leadQualityCounts?.unlockShortlist ?? 0) > 0 ? "warn" : "default"} />
+          <StatTile
+            label={(leadLifecycle?.active_working_leads ?? 0) === 0 ? "Fresh Apollo search required" : "Active working leads"}
+            value={(leadLifecycle?.active_working_leads ?? 0) === 0 ? "Use NeonCandy brief" : (leadLifecycle?.active_working_leads ?? 0)}
+            icon={Sparkles}
+            tone={(leadLifecycle?.active_working_leads ?? 0) === 0 ? "warn" : "good"}
+          />
+          <StatTile label="Safe to unlock" value={leadLifecycle?.safe_to_unlock ?? 0} icon={Search} tone={(leadLifecycle?.safe_to_unlock ?? 0) > 0 ? "good" : "default"} />
+          <StatTile label="Safe to promote" value={leadLifecycle?.safe_to_promote ?? 0} icon={CheckCircle2} tone={(leadLifecycle?.safe_to_promote ?? 0) > 0 ? "good" : "default"} />
+          <StatTile label="Legacy optional unlock candidates" value={leadLifecycle?.legacy_optional_unlock_candidates ?? 0} icon={Clock} tone="default" />
           <StatTile label="Leads promoted to contacts" value={leadQualityCounts?.promoted ?? 0} icon={CheckCircle2} tone="good" />
         </div>
 
