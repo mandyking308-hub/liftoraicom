@@ -14,8 +14,8 @@ const SystemModeBanner = () => {
         supabase.from("system_feature_flags").select("feature_name,enabled,execution_mode_id"),
         supabase.from("email_queue").select("id", { count: "exact", head: true }).eq("status", "blocked"),
         supabase.from("email_queue").select("id", { count: "exact", head: true }).eq("status", "blocked").eq("block_reason", "PROVIDER_DAILY_LIMIT_REACHED"),
-        supabase.from("inboxes").select("id,email", { count: "exact" }).eq("active", true),
-        supabase.from("system_events").select("id", { count: "exact", head: true }).eq("severity", "warning"),
+        supabase.from("inboxes").select("id,email_address", { count: "exact" }).eq("active", true),
+        supabase.from("system_events").select("id", { count: "exact", head: true }).in("severity", ["high", "critical"]),
       ]);
 
       const settingsMap = Object.fromEntries((settings.data ?? []).map((r: any) => [r.key, r.value]));
@@ -26,7 +26,7 @@ const SystemModeBanner = () => {
         flagsTotal: (flags.data ?? []).length,
         blocked: blocked.count ?? 0,
         providerCapped: (capQueue.count ?? 0) > 0,
-        liveInbox: liveInbox.data?.[0]?.email ?? null,
+        liveInbox: (liveInbox.data?.[0] as any)?.email_address ?? null,
         liveInboxCount: liveInbox.count ?? 0,
         sysWarnings: recentSysWarn.count ?? 0,
       };
