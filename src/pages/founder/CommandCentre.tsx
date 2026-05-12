@@ -4,6 +4,7 @@ import LiftorCapabilities from "@/components/founder/LiftorCapabilities";
 import AgentOrchestration from "@/components/founder/AgentOrchestration";
 import SystemModeBanner from "@/components/founder/SystemModeBanner";
 import ControlledProofSend from "@/components/founder/ControlledProofSend";
+import ExecutionStatusPanel from "@/components/founder/ExecutionStatusPanel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -396,6 +397,8 @@ const CommandCentre = () => {
         </div>
 
         <SystemModeBanner />
+
+        <ExecutionStatusPanel />
 
         <ControlledProofSend />
 
