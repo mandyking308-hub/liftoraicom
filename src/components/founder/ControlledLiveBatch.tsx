@@ -19,7 +19,9 @@ import { toast } from "sonner";
 
 type BatchSummary = {
   batch_size_requested: number;
-  eligible_selected: number;
+  candidates_considered?: number;
+  structurally_eligible?: number;
+  orphan_rejected_preselect?: number;
   rescheduled_to_now?: number;
   future_scheduled_count?: number;
   sent: number;
@@ -36,6 +38,7 @@ type BatchResult = {
   message: string;
   note?: string;
   summary?: BatchSummary;
+  orphan_rejected_preselect?: Array<{ id: string; contact_id: string; sequence_step: number; reason: string }>;
   recent_rows?: Array<{
     id: string;
     status: string;
@@ -47,6 +50,19 @@ type BatchResult = {
   next_recommended_action?: string;
 };
 
+type OrphanResult = {
+  ok: boolean;
+  dry_run: boolean;
+  message: string;
+  summary?: {
+    orphans_found: number;
+    contacts_affected: number;
+    safe_to_restart: number;
+    cancelled: number;
+    restart_created: number;
+  };
+};
+
 const PRESETS = [1, 5, 10] as const;
 
 const ControlledLiveBatch = () => {
@@ -55,6 +71,8 @@ const ControlledLiveBatch = () => {
   const [running, setRunning] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [result, setResult] = useState<BatchResult | null>(null);
+  const [orphanRunning, setOrphanRunning] = useState<false | "preview" | "apply">(false);
+  const [orphanResult, setOrphanResult] = useState<OrphanResult | null>(null);
 
   const effectiveSize = (() => {
     if (custom.trim()) {
@@ -86,6 +104,27 @@ const ControlledLiveBatch = () => {
     } finally {
       setRunning(false);
       setConfirmOpen(false);
+    }
+  };
+
+  const runOrphan = async (apply: boolean) => {
+    setOrphanRunning(apply ? "apply" : "preview");
+    setOrphanResult(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("resolve-orphan-followups", {
+        body: { dry_run: !apply, restart_step1: apply },
+      });
+      if (error) {
+        toast.error(`Orphan resolver error: ${error.message}`);
+        setOrphanResult({ ok: false, dry_run: !apply, message: error.message });
+      } else {
+        setOrphanResult(data as OrphanResult);
+        toast.success((data as OrphanResult).message);
+      }
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setOrphanRunning(false);
     }
   };
 
@@ -159,7 +198,9 @@ const ControlledLiveBatch = () => {
           <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs font-mono">
             <div>Sent before → after: {result.summary.sent_before ?? "—"} → {result.summary.sent_after ?? "—"}</div>
             <div>Queued before → after: {result.summary.pending_before ?? "—"} → {result.summary.pending_after ?? "—"}</div>
-            <div>Eligible selected: {result.summary.eligible_selected}</div>
+            <div>Candidates considered: {result.summary.candidates_considered ?? 0}</div>
+            <div>Structurally eligible: {result.summary.structurally_eligible ?? 0}</div>
+            <div>Orphan rejected (preselect): {result.summary.orphan_rejected_preselect ?? 0}</div>
             <div>Rescheduled to now: {result.summary.rescheduled_to_now ?? 0}</div>
             <div>Future-scheduled in batch: {result.summary.future_scheduled_count ?? 0}</div>
             <div>Blocked total: {result.summary.blocked_after ?? "—"}</div>
@@ -196,6 +237,57 @@ const ControlledLiveBatch = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <div className="border-t border-border/40 pt-4 space-y-2">
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <h4 className="text-sm font-semibold">Resolve orphan follow-ups</h4>
+            <p className="text-xs text-muted-foreground mt-1">
+              Pending step 2/3/4 rows whose earlier sequence step never sent
+              via real SMTP. Preview safely; apply to cancel them and
+              optionally restart safe contacts at Step 1.
+            </p>
+          </div>
+          <div className="flex gap-2 shrink-0">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => runOrphan(false)}
+              disabled={!!orphanRunning}
+            >
+              {orphanRunning === "preview" ? (
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Previewing…</>
+              ) : "Preview"}
+            </Button>
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={() => runOrphan(true)}
+              disabled={!!orphanRunning}
+            >
+              {orphanRunning === "apply" ? (
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Applying…</>
+              ) : "Cancel orphans + restart safe Step 1"}
+            </Button>
+          </div>
+        </div>
+        {orphanResult && (
+          <div className="rounded-md border border-border/50 bg-muted/20 p-3 text-xs space-y-1">
+            <div className="font-medium text-sm">
+              {orphanResult.dry_run ? "Preview" : "Applied"}: {orphanResult.message}
+            </div>
+            {orphanResult.summary && (
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1 font-mono">
+                <div>Orphans found: {orphanResult.summary.orphans_found}</div>
+                <div>Contacts affected: {orphanResult.summary.contacts_affected}</div>
+                <div>Safe to restart: {orphanResult.summary.safe_to_restart}</div>
+                <div>Cancelled: {orphanResult.summary.cancelled}</div>
+                <div>Step 1 restarts created: {orphanResult.summary.restart_created}</div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </Card>
   );
 };
