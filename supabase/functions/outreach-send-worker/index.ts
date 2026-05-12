@@ -722,6 +722,53 @@ Deno.serve(async (req) => {
 
         sent += 1;
         touchedCampaigns.add(item.campaign_id);
+
+        // ===== CHAIN-ON-SUCCESS =====
+        // Only enqueue the next sequence step after a real-SMTP accept.
+        // This prevents orphan follow-ups when a prior step is blocked,
+        // delayed, or held by a contact-gate (e.g. RECENT_COMMUNICATION_24H).
+        if (useReal && realSendOk) {
+          try {
+            const nextStepNum = item.sequence_step + 1;
+            const { data: nextSeq } = await supabase
+              .from("outreach_sequences")
+              .select("step_number, delay_days")
+              .eq("campaign_id", item.campaign_id)
+              .eq("step_number", nextStepNum)
+              .maybeSingle();
+            if (nextSeq) {
+              // Avoid duplicating if a row for this step somehow already exists.
+              const { data: existsNext } = await supabase
+                .from("email_queue")
+                .select("id")
+                .eq("contact_id", item.contact_id)
+                .eq("campaign_id", item.campaign_id)
+                .eq("sequence_step", nextStepNum)
+                .limit(1);
+              if (!existsNext || existsNext.length === 0) {
+                const delayDays = (nextSeq as any).delay_days ?? 0;
+                const sched = new Date(Date.now() + Math.max(0, delayDays) * 86_400_000).toISOString();
+                await supabase.from("email_queue").insert({
+                  contact_id: item.contact_id,
+                  campaign_id: item.campaign_id,
+                  sequence_step: nextStepNum,
+                  scheduled_at: sched,
+                  status: "pending",
+                  inbox_id: item.inbox_id,
+                  business_name: item.business_name,
+                });
+                await supabase.from("activity_log").insert({
+                  event_type: "cadence_step_chained",
+                  description: `Chained step ${nextStepNum} for contact ${item.contact_id} after real-SMTP send of step ${item.sequence_step}`,
+                  entity_type: "email_queue",
+                  entity_id: item.id,
+                });
+              }
+            }
+          } catch (chainErr) {
+            console.error("CHAIN_ON_SUCCESS_FAILED", { item: item.id, error: (chainErr as Error).message });
+          }
+        }
       } catch (err) {
         // Persist error on the queue row so operators can see it
         const errMsg = (err as Error).message;
