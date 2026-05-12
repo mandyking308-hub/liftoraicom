@@ -37,13 +37,15 @@ const SystemModeBanner = () => {
 
   if (!data) return null;
 
-  const isLive = data.systemMode === "live";
+  // TEST MODE removed as operational gate. Treat anything other than explicit
+  // admin-only "sandbox" as LIVE OPERATING MODE.
+  const isLive = data.systemMode !== "sandbox";
   const banners: { icon: any; cls: string; title: string; detail: string; to: string }[] = [];
 
   banners.push(
     isLive
-      ? { icon: ShieldAlert, cls: "bg-destructive/10 border-destructive/40 text-destructive", title: "LIVE MODE — outbound sends can run", detail: `Execution mode: ${data.executionMode ?? "default"} · ${data.flagsEnabled}/${data.flagsTotal} feature flags on`, to: "/founder/system/modes" }
-      : { icon: ShieldCheck, cls: "bg-yellow-500/10 border-yellow-500/30 text-yellow-400", title: "TEST MODE — live sends will not run", detail: "TEST MODE is the primary send gate. Switch to LIVE only after founder confirms.", to: "/founder/system/modes" }
+      ? { icon: ShieldCheck, cls: "bg-emerald-500/10 border-emerald-500/30 text-emerald-400", title: "LIVE OPERATING MODE — real execution enabled. Guardrails active.", detail: `Execution mode: ${data.executionMode ?? "default"} · ${data.flagsEnabled}/${data.flagsTotal} feature flags on · provider, contact and compliance guardrails enforced`, to: "/founder/system/modes" }
+      : { icon: ShieldAlert, cls: "bg-yellow-500/10 border-yellow-500/30 text-yellow-400", title: "SANDBOX MODE (admin-only)", detail: "Sandbox is a non-default development mode. Live execution is paused.", to: "/founder/system/modes" }
   );
 
   if (data.liveInboxCount === 0) {
