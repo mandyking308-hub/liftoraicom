@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -241,8 +241,8 @@ const App = () => (
             <Route path="/founder/integrations/:id" element={<FounderRoute><IntegrationDetail /></FounderRoute>} />
             <Route path="/founder/executions" element={<FounderRoute><ExecutionDashboard /></FounderRoute>} />
             <Route path="/founder/executions/:id" element={<FounderRoute><ExecutionDetail /></FounderRoute>} />
-            <Route path="/founder/command-center" element={<FounderRoute><CommandCentre /></FounderRoute>} />
             <Route path="/founder/command-centre" element={<FounderRoute><CommandCentre /></FounderRoute>} />
+            <Route path="/founder/command-center" element={<Navigate to="/founder/command-centre" replace />} />
             <Route path="/founder/command-center/legacy" element={<FounderRoute><CommandCenter /></FounderRoute>} />
             <Route path="/founder/processes" element={<FounderRoute><ProcessDirectory /></FounderRoute>} />
             <Route path="/founder/processes/:id" element={<FounderRoute><ProcessDetail /></FounderRoute>} />
