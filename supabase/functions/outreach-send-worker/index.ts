@@ -613,6 +613,33 @@ Deno.serve(async (req) => {
               savedFolder = ap.folder ?? null;
             } else {
               appendError = ap.error ?? "append failed";
+              // Log APPEND failure as a SEPARATE secondary warning. The
+              // SMTP send itself succeeded — we never resend on APPEND
+              // failure. This is a sent-folder sync warning only.
+              await supabase.from("system_events").insert({
+                event_type: "sent_folder_copy_failed",
+                severity: "low",
+                business_name: item.business_name ?? "",
+                entity_type: "email_queue",
+                entity_id: item.id,
+                message: `Email sent successfully. Sent-folder copy failed: ${appendError}`,
+                metadata: {
+                  queue_id: item.id,
+                  inbox_id: inboxRow.id,
+                  inbox_email: inboxRow.email_address,
+                  provider_message_id: providerMessageId,
+                  append_error: appendError,
+                  resend_triggered: false,
+                },
+                resolved: true,
+                resolution_note: "Secondary IMAP APPEND warning — SMTP delivery confirmed; no resend.",
+              }).then(() => {}, () => {});
+              await supabase.from("activity_log").insert({
+                event_type: "sent_folder_copy_failed",
+                description: `Sent-folder copy failed for queue ${item.id} (SMTP delivery succeeded; no resend)`,
+                entity_type: "email_queue", entity_id: item.id,
+                business_name: item.business_name ?? "",
+              }).then(() => {}, () => {});
             }
           }
       } else {
