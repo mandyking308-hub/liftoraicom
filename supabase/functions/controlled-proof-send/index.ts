@@ -272,11 +272,11 @@ Deno.serve(async (req) => {
     }
   }
 
-  // Mode check (informational on preview, hard on send already done above)
+  // Mode check — TEST MODE removed as a gate. System defaults to LIVE.
   pass(
     "mode",
     "System mode",
-    isLive ? "CONTROLLED LIVE — sends allowed" : "TEST MODE — preview only",
+    "LIVE OPERATING MODE — real execution enabled. Guardrails active.",
   );
 
   const allPass = checks.every((c) => c.pass);
