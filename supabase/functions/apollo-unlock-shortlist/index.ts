@@ -85,6 +85,27 @@ Deno.serve(async (req) => {
     .limit(2000);
   if (error) return json({ error: error.message }, 500);
 
+  // Pull apollo_person_id for dedup (the view exposes lead identity, not the
+  // join key Apollo uses for the same person across runs/segments).
+  const ids = (rows ?? []).map((r: any) => r.apollo_lead_id);
+  let personMap = new Map<string, string>();
+  if (ids.length) {
+    const { data: persons } = await admin
+      .from("apollo_leads").select("id,apollo_person_id").in("id", ids);
+    for (const p of persons ?? []) personMap.set(p.id as string, (p as any).apollo_person_id ?? p.id);
+  }
+
+  // Dedup by apollo_person_id (fall back to lead id) — keep the first row.
+  const seenPersons = new Set<string>();
+  const uniqueRows: any[] = [];
+  let duplicateRows = 0;
+  for (const r of rows ?? []) {
+    const pid = personMap.get(r.apollo_lead_id) ?? r.apollo_lead_id;
+    if (seenPersons.has(pid)) { duplicateRows++; continue; }
+    seenPersons.add(pid);
+    uniqueRows.push({ ...r, apollo_person_id: pid });
+  }
+
   // Domain de-dup signal: any domain already represented in promoted contacts
   const { data: contactRows } = await admin
     .from("contacts").select("email").not("email","is",null).limit(2000);
@@ -94,7 +115,7 @@ Deno.serve(async (req) => {
       .filter(Boolean),
   );
 
-  const ranked = (rows ?? [])
+  const ranked = uniqueRows
     .map((r) => {
       const s = scoreOne(r);
       let score = s.score;
@@ -104,6 +125,7 @@ Deno.serve(async (req) => {
       }
       return {
         apollo_lead_id: r.apollo_lead_id,
+        apollo_person_id: r.apollo_person_id,
         name: `${r.first_name ?? ""} ${r.last_name ?? ""}`.trim(),
         title: r.title,
         company: r.company,
@@ -125,6 +147,8 @@ Deno.serve(async (req) => {
   return json({
     ok: true,
     total_needs_verification: rows?.length ?? 0,
+    unique_persons: uniqueRows.length,
+    duplicate_rows_collapsed: duplicateRows,
     batch_size: batchSize,
     min_score: minScore,
     shortlist_count: shortlist.length,
@@ -132,6 +156,6 @@ Deno.serve(async (req) => {
     fit_breakdown: fitBreakdown,
     shortlist,
     deprioritised_sample: deprioritised.slice(0, 10),
-    note: "No Apollo unlock or enrichment performed. Founder approval required for any unlock spend.",
+    note: "Unique persons only (deduped by apollo_person_id). No Apollo unlock or enrichment performed. Founder approval required for any unlock spend.",
   });
 });
