@@ -1,79 +1,78 @@
-# Central CRM Gap Closure — Implementation Plan
+## Apollo Reveal Workflow — Search → Shortlist → Reveal → Promote
 
-## Goal
-Harden the Liftor central CRM spine so every lead, contact, conversation, proposal, deal and send reconciles to `contacts`. No live sends, no Apollo credits, no AI, no new dashboard.
+Rebuild Liftor's Apollo workflow to correctly model the two-stage Apollo process (search vs. reveal), with a founder approval gate before any credit spend. No credits spent, no AI, no promotion, no queueing, no sends during this task.
 
-## Approach
-One additive migration → data backfill via insert tool → edge function hardening → UI summary tile in existing Lead Quality panel → re-audit report.
+### 1. Data model (migration)
 
----
+Extend `lead_quality_profiles.lifecycle_stage` constraint with the canonical stages used across the new flow:
+- `apollo_candidate_email_available_locked` (replaces today's `verified_email_available_locked` for the 75)
+- `email_reveal_required`
+- `reveal_shortlisted`
+- `reveal_attempted_no_email`
+- `reveal_invalid_email`
+- `safe_to_promote_after_reveal`
+- `already_in_crm_after_reveal`
+- `needs_founder_review`
 
-## PART 1 — Migration (additive, safe)
+Add columns to `lead_quality_profiles` (nullable, additive only):
+- `reveal_recommendation text` — `reveal | hold | skip`
+- `reveal_score numeric`
+- `reveal_rank int`
+- `reveal_reason text`
+- `revealed_at timestamptz`
+- `reveal_outcome text`
+- `apollo_credits_used int default 0`
 
-`supabase/migrations/<ts>_crm_spine_hardening.sql`:
+Add table `apollo_reveal_batches` to log founder approvals:
+- `founder_user_id`, `selected_candidate_ids uuid[]`, `estimated_credits int`, `actual_credits_used int`, `status text` (`pending | approved | revealed | failed`), `created_at`, `revealed_at`.
+- RLS: founder-only (admin role via `has_role`).
 
-1. **`internal_email_identities`** — ensure unique index on `lower(email)`; add columns if missing: `kind` (founder|system|sender|test), `notes`, `created_by`.
-2. **`contacts`** — add columns if missing: `is_internal boolean default false`, `sendable_status text default 'sendable'` (sendable|suppressed|hard_bounced|review), `archived_at timestamptz`, `archive_reason text`. Index on `(is_internal)`, `(sendable_status)`.
-3. **`business_contact_relationships`** — add nullable `business_id uuid` referencing `businesses(id)`; index `(business_id)`. Keep `business_name` text as legacy/display.
-4. **`proposals`** — add nullable `contact_id uuid` referencing `contacts(id)`, nullable `business_id uuid` referencing `businesses(id)`, `crm_reconciliation_status text default 'pending'` (matched|unmatched|needs_review|pending). Indexes.
-5. **View `crm_spine_summary`** — single-row counts: total contacts, with BCR, missing BCR, internal identities, suppressed/bounced, apollo promoted, apollo needs verification, duplicates collapsed, proposals needing reconciliation, safe-to-unlock count.
-6. **View `proposal_crm_reconciliation`** — proposal_id, contact_email, matched contact_id, matched business_id, status.
-7. **Function `resolve_contact_by_email(text) returns uuid`** — case-insensitive lookup.
-8. **Trigger `proposals_reconcile_trg`** — on insert/update of `contact_email`, set `contact_id`/`business_id`/`crm_reconciliation_status` automatically (no contact creation).
-9. **Function `is_internal_identity(text) returns boolean`** — checks `internal_email_identities`.
+Reclassify the 75 current `verified_email_available_locked` rows to `email_reveal_required` via the same migration (UPDATE statement, no credits spent).
 
----
+Update `lead_lifecycle_summary` view to expose new buckets.
 
-## PART 2 — Data backfill (insert tool, after migration approved)
+### 2. Edge functions
 
-1. Seed `internal_email_identities`: `mandyking308@gmail.com` (founder), `hello@neoncandy.online` (system/sender), any `from_email` found on `outreach_queue`/`communications`.
-2. Reclassify `hello@neoncandy.online` contact → `is_internal=true`, `sendable_status='suppressed'`, cancel any pending queue rows.
-3. Audit 20 BCR-less contacts:
-   - If email matches `internal_email_identities` → mark internal/suppressed, no BCR.
-   - Match `mailer-daemon`, `postmaster`, `no-reply`, `notifications@` patterns → archive as `stale/system`.
-   - Real prospects (have `apollo_person_id` or `imported_leads` source) → create BCR row linked to NeonCandy `business_id`.
-   - Else → mark `archived_at` with `archive_reason='needs_founder_review'`.
-4. Backfill NDR contacts: parse 8 NDR inbound rows for original recipient → set those contacts `sendable_status='hard_bounced'`, cancel pending queue rows.
-5. Backfill `business_contact_relationships.business_id` for all rows where `business_name ilike 'neon candy'` → NeonCandy `businesses.id`.
-6. Run proposal trigger: `UPDATE proposals SET contact_email = contact_email` to populate `contact_id`/`business_id`/`crm_reconciliation_status`.
+**`lead-quality-autopilot`** — extend Step 0/1 scoring to compute, for each `email_reveal_required` candidate, deterministic checks only (no AI):
+- title fit, company fit, campaign fit
+- duplicate Apollo person_id, duplicate name+company
+- already in CRM (contacts table)
+- already has BCR / queued / sent / has conversation / proposal / demo / deal / invoice
+- bounced / suppressed / internal
+- domain already contacted, domain overload (>N per domain)
 
----
+Writes `reveal_score`, `reveal_rank`, `reveal_recommendation`, `reveal_reason`. Top 25 unique `reveal` candidates form the shortlist.
 
-## PART 3 — Edge function hardening
+**`apollo-reveal-shortlist`** (new, read-only) — returns the ranked shortlist + credit estimate (unique recommended only, capped at 25, no padding).
 
-- **`outreach-inbound-poll`** & **`outreach-inbound-webhook`**: detect NDR (subject contains `Undelivered`/`Mail Delivery`/`failure notice`, or from `mailer-daemon`/`postmaster`), parse original recipient, mark contact suppressed, cancel queue rows. Detect internal-identity senders → tag, do not create prospect.
-- **`apollo-unlock-shortlist`** & **`apollo-unlock-selected`**: pre-check `contacts` (by email/apollo_person_id), `business_contact_relationships`, `email_queue`, `communications`, `conversations`, `proposals`, `internal_email_identities`, `sendable_status`. Adjust credit estimate to count only safe new leads. Add `crm_check` to response payload.
-- **`outreach-send-worker`**: refuse to send when contact `is_internal=true` or `sendable_status != 'sendable'`.
+**`apollo-reveal-batch`** (new) — founder-approval-gated reveal. Accepts selected candidate IDs, validates auth (admin role), de-dupes, excludes CRM-known, calls Apollo enrichment for each, writes results back, runs post-reveal classification (safe_to_promote_after_reveal / already_in_crm_after_reveal / attempted_no_email / invalid_email / needs_founder_review). Logs credit spend in `apollo_reveal_batches`. **Does not promote, enqueue, or send.** Behind a `dry_run` flag defaulting to true so this task ships without spending credits.
 
----
+**`apollo-pull-verified`** — update return payload labels:
+- `apollo_candidate_profiles_staged` (was `leads_pulled_into_staging`)
+- `verified_email_available_candidates_pulled` (was `verified_emails_imported`)
+- Remove any `safe_to_promote` from the immediate pull response; replace with note that promotion requires reveal + post-reveal CRM check.
 
-## PART 4 — UI
+### 3. UI changes
 
-`src/components/founder/LeadQualityPanel.tsx`: add a compact `CRM Spine Summary` card (above existing content) reading from `crm_spine_summary` view. Tiles: Contacts / With BCR / Missing BCR / Internal / Suppressed / Apollo Promoted / Needs Verification / Duplicates Collapsed / Proposals Needing Recon / Safe-to-Unlock. No new route.
+**`src/components/founder/ApolloPullPanel.tsx`** — relabel result tiles per Part 1; add a "Candidate profiles staged → email reveal required" status line.
 
----
+**`src/components/founder/LeadQualityPanel.tsx`** — replace any "Verified emails imported" wording. Add Apollo stage breakdown counters: candidate profiles pulled, email reveal required, shortlisted, revealed, safe to promote (post-reveal).
 
-## PART 5 — Re-audit report
+**New: `src/components/founder/ApolloRevealShortlist.tsx`** — table of recommended reveal candidates with rank, name, title, company, location, Apollo person ID, campaign fit, score, reason, CRM/domain flags, recommendation. Bulk-select, shows credit estimate (unique only, ≤25), and a "Reveal emails for selected Apollo candidates" button with confirm dialog showing estimated credits. Dry-run on by default.
 
-After data backfill, generate `/mnt/documents/central_crm_audit_v2.md` with:
-- contacts total, duplicates, missing BCR
-- internal identities count
-- NDR handling status (suppressed counts)
-- proposal reconciliation matched/unmatched
-- BCR business_id coverage
-- Apollo safe-to-unlock count
-- All 10 acceptance tests pass/fail
+**`src/pages/founder/CommandCentre.tsx`** — within the existing Apollo section, render the 9-stage sequence (Part 9) as a horizontal stepper, mount `ApolloRevealShortlist` between Source and Quality sections.
 
----
+### 4. Acceptance verification
 
-## Out of scope
-- No live sends, no Apollo credits, no AI, no auto-promote, no new dashboard, no contact auto-creation from proposals, no fake/demo data, TEST mode stays off.
+After implementation, run `supabase--read_query` to confirm:
+- 75 rows now show `lifecycle_stage = 'email_reveal_required'`
+- No promotions, queue rows, or sends were created
+- `apollo_reveal_batches` has zero `revealed` rows
 
-## Deployment order
-1. Migration (await user approval)
-2. Data backfills via insert tool
-3. Edge function deploys
-4. UI panel update
-5. Re-audit report
+### Technical details
 
-Ready to proceed with the migration on your approval.
+- Migration is additive (new stages added to CHECK constraint, columns nullable with defaults). No destructive schema changes.
+- `apollo-reveal-batch` defaults to `dry_run = true`; founder must explicitly pass `dry_run: false` after reviewing the shortlist. This task ships with dry-run only — no live reveal triggered.
+- Shortlist scoring is deterministic SQL/JS, no AI gateway calls.
+- Credit estimate = `count(distinct apollo_person_id where reveal_recommendation='reveal' and not in CRM and not duplicate) capped at 25`.
+- All new RLS policies use `public.has_role(auth.uid(), 'admin')`.
