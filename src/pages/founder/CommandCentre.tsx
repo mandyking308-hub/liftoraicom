@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import FounderLayout from "@/components/founder/FounderLayout";
 import LiftorCapabilities from "@/components/founder/LiftorCapabilities";
+import AgentOrchestration from "@/components/founder/AgentOrchestration";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -339,6 +340,7 @@ const CommandCentre = () => {
         <Tabs defaultValue="today" className="space-y-6">
           <TabsList>
             <TabsTrigger value="today">Today</TabsTrigger>
+            <TabsTrigger value="orchestration">Agent Orchestration</TabsTrigger>
             <TabsTrigger value="capabilities">Liftor Capabilities</TabsTrigger>
           </TabsList>
           <TabsContent value="today" className="space-y-6 mt-0">
@@ -522,6 +524,9 @@ const CommandCentre = () => {
           </TabsContent>
           <TabsContent value="capabilities" className="mt-0">
             <LiftorCapabilities />
+          </TabsContent>
+          <TabsContent value="orchestration" className="mt-0">
+            <AgentOrchestration />
           </TabsContent>
         </Tabs>
       </div>
