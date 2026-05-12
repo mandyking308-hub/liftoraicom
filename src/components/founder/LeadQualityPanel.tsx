@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { ShieldCheck, Loader2, AlertTriangle, CheckCircle2, Sparkles, KeyRound } from "lucide-react";
+import { ShieldCheck, Loader2, AlertTriangle, CheckCircle2, Sparkles, KeyRound, Network } from "lucide-react";
 import { toast } from "sonner";
 
 type Overview = {
@@ -20,6 +20,22 @@ type Overview = {
   terminal_blocked: number;
   safe_to_queue: number;
   duplicate_or_risky: number;
+};
+
+type CrmSpine = {
+  contacts_total: number;
+  contacts_with_bcr: number;
+  contacts_missing_bcr: number;
+  internal_contacts: number;
+  internal_identities: number;
+  suppressed_contacts: number;
+  apollo_promoted: number;
+  apollo_needs_verification: number;
+  apollo_duplicates_collapsed: number;
+  proposals_needing_reconciliation: number;
+  bcr_with_business_id: number;
+  bcr_missing_business_id: number;
+  safe_to_unlock_count: number;
 };
 
 const Tile = ({ label, value, tone = "default" }: { label: string; value: number | string; tone?: "default" | "good" | "warn" | "danger" }) => {
@@ -58,6 +74,15 @@ export default function LeadQualityPanel() {
       const { data, error } = await (supabase as any).from("lead_quality_overview").select("*").maybeSingle();
       if (error) throw error;
       return data as Overview | null;
+    },
+  });
+
+  const { data: crmSpine } = useQuery({
+    queryKey: ["crm-spine-summary"],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any).from("crm_spine_summary").select("*").maybeSingle();
+      if (error) throw error;
+      return data as CrmSpine | null;
     },
   });
 
@@ -102,6 +127,27 @@ export default function LeadQualityPanel() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {crmSpine && (
+          <div className="space-y-2">
+            <p className="text-xs font-medium text-foreground flex items-center gap-1.5">
+              <Network size={12} className="text-primary" />
+              Central CRM spine
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+              <Tile label="Central contacts" value={crmSpine.contacts_total} />
+              <Tile label="With business link" value={crmSpine.contacts_with_bcr} tone="good" />
+              <Tile label="Missing business link" value={crmSpine.contacts_missing_bcr} tone={crmSpine.contacts_missing_bcr > 0 ? "warn" : "good"} />
+              <Tile label="Internal identities" value={crmSpine.internal_identities} />
+              <Tile label="Suppressed / bounced" value={crmSpine.suppressed_contacts} tone="warn" />
+              <Tile label="Apollo → contacts" value={crmSpine.apollo_promoted} tone="good" />
+              <Tile label="Apollo needs verify" value={crmSpine.apollo_needs_verification} tone="warn" />
+              <Tile label="Apollo dups collapsed" value={crmSpine.apollo_duplicates_collapsed} />
+              <Tile label="Proposals to reconcile" value={crmSpine.proposals_needing_reconciliation} tone={crmSpine.proposals_needing_reconciliation > 0 ? "warn" : "good"} />
+              <Tile label="Safe-to-unlock (CRM-checked)" value={crmSpine.safe_to_unlock_count} tone="good" />
+            </div>
+          </div>
+        )}
+
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Loading…</p>
         ) : (
