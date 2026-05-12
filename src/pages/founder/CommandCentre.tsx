@@ -61,7 +61,7 @@ const CommandCentre = () => {
   });
   const { data: contacts = [] } = useQuery({
     queryKey: ["cc2-contacts"],
-    queryFn: async () => (await supabase.from("contacts").select("id,assigned_business,status,intent_score,last_replied_at,conversation_active")).data ?? [],
+    queryFn: async () => (await supabase.from("contacts").select("id,assigned_business,status,intent_score,last_replied_at,conversation_active").neq("status", "INTERNAL")).data ?? [],
   });
   const { data: campaigns = [] } = useQuery({
     queryKey: ["cc2-campaigns"],
@@ -75,6 +75,28 @@ const CommandCentre = () => {
   const { data: inboxes = [] } = useQuery({
     queryKey: ["cc2-inboxes"],
     queryFn: async () => (await supabase.from("inboxes").select("*")).data ?? [],
+  });
+  const { data: activeInboxes = [] } = useQuery({
+    queryKey: ["cc2-active-inboxes-view"],
+    queryFn: async () => (await (supabase as any).from("command_centre_active_inboxes").select("*")).data ?? [],
+  });
+  const { data: leadQualityCounts } = useQuery({
+    queryKey: ["cc2-lead-quality-counts"],
+    queryFn: async () => {
+      const [needsVer, raw, promoted, shortlist] = await Promise.all([
+        supabase.from("lead_quality_profiles").select("id", { count: "exact", head: true }).eq("quality_status", "needs_verification"),
+        supabase.from("lead_quality_profiles").select("id", { count: "exact", head: true }).eq("quality_status", "raw"),
+        supabase.from("lead_quality_profiles").select("id", { count: "exact", head: true }).not("promoted_contact_id", "is", null),
+        supabase.from("lead_quality_profiles").select("id", { count: "exact", head: true }).eq("quality_status", "needs_verification").contains("risk_flags", ["needs_apollo_unlock"]),
+      ]);
+      return {
+        needsVerification: needsVer.count ?? 0,
+        raw: raw.count ?? 0,
+        promoted: promoted.count ?? 0,
+        unlockShortlist: shortlist.count ?? 0,
+      };
+    },
+    refetchInterval: 60000,
   });
   const { data: drafts = [] } = useQuery({
     queryKey: ["cc2-drafts"],
@@ -408,6 +430,20 @@ const CommandCentre = () => {
           with a provider message ID).
         </div>
 
+        {activeInboxes.length > 0 && (
+          <div className="rounded-lg border border-border bg-muted/30 px-4 py-3 text-sm">
+            <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1.5">Active sender identity</p>
+            <div className="flex flex-wrap gap-2">
+              {activeInboxes.map((i: any) => (
+                <Badge key={i.id} variant="secondary" className={`text-xs ${i.status_label === "ok" ? "bg-green-500/15 text-green-300" : "bg-yellow-500/15 text-yellow-300"}`}>
+                  {i.from_name ? `${i.from_name} · ` : ""}{i.email_address} <span className="text-muted-foreground ml-1">({i.business_name})</span>
+                </Badge>
+              ))}
+            </div>
+            <p className="text-[11px] text-muted-foreground mt-1.5">Outbound sends use these inboxes only. Founder/internal addresses (e.g. mandyking308@gmail.com) are suppressed from prospect flows.</p>
+          </div>
+        )}
+
         <LeadQualityPanel />
 
         <Tabs defaultValue="today" className="space-y-6">
@@ -432,6 +468,9 @@ const CommandCentre = () => {
           <StatTile label="Failed sends" value={totals.failedSends} icon={AlertTriangle} tone={totals.failedSends ? "danger" : "good"} to="/founder/outreach/queue" />
           <StatTile label={`System warnings (open / logged)`} value={`${totals.systemWarningsOpen} / ${totals.systemWarningsTotal}`} icon={AlertTriangle} tone={totals.systemWarningsOpen ? "danger" : "good"} to="/founder/system" />
           <StatTile label="Open deals" value={deals.filter((d: any) => d.status !== "won" && d.status !== "lost").length} icon={Banknote} to="/founder/finance" />
+          <StatTile label="Raw leads needing verification" value={leadQualityCounts?.needsVerification ?? 0} icon={Search} tone={(leadQualityCounts?.needsVerification ?? 0) > 0 ? "warn" : "good"} />
+          <StatTile label="Apollo unlock shortlist" value={leadQualityCounts?.unlockShortlist ?? 0} icon={Sparkles} tone={(leadQualityCounts?.unlockShortlist ?? 0) > 0 ? "warn" : "default"} />
+          <StatTile label="Leads promoted to contacts" value={leadQualityCounts?.promoted ?? 0} icon={CheckCircle2} tone="good" />
         </div>
 
         {/* 8. Recommended Actions */}
