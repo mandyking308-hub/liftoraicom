@@ -7576,6 +7576,45 @@ export type Database = {
           },
         ]
       }
+      cadence_status: {
+        Row: {
+          blocked_rows: number | null
+          campaign_id: string | null
+          cancelled_rows: number | null
+          contact_id: string | null
+          current_step: number | null
+          delayed_rows: number | null
+          last_valid_sent_step: number | null
+          next_eligible_send_at: string | null
+          next_eligible_step: number | null
+          next_status: Database["public"]["Enums"]["email_queue_status"] | null
+          paused_reason: string | null
+          pending_rows: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_queue_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "outreach_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_queue_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_queue_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+        ]
+      }
       domain_usage_summary: {
         Row: {
           current_usage: number | null
