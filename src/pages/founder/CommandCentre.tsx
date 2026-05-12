@@ -4,6 +4,7 @@ import LiftorCapabilities from "@/components/founder/LiftorCapabilities";
 import AgentOrchestration from "@/components/founder/AgentOrchestration";
 import SystemModeBanner from "@/components/founder/SystemModeBanner";
 import ControlledProofSend from "@/components/founder/ControlledProofSend";
+import ControlledLiveBatch from "@/components/founder/ControlledLiveBatch";
 import ExecutionStatusPanel from "@/components/founder/ExecutionStatusPanel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
@@ -395,6 +396,8 @@ const CommandCentre = () => {
         <ExecutionStatusPanel />
 
         <ControlledProofSend />
+
+        <ControlledLiveBatch />
 
         <Tabs defaultValue="today" className="space-y-6">
           <TabsList>
