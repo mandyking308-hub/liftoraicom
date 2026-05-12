@@ -45,7 +45,11 @@ Deno.serve(async (req) => {
   const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
   const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
-  const ENC_KEY = Deno.env.get("APOLLO_KEY_ENC") ?? Deno.env.get("APOLLO_ENC_KEY") ?? "";
+  const ENC_KEY =
+    Deno.env.get("APOLLO_ENCRYPTION_KEY") ??
+    Deno.env.get("APOLLO_KEY_ENC") ??
+    Deno.env.get("APOLLO_ENC_KEY") ??
+    "";
 
   const auth = req.headers.get("Authorization") ?? "";
   if (!auth.startsWith("Bearer ")) return json({ error: "Unauthorized" }, 401);
