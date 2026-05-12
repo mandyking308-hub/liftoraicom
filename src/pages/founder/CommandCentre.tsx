@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import FounderLayout from "@/components/founder/FounderLayout";
 import LiftorCapabilities from "@/components/founder/LiftorCapabilities";
 import AgentOrchestration from "@/components/founder/AgentOrchestration";
+import SystemModeBanner from "@/components/founder/SystemModeBanner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -336,6 +337,8 @@ const CommandCentre = () => {
             <Link to="/founder/testing"><Button size="sm" variant="outline"><FlaskConical size={14} /> Diagnostics</Button></Link>
           </div>
         </div>
+
+        <SystemModeBanner />
 
         <Tabs defaultValue="today" className="space-y-6">
           <TabsList>
