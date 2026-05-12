@@ -513,8 +513,32 @@ Deno.serve(async (req) => {
       const allowed = checkJson?.allowed === true;
 
       if (!allowed) {
+        const reason = String(checkJson?.reason ?? "BLOCKED");
+        const isCoolingGate = /RECENT_COMMUNICATION_24H|RECENTLY_CONTACTED/i.test(reason);
+        if (isCoolingGate) {
+          // Pause this step; reschedule past the 24h cooling window so the
+          // cadence resumes rather than orphaning downstream steps.
+          const retryAt = new Date(Date.now() + 24 * 60 * 60 * 1000 + 5 * 60 * 1000).toISOString();
+          await supabase.from("email_queue").update({
+            status: "delayed",
+            block_reason: "paused_by_contact_gate",
+            scheduled_at: retryAt,
+            send_error: null,
+            provider_response: `Paused by contact gate (${reason}); cadence will resume at ${retryAt}.`,
+            last_attempt_at: new Date().toISOString(),
+          }).eq("id", item.id);
+          await supabase.from("activity_log").insert({
+            event_type: "cadence_paused",
+            description: `Queue ${item.id} paused_by_contact_gate (${reason}); rescheduled to ${retryAt}`,
+            entity_type: "email_queue",
+            entity_id: item.id,
+          });
+          delayed += 1;
+          touchedCampaigns.add(item.campaign_id);
+          continue;
+        }
         await supabase.from("email_queue")
-          .update({ status: "blocked", block_reason: checkJson?.reason ?? "BLOCKED" })
+          .update({ status: "blocked", block_reason: reason })
           .eq("id", item.id);
         blocked += 1;
         touchedCampaigns.add(item.campaign_id);
@@ -722,6 +746,53 @@ Deno.serve(async (req) => {
 
         sent += 1;
         touchedCampaigns.add(item.campaign_id);
+
+        // ===== CHAIN-ON-SUCCESS =====
+        // Only enqueue the next sequence step after a real-SMTP accept.
+        // This prevents orphan follow-ups when a prior step is blocked,
+        // delayed, or held by a contact-gate (e.g. RECENT_COMMUNICATION_24H).
+        if (useReal && realSendOk) {
+          try {
+            const nextStepNum = item.sequence_step + 1;
+            const { data: nextSeq } = await supabase
+              .from("outreach_sequences")
+              .select("step_number, delay_days")
+              .eq("campaign_id", item.campaign_id)
+              .eq("step_number", nextStepNum)
+              .maybeSingle();
+            if (nextSeq) {
+              // Avoid duplicating if a row for this step somehow already exists.
+              const { data: existsNext } = await supabase
+                .from("email_queue")
+                .select("id")
+                .eq("contact_id", item.contact_id)
+                .eq("campaign_id", item.campaign_id)
+                .eq("sequence_step", nextStepNum)
+                .limit(1);
+              if (!existsNext || existsNext.length === 0) {
+                const delayDays = (nextSeq as any).delay_days ?? 0;
+                const sched = new Date(Date.now() + Math.max(0, delayDays) * 86_400_000).toISOString();
+                await supabase.from("email_queue").insert({
+                  contact_id: item.contact_id,
+                  campaign_id: item.campaign_id,
+                  sequence_step: nextStepNum,
+                  scheduled_at: sched,
+                  status: "pending",
+                  inbox_id: item.inbox_id,
+                  business_name: item.business_name,
+                });
+                await supabase.from("activity_log").insert({
+                  event_type: "cadence_step_chained",
+                  description: `Chained step ${nextStepNum} for contact ${item.contact_id} after real-SMTP send of step ${item.sequence_step}`,
+                  entity_type: "email_queue",
+                  entity_id: item.id,
+                });
+              }
+            }
+          } catch (chainErr) {
+            console.error("CHAIN_ON_SUCCESS_FAILED", { item: item.id, error: (chainErr as Error).message });
+          }
+        }
       } catch (err) {
         // Persist error on the queue row so operators can see it
         const errMsg = (err as Error).message;

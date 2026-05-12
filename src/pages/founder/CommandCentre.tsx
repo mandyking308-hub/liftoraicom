@@ -400,6 +400,13 @@ const CommandCentre = () => {
 
         <ControlledLiveBatch />
 
+        <div className="rounded-lg border border-border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
+          <span className="font-medium text-foreground">Cadence integrity:</span>{" "}
+          Cadence paused when prior step is blocked. Downstream steps will not be
+          created until the prior step is successfully sent (real SMTP, accepted,
+          with a provider message ID).
+        </div>
+
         <LeadQualityPanel />
 
         <Tabs defaultValue="today" className="space-y-6">

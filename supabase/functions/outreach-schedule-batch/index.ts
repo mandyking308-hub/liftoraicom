@@ -12,7 +12,11 @@ interface Body {
   max_contacts?: number;
 }
 
-const STEP_DELAYS: Record<number, number> = { 1: 0, 2: 3, 3: 7, 4: 14 };
+// NOTE: We no longer pre-create steps 2/3/4 here. Downstream steps are
+// chained by `outreach-send-worker` only after the prior step has been
+// accepted via real SMTP. This prevents orphan follow-ups whenever a
+// step is blocked, delayed, or cooled-off.
+const STEP1_DELAY_DAYS = 0;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -82,20 +86,21 @@ Deno.serve(async (req) => {
         }
       }
 
-      for (const seq of sequences) {
-        const delay = STEP_DELAYS[seq.step_number] ?? seq.delay_days ?? 0;
-        const sched = new Date(baseDate.getTime() + delay * 86_400_000);
-        const { error } = await supabase.from("email_queue").insert({
-          contact_id: cid,
-          campaign_id: body.campaign_id,
-          sequence_step: seq.step_number,
-          scheduled_at: sched.toISOString(),
-          status: "pending",
-          inbox_id: inboxId as string,
-          business_name: campaign.business_name,
-        });
-        if (!error) scheduled += 1;
-      }
+      // Only Step 1 is enqueued. Subsequent steps are created by the send
+      // worker upon successful real-SMTP delivery (chain-on-success).
+      const step1 = sequences.find((s) => s.step_number === 1);
+      if (!step1) continue;
+      const sched = new Date(baseDate.getTime() + STEP1_DELAY_DAYS * 86_400_000);
+      const { error } = await supabase.from("email_queue").insert({
+        contact_id: cid,
+        campaign_id: body.campaign_id,
+        sequence_step: 1,
+        scheduled_at: sched.toISOString(),
+        status: "pending",
+        inbox_id: inboxId as string,
+        business_name: campaign.business_name,
+      });
+      if (!error) scheduled += 1;
     }
 
     return json({ scheduled, contacts: contactIds.length }, 200);
