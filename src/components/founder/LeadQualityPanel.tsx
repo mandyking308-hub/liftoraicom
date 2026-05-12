@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { ShieldCheck, Loader2, AlertTriangle, CheckCircle2, Sparkles } from "lucide-react";
+import { ShieldCheck, Loader2, AlertTriangle, CheckCircle2, Sparkles, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 
 type Overview = {
@@ -46,7 +46,8 @@ export default function LeadQualityPanel() {
   const [busy, setBusy] = useState<string | null>(null);
   const [batchSize, setBatchSize] = useState(25);
   const [perDomainCap, setPerDomainCap] = useState(2);
-  const [aiBatchSize, setAiBatchSize] = useState(25);
+  const [aiBatchSize, setAiBatchSize] = useState(150);
+  const [unlockBatchSize, setUnlockBatchSize] = useState(25);
   const [lastResult, setLastResult] = useState<any>(null);
 
   const { data: overview, isLoading } = useQuery({
@@ -59,7 +60,7 @@ export default function LeadQualityPanel() {
   });
 
   const call = async (
-    fn: "lead-quality-scan" | "lead-fit-classify" | "promote-leads-to-contacts" | "enqueue-eligible-contacts",
+    fn: "lead-quality-scan" | "lead-fit-classify" | "promote-leads-to-contacts" | "enqueue-eligible-contacts" | "apollo-unlock-shortlist",
     body: any,
     label: string,
   ) => {
@@ -108,41 +109,59 @@ export default function LeadQualityPanel() {
           <div className="flex flex-wrap gap-2 items-center">
             <p className="text-xs text-muted-foreground w-full">1. Cheap quality scan (no AI)</p>
             <Button size="sm" variant="outline" disabled={!!busy}
-              onClick={() => call("lead-quality-scan", { dry_run: true, limit: 500 }, "Scan preview")}>
-              {busy === "Scan preview" ? <Loader2 className="animate-spin" size={14} /> : "Preview scan"}
+              onClick={() => call("lead-quality-scan", { dry_run: true, limit: 5000 }, "Scan preview")}>
+              {busy === "Scan preview" ? <Loader2 className="animate-spin" size={14} /> : "Preview scan — all raw"}
             </Button>
             <Button size="sm" disabled={!!busy}
-              onClick={() => call("lead-quality-scan", { dry_run: false, limit: 500 }, "Scan apply")}>
-              {busy === "Scan apply" ? <Loader2 className="animate-spin" size={14} /> : "Apply scan"}
+              onClick={() => call("lead-quality-scan", { dry_run: false, limit: 5000 }, "Scan apply")}>
+              {busy === "Scan apply" ? <Loader2 className="animate-spin" size={14} /> : "Apply scan — all raw"}
             </Button>
           </div>
 
           <div className="flex flex-wrap gap-2 items-center">
-            <p className="text-xs text-muted-foreground w-full">2. Campaign-fit classification</p>
+            <p className="text-xs text-muted-foreground w-full">2. Campaign-fit classification (rules = whole batch · AI = selected, with cost confirmation)</p>
             <Button size="sm" variant="outline" disabled={!!busy}
-              onClick={() => call("lead-fit-classify", { dry_run: true, method: "rules", limit: 1000 }, "Rules preview")}>
-              {busy === "Rules preview" ? <Loader2 className="animate-spin" size={14} /> : "Preview rules"}
+              onClick={() => call("lead-fit-classify", { dry_run: true, method: "rules", limit: 5000 }, "Rules preview")}>
+              {busy === "Rules preview" ? <Loader2 className="animate-spin" size={14} /> : "Preview rules — all eligible"}
             </Button>
             <Button size="sm" disabled={!!busy}
-              onClick={() => call("lead-fit-classify", { dry_run: false, method: "rules", limit: 1000 }, "Rules apply")}>
-              {busy === "Rules apply" ? <Loader2 className="animate-spin" size={14} /> : "Apply rules"}
+              onClick={() => call("lead-fit-classify", { dry_run: false, method: "rules", limit: 5000 }, "Rules apply")}>
+              {busy === "Rules apply" ? <Loader2 className="animate-spin" size={14} /> : "Apply rules — all eligible"}
             </Button>
             <span className="mx-2 text-muted-foreground">|</span>
-            <Input type="number" className="w-20 h-8" value={aiBatchSize} min={1} max={200}
-              onChange={(e) => setAiBatchSize(Math.min(200, Math.max(1, Number(e.target.value) || 25)))} />
+            <Input type="number" className="w-24 h-8" value={aiBatchSize} min={1} max={500}
+              onChange={(e) => setAiBatchSize(Math.min(500, Math.max(1, Number(e.target.value) || 25)))} />
+            <span className="text-xs text-muted-foreground">selection size (chunked internally)</span>
             <Button size="sm" variant="outline" disabled={!!busy}
-              onClick={() => call("lead-fit-classify", { dry_run: true, method: "ai", limit: aiBatchSize }, "AI preview")}>
-              <Sparkles size={12} /> Preview AI ({aiBatchSize})
+              onClick={() => call("lead-fit-classify", { dry_run: true, method: "ai", limit: aiBatchSize, ai_chunk_size: 25 }, "AI preview")}>
+              <Sparkles size={12} /> Preview AI ({aiBatchSize} selected)
             </Button>
             <Button size="sm" disabled={!!busy}
-              onClick={() => call("lead-fit-classify", { dry_run: false, method: "ai", limit: aiBatchSize }, "AI apply")}>
-              {busy === "AI apply" ? <Loader2 className="animate-spin" size={14} /> : `Apply AI (${aiBatchSize})`}
+              onClick={() => {
+                if (!confirm(`Run AI classification on ${aiBatchSize} leads?\nCost is per-lead via Lovable AI Gateway. Continue?`)) return;
+                call("lead-fit-classify", { dry_run: false, method: "ai", limit: aiBatchSize, ai_chunk_size: 25, confirm_ai_cost: true }, "AI apply");
+              }}>
+              {busy === "AI apply" ? <Loader2 className="animate-spin" size={14} /> : `Apply AI (${aiBatchSize}, confirm cost)`}
             </Button>
-            <span className="text-xs text-muted-foreground w-full">AI cap: 25 default · 200 absolute ceiling.</span>
+            <span className="text-xs text-muted-foreground w-full">AI is internally chunked at 25 per request (one founder click). Absolute ceiling 500 / action.</span>
           </div>
 
           <div className="flex flex-wrap gap-2 items-center">
-            <p className="text-xs text-muted-foreground w-full">3. Promote qualified leads to contacts</p>
+            <p className="text-xs text-muted-foreground w-full flex items-center gap-1">
+              <KeyRound size={12} /> 3. Apollo Unlock Shortlist (cheap rules ranking — NO Apollo calls)
+            </p>
+            <Input type="number" className="w-24 h-8" value={unlockBatchSize} min={1} max={200}
+              onChange={(e) => setUnlockBatchSize(Math.min(200, Math.max(1, Number(e.target.value) || 25)))} />
+            <span className="text-xs text-muted-foreground">suggested first unlock batch</span>
+            <Button size="sm" variant="outline" disabled={!!busy}
+              onClick={() => call("apollo-unlock-shortlist", { batch_size: unlockBatchSize, min_score: 4 }, "Unlock shortlist")}>
+              {busy === "Unlock shortlist" ? <Loader2 className="animate-spin" size={14} /> : "Build unlock shortlist"}
+            </Button>
+            <span className="text-xs text-muted-foreground w-full">Founder approval required before any Apollo unlock/enrichment spend.</span>
+          </div>
+
+          <div className="flex flex-wrap gap-2 items-center">
+            <p className="text-xs text-muted-foreground w-full">4. Promote qualified leads to contacts</p>
             <Button size="sm" variant="outline" disabled={!!busy}
               onClick={() => call("promote-leads-to-contacts", { dry_run: true, limit: 100 }, "Promote preview")}>
               {busy === "Promote preview" ? <Loader2 className="animate-spin" size={14} /> : "Preview promote"}
@@ -154,7 +173,7 @@ export default function LeadQualityPanel() {
           </div>
 
           <div className="flex flex-wrap gap-2 items-center">
-            <p className="text-xs text-muted-foreground w-full">4. Enqueue eligible contacts (Step 1, balanced)</p>
+            <p className="text-xs text-muted-foreground w-full">5. Enqueue eligible contacts (Step 1, balanced)</p>
             <Input type="number" className="w-24 h-8" value={batchSize} min={1} max={500}
               onChange={(e) => setBatchSize(Math.min(500, Math.max(1, Number(e.target.value) || 25)))} />
             <span className="text-xs text-muted-foreground">batch</span>

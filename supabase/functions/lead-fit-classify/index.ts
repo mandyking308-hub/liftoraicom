@@ -50,24 +50,57 @@ Deno.serve(async (req) => {
     .select("role").eq("user_id", u.user.id).eq("role", "founder").maybeSingle();
   if (!role) return json({ error: "Founder role required" }, 403);
 
-  let body: { dry_run?: boolean; method?: "rules" | "ai"; limit?: number; lead_ids?: string[] } = {};
+  let body: {
+    dry_run?: boolean;
+    method?: "rules" | "ai";
+    limit?: number;
+    lead_ids?: string[];
+    only_status?: string[];
+    ai_chunk_size?: number;
+    confirm_ai_cost?: boolean;
+  } = {};
   try { body = await req.json(); } catch { /* allow empty */ }
   const dryRun = body.dry_run !== false;
   const method = body.method === "ai" ? "ai" : "rules";
-  const requestedLimit = body.limit ?? 25;
-  const AI_DEFAULT = 25, AI_CEILING = 200, RULES_LIMIT = 1000;
+  // Rules method: the founder action processes the WHOLE eligible set in one
+  // call (cheap, no per-lead cost). AI method still has internal chunking and
+  // an absolute ceiling, but the panel sends the whole selection in one click.
+  const RULES_LIMIT = 5000;
+  const AI_CEILING = 500;             // hard absolute ceiling per founder action
+  const AI_CHUNK = Math.min(Math.max(body.ai_chunk_size ?? 25, 1), 50);
+  const requestedLimit = body.limit ?? (method === "ai" ? 25 : RULES_LIMIT);
   const limit = method === "ai"
     ? Math.min(Math.max(requestedLimit, 1), AI_CEILING)
     : Math.min(Math.max(requestedLimit, 1), RULES_LIMIT);
 
-  // Only classify reviewed leads (cheap-scan must run first)
+  // Eligible statuses: rules can also score needs_verification rows so the
+  // Apollo Unlock Shortlist can rank them by music-industry fit before the
+  // founder approves any Apollo unlock spend.
+  const allowedStatusValues = new Set(["reviewed", "needs_verification"]);
+  const onlyStatus = (body.only_status && body.only_status.length
+    ? body.only_status
+    : ["reviewed", "needs_verification"]
+  ).filter((s) => allowedStatusValues.has(s));
+
+  // The cheap-scan must have run first (status reviewed or needs_verification).
   let q = admin.from("apollo_raw_leads")
-    .select("apollo_lead_id,quality_profile_id,title,company,email,first_name,last_name")
-    .eq("quality_status", "reviewed")
+    .select("apollo_lead_id,quality_profile_id,title,company,email,first_name,last_name,quality_status")
+    .in("quality_status", onlyStatus as any)
     .limit(limit);
   if (body.lead_ids && body.lead_ids.length) q = q.in("apollo_lead_id", body.lead_ids);
   const { data: rows, error } = await q;
   if (error) return json({ error: error.message }, 500);
+
+  // AI cost protection: require explicit confirm flag for any non-dry-run AI.
+  if (method === "ai" && !dryRun && body.confirm_ai_cost !== true) {
+    return json({
+      error: "AI classification requires confirm_ai_cost=true",
+      requires_confirmation: true,
+      eligible_count: (rows ?? []).length,
+      ai_chunk_size: AI_CHUNK,
+      hint: "Resubmit with confirm_ai_cost=true to authorize spend.",
+    }, 400);
+  }
 
   const decisions: Array<{
     apollo_lead_id: string; quality_profile_id: string;
@@ -77,10 +110,12 @@ Deno.serve(async (req) => {
 
   if (method === "ai") {
     if (!LOVABLE_API_KEY) return json({ error: "LOVABLE_API_KEY missing" }, 500);
-    if ((rows ?? []).length > AI_DEFAULT) {
-      // soft cap: just process up to AI_CEILING which is already enforced via limit
-    }
-    for (const r of rows ?? []) {
+    // Internal chunking: process the whole selection in chunks of AI_CHUNK
+    // so the founder is not forced to click the action repeatedly.
+    const allRows = rows ?? [];
+    for (let i = 0; i < allRows.length; i += AI_CHUNK) {
+      const slice = allRows.slice(i, i + AI_CHUNK);
+      for (const r of slice) {
       const prompt = `Classify this person's fit for outreach to ${"NeonCandy"} music promotion.
 Title: ${r.title ?? ""}
 Company: ${r.company ?? ""}
@@ -112,6 +147,7 @@ Return ONLY JSON: {"fit":"<category>","confidence":0..1,"reason":"<short>"}`;
           fit: "poor_fit", confidence: 0, reason: `ai_error: ${(e as Error).message}`, method: "ai", next_status: "needs_founder_review",
         });
       }
+      }
     }
   } else {
     for (const r of rows ?? []) {
@@ -135,15 +171,25 @@ Return ONLY JSON: {"fit":"<category>","confidence":0..1,"reason":"<short>"}`;
   let applied = 0;
   if (!dryRun && decisions.length > 0) {
     for (const d of decisions) {
-      const { error: uErr } = await admin.from("lead_quality_profiles").update({
-        quality_status: d.next_status,
+      // For needs_verification leads we ONLY annotate fit (do NOT promote to
+      // 'qualified' — they still need an email unlock first). For reviewed
+      // leads we update quality_status as before.
+      const { data: existing } = await admin.from("lead_quality_profiles")
+        .select("quality_status").eq("id", d.quality_profile_id).maybeSingle();
+      const isNeedsVerification = existing?.quality_status === "needs_verification";
+      const update: Record<string, unknown> = {
         campaign_fit: d.fit,
         fit_confidence: d.confidence,
         fit_reason: d.reason,
         fit_method: d.method,
-        needs_founder_review: d.next_status === "needs_founder_review",
         classified_at: new Date().toISOString(),
-      }).eq("id", d.quality_profile_id);
+      };
+      if (!isNeedsVerification) {
+        update.quality_status = d.next_status;
+        update.needs_founder_review = d.next_status === "needs_founder_review";
+      }
+      const { error: uErr } = await admin.from("lead_quality_profiles")
+        .update(update).eq("id", d.quality_profile_id);
       if (!uErr) applied++;
     }
     await admin.from("system_events").insert({

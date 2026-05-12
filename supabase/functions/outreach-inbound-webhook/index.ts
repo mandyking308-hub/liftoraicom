@@ -27,6 +27,18 @@ Deno.serve(async (req) => {
     const fromEmail = (body.from_email ?? "").toLowerCase().trim();
     if (!fromEmail) return json({ error: "from_email required" }, 400);
 
+    // Internal/founder/admin/test addresses are NOT prospect inbound. Log to
+    // activity_log only and short-circuit before any system_event/contact work.
+    const { data: isInternal } = await supabase.rpc("is_internal_email", { _email: fromEmail });
+    if (isInternal === true) {
+      await supabase.from("activity_log").insert({
+        event_type: "internal_inbound_ignored",
+        description: `Internal/founder inbound from ${fromEmail} — not treated as a campaign reply.`,
+        entity_type: "internal_email",
+      });
+      return json({ ok: true, action: "internal_ignored", from_email: fromEmail }, 200);
+    }
+
     const { data: contact } = await supabase
       .from("contacts").select("id, assigned_inbox_id").eq("email", fromEmail).maybeSingle();
     if (!contact) {

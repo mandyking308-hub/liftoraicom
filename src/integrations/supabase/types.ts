@@ -447,6 +447,13 @@ export type Database = {
             foreignKeyName: "ai_drafts_inbox_id_fkey"
             columns: ["inbox_id"]
             isOneToOne: false
+            referencedRelation: "command_centre_active_inboxes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_drafts_inbox_id_fkey"
+            columns: ["inbox_id"]
+            isOneToOne: false
             referencedRelation: "inbox_health_summary"
             referencedColumns: ["id"]
           },
@@ -1672,6 +1679,13 @@ export type Database = {
             foreignKeyName: "communications_inbox_id_fkey"
             columns: ["inbox_id"]
             isOneToOne: false
+            referencedRelation: "command_centre_active_inboxes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "communications_inbox_id_fkey"
+            columns: ["inbox_id"]
+            isOneToOne: false
             referencedRelation: "inbox_health_summary"
             referencedColumns: ["id"]
           },
@@ -2037,6 +2051,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "contacts_assigned_inbox_id_fkey"
+            columns: ["assigned_inbox_id"]
+            isOneToOne: false
+            referencedRelation: "command_centre_active_inboxes"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "contacts_assigned_inbox_id_fkey"
             columns: ["assigned_inbox_id"]
@@ -2568,6 +2589,13 @@ export type Database = {
             foreignKeyName: "domain_protection_alerts_inbox_id_fkey"
             columns: ["inbox_id"]
             isOneToOne: false
+            referencedRelation: "command_centre_active_inboxes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "domain_protection_alerts_inbox_id_fkey"
+            columns: ["inbox_id"]
+            isOneToOne: false
             referencedRelation: "inbox_health_summary"
             referencedColumns: ["id"]
           },
@@ -2737,6 +2765,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "high_intent_review_queue"
             referencedColumns: ["contact_id"]
+          },
+          {
+            foreignKeyName: "email_queue_inbox_id_fkey"
+            columns: ["inbox_id"]
+            isOneToOne: false
+            referencedRelation: "command_centre_active_inboxes"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "email_queue_inbox_id_fkey"
@@ -3096,6 +3131,13 @@ export type Database = {
             foreignKeyName: "inbound_messages_inbox_id_fkey"
             columns: ["inbox_id"]
             isOneToOne: false
+            referencedRelation: "command_centre_active_inboxes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inbound_messages_inbox_id_fkey"
+            columns: ["inbox_id"]
+            isOneToOne: false
             referencedRelation: "inbox_health_summary"
             referencedColumns: ["id"]
           },
@@ -3171,6 +3213,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "inbox_credentials_inbox_id_fkey"
+            columns: ["inbox_id"]
+            isOneToOne: true
+            referencedRelation: "command_centre_active_inboxes"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "inbox_credentials_inbox_id_fkey"
             columns: ["inbox_id"]
@@ -3496,6 +3545,33 @@ export type Database = {
           name?: string
           service_type?: string
           status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      internal_email_identities: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          kind: string
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          kind?: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          kind?: string
+          notes?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -5594,6 +5670,13 @@ export type Database = {
             foreignKeyName: "reputation_events_inbox_id_fkey"
             columns: ["inbox_id"]
             isOneToOne: false
+            referencedRelation: "command_centre_active_inboxes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reputation_events_inbox_id_fkey"
+            columns: ["inbox_id"]
+            isOneToOne: false
             referencedRelation: "inbox_health_summary"
             referencedColumns: ["id"]
           },
@@ -7615,6 +7698,54 @@ export type Database = {
           },
         ]
       }
+      command_centre_active_inboxes: {
+        Row: {
+          active: boolean | null
+          business_name: string | null
+          email_address: string | null
+          from_email: string | null
+          from_name: string | null
+          id: string | null
+          live_readiness:
+            | Database["public"]["Enums"]["inbox_live_readiness"]
+            | null
+          provider_blocked_reason: string | null
+          provider_blocked_until: string | null
+          reply_to_email: string | null
+          status_label: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          business_name?: string | null
+          email_address?: string | null
+          from_email?: string | null
+          from_name?: string | null
+          id?: string | null
+          live_readiness?:
+            | Database["public"]["Enums"]["inbox_live_readiness"]
+            | null
+          provider_blocked_reason?: string | null
+          provider_blocked_until?: string | null
+          reply_to_email?: string | null
+          status_label?: never
+        }
+        Update: {
+          active?: boolean | null
+          business_name?: string | null
+          email_address?: string | null
+          from_email?: string | null
+          from_name?: string | null
+          id?: string | null
+          live_readiness?:
+            | Database["public"]["Enums"]["inbox_live_readiness"]
+            | null
+          provider_blocked_reason?: string | null
+          provider_blocked_until?: string | null
+          reply_to_email?: string | null
+          status_label?: never
+        }
+        Relationships: []
+      }
       domain_usage_summary: {
         Row: {
           current_usage: number | null
@@ -8118,6 +8249,7 @@ export type Database = {
         Args: { _business_name?: string; _feature_name: string }
         Returns: boolean
       }
+      is_internal_email: { Args: { _email: string }; Returns: boolean }
       list_inbox_credentials_public: {
         Args: { _inbox_id: string }
         Returns: {
@@ -8653,6 +8785,7 @@ export type Database = {
         | "CLIENT"
         | "SUPPLIER"
         | "DO_NOT_CONTACT"
+        | "INTERNAL"
       conversation_status: "OPEN" | "QUALIFIED" | "CLOSED"
       deal_status: "NEW" | "QUALIFIED" | "PROPOSAL_SENT" | "WON" | "LOST"
       demo_access_status: "active" | "expired" | "revoked"
@@ -9009,6 +9142,7 @@ export const Constants = {
         "CLIENT",
         "SUPPLIER",
         "DO_NOT_CONTACT",
+        "INTERNAL",
       ],
       conversation_status: ["OPEN", "QUALIFIED", "CLOSED"],
       deal_status: ["NEW", "QUALIFIED", "PROPOSAL_SENT", "WON", "LOST"],
