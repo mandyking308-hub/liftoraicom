@@ -71,6 +71,38 @@ type LifecycleSummary = {
   safe_to_queue: number;
 };
 
+type AutopilotRun = {
+  id: string;
+  trigger: string;
+  status: string;
+  finished_at: string | null;
+  scanned_count: number;
+  duplicates_collapsed: number;
+  poor_fit_archived: number;
+  missing_email_held: number;
+  already_in_crm_matched: number;
+  no_email_attempts_excluded: number;
+  safe_to_unlock: number;
+  safe_to_promote: number;
+  safe_to_queue: number;
+  decisions_created: number;
+  source_quality_score: number | null;
+  next_recommended_action: string | null;
+  created_at: string;
+};
+
+type FounderDecision = {
+  id: string;
+  decision_type: string;
+  title: string;
+  finding: string | null;
+  recommendation: string | null;
+  cost_credit_impact: string | null;
+  risk: string | null;
+  status: string;
+  created_at: string;
+};
+
 const Tile = ({ label, value, tone = "default" }: { label: string; value: number | string; tone?: "default" | "good" | "warn" | "danger" }) => {
   const cls =
     tone === "good" ? "text-green-400" :
