@@ -341,6 +341,19 @@ Deno.serve(async (req) => {
       apollo_person_ids_seen: newSeen,
     }).eq("id", segment.id);
 
+    // Fire-and-forget: trigger the Lead Quality Autopilot (cheap deterministic
+    // scan + dedupe + lifecycle classify + CRM cross-check). Never blocks the
+    // import response and never spends Apollo credits or sends emails.
+    try {
+      const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+      const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      fetch(`${SUPABASE_URL}/functions/v1/lead-quality-autopilot`, {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${SERVICE_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ trigger: "after_apollo_import" }),
+      }).catch(() => {});
+    } catch { /* never block the import */ }
+
     return json({
       run_id: run.id,
       people_found: people.length,
