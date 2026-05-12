@@ -387,13 +387,13 @@ export default function SourceQualityBrief() {
           <>
             <div className="rounded-md border border-primary/40 bg-primary/10 p-3 text-xs">
               <p className="font-medium text-foreground">
-                Next step: use this brief in Apollo to search for 50–75 verified-email leads.
+                Primary route: pull verified Apollo leads directly into Liftor using this brief.
               </p>
               <ul className="mt-1 space-y-0.5 text-muted-foreground list-disc pl-4">
-                <li>Verified business email required for normal import.</li>
-                <li>Locked / no-email profiles excluded by default.</li>
-                <li>Apollo unlock only for exceptional founder-approved leads.</li>
-                <li>Do not spend unlock credits on the legacy pool unless founder overrides.</li>
+                <li>Use the “Pull verified Apollo leads” action above — verified-email only, no unlock credits.</li>
+                <li>Locked / no-email profiles are excluded by default.</li>
+                <li>Apollo unlock is only used for exceptional founder-approved leads.</li>
+                <li>Fallback: manual CSV import only if the Apollo API connection is unavailable.</li>
               </ul>
             </div>
 
