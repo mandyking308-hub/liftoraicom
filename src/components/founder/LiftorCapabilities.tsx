@@ -77,7 +77,7 @@ const LiftorCapabilities = () => {
       const lastSend = (await supabase.from("email_queue").select("sent_at").eq("status", "sent").order("sent_at", { ascending: false }).limit(1)).data?.[0]?.sent_at ?? null;
       const lastInbound = (await supabase.from("inbound_messages").select("received_at").order("received_at", { ascending: false }).limit(1)).data?.[0]?.received_at ?? null;
       const lastSysEvent = (await supabase.from("system_events").select("created_at").order("created_at", { ascending: false }).limit(1)).data?.[0]?.created_at ?? null;
-      const lastDemo = (await supabase.from("demo_events").select("created_at").order("created_at", { ascending: false }).limit(1)).data?.[0]?.created_at ?? null;
+      const lastDemo = (await supabase.from("demo_events").select("timestamp").order("timestamp", { ascending: false }).limit(1)).data?.[0]?.timestamp ?? null;
       const realSent = (await supabase.from("email_queue").select("id", { count: "exact", head: true }).eq("status", "sent").eq("delivery_kind", "smtp_real")).count ?? 0;
       const blocked = (await supabase.from("email_queue").select("id", { count: "exact", head: true }).eq("status", "blocked")).count ?? 0;
       const liveInbox = (await supabase.from("inboxes").select("id", { count: "exact", head: true }).eq("active", true)).count ?? 0;
