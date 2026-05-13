@@ -3,6 +3,9 @@ project_id = "oiwbletmjhrhqksosphi"
 [functions.unsubscribe-contact]
 verify_jwt = false
 
+[functions.compliance-approve]
+verify_jwt = false
+
 [functions.outreach-inbound-webhook]
 verify_jwt = false
 
