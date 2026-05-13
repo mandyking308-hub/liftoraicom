@@ -193,6 +193,7 @@ Deno.serve(async (req) => {
   let bcrsCreated = 0;
   let bcrsMatched = 0;
   let profilesReconciled = 0;
+  let failed = 0;
 
   if (!dryRun) {
     for (const p of plan.filter((x) => x.ok)) {
@@ -214,7 +215,7 @@ Deno.serve(async (req) => {
           apollo_organization_id: row.apollo_org_id ?? ex.apollo_org_id_from_payload ?? null,
           assigned_business: row.business_name,
           active_campaign_id: body.campaign_id ?? null,
-          status: "ACTIVE",
+          status: "NEW",
           sendable_status: "sendable",
           source: "autopilot_promotion",
           // Rich mapping derived from already-stored Apollo enrichment payload (no new Apollo calls).
@@ -233,7 +234,13 @@ Deno.serve(async (req) => {
         if (iErr) {
           // Race / UNIQUE collision → look up existing
           const { data: again } = await admin.from("contacts").select("id").eq("email", email).maybeSingle();
-          if (!again) { plan.find((x) => x.apollo_lead_id === p.apollo_lead_id)!.reason = `contact insert failed: ${iErr.message}`; continue; }
+          if (!again) {
+            const planRow = plan.find((x) => x.apollo_lead_id === p.apollo_lead_id)!;
+            planRow.ok = false;
+            planRow.reason = `contact insert failed: ${iErr.message}`;
+            failed++;
+            continue;
+          }
           contactId = again.id; contactsMatched++;
         } else {
           contactId = ins!.id; contactsCreated++;
@@ -246,6 +253,7 @@ Deno.serve(async (req) => {
       const businessId = bizMap.get(row.business_name!) ?? null;
       const { data: existingBcr } = await admin.from("business_contact_relationships")
         .select("id").eq("contact_id", contactId!).eq("business_name", row.business_name!).maybeSingle();
+      let bcrOk = true;
       if (existingBcr) {
         bcrsMatched++;
         // Backfill business_id if missing
@@ -263,11 +271,17 @@ Deno.serve(async (req) => {
           notes: `Created by promote-leads-to-contacts (autopilot_promotion). apollo_lead_id=${row.apollo_lead_id} apollo_person_id=${row.apollo_person_id ?? ""} apollo_org_id=${row.apollo_org_id ?? (enrich.extras as any).apollo_org_id_from_payload ?? ""} reveal_run_id=${enrich.run_id ?? ""} campaign_fit=${row.campaign_fit ?? ""} validation=valid_person_match source=apollo_reveal`,
         });
         if (bErr) {
-          plan.find((x) => x.apollo_lead_id === p.apollo_lead_id)!.reason = `bcr insert failed: ${bErr.message}`;
+          const planRow = plan.find((x) => x.apollo_lead_id === p.apollo_lead_id)!;
+          planRow.ok = false;
+          planRow.reason = `bcr insert failed: ${bErr.message}`;
+          bcrOk = false;
+          failed++;
         } else {
           bcrsCreated++;
         }
       }
+
+      if (!bcrOk) continue;
 
       // 3. Reconcile lead quality profile + apollo_leads.contact_id
       const profilePatch = p.contact_action === "match_existing"
@@ -306,8 +320,8 @@ Deno.serve(async (req) => {
     contacts_to_match: plan.filter((p) => p.contact_action === "match_existing").length,
     bcrs_to_create: plan.filter((p) => p.bcr_action === "create_new" && p.ok).length,
     bcrs_to_match: plan.filter((p) => p.bcr_action === "match_existing" && p.ok).length,
-    contactsCreated, contactsMatched, bcrsCreated, bcrsMatched, profilesReconciled,
+    contactsCreated, contactsMatched, bcrsCreated, bcrsMatched, profilesReconciled, failed,
     promoted: contactsCreated + contactsMatched,
   };
-  return json({ ok: true, dry_run: dryRun, summary, plan_sample: plan.slice(0, 25), plan });
+  return json({ ok: failed === 0, dry_run: dryRun, summary, plan_sample: plan.slice(0, 25), plan });
 });
