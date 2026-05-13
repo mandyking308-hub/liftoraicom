@@ -12,6 +12,7 @@ import ApolloPullPanel from "@/components/founder/ApolloPullPanel";
 import AutonomousPipelineStatus from "@/components/founder/AutonomousPipelineStatus";
 import AutopilotPolicyPanel from "@/components/founder/AutopilotPolicyPanel";
 import OutreachSafetyPanel from "@/components/founder/safety/OutreachSafetyPanel";
+import CommandCentreCoverageMap from "@/components/founder/safety/CommandCentreCoverageMap";
 import { useOutreachSafetyAudit } from "@/hooks/useOutreachSafetyAudit";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { supabase } from "@/integrations/supabase/client";
@@ -875,6 +876,9 @@ const CommandCentre = () => {
           </div>
         );
       })()}
+      <div className="mt-6">
+        <CommandCentreCoverageMap />
+      </div>
     </FounderLayout>
   );
 };
