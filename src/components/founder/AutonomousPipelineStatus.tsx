@@ -248,7 +248,7 @@ export default function AutonomousPipelineStatus({ businessName = "Neon Candy" }
           <Stat label="Skipped — suppressed" value={counters.skipped_suppressed_or_bounced ?? 0} tone="warn" />
           <Stat label="Skipped — prev no-email" value={counters.skipped_previous_no_email ?? 0} tone="warn" />
           <Stat label="Skipped — legacy hold" value={counters.skipped_legacy_hold ?? 0} tone="warn" />
-          <Stat label="Promote planned" value={counters.promote_planned ?? 0} tone="good" />
+          <Stat label="Last planned (snapshot)" value={counters.promote_planned ?? 0} tone="good" />
           <Stat label="Queue planned" value={counters.queue_planned ?? 0} tone="good" />
           <Stat label="Queue skipped" value={counters.queue_skipped ?? 0} tone="warn" />
           <Stat label="Founder decisions" value={pendingDecisions ?? 0} tone={(pendingDecisions ?? 0) > 0 ? "warn" : "default"} />
@@ -256,7 +256,7 @@ export default function AutonomousPipelineStatus({ businessName = "Neon Candy" }
           <Stat label="Would send" value={counters.would_send ?? 0} />
           <Stat label="Validated (post-reveal)" value={(counters as any).post_reveal_validated ?? 0} />
           <Stat label="Valid for auto-promotion" value={(counters as any).valid_for_auto_promotion ?? 0} tone="good" />
-          <Stat label="Needs founder review" value={(counters as any).needs_founder_review ?? 0} tone="warn" />
+          <Stat label="Needs founder review (snapshot)" value={(counters as any).needs_founder_review ?? 0} tone="warn" />
           <Stat label="Blocked — wrong person" value={(counters as any).blocked_possible_wrong_person ?? 0} tone="warn" />
           <Stat label="Blocked — generic mailbox" value={(counters as any).blocked_generic_or_shared ?? 0} tone="warn" />
           <Stat label="Blocked — domain mismatch" value={(counters as any).blocked_domain_mismatch ?? 0} tone="warn" />
@@ -275,7 +275,7 @@ export default function AutonomousPipelineStatus({ businessName = "Neon Candy" }
         {/* Last reveal execution result */}
         {revealExec?.attempted && (
           <div className="space-y-2 p-3 rounded border border-border/50 bg-secondary/30">
-            <p className="text-xs uppercase text-muted-foreground">Last Apollo reveal execution</p>
+            <p className="text-xs uppercase text-muted-foreground">Last Apollo reveal execution — historical</p>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 text-xs">
               <Stat label="Apollo API called" value={revealExec.apollo_api_called ? "yes" : "no"} tone={revealExec.apollo_api_called ? "good" : "danger"} />
               <Stat label="Credits actually spent" value={revealExec.credits_actually_spent ?? 0} />
