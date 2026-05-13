@@ -69,6 +69,28 @@ type Counters = {
   would_spend_credits: number;
 };
 
+// Normalize helpers — used for pre-reveal dedupe and company grouping.
+function norm(s: string | null | undefined): string {
+  return (s ?? "").toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, " ").trim();
+}
+function dedupeKey(lead: any): { key: string; source: string } {
+  if (lead?.apollo_person_id) return { key: `pid:${String(lead.apollo_person_id).toLowerCase()}`, source: "apollo_person_id" };
+  const li = (lead?.linkedin_url ?? "").toLowerCase().replace(/^https?:\/\/(www\.)?/, "").replace(/\/+$/, "");
+  if (li) return { key: `li:${li}`, source: "linkedin_url" };
+  const fn = norm(lead?.first_name); const ln = norm(lead?.last_name);
+  const co = norm(lead?.company); const ti = norm(lead?.title);
+  return { key: `nm:${fn}|${ln}|${co}|${ti}`, source: "name_company_title" };
+}
+function companyGroupKey(lead: any): { key: string; display: string; source: string } {
+  const dom = (lead?.email_domain ?? "").toLowerCase().trim();
+  if (dom) return { key: `dom:${dom}`, display: dom, source: "email_domain" };
+  const orgId = lead?.apollo_org_id ? String(lead.apollo_org_id) : "";
+  if (orgId) return { key: `org:${orgId.toLowerCase()}`, display: `org:${orgId.slice(0, 8)}`, source: "apollo_org_id" };
+  const co = norm(lead?.company);
+  if (co) return { key: `co:${co}`, display: `co:${lead.company}`, source: "company_name" };
+  return { key: "unknown", display: "—", source: "none" };
+}
+
 // Inline deterministic scorer — mirrors apollo-unlock-shortlist title/company
 // rules and returns a 0–10 score plus a campaign_fit label. NO Apollo calls,
 // NO AI, NO credits.
@@ -260,7 +282,12 @@ Deno.serve(async (req) => {
     : { data: [] as any[] };
   const crmPersonSet = new Set((crmHits ?? []).map(c => c.apollo_person_id));
 
-  const eligible: Array<{ qp: any; lead: any; score: number; domain: string }> = [];
+  const eligible: Array<{
+    qp: any; lead: any; score: number;
+    domain: string;
+    group_key: string; group_display: string; group_source: string;
+    dup_key: string; dup_source: string;
+  }> = [];
 
   for (const qp of revealCandidates ?? []) {
     const lead = leadByQp.get(qp.apollo_lead_id);
@@ -329,23 +356,70 @@ Deno.serve(async (req) => {
     }
 
     counters.passed_quality_policy++;
-    eligible.push({ qp, lead, score, domain: (lead.email_domain ?? "").toLowerCase() });
+    const grp = companyGroupKey(lead);
+    const dup = dedupeKey(lead);
+    eligible.push({
+      qp, lead, score,
+      domain: (lead.email_domain ?? "").toLowerCase(),
+      group_key: grp.key, group_display: grp.display, group_source: grp.source,
+      dup_key: dup.key, dup_source: dup.source,
+    });
   }
 
-  eligible.sort((a, b) => b.score - a.score);
-  const domainSeen = new Map<string, number>();
-  const planReveal: typeof eligible = [];
+  // Sort by score, then stable on apollo_lead_id so dedupe selection is deterministic.
+  eligible.sort((a, b) => (b.score - a.score) || String(a.qp.apollo_lead_id).localeCompare(String(b.qp.apollo_lead_id)));
+
+  // ---------- Pre-reveal dedupe (BEFORE domain cap, BEFORE selection) ----------
+  const dedupeSeen = new Map<string, { qp_id: string; apollo_lead_id: string; name: string; company: string }>();
+  const dedupedEligible: typeof eligible = [];
+  const duplicatesHeldBack: Array<Record<string, unknown>> = [];
   for (const e of eligible) {
-    const cap = policy.apollo_reveal_max_domain_frequency;
-    const cnt = domainSeen.get(e.domain) ?? 0;
-    if (e.domain && cap > 0 && cnt >= cap) {
-      counters.reveal_skipped_domain_cap++;
-      pushSkip({ stage: "reveal", reason: "domain_cap", candidate_id: e.qp.id, domain: e.domain, source_quality_score: e.score });
+    const existing = dedupeSeen.get(e.dup_key);
+    const name = `${e.lead.first_name ?? ""} ${e.lead.last_name ?? ""}`.trim() || "—";
+    if (existing) {
+      (counters as any).held_back_by_duplicate_pre_reveal =
+        ((counters as any).held_back_by_duplicate_pre_reveal ?? 0) + 1;
+      counters.skipped_duplicate++;
+      duplicatesHeldBack.push({
+        candidate_id: e.qp.id,
+        apollo_lead_id: e.qp.apollo_lead_id,
+        apollo_person_id: e.lead.apollo_person_id ?? null,
+        name, company: e.lead.company ?? null,
+        duplicate_key: e.dup_key,
+        duplicate_key_source: e.dup_source,
+        matched_selected_candidate: existing,
+        reason_held: "duplicate_pre_reveal",
+      });
+      pushSkip({ stage: "reveal", reason: "duplicate_pre_reveal", candidate_id: e.qp.id, dup_key: e.dup_key, matched: existing });
       continue;
     }
-    domainSeen.set(e.domain, cnt + 1);
+    dedupeSeen.set(e.dup_key, { qp_id: e.qp.id, apollo_lead_id: e.qp.apollo_lead_id, name, company: e.lead.company ?? "—" });
+    dedupedEligible.push(e);
+  }
+  (counters as any).duplicate_candidates_detected = duplicatesHeldBack.length;
+  (counters as any).selected_unique_candidates = dedupedEligible.length;
+
+  // ---------- Domain / company-group cap (operates on derived group_key) ----------
+  const groupSeen = new Map<string, number>();
+  const planReveal: typeof eligible = [];
+  for (const e of dedupedEligible) {
+    const cap = policy.apollo_reveal_max_domain_frequency;
+    const cnt = groupSeen.get(e.group_key) ?? 0;
+    if (cap > 0 && e.group_key !== "unknown" && cnt >= cap) {
+      counters.reveal_skipped_domain_cap++;
+      (counters as any).held_back_by_company_or_domain_cap =
+        ((counters as any).held_back_by_company_or_domain_cap ?? 0) + 1;
+      pushSkip({
+        stage: "reveal", reason: "company_or_domain_cap_pre_reveal",
+        candidate_id: e.qp.id, group_key: e.group_key, group_source: e.group_source,
+        source_quality_score: e.score,
+      });
+      continue;
+    }
+    groupSeen.set(e.group_key, cnt + 1);
     planReveal.push(e);
   }
+  (counters as any).company_group_cap_applied = groupSeen.size;
   counters.reveal_eligible = planReveal.length;
 
   const budgetCap = Math.min(counters.credits_remaining_today, counters.credits_remaining_month);
@@ -413,10 +487,16 @@ Deno.serve(async (req) => {
   const selectedCandidates = afterBudget.map(e => ({
     candidate_id: e.qp.id,
     apollo_lead_id: e.qp.apollo_lead_id,
+    apollo_person_id: e.lead.apollo_person_id ?? null,
     name: `${e.lead.first_name ?? ""} ${e.lead.last_name ?? ""}`.trim() || null,
     title: e.lead.title ?? null,
     company: e.lead.company ?? null,
     domain: e.domain || null,
+    domain_or_company_group: e.group_display,
+    group_source: e.group_source,
+    duplicate_key: e.dup_key,
+    duplicate_key_source: e.dup_source,
+    why_selected: `score=${e.score} fit=${e.qp.campaign_fit ?? "—"} group=${e.group_display}`,
     country: e.lead.country ?? null,
     source_quality_score: e.score,
     campaign_fit: e.qp.campaign_fit ?? e.lead.campaign_fit ?? null,
@@ -434,6 +514,7 @@ Deno.serve(async (req) => {
     title: e.lead.title ?? null,
     company: e.lead.company ?? null,
     domain: e.domain || null,
+    domain_or_company_group: e.group_display,
     source_quality_score: e.score,
     reason_not_selected:
       founderAmount === null ? "founder_amount_not_set"
@@ -652,6 +733,7 @@ Deno.serve(async (req) => {
       blocked_reason: blockedReason,
       selected_candidates: selectedCandidates,
       eligible_not_selected: eligibleNotSelected.slice(0, 100),
+      duplicates_held_back: duplicatesHeldBack.slice(0, 100),
       policy_snapshot: {
         apollo_email_reveal_autonomous: policy.apollo_email_reveal_autonomous,
         auto_promote_after_valid_reveal: policy.auto_promote_after_valid_reveal,
@@ -688,6 +770,7 @@ Deno.serve(async (req) => {
     counters,
     selected_candidates: selectedCandidates,
     eligible_not_selected: eligibleNotSelected.slice(0, 100),
+    duplicates_held_back: duplicatesHeldBack.slice(0, 100),
     sample_skips: sampleSkips.slice(0, 20),
   });
 });

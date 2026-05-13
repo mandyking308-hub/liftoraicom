@@ -90,6 +90,7 @@ export default function AutonomousPipelineStatus({ businessName = "Neon Candy" }
   const blockedReason: string | null = planResult?.blocked_reason ?? lastRun?.details?.blocked_reason ?? null;
   const selectedCandidates: any[] = planResult?.selected_candidates ?? lastRun?.details?.selected_candidates ?? [];
   const eligibleNotSelected: any[] = planResult?.eligible_not_selected ?? lastRun?.details?.eligible_not_selected ?? [];
+  const duplicatesHeldBack: any[] = planResult?.duplicates_held_back ?? lastRun?.details?.duplicates_held_back ?? [];
 
   const parsedAmount = revealAmount.trim() === "" ? null : Math.max(0, Math.floor(Number(revealAmount)));
   const amountInvalid = revealAmount.trim() !== "" && (Number.isNaN(Number(revealAmount)) || (parsedAmount ?? 0) <= 0);
@@ -227,6 +228,11 @@ export default function AutonomousPipelineStatus({ businessName = "Neon Candy" }
           <Stat label="Held back — founder amount" value={counters.held_back_by_founder_amount ?? 0} tone="warn" />
           <Stat label="Held back — budget" value={counters.held_back_by_budget ?? 0} tone="warn" />
           <Stat label="Held back — domain cap" value={counters.held_back_by_domain_cap ?? counters.reveal_skipped_domain_cap ?? 0} tone="warn" />
+          <Stat label="Held back — duplicate (pre-reveal)" value={(counters as any).held_back_by_duplicate_pre_reveal ?? 0} tone="warn" />
+          <Stat label="Held back — company/domain cap" value={(counters as any).held_back_by_company_or_domain_cap ?? 0} tone="warn" />
+          <Stat label="Unique candidates (post-dedupe)" value={(counters as any).selected_unique_candidates ?? 0} tone="good" />
+          <Stat label="Duplicates detected" value={(counters as any).duplicate_candidates_detected ?? 0} tone="warn" />
+          <Stat label="Company groups in batch" value={(counters as any).company_group_cap_applied ?? 0} />
           <Stat label="Reveal planned (live)" value={counters.reveal_planned ?? 0} tone="good" />
           <Stat label="Awaiting founder approval" value={counters.awaiting_founder_reveal_approval ?? 0} tone="warn" />
           <Stat label="Skipped — below min score" value={counters.skipped_below_min_score ?? 0} tone="warn" />
@@ -261,7 +267,8 @@ export default function AutonomousPipelineStatus({ businessName = "Neon Candy" }
                     <TableHead>Name</TableHead>
                     <TableHead>Title</TableHead>
                     <TableHead>Company</TableHead>
-                    <TableHead>Domain</TableHead>
+                    <TableHead>Domain / Group</TableHead>
+                    <TableHead>Dup key</TableHead>
                     <TableHead>Score</TableHead>
                     <TableHead>Fit</TableHead>
                     <TableHead>Email</TableHead>
@@ -274,11 +281,42 @@ export default function AutonomousPipelineStatus({ businessName = "Neon Candy" }
                       <TableCell>{c.name ?? "—"}</TableCell>
                       <TableCell className="text-xs">{c.title ?? "—"}</TableCell>
                       <TableCell className="text-xs">{c.company ?? "—"}</TableCell>
-                      <TableCell className="text-xs">{c.domain ?? "—"}</TableCell>
+                      <TableCell className="text-xs">{c.domain_or_company_group ?? c.domain ?? "—"}</TableCell>
+                      <TableCell className="text-xs font-mono">{(c.duplicate_key ?? "—").toString().slice(0, 28)}</TableCell>
                       <TableCell>{c.source_quality_score}</TableCell>
                       <TableCell className="text-xs">{c.campaign_fit ?? "—"}</TableCell>
                       <TableCell className="text-xs">{c.email_available ? "available" : "reveal needed"}</TableCell>
                       <TableCell className="text-xs">{c.estimated_credit_cost} credit</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        )}
+
+        {duplicatesHeldBack.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-xs uppercase text-yellow-300">Duplicate candidates held back before reveal ({duplicatesHeldBack.length})</p>
+            <div className="max-h-56 overflow-auto rounded border border-yellow-500/30">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Company</TableHead>
+                    <TableHead>Dup key</TableHead>
+                    <TableHead>Matched selected</TableHead>
+                    <TableHead>Reason</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {duplicatesHeldBack.map((c) => (
+                    <TableRow key={c.candidate_id}>
+                      <TableCell>{c.name ?? "—"}</TableCell>
+                      <TableCell className="text-xs">{c.company ?? "—"}</TableCell>
+                      <TableCell className="text-xs font-mono">{(c.duplicate_key ?? "—").toString().slice(0, 28)}</TableCell>
+                      <TableCell className="text-xs">{c.matched_selected_candidate?.name ?? "—"} ({c.matched_selected_candidate?.company ?? "—"})</TableCell>
+                      <TableCell className="text-xs">{c.reason_held}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
