@@ -295,6 +295,190 @@ provider-side daily cap.**
 
 ---
 
+## SECTION 0b — APOLLO REVEAL WORKFLOW & POLICY-CONTROLLED AUTONOMOUS PIPELINE (13 MAY 2026)
+
+> Captures the corrections and the new autonomous pipeline shipped
+> between 12–13 May 2026. Supersedes any earlier wording about
+> "pull verified emails" or "Apollo gives us emails directly".
+
+### 0b.1 Apollo reality (corrected wording)
+
+- Apollo **People Search** (\`/api/v1/mixed_people/api_search\`) returns
+  candidate profiles and *email availability signals* only.
+- Apollo **does not** return the actual email address from search.
+- The deliverable email is only obtained via Apollo
+  **reveal / enrichment / unlock** (\`/api/v1/people/match\` or
+  \`/api/v1/people/bulk_match\`), which **spends Apollo credits**.
+- Therefore the platform now treats *Search* and *Email Reveal* as two
+  distinct stages with two distinct gates.
+
+### 0b.2 Stage model (Command Centre)
+
+1. **Apollo Candidate Pull** — search → stage candidates as
+   \`email_reveal_required\`. No credits spent.
+2. **Lead Quality Scoring** — \`lead-quality-autopilot\` scores each
+   candidate (0–10 \`fit_confidence\`); de-dupes against \`contacts\` /
+   BCR / suppression / internal / previous-no-email / poor-fit /
+   bounced.
+3. **Reveal Shortlist** — only candidates with verified-email-available
+   signal AND quality score ≥ policy threshold AND domain frequency ≤
+   policy cap are recommended for reveal. Founder sees a credit
+   estimate based on **unique** candidates before any credits are spent.
+4. **Apollo Email Reveal** — \`apollo-unlock-shortlist\` /
+   \`apollo-unlock-selected\` runs bulk_match. Every credit use is
+   logged to \`apollo_credit_ledger\` (append-only).
+5. **CRM Promotion** — only verified, CRM-new, campaign-fit, not
+   suppressed leads are promoted into central \`contacts\` and attached
+   via \`business_contact_relationships\` (BCR).
+6. **Queue (Step 1)** — \`crm-send-check\` gates every queue insertion;
+   domain cap is enforced.
+7. **Send** — \`outreach-send-worker\` continues to enforce all hard
+   guardrails (suppression, hard-bounce, internal, duplicate-pending,
+   NeonCandy inbox guard, sequence chain-on-success).
+
+### 0b.3 Safe-to counters
+
+- *Safe to reveal* = unique candidates passing quality + policy gates.
+- *Safe to promote* = stays at 0 until reveal is complete.
+- *Safe to queue* = stays at 0 until promotion is complete.
+
+### 0b.4 Policy-controlled autonomous pipeline
+
+New table \`business_autopilot_settings\` (one row per business, keyed
+by \`business_id\`) holds the operating rules:
+
+- \`apollo_candidate_pull_enabled\`
+- \`apollo_email_reveal_autonomous\` (default **false** — founder must
+  explicitly enable)
+- \`apollo_reveal_daily_credit_budget\` (default 50)
+- \`apollo_reveal_monthly_credit_budget\` (default 500)
+- \`apollo_reveal_min_quality_score\` (default 7)
+- \`apollo_reveal_max_domain_frequency\` (default 2)
+- \`auto_promote_after_valid_reveal\`,
+  \`auto_promote_only_verified_email\`,
+  \`auto_promote_only_crm_new\`,
+  \`auto_promote_only_campaign_fit\`
+- \`auto_queue_after_promotion\`, \`auto_queue_domain_cap\` (default 2)
+- \`auto_send_after_queue\` (default **false** — IONOS proof mode)
+- \`sending_provider_mode\` (\`ionos_proof\` | \`external_scale\`)
+- \`daily_send_budget\` (default 20)
+
+Audit / decision tables (existing tables reused, no parallel duplicates):
+
+- \`autopilot_runs\` — per-run summary + JSONB \`details\` snapshot.
+- \`system_events\` — per-stage events
+  (revealed / promoted / queued / blocked-by-policy / ambiguous).
+- \`founder_decisions\` — captures policy changes, budget overrides,
+  enable-auto-send flips, ambiguous-lead approvals.
+- \`apollo_credit_ledger\` — append-only credit usage with
+  \`function_source\`, \`credits_used\`, \`apollo_person_ids\`.
+
+### 0b.5 \`autopilot-orchestrator\` edge function
+
+Single entry point per business (manual trigger + scheduled).
+Defaults to \`dry_run: true\` so the first run never spends credits or
+creates contacts/queue rows. Deterministic — no AI calls.
+
+1. Loads policy + today's credit usage.
+2. Selects \`lead_quality_profiles\` rows in \`email_reveal_required\`
+   that pass policy (score ≥ threshold, not in CRM, not duplicate, not
+   bounced/suppressed/internal, not previous-no-email, not poor-fit,
+   domain count under cap).
+3. Computes
+   \`reveal_batch_size = min(eligible, daily_remaining, monthly_remaining)\`.
+4. If \`apollo_email_reveal_autonomous = true\` → calls bulk reveal,
+   classifies outcomes (verified / no_email / catch_all / failed).
+5. If \`auto_promote_after_valid_reveal = true\` → promotes verified,
+   CRM-new, campaign-fit, not-suppressed leads to \`contacts\` + BCR.
+6. If \`auto_queue_after_promotion = true\` → inserts Step 1 into
+   \`email_queue\` via \`assign_inbox_for_contact\`, respecting
+   \`auto_queue_domain_cap\`.
+7. If \`auto_send_after_queue = false\` (current default) → stops.
+   The send worker remains the only thing that can dispatch live email
+   and it still enforces every existing guardrail.
+8. Anything ambiguous (unexpected enrichment shape, policy breach,
+   budget about to exceed, new-large-suppression event, copy change
+   request) is **not** acted on — it is written to
+   \`founder_decisions\` for explicit founder approval.
+9. Every action (acted, planned, blocked, skipped) is written to
+   \`autopilot_runs.details\` and \`system_events\`.
+
+### 0b.6 UI surfaces (Command Centre)
+
+- \`AutonomousPipelineStatus.tsx\` — live counters (pulled / passed /
+  revealed / credits used today + this month / valid / no-email /
+  promoted / queued / waiting on send provider / blocked by policy /
+  next scheduled run) + ON/OFF policy chips
+  (Reveal · Auto-promote · Auto-queue · Auto-send) + sending provider
+  mode + **Plan (dry-run)** and **Run live** buttons.
+- \`AutopilotPolicyPanel.tsx\` — founder-only form bound to
+  \`business_autopilot_settings\`. Sensitive flips (enabling
+  \`apollo_email_reveal_autonomous\`, raising credit budgets, flipping
+  \`auto_send_after_queue\` to true, switching to
+  \`external_scale\`) write a row to \`founder_decisions\` for audit.
+- \`FounderDecisionQueue\` view surfaces pending decisions with
+  approve / reject buttons.
+- \`ApolloRevealShortlist.tsx\` collapses to read-only "Recent
+  autonomous reveal batches" when the autonomous flag is on.
+- \`ApolloPullPanel.tsx\` and \`SourceQualityBrief.tsx\` re-labelled to
+  reflect Search vs Reveal as separate stages and to show the unique
+  credit estimate before reveal.
+
+### 0b.7 Safety posture as shipped (13 May 2026)
+
+- NeonCandy row in \`business_autopilot_settings\` seeded with
+  \`apollo_email_reveal_autonomous = false\` and
+  \`auto_send_after_queue = false\`.
+- First orchestrator run is dry-run only.
+- **No Apollo credits were spent during implementation.**
+- **No contacts were promoted during implementation.**
+- **No \`email_queue\` rows were created during implementation.**
+- **No emails were sent during implementation.**
+- The 75 previously-staged candidates are held as
+  \`email_reveal_required\` until the founder reviews the dry-run plan
+  and explicitly enables live policy.
+
+### 0b.8 How to turn it on (when ready)
+
+1. Open Command Centre → *Autopilot Operating Policy*.
+2. Review/adjust thresholds and credit budgets.
+3. Click **Plan (dry-run)** and inspect planned actions in
+   \`AutonomousPipelineStatus\` and \`autopilot_runs.details\`.
+4. Toggle **Autonomous email reveal** ON, save (creates a
+   \`founder_decisions\` audit row), and click **Run live**.
+5. \`auto_send_after_queue\` stays OFF until an external scaled
+   provider (e.g. Smartlead) is configured. IONOS continues to be the
+   proof inbox only.
+
+### 0b.9 Migrations / files of record (this build window)
+
+- \`supabase/migrations/20260512200652_*.sql\` — Apollo reveal workflow
+  correction (search vs reveal as separate stages,
+  \`email_reveal_required\` staging).
+- \`supabase/migrations/20260513080401_*.sql\` — initial autopilot
+  schema (later consolidated).
+- \`supabase/migrations/20260513080925_*.sql\` — consolidation: removed
+  parallel duplicate audit tables, switched to \`business_id\`, reused
+  \`autopilot_runs\` / \`founder_decisions\` / \`system_events\`,
+  preserved CRM spine
+  (candidate → \`lead_quality_profile\` → \`contacts\` → BCR →
+  \`email_queue\`).
+- \`supabase/functions/autopilot-orchestrator/index.ts\` — orchestrator.
+- \`supabase/functions/lead-quality-autopilot/index.ts\` — recommends
+  *"View autonomous pipeline status"* when autonomous reveal is on.
+- \`supabase/functions/apollo-pull-verified/index.ts\` — fires
+  orchestrator (fire-and-forget) after a successful pull when both
+  \`apollo_candidate_pull_enabled\` and
+  \`apollo_email_reveal_autonomous\` are true.
+- \`supabase/functions/apollo-unlock-shortlist/index.ts\` — reveal
+  shortlist execution.
+- \`src/components/founder/AutonomousPipelineStatus.tsx\`,
+  \`AutopilotPolicyPanel.tsx\`, \`ApolloPullPanel.tsx\`,
+  \`ApolloRevealShortlist.tsx\`, \`SourceQualityBrief.tsx\`,
+  \`LeadQualityPanel.tsx\` and \`src/pages/founder/CommandCentre.tsx\`.
+
+---
+
 ## SECTION 0a — CREDENTIALS & SECRETS REGISTER
 
 > **Raw passwords and API keys are not stored in this manual.**
