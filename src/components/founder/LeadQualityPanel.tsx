@@ -442,8 +442,9 @@ export default function LeadQualityPanel() {
       ? `Preview queue creation for ${lifecycle?.safe_to_queue} staged contact(s). Auto-send remains OFF.`
       : (lifecycle?.safe_to_promote ?? 0) > 0
       ? `Promote ${lifecycle?.safe_to_promote} validation-clean contact(s) — preview first${livePendingDecisions > 0 ? ` · review/hold ${livePendingDecisions} founder decision(s)` : ""}`
-      : (stageCandidateCount ?? 0) > 0
-      ? `Review campaign eligibility and assign inbox/campaign for ${stageCandidateCount} staged CRM contact(s).`
+      : `Preview stage-to-queue eligibility for the latest Apollo promotion batch (Neon Candy).`
+      .replace(/$/, "")
+      ? `Preview stage-to-queue eligibility for the latest Apollo promotion batch (Neon Candy).`
       : (lifecycle?.active_working_leads ?? 0) > 0
       ? "Review active working leads — autopilot has no recommended unlock work"
       : "Run fresh Apollo verified-email search using NeonCandy Source Quality Brief — do not spend credits on the legacy pool";
