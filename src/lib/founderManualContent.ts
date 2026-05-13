@@ -481,6 +481,281 @@ creates contacts/queue rows. Deterministic — no AI calls.
 
 ---
 
+## SECTION 0c — COMPLIANCE SPINE, STAGE-TO-QUEUE GATE, QUEUE CREATION GATE & AUTO-SEND INCIDENT (13 MAY 2026)
+
+> Captures the May 13 2026 build window in which the platform's outreach
+> pipeline was re-architected around an explicit, server-enforced
+> compliance spine and a multi-gate promotion model
+> (Promote → Stage → Queue → Send). Also documents the live-fire incident
+> in which three Apollo-promotion contacts were sent before an
+> auto-send kill-switch existed, and the corrective architecture that
+> follows.
+
+### 0c.1 The new outreach promotion model
+
+Outreach is no longer a single button. It is a sequence of four
+independent server-side gates, each with its own audit row and dry-run
+preview. Nothing advances to the next gate without an explicit founder
+action.
+
+1. **Promote (Apollo → CRM)** — \`promote-leads-to-contacts\` moves
+   verified, campaign-fit, CRM-new Apollo leads into central
+   \`contacts\` with \`compliance_status='pending_review'\` and creates
+   the matching \`business_contact_relationships\` (BCR) row at
+   \`current_stage='promoted'\`.
+2. **Compliance Approval** — \`compliance-approve\` flips a contact
+   from \`pending_review\` to \`outreach_allowed\` (or
+   \`rejected\` / \`dnc\`) and writes a row to
+   \`contact_compliance_events\` with founder identity, prior status,
+   new status, reason, and timestamp.
+3. **Stage-to-Queue Eligibility Gate** —
+   \`stage-to-queue-eligibility\` evaluates contacts that are
+   \`outreach_allowed\` AND in the clean Apollo promotion batch AND
+   have no historical conflict, and stages the BCR
+   (\`current_stage='staged'\`, \`campaign_eligible=true\`,
+   \`last_campaign_id\` = target campaign).
+4. **Queue Creation Gate** — \`create-queue-from-staged\` inserts
+   Step 1 \`email_queue\` rows for staged + outreach-allowed +
+   campaign-eligible BCRs (status=\`pending\`, scheduled_at=now).
+   Idempotent: refuses to insert if a row for
+   (contact_id, campaign_id, sequence_step=1) already exists.
+5. **Send** — \`outreach-send-worker\` (cron-driven every 2 minutes via
+   \`outreach-send-worker-2min\`) drains rows in
+   (\`pending\`,\`delayed\`,\`throttled\`) through IONOS SMTP.
+
+Each gate ships with a Command Centre dry-run preview panel. The Apply
+button is disabled until a Preview has succeeded in the same session.
+
+### 0c.2 Compliance Spine — schema additions
+
+- \`contacts.compliance_status\` — enum-like text:
+  \`pending_review\` (default for newly promoted) ·
+  \`outreach_allowed\` · \`rejected\` · \`dnc\`.
+- \`contact_compliance_events\` (append-only) —
+  \`contact_id\`, \`previous_status\`, \`new_status\`, \`reason\`,
+  \`actor_user_id\`, \`actor_email\`, \`source\`
+  (\`founder_panel\` | \`auto\` | \`bulk_backfill\`), \`metadata\` jsonb,
+  \`created_at\`. RLS: founder-only insert, founder-only select.
+- \`compliance_spine_backfilled\` event recorded once
+  (\`system_events\` 13 May 14:28 UTC) when historical contacts were
+  given default \`compliance_status\` values.
+
+**Hard rule:** no contact with \`compliance_status != 'outreach_allowed'\`
+may be staged, queued, or sent — enforced server-side at every gate, not
+just in the UI.
+
+### 0c.3 Stage-to-Queue Eligibility Gate
+
+Edge function: \`supabase/functions/stage-to-queue-eligibility/index.ts\`.
+
+Server-side candidate selection:
+
+- \`assigned_business = 'Neon Candy'\`
+- \`compliance_status = 'outreach_allowed'\`
+- Member of the *clean Apollo promotion batch* (verified email, not
+  duplicate, not previously bounced, not in suppression).
+- Has a BCR for Neon Candy in \`promoted\` (or already \`staged\` —
+  re-stage is a no-op).
+- No prior \`email_queue\` row for the target campaign.
+
+Outcome categories per candidate:
+
+- \`eligible_to_stage\` — passes all checks.
+- \`already_staged\` — BCR already at \`staged\`.
+- \`excluded_no_bcr\` — no BCR row for the business (this caused a bug
+  on 13 May; see 0c.6).
+- \`excluded_compliance\` — \`pending_review\` / \`rejected\` / \`dnc\`.
+- \`excluded_existing_queue_row\` — already has a queue row for this
+  campaign step.
+- \`excluded_history\` — historic suppression / bounce / DNC / inbound
+  STOP / prior conversation owned by another business.
+
+The dry-run preview returns the per-row outcome breakdown plus
+aggregate counts (\`candidates_checked\`, \`eligible_to_stage\`,
+\`bcrs_to_qualify\`, \`contacts_to_assign_inbox\`,
+\`contacts_to_assign_campaign\`, \`queue_rows_to_create\` (always 0 at
+this stage), \`sends_to_create\` (always 0),
+\`apollo_credits_to_spend\` (always 0)).
+
+Apply path stages BCRs only — it does **not** create queue rows or send
+anything. Audit row written to \`system_events\` as
+\`stage_to_queue_eligibility_approved\` with the full eligibility
+payload. Recorded run on 13 May 14:45 UTC staged Aaliah, Morgan and
+Pooja.
+
+### 0c.4 Queue Creation Gate
+
+Edge function: \`supabase/functions/create-queue-from-staged/index.ts\`.
+
+Server-side selection:
+
+- BCR \`current_stage = 'staged'\` AND \`campaign_eligible = true\`
+  AND \`last_campaign_id\` = Early Access Collaboration Test campaign id.
+- Contact \`compliance_status = 'outreach_allowed'\`.
+- No existing \`email_queue\` row for
+  (contact_id, campaign_id, sequence_step=1).
+- Sender resolves to \`hello@neoncandy.online\` only — any other inbox
+  is blocked with sanity reason \`NEONCANDY_INVALID_INBOX\`.
+
+Apply path inserts \`email_queue\` rows with \`status='pending'\`,
+\`scheduled_at=now()\`, \`business_name='Neon Candy'\`,
+\`sequence_step=1\`. Idempotent: \`NOT EXISTS\` pre-check on
+(contact_id, campaign_id, step).
+
+Audit row written to \`system_events\` as
+\`queue_created_from_staged_contacts\` with the created queue row ids,
+contact ids, exclusion counts, and zero-send confirmations.
+
+On 13 May 15:00 UTC this created 3 \`email_queue\` rows for Aaliah,
+Morgan and Pooja:
+
+- \`8a92edbb-2e61-49b7-a6df-3bac21268fe0\`
+- \`677a3ffd-bf48-457d-88e1-189225d8ce6a\`
+- \`e5a80b74-48b2-4317-89e5-bc687e42cb65\`
+
+### 0c.5 Compliance Approval flow
+
+- Edge function \`compliance-approve\` flips a single contact's
+  \`compliance_status\` and writes to \`contact_compliance_events\`.
+- Founder-only Compliance Approval panel surfaces every
+  \`pending_review\` contact with the Apollo source payload, the BCR
+  context, the deliverable email, and Approve / Reject / DNC buttons.
+- Bulk approve is gated by the same per-contact server-side checks; UI
+  selection is convenience only — the function still validates each
+  row.
+- Audit run \`contact_compliance_approval_completed\` recorded on
+  13 May 14:43 UTC for the Aaliah / Morgan / Pooja batch.
+
+### 0c.6 BCR-lookup bug (caught and fixed in this window)
+
+- **Symptom:** Stage-to-Queue gate reported
+  \`excluded_no_bcr\` for all 3 Apollo promotion contacts even though
+  their BCR rows clearly existed.
+- **Cause:** the candidate join was matching BCR rows on a normalised
+  business slug while the BCR table stored the human-readable
+  \`business_name\`. The lookup therefore returned zero rows.
+- **Fix:** the eligibility query now joins via
+  \`business_contact_relationships.business_name = 'Neon Candy'\`
+  (and a tolerant \`ilike\` fallback for legacy \`'NeonCandy'\`
+  rows), and the candidate set is reduced to the clean Apollo
+  promotion batch *before* the BCR join — preventing legitimate
+  contacts being mis-flagged as \`excluded_no_bcr\`.
+- **Validation:** preview re-run on 13 May returned
+  \`candidates_checked=3\`, \`eligible_to_stage=3\`,
+  \`excluded_no_bcr=0\`. No queue rows or sends were created during
+  the diagnostic phase.
+
+### 0c.7 Auto-Send Incident (13 May 2026, 15:00 UTC) — root cause and corrective architecture
+
+**What happened.** Within 25–42 seconds of the Queue Creation Gate
+inserting the 3 \`pending\` rows for Aaliah, Morgan and Pooja, the
+\`outreach-send-worker-2min\` cron job picked them up and sent all 3
+via IONOS SMTP through \`hello@neoncandy.online\`. Each row recorded a
+populated \`sent_at\`, \`smtp_accepted_at\` and a valid IONOS
+\`provider_message_id\`. \`sent_folder_copy_failed\` events fired for
+each (the IMAP-APPEND-to-Sent issue from Section 0.15 is still open).
+
+**Root cause.** The repeated operating brief said *"Auto-send: OFF"*
+but **no \`auto_send_enabled\` flag actually existed**. The
+\`system_settings\` table only contained:
+
+| key | value |
+|-----|-------|
+| \`outbound_provider_configured\` | \`true\` |
+| \`outbound_provider_test_passed_at\` | \`2026-05-01 09:25:15+00\` |
+| \`system_mode\` | \`live\` |
+
+The send worker had no kill-switch to read. Once a queue row was in
+\`pending\` and the cron was active, sending was inevitable.
+
+**Sierra and Jack were correctly excluded** by the existing server-side
+gates (Sierra: \`apollo_raw_leads.quality_status='rejected'\`;
+Jack: prior \`email_queue\` history). Suppression / bounce / DNC /
+internal-domain / inbound-STOP gates all behaved correctly. The defect
+was strictly the absence of a global send kill-switch.
+
+**Corrective architecture (queued for the next build):**
+
+1. Add \`system_settings.auto_send_enabled\` (boolean, default
+   **false**) — the single global send kill-switch.
+2. Patch \`outreach-send-worker/index.ts\` so the very first action
+   after auth is to read the flag and exit cleanly when false (with a
+   \`worker_skipped_auto_send_off\` \`system_events\` row per skipped
+   tick).
+3. Per-business override:
+   \`business_autopilot_settings.auto_send_after_queue\` (already
+   exists, default false) is required to ALSO be true for any row
+   tagged with that \`business_id\` to be eligible for send.
+4. Founder-only **Auto-Send Master Switch** card in Command Centre
+   that flips the global flag and writes a \`founder_decisions\` row
+   capturing actor, previous value, new value, reason and timestamp.
+5. Live Monitor banner: *"Auto-send is OFF — queue rows will accumulate
+   as \`pending\` and will not be dispatched."* whenever the flag is
+   false.
+6. Backfill \`contact_compliance_events\` with
+   \`event_type='outreach_email_sent'\` rows for the 3 already-sent
+   Aaliah / Morgan / Pooja messages so the audit trail reflects
+   reality, and update their conversation lifecycle in
+   \`conversations\` / \`communications\`.
+
+Until item 1 ships, the only safe operational posture is to leave
+\`outreach-send-worker-2min\` paused (\`active=false\`) whenever a
+founder is not actively shepherding a send window.
+
+### 0c.8 Server-side guardrails confirmed working
+
+The incident was an absent kill-switch, not a guardrail failure. The
+following gates were verified in the same diagnostic window:
+
+- \`crm-send-check\` — RECENT_COMMUNICATION_24H, suppression,
+  hard-bounce, internal-domain, NEONCANDY_INVALID_INBOX,
+  duplicate-pending, inbound-STOP, prior-conversation-owned-elsewhere,
+  domain-cap.
+- \`stage-to-queue-eligibility\` — compliance, BCR existence,
+  campaign-fit, history conflict.
+- \`create-queue-from-staged\` — idempotency, sender allow-list,
+  compliance re-check at insertion time.
+- \`outreach-send-worker\` — provider-cap (\`450 Mail send limit
+  exceeded\` → row marked \`delayed\`), suppression and DNC
+  re-check at dispatch.
+
+### 0c.9 Operational state at end of build window (13 May 2026)
+
+- 3 Apollo-promotion contacts (Aaliah, Morgan, Pooja) sent at 15:00 UTC
+  through \`hello@neoncandy.online\` — outside the originally-intended
+  preview-only flow.
+- All other Apollo promotion candidates remain at
+  \`compliance_status='pending_review'\` and have not been staged.
+- Sierra remains \`rejected\`. Jack remains excluded by prior queue
+  history.
+- \`auto_send_after_queue\` for NeonCandy in
+  \`business_autopilot_settings\` is **false**.
+- The 2-minute send-worker cron should be paused until the global
+  \`auto_send_enabled\` flag ships.
+
+### 0c.10 Files of record (this build window)
+
+- \`supabase/functions/promote-leads-to-contacts/index.ts\`
+- \`supabase/functions/compliance-approve/index.ts\`
+- \`supabase/functions/stage-to-queue-eligibility/index.ts\`
+- \`supabase/functions/create-queue-from-staged/index.ts\`
+- \`supabase/functions/crm-send-check/index.ts\`
+- \`supabase/functions/outreach-send-worker/index.ts\`
+- \`src/components/founder/LeadQualityPanel.tsx\` (Stage-to-Queue gate
+  + Queue Creation gate panels with dry-run preview)
+- Compliance Approval panel surfaced under Command Centre →
+  *Lead Quality + Queue Integrity Gate*.
+- New tables / columns: \`contacts.compliance_status\`,
+  \`contact_compliance_events\`.
+- Audit \`system_events\`: \`compliance_spine_backfilled\`,
+  \`leads_promoted_to_contacts\` (×3),
+  \`contact_compliance_approval_completed\`,
+  \`stage_to_queue_eligibility_approved\`,
+  \`queue_created_from_staged_contacts\`,
+  \`sent_folder_copy_failed\` (×3).
+
+---
+
 ## SECTION 0a — CREDENTIALS & SECRETS REGISTER
 
 > **Raw passwords and API keys are not stored in this manual.**
