@@ -52,11 +52,14 @@ Deno.serve(async (req) => {
   const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
   const auth = req.headers.get("Authorization") ?? "";
-  const isCron = req.headers.get("x-cron-secret") === Deno.env.get("CRON_SECRET");
+  const cronSecret = Deno.env.get("CRON_SECRET");
+  const isCron = !!cronSecret && req.headers.get("x-cron-secret") === cronSecret;
+  // Service role key bypass (used by cron / pg_net invocations)
+  const isServiceRole = auth === `Bearer ${SERVICE_KEY}`;
 
   let actor = "system";
   let actorUserId: string | null = null;
-  if (!isCron) {
+  if (!isCron && !isServiceRole) {
     if (!auth.startsWith("Bearer ")) return json({ error: "Unauthorized" }, 401);
     const userClient = createClient(SUPABASE_URL, ANON_KEY, {
       global: { headers: { Authorization: auth } }, auth: { persistSession: false },
