@@ -387,12 +387,13 @@ export default function SourceQualityBrief() {
           <>
             <div className="rounded-md border border-primary/40 bg-primary/10 p-3 text-xs">
               <p className="font-medium text-foreground">
-                Primary route: pull verified Apollo leads directly into Liftor using this brief.
+                Primary route: pull Apollo candidates directly into Liftor using this brief.
               </p>
               <ul className="mt-1 space-y-0.5 text-muted-foreground list-disc pl-4">
-                <li>Use the “Pull verified Apollo leads” action above — verified-email only, no unlock credits.</li>
-                <li>Locked / no-email profiles are excluded by default.</li>
-                <li>Apollo unlock is only used for exceptional founder-approved leads.</li>
+                <li>Use the “Pull Apollo candidates” action above — verified-email availability only, no unlock credits spent.</li>
+                <li>Apollo confirms email exists but withholds the actual address until reveal/enrichment credits are spent.</li>
+                <li>Email reveal requires explicit founder approval — never automatic.</li>
+                <li>No-email / unverified profiles are excluded at search stage.</li>
                 <li>Fallback: manual CSV import only if the Apollo API connection is unavailable.</li>
               </ul>
             </div>

@@ -397,11 +397,11 @@ Deno.serve(async (req) => {
       cost_credit_impact: "None. No sends triggered.",
       risk: "Low.",
     });
-  } else if (((summary as any)?.active_working_leads ?? 0) > 0) {
-    nextAction = "Build Apollo unlock shortlist for active working leads (no credits spent until founder approves)";
   } else if ((((summary as any)?.email_reveal_required ?? 0) + ((summary as any)?.verified_email_available_locked ?? 0)) > 0) {
     const pending = ((summary as any)?.email_reveal_required ?? 0) + ((summary as any)?.verified_email_available_locked ?? 0);
-    nextAction = `Build email reveal shortlist and approve credit spend for the strongest unique candidates (${pending} pending reveal)`;
+    nextAction = `Review Apollo email reveal shortlist (${pending} verified-email-available candidate(s) pending founder-approved reveal — no credits spent yet)`;
+  } else if (((summary as any)?.active_working_leads ?? 0) > 0) {
+    nextAction = "Build Apollo unlock shortlist for active working leads (no credits spent until founder approves)";
   } else if (((summary as any)?.legacy_optional_unlock_candidates ?? 0) > 0) {
     nextAction = "Run fresh Apollo verified-email search using NeonCandy Source Quality Brief (legacy hold pool not recommended)";
   } else {

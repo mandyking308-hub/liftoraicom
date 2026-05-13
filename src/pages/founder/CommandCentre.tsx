@@ -112,7 +112,19 @@ const CommandCentre = () => {
     queryKey: ["cc2-lead-lifecycle"],
     queryFn: async () => {
       const { data } = await (supabase as any).from("lead_lifecycle_summary").select("*").maybeSingle();
-      return data as { active_working_leads: number; safe_to_unlock: number; safe_to_promote: number; safe_to_queue: number; legacy_optional_unlock_candidates: number } | null;
+      return data as {
+        active_working_leads: number;
+        safe_to_unlock: number;
+        safe_to_promote: number;
+        safe_to_queue: number;
+        legacy_optional_unlock_candidates: number;
+        email_reveal_required?: number;
+        verified_email_available_locked?: number;
+        safe_to_promote_after_reveal?: number;
+        already_in_crm_after_reveal?: number;
+        total_leads?: number;
+        reveal_shortlisted?: number;
+      } | null;
     },
     refetchInterval: 60000,
   });
@@ -437,26 +449,38 @@ const CommandCentre = () => {
 
         const stages = [
           {
-            key: "source", label: "Source Leads", icon: Search, count: leadQualityCounts?.raw ?? 0,
+            key: "source", label: "Source Candidates", icon: Search, count: leadQualityCounts?.raw ?? 0,
             status: (leadLifecycle?.active_working_leads ?? 0) === 0 ? "blocked" : "active",
-            blocker: (leadLifecycle?.active_working_leads ?? 0) === 0 ? "Need fresh verified-email Apollo pull" : null,
-            next: "Pull verified Apollo leads",
+            blocker: (leadLifecycle?.active_working_leads ?? 0) === 0 ? "Need fresh Apollo candidate pull" : null,
+            next: "Pull Apollo candidates",
             anchor: "#sec-source",
           },
           {
-            key: "quality", label: "Quality Scan", icon: Filter, count: leadQualityCounts?.needsVerification ?? 0,
+            key: "quality", label: "Quality / CRM Check", icon: Filter, count: leadQualityCounts?.needsVerification ?? 0,
             status: (leadQualityCounts?.needsVerification ?? 0) > 0 ? "active" : "complete",
             blocker: null, next: "Run autopilot scan", anchor: "#sec-autopilot",
           },
           {
-            key: "crm", label: "CRM Check", icon: Database, count: contacts.length,
-            status: contacts.length > 0 ? "active" : "not_started",
-            blocker: null, next: "Cross-check against CRM", anchor: "#sec-crm",
+            key: "reveal_approval", label: "Email Reveal Approval", icon: ShieldCheck,
+            count: (leadLifecycle?.email_reveal_required ?? 0) + (leadLifecycle?.verified_email_available_locked ?? 0),
+            status: ((leadLifecycle?.email_reveal_required ?? 0) + (leadLifecycle?.verified_email_available_locked ?? 0)) > 0 ? "active" : "not_started",
+            blocker: null,
+            next: "Review Apollo email reveal shortlist",
+            anchor: "#sec-autopilot",
           },
           {
-            key: "promote", label: "Promote to Contact", icon: CheckCircle2, count: leadLifecycle?.safe_to_promote ?? 0,
-            status: (leadLifecycle?.safe_to_promote ?? 0) > 0 ? "active" : "not_started",
-            blocker: (leadLifecycle?.safe_to_promote ?? 0) === 0 ? "Nothing safe to promote" : null,
+            key: "post_reveal", label: "Post-Reveal Check", icon: Database,
+            count: leadLifecycle?.already_in_crm_after_reveal ?? 0,
+            status: (leadLifecycle?.safe_to_promote_after_reveal ?? 0) > 0 ? "active" : "not_started",
+            blocker: (leadLifecycle?.safe_to_promote_after_reveal ?? 0) === 0 ? "Awaiting reveal results" : null,
+            next: "Verify revealed emails against CRM",
+            anchor: "#sec-autopilot",
+          },
+          {
+            key: "promote", label: "Promote to Contact", icon: CheckCircle2,
+            count: leadLifecycle?.safe_to_promote_after_reveal ?? leadLifecycle?.safe_to_promote ?? 0,
+            status: (leadLifecycle?.safe_to_promote_after_reveal ?? 0) > 0 ? "active" : "not_started",
+            blocker: (leadLifecycle?.safe_to_promote_after_reveal ?? 0) === 0 ? "Blocked until email reveal completes" : null,
             next: "Approve promotion", anchor: "#sec-autopilot",
           },
           {
