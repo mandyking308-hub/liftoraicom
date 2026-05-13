@@ -309,6 +309,45 @@ export default function LeadQualityPanel() {
     },
   });
 
+  // === Compliance readiness summary (live) ===
+  const { data: complianceSummary } = useQuery({
+    queryKey: ["compliance-readiness-summary"],
+    refetchInterval: 30000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("contacts")
+        .select("id, email, name, assigned_business, status, compliance_status, lawful_basis, unsubscribe_token, retention_until, is_globally_suppressed, hard_bounced, unsubscribed_at, source")
+        .in("source", ["autopilot_promotion", "apollo"])
+        .eq("is_internal", false);
+      if (error) throw error;
+      const rows = (data ?? []) as Array<{
+        id: string; email: string; name: string; assigned_business: string;
+        status: string; compliance_status: string | null; lawful_basis: string | null;
+        unsubscribe_token: string | null; retention_until: string | null;
+        is_globally_suppressed: boolean; hard_bounced: boolean; unsubscribed_at: string | null;
+      }>;
+      const now = Date.now();
+      const summary = {
+        total: rows.length,
+        lawful_basis_present: rows.filter(r => !!r.lawful_basis).length,
+        unsubscribe_token_present: rows.filter(r => !!r.unsubscribe_token).length,
+        retention_set: rows.filter(r => r.retention_until && new Date(r.retention_until).getTime() > now).length,
+        suppressed: rows.filter(r => r.is_globally_suppressed).length,
+        hard_bounced: rows.filter(r => r.hard_bounced).length,
+        unsubscribed: rows.filter(r => !!r.unsubscribed_at).length,
+        pending_review: rows.filter(r => r.compliance_status === "pending_review").length,
+        outreach_allowed: rows.filter(r => r.compliance_status === "outreach_allowed").length,
+        outreach_blocked: rows.filter(r =>
+          ["unsubscribed","hard_bounced","do_not_contact","retained_no_outreach","pending_review"].includes(r.compliance_status ?? "")
+          || r.is_globally_suppressed || r.hard_bounced || !!r.unsubscribed_at
+          || r.status === "DO_NOT_CONTACT"
+        ).length,
+        rows,
+      };
+      return summary;
+    },
+  });
+
   const call = async (
     fn: "lead-quality-scan" | "lead-fit-classify" | "promote-leads-to-contacts" | "enqueue-eligible-contacts" | "apollo-unlock-shortlist" | "apollo-unlock-selected",
     body: any,
