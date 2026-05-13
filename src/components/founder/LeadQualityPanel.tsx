@@ -442,8 +442,6 @@ export default function LeadQualityPanel() {
       ? `Preview queue creation for ${lifecycle?.safe_to_queue} staged contact(s). Auto-send remains OFF.`
       : (lifecycle?.safe_to_promote ?? 0) > 0
       ? `Promote ${lifecycle?.safe_to_promote} validation-clean contact(s) — preview first${livePendingDecisions > 0 ? ` · review/hold ${livePendingDecisions} founder decision(s)` : ""}`
-      : (stageCandidateCount ?? 0) > 0
-      ? `Review campaign eligibility and assign inbox/campaign for ${stageCandidateCount} staged CRM contact(s).`
       : (lifecycle?.active_working_leads ?? 0) > 0
       ? "Review active working leads — autopilot has no recommended unlock work"
       : "Run fresh Apollo verified-email search using NeonCandy Source Quality Brief — do not spend credits on the legacy pool";
@@ -776,7 +774,7 @@ export default function LeadQualityPanel() {
             ready_to_stage / needs_review / not eligible →
             qualified / staged / eligible, and assigns the inbox + campaign on
             the contact. Does NOT create queue rows or send emails. */}
-        {((stageCandidateCount ?? 0) > 0 || stagePreviewResult || stageAppliedResult) && (
+        {(true) && (
           <div className="rounded-md border border-primary/40 bg-primary/5 p-4 space-y-3">
             <div className="flex items-center justify-between gap-2 flex-wrap">
               <div>
@@ -785,7 +783,16 @@ export default function LeadQualityPanel() {
                   <Badge variant="outline" className="text-[10px]">Neon Candy · hello@neoncandy.online</Badge>
                 </p>
                 <ul className="text-xs text-muted-foreground mt-1 space-y-0.5 list-disc list-inside">
-                  <li><strong className="text-foreground">{stageCandidateCount ?? 0}</strong> CRM contact(s) waiting on founder approval to become queue-eligible</li>
+                  {stagePreviewResult || stageAppliedResult ? (
+                    <li>
+                      <strong className="text-foreground">
+                        {(stageAppliedResult ?? stagePreviewResult)?.summary?.eligible_to_stage ?? 0}
+                      </strong>{" "}
+                      contact(s) eligible for queue staging from this Apollo promotion batch
+                    </li>
+                  ) : (
+                    <li className="text-yellow-300"><strong>Preview required before approval.</strong> Click <em>Preview stage-to-queue eligibility</em> to compute the exact eligible set.</li>
+                  )}
                   <li>Sets BCR <code>qualification=qualified</code>, <code>campaign_eligible=true</code>, <code>current_stage=staged</code></li>
                   <li>Assigns inbox + active campaign on the contact row</li>
                   <li>Does <strong>not</strong> create queue rows; does <strong>not</strong> send emails; auto-send stays OFF</li>
