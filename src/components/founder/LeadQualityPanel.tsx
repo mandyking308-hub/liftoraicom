@@ -523,43 +523,85 @@ export default function LeadQualityPanel() {
           </div>
         </div>
 
-        {/* === Promote Action — surfaced primary === */}
+        {/* === Ready to promote to CRM — primary action panel === */}
         {(lifecycle?.safe_to_promote ?? 0) > 0 && (
           <div className="rounded-md border border-primary/40 bg-primary/5 p-4 space-y-3">
             <div className="flex items-center justify-between gap-2 flex-wrap">
               <div>
-                <p className="text-sm font-medium text-foreground">
-                  {promotePreviewResult ? "Preview ready — promotion validated" : "Promotion ready"}
+                <p className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <CheckCircle2 size={14} className="text-primary" /> Ready to promote to CRM
                 </p>
-                <p className="text-xs text-muted-foreground">
-                  {promotePreviewResult
-                    ? `${promotePreviewResult.summary?.contacts_to_create ?? 0} contacts to create · ${promotePreviewResult.summary?.contacts_to_match ?? 0} to match · ${promotePreviewResult.summary?.bcrs_to_create ?? 0} BCRs to create · ${promotePreviewResult.summary?.bcrs_to_match ?? 0} to match`
-                    : `${lifecycle?.safe_to_promote ?? 0} validation-clean Apollo leads ready for CRM promotion`
-                  }
-                </p>
+                <ul className="text-xs text-muted-foreground mt-1 space-y-0.5 list-disc list-inside">
+                  <li><strong className="text-foreground">{lifecycle?.safe_to_promote ?? 0}</strong> validation-clean contacts ready</li>
+                  <li><strong className="text-foreground">{excludedRejectedCount ?? 0}</strong> rejected/held record(s) excluded</li>
+                  <li>No emails will be sent — auto-send OFF</li>
+                  <li>Queue will <strong>not</strong> run automatically — separate approval required</li>
+                </ul>
               </div>
-              {!promotePreviewResult ? (
-                <Button size="sm" disabled={!!busy} onClick={() => runPromote(true)}>
+              <div className="flex gap-2 flex-wrap">
+                <Button size="sm" variant="outline" disabled={!!busy} onClick={() => runPromote(true)}>
                   {busy === "Promote preview" ? <Loader2 className="animate-spin" size={14} /> : `Preview promote (${lifecycle?.safe_to_promote ?? 0})`}
                 </Button>
-              ) : (
-                <Button size="sm" variant="default" disabled={!!busy} onClick={() => runPromote(false)}>
+                <Button size="sm" variant="default" disabled={!!busy || !promotePreviewResult} onClick={() => runPromote(false)}
+                  title={!promotePreviewResult ? "Run preview first" : undefined}>
                   {busy === "Promote apply" ? <Loader2 className="animate-spin" size={14} /> : `Promote ${lifecycle?.safe_to_promote ?? 0} validation-clean contacts`}
                 </Button>
-              )}
+              </div>
             </div>
+            {!promotePreviewResult && (
+              <p className="text-[11px] text-yellow-300">
+                Apply button is disabled until <strong>Preview promote</strong> succeeds in this session.
+              </p>
+            )}
             {promotePreviewResult && (
-              <div className="rounded border border-border/50 bg-card/40 p-2 text-xs space-y-1">
-                <p className="text-muted-foreground">Dry-run preview summary:</p>
+              <div className="rounded border border-border/50 bg-card/40 p-3 space-y-2 text-xs">
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant="secondary" className="text-[10px]">contacts create: {promotePreviewResult.summary?.contacts_to_create ?? 0}</Badge>
-                  <Badge variant="secondary" className="text-[10px]">contacts match: {promotePreviewResult.summary?.contacts_to_match ?? 0}</Badge>
-                  <Badge variant="secondary" className="text-[10px]">BCRs create: {promotePreviewResult.summary?.bcrs_to_create ?? 0}</Badge>
-                  <Badge variant="secondary" className="text-[10px]">BCRs match: {promotePreviewResult.summary?.bcrs_to_match ?? 0}</Badge>
+                  <Badge variant="secondary" className="text-[10px]">contacts_to_create: {promotePreviewResult.summary?.contacts_to_create ?? 0}</Badge>
+                  <Badge variant="secondary" className="text-[10px]">contacts_to_match: {promotePreviewResult.summary?.contacts_to_match ?? 0}</Badge>
+                  <Badge variant="secondary" className="text-[10px]">bcrs_to_create: {promotePreviewResult.summary?.bcrs_to_create ?? 0}</Badge>
+                  <Badge variant="secondary" className="text-[10px]">bcrs_to_match: {promotePreviewResult.summary?.bcrs_to_match ?? 0}</Badge>
+                  <Badge variant="secondary" className="text-[10px]">blocked: {promotePreviewResult.summary?.blocked ?? 0}</Badge>
+                  <Badge variant="secondary" className="text-[10px]">send_action: none</Badge>
                 </div>
-                {promotePreviewResult.summary?.raw_payload_present && (
-                  <p className="text-[10px] text-green-400">Apollo raw payload present — rich mapping available</p>
+                {Array.isArray(promotePreviewResult.plan) && promotePreviewResult.plan.length > 0 && (
+                  <div className="overflow-x-auto rounded border border-border/40">
+                    <table className="w-full text-[11px]">
+                      <thead className="bg-muted/30 text-muted-foreground">
+                        <tr>
+                          <th className="text-left px-2 py-1">Name</th>
+                          <th className="text-left px-2 py-1">Company</th>
+                          <th className="text-left px-2 py-1">Email</th>
+                          <th className="text-left px-2 py-1">Contact</th>
+                          <th className="text-left px-2 py-1">BCR</th>
+                          <th className="text-left px-2 py-1">Apollo payload</th>
+                          <th className="text-left px-2 py-1">Org payload</th>
+                          <th className="text-left px-2 py-1">Profile</th>
+                          <th className="text-left px-2 py-1">Queue</th>
+                          <th className="text-left px-2 py-1">Send</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {promotePreviewResult.plan.map((p: any, idx: number) => (
+                          <tr key={p.apollo_lead_id ?? idx} className="border-t border-border/30">
+                            <td className="px-2 py-1">{p.name ?? "—"}</td>
+                            <td className="px-2 py-1">{p.company ?? "—"}</td>
+                            <td className="px-2 py-1 font-mono text-[10px]">{p.email ?? "—"}</td>
+                            <td className="px-2 py-1">{p.contact_action}</td>
+                            <td className="px-2 py-1">{p.bcr_action}</td>
+                            <td className="px-2 py-1">{p.raw_payload_present ? "yes" : "no"}</td>
+                            <td className="px-2 py-1">{p.org_payload_present ? "yes" : "no"}</td>
+                            <td className="px-2 py-1">{p.profile_action}</td>
+                            <td className="px-2 py-1">{p.queue_eligibility}</td>
+                            <td className="px-2 py-1 text-muted-foreground">{p.send_action}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 )}
+                <p className="text-[10px] text-muted-foreground">
+                  Sierra and other rejected/held records are filtered server-side via <code>quality_status='qualified'</code> and never appear in this plan.
+                </p>
               </div>
             )}
           </div>
