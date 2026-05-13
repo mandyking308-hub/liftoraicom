@@ -2296,6 +2296,63 @@ export type Database = {
         }
         Relationships: []
       }
+      contact_compliance_events: {
+        Row: {
+          actor: string
+          business_id: string | null
+          business_name: string
+          contact_id: string | null
+          created_at: string
+          event_notes: string
+          event_source: string
+          event_type: string
+          id: string
+          new_value: Json
+          old_value: Json
+        }
+        Insert: {
+          actor?: string
+          business_id?: string | null
+          business_name?: string
+          contact_id?: string | null
+          created_at?: string
+          event_notes?: string
+          event_source?: string
+          event_type: string
+          id?: string
+          new_value?: Json
+          old_value?: Json
+        }
+        Update: {
+          actor?: string
+          business_id?: string | null
+          business_name?: string
+          contact_id?: string | null
+          created_at?: string
+          event_notes?: string
+          event_source?: string
+          event_type?: string
+          id?: string
+          new_value?: Json
+          old_value?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_compliance_events_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_compliance_events_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+        ]
+      }
       contacts: {
         Row: {
           active_campaign_id: string | null
@@ -2309,9 +2366,13 @@ export type Database = {
           assigned_inbox_id: string | null
           company: string
           company_size: Database["public"]["Enums"]["company_size_tier"] | null
+          compliance_status: string
           conversation_active: boolean
           country: string | null
           created_at: string
+          data_source: string | null
+          do_not_contact_at: string | null
+          do_not_contact_reason: string | null
           email: string
           email_verified_status: string
           enriched_at: string | null
@@ -2328,21 +2389,33 @@ export type Database = {
           intent_score: number
           is_globally_suppressed: boolean
           is_internal: boolean
+          last_compliance_review_at: string | null
           last_contacted_at: string | null
           last_name: string | null
           last_replied_at: string | null
+          lawful_basis: string | null
+          lawful_basis_notes: string | null
+          lawful_basis_recorded_at: string | null
           linkedin_url: string | null
           name: string
           notes: string
           phone: string | null
+          retention_policy: string | null
+          retention_until: string | null
           role: string
           sendable_status: Database["public"]["Enums"]["contact_sendable_status"]
           seniority: Database["public"]["Enums"]["seniority_level"] | null
           source: string
+          source_collected_at: string | null
+          source_platform: string | null
+          source_record_id: string | null
           status: Database["public"]["Enums"]["contact_status"]
           tags: string[]
           timezone: string | null
           timezone_confidence: Database["public"]["Enums"]["timezone_confidence_level"]
+          unsubscribe_source: string | null
+          unsubscribe_token: string | null
+          unsubscribed_at: string | null
           updated_at: string
         }
         Insert: {
@@ -2357,9 +2430,13 @@ export type Database = {
           assigned_inbox_id?: string | null
           company?: string
           company_size?: Database["public"]["Enums"]["company_size_tier"] | null
+          compliance_status?: string
           conversation_active?: boolean
           country?: string | null
           created_at?: string
+          data_source?: string | null
+          do_not_contact_at?: string | null
+          do_not_contact_reason?: string | null
           email: string
           email_verified_status?: string
           enriched_at?: string | null
@@ -2376,21 +2453,33 @@ export type Database = {
           intent_score?: number
           is_globally_suppressed?: boolean
           is_internal?: boolean
+          last_compliance_review_at?: string | null
           last_contacted_at?: string | null
           last_name?: string | null
           last_replied_at?: string | null
+          lawful_basis?: string | null
+          lawful_basis_notes?: string | null
+          lawful_basis_recorded_at?: string | null
           linkedin_url?: string | null
           name?: string
           notes?: string
           phone?: string | null
+          retention_policy?: string | null
+          retention_until?: string | null
           role?: string
           sendable_status?: Database["public"]["Enums"]["contact_sendable_status"]
           seniority?: Database["public"]["Enums"]["seniority_level"] | null
           source?: string
+          source_collected_at?: string | null
+          source_platform?: string | null
+          source_record_id?: string | null
           status?: Database["public"]["Enums"]["contact_status"]
           tags?: string[]
           timezone?: string | null
           timezone_confidence?: Database["public"]["Enums"]["timezone_confidence_level"]
+          unsubscribe_source?: string | null
+          unsubscribe_token?: string | null
+          unsubscribed_at?: string | null
           updated_at?: string
         }
         Update: {
@@ -2405,9 +2494,13 @@ export type Database = {
           assigned_inbox_id?: string | null
           company?: string
           company_size?: Database["public"]["Enums"]["company_size_tier"] | null
+          compliance_status?: string
           conversation_active?: boolean
           country?: string | null
           created_at?: string
+          data_source?: string | null
+          do_not_contact_at?: string | null
+          do_not_contact_reason?: string | null
           email?: string
           email_verified_status?: string
           enriched_at?: string | null
@@ -2424,21 +2517,33 @@ export type Database = {
           intent_score?: number
           is_globally_suppressed?: boolean
           is_internal?: boolean
+          last_compliance_review_at?: string | null
           last_contacted_at?: string | null
           last_name?: string | null
           last_replied_at?: string | null
+          lawful_basis?: string | null
+          lawful_basis_notes?: string | null
+          lawful_basis_recorded_at?: string | null
           linkedin_url?: string | null
           name?: string
           notes?: string
           phone?: string | null
+          retention_policy?: string | null
+          retention_until?: string | null
           role?: string
           sendable_status?: Database["public"]["Enums"]["contact_sendable_status"]
           seniority?: Database["public"]["Enums"]["seniority_level"] | null
           source?: string
+          source_collected_at?: string | null
+          source_platform?: string | null
+          source_record_id?: string | null
           status?: Database["public"]["Enums"]["contact_status"]
           tags?: string[]
           timezone?: string | null
           timezone_confidence?: Database["public"]["Enums"]["timezone_confidence_level"]
+          unsubscribe_source?: string | null
+          unsubscribe_token?: string | null
+          unsubscribed_at?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -8618,6 +8723,14 @@ export type Database = {
         Args: { enc_key: string; plain: string }
         Returns: string
       }
+      apply_reply_stop_suppression: {
+        Args: {
+          p_contact_id: string
+          p_message_body: string
+          p_source?: string
+        }
+        Returns: boolean
+      }
       apply_reputation_event: {
         Args: {
           _contact_id: string
@@ -8632,7 +8745,12 @@ export type Database = {
         Returns: string
       }
       auto_resolve_system_events: { Args: never; Returns: number }
-      check_outreach_allowed: { Args: { _contact_id: string }; Returns: Json }
+      check_outreach_allowed:
+        | { Args: { _contact_id: string }; Returns: Json }
+        | {
+            Args: { p_business_id?: string; p_contact_id: string }
+            Returns: Json
+          }
       check_send_throttle: {
         Args: { _contact_id: string; _inbox_id: string }
         Returns: Json
@@ -9228,9 +9346,13 @@ export type Database = {
           assigned_inbox_id: string | null
           company: string
           company_size: Database["public"]["Enums"]["company_size_tier"] | null
+          compliance_status: string
           conversation_active: boolean
           country: string | null
           created_at: string
+          data_source: string | null
+          do_not_contact_at: string | null
+          do_not_contact_reason: string | null
           email: string
           email_verified_status: string
           enriched_at: string | null
@@ -9247,21 +9369,33 @@ export type Database = {
           intent_score: number
           is_globally_suppressed: boolean
           is_internal: boolean
+          last_compliance_review_at: string | null
           last_contacted_at: string | null
           last_name: string | null
           last_replied_at: string | null
+          lawful_basis: string | null
+          lawful_basis_notes: string | null
+          lawful_basis_recorded_at: string | null
           linkedin_url: string | null
           name: string
           notes: string
           phone: string | null
+          retention_policy: string | null
+          retention_until: string | null
           role: string
           sendable_status: Database["public"]["Enums"]["contact_sendable_status"]
           seniority: Database["public"]["Enums"]["seniority_level"] | null
           source: string
+          source_collected_at: string | null
+          source_platform: string | null
+          source_record_id: string | null
           status: Database["public"]["Enums"]["contact_status"]
           tags: string[]
           timezone: string | null
           timezone_confidence: Database["public"]["Enums"]["timezone_confidence_level"]
+          unsubscribe_source: string | null
+          unsubscribe_token: string | null
+          unsubscribed_at: string | null
           updated_at: string
         }
         SetofOptions: {
