@@ -463,6 +463,33 @@ export default function LeadQualityPanel() {
     }
   };
 
+  const runQueueCreation = async (dryRun: boolean) => {
+    try {
+      setBusy(dryRun ? "Queue preview" : "Queue apply");
+      setLastResult(null);
+      const { data, error } = await supabase.functions.invoke("create-queue-from-staged", {
+        body: { dry_run: dryRun, business_name: "Neon Candy" },
+      });
+      if (error) throw error;
+      setLastResult(data);
+      if (dryRun) { setQueuePreviewResult(data); setQueueAppliedResult(null); }
+      else { setQueueAppliedResult(data); setQueuePreviewResult(null); }
+      const s = data?.summary ?? {};
+      toast.success(dryRun ? "Queue creation preview complete" : "Queue rows created", {
+        description: dryRun
+          ? `eligible ${s.eligible_to_queue ?? 0} · queue_rows_to_create ${s.queue_rows_to_create ?? 0} · sends 0 · Apollo 0`
+          : `created ${s.queue_rows_created ?? 0} · sends 0 · provider_calls 0 · Apollo 0`,
+      });
+      qc.invalidateQueries({ queryKey: ["lead-lifecycle-summary"] });
+    } catch (e: any) {
+      toast.error(dryRun ? "Queue preview failed" : "Queue apply failed", {
+        description: e?.message ?? String(e),
+      });
+    } finally {
+      setBusy(null);
+    }
+  };
+
   // Use live founder_decisions (status='pending') as the primary source of
   // truth for "needs founder review" — never derive it from rejected or
   // phantom needs_verification rows.
