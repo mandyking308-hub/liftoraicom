@@ -505,6 +505,48 @@ export default function LeadQualityPanel() {
           </div>
         </div>
 
+        {/* === Promote Action — surfaced primary === */}
+        {(lifecycle?.safe_to_promote ?? 0) > 0 && (
+          <div className="rounded-md border border-primary/40 bg-primary/5 p-4 space-y-3">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <div>
+                <p className="text-sm font-medium text-foreground">
+                  {promotePreviewResult ? "Preview ready — promotion validated" : "Promotion ready"}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {promotePreviewResult
+                    ? `${promotePreviewResult.summary?.contacts_to_create ?? 0} contacts to create · ${promotePreviewResult.summary?.contacts_to_match ?? 0} to match · ${promotePreviewResult.summary?.bcrs_to_create ?? 0} BCRs to create · ${promotePreviewResult.summary?.bcrs_to_match ?? 0} to match`
+                    : `${lifecycle?.safe_to_promote ?? 0} validation-clean Apollo leads ready for CRM promotion`
+                  }
+                </p>
+              </div>
+              {!promotePreviewResult ? (
+                <Button size="sm" disabled={!!busy} onClick={() => runPromote(true)}>
+                  {busy === "Promote preview" ? <Loader2 className="animate-spin" size={14} /> : `Preview promote (${lifecycle?.safe_to_promote ?? 0})`}
+                </Button>
+              ) : (
+                <Button size="sm" variant="default" disabled={!!busy} onClick={() => runPromote(false)}>
+                  {busy === "Promote apply" ? <Loader2 className="animate-spin" size={14} /> : `Promote ${lifecycle?.safe_to_promote ?? 0} validation-clean contacts`}
+                </Button>
+              )}
+            </div>
+            {promotePreviewResult && (
+              <div className="rounded border border-border/50 bg-card/40 p-2 text-xs space-y-1">
+                <p className="text-muted-foreground">Dry-run preview summary:</p>
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="secondary" className="text-[10px]">contacts create: {promotePreviewResult.summary?.contacts_to_create ?? 0}</Badge>
+                  <Badge variant="secondary" className="text-[10px]">contacts match: {promotePreviewResult.summary?.contacts_to_match ?? 0}</Badge>
+                  <Badge variant="secondary" className="text-[10px]">BCRs create: {promotePreviewResult.summary?.bcrs_to_create ?? 0}</Badge>
+                  <Badge variant="secondary" className="text-[10px]">BCRs match: {promotePreviewResult.summary?.bcrs_to_match ?? 0}</Badge>
+                </div>
+                {promotePreviewResult.summary?.raw_payload_present && (
+                  <p className="text-[10px] text-green-400">Apollo raw payload present — rich mapping available</p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         <details className="rounded-md border border-border/50 bg-muted/20 p-3 group">
           <summary className="cursor-pointer text-xs font-medium text-foreground flex items-center gap-2">
             <AlertTriangle size={12} className="text-yellow-400" />
