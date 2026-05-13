@@ -11,6 +11,8 @@ import SourceQualityBrief from "@/components/founder/SourceQualityBrief";
 import ApolloPullPanel from "@/components/founder/ApolloPullPanel";
 import AutonomousPipelineStatus from "@/components/founder/AutonomousPipelineStatus";
 import AutopilotPolicyPanel from "@/components/founder/AutopilotPolicyPanel";
+import OutreachSafetyPanel from "@/components/founder/safety/OutreachSafetyPanel";
+import { useOutreachSafetyAudit } from "@/hooks/useOutreachSafetyAudit";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -59,6 +61,13 @@ const Section = ({ title, icon: Icon, action, children }: any) => (
 );
 
 const CommandCentre = () => {
+  // Single source of truth for outreach send brake (shared with /founder/outreach/queue-audit).
+  const { data: safetyAudit } = useOutreachSafetyAudit();
+  const safetyStatus = safetyAudit?.summary?.safety_status;
+  const cronCheck = safetyAudit?.summary?.cron_check ?? safetyAudit?.baseline?.cron_check;
+  const autoSendStrictFalse = safetyAudit?.baseline?.auto_send_is_strict_false ?? false;
+  const isSafeBlocked = safetyStatus === "SAFE_BLOCKED" && autoSendStrictFalse && cronCheck === "verified_disabled";
+  const sendUnsafe = !isSafeBlocked;
   // Businesses
   const { data: businesses = [] } = useQuery({
     queryKey: ["cc2-businesses"],
@@ -449,6 +458,27 @@ const CommandCentre = () => {
         const nextRecommended = recommendations[0]?.msg ?? "All clear.";
         const nextRecommendedTo = recommendations[0]?.to ?? "/founder/analytics";
         const founderActions = recommendations.filter((r) => r.tone === "primary" || r.tone === "danger" || r.tone === "warn");
+        // Safety-led ordering: when outreach send brake is not verified, the
+        // Command Centre's top actions must prioritise verifying the brake and
+        // reviewing the queue audit BEFORE any send / queue / Apollo action.
+        const safetyLedActions = sendUnsafe
+          ? [
+              { msg: "Verify outreach brake / cron status (Queue Audit)", to: "/founder/outreach/queue-audit", tone: "danger" as const },
+              { msg: "Review Queue Audit classification before any cleanup or send", to: "/founder/outreach/queue-audit", tone: "warn" as const },
+            ]
+          : [];
+        const orderedFounderActions = sendUnsafe
+          ? [
+              ...safetyLedActions,
+              ...founderActions.filter((r) => {
+                const m = (r.msg ?? "").toLowerCase();
+                return !m.includes("controlled live batch")
+                  && !m.includes("apollo")
+                  && !m.includes("create queue")
+                  && !m.includes("manual send");
+              }),
+            ]
+          : founderActions;
 
         const stages = [
           {
@@ -494,9 +524,12 @@ const CommandCentre = () => {
           },
           {
             key: "send", label: "Send", icon: Send, count: totals.sentToday,
-            status: totals.failedSends > 0 ? "blocked" : totals.pendingQueue > 0 ? "active" : "not_started",
-            blocker: totals.failedSends > 0 ? `${totals.failedSends} failed sends` : null,
-            next: "Run controlled live batch", anchor: "#sec-queue",
+            status: sendUnsafe ? "blocked" : totals.failedSends > 0 ? "blocked" : totals.pendingQueue > 0 ? "active" : "not_started",
+            blocker: sendUnsafe
+              ? "Send blocked — outreach brake review required"
+              : totals.failedSends > 0 ? `${totals.failedSends} failed sends` : null,
+            next: sendUnsafe ? "Verify outreach brake / cron status" : "Run controlled live batch",
+            anchor: sendUnsafe ? "#sec-safety" : "#sec-queue",
           },
           {
             key: "replies", label: "Replies", icon: InboxIcon, count: totals.repliesAll,
@@ -549,6 +582,11 @@ const CommandCentre = () => {
               </div>
             </div>
 
+            {/* OUTREACH SAFETY / QUEUE BRAKE — read-only, shared source of truth with /founder/outreach/queue-audit */}
+            <div id="sec-safety" className="scroll-mt-24">
+              <OutreachSafetyPanel />
+            </div>
+
             <div className="flex items-end justify-between flex-wrap gap-3">
               <div>
                 <h1 className="text-2xl font-bold">Founder Command Centre</h1>
@@ -564,11 +602,11 @@ const CommandCentre = () => {
 
             {/* SECTION 2 — Today's Founder Actions */}
             <Section title="Today's founder actions" icon={Sparkles}>
-              {founderActions.length === 0 ? (
+              {orderedFounderActions.length === 0 ? (
                 <p className="text-sm text-muted-foreground">No founder decision required right now.</p>
               ) : (
                 <div className="grid sm:grid-cols-2 gap-2">
-                  {founderActions.map((r, idx) => (
+                  {orderedFounderActions.map((r, idx) => (
                     <Link key={idx} to={r.to} className={`flex items-center justify-between p-3 rounded-lg border transition-colors ${
                       r.tone === "danger" ? "bg-destructive/10 border-destructive/30 hover:bg-destructive/15" :
                       r.tone === "warn" ? "bg-yellow-500/10 border-yellow-500/30 hover:bg-yellow-500/15" :
@@ -584,6 +622,20 @@ const CommandCentre = () => {
 
             {/* SECTION 3 — Business Workflow Rail */}
             <Section title="Business workflow" icon={WorkflowIcon}>
+              {(() => {
+                const safeToPromote = leadLifecycle?.safe_to_promote_after_reveal ?? leadLifecycle?.safe_to_promote ?? 0;
+                const safeToQueue = leadLifecycle?.safe_to_queue ?? 0;
+                const notes: string[] = [];
+                if (safeToPromote === 0) notes.push("Promote (validation-clean) shows 0 — historical snapshot, not a current action.");
+                if (safeToQueue === 0) notes.push("Queue Campaign shows 0 — historical snapshot, not a current action.");
+                if ((leadLifecycle?.safe_to_promote_after_reveal ?? 0) === 0) notes.push("Post-Reveal Check 'awaiting reveal results' is a stale counter — review queue audit / latest run before action.");
+                if (notes.length === 0) return null;
+                return (
+                  <div className="mb-2 rounded-md border border-border/50 bg-muted/20 p-2 text-[11px] text-muted-foreground space-y-0.5">
+                    {notes.map((n, i) => <p key={i}>• {n}</p>)}
+                  </div>
+                );
+              })()}
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
                 {stages.map((s, idx) => (
                   <a key={s.key} href={s.anchor} className={`p-3 rounded-lg border transition-colors hover:border-primary/50 ${stageStatusCls(s.status)}`}>
@@ -605,6 +657,9 @@ const CommandCentre = () => {
 
             {/* SECTION 4 — Source Leads / Apollo */}
             <div id="sec-source" className="space-y-4 scroll-mt-24">
+              <div className="rounded-md border border-border/50 bg-muted/20 px-3 py-2 text-[11px] text-muted-foreground">
+                Historical Apollo reveal execution shown below — figures may reflect prior runs / completed reconciliations, not the next live action. Always verify against the latest run before approving credit spend.
+              </div>
               <AutonomousPipelineStatus businessName="Neon Candy" />
               <ApolloRevealStageStrip lifecycle={leadLifecycle} />
               <ApolloPullPanel />
@@ -649,7 +704,23 @@ const CommandCentre = () => {
                 <div className="text-[11px] text-muted-foreground border-t border-border/40 pt-2">
                   <span className="font-medium text-foreground">Cadence integrity:</span> downstream steps wait until prior step sent (real SMTP, accepted, provider message ID).
                 </div>
-                <ControlledLiveBatch />
+                {sendUnsafe ? (
+                  <div className="rounded-md border border-yellow-500/40 bg-yellow-500/10 p-3 text-xs space-y-2">
+                    <p className="font-medium text-yellow-200">Send blocked — outreach brake review required</p>
+                    <p className="text-yellow-100/80">
+                      Live batch sending is disabled until the Outreach Safety panel reports
+                      <span className="font-mono"> SAFE_BLOCKED</span> with
+                      <span className="font-mono"> auto_send_enabled=false</span> and
+                      <span className="font-mono"> cron_check=verified_disabled</span>.
+                      Queue creation is blocked until the send brake is verified. Queue creation is not harmless unless the send worker and cron are physically blocked.
+                    </p>
+                    <Link to="/founder/outreach/queue-audit">
+                      <Button size="sm" variant="outline">Open Queue Audit</Button>
+                    </Link>
+                  </div>
+                ) : (
+                  <ControlledLiveBatch />
+                )}
               </div>
             </Section>
 

@@ -8935,6 +8935,7 @@ export type Database = {
         Returns: Json
       }
       get_outbound_status: { Args: never; Returns: Json }
+      get_outreach_send_cron_status: { Args: never; Returns: Json }
       get_proposal_by_token: {
         Args: { _token: string }
         Returns: {
