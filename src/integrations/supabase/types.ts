@@ -1559,6 +1559,7 @@ export type Database = {
           business_id: string
           created_at: string
           daily_send_budget: number
+          founder_reveal_amount_next_run: number | null
           id: string
           max_apollo_unlock_credits_without_founder_approval: number
           sending_provider_mode: string
@@ -1603,6 +1604,7 @@ export type Database = {
           business_id: string
           created_at?: string
           daily_send_budget?: number
+          founder_reveal_amount_next_run?: number | null
           id?: string
           max_apollo_unlock_credits_without_founder_approval?: number
           sending_provider_mode?: string
@@ -1647,6 +1649,7 @@ export type Database = {
           business_id?: string
           created_at?: string
           daily_send_budget?: number
+          founder_reveal_amount_next_run?: number | null
           id?: string
           max_apollo_unlock_credits_without_founder_approval?: number
           sending_provider_mode?: string

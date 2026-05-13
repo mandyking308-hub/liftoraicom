@@ -3,6 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Bot, Activity, AlertTriangle, Loader2, PlayCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -29,6 +32,8 @@ const Chip = ({ on, label }: { on: boolean; label: string }) => (
 
 export default function AutonomousPipelineStatus({ businessName = "Neon Candy" }: { businessName?: string }) {
   const [running, setRunning] = useState(false);
+  const [revealAmount, setRevealAmount] = useState<string>("");
+  const [planResult, setPlanResult] = useState<any | null>(null);
 
   const { data: bizRow } = useQuery({
     queryKey: ["autopilot-bizrow", businessName],
@@ -82,15 +87,23 @@ export default function AutonomousPipelineStatus({ businessName = "Neon Candy" }
   });
 
   const counters: Counters = lastRun?.details?.counters ?? {};
+  const blockedReason: string | null = planResult?.blocked_reason ?? lastRun?.details?.blocked_reason ?? null;
+  const selectedCandidates: any[] = planResult?.selected_candidates ?? lastRun?.details?.selected_candidates ?? [];
+  const eligibleNotSelected: any[] = planResult?.eligible_not_selected ?? lastRun?.details?.eligible_not_selected ?? [];
+
+  const parsedAmount = revealAmount.trim() === "" ? null : Math.max(0, Math.floor(Number(revealAmount)));
+  const amountInvalid = revealAmount.trim() !== "" && (Number.isNaN(Number(revealAmount)) || (parsedAmount ?? 0) <= 0);
 
   const runDryPlan = async () => {
     setRunning(true);
     try {
       const { data, error } = await supabase.functions.invoke("autopilot-orchestrator", {
-        body: { business_id: businessId, business_name: businessName, dry_run: true },
+        body: { business_id: businessId, business_name: businessName, dry_run: true, reveal_amount: parsedAmount },
       });
       if (error) throw error;
-      toast.success(`Plan ready — ${data?.counters?.reveal_planned ?? 0} reveal · ${data?.counters?.promote_planned ?? 0} promote · ${data?.counters?.queue_planned ?? 0} queue`);
+      setPlanResult(data);
+      const sel = data?.counters?.selected_for_next_reveal ?? 0;
+      toast.success(`Plan ready — ${sel} selected · ${data?.counters?.reveal_eligible_total ?? 0} eligible total`);
       refetchRuns();
     } catch (e: any) {
       toast.error(e.message ?? "Failed to run autopilot plan");
@@ -100,14 +113,24 @@ export default function AutonomousPipelineStatus({ businessName = "Neon Candy" }
   };
 
   const runLive = async () => {
-    if (!confirm("Execute autopilot live? This will spend Apollo credits within policy budget and create real CRM/queue rows. Sending remains gated by auto_send_after_queue.")) return;
+    if (parsedAmount === null) {
+      toast.error("Enter a reveal amount before running live.");
+      return;
+    }
+    if (!confirm(`Execute live? Liftor will reveal up to ${parsedAmount} Apollo emails (within budget + domain caps). Sending remains gated by auto-send policy.`)) return;
     setRunning(true);
     try {
       const { data, error } = await supabase.functions.invoke("autopilot-orchestrator", {
-        body: { business_id: businessId, business_name: businessName, dry_run: false },
+        body: { business_id: businessId, business_name: businessName, dry_run: false, reveal_amount: parsedAmount },
       });
       if (error) throw error;
-      toast.success(`Executed — ${data?.counters?.reveal_planned ?? 0} reveal · ${data?.counters?.promote_planned ?? 0} promote · ${data?.counters?.queue_planned ?? 0} queue`);
+      setPlanResult(data);
+      if (data?.blocked_reason) {
+        toast.error(`Blocked: ${data.blocked_reason}`);
+      } else {
+        toast.success(`Executed — ${data?.counters?.reveal_planned ?? 0} reveal · ${data?.counters?.promote_planned ?? 0} promote · ${data?.counters?.queue_planned ?? 0} queue`);
+        setRevealAmount("");
+      }
       refetchRuns();
     } catch (e: any) {
       toast.error(e.message ?? "Failed to execute");
@@ -127,12 +150,41 @@ export default function AutonomousPipelineStatus({ businessName = "Neon Candy" }
             {running ? <Loader2 size={12} className="animate-spin mr-1" /> : <Activity size={12} className="mr-1" />}
             Plan (dry-run)
           </Button>
-          <Button size="sm" onClick={runLive} disabled={running || !policy}>
+          <Button size="sm" onClick={runLive} disabled={running || !policy || parsedAmount === null || amountInvalid}>
             <PlayCircle size={12} className="mr-1" /> Run now
           </Button>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Founder-defined reveal amount */}
+        <div className="p-3 rounded border border-border/60 bg-secondary/30 space-y-2">
+          <div className="flex items-end gap-3 flex-wrap">
+            <div className="space-y-1">
+              <Label className="text-xs">Reveal amount for next run</Label>
+              <Input
+                type="number"
+                min={1}
+                value={revealAmount}
+                onChange={(e) => setRevealAmount(e.target.value)}
+                placeholder="Enter number of Apollo emails to reveal"
+                className="h-9 w-72"
+              />
+            </div>
+            <p className="text-[11px] text-muted-foreground max-w-md">
+              Founder controls reveal quantity. Liftor selects the best eligible candidates within
+              founder-approved amount, budget, domain caps, CRM exclusions, and compliance guardrails.
+              Empty by default — no credits are spent until you enter a value and run live.
+            </p>
+          </div>
+          {amountInvalid && <p className="text-xs text-destructive">Enter a positive integer.</p>}
+          {parsedAmount !== null && counters.reveal_eligible_total !== undefined &&
+            parsedAmount > (counters.reveal_eligible_total ?? 0) && (
+              <p className="text-xs text-yellow-300">
+                Requested {parsedAmount} exceeds eligible pool ({counters.reveal_eligible_total}); only {counters.reveal_eligible_total} would be selected.
+              </p>
+          )}
+        </div>
+
         {/* Policy chips */}
         <div className="flex flex-wrap gap-2 text-xs">
           <Chip on={!!policy?.apollo_email_reveal_autonomous} label="Reveal automation" />
@@ -146,15 +198,22 @@ export default function AutonomousPipelineStatus({ businessName = "Neon Candy" }
           <Badge variant="outline">
             Min score: {policy?.apollo_reveal_min_quality_score ?? 0}
           </Badge>
+          {blockedReason && (
+            <Badge variant="destructive">Blocked: {blockedReason}</Badge>
+          )}
         </div>
 
         {/* Counters */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           <Stat label="Candidates pulled" value={counters.candidates_pulled ?? 0} />
           <Stat label="Passed quality" value={counters.passed_quality_policy ?? 0} tone="good" />
-          <Stat label="Reveal eligible" value={counters.reveal_eligible ?? 0} />
-          <Stat label="Eligible — pending policy" value={counters.eligible_pending_founder_policy ?? 0} tone="warn" />
-          <Stat label="Planned if policy ON" value={counters.planned_if_policy_enabled ?? 0} />
+          <Stat label="Reveal eligible (total)" value={counters.reveal_eligible_total ?? counters.reveal_eligible ?? 0} />
+          <Stat label="Founder amount requested" value={counters.founder_reveal_amount_requested ?? "—"} tone={counters.founder_reveal_amount_requested ? "good" : "warn"} />
+          <Stat label="Selected for next reveal" value={counters.selected_for_next_reveal ?? 0} tone="good" />
+          <Stat label="Would spend credits" value={counters.would_spend_credits ?? 0} />
+          <Stat label="Held back — founder amount" value={counters.held_back_by_founder_amount ?? 0} tone="warn" />
+          <Stat label="Held back — budget" value={counters.held_back_by_budget ?? 0} tone="warn" />
+          <Stat label="Held back — domain cap" value={counters.held_back_by_domain_cap ?? counters.reveal_skipped_domain_cap ?? 0} tone="warn" />
           <Stat label="Reveal planned (live)" value={counters.reveal_planned ?? 0} tone="good" />
           <Stat label="Skipped — reveal OFF" value={counters.skipped_reveal_disabled ?? 0} tone="warn" />
           <Stat label="Skipped — below min score" value={counters.skipped_below_min_score ?? 0} tone="warn" />
@@ -164,13 +223,12 @@ export default function AutonomousPipelineStatus({ businessName = "Neon Candy" }
           <Stat label="Skipped — suppressed" value={counters.skipped_suppressed_or_bounced ?? 0} tone="warn" />
           <Stat label="Skipped — prev no-email" value={counters.skipped_previous_no_email ?? 0} tone="warn" />
           <Stat label="Skipped — legacy hold" value={counters.skipped_legacy_hold ?? 0} tone="warn" />
-          <Stat label="Skipped — budget" value={counters.reveal_skipped_budget ?? 0} tone="warn" />
-          <Stat label="Skipped — domain cap" value={counters.reveal_skipped_domain_cap ?? 0} tone="warn" />
           <Stat label="Promote planned" value={counters.promote_planned ?? 0} tone="good" />
           <Stat label="Queue planned" value={counters.queue_planned ?? 0} tone="good" />
           <Stat label="Queue skipped" value={counters.queue_skipped ?? 0} tone="warn" />
           <Stat label="Founder decisions" value={pendingDecisions ?? 0} tone={(pendingDecisions ?? 0) > 0 ? "warn" : "default"} />
           <Stat label="Credits used (month)" value={counters.credits_used_month ?? 0} />
+          <Stat label="Would send" value={counters.would_send ?? 0} />
         </div>
 
         <p className="text-xs text-muted-foreground">
@@ -178,6 +236,73 @@ export default function AutonomousPipelineStatus({ businessName = "Neon Candy" }
             ? <>Last autopilot run {formatDistanceToNow(new Date(lastRun.created_at), { addSuffix: true })} — next: <span className="text-foreground">{lastRun?.next_recommended_action ?? lastRun?.outcome ?? "—"}</span></>
             : "No autopilot run yet — click Plan to compute the next batch."}
         </p>
+
+        {/* Selected for next reveal */}
+        {selectedCandidates.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-xs uppercase text-muted-foreground">Selected for next Apollo reveal ({selectedCandidates.length})</p>
+            <div className="max-h-72 overflow-auto rounded border border-border/50">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Title</TableHead>
+                    <TableHead>Company</TableHead>
+                    <TableHead>Domain</TableHead>
+                    <TableHead>Score</TableHead>
+                    <TableHead>Fit</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Cost</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {selectedCandidates.map((c) => (
+                    <TableRow key={c.candidate_id}>
+                      <TableCell>{c.name ?? "—"}</TableCell>
+                      <TableCell className="text-xs">{c.title ?? "—"}</TableCell>
+                      <TableCell className="text-xs">{c.company ?? "—"}</TableCell>
+                      <TableCell className="text-xs">{c.domain ?? "—"}</TableCell>
+                      <TableCell>{c.source_quality_score}</TableCell>
+                      <TableCell className="text-xs">{c.campaign_fit ?? "—"}</TableCell>
+                      <TableCell className="text-xs">{c.email_available ? "available" : "reveal needed"}</TableCell>
+                      <TableCell className="text-xs">{c.estimated_credit_cost} credit</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        )}
+
+        {eligibleNotSelected.length > 0 && (
+          <details className="text-xs">
+            <summary className="cursor-pointer text-muted-foreground">Eligible but not selected this run ({eligibleNotSelected.length})</summary>
+            <div className="max-h-56 overflow-auto rounded border border-border/50 mt-2">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Company</TableHead>
+                    <TableHead>Domain</TableHead>
+                    <TableHead>Score</TableHead>
+                    <TableHead>Reason</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {eligibleNotSelected.map((c) => (
+                    <TableRow key={c.candidate_id}>
+                      <TableCell>{c.name ?? "—"}</TableCell>
+                      <TableCell>{c.company ?? "—"}</TableCell>
+                      <TableCell>{c.domain ?? "—"}</TableCell>
+                      <TableCell>{c.source_quality_score}</TableCell>
+                      <TableCell>{c.reason_not_selected}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </details>
+        )}
 
         {!policy?.auto_send_after_queue && (
           <div className="flex items-start gap-2 p-3 rounded border border-yellow-500/30 bg-yellow-500/5 text-xs text-yellow-200">
