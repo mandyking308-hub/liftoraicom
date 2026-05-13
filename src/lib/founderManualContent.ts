@@ -1275,6 +1275,140 @@ Backfill state for this session:
 
 ---
 
+## SECTION 0f — NEXT BUILD ORDER — DO NOT SKIP (13 May 2026)
+
+> **⚠️ WARNING — QUEUE CREATION IS NOT HARMLESS**
+>
+> No future feature may create \`email_queue\` rows unless the global
+> send brake is verified AND either \`system_settings.auto_send_enabled = false\`
+> OR a controlled manual-send gate is being used. Queue creation is
+> **not harmless** unless the worker is physically blocked. Treat any
+> insertion into \`email_queue\` as a live-send risk until proven otherwise.
+
+This section defines the **mandatory operational build order** for the
+Neon Candy outreach pathway and any future outreach venture. Steps must
+be completed sequentially. Skipping a step is a safety violation.
+
+### 1. Safety baseline first
+
+- Confirm cron send worker (\`outreach-send-worker-2min\`) remains
+  **unscheduled**.
+- Confirm \`system_settings.auto_send_enabled = false\`.
+- Confirm \`outreach-send-worker\` exits **before** queue selection when
+  \`auto_send_enabled\` is not strictly \`true\` (fail-closed).
+- Confirm no new pending \`email_queue\` rows can auto-send in the
+  background under any condition.
+- Evidence: dry-run shows \`rows_processed=0\`, \`provider_calls=0\`,
+  \`emails_sent=0\`.
+
+### 2. Parked queue cleanup
+
+- Audit the **10 remaining pending Neon Candy rows** in \`email_queue\`.
+- Classify each row as one of:
+  - \`orphan_followup\` — references a contact/campaign no longer valid
+  - \`legacy_pending\` — created before compliance spine landed
+  - \`valid_future_step\` — legitimate scheduled follow-up
+  - \`cancel_candidate\` — superseded, duplicate, or unsafe
+- Build a **preview/apply cancellation gate** (dry-run first, apply
+  only on explicit confirmation, batch size = 1 default).
+- Cancel all unsafe / orphan / legacy pending rows **before** any new
+  queue creation occurs.
+- Log every cancellation to \`system_events\` with reason and operator.
+
+### 3. UI truth cleanup
+
+- Fix stale counters and labels across Command Centre, Outreach
+  dashboards, and per-contact views.
+- Separate **historical run snapshots** from **live actionable counts**
+  (clearly labelled, not interleaved).
+- Make Command Centre display the **real next action**, not stale
+  promotion / reveal text from earlier sessions.
+- Remove or relabel any "ready to send" indicator that does not
+  reflect the current kill-switch state.
+
+### 4. Tracking / legal disclosure
+
+- Add **footer / privacy disclosure** for open and click tracking to
+  every outbound email template.
+- **Do not inject tracking pixels or rewrite links** until the
+  disclosure language is live in all active templates.
+- Label opens as **"open signal"** in all UI and reports — never as
+  legal proof of human reading (pre-fetch, image proxies and bot
+  scanners trigger opens without a human).
+- Update privacy policy and unsubscribe footer to reference engagement
+  tracking and lawful basis.
+
+### 5. Controlled Manual Send Gate (apply path)
+
+- Build the **apply / send path** only **after** queue cleanup (step 2)
+  and tracking disclosure (step 4) are complete.
+- Default **batch size = 1**.
+- Must require a **preview in the same session** — preview tokens
+  expire on session end and cannot be reused.
+- Must only send rows that were **preview-approved** in that session.
+- Must enforce, in code, **all** of:
+  - compliance status (\`compliance_status = 'cleared'\`)
+  - suppression list lookup
+  - unsubscribe token presence
+  - bounce history check
+  - duplicate / dedupe check
+  - BCR lookup
+  - campaign active state
+  - inbox active state and warmup budget
+  - provider health
+  - daily send budget
+  - global auto-send guard (\`auto_send_enabled\` semantics)
+- Must write to: \`email_events\`, \`communications\`,
+  \`contact_compliance_events\`, \`system_events\`.
+- Must record \`provider_message_id\`, \`smtp_accepted_at\`,
+  \`preview_token\`, and operator identity.
+
+### 6. Engagement CRM journey
+
+- Add a per-contact timeline showing:
+  **sent → open → click → reply → bounce → unsubscribe**.
+- Display \`provider_message_id\` and \`queue_id\` on every event.
+- Show the full **legal / compliance trail** (lawful basis, retention,
+  consent source, unsubscribe token, BCR linkage).
+- Keep **Apollo source / enrichment** visible so provenance is never
+  lost.
+- Surface the timeline inside the existing CRM contact view, not as a
+  separate orphan dashboard.
+
+### 7. Provider polish
+
+- Fix the **IONOS sent-folder IMAP** issue (German folder naming —
+  \`Gesendet\` / \`Gesendete Objekte\` etc.).
+- Confirm sent-folder copy works, **or** mark it explicitly
+  non-blocking provided SMTP delivery and \`provider_message_id\` are
+  logged in \`email_events\`.
+- Document the IMAP folder mapping per provider in the Credentials
+  Register.
+
+### 8. Scale pathway
+
+Only after the **proof send path works cleanly end-to-end** (steps 1–7
+verified):
+
+1. Repeat Apollo pull → reveal → promotion with a **small batch**.
+2. Run **queue preview** (dry-run, no inserts).
+3. Run **controlled send preview** (dry-run, no SMTP).
+4. Execute **one-by-one proof sending** (batch = 1).
+5. Gradually increase to small batch sending only after multiple
+   clean proof cycles.
+
+**Do not enable autonomous / background sending** until the full
+safety / compliance / preview architecture has been **tested
+repeatedly** with zero incidents across multiple sessions.
+
+### Binding sequencing rule
+
+Steps 1–4 are **prerequisites** to step 5. Step 5 is a prerequisite
+to step 6. Steps 1–7 are prerequisites to step 8. Out-of-order work
+is treated as an incident and must be rolled back.
+
+---
+
 ## SECTION 0a — CREDENTIALS & SECRETS REGISTER
 
 > **Raw passwords and API keys are not stored in this manual.**
