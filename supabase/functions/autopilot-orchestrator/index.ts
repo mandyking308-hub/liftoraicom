@@ -644,9 +644,6 @@ Deno.serve(async (req) => {
       if (founderAmount === null)
         return "Enter reveal amount and review selected candidates.";
       return `Click "Approve & reveal selected candidates" to spend ~${counters.would_spend_credits} Apollo credits on ${counters.selected_for_next_reveal} selected. Auto-send remains OFF.`;
-      if (!policy.auto_send_after_queue)
-        return `Reveal/promote/queue may run within approved reveal amount (${counters.selected_for_next_reveal}). Auto-send remains OFF.`;
-      return `Approve reveal of ${counters.selected_for_next_reveal} (~${counters.would_spend_credits} credits)`;
     })(),
     details: {
       dry_run: dryRun, actor, actor_user_id: actorUserId,
