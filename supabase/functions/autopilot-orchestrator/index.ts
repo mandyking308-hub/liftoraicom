@@ -1131,10 +1131,14 @@ Deno.serve(async (req) => {
         if (liveRevealAttempted) {
           if (providerErrors > 0 && emailsReturned === 0)
             return "Resolve Apollo reveal outcome before continuing.";
+          if (emailsReturned > 0 && (counters as any).needs_founder_review > 0 && (counters as any).valid_for_auto_promotion === 0)
+            return `Review ${(counters as any).needs_founder_review} post-reveal validation flags — none auto-promoted.`;
+          if (emailsReturned > 0 && (counters as any).needs_founder_review > 0)
+            return `Review ${(counters as any).needs_founder_review} post-reveal flags · ${(counters as any).valid_for_auto_promotion} valid for promotion.`;
           if (emailsReturned > 0 && counters.promote_planned === 0)
             return "Review post-reveal CRM/promotion blockers.";
           if (counters.queue_planned === 0 && counters.promote_planned > 0)
-            return "Review queue blockers — promoted contacts not enqueued.";
+            return `Review queue blockers: ${Object.keys((counters as any).queue_blocker_reasons ?? {}).slice(0,3).join(", ") || "see details"}`;
         }
         return policy.auto_send_after_queue
           ? "Monitor send worker and reply rates"
@@ -1158,6 +1162,8 @@ Deno.serve(async (req) => {
       eligible_not_selected: eligibleNotSelected.slice(0, 100),
       duplicates_held_back: duplicatesHeldBack.slice(0, 100),
       reveal_outcomes: revealOutcomes,
+      post_reveal_validations: postRevealValidations,
+      queue_blocker_reasons: queueBlockerReasons,
       reveal_execution: {
         attempted: liveRevealAttempted,
         apollo_api_called: apolloApiCalled,
