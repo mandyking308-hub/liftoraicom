@@ -42,7 +42,71 @@ type Counters = {
   credits_remaining_today: number;
   credits_remaining_month: number;
   estimated_credits_this_run: number;
+  // Granular reason buckets (additive — sum may exceed reveal_skipped_excluded
+  // because a single candidate is counted under one specific reason).
+  skipped_below_min_score: number;
+  skipped_missing_score: number;
+  skipped_missing_quality_profile: number;
+  skipped_lifecycle_mismatch: number;
+  skipped_existing_crm: number;
+  skipped_duplicate: number;
+  skipped_suppressed_or_bounced: number;
+  skipped_previous_no_email: number;
+  skipped_legacy_hold: number;
+  skipped_unknown: number;
+  skipped_reveal_disabled: number;
+  // Reveal automation OFF accounting — what WOULD happen if founder enabled
+  // policy.apollo_email_reveal_autonomous (still bounded by budget + domain cap).
+  eligible_pending_founder_policy: number;
+  planned_if_policy_enabled: number;
 };
+
+// Inline deterministic scorer — mirrors apollo-unlock-shortlist title/company
+// rules and returns a 0–10 score plus a campaign_fit label. NO Apollo calls,
+// NO AI, NO credits.
+const POSITIVE_KEYWORDS: Array<{ tag: string; weight: number; pattern: RegExp }> = [
+  { tag: "playlist_curator", weight: 7, pattern: /\b(playlist|curator|a\s*&\s*r|a\s*and\s*r|editorial)\b/i },
+  { tag: "music_supervisor", weight: 6, pattern: /\b(music\s*supervisor|sync\s*licens|music\s*editor|music\s*licens)\b/i },
+  { tag: "dj",               weight: 5, pattern: /\b(dj|selector|turntab|residen(t|cy))\b/i },
+  { tag: "music_blog",       weight: 5, pattern: /\b(music\s*(blog|journal|critic|writer|editor|reporter)|press\b)\b/i },
+  { tag: "radio",            weight: 5, pattern: /\b(radio|broadcast|presenter|host\b|program(me)?\s*director)\b/i },
+  { tag: "event_promoter",   weight: 4, pattern: /\b(promoter|booker|booking|festival|venue|club\b|nightlife)\b/i },
+  { tag: "creator_influencer", weight: 4, pattern: /\b(influencer|creator|youtub|tiktok|streamer|content\s*creator)\b/i },
+];
+const NEGATIVE_KEYWORDS: Array<{ tag: string; weight: number; pattern: RegExp }> = [
+  { tag: "hospitality_unrelated", weight: -5, pattern: /\b(housekeep|concierge|front\s*desk|waiter|waitress|chef|sous|barista)\b/i },
+  { tag: "generic_corporate",     weight: -3, pattern: /\b(general\s*manager|operations\s*manager|customs|purchas|procurement|hr\b|human\s*resources|finance|accounting)\b/i },
+  { tag: "engineering_unrelated", weight: -2, pattern: /\b(software\s*engineer|developer|qa\s*engineer|backend|frontend)\b/i },
+];
+const COMPANY_BONUS = /\b(music|playlist|radio|curator|records|sound|audio|beat|spotify|tidal|deezer|amazon\s*music|apple\s*music)\b/i;
+
+function computeFit(title: string | null, company: string | null): { score: number; fit: string; reasons: string[] } {
+  const t = (title ?? "").trim();
+  const c = (company ?? "").trim();
+  const text = `${t} ${c}`;
+  const reasons: string[] = [];
+  let score = 0;
+  let bestTag = "poor_fit";
+  let bestWeight = 0;
+  if (!t) { score -= 3; reasons.push("missing_title"); }
+  for (const k of POSITIVE_KEYWORDS) {
+    if (k.pattern.test(text)) {
+      score += k.weight; reasons.push(`+${k.tag}`);
+      if (k.weight > bestWeight) { bestWeight = k.weight; bestTag = k.tag; }
+    }
+  }
+  for (const k of NEGATIVE_KEYWORDS) {
+    if (k.pattern.test(text)) { score += k.weight; reasons.push(`-${k.tag}`); }
+  }
+  if (c && COMPANY_BONUS.test(c)) { score += 1; reasons.push("+company_music_brand"); }
+  // Clamp to 0–10 and label.
+  const clamped = Math.max(0, Math.min(10, score));
+  let fit = "poor";
+  if (clamped >= 7) fit = "strong";
+  else if (clamped >= 5) fit = "moderate";
+  else if (clamped >= 3) fit = "weak";
+  return { score: clamped, fit, reasons };
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -112,9 +176,18 @@ Deno.serve(async (req) => {
     credits_used_today: 0, credits_used_month: 0,
     credits_remaining_today: 0, credits_remaining_month: 0,
     estimated_credits_this_run: 0,
+    skipped_below_min_score: 0, skipped_missing_score: 0,
+    skipped_missing_quality_profile: 0, skipped_lifecycle_mismatch: 0,
+    skipped_existing_crm: 0, skipped_duplicate: 0,
+    skipped_suppressed_or_bounced: 0, skipped_previous_no_email: 0,
+    skipped_legacy_hold: 0, skipped_unknown: 0, skipped_reveal_disabled: 0,
+    eligible_pending_founder_policy: 0, planned_if_policy_enabled: 0,
   };
 
-  const sampleSkips: Array<{ stage: string; reason: string; candidate_id?: string }> = [];
+  const sampleSkips: Array<Record<string, unknown>> = [];
+  const pushSkip = (entry: Record<string, unknown>) => {
+    if (sampleSkips.length < 50) sampleSkips.push(entry);
+  };
 
   // Helper: detail event
   const event = async (eventType: string, message: string, severity: "low" | "medium" | "high" = "low", metadata: any = {}) => {
@@ -171,34 +244,67 @@ Deno.serve(async (req) => {
 
   for (const qp of revealCandidates ?? []) {
     const lead = leadByQp.get(qp.apollo_lead_id);
-    if (!lead) { sampleSkips.push({ stage: "reveal", reason: "no_lead_record", candidate_id: qp.id }); continue; }
+    const baseSkip = {
+      stage: "reveal",
+      candidate_id: qp.id,
+      apollo_lead_id: qp.apollo_lead_id,
+      lifecycle_stage: qp.lifecycle_stage,
+      business_match: true, // lead_quality_profiles is global; no business_id column on it
+    };
+    if (!lead) {
+      counters.skipped_missing_quality_profile++;
+      counters.reveal_skipped_excluded++;
+      pushSkip({ ...baseSkip, reason: "no_lead_record" });
+      continue;
+    }
+    const ctx = {
+      ...baseSkip,
+      name: `${lead.first_name ?? ""} ${lead.last_name ?? ""}`.trim() || null,
+      company: lead.company ?? null,
+      domain: lead.email_domain ?? null,
+      email_available: !!lead.email,
+    };
 
     if (policy.apollo_reveal_exclude_existing_crm && lead.apollo_person_id && crmPersonSet.has(lead.apollo_person_id)) {
-      counters.reveal_skipped_excluded++;
-      sampleSkips.push({ stage: "reveal", reason: "already_in_crm", candidate_id: qp.id }); continue;
+      counters.skipped_existing_crm++; counters.reveal_skipped_excluded++;
+      pushSkip({ ...ctx, reason: "already_in_crm" }); continue;
     }
     if (policy.apollo_reveal_exclude_duplicates && qp.dup_of_contact_id) {
-      counters.reveal_skipped_excluded++;
-      sampleSkips.push({ stage: "reveal", reason: "duplicate", candidate_id: qp.id }); continue;
+      counters.skipped_duplicate++; counters.reveal_skipped_excluded++;
+      pushSkip({ ...ctx, reason: "duplicate" }); continue;
     }
     if (policy.apollo_reveal_exclude_poor_fit && qp.campaign_fit === "poor") {
-      counters.reveal_skipped_excluded++;
-      sampleSkips.push({ stage: "reveal", reason: "poor_fit", candidate_id: qp.id }); continue;
+      counters.skipped_below_min_score++; counters.reveal_skipped_excluded++;
+      pushSkip({ ...ctx, reason: "poor_fit_label", source_quality_score: (qp.fit_confidence ?? 0) * 10 }); continue;
     }
     if (policy.apollo_reveal_exclude_legacy_hold && qp.lifecycle_stage === "legacy_needs_verification_hold") {
-      counters.reveal_skipped_excluded++;
-      sampleSkips.push({ stage: "reveal", reason: "legacy_hold", candidate_id: qp.id }); continue;
+      counters.skipped_legacy_hold++; counters.reveal_skipped_excluded++;
+      pushSkip({ ...ctx, reason: "legacy_hold" }); continue;
     }
     const flags: string[] = qp.risk_flags ?? [];
     if (flags.includes("bounced") || flags.includes("suppressed") || flags.includes("internal")) {
-      counters.reveal_skipped_excluded++;
-      sampleSkips.push({ stage: "reveal", reason: "bounced_or_suppressed", candidate_id: qp.id }); continue;
+      counters.skipped_suppressed_or_bounced++; counters.reveal_skipped_excluded++;
+      pushSkip({ ...ctx, reason: "bounced_or_suppressed", risk_flags: flags }); continue;
+    }
+    if (flags.includes("unlock_attempt_no_email")) {
+      counters.skipped_previous_no_email++; counters.reveal_skipped_excluded++;
+      pushSkip({ ...ctx, reason: "previous_no_email" }); continue;
     }
 
-    const score = Math.round(((qp.fit_confidence ?? 0) * 10) * 10) / 10;
+    // Score: prefer stored fit_confidence (0–1), else compute on the fly from title+company.
+    let score: number;
+    let computed = false;
+    if (qp.fit_confidence != null) {
+      score = Math.round(((qp.fit_confidence ?? 0) * 10) * 10) / 10;
+    } else {
+      const c = computeFit(lead.title, lead.company);
+      score = c.score; computed = true;
+    }
     if (score < policy.apollo_reveal_min_quality_score) {
+      if (qp.fit_confidence == null && score === 0) counters.skipped_missing_score++;
+      else counters.skipped_below_min_score++;
       counters.reveal_skipped_excluded++;
-      sampleSkips.push({ stage: "reveal", reason: `score_${score}_below_${policy.apollo_reveal_min_quality_score}`, candidate_id: qp.id });
+      pushSkip({ ...ctx, reason: `score_${score}_below_${policy.apollo_reveal_min_quality_score}`, source_quality_score: score, computed_on_the_fly: computed });
       continue;
     }
 
@@ -214,6 +320,7 @@ Deno.serve(async (req) => {
     const cnt = domainSeen.get(e.domain) ?? 0;
     if (e.domain && cap > 0 && cnt >= cap) {
       counters.reveal_skipped_domain_cap++;
+      pushSkip({ stage: "reveal", reason: "domain_cap", candidate_id: e.qp.id, domain: e.domain, source_quality_score: e.score });
       continue;
     }
     domainSeen.set(e.domain, cnt + 1);
@@ -222,9 +329,16 @@ Deno.serve(async (req) => {
   counters.reveal_eligible = planReveal.length;
 
   const budgetCap = Math.min(counters.credits_remaining_today, counters.credits_remaining_month);
-  const finalReveal = planReveal.slice(0, budgetCap);
+  const wouldRevealUnderPolicy = planReveal.slice(0, budgetCap);
+  counters.planned_if_policy_enabled = wouldRevealUnderPolicy.length;
+  counters.eligible_pending_founder_policy = !policy.apollo_email_reveal_autonomous ? wouldRevealUnderPolicy.length : 0;
+
+  // Reveal automation gate: if OFF, do NOT bury eligible candidates under
+  // "excluded" — surface them in eligible_pending_founder_policy instead.
+  const finalReveal = policy.apollo_email_reveal_autonomous ? wouldRevealUnderPolicy : [];
   counters.reveal_planned = finalReveal.length;
-  counters.reveal_skipped_budget = planReveal.length - finalReveal.length;
+  counters.reveal_skipped_budget = planReveal.length - wouldRevealUnderPolicy.length;
+  counters.skipped_reveal_disabled = policy.apollo_email_reveal_autonomous ? 0 : wouldRevealUnderPolicy.length;
   counters.estimated_credits_this_run = finalReveal.length;
 
   await event("reveal_plan",
@@ -405,9 +519,23 @@ Deno.serve(async (req) => {
     safe_to_promote: counters.promote_planned,
     safe_to_queue: counters.queue_planned,
     decisions_created: counters.decisions_created,
-    next_recommended_action: dryRun
-      ? `Review dry-run: would reveal ${counters.reveal_planned}, promote ${counters.promote_planned}, queue ${counters.queue_planned}. Enable live policy after review.`
-      : (policy.auto_send_after_queue ? "Monitor send worker and reply rates" : "Configure external sending provider before enabling auto-send"),
+    next_recommended_action: (() => {
+      if (!dryRun) {
+        return policy.auto_send_after_queue
+          ? "Monitor send worker and reply rates"
+          : "Configure external sending provider before enabling auto-send";
+      }
+      if (counters.candidates_pulled === 0) return "No reveal candidates — pull fresh Apollo if needed";
+      if (counters.passed_quality_policy === 0 && counters.skipped_missing_score > 0)
+        return "Repair candidate scoring / quality profile linkage";
+      if (counters.passed_quality_policy === 0)
+        return "Review dry-run skip reasons — no candidates passed quality policy";
+      if (counters.eligible_pending_founder_policy > 0)
+        return `Review ${counters.eligible_pending_founder_policy} reveal-eligible candidates and approve reveal policy/budget`;
+      if (counters.reveal_planned > 0)
+        return `Approve reveal of ${counters.reveal_planned} (within ~${counters.estimated_credits_this_run} credits)`;
+      return "Review dry-run skip reasons before enabling live policy";
+    })(),
     details: {
       dry_run: dryRun, actor, actor_user_id: actorUserId,
       counters, sample_skips: sampleSkips.slice(0, 50),
