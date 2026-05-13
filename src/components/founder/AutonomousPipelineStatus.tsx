@@ -93,6 +93,9 @@ export default function AutonomousPipelineStatus({ businessName = "Neon Candy" }
   const duplicatesHeldBack: any[] = planResult?.duplicates_held_back ?? lastRun?.details?.duplicates_held_back ?? [];
   const revealOutcomes: any[] = lastRun?.details?.reveal_outcomes ?? [];
   const revealExec: any = lastRun?.details?.reveal_execution ?? null;
+  const postRevealValidations: any[] = planResult?.post_reveal_validations ?? lastRun?.details?.post_reveal_validations ?? [];
+  const queueBlockerReasons: Record<string, number> =
+    planResult?.queue_blocker_reasons ?? lastRun?.details?.queue_blocker_reasons ?? {};
   const outcomeByCandidateId = new Map<string, any>(revealOutcomes.map((o: any) => [o.candidate_id, o]));
 
   const parsedAmount = revealAmount.trim() === "" ? null : Math.max(0, Math.floor(Number(revealAmount)));
@@ -251,6 +254,16 @@ export default function AutonomousPipelineStatus({ businessName = "Neon Candy" }
           <Stat label="Founder decisions" value={pendingDecisions ?? 0} tone={(pendingDecisions ?? 0) > 0 ? "warn" : "default"} />
           <Stat label="Credits used (month)" value={counters.credits_used_month ?? 0} />
           <Stat label="Would send" value={counters.would_send ?? 0} />
+          <Stat label="Validated (post-reveal)" value={(counters as any).post_reveal_validated ?? 0} />
+          <Stat label="Valid for auto-promotion" value={(counters as any).valid_for_auto_promotion ?? 0} tone="good" />
+          <Stat label="Needs founder review" value={(counters as any).needs_founder_review ?? 0} tone="warn" />
+          <Stat label="Blocked — wrong person" value={(counters as any).blocked_possible_wrong_person ?? 0} tone="warn" />
+          <Stat label="Blocked — generic mailbox" value={(counters as any).blocked_generic_or_shared ?? 0} tone="warn" />
+          <Stat label="Blocked — domain mismatch" value={(counters as any).blocked_domain_mismatch ?? 0} tone="warn" />
+          <Stat label="Blocked — existing CRM (post-reveal)" value={(counters as any).blocked_existing_crm ?? 0} tone="warn" />
+          <Stat label="Blocked — duplicate revealed email" value={(counters as any).blocked_duplicate_revealed_email ?? 0} tone="warn" />
+          <Stat label="Promoted contacts (this run)" value={(counters as any).promoted_contacts ?? 0} tone="good" />
+          <Stat label="BCRs created (this run)" value={(counters as any).bcrs_created ?? 0} tone="good" />
         </div>
 
         <p className="text-xs text-muted-foreground">
@@ -299,6 +312,67 @@ export default function AutonomousPipelineStatus({ businessName = "Neon Candy" }
                 </Table>
               </div>
             )}
+          </div>
+        )}
+
+        {postRevealValidations.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-xs uppercase text-muted-foreground">
+              Post-reveal validation ({postRevealValidations.length})
+            </p>
+            <div className="max-h-80 overflow-auto rounded border border-border/50">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Title</TableHead>
+                    <TableHead>Company</TableHead>
+                    <TableHead>Revealed email</TableHead>
+                    <TableHead>Domain match</TableHead>
+                    <TableHead>Name match</TableHead>
+                    <TableHead>CRM</TableHead>
+                    <TableHead>Suppression</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Promote?</TableHead>
+                    <TableHead>Reason / action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {postRevealValidations.map((v: any) => (
+                    <TableRow key={v.apollo_lead_id}>
+                      <TableCell>{v.name ?? "—"}</TableCell>
+                      <TableCell className="text-xs">{v.title ?? "—"}</TableCell>
+                      <TableCell className="text-xs">{v.company ?? "—"}</TableCell>
+                      <TableCell className="text-xs">{v.revealed_email}</TableCell>
+                      <TableCell className="text-xs">{v.domain_match ? "yes" : "no"}</TableCell>
+                      <TableCell className="text-xs">{v.name_match ? `yes (${(v.name_match_hits ?? []).join("/")})` : "no"}</TableCell>
+                      <TableCell className="text-xs">{v.crm_status}</TableCell>
+                      <TableCell className="text-xs">{v.suppression_status}</TableCell>
+                      <TableCell className="text-xs">
+                        <Badge variant={v.promote_allowed ? "default" : "outline"} className={v.promote_allowed ? "" : "text-yellow-300 border-yellow-500/40"}>
+                          {v.validation_status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-xs">{v.promote_allowed ? "yes" : "no"}</TableCell>
+                      <TableCell className="text-xs">{v.recommended_action}{v.reason_blocked ? ` · ${v.reason_blocked}` : ""}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        )}
+
+        {Object.keys(queueBlockerReasons).length > 0 && (
+          <div className="space-y-2">
+            <p className="text-xs uppercase text-yellow-300">Queue blocker reasons</p>
+            <div className="flex flex-wrap gap-2 text-xs">
+              {Object.entries(queueBlockerReasons).map(([k, v]) => (
+                <Badge key={k} variant="outline" className="text-yellow-200 border-yellow-500/30">
+                  {k}: {v}
+                </Badge>
+              ))}
+            </div>
           </div>
         )}
 
