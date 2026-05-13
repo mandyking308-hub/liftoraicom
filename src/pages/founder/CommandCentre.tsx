@@ -479,7 +479,7 @@ const CommandCentre = () => {
             anchor: "#sec-autopilot",
           },
           {
-            key: "promote", label: "Promote to Contact", icon: CheckCircle2,
+            key: "promote", label: "Promote (validation-clean)", icon: CheckCircle2,
             count: leadLifecycle?.safe_to_promote_after_reveal ?? leadLifecycle?.safe_to_promote ?? 0,
             status: (leadLifecycle?.safe_to_promote_after_reveal ?? 0) > 0 ? "active" : "not_started",
             blocker: (leadLifecycle?.safe_to_promote_after_reveal ?? 0) === 0 ? "Blocked until email reveal completes" : null,
