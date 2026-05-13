@@ -487,10 +487,16 @@ Deno.serve(async (req) => {
   const selectedCandidates = afterBudget.map(e => ({
     candidate_id: e.qp.id,
     apollo_lead_id: e.qp.apollo_lead_id,
+    apollo_person_id: e.lead.apollo_person_id ?? null,
     name: `${e.lead.first_name ?? ""} ${e.lead.last_name ?? ""}`.trim() || null,
     title: e.lead.title ?? null,
     company: e.lead.company ?? null,
     domain: e.domain || null,
+    domain_or_company_group: e.group_display,
+    group_source: e.group_source,
+    duplicate_key: e.dup_key,
+    duplicate_key_source: e.dup_source,
+    why_selected: `score=${e.score} fit=${e.qp.campaign_fit ?? "—"} group=${e.group_display}`,
     country: e.lead.country ?? null,
     source_quality_score: e.score,
     campaign_fit: e.qp.campaign_fit ?? e.lead.campaign_fit ?? null,
@@ -508,6 +514,7 @@ Deno.serve(async (req) => {
     title: e.lead.title ?? null,
     company: e.lead.company ?? null,
     domain: e.domain || null,
+    domain_or_company_group: e.group_display,
     source_quality_score: e.score,
     reason_not_selected:
       founderAmount === null ? "founder_amount_not_set"
