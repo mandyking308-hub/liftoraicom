@@ -952,7 +952,9 @@ Deno.serve(async (req) => {
     });
 
     // Founder decision for the high-risk possible-wrong-person case.
-    if (!dryRun && status === "possible_wrong_person") {
+    // Created in both live and dry-run/backfill modes — it's a UI decision item,
+    // not a credit-spend, and must surface for already-revealed emails too.
+    if (status === "possible_wrong_person") {
       const { data: existingDec } = await admin.from("founder_decisions")
         .select("id").eq("business_id", businessId)
         .eq("decision_type", "possible_wrong_person_email_match")
