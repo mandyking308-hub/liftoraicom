@@ -458,6 +458,27 @@ const CommandCentre = () => {
         const nextRecommended = recommendations[0]?.msg ?? "All clear.";
         const nextRecommendedTo = recommendations[0]?.to ?? "/founder/analytics";
         const founderActions = recommendations.filter((r) => r.tone === "primary" || r.tone === "danger" || r.tone === "warn");
+        // Safety-led ordering: when outreach send brake is not verified, the
+        // Command Centre's top actions must prioritise verifying the brake and
+        // reviewing the queue audit BEFORE any send / queue / Apollo action.
+        const safetyLedActions = sendUnsafe
+          ? [
+              { msg: "Verify outreach brake / cron status (Queue Audit)", to: "/founder/outreach/queue-audit", tone: "danger" as const },
+              { msg: "Review Queue Audit classification before any cleanup or send", to: "/founder/outreach/queue-audit", tone: "warn" as const },
+            ]
+          : [];
+        const orderedFounderActions = sendUnsafe
+          ? [
+              ...safetyLedActions,
+              ...founderActions.filter((r) => {
+                const m = (r.msg ?? "").toLowerCase();
+                return !m.includes("controlled live batch")
+                  && !m.includes("apollo")
+                  && !m.includes("create queue")
+                  && !m.includes("manual send");
+              }),
+            ]
+          : founderActions;
 
         const stages = [
           {
@@ -579,11 +600,11 @@ const CommandCentre = () => {
 
             {/* SECTION 2 — Today's Founder Actions */}
             <Section title="Today's founder actions" icon={Sparkles}>
-              {founderActions.length === 0 ? (
+              {orderedFounderActions.length === 0 ? (
                 <p className="text-sm text-muted-foreground">No founder decision required right now.</p>
               ) : (
                 <div className="grid sm:grid-cols-2 gap-2">
-                  {founderActions.map((r, idx) => (
+                  {orderedFounderActions.map((r, idx) => (
                     <Link key={idx} to={r.to} className={`flex items-center justify-between p-3 rounded-lg border transition-colors ${
                       r.tone === "danger" ? "bg-destructive/10 border-destructive/30 hover:bg-destructive/15" :
                       r.tone === "warn" ? "bg-yellow-500/10 border-yellow-500/30 hover:bg-yellow-500/15" :
