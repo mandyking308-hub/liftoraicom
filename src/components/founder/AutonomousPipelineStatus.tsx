@@ -315,6 +315,67 @@ export default function AutonomousPipelineStatus({ businessName = "Neon Candy" }
           </div>
         )}
 
+        {postRevealValidations.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-xs uppercase text-muted-foreground">
+              Post-reveal validation ({postRevealValidations.length})
+            </p>
+            <div className="max-h-80 overflow-auto rounded border border-border/50">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Title</TableHead>
+                    <TableHead>Company</TableHead>
+                    <TableHead>Revealed email</TableHead>
+                    <TableHead>Domain match</TableHead>
+                    <TableHead>Name match</TableHead>
+                    <TableHead>CRM</TableHead>
+                    <TableHead>Suppression</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Promote?</TableHead>
+                    <TableHead>Reason / action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {postRevealValidations.map((v: any) => (
+                    <TableRow key={v.apollo_lead_id}>
+                      <TableCell>{v.name ?? "—"}</TableCell>
+                      <TableCell className="text-xs">{v.title ?? "—"}</TableCell>
+                      <TableCell className="text-xs">{v.company ?? "—"}</TableCell>
+                      <TableCell className="text-xs">{v.revealed_email}</TableCell>
+                      <TableCell className="text-xs">{v.domain_match ? "yes" : "no"}</TableCell>
+                      <TableCell className="text-xs">{v.name_match ? `yes (${(v.name_match_hits ?? []).join("/")})` : "no"}</TableCell>
+                      <TableCell className="text-xs">{v.crm_status}</TableCell>
+                      <TableCell className="text-xs">{v.suppression_status}</TableCell>
+                      <TableCell className="text-xs">
+                        <Badge variant={v.promote_allowed ? "default" : "outline"} className={v.promote_allowed ? "" : "text-yellow-300 border-yellow-500/40"}>
+                          {v.validation_status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-xs">{v.promote_allowed ? "yes" : "no"}</TableCell>
+                      <TableCell className="text-xs">{v.recommended_action}{v.reason_blocked ? ` · ${v.reason_blocked}` : ""}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        )}
+
+        {Object.keys(queueBlockerReasons).length > 0 && (
+          <div className="space-y-2">
+            <p className="text-xs uppercase text-yellow-300">Queue blocker reasons</p>
+            <div className="flex flex-wrap gap-2 text-xs">
+              {Object.entries(queueBlockerReasons).map(([k, v]) => (
+                <Badge key={k} variant="outline" className="text-yellow-200 border-yellow-500/30">
+                  {k}: {v}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Selected for next reveal */}
         {selectedCandidates.length > 0 && (
           <div className="space-y-2">
