@@ -282,7 +282,12 @@ Deno.serve(async (req) => {
     : { data: [] as any[] };
   const crmPersonSet = new Set((crmHits ?? []).map(c => c.apollo_person_id));
 
-  const eligible: Array<{ qp: any; lead: any; score: number; domain: string }> = [];
+  const eligible: Array<{
+    qp: any; lead: any; score: number;
+    domain: string;
+    group_key: string; group_display: string; group_source: string;
+    dup_key: string; dup_source: string;
+  }> = [];
 
   for (const qp of revealCandidates ?? []) {
     const lead = leadByQp.get(qp.apollo_lead_id);
@@ -351,23 +356,70 @@ Deno.serve(async (req) => {
     }
 
     counters.passed_quality_policy++;
-    eligible.push({ qp, lead, score, domain: (lead.email_domain ?? "").toLowerCase() });
+    const grp = companyGroupKey(lead);
+    const dup = dedupeKey(lead);
+    eligible.push({
+      qp, lead, score,
+      domain: (lead.email_domain ?? "").toLowerCase(),
+      group_key: grp.key, group_display: grp.display, group_source: grp.source,
+      dup_key: dup.key, dup_source: dup.source,
+    });
   }
 
-  eligible.sort((a, b) => b.score - a.score);
-  const domainSeen = new Map<string, number>();
-  const planReveal: typeof eligible = [];
+  // Sort by score, then stable on apollo_lead_id so dedupe selection is deterministic.
+  eligible.sort((a, b) => (b.score - a.score) || String(a.qp.apollo_lead_id).localeCompare(String(b.qp.apollo_lead_id)));
+
+  // ---------- Pre-reveal dedupe (BEFORE domain cap, BEFORE selection) ----------
+  const dedupeSeen = new Map<string, { qp_id: string; apollo_lead_id: string; name: string; company: string }>();
+  const dedupedEligible: typeof eligible = [];
+  const duplicatesHeldBack: Array<Record<string, unknown>> = [];
   for (const e of eligible) {
-    const cap = policy.apollo_reveal_max_domain_frequency;
-    const cnt = domainSeen.get(e.domain) ?? 0;
-    if (e.domain && cap > 0 && cnt >= cap) {
-      counters.reveal_skipped_domain_cap++;
-      pushSkip({ stage: "reveal", reason: "domain_cap", candidate_id: e.qp.id, domain: e.domain, source_quality_score: e.score });
+    const existing = dedupeSeen.get(e.dup_key);
+    const name = `${e.lead.first_name ?? ""} ${e.lead.last_name ?? ""}`.trim() || "—";
+    if (existing) {
+      (counters as any).held_back_by_duplicate_pre_reveal =
+        ((counters as any).held_back_by_duplicate_pre_reveal ?? 0) + 1;
+      counters.skipped_duplicate++;
+      duplicatesHeldBack.push({
+        candidate_id: e.qp.id,
+        apollo_lead_id: e.qp.apollo_lead_id,
+        apollo_person_id: e.lead.apollo_person_id ?? null,
+        name, company: e.lead.company ?? null,
+        duplicate_key: e.dup_key,
+        duplicate_key_source: e.dup_source,
+        matched_selected_candidate: existing,
+        reason_held: "duplicate_pre_reveal",
+      });
+      pushSkip({ stage: "reveal", reason: "duplicate_pre_reveal", candidate_id: e.qp.id, dup_key: e.dup_key, matched: existing });
       continue;
     }
-    domainSeen.set(e.domain, cnt + 1);
+    dedupeSeen.set(e.dup_key, { qp_id: e.qp.id, apollo_lead_id: e.qp.apollo_lead_id, name, company: e.lead.company ?? "—" });
+    dedupedEligible.push(e);
+  }
+  (counters as any).duplicate_candidates_detected = duplicatesHeldBack.length;
+  (counters as any).selected_unique_candidates = dedupedEligible.length;
+
+  // ---------- Domain / company-group cap (operates on derived group_key) ----------
+  const groupSeen = new Map<string, number>();
+  const planReveal: typeof eligible = [];
+  for (const e of dedupedEligible) {
+    const cap = policy.apollo_reveal_max_domain_frequency;
+    const cnt = groupSeen.get(e.group_key) ?? 0;
+    if (cap > 0 && e.group_key !== "unknown" && cnt >= cap) {
+      counters.reveal_skipped_domain_cap++;
+      (counters as any).held_back_by_company_or_domain_cap =
+        ((counters as any).held_back_by_company_or_domain_cap ?? 0) + 1;
+      pushSkip({
+        stage: "reveal", reason: "company_or_domain_cap_pre_reveal",
+        candidate_id: e.qp.id, group_key: e.group_key, group_source: e.group_source,
+        source_quality_score: e.score,
+      });
+      continue;
+    }
+    groupSeen.set(e.group_key, cnt + 1);
     planReveal.push(e);
   }
+  (counters as any).company_group_cap_applied = groupSeen.size;
   counters.reveal_eligible = planReveal.length;
 
   const budgetCap = Math.min(counters.credits_remaining_today, counters.credits_remaining_month);
