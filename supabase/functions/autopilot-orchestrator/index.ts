@@ -765,8 +765,8 @@ Deno.serve(async (req) => {
     const l = normAlpha(local);
     const fn = normAlpha(first);
     const ln = normAlpha(last);
-    if (!l) return false;
     const hits: string[] = [];
+    if (!l) return { matched: false, hits };
     if (fn && l.includes(fn)) hits.push("first_in_local");
     if (ln && l.includes(ln)) hits.push("last_in_local");
     if (fn && ln && l.startsWith(fn[0]) && l.includes(ln)) hits.push("flast");
