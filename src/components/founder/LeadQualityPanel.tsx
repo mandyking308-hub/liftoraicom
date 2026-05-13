@@ -798,6 +798,101 @@ export default function LeadQualityPanel() {
           </div>
         )}
 
+        {/* === Compliance Approval Gate === */}
+        <div className="rounded-md border border-primary/40 bg-primary/5 p-4 space-y-3">
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <div>
+              <p className="text-sm font-semibold text-foreground flex items-center gap-2">
+                <ShieldCheck size={14} className="text-primary" /> Compliance Approval Gate
+                <Badge variant="outline" className="text-[10px]">Neon Candy · pending_review → outreach_allowed</Badge>
+              </p>
+              <ul className="text-xs text-muted-foreground mt-1 space-y-0.5 list-disc list-inside">
+                {compliancePreviewResult || complianceAppliedResult ? (
+                  <li>
+                    <strong className="text-foreground">
+                      {(complianceAppliedResult ?? compliancePreviewResult)?.summary?.eligible_for_compliance_approval ?? 0}
+                    </strong>{" "}
+                    contact(s) eligible for compliance approval (lawful basis + retention + unsubscribe token + clean Apollo lifecycle)
+                  </li>
+                ) : (
+                  <li className="text-yellow-300"><strong>Preview required before approval.</strong> Click <em>Preview compliance approval</em> to compute the exact eligible set.</li>
+                )}
+                <li>Sets <code>compliance_status=outreach_allowed</code> and writes a <code>compliance_approved</code> audit event per contact</li>
+                <li>Does <strong>not</strong> set BCR <code>campaign_eligible</code> (that is the next, separate Stage-to-Queue gate)</li>
+                <li>Does <strong>not</strong> create queue rows; does <strong>not</strong> send emails; no Apollo calls</li>
+                <li>Sierra (rejected), Jack (CONTACTED) and old CRM records are filtered server-side</li>
+              </ul>
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              <Button size="sm" variant="outline" disabled={!!busy} onClick={() => runComplianceApprove(true)}>
+                {busy === "Compliance preview" ? <Loader2 className="animate-spin" size={14} /> : "Preview compliance approval"}
+              </Button>
+              <Button size="sm" variant="default"
+                disabled={!!busy || !compliancePreviewResult || (compliancePreviewResult?.summary?.eligible_for_compliance_approval ?? 0) === 0}
+                onClick={() => runComplianceApprove(false)}
+                title={!compliancePreviewResult ? "Run preview first" : undefined}>
+                {busy === "Compliance apply" ? <Loader2 className="animate-spin" size={14} /> : `Approve ${compliancePreviewResult?.summary?.eligible_for_compliance_approval ?? 0} for outreach`}
+              </Button>
+            </div>
+          </div>
+          {(compliancePreviewResult || complianceAppliedResult) && (() => {
+            const r = complianceAppliedResult ?? compliancePreviewResult;
+            const s = r?.summary ?? {};
+            const planRows: any[] = Array.isArray(r?.plan) ? r.plan : [];
+            return (
+              <div className="rounded border border-border/50 bg-card/40 p-3 space-y-2 text-xs">
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="secondary" className="text-[10px]">eligible_for_compliance_approval: {s.eligible_for_compliance_approval ?? 0}</Badge>
+                  <Badge variant="secondary" className="text-[10px]">blocked: {s.blocked ?? 0}</Badge>
+                  <Badge variant="secondary" className="text-[10px]">queue_rows_to_create: 0</Badge>
+                  <Badge variant="secondary" className="text-[10px]">sends_to_create: 0</Badge>
+                  <Badge variant="secondary" className="text-[10px]">apollo_credits_to_spend: 0</Badge>
+                  {complianceAppliedResult && (
+                    <Badge variant="default" className="text-[10px]">contacts_updated: {s.contacts_updated ?? 0}</Badge>
+                  )}
+                </div>
+                {planRows.length > 0 && (
+                  <div className="overflow-x-auto rounded border border-border/40">
+                    <table className="w-full text-[11px]">
+                      <thead className="bg-muted/30 text-muted-foreground">
+                        <tr>
+                          <th className="text-left px-2 py-1">Name</th>
+                          <th className="text-left px-2 py-1">Email</th>
+                          <th className="text-left px-2 py-1">Company</th>
+                          <th className="text-left px-2 py-1">Lawful basis</th>
+                          <th className="text-left px-2 py-1">Retention</th>
+                          <th className="text-left px-2 py-1">Unsub token</th>
+                          <th className="text-left px-2 py-1">Current</th>
+                          <th className="text-left px-2 py-1">Proposed</th>
+                          <th className="text-left px-2 py-1">Reason</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {planRows.map((p: any) => (
+                          <tr key={p.contact_id} className="border-t border-border/30">
+                            <td className="px-2 py-1">{p.name ?? "—"}</td>
+                            <td className="px-2 py-1 font-mono text-[10px]">{p.email ?? "—"}</td>
+                            <td className="px-2 py-1">{p.company ?? "—"}</td>
+                            <td className="px-2 py-1">{p.lawful_basis ?? "—"}</td>
+                            <td className="px-2 py-1">{p.retention_until ? new Date(p.retention_until).toLocaleDateString() : "—"}</td>
+                            <td className="px-2 py-1">{p.unsubscribe_token_present ? "yes" : "no"}</td>
+                            <td className="px-2 py-1">{p.current_compliance_status ?? "—"}</td>
+                            <td className={`px-2 py-1 ${p.eligible ? "text-green-300" : "text-yellow-300"}`}>{p.eligible ? p.proposed_compliance_status : "blocked"}</td>
+                            <td className="px-2 py-1 text-muted-foreground">{p.eligible ? p.reason : (p.blocker_reason ?? "—")}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+                <p className="text-[10px] text-muted-foreground">
+                  Approval flips <code>compliance_status</code> only. <code>check_outreach_allowed</code> will still block on BCR <code>campaign_eligible=false</code> / <code>qualification=needs_review</code> until the Stage-to-Queue gate is approved next. Auto-send remains OFF.
+                </p>
+              </div>
+            );
+          })()}
+        </div>
+
         {/* === Stage-to-Queue Eligibility Gate ===
             Founder-controlled gate that flips qualified BCRs from
             ready_to_stage / needs_review / not eligible →
