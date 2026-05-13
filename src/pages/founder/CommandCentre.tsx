@@ -126,6 +126,7 @@ const CommandCentre = () => {
         already_in_crm_after_reveal?: number;
         total_leads?: number;
         reveal_shortlisted?: number;
+        founder_review_required?: number;
       } | null;
     },
     refetchInterval: 60000,
