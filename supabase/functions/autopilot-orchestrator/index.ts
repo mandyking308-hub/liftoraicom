@@ -1209,6 +1209,8 @@ Deno.serve(async (req) => {
     selected_candidates: selectedCandidates,
     eligible_not_selected: eligibleNotSelected.slice(0, 100),
     duplicates_held_back: duplicatesHeldBack.slice(0, 100),
+    post_reveal_validations: postRevealValidations,
+    queue_blocker_reasons: queueBlockerReasons,
     sample_skips: sampleSkips.slice(0, 20),
   });
 });
