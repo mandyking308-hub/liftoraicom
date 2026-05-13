@@ -157,7 +157,7 @@ Deno.serve(async (req) => {
     entity_type: "email_queue",
     entity_id: null,
     business_name: BUSINESS_NAME,
-    severity: "info",
+    severity: "low",
     message: `Founder cleanup: ${action} → ${newStatus} for ${updated?.length ?? 0} pending row(s) (reason: ${reason})`,
     metadata: {
       action,
