@@ -26,7 +26,7 @@ export const generateManualMarkdown = (data: ManualLiveData): string => {
   return `# Liftor AI — Founder Manual
 ## Complete Engineering-Level Platform Documentation
 
-**Version:** 4.6 — Auto-Send Emergency Brake, Sent-Email Audit Trail, Engagement Tracking Layer & Controlled Send Preview Gate (13 May 2026)
+**Version:** 4.7 — Full Neon Candy Session Record (Apollo→Promotion→Compliance→Queue→Incident→Brake→Audit→Tracking→Preview) (13 May 2026)
 **Generated:** ${now}
 **Classification:** Founder / Internal Engineering / Investor Documentation
 **Status:** Live — Auto-generated from platform state
@@ -39,6 +39,7 @@ export const generateManualMarkdown = (data: ManualLiveData): string => {
 0b. Apollo Reveal Workflow & Policy-Controlled Autonomous Pipeline (13 May 2026)
 0c. Compliance Spine, Stage-to-Queue Gate, Queue Creation Gate & Auto-Send Incident (13 May 2026)
 0d. Emergency Outreach Brake, Sent-Email Audit, Engagement Tracking & Controlled Send Preview (13 May 2026)
+0e. Full Session Record — Neon Candy Outreach Safety, Compliance, Queue, Tracking (13 May 2026)
 0a. Credentials & Secrets Register
 1. Platform Overview
 2. Full Platform Architecture
@@ -1015,6 +1016,262 @@ held.
   ×3 audit linkage).
 - Constraint update: \`contact_compliance_events_event_type_check\` now
   allows \`outreach_email_sent\`.
+
+---
+
+## SECTION 0e — FULL SESSION RECORD — NEON CANDY OUTREACH SAFETY, COMPLIANCE, QUEUE, TRACKING (13 May 2026)
+
+> Canonical, structured record of the full 13 May 2026 build session.
+> Sections 0c and 0d remain as engineering detail; 0e is the operating
+> summary in the format used for incident review and weekly handover.
+
+### 0e.1 Apollo reveal & validation flow
+
+- Neon Candy Apollo reveal used **5 reveal credits** (no further credits
+  spent in this session).
+- 5 emails returned: **Aaliah, Sierra, Morgan, Jack, Pooja**.
+- **Sierra** rejected with reason \`possible_wrong_person_email_match\`.
+  Preserved in Apollo raw / profile records but excluded from
+  promotion, queue and send.
+- **Aaliah, Morgan, Jack, Pooja** validation-clean.
+- Apollo \`search_payload\` and \`enrichment_payload\` are stored on the
+  Apollo lead row.
+- Apollo enrichment mapping now writes usable CRM fields:
+  \`first_name + last_name\`, \`email\`, \`title → role\`,
+  \`organization.name → company\`, \`industry\`, \`company_size\`,
+  \`seniority\`, \`timezone\`, \`linkedin_url\`,
+  \`apollo_person_id\`, \`apollo_organization_id\` (with org-id
+  fallback when person-level org id is missing),
+  \`email_verified_status\` / \`sendable_status\`,
+  \`apollo_last_enriched_at\`, \`apollo_enrichment_status\`.
+- **Phone reveal was not enabled and was not used.**
+
+### 0e.2 Promotion to CRM
+
+- \`promote-leads-to-contacts\` is the single sanctioned writer for
+  contact creation/matching **and** BCR creation/matching.
+- **New CRM contacts:** Aaliah, Morgan, Pooja.
+- **Reconciled to existing CRM contact / BCR:** Jack.
+- **\`contact_status\` enum fix:** \`NEW\` is valid, \`ACTIVE\` is invalid.
+  Promote path now writes \`NEW\`.
+- Idempotency protections enforced:
+  - \`contacts.email\` unique
+  - \`contacts.apollo_person_id\` unique where not null
+  - \`business_campaign_relationships\` unique on \`(contact_id, business_name)\`
+  - Promoted/rejected Apollo leads move out of
+    \`quality_status='qualified'\` so the "safe-to-promote" count
+    settles to 0.
+- Jack reconciliation issue corrected — Safe→promote count for this
+  batch is now **0** (no duplicate creation, no re-queue).
+
+### 0e.3 Compliance spine
+
+New compliance model on \`contacts\`:
+
+- \`lawful_basis\`, \`lawful_basis_notes\`, \`lawful_basis_recorded_at\`
+- \`retention_until\`, \`retention_policy\`
+- \`unsubscribe_token\`, \`unsubscribed_at\`, \`unsubscribe_source\`
+- \`do_not_contact_at\`, \`do_not_contact_reason\`
+- \`compliance_status\` (\`pending_review\` → \`outreach_allowed\` |
+  \`rejected\`)
+- \`last_compliance_review_at\`
+
+Append-only audit table: \`contact_compliance_events\`.
+
+Server-side primitives:
+
+- \`unsubscribe-contact\` edge function — public, token-validated,
+  sets \`unsubscribed_at\` + \`do_not_contact_at\`, writes audit event.
+- Bounce suppression trigger — flips
+  \`is_globally_suppressed\` / \`hard_bounced\` and writes
+  \`bounce_recorded\` audit event.
+- Reply-stop suppression function — recognises STOP / UNSUBSCRIBE /
+  opt-out language in inbound replies and applies suppression +
+  \`reply_stop_received\` audit event.
+- \`check_outreach_allowed\` — server-enforced gate that blocks sends
+  to suppressed / unsubscribed / hard-bounced / \`do_not_contact\` /
+  non-\`outreach_allowed\` contacts.
+- **Compliance Approval Gate** (UI under *Lead Quality + Queue
+  Integrity Gate*) is the only path that flips a contact to
+  \`outreach_allowed\` and writes the matching audit row.
+
+Backfill state for this session:
+
+- **Aaliah, Morgan, Pooja:** \`lawful_basis = legitimate_interest_b2b\`,
+  \`retention_until = 2027-05-13\`, \`unsubscribe_token\` populated,
+  \`compliance_status = outreach_allowed\` after founder approval.
+- **Jack and old CRM records:** remain \`pending_review\` unless
+  separately remediated. They are blocked from sends by
+  \`check_outreach_allowed\` until remediated.
+
+### 0e.4 Stage-to-Queue and Queue Creation
+
+- **Stage-to-Queue Eligibility Gate** added.
+- **BCR lookup bug fixed** by decoupling BCR lookup from stage /
+  qualification filters (the join previously over-filtered and hid
+  qualified BCRs).
+- Aaliah, Morgan, Pooja confirmed staged / qualified /
+  \`campaign_eligible=true\` with inbox \`hello@neoncandy.online\`
+  (\`0a7096d1-8160-4243-97bc-c1615b6673b3\`) and campaign
+  *Early Access Collaboration Test* (\`d621d6bc-76af-48a2-a8f2-c7505dbb9654\`).
+- **Queue Creation Gate** added (\`create-queue-from-staged\`).
+  Idempotent on \`(contact_id, campaign_id, sequence_step=1)\`.
+- 3 Step-1 \`pending\` queue rows created at 14:59:45 UTC:
+  - Aaliah / aaliah@rxmusic.com / **\`8a92edbb-2e61-49b7-a6df-3bac21268fe0\`**
+  - Morgan / morgann@spotify.com / **\`677a3ffd-bf48-457d-88e1-189225d8ce6a\`**
+  - Pooja / gpooja@amazon.com / **\`e5a80b74-48b2-4317-89e5-bc687e42cb65\`**
+- Jack excluded by prior queue / send history.
+- Sierra excluded by rejected Apollo lifecycle.
+
+### 0e.5 Critical auto-send incident
+
+- The system previously **assumed** auto-send was OFF, but **no actual
+  \`auto_send_enabled\` guard existed** in code or in
+  \`system_settings\`.
+- \`outreach-send-worker-2min\` cron was active every 2 minutes.
+- The 3 pending queue rows were drained automatically by the cron
+  worker.
+- SMTP via IONOS from \`hello@neoncandy.online\`:
+  - **Pooja** at 15:00:10Z — \`<68babca384134740b415cabdd49462fb@neoncandy.online>\`
+  - **Aaliah** at 15:00:20Z — \`<4c939e2a2b914c5dba921e44bcd36e66@neoncandy.online>\`
+  - **Morgan** at 15:00:27Z — \`<4ff349eea4dc4652b7b26d60aded67f5@neoncandy.online>\`
+- **IMAP sent-folder copy failed** for all three due to a folder
+  naming / German folder issue on the IONOS account. SMTP delivery
+  succeeded — recipients received the emails.
+- **The emails cannot be recalled.**
+- Incident classified **non-catastrophic** (contacts were campaign-fit
+  and compliance-approved) but it exposed a **critical control gap**:
+  the absence of a server-enforced kill switch. The control gap is the
+  primary lesson of this session.
+
+### 0e.6 Emergency brake / safety circuit
+
+- Cron \`outreach-send-worker-2min\` **unscheduled**. No cron job
+  referencing \`outreach-send-worker\` remains in \`cron.job\`.
+- \`system_settings.auto_send_enabled = false\` added (single source of
+  truth).
+- \`outreach-send-worker\` checks \`auto_send_enabled\` immediately
+  after service-role client creation and **exits before any queue
+  selection, SMTP/provider call or row mutation** unless the value is
+  exactly boolean \`true\`. **Missing row, fetch error, parse error or
+  any non-true value fails closed.**
+- Dry verification response (recorded):
+  \`\`\`json
+  { "blocked": true, "reason": "auto_send_disabled",
+    "rows_processed": 0, "provider_calls": 0, "emails_sent": 0,
+    "queue_rows_changed": 0 }
+  \`\`\`
+- This is now the **required global safety model** before any future
+  queue creation or send testing.
+
+### 0e.7 Queue audit after brake
+
+- The 3 incident rows are \`status = sent\` with \`sent_at\`,
+  \`smtp_accepted_at\` and \`provider_message_id\` populated.
+- \`email_events\` rows of \`event_type = 'sent'\` exist for all three.
+- \`communications\` outbound rows (channel \`email\`, inbox
+  \`hello@neoncandy.online\`) exist for all three.
+- \`contact_compliance_events\` of \`event_type = 'outreach_email_sent'\`
+  exist for all three (incident pass + a second
+  \`sent_email_audit_link\` row carrying \`queue_id\`,
+  \`provider_message_id\`, \`campaign_id\`, \`inbox_id\`,
+  \`sequence_step\`, \`sent_at\` for self-contained traceability).
+- **10 pending Neon Candy rows remain:**
+  - 7 step-4 rows scheduled 2026-05-15
+  - 3 step-2 rows scheduled 2026-05-16
+- All 10 are blocked by the kill switch + absent cron. **No
+  background send can occur** while \`auto_send_enabled = false\` and
+  cron remains disabled.
+
+### 0e.8 Engagement tracking layer
+
+- New table \`email_tracking_events\` (queue_id, contact_id,
+  campaign_id, business_name, event_type, event_at, ip_hash,
+  user_agent_hash, link_url, source, metadata jsonb). Append-only.
+  Founder read; service-role insert.
+- Event types: \`open\`, \`click\`, \`reply\`, \`bounce\`,
+  \`unsubscribe\`.
+- \`track-open\` edge function — 1×1 GIF pixel; records \`open\` keyed
+  on \`?t=<tracking_token>\` or \`?q=<queue_id>\`.
+- \`track-click\` edge function — signed redirect (\`?u=<url>&t=<token>\`);
+  records \`click\`, then 302s to the original URL. http/https only.
+- \`system_settings.tracking_secret\` seeded for future signed redirects.
+- \`/founder/outreach/engagement\` — read-only per-contact dashboard
+  (sent / opens / clicks / replies / bounces / unsubscribes / last
+  engagement).
+- \`tracking_token\` already existed on \`email_queue\` and is reused.
+- The 3 emails already sent have **empty \`tracking_token\`** and
+  **cannot be attributed for opens or clicks** — engagement tracking
+  is **not retroactive** for this batch.
+- **Open tracking must be labelled "open signal", not proof of human
+  reading.** Image preloaders and corporate scanners trigger pixel
+  loads.
+- **Clicks and replies** are stronger engagement evidence.
+- **Disclosure required:** tracking must be disclosed in the email
+  footer and privacy notice **before** any future injection of the
+  pixel or tracked links into live outbound emails.
+
+### 0e.9 Controlled Send Preview Gate
+
+- \`controlled-send-preview\` edge function — dry-run only.
+- \`/founder/outreach/send-preview\` page — preview UI.
+- Returns per queue id: contact, \`compliance_status\`, \`lawful_basis\`,
+  unsubscribe-token presence, tracking-token presence, campaign,
+  inbox, provider (\`ionos_proof\`), sequence step, \`scheduled_at\`,
+  prior \`provider_message_id\` / \`sent_at\`, send-budget impact, live
+  \`auto_send_enabled\` value, and a \`blockers[]\` list.
+- Always returns \`sends_to_create=0\`, \`emails_sent=0\`,
+  \`provider_calls=0\`, \`apollo_credits_spent=0\`.
+- **Apply / Send path is intentionally not built.** UI button
+  rendered disabled.
+- **Future Apply requirements (binding):**
+  - Founder-controlled, never automatic.
+  - Batch size limited (default 1).
+  - Must enforce **every** compliance, suppression, duplicate, BCR,
+    campaign, inbox, provider and budget gate at apply-time.
+  - Must verify \`auto_send_enabled\` and cron state at apply-time and
+    record the assertion in \`system_events\`.
+
+### 0e.10 Current state at end of session
+
+- Auto-send **OFF and enforced server-side**.
+- Cron send worker **disabled**.
+- Worker **fails closed**.
+- **3 emails sent and audit-recorded** (no recall).
+- **10 pending rows parked / blocked.**
+- **No additional emails can send automatically.**
+- **Apollo credits spent today: 5 reveal credits only.**
+- **Sierra:** rejected / excluded.
+- **Jack:** not newly queued; reconciled to existing record.
+- **Aaliah, Morgan, Pooja:** now contacted (one Step-1 send each).
+- **Engagement tracking:** ready for future emails, **not retroactive**.
+- **Controlled Send Preview:** preview-only.
+
+### 0e.11 Remaining work — recommended next-build sequence
+
+| Order | Item |
+|-------|------|
+| A | Pending-queue cleanup / cancellation gate for the 10 parked rows |
+| B | Fix stale UI counters and historical snapshot labels |
+| C | Add privacy / footer disclosure copy for tracking |
+| D | Add tracking pixel / redirect injection — **only after** disclosure ships |
+| E | Build Controlled Manual Send **Apply** path (batch size default 1, founder-controlled) |
+| F | Fix sent-folder IMAP handling for IONOS / German folder naming |
+| G | Wire open / click / reply / bounce engagement into the CRM journey timeline |
+| H | Remediation pass on old CRM contacts missing compliance fields **before** any further outreach |
+
+### 0e.12 Operating rule (binding)
+
+> **No queue row may be created and no outbound send may occur unless:**
+>
+> 1. \`system_settings.auto_send_enabled = false\` AND no cron job
+>    referencing \`outreach-send-worker\` exists, **or**
+> 2. The Controlled Manual Send Apply architecture (0e.9 / 0e.11.E) is
+>    in place and the inserting/sending code path is invoked from that
+>    architecture only, with the assertion recorded in
+>    \`system_events\`.
+>
+> Any code path that violates this rule must be rolled back on sight.
 
 ---
 
