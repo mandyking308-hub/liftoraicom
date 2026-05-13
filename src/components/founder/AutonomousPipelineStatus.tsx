@@ -152,11 +152,20 @@ export default function AutonomousPipelineStatus({ businessName = "Neon Candy" }
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           <Stat label="Candidates pulled" value={counters.candidates_pulled ?? 0} />
           <Stat label="Passed quality" value={counters.passed_quality_policy ?? 0} tone="good" />
-          <Stat label="Reveal planned" value={counters.reveal_planned ?? 0} tone="good" />
           <Stat label="Reveal eligible" value={counters.reveal_eligible ?? 0} />
+          <Stat label="Eligible — pending policy" value={counters.eligible_pending_founder_policy ?? 0} tone="warn" />
+          <Stat label="Planned if policy ON" value={counters.planned_if_policy_enabled ?? 0} />
+          <Stat label="Reveal planned (live)" value={counters.reveal_planned ?? 0} tone="good" />
+          <Stat label="Skipped — reveal OFF" value={counters.skipped_reveal_disabled ?? 0} tone="warn" />
+          <Stat label="Skipped — below min score" value={counters.skipped_below_min_score ?? 0} tone="warn" />
+          <Stat label="Skipped — missing score" value={counters.skipped_missing_score ?? 0} tone="warn" />
+          <Stat label="Skipped — existing CRM" value={counters.skipped_existing_crm ?? 0} tone="warn" />
+          <Stat label="Skipped — duplicate" value={counters.skipped_duplicate ?? 0} tone="warn" />
+          <Stat label="Skipped — suppressed" value={counters.skipped_suppressed_or_bounced ?? 0} tone="warn" />
+          <Stat label="Skipped — prev no-email" value={counters.skipped_previous_no_email ?? 0} tone="warn" />
+          <Stat label="Skipped — legacy hold" value={counters.skipped_legacy_hold ?? 0} tone="warn" />
           <Stat label="Skipped — budget" value={counters.reveal_skipped_budget ?? 0} tone="warn" />
           <Stat label="Skipped — domain cap" value={counters.reveal_skipped_domain_cap ?? 0} tone="warn" />
-          <Stat label="Skipped — excluded" value={counters.reveal_skipped_excluded ?? 0} tone="warn" />
           <Stat label="Promote planned" value={counters.promote_planned ?? 0} tone="good" />
           <Stat label="Queue planned" value={counters.queue_planned ?? 0} tone="good" />
           <Stat label="Queue skipped" value={counters.queue_skipped ?? 0} tone="warn" />
@@ -166,7 +175,7 @@ export default function AutonomousPipelineStatus({ businessName = "Neon Candy" }
 
         <p className="text-xs text-muted-foreground">
           {lastRun
-            ? <>Last autopilot run {formatDistanceToNow(new Date(lastRun.created_at), { addSuffix: true })} — outcome: <span className="text-foreground">{lastRun.outcome}</span></>
+            ? <>Last autopilot run {formatDistanceToNow(new Date(lastRun.created_at), { addSuffix: true })} — next: <span className="text-foreground">{lastRun?.next_recommended_action ?? lastRun?.outcome ?? "—"}</span></>
             : "No autopilot run yet — click Plan to compute the next batch."}
         </p>
 
