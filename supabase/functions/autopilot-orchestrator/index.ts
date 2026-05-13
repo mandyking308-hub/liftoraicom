@@ -59,6 +59,14 @@ type Counters = {
   // policy.apollo_email_reveal_autonomous (still bounded by budget + domain cap).
   eligible_pending_founder_policy: number;
   planned_if_policy_enabled: number;
+  // Founder-defined reveal amount accounting
+  reveal_eligible_total: number;
+  founder_reveal_amount_requested: number | null;
+  selected_for_next_reveal: number;
+  held_back_by_founder_amount: number;
+  held_back_by_budget: number;
+  held_back_by_domain_cap: number;
+  would_spend_credits: number;
 };
 
 // Inline deterministic scorer — mirrors apollo-unlock-shortlist title/company
@@ -140,7 +148,12 @@ Deno.serve(async (req) => {
 
   const admin = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
 
-  let body: { business_name?: string; business_id?: string; dry_run?: boolean } = {};
+  let body: {
+    business_name?: string;
+    business_id?: string;
+    dry_run?: boolean;
+    reveal_amount?: number | null;
+  } = {};
   try { body = await req.json(); } catch {}
   const dryRun = body.dry_run !== false;
 
@@ -182,6 +195,13 @@ Deno.serve(async (req) => {
     skipped_suppressed_or_bounced: 0, skipped_previous_no_email: 0,
     skipped_legacy_hold: 0, skipped_unknown: 0, skipped_reveal_disabled: 0,
     eligible_pending_founder_policy: 0, planned_if_policy_enabled: 0,
+    reveal_eligible_total: 0,
+    founder_reveal_amount_requested: null,
+    selected_for_next_reveal: 0,
+    held_back_by_founder_amount: 0,
+    held_back_by_budget: 0,
+    held_back_by_domain_cap: 0,
+    would_spend_credits: 0,
   };
 
   const sampleSkips: Array<Record<string, unknown>> = [];
@@ -329,25 +349,92 @@ Deno.serve(async (req) => {
   counters.reveal_eligible = planReveal.length;
 
   const budgetCap = Math.min(counters.credits_remaining_today, counters.credits_remaining_month);
-  const wouldRevealUnderPolicy = planReveal.slice(0, budgetCap);
-  counters.planned_if_policy_enabled = wouldRevealUnderPolicy.length;
-  counters.eligible_pending_founder_policy = !policy.apollo_email_reveal_autonomous ? wouldRevealUnderPolicy.length : 0;
 
-  // Reveal automation gate: if OFF, do NOT bury eligible candidates under
-  // "excluded" — surface them in eligible_pending_founder_policy instead.
-  const finalReveal = policy.apollo_email_reveal_autonomous ? wouldRevealUnderPolicy : [];
+  // ---------- Founder-defined reveal amount ----------
+  // The founder must explicitly enter how many emails to reveal — we never
+  // default to the daily budget or a hardcoded number. Per-invocation
+  // body.reveal_amount overrides the saved policy value (one-shot approval).
+  const rawAmount =
+    body.reveal_amount !== undefined && body.reveal_amount !== null
+      ? Number(body.reveal_amount)
+      : (policy.founder_reveal_amount_next_run as number | null);
+  const founderAmount =
+    rawAmount === null || rawAmount === undefined || Number.isNaN(rawAmount) || rawAmount <= 0
+      ? null
+      : Math.floor(rawAmount);
+  counters.founder_reveal_amount_requested = founderAmount;
+  counters.reveal_eligible_total = planReveal.length;
+
+  // Selection chain: founder amount → daily/monthly budget → domain cap (already
+  // applied above to planReveal). Emit detailed held-back accounting.
+  const afterFounder = founderAmount === null ? [] : planReveal.slice(0, founderAmount);
+  counters.held_back_by_founder_amount = founderAmount === null
+    ? planReveal.length
+    : Math.max(0, planReveal.length - founderAmount);
+
+  const afterBudget = afterFounder.slice(0, budgetCap);
+  counters.held_back_by_budget = afterFounder.length - afterBudget.length;
+  counters.held_back_by_domain_cap = counters.reveal_skipped_domain_cap;
+
+  counters.selected_for_next_reveal = afterBudget.length;
+  counters.would_spend_credits = afterBudget.length;
+
+  // Back-compat counters (kept for the existing dashboard tiles).
+  counters.planned_if_policy_enabled = afterBudget.length;
+  counters.eligible_pending_founder_policy =
+    !policy.apollo_email_reveal_autonomous ? planReveal.length : 0;
+  counters.reveal_skipped_budget = counters.held_back_by_budget;
+
+  // Live reveal is gated on BOTH founder amount entered AND reveal automation ON.
+  let blockedReason: string | null = null;
+  if (founderAmount === null) blockedReason = "founder_reveal_amount_required";
+  else if (!policy.apollo_email_reveal_autonomous) blockedReason = "reveal_automation_disabled";
+
+  const finalReveal = blockedReason === null ? afterBudget : [];
   counters.reveal_planned = finalReveal.length;
-  counters.reveal_skipped_budget = planReveal.length - wouldRevealUnderPolicy.length;
-  counters.skipped_reveal_disabled = policy.apollo_email_reveal_autonomous ? 0 : wouldRevealUnderPolicy.length;
+  counters.skipped_reveal_disabled =
+    blockedReason === "reveal_automation_disabled" ? afterBudget.length : 0;
   counters.estimated_credits_this_run = finalReveal.length;
 
+  // Selected-candidate review payload (always returned, never mutates state).
+  const selectedCandidates = afterBudget.map(e => ({
+    candidate_id: e.qp.id,
+    apollo_lead_id: e.qp.apollo_lead_id,
+    name: `${e.lead.first_name ?? ""} ${e.lead.last_name ?? ""}`.trim() || null,
+    title: e.lead.title ?? null,
+    company: e.lead.company ?? null,
+    domain: e.domain || null,
+    country: e.lead.country ?? null,
+    source_quality_score: e.score,
+    campaign_fit: e.qp.campaign_fit ?? e.lead.campaign_fit ?? null,
+    lifecycle_stage: e.qp.lifecycle_stage,
+    email_available: !!e.lead.email,
+    crm_duplicate: false,
+    suppression_or_bounce: false,
+    domain_cap_ok: true,
+    estimated_credit_cost: 1,
+  }));
+  const eligibleNotSelected = planReveal.slice(afterBudget.length).map(e => ({
+    candidate_id: e.qp.id,
+    apollo_lead_id: e.qp.apollo_lead_id,
+    name: `${e.lead.first_name ?? ""} ${e.lead.last_name ?? ""}`.trim() || null,
+    title: e.lead.title ?? null,
+    company: e.lead.company ?? null,
+    domain: e.domain || null,
+    source_quality_score: e.score,
+    reason_not_selected:
+      founderAmount === null ? "founder_amount_not_set"
+      : afterFounder.length > afterBudget.length ? "budget_cap"
+      : "above_founder_amount",
+  }));
+
   await event("reveal_plan",
-    `Reveal plan: ${finalReveal.length} of ${planReveal.length} eligible (budget cap ${budgetCap})`,
+    `Reveal plan: founder_amount=${founderAmount ?? "unset"} selected=${finalReveal.length} eligible=${planReveal.length} budget_cap=${budgetCap} blocked=${blockedReason ?? "none"}`,
     "low",
-    { counters: { reveal_planned: finalReveal.length, reveal_eligible: planReveal.length, budget_cap: budgetCap } });
+    { counters: { reveal_planned: finalReveal.length, reveal_eligible: planReveal.length, budget_cap: budgetCap, founder_amount: founderAmount, blocked_reason: blockedReason } });
 
   // ---------- Stage 2: Reveal execution (only when not dry-run + autonomous reveal) ----------
-  if (!dryRun && policy.apollo_email_reveal_autonomous && finalReveal.length > 0) {
+  if (!dryRun && blockedReason === null && finalReveal.length > 0) {
     const candidateIds = finalReveal.map(e => e.qp.apollo_lead_id);
     try {
       const resp = await fetch(`${SUPABASE_URL}/functions/v1/apollo-unlock-selected`, {
@@ -370,9 +457,18 @@ Deno.serve(async (req) => {
       });
       await event("reveal_executed", `Reveal call returned for ${candidateIds.length} candidates`, "medium",
         { credits, response_status: resp.status });
+      // One-shot: clear the saved founder amount so the next run requires
+      // a fresh, explicit approval.
+      await admin.from("business_autopilot_settings")
+        .update({ founder_reveal_amount_next_run: null } as never)
+        .eq("business_id", businessId);
     } catch (err) {
       await event("reveal_failed", (err as Error).message, "high");
     }
+  } else if (!dryRun && blockedReason !== null) {
+    await event("reveal_blocked",
+      `Live reveal blocked — ${blockedReason}`, "medium",
+      { blocked_reason: blockedReason, founder_amount: founderAmount });
   }
 
   // ---------- Stage 3: Auto-promote (post-reveal) → contacts + BCR ----------
@@ -521,6 +617,10 @@ Deno.serve(async (req) => {
     decisions_created: counters.decisions_created,
     next_recommended_action: (() => {
       if (!dryRun) {
+        if (blockedReason === "founder_reveal_amount_required")
+          return "Enter reveal amount and review selected candidates.";
+        if (blockedReason === "reveal_automation_disabled")
+          return "Review selected candidates, then approve Apollo reveal for this run.";
         return policy.auto_send_after_queue
           ? "Monitor send worker and reply rates"
           : "Configure external sending provider before enabling auto-send";
@@ -530,15 +630,21 @@ Deno.serve(async (req) => {
         return "Repair candidate scoring / quality profile linkage";
       if (counters.passed_quality_policy === 0)
         return "Review dry-run skip reasons — no candidates passed quality policy";
-      if (counters.eligible_pending_founder_policy > 0)
-        return `Review ${counters.eligible_pending_founder_policy} reveal-eligible candidates and approve reveal policy/budget`;
-      if (counters.reveal_planned > 0)
-        return `Approve reveal of ${counters.reveal_planned} (within ~${counters.estimated_credits_this_run} credits)`;
-      return "Review dry-run skip reasons before enabling live policy";
+      if (founderAmount === null)
+        return "Enter reveal amount and review selected candidates.";
+      if (!policy.apollo_email_reveal_autonomous)
+        return `Review ${counters.selected_for_next_reveal} selected candidates, then approve Apollo reveal for this run.`;
+      if (!policy.auto_send_after_queue)
+        return `Reveal/promote/queue may run within approved reveal amount (${counters.selected_for_next_reveal}). Auto-send remains OFF.`;
+      return `Approve reveal of ${counters.selected_for_next_reveal} (~${counters.would_spend_credits} credits)`;
     })(),
     details: {
       dry_run: dryRun, actor, actor_user_id: actorUserId,
-      counters, sample_skips: sampleSkips.slice(0, 50),
+      counters,
+      sample_skips: sampleSkips.slice(0, 50),
+      blocked_reason: blockedReason,
+      selected_candidates: selectedCandidates,
+      eligible_not_selected: eligibleNotSelected.slice(0, 100),
       policy_snapshot: {
         apollo_email_reveal_autonomous: policy.apollo_email_reveal_autonomous,
         auto_promote_after_valid_reveal: policy.auto_promote_after_valid_reveal,
@@ -560,6 +666,7 @@ Deno.serve(async (req) => {
   return json({
     ok: true, run_id: runId, business_id: businessId, business_name: businessName,
     dry_run: dryRun,
+    blocked_reason: blockedReason,
     policy: {
       reveal_autonomous: policy.apollo_email_reveal_autonomous,
       auto_promote: policy.auto_promote_after_valid_reveal,
@@ -569,8 +676,11 @@ Deno.serve(async (req) => {
       daily_budget: policy.apollo_reveal_daily_credit_budget,
       monthly_budget: policy.apollo_reveal_monthly_credit_budget,
       min_score: policy.apollo_reveal_min_quality_score,
+      founder_reveal_amount_next_run: policy.founder_reveal_amount_next_run ?? null,
     },
     counters,
+    selected_candidates: selectedCandidates,
+    eligible_not_selected: eligibleNotSelected.slice(0, 100),
     sample_skips: sampleSkips.slice(0, 20),
   });
 });
