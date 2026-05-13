@@ -140,6 +140,7 @@ export default function LeadQualityPanel() {
   const [lastResult, setLastResult] = useState<any>(null);
   const [shortlistResult, setShortlistResult] = useState<any>(null);
   const [shortlistRunAt, setShortlistRunAt] = useState<string | null>(null);
+  const [promotePreviewResult, setPromotePreviewResult] = useState<any>(null);
 
   const { data: overview, isLoading } = useQuery({
     queryKey: ["lead-quality-overview"],
