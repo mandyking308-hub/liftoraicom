@@ -43,6 +43,7 @@ type AuditItem = {
 type AuditResponse = {
   ok: boolean;
   dry_run: boolean;
+  founder_protected?: boolean;
   generated_at: string;
   baseline: any;
   summary: any;
