@@ -434,6 +434,33 @@ export default function LeadQualityPanel() {
     }
   };
 
+  const runComplianceApprove = async (dryRun: boolean) => {
+    try {
+      setBusy(dryRun ? "Compliance preview" : "Compliance apply");
+      setLastResult(null);
+      const { data, error } = await supabase.functions.invoke("compliance-approve", {
+        body: { dry_run: dryRun, business_name: "Neon Candy" },
+      });
+      if (error) throw error;
+      setLastResult(data);
+      if (dryRun) { setCompliancePreviewResult(data); setComplianceAppliedResult(null); }
+      else { setComplianceAppliedResult(data); setCompliancePreviewResult(null); }
+      const s = data?.summary ?? {};
+      toast.success(dryRun ? "Compliance preview complete" : "Compliance approved", {
+        description: dryRun
+          ? `eligible ${s.eligible_for_compliance_approval ?? 0} · blocked ${s.blocked ?? 0} · queue 0 · sends 0`
+          : `approved ${s.contacts_updated ?? 0} · queue 0 · sends 0 · Apollo 0`,
+      });
+      qc.invalidateQueries({ queryKey: ["compliance-readiness-summary"] });
+    } catch (e: any) {
+      toast.error(dryRun ? "Compliance preview failed" : "Compliance approval failed", {
+        description: e?.message ?? String(e),
+      });
+    } finally {
+      setBusy(null);
+    }
+  };
+
   // Use live founder_decisions (status='pending') as the primary source of
   // truth for "needs founder review" — never derive it from rejected or
   // phantom needs_verification rows.
