@@ -86,6 +86,12 @@ Deno.serve(async (req) => {
     return json({ error: `campaign not active: status=${campaignRow.status}` }, 400);
   }
 
+  // Resolve the business row (tolerant match) so we can fall back to
+  // business_id lookup when BCR rows have business_name set but no id.
+  const { data: bizRow } = await admin.from("businesses")
+    .select("id,name").ilike("name", businessName).limit(1).maybeSingle();
+  const resolvedBusinessId = bizRow?.id ?? null;
+
   // 2) Narrow candidate set: only contacts that came through the clean
   //    Apollo reveal → promotion lifecycle. We start from
   //    lead_quality_profiles (promoted_to_contact) and intersect with
@@ -129,15 +135,21 @@ Deno.serve(async (req) => {
   }
 
   // 3) BCRs for this business — only the staging-ready ones.
-  const { data: bcrs } = await admin.from("business_contact_relationships")
-    .select("id,contact_id,business_name,business_id,qualification,current_stage,campaign_eligible,do_not_contact,notes,relevance_category")
-    .in("contact_id", contactIds)
-    .eq("business_name", businessName)
-    .eq("current_stage", "ready_to_stage")
-    .eq("qualification", "needs_review")
-    .eq("campaign_eligible", false)
-    .eq("do_not_contact", false);
-  const bcrByContact = new Map<string, any>((bcrs ?? []).map((b) => [b.contact_id, b]));
+  // 3) BCRs for this business — tolerant match on business_id OR
+  // case/space-insensitive business_name. Do NOT pre-filter on
+  // qualification / current_stage / campaign_eligible / do_not_contact
+  // — those are classified after lookup so a "filtered-out" BCR is
+  // not silently treated as "no BCR".
+  const businessNameNorm = businessName.trim().toLowerCase();
+  const { data: bcrsRaw } = await admin.from("business_contact_relationships")
+    .select("id,contact_id,business_name,business_id,qualification,current_stage,campaign_eligible,do_not_contact,notes,relevance_category,qualification_reason")
+    .in("contact_id", contactIds);
+  const bcrs = (bcrsRaw ?? []).filter((b: any) => {
+    if (resolvedBusinessId && b.business_id === resolvedBusinessId) return true;
+    const bn = (b.business_name ?? "").trim().toLowerCase();
+    return bn === businessNameNorm;
+  });
+  const bcrByContact = new Map<string, any>(bcrs.map((b: any) => [b.contact_id, b]));
 
   // 4) Apollo lifecycle status (Sierra etc.)
   const { data: apolloLeads } = await admin.from("apollo_leads")
@@ -164,6 +176,9 @@ Deno.serve(async (req) => {
     | "already_staged"
     | "blocked_compliance_pending"
     | "excluded_no_bcr"
+    | "excluded_wrong_bcr_stage"
+    | "excluded_wrong_qualification"
+    | "excluded_already_campaign_eligible"
     | "excluded_already_contacted_or_historical_sequence"
     | "excluded_pending_queue_row"
     | "excluded_rejected_wrong_person"
@@ -248,11 +263,6 @@ Deno.serve(async (req) => {
       plan.push({ ...base, eligibility: "excluded_pending_queue_row", blocker_reason: "pending email_queue row already exists" });
       continue;
     }
-    // Already advanced past ready_to_stage?
-    if (bcr.current_stage !== "ready_to_stage" && bcr.qualification === "qualified" && bcr.campaign_eligible) {
-      plan.push({ ...base, eligibility: "already_staged", blocker_reason: null });
-      continue;
-    }
     // Apollo lifecycle gate (must be promoted-to-contact, not anything earlier)
     if (apolloRawStatus && apolloRawStatus !== "promoted_to_contact" && apolloRawStatus !== "already_contacted") {
       plan.push({ ...base, eligibility: "excluded_apollo_lifecycle_not_promoted", blocker_reason: `apollo_raw quality_status=${apolloRawStatus}` });
@@ -278,6 +288,24 @@ Deno.serve(async (req) => {
       continue;
     }
 
+    // Classify BCR state (after lookup, after compliance gate).
+    if (bcr.current_stage === "staged" && bcr.qualification === "qualified" && bcr.campaign_eligible === true) {
+      plan.push({ ...base, eligibility: "already_staged", blocker_reason: null });
+      continue;
+    }
+    if (bcr.current_stage !== "ready_to_stage") {
+      plan.push({ ...base, eligibility: "excluded_wrong_bcr_stage", blocker_reason: `bcr.current_stage=${bcr.current_stage}` });
+      continue;
+    }
+    if (bcr.qualification !== "needs_review") {
+      plan.push({ ...base, eligibility: "excluded_wrong_qualification", blocker_reason: `bcr.qualification=${bcr.qualification}` });
+      continue;
+    }
+    if (bcr.campaign_eligible !== false) {
+      plan.push({ ...base, eligibility: "excluded_already_campaign_eligible", blocker_reason: `bcr.campaign_eligible=${bcr.campaign_eligible}` });
+      continue;
+    }
+
     base.will_qualify_bcr = !(bcr.qualification === "qualified" && bcr.campaign_eligible === true && bcr.current_stage === "staged");
     base.will_assign_inbox = c.assigned_inbox_id !== inboxId;
     base.will_assign_campaign = c.active_campaign_id !== campaignId;
@@ -289,6 +317,9 @@ Deno.serve(async (req) => {
     eligible_to_stage: plan.filter((p) => p.eligibility === "eligible_to_stage").length,
     already_staged: plan.filter((p) => p.eligibility === "already_staged").length,
     blocked_compliance_pending: plan.filter((p) => p.eligibility === "blocked_compliance_pending").length,
+    excluded_wrong_bcr_stage: plan.filter((p) => p.eligibility === "excluded_wrong_bcr_stage").length,
+    excluded_wrong_qualification: plan.filter((p) => p.eligibility === "excluded_wrong_qualification").length,
+    excluded_already_campaign_eligible: plan.filter((p) => p.eligibility === "excluded_already_campaign_eligible").length,
     excluded_already_contacted: plan.filter((p) => p.eligibility === "excluded_already_contacted_or_historical_sequence").length,
     excluded_pending_queue_row: plan.filter((p) => p.eligibility === "excluded_pending_queue_row").length,
     excluded_rejected: plan.filter((p) => p.eligibility === "excluded_rejected_wrong_person").length,
@@ -322,16 +353,22 @@ Deno.serve(async (req) => {
     for (const row of eligible) {
       // Update BCR (idempotent: skip writes when already qualified+eligible+staged)
       if (row.will_qualify_bcr && row.bcr_id) {
+        const currentBcr = (bcrs ?? []).find((b: any) => b.id === row.bcr_id);
         const auditNote =
           `\n[stage_to_queue_eligibility_gate ${approvedAt}] founder_approved_queue_eligibility=true ` +
           `campaign_id=${campaignId} inbox_id=${inboxId} actor=${userEmail} ` +
           `no_queue_row_created=true no_email_sent=true`;
-        const { error: bErr } = await admin.from("business_contact_relationships").update({
+        const patchBcr: Record<string, any> = {
           qualification: "qualified",
           campaign_eligible: true,
           current_stage: "staged",
-          notes: ((bcrs ?? []).find((b) => b.id === row.bcr_id)?.notes ?? "") + auditNote,
-        }).eq("id", row.bcr_id);
+          notes: (currentBcr?.notes ?? "") + auditNote,
+        };
+        if (resolvedBusinessId && !currentBcr?.business_id) {
+          patchBcr.business_id = resolvedBusinessId;
+        }
+        const { error: bErr } = await admin.from("business_contact_relationships")
+          .update(patchBcr).eq("id", row.bcr_id);
         if (!bErr) { qualifiedNow++; appliedBcrIds.push(row.bcr_id); }
       }
       // Update contact (idempotent: only patch the fields that change)
@@ -391,6 +428,8 @@ function emptySummary() {
   return {
     candidates_checked: 0, eligible_to_stage: 0, already_staged: 0,
     blocked_compliance_pending: 0,
+    excluded_wrong_bcr_stage: 0, excluded_wrong_qualification: 0,
+    excluded_already_campaign_eligible: 0,
     excluded_already_contacted: 0, excluded_pending_queue_row: 0,
     excluded_rejected: 0, excluded_suppressed_or_bounced: 0,
     excluded_do_not_contact: 0, excluded_active_conversation: 0,
