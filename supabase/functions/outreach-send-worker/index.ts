@@ -299,7 +299,7 @@ Deno.serve(async (req) => {
       console.warn("[outreach-send-worker] blocked: auto_send_disabled — no rows selected, no SMTP, no mutations.");
       return json({
         ok: true,
-        blocked: true,
+        skipped: true,
         reason: "auto_send_disabled",
         rows_processed: 0,
         provider_calls: 0,
