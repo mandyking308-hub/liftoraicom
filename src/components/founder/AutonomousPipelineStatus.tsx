@@ -91,6 +91,9 @@ export default function AutonomousPipelineStatus({ businessName = "Neon Candy" }
   const selectedCandidates: any[] = planResult?.selected_candidates ?? lastRun?.details?.selected_candidates ?? [];
   const eligibleNotSelected: any[] = planResult?.eligible_not_selected ?? lastRun?.details?.eligible_not_selected ?? [];
   const duplicatesHeldBack: any[] = planResult?.duplicates_held_back ?? lastRun?.details?.duplicates_held_back ?? [];
+  const revealOutcomes: any[] = lastRun?.details?.reveal_outcomes ?? [];
+  const revealExec: any = lastRun?.details?.reveal_execution ?? null;
+  const outcomeByCandidateId = new Map<string, any>(revealOutcomes.map((o: any) => [o.candidate_id, o]));
 
   const parsedAmount = revealAmount.trim() === "" ? null : Math.max(0, Math.floor(Number(revealAmount)));
   const amountInvalid = revealAmount.trim() !== "" && (Number.isNaN(Number(revealAmount)) || (parsedAmount ?? 0) <= 0);
@@ -256,6 +259,49 @@ export default function AutonomousPipelineStatus({ businessName = "Neon Candy" }
             : "No autopilot run yet — click Plan to compute the next batch."}
         </p>
 
+        {/* Last reveal execution result */}
+        {revealExec?.attempted && (
+          <div className="space-y-2 p-3 rounded border border-border/50 bg-secondary/30">
+            <p className="text-xs uppercase text-muted-foreground">Last Apollo reveal execution</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 text-xs">
+              <Stat label="Apollo API called" value={revealExec.apollo_api_called ? "yes" : "no"} tone={revealExec.apollo_api_called ? "good" : "danger"} />
+              <Stat label="Credits actually spent" value={revealExec.credits_actually_spent ?? 0} />
+              <Stat label="Emails returned" value={revealExec.emails_returned ?? 0} tone={revealExec.emails_returned > 0 ? "good" : "warn"} />
+              <Stat label="Provider errors" value={revealExec.provider_errors ?? 0} tone={revealExec.provider_errors > 0 ? "danger" : "default"} />
+              <Stat label="Already recorded" value={revealExec.already_recorded ? "yes" : "no"} tone={revealExec.already_recorded ? "warn" : "default"} />
+              <Stat label="Outcomes logged" value={revealOutcomes.length} />
+            </div>
+            {revealOutcomes.length > 0 && (
+              <div className="max-h-72 overflow-auto rounded border border-border/50">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Company</TableHead>
+                      <TableHead>Outcome</TableHead>
+                      <TableHead>Apollo status</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Credit</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {revealOutcomes.map((o: any) => (
+                      <TableRow key={o.candidate_id}>
+                        <TableCell>{o.name ?? "—"}</TableCell>
+                        <TableCell className="text-xs">{o.company ?? "—"}</TableCell>
+                        <TableCell className="text-xs">{o.outcome}</TableCell>
+                        <TableCell className="text-xs">{o.apollo_status ?? "—"}</TableCell>
+                        <TableCell className="text-xs">{o.email ?? (o.email_returned ? "yes" : "no")}</TableCell>
+                        <TableCell className="text-xs">{o.credit_consumed ? "1" : "0"}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Selected for next reveal */}
         {selectedCandidates.length > 0 && (
           <div className="space-y-2">
@@ -285,7 +331,11 @@ export default function AutonomousPipelineStatus({ businessName = "Neon Candy" }
                       <TableCell className="text-xs font-mono">{(c.duplicate_key ?? "—").toString().slice(0, 28)}</TableCell>
                       <TableCell>{c.source_quality_score}</TableCell>
                       <TableCell className="text-xs">{c.campaign_fit ?? "—"}</TableCell>
-                      <TableCell className="text-xs">{c.email_available ? "available" : "reveal needed"}</TableCell>
+                      <TableCell className="text-xs">{(() => {
+                        const o = outcomeByCandidateId.get(c.candidate_id);
+                        if (o) return o.email ?? o.outcome;
+                        return c.email_available ? "available" : "reveal needed";
+                      })()}</TableCell>
                       <TableCell className="text-xs">{c.estimated_credit_cost} credit</TableCell>
                     </TableRow>
                   ))}
