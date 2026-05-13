@@ -108,7 +108,7 @@ Deno.serve(async (req) => {
   }
 
   let cq = admin.from("contacts")
-    .select("id,email,name,first_name,last_name,company,status,source,assigned_business,assigned_inbox_id,active_campaign_id,sendable_status,is_globally_suppressed,hard_bounced,conversation_active,last_contacted_at,apollo_person_id,apollo_enrichment_status")
+    .select("id,email,name,first_name,last_name,company,status,source,assigned_business,assigned_inbox_id,active_campaign_id,sendable_status,is_globally_suppressed,hard_bounced,conversation_active,last_contacted_at,apollo_person_id,apollo_enrichment_status,compliance_status,lawful_basis,retention_until,unsubscribe_token,unsubscribed_at")
     .eq("assigned_business", businessName)
     .eq("source", "autopilot_promotion")
     .eq("status", "NEW")
@@ -162,6 +162,7 @@ Deno.serve(async (req) => {
   type Eligibility =
     | "eligible_to_stage"
     | "already_staged"
+    | "blocked_compliance_pending"
     | "excluded_no_bcr"
     | "excluded_already_contacted_or_historical_sequence"
     | "excluded_pending_queue_row"
@@ -258,6 +259,25 @@ Deno.serve(async (req) => {
       continue;
     }
 
+    // Compliance hard gate — must have explicit outreach approval + valid legal basis fields.
+    const cs = (c as any).compliance_status as string | null;
+    const lb = (c as any).lawful_basis as string | null;
+    const ru = (c as any).retention_until as string | null;
+    const ut = (c as any).unsubscribe_token as string | null;
+    const ua = (c as any).unsubscribed_at as string | null;
+    const retentionOk = !!ru && new Date(ru).getTime() > Date.now();
+    const complianceFieldsComplete = !!lb && retentionOk && !!ut && !ua;
+    if (cs !== "outreach_allowed" || !complianceFieldsComplete) {
+      const reasons: string[] = [];
+      if (cs !== "outreach_allowed") reasons.push(`compliance_status=${cs ?? "null"}`);
+      if (!lb) reasons.push("lawful_basis missing");
+      if (!retentionOk) reasons.push("retention_until expired or missing");
+      if (!ut) reasons.push("unsubscribe_token missing");
+      if (ua) reasons.push("unsubscribed_at set");
+      plan.push({ ...base, eligibility: "blocked_compliance_pending", blocker_reason: reasons.join("; ") });
+      continue;
+    }
+
     base.will_qualify_bcr = !(bcr.qualification === "qualified" && bcr.campaign_eligible === true && bcr.current_stage === "staged");
     base.will_assign_inbox = c.assigned_inbox_id !== inboxId;
     base.will_assign_campaign = c.active_campaign_id !== campaignId;
@@ -268,6 +288,7 @@ Deno.serve(async (req) => {
     candidates_checked: plan.length,
     eligible_to_stage: plan.filter((p) => p.eligibility === "eligible_to_stage").length,
     already_staged: plan.filter((p) => p.eligibility === "already_staged").length,
+    blocked_compliance_pending: plan.filter((p) => p.eligibility === "blocked_compliance_pending").length,
     excluded_already_contacted: plan.filter((p) => p.eligibility === "excluded_already_contacted_or_historical_sequence").length,
     excluded_pending_queue_row: plan.filter((p) => p.eligibility === "excluded_pending_queue_row").length,
     excluded_rejected: plan.filter((p) => p.eligibility === "excluded_rejected_wrong_person").length,
@@ -369,6 +390,7 @@ Deno.serve(async (req) => {
 function emptySummary() {
   return {
     candidates_checked: 0, eligible_to_stage: 0, already_staged: 0,
+    blocked_compliance_pending: 0,
     excluded_already_contacted: 0, excluded_pending_queue_row: 0,
     excluded_rejected: 0, excluded_suppressed_or_bounced: 0,
     excluded_do_not_contact: 0, excluded_active_conversation: 0,
