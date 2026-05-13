@@ -112,7 +112,19 @@ const CommandCentre = () => {
     queryKey: ["cc2-lead-lifecycle"],
     queryFn: async () => {
       const { data } = await (supabase as any).from("lead_lifecycle_summary").select("*").maybeSingle();
-      return data as { active_working_leads: number; safe_to_unlock: number; safe_to_promote: number; safe_to_queue: number; legacy_optional_unlock_candidates: number } | null;
+      return data as {
+        active_working_leads: number;
+        safe_to_unlock: number;
+        safe_to_promote: number;
+        safe_to_queue: number;
+        legacy_optional_unlock_candidates: number;
+        email_reveal_required?: number;
+        verified_email_available_locked?: number;
+        safe_to_promote_after_reveal?: number;
+        already_in_crm_after_reveal?: number;
+        total_leads?: number;
+        reveal_shortlisted?: number;
+      } | null;
     },
     refetchInterval: 60000,
   });
