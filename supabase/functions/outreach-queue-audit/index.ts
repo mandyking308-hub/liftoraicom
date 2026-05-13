@@ -32,13 +32,13 @@ Deno.serve(async (req) => {
     { global: { headers: { Authorization: authHeader } } },
   );
   const token = authHeader.replace("Bearer ", "");
-  const { data: claimsData, error: claimsErr } = await userClient.auth.getClaims(token);
-  if (claimsErr || !claimsData?.claims?.sub) {
-    return new Response(JSON.stringify({ ok: false, error: "Unauthorized — invalid token" }), {
+  const { data: userData, error: userErr } = await userClient.auth.getUser(token);
+  if (userErr || !userData?.user?.id) {
+    return new Response(JSON.stringify({ ok: false, error: "Unauthorized — invalid token", detail: userErr?.message ?? null }), {
       status: 401, headers: { ...cors, "Content-Type": "application/json" },
     });
   }
-  const userId = claimsData.claims.sub as string;
+  const userId = userData.user.id;
 
   const supa = createClient(
     Deno.env.get("SUPABASE_URL")!,
