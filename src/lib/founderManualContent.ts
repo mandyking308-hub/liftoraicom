@@ -26,7 +26,7 @@ export const generateManualMarkdown = (data: ManualLiveData): string => {
   return `# Liftor AI — Founder Manual
 ## Complete Engineering-Level Platform Documentation
 
-**Version:** 4.3 — NeonCandy Day-1 Sending Complete, IONOS Cap Reached (1 May 2026)
+**Version:** 4.4 — Apollo Reveal Workflow Correction + Policy-Controlled Autonomous Pipeline (13 May 2026)
 **Generated:** ${now}
 **Classification:** Founder / Internal Engineering / Investor Documentation
 **Status:** Live — Auto-generated from platform state
@@ -36,6 +36,7 @@ export const generateManualMarkdown = (data: ManualLiveData): string => {
 ## Table of Contents
 
 0. Operational Handover — NeonCandy / Outreach (1 May 2026)
+0b. Apollo Reveal Workflow & Policy-Controlled Autonomous Pipeline (13 May 2026)
 0a. Credentials & Secrets Register
 1. Platform Overview
 2. Full Platform Architecture
