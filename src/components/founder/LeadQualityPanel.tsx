@@ -668,6 +668,111 @@ export default function LeadQualityPanel() {
           </div>
         )}
 
+        {/* === Stage-to-Queue Eligibility Gate ===
+            Founder-controlled gate that flips qualified BCRs from
+            ready_to_stage / needs_review / not eligible →
+            qualified / staged / eligible, and assigns the inbox + campaign on
+            the contact. Does NOT create queue rows or send emails. */}
+        {((stageCandidateCount ?? 0) > 0 || stagePreviewResult || stageAppliedResult) && (
+          <div className="rounded-md border border-primary/40 bg-primary/5 p-4 space-y-3">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <div>
+                <p className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <CheckCircle2 size={14} className="text-primary" /> Stage-to-Queue Eligibility Gate
+                  <Badge variant="outline" className="text-[10px]">Neon Candy · hello@neoncandy.online</Badge>
+                </p>
+                <ul className="text-xs text-muted-foreground mt-1 space-y-0.5 list-disc list-inside">
+                  <li><strong className="text-foreground">{stageCandidateCount ?? 0}</strong> CRM contact(s) waiting on founder approval to become queue-eligible</li>
+                  <li>Sets BCR <code>qualification=qualified</code>, <code>campaign_eligible=true</code>, <code>current_stage=staged</code></li>
+                  <li>Assigns inbox + active campaign on the contact row</li>
+                  <li>Does <strong>not</strong> create queue rows; does <strong>not</strong> send emails; auto-send stays OFF</li>
+                  <li>Sierra (rejected) and Jack (prior sequence history) are filtered server-side</li>
+                </ul>
+              </div>
+              <div className="flex gap-2 flex-wrap">
+                <Button size="sm" variant="outline" disabled={!!busy} onClick={() => runStageToQueue(true)}>
+                  {busy === "Stage preview" ? <Loader2 className="animate-spin" size={14} /> : "Preview stage-to-queue eligibility"}
+                </Button>
+                <Button size="sm" variant="default"
+                  disabled={!!busy || !stagePreviewResult || (stagePreviewResult?.summary?.eligible_to_stage ?? 0) === 0}
+                  onClick={() => runStageToQueue(false)}
+                  title={!stagePreviewResult ? "Run preview first" : undefined}>
+                  {busy === "Stage apply" ? <Loader2 className="animate-spin" size={14} /> : `Approve ${stagePreviewResult?.summary?.eligible_to_stage ?? 0} for queue eligibility`}
+                </Button>
+              </div>
+            </div>
+            {!stagePreviewResult && !stageAppliedResult && (
+              <p className="text-[11px] text-yellow-300">
+                Apply button is disabled until <strong>Preview stage-to-queue eligibility</strong> succeeds in this session.
+              </p>
+            )}
+            {(stagePreviewResult || stageAppliedResult) && (() => {
+              const r = stageAppliedResult ?? stagePreviewResult;
+              const s = r?.summary ?? {};
+              const planRows: any[] = Array.isArray(r?.plan) ? r.plan : [];
+              return (
+                <div className="rounded border border-border/50 bg-card/40 p-3 space-y-2 text-xs">
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="secondary" className="text-[10px]">candidates_checked: {s.candidates_checked ?? 0}</Badge>
+                    <Badge variant="secondary" className="text-[10px]">eligible_to_stage: {s.eligible_to_stage ?? 0}</Badge>
+                    <Badge variant="secondary" className="text-[10px]">already_staged: {s.already_staged ?? 0}</Badge>
+                    <Badge variant="secondary" className="text-[10px]">excluded_already_contacted: {s.excluded_already_contacted ?? 0}</Badge>
+                    <Badge variant="secondary" className="text-[10px]">excluded_rejected: {s.excluded_rejected ?? 0}</Badge>
+                    <Badge variant="secondary" className="text-[10px]">bcrs_to_qualify: {s.bcrs_to_qualify ?? 0}</Badge>
+                    <Badge variant="secondary" className="text-[10px]">contacts_to_assign_inbox: {s.contacts_to_assign_inbox ?? 0}</Badge>
+                    <Badge variant="secondary" className="text-[10px]">contacts_to_assign_campaign: {s.contacts_to_assign_campaign ?? 0}</Badge>
+                    <Badge variant="secondary" className="text-[10px]">queue_rows_to_create: 0</Badge>
+                    <Badge variant="secondary" className="text-[10px]">sends_to_create: 0</Badge>
+                  </div>
+                  {stageAppliedResult && (
+                    <div className="rounded border border-green-500/30 bg-green-500/5 p-2 text-[11px] text-foreground">
+                      Staged for queue eligibility: <strong>{s.bcrs_qualified_now ?? 0}</strong> · Queue rows created: <strong>0</strong> · Emails sent: <strong>0</strong>.{" "}
+                      Next: <span className="text-primary">Preview queue creation for {s.bcrs_qualified_now ?? s.eligible_to_stage ?? 0} staged contacts. Auto-send remains OFF.</span>
+                    </div>
+                  )}
+                  {planRows.length > 0 && (
+                    <div className="overflow-x-auto rounded border border-border/40">
+                      <table className="w-full text-[11px]">
+                        <thead className="bg-muted/30 text-muted-foreground">
+                          <tr>
+                            <th className="text-left px-2 py-1">Name</th>
+                            <th className="text-left px-2 py-1">Email</th>
+                            <th className="text-left px-2 py-1">Company</th>
+                            <th className="text-left px-2 py-1">Stage</th>
+                            <th className="text-left px-2 py-1">Qualif.</th>
+                            <th className="text-left px-2 py-1">Eligible</th>
+                            <th className="text-left px-2 py-1">Eligibility</th>
+                            <th className="text-left px-2 py-1">Reason</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {planRows.map((p: any) => (
+                            <tr key={p.contact_id} className="border-t border-border/30">
+                              <td className="px-2 py-1">{p.name ?? "—"}</td>
+                              <td className="px-2 py-1 font-mono text-[10px]">{p.email ?? "—"}</td>
+                              <td className="px-2 py-1">{p.company ?? "—"}</td>
+                              <td className="px-2 py-1">{p.current_stage ?? "—"}</td>
+                              <td className="px-2 py-1">{p.qualification ?? "—"}</td>
+                              <td className="px-2 py-1">{p.campaign_eligible ? "yes" : "no"}</td>
+                              <td className={`px-2 py-1 ${p.eligibility === "eligible_to_stage" ? "text-green-300" : p.eligibility === "already_staged" ? "text-muted-foreground" : "text-yellow-300"}`}>
+                                {p.eligibility}
+                              </td>
+                              <td className="px-2 py-1 text-muted-foreground">{p.blocker_reason ?? "—"}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                  <p className="text-[10px] text-muted-foreground">
+                    Sierra is filtered via <code>apollo_raw_leads.quality_status='rejected'</code>. Jack is filtered via prior sent/cancelled <code>email_queue</code> rows for the same campaign. No Apollo credits, no reveals, no contact/BCR creation.
+                  </p>
+                </div>
+              );
+            })()}
+          </div>
+        )}
+
         <details className="rounded-md border border-border/50 bg-muted/20 p-3 group">
           <summary className="cursor-pointer text-xs font-medium text-foreground flex items-center gap-2">
             <AlertTriangle size={12} className="text-yellow-400" />
@@ -687,7 +792,7 @@ export default function LeadQualityPanel() {
               <Tile label="Qualified" value={overview?.qualified_leads ?? 0} tone="good" />
               <Tile label="Promoted contacts" value={overview?.promoted_contacts ?? 0} tone="good" />
               <Tile label="Needs verification" value={overview?.needs_verification ?? 0} tone="warn" />
-              <Tile label="Needs founder review" value={overview?.needs_founder_review ?? 0} tone="warn" />
+              <Tile label="Needs founder review (live decisions)" value={livePendingDecisions} tone={livePendingDecisions > 0 ? "warn" : "default"} />
               <Tile label="Rejected" value={overview?.rejected_leads ?? 0} tone="danger" />
               <Tile label="Terminal blocked" value={overview?.terminal_blocked ?? 0} tone="danger" />
               <Tile label="Duplicate / risky" value={overview?.duplicate_or_risky ?? 0} tone="warn" />
