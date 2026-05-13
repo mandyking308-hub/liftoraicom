@@ -16,7 +16,7 @@ const PROVIDER_MODE = "ionos_proof";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
-
+  try {
   // ===== ACCESS CONTROL: founder/admin only =====
   const authHeader = req.headers.get("Authorization") ?? "";
   let founderProtected = false;
@@ -387,4 +387,9 @@ Deno.serve(async (req) => {
     items,
     cleanup_preview,
   }), { headers: { ...cors, "Content-Type": "application/json" } });
+  } catch (e) {
+    return new Response(JSON.stringify({ ok: false, error: "internal_error", detail: (e as Error).message }), {
+      status: 500, headers: { ...cors, "Content-Type": "application/json" },
+    });
+  }
 });
