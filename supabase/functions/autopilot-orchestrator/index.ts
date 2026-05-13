@@ -747,6 +747,213 @@ Deno.serve(async (req) => {
   (counters as any).reveal_provider_errors = providerErrors;
   (counters as any).reveal_already_recorded = revealAlreadyRecorded;
 
+  // ---------- Stage 2.5: Post-reveal validation gate ----------
+  // For each revealed email, classify identity coherence, generic-mailbox risk,
+  // domain match, CRM duplication, suppression, intra-batch duplicate. Only
+  // `valid_person_match` is auto-promotable; anything uncertain → founder review.
+  const GENERIC_LOCALPARTS = new Set([
+    "info","hello","contact","contacts","team","music","submissions","submission",
+    "playlist","playlists","editor","editors","editorial","hi","admin","support",
+    "sales","press","pr","office","general","mail","email","help","inbox","noreply",
+    "no-reply","reply","webmaster","postmaster",
+  ]);
+  const normAlpha = (s: string | null | undefined) =>
+    (s ?? "").toLowerCase().normalize("NFKD").replace(/[^a-z]/g, "");
+  const localPartOf = (email: string) => (email.split("@")[0] ?? "").toLowerCase();
+  const domainOf = (email: string) => (email.split("@")[1] ?? "").toLowerCase();
+  const nameMatchesLocal = (local: string, first: string | null, last: string | null) => {
+    const l = normAlpha(local);
+    const fn = normAlpha(first);
+    const ln = normAlpha(last);
+    if (!l) return false;
+    const hits: string[] = [];
+    if (fn && l.includes(fn)) hits.push("first_in_local");
+    if (ln && l.includes(ln)) hits.push("last_in_local");
+    if (fn && ln && l.startsWith(fn[0]) && l.includes(ln)) hits.push("flast");
+    if (fn && ln && l.startsWith(ln[0]) && l.includes(fn)) hits.push("lfirst");
+    return { matched: hits.length > 0, hits };
+  };
+  const domainMatchesCompany = (domain: string, company: string | null, knownDomain: string | null) => {
+    const d = domain.toLowerCase();
+    if (knownDomain && d === knownDomain.toLowerCase()) return true;
+    const tokens = norm(company).split(" ").filter(t => t.length >= 3);
+    return tokens.some(t => d.includes(t));
+  };
+
+  const validationCounts = {
+    emails_returned: emailsReturned,
+    post_reveal_validated: 0,
+    valid_for_auto_promotion: 0,
+    needs_founder_review: 0,
+    blocked_existing_crm: 0,
+    blocked_possible_wrong_person: 0,
+    blocked_generic_or_shared: 0,
+    blocked_domain_mismatch: 0,
+    blocked_suppressed_or_bounced: 0,
+    blocked_duplicate_revealed_email: 0,
+    promoted_contacts: 0,
+    bcrs_created: 0,
+    queue_ready: 0,
+    queue_blocked: 0,
+  };
+  const postRevealValidations: Array<Record<string, unknown>> = [];
+  const promotionAllowedQpIds = new Set<string>();
+
+  // Collect revealed emails (from this run's outcomes OR existing rows already
+  // marked safe_to_promote_after_reveal so post-reveal-only re-runs work too).
+  const successOutcomes = revealOutcomes.filter((o: any) => o.email_returned && o.email);
+  const emailFreq = new Map<string, number>();
+  for (const o of successOutcomes) {
+    const e = String((o as any).email).toLowerCase();
+    emailFreq.set(e, (emailFreq.get(e) ?? 0) + 1);
+  }
+  const revealedEmailList = Array.from(emailFreq.keys());
+
+  const { data: contactHits } = revealedEmailList.length
+    ? await admin.from("contacts").select("id, email, status, sendable_status").in("email", revealedEmailList)
+    : { data: [] as any[] };
+  const contactByEmail = new Map(
+    (contactHits ?? []).map((c: any) => [String(c.email).toLowerCase(), c]),
+  );
+
+  // Build a lead lookup for the candidates we attempted to reveal.
+  const validationLeadIds = successOutcomes.map((o: any) => o.apollo_lead_id).filter(Boolean);
+  const { data: validationLeads } = validationLeadIds.length
+    ? await admin.from("apollo_raw_leads")
+      .select("apollo_lead_id, apollo_person_id, email_domain, email, first_name, last_name, title, company, country, linkedin_url, apollo_org_id")
+      .in("apollo_lead_id", validationLeadIds)
+    : { data: [] as any[] };
+  const validationLeadMap = new Map((validationLeads ?? []).map((l: any) => [l.apollo_lead_id, l]));
+
+  // Pull the matching quality profiles to read risk_flags + lifecycle.
+  const { data: validationQps } = validationLeadIds.length
+    ? await admin.from("lead_quality_profiles")
+      .select("id, apollo_lead_id, lifecycle_stage, campaign_fit, risk_flags, promoted_contact_id")
+      .in("apollo_lead_id", validationLeadIds)
+    : { data: [] as any[] };
+  const qpByLead = new Map((validationQps ?? []).map((q: any) => [q.apollo_lead_id, q]));
+
+  for (const o of successOutcomes) {
+    const email = String((o as any).email).toLowerCase();
+    const lead = validationLeadMap.get((o as any).apollo_lead_id) ?? {};
+    const qp = qpByLead.get((o as any).apollo_lead_id) ?? {};
+    const local = localPartOf(email);
+    const domain = domainOf(email);
+    const nm = nameMatchesLocal(local, lead.first_name ?? null, lead.last_name ?? null) as any;
+    const generic = GENERIC_LOCALPARTS.has(local);
+    const domainOk = domainMatchesCompany(domain, lead.company ?? null, lead.email_domain ?? null);
+    const flags: string[] = qp.risk_flags ?? [];
+    const suppressed = flags.includes("bounced") || flags.includes("suppressed") || flags.includes("internal");
+    const crmHit = contactByEmail.get(email);
+    const dupRevealed = (emailFreq.get(email) ?? 0) > 1;
+
+    // Classification — first matching reason wins.
+    const reasons: string[] = [];
+    let status:
+      | "valid_person_match"
+      | "valid_company_domain_but_name_uncertain"
+      | "generic_or_shared_email"
+      | "possible_wrong_person"
+      | "domain_mismatch"
+      | "existing_crm"
+      | "duplicate_revealed_email"
+      | "suppressed_or_bounced"
+      | "needs_founder_review";
+
+    if (suppressed) { status = "suppressed_or_bounced"; reasons.push("risk_flag_bounced_or_suppressed"); }
+    else if (crmHit) { status = "existing_crm"; reasons.push("contact_email_already_in_crm"); }
+    else if (dupRevealed) { status = "duplicate_revealed_email"; reasons.push("email_appears_multiple_times_in_batch"); }
+    else if (generic) { status = "generic_or_shared_email"; reasons.push(`generic_localpart_${local}`); }
+    else if (!domainOk) { status = "domain_mismatch"; reasons.push(`domain_${domain}_does_not_match_company`); }
+    else if (!nm.matched && (lead.first_name || lead.last_name)) {
+      status = "possible_wrong_person";
+      reasons.push(`local_${local}_does_not_match_${(lead.first_name ?? "")}_${(lead.last_name ?? "")}`.toLowerCase());
+    } else if (nm.matched) {
+      status = "valid_person_match";
+      reasons.push(...nm.hits, "domain_company_match");
+    } else {
+      status = "valid_company_domain_but_name_uncertain";
+      reasons.push("domain_match_no_name_to_verify");
+    }
+
+    const promoteAllowed = status === "valid_person_match";
+    const recommended = promoteAllowed
+      ? (policy.auto_promote_after_valid_reveal ? "auto_promote" : "promote_after_founder_approval")
+      : status === "existing_crm" ? "skip_already_in_crm"
+      : status === "suppressed_or_bounced" ? "skip_suppressed"
+      : status === "duplicate_revealed_email" ? "hold_one_per_email"
+      : "founder_review_required";
+
+    validationCounts.post_reveal_validated++;
+    if (promoteAllowed) {
+      validationCounts.valid_for_auto_promotion++;
+      if (qp.id) promotionAllowedQpIds.add(qp.id);
+    } else {
+      validationCounts.needs_founder_review++;
+      if (status === "existing_crm") validationCounts.blocked_existing_crm++;
+      if (status === "possible_wrong_person") validationCounts.blocked_possible_wrong_person++;
+      if (status === "generic_or_shared_email") validationCounts.blocked_generic_or_shared++;
+      if (status === "domain_mismatch") validationCounts.blocked_domain_mismatch++;
+      if (status === "suppressed_or_bounced") validationCounts.blocked_suppressed_or_bounced++;
+      if (status === "duplicate_revealed_email") validationCounts.blocked_duplicate_revealed_email++;
+    }
+
+    postRevealValidations.push({
+      candidate_id: qp.id ?? null,
+      apollo_lead_id: (o as any).apollo_lead_id,
+      apollo_person_id: lead.apollo_person_id ?? null,
+      name: `${lead.first_name ?? ""} ${lead.last_name ?? ""}`.trim() || null,
+      title: lead.title ?? null,
+      company: lead.company ?? null,
+      revealed_email: email,
+      domain,
+      domain_match: domainOk,
+      name_match: nm.matched,
+      name_match_hits: nm.hits,
+      generic_or_shared: generic,
+      crm_status: crmHit ? "existing_contact" : "new",
+      suppression_status: suppressed ? "flagged" : "clean",
+      duplicate_revealed_email_in_batch: dupRevealed,
+      validation_status: status,
+      reasons,
+      recommended_action: recommended,
+      promote_allowed: promoteAllowed,
+      reason_blocked: promoteAllowed ? null : reasons[0] ?? status,
+    });
+
+    // Founder decision for the high-risk possible-wrong-person case.
+    if (!dryRun && status === "possible_wrong_person") {
+      const { data: existingDec } = await admin.from("founder_decisions")
+        .select("id").eq("business_id", businessId)
+        .eq("decision_type", "possible_wrong_person_email_match")
+        .eq("status", "pending")
+        .filter("related_ids->>apollo_lead_id", "eq", String((o as any).apollo_lead_id))
+        .maybeSingle();
+      if (!existingDec) {
+        await admin.from("founder_decisions").insert({
+          business_id: businessId,
+          decision_type: "possible_wrong_person_email_match",
+          title: `Review revealed email: ${email}`,
+          finding: `Apollo returned ${email} for ${lead.first_name ?? ""} ${lead.last_name ?? ""} at ${lead.company ?? "—"}, but the local-part does not match the candidate name. Domain matches the company.`,
+          recommendation: "Manually verify identity before promotion. Do not auto-send.",
+          cost_credit_impact: "1 Apollo credit already spent",
+          risk: "medium",
+          status: "pending",
+          related_ids: { apollo_lead_id: (o as any).apollo_lead_id, candidate_id: qp.id ?? null, email } as never,
+          created_by_run: runId,
+        });
+        counters.decisions_created++;
+      }
+    }
+  }
+
+  await event("post_reveal_validation",
+    `Validated ${validationCounts.post_reveal_validated} revealed emails: ${validationCounts.valid_for_auto_promotion} valid · ${validationCounts.needs_founder_review} need review`,
+    validationCounts.needs_founder_review > 0 ? "medium" : "low",
+    { validation_counts: validationCounts });
+
+  Object.assign(counters as any, validationCounts);
+
   // ---------- Stage 3: Auto-promote (post-reveal) → contacts + BCR ----------
   if (policy.auto_promote_after_valid_reveal) {
     const { data: postReveal } = await admin
@@ -768,6 +975,14 @@ Deno.serve(async (req) => {
       const lead = leadMap.get(p.apollo_lead_id);
       const email = (lead?.email ?? "").toLowerCase();
       if (!email) { counters.promote_skipped++; sampleSkips.push({ stage: "promote", reason: "no_email" }); continue; }
+      // POST-REVEAL VALIDATION GATE — only candidates classified
+      // `valid_person_match` are auto-promotable. Anything uncertain becomes
+      // a founder review item; we never silently promote.
+      if (postRevealValidations.length > 0 && !promotionAllowedQpIds.has(p.id)) {
+        counters.promote_skipped++;
+        sampleSkips.push({ stage: "promote", reason: "post_reveal_validation_gate", candidate_id: p.id, email });
+        continue;
+      }
       if (policy.auto_promote_only_campaign_fit && p.campaign_fit === "poor") { counters.promote_skipped++; continue; }
 
       const flags: string[] = p.risk_flags ?? [];
@@ -796,6 +1011,7 @@ Deno.serve(async (req) => {
       }).select("id").single();
       if (insErr || !inserted) { counters.promote_skipped++; continue; }
       const contactId = inserted.id as string;
+      validationCounts.promoted_contacts++;
 
       // Central CRM spine: BCR row (preserves business_id link)
       await admin.from("business_contact_relationships").insert({
@@ -805,6 +1021,7 @@ Deno.serve(async (req) => {
         current_stage: "ready_to_stage",
         qualification_reason: `autopilot_promotion run=${runId}`,
       });
+      validationCounts.bcrs_created++;
 
       await admin.from("lead_quality_profiles").update({
         quality_status: "promoted_to_contact",
