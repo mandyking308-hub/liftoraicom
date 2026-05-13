@@ -46,6 +46,66 @@ Deno.serve(async (req) => {
   const { data: rows, error } = await q;
   if (error) return json({ error: error.message }, 500);
 
+  // Pull rich Apollo payloads (enrichment + search) for the candidate leads so we can map
+  // additional fields into contacts without re-calling Apollo (no credit spend, no reveal).
+  const leadIds = (rows ?? []).map((r) => r.apollo_lead_id).filter(Boolean) as string[];
+  const payloadMap = new Map<string, { enrichment: any; search: any; run_id: string | null }>();
+  if (leadIds.length) {
+    const { data: payloadRows } = await admin.from("apollo_leads")
+      .select("id,enrichment_payload,search_payload,run_id").in("id", leadIds);
+    for (const pr of payloadRows ?? []) {
+      payloadMap.set(pr.id as string, {
+        enrichment: pr.enrichment_payload ?? null,
+        search: pr.search_payload ?? null,
+        run_id: (pr.run_id as string | null) ?? null,
+      });
+    }
+  }
+
+  // Helpers: derive clean optional fields from raw Apollo payload without overwriting
+  // stronger existing data downstream. All values returned here are nullable and will only
+  // be applied during INSERT (new contact); we never overwrite an existing contact.
+  const SENIORITY_MAP: Record<string, string> = {
+    owner: "c-level", founder: "c-level", c_suite: "c-level", "c-level": "c-level",
+    partner: "c-level", vp: "director", head: "director", director: "director",
+    manager: "manager", senior: "manager", entry: "junior", intern: "junior", junior: "junior",
+  };
+  const sizeFromCount = (n: number | null | undefined): "small" | "medium" | "large" | null => {
+    if (typeof n !== "number" || !Number.isFinite(n)) return null;
+    if (n < 50) return "small";
+    if (n < 500) return "medium";
+    return "large";
+  };
+  const deriveApolloExtras = (leadId: string) => {
+    const pkg = payloadMap.get(leadId);
+    if (!pkg) return { extras: {}, raw_present: false, org_present: false, run_id: null as string | null };
+    const e = pkg.enrichment ?? {};
+    const org = e?.organization ?? null;
+    const seniorityRaw = (e?.seniority ?? "").toString().toLowerCase().trim();
+    const seniority = SENIORITY_MAP[seniorityRaw] ?? null;
+    const company_size = sizeFromCount(org?.estimated_num_employees ?? org?.organization_num_employees ?? null);
+    const industry = (org?.industry ?? null) as string | null;
+    const timezone = (e?.time_zone ?? null) as string | null;
+    const email_verified_status = (e?.email_status ?? null) as string | null;
+    const intent_strength_raw = (e?.intent_strength ?? null);
+    const intent_score = typeof intent_strength_raw === "number"
+      ? Math.max(0, Math.min(100, Math.round(intent_strength_raw)))
+      : null;
+    const apollo_org_id_from_payload = (e?.organization_id ?? org?.id ?? null) as string | null;
+    return {
+      extras: {
+        seniority, company_size, industry, timezone,
+        email_verified_status, intent_score,
+        apollo_org_id_from_payload,
+        org_domain: (org?.primary_domain ?? org?.website_url ?? null) as string | null,
+        photo_url: (e?.photo_url ?? null) as string | null,
+      },
+      raw_present: !!pkg.enrichment || !!pkg.search,
+      org_present: !!org,
+      run_id: pkg.run_id,
+    };
+  };
+
   // Resolve businesses up-front (one row per distinct business_name)
   const businessNames = Array.from(new Set((rows ?? []).map((r) => r.business_name).filter(Boolean))) as string[];
   const bizMap = new Map<string, string>(); // name → business_id
@@ -72,11 +132,17 @@ Deno.serve(async (req) => {
     reason: string;
     existing_contact_id?: string;
     existing_bcr_id?: string;
+    apollo_person_id?: string;
+    apollo_org_id?: string;
+    raw_payload_present?: boolean;
+    org_payload_present?: boolean;
+    mapped_extras?: Record<string, unknown>;
   };
   const plan: PlanRow[] = [];
 
   for (const r of rows ?? []) {
     const email = (r.email ?? "").toLowerCase();
+    const enrich = deriveApolloExtras(r.apollo_lead_id);
     const base: Partial<PlanRow> = {
       apollo_lead_id: r.apollo_lead_id,
       profile_id: r.quality_profile_id,
@@ -86,6 +152,11 @@ Deno.serve(async (req) => {
       business_name: r.business_name ?? undefined,
       business_id: r.business_name ? bizMap.get(r.business_name) : undefined,
       send_action: "none",
+      apollo_person_id: r.apollo_person_id ?? undefined,
+      apollo_org_id: r.apollo_org_id ?? (enrich.extras as any).apollo_org_id_from_payload ?? undefined,
+      raw_payload_present: enrich.raw_present,
+      org_payload_present: enrich.org_present,
+      mapped_extras: enrich.extras,
     };
     if (!email) {
       plan.push({ ...(base as PlanRow), contact_action: "skip", bcr_action: "skip", profile_action: "skip", queue_eligibility: "blocked", queue_blocker: "no email", ok: false, reason: "no email" });
@@ -131,6 +202,7 @@ Deno.serve(async (req) => {
       // 1. Contact upsert/match (idempotent via UNIQUE email)
       let contactId: string | undefined = p.existing_contact_id;
       if (!contactId) {
+        const ex = enrich.extras as any;
         const insertPayload = {
           email,
           first_name: row.first_name, last_name: row.last_name,
@@ -138,12 +210,22 @@ Deno.serve(async (req) => {
           role: row.title ?? null, company: row.company ?? null,
           country: row.country ?? null, linkedin_url: row.linkedin_url ?? null,
           apollo_person_id: row.apollo_person_id ?? null,
-          apollo_organization_id: row.apollo_org_id ?? null,
+          apollo_organization_id: row.apollo_org_id ?? ex.apollo_org_id_from_payload ?? null,
           assigned_business: row.business_name,
           active_campaign_id: body.campaign_id ?? null,
           status: "ACTIVE",
           sendable_status: "sendable",
           source: "autopilot_promotion",
+          // Rich mapping derived from already-stored Apollo enrichment payload (no new Apollo calls).
+          seniority: ex.seniority ?? null,
+          industry: ex.industry ?? null,
+          company_size: ex.company_size ?? null,
+          timezone: ex.timezone ?? null,
+          email_verified_status: ex.email_verified_status ?? "unknown",
+          intent_score: ex.intent_score ?? 0,
+          apollo_enrichment_status: enrich.raw_present ? "succeeded" : "pending",
+          apollo_last_enriched_at: enrich.raw_present ? new Date().toISOString() : null,
+          enriched_at: enrich.raw_present ? new Date().toISOString() : null,
         };
         const { data: ins, error: iErr } = await admin.from("contacts")
           .insert(insertPayload).select("id").maybeSingle();
@@ -177,7 +259,7 @@ Deno.serve(async (req) => {
           qualification_reason: "promoted from autopilot apollo reveal",
           campaign_eligible: false,
           current_stage: "ready_to_stage",
-          notes: `Created by promote-leads-to-contacts (autopilot_promotion). apollo_lead_id=${row.apollo_lead_id} apollo_person_id=${row.apollo_person_id ?? ""}`,
+          notes: `Created by promote-leads-to-contacts (autopilot_promotion). apollo_lead_id=${row.apollo_lead_id} apollo_person_id=${row.apollo_person_id ?? ""} apollo_org_id=${row.apollo_org_id ?? (enrich.extras as any).apollo_org_id_from_payload ?? ""} reveal_run_id=${enrich.run_id ?? ""} campaign_fit=${row.campaign_fit ?? ""} validation=valid_person_match source=apollo_reveal`,
         });
         if (bErr) {
           plan.find((x) => x.apollo_lead_id === p.apollo_lead_id)!.reason = `bcr insert failed: ${bErr.message}`;
