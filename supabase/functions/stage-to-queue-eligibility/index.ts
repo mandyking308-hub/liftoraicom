@@ -428,6 +428,8 @@ function emptySummary() {
   return {
     candidates_checked: 0, eligible_to_stage: 0, already_staged: 0,
     blocked_compliance_pending: 0,
+    excluded_wrong_bcr_stage: 0, excluded_wrong_qualification: 0,
+    excluded_already_campaign_eligible: 0,
     excluded_already_contacted: 0, excluded_pending_queue_row: 0,
     excluded_rejected: 0, excluded_suppressed_or_bounced: 0,
     excluded_do_not_contact: 0, excluded_active_conversation: 0,
