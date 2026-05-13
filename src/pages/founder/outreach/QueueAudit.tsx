@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Loader2, ShieldAlert, ShieldCheck, RefreshCw } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
 
 type AuditItem = {
   queue_id: string;
@@ -72,17 +75,92 @@ const QueueAudit = () => {
   const [data, setData] = useState<AuditResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  // ===== Cleanup gate state =====
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [reason, setReason] = useState<string>("founder_cleanup");
+  const [action, setAction] = useState<"park" | "cancel">("park");
+  const [previewedKey, setPreviewedKey] = useState<string | null>(null);
+  const [previewResult, setPreviewResult] = useState<any>(null);
+  const [ackChecked, setAckChecked] = useState(false);
+  const [confirmText, setConfirmText] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const CONFIRM = "I understand this only parks/cancels pending rows and sends nothing";
 
   const load = async () => {
     setLoading(true);
     setError(null);
     const { data: res, error: err } = await supabase.functions.invoke("outreach-queue-audit", { body: {} });
     if (err) setError(err.message);
-    else setData(res as AuditResponse);
+    else {
+      const r = res as AuditResponse;
+      setData(r);
+      // Default-select would_cancel + would_park; not would_review; not would_keep_blocked.
+      const def = new Set<string>();
+      const cp = r.cleanup_preview ?? {};
+      for (const x of (cp.would_cancel ?? []) as any[]) def.add(x.queue_id);
+      for (const x of (cp.would_park ?? []) as any[]) def.add(x.queue_id);
+      setSelected(def);
+      setPreviewedKey(null);
+      setPreviewResult(null);
+      setAckChecked(false);
+      setConfirmText("");
+    }
     setLoading(false);
   };
 
   useEffect(() => { load(); }, []);
+
+  const selKey = () => `${action}|${reason}|${[...selected].sort().join(",")}`;
+  const canApply = !!previewResult
+    && previewedKey === selKey()
+    && ackChecked
+    && confirmText === CONFIRM
+    && selected.size > 0
+    && !busy;
+
+  const runPreview = async () => {
+    if (selected.size === 0) { toast({ title: "Select at least one row", variant: "destructive" }); return; }
+    setBusy(true);
+    const { data: res, error: err } = await supabase.functions.invoke("outreach-queue-cleanup", {
+      body: { dry_run: true, queue_ids: [...selected], action, reason },
+    });
+    setBusy(false);
+    if (err) { toast({ title: "Preview failed", description: err.message, variant: "destructive" }); return; }
+    if (!(res as any)?.ok) { toast({ title: "Preview rejected", description: JSON.stringify(res), variant: "destructive" }); return; }
+    setPreviewResult(res);
+    setPreviewedKey(selKey());
+    toast({ title: "Preview ready — review and confirm to apply." });
+  };
+
+  const runApply = async () => {
+    if (!canApply) return;
+    setBusy(true);
+    const { data: res, error: err } = await supabase.functions.invoke("outreach-queue-cleanup", {
+      body: { dry_run: false, queue_ids: [...selected], action, reason, confirmation: CONFIRM },
+    });
+    setBusy(false);
+    if (err || !(res as any)?.ok) {
+      toast({ title: "Apply failed", description: err?.message ?? JSON.stringify(res), variant: "destructive" });
+      return;
+    }
+    toast({ title: `Cleanup applied — ${(res as any).rows_changed} row(s) ${(res as any).new_status}. No emails sent.` });
+    await load();
+  };
+
+  const toggleRow = (id: string) => {
+    setSelected(prev => {
+      const n = new Set(prev);
+      n.has(id) ? n.delete(id) : n.add(id);
+      return n;
+    });
+    setPreviewResult(null);
+    setPreviewedKey(null);
+    setAckChecked(false);
+    setConfirmText("");
+  };
 
   return (
     <div className="container max-w-7xl py-8 space-y-6">
@@ -283,6 +361,133 @@ const QueueAudit = () => {
                 ))}
               </div>
               <Button disabled className="mt-2">Apply disabled — audit hardening only</Button>
+            </CardContent>
+          </Card>
+
+          {/* ====== Cleanup / Park Pending Rows ====== */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Cleanup / Park Pending Rows</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 text-sm">
+              {/* Safety display */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                <div className="rounded border bg-muted/30 p-2"><div className="text-muted-foreground">auto_send_enabled</div><b>{JSON.stringify(data.baseline.auto_send_enabled_value)}</b></div>
+                <div className="rounded border bg-muted/30 p-2"><div className="text-muted-foreground">worker kill switch</div><b>{data.baseline.worker_guard_present_in_source ? "yes" : "no"}</b></div>
+                <div className="rounded border bg-muted/30 p-2"><div className="text-muted-foreground">cron_check</div><b>{data.baseline.cron_check}</b></div>
+                <div className="rounded border bg-muted/30 p-2"><div className="text-muted-foreground">safety_status</div><b>{data.summary.safety_status}</b></div>
+                <div className="rounded border bg-muted/30 p-2"><div className="text-muted-foreground">safe non-sendable park status</div><b>blocked</b></div>
+                <div className="rounded border bg-muted/30 p-2"><div className="text-muted-foreground">safe non-sendable cancel status</div><b>cancelled</b></div>
+                <div className="rounded border bg-muted/30 p-2"><div className="text-muted-foreground">dry_run default</div><b>true</b></div>
+                <div className="rounded border bg-muted/30 p-2"><div className="text-muted-foreground">SMTP / Apollo calls</div><b>0 / 0</b></div>
+              </div>
+
+              {data.baseline.cron_check === "unreadable_review_required" && (
+                <Alert>
+                  <ShieldAlert />
+                  <AlertTitle>Cron could not be verified.</AlertTitle>
+                  <AlertDescription>Cleanup is allowed only because it removes rows from sendable pending state. Sending remains blocked.</AlertDescription>
+                </Alert>
+              )}
+
+              {/* Action + reason */}
+              <div className="grid md:grid-cols-3 gap-3">
+                <div>
+                  <div className="text-xs text-muted-foreground mb-1">Action</div>
+                  <select className="w-full rounded border bg-background p-2 text-sm" value={action} onChange={(e) => { setAction(e.target.value as any); setPreviewResult(null); setPreviewedKey(null); setAckChecked(false); setConfirmText(""); }}>
+                    <option value="park">park → blocked</option>
+                    <option value="cancel">cancel → cancelled</option>
+                  </select>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground mb-1">Reason</div>
+                  <select className="w-full rounded border bg-background p-2 text-sm" value={reason} onChange={(e) => { setReason(e.target.value); setPreviewResult(null); setPreviewedKey(null); setAckChecked(false); setConfirmText(""); }}>
+                    {["founder_cleanup","legacy_pending","orphan_followup","cancel_candidate","review_required","safety_baseline_unverified"].map(r => <option key={r} value={r}>{r}</option>)}
+                  </select>
+                </div>
+                <div className="self-end text-xs text-muted-foreground">Selected rows: <b>{selected.size}</b> / max 10</div>
+              </div>
+
+              {/* Grouped selectable rows */}
+              {[
+                ["would_cancel", "Would cancel — selectable, default ON"],
+                ["would_park", "Would park — selectable, default ON"],
+                ["would_review", "Would require review — selectable, default OFF"],
+                ["would_keep_blocked", "Would keep blocked — NOT selectable here"],
+              ].map(([k, label]) => {
+                const groupRows = (data.cleanup_preview[k] ?? []) as { queue_id: string; reason: string }[];
+                const selectable = k !== "would_keep_blocked";
+                return (
+                  <div key={k} className="rounded-md border p-3">
+                    <div className="font-medium mb-2">{label} ({groupRows.length})</div>
+                    {groupRows.length === 0
+                      ? <div className="text-xs text-muted-foreground">—</div>
+                      : <div className="space-y-1">
+                          {groupRows.map(gr => {
+                            const it = data.items.find(i => i.queue_id === gr.queue_id);
+                            return (
+                              <div key={gr.queue_id} className="flex items-start gap-2 text-xs border-b py-1">
+                                <Checkbox
+                                  checked={selected.has(gr.queue_id)}
+                                  disabled={!selectable}
+                                  onCheckedChange={() => selectable && toggleRow(gr.queue_id)}
+                                />
+                                <div className="flex-1">
+                                  <div className="font-medium">{it?.contact_name ?? "—"} <span className="text-muted-foreground">{it?.contact_email}</span></div>
+                                  <div className="text-muted-foreground">step {it?.sequence_step} · {it?.classification} · <span className="font-mono">{gr.queue_id}</span></div>
+                                  <div className="text-muted-foreground">reason: {gr.reason}</div>
+                                  <div className="text-muted-foreground">recommended: {it?.recommended_action}</div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>}
+                  </div>
+                );
+              })}
+
+              {/* Preview + Apply controls */}
+              <div className="flex flex-col gap-3 rounded-md border p-3 bg-muted/20">
+                <div className="flex flex-wrap gap-2">
+                  <Button onClick={runPreview} disabled={busy || selected.size === 0} variant="outline">
+                    {busy ? <Loader2 className="animate-spin" /> : null} Preview Cleanup
+                  </Button>
+                  <Button onClick={runApply} disabled={!canApply} variant="destructive">
+                    Apply Cleanup — No Emails Sent
+                  </Button>
+                </div>
+
+                {previewResult && previewedKey === selKey() && (
+                  <div className="text-xs space-y-1 rounded border p-2 bg-background">
+                    <div className="font-medium">Preview result (dry_run)</div>
+                    <div>action: <b>{previewResult.preview.action}</b> → <b>{previewResult.preview.new_status}</b></div>
+                    <div>reason: <b>{previewResult.preview.reason}</b></div>
+                    <div>eligible_ids ({previewResult.preview.eligible_ids.length}): <span className="font-mono break-all">{previewResult.preview.eligible_ids.join(", ") || "—"}</span></div>
+                    {previewResult.preview.rejected.length > 0 && (
+                      <div className="text-destructive">rejected: {previewResult.preview.rejected.map((r: any) => `${r.queue_id.slice(0,8)}…(${r.reason})`).join(", ")}</div>
+                    )}
+                  </div>
+                )}
+
+                <label className="flex items-start gap-2 text-xs">
+                  <Checkbox checked={ackChecked} onCheckedChange={(v) => setAckChecked(!!v)} disabled={!previewResult || previewedKey !== selKey()} />
+                  <span>I understand this will only park/cancel pending queue rows and will not send emails.</span>
+                </label>
+
+                <div>
+                  <div className="text-xs text-muted-foreground mb-1">Type to confirm: <span className="font-mono">{CONFIRM}</span></div>
+                  <Input
+                    value={confirmText}
+                    onChange={(e) => setConfirmText(e.target.value)}
+                    disabled={!previewResult || previewedKey !== selKey()}
+                    placeholder={CONFIRM}
+                  />
+                </div>
+
+                {previewResult && previewedKey !== selKey() && (
+                  <div className="text-xs text-destructive">Selection or action/reason changed — re-run Preview before Apply.</div>
+                )}
+              </div>
             </CardContent>
           </Card>
 
