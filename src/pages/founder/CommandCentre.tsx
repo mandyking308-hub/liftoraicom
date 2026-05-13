@@ -13,6 +13,7 @@ import AutonomousPipelineStatus from "@/components/founder/AutonomousPipelineSta
 import AutopilotPolicyPanel from "@/components/founder/AutopilotPolicyPanel";
 import OutreachSafetyPanel from "@/components/founder/safety/OutreachSafetyPanel";
 import CommandCentreCoverageMap from "@/components/founder/safety/CommandCentreCoverageMap";
+import CommandCentreMasterIndex from "@/components/founder/command/CommandCentreMasterIndex";
 import { useOutreachSafetyAudit } from "@/hooks/useOutreachSafetyAudit";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { supabase } from "@/integrations/supabase/client";
