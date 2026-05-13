@@ -876,6 +876,9 @@ const CommandCentre = () => {
           </div>
         );
       })()}
+      <div className="mt-6">
+        <CommandCentreCoverageMap />
+      </div>
     </FounderLayout>
   );
 };
