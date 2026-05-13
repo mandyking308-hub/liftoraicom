@@ -986,6 +986,27 @@ Deno.serve(async (req) => {
 
   Object.assign(counters as any, validationCounts);
 
+  // Persist validation results back to the originating run if this is a backfill.
+  if (backfillRunId && postRevealValidations.length > 0) {
+    const { data: priorRow } = await admin
+      .from("autopilot_runs").select("details").eq("id", backfillRunId).maybeSingle();
+    const priorDetails: any = (priorRow?.details ?? {}) as any;
+    const mergedCounters = { ...(priorDetails.counters ?? {}), ...validationCounts };
+    await admin.from("autopilot_runs").update({
+      details: {
+        ...priorDetails,
+        counters: mergedCounters,
+        post_reveal_validations: postRevealValidations,
+        post_reveal_validation_backfilled_at: new Date().toISOString(),
+        post_reveal_validation_backfilled_by_run: runId,
+      } as never,
+      safe_to_promote: mergedCounters.valid_for_auto_promotion ?? priorDetails.counters?.promote_planned ?? 0,
+      next_recommended_action: validationCounts.needs_founder_review > 0
+        ? `Promote ${validationCounts.valid_for_auto_promotion} validation-clean contacts. Review ${validationCounts.needs_founder_review} founder decision${validationCounts.needs_founder_review === 1 ? "" : "s"}.`
+        : `Promote ${validationCounts.valid_for_auto_promotion} validation-clean contacts.`,
+    }).eq("id", backfillRunId);
+  }
+
   // ---------- Stage 3: Auto-promote (post-reveal) → contacts + BCR ----------
   if (policy.auto_promote_after_valid_reveal) {
     const { data: postReveal } = await admin
