@@ -202,10 +202,41 @@ export default function LeadQualityPanel() {
   };
 
   const decideOn = async (id: string, status: "approved"|"rejected"|"hold") => {
+    // Look up the decision so promotion_approval can trigger the actual promotion.
+    const decision = (pendingDecisions ?? []).find((d: any) => d.id === id);
+    const note =
+      status === "approved" && decision?.decision_type === "promotion_approval"
+        ? "Approved via founder decision card — invoking promote-leads-to-contacts (idempotent: unique email + unique BCR)."
+        : status === "approved"
+          ? "Approved via founder decision card. No automatic side-effect — founder must run the relevant action."
+          : status === "rejected"
+            ? "Rejected via founder decision card."
+            : "Held via founder decision card.";
     const { error } = await (supabase as any).from("founder_decisions")
-      .update({ status, decided_at: new Date().toISOString() }).eq("id", id);
-    if (error) toast.error("Failed", { description: error.message });
-    else { toast.success(`Decision ${status}`); refetchDecisions(); }
+      .update({ status, decided_at: new Date().toISOString(), resolution_note: note })
+      .eq("id", id);
+    if (error) { toast.error("Failed", { description: error.message }); return; }
+    if (status === "approved" && decision?.decision_type === "promotion_approval") {
+      try {
+        const { data, error: pErr } = await supabase.functions.invoke(
+          "promote-leads-to-contacts",
+          { body: { dry_run: false, limit: 100 } },
+        );
+        if (pErr) throw pErr;
+        const summary = (data as any)?.summary;
+        toast.success("Promotion executed", {
+          description: `Promoted ${summary?.promoted ?? 0} · ready ${summary?.ready ?? 0} · blocked ${summary?.blocked ?? 0}`,
+        });
+      } catch (e: any) {
+        toast.error("Promotion failed (decision still marked approved)", { description: e?.message ?? String(e) });
+      }
+      qc.invalidateQueries({ queryKey: ["lead-lifecycle-summary"] });
+      qc.invalidateQueries({ queryKey: ["crm-spine-summary"] });
+      refetchAutopilot();
+    } else {
+      toast.success(`Decision ${status}`);
+    }
+    refetchDecisions();
   };
 
   // Last Apollo unlock run + previously-attempted-no-email count
