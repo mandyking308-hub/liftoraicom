@@ -91,32 +91,29 @@ Deno.serve(async (req) => {
     baseline.notes.push(`auto_send read error: ${(e as Error).message}`);
   }
 
-  // Best-effort cron inspection. cron schema may not be readable; treat failure as REVIEW_REQUIRED.
+  // Cron inspection via SECURITY DEFINER RPC (read-only, restricted to service_role).
   try {
     baseline.cron_query_attempted = true;
-    const { data: cronRows, error: cronErr } = await supa
-      .from("cron.job" as any)
-      .select("jobname,schedule,active,command");
-    if (!cronErr && cronRows) {
-      baseline.cron_query_ok = true;
-      for (const j of cronRows as any[]) {
-        const cmd = String(j.command ?? "");
-        const isOutbound = cmd.includes("outreach-send-worker");
-        const isInbound = cmd.includes("outreach-inbound-poll") || cmd.includes("outreach-inbound-webhook");
-        const entry = { jobname: j.jobname, schedule: j.schedule, active: j.active };
-        if (isOutbound && j.active) baseline.cron_outbound_send_jobs.push(entry);
-        else if (isInbound) baseline.cron_inbound_only_jobs.push(entry);
-        else if (!isOutbound && !isInbound) baseline.cron_unknown_jobs.push(entry);
+    const { data: cronStatus, error: cronErr } = await supa.rpc("get_outreach_send_cron_status");
+    if (!cronErr && cronStatus) {
+      const cs: any = cronStatus;
+      if (cs.cron_readable) {
+        baseline.cron_query_ok = true;
+        baseline.cron_outbound_send_jobs = (cs.active_job_names ?? []).map((n: string) => ({ jobname: n, active: true }));
+        baseline.cron_check = cs.active_sender_found
+          ? "active_sender_found_unsafe"
+          : "verified_disabled";
+        baseline.notes.push(`cron RPC: active=${cs.active_sender_count} disabled=${cs.disabled_sender_count}`);
+      } else {
+        baseline.cron_check = "unreadable_review_required";
+        baseline.notes.push("cron RPC reports cron schema unreadable");
       }
-      baseline.cron_check = baseline.cron_outbound_send_jobs.length > 0
-        ? "active_sender_found_unsafe"
-        : "verified_disabled";
     } else {
-      baseline.notes.push(`cron query failed: ${cronErr?.message ?? "unknown"}`);
+      baseline.notes.push(`cron RPC failed: ${cronErr?.message ?? "no result"}`);
       baseline.cron_check = "unreadable_review_required";
     }
   } catch (e) {
-    baseline.notes.push(`cron query exception: ${(e as Error).message}`);
+    baseline.notes.push(`cron RPC exception: ${(e as Error).message}`);
     baseline.cron_check = "unreadable_review_required";
   }
 
