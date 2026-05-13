@@ -145,6 +145,8 @@ export default function LeadQualityPanel() {
   const [stageAppliedResult, setStageAppliedResult] = useState<any>(null);
   const [compliancePreviewResult, setCompliancePreviewResult] = useState<any>(null);
   const [complianceAppliedResult, setComplianceAppliedResult] = useState<any>(null);
+  const [queuePreviewResult, setQueuePreviewResult] = useState<any>(null);
+  const [queueAppliedResult, setQueueAppliedResult] = useState<any>(null);
 
   const { data: overview, isLoading } = useQuery({
     queryKey: ["lead-quality-overview"],
