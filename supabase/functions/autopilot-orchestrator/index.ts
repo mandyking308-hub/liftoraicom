@@ -733,6 +733,7 @@ Deno.serve(async (req) => {
       blocked_reason: blockedReason,
       selected_candidates: selectedCandidates,
       eligible_not_selected: eligibleNotSelected.slice(0, 100),
+      duplicates_held_back: duplicatesHeldBack.slice(0, 100),
       policy_snapshot: {
         apollo_email_reveal_autonomous: policy.apollo_email_reveal_autonomous,
         auto_promote_after_valid_reveal: policy.auto_promote_after_valid_reveal,
@@ -769,6 +770,7 @@ Deno.serve(async (req) => {
     counters,
     selected_candidates: selectedCandidates,
     eligible_not_selected: eligibleNotSelected.slice(0, 100),
+    duplicates_held_back: duplicatesHeldBack.slice(0, 100),
     sample_skips: sampleSkips.slice(0, 20),
   });
 });
