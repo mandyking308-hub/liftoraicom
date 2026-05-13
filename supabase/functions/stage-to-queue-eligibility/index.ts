@@ -204,7 +204,7 @@ Deno.serve(async (req) => {
     const base: PlanRow = {
       contact_id: c.id,
       email: c.email ?? null,
-      name: c.name ?? [c.first_name, c.last_name].filter(Boolean).join(" ") || null,
+      name: (c.name ?? ([c.first_name, c.last_name].filter(Boolean).join(" ") || null)),
       company: c.company ?? null,
       bcr_id: bcr?.id ?? null,
       business_id: bcr?.business_id ?? null,
