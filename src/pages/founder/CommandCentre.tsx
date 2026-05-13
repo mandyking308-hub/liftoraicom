@@ -126,6 +126,7 @@ const CommandCentre = () => {
         already_in_crm_after_reveal?: number;
         total_leads?: number;
         reveal_shortlisted?: number;
+        founder_review_required?: number;
       } | null;
     },
     refetchInterval: 60000,
@@ -479,7 +480,7 @@ const CommandCentre = () => {
             anchor: "#sec-autopilot",
           },
           {
-            key: "promote", label: "Promote to Contact", icon: CheckCircle2,
+            key: "promote", label: "Promote (validation-clean)", icon: CheckCircle2,
             count: leadLifecycle?.safe_to_promote_after_reveal ?? leadLifecycle?.safe_to_promote ?? 0,
             status: (leadLifecycle?.safe_to_promote_after_reveal ?? 0) > 0 ? "active" : "not_started",
             blocker: (leadLifecycle?.safe_to_promote_after_reveal ?? 0) === 0 ? "Blocked until email reveal completes" : null,
@@ -818,9 +819,9 @@ function ApolloRevealStageStrip({ lifecycle }: { lifecycle: any }) {
     { n: 2, label: "Email reveal required", value: reveal_required, tone: reveal_required > 0 ? "warn" : "default" },
     { n: 3, label: "Reveal shortlist built", value: lifecycle?.reveal_shortlisted ?? 0 },
     { n: 4, label: "Founder approves reveal credits", value: "manual", tone: "default" },
-    { n: 5, label: "Emails returned", value: lifecycle?.safe_to_promote_after_reveal ?? 0 },
+    { n: 5, label: "Emails returned", value: (lifecycle?.safe_to_promote_after_reveal ?? 0) + (lifecycle?.founder_review_required ?? 0) + (lifecycle?.already_in_crm_after_reveal ?? 0) },
     { n: 6, label: "Post-reveal CRM check", value: lifecycle?.already_in_crm_after_reveal ?? 0 },
-    { n: 7, label: "Safe to promote", value: lifecycle?.safe_to_promote_after_reveal ?? lifecycle?.safe_to_promote ?? 0, tone: "good" },
+    { n: 7, label: "Safe to promote (validation-clean)", value: lifecycle?.safe_to_promote_after_reveal ?? lifecycle?.safe_to_promote ?? 0, tone: "good" },
     { n: 8, label: "Safe to queue", value: lifecycle?.safe_to_queue ?? 0, tone: "good" },
     { n: 9, label: "Send", value: "controlled", tone: "default" },
   ];
