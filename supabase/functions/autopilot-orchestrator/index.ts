@@ -801,6 +801,36 @@ Deno.serve(async (req) => {
 
   // Collect revealed emails (from this run's outcomes OR existing rows already
   // marked safe_to_promote_after_reveal so post-reveal-only re-runs work too).
+  // BACKFILL: if this run did not perform a reveal but a previous run did and
+  // never had post-reveal validation persisted, hydrate revealOutcomes from
+  // that prior run so we can validate, persist, and reconcile counters.
+  let backfillRunId: string | null = null;
+  let backfillFromOutcomes = false;
+  if (revealOutcomes.length === 0) {
+    const { data: priorRuns } = await admin
+      .from("autopilot_runs")
+      .select("id, details, created_at")
+      .eq("business_id", businessId)
+      .order("created_at", { ascending: false })
+      .limit(10);
+    for (const r of priorRuns ?? []) {
+      const d: any = r.details ?? {};
+      const ros: any[] = Array.isArray(d.reveal_outcomes) ? d.reveal_outcomes : [];
+      const hasSuccess = ros.some((o: any) => o.email_returned && o.email);
+      const alreadyValidated = Array.isArray(d.post_reveal_validations) && d.post_reveal_validations.length > 0;
+      if (hasSuccess && !alreadyValidated) {
+        backfillRunId = r.id;
+        backfillFromOutcomes = true;
+        for (const o of ros) revealOutcomes.push(o);
+        break;
+      }
+    }
+    if (backfillFromOutcomes) {
+      await event("post_reveal_validation_backfill",
+        `Backfilling post-reveal validation against prior run ${backfillRunId}`,
+        "low", { backfill_run_id: backfillRunId, outcomes: revealOutcomes.length });
+    }
+  }
   const successOutcomes = revealOutcomes.filter((o: any) => o.email_returned && o.email);
   const emailFreq = new Map<string, number>();
   for (const o of successOutcomes) {
@@ -922,7 +952,9 @@ Deno.serve(async (req) => {
     });
 
     // Founder decision for the high-risk possible-wrong-person case.
-    if (!dryRun && status === "possible_wrong_person") {
+    // Created in both live and dry-run/backfill modes — it's a UI decision item,
+    // not a credit-spend, and must surface for already-revealed emails too.
+    if (status === "possible_wrong_person") {
       const { data: existingDec } = await admin.from("founder_decisions")
         .select("id").eq("business_id", businessId)
         .eq("decision_type", "possible_wrong_person_email_match")
@@ -953,6 +985,27 @@ Deno.serve(async (req) => {
     { validation_counts: validationCounts });
 
   Object.assign(counters as any, validationCounts);
+
+  // Persist validation results back to the originating run if this is a backfill.
+  if (backfillRunId && postRevealValidations.length > 0) {
+    const { data: priorRow } = await admin
+      .from("autopilot_runs").select("details").eq("id", backfillRunId).maybeSingle();
+    const priorDetails: any = (priorRow?.details ?? {}) as any;
+    const mergedCounters = { ...(priorDetails.counters ?? {}), ...validationCounts };
+    await admin.from("autopilot_runs").update({
+      details: {
+        ...priorDetails,
+        counters: mergedCounters,
+        post_reveal_validations: postRevealValidations,
+        post_reveal_validation_backfilled_at: new Date().toISOString(),
+        post_reveal_validation_backfilled_by_run: runId,
+      } as never,
+      safe_to_promote: mergedCounters.valid_for_auto_promotion ?? priorDetails.counters?.promote_planned ?? 0,
+      next_recommended_action: validationCounts.needs_founder_review > 0
+        ? `Promote ${validationCounts.valid_for_auto_promotion} validation-clean contacts. Review ${validationCounts.needs_founder_review} founder decision${validationCounts.needs_founder_review === 1 ? "" : "s"}.`
+        : `Promote ${validationCounts.valid_for_auto_promotion} validation-clean contacts.`,
+    }).eq("id", backfillRunId);
+  }
 
   // ---------- Stage 3: Auto-promote (post-reveal) → contacts + BCR ----------
   if (policy.auto_promote_after_valid_reveal) {
@@ -1145,6 +1198,12 @@ Deno.serve(async (req) => {
           : "Configure external sending provider before auto-send.";
       }
       if (counters.candidates_pulled === 0) return "No reveal candidates — pull fresh Apollo if needed";
+      if ((counters as any).post_reveal_validated > 0) {
+        const v = (counters as any).valid_for_auto_promotion ?? 0;
+        const r = (counters as any).needs_founder_review ?? 0;
+        if (r > 0) return `Promote ${v} validation-clean contacts. Review ${r} founder decision${r === 1 ? "" : "s"}.`;
+        return `Promote ${v} validation-clean contacts.`;
+      }
       if (counters.passed_quality_policy === 0 && counters.skipped_missing_score > 0)
         return "Repair candidate scoring / quality profile linkage";
       if (counters.passed_quality_policy === 0)
