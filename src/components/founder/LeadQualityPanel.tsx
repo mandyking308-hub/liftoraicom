@@ -707,6 +707,70 @@ export default function LeadQualityPanel() {
           </div>
         )}
 
+        {/* === Compliance readiness === */}
+        {complianceSummary && complianceSummary.total > 0 && (
+          <div className="rounded-md border border-primary/30 bg-card/40 p-4 space-y-3">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <p className="text-sm font-semibold text-foreground flex items-center gap-2">
+                <ShieldCheck size={14} className="text-primary" /> Compliance readiness
+                <Badge variant="outline" className="text-[10px]">Per-contact legal spine</Badge>
+              </p>
+              <Badge variant={complianceSummary.outreach_allowed > 0 ? "default" : "outline"} className="text-[10px]">
+                {complianceSummary.outreach_allowed} outreach-allowed · {complianceSummary.outreach_blocked} blocked
+              </Badge>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+              <Tile label="CRM contacts (Apollo-sourced)" value={complianceSummary.total} />
+              <Tile label="Lawful basis present" value={complianceSummary.lawful_basis_present} tone="good" />
+              <Tile label="Unsubscribe token present" value={complianceSummary.unsubscribe_token_present} tone="good" />
+              <Tile label="Retention set (active)" value={complianceSummary.retention_set} tone="good" />
+              <Tile label="Compliance pending review" value={complianceSummary.pending_review} tone={complianceSummary.pending_review > 0 ? "warn" : "default"} />
+              <Tile label="Outreach allowed" value={complianceSummary.outreach_allowed} tone={complianceSummary.outreach_allowed > 0 ? "good" : "default"} />
+              <Tile label="Outreach blocked" value={complianceSummary.outreach_blocked} tone={complianceSummary.outreach_blocked > 0 ? "warn" : "default"} />
+              <Tile label="Suppressed" value={complianceSummary.suppressed} tone={complianceSummary.suppressed > 0 ? "warn" : "default"} />
+              <Tile label="Hard bounced" value={complianceSummary.hard_bounced} tone={complianceSummary.hard_bounced > 0 ? "danger" : "default"} />
+              <Tile label="Unsubscribed" value={complianceSummary.unsubscribed} tone={complianceSummary.unsubscribed > 0 ? "warn" : "default"} />
+            </div>
+            <div className="overflow-x-auto rounded border border-border/40">
+              <table className="w-full text-[11px]">
+                <thead className="bg-muted/30 text-muted-foreground">
+                  <tr>
+                    <th className="text-left px-2 py-1">Contact</th>
+                    <th className="text-left px-2 py-1">Business</th>
+                    <th className="text-left px-2 py-1">Status</th>
+                    <th className="text-left px-2 py-1">Lawful basis</th>
+                    <th className="text-left px-2 py-1">Unsub token</th>
+                    <th className="text-left px-2 py-1">Retention</th>
+                    <th className="text-left px-2 py-1">Compliance</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {complianceSummary.rows
+                    .filter(r => r.assigned_business === "Neon Candy")
+                    .map(r => (
+                      <tr key={r.id} className="border-t border-border/30">
+                        <td className="px-2 py-1">{r.name || r.email}</td>
+                        <td className="px-2 py-1">{r.assigned_business || "—"}</td>
+                        <td className="px-2 py-1">{r.status}</td>
+                        <td className="px-2 py-1">{r.lawful_basis ?? "—"}</td>
+                        <td className="px-2 py-1">{r.unsubscribe_token ? "yes" : "no"}</td>
+                        <td className="px-2 py-1">{r.retention_until ? new Date(r.retention_until).toLocaleDateString() : "—"}</td>
+                        <td className="px-2 py-1">
+                          <Badge variant="outline" className="text-[10px]">
+                            {r.compliance_status ?? "—"}
+                          </Badge>
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+            <p className="text-[10px] text-muted-foreground">
+              <code>pending_review</code> blocks outreach by design. The founder must explicitly approve <code>compliance_status='outreach_allowed'</code> per contact before any queue or send is permitted. Auto-send remains OFF.
+            </p>
+          </div>
+        )}
+
         {/* === Stage-to-Queue Eligibility Gate ===
             Founder-controlled gate that flips qualified BCRs from
             ready_to_stage / needs_review / not eligible →
