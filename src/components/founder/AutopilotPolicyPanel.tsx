@@ -67,14 +67,15 @@ export default function AutopilotPolicyPanel({ businessName = "Neon Candy" }: { 
   const save = async () => {
     setSaving(true);
     try {
+      const prev = (loaded ?? {}) as any;
       const sensitive: string[] = [];
-      if (loaded?.auto_send_after_queue !== policy.auto_send_after_queue && policy.auto_send_after_queue) {
+      if (prev.auto_send_after_queue !== policy.auto_send_after_queue && policy.auto_send_after_queue) {
         sensitive.push("enable_auto_send");
       }
-      if (policy.apollo_reveal_daily_credit_budget > (loaded?.apollo_reveal_daily_credit_budget ?? 0) * 2 + 1) {
+      if (policy.apollo_reveal_daily_credit_budget > (prev.apollo_reveal_daily_credit_budget ?? 0) * 2 + 1) {
         sensitive.push("budget_increase");
       }
-      if (loaded?.sending_provider_mode !== policy.sending_provider_mode) {
+      if (prev.sending_provider_mode !== policy.sending_provider_mode) {
         sensitive.push("provider_approval");
       }
 
