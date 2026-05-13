@@ -277,6 +277,17 @@ export default function LeadQualityPanel() {
     },
   });
 
+  const { data: excludedRejectedCount } = useQuery({
+    queryKey: ["apollo-rejected-excluded-count"],
+    queryFn: async () => {
+      const { count } = await (supabase as any)
+        .from("apollo_raw_leads")
+        .select("apollo_lead_id", { count: "exact", head: true })
+        .in("quality_status", ["rejected", "needs_founder_review"]);
+      return count ?? 0;
+    },
+  });
+
   const call = async (
     fn: "lead-quality-scan" | "lead-fit-classify" | "promote-leads-to-contacts" | "enqueue-eligible-contacts" | "apollo-unlock-shortlist" | "apollo-unlock-selected",
     body: any,
