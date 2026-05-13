@@ -9,6 +9,8 @@ import ExecutionStatusPanel from "@/components/founder/ExecutionStatusPanel";
 import LeadQualityPanel from "@/components/founder/LeadQualityPanel";
 import SourceQualityBrief from "@/components/founder/SourceQualityBrief";
 import ApolloPullPanel from "@/components/founder/ApolloPullPanel";
+import AutonomousPipelineStatus from "@/components/founder/AutonomousPipelineStatus";
+import AutopilotPolicyPanel from "@/components/founder/AutopilotPolicyPanel";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -602,6 +604,7 @@ const CommandCentre = () => {
 
             {/* SECTION 4 — Source Leads / Apollo */}
             <div id="sec-source" className="space-y-4 scroll-mt-24">
+              <AutonomousPipelineStatus businessName="Neon Candy" />
               <ApolloRevealStageStrip lifecycle={leadLifecycle} />
               <ApolloPullPanel />
               <SourceQualityBrief />
@@ -610,6 +613,9 @@ const CommandCentre = () => {
             {/* SECTION 5 — Lead Quality Autopilot */}
             <div id="sec-autopilot" className="scroll-mt-24">
               <LeadQualityPanel />
+              <div className="mt-4">
+                <AutopilotPolicyPanel businessName="Neon Candy" />
+              </div>
             </div>
 
             {/* SECTION 6 — CRM Spine (compact health card) */}
