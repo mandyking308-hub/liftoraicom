@@ -625,14 +625,14 @@ export default function LeadQualityPanel() {
           </div>
 
           <div className="flex flex-wrap gap-2 items-center">
-            <p className="text-xs text-muted-foreground w-full">4. Promote qualified leads to contacts</p>
+            <p className="text-xs text-muted-foreground w-full">4. Promote {lifecycle?.safe_to_promote ?? 0} validation-clean contact(s){(overview?.needs_founder_review ?? 0) > 0 ? ` · review/hold ${overview?.needs_founder_review} founder decision(s)` : ""}</p>
             <Button size="sm" variant="outline" disabled={!!busy}
               onClick={() => call("promote-leads-to-contacts", { dry_run: true, limit: 100 }, "Promote preview")}>
-              {busy === "Promote preview" ? <Loader2 className="animate-spin" size={14} /> : "Preview promote"}
+              {busy === "Promote preview" ? <Loader2 className="animate-spin" size={14} /> : `Preview promote (${lifecycle?.safe_to_promote ?? 0})`}
             </Button>
             <Button size="sm" disabled={!!busy}
               onClick={() => call("promote-leads-to-contacts", { dry_run: false, limit: 100 }, "Promote apply")}>
-              {busy === "Promote apply" ? <Loader2 className="animate-spin" size={14} /> : "Apply promote"}
+              {busy === "Promote apply" ? <Loader2 className="animate-spin" size={14} /> : `Promote ${lifecycle?.safe_to_promote ?? 0} validation-clean contact(s)`}
             </Button>
           </div>
 
