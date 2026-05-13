@@ -201,6 +201,7 @@ Deno.serve(async (req) => {
 
       // 1. Contact upsert/match (idempotent via UNIQUE email)
       let contactId: string | undefined = p.existing_contact_id;
+      const enrich = deriveApolloExtras(row.apollo_lead_id);
       if (!contactId) {
         const ex = enrich.extras as any;
         const insertPayload = {
