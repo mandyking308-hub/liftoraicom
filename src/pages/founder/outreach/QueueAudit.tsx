@@ -92,8 +92,42 @@ const QueueAudit = () => {
   const load = async () => {
     setLoading(true);
     setError(null);
-    const { data: res, error: err } = await supabase.functions.invoke("outreach-queue-audit", { body: {} });
-    if (err) setError(err.message);
+    const { data: sessionData } = await supabase.auth.getSession();
+    const session = sessionData?.session;
+    if (!session?.access_token) {
+      setError("Please log in as founder/admin to view queue audit.");
+      setLoading(false);
+      return;
+    }
+    let res: any = null;
+    let errMsg: string | null = null;
+    try {
+      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/outreach-queue-audit`;
+      const resp = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session.access_token}`,
+          "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        },
+        body: JSON.stringify({}),
+      });
+      const text = await resp.text();
+      let parsed: any = null;
+      try { parsed = text ? JSON.parse(text) : null; } catch { /* ignore */ }
+      if (!resp.ok) {
+        errMsg = `[outreach-queue-audit] HTTP ${resp.status} ${resp.statusText}`
+          + ` · session_token=present · authenticated=${!!session.user}`
+          + ` · category=${resp.status === 401 ? "AUTH" : resp.status === 403 ? "AUTHORIZATION" : resp.status >= 500 ? "SERVER" : "CLIENT"}`
+          + (parsed?.error ? ` · error="${parsed.error}"` : "")
+          + (parsed?.detail ? ` · detail="${parsed.detail}"` : (text && !parsed ? ` · body="${text.slice(0,300)}"` : ""));
+      } else {
+        res = parsed;
+      }
+    } catch (netErr: any) {
+      errMsg = `[outreach-queue-audit] NETWORK/CORS failure · session_token=present · authenticated=${!!session.user} · message="${netErr?.message ?? String(netErr)}"`;
+    }
+    if (errMsg) setError(errMsg);
     else {
       const r = res as AuditResponse;
       setData(r);
