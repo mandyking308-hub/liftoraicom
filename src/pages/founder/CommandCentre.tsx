@@ -11,6 +11,8 @@ import SourceQualityBrief from "@/components/founder/SourceQualityBrief";
 import ApolloPullPanel from "@/components/founder/ApolloPullPanel";
 import AutonomousPipelineStatus from "@/components/founder/AutonomousPipelineStatus";
 import AutopilotPolicyPanel from "@/components/founder/AutopilotPolicyPanel";
+import OutreachSafetyPanel from "@/components/founder/safety/OutreachSafetyPanel";
+import { useOutreachSafetyAudit } from "@/hooks/useOutreachSafetyAudit";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -59,6 +61,13 @@ const Section = ({ title, icon: Icon, action, children }: any) => (
 );
 
 const CommandCentre = () => {
+  // Single source of truth for outreach send brake (shared with /founder/outreach/queue-audit).
+  const { data: safetyAudit } = useOutreachSafetyAudit();
+  const safetyStatus = safetyAudit?.summary?.safety_status;
+  const cronCheck = safetyAudit?.summary?.cron_check ?? safetyAudit?.baseline?.cron_check;
+  const autoSendStrictFalse = safetyAudit?.baseline?.auto_send_is_strict_false ?? false;
+  const isSafeBlocked = safetyStatus === "SAFE_BLOCKED" && autoSendStrictFalse && cronCheck === "verified_disabled";
+  const sendUnsafe = !isSafeBlocked;
   // Businesses
   const { data: businesses = [] } = useQuery({
     queryKey: ["cc2-businesses"],
@@ -548,6 +557,9 @@ const CommandCentre = () => {
                 </Link>
               </div>
             </div>
+
+            {/* OUTREACH SAFETY / QUEUE BRAKE — read-only, shared source of truth with /founder/outreach/queue-audit */}
+            <OutreachSafetyPanel />
 
             <div className="flex items-end justify-between flex-wrap gap-3">
               <div>
