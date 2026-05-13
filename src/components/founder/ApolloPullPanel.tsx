@@ -79,21 +79,21 @@ export default function ApolloPullPanel() {
     <Card className="tech-card">
       <CardHeader className="pb-2">
         <CardTitle className="text-base flex items-center gap-2 flex-wrap">
-          <DownloadCloud size={16} /> Pull verified Apollo leads
+          <DownloadCloud size={16} /> Pull Apollo candidates
           <Badge variant="outline" className="text-[10px] border-green-500/40 text-green-300">
-            verified-email only
+            verified-email availability only
           </Badge>
           <Badge variant="outline" className="text-[10px] border-green-500/40 text-green-300">
-            no unlock credits
+            no unlock credits spent
           </Badge>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-xs text-muted-foreground">
-          Pulls verified-email-available candidates from Apollo using the NeonCandy Source Quality Brief
-          into staging, then runs Lead Quality Autopilot. Apollo confirms an email exists but does NOT
-          release the address — reveal requires a founder-approved unlock. No credits spent on this pull.
-          No promotions, no queue rows, no sends.
+          Verified-email availability only — actual email reveal requires founder approval and Apollo
+          credits. Pulls Apollo candidate profiles using the NeonCandy Source Quality Brief into
+          staging, then runs Lead Quality Autopilot. Actual email remains locked until founder-approved
+          reveal. No credits spent, no promotions, no queue rows, no sends.
         </p>
 
         <div className="grid md:grid-cols-3 gap-3">
@@ -138,12 +138,12 @@ export default function ApolloPullPanel() {
         <div className="flex flex-wrap items-center gap-2">
           {!confirming ? (
             <Button size="sm" onClick={() => setConfirming(true)} disabled={running}>
-              <DownloadCloud size={14} className="mr-1" /> Pull verified Apollo leads
+              <DownloadCloud size={14} className="mr-1" /> Pull Apollo candidates
             </Button>
           ) : (
             <>
               <span className="text-xs text-yellow-300 flex items-center gap-1">
-                <ShieldCheck size={12} /> Confirm: pull up to {importLimit} verified-email leads — no unlock credits
+                <ShieldCheck size={12} /> Confirm: pull up to {importLimit} Apollo candidate profiles — no unlock credits spent
               </span>
               <Button size="sm" onClick={run} disabled={running}>
                 {running ? <Loader2 size={14} className="animate-spin mr-1" /> : null}
