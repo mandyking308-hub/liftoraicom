@@ -1198,6 +1198,12 @@ Deno.serve(async (req) => {
           : "Configure external sending provider before auto-send.";
       }
       if (counters.candidates_pulled === 0) return "No reveal candidates — pull fresh Apollo if needed";
+      if ((counters as any).post_reveal_validated > 0) {
+        const v = (counters as any).valid_for_auto_promotion ?? 0;
+        const r = (counters as any).needs_founder_review ?? 0;
+        if (r > 0) return `Promote ${v} validation-clean contacts. Review ${r} founder decision${r === 1 ? "" : "s"}.`;
+        return `Promote ${v} validation-clean contacts.`;
+      }
       if (counters.passed_quality_policy === 0 && counters.skipped_missing_score > 0)
         return "Repair candidate scoring / quality profile linkage";
       if (counters.passed_quality_policy === 0)
