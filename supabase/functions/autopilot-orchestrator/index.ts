@@ -1037,6 +1037,11 @@ Deno.serve(async (req) => {
   }
 
   // ---------- Stage 4: Auto-queue Step 1 ----------
+  const queueBlockerReasons: Record<string, number> = {};
+  const bumpQ = (k: string) => { queueBlockerReasons[k] = (queueBlockerReasons[k] ?? 0) + 1; };
+  if (!policy.auto_queue_after_promotion) bumpQ("auto_queue_disabled");
+  if (!policy.auto_queue_campaign_id) bumpQ("no_active_campaign_configured");
+  if (!policy.auto_send_after_queue) bumpQ("auto_send_off_provider_" + (policy.sending_provider_mode ?? "unknown"));
   if (policy.auto_queue_after_promotion && policy.auto_queue_campaign_id) {
     const { data: bcrs } = await admin.from("business_contact_relationships")
       .select("contact_id, qualification, do_not_contact, current_stage")
@@ -1058,11 +1063,15 @@ Deno.serve(async (req) => {
     for (const c of promoted ?? []) {
       const domain = (c.email ?? "").split("@")[1]?.toLowerCase() ?? "";
       const cnt = domainCount.get(domain) ?? 0;
-      if (cnt >= policy.auto_queue_domain_cap) { counters.queue_skipped++; continue; }
+      if (cnt >= policy.auto_queue_domain_cap) {
+        counters.queue_skipped++; bumpQ("domain_cap_reached"); continue;
+      }
 
       const { data: existing } = await admin.from("email_queue")
         .select("id").eq("contact_id", c.id).in("status", ["pending", "sent"]).limit(1);
-      if (existing && existing.length) { counters.queue_skipped++; continue; }
+      if (existing && existing.length) {
+        counters.queue_skipped++; bumpQ("duplicate_pending_or_sent_queue_row"); continue;
+      }
 
       counters.queue_planned++;
       domainCount.set(domain, cnt + 1);
@@ -1070,7 +1079,7 @@ Deno.serve(async (req) => {
       if (dryRun) continue;
 
       const { data: inboxId } = await admin.rpc("assign_inbox_for_contact", { _contact_id: c.id });
-      if (!inboxId) { counters.queue_skipped++; continue; }
+      if (!inboxId) { counters.queue_skipped++; bumpQ("no_assignable_inbox"); continue; }
       const sched = new Date(); sched.setUTCHours(9, 0, 0, 0);
       const { error: qErr } = await admin.from("email_queue").insert({
         contact_id: c.id, campaign_id: policy.auto_queue_campaign_id,
@@ -1081,9 +1090,15 @@ Deno.serve(async (req) => {
       if (!qErr) {
         await admin.from("contacts").update({ active_campaign_id: policy.auto_queue_campaign_id }).eq("id", c.id);
         await event("queued", `Queued step 1 for ${c.email}`, "low", { contact_id: c.id });
+      } else {
+        counters.queue_skipped++; bumpQ("queue_insert_error_" + (qErr.code ?? "unknown"));
       }
     }
   }
+  validationCounts.queue_ready = counters.queue_planned;
+  validationCounts.queue_blocked = counters.queue_skipped + Object.values(queueBlockerReasons).reduce((a,b)=>a+b,0);
+  (counters as any).queue_blocker_reasons = queueBlockerReasons;
+  Object.assign(counters as any, validationCounts);
 
   // ---------- Stage 5: Send (gated) ----------
   // Worker runs separately. Orchestrator only records policy state and would_send count.
