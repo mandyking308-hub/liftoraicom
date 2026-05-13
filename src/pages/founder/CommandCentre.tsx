@@ -641,6 +641,9 @@ const CommandCentre = () => {
 
             {/* SECTION 4 — Source Leads / Apollo */}
             <div id="sec-source" className="space-y-4 scroll-mt-24">
+              <div className="rounded-md border border-border/50 bg-muted/20 px-3 py-2 text-[11px] text-muted-foreground">
+                Historical Apollo reveal execution shown below — figures may reflect prior runs / completed reconciliations, not the next live action. Always verify against the latest run before approving credit spend.
+              </div>
               <AutonomousPipelineStatus businessName="Neon Candy" />
               <ApolloRevealStageStrip lifecycle={leadLifecycle} />
               <ApolloPullPanel />
@@ -685,7 +688,23 @@ const CommandCentre = () => {
                 <div className="text-[11px] text-muted-foreground border-t border-border/40 pt-2">
                   <span className="font-medium text-foreground">Cadence integrity:</span> downstream steps wait until prior step sent (real SMTP, accepted, provider message ID).
                 </div>
-                <ControlledLiveBatch />
+                {sendUnsafe ? (
+                  <div className="rounded-md border border-yellow-500/40 bg-yellow-500/10 p-3 text-xs space-y-2">
+                    <p className="font-medium text-yellow-200">Send blocked — outreach brake review required</p>
+                    <p className="text-yellow-100/80">
+                      Live batch sending is disabled until the Outreach Safety panel reports
+                      <span className="font-mono"> SAFE_BLOCKED</span> with
+                      <span className="font-mono"> auto_send_enabled=false</span> and
+                      <span className="font-mono"> cron_check=verified_disabled</span>.
+                      Queue creation is blocked until the send brake is verified. Queue creation is not harmless unless the send worker and cron are physically blocked.
+                    </p>
+                    <Link to="/founder/outreach/queue-audit">
+                      <Button size="sm" variant="outline">Open Queue Audit</Button>
+                    </Link>
+                  </div>
+                ) : (
+                  <ControlledLiveBatch />
+                )}
               </div>
             </Section>
 
