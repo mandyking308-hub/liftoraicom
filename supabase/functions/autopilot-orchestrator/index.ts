@@ -895,9 +895,18 @@ Deno.serve(async (req) => {
       if (!dryRun) {
         if (blockedReason === "founder_reveal_amount_required")
           return "Enter reveal amount and review selected candidates.";
+        // Live-run guidance must reflect what actually happened in the reveal stage.
+        if (liveRevealAttempted) {
+          if (providerErrors > 0 && emailsReturned === 0)
+            return "Resolve Apollo reveal outcome before continuing.";
+          if (emailsReturned > 0 && counters.promote_planned === 0)
+            return "Review post-reveal CRM/promotion blockers.";
+          if (counters.queue_planned === 0 && counters.promote_planned > 0)
+            return "Review queue blockers — promoted contacts not enqueued.";
+        }
         return policy.auto_send_after_queue
           ? "Monitor send worker and reply rates"
-          : "Configure external sending provider before enabling auto-send";
+          : "Configure external sending provider before auto-send.";
       }
       if (counters.candidates_pulled === 0) return "No reveal candidates — pull fresh Apollo if needed";
       if (counters.passed_quality_policy === 0 && counters.skipped_missing_score > 0)
@@ -916,6 +925,15 @@ Deno.serve(async (req) => {
       selected_candidates: selectedCandidates,
       eligible_not_selected: eligibleNotSelected.slice(0, 100),
       duplicates_held_back: duplicatesHeldBack.slice(0, 100),
+      reveal_outcomes: revealOutcomes,
+      reveal_execution: {
+        attempted: liveRevealAttempted,
+        apollo_api_called: apolloApiCalled,
+        credits_actually_spent: creditsActuallySpent,
+        emails_returned: emailsReturned,
+        provider_errors: providerErrors,
+        already_recorded: revealAlreadyRecorded,
+      },
       policy_snapshot: {
         apollo_email_reveal_autonomous: policy.apollo_email_reveal_autonomous,
         auto_promote_after_valid_reveal: policy.auto_promote_after_valid_reveal,
