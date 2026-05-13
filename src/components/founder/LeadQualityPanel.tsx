@@ -401,10 +401,17 @@ export default function LeadQualityPanel() {
                       {d.risk && <>Risk: {d.risk}</>}
                     </p>
                   )}
-                  <div className="flex gap-2 pt-1">
-                    <Button size="sm" variant="default" onClick={() => decideOn(d.id, "approved")}>Approve</Button>
+                  <div className="flex gap-2 pt-1 items-center flex-wrap">
+                    <Button size="sm" variant="default" onClick={() => decideOn(d.id, "approved")}>
+                      {d.decision_type === "promotion_approval" ? "Approve decision only — does not promote contacts" : "Approve"}
+                    </Button>
                     <Button size="sm" variant="outline" onClick={() => decideOn(d.id, "hold")}>Hold</Button>
                     <Button size="sm" variant="outline" onClick={() => decideOn(d.id, "rejected")}>Reject</Button>
+                    {d.decision_type === "promotion_approval" && (
+                      <span className="text-[10px] text-muted-foreground w-full">
+                        To actually promote, use the “Ready to promote to CRM” panel below.
+                      </span>
+                    )}
                   </div>
                 </div>
               ))}
