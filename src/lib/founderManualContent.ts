@@ -757,6 +757,267 @@ following gates were verified in the same diagnostic window:
 
 ---
 
+## SECTION 0d — EMERGENCY OUTREACH BRAKE, SENT-EMAIL AUDIT, ENGAGEMENT TRACKING & CONTROLLED SEND PREVIEW (13 May 2026)
+
+> Continuation of Section 0c. Captures the corrective architecture put in
+> place after the unintended Neon Candy SMTP send, plus the new audit /
+> tracking / preview surfaces. This section is the single source of truth
+> for current outreach safety state.
+
+### 0d.1 Apollo reveal & promotion flow (recap, normative)
+
+- 5 Apollo people were revealed for Neon Candy (5 reveal credits — no
+  further Apollo credits were spent in this build window).
+- 4 records passed validation (Aaliah, Morgan, Pooja, Jack). Sierra was
+  rejected as a probable wrong-person email match (\`compliance_status='rejected'\`,
+  \`do_not_contact_reason='wrong_person_match'\`) and remains excluded.
+- **Aaliah, Morgan, Pooja** were promoted as new CRM contacts via
+  \`promote-leads-to-contacts\`. **Jack** was reconciled to an existing
+  CRM contact (no duplicate) and is *not* re-queued.
+- \`promote-leads-to-contacts\` is the only sanctioned writer for new
+  contacts + matching BCR rows. Idempotency is enforced by
+  \`(business_name, lower(email))\` and the unique constraint on
+  \`contacts.email\` per workspace; replays are no-ops.
+- Apollo payload mapping is normalised on enrichment:
+  \`first_name + last_name\`, \`email\`, \`title → role\`, \`organization.name → company\`,
+  \`organization.industry → industry\`, \`person.linkedin_url\`,
+  \`person.id → apollo_person_id\`, \`organization.id → apollo_organization_id\`,
+  \`person.timezone → timezone\`, \`employment_history → seniority\`,
+  \`email_status → email_verified_status / sendable_status\`.
+
+### 0d.2 Compliance spine — confirmed live
+
+- Columns enforced on \`contacts\`: \`lawful_basis\`, \`lawful_basis_notes\`,
+  \`lawful_basis_recorded_at\`, \`retention_until\`, \`retention_policy\`,
+  \`unsubscribe_token\`, \`unsubscribed_at\`, \`unsubscribe_source\`,
+  \`do_not_contact_at\`, \`do_not_contact_reason\`, \`compliance_status\`,
+  \`last_compliance_review_at\`.
+- Append-only audit table \`contact_compliance_events\` records every
+  state transition (\`event_type\`, \`event_source\`, \`event_notes\`,
+  \`actor\`, \`old_value\`, \`new_value\`).
+- Functions of record:
+  - \`unsubscribe-contact\` — public, token-validated, sets
+    \`unsubscribed_at\` + \`do_not_contact_at\`, writes audit event.
+  - \`crm-send-check\` / \`check_outreach_allowed\` — server-enforced
+    gate that blocks sends to suppressed / unsubscribed / hard-bounced /
+    \`do_not_contact\` / non-\`outreach_allowed\` contacts.
+  - Bounce + reply-stop handlers append \`bounce_recorded\` /
+    \`reply_stop_received\` events and flip \`is_globally_suppressed\` /
+    \`unsubscribed_at\` as appropriate.
+- **Compliance Approval Gate** (UI under *Lead Quality + Queue Integrity*)
+  is the only path that flips a contact from \`pending_review\` to
+  \`outreach_allowed\` and writes the matching audit row.
+- **Aaliah, Morgan, Pooja** are currently \`compliance_status='outreach_allowed'\`
+  with \`lawful_basis\` and \`unsubscribe_token\` populated. Jack stays on
+  the existing CRM record with its prior compliance state. Sierra remains
+  \`rejected\`.
+
+### 0d.3 Stage-to-Queue and Queue Creation gates (recap)
+
+- Stage-to-Queue Gate qualifies a contact's BCR for a campaign (BCR
+  lookup bug fixed: business name normalisation now applied on both
+  sides of the join).
+- Queue Creation Gate (\`create-queue-from-staged\`) is idempotent on
+  \`(contact_id, campaign_id, sequence_step=1)\`; replays are no-ops.
+- Three Step-1 queue rows were created and recorded:
+  - Aaliah → \`8a92edbb-2e61-49b7-a6df-3bac21268fe0\`
+  - Morgan → \`677a3ffd-bf48-457d-88e1-189225d8ce6a\`
+  - Pooja  → \`e5a80b74-48b2-4317-89e5-bc687e42cb65\`
+- Rows were inserted as \`pending\` on 13 May at 14:59:45 UTC.
+
+### 0d.4 Critical incident — unintended SMTP send
+
+- "Auto-send OFF" was an *operating assumption* in the UI; it was **not
+  enforced in code**. No global \`auto_send_enabled\` kill switch existed.
+- The active cron \`outreach-send-worker-2min\` picked up the 3 pending
+  rows and dispatched them through IONOS (\`hello@neoncandy.online\`)
+  between 15:00:10 and 15:00:27 UTC.
+- \`sent_at\`, \`smtp_accepted_at\` and \`provider_message_id\` are
+  populated on all three rows:
+  - Aaliah: \`<4c939e2a2b914c5dba921e44bcd36e66@neoncandy.online>\`
+  - Morgan: \`<4ff349eea4dc4652b7b26d60aded67f5@neoncandy.online>\`
+  - Pooja:  \`<68babca384134740b415cabdd49462fb@neoncandy.online>\`
+- The SMTP send succeeded; the IMAP "sent folder" copy failed for all
+  three (\`sent_folder_copy_failed\` ×3) due to a folder-naming mismatch
+  on the IONOS account (likely \`Sent\` vs \`INBOX.Sent\` / locale variant).
+  This is a logging issue only — the recipient mailboxes received the
+  emails. **There is no recall path for an SMTP-accepted message.**
+- The incident is fully audit-recorded:
+  - \`system_events.event_type='auto_send_safety_incident'\` (severity
+    \`critical\`) with the 3 queue ids in the payload.
+  - \`contact_compliance_events.event_type='outreach_email_sent'\` with
+    \`event_source='auto_send_safety_incident'\` for each contact.
+  - A second \`outreach_email_sent\` row per contact with
+    \`event_source='sent_email_audit_link'\` carrying \`queue_id\`,
+    \`provider_message_id\`, \`campaign_id\`, \`inbox_id\`, \`sequence_step\`
+    and \`sent_at\` for self-contained traceability.
+  - \`email_events.event_type='sent'\` and \`communications\` outbound
+    rows already exist from the worker.
+- **No additional pending rows were sent after the brake was engaged.**
+
+### 0d.5 Emergency Outreach Brake (corrective architecture)
+
+1. **Cron unscheduled.** \`outreach-send-worker-2min\` and any job whose
+   command references \`outreach-send-worker\` were removed from
+   \`cron.job\`. Only \`outreach-inbound-poll-every-2min\` (inbound only)
+   remains active.
+2. **Global kill switch.** \`system_settings.auto_send_enabled\` is set
+   to \`false\` and is the single source of truth. Missing / non-true
+   values are treated as \`false\` (fail-closed).
+3. **Worker fail-closed guard.** \`supabase/functions/outreach-send-worker/index.ts\`
+   reads \`auto_send_enabled\` at the top of \`Deno.serve()\` *before*
+   any queue selection, SMTP/provider call or row mutation. If not
+   strictly \`true\`, the worker returns:
+   \`\`\`json
+   { "ok": true, "skipped": true, "reason": "auto_send_disabled",
+     "emails_sent": 0, "provider_calls": 0,
+     "queue_rows_changed": 0, "contacts_changed": 0,
+     "bcrs_changed": 0, "email_events_created": 0,
+     "communications_created": 0 }
+   \`\`\`
+4. **Dry verification.** A direct \`POST\` to \`outreach-send-worker\`
+   returned the blocked response above with all-zero counters. No SMTP
+   call, no provider call, no \`email_queue\` mutation, no
+   \`email_events\` / \`communications\` insert.
+5. **Audit.** \`system_events.event_type='auto_send_kill_switch_engaged'\`
+   (severity \`critical\`) records the brake engagement. Constraint
+   \`contact_compliance_events_event_type_check\` was extended to allow
+   \`outreach_email_sent\` so the incident audit could be recorded.
+
+### 0d.6 Sent-Email Audit Trail (closed)
+
+For each of the three sent emails the following are now linked and
+queryable end-to-end:
+
+| Surface | Row |
+|---|---|
+| \`email_queue\` | status=\`sent\`, \`sent_at\`, \`smtp_accepted_at\`, \`provider_message_id\` |
+| \`email_events\` | \`event_type='sent'\` keyed on the queue id |
+| \`communications\` | outbound row, channel=\`email\`, inbox \`hello@neoncandy.online\` |
+| \`contact_compliance_events\` | \`outreach_email_sent\` ×2 per contact (incident + linkage) |
+| \`system_events\` | \`auto_send_safety_incident\` + \`auto_send_kill_switch_engaged\` |
+
+### 0d.7 Engagement Tracking Layer (schema + endpoints, NOT yet injected)
+
+Schema and endpoints are live; **outbound emails are not yet rewritten**
+to inject the pixel or tracked links.
+
+- **Table** \`email_tracking_events\`:
+  \`id, queue_id, contact_id, campaign_id, business_name,
+   event_type ∈ {open, click, reply, bounce, unsubscribe},
+   event_at, ip_hash, user_agent_hash, link_url, source, metadata jsonb\`.
+  Append-only. RLS: founders read; service-role insert.
+- **Token** \`email_queue.tracking_token\` re-used as the per-row signing
+  key. \`system_settings.tracking_secret\` seeded for future signed
+  redirects.
+- **Edge functions:**
+  - \`track-open\` — 1×1 GIF pixel; records \`open\` keyed on
+    \`?t=<tracking_token>\` or \`?q=<queue_id>\`.
+  - \`track-click\` — signed redirect (\`?u=<url>&t=<token>\`); records
+    \`click\` then 302s to the original URL. http/https only.
+- **UI** \`/founder/outreach/engagement\` — read-only per-contact
+  dashboard: sent / opens / clicks / replies / bounces / unsubscribes /
+  last engagement. Includes the explicit caveat that **opens are an
+  "open signal" only and are not proof of human reading** (image
+  preloaders and corporate scanners trigger pixel loads). Clicks and
+  replies are stronger evidence of human engagement.
+- **Compliance gate.** Open and click tracking **must be disclosed** in
+  the email footer and in the privacy notice **before** any outbound
+  email is rewritten to inject the pixel or tracked links. Until that
+  disclosure ships, the endpoints exist but are not invoked from any
+  outbound email body.
+
+### 0d.8 Controlled Send Preview Gate (preview only)
+
+- Edge function \`controlled-send-preview\` returns, per queue id:
+  contact, \`compliance_status\`, \`lawful_basis\`, unsubscribe-token
+  presence, tracking-token presence, campaign, inbox, provider
+  (\`ionos_proof\`), sequence step, scheduled time, prior \`sent_at\` /
+  \`provider_message_id\`, send-budget impact, the live value of
+  \`auto_send_enabled\`, and a \`blockers[]\` list. Always returns
+  \`dry_run: true, sends_to_create: 0, emails_sent: 0,
+  provider_calls: 0, apollo_credits_spent: 0\`.
+- UI \`/founder/outreach/send-preview\` — input queue ids, run dry-run,
+  see the JSON. **Apply / Send button is rendered disabled** with the
+  label "Apply path intentionally not built". The Apply path is
+  blocked behind the queue-clean-up work in 0d.10.
+
+### 0d.9 Current safe state (end of 13 May 2026 build window)
+
+- \`system_settings.auto_send_enabled = false\` (enforced server-side).
+- No cron job references \`outreach-send-worker\`.
+- \`outreach-send-worker\` fails closed unless \`auto_send_enabled = true\`.
+- 3 emails sent, fully audit-recorded; no recall.
+- 10 \`pending\` rows remain on \`email_queue\` for Neon Candy (7 step-4
+  scheduled 2026-05-15, 3 step-2 scheduled 2026-05-16). All blocked by
+  the kill switch and the absent cron.
+- No Apollo credits spent after the original 5 reveal credits.
+- Sierra remains \`rejected\` and excluded. Jack is not re-queued.
+- **No further emails may be sent** without an explicit
+  founder-controlled preview/apply flow that runs in front of the kill
+  switch.
+
+### 0d.10 Remaining work (do not skip)
+
+1. Complete the pending-queue audit and classify every remaining row
+   (legacy / orphan / live-eligible).
+2. Cancel or park orphan/legacy pending rows so they cannot revive if
+   cron is ever re-enabled.
+3. Build the Controlled Send **Apply** path **only after** the queue is
+   clean and the manual-send architecture below is in place.
+4. Add the open / click disclosure copy to the email footer and to the
+   privacy notice **before** rewriting any outbound email to inject the
+   tracking pixel or tracked links.
+5. Wire engagement events into the CRM journey timeline (delivery,
+   open signal, click, reply, bounce, unsubscribe).
+6. Fix stale UI counters and historical snapshot labels that still
+   imply "Auto-send OFF" without referencing the server-enforced
+   kill switch.
+7. Improve sent-folder IMAP handling (folder discovery + locale-safe
+   mapping) so SMTP-accepted messages always land in the visible Sent
+   folder.
+
+### 0d.11 Operating rule — queue creation guard
+
+> **No queue row may be created unless one of the following is true:**
+>
+> 1. \`system_settings.auto_send_enabled = false\` AND no cron job
+>    referencing \`outreach-send-worker\` exists (verified at the moment
+>    of insert), **or**
+> 2. The controlled manual-send architecture is in place (preview →
+>    explicit founder Apply → audited single-row send), and the
+>    inserting code path is invoked from that architecture only.
+
+This rule is now binding for every new outreach feature. Any code path
+that inserts into \`email_queue\` must assert one of the two conditions
+above and write a \`system_events\` audit row recording which condition
+held.
+
+### 0d.12 Files of record (this build window)
+
+- \`supabase/functions/outreach-send-worker/index.ts\` — fail-closed
+  \`auto_send_enabled\` guard.
+- \`supabase/functions/track-open/index.ts\` — open pixel.
+- \`supabase/functions/track-click/index.ts\` — tracked redirect.
+- \`supabase/functions/controlled-send-preview/index.ts\` — dry-run
+  preview only.
+- \`src/pages/founder/outreach/EngagementTracking.tsx\` — read-only
+  engagement dashboard at \`/founder/outreach/engagement\`.
+- \`src/pages/founder/outreach/ControlledSendPreview.tsx\` — preview
+  gate at \`/founder/outreach/send-preview\` (Apply disabled).
+- \`src/App.tsx\` — routes added.
+- New table \`email_tracking_events\` + index/RLS migration.
+- \`system_settings\` keys: \`auto_send_enabled\` (false),
+  \`tracking_secret\` (seeded).
+- \`system_events\`: \`auto_send_safety_incident\`,
+  \`auto_send_kill_switch_engaged\`.
+- \`contact_compliance_events\`: \`outreach_email_sent\` (×3 incident,
+  ×3 audit linkage).
+- Constraint update: \`contact_compliance_events_event_type_check\` now
+  allows \`outreach_email_sent\`.
+
+---
+
 ## SECTION 0a — CREDENTIALS & SECRETS REGISTER
 
 > **Raw passwords and API keys are not stored in this manual.**
