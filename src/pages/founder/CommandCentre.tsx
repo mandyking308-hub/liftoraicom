@@ -583,7 +583,9 @@ const CommandCentre = () => {
             </div>
 
             {/* OUTREACH SAFETY / QUEUE BRAKE — read-only, shared source of truth with /founder/outreach/queue-audit */}
-            <OutreachSafetyPanel />
+            <div id="sec-safety" className="scroll-mt-24">
+              <OutreachSafetyPanel />
+            </div>
 
             <div className="flex items-end justify-between flex-wrap gap-3">
               <div>
@@ -620,6 +622,20 @@ const CommandCentre = () => {
 
             {/* SECTION 3 — Business Workflow Rail */}
             <Section title="Business workflow" icon={WorkflowIcon}>
+              {(() => {
+                const safeToPromote = leadLifecycle?.safe_to_promote_after_reveal ?? leadLifecycle?.safe_to_promote ?? 0;
+                const safeToQueue = leadLifecycle?.safe_to_queue ?? 0;
+                const notes: string[] = [];
+                if (safeToPromote === 0) notes.push("Promote (validation-clean) shows 0 — historical snapshot, not a current action.");
+                if (safeToQueue === 0) notes.push("Queue Campaign shows 0 — historical snapshot, not a current action.");
+                if ((leadLifecycle?.safe_to_promote_after_reveal ?? 0) === 0) notes.push("Post-Reveal Check 'awaiting reveal results' is a stale counter — review queue audit / latest run before action.");
+                if (notes.length === 0) return null;
+                return (
+                  <div className="mb-2 rounded-md border border-border/50 bg-muted/20 p-2 text-[11px] text-muted-foreground space-y-0.5">
+                    {notes.map((n, i) => <p key={i}>• {n}</p>)}
+                  </div>
+                );
+              })()}
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
                 {stages.map((s, idx) => (
                   <a key={s.key} href={s.anchor} className={`p-3 rounded-lg border transition-colors hover:border-primary/50 ${stageStatusCls(s.status)}`}>
