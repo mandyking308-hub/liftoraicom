@@ -3292,6 +3292,54 @@ export type Database = {
           },
         ]
       }
+      email_tracking_events: {
+        Row: {
+          business_name: string | null
+          campaign_id: string | null
+          contact_id: string | null
+          created_at: string
+          event_at: string
+          event_type: string
+          id: string
+          ip_hash: string | null
+          link_url: string | null
+          metadata: Json
+          queue_id: string | null
+          source: string | null
+          user_agent_hash: string | null
+        }
+        Insert: {
+          business_name?: string | null
+          campaign_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          event_at?: string
+          event_type: string
+          id?: string
+          ip_hash?: string | null
+          link_url?: string | null
+          metadata?: Json
+          queue_id?: string | null
+          source?: string | null
+          user_agent_hash?: string | null
+        }
+        Update: {
+          business_name?: string | null
+          campaign_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          event_at?: string
+          event_type?: string
+          id?: string
+          ip_hash?: string | null
+          link_url?: string | null
+          metadata?: Json
+          queue_id?: string | null
+          source?: string | null
+          user_agent_hash?: string | null
+        }
+        Relationships: []
+      }
       execution_logs: {
         Row: {
           created_at: string
