@@ -46,62 +46,172 @@ Deno.serve(async (req) => {
   const { data: rows, error } = await q;
   if (error) return json({ error: error.message }, 500);
 
-  const plan: Array<{ apollo_lead_id: string; ok: boolean; reason: string; existing_contact_id?: string }> = [];
-  const toInsert: any[] = [];
+  // Resolve businesses up-front (one row per distinct business_name)
+  const businessNames = Array.from(new Set((rows ?? []).map((r) => r.business_name).filter(Boolean))) as string[];
+  const bizMap = new Map<string, string>(); // name → business_id
+  if (businessNames.length) {
+    const { data: bizRows } = await admin.from("businesses").select("id,name").in("name", businessNames);
+    for (const b of bizRows ?? []) bizMap.set(b.name as string, b.id as string);
+  }
+
+  type PlanRow = {
+    apollo_lead_id: string;
+    profile_id?: string;
+    name?: string;
+    company?: string;
+    email?: string;
+    business_name?: string;
+    business_id?: string;
+    contact_action: "create_new" | "match_existing" | "skip";
+    bcr_action: "create_new" | "match_existing" | "skip";
+    profile_action: "mark_promoted" | "link_existing" | "skip";
+    queue_eligibility: "not_yet" | "blocked";
+    queue_blocker?: string;
+    send_action: "none";
+    ok: boolean;
+    reason: string;
+    existing_contact_id?: string;
+    existing_bcr_id?: string;
+  };
+  const plan: PlanRow[] = [];
 
   for (const r of rows ?? []) {
     const email = (r.email ?? "").toLowerCase();
-    if (!email) { plan.push({ apollo_lead_id: r.apollo_lead_id, ok: false, reason: "no email" }); continue; }
-    const { data: existing } = await admin.from("contacts").select("id").eq("email", email).maybeSingle();
-    if (existing) {
-      plan.push({ apollo_lead_id: r.apollo_lead_id, ok: false, reason: "contact already exists", existing_contact_id: existing.id });
+    const base: Partial<PlanRow> = {
+      apollo_lead_id: r.apollo_lead_id,
+      profile_id: r.quality_profile_id,
+      name: [r.first_name, r.last_name].filter(Boolean).join(" ") || r.first_name || undefined,
+      company: r.company ?? undefined,
+      email: email || undefined,
+      business_name: r.business_name ?? undefined,
+      business_id: r.business_name ? bizMap.get(r.business_name) : undefined,
+      send_action: "none",
+    };
+    if (!email) {
+      plan.push({ ...(base as PlanRow), contact_action: "skip", bcr_action: "skip", profile_action: "skip", queue_eligibility: "blocked", queue_blocker: "no email", ok: false, reason: "no email" });
       continue;
     }
     if (!r.business_name) {
-      plan.push({ apollo_lead_id: r.apollo_lead_id, ok: false, reason: "no business_name on apollo lead" });
+      plan.push({ ...(base as PlanRow), contact_action: "skip", bcr_action: "skip", profile_action: "skip", queue_eligibility: "blocked", queue_blocker: "no business_name", ok: false, reason: "no business_name on apollo lead" });
       continue;
     }
-    plan.push({ apollo_lead_id: r.apollo_lead_id, ok: true, reason: "ready to promote" });
-    toInsert.push({
-      email,
-      first_name: r.first_name, last_name: r.last_name,
-      name: [r.first_name, r.last_name].filter(Boolean).join(" ") || null,
-      role: r.title ?? null, company: r.company ?? null,
-      country: r.country ?? null, linkedin_url: r.linkedin_url ?? null,
-      apollo_person_id: r.apollo_person_id ?? null,
-      apollo_organization_id: r.apollo_org_id ?? null,
-      assigned_business: r.business_name,
-      active_campaign_id: body.campaign_id ?? null,
-      status: "ACTIVE",
-      sendable_status: "sendable",
-      source: "apollo_quality_promotion",
-      tags: r.campaign_fit ? [r.campaign_fit] : [],
+    const { data: existingContact } = await admin.from("contacts").select("id").eq("email", email).maybeSingle();
+    let bcrAction: PlanRow["bcr_action"] = "create_new";
+    let existingBcrId: string | undefined;
+    if (existingContact) {
+      const { data: existingBcr } = await admin.from("business_contact_relationships")
+        .select("id").eq("contact_id", existingContact.id).eq("business_name", r.business_name).maybeSingle();
+      if (existingBcr) { bcrAction = "match_existing"; existingBcrId = existingBcr.id; }
+    }
+    plan.push({
+      ...(base as PlanRow),
+      contact_action: existingContact ? "match_existing" : "create_new",
+      bcr_action: bcrAction,
+      profile_action: existingContact ? "link_existing" : "mark_promoted",
+      queue_eligibility: "not_yet",
+      queue_blocker: "auto-send OFF / queue gates evaluated separately",
+      ok: true,
+      reason: existingContact ? "match existing contact + reconcile BCR" : "create contact + create BCR",
+      existing_contact_id: existingContact?.id,
+      existing_bcr_id: existingBcrId,
     });
   }
 
-  let promoted = 0;
-  if (!dryRun && toInsert.length > 0) {
-    const { data: inserted, error: iErr } = await admin.from("contacts").insert(toInsert).select("id,email,apollo_person_id");
-    if (iErr) return json({ error: `insert failed: ${iErr.message}` }, 500);
-    promoted = inserted?.length ?? 0;
-    // map back to profiles + apollo_leads.contact_id
-    const byEmail = new Map<string, string>();
-    for (const c of inserted ?? []) byEmail.set((c.email ?? "").toLowerCase(), c.id);
+  let contactsCreated = 0;
+  let contactsMatched = 0;
+  let bcrsCreated = 0;
+  let bcrsMatched = 0;
+  let profilesReconciled = 0;
+
+  if (!dryRun) {
     for (const p of plan.filter((x) => x.ok)) {
       const row = (rows ?? []).find((r) => r.apollo_lead_id === p.apollo_lead_id)!;
-      const cid = byEmail.get((row.email ?? "").toLowerCase());
-      if (!cid) continue;
-      await admin.from("lead_quality_profiles").update({
-        quality_status: "promoted_to_contact",
-        promoted_contact_id: cid,
-        promoted_at: new Date().toISOString(),
-      }).eq("id", row.quality_profile_id);
-      await admin.from("apollo_leads").update({ contact_id: cid }).eq("id", row.apollo_lead_id);
+      const email = (row.email ?? "").toLowerCase();
+
+      // 1. Contact upsert/match (idempotent via UNIQUE email)
+      let contactId: string | undefined = p.existing_contact_id;
+      if (!contactId) {
+        const insertPayload = {
+          email,
+          first_name: row.first_name, last_name: row.last_name,
+          name: [row.first_name, row.last_name].filter(Boolean).join(" ") || null,
+          role: row.title ?? null, company: row.company ?? null,
+          country: row.country ?? null, linkedin_url: row.linkedin_url ?? null,
+          apollo_person_id: row.apollo_person_id ?? null,
+          apollo_organization_id: row.apollo_org_id ?? null,
+          assigned_business: row.business_name,
+          active_campaign_id: body.campaign_id ?? null,
+          status: "ACTIVE",
+          sendable_status: "sendable",
+          source: "autopilot_promotion",
+        };
+        const { data: ins, error: iErr } = await admin.from("contacts")
+          .insert(insertPayload).select("id").maybeSingle();
+        if (iErr) {
+          // Race / UNIQUE collision → look up existing
+          const { data: again } = await admin.from("contacts").select("id").eq("email", email).maybeSingle();
+          if (!again) { plan.find((x) => x.apollo_lead_id === p.apollo_lead_id)!.reason = `contact insert failed: ${iErr.message}`; continue; }
+          contactId = again.id; contactsMatched++;
+        } else {
+          contactId = ins!.id; contactsCreated++;
+        }
+      } else {
+        contactsMatched++;
+      }
+
+      // 2. BCR upsert/match (idempotent via UNIQUE (contact_id, business_name))
+      const businessId = bizMap.get(row.business_name!) ?? null;
+      const { data: existingBcr } = await admin.from("business_contact_relationships")
+        .select("id").eq("contact_id", contactId!).eq("business_name", row.business_name!).maybeSingle();
+      if (existingBcr) {
+        bcrsMatched++;
+        // Backfill business_id if missing
+        if (businessId) await admin.from("business_contact_relationships").update({ business_id: businessId }).eq("id", existingBcr.id).is("business_id", null);
+      } else {
+        const { error: bErr } = await admin.from("business_contact_relationships").insert({
+          contact_id: contactId!,
+          business_name: row.business_name!,
+          business_id: businessId,
+          relevance_category: row.campaign_fit ?? "apollo_reveal",
+          qualification: "needs_review",
+          qualification_reason: "promoted from autopilot apollo reveal",
+          campaign_eligible: false,
+          current_stage: "ready_to_stage",
+          notes: `Created by promote-leads-to-contacts (autopilot_promotion). apollo_lead_id=${row.apollo_lead_id} apollo_person_id=${row.apollo_person_id ?? ""}`,
+        });
+        if (bErr) {
+          plan.find((x) => x.apollo_lead_id === p.apollo_lead_id)!.reason = `bcr insert failed: ${bErr.message}`;
+        } else {
+          bcrsCreated++;
+        }
+      }
+
+      // 3. Reconcile lead quality profile + apollo_leads.contact_id
+      const profilePatch = p.contact_action === "match_existing"
+        ? {
+            quality_status: "already_in_crm",
+            lifecycle_stage: "already_in_crm_after_reveal",
+            lifecycle_reason: "linked_to_existing_contact_during_promotion",
+            promoted_contact_id: contactId,
+            promoted_at: new Date().toISOString(),
+          }
+        : {
+            quality_status: "promoted_to_contact",
+            lifecycle_stage: "promoted_to_contact",
+            lifecycle_reason: "promoted_via_autopilot_promotion",
+            promoted_contact_id: contactId,
+            promoted_at: new Date().toISOString(),
+          };
+      await admin.from("lead_quality_profiles").update(profilePatch).eq("id", row.quality_profile_id);
+      await admin.from("apollo_leads").update({ contact_id: contactId }).eq("id", row.apollo_lead_id);
+      profilesReconciled++;
     }
+
     await admin.from("system_events").insert({
       event_type: "leads_promoted_to_contacts", severity: "low", business_name: "",
-      message: `Founder ${userEmail} promoted ${promoted} qualified lead(s) to contacts.`,
-      metadata: { actor: userEmail, count: promoted }, resolved: true,
+      message: `Founder ${userEmail} promoted ${contactsCreated} new + matched ${contactsMatched} existing contact(s); BCR created ${bcrsCreated}, matched ${bcrsMatched}.`,
+      metadata: { actor: userEmail, contactsCreated, contactsMatched, bcrsCreated, bcrsMatched, profilesReconciled },
+      resolved: true,
     });
   }
 
@@ -109,7 +219,12 @@ Deno.serve(async (req) => {
     candidates: rows?.length ?? 0,
     ready: plan.filter((p) => p.ok).length,
     blocked: plan.filter((p) => !p.ok).length,
-    promoted,
+    contacts_to_create: plan.filter((p) => p.contact_action === "create_new").length,
+    contacts_to_match: plan.filter((p) => p.contact_action === "match_existing").length,
+    bcrs_to_create: plan.filter((p) => p.bcr_action === "create_new" && p.ok).length,
+    bcrs_to_match: plan.filter((p) => p.bcr_action === "match_existing" && p.ok).length,
+    contactsCreated, contactsMatched, bcrsCreated, bcrsMatched, profilesReconciled,
+    promoted: contactsCreated + contactsMatched,
   };
-  return json({ ok: true, dry_run: dryRun, summary, plan_sample: plan.slice(0, 25) });
+  return json({ ok: true, dry_run: dryRun, summary, plan_sample: plan.slice(0, 25), plan });
 });
