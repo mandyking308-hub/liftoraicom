@@ -300,6 +300,34 @@ export default function LeadQualityPanel() {
     }
   };
 
+  const runPromote = async (dryRun: boolean) => {
+    try {
+      setBusy(dryRun ? "Promote preview" : "Promote apply");
+      setLastResult(null);
+      const { data, error } = await supabase.functions.invoke("promote-leads-to-contacts", {
+        body: { dry_run: dryRun, limit: 100 },
+      });
+      if (error) throw error;
+      setLastResult(data);
+      if (dryRun) setPromotePreviewResult(data);
+      if (!dryRun) setPromotePreviewResult(null);
+      toast.success(dryRun ? "Preview complete" : "Promotion applied", {
+        description: data?.dry_run ? "Dry-run preview" : "Applied",
+      });
+      qc.invalidateQueries({ queryKey: ["lead-quality-overview"] });
+      qc.invalidateQueries({ queryKey: ["crm-spine-summary"] });
+      qc.invalidateQueries({ queryKey: ["lead-lifecycle-summary"] });
+      qc.invalidateQueries({ queryKey: ["autopilot-last-run"] });
+      refetchDecisions();
+    } catch (e: any) {
+      toast.error(dryRun ? "Preview failed" : "Promotion failed", {
+        description: e?.message ?? String(e),
+      });
+    } finally {
+      setBusy(null);
+    }
+  };
+
   const nextAction =
     (lifecycle?.safe_to_queue ?? 0) > 0
       ? `Enqueue up to ${lifecycle?.safe_to_queue} eligible contact(s) — preview first`
