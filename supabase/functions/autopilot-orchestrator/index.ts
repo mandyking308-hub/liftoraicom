@@ -385,15 +385,28 @@ Deno.serve(async (req) => {
     !policy.apollo_email_reveal_autonomous ? planReveal.length : 0;
   counters.reveal_skipped_budget = counters.held_back_by_budget;
 
-  // Live reveal is gated on BOTH founder amount entered AND reveal automation ON.
+  // Live reveal has TWO independent approval paths:
+  //   A) One-shot founder approval — founder enters reveal_amount and explicitly
+  //      runs live. Permitted even while full autonomous reveal is OFF.
+  //   B) Full autonomous reveal — apollo_email_reveal_autonomous = true.
+  // The only hard block is the absence of a founder amount AND no autonomy.
   let blockedReason: string | null = null;
-  if (founderAmount === null) blockedReason = "founder_reveal_amount_required";
-  else if (!policy.apollo_email_reveal_autonomous) blockedReason = "reveal_automation_disabled";
+  let revealMode: "one_shot_founder" | "autonomous" | "blocked" = "blocked";
+  if (founderAmount !== null && founderAmount > 0) {
+    revealMode = "one_shot_founder";
+  } else if (policy.apollo_email_reveal_autonomous) {
+    revealMode = "autonomous";
+  } else {
+    blockedReason = "founder_reveal_amount_required";
+  }
 
   const finalReveal = blockedReason === null ? afterBudget : [];
   counters.reveal_planned = finalReveal.length;
-  counters.skipped_reveal_disabled =
-    blockedReason === "reveal_automation_disabled" ? afterBudget.length : 0;
+  // Selected candidates are awaiting one-shot approval, not "skipped — reveal OFF".
+  counters.skipped_reveal_disabled = 0;
+  (counters as any).awaiting_founder_reveal_approval =
+    revealMode === "one_shot_founder" && dryRun ? afterBudget.length : 0;
+  (counters as any).reveal_mode = revealMode as any;
   counters.estimated_credits_this_run = finalReveal.length;
 
   // Selected-candidate review payload (always returned, never mutates state).
@@ -429,9 +442,9 @@ Deno.serve(async (req) => {
   }));
 
   await event("reveal_plan",
-    `Reveal plan: founder_amount=${founderAmount ?? "unset"} selected=${finalReveal.length} eligible=${planReveal.length} budget_cap=${budgetCap} blocked=${blockedReason ?? "none"}`,
+    `Reveal plan: mode=${revealMode} founder_amount=${founderAmount ?? "unset"} selected=${finalReveal.length} eligible=${planReveal.length} budget_cap=${budgetCap} blocked=${blockedReason ?? "none"}`,
     "low",
-    { counters: { reveal_planned: finalReveal.length, reveal_eligible: planReveal.length, budget_cap: budgetCap, founder_amount: founderAmount, blocked_reason: blockedReason } });
+    { counters: { reveal_planned: finalReveal.length, reveal_eligible: planReveal.length, budget_cap: budgetCap, founder_amount: founderAmount, blocked_reason: blockedReason, reveal_mode: revealMode } });
 
   // ---------- Stage 2: Reveal execution (only when not dry-run + autonomous reveal) ----------
   if (!dryRun && blockedReason === null && finalReveal.length > 0) {
@@ -619,8 +632,6 @@ Deno.serve(async (req) => {
       if (!dryRun) {
         if (blockedReason === "founder_reveal_amount_required")
           return "Enter reveal amount and review selected candidates.";
-        if (blockedReason === "reveal_automation_disabled")
-          return "Review selected candidates, then approve Apollo reveal for this run.";
         return policy.auto_send_after_queue
           ? "Monitor send worker and reply rates"
           : "Configure external sending provider before enabling auto-send";
@@ -632,11 +643,7 @@ Deno.serve(async (req) => {
         return "Review dry-run skip reasons — no candidates passed quality policy";
       if (founderAmount === null)
         return "Enter reveal amount and review selected candidates.";
-      if (!policy.apollo_email_reveal_autonomous)
-        return `Review ${counters.selected_for_next_reveal} selected candidates, then approve Apollo reveal for this run.`;
-      if (!policy.auto_send_after_queue)
-        return `Reveal/promote/queue may run within approved reveal amount (${counters.selected_for_next_reveal}). Auto-send remains OFF.`;
-      return `Approve reveal of ${counters.selected_for_next_reveal} (~${counters.would_spend_credits} credits)`;
+      return `Click "Approve & reveal selected candidates" to spend ~${counters.would_spend_credits} Apollo credits on ${counters.selected_for_next_reveal} selected. Auto-send remains OFF.`;
     })(),
     details: {
       dry_run: dryRun, actor, actor_user_id: actorUserId,
