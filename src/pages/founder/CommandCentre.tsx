@@ -503,9 +503,12 @@ const CommandCentre = () => {
           },
           {
             key: "send", label: "Send", icon: Send, count: totals.sentToday,
-            status: totals.failedSends > 0 ? "blocked" : totals.pendingQueue > 0 ? "active" : "not_started",
-            blocker: totals.failedSends > 0 ? `${totals.failedSends} failed sends` : null,
-            next: "Run controlled live batch", anchor: "#sec-queue",
+            status: sendUnsafe ? "blocked" : totals.failedSends > 0 ? "blocked" : totals.pendingQueue > 0 ? "active" : "not_started",
+            blocker: sendUnsafe
+              ? "Send blocked — outreach brake review required"
+              : totals.failedSends > 0 ? `${totals.failedSends} failed sends` : null,
+            next: sendUnsafe ? "Verify outreach brake / cron status" : "Run controlled live batch",
+            anchor: sendUnsafe ? "#sec-safety" : "#sec-queue",
           },
           {
             key: "replies", label: "Replies", icon: InboxIcon, count: totals.repliesAll,
