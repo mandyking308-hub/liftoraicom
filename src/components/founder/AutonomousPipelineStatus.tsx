@@ -93,6 +93,9 @@ export default function AutonomousPipelineStatus({ businessName = "Neon Candy" }
   const duplicatesHeldBack: any[] = planResult?.duplicates_held_back ?? lastRun?.details?.duplicates_held_back ?? [];
   const revealOutcomes: any[] = lastRun?.details?.reveal_outcomes ?? [];
   const revealExec: any = lastRun?.details?.reveal_execution ?? null;
+  const postRevealValidations: any[] = planResult?.post_reveal_validations ?? lastRun?.details?.post_reveal_validations ?? [];
+  const queueBlockerReasons: Record<string, number> =
+    planResult?.queue_blocker_reasons ?? lastRun?.details?.queue_blocker_reasons ?? {};
   const outcomeByCandidateId = new Map<string, any>(revealOutcomes.map((o: any) => [o.candidate_id, o]));
 
   const parsedAmount = revealAmount.trim() === "" ? null : Math.max(0, Math.floor(Number(revealAmount)));
@@ -251,6 +254,16 @@ export default function AutonomousPipelineStatus({ businessName = "Neon Candy" }
           <Stat label="Founder decisions" value={pendingDecisions ?? 0} tone={(pendingDecisions ?? 0) > 0 ? "warn" : "default"} />
           <Stat label="Credits used (month)" value={counters.credits_used_month ?? 0} />
           <Stat label="Would send" value={counters.would_send ?? 0} />
+          <Stat label="Validated (post-reveal)" value={(counters as any).post_reveal_validated ?? 0} />
+          <Stat label="Valid for auto-promotion" value={(counters as any).valid_for_auto_promotion ?? 0} tone="good" />
+          <Stat label="Needs founder review" value={(counters as any).needs_founder_review ?? 0} tone="warn" />
+          <Stat label="Blocked — wrong person" value={(counters as any).blocked_possible_wrong_person ?? 0} tone="warn" />
+          <Stat label="Blocked — generic mailbox" value={(counters as any).blocked_generic_or_shared ?? 0} tone="warn" />
+          <Stat label="Blocked — domain mismatch" value={(counters as any).blocked_domain_mismatch ?? 0} tone="warn" />
+          <Stat label="Blocked — existing CRM (post-reveal)" value={(counters as any).blocked_existing_crm ?? 0} tone="warn" />
+          <Stat label="Blocked — duplicate revealed email" value={(counters as any).blocked_duplicate_revealed_email ?? 0} tone="warn" />
+          <Stat label="Promoted contacts (this run)" value={(counters as any).promoted_contacts ?? 0} tone="good" />
+          <Stat label="BCRs created (this run)" value={(counters as any).bcrs_created ?? 0} tone="good" />
         </div>
 
         <p className="text-xs text-muted-foreground">
