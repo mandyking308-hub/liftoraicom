@@ -776,7 +776,7 @@ export default function LeadQualityPanel() {
             ready_to_stage / needs_review / not eligible →
             qualified / staged / eligible, and assigns the inbox + campaign on
             the contact. Does NOT create queue rows or send emails. */}
-        {((stageCandidateCount ?? 0) > 0 || stagePreviewResult || stageAppliedResult) && (
+        {(true) && (
           <div className="rounded-md border border-primary/40 bg-primary/5 p-4 space-y-3">
             <div className="flex items-center justify-between gap-2 flex-wrap">
               <div>
