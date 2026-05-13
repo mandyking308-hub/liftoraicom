@@ -528,42 +528,224 @@ Deno.serve(async (req) => {
     { counters: { reveal_planned: finalReveal.length, reveal_eligible: planReveal.length, budget_cap: budgetCap, founder_amount: founderAmount, blocked_reason: blockedReason, reveal_mode: revealMode } });
 
   // ---------- Stage 2: Reveal execution (only when not dry-run + autonomous reveal) ----------
+  // Per-candidate reveal outcomes — persisted in autopilot_runs.details for UI rendering.
+  const revealOutcomes: Array<Record<string, unknown>> = [];
+  let liveRevealAttempted = false;
+  let apolloApiCalled = false;
+  let creditsActuallySpent = 0;
+  let emailsReturned = 0;
+  let providerErrors = 0;
+  let revealAlreadyRecorded = false;
+
   if (!dryRun && blockedReason === null && finalReveal.length > 0) {
-    const candidateIds = finalReveal.map(e => e.qp.apollo_lead_id);
-    try {
-      const resp = await fetch(`${SUPABASE_URL}/functions/v1/apollo-unlock-selected`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${SERVICE_KEY}`,
-          "apikey": SERVICE_KEY,
-          "x-autopilot-run-id": runId,
-        },
-        body: JSON.stringify({ apollo_lead_ids: candidateIds, autopilot: true }),
-      });
-      const out = await resp.json().catch(() => ({}));
-      const credits = out?.enrichment_credits_used ?? finalReveal.length;
-      await admin.from("apollo_credit_ledger").insert({
-        business_id: businessId, business_name: businessName,
-        function_source: "reveal", credits_used: credits,
-        apollo_person_ids: finalReveal.map(e => e.lead.apollo_person_id).filter(Boolean),
-        metadata: { run_id: runId, response: out } as never,
-      });
-      await event("reveal_executed", `Reveal call returned for ${candidateIds.length} candidates`, "medium",
-        { credits, response_status: resp.status });
-      // One-shot: clear the saved founder amount so the next run requires
-      // a fresh, explicit approval.
-      await admin.from("business_autopilot_settings")
-        .update({ founder_reveal_amount_next_run: null } as never)
-        .eq("business_id", businessId);
-    } catch (err) {
-      await event("reveal_failed", (err as Error).message, "high");
+    liveRevealAttempted = true;
+
+    // Idempotency: if a ledger row already exists for this run_id, do NOT
+    // re-spend. The unique index added in migration enforces this at DB level
+    // but we also short-circuit in code so we report "already recorded".
+    const { data: existingLedger } = await admin.from("apollo_credit_ledger")
+      .select("id, credits_used, metadata")
+      .eq("business_id", businessId)
+      .eq("function_source", "reveal")
+      .filter("metadata->>run_id", "eq", runId)
+      .maybeSingle();
+
+    if (existingLedger) {
+      revealAlreadyRecorded = true;
+      await event("reveal_idempotent_skip",
+        `Reveal already recorded for run ${runId}; skipping re-spend`, "medium",
+        { ledger_id: existingLedger.id });
+    } else {
+      // Resolve Apollo API key for this business
+      const ENC_KEY =
+        Deno.env.get("APOLLO_ENCRYPTION_KEY") ??
+        Deno.env.get("APOLLO_KEY_ENC") ??
+        Deno.env.get("APOLLO_ENC_KEY") ??
+        "";
+      const { data: conn } = await admin.from("apollo_connections")
+        .select("api_key_cipher, enrichment_api_status, is_active")
+        .eq("business_name", businessName).maybeSingle();
+
+      let apiKey: string | null = null;
+      let preflightError: string | null = null;
+      if (!conn) preflightError = "no_apollo_connection";
+      else if (!conn.is_active) preflightError = "apollo_connection_inactive";
+      else if (conn.enrichment_api_status !== "ok") preflightError = "enrichment_api_not_verified";
+      else {
+        const { data: dec } = await admin.rpc("apollo_decrypt_key", {
+          cipher: conn.api_key_cipher, enc_key: ENC_KEY,
+        });
+        apiKey = (dec as string) || null;
+        if (!apiKey) preflightError = "apollo_key_decrypt_failed";
+      }
+
+      if (preflightError) {
+        // Record outcome for each selected candidate WITHOUT spending credits
+        for (const e of finalReveal) {
+          revealOutcomes.push({
+            candidate_id: e.qp.id,
+            apollo_lead_id: e.qp.apollo_lead_id,
+            apollo_person_id: e.lead.apollo_person_id ?? null,
+            name: `${e.lead.first_name ?? ""} ${e.lead.last_name ?? ""}`.trim() || null,
+            company: e.lead.company ?? null,
+            outcome: "reveal_failed_provider_error",
+            apollo_called: false,
+            apollo_status: null,
+            email_returned: false,
+            email: null,
+            credit_consumed: false,
+            error: preflightError,
+          });
+          providerErrors++;
+        }
+        await event("reveal_failed", `Apollo preflight failed: ${preflightError}`, "high",
+          { preflight_error: preflightError, candidates: finalReveal.length });
+      } else {
+        // Per-candidate Apollo /people/match calls
+        const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const APOLLO_BASE = "https://api.apollo.io/api/v1";
+        for (const e of finalReveal) {
+          const pid = e.lead.apollo_person_id;
+          if (!pid) {
+            revealOutcomes.push({
+              candidate_id: e.qp.id, apollo_lead_id: e.qp.apollo_lead_id,
+              apollo_person_id: null,
+              name: `${e.lead.first_name ?? ""} ${e.lead.last_name ?? ""}`.trim() || null,
+              company: e.lead.company ?? null,
+              outcome: "reveal_failed_missing_apollo_person_id",
+              apollo_called: false, apollo_status: null,
+              email_returned: false, email: null, credit_consumed: false,
+            });
+            continue;
+          }
+          let resp: Response | null = null;
+          let data: any = null;
+          let httpErr: string | null = null;
+          try {
+            resp = await fetch(
+              `${APOLLO_BASE}/people/match?id=${encodeURIComponent(pid)}&reveal_personal_emails=false`,
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "Cache-Control": "no-cache", "X-Api-Key": apiKey! },
+                body: JSON.stringify({}),
+                signal: AbortSignal.timeout(15_000),
+              },
+            );
+            apolloApiCalled = true;
+            data = await resp.json().catch(() => null);
+          } catch (err) {
+            httpErr = (err as Error).message;
+          }
+          const person = data?.person ?? data?.matched_person ?? null;
+          const email: string | null =
+            person?.email && EMAIL_RE.test(person.email) ? person.email : null;
+          if (resp?.ok && email) {
+            // Apollo returned an email → real credit spend
+            const domain = email.split("@")[1]?.toLowerCase() ?? null;
+            await admin.from("apollo_leads")
+              .update({ email, status: "enriched", enrichment_payload: person })
+              .eq("id", e.qp.apollo_lead_id);
+            await admin.from("apollo_raw_leads")
+              .update({ email, email_domain: domain })
+              .eq("apollo_lead_id", e.qp.apollo_lead_id);
+            const baseFlags = (e.qp.risk_flags ?? []).filter((f: string) =>
+              f !== "missing_email" && f !== "needs_apollo_unlock" && f !== "apollo_email_unavailable");
+            await admin.from("lead_quality_profiles").update({
+              risk_flags: baseFlags,
+              unlock_recommendation: "unlocked",
+              lifecycle_stage: "safe_to_promote_after_reveal",
+            }).eq("id", e.qp.id);
+            creditsActuallySpent++;
+            emailsReturned++;
+            revealOutcomes.push({
+              candidate_id: e.qp.id, apollo_lead_id: e.qp.apollo_lead_id,
+              apollo_person_id: pid,
+              name: `${e.lead.first_name ?? ""} ${e.lead.last_name ?? ""}`.trim() || null,
+              company: e.lead.company ?? null,
+              outcome: "revealed_success_email_returned",
+              apollo_called: true, apollo_status: resp.status,
+              email_returned: true, email, credit_consumed: true,
+            });
+          } else if (resp?.ok && !email) {
+            // Apollo accepted but had no email — treat as no credit consumed
+            await admin.from("lead_quality_profiles").update({
+              risk_flags: Array.from(new Set([...(e.qp.risk_flags ?? []), "apollo_email_unavailable"])),
+              unlock_recommendation: "attempted_no_email",
+            }).eq("id", e.qp.id);
+            revealOutcomes.push({
+              candidate_id: e.qp.id, apollo_lead_id: e.qp.apollo_lead_id,
+              apollo_person_id: pid,
+              name: `${e.lead.first_name ?? ""} ${e.lead.last_name ?? ""}`.trim() || null,
+              company: e.lead.company ?? null,
+              outcome: "reveal_success_no_email_returned",
+              apollo_called: true, apollo_status: resp.status,
+              email_returned: false, email: null, credit_consumed: false,
+            });
+          } else {
+            providerErrors++;
+            revealOutcomes.push({
+              candidate_id: e.qp.id, apollo_lead_id: e.qp.apollo_lead_id,
+              apollo_person_id: pid,
+              name: `${e.lead.first_name ?? ""} ${e.lead.last_name ?? ""}`.trim() || null,
+              company: e.lead.company ?? null,
+              outcome: "reveal_failed_provider_error",
+              apollo_called: !!resp,
+              apollo_status: resp?.status ?? null,
+              email_returned: false, email: null, credit_consumed: false,
+              error: httpErr ?? data?.error ?? `apollo_status_${resp?.status ?? "unknown"}`,
+            });
+          }
+        }
+
+        // Ledger row reflects ACTUAL credits Apollo charged us for (emails returned only).
+        const { error: ledErr } = await admin.from("apollo_credit_ledger").insert({
+          business_id: businessId, business_name: businessName,
+          function_source: "reveal",
+          credits_used: creditsActuallySpent,
+          apollo_person_ids: finalReveal.map(e => e.lead.apollo_person_id).filter(Boolean),
+          metadata: {
+            run_id: runId,
+            attempted: finalReveal.length,
+            emails_returned: emailsReturned,
+            provider_errors: providerErrors,
+            apollo_api_called: apolloApiCalled,
+          } as never,
+        });
+        if (ledErr) {
+          await event("reveal_ledger_insert_failed", ledErr.message, "high");
+        }
+
+        await event("reveal_executed",
+          `Reveal completed: attempted=${finalReveal.length} emails_returned=${emailsReturned} credits_spent=${creditsActuallySpent} provider_errors=${providerErrors}`,
+          emailsReturned > 0 ? "medium" : "high",
+          { attempted: finalReveal.length, emails_returned: emailsReturned, credits_spent: creditsActuallySpent, provider_errors: providerErrors });
+
+        // Refresh today/month counters AFTER this run's spend so the run snapshot is consistent.
+        counters.credits_used_today = usedToday + creditsActuallySpent;
+        counters.credits_used_month = usedMonth + creditsActuallySpent;
+        counters.credits_remaining_today = Math.max(0, policy.apollo_reveal_daily_credit_budget - counters.credits_used_today);
+        counters.credits_remaining_month = Math.max(0, policy.apollo_reveal_monthly_credit_budget - counters.credits_used_month);
+
+        // One-shot: clear the saved founder amount only on a real attempt (success or failure)
+        // so retries are not auto-armed.
+        await admin.from("business_autopilot_settings")
+          .update({ founder_reveal_amount_next_run: null } as never)
+          .eq("business_id", businessId);
+      }
     }
   } else if (!dryRun && blockedReason !== null) {
     await event("reveal_blocked",
       `Live reveal blocked — ${blockedReason}`, "medium",
       { blocked_reason: blockedReason, founder_amount: founderAmount });
   }
+
+  // Expose reveal-execution counters to UI
+  (counters as any).live_reveal_attempted = liveRevealAttempted;
+  (counters as any).apollo_api_called = apolloApiCalled;
+  (counters as any).credits_spent = creditsActuallySpent;
+  (counters as any).emails_returned = emailsReturned;
+  (counters as any).reveal_provider_errors = providerErrors;
+  (counters as any).reveal_already_recorded = revealAlreadyRecorded;
 
   // ---------- Stage 3: Auto-promote (post-reveal) → contacts + BCR ----------
   if (policy.auto_promote_after_valid_reveal) {
@@ -713,9 +895,18 @@ Deno.serve(async (req) => {
       if (!dryRun) {
         if (blockedReason === "founder_reveal_amount_required")
           return "Enter reveal amount and review selected candidates.";
+        // Live-run guidance must reflect what actually happened in the reveal stage.
+        if (liveRevealAttempted) {
+          if (providerErrors > 0 && emailsReturned === 0)
+            return "Resolve Apollo reveal outcome before continuing.";
+          if (emailsReturned > 0 && counters.promote_planned === 0)
+            return "Review post-reveal CRM/promotion blockers.";
+          if (counters.queue_planned === 0 && counters.promote_planned > 0)
+            return "Review queue blockers — promoted contacts not enqueued.";
+        }
         return policy.auto_send_after_queue
           ? "Monitor send worker and reply rates"
-          : "Configure external sending provider before enabling auto-send";
+          : "Configure external sending provider before auto-send.";
       }
       if (counters.candidates_pulled === 0) return "No reveal candidates — pull fresh Apollo if needed";
       if (counters.passed_quality_policy === 0 && counters.skipped_missing_score > 0)
@@ -734,6 +925,15 @@ Deno.serve(async (req) => {
       selected_candidates: selectedCandidates,
       eligible_not_selected: eligibleNotSelected.slice(0, 100),
       duplicates_held_back: duplicatesHeldBack.slice(0, 100),
+      reveal_outcomes: revealOutcomes,
+      reveal_execution: {
+        attempted: liveRevealAttempted,
+        apollo_api_called: apolloApiCalled,
+        credits_actually_spent: creditsActuallySpent,
+        emails_returned: emailsReturned,
+        provider_errors: providerErrors,
+        already_recorded: revealAlreadyRecorded,
+      },
       policy_snapshot: {
         apollo_email_reveal_autonomous: policy.apollo_email_reveal_autonomous,
         auto_promote_after_valid_reveal: policy.auto_promote_after_valid_reveal,
