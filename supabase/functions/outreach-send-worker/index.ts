@@ -273,6 +273,46 @@ Deno.serve(async (req) => {
 
     const now = new Date();
 
+    // ===== GLOBAL AUTO-SEND KILL SWITCH (FAIL CLOSED) =====
+    // The worker MUST NOT select queue rows, call SMTP, mutate email_queue,
+    // update contacts/BCRs, or write email_events / communications when the
+    // global `system_settings.auto_send_enabled` flag is anything other than
+    // exactly true. Missing row, invalid JSON, fetch error, or any value
+    // other than the boolean `true` are all treated as DISABLED.
+    let autoSendEnabled = false;
+    try {
+      const { data: autoSendRow, error: autoSendErr } = await supabase
+        .from("system_settings")
+        .select("value")
+        .eq("key", "auto_send_enabled")
+        .maybeSingle();
+      if (autoSendErr) {
+        autoSendEnabled = false;
+      } else {
+        const v = autoSendRow?.value;
+        autoSendEnabled = v === true || v === "true";
+      }
+    } catch {
+      autoSendEnabled = false;
+    }
+    if (autoSendEnabled !== true) {
+      console.warn("[outreach-send-worker] blocked: auto_send_disabled — no rows selected, no SMTP, no mutations.");
+      return json({
+        ok: true,
+        blocked: true,
+        reason: "auto_send_disabled",
+        rows_processed: 0,
+        provider_calls: 0,
+        emails_sent: 0,
+        queue_rows_changed: 0,
+        contacts_changed: 0,
+        bcrs_changed: 0,
+        email_events_created: 0,
+        communications_created: 0,
+        message: "Global auto_send_enabled flag is not true. Worker exited before queue selection.",
+      }, 200);
+    }
+
     // Optional max override for safe one-shot proof runs.
     let maxOverride: number | null = null;
     try {
