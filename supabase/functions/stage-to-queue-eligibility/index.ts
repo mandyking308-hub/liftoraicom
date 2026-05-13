@@ -86,10 +86,39 @@ Deno.serve(async (req) => {
     return json({ error: `campaign not active: status=${campaignRow.status}` }, 400);
   }
 
-  // 2) Pull all candidate contacts assigned to this business.
+  // 2) Narrow candidate set: only contacts that came through the clean
+  //    Apollo reveal → promotion lifecycle. We start from
+  //    lead_quality_profiles (promoted_to_contact) and intersect with
+  //    contacts that still carry autopilot_promotion provenance and pass
+  //    every freshness/suppression gate.
+  const { data: lqp, error: lqpErr } = await admin
+    .from("lead_quality_profiles")
+    .select("promoted_contact_id, lifecycle_stage, quality_status, promoted_at")
+    .eq("lifecycle_stage", "promoted_to_contact")
+    .eq("quality_status", "promoted_to_contact")
+    .not("promoted_contact_id", "is", null)
+    .not("promoted_at", "is", null);
+  if (lqpErr) return json({ error: lqpErr.message }, 500);
+
+  const promotedContactIds = Array.from(
+    new Set((lqp ?? []).map((r: any) => r.promoted_contact_id as string))
+  );
+  if (!promotedContactIds.length) {
+    return json({ ok: true, dry_run: dryRun, summary: emptySummary(), plan: [] });
+  }
+
   let cq = admin.from("contacts")
-    .select("id,email,name,first_name,last_name,company,status,assigned_business,assigned_inbox_id,active_campaign_id,sendable_status,is_globally_suppressed,hard_bounced,conversation_active,last_contacted_at")
-    .eq("assigned_business", businessName);
+    .select("id,email,name,first_name,last_name,company,status,source,assigned_business,assigned_inbox_id,active_campaign_id,sendable_status,is_globally_suppressed,hard_bounced,conversation_active,last_contacted_at,apollo_person_id,apollo_enrichment_status")
+    .eq("assigned_business", businessName)
+    .eq("source", "autopilot_promotion")
+    .eq("status", "NEW")
+    .eq("sendable_status", "sendable")
+    .eq("apollo_enrichment_status", "succeeded")
+    .not("apollo_person_id", "is", null)
+    .eq("is_globally_suppressed", false)
+    .eq("hard_bounced", false)
+    .eq("conversation_active", false)
+    .in("id", promotedContactIds);
   if (body.contact_ids?.length) cq = cq.in("id", body.contact_ids);
   const { data: contacts, error: cErr } = await cq;
   if (cErr) return json({ error: cErr.message }, 500);
@@ -99,10 +128,15 @@ Deno.serve(async (req) => {
     return json({ ok: true, dry_run: dryRun, summary: emptySummary(), plan: [] });
   }
 
-  // 3) BCRs for this business
+  // 3) BCRs for this business — only the staging-ready ones.
   const { data: bcrs } = await admin.from("business_contact_relationships")
     .select("id,contact_id,business_name,business_id,qualification,current_stage,campaign_eligible,do_not_contact,notes,relevance_category")
-    .in("contact_id", contactIds).eq("business_name", businessName);
+    .in("contact_id", contactIds)
+    .eq("business_name", businessName)
+    .eq("current_stage", "ready_to_stage")
+    .eq("qualification", "needs_review")
+    .eq("campaign_eligible", false)
+    .eq("do_not_contact", false);
   const bcrByContact = new Map<string, any>((bcrs ?? []).map((b) => [b.contact_id, b]));
 
   // 4) Apollo lifecycle status (Sierra etc.)
