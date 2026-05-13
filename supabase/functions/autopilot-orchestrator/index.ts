@@ -801,6 +801,36 @@ Deno.serve(async (req) => {
 
   // Collect revealed emails (from this run's outcomes OR existing rows already
   // marked safe_to_promote_after_reveal so post-reveal-only re-runs work too).
+  // BACKFILL: if this run did not perform a reveal but a previous run did and
+  // never had post-reveal validation persisted, hydrate revealOutcomes from
+  // that prior run so we can validate, persist, and reconcile counters.
+  let backfillRunId: string | null = null;
+  let backfillFromOutcomes = false;
+  if (revealOutcomes.length === 0) {
+    const { data: priorRuns } = await admin
+      .from("autopilot_runs")
+      .select("id, details, created_at")
+      .eq("business_id", businessId)
+      .order("created_at", { ascending: false })
+      .limit(10);
+    for (const r of priorRuns ?? []) {
+      const d: any = r.details ?? {};
+      const ros: any[] = Array.isArray(d.reveal_outcomes) ? d.reveal_outcomes : [];
+      const hasSuccess = ros.some((o: any) => o.email_returned && o.email);
+      const alreadyValidated = Array.isArray(d.post_reveal_validations) && d.post_reveal_validations.length > 0;
+      if (hasSuccess && !alreadyValidated) {
+        backfillRunId = r.id;
+        backfillFromOutcomes = true;
+        for (const o of ros) revealOutcomes.push(o);
+        break;
+      }
+    }
+    if (backfillFromOutcomes) {
+      await event("post_reveal_validation_backfill",
+        `Backfilling post-reveal validation against prior run ${backfillRunId}`,
+        "low", { backfill_run_id: backfillRunId, outcomes: revealOutcomes.length });
+    }
+  }
   const successOutcomes = revealOutcomes.filter((o: any) => o.email_returned && o.email);
   const emailFreq = new Map<string, number>();
   for (const o of successOutcomes) {
