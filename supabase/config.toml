@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.outreach-test-imap]
 verify_jwt = false
+
+[functions.autopilot-orchestrator]
+verify_jwt = false
