@@ -785,7 +785,16 @@ export default function LeadQualityPanel() {
                   <Badge variant="outline" className="text-[10px]">Neon Candy · hello@neoncandy.online</Badge>
                 </p>
                 <ul className="text-xs text-muted-foreground mt-1 space-y-0.5 list-disc list-inside">
-                  <li><strong className="text-foreground">{stageCandidateCount ?? 0}</strong> CRM contact(s) waiting on founder approval to become queue-eligible</li>
+                  {stagePreviewResult || stageAppliedResult ? (
+                    <li>
+                      <strong className="text-foreground">
+                        {(stageAppliedResult ?? stagePreviewResult)?.summary?.eligible_to_stage ?? 0}
+                      </strong>{" "}
+                      contact(s) eligible for queue staging from this Apollo promotion batch
+                    </li>
+                  ) : (
+                    <li className="text-yellow-300"><strong>Preview required before approval.</strong> Click <em>Preview stage-to-queue eligibility</em> to compute the exact eligible set.</li>
+                  )}
                   <li>Sets BCR <code>qualification=qualified</code>, <code>campaign_eligible=true</code>, <code>current_stage=staged</code></li>
                   <li>Assigns inbox + active campaign on the contact row</li>
                   <li>Does <strong>not</strong> create queue rows; does <strong>not</strong> send emails; auto-send stays OFF</li>
