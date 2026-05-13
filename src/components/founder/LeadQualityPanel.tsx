@@ -141,6 +141,8 @@ export default function LeadQualityPanel() {
   const [shortlistResult, setShortlistResult] = useState<any>(null);
   const [shortlistRunAt, setShortlistRunAt] = useState<string | null>(null);
   const [promotePreviewResult, setPromotePreviewResult] = useState<any>(null);
+  const [stagePreviewResult, setStagePreviewResult] = useState<any>(null);
+  const [stageAppliedResult, setStageAppliedResult] = useState<any>(null);
 
   const { data: overview, isLoading } = useQuery({
     queryKey: ["lead-quality-overview"],
@@ -288,6 +290,25 @@ export default function LeadQualityPanel() {
     },
   });
 
+  // === Stage-to-Queue eligibility candidate count (live) ===
+  // Counts contacts assigned to Neon Candy whose BCR is still in
+  // ready_to_stage / needs_review / not eligible — i.e. waiting for
+  // founder approval to move into queue eligibility.
+  const { data: stageCandidateCount, refetch: refetchStageCandidates } = useQuery({
+    queryKey: ["stage-to-queue-candidate-count"],
+    queryFn: async () => {
+      const { count } = await (supabase as any)
+        .from("business_contact_relationships")
+        .select("id", { count: "exact", head: true })
+        .eq("business_name", "Neon Candy")
+        .eq("current_stage", "ready_to_stage")
+        .eq("qualification", "needs_review")
+        .eq("campaign_eligible", false)
+        .eq("do_not_contact", false);
+      return count ?? 0;
+    },
+  });
+
   const call = async (
     fn: "lead-quality-scan" | "lead-fit-classify" | "promote-leads-to-contacts" | "enqueue-eligible-contacts" | "apollo-unlock-shortlist" | "apollo-unlock-selected",
     body: any,
@@ -339,11 +360,51 @@ export default function LeadQualityPanel() {
     }
   };
 
+  const runStageToQueue = async (dryRun: boolean) => {
+    try {
+      setBusy(dryRun ? "Stage preview" : "Stage apply");
+      setLastResult(null);
+      const { data, error } = await supabase.functions.invoke("stage-to-queue-eligibility", {
+        body: {
+          dry_run: dryRun,
+          business_name: "Neon Candy",
+        },
+      });
+      if (error) throw error;
+      setLastResult(data);
+      if (dryRun) { setStagePreviewResult(data); setStageAppliedResult(null); }
+      else { setStageAppliedResult(data); setStagePreviewResult(null); }
+      const s = data?.summary ?? {};
+      toast.success(dryRun ? "Stage-to-queue preview complete" : "Stage-to-queue applied", {
+        description: dryRun
+          ? `eligible ${s.eligible_to_stage ?? 0} · already_staged ${s.already_staged ?? 0} · excluded ${(s.excluded_already_contacted ?? 0) + (s.excluded_rejected ?? 0)}`
+          : `staged ${s.bcrs_qualified_now ?? 0} · queue rows 0 · emails 0`,
+      });
+      qc.invalidateQueries({ queryKey: ["lead-quality-overview"] });
+      qc.invalidateQueries({ queryKey: ["crm-spine-summary"] });
+      qc.invalidateQueries({ queryKey: ["lead-lifecycle-summary"] });
+      refetchStageCandidates();
+    } catch (e: any) {
+      toast.error(dryRun ? "Stage preview failed" : "Stage apply failed", {
+        description: e?.message ?? String(e),
+      });
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  // Use live founder_decisions (status='pending') as the primary source of
+  // truth for "needs founder review" — never derive it from rejected or
+  // phantom needs_verification rows.
+  const livePendingDecisions = (pendingDecisions ?? []).length;
+
   const nextAction =
     (lifecycle?.safe_to_queue ?? 0) > 0
-      ? `Enqueue up to ${lifecycle?.safe_to_queue} eligible contact(s) — preview first`
+      ? `Preview queue creation for ${lifecycle?.safe_to_queue} staged contact(s). Auto-send remains OFF.`
       : (lifecycle?.safe_to_promote ?? 0) > 0
-      ? `Promote ${lifecycle?.safe_to_promote} validation-clean contact(s) — preview first${(overview?.needs_founder_review ?? 0) > 0 ? ` · review/hold ${overview?.needs_founder_review} founder decision(s)` : ""}`
+      ? `Promote ${lifecycle?.safe_to_promote} validation-clean contact(s) — preview first${livePendingDecisions > 0 ? ` · review/hold ${livePendingDecisions} founder decision(s)` : ""}`
+      : (stageCandidateCount ?? 0) > 0
+      ? `Review campaign eligibility and assign inbox/campaign for ${stageCandidateCount} staged CRM contact(s).`
       : (lifecycle?.active_working_leads ?? 0) > 0
       ? "Review active working leads — autopilot has no recommended unlock work"
       : "Run fresh Apollo verified-email search using NeonCandy Source Quality Brief — do not spend credits on the legacy pool";
