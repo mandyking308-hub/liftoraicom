@@ -30,22 +30,28 @@ const Chip = ({ on, label }: { on: boolean; label: string }) => (
 export default function AutonomousPipelineStatus({ businessName = "Neon Candy" }: { businessName?: string }) {
   const [running, setRunning] = useState(false);
 
-  const { data: policy, refetch: refetchPolicy } = useQuery({
+  const { data: bizRow } = useQuery({
+    queryKey: ["autopilot-bizrow", businessName],
+    queryFn: async () => (await supabase.from("businesses").select("id,name").eq("name", businessName).maybeSingle()).data,
+  });
+  const businessId = bizRow?.id ?? null;
+
+  const { data: policy } = useQuery({
     queryKey: ["autopilot-policy", businessName],
+    enabled: !!businessId,
     queryFn: async () => {
-      const { data: biz } = await supabase.from("businesses").select("id").eq("name", businessName).maybeSingle();
-      if (!biz) return null;
       const { data } = await supabase.from("business_autopilot_settings" as never)
-        .select("*").eq("business_id", biz.id).maybeSingle();
+        .select("*").eq("business_id", businessId).maybeSingle();
       return data as any;
     },
   });
 
   const { data: lastRun, refetch: refetchRuns } = useQuery({
-    queryKey: ["autopilot-last-run", businessName],
+    queryKey: ["autopilot-last-run", businessId],
+    enabled: !!businessId,
     queryFn: async () => {
-      const { data } = await supabase.from("autopilot_run_log" as never)
-        .select("*").eq("business_name", businessName).eq("stage", "run_end")
+      const { data } = await supabase.from("autopilot_runs" as never)
+        .select("*").eq("business_id", businessId).eq("status", "completed")
         .order("created_at", { ascending: false }).limit(1).maybeSingle();
       return data as any;
     },
@@ -53,33 +59,35 @@ export default function AutonomousPipelineStatus({ businessName = "Neon Candy" }
   });
 
   const { data: ledgerToday } = useQuery({
-    queryKey: ["autopilot-credits-today", businessName],
+    queryKey: ["autopilot-credits-today", businessId],
+    enabled: !!businessId,
     queryFn: async () => {
       const today = new Date(); today.setUTCHours(0, 0, 0, 0);
       const { data } = await supabase.from("apollo_credit_ledger" as never)
-        .select("credits_used,created_at").eq("business_name", businessName)
+        .select("credits_used,created_at").eq("business_id", businessId)
         .gte("created_at", today.toISOString());
       return ((data ?? []) as any[]).reduce((s, r) => s + (r.credits_used ?? 0), 0);
     },
   });
 
   const { data: pendingDecisions } = useQuery({
-    queryKey: ["autopilot-decisions", businessName],
+    queryKey: ["autopilot-decisions", businessId],
+    enabled: !!businessId,
     queryFn: async () => {
-      const { count } = await supabase.from("founder_decision_queue" as never)
+      const { count } = await supabase.from("founder_decisions" as never)
         .select("id", { count: "exact", head: true })
-        .eq("business_name", businessName).eq("status", "pending");
+        .eq("business_id", businessId).eq("status", "pending");
       return count ?? 0;
     },
   });
 
-  const counters: Counters = lastRun?.metadata?.counters ?? {};
+  const counters: Counters = lastRun?.details?.counters ?? {};
 
   const runDryPlan = async () => {
     setRunning(true);
     try {
       const { data, error } = await supabase.functions.invoke("autopilot-orchestrator", {
-        body: { business_name: businessName, dry_run: true },
+        body: { business_id: businessId, business_name: businessName, dry_run: true },
       });
       if (error) throw error;
       toast.success(`Plan ready — ${data?.counters?.reveal_planned ?? 0} reveal · ${data?.counters?.promote_planned ?? 0} promote · ${data?.counters?.queue_planned ?? 0} queue`);
@@ -96,7 +104,7 @@ export default function AutonomousPipelineStatus({ businessName = "Neon Candy" }
     setRunning(true);
     try {
       const { data, error } = await supabase.functions.invoke("autopilot-orchestrator", {
-        body: { business_name: businessName, dry_run: false },
+        body: { business_id: businessId, business_name: businessName, dry_run: false },
       });
       if (error) throw error;
       toast.success(`Executed — ${data?.counters?.reveal_planned ?? 0} reveal · ${data?.counters?.promote_planned ?? 0} promote · ${data?.counters?.queue_planned ?? 0} queue`);

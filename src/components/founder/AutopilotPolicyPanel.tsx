@@ -84,12 +84,15 @@ export default function AutopilotPolicyPanel({ businessName = "Neon Candy" }: { 
       if (error) throw error;
 
       for (const t of sensitive) {
-        await supabase.from("founder_decision_queue" as never).insert({
-          business_name: businessName,
+        await supabase.from("founder_decisions" as never).insert({
+          business_id: bizId,
           decision_type: t,
-          payload: { policy_id: policy.id, change: policy } as never,
-          status: "auto_approved",
-          resolved_at: new Date().toISOString(),
+          title: `Policy change: ${t}`,
+          finding: `Founder updated autopilot policy for ${businessName}`,
+          recommendation: "Auto-approved by founder via policy editor",
+          status: "approved",
+          decided_at: new Date().toISOString(),
+          related_ids: { policy_id: policy.id, change: policy } as never,
         } as never);
       }
 

@@ -611,6 +611,7 @@ export type Database = {
       apollo_credit_ledger: {
         Row: {
           apollo_person_ids: string[]
+          business_id: string | null
           business_name: string
           created_at: string
           credits_used: number
@@ -620,6 +621,7 @@ export type Database = {
         }
         Insert: {
           apollo_person_ids?: string[]
+          business_id?: string | null
           business_name: string
           created_at?: string
           credits_used?: number
@@ -629,6 +631,7 @@ export type Database = {
         }
         Update: {
           apollo_person_ids?: string[]
+          business_id?: string | null
           business_name?: string
           created_at?: string
           credits_used?: number
@@ -636,7 +639,15 @@ export type Database = {
           id?: string
           metadata?: Json
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "apollo_credit_ledger_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       apollo_leads: {
         Row: {
@@ -1276,51 +1287,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      autopilot_run_log: {
-        Row: {
-          actor: string
-          apollo_person_id: string | null
-          business_name: string
-          candidate_id: string | null
-          contact_id: string | null
-          created_at: string
-          id: string
-          metadata: Json
-          outcome: string
-          reason: string | null
-          run_id: string | null
-          stage: string
-        }
-        Insert: {
-          actor?: string
-          apollo_person_id?: string | null
-          business_name: string
-          candidate_id?: string | null
-          contact_id?: string | null
-          created_at?: string
-          id?: string
-          metadata?: Json
-          outcome: string
-          reason?: string | null
-          run_id?: string | null
-          stage: string
-        }
-        Update: {
-          actor?: string
-          apollo_person_id?: string | null
-          business_name?: string
-          candidate_id?: string | null
-          contact_id?: string | null
-          created_at?: string
-          id?: string
-          metadata?: Json
-          outcome?: string
-          reason?: string | null
-          run_id?: string | null
-          stage?: string
-        }
-        Relationships: []
       }
       autopilot_runs: {
         Row: {
@@ -3369,42 +3335,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      founder_decision_queue: {
-        Row: {
-          business_name: string
-          decision_type: string
-          id: string
-          payload: Json
-          requested_at: string
-          resolved_at: string | null
-          resolver_note: string | null
-          resolver_user_id: string | null
-          status: string
-        }
-        Insert: {
-          business_name: string
-          decision_type: string
-          id?: string
-          payload?: Json
-          requested_at?: string
-          resolved_at?: string | null
-          resolver_note?: string | null
-          resolver_user_id?: string | null
-          status?: string
-        }
-        Update: {
-          business_name?: string
-          decision_type?: string
-          id?: string
-          payload?: Json
-          requested_at?: string
-          resolved_at?: string | null
-          resolver_note?: string | null
-          resolver_user_id?: string | null
-          status?: string
-        }
-        Relationships: []
       }
       founder_decisions: {
         Row: {
