@@ -69,6 +69,28 @@ type Counters = {
   would_spend_credits: number;
 };
 
+// Normalize helpers — used for pre-reveal dedupe and company grouping.
+function norm(s: string | null | undefined): string {
+  return (s ?? "").toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, " ").trim();
+}
+function dedupeKey(lead: any): { key: string; source: string } {
+  if (lead?.apollo_person_id) return { key: `pid:${String(lead.apollo_person_id).toLowerCase()}`, source: "apollo_person_id" };
+  const li = (lead?.linkedin_url ?? "").toLowerCase().replace(/^https?:\/\/(www\.)?/, "").replace(/\/+$/, "");
+  if (li) return { key: `li:${li}`, source: "linkedin_url" };
+  const fn = norm(lead?.first_name); const ln = norm(lead?.last_name);
+  const co = norm(lead?.company); const ti = norm(lead?.title);
+  return { key: `nm:${fn}|${ln}|${co}|${ti}`, source: "name_company_title" };
+}
+function companyGroupKey(lead: any): { key: string; display: string; source: string } {
+  const dom = (lead?.email_domain ?? "").toLowerCase().trim();
+  if (dom) return { key: `dom:${dom}`, display: dom, source: "email_domain" };
+  const orgId = lead?.apollo_org_id ? String(lead.apollo_org_id) : "";
+  if (orgId) return { key: `org:${orgId.toLowerCase()}`, display: `org:${orgId.slice(0, 8)}`, source: "apollo_org_id" };
+  const co = norm(lead?.company);
+  if (co) return { key: `co:${co}`, display: `co:${lead.company}`, source: "company_name" };
+  return { key: "unknown", display: "—", source: "none" };
+}
+
 // Inline deterministic scorer — mirrors apollo-unlock-shortlist title/company
 // rules and returns a 0–10 score plus a campaign_fit label. NO Apollo calls,
 // NO AI, NO credits.
