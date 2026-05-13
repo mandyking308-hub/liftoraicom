@@ -75,6 +75,7 @@ const OutreachDashboard = () => {
             <Button asChild variant="outline" size="sm"><Link to="/founder/outreach/campaigns"><Megaphone className="h-4 w-4 mr-2" />Campaigns</Link></Button>
             <Button asChild variant="outline" size="sm"><Link to="/founder/outreach/queue"><Database className="h-4 w-4 mr-2" />Queue</Link></Button>
             <Button asChild variant="outline" size="sm"><Link to="/founder/outreach/apollo"><Sparkles className="h-4 w-4 mr-2" />Apollo</Link></Button>
+            <Button asChild variant="outline" size="sm"><Link to="/founder/outreach/queue-audit"><Database className="h-4 w-4 mr-2" />Queue Audit</Link></Button>
           </div>
         </div>
 
