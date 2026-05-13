@@ -145,6 +145,8 @@ export default function LeadQualityPanel() {
   const [stageAppliedResult, setStageAppliedResult] = useState<any>(null);
   const [compliancePreviewResult, setCompliancePreviewResult] = useState<any>(null);
   const [complianceAppliedResult, setComplianceAppliedResult] = useState<any>(null);
+  const [queuePreviewResult, setQueuePreviewResult] = useState<any>(null);
+  const [queueAppliedResult, setQueueAppliedResult] = useState<any>(null);
 
   const { data: overview, isLoading } = useQuery({
     queryKey: ["lead-quality-overview"],
@@ -454,6 +456,33 @@ export default function LeadQualityPanel() {
       qc.invalidateQueries({ queryKey: ["compliance-readiness-summary"] });
     } catch (e: any) {
       toast.error(dryRun ? "Compliance preview failed" : "Compliance approval failed", {
+        description: e?.message ?? String(e),
+      });
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const runQueueCreation = async (dryRun: boolean) => {
+    try {
+      setBusy(dryRun ? "Queue preview" : "Queue apply");
+      setLastResult(null);
+      const { data, error } = await supabase.functions.invoke("create-queue-from-staged", {
+        body: { dry_run: dryRun, business_name: "Neon Candy" },
+      });
+      if (error) throw error;
+      setLastResult(data);
+      if (dryRun) { setQueuePreviewResult(data); setQueueAppliedResult(null); }
+      else { setQueueAppliedResult(data); setQueuePreviewResult(null); }
+      const s = data?.summary ?? {};
+      toast.success(dryRun ? "Queue creation preview complete" : "Queue rows created", {
+        description: dryRun
+          ? `eligible ${s.eligible_to_queue ?? 0} · queue_rows_to_create ${s.queue_rows_to_create ?? 0} · sends 0 · Apollo 0`
+          : `created ${s.queue_rows_created ?? 0} · sends 0 · provider_calls 0 · Apollo 0`,
+      });
+      qc.invalidateQueries({ queryKey: ["lead-lifecycle-summary"] });
+    } catch (e: any) {
+      toast.error(dryRun ? "Queue preview failed" : "Queue apply failed", {
         description: e?.message ?? String(e),
       });
     } finally {
@@ -1000,6 +1029,114 @@ export default function LeadQualityPanel() {
                   )}
                   <p className="text-[10px] text-muted-foreground">
                     Sierra is filtered via <code>apollo_raw_leads.quality_status='rejected'</code>. Jack is filtered via prior sent/cancelled <code>email_queue</code> rows for the same campaign. No Apollo credits, no reveals, no contact/BCR creation.
+                  </p>
+                </div>
+              );
+            })()}
+          </div>
+        )}
+
+        {/* === Queue Creation Gate ===
+            Inserts Step 1 email_queue rows for already-staged contacts.
+            Auto-send remains OFF; the worker will not pick these up. */}
+        {(true) && (
+          <div className="rounded-md border border-primary/40 bg-primary/5 p-4 space-y-3">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <div>
+                <p className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <CheckCircle2 size={14} className="text-primary" /> Queue Creation Gate
+                  <Badge variant="outline" className="text-[10px]">Neon Candy · hello@neoncandy.online · Step 1</Badge>
+                </p>
+                <ul className="text-xs text-muted-foreground mt-1 space-y-0.5 list-disc list-inside">
+                  {queuePreviewResult || queueAppliedResult ? (
+                    <li>
+                      <strong className="text-foreground">
+                        {(queueAppliedResult ?? queuePreviewResult)?.summary?.eligible_to_queue ?? 0}
+                      </strong>{" "}
+                      staged contact(s) eligible for queue row creation
+                    </li>
+                  ) : (
+                    <li className="text-yellow-300"><strong>Preview required before queue creation.</strong></li>
+                  )}
+                  <li>Inserts <code>email_queue</code> Step 1 row with <code>status=pending</code>; auto-send OFF means the worker will not send</li>
+                  <li>Idempotent: re-clicking Apply will not duplicate (contact_id + campaign_id + step 1 dedupe)</li>
+                  <li>Does <strong>not</strong> send emails, call provider, or spend Apollo credits</li>
+                </ul>
+              </div>
+              <div className="flex gap-2 flex-wrap">
+                <Button size="sm" variant="outline" disabled={!!busy} onClick={() => runQueueCreation(true)}>
+                  {busy === "Queue preview" ? <Loader2 className="animate-spin" size={14} /> : "Preview queue creation"}
+                </Button>
+                <Button size="sm" variant="default"
+                  disabled={!!busy || !queuePreviewResult || (queuePreviewResult?.summary?.queue_rows_to_create ?? 0) === 0}
+                  onClick={() => runQueueCreation(false)}
+                  title={!queuePreviewResult ? "Run preview first" : undefined}>
+                  {busy === "Queue apply" ? <Loader2 className="animate-spin" size={14} /> : `Create ${queuePreviewResult?.summary?.queue_rows_to_create ?? 0} queue row(s)`}
+                </Button>
+              </div>
+            </div>
+            {!queuePreviewResult && !queueAppliedResult && (
+              <p className="text-[11px] text-yellow-300">
+                Apply button is disabled until <strong>Preview queue creation</strong> succeeds in this session.
+              </p>
+            )}
+            {(queuePreviewResult || queueAppliedResult) && (() => {
+              const r = queueAppliedResult ?? queuePreviewResult;
+              const s = r?.summary ?? {};
+              const planRows: any[] = Array.isArray(r?.plan) ? r.plan : [];
+              return (
+                <div className="rounded border border-border/50 bg-card/40 p-3 space-y-2 text-xs">
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="secondary" className="text-[10px]">candidates_checked: {s.candidates_checked ?? 0}</Badge>
+                    <Badge variant="secondary" className="text-[10px]">eligible_to_queue: {s.eligible_to_queue ?? 0}</Badge>
+                    <Badge variant="secondary" className="text-[10px]">queue_rows_to_create: {s.queue_rows_to_create ?? 0}</Badge>
+                    <Badge variant="secondary" className="text-[10px]">sends_to_create: 0</Badge>
+                    <Badge variant="secondary" className="text-[10px]">apollo_credits_to_spend: 0</Badge>
+                    <Badge variant="secondary" className="text-[10px]">excluded_no_bcr: {s.excluded_no_bcr ?? 0}</Badge>
+                    <Badge variant="secondary" className="text-[10px]">excluded_bcr_not_staged: {s.excluded_bcr_not_staged ?? 0}</Badge>
+                    <Badge variant="secondary" className="text-[10px]">excluded_existing_step1: {s.excluded_existing_queue_row_step1 ?? 0}</Badge>
+                    <Badge variant="secondary" className="text-[10px]">excluded_prior_history: {s.excluded_prior_queue_history ?? 0}</Badge>
+                  </div>
+                  {queueAppliedResult && (
+                    <div className="rounded border border-green-500/30 bg-green-500/5 p-2 text-[11px] text-foreground">
+                      Queue rows created: <strong>{s.queue_rows_created ?? 0}</strong> · Emails sent: <strong>0</strong> · Provider calls: <strong>0</strong> · Apollo credits: <strong>0</strong>.
+                      {Array.isArray(s.created_queue_ids) && s.created_queue_ids.length > 0 && (
+                        <div className="mt-1 font-mono text-[10px] text-muted-foreground break-all">
+                          {s.created_queue_ids.join(", ")}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {planRows.length > 0 && (
+                    <div className="overflow-x-auto rounded border border-border/40">
+                      <table className="w-full text-[11px]">
+                        <thead className="bg-muted/30 text-muted-foreground">
+                          <tr>
+                            <th className="text-left px-2 py-1">Name</th>
+                            <th className="text-left px-2 py-1">Email</th>
+                            <th className="text-left px-2 py-1">Company</th>
+                            <th className="text-left px-2 py-1">Step</th>
+                            <th className="text-left px-2 py-1">Eligibility</th>
+                            <th className="text-left px-2 py-1">Reason</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {planRows.map((p: any) => (
+                            <tr key={p.contact_id} className="border-t border-border/30">
+                              <td className="px-2 py-1">{p.name ?? "—"}</td>
+                              <td className="px-2 py-1 font-mono text-[10px]">{p.email ?? "—"}</td>
+                              <td className="px-2 py-1">{p.company ?? "—"}</td>
+                              <td className="px-2 py-1">{p.sequence_step}</td>
+                              <td className={`px-2 py-1 ${p.eligibility === "eligible_to_queue" ? "text-green-300" : "text-yellow-300"}`}>{p.eligibility}</td>
+                              <td className="px-2 py-1 text-muted-foreground">{p.blocker_reason ?? "—"}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                  <p className="text-[10px] text-muted-foreground">
+                    Queue rows are inserted with <code>status=pending</code>. The send worker only fires when system auto-send is ON; it remains OFF.
                   </p>
                 </div>
               );
