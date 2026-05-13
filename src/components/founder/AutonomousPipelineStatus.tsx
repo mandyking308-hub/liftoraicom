@@ -117,7 +117,7 @@ export default function AutonomousPipelineStatus({ businessName = "Neon Candy" }
       toast.error("Enter a reveal amount before running live.");
       return;
     }
-    if (!confirm(`Execute live? Liftor will reveal up to ${parsedAmount} Apollo emails (within budget + domain caps). Sending remains gated by auto-send policy.`)) return;
+    if (!confirm(`Approve & reveal selected candidates?\n\nThis will spend approximately ${parsedAmount} Apollo credits.\nIt will not send emails. Auto-send remains OFF.`)) return;
     setRunning(true);
     try {
       const { data, error } = await supabase.functions.invoke("autopilot-orchestrator", {
@@ -150,12 +150,18 @@ export default function AutonomousPipelineStatus({ businessName = "Neon Candy" }
             {running ? <Loader2 size={12} className="animate-spin mr-1" /> : <Activity size={12} className="mr-1" />}
             Plan (dry-run)
           </Button>
-          <Button size="sm" onClick={runLive} disabled={running || !policy || parsedAmount === null || amountInvalid}>
-            <PlayCircle size={12} className="mr-1" /> Run now
+          <Button size="sm" onClick={runLive} disabled={running || !policy || parsedAmount === null || amountInvalid || selectedCandidates.length === 0}>
+            <PlayCircle size={12} className="mr-1" /> Approve & reveal selected candidates
           </Button>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* One-shot vs autonomous reveal explainer */}
+        <div className="text-xs text-muted-foreground p-2 rounded bg-secondary/20 border border-border/40">
+          {policy?.apollo_email_reveal_autonomous
+            ? "Autonomous reveal is ON — Liftor reveals automatically within policy."
+            : "Autonomous reveal is OFF. One-shot founder-approved reveal is available — enter an amount, run Plan, then click Approve & reveal selected candidates."}
+        </div>
         {/* Founder-defined reveal amount */}
         <div className="p-3 rounded border border-border/60 bg-secondary/30 space-y-2">
           <div className="flex items-end gap-3 flex-wrap">
@@ -177,6 +183,13 @@ export default function AutonomousPipelineStatus({ businessName = "Neon Candy" }
             </p>
           </div>
           {amountInvalid && <p className="text-xs text-destructive">Enter a positive integer.</p>}
+          {parsedAmount !== null && !amountInvalid && (
+            <p className="text-xs text-yellow-200">
+              {selectedCandidates.length === 0
+                ? "Run Plan (dry-run) and review selected candidates first."
+                : `Approve one-shot reveal of ${selectedCandidates.length} selected candidates. This will spend approximately ${selectedCandidates.length} Apollo credits. It will not send emails. Auto-send remains OFF.`}
+            </p>
+          )}
           {parsedAmount !== null && counters.reveal_eligible_total !== undefined &&
             parsedAmount > (counters.reveal_eligible_total ?? 0) && (
               <p className="text-xs text-yellow-300">
@@ -215,7 +228,7 @@ export default function AutonomousPipelineStatus({ businessName = "Neon Candy" }
           <Stat label="Held back — budget" value={counters.held_back_by_budget ?? 0} tone="warn" />
           <Stat label="Held back — domain cap" value={counters.held_back_by_domain_cap ?? counters.reveal_skipped_domain_cap ?? 0} tone="warn" />
           <Stat label="Reveal planned (live)" value={counters.reveal_planned ?? 0} tone="good" />
-          <Stat label="Skipped — reveal OFF" value={counters.skipped_reveal_disabled ?? 0} tone="warn" />
+          <Stat label="Awaiting founder approval" value={counters.awaiting_founder_reveal_approval ?? 0} tone="warn" />
           <Stat label="Skipped — below min score" value={counters.skipped_below_min_score ?? 0} tone="warn" />
           <Stat label="Skipped — missing score" value={counters.skipped_missing_score ?? 0} tone="warn" />
           <Stat label="Skipped — existing CRM" value={counters.skipped_existing_crm ?? 0} tone="warn" />
