@@ -608,6 +608,36 @@ export type Database = {
         }
         Relationships: []
       }
+      apollo_credit_ledger: {
+        Row: {
+          apollo_person_ids: string[]
+          business_name: string
+          created_at: string
+          credits_used: number
+          function_source: string
+          id: string
+          metadata: Json
+        }
+        Insert: {
+          apollo_person_ids?: string[]
+          business_name: string
+          created_at?: string
+          credits_used?: number
+          function_source: string
+          id?: string
+          metadata?: Json
+        }
+        Update: {
+          apollo_person_ids?: string[]
+          business_name?: string
+          created_at?: string
+          credits_used?: number
+          function_source?: string
+          id?: string
+          metadata?: Json
+        }
+        Relationships: []
+      }
       apollo_leads: {
         Row: {
           ai_tags: string[]
@@ -1247,6 +1277,51 @@ export type Database = {
           },
         ]
       }
+      autopilot_run_log: {
+        Row: {
+          actor: string
+          apollo_person_id: string | null
+          business_name: string
+          candidate_id: string | null
+          contact_id: string | null
+          created_at: string
+          id: string
+          metadata: Json
+          outcome: string
+          reason: string | null
+          run_id: string | null
+          stage: string
+        }
+        Insert: {
+          actor?: string
+          apollo_person_id?: string | null
+          business_name: string
+          candidate_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          outcome: string
+          reason?: string | null
+          run_id?: string | null
+          stage: string
+        }
+        Update: {
+          actor?: string
+          apollo_person_id?: string | null
+          business_name?: string
+          candidate_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          outcome?: string
+          reason?: string | null
+          run_id?: string | null
+          stage?: string
+        }
+        Relationships: []
+      }
       autopilot_runs: {
         Row: {
           already_in_crm_matched: number
@@ -1483,6 +1558,17 @@ export type Database = {
       business_autopilot_settings: {
         Row: {
           ai_classification_allowed: boolean
+          apollo_candidate_pull_enabled: boolean
+          apollo_email_reveal_autonomous: boolean
+          apollo_reveal_daily_credit_budget: number
+          apollo_reveal_exclude_duplicates: boolean
+          apollo_reveal_exclude_existing_crm: boolean
+          apollo_reveal_exclude_legacy_hold: boolean
+          apollo_reveal_exclude_poor_fit: boolean
+          apollo_reveal_exclude_previous_no_email: boolean
+          apollo_reveal_max_domain_frequency: number
+          apollo_reveal_min_quality_score: number
+          apollo_reveal_monthly_credit_budget: number
           auto_archive_duplicates: boolean
           auto_archive_poor_fit: boolean
           auto_build_unlock_shortlist: boolean
@@ -1491,19 +1577,42 @@ export type Database = {
           auto_enqueue_contacts: boolean
           auto_hold_missing_email_old_pool: boolean
           auto_lifecycle_classify: boolean
+          auto_promote_after_valid_reveal: boolean
+          auto_promote_only_campaign_fit: boolean
+          auto_promote_only_crm_new: boolean
+          auto_promote_only_verified_email: boolean
           auto_promote_verified_qualified_leads: boolean
+          auto_queue_after_promotion: boolean
+          auto_queue_campaign_id: string | null
+          auto_queue_domain_cap: number
+          auto_queue_step: number
           auto_scan_imported_leads: boolean
+          auto_send_after_queue: boolean
           auto_send_live_batches: boolean
           auto_unlock_apollo_emails: boolean
           business_id: string
           created_at: string
+          daily_send_budget: number
           id: string
           max_apollo_unlock_credits_without_founder_approval: number
+          sending_provider_mode: string
           stale_needs_verification_days: number
           updated_at: string
+          updated_by: string | null
         }
         Insert: {
           ai_classification_allowed?: boolean
+          apollo_candidate_pull_enabled?: boolean
+          apollo_email_reveal_autonomous?: boolean
+          apollo_reveal_daily_credit_budget?: number
+          apollo_reveal_exclude_duplicates?: boolean
+          apollo_reveal_exclude_existing_crm?: boolean
+          apollo_reveal_exclude_legacy_hold?: boolean
+          apollo_reveal_exclude_poor_fit?: boolean
+          apollo_reveal_exclude_previous_no_email?: boolean
+          apollo_reveal_max_domain_frequency?: number
+          apollo_reveal_min_quality_score?: number
+          apollo_reveal_monthly_credit_budget?: number
           auto_archive_duplicates?: boolean
           auto_archive_poor_fit?: boolean
           auto_build_unlock_shortlist?: boolean
@@ -1512,19 +1621,42 @@ export type Database = {
           auto_enqueue_contacts?: boolean
           auto_hold_missing_email_old_pool?: boolean
           auto_lifecycle_classify?: boolean
+          auto_promote_after_valid_reveal?: boolean
+          auto_promote_only_campaign_fit?: boolean
+          auto_promote_only_crm_new?: boolean
+          auto_promote_only_verified_email?: boolean
           auto_promote_verified_qualified_leads?: boolean
+          auto_queue_after_promotion?: boolean
+          auto_queue_campaign_id?: string | null
+          auto_queue_domain_cap?: number
+          auto_queue_step?: number
           auto_scan_imported_leads?: boolean
+          auto_send_after_queue?: boolean
           auto_send_live_batches?: boolean
           auto_unlock_apollo_emails?: boolean
           business_id: string
           created_at?: string
+          daily_send_budget?: number
           id?: string
           max_apollo_unlock_credits_without_founder_approval?: number
+          sending_provider_mode?: string
           stale_needs_verification_days?: number
           updated_at?: string
+          updated_by?: string | null
         }
         Update: {
           ai_classification_allowed?: boolean
+          apollo_candidate_pull_enabled?: boolean
+          apollo_email_reveal_autonomous?: boolean
+          apollo_reveal_daily_credit_budget?: number
+          apollo_reveal_exclude_duplicates?: boolean
+          apollo_reveal_exclude_existing_crm?: boolean
+          apollo_reveal_exclude_legacy_hold?: boolean
+          apollo_reveal_exclude_poor_fit?: boolean
+          apollo_reveal_exclude_previous_no_email?: boolean
+          apollo_reveal_max_domain_frequency?: number
+          apollo_reveal_min_quality_score?: number
+          apollo_reveal_monthly_credit_budget?: number
           auto_archive_duplicates?: boolean
           auto_archive_poor_fit?: boolean
           auto_build_unlock_shortlist?: boolean
@@ -1533,16 +1665,28 @@ export type Database = {
           auto_enqueue_contacts?: boolean
           auto_hold_missing_email_old_pool?: boolean
           auto_lifecycle_classify?: boolean
+          auto_promote_after_valid_reveal?: boolean
+          auto_promote_only_campaign_fit?: boolean
+          auto_promote_only_crm_new?: boolean
+          auto_promote_only_verified_email?: boolean
           auto_promote_verified_qualified_leads?: boolean
+          auto_queue_after_promotion?: boolean
+          auto_queue_campaign_id?: string | null
+          auto_queue_domain_cap?: number
+          auto_queue_step?: number
           auto_scan_imported_leads?: boolean
+          auto_send_after_queue?: boolean
           auto_send_live_batches?: boolean
           auto_unlock_apollo_emails?: boolean
           business_id?: string
           created_at?: string
+          daily_send_budget?: number
           id?: string
           max_apollo_unlock_credits_without_founder_approval?: number
+          sending_provider_mode?: string
           stale_needs_verification_days?: number
           updated_at?: string
+          updated_by?: string | null
         }
         Relationships: []
       }
@@ -3225,6 +3369,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      founder_decision_queue: {
+        Row: {
+          business_name: string
+          decision_type: string
+          id: string
+          payload: Json
+          requested_at: string
+          resolved_at: string | null
+          resolver_note: string | null
+          resolver_user_id: string | null
+          status: string
+        }
+        Insert: {
+          business_name: string
+          decision_type: string
+          id?: string
+          payload?: Json
+          requested_at?: string
+          resolved_at?: string | null
+          resolver_note?: string | null
+          resolver_user_id?: string | null
+          status?: string
+        }
+        Update: {
+          business_name?: string
+          decision_type?: string
+          id?: string
+          payload?: Json
+          requested_at?: string
+          resolved_at?: string | null
+          resolver_note?: string | null
+          resolver_user_id?: string | null
+          status?: string
+        }
+        Relationships: []
       }
       founder_decisions: {
         Row: {
