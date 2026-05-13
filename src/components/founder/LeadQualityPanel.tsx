@@ -272,7 +272,7 @@ export default function LeadQualityPanel() {
     (lifecycle?.safe_to_queue ?? 0) > 0
       ? `Enqueue up to ${lifecycle?.safe_to_queue} eligible contact(s) — preview first`
       : (lifecycle?.safe_to_promote ?? 0) > 0
-      ? `Promote ${lifecycle?.safe_to_promote} qualified lead(s) to contacts — preview first`
+      ? `Promote ${lifecycle?.safe_to_promote} validation-clean contact(s) — preview first${(overview?.needs_founder_review ?? 0) > 0 ? ` · review/hold ${overview?.needs_founder_review} founder decision(s)` : ""}`
       : (lifecycle?.active_working_leads ?? 0) > 0
       ? "Review active working leads — autopilot has no recommended unlock work"
       : "Run fresh Apollo verified-email search using NeonCandy Source Quality Brief — do not spend credits on the legacy pool";
