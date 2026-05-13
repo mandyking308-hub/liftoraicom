@@ -15,8 +15,12 @@ type AuditItem = {
   scheduled_at: string;
   classification: string;
   recommended_action: string;
+  reason: string;
   blockers: string[];
   prior_sent_steps: number[];
+  last_sent_step: number | null;
+  last_sent_at: string | null;
+  last_provider_message_id: string | null;
   step1_sent: boolean;
   follows_last_sent_step: boolean;
   duplicate_pending_same_step: boolean;
@@ -39,6 +43,7 @@ type AuditItem = {
 type AuditResponse = {
   ok: boolean;
   dry_run: boolean;
+  founder_protected?: boolean;
   generated_at: string;
   baseline: any;
   summary: any;
@@ -99,6 +104,14 @@ const QueueAudit = () => {
         </AlertDescription>
       </Alert>
 
+      {data && !data.founder_protected && (
+        <Alert variant="destructive">
+          <ShieldAlert />
+          <AlertTitle>Security hardening required: audit endpoint must be founder-only before production use.</AlertTitle>
+          <AlertDescription>The audit endpoint did not confirm founder/admin access on this call.</AlertDescription>
+        </Alert>
+      )}
+
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 text-xs">
         {["Auto-send is blocked","Pending rows are parked","Dry-run audit only","No SMTP calls made","No Apollo calls made","No queue rows changed","No contacts changed","No BCRs changed","No compliance records changed"].map(s => (
           <div key={s} className="rounded-md border bg-muted/30 px-2 py-1.5 text-center">{s}</div>
@@ -125,11 +138,16 @@ const QueueAudit = () => {
               <div>strict false: <b>{String(data.baseline.auto_send_is_strict_false)}</b></div>
               <div>worker fail-closed guard present in source: <b>{String(data.baseline.worker_guard_present_in_source)}</b></div>
               <div>worker exits before queue selection unless auto_send_enabled === true: <b>{String(data.baseline.worker_exits_before_queue_selection)}</b></div>
-              <div>cron query ok: <b>{String(data.baseline.cron_query_ok)}</b></div>
+              <div>cron_check: <b className={
+                data.baseline.cron_check === "verified_disabled" ? "text-primary"
+                : data.baseline.cron_check === "active_sender_found_unsafe" ? "text-destructive"
+                : "text-destructive"
+              }>{data.baseline.cron_check}</b></div>
               <div>active outbound send cron jobs: <b>{data.baseline.cron_outbound_send_jobs.length}</b></div>
               <div>inbound-only cron jobs: <b>{data.baseline.cron_inbound_only_jobs.length}</b></div>
               <div>SMTP called by this audit: <b>{String(data.baseline.smtp_called)}</b></div>
               <div>Apollo called by this audit: <b>{String(data.baseline.apollo_called)}</b></div>
+              <div>founder-protected: <b>{String(data.baseline.founder_protected)}</b> — {data.baseline.auth_reason}</div>
               {data.summary.unsafe_reasons.length > 0 && (
                 <Alert variant="destructive" className="mt-3">
                   <AlertTitle>Review required</AlertTitle>
@@ -201,6 +219,8 @@ const QueueAudit = () => {
                       </TableCell>
                       <TableCell className="text-xs">
                         steps: [{it.prior_sent_steps.join(",")}]<br />
+                        last sent: {it.last_sent_step ?? "—"}{it.last_sent_at ? ` @ ${new Date(it.last_sent_at).toISOString().slice(0,16).replace("T"," ")}` : ""}<br />
+                        msg-id: <span className="font-mono break-all">{it.last_provider_message_id ?? "—"}</span><br />
                         step1: {it.step1_sent ? "✓" : "✗"} | next: {it.follows_last_sent_step ? "✓" : "✗"}
                       </TableCell>
                       <TableCell className="text-xs">
@@ -214,7 +234,10 @@ const QueueAudit = () => {
                         eligible: {String(it.bcr_campaign_eligible)}<br />
                         dnc: {String(it.bcr_do_not_contact)}
                       </TableCell>
-                      <TableCell className="text-xs max-w-[260px]">{it.recommended_action}</TableCell>
+                      <TableCell className="text-xs max-w-[280px]">
+                        <div>{it.recommended_action}</div>
+                        <div className="text-muted-foreground mt-1">reason: {it.reason}</div>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -224,25 +247,32 @@ const QueueAudit = () => {
 
           {/* Cleanup preview */}
           <Card>
-            <CardHeader><CardTitle>Preview-only cleanup design (no apply)</CardTitle></CardHeader>
+            <CardHeader><CardTitle>Cleanup gate — preview only (no apply)</CardTitle></CardHeader>
             <CardContent className="space-y-3 text-sm">
               <div className="grid md:grid-cols-2 gap-3">
-                <div className="rounded-md border p-3">
-                  <div className="font-medium mb-1">Would cancel ({data.cleanup_preview.cancel_ids.length})</div>
-                  <div className="text-xs font-mono break-all text-muted-foreground">{data.cleanup_preview.cancel_ids.join(", ") || "—"}</div>
-                </div>
-                <div className="rounded-md border p-3">
-                  <div className="font-medium mb-1">Would park ({data.cleanup_preview.park_ids.length})</div>
-                  <div className="text-xs font-mono break-all text-muted-foreground">{data.cleanup_preview.park_ids.join(", ") || "—"}</div>
-                </div>
-                <div className="rounded-md border p-3">
-                  <div className="font-medium mb-1">Requires human review ({data.cleanup_preview.review_ids.length})</div>
-                  <div className="text-xs font-mono break-all text-muted-foreground">{data.cleanup_preview.review_ids.join(", ") || "—"}</div>
-                </div>
-                <div className="rounded-md border p-3">
-                  <div className="font-medium mb-1">Valid but blocked — hold ({data.cleanup_preview.valid_blocked_ids.length})</div>
-                  <div className="text-xs font-mono break-all text-muted-foreground">{data.cleanup_preview.valid_blocked_ids.join(", ") || "—"}</div>
-                </div>
+                {[
+                  ["would_cancel", "Would cancel"],
+                  ["would_park", "Would park"],
+                  ["would_review", "Would require human review"],
+                  ["would_keep_blocked", "Would keep blocked (clean, hold)"],
+                ].map(([k, label]) => {
+                  const rows = (data.cleanup_preview[k] ?? []) as { queue_id: string; reason: string }[];
+                  return (
+                    <div key={k} className="rounded-md border p-3">
+                      <div className="font-medium mb-1">{label} ({rows.length})</div>
+                      {rows.length === 0
+                        ? <div className="text-xs text-muted-foreground">—</div>
+                        : <ul className="text-xs space-y-1">
+                            {rows.map(r => (
+                              <li key={r.queue_id}>
+                                <span className="font-mono">{r.queue_id}</span>
+                                <div className="text-muted-foreground">{r.reason}</div>
+                              </li>
+                            ))}
+                          </ul>}
+                    </div>
+                  );
+                })}
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
                 {Object.entries(data.cleanup_preview.counters).map(([k, v]) => (
@@ -252,7 +282,7 @@ const QueueAudit = () => {
                   </div>
                 ))}
               </div>
-              <Button disabled className="mt-2">Apply disabled — audit only</Button>
+              <Button disabled className="mt-2">Apply disabled — audit hardening only</Button>
             </CardContent>
           </Card>
 
