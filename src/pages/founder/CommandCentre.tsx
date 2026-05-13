@@ -622,6 +622,9 @@ const CommandCentre = () => {
               )}
             </Section>
 
+            {/* MASTER INDEX / SYSTEM MAP — read-only navigation map of every Liftor function. */}
+            <CommandCentreMasterIndex />
+
             {/* SECTION 3 — Business Workflow Rail */}
             <Section title="Business workflow" icon={WorkflowIcon}>
               {(() => {
