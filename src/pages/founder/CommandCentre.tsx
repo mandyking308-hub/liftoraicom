@@ -820,7 +820,7 @@ function ApolloRevealStageStrip({ lifecycle }: { lifecycle: any }) {
     { n: 4, label: "Founder approves reveal credits", value: "manual", tone: "default" },
     { n: 5, label: "Emails returned", value: lifecycle?.safe_to_promote_after_reveal ?? 0 },
     { n: 6, label: "Post-reveal CRM check", value: lifecycle?.already_in_crm_after_reveal ?? 0 },
-    { n: 7, label: "Safe to promote", value: lifecycle?.safe_to_promote_after_reveal ?? lifecycle?.safe_to_promote ?? 0, tone: "good" },
+    { n: 7, label: "Safe to promote (validation-clean)", value: lifecycle?.safe_to_promote_after_reveal ?? lifecycle?.safe_to_promote ?? 0, tone: "good" },
     { n: 8, label: "Safe to queue", value: lifecycle?.safe_to_queue ?? 0, tone: "good" },
     { n: 9, label: "Send", value: "controlled", tone: "default" },
   ];
