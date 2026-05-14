@@ -202,7 +202,7 @@ const SECTIONS: { id: string; title: string }[] = [
   { id: "14", title: "14 · Legacy / Historical / Archive" },
 ];
 
-const REGISTRY: RegistryItem[] = [
+export const REGISTRY: RegistryItem[] = [
   // ─────────── 0 · Executive Control
   { name: "Founder Overview", path: "/founder", section: "0", risk: "read-only", status: "valid", source: "App.tsx" },
   { name: "Command Centre (this page)", path: "/founder/command-centre", section: "0", risk: "read-only", status: "valid", source: "App.tsx" },
@@ -360,6 +360,37 @@ const REGISTRY: RegistryItem[] = [
   { name: "Legacy Apollo Pool / Historical Runs", path: "/founder/outreach/apollo", section: "14", risk: "legacy-archive", status: "valid", source: "App.tsx", notes: "Historical tab in Apollo Integration." },
   { name: "Duplicate / Held-Back Candidates", path: "/founder/outreach/queue-audit", section: "14", risk: "legacy-archive", status: "valid", source: "App.tsx", notes: "Surfaced via Queue Audit classification." },
   { name: "Old Snapshots / Raw Diagnostics", path: "/founder/testing", section: "14", risk: "legacy-archive", status: "valid", source: "App.tsx" },
+
+  // ─────────── Dynamic founder routes (require :id) — represented near parent
+  { name: "Proposal Detail (dynamic)", path: "/founder/proposals/:id", nearest: "/founder/proposals", section: "7", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id from list." },
+  { name: "Founder Project Detail (dynamic)", path: "/founder/projects/:id", nearest: "/founder/projects", section: "7", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id." },
+  { name: "Monitoring System Detail (dynamic)", path: "/founder/monitoring/:id", nearest: "/founder/monitoring", section: "11", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id." },
+  { name: "Agent Profile (dynamic)", path: "/founder/agents/:id", nearest: "/founder/agents", section: "2", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id." },
+  { name: "Workflow Detail (dynamic)", path: "/founder/workflows/:id", nearest: "/founder/workflows", section: "2", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id." },
+  { name: "Integration Detail (dynamic)", path: "/founder/integrations/:id", nearest: "/founder/integrations", section: "10", risk: "external-integration", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id." },
+  { name: "Execution Detail (dynamic)", path: "/founder/executions/:id", nearest: "/founder/executions", section: "11", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id." },
+  { name: "Process Detail (dynamic)", path: "/founder/processes/:id", nearest: "/founder/processes", section: "12", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id." },
+  { name: "Architecture Detail (dynamic)", path: "/founder/architectures/:id", nearest: "/founder/architectures", section: "12", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id." },
+  { name: "Deployment Detail (dynamic)", path: "/founder/deployments/:id", nearest: "/founder/deployments", section: "12", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id." },
+  { name: "Knowledge Detail (dynamic)", path: "/founder/knowledge/:id", nearest: "/founder/knowledge", section: "12", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id." },
+  { name: "Organisation Profile (dynamic)", path: "/founder/organisations/:id", nearest: "/founder/organisations", section: "4", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id." },
+  { name: "Template Detail (dynamic)", path: "/founder/templates/:id", nearest: "/founder/templates", section: "12", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id." },
+  { name: "Platform Launch Detail (dynamic)", path: "/founder/expansion/:id", nearest: "/founder/expansion", section: "13", risk: "admin-security", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id." },
+  { name: "Manual Page Detail (dynamic)", path: "/founder/manual/:id", nearest: "/founder/manual", section: "12", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id." },
+  { name: "CRM Contact Detail (dynamic)", path: "/founder/crm/contacts/:id", nearest: "/founder/crm/contacts", section: "4", risk: "compliance-sensitive", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id." },
+  { name: "CRM Inbox Configure (dynamic)", path: "/founder/crm/inboxes/:id/configure", nearest: "/founder/crm/inboxes", section: "4", risk: "send-adjacent", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id." },
+  { name: "Conversation Detail (dynamic)", path: "/founder/conversations/:id", nearest: "/founder/conversations", section: "6", risk: "live-action", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id." },
+  { name: "Internal Proposal Detail (dynamic)", path: "/founder/internal-proposals/:id", nearest: "/founder/internal-proposals", section: "7", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id." },
+  { name: "Supplier Detail (dynamic)", path: "/founder/suppliers/:id", nearest: "/founder/suppliers", section: "9", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id." },
+
+  // Public/portal/partner dynamic — kept visible so they are not silently excluded
+  { name: "Public Proposal View (dynamic token)", path: "/proposals/view/:token", nearest: "/founder/proposals", section: "7", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated token/link." },
+  { name: "Public Proposal Accept (dynamic token)", path: "/proposals/accept/:token", nearest: "/founder/proposals", section: "7", risk: "live-action", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated token/link." },
+  { name: "Public Demo (dynamic token)", path: "/demo/:token", nearest: "/founder/demos", section: "7", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated token/link." },
+  { name: "Portal Project Detail (dynamic)", path: "/portal/projects/:id", nearest: "/portal/projects", section: "7", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — client portal." },
+  { name: "Portal System Detail (dynamic)", path: "/portal/systems/:id", nearest: "/portal/systems", section: "7", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — client portal." },
+  { name: "Partner Opportunity Detail (dynamic)", path: "/partner/opportunities/:id", nearest: "/partner/opportunities", section: "13", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — partner portal." },
+  { name: "Partner Project Detail (dynamic)", path: "/partner/projects/:id", nearest: "/partner/projects", section: "13", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — partner portal." },
 ];
 
 /* Snapshot of CURRENT visible Command Centre sections (manual baseline, before refactor).
@@ -422,14 +453,23 @@ function guardRequired(risk: Risk): boolean {
 }
 
 /* Audit: every discovered founder route must be represented (or aliased/legacy). */
-function runAudit() {
+export function runAudit() {
   const represented = new Set(REGISTRY.map((r) => r.path).filter((p) => p.length > 0));
   const missing: string[] = [];
   for (const p of DISCOVERED_FOUNDER_ROUTES) {
     if (!represented.has(p)) missing.push(p);
   }
+  // Dynamic founder routes must be represented as `dynamic`
+  const dynamicMissing: string[] = [];
+  for (const p of DISCOVERED_DYNAMIC_FOUNDER_ROUTES) {
+    const item = REGISTRY.find((r) => r.path === p);
+    if (!item || item.status !== "dynamic") dynamicMissing.push(p);
+  }
   // Broken = path declared in registry but not in router (only check /founder/*)
-  const allRouterPaths = new Set(DISCOVERED_FOUNDER_ROUTES);
+  const allRouterPaths = new Set<string>([
+    ...DISCOVERED_FOUNDER_ROUTES,
+    ...DISCOVERED_DYNAMIC_FOUNDER_ROUTES,
+  ]);
   const broken: string[] = [];
   for (const r of REGISTRY) {
     if (!r.path) continue;
@@ -457,6 +497,7 @@ function runAudit() {
   const noRouteLabelled = noRouteItems.filter(
     (r) => r.status === "no-dedicated-ui" || r.status === "nearest-route-only",
   );
+  const dynamicItems = REGISTRY.filter((r) => r.status === "dynamic");
   const aliases = REGISTRY.filter((r) => r.status === "alias");
   const legacy = REGISTRY.filter((r) => r.status === "legacy");
   const guarded = REGISTRY.filter((r) => guardRequired(r.risk));
@@ -465,12 +506,16 @@ function runAudit() {
     missing.length === 0 &&
     broken.length === 0 &&
     canonicalViolations.length === 0 &&
+    dynamicMissing.length === 0 &&
     noRouteItems.length === noRouteLabelled.length;
 
   return {
     discovered: DISCOVERED_FOUNDER_ROUTES.length,
+    discoveredDynamic: DISCOVERED_DYNAMIC_FOUNDER_ROUTES.length,
     represented: REGISTRY.filter((r) => r.path && r.path.startsWith("/founder")).length,
     missing,
+    dynamicMissing,
+    dynamicItems,
     broken,
     duplicates,
     canonicalViolations,
