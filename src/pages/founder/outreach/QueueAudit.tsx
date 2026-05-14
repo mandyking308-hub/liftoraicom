@@ -402,6 +402,9 @@ const QueueAudit = () => {
             </CardContent>
           </Card>
 
+          {/* Review Required Queue Rows — Decision Gate (preview-only) */}
+          <ReviewRequiredDecisionGate items={data.items} />
+
           {/* ====== Cleanup / Park Pending Rows ====== */}
           <Card>
             <CardHeader>
