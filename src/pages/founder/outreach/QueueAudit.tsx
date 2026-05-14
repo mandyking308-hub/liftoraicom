@@ -9,6 +9,7 @@ import { Loader2, ShieldAlert, ShieldCheck, RefreshCw } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { ReviewRequiredDecisionGate } from "@/components/founder/safety/ReviewRequiredDecisionGate";
 
 type AuditItem = {
   queue_id: string;
@@ -136,6 +137,9 @@ const QueueAudit = () => {
       const cp = r.cleanup_preview ?? {};
       for (const x of (cp.would_cancel ?? []) as any[]) def.add(x.queue_id);
       for (const x of (cp.would_park ?? []) as any[]) def.add(x.queue_id);
+      // Defensive: never pre-select review_required rows for generic cleanup; they have a dedicated decision gate.
+      const reviewIds = new Set<string>(((cp.would_review ?? []) as any[]).map((x: any) => x.queue_id));
+      for (const id of [...def]) if (reviewIds.has(id)) def.delete(id);
       setSelected(def);
       setPreviewedKey(null);
       setPreviewResult(null);
@@ -398,6 +402,9 @@ const QueueAudit = () => {
             </CardContent>
           </Card>
 
+          {/* Review Required Queue Rows — Decision Gate (preview-only) */}
+          <ReviewRequiredDecisionGate items={data.items} />
+
           {/* ====== Cleanup / Park Pending Rows ====== */}
           <Card>
             <CardHeader>
@@ -446,14 +453,23 @@ const QueueAudit = () => {
               {[
                 ["would_cancel", "Would cancel — selectable, default ON"],
                 ["would_park", "Would park — selectable, default ON"],
-                ["would_review", "Would require review — selectable, default OFF"],
+                ["would_review", "Would require review — handled by Decision Gate (not selectable here)"],
                 ["would_keep_blocked", "Would keep blocked — NOT selectable here"],
               ].map(([k, label]) => {
                 const groupRows = (data.cleanup_preview[k] ?? []) as { queue_id: string; reason: string }[];
-                const selectable = k !== "would_keep_blocked";
+                const selectable = k !== "would_keep_blocked" && k !== "would_review";
                 return (
                   <div key={k} className="rounded-md border p-3">
                     <div className="font-medium mb-2">{label} ({groupRows.length})</div>
+                    {k === "would_review" && groupRows.length > 0 && (
+                      <div className="text-[11px] text-muted-foreground mb-2">
+                        Review-required rows must be handled through the{" "}
+                        <a href="#review-required-decision-gate" className="underline">
+                          Review Required Queue Rows — Decision Gate
+                        </a>
+                        . Generic founder_cleanup parking is disabled for these rows until the dedicated decision gate has an apply path.
+                      </div>
+                    )}
                     {groupRows.length === 0
                       ? <div className="text-xs text-muted-foreground">—</div>
                       : <div className="space-y-1">
