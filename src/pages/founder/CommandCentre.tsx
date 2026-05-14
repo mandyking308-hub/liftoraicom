@@ -767,6 +767,11 @@ const CommandCentre = () => {
                   <Link to="/founder/outreach/queue-audit">
                     <Button size="sm" variant="outline">Open Queue Audit</Button>
                   </Link>
+                  {reviewRequired > 0 && (
+                    <Link to="/founder/outreach/queue-audit#review-required-decision-gate" className="ml-2">
+                      <Button size="sm" variant="outline">Open Review Required Queue Gate</Button>
+                    </Link>
+                  )}
                 </div>
                 {/* Queue Creation guard */}
                 <div
