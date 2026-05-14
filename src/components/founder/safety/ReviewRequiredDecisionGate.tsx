@@ -260,17 +260,30 @@ export const ReviewRequiredDecisionGate = ({ items }: { items: any[] }) => {
           <div className="space-y-3">
             {reviewItems.map((it) => {
               const d = decisions[it.queue_id] ?? defaultRecommendation(it);
+              const isEligible = ELIGIBLE_QUEUE_IDS.has(it.queue_id);
               return (
                 <div key={it.queue_id} className="rounded-md border p-3 space-y-2 bg-card">
                   <div className="flex items-start justify-between gap-3 flex-wrap">
                     <div>
                       <div className="font-medium">
+                        {isEligible && (
+                          <input
+                            type="checkbox"
+                            className="mr-2 align-middle"
+                            checked={!!selected[it.queue_id]}
+                            onChange={(e) =>
+                              setSelected((p) => ({ ...p, [it.queue_id]: e.target.checked }))
+                            }
+                            aria-label={`Select ${it.contact_email} for park_followup`}
+                          />
+                        )}
                         {it.contact_name ?? "—"}{" "}
                         <span className="text-muted-foreground text-xs">{it.contact_email}</span>
                       </div>
                       <div className="text-[11px] text-muted-foreground">
                         queue: <span className="font-mono">{it.queue_id}</span> · contact: <span className="font-mono">{it.contact_id}</span>
                         {it.bcr_business_match && <> · bcr: matched</>}
+                        {!isEligible && <> · <Badge variant="outline" className="text-[10px]">not in apply set</Badge></>}
                       </div>
                     </div>
                     <Badge variant="outline">Step {it.sequence_step}</Badge>
@@ -345,6 +358,92 @@ export const ReviewRequiredDecisionGate = ({ items }: { items: any[] }) => {
             })}
           </div>
         )}
+
+        {/* ===== APPLY PATH ===== */}
+        <div className="rounded-md border p-3 space-y-3 bg-muted/20" data-testid="decision-apply-panel">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="font-medium">Decision Apply — Park selected follow-ups</div>
+            <Badge variant="outline" className="text-[10px]">park_followup only · no send</Badge>
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            Selected: {selectedIds.length} of {eligibleItems.length} eligible. Default recommendation
+            for all 7 rows is park_followup. Untick any row to exclude it. The 3 valid_future_step_blocked
+            Step 2 rows are not selectable here and are never touched by this path.
+          </p>
+
+          <div className="flex flex-wrap gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={onPreview}
+              disabled={previewing || selectedIds.length === 0}
+              data-testid="decision-preview-btn"
+            >
+              {previewing ? "Previewing…" : "1. Preview Decision Apply"}
+            </Button>
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={onApply}
+              disabled={!applyEnabled}
+              data-testid="decision-apply-btn"
+            >
+              {applying ? "Applying…" : "2. Apply Decision — Park Selected Follow-ups"}
+            </Button>
+          </div>
+
+          {previewResult && (
+            <div className="rounded border bg-background p-2 text-[11px] space-y-1">
+              <div className="font-medium">Preview ({previewMatches ? "matches selection" : "stale — re-preview after changing selection"})</div>
+              <div>selected_count: <span className="font-mono">{previewResult.selected_count}</span></div>
+              <div>queue_ids: <span className="font-mono break-all">{(previewResult.selected_queue_ids ?? []).join(", ")}</span></div>
+              <div>proposed_new_status: <span className="font-mono">blocked</span> · reason: <span className="font-mono">{previewResult.rows?.[0]?.reason}</span></div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-1 mt-1">
+                {Object.entries(previewResult.counters ?? {}).map(([k, v]) => (
+                  <div key={k} className="rounded border bg-muted/30 px-1.5 py-1">
+                    <div className="text-muted-foreground">{k}</div>
+                    <div className="font-mono">{String(v)}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <label className="flex items-start gap-2 text-[11px]">
+            <Checkbox
+              checked={ack}
+              onCheckedChange={(v) => setAck(v === true)}
+              data-testid="decision-ack-checkbox"
+            />
+            <span>
+              I understand this will only park selected review-required follow-ups and will not send emails.
+            </span>
+          </label>
+
+          <div className="space-y-1">
+            <div className="text-[11px] text-muted-foreground">
+              Type exactly: <span className="font-mono">{CONFIRMATION_TEXT}</span>
+            </div>
+            <Input
+              value={confirmation}
+              onChange={(e) => setConfirmation(e.target.value)}
+              placeholder={CONFIRMATION_TEXT}
+              className="font-mono text-[11px]"
+              data-testid="decision-confirmation-input"
+            />
+          </div>
+
+          {errorMsg && (
+            <div className="text-[11px] text-destructive">{errorMsg}</div>
+          )}
+
+          {applyResult && (
+            <div className="rounded border border-green-500/40 bg-green-500/10 p-2 text-[11px]">
+              Decision applied. Rows changed: {applyResult.rows_changed}. Re-run audit to confirm
+              pending queue count.
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
