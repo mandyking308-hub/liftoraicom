@@ -9,6 +9,7 @@ import { Loader2, ShieldAlert, ShieldCheck, RefreshCw } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { ReviewRequiredDecisionGate } from "@/components/founder/safety/ReviewRequiredDecisionGate";
 
 type AuditItem = {
   queue_id: string;
@@ -136,6 +137,9 @@ const QueueAudit = () => {
       const cp = r.cleanup_preview ?? {};
       for (const x of (cp.would_cancel ?? []) as any[]) def.add(x.queue_id);
       for (const x of (cp.would_park ?? []) as any[]) def.add(x.queue_id);
+      // Defensive: never pre-select review_required rows for generic cleanup; they have a dedicated decision gate.
+      const reviewIds = new Set<string>(((cp.would_review ?? []) as any[]).map((x: any) => x.queue_id));
+      for (const id of [...def]) if (reviewIds.has(id)) def.delete(id);
       setSelected(def);
       setPreviewedKey(null);
       setPreviewResult(null);
