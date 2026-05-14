@@ -540,7 +540,7 @@ export const ReviewRequiredDecisionGate = ({ items }: { items: any[] }) => {
               size="sm"
               variant="destructive"
               onClick={onApply}
-              disabled={!applyEnabled}
+              disabled={applyButtonDisabled}
               data-testid="decision-apply-btn"
             >
               {applying ? "Applying…" : "2. Apply Decision — Park Selected Follow-ups"}
@@ -585,6 +585,7 @@ export const ReviewRequiredDecisionGate = ({ items }: { items: any[] }) => {
               Type exactly: <span className="font-mono">{CONFIRMATION_TEXT}</span>
             </div>
             <Input
+              ref={confirmationInputRef}
               value={confirmation}
               onChange={(e) => setConfirmation(e.target.value)}
               placeholder={CONFIRMATION_TEXT}
@@ -596,18 +597,22 @@ export const ReviewRequiredDecisionGate = ({ items }: { items: any[] }) => {
                 size="sm"
                 variant="outline"
                 type="button"
-                onClick={() => setConfirmation(CONFIRMATION_TEXT)}
+                onClick={onCopyConfirmationPhrase}
                 data-testid="decision-copy-confirmation-btn"
                 className="text-[11px] h-7"
               >
                 Copy confirmation phrase
               </Button>
-              {!confirmationExact && confirmation.length > 0 && (
-                <span className="text-[11px] text-muted-foreground">
-                  expected chars: <span className="font-mono">{NORMALIZED_EXPECTED.length}</span>
-                  {" · "}typed chars: <span className="font-mono">{normalizedTyped.length}</span>
-                  {hasEdgeWhitespace && <> · <span className="text-destructive">leading/trailing whitespace detected</span></>}
-                </span>
+            </div>
+            <div className="text-[11px] text-muted-foreground" data-testid="decision-confirmation-debug">
+              expected normalised length: <span className="font-mono">{applyReadiness.expectedNormalizedLength}</span>
+              {" · "}typed normalised length: <span className="font-mono">{applyReadiness.typedNormalizedLength}</span>
+              {" · "}confirmationExact: <span className="font-mono">{String(applyReadiness.confirmationExact)}</span>
+              {" · "}acknowledgementChecked: <span className="font-mono">{String(applyReadiness.acknowledgementChecked)}</span>
+              {" · "}canApply: <span className="font-mono">{String(applyReadiness.canApply)}</span>
+              {" · "}disabledReasons: <span className="font-mono break-all">[{applyReadiness.disabledReasons.join(" | ")}]</span>
+              {applyReadiness.typedHadEdgeWhitespace && (
+                <span className="text-destructive"> {" · "}leading/trailing whitespace detected</span>
               )}
             </div>
           </div>
@@ -620,23 +625,33 @@ export const ReviewRequiredDecisionGate = ({ items }: { items: any[] }) => {
           <div className="rounded border bg-background p-2 text-[11px] space-y-1" data-testid="apply-readiness">
             <div className="font-medium">Apply readiness</div>
             <ul className="space-y-0.5">
-              <ReadinessItem ok={true} label="Founder authenticated (server-enforced)" />
-              <ReadinessItem ok={!!previewResult} label="Preview succeeded" />
-              <ReadinessItem ok={previewMatches} label="Preview matches selected rows" />
-              <ReadinessItem ok={selectedIds.length === 7} label={`Selected rows: ${selectedIds.length} (need 7)`} />
-              <ReadinessItem ok={allParkFollowup} label="Only park_followup decisions" />
-              <ReadinessItem ok={forbiddenSelected.length === 0} label={`Forbidden Step 2 rows touched: ${forbiddenSelected.length}`} />
-              <ReadinessItem ok={confirmationExact} label="Confirmation text exact" />
-              <ReadinessItem ok={ack} label="Acknowledgement checked" />
-              <ReadinessItem ok={true} label="Emails to send: 0" />
-              <ReadinessItem ok={true} label="SMTP calls: 0" />
-              <ReadinessItem ok={true} label="Apollo calls: 0" />
-              <ReadinessItem ok={true} label="Contacts/BCR/compliance changes: 0" />
+              <ReadinessItem ok={applyReadiness.founderAuthenticated} label="Founder authenticated (server-enforced)" />
+              <ReadinessItem ok={applyReadiness.previewSucceeded} label="Preview succeeded" />
+              <ReadinessItem ok={applyReadiness.previewMatchesSelection} label="Preview matches selected rows" />
+              <ReadinessItem ok={applyReadiness.selectedCountValid} label={`Selected rows: ${selectedIds.length} (need ${REQUIRED_SELECTED_COUNT})`} />
+              <ReadinessItem ok={applyReadiness.onlyParkFollowup} label="Only park_followup decisions" />
+              <ReadinessItem ok={applyReadiness.forbiddenStep2TouchedZero} label={`Forbidden Step 2 rows touched: ${previewResult?.counters?.valid_future_step_blocked_rows_touched ?? forbiddenSelected.length}`} />
+              <ReadinessItem ok={applyReadiness.confirmationExact} label="Confirmation text exact" />
+              <ReadinessItem ok={applyReadiness.acknowledgementChecked} label="Acknowledgement checked" />
+              <ReadinessItem ok={applyReadiness.emailsZero} label={`Emails to send: ${previewResult?.counters?.emails_sent ?? "—"}`} />
+              <ReadinessItem ok={applyReadiness.smtpZero} label={`SMTP calls: ${previewResult?.counters?.smtp_calls ?? "—"}`} />
+              <ReadinessItem ok={applyReadiness.apolloZero} label={`Apollo calls: ${previewResult?.counters?.apollo_calls ?? "—"}`} />
+              <ReadinessItem
+                ok={applyReadiness.contactsBcrComplianceZero}
+                label={`Contacts/BCR/compliance changes: ${[
+                  previewResult?.counters?.contacts_changed_if_applied ?? "—",
+                  previewResult?.counters?.bcrs_changed_if_applied ?? "—",
+                  previewResult?.counters?.compliance_records_changed_if_applied ?? "—",
+                ].join("/")}`}
+              />
             </ul>
-            {applyDisabledReason && (
+            {applyReadiness.disabledReasons.length > 0 && (
               <div className="mt-1 text-destructive">
-                Apply disabled because: {applyDisabledReason}
+                Apply disabled because: {applyReadiness.disabledReasons.join(" | ")}
               </div>
+            )}
+            {applyButtonStateError && (
+              <div className="mt-1 text-destructive">UI state error: canApply true but button disabled</div>
             )}
           </div>
 
