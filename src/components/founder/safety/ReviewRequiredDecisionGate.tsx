@@ -3,6 +3,23 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ShieldAlert } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
+
+const ELIGIBLE_QUEUE_IDS = new Set<string>([
+  "77a84330-a066-4a28-983f-e42adf295936",
+  "2771e102-7d76-4ab3-bb16-29d8769d7b02",
+  "0fe97fb4-1947-40d8-b983-9bfa419a21f7",
+  "11d3c5bf-31d3-414d-9093-bcba5c78a618",
+  "0c46352b-cf98-4bbb-98b6-a24a6aa97f64",
+  "0d14b45e-2142-4db4-b66d-aab530c03cf2",
+  "baec3a1a-3430-4172-940e-d99843abea3e",
+]);
+const CONFIRMATION_TEXT =
+  "I understand this parks selected review-required follow-ups and sends nothing";
 
 export type DecisionOption =
   | "leave_under_review"
@@ -39,6 +56,111 @@ export const ReviewRequiredDecisionGate = ({ items }: { items: any[] }) => {
     for (const it of reviewItems) init[it.queue_id] = defaultRecommendation(it);
     return init;
   });
+
+  // Apply-path state.
+  const eligibleItems = useMemo(
+    () => reviewItems.filter((it) => ELIGIBLE_QUEUE_IDS.has(it.queue_id)),
+    [reviewItems],
+  );
+  const [selected, setSelected] = useState<Record<string, boolean>>(() => {
+    const init: Record<string, boolean> = {};
+    for (const it of reviewItems) {
+      if (ELIGIBLE_QUEUE_IDS.has(it.queue_id)) init[it.queue_id] = true;
+    }
+    return init;
+  });
+  const [ack, setAck] = useState(false);
+  const [confirmation, setConfirmation] = useState("");
+  const [previewing, setPreviewing] = useState(false);
+  const [applying, setApplying] = useState(false);
+  const [previewResult, setPreviewResult] = useState<any>(null);
+  const [applyResult, setApplyResult] = useState<any>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const selectedIds = useMemo(
+    () => eligibleItems.filter((it) => selected[it.queue_id]).map((it) => it.queue_id).sort(),
+    [eligibleItems, selected],
+  );
+  const previewedIds: string[] = useMemo(
+    () => ((previewResult?.selected_queue_ids ?? []) as string[]).slice().sort(),
+    [previewResult],
+  );
+  const previewMatches =
+    previewedIds.length > 0 &&
+    previewedIds.length === selectedIds.length &&
+    previewedIds.every((id, i) => id === selectedIds[i]);
+
+  const applyEnabled =
+    !!previewResult &&
+    previewMatches &&
+    selectedIds.length > 0 &&
+    selectedIds.every((id) => decisions[id] === "recommend_park_followup") &&
+    ack &&
+    confirmation === CONFIRMATION_TEXT &&
+    !applying;
+
+  async function callDecisionFn(payload: any) {
+    const { data: sess } = await supabase.auth.getSession();
+    const token = sess.session?.access_token;
+    if (!token) throw new Error("Not signed in");
+    const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/review-required-queue-decision`;
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+      },
+      body: JSON.stringify(payload),
+    });
+    const text = await res.text();
+    let json: any = null;
+    try { json = text ? JSON.parse(text) : null; } catch { /* ignore */ }
+    if (!res.ok || !json?.ok) throw new Error(json?.error || `Request failed (${res.status})`);
+    return json;
+  }
+
+  async function onPreview() {
+    setErrorMsg(null);
+    setApplyResult(null);
+    if (selectedIds.length === 0) {
+      setErrorMsg("Select at least one eligible row.");
+      return;
+    }
+    setPreviewing(true);
+    try {
+      const res = await callDecisionFn({
+        dry_run: true,
+        decisions: selectedIds.map((id) => ({ queue_id: id, decision: "park_followup" })),
+      });
+      setPreviewResult(res);
+    } catch (e: any) {
+      setErrorMsg(e?.message ?? "Preview failed");
+    } finally {
+      setPreviewing(false);
+    }
+  }
+
+  async function onApply() {
+    setErrorMsg(null);
+    setApplying(true);
+    try {
+      const res = await callDecisionFn({
+        dry_run: false,
+        decisions: selectedIds.map((id) => ({ queue_id: id, decision: "park_followup" })),
+        confirmation: CONFIRMATION_TEXT,
+      });
+      setApplyResult(res);
+      toast({
+        title: "Decision applied",
+        description: `Parked ${res.rows_changed} review-required follow-up(s). Re-run audit to confirm.`,
+      });
+    } catch (e: any) {
+      setErrorMsg(e?.message ?? "Apply failed");
+    } finally {
+      setApplying(false);
+    }
+  }
 
   const counts = useMemo(() => {
     const c = {
@@ -78,17 +200,20 @@ export const ReviewRequiredDecisionGate = ({ items }: { items: any[] }) => {
       <CardHeader>
         <CardTitle>Review Required Queue Rows — Decision Gate</CardTitle>
         <p className="text-xs text-muted-foreground mt-1">
-          Read-only founder decision gate for pending rows where the compliance spine is incomplete.
-          No apply path. No emails sent. No SMTP / Apollo / queue / contact / BCR / compliance / system_settings / cron mutations.
+          Founder decision gate for pending rows where the compliance spine is incomplete.
+          A founder-only Apply path exists only for park_followup on the 7 eligible Step 4 rows.
+          No emails sent. No SMTP / Apollo / contact / BCR / compliance / campaign / inbox /
+          system_settings / cron mutations.
         </p>
       </CardHeader>
       <CardContent className="space-y-4 text-sm">
         <Alert>
           <ShieldAlert />
-          <AlertTitle>Preview only — no mutation path in this view</AlertTitle>
+          <AlertTitle>Park-only Apply path — no sending, no compliance changes</AlertTitle>
           <AlertDescription>
-            These rows must not be auto-approved, remediated, sent, parked or cancelled without a founder decision gate
-            with an explicit apply path (built in a later task).
+            This does not approve compliance, does not generate unsubscribe tokens, does not send
+            emails, and does not build Manual Send Apply. It only parks old Step 4 follow-ups that
+            are missing the newer compliance spine.
           </AlertDescription>
         </Alert>
 
