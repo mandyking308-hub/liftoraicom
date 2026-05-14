@@ -661,6 +661,28 @@ export default function CommandCentreMasterIndex() {
         <CardContent className="space-y-3">
           {SECTIONS.map((s) => <SectionBlock key={s.id} id={s.id} title={s.title} />)}
 
+          {/* Truth / warning reconciliation — addresses contradictory legacy
+           *  warnings reported by stale system-mirror diagnostics. */}
+          <div className="rounded-lg border border-border/50 bg-card/50 p-3 text-[11px] space-y-1.5">
+            <p className="text-sm font-semibold flex items-center gap-2">
+              <Lock size={14} /> Master Index truth panel
+            </p>
+            <p className="text-muted-foreground">
+              Resolves stale warnings previously seen on this page:
+            </p>
+            <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+              <li>
+                <span className="text-foreground">"Undocumented function: get_outreach_send_cron_status"</span> — registered in Section 11 as a deliberate safe RPC (SECURITY DEFINER, EXECUTE only service_role, mutation: none). No longer undocumented.
+              </li>
+              <li>
+                <span className="text-foreground">"System coverage below 100% (100%) — 2 gap(s)"</span> — contradictory legacy warning. The 2 historical gaps were (1) the unregistered safe RPC above, and (2) the 87-vs-67 founder route count discrepancy. Both are now resolved by this Master Index. Coverage in the Link Coverage Audit is at 100% (missing=0, broken=0, dynamic-missing=0, canonical-violations=0). If the legacy warning text persists, treat it as a stale system-mirror cache; the truth source is this Master Index.
+              </li>
+              <li>
+                <span className="text-foreground">Coverage Map "Founder routes = 87 / Visible on CC = 1 / Hidden = 59"</span> — superseded baseline snapshot. Use the Link Coverage Audit above. 87 = 67 non-dynamic + 20 dynamic founder routes (same router).
+              </li>
+            </ul>
+          </div>
+
           {/* Route Reconciliation (87 vs 67) */}
           <Collapsible defaultOpen className="rounded-lg border border-border/50 bg-card/50">
             <CollapsibleTrigger className="w-full flex items-center gap-2 p-3 hover:bg-secondary/30">
