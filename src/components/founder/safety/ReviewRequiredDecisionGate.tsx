@@ -514,4 +514,15 @@ const Field = ({ k, v }: { k: string; v: string }) => (
   </div>
 );
 
+const ReadinessItem = ({ ok, label }: { ok: boolean; label: string }) => (
+  <li className="flex items-center gap-1.5">
+    {ok ? (
+      <Check className="h-3 w-3 text-green-600" aria-label="pass" />
+    ) : (
+      <X className="h-3 w-3 text-destructive" aria-label="fail" />
+    )}
+    <span className={ok ? "" : "text-muted-foreground"}>{label}</span>
+  </li>
+);
+
 export default ReviewRequiredDecisionGate;
