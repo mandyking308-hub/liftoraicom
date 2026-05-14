@@ -450,14 +450,23 @@ const QueueAudit = () => {
               {[
                 ["would_cancel", "Would cancel — selectable, default ON"],
                 ["would_park", "Would park — selectable, default ON"],
-                ["would_review", "Would require review — selectable, default OFF"],
+                ["would_review", "Would require review — handled by Decision Gate (not selectable here)"],
                 ["would_keep_blocked", "Would keep blocked — NOT selectable here"],
               ].map(([k, label]) => {
                 const groupRows = (data.cleanup_preview[k] ?? []) as { queue_id: string; reason: string }[];
-                const selectable = k !== "would_keep_blocked";
+                const selectable = k !== "would_keep_blocked" && k !== "would_review";
                 return (
                   <div key={k} className="rounded-md border p-3">
                     <div className="font-medium mb-2">{label} ({groupRows.length})</div>
+                    {k === "would_review" && groupRows.length > 0 && (
+                      <div className="text-[11px] text-muted-foreground mb-2">
+                        Review-required rows must be handled through the{" "}
+                        <a href="#review-required-decision-gate" className="underline">
+                          Review Required Queue Rows — Decision Gate
+                        </a>
+                        . Generic founder_cleanup parking is disabled for these rows until the dedicated decision gate has an apply path.
+                      </div>
+                    )}
                     {groupRows.length === 0
                       ? <div className="text-xs text-muted-foreground">—</div>
                       : <div className="space-y-1">
