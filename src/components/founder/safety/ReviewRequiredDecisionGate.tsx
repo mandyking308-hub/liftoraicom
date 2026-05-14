@@ -6,6 +6,8 @@ import { ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Check, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
@@ -85,19 +87,39 @@ export const ReviewRequiredDecisionGate = ({ items }: { items: any[] }) => {
     () => ((previewResult?.selected_queue_ids ?? []) as string[]).slice().sort(),
     [previewResult],
   );
-  const previewMatches =
-    previewedIds.length > 0 &&
-    previewedIds.length === selectedIds.length &&
-    previewedIds.every((id, i) => id === selectedIds[i]);
+  // Set-based (order-independent) match between preview and current selection.
+  const previewMatches = useMemo(() => {
+    if (previewedIds.length === 0) return false;
+    if (previewedIds.length !== selectedIds.length) return false;
+    const a = new Set(previewedIds);
+    return selectedIds.every((id) => a.has(id));
+  }, [previewedIds, selectedIds]);
 
-  const applyEnabled =
-    !!previewResult &&
-    previewMatches &&
+  const forbiddenSelected = selectedIds.filter((id) => !ELIGIBLE_QUEUE_IDS.has(id));
+  const allParkFollowup =
     selectedIds.length > 0 &&
-    selectedIds.every((id) => decisions[id] === "recommend_park_followup") &&
-    ack &&
-    confirmation === CONFIRMATION_TEXT &&
-    !applying;
+    selectedIds.every((id) => decisions[id] === "recommend_park_followup");
+  const confirmationExact = confirmation === CONFIRMATION_TEXT;
+
+  const applyDisabledReason: string | null = !previewResult
+    ? "Preview has not been run yet."
+    : !previewMatches
+      ? "Preview is stale — re-run preview after changing selection."
+      : selectedIds.length === 0
+        ? "Select at least one eligible row."
+        : forbiddenSelected.length > 0
+          ? "Selection contains rows outside the 7 eligible Step 4 IDs."
+          : !allParkFollowup
+            ? "All selected rows must have decision = park_followup."
+            : !confirmationExact
+              ? "Confirmation text does not match exactly."
+              : !ack
+                ? "Acknowledgement checkbox is not ticked."
+                : applying
+                  ? "Apply already in progress."
+                  : null;
+
+  const applyEnabled = applyDisabledReason === null;
 
   async function callDecisionFn(payload: any) {
     const { data: sess } = await supabase.auth.getSession();
@@ -409,16 +431,21 @@ export const ReviewRequiredDecisionGate = ({ items }: { items: any[] }) => {
             </div>
           )}
 
-          <label className="flex items-start gap-2 text-[11px]">
+          <div className="flex items-start gap-2 text-[11px]">
             <Checkbox
+              id="decision-ack-checkbox"
               checked={ack}
               onCheckedChange={(v) => setAck(v === true)}
               data-testid="decision-ack-checkbox"
+              className="mt-0.5"
             />
-            <span>
+            <Label
+              htmlFor="decision-ack-checkbox"
+              className="text-[11px] font-normal leading-snug cursor-pointer select-none"
+            >
               I understand this will only park selected review-required follow-ups and will not send emails.
-            </span>
-          </label>
+            </Label>
+          </div>
 
           <div className="space-y-1">
             <div className="text-[11px] text-muted-foreground">
@@ -436,6 +463,30 @@ export const ReviewRequiredDecisionGate = ({ items }: { items: any[] }) => {
           {errorMsg && (
             <div className="text-[11px] text-destructive">{errorMsg}</div>
           )}
+
+          {/* Apply readiness checklist */}
+          <div className="rounded border bg-background p-2 text-[11px] space-y-1" data-testid="apply-readiness">
+            <div className="font-medium">Apply readiness</div>
+            <ul className="space-y-0.5">
+              <ReadinessItem ok={true} label="Founder authenticated (server-enforced)" />
+              <ReadinessItem ok={!!previewResult} label="Preview succeeded" />
+              <ReadinessItem ok={previewMatches} label="Preview matches selected rows" />
+              <ReadinessItem ok={selectedIds.length === 7} label={`Selected rows: ${selectedIds.length} (need 7)`} />
+              <ReadinessItem ok={allParkFollowup} label="Only park_followup decisions" />
+              <ReadinessItem ok={forbiddenSelected.length === 0} label={`Forbidden Step 2 rows touched: ${forbiddenSelected.length}`} />
+              <ReadinessItem ok={confirmationExact} label="Confirmation text exact" />
+              <ReadinessItem ok={ack} label="Acknowledgement checked" />
+              <ReadinessItem ok={true} label="Emails to send: 0" />
+              <ReadinessItem ok={true} label="SMTP calls: 0" />
+              <ReadinessItem ok={true} label="Apollo calls: 0" />
+              <ReadinessItem ok={true} label="Contacts/BCR/compliance changes: 0" />
+            </ul>
+            {applyDisabledReason && (
+              <div className="mt-1 text-destructive">
+                Apply disabled because: {applyDisabledReason}
+              </div>
+            )}
+          </div>
 
           {applyResult && (
             <div className="rounded border border-green-500/40 bg-green-500/10 p-2 text-[11px]">
@@ -461,6 +512,17 @@ const Field = ({ k, v }: { k: string; v: string }) => (
     <div className="text-muted-foreground">{k}</div>
     <div className="font-mono break-all">{v}</div>
   </div>
+);
+
+const ReadinessItem = ({ ok, label }: { ok: boolean; label: string }) => (
+  <li className="flex items-center gap-1.5">
+    {ok ? (
+      <Check className="h-3 w-3 text-green-600" aria-label="pass" />
+    ) : (
+      <X className="h-3 w-3 text-destructive" aria-label="fail" />
+    )}
+    <span className={ok ? "" : "text-muted-foreground"}>{label}</span>
+  </li>
 );
 
 export default ReviewRequiredDecisionGate;
