@@ -483,8 +483,8 @@ const CommandCentre = () => {
             ]
           : reviewRequired > 0 || totalPendingFromAudit > 0
           ? [
-              { msg: `Review ${reviewRequired} queue row${reviewRequired === 1 ? "" : "s"} requiring compliance evidence`, to: "/founder/outreach/queue-audit", tone: "danger" as const },
-              { msg: "Open Queue Audit", to: "/founder/outreach/queue-audit", tone: "warn" as const },
+              { msg: `Review ${reviewRequired} queue row${reviewRequired === 1 ? "" : "s"} requiring compliance decision`, to: "/founder/outreach/queue-audit#review-required-decision-gate", tone: "danger" as const },
+              { msg: "Open Review Required Queue Gate", to: "/founder/outreach/queue-audit#review-required-decision-gate", tone: "warn" as const },
               { msg: "Decide whether review_required rows should be remediated, blocked, or left parked", to: "/founder/outreach/queue-audit", tone: "warn" as const },
             ]
           : [];
