@@ -744,6 +744,8 @@ export default function CommandCentreMasterIndex() {
                   <Stat label="Represented" value={audit.represented} />
                   <Stat label="Missing" value={audit.missing.length} />
                   <Stat label="Broken" value={audit.broken.length} />
+                  <Stat label="Dynamic discovered" value={audit.discoveredDynamic} />
+                  <Stat label="Dynamic missing" value={audit.dynamicMissing.length} />
                   <Stat label="Confusing duplicates" value={audit.duplicates.length} />
                   <Stat label="Aliases" value={audit.aliases.length} />
                   <Stat label="Legacy/archive" value={audit.legacy.length} />
