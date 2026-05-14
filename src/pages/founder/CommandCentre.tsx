@@ -4,7 +4,6 @@ import LiftorCapabilities from "@/components/founder/LiftorCapabilities";
 import AgentOrchestration from "@/components/founder/AgentOrchestration";
 import SystemModeBanner from "@/components/founder/SystemModeBanner";
 import ControlledProofSend from "@/components/founder/ControlledProofSend";
-import ControlledLiveBatch from "@/components/founder/ControlledLiveBatch";
 import ExecutionStatusPanel from "@/components/founder/ExecutionStatusPanel";
 import LeadQualityPanel from "@/components/founder/LeadQualityPanel";
 import SourceQualityBrief from "@/components/founder/SourceQualityBrief";
