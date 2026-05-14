@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Check, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 const ELIGIBLE_QUEUE_IDS = new Set<string>([
   "77a84330-a066-4a28-983f-e42adf295936",
@@ -20,13 +21,134 @@ const ELIGIBLE_QUEUE_IDS = new Set<string>([
   "0d14b45e-2142-4db4-b66d-aab530c03cf2",
   "baec3a1a-3430-4172-940e-d99843abea3e",
 ]);
-const CONFIRMATION_TEXT =
+export const CONFIRMATION_TEXT =
   "I understand this parks selected review-required follow-ups and sends nothing";
+const REQUIRED_SELECTED_COUNT = ELIGIBLE_QUEUE_IDS.size;
 
-function normalizeConfirmationText(s: string): string {
-  return (s ?? "").trim().replace(/\s+/g, " ");
+export function normalizeConfirmationText(value: string | null | undefined): string {
+  return String(value || "").trim().replace(/\s+/g, " ");
 }
 const NORMALIZED_EXPECTED = normalizeConfirmationText(CONFIRMATION_TEXT);
+
+type DecisionApplyReadinessInput = {
+  acknowledgementChecked: boolean;
+  confirmationValue: string;
+  decisions: Record<string, DecisionOption>;
+  forbiddenSelectedIds: string[];
+  founderAuthenticated: boolean;
+  previewMatchesSelection: boolean;
+  previewResult: any | null;
+  selectedIds: string[];
+};
+
+export type DecisionApplyReadiness = {
+  acknowledgementChecked: boolean;
+  apolloZero: boolean;
+  canApply: boolean;
+  confirmationExact: boolean;
+  contactsBcrComplianceZero: boolean;
+  disabledReasons: string[];
+  emailsZero: boolean;
+  expectedNormalizedLength: number;
+  forbiddenStep2TouchedZero: boolean;
+  founderAuthenticated: boolean;
+  onlyParkFollowup: boolean;
+  previewMatchesSelection: boolean;
+  previewSucceeded: boolean;
+  selectedCountValid: boolean;
+  smtpZero: boolean;
+  typedHadEdgeWhitespace: boolean;
+  typedNormalizedLength: number;
+};
+
+const isZeroCounter = (value: unknown) => Number(value) === 0;
+
+export function getDecisionApplyReadiness({
+  acknowledgementChecked,
+  confirmationValue,
+  decisions,
+  forbiddenSelectedIds,
+  founderAuthenticated,
+  previewMatchesSelection,
+  previewResult,
+  selectedIds,
+}: DecisionApplyReadinessInput): DecisionApplyReadiness {
+  const normalizedConfirmation = normalizeConfirmationText(confirmationValue);
+  const rawConfirmation = String(confirmationValue || "");
+  const previewSucceeded = Boolean(previewResult?.ok);
+  const counters = previewResult?.counters ?? {};
+
+  const readiness: DecisionApplyReadiness = {
+    founderAuthenticated: Boolean(founderAuthenticated),
+    previewSucceeded,
+    previewMatchesSelection: previewSucceeded && previewMatchesSelection,
+    selectedCountValid: selectedIds.length === REQUIRED_SELECTED_COUNT,
+    onlyParkFollowup:
+      selectedIds.length > 0 &&
+      selectedIds.every((id) => decisions[id] === "recommend_park_followup"),
+    forbiddenStep2TouchedZero:
+      previewSucceeded &&
+      forbiddenSelectedIds.length === 0 &&
+      isZeroCounter(counters.valid_future_step_blocked_rows_touched),
+    confirmationExact: normalizedConfirmation === NORMALIZED_EXPECTED,
+    acknowledgementChecked,
+    emailsZero: previewSucceeded && isZeroCounter(counters.emails_sent),
+    smtpZero: previewSucceeded && isZeroCounter(counters.smtp_calls),
+    apolloZero: previewSucceeded && isZeroCounter(counters.apollo_calls),
+    contactsBcrComplianceZero:
+      previewSucceeded &&
+      isZeroCounter(counters.contacts_changed_if_applied) &&
+      isZeroCounter(counters.bcrs_changed_if_applied) &&
+      isZeroCounter(counters.compliance_records_changed_if_applied),
+    canApply: false,
+    disabledReasons: [],
+    expectedNormalizedLength: NORMALIZED_EXPECTED.length,
+    typedNormalizedLength: normalizedConfirmation.length,
+    typedHadEdgeWhitespace: rawConfirmation.length > 0 && rawConfirmation.trim() !== rawConfirmation,
+  };
+
+  if (!readiness.founderAuthenticated) {
+    readiness.disabledReasons.push("Founder/admin authentication required.");
+  }
+  if (!readiness.previewSucceeded) {
+    readiness.disabledReasons.push("Preview has not been run yet.");
+  }
+  if (readiness.previewSucceeded && !readiness.previewMatchesSelection) {
+    readiness.disabledReasons.push("Preview is stale — re-run preview after changing selection.");
+  }
+  if (!readiness.selectedCountValid) {
+    readiness.disabledReasons.push(`Selected rows must equal ${REQUIRED_SELECTED_COUNT}.`);
+  }
+  if (!readiness.onlyParkFollowup) {
+    readiness.disabledReasons.push("All selected rows must have decision = park_followup.");
+  }
+  if (forbiddenSelectedIds.length > 0) {
+    readiness.disabledReasons.push("Selection contains rows outside the 7 eligible Step 4 IDs.");
+  } else if (readiness.previewSucceeded && !readiness.forbiddenStep2TouchedZero) {
+    readiness.disabledReasons.push("Forbidden Step 2 rows would be touched by this apply path.");
+  }
+  if (!readiness.confirmationExact) {
+    readiness.disabledReasons.push("Confirmation text does not match exactly.");
+  }
+  if (!readiness.acknowledgementChecked) {
+    readiness.disabledReasons.push("Acknowledgement checkbox is not ticked.");
+  }
+  if (readiness.previewSucceeded && !readiness.emailsZero) {
+    readiness.disabledReasons.push("Preview shows non-zero emails to send.");
+  }
+  if (readiness.previewSucceeded && !readiness.smtpZero) {
+    readiness.disabledReasons.push("Preview shows non-zero SMTP calls.");
+  }
+  if (readiness.previewSucceeded && !readiness.apolloZero) {
+    readiness.disabledReasons.push("Preview shows non-zero Apollo calls.");
+  }
+  if (readiness.previewSucceeded && !readiness.contactsBcrComplianceZero) {
+    readiness.disabledReasons.push("Preview shows contact/BCR/compliance mutations.");
+  }
+
+  readiness.canApply = readiness.disabledReasons.length === 0;
+  return readiness;
+}
 
 export type DecisionOption =
   | "leave_under_review"
@@ -54,6 +176,7 @@ function defaultRecommendation(it: any): DecisionOption {
 }
 
 export const ReviewRequiredDecisionGate = ({ items }: { items: any[] }) => {
+  const { session } = useAuth();
   const reviewItems = useMemo(
     () => (items ?? []).filter((i) => i.classification === "review_required"),
     [items],
@@ -83,6 +206,7 @@ export const ReviewRequiredDecisionGate = ({ items }: { items: any[] }) => {
   const [previewResult, setPreviewResult] = useState<any>(null);
   const [applyResult, setApplyResult] = useState<any>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const confirmationInputRef = useRef<HTMLInputElement>(null);
 
   const selectedIds = useMemo(
     () => eligibleItems.filter((it) => selected[it.queue_id]).map((it) => it.queue_id).sort(),
@@ -101,32 +225,22 @@ export const ReviewRequiredDecisionGate = ({ items }: { items: any[] }) => {
   }, [previewedIds, selectedIds]);
 
   const forbiddenSelected = selectedIds.filter((id) => !ELIGIBLE_QUEUE_IDS.has(id));
-  const allParkFollowup =
-    selectedIds.length > 0 &&
-    selectedIds.every((id) => decisions[id] === "recommend_park_followup");
-  const normalizedTyped = normalizeConfirmationText(confirmation);
-  const confirmationExact = normalizedTyped === NORMALIZED_EXPECTED;
-  const hasEdgeWhitespace = confirmation.length > 0 && confirmation.trim() !== confirmation;
-
-  const applyDisabledReason: string | null = !previewResult
-    ? "Preview has not been run yet."
-    : !previewMatches
-      ? "Preview is stale — re-run preview after changing selection."
-      : selectedIds.length === 0
-        ? "Select at least one eligible row."
-        : forbiddenSelected.length > 0
-          ? "Selection contains rows outside the 7 eligible Step 4 IDs."
-          : !allParkFollowup
-            ? "All selected rows must have decision = park_followup."
-            : !confirmationExact
-              ? "Confirmation text does not match exactly."
-              : !ack
-                ? "Acknowledgement checkbox is not ticked."
-                : applying
-                  ? "Apply already in progress."
-                  : null;
-
-  const applyEnabled = applyDisabledReason === null;
+  const applyReadiness = useMemo(
+    () =>
+      getDecisionApplyReadiness({
+        acknowledgementChecked: ack,
+        confirmationValue: confirmation,
+        decisions,
+        forbiddenSelectedIds: forbiddenSelected,
+        founderAuthenticated: Boolean(session?.access_token),
+        previewMatchesSelection: previewMatches,
+        previewResult,
+        selectedIds,
+      }),
+    [ack, confirmation, decisions, forbiddenSelected, previewMatches, previewResult, selectedIds, session?.access_token],
+  );
+  const applyButtonDisabled = !applyReadiness.canApply || applying;
+  const applyButtonStateError = applyReadiness.canApply && applyButtonDisabled && !applying;
 
   async function callDecisionFn(payload: any) {
     const { data: sess } = await supabase.auth.getSession();
@@ -172,6 +286,10 @@ export const ReviewRequiredDecisionGate = ({ items }: { items: any[] }) => {
 
   async function onApply() {
     setErrorMsg(null);
+    if (!applyReadiness.canApply) {
+      setErrorMsg(`Apply disabled because: ${applyReadiness.disabledReasons.join(" | ")}`);
+      return;
+    }
     setApplying(true);
     try {
       const res = await callDecisionFn({
@@ -189,6 +307,14 @@ export const ReviewRequiredDecisionGate = ({ items }: { items: any[] }) => {
     } finally {
       setApplying(false);
     }
+  }
+
+  function onCopyConfirmationPhrase() {
+    setConfirmation(CONFIRMATION_TEXT);
+    queueMicrotask(() => {
+      confirmationInputRef.current?.focus();
+      confirmationInputRef.current?.setSelectionRange(CONFIRMATION_TEXT.length, CONFIRMATION_TEXT.length);
+    });
   }
 
   const counts = useMemo(() => {
