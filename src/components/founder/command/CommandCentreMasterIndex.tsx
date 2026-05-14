@@ -640,6 +640,7 @@ export default function CommandCentreMasterIndex() {
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2 mt-3 text-[11px]">
           <Stat label="Total routes (sitemap)" value={145} hint="coverage map snapshot" />
           <Stat label="Founder routes (router)" value={audit.discovered} />
+          <Stat label="Founder dynamic routes" value={audit.discoveredDynamic} />
           <Stat label="Sections" value={SECTIONS.length} />
           <Stat label="Index items" value={totalItems} />
           <Stat label="Direct route" value={directRoute} />
@@ -656,6 +657,40 @@ export default function CommandCentreMasterIndex() {
       {open && (
         <CardContent className="space-y-3">
           {SECTIONS.map((s) => <SectionBlock key={s.id} id={s.id} title={s.title} />)}
+
+          {/* Route Reconciliation (87 vs 67) */}
+          <Collapsible defaultOpen className="rounded-lg border border-border/50 bg-card/50">
+            <CollapsibleTrigger className="w-full flex items-center gap-2 p-3 hover:bg-secondary/30">
+              <Layers size={14} />
+              <span className="text-sm font-semibold">Route Reconciliation (87 vs 67)</span>
+              <Badge variant="secondary" className="text-[10px]">{RECONCILIATION_ROWS.length}</Badge>
+              <span className="ml-auto text-[10px] text-muted-foreground">87 − 67 = 20 dynamic founder routes.</span>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="overflow-x-auto p-3 pt-0">
+                <table className="w-full text-[11px]">
+                  <thead className="text-muted-foreground">
+                    <tr className="text-left">
+                      <th className="py-1 pr-2">Category</th>
+                      <th className="py-1 pr-2">Count</th>
+                      <th className="py-1 pr-2">Notes</th>
+                      <th className="py-1 pr-2">Representation</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {RECONCILIATION_ROWS.map((row, i) => (
+                      <tr key={i} className="border-t border-border/30">
+                        <td className="py-1 pr-2 font-medium">{row.category}</td>
+                        <td className="py-1 pr-2 font-mono">{row.count}</td>
+                        <td className="py-1 pr-2 text-muted-foreground">{row.notes}</td>
+                        <td className="py-1 pr-2">{row.representation}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
 
           {/* Before-refactor snapshot */}
           <Collapsible className="rounded-lg border border-border/50 bg-card/50">
