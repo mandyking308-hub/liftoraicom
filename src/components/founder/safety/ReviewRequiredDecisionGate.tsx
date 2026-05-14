@@ -3,6 +3,23 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ShieldAlert } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
+
+const ELIGIBLE_QUEUE_IDS = new Set<string>([
+  "77a84330-a066-4a28-983f-e42adf295936",
+  "2771e102-7d76-4ab3-bb16-29d8769d7b02",
+  "0fe97fb4-1947-40d8-b983-9bfa419a21f7",
+  "11d3c5bf-31d3-414d-9093-bcba5c78a618",
+  "0c46352b-cf98-4bbb-98b6-a24a6aa97f64",
+  "0d14b45e-2142-4db4-b66d-aab530c03cf2",
+  "baec3a1a-3430-4172-940e-d99843abea3e",
+]);
+const CONFIRMATION_TEXT =
+  "I understand this parks selected review-required follow-ups and sends nothing";
 
 export type DecisionOption =
   | "leave_under_review"
@@ -39,6 +56,111 @@ export const ReviewRequiredDecisionGate = ({ items }: { items: any[] }) => {
     for (const it of reviewItems) init[it.queue_id] = defaultRecommendation(it);
     return init;
   });
+
+  // Apply-path state.
+  const eligibleItems = useMemo(
+    () => reviewItems.filter((it) => ELIGIBLE_QUEUE_IDS.has(it.queue_id)),
+    [reviewItems],
+  );
+  const [selected, setSelected] = useState<Record<string, boolean>>(() => {
+    const init: Record<string, boolean> = {};
+    for (const it of reviewItems) {
+      if (ELIGIBLE_QUEUE_IDS.has(it.queue_id)) init[it.queue_id] = true;
+    }
+    return init;
+  });
+  const [ack, setAck] = useState(false);
+  const [confirmation, setConfirmation] = useState("");
+  const [previewing, setPreviewing] = useState(false);
+  const [applying, setApplying] = useState(false);
+  const [previewResult, setPreviewResult] = useState<any>(null);
+  const [applyResult, setApplyResult] = useState<any>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const selectedIds = useMemo(
+    () => eligibleItems.filter((it) => selected[it.queue_id]).map((it) => it.queue_id).sort(),
+    [eligibleItems, selected],
+  );
+  const previewedIds: string[] = useMemo(
+    () => ((previewResult?.selected_queue_ids ?? []) as string[]).slice().sort(),
+    [previewResult],
+  );
+  const previewMatches =
+    previewedIds.length > 0 &&
+    previewedIds.length === selectedIds.length &&
+    previewedIds.every((id, i) => id === selectedIds[i]);
+
+  const applyEnabled =
+    !!previewResult &&
+    previewMatches &&
+    selectedIds.length > 0 &&
+    selectedIds.every((id) => decisions[id] === "recommend_park_followup") &&
+    ack &&
+    confirmation === CONFIRMATION_TEXT &&
+    !applying;
+
+  async function callDecisionFn(payload: any) {
+    const { data: sess } = await supabase.auth.getSession();
+    const token = sess.session?.access_token;
+    if (!token) throw new Error("Not signed in");
+    const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/review-required-queue-decision`;
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+      },
+      body: JSON.stringify(payload),
+    });
+    const text = await res.text();
+    let json: any = null;
+    try { json = text ? JSON.parse(text) : null; } catch { /* ignore */ }
+    if (!res.ok || !json?.ok) throw new Error(json?.error || `Request failed (${res.status})`);
+    return json;
+  }
+
+  async function onPreview() {
+    setErrorMsg(null);
+    setApplyResult(null);
+    if (selectedIds.length === 0) {
+      setErrorMsg("Select at least one eligible row.");
+      return;
+    }
+    setPreviewing(true);
+    try {
+      const res = await callDecisionFn({
+        dry_run: true,
+        decisions: selectedIds.map((id) => ({ queue_id: id, decision: "park_followup" })),
+      });
+      setPreviewResult(res);
+    } catch (e: any) {
+      setErrorMsg(e?.message ?? "Preview failed");
+    } finally {
+      setPreviewing(false);
+    }
+  }
+
+  async function onApply() {
+    setErrorMsg(null);
+    setApplying(true);
+    try {
+      const res = await callDecisionFn({
+        dry_run: false,
+        decisions: selectedIds.map((id) => ({ queue_id: id, decision: "park_followup" })),
+        confirmation: CONFIRMATION_TEXT,
+      });
+      setApplyResult(res);
+      toast({
+        title: "Decision applied",
+        description: `Parked ${res.rows_changed} review-required follow-up(s). Re-run audit to confirm.`,
+      });
+    } catch (e: any) {
+      setErrorMsg(e?.message ?? "Apply failed");
+    } finally {
+      setApplying(false);
+    }
+  }
 
   const counts = useMemo(() => {
     const c = {
@@ -78,17 +200,20 @@ export const ReviewRequiredDecisionGate = ({ items }: { items: any[] }) => {
       <CardHeader>
         <CardTitle>Review Required Queue Rows — Decision Gate</CardTitle>
         <p className="text-xs text-muted-foreground mt-1">
-          Read-only founder decision gate for pending rows where the compliance spine is incomplete.
-          No apply path. No emails sent. No SMTP / Apollo / queue / contact / BCR / compliance / system_settings / cron mutations.
+          Founder decision gate for pending rows where the compliance spine is incomplete.
+          A founder-only Apply path exists only for park_followup on the 7 eligible Step 4 rows.
+          No emails sent. No SMTP / Apollo / contact / BCR / compliance / campaign / inbox /
+          system_settings / cron mutations.
         </p>
       </CardHeader>
       <CardContent className="space-y-4 text-sm">
         <Alert>
           <ShieldAlert />
-          <AlertTitle>Preview only — no mutation path in this view</AlertTitle>
+          <AlertTitle>Park-only Apply path — no sending, no compliance changes</AlertTitle>
           <AlertDescription>
-            These rows must not be auto-approved, remediated, sent, parked or cancelled without a founder decision gate
-            with an explicit apply path (built in a later task).
+            This does not approve compliance, does not generate unsubscribe tokens, does not send
+            emails, and does not build Manual Send Apply. It only parks old Step 4 follow-ups that
+            are missing the newer compliance spine.
           </AlertDescription>
         </Alert>
 
@@ -135,17 +260,30 @@ export const ReviewRequiredDecisionGate = ({ items }: { items: any[] }) => {
           <div className="space-y-3">
             {reviewItems.map((it) => {
               const d = decisions[it.queue_id] ?? defaultRecommendation(it);
+              const isEligible = ELIGIBLE_QUEUE_IDS.has(it.queue_id);
               return (
                 <div key={it.queue_id} className="rounded-md border p-3 space-y-2 bg-card">
                   <div className="flex items-start justify-between gap-3 flex-wrap">
                     <div>
                       <div className="font-medium">
+                        {isEligible && (
+                          <input
+                            type="checkbox"
+                            className="mr-2 align-middle"
+                            checked={!!selected[it.queue_id]}
+                            onChange={(e) =>
+                              setSelected((p) => ({ ...p, [it.queue_id]: e.target.checked }))
+                            }
+                            aria-label={`Select ${it.contact_email} for park_followup`}
+                          />
+                        )}
                         {it.contact_name ?? "—"}{" "}
                         <span className="text-muted-foreground text-xs">{it.contact_email}</span>
                       </div>
                       <div className="text-[11px] text-muted-foreground">
                         queue: <span className="font-mono">{it.queue_id}</span> · contact: <span className="font-mono">{it.contact_id}</span>
                         {it.bcr_business_match && <> · bcr: matched</>}
+                        {!isEligible && <> · <Badge variant="outline" className="text-[10px]">not in apply set</Badge></>}
                       </div>
                     </div>
                     <Badge variant="outline">Step {it.sequence_step}</Badge>
@@ -220,6 +358,92 @@ export const ReviewRequiredDecisionGate = ({ items }: { items: any[] }) => {
             })}
           </div>
         )}
+
+        {/* ===== APPLY PATH ===== */}
+        <div className="rounded-md border p-3 space-y-3 bg-muted/20" data-testid="decision-apply-panel">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="font-medium">Decision Apply — Park selected follow-ups</div>
+            <Badge variant="outline" className="text-[10px]">park_followup only · no send</Badge>
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            Selected: {selectedIds.length} of {eligibleItems.length} eligible. Default recommendation
+            for all 7 rows is park_followup. Untick any row to exclude it. The 3 valid_future_step_blocked
+            Step 2 rows are not selectable here and are never touched by this path.
+          </p>
+
+          <div className="flex flex-wrap gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={onPreview}
+              disabled={previewing || selectedIds.length === 0}
+              data-testid="decision-preview-btn"
+            >
+              {previewing ? "Previewing…" : "1. Preview Decision Apply"}
+            </Button>
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={onApply}
+              disabled={!applyEnabled}
+              data-testid="decision-apply-btn"
+            >
+              {applying ? "Applying…" : "2. Apply Decision — Park Selected Follow-ups"}
+            </Button>
+          </div>
+
+          {previewResult && (
+            <div className="rounded border bg-background p-2 text-[11px] space-y-1">
+              <div className="font-medium">Preview ({previewMatches ? "matches selection" : "stale — re-preview after changing selection"})</div>
+              <div>selected_count: <span className="font-mono">{previewResult.selected_count}</span></div>
+              <div>queue_ids: <span className="font-mono break-all">{(previewResult.selected_queue_ids ?? []).join(", ")}</span></div>
+              <div>proposed_new_status: <span className="font-mono">blocked</span> · reason: <span className="font-mono">{previewResult.rows?.[0]?.reason}</span></div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-1 mt-1">
+                {Object.entries(previewResult.counters ?? {}).map(([k, v]) => (
+                  <div key={k} className="rounded border bg-muted/30 px-1.5 py-1">
+                    <div className="text-muted-foreground">{k}</div>
+                    <div className="font-mono">{String(v)}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <label className="flex items-start gap-2 text-[11px]">
+            <Checkbox
+              checked={ack}
+              onCheckedChange={(v) => setAck(v === true)}
+              data-testid="decision-ack-checkbox"
+            />
+            <span>
+              I understand this will only park selected review-required follow-ups and will not send emails.
+            </span>
+          </label>
+
+          <div className="space-y-1">
+            <div className="text-[11px] text-muted-foreground">
+              Type exactly: <span className="font-mono">{CONFIRMATION_TEXT}</span>
+            </div>
+            <Input
+              value={confirmation}
+              onChange={(e) => setConfirmation(e.target.value)}
+              placeholder={CONFIRMATION_TEXT}
+              className="font-mono text-[11px]"
+              data-testid="decision-confirmation-input"
+            />
+          </div>
+
+          {errorMsg && (
+            <div className="text-[11px] text-destructive">{errorMsg}</div>
+          )}
+
+          {applyResult && (
+            <div className="rounded border border-green-500/40 bg-green-500/10 p-2 text-[11px]">
+              Decision applied. Rows changed: {applyResult.rows_changed}. Re-run audit to confirm
+              pending queue count.
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

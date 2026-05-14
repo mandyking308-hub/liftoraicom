@@ -483,9 +483,17 @@ const CommandCentre = () => {
             ]
           : reviewRequired > 0 || totalPendingFromAudit > 0
           ? [
-              { msg: `Review ${reviewRequired} queue row${reviewRequired === 1 ? "" : "s"} requiring compliance decision`, to: "/founder/outreach/queue-audit#review-required-decision-gate", tone: "danger" as const },
-              { msg: "Open Review Required Queue Gate", to: "/founder/outreach/queue-audit#review-required-decision-gate", tone: "warn" as const },
-              { msg: "Decide whether review_required rows should be remediated, blocked, or left parked", to: "/founder/outreach/queue-audit", tone: "warn" as const },
+              ...(reviewRequired > 0
+                ? [
+                    { msg: `Park ${reviewRequired} review-required Step 4 follow-up${reviewRequired === 1 ? "" : "s"} or leave selected rows under review`, to: "/founder/outreach/queue-audit#review-required-decision-gate", tone: "danger" as const },
+                    { msg: "Open Review Required Queue Gate (preview + park-only apply path)", to: "/founder/outreach/queue-audit#review-required-decision-gate", tone: "warn" as const },
+                  ]
+                : []),
+              ...(reviewRequired === 0 && validFutureBlocked > 0
+                ? [
+                    { msg: `${validFutureBlocked} clean Step 2 row${validFutureBlocked === 1 ? "" : "s"} held — Manual Send Apply not built`, to: "/founder/outreach/queue-audit", tone: "warn" as const },
+                  ]
+                : []),
             ]
           : [];
         const orderedFounderActions = (sendUnsafe || reviewRequired > 0 || totalPendingFromAudit > 0)
