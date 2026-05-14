@@ -24,14 +24,15 @@ type Risk =
   | "external-integration"
   | "legacy-archive";
 
-type LinkStatus =
+export type LinkStatus =
   | "valid"
   | "alias"
   | "legacy"
   | "no-dedicated-ui"
-  | "nearest-route-only";
+  | "nearest-route-only"
+  | "dynamic";
 
-interface RegistryItem {
+export interface RegistryItem {
   name: string;
   /** Canonical route, "" when no dedicated UI */
   path: string;
@@ -47,7 +48,7 @@ interface RegistryItem {
 
 /* All NON-DYNAMIC founder routes discovered in src/App.tsx (67 paths).
  * Each must appear in REGISTRY exactly once OR be intentionally aliased/legacy. */
-const DISCOVERED_FOUNDER_ROUTES: string[] = [
+export const DISCOVERED_FOUNDER_ROUTES: string[] = [
   "/founder",
   "/founder/access-control",
   "/founder/activity",
@@ -115,6 +116,72 @@ const DISCOVERED_FOUNDER_ROUTES: string[] = [
   "/founder/templates",
   "/founder/testing",
   "/founder/workflows",
+];
+
+/* All DYNAMIC founder routes (with :id / :token / parameter segments) extracted
+ * from src/App.tsx. These are not directly clickable from the Master Index
+ * because they require a generated id/token; each is represented as a
+ * "Dynamic route — accessed by generated id/link" entry near its parent list. */
+export const DISCOVERED_DYNAMIC_FOUNDER_ROUTES: string[] = [
+  "/founder/proposals/:id",
+  "/founder/projects/:id",
+  "/founder/monitoring/:id",
+  "/founder/agents/:id",
+  "/founder/workflows/:id",
+  "/founder/integrations/:id",
+  "/founder/executions/:id",
+  "/founder/processes/:id",
+  "/founder/architectures/:id",
+  "/founder/deployments/:id",
+  "/founder/knowledge/:id",
+  "/founder/organisations/:id",
+  "/founder/templates/:id",
+  "/founder/expansion/:id",
+  "/founder/manual/:id",
+  "/founder/crm/contacts/:id",
+  "/founder/crm/inboxes/:id/configure",
+  "/founder/conversations/:id",
+  "/founder/internal-proposals/:id",
+  "/founder/suppliers/:id",
+];
+
+/* Public / portal / partner / supplier dynamic routes — represented under
+ * Section 7 (client journey) and Section 14 (legacy/cross-area) so they are
+ * never silently excluded. */
+export const DISCOVERED_NON_FOUNDER_DYNAMIC_ROUTES: string[] = [
+  "/portal/projects/:id",
+  "/portal/systems/:id",
+  "/partner/opportunities/:id",
+  "/partner/projects/:id",
+  "/proposals/view/:token",
+  "/proposals/accept/:token",
+  "/demo/:token",
+];
+
+/* Route reconciliation table — explains 87 (prior coverage map) vs 67 (router
+ * snapshot of non-dynamic founder paths) and lists every category of route. */
+export interface ReconciliationRow {
+  category: string;
+  count: number;
+  notes: string;
+  representation: string;
+}
+export const RECONCILIATION_ROWS: ReconciliationRow[] = [
+  { category: "Total routes (prior coverage map)", count: 145, notes: "Full sitemap snapshot incl. dynamic, public, legal, portal, partner, supplier, founder.", representation: "Coverage Map" },
+  { category: "Total routes (router snapshot)", count: 145, notes: "Re-counted from src/App.tsx (public + legal + portal + founder + public proposal/demo + supplier + partner).", representation: "App.tsx" },
+  { category: "Founder routes (prior coverage map)", count: 87, notes: "Counted dynamic + non-dynamic founder paths together (67 + 20).", representation: "Coverage Map" },
+  { category: "Founder non-dynamic routes (router)", count: 67, notes: "Listed in DISCOVERED_FOUNDER_ROUTES; each represented in REGISTRY.", representation: "Master Index sections 0–14" },
+  { category: "Founder dynamic routes (router)", count: 20, notes: "Detail/edit pages requiring :id; explains the 87 → 67 gap (87 − 67 = 20).", representation: "Dynamic route entries near each parent" },
+  { category: "Aliases (founder)", count: 1, notes: "/founder/command-center → /founder/command-centre (Navigate).", representation: "Section 14" },
+  { category: "Legacy (founder)", count: 1, notes: "/founder/command-center/legacy retained for fallback.", representation: "Section 14" },
+  { category: "Portal / client routes", count: 17, notes: "Auth + protected client area. Not represented per item; shown as nearest-route-only in Section 7.", representation: "Section 7 (nearest-route-only)" },
+  { category: "Supplier routes", count: 3, notes: "External supplier portal.", representation: "Section 9 (nearest-route-only)" },
+  { category: "Partner routes", count: 7, notes: "Partner portal (incl. 2 dynamic).", representation: "Section 13 cards + dynamic entries" },
+  { category: "Public marketing routes", count: 12, notes: "Marketing site (/, /about, /platform, etc.).", representation: "Out of Master Index scope (founder cockpit only)" },
+  { category: "Public legal routes", count: 13, notes: "/legal hub + 12 documents.", representation: "Section 5 via /legal entry" },
+  { category: "Public proposal / demo routes", count: 3, notes: "Token-based public views (/proposals/view/:token, /proposals/accept/:token, /demo/:token).", representation: "Section 7 dynamic entries" },
+  { category: "Manual-derived concepts (no route)", count: 40, notes: "Edge functions / schema concepts surfaced from Liftor manual.", representation: "no-dedicated-ui in nearest section" },
+  { category: "Routes intentionally excluded from founder Master Index", count: 0, notes: "None silently excluded. Public marketing pages are out-of-scope by design (founder cockpit only) and are explicitly noted above.", representation: "n/a" },
 ];
 
 const SECTIONS: { id: string; title: string }[] = [
