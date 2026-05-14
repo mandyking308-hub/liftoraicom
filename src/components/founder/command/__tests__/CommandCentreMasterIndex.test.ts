@@ -62,4 +62,29 @@ describe("CommandCentreMasterIndex registry", () => {
     expect(audit.broken.length).toBe(0);
     expect(audit.dynamicMissing.length).toBe(0);
   });
+
+  it("registers the safe cron RPC so it is not flagged undocumented", () => {
+    const rpc = REGISTRY.find((r) => r.source === "rpc:public.get_outreach_send_cron_status");
+    expect(rpc, "get_outreach_send_cron_status not registered").toBeTruthy();
+    expect(rpc!.risk).toBe("admin-security");
+    expect(rpc!.notes ?? "").toMatch(/SECURITY DEFINER/i);
+    expect(rpc!.notes ?? "").toMatch(/service_role/i);
+    expect(rpc!.notes ?? "").toMatch(/Mutation:\s*none/i);
+  });
+
+  it("uses the corrected Queue Creation Gate wording (no unsafe legacy text)", () => {
+    const gate = REGISTRY.find((r) => r.name === "Queue Creation Gate");
+    expect(gate, "Queue Creation Gate missing").toBeTruthy();
+    const notes = gate!.notes ?? "";
+    expect(notes).toMatch(/Queue creation is paused/i);
+    expect(notes).not.toMatch(/Inserts email_queue Step 1/i);
+    expect(notes).not.toMatch(/worker will not send/i);
+  });
+
+  it("represents at least one public token-based dynamic route", () => {
+    const tokenRoute = REGISTRY.find((r) => r.path === "/proposals/view/:token");
+    expect(tokenRoute, "/proposals/view/:token not represented").toBeTruthy();
+    expect(tokenRoute!.status).toBe("dynamic");
+    expect(tokenRoute!.notes ?? "").toMatch(/Dynamic route/i);
+  });
 });

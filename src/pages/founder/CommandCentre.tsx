@@ -4,7 +4,6 @@ import LiftorCapabilities from "@/components/founder/LiftorCapabilities";
 import AgentOrchestration from "@/components/founder/AgentOrchestration";
 import SystemModeBanner from "@/components/founder/SystemModeBanner";
 import ControlledProofSend from "@/components/founder/ControlledProofSend";
-import ControlledLiveBatch from "@/components/founder/ControlledLiveBatch";
 import ExecutionStatusPanel from "@/components/founder/ExecutionStatusPanel";
 import LeadQualityPanel from "@/components/founder/LeadQualityPanel";
 import SourceQualityBrief from "@/components/founder/SourceQualityBrief";
@@ -70,6 +69,20 @@ const CommandCentre = () => {
   const autoSendStrictFalse = safetyAudit?.baseline?.auto_send_is_strict_false ?? false;
   const isSafeBlocked = safetyStatus === "SAFE_BLOCKED" && autoSendStrictFalse && cronCheck === "verified_disabled";
   const sendUnsafe = !isSafeBlocked;
+  // SAFE_BLOCKED means safe to inspect and clean — NOT safe to send.
+  // Manual Send Apply is not built and tracking disclosure is not injected,
+  // so live send controls must remain guarded even when safety_status=SAFE_BLOCKED.
+  const MANUAL_SEND_APPLY_BUILT = false;
+  const auditCounts = safetyAudit?.summary?.classification_counts;
+  const totalPendingFromAudit = safetyAudit?.summary?.total_pending ?? 0;
+  const reviewRequired = auditCounts?.review_required ?? 0;
+  const validFutureBlocked = auditCounts?.valid_future_step_blocked ?? 0;
+  const cancelCandidate = auditCounts?.cancel_candidate ?? 0;
+  const legacyPending = auditCounts?.legacy_pending ?? 0;
+  const orphanFollowup = auditCounts?.orphan_followup ?? 0;
+  const liveSendBlocked = sendUnsafe || !MANUAL_SEND_APPLY_BUILT || totalPendingFromAudit > 0 || reviewRequired > 0;
+  const queueCreationBlocked =
+    sendUnsafe || totalPendingFromAudit > 0 || reviewRequired > 0 || !MANUAL_SEND_APPLY_BUILT;
   // Businesses
   const { data: businesses = [] } = useQuery({
     queryKey: ["cc2-businesses"],
@@ -468,19 +481,37 @@ const CommandCentre = () => {
               { msg: "Verify outreach brake / cron status (Queue Audit)", to: "/founder/outreach/queue-audit", tone: "danger" as const },
               { msg: "Review Queue Audit classification before any cleanup or send", to: "/founder/outreach/queue-audit", tone: "warn" as const },
             ]
+          : reviewRequired > 0 || totalPendingFromAudit > 0
+          ? [
+              { msg: `Review ${reviewRequired} queue row${reviewRequired === 1 ? "" : "s"} requiring compliance evidence`, to: "/founder/outreach/queue-audit", tone: "danger" as const },
+              { msg: "Open Queue Audit", to: "/founder/outreach/queue-audit", tone: "warn" as const },
+              { msg: "Decide whether review_required rows should be remediated, blocked, or left parked", to: "/founder/outreach/queue-audit", tone: "warn" as const },
+            ]
           : [];
-        const orderedFounderActions = sendUnsafe
+        const orderedFounderActions = (sendUnsafe || reviewRequired > 0 || totalPendingFromAudit > 0)
           ? [
               ...safetyLedActions,
               ...founderActions.filter((r) => {
                 const m = (r.msg ?? "").toLowerCase();
+                // Suppress send / Apollo / queue-creation / reply-approval prompts
+                // until pending queue rows have been triaged.
                 return !m.includes("controlled live batch")
                   && !m.includes("apollo")
                   && !m.includes("create queue")
-                  && !m.includes("manual send");
+                  && !m.includes("manual send")
+                  && !m.includes("approve") // covers "Approve N AI reply drafts"
+                  && !m.includes("send proposals")
+                  && !m.includes("send batch")
+                  && !m.includes("run batch")
+                  && !m.includes("run live batch")
+                  && !m.includes("run controlled");
               }),
             ]
           : founderActions;
+        // Top-strip Next action must follow the same safety-led ordering.
+        const safetyLedNext = orderedFounderActions[0];
+        const topNextMsg = safetyLedNext?.msg ?? nextRecommended;
+        const topNextTo = safetyLedNext?.to ?? nextRecommendedTo;
 
         const stages = [
           {
@@ -578,8 +609,8 @@ const CommandCentre = () => {
                 <span className="text-muted-foreground">Approvals: <span className={totals.approvalsTotal ? "text-yellow-400" : "text-green-400"}>{totals.approvalsTotal}</span></span>
                 <span className="text-muted-foreground">Safe→promote: <span className="text-foreground">{leadLifecycle?.safe_to_promote ?? 0}</span></span>
                 <span className="text-muted-foreground">Safe→queue: <span className="text-foreground">{leadLifecycle?.safe_to_queue ?? 0}</span></span>
-                <Link to={nextRecommendedTo} className="ml-auto flex items-center gap-1 text-primary hover:underline">
-                  Next: {nextRecommended} <ArrowRight size={12} />
+                <Link to={topNextTo} className="ml-auto flex items-center gap-1 text-primary hover:underline">
+                  Next: {topNextMsg} <ArrowRight size={12} />
                 </Link>
               </div>
             </div>
@@ -709,23 +740,51 @@ const CommandCentre = () => {
                 <div className="text-[11px] text-muted-foreground border-t border-border/40 pt-2">
                   <span className="font-medium text-foreground">Cadence integrity:</span> downstream steps wait until prior step sent (real SMTP, accepted, provider message ID).
                 </div>
-                {sendUnsafe ? (
-                  <div className="rounded-md border border-yellow-500/40 bg-yellow-500/10 p-3 text-xs space-y-2">
-                    <p className="font-medium text-yellow-200">Send blocked — outreach brake review required</p>
-                    <p className="text-yellow-100/80">
-                      Live batch sending is disabled until the Outreach Safety panel reports
-                      <span className="font-mono"> SAFE_BLOCKED</span> with
-                      <span className="font-mono"> auto_send_enabled=false</span> and
-                      <span className="font-mono"> cron_check=verified_disabled</span>.
-                      Queue creation is blocked until the send brake is verified. Queue creation is not harmless unless the send worker and cron are physically blocked.
-                    </p>
-                    <Link to="/founder/outreach/queue-audit">
-                      <Button size="sm" variant="outline">Open Queue Audit</Button>
-                    </Link>
-                  </div>
-                ) : (
-                  <ControlledLiveBatch />
-                )}
+                {/* Guard live send controls. Even when safety_status=SAFE_BLOCKED,
+                 *  live batch sending stays disabled until Manual Send Apply is built,
+                 *  pending queue rows are triaged, and tracking disclosure is injected.
+                 *  SAFE_BLOCKED ≠ safe to send — only safe to inspect and clean. */}
+                <div
+                  data-testid="live-send-guard"
+                  className="rounded-md border border-yellow-500/40 bg-yellow-500/10 p-3 text-xs space-y-2"
+                >
+                  <p className="font-medium text-yellow-200">
+                    Send blocked — Manual Send Apply is not built. Existing pending queue rows must be reviewed first.
+                  </p>
+                  <ul className="list-disc list-inside text-yellow-100/80 space-y-0.5">
+                    <li>safety_status: <span className="font-mono">{safetyStatus ?? "unknown"}</span></li>
+                    <li>auto_send_enabled: <span className="font-mono">{String(safetyAudit?.baseline?.auto_send_enabled_value ?? "missing")}</span></li>
+                    <li>cron_check: <span className="font-mono">{cronCheck ?? "unknown"}</span></li>
+                    <li>pending queue rows: <span className="font-mono">{totalPendingFromAudit}</span></li>
+                    <li>review_required: <span className="font-mono">{reviewRequired}</span></li>
+                    <li>Manual Send Apply built: <span className="font-mono">no</span></li>
+                    <li>Tracking disclosure injected: <span className="font-mono">no</span></li>
+                  </ul>
+                  <p className="text-yellow-100/70">
+                    Run controlled live batch / Run next live batch / Run batch of N controls are intentionally hidden.
+                    SAFE_BLOCKED means safe to inspect and clean, not safe to send.
+                  </p>
+                  <Link to="/founder/outreach/queue-audit">
+                    <Button size="sm" variant="outline">Open Queue Audit</Button>
+                  </Link>
+                </div>
+                {/* Queue Creation guard */}
+                <div
+                  data-testid="queue-creation-guard"
+                  className="rounded-md border border-yellow-500/40 bg-yellow-500/10 p-3 text-xs space-y-2"
+                >
+                  <p className="font-medium text-yellow-200">
+                    Create queue rows disabled — pending queue review required.
+                  </p>
+                  <p className="text-yellow-100/80">
+                    Queue creation is paused until the {totalPendingFromAudit} existing pending row{totalPendingFromAudit === 1 ? "" : "s"} {totalPendingFromAudit === 1 ? "is" : "are"} reviewed
+                    or safely resolved. Auto-send is off and the background send worker is blocked, but queue creation
+                    remains controlled because pending rows can become dangerous if the brake is ever removed.
+                  </p>
+                  <p className="text-yellow-100/70">
+                    review_required: {reviewRequired} · valid_future_step_blocked: {validFutureBlocked} · cancel_candidate: {cancelCandidate} · legacy_pending: {legacyPending} · orphan_followup: {orphanFollowup}
+                  </p>
+                </div>
               </div>
             </Section>
 

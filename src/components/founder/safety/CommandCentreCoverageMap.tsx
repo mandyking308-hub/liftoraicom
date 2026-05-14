@@ -226,7 +226,13 @@ const ItemTable = ({ items }: { items: Item[] }) => (
 
 const CommandCentreCoverageMap = () => {
   const totalRoutes = 145;
+  // Founder routes total = 67 non-dynamic + 20 dynamic (router truth from src/App.tsx).
+  // Earlier coverage map reported 87 by counting both together; both numbers
+  // describe the same router. The Master Index Link Coverage Audit is now the
+  // authoritative source.
   const founderRoutes = 87;
+  const founderNonDynamic = 67;
+  const founderDynamic = 20;
   const visible = ALL.filter((i) => i.visibility === "visible").length;
   const partial = ALL.filter((i) => i.visibility === "partial").length;
   const hidden = ALL.filter((i) => i.visibility === "hidden").length;
@@ -247,13 +253,19 @@ const CommandCentreCoverageMap = () => {
       <CardHeader className="pb-3">
         <CardTitle className="text-base flex items-center gap-2">
           <MapIcon size={16} className="text-primary" />
-          Command Centre Coverage Map — Draft
-          <Badge variant="outline" className="text-[10px] ml-2">diagnostic · read-only</Badge>
+          Command Centre Coverage Map — Superseded baseline snapshot
+          <Badge variant="outline" className="text-[10px] ml-2 bg-secondary/40 text-muted-foreground border-border/50">superseded · read-only</Badge>
         </CardTitle>
         <p className="text-xs text-muted-foreground">
-          Inventory + blueprint of all Liftor functionality vs current Command Centre visibility.
-          No layout has been refactored. No data has been mutated. No outreach action has been taken.
+          Frozen pre-Master-Index inventory snapshot retained as a historical baseline.
+          Use the <Link to="#" className="text-primary underline">Master Index Link Coverage Audit</Link> above
+          as the current source of truth for route counts and coverage. Numbers here are not refreshed.
         </p>
+        <div className="mt-2 rounded-md border border-yellow-500/30 bg-yellow-500/5 p-2 text-[11px] text-yellow-100/90 space-y-0.5">
+          <p><span className="font-medium text-yellow-200">Reconciliation:</span> 87 founder routes here = {founderNonDynamic} non-dynamic + {founderDynamic} dynamic founder paths in src/App.tsx. Both figures describe the same router.</p>
+          <p>Dynamic routes (e.g. <code>/founder/proposals/:id</code>, <code>/proposals/view/:token</code>) are individually represented in the Master Index. Aliases (<code>/founder/command-center → /founder/command-centre</code>) and legacy (<code>/founder/command-center/legacy</code>) are tagged in Section 14.</p>
+          <p>Portal, supplier, partner and public marketing routes are intentionally out-of-scope for the founder cockpit Master Index and are linked via "nearest-route-only" cards. <span className="font-medium">Excluded routes from Master Index: 0.</span></p>
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Top stats */}
