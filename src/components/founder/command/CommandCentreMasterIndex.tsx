@@ -24,14 +24,15 @@ type Risk =
   | "external-integration"
   | "legacy-archive";
 
-type LinkStatus =
+export type LinkStatus =
   | "valid"
   | "alias"
   | "legacy"
   | "no-dedicated-ui"
-  | "nearest-route-only";
+  | "nearest-route-only"
+  | "dynamic";
 
-interface RegistryItem {
+export interface RegistryItem {
   name: string;
   /** Canonical route, "" when no dedicated UI */
   path: string;
@@ -47,7 +48,7 @@ interface RegistryItem {
 
 /* All NON-DYNAMIC founder routes discovered in src/App.tsx (67 paths).
  * Each must appear in REGISTRY exactly once OR be intentionally aliased/legacy. */
-const DISCOVERED_FOUNDER_ROUTES: string[] = [
+export const DISCOVERED_FOUNDER_ROUTES: string[] = [
   "/founder",
   "/founder/access-control",
   "/founder/activity",
@@ -117,6 +118,72 @@ const DISCOVERED_FOUNDER_ROUTES: string[] = [
   "/founder/workflows",
 ];
 
+/* All DYNAMIC founder routes (with :id / :token / parameter segments) extracted
+ * from src/App.tsx. These are not directly clickable from the Master Index
+ * because they require a generated id/token; each is represented as a
+ * "Dynamic route — accessed by generated id/link" entry near its parent list. */
+export const DISCOVERED_DYNAMIC_FOUNDER_ROUTES: string[] = [
+  "/founder/proposals/:id",
+  "/founder/projects/:id",
+  "/founder/monitoring/:id",
+  "/founder/agents/:id",
+  "/founder/workflows/:id",
+  "/founder/integrations/:id",
+  "/founder/executions/:id",
+  "/founder/processes/:id",
+  "/founder/architectures/:id",
+  "/founder/deployments/:id",
+  "/founder/knowledge/:id",
+  "/founder/organisations/:id",
+  "/founder/templates/:id",
+  "/founder/expansion/:id",
+  "/founder/manual/:id",
+  "/founder/crm/contacts/:id",
+  "/founder/crm/inboxes/:id/configure",
+  "/founder/conversations/:id",
+  "/founder/internal-proposals/:id",
+  "/founder/suppliers/:id",
+];
+
+/* Public / portal / partner / supplier dynamic routes — represented under
+ * Section 7 (client journey) and Section 14 (legacy/cross-area) so they are
+ * never silently excluded. */
+export const DISCOVERED_NON_FOUNDER_DYNAMIC_ROUTES: string[] = [
+  "/portal/projects/:id",
+  "/portal/systems/:id",
+  "/partner/opportunities/:id",
+  "/partner/projects/:id",
+  "/proposals/view/:token",
+  "/proposals/accept/:token",
+  "/demo/:token",
+];
+
+/* Route reconciliation table — explains 87 (prior coverage map) vs 67 (router
+ * snapshot of non-dynamic founder paths) and lists every category of route. */
+export interface ReconciliationRow {
+  category: string;
+  count: number;
+  notes: string;
+  representation: string;
+}
+export const RECONCILIATION_ROWS: ReconciliationRow[] = [
+  { category: "Total routes (prior coverage map)", count: 145, notes: "Full sitemap snapshot incl. dynamic, public, legal, portal, partner, supplier, founder.", representation: "Coverage Map" },
+  { category: "Total routes (router snapshot)", count: 145, notes: "Re-counted from src/App.tsx (public + legal + portal + founder + public proposal/demo + supplier + partner).", representation: "App.tsx" },
+  { category: "Founder routes (prior coverage map)", count: 87, notes: "Counted dynamic + non-dynamic founder paths together (67 + 20).", representation: "Coverage Map" },
+  { category: "Founder non-dynamic routes (router)", count: 67, notes: "Listed in DISCOVERED_FOUNDER_ROUTES; each represented in REGISTRY.", representation: "Master Index sections 0–14" },
+  { category: "Founder dynamic routes (router)", count: 20, notes: "Detail/edit pages requiring :id; explains the 87 → 67 gap (87 − 67 = 20).", representation: "Dynamic route entries near each parent" },
+  { category: "Aliases (founder)", count: 1, notes: "/founder/command-center → /founder/command-centre (Navigate).", representation: "Section 14" },
+  { category: "Legacy (founder)", count: 1, notes: "/founder/command-center/legacy retained for fallback.", representation: "Section 14" },
+  { category: "Portal / client routes", count: 17, notes: "Auth + protected client area. Not represented per item; shown as nearest-route-only in Section 7.", representation: "Section 7 (nearest-route-only)" },
+  { category: "Supplier routes", count: 3, notes: "External supplier portal.", representation: "Section 9 (nearest-route-only)" },
+  { category: "Partner routes", count: 7, notes: "Partner portal (incl. 2 dynamic).", representation: "Section 13 cards + dynamic entries" },
+  { category: "Public marketing routes", count: 12, notes: "Marketing site (/, /about, /platform, etc.).", representation: "Out of Master Index scope (founder cockpit only)" },
+  { category: "Public legal routes", count: 13, notes: "/legal hub + 12 documents.", representation: "Section 5 via /legal entry" },
+  { category: "Public proposal / demo routes", count: 3, notes: "Token-based public views (/proposals/view/:token, /proposals/accept/:token, /demo/:token).", representation: "Section 7 dynamic entries" },
+  { category: "Manual-derived concepts (no route)", count: 40, notes: "Edge functions / schema concepts surfaced from Liftor manual.", representation: "no-dedicated-ui in nearest section" },
+  { category: "Routes intentionally excluded from founder Master Index", count: 0, notes: "None silently excluded. Public marketing pages are out-of-scope by design (founder cockpit only) and are explicitly noted above.", representation: "n/a" },
+];
+
 const SECTIONS: { id: string; title: string }[] = [
   { id: "0", title: "0 · Executive Control" },
   { id: "1", title: "1 · Safety / Brake / System Mode" },
@@ -135,7 +202,7 @@ const SECTIONS: { id: string; title: string }[] = [
   { id: "14", title: "14 · Legacy / Historical / Archive" },
 ];
 
-const REGISTRY: RegistryItem[] = [
+export const REGISTRY: RegistryItem[] = [
   // ─────────── 0 · Executive Control
   { name: "Founder Overview", path: "/founder", section: "0", risk: "read-only", status: "valid", source: "App.tsx" },
   { name: "Command Centre (this page)", path: "/founder/command-centre", section: "0", risk: "read-only", status: "valid", source: "App.tsx" },
@@ -293,6 +360,37 @@ const REGISTRY: RegistryItem[] = [
   { name: "Legacy Apollo Pool / Historical Runs", path: "/founder/outreach/apollo", section: "14", risk: "legacy-archive", status: "valid", source: "App.tsx", notes: "Historical tab in Apollo Integration." },
   { name: "Duplicate / Held-Back Candidates", path: "/founder/outreach/queue-audit", section: "14", risk: "legacy-archive", status: "valid", source: "App.tsx", notes: "Surfaced via Queue Audit classification." },
   { name: "Old Snapshots / Raw Diagnostics", path: "/founder/testing", section: "14", risk: "legacy-archive", status: "valid", source: "App.tsx" },
+
+  // ─────────── Dynamic founder routes (require :id) — represented near parent
+  { name: "Proposal Detail (dynamic)", path: "/founder/proposals/:id", nearest: "/founder/proposals", section: "7", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id from list." },
+  { name: "Founder Project Detail (dynamic)", path: "/founder/projects/:id", nearest: "/founder/projects", section: "7", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id." },
+  { name: "Monitoring System Detail (dynamic)", path: "/founder/monitoring/:id", nearest: "/founder/monitoring", section: "11", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id." },
+  { name: "Agent Profile (dynamic)", path: "/founder/agents/:id", nearest: "/founder/agents", section: "2", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id." },
+  { name: "Workflow Detail (dynamic)", path: "/founder/workflows/:id", nearest: "/founder/workflows", section: "2", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id." },
+  { name: "Integration Detail (dynamic)", path: "/founder/integrations/:id", nearest: "/founder/integrations", section: "10", risk: "external-integration", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id." },
+  { name: "Execution Detail (dynamic)", path: "/founder/executions/:id", nearest: "/founder/executions", section: "11", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id." },
+  { name: "Process Detail (dynamic)", path: "/founder/processes/:id", nearest: "/founder/processes", section: "12", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id." },
+  { name: "Architecture Detail (dynamic)", path: "/founder/architectures/:id", nearest: "/founder/architectures", section: "12", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id." },
+  { name: "Deployment Detail (dynamic)", path: "/founder/deployments/:id", nearest: "/founder/deployments", section: "12", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id." },
+  { name: "Knowledge Detail (dynamic)", path: "/founder/knowledge/:id", nearest: "/founder/knowledge", section: "12", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id." },
+  { name: "Organisation Profile (dynamic)", path: "/founder/organisations/:id", nearest: "/founder/organisations", section: "4", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id." },
+  { name: "Template Detail (dynamic)", path: "/founder/templates/:id", nearest: "/founder/templates", section: "12", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id." },
+  { name: "Platform Launch Detail (dynamic)", path: "/founder/expansion/:id", nearest: "/founder/expansion", section: "13", risk: "admin-security", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id." },
+  { name: "Manual Page Detail (dynamic)", path: "/founder/manual/:id", nearest: "/founder/manual", section: "12", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id." },
+  { name: "CRM Contact Detail (dynamic)", path: "/founder/crm/contacts/:id", nearest: "/founder/crm/contacts", section: "4", risk: "compliance-sensitive", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id." },
+  { name: "CRM Inbox Configure (dynamic)", path: "/founder/crm/inboxes/:id/configure", nearest: "/founder/crm/inboxes", section: "4", risk: "send-adjacent", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id." },
+  { name: "Conversation Detail (dynamic)", path: "/founder/conversations/:id", nearest: "/founder/conversations", section: "6", risk: "live-action", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id." },
+  { name: "Internal Proposal Detail (dynamic)", path: "/founder/internal-proposals/:id", nearest: "/founder/internal-proposals", section: "7", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id." },
+  { name: "Supplier Detail (dynamic)", path: "/founder/suppliers/:id", nearest: "/founder/suppliers", section: "9", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated id." },
+
+  // Public/portal/partner dynamic — kept visible so they are not silently excluded
+  { name: "Public Proposal View (dynamic token)", path: "/proposals/view/:token", nearest: "/founder/proposals", section: "7", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated token/link." },
+  { name: "Public Proposal Accept (dynamic token)", path: "/proposals/accept/:token", nearest: "/founder/proposals", section: "7", risk: "live-action", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated token/link." },
+  { name: "Public Demo (dynamic token)", path: "/demo/:token", nearest: "/founder/demos", section: "7", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — accessed by generated token/link." },
+  { name: "Portal Project Detail (dynamic)", path: "/portal/projects/:id", nearest: "/portal/projects", section: "7", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — client portal." },
+  { name: "Portal System Detail (dynamic)", path: "/portal/systems/:id", nearest: "/portal/systems", section: "7", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — client portal." },
+  { name: "Partner Opportunity Detail (dynamic)", path: "/partner/opportunities/:id", nearest: "/partner/opportunities", section: "13", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — partner portal." },
+  { name: "Partner Project Detail (dynamic)", path: "/partner/projects/:id", nearest: "/partner/projects", section: "13", risk: "read-only", status: "dynamic", source: "App.tsx", notes: "Dynamic route — partner portal." },
 ];
 
 /* Snapshot of CURRENT visible Command Centre sections (manual baseline, before refactor).
@@ -355,14 +453,23 @@ function guardRequired(risk: Risk): boolean {
 }
 
 /* Audit: every discovered founder route must be represented (or aliased/legacy). */
-function runAudit() {
+export function runAudit() {
   const represented = new Set(REGISTRY.map((r) => r.path).filter((p) => p.length > 0));
   const missing: string[] = [];
   for (const p of DISCOVERED_FOUNDER_ROUTES) {
     if (!represented.has(p)) missing.push(p);
   }
+  // Dynamic founder routes must be represented as `dynamic`
+  const dynamicMissing: string[] = [];
+  for (const p of DISCOVERED_DYNAMIC_FOUNDER_ROUTES) {
+    const item = REGISTRY.find((r) => r.path === p);
+    if (!item || item.status !== "dynamic") dynamicMissing.push(p);
+  }
   // Broken = path declared in registry but not in router (only check /founder/*)
-  const allRouterPaths = new Set(DISCOVERED_FOUNDER_ROUTES);
+  const allRouterPaths = new Set<string>([
+    ...DISCOVERED_FOUNDER_ROUTES,
+    ...DISCOVERED_DYNAMIC_FOUNDER_ROUTES,
+  ]);
   const broken: string[] = [];
   for (const r of REGISTRY) {
     if (!r.path) continue;
@@ -390,6 +497,7 @@ function runAudit() {
   const noRouteLabelled = noRouteItems.filter(
     (r) => r.status === "no-dedicated-ui" || r.status === "nearest-route-only",
   );
+  const dynamicItems = REGISTRY.filter((r) => r.status === "dynamic");
   const aliases = REGISTRY.filter((r) => r.status === "alias");
   const legacy = REGISTRY.filter((r) => r.status === "legacy");
   const guarded = REGISTRY.filter((r) => guardRequired(r.risk));
@@ -398,12 +506,16 @@ function runAudit() {
     missing.length === 0 &&
     broken.length === 0 &&
     canonicalViolations.length === 0 &&
+    dynamicMissing.length === 0 &&
     noRouteItems.length === noRouteLabelled.length;
 
   return {
     discovered: DISCOVERED_FOUNDER_ROUTES.length,
+    discoveredDynamic: DISCOVERED_DYNAMIC_FOUNDER_ROUTES.length,
     represented: REGISTRY.filter((r) => r.path && r.path.startsWith("/founder")).length,
     missing,
+    dynamicMissing,
+    dynamicItems,
     broken,
     duplicates,
     canonicalViolations,
@@ -528,6 +640,7 @@ export default function CommandCentreMasterIndex() {
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2 mt-3 text-[11px]">
           <Stat label="Total routes (sitemap)" value={145} hint="coverage map snapshot" />
           <Stat label="Founder routes (router)" value={audit.discovered} />
+          <Stat label="Founder dynamic routes" value={audit.discoveredDynamic} />
           <Stat label="Sections" value={SECTIONS.length} />
           <Stat label="Index items" value={totalItems} />
           <Stat label="Direct route" value={directRoute} />
@@ -544,6 +657,40 @@ export default function CommandCentreMasterIndex() {
       {open && (
         <CardContent className="space-y-3">
           {SECTIONS.map((s) => <SectionBlock key={s.id} id={s.id} title={s.title} />)}
+
+          {/* Route Reconciliation (87 vs 67) */}
+          <Collapsible defaultOpen className="rounded-lg border border-border/50 bg-card/50">
+            <CollapsibleTrigger className="w-full flex items-center gap-2 p-3 hover:bg-secondary/30">
+              <Layers size={14} />
+              <span className="text-sm font-semibold">Route Reconciliation (87 vs 67)</span>
+              <Badge variant="secondary" className="text-[10px]">{RECONCILIATION_ROWS.length}</Badge>
+              <span className="ml-auto text-[10px] text-muted-foreground">87 − 67 = 20 dynamic founder routes.</span>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="overflow-x-auto p-3 pt-0">
+                <table className="w-full text-[11px]">
+                  <thead className="text-muted-foreground">
+                    <tr className="text-left">
+                      <th className="py-1 pr-2">Category</th>
+                      <th className="py-1 pr-2">Count</th>
+                      <th className="py-1 pr-2">Notes</th>
+                      <th className="py-1 pr-2">Representation</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {RECONCILIATION_ROWS.map((row, i) => (
+                      <tr key={i} className="border-t border-border/30">
+                        <td className="py-1 pr-2 font-medium">{row.category}</td>
+                        <td className="py-1 pr-2 font-mono">{row.count}</td>
+                        <td className="py-1 pr-2 text-muted-foreground">{row.notes}</td>
+                        <td className="py-1 pr-2">{row.representation}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
 
           {/* Before-refactor snapshot */}
           <Collapsible className="rounded-lg border border-border/50 bg-card/50">
@@ -597,6 +744,8 @@ export default function CommandCentreMasterIndex() {
                   <Stat label="Represented" value={audit.represented} />
                   <Stat label="Missing" value={audit.missing.length} />
                   <Stat label="Broken" value={audit.broken.length} />
+                  <Stat label="Dynamic discovered" value={audit.discoveredDynamic} />
+                  <Stat label="Dynamic missing" value={audit.dynamicMissing.length} />
                   <Stat label="Confusing duplicates" value={audit.duplicates.length} />
                   <Stat label="Aliases" value={audit.aliases.length} />
                   <Stat label="Legacy/archive" value={audit.legacy.length} />
