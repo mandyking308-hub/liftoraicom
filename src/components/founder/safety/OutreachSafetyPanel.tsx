@@ -30,6 +30,14 @@ export default function OutreachSafetyPanel() {
   const cronCheck = data?.summary?.cron_check ?? data?.baseline?.cron_check;
   const isSafe = status === "SAFE_BLOCKED";
   const counts = data?.summary?.classification_counts;
+  const reviewRequired = counts?.review_required ?? 0;
+  const validFutureBlocked = counts?.valid_future_step_blocked ?? 0;
+  const cancelCandidate = counts?.cancel_candidate ?? 0;
+  const legacyPending = counts?.legacy_pending ?? 0;
+  const orphanFollowup = counts?.orphan_followup ?? 0;
+  const parkOrCancelTotal = cancelCandidate + legacyPending + orphanFollowup;
+  const cleanupApplyEnabled = data?.cleanup_preview?.apply_button?.enabled ?? false;
+  const cleanupApplyUnavailable = !cleanupApplyEnabled || parkOrCancelTotal === 0;
 
   const headerTone = error ? "danger" : isSafe ? "good" : "warn";
   const HeaderIcon = isSafe ? ShieldCheck : ShieldAlert;
@@ -102,11 +110,26 @@ export default function OutreachSafetyPanel() {
               <Stat label="Queue rows changed" value={data?.cleanup_preview?.counters?.rows_changed ?? 0} tone="good" />
             </div>
 
-            <div className="rounded-md border border-border/50 bg-background/40 p-2 text-xs">
-              <span className="font-medium text-foreground">Next recommended action: </span>
-              {!isSafe
-                ? "Verify outreach brake / cron status, then review Queue Audit before any cleanup or send action."
-                : "Open Queue Audit to review classification groups, then apply cleanup parking before any controlled manual send."}
+            <div className="rounded-md border border-border/50 bg-background/40 p-2 text-xs space-y-1.5">
+              <p>
+                <span className="font-medium text-foreground">Next recommended action: </span>
+                {!isSafe
+                  ? "Verify outreach brake / cron status, then review Queue Audit before any cleanup or send action."
+                  : reviewRequired > 0
+                  ? `Open Queue Audit to inspect the ${reviewRequired} review_required row${reviewRequired === 1 ? "" : "s"}. Do not send. Decide whether each row needs compliance remediation, blocking, or parking. The ${validFutureBlocked} valid_future_step_blocked row${validFutureBlocked === 1 ? "" : "s"} remain held until Manual Send Apply is built.`
+                  : parkOrCancelTotal > 0
+                  ? "Open Queue Audit to review cleanup classification groups before any controlled manual send."
+                  : "Open Queue Audit. No park/cancel candidates currently. No send action available."}
+              </p>
+              {cleanupApplyUnavailable && (
+                <p className="text-muted-foreground">
+                  Cleanup Apply unavailable for current classification.
+                  {parkOrCancelTotal === 0 && " (cancel_candidate=0, legacy_pending=0, orphan_followup=0)"}
+                </p>
+              )}
+              <p className="text-muted-foreground">
+                Manual Send Apply is not built. SAFE_BLOCKED means safe to inspect and clean — not safe to send.
+              </p>
             </div>
 
             {!isSafe && (
