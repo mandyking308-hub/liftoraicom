@@ -256,7 +256,8 @@ export const REGISTRY: RegistryItem[] = [
   { name: "Promote to CRM", path: "", nearest: "/founder/crm/contacts", section: "3", risk: "compliance-sensitive", status: "no-dedicated-ui", source: "edge-fn:promote-leads-to-contacts" },
   { name: "Compliance Approval Gate", path: "/founder/compliance", section: "3", risk: "compliance-sensitive", status: "valid", source: "App.tsx" },
   { name: "Stage-to-Queue Gate", path: "", nearest: "/founder/outreach/queue", section: "3", risk: "send-adjacent", status: "no-dedicated-ui", source: "edge-fn:stage-to-queue-eligibility" },
-  { name: "Queue Creation Gate", path: "", nearest: "/founder/outreach/queue", section: "3", risk: "send-adjacent", status: "no-dedicated-ui", source: "edge-fn:create-queue-from-staged" },
+  { name: "Queue Creation Gate", path: "", nearest: "/founder/outreach/queue", section: "3", risk: "send-adjacent", status: "no-dedicated-ui", source: "edge-fn:create-queue-from-staged",
+    notes: "Queue creation is paused until the existing pending rows are reviewed or safely resolved. Auto-send is off and the background send worker is blocked, but queue creation remains controlled because pending rows can become dangerous if the brake is ever removed." },
 
   // ─────────── 4 · CRM / Contacts / Inboxes
   { name: "CRM Dashboard", path: "/founder/crm", section: "4", risk: "read-only", status: "valid", source: "App.tsx" },
@@ -324,6 +325,8 @@ export const REGISTRY: RegistryItem[] = [
 
   // ─────────── 11 · Monitoring / Security / System Health
   { name: "Monitoring Dashboard", path: "/founder/monitoring", section: "11", risk: "read-only", status: "valid", source: "App.tsx" },
+  { name: "get_outreach_send_cron_status (safe RPC)", path: "", nearest: "/founder/outreach/queue-audit", section: "11", risk: "admin-security", status: "no-dedicated-ui", source: "rpc:public.get_outreach_send_cron_status",
+    notes: "Read-only PL/pgSQL function (SECURITY DEFINER, EXECUTE only service_role). Verifies whether any active cron job references outreach-send-worker. Mutation: none. Surface: Outreach Safety / Queue Brake + Queue Audit. Deliberate safety primitive — registered here so it is not flagged as undocumented." },
   { name: "Retry Queue", path: "", nearest: "/founder/executions", section: "11", risk: "live-action", status: "no-dedicated-ui", source: "schema:execution_retries" },
   { name: "Risk Indicators", path: "", nearest: "/founder/security", section: "11", risk: "admin-security", status: "no-dedicated-ui", source: "schema:risk_indicators" },
   { name: "Domain Protection Alerts", path: "", nearest: "/founder/security", section: "11", risk: "admin-security", status: "no-dedicated-ui", source: "schema:domain_alerts" },
