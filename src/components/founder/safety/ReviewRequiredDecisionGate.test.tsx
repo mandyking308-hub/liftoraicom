@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   CONFIRMATION_TEXT,
   getDecisionApplyReadiness,
+  type DecisionOption,
 } from "./ReviewRequiredDecisionGate";
 
 const eligibleQueueIds = [
@@ -30,7 +31,7 @@ const previewResult = {
 
 describe("getDecisionApplyReadiness", () => {
   it("returns canApply=true for the exact all-green scenario", () => {
-    const decisions = Object.fromEntries(
+    const decisions: Record<string, DecisionOption> = Object.fromEntries(
       eligibleQueueIds.map((id) => [id, "recommend_park_followup"]),
     );
 
@@ -51,7 +52,7 @@ describe("getDecisionApplyReadiness", () => {
   });
 
   it("fails with confirmation mismatch when the phrase differs", () => {
-    const decisions = Object.fromEntries(
+    const decisions: Record<string, DecisionOption> = Object.fromEntries(
       eligibleQueueIds.map((id) => [id, "recommend_park_followup"]),
     );
 
