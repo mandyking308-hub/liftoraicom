@@ -23,6 +23,11 @@ const ELIGIBLE_QUEUE_IDS = new Set<string>([
 const CONFIRMATION_TEXT =
   "I understand this parks selected review-required follow-ups and sends nothing";
 
+function normalizeConfirmationText(s: string): string {
+  return (s ?? "").trim().replace(/\s+/g, " ");
+}
+const NORMALIZED_EXPECTED = normalizeConfirmationText(CONFIRMATION_TEXT);
+
 export type DecisionOption =
   | "leave_under_review"
   | "recommend_park_followup"
@@ -99,7 +104,9 @@ export const ReviewRequiredDecisionGate = ({ items }: { items: any[] }) => {
   const allParkFollowup =
     selectedIds.length > 0 &&
     selectedIds.every((id) => decisions[id] === "recommend_park_followup");
-  const confirmationExact = confirmation === CONFIRMATION_TEXT;
+  const normalizedTyped = normalizeConfirmationText(confirmation);
+  const confirmationExact = normalizedTyped === NORMALIZED_EXPECTED;
+  const hasEdgeWhitespace = confirmation.length > 0 && confirmation.trim() !== confirmation;
 
   const applyDisabledReason: string | null = !previewResult
     ? "Preview has not been run yet."
@@ -458,6 +465,25 @@ export const ReviewRequiredDecisionGate = ({ items }: { items: any[] }) => {
               className="font-mono text-[11px]"
               data-testid="decision-confirmation-input"
             />
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                type="button"
+                onClick={() => setConfirmation(CONFIRMATION_TEXT)}
+                data-testid="decision-copy-confirmation-btn"
+                className="text-[11px] h-7"
+              >
+                Copy confirmation phrase
+              </Button>
+              {!confirmationExact && confirmation.length > 0 && (
+                <span className="text-[11px] text-muted-foreground">
+                  expected chars: <span className="font-mono">{NORMALIZED_EXPECTED.length}</span>
+                  {" · "}typed chars: <span className="font-mono">{normalizedTyped.length}</span>
+                  {hasEdgeWhitespace && <> · <span className="text-destructive">leading/trailing whitespace detected</span></>}
+                </span>
+              )}
+            </div>
           </div>
 
           {errorMsg && (
