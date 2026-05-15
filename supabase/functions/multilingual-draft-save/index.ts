@@ -125,13 +125,20 @@ Deno.serve(async (req) => {
         .from("founder_approval_items")
         .insert({
           business_id: input.business_id ?? null,
-          item_type: "multilingual_draft_review",
+          approval_type: "multilingual_draft_review",
           status: "pending",
-          priority: "medium",
-          summary: `Multilingual draft (${input.source_language ?? "?"}) → ${input.recommended_response_language ?? "?"}`,
-          payload: { review_id: review.id, risk_flags: input.risk_flags ?? [] },
+          priority_level: "medium",
+          title: `Multilingual draft (${input.source_language ?? "?"} → ${input.recommended_response_language ?? "?"})`,
+          summary: input.founder_summary_english ?? null,
           source_table: "multilingual_interaction_reviews",
           source_id: review.id,
+          contact_id: input.contact_id ?? null,
+          conversation_id: input.conversation_id ?? null,
+          risk_flags: input.risk_flags ?? [],
+          send_allowed: false,
+          execution_enabled: false,
+          auto_execute_allowed: false,
+          metadata: { review_id: review.id },
         })
         .select("id")
         .maybeSingle();
