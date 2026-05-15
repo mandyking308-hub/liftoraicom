@@ -76,6 +76,7 @@ const FounderProposals = () => {
           </div>
         )}
         <CreativeAssetLibraryPanel />
+        <CustomerOnboardingPanel />
       </div>
     </FounderLayout>
   );
