@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import FounderLayout from "@/components/founder/FounderLayout";
+import CRMInteractionSourceAdaptersPanel from "@/components/founder/crm/CRMInteractionSourceAdaptersPanel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid } from "recharts";
 import { format } from "date-fns";
@@ -54,6 +55,8 @@ const SystemHealth = () => {
             7-day metric history sampled every 15 minutes.
           </p>
         </div>
+
+        <CRMInteractionSourceAdaptersPanel />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {METRICS.map((m) => {
