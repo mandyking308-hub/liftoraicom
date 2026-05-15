@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { Rocket, Search, Plus, LayoutTemplate, Building2, Activity, CheckCircle2, Clock } from "lucide-react";
 import { format } from "date-fns";
 import MultiBusinessOperatingLayerPanel from "@/components/founder/operations/MultiBusinessOperatingLayerPanel";
+import BusinessKnowledgeBrainPanel from "@/components/founder/knowledge/BusinessKnowledgeBrainPanel";
 import BusinessLaunchFactoryPanel from "@/components/founder/expansion/BusinessLaunchFactoryPanel";
 
 const statusClass = (s: string) => {
@@ -127,6 +128,7 @@ const PlatformExpansion = () => {
         </div>
 
         <MultiBusinessOperatingLayerPanel />
+        <BusinessKnowledgeBrainPanel />
         <BusinessLaunchFactoryPanel />
 
         {/* Stats */}

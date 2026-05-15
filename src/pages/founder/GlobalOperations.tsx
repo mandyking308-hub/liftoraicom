@@ -13,6 +13,7 @@ import {
   Activity, Play, Search, Shield,
 } from "lucide-react";
 import MultiBusinessOperatingLayerPanel from "@/components/founder/operations/MultiBusinessOperatingLayerPanel";
+import BusinessKnowledgeBrainPanel from "@/components/founder/knowledge/BusinessKnowledgeBrainPanel";
 import BusinessLaunchFactoryPanel from "@/components/founder/expansion/BusinessLaunchFactoryPanel";
 
 const statusIcon = (s: string) => {
@@ -139,6 +140,7 @@ const GlobalOperations = () => {
         </div>
 
         <MultiBusinessOperatingLayerPanel />
+        <BusinessKnowledgeBrainPanel />
         <BusinessLaunchFactoryPanel />
 
         {/* Global KPIs */}
