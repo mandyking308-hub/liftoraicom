@@ -39,6 +39,7 @@ import OutboundChannelPolicyPanel from "@/components/founder/integrations/Outbou
 import ScaleOperationsDryRunDashboard from "@/components/founder/command/ScaleOperationsDryRunDashboard";
 import CRMInteractionLedgerPanel from "@/components/founder/crm/CRMInteractionLedgerPanel";
 import CRMInteractionMatchPreviewPanel from "@/components/founder/crm/CRMInteractionMatchPreviewPanel";
+import CRMInteractionSourceAdaptersPanel from "@/components/founder/crm/CRMInteractionSourceAdaptersPanel";
 import {
   Building2, Bot, Send, Mail, Inbox as InboxIcon, MessageSquare, FileSignature,
   Search, Banknote, ShieldCheck, Workflow as WorkflowIcon, Phone, AlertTriangle,
@@ -907,6 +908,7 @@ const CommandCentre = () => {
               ]} />
               <CRMInteractionLedgerPanel />
               <CRMInteractionMatchPreviewPanel />
+              <CRMInteractionSourceAdaptersPanel />
             </Section>
 
             {/* SECTION 8 — Compliance / Legal / Rules */}

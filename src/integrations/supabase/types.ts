@@ -2968,6 +2968,57 @@ export type Database = {
           },
         ]
       }
+      crm_interaction_source_adapters: {
+        Row: {
+          adapter_key: string
+          capture_requires_feature_flag: boolean
+          created_at: string
+          enabled_for_capture: boolean
+          enabled_for_preview: boolean
+          feature_flag_name: string | null
+          id: string
+          metadata: Json
+          notes: string | null
+          source_channel: string
+          source_system: string
+          source_table: string | null
+          supported_interaction_types: Json
+          updated_at: string
+        }
+        Insert: {
+          adapter_key: string
+          capture_requires_feature_flag?: boolean
+          created_at?: string
+          enabled_for_capture?: boolean
+          enabled_for_preview?: boolean
+          feature_flag_name?: string | null
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          source_channel: string
+          source_system: string
+          source_table?: string | null
+          supported_interaction_types?: Json
+          updated_at?: string
+        }
+        Update: {
+          adapter_key?: string
+          capture_requires_feature_flag?: boolean
+          created_at?: string
+          enabled_for_capture?: boolean
+          enabled_for_preview?: boolean
+          feature_flag_name?: string | null
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          source_channel?: string
+          source_system?: string
+          source_table?: string | null
+          supported_interaction_types?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       crm_interaction_types: {
         Row: {
           ai_relevant: boolean
