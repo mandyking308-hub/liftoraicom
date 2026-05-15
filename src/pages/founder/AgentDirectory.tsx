@@ -5,6 +5,7 @@ import AIAgentOrchestratorPanel from "@/components/founder/agents/AIAgentOrchest
 import AIConversationDraftingPanel from "@/components/founder/agents/AIConversationDraftingPanel";
 import FounderApprovalConsole from "@/components/founder/approvals/FounderApprovalConsole";
 import AgentBusinessLivePanel from "@/components/founder/agents/AgentBusinessLivePanel";
+import AIEngagementAgentLivePanel from "@/components/founder/agents/AIEngagementAgentLivePanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -111,6 +112,7 @@ const AgentDirectory = () => {
         </div>
 
         <AgentBusinessLivePanel />
+        <AIEngagementAgentLivePanel />
 
         {/* Agent Directory */}
         <Card className="bg-card border-border/50">
