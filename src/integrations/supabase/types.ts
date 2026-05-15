@@ -361,6 +361,7 @@ export type Database = {
           enabled: boolean
           founder_review_required: boolean
           from_agent_key: string
+          from_customer_stage: string | null
           handover_type: string
           id: string
           metadata: Json
@@ -368,6 +369,7 @@ export type Database = {
           required_context: Json
           rule_key: string
           to_agent_key: string
+          to_customer_stage: string | null
           trigger_event: string
           updated_at: string
         }
@@ -377,6 +379,7 @@ export type Database = {
           enabled?: boolean
           founder_review_required?: boolean
           from_agent_key: string
+          from_customer_stage?: string | null
           handover_type: string
           id?: string
           metadata?: Json
@@ -384,6 +387,7 @@ export type Database = {
           required_context?: Json
           rule_key: string
           to_agent_key: string
+          to_customer_stage?: string | null
           trigger_event: string
           updated_at?: string
         }
@@ -393,6 +397,7 @@ export type Database = {
           enabled?: boolean
           founder_review_required?: boolean
           from_agent_key?: string
+          from_customer_stage?: string | null
           handover_type?: string
           id?: string
           metadata?: Json
@@ -400,6 +405,7 @@ export type Database = {
           required_context?: Json
           rule_key?: string
           to_agent_key?: string
+          to_customer_stage?: string | null
           trigger_event?: string
           updated_at?: string
         }
