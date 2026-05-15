@@ -6309,6 +6309,195 @@ export type Database = {
           },
         ]
       }
+      customer_onboarding_plans: {
+        Row: {
+          approved_at: string | null
+          business_id: string | null
+          check_in_schedule: Json
+          contact_id: string | null
+          created_at: string
+          customer_facing_instructions: string | null
+          customer_goal: string | null
+          customer_share_allowed: boolean
+          deal_id: string | null
+          founder_review_required: boolean
+          id: string
+          internal_notes: string | null
+          key_contacts: Json
+          metadata: Json
+          milestones: Json
+          onboarding_status: string
+          onboarding_token: string
+          onboarding_type: string | null
+          organisation_id: string | null
+          owner_agent_key: string
+          proposal_id: string | null
+          required_company_actions: Json
+          required_customer_actions: Json
+          risks: Json
+          success_definition: string | null
+          support_route: string | null
+          timeline: Json
+          updated_at: string
+          welcome_summary: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          business_id?: string | null
+          check_in_schedule?: Json
+          contact_id?: string | null
+          created_at?: string
+          customer_facing_instructions?: string | null
+          customer_goal?: string | null
+          customer_share_allowed?: boolean
+          deal_id?: string | null
+          founder_review_required?: boolean
+          id?: string
+          internal_notes?: string | null
+          key_contacts?: Json
+          metadata?: Json
+          milestones?: Json
+          onboarding_status?: string
+          onboarding_token?: string
+          onboarding_type?: string | null
+          organisation_id?: string | null
+          owner_agent_key?: string
+          proposal_id?: string | null
+          required_company_actions?: Json
+          required_customer_actions?: Json
+          risks?: Json
+          success_definition?: string | null
+          support_route?: string | null
+          timeline?: Json
+          updated_at?: string
+          welcome_summary?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          business_id?: string | null
+          check_in_schedule?: Json
+          contact_id?: string | null
+          created_at?: string
+          customer_facing_instructions?: string | null
+          customer_goal?: string | null
+          customer_share_allowed?: boolean
+          deal_id?: string | null
+          founder_review_required?: boolean
+          id?: string
+          internal_notes?: string | null
+          key_contacts?: Json
+          metadata?: Json
+          milestones?: Json
+          onboarding_status?: string
+          onboarding_token?: string
+          onboarding_type?: string | null
+          organisation_id?: string | null
+          owner_agent_key?: string
+          proposal_id?: string | null
+          required_company_actions?: Json
+          required_customer_actions?: Json
+          risks?: Json
+          success_definition?: string | null
+          support_route?: string | null
+          timeline?: Json
+          updated_at?: string
+          welcome_summary?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_onboarding_plans_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_onboarding_plans_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_onboarding_plans_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+        ]
+      }
+      customer_onboarding_tasks: {
+        Row: {
+          blockers: Json
+          business_id: string | null
+          completed_at: string | null
+          contact_id: string | null
+          created_at: string
+          customer_visible: boolean
+          due_at: string | null
+          founder_review_required: boolean
+          id: string
+          metadata: Json
+          onboarding_plan_id: string | null
+          owner_agent_key: string | null
+          priority_level: string
+          task_description: string | null
+          task_owner: string
+          task_status: string
+          task_title: string
+          updated_at: string
+        }
+        Insert: {
+          blockers?: Json
+          business_id?: string | null
+          completed_at?: string | null
+          contact_id?: string | null
+          created_at?: string
+          customer_visible?: boolean
+          due_at?: string | null
+          founder_review_required?: boolean
+          id?: string
+          metadata?: Json
+          onboarding_plan_id?: string | null
+          owner_agent_key?: string | null
+          priority_level?: string
+          task_description?: string | null
+          task_owner?: string
+          task_status?: string
+          task_title: string
+          updated_at?: string
+        }
+        Update: {
+          blockers?: Json
+          business_id?: string | null
+          completed_at?: string | null
+          contact_id?: string | null
+          created_at?: string
+          customer_visible?: boolean
+          due_at?: string | null
+          founder_review_required?: boolean
+          id?: string
+          metadata?: Json
+          onboarding_plan_id?: string | null
+          owner_agent_key?: string | null
+          priority_level?: string
+          task_description?: string | null
+          task_owner?: string
+          task_status?: string
+          task_title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_onboarding_tasks_onboarding_plan_id_fkey"
+            columns: ["onboarding_plan_id"]
+            isOneToOne: false
+            referencedRelation: "customer_onboarding_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_package_catalog: {
         Row: {
           active: boolean | null
@@ -10572,6 +10761,89 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      onboarding_email_drafts: {
+        Row: {
+          approval_status: string
+          business_id: string | null
+          contact_id: string | null
+          created_at: string
+          customer_facing: boolean
+          draft_body: string | null
+          draft_subject: string | null
+          draft_type: string
+          founder_review_required: boolean
+          id: string
+          metadata: Json
+          onboarding_plan_id: string | null
+          risk_flags: Json
+          send_allowed: boolean
+          updated_at: string
+        }
+        Insert: {
+          approval_status?: string
+          business_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          customer_facing?: boolean
+          draft_body?: string | null
+          draft_subject?: string | null
+          draft_type: string
+          founder_review_required?: boolean
+          id?: string
+          metadata?: Json
+          onboarding_plan_id?: string | null
+          risk_flags?: Json
+          send_allowed?: boolean
+          updated_at?: string
+        }
+        Update: {
+          approval_status?: string
+          business_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          customer_facing?: boolean
+          draft_body?: string | null
+          draft_subject?: string | null
+          draft_type?: string
+          founder_review_required?: boolean
+          id?: string
+          metadata?: Json
+          onboarding_plan_id?: string | null
+          risk_flags?: Json
+          send_allowed?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_email_drafts_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "onboarding_email_drafts_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "onboarding_email_drafts_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+          {
+            foreignKeyName: "onboarding_email_drafts_onboarding_plan_id_fkey"
+            columns: ["onboarding_plan_id"]
+            isOneToOne: false
+            referencedRelation: "customer_onboarding_plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       optimisation_insights: {
         Row: {

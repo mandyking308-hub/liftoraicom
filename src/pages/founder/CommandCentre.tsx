@@ -75,6 +75,7 @@ import SelfHealingMonitoringPanel from "@/components/founder/monitoring/SelfHeal
 import PortfolioIntelligenceBrainPanel from "@/components/founder/strategy/PortfolioIntelligenceBrainPanel";
 import CompetitorLearningPositioningPanel from "@/components/founder/strategy/CompetitorLearningPositioningPanel";
 import HumanAccountManagerPanel from "@/components/founder/customer/HumanAccountManagerPanel";
+import CustomerOnboardingPanel from "@/components/founder/customer/CustomerOnboardingPanel";
 import CommandCentreModuleRegistryPanel from "@/components/founder/command/CommandCentreModuleRegistryPanel";
 import BusinessCapabilityMatrixPanel from "@/components/founder/operations/BusinessCapabilityMatrixPanel";
 import SocialMediaBrainPanel from "@/components/founder/social/SocialMediaBrainPanel";
@@ -886,6 +887,7 @@ const CommandCentre = () => {
             <PortfolioIntelligenceBrainPanel />
             <CompetitorLearningPositioningPanel />
             <HumanAccountManagerPanel />
+            <CustomerOnboardingPanel />
 
             {/* OUTREACH SAFETY / QUEUE BRAKE — read-only, shared source of truth with /founder/outreach/queue-audit */}
             <RunwayHeader n={2} title="Safety / Brake — Native Liftor / IONOS queue (not Smartlead scale)" icon={ShieldCheck} anchor="sec-safety" />
