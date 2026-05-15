@@ -47,6 +47,7 @@ import CRMCustomerMemoryDashboard from "@/components/founder/crm/CRMCustomerMemo
 import AIAgentOperatingModelPanel from "@/components/founder/agents/AIAgentOperatingModelPanel";
 import AIAgentOrchestratorPanel from "@/components/founder/agents/AIAgentOrchestratorPanel";
 import AIConversationDraftingPanel from "@/components/founder/agents/AIConversationDraftingPanel";
+import FounderApprovalConsole from "@/components/founder/approvals/FounderApprovalConsole";
 import CRMContact360Panel from "@/components/founder/crm/CRMContact360Panel";
 import {
   Building2, Bot, Send, Mail, Inbox as InboxIcon, MessageSquare, FileSignature,
@@ -706,6 +707,7 @@ const CommandCentre = () => {
                 native lane and are not the global top action.
               </p>
             </Section>
+            <FounderApprovalConsole />
 
             {/* SECTION 4 — Liftor System Map / Master Index (collapsible) */}
             <RunwayHeader n={4} title="Liftor System Map / Master Index" icon={MapIcon} anchor="sec-map" />
@@ -738,6 +740,7 @@ const CommandCentre = () => {
               <AIAgentOperatingModelPanel />
               <AIAgentOrchestratorPanel />
               <AIConversationDraftingPanel />
+              <FounderApprovalConsole />
             </Section>
 
             {/* SECTION 6 — Outreach Runway */}

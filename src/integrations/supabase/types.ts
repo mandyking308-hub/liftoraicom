@@ -4844,6 +4844,147 @@ export type Database = {
           },
         ]
       }
+      founder_approval_items: {
+        Row: {
+          agent_key: string | null
+          approval_type: string
+          auto_execute_allowed: boolean
+          business_id: string | null
+          compliance_flags: Json
+          contact_id: string | null
+          conversation_id: string | null
+          created_at: string
+          deal_id: string | null
+          decided_at: string | null
+          draft_body: string | null
+          draft_subject: string | null
+          execution_enabled: boolean
+          founder_decision: string | null
+          founder_notes: string | null
+          id: string
+          invoice_id: string | null
+          metadata: Json
+          priority_level: string
+          proposal_id: string | null
+          recommended_action: string | null
+          risk_flags: Json
+          send_allowed: boolean
+          source_id: string | null
+          source_system: string | null
+          source_table: string | null
+          status: string
+          summary: string | null
+          supplier_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          agent_key?: string | null
+          approval_type: string
+          auto_execute_allowed?: boolean
+          business_id?: string | null
+          compliance_flags?: Json
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          deal_id?: string | null
+          decided_at?: string | null
+          draft_body?: string | null
+          draft_subject?: string | null
+          execution_enabled?: boolean
+          founder_decision?: string | null
+          founder_notes?: string | null
+          id?: string
+          invoice_id?: string | null
+          metadata?: Json
+          priority_level?: string
+          proposal_id?: string | null
+          recommended_action?: string | null
+          risk_flags?: Json
+          send_allowed?: boolean
+          source_id?: string | null
+          source_system?: string | null
+          source_table?: string | null
+          status?: string
+          summary?: string | null
+          supplier_id?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          agent_key?: string | null
+          approval_type?: string
+          auto_execute_allowed?: boolean
+          business_id?: string | null
+          compliance_flags?: Json
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          deal_id?: string | null
+          decided_at?: string | null
+          draft_body?: string | null
+          draft_subject?: string | null
+          execution_enabled?: boolean
+          founder_decision?: string | null
+          founder_notes?: string | null
+          id?: string
+          invoice_id?: string | null
+          metadata?: Json
+          priority_level?: string
+          proposal_id?: string | null
+          recommended_action?: string | null
+          risk_flags?: Json
+          send_allowed?: boolean
+          source_id?: string | null
+          source_system?: string | null
+          source_table?: string | null
+          status?: string
+          summary?: string | null
+          supplier_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      founder_approval_types: {
+        Row: {
+          active: boolean
+          auto_execute_allowed: boolean
+          created_at: string
+          default_priority: string
+          description: string | null
+          execution_enabled: boolean
+          id: string
+          label: string
+          type_key: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          auto_execute_allowed?: boolean
+          created_at?: string
+          default_priority?: string
+          description?: string | null
+          execution_enabled?: boolean
+          id?: string
+          label: string
+          type_key: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          auto_execute_allowed?: boolean
+          created_at?: string
+          default_priority?: string
+          description?: string | null
+          execution_enabled?: boolean
+          id?: string
+          label?: string
+          type_key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       founder_decisions: {
         Row: {
           business_id: string | null
