@@ -75,6 +75,7 @@ import SelfHealingMonitoringPanel from "@/components/founder/monitoring/SelfHeal
 import PortfolioIntelligenceBrainPanel from "@/components/founder/strategy/PortfolioIntelligenceBrainPanel";
 import SocialMediaBrainPanel from "@/components/founder/social/SocialMediaBrainPanel";
 import SocialContentFactoryPanel from "@/components/founder/social/SocialContentFactoryPanel";
+import SocialRepurposingEnginePanel from "@/components/founder/social/SocialRepurposingEnginePanel";
 import { SecurityGovernancePanel } from "@/components/founder/security/SecurityGovernancePanel";
 import { ProductisationReadinessPanel } from "@/components/founder/revenue/ProductisationReadinessPanel";
 import BusinessLaunchFactoryPanel from "@/components/founder/expansion/BusinessLaunchFactoryPanel";
@@ -826,6 +827,7 @@ const CommandCentre = () => {
               <AutopilotActivationGatesPanel />
               <SocialMediaBrainPanel />
               <SocialContentFactoryPanel />
+              <SocialRepurposingEnginePanel />
             </Section>
 
             {/* SECTION 6 — Outreach Runway */}

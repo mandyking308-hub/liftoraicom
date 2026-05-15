@@ -11577,6 +11577,122 @@ export type Database = {
           },
         ]
       }
+      social_repurposing_jobs: {
+        Row: {
+          business_id: string
+          created_at: string
+          founder_review_required: boolean
+          id: string
+          job_name: string
+          job_status: string
+          metadata: Json
+          output_types: Json
+          outputs_created: number
+          source_asset_id: string
+          target_platforms: Json
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          founder_review_required?: boolean
+          id?: string
+          job_name: string
+          job_status?: string
+          metadata?: Json
+          output_types?: Json
+          outputs_created?: number
+          source_asset_id: string
+          target_platforms?: Json
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          founder_review_required?: boolean
+          id?: string
+          job_name?: string
+          job_status?: string
+          metadata?: Json
+          output_types?: Json
+          outputs_created?: number
+          source_asset_id?: string
+          target_platforms?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_repurposing_jobs_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_repurposing_jobs_source_asset_id_fkey"
+            columns: ["source_asset_id"]
+            isOneToOne: false
+            referencedRelation: "social_source_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_source_assets: {
+        Row: {
+          asset_notes: string | null
+          asset_title: string
+          asset_type: string
+          asset_url: string | null
+          business_id: string
+          campaign_name: string | null
+          created_at: string
+          id: string
+          metadata: Json
+          release_date: string | null
+          source_platform: string | null
+          transcript: string | null
+          updated_at: string
+        }
+        Insert: {
+          asset_notes?: string | null
+          asset_title: string
+          asset_type: string
+          asset_url?: string | null
+          business_id: string
+          campaign_name?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          release_date?: string | null
+          source_platform?: string | null
+          transcript?: string | null
+          updated_at?: string
+        }
+        Update: {
+          asset_notes?: string | null
+          asset_title?: string
+          asset_type?: string
+          asset_url?: string | null
+          business_id?: string
+          campaign_name?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          release_date?: string | null
+          source_platform?: string | null
+          transcript?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_source_assets_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       strategy_insights: {
         Row: {
           category: string

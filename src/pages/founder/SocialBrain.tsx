@@ -1,6 +1,7 @@
 import FounderLayout from "@/components/founder/FounderLayout";
 import SocialMediaBrainPanel from "@/components/founder/social/SocialMediaBrainPanel";
 import SocialContentFactoryPanel from "@/components/founder/social/SocialContentFactoryPanel";
+import SocialRepurposingEnginePanel from "@/components/founder/social/SocialRepurposingEnginePanel";
 
 const SocialBrain = () => {
   return (
@@ -12,6 +13,7 @@ const SocialBrain = () => {
         </div>
         <SocialMediaBrainPanel />
         <SocialContentFactoryPanel />
+        <SocialRepurposingEnginePanel />
       </div>
     </FounderLayout>
   );
