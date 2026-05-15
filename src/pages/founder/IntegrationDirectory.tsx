@@ -1,4 +1,5 @@
 import FounderLayout from "@/components/founder/FounderLayout";
+import CRMInteractionMatchPreviewPanel from "@/components/founder/crm/CRMInteractionMatchPreviewPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -118,6 +119,7 @@ const IntegrationDirectory = () => {
         </div>
 
         <OutboundProviderEnginePanel />
+        <CRMInteractionMatchPreviewPanel />
         <BulkSendEngineBlueprint />
         <OutboundChannelPolicyPanel />
         <SmartleadCampaignMappingPreview />
