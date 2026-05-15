@@ -34,6 +34,7 @@ import SmartleadLeadPushPreview from "@/components/founder/integrations/Smartlea
 import BulkSendPreviewPanel from "@/components/founder/integrations/BulkSendPreviewPanel";
 import SmartleadScaleNextActionBanner from "@/components/founder/integrations/SmartleadScaleNextActionBanner";
 import OutboundChannelLanesPanel from "@/components/founder/integrations/OutboundChannelLanesPanel";
+import OutboundChannelPolicyPanel from "@/components/founder/integrations/OutboundChannelPolicyPanel";
 import {
   Building2, Bot, Send, Mail, Inbox as InboxIcon, MessageSquare, FileSignature,
   Search, Banknote, ShieldCheck, Workflow as WorkflowIcon, Phone, AlertTriangle,
@@ -968,6 +969,13 @@ const CommandCentre = () => {
             </Section>
             <OutboundProviderEnginePanel />
             <BulkSendEngineBlueprint />
+            <OutboundChannelPolicyPanel />
+            <p className="text-[11px] text-muted-foreground px-1">
+              Outbound routing is split: Smartlead handles cold scale outreach;
+              Liftor native handles controlled customer / proposal / finance /
+              supplier emails. Founder approval required on every lane; auto-send
+              is off everywhere.
+            </p>
             <SmartleadScaleSetupChecklist />
             <SmartleadCampaignMappingPreview />
             <SmartleadLeadPushPreview />

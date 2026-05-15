@@ -5185,6 +5185,60 @@ export type Database = {
         }
         Relationships: []
       }
+      outbound_channel_policies: {
+        Row: {
+          auto_send_allowed: boolean
+          business_id: string | null
+          communication_type: string
+          created_at: string
+          id: string
+          metadata: Json
+          native_allowed: boolean
+          notes: string | null
+          policy_key: string
+          provider_type: string | null
+          recommended_channel: string
+          requires_founder_approval: boolean
+          scale_allowed: boolean
+          smartlead_allowed: boolean
+          updated_at: string
+        }
+        Insert: {
+          auto_send_allowed?: boolean
+          business_id?: string | null
+          communication_type: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          native_allowed?: boolean
+          notes?: string | null
+          policy_key: string
+          provider_type?: string | null
+          recommended_channel: string
+          requires_founder_approval?: boolean
+          scale_allowed?: boolean
+          smartlead_allowed?: boolean
+          updated_at?: string
+        }
+        Update: {
+          auto_send_allowed?: boolean
+          business_id?: string | null
+          communication_type?: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          native_allowed?: boolean
+          notes?: string | null
+          policy_key?: string
+          provider_type?: string | null
+          recommended_channel?: string
+          requires_founder_approval?: boolean
+          scale_allowed?: boolean
+          smartlead_allowed?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       outbound_provider_campaign_mappings: {
         Row: {
           business_id: string | null

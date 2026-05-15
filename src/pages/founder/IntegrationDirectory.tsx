@@ -14,6 +14,7 @@ import { Plus, Search, Plug, CheckCircle2, XCircle, AlertCircle, Clock, Wifi } f
 import { useState } from "react";
 import { toast } from "sonner";
 import OutboundProviderEnginePanel from "@/components/founder/integrations/OutboundProviderEnginePanel";
+import OutboundChannelPolicyPanel from "@/components/founder/integrations/OutboundChannelPolicyPanel";
 import BulkSendEngineBlueprint from "@/components/founder/integrations/BulkSendEngineBlueprint";
 
 const statusIcon = (s: string) => {
@@ -115,6 +116,7 @@ const IntegrationDirectory = () => {
 
         <OutboundProviderEnginePanel />
         <BulkSendEngineBlueprint />
+        <OutboundChannelPolicyPanel />
 
         <div className="flex items-center justify-between">
           <div className="text-sm font-semibold">All integrations</div>
