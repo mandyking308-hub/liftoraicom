@@ -83,6 +83,7 @@ import SocialEngagementInboxPanel from "@/components/founder/social/SocialEngage
 import SocialAnalyticsTrendPanel from "@/components/founder/social/SocialAnalyticsTrendPanel";
 import MarketingContentFunnelPanel from "@/components/founder/marketing/MarketingContentFunnelPanel";
 import SupportKnowledgeAgentPanel from "@/components/founder/support/SupportKnowledgeAgentPanel";
+import CreativeAssetLibraryPanel from "@/components/founder/assets/CreativeAssetLibraryPanel";
 import { SecurityGovernancePanel } from "@/components/founder/security/SecurityGovernancePanel";
 import { ProductisationReadinessPanel } from "@/components/founder/revenue/ProductisationReadinessPanel";
 import BusinessLaunchFactoryPanel from "@/components/founder/expansion/BusinessLaunchFactoryPanel";
@@ -313,6 +314,35 @@ const CommandCentre = () => {
         openReviews: revs.filter((r) => r.status !== "resolved").length,
         escalations: revs.filter((r) => r.escalation_required).length,
         sendLocked: revs.filter((r) => !r.send_allowed).length,
+        businessesCovered: businessIds.size,
+      };
+    },
+  });
+  const { data: creativeAssetSummary } = useQuery({
+    queryKey: ["cc2-creative-asset-summary"],
+    refetchInterval: 60000,
+    queryFn: async () => {
+      const sb: any = supabase as any;
+      const [aR, uR] = await Promise.all([
+        sb.from("creative_asset_library").select("id,asset_type,asset_status,approved_for_social,approved_for_ads,approved_for_proposals,approved_for_website,usage_rights,expires_at,business_id"),
+        sb.from("creative_asset_usage").select("id,used_at"),
+      ]);
+      const a = (aR.data ?? []) as any[];
+      const u = (uR.data ?? []) as any[];
+      const businessIds = new Set<string>();
+      a.forEach((x) => x.business_id && businessIds.add(x.business_id));
+      const needsApproval = a.filter((x) => !x.approved_for_social && !x.approved_for_ads && !x.approved_for_proposals && !x.approved_for_website).length;
+      const expired = a.filter((x) => x.expires_at && new Date(x.expires_at) < new Date()).length;
+      return {
+        total: a.length,
+        approvedSocial: a.filter((x) => x.approved_for_social).length,
+        approvedAds: a.filter((x) => x.approved_for_ads).length,
+        approvedProposals: a.filter((x) => x.approved_for_proposals).length,
+        approvedWebsite: a.filter((x) => x.approved_for_website).length,
+        missingRights: a.filter((x) => !x.usage_rights).length,
+        needsApproval,
+        expired,
+        usageEvents: u.length,
         businessesCovered: businessIds.size,
       };
     },
