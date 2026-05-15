@@ -1,6 +1,7 @@
 import FounderLayout from "@/components/founder/FounderLayout";
 import { supabase } from "@/integrations/supabase/client";
 import LearningOptimisationEnginePanel from "@/components/founder/optimisation/LearningOptimisationEnginePanel";
+import HumanAccountManagerPanel from "@/components/founder/customer/HumanAccountManagerPanel";
 import PortfolioIntelligenceBrainPanel from "@/components/founder/strategy/PortfolioIntelligenceBrainPanel";
 import SocialAnalyticsTrendPanel from "@/components/founder/social/SocialAnalyticsTrendPanel";
 import { useQuery } from "@tanstack/react-query";
@@ -101,6 +102,7 @@ const FounderAnalytics = () => {
         </div>
 
         <LearningOptimisationEnginePanel />
+        <HumanAccountManagerPanel />
         <PortfolioIntelligenceBrainPanel />
 
         {/* KPIs */}
