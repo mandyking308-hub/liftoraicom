@@ -69,6 +69,7 @@ import MultiChannelInboxPanel from "@/components/founder/channels/MultiChannelIn
 import AgentHandoverProtocolPanel from "@/components/founder/agents/AgentHandoverProtocolPanel";
 import GlobalOperatingClockPanel from "@/components/founder/global/GlobalOperatingClockPanel";
 import LearningOptimisationEnginePanel from "@/components/founder/optimisation/LearningOptimisationEnginePanel";
+import SelfHealingMonitoringPanel from "@/components/founder/monitoring/SelfHealingMonitoringPanel";
 import { SecurityGovernancePanel } from "@/components/founder/security/SecurityGovernancePanel";
 import { ProductisationReadinessPanel } from "@/components/founder/revenue/ProductisationReadinessPanel";
 import BusinessLaunchFactoryPanel from "@/components/founder/expansion/BusinessLaunchFactoryPanel";
@@ -1091,6 +1092,7 @@ const CommandCentre = () => {
             <LiftorBusinessLiveRunPanel />
             <SecurityGovernancePanel />
             <LearningOptimisationEnginePanel />
+            <SelfHealingMonitoringPanel />
 
             {/* SECTION 14 — Knowledge / Manual / Build Log */}
             <InternalOperatingSchedulesPanel />
