@@ -153,6 +153,14 @@ Deno.serve(async (req) => {
       const next = c.payload?.proposed_next_step ?? "Founder reviews and triggers proposal generation.";
       const summaryText = c.payload?.qualification_summary ?? c.payload?.recommended_action ?? c.title;
 
+      // Pull business knowledge brain (no external calls) to enforce tone/forbidden claims
+      let businessKnowledge: any = null;
+      const bizId = c.payload?.business_id ?? null;
+      if (bizId) {
+        const { data: kp } = await admin.from("business_knowledge_profiles").select("approved_tone,offer_summary,target_customer,forbidden_claims,required_disclaimers,proposal_rules").eq("business_id", bizId).maybeSingle();
+        if (kp) businessKnowledge = kp;
+      }
+
       const { data: chr, error: chrErr } = await admin.from("commercial_handoff_reviews").insert({
         business_id: c.payload?.business_id ?? null,
         contact_id: c.contact_id ?? null,
@@ -172,6 +180,7 @@ Deno.serve(async (req) => {
         apply_status: "draft_pending_founder_review",
         blockers: ["awaiting_founder_proposal_generation", "no_external_send"],
         metadata: { source: SOURCE_FUNCTION, source_table: c.source, source_id: c.source_id, payload: c.payload },
+        ...(businessKnowledge ? { metadata: { source: SOURCE_FUNCTION, source_table: c.source, source_id: c.source_id, payload: c.payload, business_knowledge: businessKnowledge } } : {}),
       }).select("id").maybeSingle();
 
       if (chrErr) {
@@ -202,6 +211,7 @@ Deno.serve(async (req) => {
         auto_execute_allowed: false,
         send_allowed: false,
         metadata: { handoff_review_id: chr!.id, source_function: SOURCE_FUNCTION },
+        ...(businessKnowledge ? { metadata: { handoff_review_id: chr!.id, source_function: SOURCE_FUNCTION, business_knowledge: businessKnowledge } } : {}),
       }).select("id").maybeSingle();
       if (!faiErr && fai) {
         approvalsCreated++;
