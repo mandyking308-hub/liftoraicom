@@ -132,16 +132,45 @@ Deno.serve(async (req) => {
       { id: 11, label: "Scale sending enabled", done: false },
     ],
     smartlead_provider: summarise(smartlead),
+    smartlead_summary: {
+      smartlead_provider_exists: !!smartlead,
+      base_url: "https://server.smartlead.ai/api/v1",
+      auth_method: "api_key_query_param",
+      secret_name: "SMARTLEAD_API_KEY",
+      credentials_present: !!smartlead?.credentials_present,
+      connection_test_available: true,
+      connection_test_result:
+        smartlead?.last_test_at
+          ? smartlead?.provider_health === "ok"
+            ? "ok"
+            : "error"
+          : "not_run",
+      last_test_at: smartlead?.last_test_at ?? null,
+      last_error: smartlead?.last_error ?? null,
+      webhook_configured: !!smartlead?.webhook_configured,
+      warmup_status: smartlead?.warmup_status ?? "unknown",
+      can_send_scale: false,
+      can_preview_scale:
+        !!smartlead?.credentials_present && smartlead?.provider_health === "ok",
+      // Live counts (campaign_count / email_account_count / active / drafted /
+      // sending_accounts_present) are returned by `smartlead-test-connection`
+      // and merged into the UI from there — not cached server-side in v1.
+      campaign_count: null,
+      active_campaign_count: null,
+      drafted_campaign_count: null,
+      email_account_count: null,
+      sending_accounts_present: null,
+    },
     smartlead_webhook_blueprint: {
       configured: !!smartlead?.webhook_configured,
       events: [
-        "email_sent",
-        "email_opened",
-        "link_clicked",
-        "reply_received",
+        "email_reply_received",
         "email_bounced",
         "lead_unsubscribed",
         "campaign_completed",
+        "lead_status_changed",
+        "email_opened",
+        "link_clicked",
         "account_error",
       ],
       note: "Blueprint only — no live webhook endpoint created in v1.",
