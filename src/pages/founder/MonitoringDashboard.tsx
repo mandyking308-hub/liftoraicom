@@ -1,4 +1,5 @@
 import FounderLayout from "@/components/founder/FounderLayout";
+import GlobalOperatingClockPanel from "@/components/founder/global/GlobalOperatingClockPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -282,6 +283,7 @@ const MonitoringDashboard = () => {
             )}
           </CardContent>
         </Card>
+        <GlobalOperatingClockPanel />
       </div>
     </FounderLayout>
   );
