@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ShieldAlert, AlertTriangle, Globe, Activity, TrendingUp, TrendingDown, Minus, Building2 } from "lucide-react";
 import { format } from "date-fns";
 import GlobalJurisdictionPolicyPanel from "@/components/founder/compliance/GlobalJurisdictionPolicyPanel";
+import DataPrivacyRetentionPanel from "@/components/founder/compliance/DataPrivacyRetentionPanel";
 
 type EventRow = {
   id: string; severity: "low" | "medium" | "high" | "critical";
@@ -259,6 +260,7 @@ const ComplianceDashboard = () => {
         <GlobalJurisdictionPolicyPanel />
       </div>
     <div className="max-w-7xl mx-auto px-4 pb-6"><GroupHQOperatingPanel /></div>
+    <div className="max-w-7xl mx-auto px-4 pb-6"><DataPrivacyRetentionPanel /></div>
     </FounderLayout>
   );
 };
