@@ -48,6 +48,7 @@ Deno.serve(async (req) => {
   const list = (providers ?? []) as any[];
   const proof = list.find((p) => p.mode === "proof") ?? null;
   const scale = list.find((p) => p.mode === "scale") ?? null;
+  const smartlead = list.find((p) => p.provider_type === "smartlead") ?? scale;
 
   const proofConfigured =
     !!proof && proof.status !== "not_configured" && !!proof.credentials_present;
@@ -62,6 +63,10 @@ Deno.serve(async (req) => {
   if (!scaleConfigured) blockers.push("Scale provider not yet configured.");
   if (scale && !scale.webhook_configured) blockers.push("Scale provider webhook not connected.");
   if (scale && !scale.sending_domain) blockers.push("Scale sending domain not verified.");
+  if (smartlead && !smartlead.credentials_present)
+    blockers.push("Smartlead API key (SMARTLEAD_API_KEY) not configured.");
+  if (smartlead && smartlead.credentials_present && !smartlead.last_test_at)
+    blockers.push("Smartlead connection not tested yet.");
 
   const summarise = (p: any) =>
     p && {
@@ -110,16 +115,37 @@ Deno.serve(async (req) => {
     },
     blockers,
     bulk_engine_stages: [
-      { id: 1, label: "Provider configured", done: proofConfigured },
-      { id: 2, label: "Domain verified", done: !!scale?.sending_domain },
-      { id: 3, label: "Credentials stored", done: !!scale?.credentials_present },
-      { id: 4, label: "Webhook connected", done: !!scale?.webhook_configured },
-      { id: 5, label: "Queue eligibility ready", done: false },
-      { id: 6, label: "Bulk preview ready", done: false },
-      { id: 7, label: "Manual batch apply ready", done: false },
-      { id: 8, label: "Auto-send disabled", done: !autoSendOn },
-      { id: 9, label: "Scale sending not yet enabled", done: !scaleConfigured },
+      { id: 1, label: "Provider configured (Smartlead row exists)", done: !!smartlead },
+      { id: 2, label: "Smartlead credentials stored", done: !!smartlead?.credentials_present },
+      {
+        id: 3,
+        label: "Smartlead connection tested",
+        done: !!(smartlead?.last_test_at && smartlead?.provider_health === "ok"),
+      },
+      { id: 4, label: "Sending accounts connected", done: false },
+      { id: 5, label: "Campaign mapping ready", done: false },
+      { id: 6, label: "Lead push preview ready", done: false },
+      { id: 7, label: "Webhooks connected", done: !!smartlead?.webhook_configured },
+      { id: 8, label: "Bulk send preview ready", done: false },
+      { id: 9, label: "Manual batch apply ready", done: false },
+      { id: 10, label: "Auto-send disabled", done: !autoSendOn },
+      { id: 11, label: "Scale sending enabled", done: false },
     ],
+    smartlead_provider: summarise(smartlead),
+    smartlead_webhook_blueprint: {
+      configured: !!smartlead?.webhook_configured,
+      events: [
+        "email_sent",
+        "email_opened",
+        "link_clicked",
+        "reply_received",
+        "email_bounced",
+        "lead_unsubscribed",
+        "campaign_completed",
+        "account_error",
+      ],
+      note: "Blueprint only — no live webhook endpoint created in v1.",
+    },
     proof_provider_status_label: proofConfigured ? "configured" : "not_configured",
     scale_provider_status_label: scaleConfigured ? "configured" : "not_configured",
     provider_mode_summary: scaleConfigured ? "scale ready" : proofConfigured ? "proof only" : "disabled",
