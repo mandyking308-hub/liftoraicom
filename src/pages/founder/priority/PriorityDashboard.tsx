@@ -140,6 +140,7 @@ const PriorityDashboard = () => {
         <FounderApprovalConsole />
         <ApprovedActionExecutionPanel />
         <AgentHandoverProtocolPanel />
+        <AgentCollaborationBoard />
       </div>
     </FounderLayout>
   );
