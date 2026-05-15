@@ -53,6 +53,7 @@ import AIEngagementAgentLivePanel from "@/components/founder/agents/AIEngagement
 import CommercialHandoffPanel from "@/components/founder/commercial/CommercialHandoffPanel";
 import LiveCommercialAgentsPanel from "@/components/founder/commercial/LiveCommercialAgentsPanel";
 import LiftorBusinessLiveRunPanel from "@/components/founder/command/LiftorBusinessLiveRunPanel";
+import MultiBusinessOperatingLayerPanel from "@/components/founder/operations/MultiBusinessOperatingLayerPanel";
 import RevenueOperationsPanel from "@/components/founder/finance/RevenueOperationsPanel";
 import LiftorMasterDryRunPanel from "@/components/founder/testing/LiftorMasterDryRunPanel";
 import CRMContact360Panel from "@/components/founder/crm/CRMContact360Panel";
@@ -722,6 +723,7 @@ const CommandCentre = () => {
             <FounderApprovalConsole />
             <LiftorMasterDryRunPanel />
             <LiftorBusinessLiveRunPanel />
+            <MultiBusinessOperatingLayerPanel />
 
             {/* SECTION 4 — Liftor System Map / Master Index (collapsible) */}
             <RunwayHeader n={4} title="Liftor System Map / Master Index" icon={MapIcon} anchor="sec-map" />

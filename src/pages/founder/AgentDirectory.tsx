@@ -8,6 +8,7 @@ import AgentBusinessLivePanel from "@/components/founder/agents/AgentBusinessLiv
 import AIEngagementAgentLivePanel from "@/components/founder/agents/AIEngagementAgentLivePanel";
 import LiveCommercialAgentsPanel from "@/components/founder/commercial/LiveCommercialAgentsPanel";
 import LiftorBusinessLiveRunPanel from "@/components/founder/command/LiftorBusinessLiveRunPanel";
+import MultiBusinessOperatingLayerPanel from "@/components/founder/operations/MultiBusinessOperatingLayerPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -116,6 +117,7 @@ const AgentDirectory = () => {
         <AgentBusinessLivePanel />
         <AIEngagementAgentLivePanel />
         <LiftorBusinessLiveRunPanel />
+        <MultiBusinessOperatingLayerPanel />
 
         {/* Agent Directory */}
         <Card className="bg-card border-border/50">

@@ -12,6 +12,7 @@ import {
   Globe, Server, Bot, Workflow, AlertTriangle, CheckCircle2, XCircle, Clock,
   Activity, Play, Search, Shield,
 } from "lucide-react";
+import MultiBusinessOperatingLayerPanel from "@/components/founder/operations/MultiBusinessOperatingLayerPanel";
 
 const statusIcon = (s: string) => {
   if (["operational", "active", "connected", "completed", "running", "success"].includes(s)) return <CheckCircle2 size={14} className="text-green-400" />;
@@ -135,6 +136,8 @@ const GlobalOperations = () => {
           <h1 className="text-2xl font-bold flex items-center gap-2"><Globe size={24} className="text-primary" /> Global AI Operations</h1>
           <p className="text-muted-foreground text-sm mt-1">Platform-wide operational oversight across all client systems</p>
         </div>
+
+        <MultiBusinessOperatingLayerPanel />
 
         {/* Global KPIs */}
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
