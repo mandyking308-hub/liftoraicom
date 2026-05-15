@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, FlaskConical, ShieldCheck, AlertTriangle, GraduationCap, Play } from "lucide-react";
+import { FlaskConical, ShieldCheck, AlertTriangle, GraduationCap, Play, Trash2, Sparkles } from "lucide-react";
 
 const REHEARSAL_TYPES = [
   "full_customer_journey", "sales_only", "support_only", "complaint_recovery",
@@ -29,6 +29,8 @@ export const BusinessRehearsalSimulationPanel = () => {
   const [scenarios, setScenarios] = useState<any[]>([]);
   const [checklists, setChecklists] = useState<any[]>([]);
   const [busy, setBusy] = useState(false);
+  const [cleanliness, setCleanliness] = useState<any>(null);
+  const [resetPreview, setResetPreview] = useState<any>(null);
 
   useEffect(() => {
     (async () => {
@@ -55,6 +57,8 @@ export const BusinessRehearsalSimulationPanel = () => {
     } else {
       setScenarios([]);
     }
+    const { data: cc } = await supabase.from("rehearsal_cleanliness_checks").select("*").eq("business_id", businessId).order("checked_at", { ascending: false }).limit(1);
+    setCleanliness((cc ?? [])[0] ?? null);
   };
 
   useEffect(() => { refresh(); /* eslint-disable-next-line */ }, [businessId]);
@@ -98,12 +102,51 @@ export const BusinessRehearsalSimulationPanel = () => {
     } catch (e: any) { toast.error(e.message); } finally { setBusy(false); }
   };
 
+  const previewReset = async () => {
+    if (!businessId) return;
+    setBusy(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("rehearsal-reset-preview", { body: { business_id: businessId } });
+      if (error) throw error;
+      setResetPreview(data);
+      toast.success(`Preview: ${data.total_test_records} test record(s) — ${data.recommended_action}`);
+    } catch (e: any) { toast.error(e.message); } finally { setBusy(false); }
+  };
+
+  const applyReset = async () => {
+    if (!businessId) return;
+    if (!resetPreview) { toast.error("Run reset preview first"); return; }
+    setBusy(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("rehearsal-reset-apply", {
+        body: { business_id: businessId, dry_run: false, confirm: "RESET REHEARSAL DATA" },
+      });
+      if (error) throw error;
+      toast.success(`Reset complete: ${data.deleted} deleted, ${data.archived} archived — mode: ${data.operating_mode}`);
+      setResetPreview(null);
+      refresh();
+    } catch (e: any) { toast.error(e.message); } finally { setBusy(false); }
+  };
+
+  const runCleanliness = async () => {
+    if (!businessId) return;
+    setBusy(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("rehearsal-cleanliness-check", { body: { business_id: businessId } });
+      if (error) throw error;
+      toast.success(data.clean_for_real_use ? "Clean Real Mode confirmed" : `Dirty: ${data.test_records_remaining} test record(s)`);
+      refresh();
+    } catch (e: any) { toast.error(e.message); } finally { setBusy(false); }
+  };
+
   const latest = runs[0];
   const passed = useMemo(() => scenarios.filter((s) => s.passed).length, [scenarios]);
   const total = scenarios.length;
   const score = latest?.readiness_score ?? (total ? Math.round((passed / total) * 100) : 0);
+  const cleanReal = cleanliness?.real_mode_ready === true;
   const internalReady = score >= 80 && total > 0;
   const externalReady = false; // always locked until founder explicit go-live
+  const resetRequired = (cleanliness && !cleanliness.real_mode_ready) || runs.some((r) => r.reset_status !== "reset_completed");
 
   return (
     <Card className="tech-card">
@@ -129,6 +172,10 @@ export const BusinessRehearsalSimulationPanel = () => {
           <Badge variant={internalReady ? "secondary" : "outline"}>Internal use ready: {internalReady ? "yes" : "no"}</Badge>
           <Badge variant="destructive"><AlertTriangle className="h-3 w-3 mr-1" /> External go-live: {externalReady ? "yes" : "no"}</Badge>
           <Badge variant="outline">Latest score: {score}%</Badge>
+          <Badge variant={cleanReal ? "secondary" : "destructive"}>
+            {cleanReal ? <><Sparkles className="h-3 w-3 mr-1" /> Clean Real Mode</> : <>Reset required: {resetRequired ? "yes" : "unknown"}</>}
+          </Badge>
+          {cleanliness && <Badge variant="outline">Test records: {cleanliness.test_records_remaining}</Badge>}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -194,6 +241,40 @@ export const BusinessRehearsalSimulationPanel = () => {
                 </li>
               ))}
             </ul>
+          )}
+        </div>
+
+        <div className="rounded-md border border-border/40 p-3 space-y-2">
+          <div className="text-sm font-semibold flex items-center gap-2">
+            <Trash2 className="h-4 w-4" /> Rehearsal reset · Clean Real Mode
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Removes only records flagged as test/rehearsal. Real customer / CRM / proposal / invoice data is never touched.
+            Apply requires confirmation phrase <code>RESET REHEARSAL DATA</code>.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Button size="sm" variant="outline" onClick={previewReset} disabled={busy || !businessId}>Reset preview</Button>
+            <Button size="sm" variant="destructive" onClick={applyReset} disabled={busy || !resetPreview || !resetPreview.safe_to_purge}>
+              Apply reset
+            </Button>
+            <Button size="sm" variant="outline" onClick={runCleanliness} disabled={busy || !businessId}>
+              <Sparkles className="h-3 w-3 mr-1" /> Cleanliness check
+            </Button>
+          </div>
+          {resetPreview && (
+            <div className="text-xs text-muted-foreground">
+              Planned purge: <span className="text-foreground">{resetPreview.total_test_records}</span> ·
+              Suspicious: <span className="text-foreground">{resetPreview.suspicious_records}</span> ·
+              {Object.entries(resetPreview.records_by_table ?? {}).map(([t, v]: any) => (
+                <span key={t} className="ml-2">{t}: {v.count}</span>
+              ))}
+            </div>
+          )}
+          {cleanliness && (
+            <div className="text-xs text-muted-foreground">
+              Last check: {cleanliness.check_status} · ready={String(cleanliness.real_mode_ready)} ·
+              modules: {(cleanliness.metadata?.affected_modules ?? []).join(", ") || "none"}
+            </div>
           )}
         </div>
       </CardContent>
