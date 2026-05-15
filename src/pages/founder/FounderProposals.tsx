@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import FounderLayout from "@/components/founder/FounderLayout";
 import { ArrowRight } from "lucide-react";
+import { ProductisationReadinessPanel } from "@/components/founder/revenue/ProductisationReadinessPanel";
 
 const FounderProposals = () => {
   const [proposals, setProposals] = useState<any[]>([]);
@@ -37,6 +38,8 @@ const FounderProposals = () => {
           <h1 className="text-2xl sm:text-3xl font-bold">Proposals</h1>
           <p className="text-muted-foreground mt-1">All AI proposal generator submissions</p>
         </div>
+
+        <div className="mb-6"><ProductisationReadinessPanel /></div>
 
         {loading ? (
           <p className="text-muted-foreground">Loading...</p>
