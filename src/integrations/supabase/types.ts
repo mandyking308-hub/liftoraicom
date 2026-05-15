@@ -77,6 +77,62 @@ export type Database = {
         }
         Relationships: []
       }
+      access_review_items: {
+        Row: {
+          access_status: string | null
+          access_type: string | null
+          business_id: string | null
+          created_at: string | null
+          founder_review_required: boolean | null
+          id: string
+          last_reviewed_at: string | null
+          next_review_due_at: string | null
+          notes: string | null
+          person_id: string | null
+          risk_level: string | null
+          system_name: string
+          updated_at: string | null
+        }
+        Insert: {
+          access_status?: string | null
+          access_type?: string | null
+          business_id?: string | null
+          created_at?: string | null
+          founder_review_required?: boolean | null
+          id?: string
+          last_reviewed_at?: string | null
+          next_review_due_at?: string | null
+          notes?: string | null
+          person_id?: string | null
+          risk_level?: string | null
+          system_name: string
+          updated_at?: string | null
+        }
+        Update: {
+          access_status?: string | null
+          access_type?: string | null
+          business_id?: string | null
+          created_at?: string | null
+          founder_review_required?: boolean | null
+          id?: string
+          last_reviewed_at?: string | null
+          next_review_due_at?: string | null
+          notes?: string | null
+          person_id?: string | null
+          risk_level?: string | null
+          system_name?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "access_review_items_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people_register"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       accounting_close_tasks: {
         Row: {
           adviser_required: boolean | null
@@ -12943,6 +12999,69 @@ export type Database = {
           },
         ]
       }
+      people_register: {
+        Row: {
+          business_id: string | null
+          contract_status: string | null
+          created_at: string | null
+          data_access_level: string | null
+          email: string | null
+          end_date: string | null
+          entity_id: string | null
+          id: string
+          metadata: Json | null
+          nda_status: string | null
+          notes: string | null
+          person_name: string
+          relationship_type: string | null
+          role_type: string
+          start_date: string | null
+          status: string | null
+          system_access_required: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          business_id?: string | null
+          contract_status?: string | null
+          created_at?: string | null
+          data_access_level?: string | null
+          email?: string | null
+          end_date?: string | null
+          entity_id?: string | null
+          id?: string
+          metadata?: Json | null
+          nda_status?: string | null
+          notes?: string | null
+          person_name: string
+          relationship_type?: string | null
+          role_type: string
+          start_date?: string | null
+          status?: string | null
+          system_access_required?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          business_id?: string | null
+          contract_status?: string | null
+          created_at?: string | null
+          data_access_level?: string | null
+          email?: string | null
+          end_date?: string | null
+          entity_id?: string | null
+          id?: string
+          metadata?: Json | null
+          nda_status?: string | null
+          notes?: string | null
+          person_name?: string
+          relationship_type?: string | null
+          role_type?: string
+          start_date?: string | null
+          status?: string | null
+          system_access_required?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       platform_diagnostic_runs: {
         Row: {
           created_at: string
@@ -17442,6 +17561,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      training_sop_records: {
+        Row: {
+          assigned_to_person_id: string | null
+          business_id: string | null
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          review_due_at: string | null
+          sop_category: string | null
+          sop_content: string | null
+          sop_name: string
+          sop_status: string | null
+          training_completed_at: string | null
+          training_required: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_to_person_id?: string | null
+          business_id?: string | null
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          review_due_at?: string | null
+          sop_category?: string | null
+          sop_content?: string | null
+          sop_name: string
+          sop_status?: string | null
+          training_completed_at?: string | null
+          training_required?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_to_person_id?: string | null
+          business_id?: string | null
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          review_due_at?: string | null
+          sop_category?: string | null
+          sop_content?: string | null
+          sop_name?: string
+          sop_status?: string | null
+          training_completed_at?: string | null
+          training_required?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       update_logs: {
         Row: {
