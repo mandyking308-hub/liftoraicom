@@ -107,6 +107,7 @@ import FounderRevenue from "./pages/founder/FounderRevenue";
 import BrainCore from "./pages/founder/BrainCore";
 import DecisionEngine from "./pages/founder/DecisionEngine";
 import StrategyEngine from "./pages/founder/StrategyEngine";
+import MarketingHub from "./pages/founder/MarketingHub";
 import SocialBrain from "./pages/founder/SocialBrain";
 import FounderCoPilot from "./pages/founder/FounderCoPilot";
 import PlatformTesting from "./pages/founder/PlatformTesting";
@@ -275,6 +276,7 @@ const App = () => (
             <Route path="/founder/brain" element={<FounderRoute><BrainCore /></FounderRoute>} />
             <Route path="/founder/decisions" element={<FounderRoute><DecisionEngine /></FounderRoute>} />
             <Route path="/founder/strategy" element={<FounderRoute><StrategyEngine /></FounderRoute>} />
+            <Route path="/founder/marketing" element={<FounderRoute><MarketingHub /></FounderRoute>} />
             <Route path="/founder/social" element={<FounderRoute><SocialBrain /></FounderRoute>} />
             <Route path="/founder/copilot" element={<FounderRoute><FounderCoPilot /></FounderRoute>} />
             <Route path="/founder/testing" element={<FounderRoute><PlatformTesting /></FounderRoute>} />

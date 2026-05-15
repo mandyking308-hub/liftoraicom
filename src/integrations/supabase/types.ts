@@ -8618,6 +8618,139 @@ export type Database = {
           },
         ]
       }
+      marketing_campaign_briefs: {
+        Row: {
+          approval_status: string
+          budget_notes: string | null
+          business_id: string | null
+          campaign_goal: string | null
+          campaign_name: string
+          campaign_type: string
+          channels: Json
+          created_at: string
+          creative_angles: Json
+          funnel_steps: Json
+          id: string
+          launch_allowed: boolean
+          metadata: Json
+          offer: string | null
+          required_assets: Json
+          target_audience: string | null
+          updated_at: string
+        }
+        Insert: {
+          approval_status?: string
+          budget_notes?: string | null
+          business_id?: string | null
+          campaign_goal?: string | null
+          campaign_name: string
+          campaign_type: string
+          channels?: Json
+          created_at?: string
+          creative_angles?: Json
+          funnel_steps?: Json
+          id?: string
+          launch_allowed?: boolean
+          metadata?: Json
+          offer?: string | null
+          required_assets?: Json
+          target_audience?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approval_status?: string
+          budget_notes?: string | null
+          business_id?: string | null
+          campaign_goal?: string | null
+          campaign_name?: string
+          campaign_type?: string
+          channels?: Json
+          created_at?: string
+          creative_angles?: Json
+          funnel_steps?: Json
+          id?: string
+          launch_allowed?: boolean
+          metadata?: Json
+          offer?: string | null
+          required_assets?: Json
+          target_audience?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_campaign_briefs_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketing_content_assets: {
+        Row: {
+          approval_status: string
+          asset_status: string
+          asset_title: string
+          asset_type: string
+          business_id: string | null
+          content_body: string | null
+          created_at: string
+          cta: string | null
+          goal: string | null
+          id: string
+          metadata: Json
+          outline: Json
+          publish_allowed: boolean
+          seo_keywords: Json
+          target_audience: string | null
+          updated_at: string
+        }
+        Insert: {
+          approval_status?: string
+          asset_status?: string
+          asset_title: string
+          asset_type: string
+          business_id?: string | null
+          content_body?: string | null
+          created_at?: string
+          cta?: string | null
+          goal?: string | null
+          id?: string
+          metadata?: Json
+          outline?: Json
+          publish_allowed?: boolean
+          seo_keywords?: Json
+          target_audience?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approval_status?: string
+          asset_status?: string
+          asset_title?: string
+          asset_type?: string
+          business_id?: string | null
+          content_body?: string | null
+          created_at?: string
+          cta?: string | null
+          goal?: string | null
+          id?: string
+          metadata?: Json
+          outline?: Json
+          publish_allowed?: boolean
+          seo_keywords?: Json
+          target_audience?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_content_assets_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           ai_generated: boolean

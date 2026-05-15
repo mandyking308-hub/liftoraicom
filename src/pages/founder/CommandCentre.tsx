@@ -81,6 +81,7 @@ import SocialRepurposingEnginePanel from "@/components/founder/social/SocialRepu
 import SocialSchedulerExportPanel from "@/components/founder/social/SocialSchedulerExportPanel";
 import SocialEngagementInboxPanel from "@/components/founder/social/SocialEngagementInboxPanel";
 import SocialAnalyticsTrendPanel from "@/components/founder/social/SocialAnalyticsTrendPanel";
+import MarketingContentFunnelPanel from "@/components/founder/marketing/MarketingContentFunnelPanel";
 import { SecurityGovernancePanel } from "@/components/founder/security/SecurityGovernancePanel";
 import { ProductisationReadinessPanel } from "@/components/founder/revenue/ProductisationReadinessPanel";
 import BusinessLaunchFactoryPanel from "@/components/founder/expansion/BusinessLaunchFactoryPanel";
@@ -257,6 +258,36 @@ const CommandCentre = () => {
         businessesMissing,
         nextModuleName: nextModule?.module_name ?? "All modules registered",
         nextModuleRoute: nextModule?.primary_route ?? "/founder/system/health",
+      };
+    },
+  });
+  const { data: marketingSummary } = useQuery({
+    queryKey: ["cc2-marketing-summary"],
+    refetchInterval: 60000,
+    queryFn: async () => {
+      const sb: any = supabase as any;
+      const [assetsR, briefsR] = await Promise.all([
+        sb.from("marketing_content_assets").select("id,asset_type,approval_status,publish_allowed,business_id"),
+        sb.from("marketing_campaign_briefs").select("id,campaign_type,approval_status,launch_allowed,business_id"),
+      ]);
+      const assets = (assetsR.data ?? []) as any[];
+      const briefs = (briefsR.data ?? []) as any[];
+      const countBy = (arr: any[], pred: (x: any) => boolean) => arr.filter(pred).length;
+      const businessIds = new Set<string>();
+      assets.forEach((a) => a.business_id && businessIds.add(a.business_id));
+      briefs.forEach((b) => b.business_id && businessIds.add(b.business_id));
+      return {
+        assetsTotal: assets.length,
+        briefsTotal: briefs.length,
+        blogs: countBy(assets, (a) => a.asset_type === "blog_post"),
+        newsletters: countBy(assets, (a) => a.asset_type === "newsletter"),
+        landingPages: countBy(assets, (a) => a.asset_type === "landing_page_copy" || a.asset_type === "sales_page"),
+        leadMagnets: countBy(assets, (a) => a.asset_type === "lead_magnet"),
+        adBriefs: countBy(assets, (a) => a.asset_type === "ad_copy"),
+        approvalsPending: countBy(assets, (a) => a.approval_status === "pending_review") + countBy(briefs, (b) => b.approval_status === "pending_review"),
+        publishLocked: countBy(assets, (a) => !a.publish_allowed),
+        launchLocked: countBy(briefs, (b) => !b.launch_allowed),
+        businessesCovered: businessIds.size,
       };
     },
   });
@@ -979,6 +1010,34 @@ const CommandCentre = () => {
               <SocialContentFactoryPanel />
               <SocialRepurposingEnginePanel />
               <SocialSchedulerExportPanel />
+            </Section>
+
+            {/* SECTION 5b — Marketing / Content / Funnel */}
+            <Section
+              title="Marketing / Content / Funnel (internal-only)"
+              icon={FileSignature}
+              action={<Link to="/founder/marketing"><Button size="sm" variant="outline"><Sparkles size={12} /> Open marketing</Button></Link>}
+            >
+              <div className="flex flex-wrap items-center gap-2 mb-2 text-[11px]">
+                <Badge variant="outline" className="border-yellow-500/40 text-yellow-300">No publish · No send · No ad spend</Badge>
+                <span className="text-muted-foreground">Businesses covered: <span className="text-foreground">{marketingSummary?.businessesCovered ?? 0}</span></span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+                <StatTile label="Content assets" value={marketingSummary?.assetsTotal ?? 0} icon={FileSignature} to="/founder/marketing" />
+                <StatTile label="Campaign briefs" value={marketingSummary?.briefsTotal ?? 0} icon={Briefcase} to="/founder/marketing" />
+                <StatTile label="Blogs / Newsletters" value={(marketingSummary?.blogs ?? 0) + (marketingSummary?.newsletters ?? 0)} icon={BookOpen} to="/founder/marketing" />
+                <StatTile label="Landing pages" value={marketingSummary?.landingPages ?? 0} icon={MonitorPlay} to="/founder/marketing" />
+                <StatTile label="Lead magnets" value={marketingSummary?.leadMagnets ?? 0} icon={Archive} to="/founder/marketing" />
+                <StatTile label="Ad briefs" value={marketingSummary?.adBriefs ?? 0} icon={TrendingUp} to="/founder/marketing" />
+              </div>
+              <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+                <span>Pending approvals: <span className={`${(marketingSummary?.approvalsPending ?? 0) > 0 ? "text-yellow-400" : "text-green-400"} font-medium`}>{marketingSummary?.approvalsPending ?? 0}</span></span>
+                <span>Publish locked: <span className="text-foreground">{marketingSummary?.publishLocked ?? 0}</span></span>
+                <span>Launch locked: <span className="text-foreground">{marketingSummary?.launchLocked ?? 0}</span></span>
+              </div>
+              <div className="mt-3">
+                <MarketingContentFunnelPanel />
+              </div>
             </Section>
 
             {/* SECTION 6 — Outreach Runway */}
