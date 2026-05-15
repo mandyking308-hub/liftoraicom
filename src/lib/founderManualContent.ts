@@ -3315,7 +3315,51 @@ The manual can be exported as a formatted PDF document using the browser's nativ
 
 ---
 
-*End of Liftor AI Founder Manual v4.9 — Smartlead Scale Engine Foundation Sprint (15 May 2026)*
+*End of Liftor AI Founder Manual v5.0 — Global Operating Brain / Command Centre Edition (15 May 2026)*
+
+---
+
+## v5.0 Addendum — Global Operating Brain / Command Centre Edition
+
+**What's new in v5.0 (consolidation, not new architecture):**
+
+- **Command Centre cockpit** — Founder Alert Strip, Master Business Selector, "What should Mandy do now?" panel, and standardised module cards (status, readiness, owner, next action, manual link, gate badge).
+- **Sticky nav** with jump-links across: Today's Actions, Customer Journey, Human Layer, Growth, Revenue, Social/Content/Marketing, Proposals/Demos/Deals, Finance/Suppliers, Group HQ, Risk/Legal/Security, AI Agents, Global Brain, Manual Coverage, Legacy/Archive.
+- **Customer Journey Flow Map** rendered end-to-end: prospecting → lead → CRM → compliance → outreach → reply → AI draft → founder approval → proposal → demo → deal → invoice → supplier/delivery → onboarding → support → surveys → complaints → quarterly report → renewal → win-back → retention.
+- **Layered visibility**: Human Layer, Growth Layer, Revenue Layer, Group HQ Layer, AI Brain/Operations Layer — all surfaced on Command Centre.
+- **Business-scoped status views** — Neon Candy is the active test business but the system is no longer hardcoded to it.
+- **Search/filter** across business, module, agent, blocked-only, approval-required, gates locked, customer/revenue/risk/social/HQ.
+- **Full link-check function** (\`command-centre-full-link-check\`) auditing all CC buttons, anchors, route links, manual links and build log links.
+- **Usability acceptance function** (\`command-centre-usability-acceptance\`) verifying cockpit structure, gate badges, manual coverage, broken links and missing cards.
+- **Legacy demoted**: Pooja proof-send, Manual Send Apply, stale review_required Step 4 rows, old IONOS proof-send loop, stale Apollo / Smartlead / coverage copy — accessible under Legacy / Archive / Native IONOS Safety, never deleted.
+- **External action gates** visibly enforced everywhere: no email send, no social publish, no DM, no Apollo POST/credit spend, no Smartlead POST, no proposal/invoice/survey/onboarding send, no money movement, no filing, no private export, no secret exposure.
+
+### Daily / Weekly / Monthly playbook (plain-English)
+
+**Daily:**
+1. Open \`/founder/command-centre\`.
+2. Read the Founder Alert Strip — clear urgent + high-severity items first.
+3. Pick the active business in the Master Business Selector.
+4. Work the "What should Mandy do now?" list top-to-bottom.
+5. Scan Customer Journey Flow Map for stuck stages.
+6. Check Human Layer (onboarding, complaints, low-CSAT, surveys due).
+7. Approve / reject anything in Founder Approvals.
+8. Run safe internal agents only — confirm gates remain locked.
+9. Glance at Revenue + Risk strips.
+
+**Weekly:** performance scorecard, retention risks, prospecting list, social/content plan, finance & cashflow, open complaints/disputes, supplier risks, system health.
+
+**Monthly / Quarterly:** customer quarterly reports, governance reviews, cashflow / accounting close, KPI/OKR review, board / founder report, data room check, entity obligations, renewal / churn / upsell review.
+
+### Onboarding another business
+
+1. Create the business record and assign agents.
+2. Run Liftor Live Readiness acceptance — must reach PASS before any external lane is enabled.
+3. Seed CRM, knowledge sources, suppliers, contracts.
+4. Mark approvals required for first 30 days of any external action.
+5. Run \`command-centre-usability-acceptance\` to confirm cockpit coverage for the new business.
+
+*End of v5.0 Addendum.*
 *Self-updating documentation generated from live platform state.*
 *${now}*
 `;
