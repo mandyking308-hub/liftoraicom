@@ -6546,6 +6546,63 @@ export type Database = {
           },
         ]
       }
+      global_brain_status_snapshots: {
+        Row: {
+          agent_tasks_pending: number
+          agents_active: number
+          autopilot_gates_enabled: number
+          businesses_active: number
+          businesses_total: number
+          founder_approvals_pending: number
+          high_risk_gates_locked: number
+          id: string
+          languages_detected: number
+          markets_active: number
+          metadata: Json
+          open_self_healing_findings: number
+          revenue_signals: Json
+          snapshot_at: string
+          top_blockers: Json
+          top_opportunities: Json
+        }
+        Insert: {
+          agent_tasks_pending?: number
+          agents_active?: number
+          autopilot_gates_enabled?: number
+          businesses_active?: number
+          businesses_total?: number
+          founder_approvals_pending?: number
+          high_risk_gates_locked?: number
+          id?: string
+          languages_detected?: number
+          markets_active?: number
+          metadata?: Json
+          open_self_healing_findings?: number
+          revenue_signals?: Json
+          snapshot_at?: string
+          top_blockers?: Json
+          top_opportunities?: Json
+        }
+        Update: {
+          agent_tasks_pending?: number
+          agents_active?: number
+          autopilot_gates_enabled?: number
+          businesses_active?: number
+          businesses_total?: number
+          founder_approvals_pending?: number
+          high_risk_gates_locked?: number
+          id?: string
+          languages_detected?: number
+          markets_active?: number
+          metadata?: Json
+          open_self_healing_findings?: number
+          revenue_signals?: Json
+          snapshot_at?: string
+          top_blockers?: Json
+          top_opportunities?: Json
+        }
+        Relationships: []
+      }
       global_market_profiles: {
         Row: {
           business_days: Json
