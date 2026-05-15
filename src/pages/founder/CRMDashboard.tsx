@@ -191,6 +191,7 @@ const CRMDashboard = () => {
             </ul>
           </CardContent>
         </Card>
+        <CRMInteractionLedgerPanel />
       </div>
     </FounderLayout>
   );
