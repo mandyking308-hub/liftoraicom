@@ -6,6 +6,7 @@ import FounderLayout from "@/components/founder/FounderLayout";
 import ProductRoadmapQAReleasePanel from "@/components/founder/product/ProductRoadmapQAReleasePanel";
 import CommandCentreModuleRegistryPanel from "@/components/founder/command/CommandCentreModuleRegistryPanel";
 import CommandCentreUsabilityReportPanel from "@/components/founder/command/CommandCentreUsabilityReportPanel";
+import BusinessActivationWizardPanel from "@/components/founder/activation/BusinessActivationWizardPanel";
 import BusinessCapabilityMatrixPanel from "@/components/founder/operations/BusinessCapabilityMatrixPanel";
 import CRMHealthIntegrityPanel from "@/components/founder/crm/CRMHealthIntegrityPanel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -289,6 +290,7 @@ const PlatformTesting = () => {
     <FounderLayout>
       <div className="space-y-6">
         <CommandCentreUsabilityReportPanel />
+        <BusinessActivationWizardPanel />
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">Platform Testing & Validation</h1>
