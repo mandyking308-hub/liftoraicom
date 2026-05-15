@@ -2093,6 +2093,68 @@ export type Database = {
         }
         Relationships: []
       }
+      business_agent_assignments_v2: {
+        Row: {
+          agent_key: string
+          blockers: Json
+          business_id: string
+          can_call_provider_post: boolean
+          can_create_internal_records: boolean
+          can_send_external: boolean
+          can_spend_credits: boolean
+          created_at: string
+          enabled: boolean
+          founder_approval_required: boolean
+          id: string
+          metadata: Json
+          operating_mode: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          agent_key: string
+          blockers?: Json
+          business_id: string
+          can_call_provider_post?: boolean
+          can_create_internal_records?: boolean
+          can_send_external?: boolean
+          can_spend_credits?: boolean
+          created_at?: string
+          enabled?: boolean
+          founder_approval_required?: boolean
+          id?: string
+          metadata?: Json
+          operating_mode?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          agent_key?: string
+          blockers?: Json
+          business_id?: string
+          can_call_provider_post?: boolean
+          can_create_internal_records?: boolean
+          can_send_external?: boolean
+          can_spend_credits?: boolean
+          created_at?: string
+          enabled?: boolean
+          founder_approval_required?: boolean
+          id?: string
+          metadata?: Json
+          operating_mode?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_agent_assignments_v2_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_autopilot_settings: {
         Row: {
           ai_classification_allowed: boolean
@@ -2307,6 +2369,154 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "high_intent_review_queue"
             referencedColumns: ["contact_id"]
+          },
+        ]
+      }
+      business_operating_modules: {
+        Row: {
+          blockers: Json
+          business_id: string
+          created_at: string
+          enabled: boolean
+          id: string
+          last_checked_at: string | null
+          metadata: Json
+          module_key: string
+          module_label: string
+          readiness_status: string
+          setup_status: string
+          updated_at: string
+        }
+        Insert: {
+          blockers?: Json
+          business_id: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          last_checked_at?: string | null
+          metadata?: Json
+          module_key: string
+          module_label: string
+          readiness_status?: string
+          setup_status?: string
+          updated_at?: string
+        }
+        Update: {
+          blockers?: Json
+          business_id?: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          last_checked_at?: string | null
+          metadata?: Json
+          module_key?: string
+          module_label?: string
+          readiness_status?: string
+          setup_status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_operating_modules_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_operating_profiles: {
+        Row: {
+          agents_enabled: boolean
+          apollo_enabled: boolean
+          auto_send_allowed: boolean
+          business_id: string
+          business_name: string
+          business_type: string | null
+          created_at: string
+          crm_enabled: boolean
+          default_outbound_lane: string | null
+          default_provider_type: string | null
+          external_provider_mutation_allowed: boolean
+          finance_enabled: boolean
+          founder_approval_required: boolean
+          id: string
+          metadata: Json
+          native_email_enabled: boolean
+          operating_status: string
+          primary_channel: string | null
+          primary_goal: string | null
+          primary_offer: string | null
+          proposals_enabled: boolean
+          revenue_model: string | null
+          smartlead_enabled: boolean
+          suppliers_enabled: boolean
+          target_market: string | null
+          updated_at: string
+        }
+        Insert: {
+          agents_enabled?: boolean
+          apollo_enabled?: boolean
+          auto_send_allowed?: boolean
+          business_id: string
+          business_name: string
+          business_type?: string | null
+          created_at?: string
+          crm_enabled?: boolean
+          default_outbound_lane?: string | null
+          default_provider_type?: string | null
+          external_provider_mutation_allowed?: boolean
+          finance_enabled?: boolean
+          founder_approval_required?: boolean
+          id?: string
+          metadata?: Json
+          native_email_enabled?: boolean
+          operating_status?: string
+          primary_channel?: string | null
+          primary_goal?: string | null
+          primary_offer?: string | null
+          proposals_enabled?: boolean
+          revenue_model?: string | null
+          smartlead_enabled?: boolean
+          suppliers_enabled?: boolean
+          target_market?: string | null
+          updated_at?: string
+        }
+        Update: {
+          agents_enabled?: boolean
+          apollo_enabled?: boolean
+          auto_send_allowed?: boolean
+          business_id?: string
+          business_name?: string
+          business_type?: string | null
+          created_at?: string
+          crm_enabled?: boolean
+          default_outbound_lane?: string | null
+          default_provider_type?: string | null
+          external_provider_mutation_allowed?: boolean
+          finance_enabled?: boolean
+          founder_approval_required?: boolean
+          id?: string
+          metadata?: Json
+          native_email_enabled?: boolean
+          operating_status?: string
+          primary_channel?: string | null
+          primary_goal?: string | null
+          primary_offer?: string | null
+          proposals_enabled?: boolean
+          revenue_model?: string | null
+          smartlead_enabled?: boolean
+          suppliers_enabled?: boolean
+          target_market?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_operating_profiles_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: true
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
           },
         ]
       }
