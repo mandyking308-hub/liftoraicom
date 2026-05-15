@@ -9153,6 +9153,248 @@ export type Database = {
         }
         Relationships: []
       }
+      group_entity_register: {
+        Row: {
+          adviser_contact: string | null
+          beneficial_owner_notes: string | null
+          business_id: string | null
+          company_number: string | null
+          created_at: string | null
+          director_notes: string | null
+          entity_name: string
+          entity_status: string | null
+          entity_type: string | null
+          financial_year_end: string | null
+          id: string
+          incorporation_date: string | null
+          jurisdiction: string | null
+          licence_expiry_date: string | null
+          licence_number: string | null
+          metadata: Json | null
+          next_filing_due_at: string | null
+          next_review_due_at: string | null
+          registered_office: string | null
+          registration_number: string | null
+          responsible_adviser: string | null
+          risk_level: string | null
+          shareholder_notes: string | null
+          tax_residency_notes: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          adviser_contact?: string | null
+          beneficial_owner_notes?: string | null
+          business_id?: string | null
+          company_number?: string | null
+          created_at?: string | null
+          director_notes?: string | null
+          entity_name: string
+          entity_status?: string | null
+          entity_type?: string | null
+          financial_year_end?: string | null
+          id?: string
+          incorporation_date?: string | null
+          jurisdiction?: string | null
+          licence_expiry_date?: string | null
+          licence_number?: string | null
+          metadata?: Json | null
+          next_filing_due_at?: string | null
+          next_review_due_at?: string | null
+          registered_office?: string | null
+          registration_number?: string | null
+          responsible_adviser?: string | null
+          risk_level?: string | null
+          shareholder_notes?: string | null
+          tax_residency_notes?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          adviser_contact?: string | null
+          beneficial_owner_notes?: string | null
+          business_id?: string | null
+          company_number?: string | null
+          created_at?: string | null
+          director_notes?: string | null
+          entity_name?: string
+          entity_status?: string | null
+          entity_type?: string | null
+          financial_year_end?: string | null
+          id?: string
+          incorporation_date?: string | null
+          jurisdiction?: string | null
+          licence_expiry_date?: string | null
+          licence_number?: string | null
+          metadata?: Json | null
+          next_filing_due_at?: string | null
+          next_review_due_at?: string | null
+          registered_office?: string | null
+          registration_number?: string | null
+          responsible_adviser?: string | null
+          risk_level?: string | null
+          shareholder_notes?: string | null
+          tax_residency_notes?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_entity_register_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      group_governance_reviews: {
+        Row: {
+          adviser_actions: Json | null
+          approved_at: string | null
+          business_id: string | null
+          created_at: string | null
+          entity_id: string | null
+          founder_review_required: boolean | null
+          id: string
+          key_decisions: Json | null
+          key_risks: Json | null
+          metadata: Json | null
+          required_actions: Json | null
+          review_period_end: string | null
+          review_period_start: string | null
+          review_status: string | null
+          review_type: string
+          summary: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          adviser_actions?: Json | null
+          approved_at?: string | null
+          business_id?: string | null
+          created_at?: string | null
+          entity_id?: string | null
+          founder_review_required?: boolean | null
+          id?: string
+          key_decisions?: Json | null
+          key_risks?: Json | null
+          metadata?: Json | null
+          required_actions?: Json | null
+          review_period_end?: string | null
+          review_period_start?: string | null
+          review_status?: string | null
+          review_type: string
+          summary?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          adviser_actions?: Json | null
+          approved_at?: string | null
+          business_id?: string | null
+          created_at?: string | null
+          entity_id?: string | null
+          founder_review_required?: boolean | null
+          id?: string
+          key_decisions?: Json | null
+          key_risks?: Json | null
+          metadata?: Json | null
+          required_actions?: Json | null
+          review_period_end?: string | null
+          review_period_start?: string | null
+          review_status?: string | null
+          review_type?: string
+          summary?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_governance_reviews_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_governance_reviews_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "group_entity_register"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      group_obligation_calendar: {
+        Row: {
+          adviser_required: boolean | null
+          business_id: string | null
+          created_at: string | null
+          due_date: string | null
+          entity_id: string | null
+          evidence_document_id: string | null
+          founder_review_required: boolean | null
+          id: string
+          jurisdiction: string | null
+          metadata: Json | null
+          notes: string | null
+          obligation_name: string
+          obligation_type: string
+          recurrence_rule: string | null
+          responsible_party: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          adviser_required?: boolean | null
+          business_id?: string | null
+          created_at?: string | null
+          due_date?: string | null
+          entity_id?: string | null
+          evidence_document_id?: string | null
+          founder_review_required?: boolean | null
+          id?: string
+          jurisdiction?: string | null
+          metadata?: Json | null
+          notes?: string | null
+          obligation_name: string
+          obligation_type: string
+          recurrence_rule?: string | null
+          responsible_party?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          adviser_required?: boolean | null
+          business_id?: string | null
+          created_at?: string | null
+          due_date?: string | null
+          entity_id?: string | null
+          evidence_document_id?: string | null
+          founder_review_required?: boolean | null
+          id?: string
+          jurisdiction?: string | null
+          metadata?: Json | null
+          notes?: string | null
+          obligation_name?: string
+          obligation_type?: string
+          recurrence_rule?: string | null
+          responsible_party?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_obligation_calendar_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_obligation_calendar_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "group_entity_register"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       import_batches: {
         Row: {
           business_name: string
