@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import FounderLayout from "@/components/founder/FounderLayout";
+import CommercialHandoffPanel from "@/components/founder/commercial/CommercialHandoffPanel";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -159,6 +160,7 @@ const FinanceDeals = () => {
             )}
           </CardContent>
         </Card>
+        <CommercialHandoffPanel />
       </div>
     </FounderLayout>
   );

@@ -2466,6 +2466,81 @@ export type Database = {
         }
         Relationships: []
       }
+      commercial_handoff_reviews: {
+        Row: {
+          apply_status: string
+          approval_item_id: string | null
+          blockers: Json
+          business_id: string | null
+          contact_id: string | null
+          conversation_id: string | null
+          created_at: string
+          deal_allowed: boolean
+          demo_allowed: boolean
+          detected_need: string | null
+          estimated_value_max: number | null
+          estimated_value_min: number | null
+          founder_review_required: boolean
+          handoff_type: string
+          id: string
+          interaction_id: string | null
+          metadata: Json
+          proposal_allowed: boolean
+          proposed_next_step: string | null
+          proposed_offer: string | null
+          qualification_summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          apply_status?: string
+          approval_item_id?: string | null
+          blockers?: Json
+          business_id?: string | null
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          deal_allowed?: boolean
+          demo_allowed?: boolean
+          detected_need?: string | null
+          estimated_value_max?: number | null
+          estimated_value_min?: number | null
+          founder_review_required?: boolean
+          handoff_type: string
+          id?: string
+          interaction_id?: string | null
+          metadata?: Json
+          proposal_allowed?: boolean
+          proposed_next_step?: string | null
+          proposed_offer?: string | null
+          qualification_summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          apply_status?: string
+          approval_item_id?: string | null
+          blockers?: Json
+          business_id?: string | null
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          deal_allowed?: boolean
+          demo_allowed?: boolean
+          detected_need?: string | null
+          estimated_value_max?: number | null
+          estimated_value_min?: number | null
+          founder_review_required?: boolean
+          handoff_type?: string
+          id?: string
+          interaction_id?: string | null
+          metadata?: Json
+          proposal_allowed?: boolean
+          proposed_next_step?: string | null
+          proposed_offer?: string | null
+          qualification_summary?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       communications: {
         Row: {
           ai_generated: boolean

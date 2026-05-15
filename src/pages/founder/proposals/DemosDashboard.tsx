@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import FounderLayout from "@/components/founder/FounderLayout";
+import CommercialHandoffPanel from "@/components/founder/commercial/CommercialHandoffPanel";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -69,6 +70,7 @@ export default function DemosDashboard() {
             </div>
           ))}
         </Card>
+        <CommercialHandoffPanel />
       </div>
     </FounderLayout>
   );

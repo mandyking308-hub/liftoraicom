@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import FounderLayout from "@/components/founder/FounderLayout";
+import CommercialHandoffPanel from "@/components/founder/commercial/CommercialHandoffPanel";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -146,6 +147,7 @@ export default function InternalProposals() {
             </Link>
           ))}
         </Card>
+        <CommercialHandoffPanel />
       </div>
     </FounderLayout>
   );
