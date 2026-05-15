@@ -82,6 +82,7 @@ import SocialSchedulerExportPanel from "@/components/founder/social/SocialSchedu
 import SocialEngagementInboxPanel from "@/components/founder/social/SocialEngagementInboxPanel";
 import SocialAnalyticsTrendPanel from "@/components/founder/social/SocialAnalyticsTrendPanel";
 import MarketingContentFunnelPanel from "@/components/founder/marketing/MarketingContentFunnelPanel";
+import SupportKnowledgeAgentPanel from "@/components/founder/support/SupportKnowledgeAgentPanel";
 import { SecurityGovernancePanel } from "@/components/founder/security/SecurityGovernancePanel";
 import { ProductisationReadinessPanel } from "@/components/founder/revenue/ProductisationReadinessPanel";
 import BusinessLaunchFactoryPanel from "@/components/founder/expansion/BusinessLaunchFactoryPanel";
@@ -287,6 +288,31 @@ const CommandCentre = () => {
         approvalsPending: countBy(assets, (a) => a.approval_status === "pending_review") + countBy(briefs, (b) => b.approval_status === "pending_review"),
         publishLocked: countBy(assets, (a) => !a.publish_allowed),
         launchLocked: countBy(briefs, (b) => !b.launch_allowed),
+        businessesCovered: businessIds.size,
+      };
+    },
+  });
+  const { data: supportSummary } = useQuery({
+    queryKey: ["cc2-support-summary"],
+    refetchInterval: 60000,
+    queryFn: async () => {
+      const sb: any = supabase as any;
+      const [artR, revR] = await Promise.all([
+        sb.from("support_knowledge_articles").select("id,article_type,approved,agent_visible,business_id"),
+        sb.from("support_interaction_reviews").select("id,status,escalation_required,founder_review_required,send_allowed,business_id"),
+      ]);
+      const arts = (artR.data ?? []) as any[];
+      const revs = (revR.data ?? []) as any[];
+      const businessIds = new Set<string>();
+      arts.forEach((a) => a.business_id && businessIds.add(a.business_id));
+      revs.forEach((r) => r.business_id && businessIds.add(r.business_id));
+      return {
+        articles: arts.length,
+        approved: arts.filter((a) => a.approved).length,
+        faqs: arts.filter((a) => a.article_type === "FAQ").length,
+        openReviews: revs.filter((r) => r.status !== "resolved").length,
+        escalations: revs.filter((r) => r.escalation_required).length,
+        sendLocked: revs.filter((r) => !r.send_allowed).length,
         businessesCovered: businessIds.size,
       };
     },
