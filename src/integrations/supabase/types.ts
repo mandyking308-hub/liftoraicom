@@ -291,6 +291,120 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_handover_log: {
+        Row: {
+          business_id: string | null
+          contact_id: string | null
+          context_payload: Json
+          conversation_id: string | null
+          created_at: string
+          founder_review_required: boolean
+          from_agent_key: string
+          id: string
+          priority_level: string
+          rule_key: string | null
+          source_id: string | null
+          source_table: string | null
+          status: string
+          summary: string | null
+          task_id: string | null
+          to_agent_key: string
+          trigger_event: string
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          contact_id?: string | null
+          context_payload?: Json
+          conversation_id?: string | null
+          created_at?: string
+          founder_review_required?: boolean
+          from_agent_key: string
+          id?: string
+          priority_level?: string
+          rule_key?: string | null
+          source_id?: string | null
+          source_table?: string | null
+          status?: string
+          summary?: string | null
+          task_id?: string | null
+          to_agent_key: string
+          trigger_event: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          contact_id?: string | null
+          context_payload?: Json
+          conversation_id?: string | null
+          created_at?: string
+          founder_review_required?: boolean
+          from_agent_key?: string
+          id?: string
+          priority_level?: string
+          rule_key?: string | null
+          source_id?: string | null
+          source_table?: string | null
+          status?: string
+          summary?: string | null
+          task_id?: string | null
+          to_agent_key?: string
+          trigger_event?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      agent_handover_rules: {
+        Row: {
+          auto_create_task: boolean
+          created_at: string
+          enabled: boolean
+          founder_review_required: boolean
+          from_agent_key: string
+          handover_type: string
+          id: string
+          metadata: Json
+          priority_level: string
+          required_context: Json
+          rule_key: string
+          to_agent_key: string
+          trigger_event: string
+          updated_at: string
+        }
+        Insert: {
+          auto_create_task?: boolean
+          created_at?: string
+          enabled?: boolean
+          founder_review_required?: boolean
+          from_agent_key: string
+          handover_type: string
+          id?: string
+          metadata?: Json
+          priority_level?: string
+          required_context?: Json
+          rule_key: string
+          to_agent_key: string
+          trigger_event: string
+          updated_at?: string
+        }
+        Update: {
+          auto_create_task?: boolean
+          created_at?: string
+          enabled?: boolean
+          founder_review_required?: boolean
+          from_agent_key?: string
+          handover_type?: string
+          id?: string
+          metadata?: Json
+          priority_level?: string
+          required_context?: Json
+          rule_key?: string
+          to_agent_key?: string
+          trigger_event?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       agent_system_assignments: {
         Row: {
           agent_id: string
