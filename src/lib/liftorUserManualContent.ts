@@ -407,3 +407,34 @@ export const BUILD_LOG_HARDENING = {
     "Next phase: internal use from Command Centre — external go-live remains gated until per-channel founder approval.",
   ],
 };
+
+export const UNDERSTANDING_BUSINESS_VALUATION = {
+  title: "Understanding Business Valuation",
+  summary:
+    "Liftor calculates indicative internal valuation ranges for each business across pre-revenue, post-revenue, profit, recurring revenue, asset-based, strategic-buyer, exit-readiness and group-portfolio stages. All outputs are internal only and require adviser review.",
+  plain_english: [
+    "Pre-revenue valuation is based on potential and assets — IP, audience, automation, strategic value, cost to recreate.",
+    "Post-revenue valuation is based on actual sales — revenue, growth, recurring percentage and sector multiples.",
+    "Profit valuation is stronger because it shows money left over (EBITDA / SDE × multiple, reduced for owner dependency).",
+    "Recurring revenue improves valuation — ARR × multiple, adjusted for churn and gross margin.",
+    "Strategic buyer valuation adds a premium for synergies; exit-readiness scores transferability and clean records.",
+    "Group portfolio valuation aggregates all businesses with a group-risk discount and a shared-infrastructure premium.",
+    "Valuation is only indicative until reviewed by qualified advisers, accountants or buyers.",
+    "Liftor improves valuation by improving revenue, profit, retention, records, systems, automation and proof.",
+  ],
+  safety: [
+    "Indicative internal estimate only. Not financial advice.",
+    "Adviser review required before relying on valuation for investment, sale, tax, lending or legal decisions.",
+    "No external disclosure. No publish. No automatic share with investors, buyers or advisers.",
+  ],
+  technical: {
+    tables: ["business_valuation_snapshots", "business_valuation_assumptions"],
+    functions: ["business-valuation-preview", "business-valuation-acceptance"],
+    panel: "BusinessValuationIntelligencePanel (Command Centre · Daily Operator View)",
+    safety_limits: [
+      "founder role required to invoke preview function",
+      "adviser_review_required defaults to true on every snapshot",
+      "no external transmission of valuation numbers",
+    ],
+  },
+};
