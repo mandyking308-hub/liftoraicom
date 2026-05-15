@@ -9835,6 +9835,48 @@ export type Database = {
           },
         ]
       }
+      founder_alert_rules: {
+        Row: {
+          alert_category: string
+          created_at: string
+          delivery_channel: string
+          enabled: boolean
+          external_delivery_allowed: boolean
+          id: string
+          metadata: Json
+          rule_key: string
+          rule_name: string
+          severity: string
+          updated_at: string
+        }
+        Insert: {
+          alert_category: string
+          created_at?: string
+          delivery_channel?: string
+          enabled?: boolean
+          external_delivery_allowed?: boolean
+          id?: string
+          metadata?: Json
+          rule_key: string
+          rule_name: string
+          severity?: string
+          updated_at?: string
+        }
+        Update: {
+          alert_category?: string
+          created_at?: string
+          delivery_channel?: string
+          enabled?: boolean
+          external_delivery_allowed?: boolean
+          id?: string
+          metadata?: Json
+          rule_key?: string
+          rule_name?: string
+          severity?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       founder_approval_items: {
         Row: {
           agent_key: string | null
@@ -10076,6 +10118,68 @@ export type Database = {
             columns: ["created_by_run"]
             isOneToOne: false
             referencedRelation: "autopilot_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      founder_notification_queue: {
+        Row: {
+          alert_rule_id: string | null
+          alert_summary: string | null
+          alert_title: string
+          business_id: string | null
+          created_at: string
+          delivery_channel: string
+          external_delivery_status: string
+          founder_action_required: boolean
+          id: string
+          read_at: string | null
+          resolved_at: string | null
+          severity: string
+          source_id: string | null
+          source_table: string | null
+          status: string
+        }
+        Insert: {
+          alert_rule_id?: string | null
+          alert_summary?: string | null
+          alert_title: string
+          business_id?: string | null
+          created_at?: string
+          delivery_channel?: string
+          external_delivery_status?: string
+          founder_action_required?: boolean
+          id?: string
+          read_at?: string | null
+          resolved_at?: string | null
+          severity?: string
+          source_id?: string | null
+          source_table?: string | null
+          status?: string
+        }
+        Update: {
+          alert_rule_id?: string | null
+          alert_summary?: string | null
+          alert_title?: string
+          business_id?: string | null
+          created_at?: string
+          delivery_channel?: string
+          external_delivery_status?: string
+          founder_action_required?: boolean
+          id?: string
+          read_at?: string | null
+          resolved_at?: string | null
+          severity?: string
+          source_id?: string | null
+          source_table?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "founder_notification_queue_alert_rule_id_fkey"
+            columns: ["alert_rule_id"]
+            isOneToOne: false
+            referencedRelation: "founder_alert_rules"
             referencedColumns: ["id"]
           },
         ]
