@@ -2372,6 +2372,139 @@ export type Database = {
           },
         ]
       }
+      business_knowledge_assets: {
+        Row: {
+          agent_visible: boolean
+          asset_content: string | null
+          asset_title: string
+          asset_type: string
+          business_id: string
+          created_at: string
+          id: string
+          metadata: Json
+          source_file_id: string | null
+          source_url: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          agent_visible?: boolean
+          asset_content?: string | null
+          asset_title: string
+          asset_type: string
+          business_id: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          source_file_id?: string | null
+          source_url?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          agent_visible?: boolean
+          asset_content?: string | null
+          asset_title?: string
+          asset_type?: string
+          business_id?: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          source_file_id?: string | null
+          source_url?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_knowledge_assets_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_knowledge_profiles: {
+        Row: {
+          approved_tone: string | null
+          business_id: string
+          business_summary: string | null
+          common_objections: Json
+          compliance_notes: string | null
+          created_at: string
+          escalation_rules: Json
+          forbidden_claims: Json
+          id: string
+          ideal_customer_profile: string | null
+          metadata: Json
+          offer_summary: string | null
+          outreach_rules: Json
+          pain_points: Json
+          profile_status: string
+          proof_points: Json
+          proposal_rules: Json
+          required_disclaimers: Json
+          target_customer: string | null
+          updated_at: string
+          value_propositions: Json
+        }
+        Insert: {
+          approved_tone?: string | null
+          business_id: string
+          business_summary?: string | null
+          common_objections?: Json
+          compliance_notes?: string | null
+          created_at?: string
+          escalation_rules?: Json
+          forbidden_claims?: Json
+          id?: string
+          ideal_customer_profile?: string | null
+          metadata?: Json
+          offer_summary?: string | null
+          outreach_rules?: Json
+          pain_points?: Json
+          profile_status?: string
+          proof_points?: Json
+          proposal_rules?: Json
+          required_disclaimers?: Json
+          target_customer?: string | null
+          updated_at?: string
+          value_propositions?: Json
+        }
+        Update: {
+          approved_tone?: string | null
+          business_id?: string
+          business_summary?: string | null
+          common_objections?: Json
+          compliance_notes?: string | null
+          created_at?: string
+          escalation_rules?: Json
+          forbidden_claims?: Json
+          id?: string
+          ideal_customer_profile?: string | null
+          metadata?: Json
+          offer_summary?: string | null
+          outreach_rules?: Json
+          pain_points?: Json
+          profile_status?: string
+          proof_points?: Json
+          proposal_rules?: Json
+          required_disclaimers?: Json
+          target_customer?: string | null
+          updated_at?: string
+          value_propositions?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_knowledge_profiles_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: true
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_launch_plans: {
         Row: {
           approved_at: string | null

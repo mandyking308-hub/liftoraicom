@@ -222,6 +222,12 @@ Deno.serve(async (req) => {
     const createdIds: string[] = [];
 
     for (const c of candidates.slice(0, maxItems)) {
+      // Pull business knowledge brain (no external calls)
+      let businessKnowledge: any = null;
+      if (c.business_id) {
+        const { data: kp } = await admin.from("business_knowledge_profiles").select("approved_tone,offer_summary,target_customer,forbidden_claims,required_disclaimers,proposal_rules,outreach_rules").eq("business_id", c.business_id).maybeSingle();
+        if (kp) businessKnowledge = kp;
+      }
       const { data: chr, error: chrErr } = await admin.from("commercial_handoff_reviews").insert({
         business_id: c.business_id,
         contact_id: c.contact_id,
@@ -239,7 +245,7 @@ Deno.serve(async (req) => {
         founder_review_required: true,
         apply_status: "pending_founder_review",
         blockers: c.blockers,
-        metadata: { source: SOURCE_FUNCTION, source_table: c.source, source_id: c.source_id },
+        metadata: { source: SOURCE_FUNCTION, source_table: c.source, source_id: c.source_id, business_knowledge: businessKnowledge },
       }).select("id").maybeSingle();
       if (chrErr) {
         await logAudit(admin, userId, "error", chrErr.message, false, phrase, null, { source: c.source, source_id: c.source_id });
@@ -268,7 +274,7 @@ Deno.serve(async (req) => {
         execution_enabled: false,
         auto_execute_allowed: false,
         send_allowed: false,
-        metadata: { handoff_review_id: chr!.id, source_function: SOURCE_FUNCTION },
+        metadata: { handoff_review_id: chr!.id, source_function: SOURCE_FUNCTION, business_knowledge: businessKnowledge },
       }).select("id").maybeSingle();
       if (fai) {
         approvalsCreated++;
