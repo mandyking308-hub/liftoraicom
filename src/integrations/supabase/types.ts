@@ -2372,6 +2372,141 @@ export type Database = {
           },
         ]
       }
+      business_launch_plans: {
+        Row: {
+          approved_at: string | null
+          blockers: Json
+          business_id: string | null
+          created_at: string
+          founder_approval_required: boolean
+          founder_brief: string | null
+          id: string
+          launch_name: string
+          launch_status: string
+          metadata: Json
+          readiness_score: number | null
+          required_integrations: Json
+          selected_agents: Json
+          selected_modules: Json
+          setup_steps: Json
+          template_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          blockers?: Json
+          business_id?: string | null
+          created_at?: string
+          founder_approval_required?: boolean
+          founder_brief?: string | null
+          id?: string
+          launch_name: string
+          launch_status?: string
+          metadata?: Json
+          readiness_score?: number | null
+          required_integrations?: Json
+          selected_agents?: Json
+          selected_modules?: Json
+          setup_steps?: Json
+          template_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          blockers?: Json
+          business_id?: string | null
+          created_at?: string
+          founder_approval_required?: boolean
+          founder_brief?: string | null
+          id?: string
+          launch_name?: string
+          launch_status?: string
+          metadata?: Json
+          readiness_score?: number | null
+          required_integrations?: Json
+          selected_agents?: Json
+          selected_modules?: Json
+          setup_steps?: Json
+          template_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_launch_plans_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_launch_plans_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "business_launch_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_launch_templates: {
+        Row: {
+          active: boolean
+          business_category: string | null
+          created_at: string
+          default_agents: Json
+          default_campaign_structure: Json
+          default_compliance_profile: Json
+          default_crm_profile: Json
+          default_finance_structure: Json
+          default_modules: Json
+          default_proposal_structure: Json
+          default_provider_lanes: Json
+          description: string | null
+          id: string
+          metadata: Json
+          template_key: string
+          template_name: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          business_category?: string | null
+          created_at?: string
+          default_agents?: Json
+          default_campaign_structure?: Json
+          default_compliance_profile?: Json
+          default_crm_profile?: Json
+          default_finance_structure?: Json
+          default_modules?: Json
+          default_proposal_structure?: Json
+          default_provider_lanes?: Json
+          description?: string | null
+          id?: string
+          metadata?: Json
+          template_key: string
+          template_name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          business_category?: string | null
+          created_at?: string
+          default_agents?: Json
+          default_campaign_structure?: Json
+          default_compliance_profile?: Json
+          default_crm_profile?: Json
+          default_finance_structure?: Json
+          default_modules?: Json
+          default_proposal_structure?: Json
+          default_provider_lanes?: Json
+          description?: string | null
+          id?: string
+          metadata?: Json
+          template_key?: string
+          template_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       business_operating_modules: {
         Row: {
           blockers: Json
