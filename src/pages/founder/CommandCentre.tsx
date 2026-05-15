@@ -770,6 +770,7 @@ const CommandCentre = () => {
       <div className="max-w-7xl mx-auto px-4 pt-4"><BusinessKnowledgeUploadTrainingPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><LiftorUserManualPanel /></div>
       <DailyOperatorNextActionsCard />
+      <CommandCentreFunctionalityMapCard />
       <DiagnosticGate>
       {(() => {
         const activeBusinessName = activeInboxes[0]?.business_name ?? businesses[0]?.name ?? "Neon Candy";
