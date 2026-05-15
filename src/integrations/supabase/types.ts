@@ -4801,6 +4801,71 @@ export type Database = {
           },
         ]
       }
+      business_revenue_targets: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          currency: string
+          founder_review_required: boolean
+          id: string
+          notes: string | null
+          owner_agent_key: string
+          period_end: string
+          period_start: string
+          status: string
+          target_amount: number
+          target_count: number | null
+          target_name: string
+          target_type: string
+          target_unit: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          currency?: string
+          founder_review_required?: boolean
+          id?: string
+          notes?: string | null
+          owner_agent_key?: string
+          period_end: string
+          period_start: string
+          status?: string
+          target_amount?: number
+          target_count?: number | null
+          target_name: string
+          target_type: string
+          target_unit?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          currency?: string
+          founder_review_required?: boolean
+          id?: string
+          notes?: string | null
+          owner_agent_key?: string
+          period_end?: string
+          period_start?: string
+          status?: string
+          target_amount?: number
+          target_count?: number | null
+          target_name?: string
+          target_type?: string
+          target_unit?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_revenue_targets_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_risk_scores: {
         Row: {
           business_name: string
@@ -17870,6 +17935,81 @@ export type Database = {
         }
         Relationships: []
       }
+      revenue_goal_progress_snapshots: {
+        Row: {
+          actual_amount: number
+          actual_count: number
+          business_id: string | null
+          created_at: string
+          days_elapsed: number | null
+          days_remaining: number | null
+          details: Json
+          forecast_amount: number | null
+          id: string
+          pace_status: string | null
+          percentage_complete: number | null
+          recommended_adjustment: string | null
+          revenue_target_id: string | null
+          shortfall_amount: number | null
+          snapshot_date: string
+          target_amount: number | null
+          target_count: number | null
+        }
+        Insert: {
+          actual_amount?: number
+          actual_count?: number
+          business_id?: string | null
+          created_at?: string
+          days_elapsed?: number | null
+          days_remaining?: number | null
+          details?: Json
+          forecast_amount?: number | null
+          id?: string
+          pace_status?: string | null
+          percentage_complete?: number | null
+          recommended_adjustment?: string | null
+          revenue_target_id?: string | null
+          shortfall_amount?: number | null
+          snapshot_date?: string
+          target_amount?: number | null
+          target_count?: number | null
+        }
+        Update: {
+          actual_amount?: number
+          actual_count?: number
+          business_id?: string | null
+          created_at?: string
+          days_elapsed?: number | null
+          days_remaining?: number | null
+          details?: Json
+          forecast_amount?: number | null
+          id?: string
+          pace_status?: string | null
+          percentage_complete?: number | null
+          recommended_adjustment?: string | null
+          revenue_target_id?: string | null
+          shortfall_amount?: number | null
+          snapshot_date?: string
+          target_amount?: number | null
+          target_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "revenue_goal_progress_snapshots_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "revenue_goal_progress_snapshots_revenue_target_id_fkey"
+            columns: ["revenue_target_id"]
+            isOneToOne: false
+            referencedRelation: "business_revenue_targets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       revenue_operations_reviews: {
         Row: {
           apply_status: string
@@ -17983,6 +18123,90 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      revenue_target_activity_plans: {
+        Row: {
+          assumed_conversion_rate: number | null
+          assumptions: Json
+          business_id: string | null
+          created_at: string
+          id: string
+          plan_status: string
+          recommended_agent_actions: Json
+          recommended_founder_actions: Json
+          required_customers: number | null
+          required_demos: number | null
+          required_followups: number | null
+          required_outreach_actions: number | null
+          required_proposals: number | null
+          required_prospects: number | null
+          required_social_actions: number | null
+          required_upsells: number | null
+          revenue_target_id: string | null
+          risk_flags: Json
+          target_gap: number | null
+          updated_at: string
+        }
+        Insert: {
+          assumed_conversion_rate?: number | null
+          assumptions?: Json
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          plan_status?: string
+          recommended_agent_actions?: Json
+          recommended_founder_actions?: Json
+          required_customers?: number | null
+          required_demos?: number | null
+          required_followups?: number | null
+          required_outreach_actions?: number | null
+          required_proposals?: number | null
+          required_prospects?: number | null
+          required_social_actions?: number | null
+          required_upsells?: number | null
+          revenue_target_id?: string | null
+          risk_flags?: Json
+          target_gap?: number | null
+          updated_at?: string
+        }
+        Update: {
+          assumed_conversion_rate?: number | null
+          assumptions?: Json
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          plan_status?: string
+          recommended_agent_actions?: Json
+          recommended_founder_actions?: Json
+          required_customers?: number | null
+          required_demos?: number | null
+          required_followups?: number | null
+          required_outreach_actions?: number | null
+          required_proposals?: number | null
+          required_prospects?: number | null
+          required_social_actions?: number | null
+          required_upsells?: number | null
+          revenue_target_id?: string | null
+          risk_flags?: Json
+          target_gap?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "revenue_target_activity_plans_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "revenue_target_activity_plans_revenue_target_id_fkey"
+            columns: ["revenue_target_id"]
+            isOneToOne: false
+            referencedRelation: "business_revenue_targets"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       revenue_targets: {
         Row: {
