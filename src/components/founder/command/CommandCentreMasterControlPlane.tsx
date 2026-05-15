@@ -149,6 +149,8 @@ export default function CommandCentreMasterControlPlane() {
             {safeAction("Run self-healing scan", "g4", () => runFn("self-healing-scan", {}), busy === "self-healing-scan")}
             {safeAction("Run portfolio intelligence", "g5", () => runFn("portfolio-intelligence-run", {}), busy === "portfolio-intelligence-run")}
             {safeAction("Refresh master status", "g6", () => runFn("command-centre-master-status", {}), busy === "command-centre-master-status")}
+            {safeAction("Run handover orchestrator (dry-run)", "g7", () => runFn("agent-handover-orchestrator", { dry_run: true, max_items: 25 }), busy === "agent-handover-orchestrator")}
+            {safeAction("Run collaboration health check", "g8", () => runFn("agent-collaboration-health", { create_finding: false }), busy === "agent-collaboration-health")}
           </div>
         </div>
 
