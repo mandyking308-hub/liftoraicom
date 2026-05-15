@@ -5566,6 +5566,57 @@ export type Database = {
           },
         ]
       }
+      external_action_gates: {
+        Row: {
+          action_type: string
+          confirmation_phrase: string
+          created_at: string
+          enabled: boolean
+          gate_key: string
+          gate_label: string
+          id: string
+          last_used_at: string | null
+          max_batch_size: number
+          metadata: Json
+          provider_type: string | null
+          requires_founder_confirmation: boolean
+          risk_level: string
+          updated_at: string
+        }
+        Insert: {
+          action_type: string
+          confirmation_phrase: string
+          created_at?: string
+          enabled?: boolean
+          gate_key: string
+          gate_label: string
+          id?: string
+          last_used_at?: string | null
+          max_batch_size?: number
+          metadata?: Json
+          provider_type?: string | null
+          requires_founder_confirmation?: boolean
+          risk_level?: string
+          updated_at?: string
+        }
+        Update: {
+          action_type?: string
+          confirmation_phrase?: string
+          created_at?: string
+          enabled?: boolean
+          gate_key?: string
+          gate_label?: string
+          id?: string
+          last_used_at?: string | null
+          max_batch_size?: number
+          metadata?: Json
+          provider_type?: string | null
+          requires_founder_confirmation?: boolean
+          risk_level?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       feature_requests: {
         Row: {
           business_impact: string | null
