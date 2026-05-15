@@ -2695,6 +2695,69 @@ export type Database = {
         }
         Relationships: []
       }
+      baseline_change_log: {
+        Row: {
+          after_snapshot: Json
+          baseline_id: string | null
+          before_snapshot: Json
+          business_id: string | null
+          change_risk: string
+          change_summary: string | null
+          change_type: string
+          changed_by: string | null
+          created_at: string
+          id: string
+          rollback_possible: boolean
+          source_id: string | null
+          source_table: string | null
+        }
+        Insert: {
+          after_snapshot?: Json
+          baseline_id?: string | null
+          before_snapshot?: Json
+          business_id?: string | null
+          change_risk?: string
+          change_summary?: string | null
+          change_type: string
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          rollback_possible?: boolean
+          source_id?: string | null
+          source_table?: string | null
+        }
+        Update: {
+          after_snapshot?: Json
+          baseline_id?: string | null
+          before_snapshot?: Json
+          business_id?: string | null
+          change_risk?: string
+          change_summary?: string | null
+          change_type?: string
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          rollback_possible?: boolean
+          source_id?: string | null
+          source_table?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "baseline_change_log_baseline_id_fkey"
+            columns: ["baseline_id"]
+            isOneToOne: false
+            referencedRelation: "business_pre_live_baselines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "baseline_change_log_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       brain_insights: {
         Row: {
           created_at: string
@@ -4383,6 +4446,196 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      business_operating_standards: {
+        Row: {
+          approved_at: string | null
+          bedding_in_checkin_days: number | null
+          business_id: string | null
+          complaint_acknowledgement_hours: number | null
+          complaint_resolution_target_days: number | null
+          created_at: string
+          escalation_rules: Json
+          founder_review_required: boolean
+          high_priority_response_time_hours: number | null
+          id: string
+          metadata: Json
+          onboarding_first_checkin_days: number | null
+          owner_agent_rules: Json
+          quarterly_report_cadence: string
+          renewal_checkin_days_before: number | null
+          standard_response_time_hours: number | null
+          standards_status: string
+          support_response_time_hours: number | null
+          updated_at: string
+          winback_after_inactive_days: number | null
+        }
+        Insert: {
+          approved_at?: string | null
+          bedding_in_checkin_days?: number | null
+          business_id?: string | null
+          complaint_acknowledgement_hours?: number | null
+          complaint_resolution_target_days?: number | null
+          created_at?: string
+          escalation_rules?: Json
+          founder_review_required?: boolean
+          high_priority_response_time_hours?: number | null
+          id?: string
+          metadata?: Json
+          onboarding_first_checkin_days?: number | null
+          owner_agent_rules?: Json
+          quarterly_report_cadence?: string
+          renewal_checkin_days_before?: number | null
+          standard_response_time_hours?: number | null
+          standards_status?: string
+          support_response_time_hours?: number | null
+          updated_at?: string
+          winback_after_inactive_days?: number | null
+        }
+        Update: {
+          approved_at?: string | null
+          bedding_in_checkin_days?: number | null
+          business_id?: string | null
+          complaint_acknowledgement_hours?: number | null
+          complaint_resolution_target_days?: number | null
+          created_at?: string
+          escalation_rules?: Json
+          founder_review_required?: boolean
+          high_priority_response_time_hours?: number | null
+          id?: string
+          metadata?: Json
+          onboarding_first_checkin_days?: number | null
+          owner_agent_rules?: Json
+          quarterly_report_cadence?: string
+          renewal_checkin_days_before?: number | null
+          standard_response_time_hours?: number | null
+          standards_status?: string
+          support_response_time_hours?: number | null
+          updated_at?: string
+          winback_after_inactive_days?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_operating_standards_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_pre_live_baselines: {
+        Row: {
+          agents_checked: boolean
+          approved_at: string | null
+          approved_by_founder: boolean
+          baseline_name: string
+          baseline_status: string
+          baseline_summary: string | null
+          blockers: Json
+          business_id: string | null
+          business_training_ready: boolean
+          clean_real_mode_confirmed: boolean
+          command_centre_ready: boolean
+          created_at: string
+          crm_memory_checked: boolean
+          customer_journey_checked: boolean
+          data_import_checked: boolean
+          external_gates_locked: boolean
+          human_layer_checked: boolean
+          id: string
+          integrations_checked: boolean
+          metadata: Json
+          operating_mode: string | null
+          readiness_score: number | null
+          rehearsal_reset_completed: boolean
+          revenue_flow_checked: boolean
+          risk_security_checked: boolean
+          social_marketing_checked: boolean
+          starter_pack_ready: boolean
+          support_recovery_checked: boolean
+          technical_manual_ready: boolean
+          templates_approved: boolean
+          updated_at: string
+          user_manual_ready: boolean
+        }
+        Insert: {
+          agents_checked?: boolean
+          approved_at?: string | null
+          approved_by_founder?: boolean
+          baseline_name: string
+          baseline_status?: string
+          baseline_summary?: string | null
+          blockers?: Json
+          business_id?: string | null
+          business_training_ready?: boolean
+          clean_real_mode_confirmed?: boolean
+          command_centre_ready?: boolean
+          created_at?: string
+          crm_memory_checked?: boolean
+          customer_journey_checked?: boolean
+          data_import_checked?: boolean
+          external_gates_locked?: boolean
+          human_layer_checked?: boolean
+          id?: string
+          integrations_checked?: boolean
+          metadata?: Json
+          operating_mode?: string | null
+          readiness_score?: number | null
+          rehearsal_reset_completed?: boolean
+          revenue_flow_checked?: boolean
+          risk_security_checked?: boolean
+          social_marketing_checked?: boolean
+          starter_pack_ready?: boolean
+          support_recovery_checked?: boolean
+          technical_manual_ready?: boolean
+          templates_approved?: boolean
+          updated_at?: string
+          user_manual_ready?: boolean
+        }
+        Update: {
+          agents_checked?: boolean
+          approved_at?: string | null
+          approved_by_founder?: boolean
+          baseline_name?: string
+          baseline_status?: string
+          baseline_summary?: string | null
+          blockers?: Json
+          business_id?: string | null
+          business_training_ready?: boolean
+          clean_real_mode_confirmed?: boolean
+          command_centre_ready?: boolean
+          created_at?: string
+          crm_memory_checked?: boolean
+          customer_journey_checked?: boolean
+          data_import_checked?: boolean
+          external_gates_locked?: boolean
+          human_layer_checked?: boolean
+          id?: string
+          integrations_checked?: boolean
+          metadata?: Json
+          operating_mode?: string | null
+          readiness_score?: number | null
+          rehearsal_reset_completed?: boolean
+          revenue_flow_checked?: boolean
+          risk_security_checked?: boolean
+          social_marketing_checked?: boolean
+          starter_pack_ready?: boolean
+          support_recovery_checked?: boolean
+          technical_manual_ready?: boolean
+          templates_approved?: boolean
+          updated_at?: string
+          user_manual_ready?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_pre_live_baselines_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       business_rehearsal_runs: {
         Row: {
