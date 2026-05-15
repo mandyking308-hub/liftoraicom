@@ -979,6 +979,7 @@ const CommandCentre = () => {
             <BusinessOperatingRunbookPanel />
             <LiftorMasterDryRunPanel />
             <LiftorMasterReconciliationPanel />
+            <FullManualFunctionControlPanel />
             <SmartleadControlledActivationPanel />
             <LiftorBusinessLiveRunPanel />
             <InternalOperatingSchedulesPanel />
