@@ -3796,6 +3796,79 @@ export type Database = {
           },
         ]
       }
+      contact_timezone_profiles: {
+        Row: {
+          best_contact_windows: Json
+          business_id: string | null
+          confidence: number
+          contact_id: string | null
+          created_at: string
+          detected_country: string | null
+          detected_region: string | null
+          detected_timezone: string | null
+          detection_source: string | null
+          id: string
+          last_resolved_at: string | null
+          local_business_hours: Json
+          metadata: Json
+          updated_at: string
+        }
+        Insert: {
+          best_contact_windows?: Json
+          business_id?: string | null
+          confidence?: number
+          contact_id?: string | null
+          created_at?: string
+          detected_country?: string | null
+          detected_region?: string | null
+          detected_timezone?: string | null
+          detection_source?: string | null
+          id?: string
+          last_resolved_at?: string | null
+          local_business_hours?: Json
+          metadata?: Json
+          updated_at?: string
+        }
+        Update: {
+          best_contact_windows?: Json
+          business_id?: string | null
+          confidence?: number
+          contact_id?: string | null
+          created_at?: string
+          detected_country?: string | null
+          detected_region?: string | null
+          detected_timezone?: string | null
+          detection_source?: string | null
+          id?: string
+          last_resolved_at?: string | null
+          local_business_hours?: Json
+          metadata?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_timezone_profiles_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_timezone_profiles_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_timezone_profiles_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+        ]
+      }
       contacts: {
         Row: {
           active_campaign_id: string | null
@@ -6069,6 +6142,45 @@ export type Database = {
         }
         Relationships: []
       }
+      founder_brief_windows: {
+        Row: {
+          brief_key: string
+          brief_label: string
+          created_at: string
+          enabled: boolean
+          id: string
+          metadata: Json
+          scheduled_time: string
+          scope: string
+          timezone: string
+          updated_at: string
+        }
+        Insert: {
+          brief_key: string
+          brief_label: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          metadata?: Json
+          scheduled_time: string
+          scope?: string
+          timezone: string
+          updated_at?: string
+        }
+        Update: {
+          brief_key?: string
+          brief_label?: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          metadata?: Json
+          scheduled_time?: string
+          scope?: string
+          timezone?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       founder_decisions: {
         Row: {
           business_id: string | null
@@ -6133,6 +6245,66 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      global_market_profiles: {
+        Row: {
+          business_days: Json
+          business_end_time: string
+          business_start_time: string
+          compliance_notes: string | null
+          country_code: string | null
+          created_at: string
+          default_timezone: string
+          id: string
+          language_defaults: Json
+          market_key: string
+          market_name: string
+          metadata: Json
+          observes_public_holidays: boolean
+          quiet_hours_end: string
+          quiet_hours_start: string
+          region: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_days?: Json
+          business_end_time?: string
+          business_start_time?: string
+          compliance_notes?: string | null
+          country_code?: string | null
+          created_at?: string
+          default_timezone: string
+          id?: string
+          language_defaults?: Json
+          market_key: string
+          market_name: string
+          metadata?: Json
+          observes_public_holidays?: boolean
+          quiet_hours_end?: string
+          quiet_hours_start?: string
+          region?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_days?: Json
+          business_end_time?: string
+          business_start_time?: string
+          compliance_notes?: string | null
+          country_code?: string | null
+          created_at?: string
+          default_timezone?: string
+          id?: string
+          language_defaults?: Json
+          market_key?: string
+          market_name?: string
+          metadata?: Json
+          observes_public_holidays?: boolean
+          quiet_hours_end?: string
+          quiet_hours_start?: string
+          region?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       import_batches: {
         Row: {
