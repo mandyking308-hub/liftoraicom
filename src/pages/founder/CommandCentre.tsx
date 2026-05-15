@@ -749,6 +749,7 @@ const CommandCentre = () => {
               </CollapsibleCard>
               <AIAgentOperatingModelPanel />
               <AIAgentOrchestratorPanel />
+              <AgentBusinessLivePanel />
               <AIConversationDraftingPanel />
               <FounderApprovalConsole />
             </Section>
