@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import FounderLayout from "@/components/founder/FounderLayout";
 import CommercialHandoffPanel from "@/components/founder/commercial/CommercialHandoffPanel";
+import { ProductisationReadinessPanel } from "@/components/founder/revenue/ProductisationReadinessPanel";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,8 @@ export default function DemosDashboard() {
           <h1 className="text-2xl font-bold flex items-center gap-2"><Monitor size={24} /> Demo Access</h1>
           <p className="text-sm text-muted-foreground mt-1">Sandbox demo passes. No real client data is exposed.</p>
         </div>
+
+        <ProductisationReadinessPanel />
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Stat icon={<Monitor size={18} />} label="Active Demos" value={active.length} />
