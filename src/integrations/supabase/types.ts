@@ -7960,6 +7960,81 @@ export type Database = {
           },
         ]
       }
+      multilingual_interaction_reviews: {
+        Row: {
+          approval_status: string
+          business_id: string | null
+          contact_id: string | null
+          conversation_id: string | null
+          created_at: string
+          cultural_tone_notes: string | null
+          detected_language_confidence: number | null
+          draft_response_english_back_translation: string | null
+          draft_response_original_language: string | null
+          founder_review_required: boolean
+          founder_summary_english: string | null
+          id: string
+          intent_detected: string | null
+          interaction_id: string | null
+          metadata: Json
+          original_text: string | null
+          recommended_response_language: string | null
+          risk_flags: Json
+          send_allowed: boolean
+          source_language: string | null
+          translated_text_english: string | null
+          updated_at: string
+        }
+        Insert: {
+          approval_status?: string
+          business_id?: string | null
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          cultural_tone_notes?: string | null
+          detected_language_confidence?: number | null
+          draft_response_english_back_translation?: string | null
+          draft_response_original_language?: string | null
+          founder_review_required?: boolean
+          founder_summary_english?: string | null
+          id?: string
+          intent_detected?: string | null
+          interaction_id?: string | null
+          metadata?: Json
+          original_text?: string | null
+          recommended_response_language?: string | null
+          risk_flags?: Json
+          send_allowed?: boolean
+          source_language?: string | null
+          translated_text_english?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approval_status?: string
+          business_id?: string | null
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          cultural_tone_notes?: string | null
+          detected_language_confidence?: number | null
+          draft_response_english_back_translation?: string | null
+          draft_response_original_language?: string | null
+          founder_review_required?: boolean
+          founder_summary_english?: string | null
+          id?: string
+          intent_detected?: string | null
+          interaction_id?: string | null
+          metadata?: Json
+          original_text?: string | null
+          recommended_response_language?: string | null
+          risk_flags?: Json
+          send_allowed?: boolean
+          source_language?: string | null
+          translated_text_english?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       optimisation_insights: {
         Row: {
           created_at: string
@@ -10613,6 +10688,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      supported_languages: {
+        Row: {
+          auto_draft_allowed: boolean
+          auto_send_allowed: boolean
+          created_at: string
+          enabled: boolean
+          founder_review_required: boolean
+          id: string
+          language_code: string
+          language_name: string
+          metadata: Json
+          native_name: string | null
+          risk_notes: string | null
+          rtl: boolean
+          script: string | null
+          updated_at: string
+        }
+        Insert: {
+          auto_draft_allowed?: boolean
+          auto_send_allowed?: boolean
+          created_at?: string
+          enabled?: boolean
+          founder_review_required?: boolean
+          id?: string
+          language_code: string
+          language_name: string
+          metadata?: Json
+          native_name?: string | null
+          risk_notes?: string | null
+          rtl?: boolean
+          script?: string | null
+          updated_at?: string
+        }
+        Update: {
+          auto_draft_allowed?: boolean
+          auto_send_allowed?: boolean
+          created_at?: string
+          enabled?: boolean
+          founder_review_required?: boolean
+          id?: string
+          language_code?: string
+          language_name?: string
+          metadata?: Json
+          native_name?: string | null
+          risk_notes?: string | null
+          rtl?: boolean
+          script?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       system_alerts: {
         Row: {

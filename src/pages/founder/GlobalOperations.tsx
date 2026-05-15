@@ -20,6 +20,7 @@ import ControlledExternalActionGatesPanel from "@/components/founder/operations/
 import BusinessOperatingRunbookPanel from "@/components/founder/operations/BusinessOperatingRunbookPanel";
 import GlobalAutonomyControlPanel from "@/components/founder/autonomy/GlobalAutonomyControlPanel";
 import GlobalOperatingClockPanel from "@/components/founder/global/GlobalOperatingClockPanel";
+import MultilingualIntelligencePanel from "@/components/founder/global/MultilingualIntelligencePanel";
 import SmartleadControlledActivationPanel from "@/components/founder/integrations/SmartleadControlledActivationPanel";
 import BusinessLaunchFactoryPanel from "@/components/founder/expansion/BusinessLaunchFactoryPanel";
 
@@ -150,6 +151,7 @@ const GlobalOperations = () => {
         <BusinessOperatingRunbookPanel />
         <GlobalAutonomyControlPanel />
         <GlobalOperatingClockPanel />
+        <MultilingualIntelligencePanel />
         <BusinessKnowledgeBrainPanel />
         <PortfolioCommandCentrePanel />
         <InternalOperatingSchedulesPanel />

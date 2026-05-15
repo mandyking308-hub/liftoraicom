@@ -63,6 +63,7 @@ import InternalOperatingSchedulesPanel from "@/components/founder/operations/Int
 import BusinessOperatingRunbookPanel from "@/components/founder/operations/BusinessOperatingRunbookPanel";
 import StartHereOperatingPanel from "@/components/founder/command/StartHereOperatingPanel";
 import GlobalAutonomyControlPanel from "@/components/founder/autonomy/GlobalAutonomyControlPanel";
+import MultilingualIntelligencePanel from "@/components/founder/global/MultilingualIntelligencePanel";
 import GlobalOperatingClockPanel from "@/components/founder/global/GlobalOperatingClockPanel";
 import { SecurityGovernancePanel } from "@/components/founder/security/SecurityGovernancePanel";
 import { ProductisationReadinessPanel } from "@/components/founder/revenue/ProductisationReadinessPanel";
@@ -786,6 +787,7 @@ const CommandCentre = () => {
               <ApprovedActionExecutionPanel />
               <LiftorBusinessLiveRunPanel />
               <GlobalAutonomyControlPanel />
+              <MultilingualIntelligencePanel />
             </Section>
 
             {/* SECTION 6 — Outreach Runway */}
