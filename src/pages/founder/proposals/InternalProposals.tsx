@@ -149,6 +149,7 @@ export default function InternalProposals() {
           ))}
         </Card>
         <CommercialHandoffPanel />
+        <LiveCommercialAgentsPanel />
       </div>
     </FounderLayout>
   );
