@@ -105,11 +105,21 @@ Deno.serve(async (req) => {
 
   const normalized = {
     event_type: eventType,
+    normalized_event_type: eventType,
+    raw_event_type: rawType ? String(rawType) : null,
     supported: SUPPORTED_EVENTS.has(eventType),
     provider_campaign_id: providerCampaignId ? String(providerCampaignId) : null,
     provider_lead_id: providerLeadId ? String(providerLeadId) : null,
     provider_event_id: providerEventId ? String(providerEventId) : null,
+    provider_message_id:
+      payload?.message_id ?? payload?.email_id ?? payload?.stats_id ?? null,
     email: payload?.lead?.email ?? payload?.email ?? null,
+    event_timestamp:
+      payload?.event_timestamp ??
+      payload?.timestamp ??
+      payload?.time_stamp ??
+      payload?.sent_time ??
+      null,
     received_at: new Date().toISOString(),
   };
 
@@ -128,8 +138,10 @@ Deno.serve(async (req) => {
     provider_lead_id: normalized.provider_lead_id,
     raw_payload: payload,
     normalized_payload: normalized,
-    processing_status: SUPPORTED_EVENTS.has(eventType) ? "mapped" : "ignored",
-    operational_mutation_applied: false, // explicit: scaffold does not mutate operational tables
+    // Capture-only spine. Mapping to operational tables is a separate, not-yet-built step.
+    processing_status: "received",
+    operational_mutation_applied: false,
+    error: null,
   });
 
   if (insErr) {
