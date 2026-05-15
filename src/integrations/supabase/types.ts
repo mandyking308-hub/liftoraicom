@@ -8463,6 +8463,62 @@ export type Database = {
           },
         ]
       }
+      metricool_export_batches: {
+        Row: {
+          batch_name: string
+          batch_status: string
+          business_id: string
+          created_at: string
+          export_format: string
+          export_payload: Json
+          exported_at: string | null
+          founder_review_required: boolean
+          id: string
+          metadata: Json
+          platforms: Json
+          post_count: number
+          updated_at: string
+        }
+        Insert: {
+          batch_name: string
+          batch_status?: string
+          business_id: string
+          created_at?: string
+          export_format?: string
+          export_payload?: Json
+          exported_at?: string | null
+          founder_review_required?: boolean
+          id?: string
+          metadata?: Json
+          platforms?: Json
+          post_count?: number
+          updated_at?: string
+        }
+        Update: {
+          batch_name?: string
+          batch_status?: string
+          business_id?: string
+          created_at?: string
+          export_format?: string
+          export_payload?: Json
+          exported_at?: string | null
+          founder_review_required?: boolean
+          id?: string
+          metadata?: Json
+          platforms?: Json
+          post_count?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "metricool_export_batches_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       monitored_systems: {
         Row: {
           client_id: string
@@ -11633,6 +11689,78 @@ export type Database = {
             columns: ["source_asset_id"]
             isOneToOne: false
             referencedRelation: "social_source_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_scheduling_queue: {
+        Row: {
+          business_id: string
+          created_at: string
+          exported_at: string | null
+          external_scheduler_id: string | null
+          id: string
+          metadata: Json
+          platform_key: string
+          post_draft_id: string
+          publish_allowed: boolean
+          scheduled_date: string | null
+          scheduled_externally_at: string | null
+          scheduled_time: string | null
+          scheduler_provider: string
+          scheduler_status: string
+          timezone: string
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          exported_at?: string | null
+          external_scheduler_id?: string | null
+          id?: string
+          metadata?: Json
+          platform_key: string
+          post_draft_id: string
+          publish_allowed?: boolean
+          scheduled_date?: string | null
+          scheduled_externally_at?: string | null
+          scheduled_time?: string | null
+          scheduler_provider?: string
+          scheduler_status?: string
+          timezone?: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          exported_at?: string | null
+          external_scheduler_id?: string | null
+          id?: string
+          metadata?: Json
+          platform_key?: string
+          post_draft_id?: string
+          publish_allowed?: boolean
+          scheduled_date?: string | null
+          scheduled_externally_at?: string | null
+          scheduled_time?: string | null
+          scheduler_provider?: string
+          scheduler_status?: string
+          timezone?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_scheduling_queue_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_scheduling_queue_post_draft_id_fkey"
+            columns: ["post_draft_id"]
+            isOneToOne: false
+            referencedRelation: "social_post_drafts"
             referencedColumns: ["id"]
           },
         ]
