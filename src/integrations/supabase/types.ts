@@ -504,6 +504,156 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_agent_task_queue: {
+        Row: {
+          agent_key: string
+          agent_output: Json
+          auto_execute_allowed: boolean
+          blockers: Json
+          business_id: string | null
+          contact_id: string | null
+          conversation_id: string | null
+          created_at: string
+          deal_id: string | null
+          dependencies: Json
+          dry_run_only: boolean
+          due_at: string | null
+          error_message: string | null
+          execution_enabled: boolean
+          founder_approval_required: boolean
+          id: string
+          interaction_id: string | null
+          invoice_id: string | null
+          priority_level: string
+          proposal_id: string | null
+          recommended_action: string | null
+          source_id: string | null
+          source_system: string | null
+          source_table: string | null
+          status: string
+          supplier_id: string | null
+          task_summary: string | null
+          task_title: string
+          task_type: string
+          updated_at: string
+        }
+        Insert: {
+          agent_key: string
+          agent_output?: Json
+          auto_execute_allowed?: boolean
+          blockers?: Json
+          business_id?: string | null
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          deal_id?: string | null
+          dependencies?: Json
+          dry_run_only?: boolean
+          due_at?: string | null
+          error_message?: string | null
+          execution_enabled?: boolean
+          founder_approval_required?: boolean
+          id?: string
+          interaction_id?: string | null
+          invoice_id?: string | null
+          priority_level?: string
+          proposal_id?: string | null
+          recommended_action?: string | null
+          source_id?: string | null
+          source_system?: string | null
+          source_table?: string | null
+          status?: string
+          supplier_id?: string | null
+          task_summary?: string | null
+          task_title: string
+          task_type: string
+          updated_at?: string
+        }
+        Update: {
+          agent_key?: string
+          agent_output?: Json
+          auto_execute_allowed?: boolean
+          blockers?: Json
+          business_id?: string | null
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          deal_id?: string | null
+          dependencies?: Json
+          dry_run_only?: boolean
+          due_at?: string | null
+          error_message?: string | null
+          execution_enabled?: boolean
+          founder_approval_required?: boolean
+          id?: string
+          interaction_id?: string | null
+          invoice_id?: string | null
+          priority_level?: string
+          proposal_id?: string | null
+          recommended_action?: string | null
+          source_id?: string | null
+          source_system?: string | null
+          source_table?: string | null
+          status?: string
+          supplier_id?: string | null
+          task_summary?: string | null
+          task_title?: string
+          task_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ai_agent_task_types: {
+        Row: {
+          auto_execute_allowed: boolean
+          created_at: string
+          creates_operational_record: boolean
+          default_agent_key: string
+          description: string | null
+          dry_run_only: boolean
+          external_provider_call: boolean
+          founder_approval_required: boolean
+          id: string
+          label: string
+          metadata: Json
+          sends_email: boolean
+          task_type: string
+          updated_at: string
+        }
+        Insert: {
+          auto_execute_allowed?: boolean
+          created_at?: string
+          creates_operational_record?: boolean
+          default_agent_key: string
+          description?: string | null
+          dry_run_only?: boolean
+          external_provider_call?: boolean
+          founder_approval_required?: boolean
+          id?: string
+          label: string
+          metadata?: Json
+          sends_email?: boolean
+          task_type: string
+          updated_at?: string
+        }
+        Update: {
+          auto_execute_allowed?: boolean
+          created_at?: string
+          creates_operational_record?: boolean
+          default_agent_key?: string
+          description?: string | null
+          dry_run_only?: boolean
+          external_provider_call?: boolean
+          founder_approval_required?: boolean
+          id?: string
+          label?: string
+          metadata?: Json
+          sends_email?: boolean
+          task_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ai_agents: {
         Row: {
           agent_function: string
