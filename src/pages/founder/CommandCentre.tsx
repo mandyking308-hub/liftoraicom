@@ -16,6 +16,7 @@ import KnowledgeSourceTruthPanel from "@/components/founder/knowledge/KnowledgeS
 import FundingExitReadinessPanel from "@/components/founder/strategy/FundingExitReadinessPanel";
 import ReputationCrisisCommsPanel from "@/components/founder/brand/ReputationCrisisCommsPanel";
 import KPIOKRPerformancePanel from "@/components/founder/analytics/KPIOKRPerformancePanel";
+import FounderAlertEscalationPanel from "@/components/founder/command/FounderAlertEscalationPanel";
 import LiftorCapabilities from "@/components/founder/LiftorCapabilities";
 import AgentOrchestration from "@/components/founder/AgentOrchestration";
 import SystemModeBanner from "@/components/founder/SystemModeBanner";
@@ -746,6 +747,7 @@ const CommandCentre = () => {
 
   return (
     <FounderLayout>
+      <div className="max-w-7xl mx-auto px-4 pt-4"><FounderAlertEscalationPanel /></div>
       {(() => {
         const activeBusinessName = activeInboxes[0]?.business_name ?? businesses[0]?.name ?? "Neon Candy";
         const activeSender = activeInboxes[0]?.email_address ?? "hello@neoncandy.online";
