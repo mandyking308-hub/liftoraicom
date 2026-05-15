@@ -73,6 +73,7 @@ import GlobalOperatingClockPanel from "@/components/founder/global/GlobalOperati
 import LearningOptimisationEnginePanel from "@/components/founder/optimisation/LearningOptimisationEnginePanel";
 import SelfHealingMonitoringPanel from "@/components/founder/monitoring/SelfHealingMonitoringPanel";
 import PortfolioIntelligenceBrainPanel from "@/components/founder/strategy/PortfolioIntelligenceBrainPanel";
+import CommandCentreModuleRegistryPanel from "@/components/founder/command/CommandCentreModuleRegistryPanel";
 import SocialMediaBrainPanel from "@/components/founder/social/SocialMediaBrainPanel";
 import SocialContentFactoryPanel from "@/components/founder/social/SocialContentFactoryPanel";
 import SocialRepurposingEnginePanel from "@/components/founder/social/SocialRepurposingEnginePanel";
@@ -114,6 +115,16 @@ const StatTile = ({ label, value, icon: Icon, tone = "default", to }: any) => {
     </Card>
   );
   return to ? <Link to={to}>{inner}</Link> : inner;
+};
+
+const RegistryTile = ({ label, value, tone = "default" }: { label: string; value: number; tone?: "default" | "good" | "warn" | "danger" }) => {
+  const toneCls = tone === "danger" ? "text-destructive" : tone === "warn" ? "text-yellow-400" : tone === "good" ? "text-green-400" : "text-primary";
+  return (
+    <div className="p-2 rounded-md border border-border/50 bg-background/40">
+      <p className={`text-lg font-bold ${toneCls}`}>{value}</p>
+      <p className="text-[10px] text-muted-foreground">{label}</p>
+    </div>
+  );
 };
 
 const Section = ({ title, icon: Icon, action, children }: any) => (
@@ -201,6 +212,50 @@ const CommandCentre = () => {
         trendItems: trends.count ?? 0,
         metricoolEnabled: gateMap["metricool_schedule_post_gate"] ?? false,
         manychatEnabled: gateMap["manychat_dm_send_gate"] ?? false,
+      };
+    },
+  });
+  const { data: moduleRegistrySummary } = useQuery({
+    queryKey: ["cc2-module-registry-summary"],
+    refetchInterval: 60000,
+    queryFn: async () => {
+      const sb: any = supabase as any;
+      const [{ data: modules }, { data: statuses }, { data: businessesAll }] = await Promise.all([
+        sb.from("command_centre_modules").select("module_key,module_name,module_category,command_centre_section,primary_route,component_name,business_scoped"),
+        sb.from("business_module_status").select("business_id,module_key,blockers,configured,live_internal"),
+        sb.from("businesses").select("id"),
+      ]);
+      const mods = (modules ?? []) as any[];
+      const sts = (statuses ?? []) as any[];
+      let active = 0, partial = 0, blocked = 0, missing = 0;
+      for (const m of mods) {
+        const rows = sts.filter((s) => s.module_key === m.module_key);
+        const blkRows = rows.filter((r) => Array.isArray(r.blockers) && r.blockers.length > 0).length;
+        const status = rows.length === 0 ? "missing" : blkRows > 0 ? "blocked" : rows.every((r) => r.live_internal) ? "active" : rows.some((r) => r.configured) ? "partial" : "missing";
+        if (status === "active") active++;
+        else if (status === "partial") partial++;
+        else if (status === "blocked") blocked++;
+        else missing++;
+      }
+      const lostPagesEstimate = mods.filter((m) => m.primary_route && !m.command_centre_section).length;
+      const businessScoped = mods.filter((m) => m.business_scoped).map((m) => m.module_key);
+      const presentByBusiness = new Map<string, Set<string>>();
+      for (const s of sts) {
+        if (!s.business_id) continue;
+        if (!presentByBusiness.has(s.business_id)) presentByBusiness.set(s.business_id, new Set());
+        presentByBusiness.get(s.business_id)!.add(s.module_key);
+      }
+      const businessesMissing = (businessesAll ?? []).filter((b: any) => {
+        const present = presentByBusiness.get(b.id) ?? new Set();
+        return businessScoped.some((k) => !present.has(k));
+      }).length;
+      const nextModule = mods.find((m) => !m.component_name) ?? mods.find((m) => m.business_scoped && !sts.some((s) => s.module_key === m.module_key));
+      return {
+        total: mods.length, active, partial, blocked, missing,
+        lostPages: lostPagesEstimate,
+        businessesMissing,
+        nextModuleName: nextModule?.module_name ?? "All modules registered",
+        nextModuleRoute: nextModule?.primary_route ?? "/founder/system/health",
       };
     },
   });
@@ -760,6 +815,33 @@ const CommandCentre = () => {
 
             <CommandCentreMasterControlPlane />
 
+            {/* Top: Module Registry summary */}
+            <Card className="bg-card border-border/50">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center justify-between gap-2">
+                  <span className="flex items-center gap-2">
+                    <Database size={14} className="text-primary" /> Module Registry — system coverage
+                  </span>
+                  <Link to="/founder/system/health" className="text-[10px] text-primary hover:underline">Open registry →</Link>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 text-center text-xs">
+                  <RegistryTile label="Registered" value={moduleRegistrySummary?.total ?? 0} />
+                  <RegistryTile label="Active" value={moduleRegistrySummary?.active ?? 0} tone="good" />
+                  <RegistryTile label="Partial" value={moduleRegistrySummary?.partial ?? 0} tone="warn" />
+                  <RegistryTile label="Blocked" value={moduleRegistrySummary?.blocked ?? 0} tone="danger" />
+                  <RegistryTile label="Missing" value={moduleRegistrySummary?.missing ?? 0} tone="warn" />
+                  <RegistryTile label="Lost pages" value={moduleRegistrySummary?.lostPages ?? 0} tone={(moduleRegistrySummary?.lostPages ?? 0) > 0 ? "warn" : "default"} />
+                  <RegistryTile label="Businesses missing setup" value={moduleRegistrySummary?.businessesMissing ?? 0} tone={(moduleRegistrySummary?.businessesMissing ?? 0) > 0 ? "warn" : "default"} />
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-2">
+                  Next module to configure: <span className="text-foreground font-medium">{moduleRegistrySummary?.nextModuleName}</span>{" "}
+                  <Link to={moduleRegistrySummary?.nextModuleRoute ?? "/founder/system/health"} className="text-primary hover:underline">→ open</Link>
+                </p>
+              </CardContent>
+            </Card>
+
             <GlobalAIBrainCommandCentre />
 
             <StartHereOperatingPanel />
@@ -820,6 +902,7 @@ const CommandCentre = () => {
             <CollapsibleCard id="sec-map" title="Master Index — every Liftor route & concept" icon={MapIcon} defaultOpen={false}>
               <CommandCentreMasterIndex />
             </CollapsibleCard>
+            <CommandCentreModuleRegistryPanel />
 
             {/* SECTION 5 — AI Agent Control Room */}
             <RunwayHeader n={5} title="AI Agent Control Room" icon={Bot} anchor="sec-agents" />

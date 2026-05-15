@@ -3105,6 +3105,68 @@ export type Database = {
         }
         Relationships: []
       }
+      business_module_status: {
+        Row: {
+          blockers: Json
+          business_id: string | null
+          configured: boolean
+          created_at: string
+          enabled: boolean
+          external_actions_enabled: boolean
+          id: string
+          last_checked_at: string | null
+          live_internal: boolean
+          metadata: Json
+          module_key: string
+          next_action: string | null
+          readiness_score: number | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          blockers?: Json
+          business_id?: string | null
+          configured?: boolean
+          created_at?: string
+          enabled?: boolean
+          external_actions_enabled?: boolean
+          id?: string
+          last_checked_at?: string | null
+          live_internal?: boolean
+          metadata?: Json
+          module_key: string
+          next_action?: string | null
+          readiness_score?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          blockers?: Json
+          business_id?: string | null
+          configured?: boolean
+          created_at?: string
+          enabled?: boolean
+          external_actions_enabled?: boolean
+          id?: string
+          last_checked_at?: string | null
+          live_internal?: boolean
+          metadata?: Json
+          module_key?: string
+          next_action?: string | null
+          readiness_score?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_module_status_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_operating_modules: {
         Row: {
           blockers: Json
@@ -3612,6 +3674,75 @@ export type Database = {
           package_name?: string
           setup_fee_max?: number | null
           setup_fee_min?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      command_centre_modules: {
+        Row: {
+          business_scoped: boolean
+          command_centre_section: string | null
+          component_name: string | null
+          created_at: string
+          enabled: boolean
+          global_module: boolean
+          id: string
+          metadata: Json
+          module_category: string
+          module_key: string
+          module_name: string
+          primary_route: string | null
+          readiness_function: string | null
+          related_routes: Json
+          required_for_25_business_scale: boolean
+          required_for_core: boolean
+          required_for_global_brain: boolean
+          section_number: number | null
+          status_source: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_scoped?: boolean
+          command_centre_section?: string | null
+          component_name?: string | null
+          created_at?: string
+          enabled?: boolean
+          global_module?: boolean
+          id?: string
+          metadata?: Json
+          module_category: string
+          module_key: string
+          module_name: string
+          primary_route?: string | null
+          readiness_function?: string | null
+          related_routes?: Json
+          required_for_25_business_scale?: boolean
+          required_for_core?: boolean
+          required_for_global_brain?: boolean
+          section_number?: number | null
+          status_source?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_scoped?: boolean
+          command_centre_section?: string | null
+          component_name?: string | null
+          created_at?: string
+          enabled?: boolean
+          global_module?: boolean
+          id?: string
+          metadata?: Json
+          module_category?: string
+          module_key?: string
+          module_name?: string
+          primary_route?: string | null
+          readiness_function?: string | null
+          related_routes?: Json
+          required_for_25_business_scale?: boolean
+          required_for_core?: boolean
+          required_for_global_brain?: boolean
+          section_number?: number | null
+          status_source?: string | null
           updated_at?: string
         }
         Relationships: []
