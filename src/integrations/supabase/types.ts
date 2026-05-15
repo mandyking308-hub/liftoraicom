@@ -7009,6 +7009,88 @@ export type Database = {
           },
         ]
       }
+      customer_retention_scores: {
+        Row: {
+          business_id: string | null
+          complaint_risk_score: number | null
+          contact_id: string | null
+          created_at: string | null
+          engagement_score: number | null
+          evidence: Json | null
+          health_status: string | null
+          id: string
+          onboarding_score: number | null
+          overall_health_score: number | null
+          payment_score: number | null
+          recommended_action: string | null
+          renewal_risk_score: number | null
+          satisfaction_score: number | null
+          score_date: string | null
+          support_score: number | null
+          upsell_fit_score: number | null
+        }
+        Insert: {
+          business_id?: string | null
+          complaint_risk_score?: number | null
+          contact_id?: string | null
+          created_at?: string | null
+          engagement_score?: number | null
+          evidence?: Json | null
+          health_status?: string | null
+          id?: string
+          onboarding_score?: number | null
+          overall_health_score?: number | null
+          payment_score?: number | null
+          recommended_action?: string | null
+          renewal_risk_score?: number | null
+          satisfaction_score?: number | null
+          score_date?: string | null
+          support_score?: number | null
+          upsell_fit_score?: number | null
+        }
+        Update: {
+          business_id?: string | null
+          complaint_risk_score?: number | null
+          contact_id?: string | null
+          created_at?: string | null
+          engagement_score?: number | null
+          evidence?: Json | null
+          health_status?: string | null
+          id?: string
+          onboarding_score?: number | null
+          overall_health_score?: number | null
+          payment_score?: number | null
+          recommended_action?: string | null
+          renewal_risk_score?: number | null
+          satisfaction_score?: number | null
+          score_date?: string | null
+          support_score?: number | null
+          upsell_fit_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_retention_scores_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_retention_scores_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_retention_scores_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+        ]
+      }
       customer_stewardship_assignments: {
         Row: {
           business_id: string | null
@@ -13274,6 +13356,79 @@ export type Database = {
           survey_feedback_checked?: boolean | null
         }
         Relationships: []
+      }
+      retention_risk_recommendations: {
+        Row: {
+          business_id: string | null
+          contact_id: string | null
+          created_at: string | null
+          evidence: Json | null
+          founder_review_required: boolean | null
+          id: string
+          owner_agent_key: string | null
+          priority_level: string | null
+          recommendation_type: string
+          recommended_action: string | null
+          status: string | null
+          summary: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          business_id?: string | null
+          contact_id?: string | null
+          created_at?: string | null
+          evidence?: Json | null
+          founder_review_required?: boolean | null
+          id?: string
+          owner_agent_key?: string | null
+          priority_level?: string | null
+          recommendation_type: string
+          recommended_action?: string | null
+          status?: string | null
+          summary?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          business_id?: string | null
+          contact_id?: string | null
+          created_at?: string | null
+          evidence?: Json | null
+          founder_review_required?: boolean | null
+          id?: string
+          owner_agent_key?: string | null
+          priority_level?: string | null
+          recommendation_type?: string
+          recommended_action?: string | null
+          status?: string | null
+          summary?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "retention_risk_recommendations_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retention_risk_recommendations_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retention_risk_recommendations_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+        ]
       }
       retry_queue: {
         Row: {

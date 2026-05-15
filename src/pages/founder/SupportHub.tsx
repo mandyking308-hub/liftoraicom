@@ -2,6 +2,7 @@ import FounderLayout from "@/components/founder/FounderLayout";
 import SupportKnowledgeAgentPanel from "@/components/founder/support/SupportKnowledgeAgentPanel";
 import HumanAccountManagerPanel from "@/components/founder/customer/HumanAccountManagerPanel";
 import CustomerOnboardingPanel from "@/components/founder/customer/CustomerOnboardingPanel";
+import RetentionRecurringRevenuePanel from "@/components/founder/customer/RetentionRecurringRevenuePanel";
 
 export default function SupportHub() {
   return (
@@ -14,6 +15,7 @@ export default function SupportHub() {
         <SupportKnowledgeAgentPanel />
         <HumanAccountManagerPanel />
         <CustomerOnboardingPanel />
+        <RetentionRecurringRevenuePanel />
       </div>
     </FounderLayout>
   );
