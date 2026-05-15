@@ -48,6 +48,7 @@ import AIAgentOperatingModelPanel from "@/components/founder/agents/AIAgentOpera
 import AIAgentOrchestratorPanel from "@/components/founder/agents/AIAgentOrchestratorPanel";
 import AIConversationDraftingPanel from "@/components/founder/agents/AIConversationDraftingPanel";
 import FounderApprovalConsole from "@/components/founder/approvals/FounderApprovalConsole";
+import AgentBusinessLivePanel from "@/components/founder/agents/AgentBusinessLivePanel";
 import CommercialHandoffPanel from "@/components/founder/commercial/CommercialHandoffPanel";
 import RevenueOperationsPanel from "@/components/founder/finance/RevenueOperationsPanel";
 import LiftorMasterDryRunPanel from "@/components/founder/testing/LiftorMasterDryRunPanel";
