@@ -1,5 +1,6 @@
 import FounderLayout from "@/components/founder/FounderLayout";
 import PortfolioIntelligenceBrainPanel from "@/components/founder/strategy/PortfolioIntelligenceBrainPanel";
+import CompetitorLearningPositioningPanel from "@/components/founder/strategy/CompetitorLearningPositioningPanel";
 import PortfolioCommandCentrePanel from "@/components/founder/command/PortfolioCommandCentrePanel";
 import { ProductisationReadinessPanel } from "@/components/founder/revenue/ProductisationReadinessPanel";
 import { supabase } from "@/integrations/supabase/client";
@@ -197,6 +198,7 @@ const FounderRevenue = () => {
         </div>
 
         <PortfolioIntelligenceBrainPanel />
+        <CompetitorLearningPositioningPanel />
 
         <PortfolioCommandCentrePanel />
         <ProductisationReadinessPanel />

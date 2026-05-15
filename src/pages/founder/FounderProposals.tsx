@@ -5,6 +5,7 @@ import CreativeAssetLibraryPanel from "@/components/founder/assets/CreativeAsset
 import FounderLayout from "@/components/founder/FounderLayout";
 import { ArrowRight } from "lucide-react";
 import { ProductisationReadinessPanel } from "@/components/founder/revenue/ProductisationReadinessPanel";
+import CompetitorLearningPositioningPanel from "@/components/founder/strategy/CompetitorLearningPositioningPanel";
 
 const FounderProposals = () => {
   const [proposals, setProposals] = useState<any[]>([]);
@@ -41,6 +42,7 @@ const FounderProposals = () => {
         </div>
 
         <div className="mb-6"><ProductisationReadinessPanel /></div>
+        <div className="mb-6"><CompetitorLearningPositioningPanel /></div>
 
         {loading ? (
           <p className="text-muted-foreground">Loading...</p>
