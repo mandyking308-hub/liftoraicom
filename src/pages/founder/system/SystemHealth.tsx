@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import FounderLayout from "@/components/founder/FounderLayout";
 import CRMInteractionSourceAdaptersPanel from "@/components/founder/crm/CRMInteractionSourceAdaptersPanel";
 import CRMHealthIntegrityPanel from "@/components/founder/crm/CRMHealthIntegrityPanel";
+import AIAgentOperatingModelPanel from "@/components/founder/agents/AIAgentOperatingModelPanel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid } from "recharts";
 import { format } from "date-fns";
@@ -102,6 +103,7 @@ const SystemHealth = () => {
           })}
         </div>
         <CRMHealthIntegrityPanel />
+        <AIAgentOperatingModelPanel />
       </div>
     </FounderLayout>
   );
