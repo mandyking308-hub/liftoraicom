@@ -1,5 +1,6 @@
 import FounderLayout from "@/components/founder/FounderLayout";
 import StrategicProspectingAgentPanel from "@/components/founder/prospecting/StrategicProspectingAgentPanel";
+import MeetingCallIntelligencePanel from "@/components/founder/customer/MeetingCallIntelligencePanel";
 import CRMCustomerMemoryDashboard from "@/components/founder/crm/CRMCustomerMemoryDashboard";
 import AIAgentOperatingModelPanel from "@/components/founder/agents/AIAgentOperatingModelPanel";
 import AIAgentOrchestratorPanel from "@/components/founder/agents/AIAgentOrchestratorPanel";
