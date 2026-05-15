@@ -26,7 +26,7 @@ export const generateManualMarkdown = (data: ManualLiveData): string => {
   return `# Liftor AI — Founder Manual
 ## Complete Engineering-Level Platform Documentation
 
-**Version:** 4.9 — Smartlead Scale Engine Foundation Sprint (Read-Only Adapter, Mapping Preview, Lead Push Preview, Webhook Scaffold, Bulk Send Preview) (15 May 2026)
+**Version:** 5.0 — Global Operating Brain / Command Centre Edition (15 May 2026)
 **Generated:** ${now}
 **Classification:** Founder / Internal Engineering / Investor Documentation
 **Status:** Live — Auto-generated from platform state
