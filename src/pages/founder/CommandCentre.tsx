@@ -33,6 +33,7 @@ import SmartleadCampaignMappingPreview from "@/components/founder/integrations/S
 import SmartleadLeadPushPreview from "@/components/founder/integrations/SmartleadLeadPushPreview";
 import BulkSendPreviewPanel from "@/components/founder/integrations/BulkSendPreviewPanel";
 import SmartleadScaleNextActionBanner from "@/components/founder/integrations/SmartleadScaleNextActionBanner";
+import OutboundChannelLanesPanel from "@/components/founder/integrations/OutboundChannelLanesPanel";
 import {
   Building2, Bot, Send, Mail, Inbox as InboxIcon, MessageSquare, FileSignature,
   Search, Banknote, ShieldCheck, Workflow as WorkflowIcon, Phone, AlertTriangle,
@@ -488,46 +489,45 @@ const CommandCentre = () => {
         // Safety-led ordering: when outreach send brake is not verified, the
         // Command Centre's top actions must prioritise verifying the brake and
         // reviewing the queue audit BEFORE any send / queue / Apollo action.
-        const safetyLedActions = sendUnsafe
-          ? [
-              { msg: "Verify outreach brake / cron status (Queue Audit)", to: "/founder/outreach/queue-audit", tone: "danger" as const },
-              { msg: "Review Queue Audit classification before any cleanup or send", to: "/founder/outreach/queue-audit", tone: "warn" as const },
-            ]
-          : reviewRequired > 0 || totalPendingFromAudit > 0
-          ? [
-              ...(reviewRequired > 0
-                ? [
-                    { msg: `Park ${reviewRequired} review-required Step 4 follow-up${reviewRequired === 1 ? "" : "s"} or leave selected rows under review`, to: "/founder/outreach/queue-audit#review-required-decision-gate", tone: "danger" as const },
-                    { msg: "Open Review Required Queue Gate (preview + park-only apply path)", to: "/founder/outreach/queue-audit#review-required-decision-gate", tone: "warn" as const },
-                  ]
-                : []),
-              ...(reviewRequired === 0 && validFutureBlocked > 0
-                ? [
-                    { msg: `${validFutureBlocked} clean Step 2 row${validFutureBlocked === 1 ? "" : "s"} held — Manual Send Apply not built`, to: "/founder/outreach/queue-audit", tone: "warn" as const },
-                  ]
-                : []),
-            ]
-          : [];
-        const orderedFounderActions = (sendUnsafe || reviewRequired > 0 || totalPendingFromAudit > 0)
-          ? [
-              ...safetyLedActions,
-              ...founderActions.filter((r) => {
-                const m = (r.msg ?? "").toLowerCase();
-                // Suppress send / Apollo / queue-creation / reply-approval prompts
-                // until pending queue rows have been triaged.
-                return !m.includes("controlled live batch")
-                  && !m.includes("apollo")
-                  && !m.includes("create queue")
-                  && !m.includes("manual send")
-                  && !m.includes("approve") // covers "Approve N AI reply drafts"
-                  && !m.includes("send proposals")
-                  && !m.includes("send batch")
-                  && !m.includes("run batch")
-                  && !m.includes("run live batch")
-                  && !m.includes("run controlled");
-              }),
-            ]
-          : founderActions;
+        // Smartlead scale lane is now the primary outreach build path.
+        // Native Liftor / IONOS queue (SAFE_BLOCKED, review_required, Manual
+        // Send Apply, controlled live batch, Pooja proof-send) is parked and
+        // surfaced as a SECONDARY native-lane action, never as the global top.
+        const smartleadTopActions = [
+          { msg: 'Smartlead scale: create draft campaign "NeonCandy - Early Access Collaboration Test" then re-run readiness', to: "/founder/integrations#smartlead-scale-setup-checklist", tone: "primary" as const },
+          { msg: "Smartlead scale: enable warmup for hello@neoncandy.online inside Smartlead", to: "/founder/integrations#smartlead-scale-setup-checklist", tone: "warn" as const },
+        ];
+        const nativeLaneSecondary: { msg: string; to: string; tone: "danger" | "warn" }[] = [];
+        if (sendUnsafe) {
+          nativeLaneSecondary.push({ msg: "Native IONOS lane (parked): verify outreach brake / cron status — not on Smartlead scale path", to: "/founder/outreach/queue-audit", tone: "warn" });
+        }
+        if (reviewRequired > 0) {
+          nativeLaneSecondary.push({ msg: `Native IONOS lane (parked): ${reviewRequired} review_required Step 4 row${reviewRequired === 1 ? "" : "s"} remain blocked — not on Smartlead scale path`, to: "/founder/outreach/queue-audit#review-required-decision-gate", tone: "warn" });
+        }
+        const safetyLedActions = [...smartleadTopActions, ...nativeLaneSecondary];
+        const orderedFounderActions = [
+          ...safetyLedActions,
+          ...founderActions.filter((r) => {
+            const m = (r.msg ?? "").toLowerCase();
+            // Suppress all native IONOS send / queue / Pooja prompts and
+            // stale "connect Smartlead mailbox" copy from competing for the
+            // top slot. Smartlead scale is the active build path.
+            return !m.includes("controlled live batch")
+              && !m.includes("apollo")
+              && !m.includes("create queue")
+              && !m.includes("manual send")
+              && !m.includes("approve")
+              && !m.includes("send proposals")
+              && !m.includes("send batch")
+              && !m.includes("run batch")
+              && !m.includes("run live batch")
+              && !m.includes("run controlled")
+              && !m.includes("connect one sending mailbox")
+              && !m.includes("park ")
+              && !m.includes("review-required")
+              && !m.includes("review required");
+          }),
+        ];
         // Top-strip Next action must follow the same safety-led ordering.
         const safetyLedNext = orderedFounderActions[0];
         const topNextMsg = safetyLedNext?.msg ?? nextRecommended;
