@@ -11,6 +11,7 @@ import CRMHealthIntegrityPanel from "@/components/founder/crm/CRMHealthIntegrity
 import CRMCustomerMemoryDashboard from "@/components/founder/crm/CRMCustomerMemoryDashboard";
 import CRMContact360Panel from "@/components/founder/crm/CRMContact360Panel";
 import MultiChannelInboxPanel from "@/components/founder/channels/MultiChannelInboxPanel";
+import CustomerJourneyControlBoard from "@/components/founder/command/CustomerJourneyControlBoard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
