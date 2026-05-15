@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import ControlledSendReadinessPreview from "@/components/founder/safety/ControlledSendReadinessPreview";
 
 const DEFAULT_IDS = [
   "8a92edbb-2e61-49b7-a6df-3bac21268fe0",
@@ -72,6 +73,8 @@ export default function ControlledSendPreview() {
           </CardContent>
         </Card>
       )}
+
+      <ControlledSendReadinessPreview />
     </div>
   );
 }
