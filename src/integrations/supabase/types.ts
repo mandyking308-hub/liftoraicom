@@ -1129,6 +1129,72 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_draft_quality_reviews: {
+        Row: {
+          agent_key: string | null
+          approved_for_customer_view: boolean | null
+          business_id: string | null
+          compliance_score: number | null
+          contact_id: string | null
+          created_at: string | null
+          customer_context_score: number | null
+          draft_type: string
+          founder_review_required: boolean | null
+          grounding_score: number | null
+          id: string
+          missing_context: Json | null
+          quality_score: number | null
+          recommended_fix: string | null
+          risk_flags: Json | null
+          source_id: string | null
+          source_table: string | null
+          tone_score: number | null
+          unsupported_claims: Json | null
+        }
+        Insert: {
+          agent_key?: string | null
+          approved_for_customer_view?: boolean | null
+          business_id?: string | null
+          compliance_score?: number | null
+          contact_id?: string | null
+          created_at?: string | null
+          customer_context_score?: number | null
+          draft_type: string
+          founder_review_required?: boolean | null
+          grounding_score?: number | null
+          id?: string
+          missing_context?: Json | null
+          quality_score?: number | null
+          recommended_fix?: string | null
+          risk_flags?: Json | null
+          source_id?: string | null
+          source_table?: string | null
+          tone_score?: number | null
+          unsupported_claims?: Json | null
+        }
+        Update: {
+          agent_key?: string | null
+          approved_for_customer_view?: boolean | null
+          business_id?: string | null
+          compliance_score?: number | null
+          contact_id?: string | null
+          created_at?: string | null
+          customer_context_score?: number | null
+          draft_type?: string
+          founder_review_required?: boolean | null
+          grounding_score?: number | null
+          id?: string
+          missing_context?: Json | null
+          quality_score?: number | null
+          recommended_fix?: string | null
+          risk_flags?: Json | null
+          source_id?: string | null
+          source_table?: string | null
+          tone_score?: number | null
+          unsupported_claims?: Json | null
+        }
+        Relationships: []
+      }
       ai_drafts: {
         Row: {
           approved_at: string | null
@@ -1242,6 +1308,60 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      ai_prompt_registry: {
+        Row: {
+          agent_key: string | null
+          approved_by_founder: boolean | null
+          business_id: string | null
+          created_at: string | null
+          id: string
+          last_reviewed_at: string | null
+          metadata: Json | null
+          prompt_body: string | null
+          prompt_key: string
+          prompt_name: string
+          prompt_purpose: string | null
+          prompt_status: string | null
+          prompt_version: string | null
+          risk_level: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          agent_key?: string | null
+          approved_by_founder?: boolean | null
+          business_id?: string | null
+          created_at?: string | null
+          id?: string
+          last_reviewed_at?: string | null
+          metadata?: Json | null
+          prompt_body?: string | null
+          prompt_key: string
+          prompt_name: string
+          prompt_purpose?: string | null
+          prompt_status?: string | null
+          prompt_version?: string | null
+          risk_level?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          agent_key?: string | null
+          approved_by_founder?: boolean | null
+          business_id?: string | null
+          created_at?: string | null
+          id?: string
+          last_reviewed_at?: string | null
+          metadata?: Json | null
+          prompt_body?: string | null
+          prompt_key?: string
+          prompt_name?: string
+          prompt_purpose?: string | null
+          prompt_status?: string | null
+          prompt_version?: string | null
+          risk_level?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       ai_reply_tone_profiles: {
         Row: {
