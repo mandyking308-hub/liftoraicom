@@ -6105,6 +6105,107 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_account_reviews: {
+        Row: {
+          account_health: string | null
+          business_id: string | null
+          completed_at: string | null
+          contact_id: string | null
+          created_at: string
+          current_needs: Json
+          customer_goal: string | null
+          due_at: string | null
+          founder_review_required: boolean
+          id: string
+          metadata: Json
+          opportunities: Json
+          owner_agent_key: string
+          quarterly_report_id: string | null
+          recent_feedback: Json
+          recommended_human_touch: string | null
+          recommended_next_action: string | null
+          review_status: string
+          review_type: string
+          risks: Json
+          updated_at: string
+        }
+        Insert: {
+          account_health?: string | null
+          business_id?: string | null
+          completed_at?: string | null
+          contact_id?: string | null
+          created_at?: string
+          current_needs?: Json
+          customer_goal?: string | null
+          due_at?: string | null
+          founder_review_required?: boolean
+          id?: string
+          metadata?: Json
+          opportunities?: Json
+          owner_agent_key?: string
+          quarterly_report_id?: string | null
+          recent_feedback?: Json
+          recommended_human_touch?: string | null
+          recommended_next_action?: string | null
+          review_status?: string
+          review_type?: string
+          risks?: Json
+          updated_at?: string
+        }
+        Update: {
+          account_health?: string | null
+          business_id?: string | null
+          completed_at?: string | null
+          contact_id?: string | null
+          created_at?: string
+          current_needs?: Json
+          customer_goal?: string | null
+          due_at?: string | null
+          founder_review_required?: boolean
+          id?: string
+          metadata?: Json
+          opportunities?: Json
+          owner_agent_key?: string
+          quarterly_report_id?: string | null
+          recent_feedback?: Json
+          recommended_human_touch?: string | null
+          recommended_next_action?: string | null
+          review_status?: string
+          review_type?: string
+          risks?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_account_reviews_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_account_reviews_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_account_reviews_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+          {
+            foreignKeyName: "customer_account_reviews_quarterly_report_id_fkey"
+            columns: ["quarterly_report_id"]
+            isOneToOne: false
+            referencedRelation: "customer_quarterly_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_memory_profiles: {
         Row: {
           business_id: string | null
@@ -6273,6 +6374,133 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "businesses"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_quarterly_reports: {
+        Row: {
+          approved_at: string | null
+          business_id: string | null
+          completed_actions: Json
+          contact_id: string | null
+          created_at: string
+          customer_facing_summary: string | null
+          customer_share_allowed: boolean
+          deal_id: string | null
+          engagement_summary: string | null
+          feedback_summary: string | null
+          founder_review_required: boolean
+          id: string
+          internal_summary: string | null
+          metadata: Json
+          next_quarter_plan: Json
+          open_issues: Json
+          organisation_id: string | null
+          recommendations: Json
+          renewal_risk_flags: Json
+          report_quarter: string | null
+          report_status: string
+          report_token: string
+          report_year: number | null
+          reporting_period_end: string
+          reporting_period_start: string
+          satisfaction_summary: string | null
+          shared_at: string | null
+          support_summary: string | null
+          updated_at: string
+          upsell_opportunities: Json
+          usage_summary: string | null
+          value_summary: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          business_id?: string | null
+          completed_actions?: Json
+          contact_id?: string | null
+          created_at?: string
+          customer_facing_summary?: string | null
+          customer_share_allowed?: boolean
+          deal_id?: string | null
+          engagement_summary?: string | null
+          feedback_summary?: string | null
+          founder_review_required?: boolean
+          id?: string
+          internal_summary?: string | null
+          metadata?: Json
+          next_quarter_plan?: Json
+          open_issues?: Json
+          organisation_id?: string | null
+          recommendations?: Json
+          renewal_risk_flags?: Json
+          report_quarter?: string | null
+          report_status?: string
+          report_token?: string
+          report_year?: number | null
+          reporting_period_end: string
+          reporting_period_start: string
+          satisfaction_summary?: string | null
+          shared_at?: string | null
+          support_summary?: string | null
+          updated_at?: string
+          upsell_opportunities?: Json
+          usage_summary?: string | null
+          value_summary?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          business_id?: string | null
+          completed_actions?: Json
+          contact_id?: string | null
+          created_at?: string
+          customer_facing_summary?: string | null
+          customer_share_allowed?: boolean
+          deal_id?: string | null
+          engagement_summary?: string | null
+          feedback_summary?: string | null
+          founder_review_required?: boolean
+          id?: string
+          internal_summary?: string | null
+          metadata?: Json
+          next_quarter_plan?: Json
+          open_issues?: Json
+          organisation_id?: string | null
+          recommendations?: Json
+          renewal_risk_flags?: Json
+          report_quarter?: string | null
+          report_status?: string
+          report_token?: string
+          report_year?: number | null
+          reporting_period_end?: string
+          reporting_period_start?: string
+          satisfaction_summary?: string | null
+          shared_at?: string | null
+          support_summary?: string | null
+          updated_at?: string
+          upsell_opportunities?: Json
+          usage_summary?: string | null
+          value_summary?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_quarterly_reports_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_quarterly_reports_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_quarterly_reports_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
           },
         ]
       }
@@ -6766,6 +6994,106 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "customer_package_catalog"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_usage_snapshots: {
+        Row: {
+          assignments_count: number
+          business_id: string | null
+          contact_id: string | null
+          content_engagement_count: number
+          conversations_count: number
+          created_at: string
+          demos_count: number
+          engagement_score: number | null
+          health_score: number | null
+          id: string
+          interactions_count: number
+          invoices_count: number
+          key_activities: Json
+          metadata: Json
+          payments_count: number
+          portal_visits_count: number
+          proposals_count: number
+          satisfaction_score: number | null
+          snapshot_period_end: string
+          snapshot_period_start: string
+          support_requests_count: number
+          usage_score: number | null
+          usage_source: string | null
+        }
+        Insert: {
+          assignments_count?: number
+          business_id?: string | null
+          contact_id?: string | null
+          content_engagement_count?: number
+          conversations_count?: number
+          created_at?: string
+          demos_count?: number
+          engagement_score?: number | null
+          health_score?: number | null
+          id?: string
+          interactions_count?: number
+          invoices_count?: number
+          key_activities?: Json
+          metadata?: Json
+          payments_count?: number
+          portal_visits_count?: number
+          proposals_count?: number
+          satisfaction_score?: number | null
+          snapshot_period_end: string
+          snapshot_period_start: string
+          support_requests_count?: number
+          usage_score?: number | null
+          usage_source?: string | null
+        }
+        Update: {
+          assignments_count?: number
+          business_id?: string | null
+          contact_id?: string | null
+          content_engagement_count?: number
+          conversations_count?: number
+          created_at?: string
+          demos_count?: number
+          engagement_score?: number | null
+          health_score?: number | null
+          id?: string
+          interactions_count?: number
+          invoices_count?: number
+          key_activities?: Json
+          metadata?: Json
+          payments_count?: number
+          portal_visits_count?: number
+          proposals_count?: number
+          satisfaction_score?: number | null
+          snapshot_period_end?: string
+          snapshot_period_start?: string
+          support_requests_count?: number
+          usage_score?: number | null
+          usage_source?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_usage_snapshots_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_usage_snapshots_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_usage_snapshots_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
           },
         ]
       }

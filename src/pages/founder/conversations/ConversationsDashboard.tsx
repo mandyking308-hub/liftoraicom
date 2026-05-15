@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import FounderLayout from "@/components/founder/FounderLayout";
 import MultilingualIntelligencePanel from "@/components/founder/global/MultilingualIntelligencePanel";
 import MultiChannelInboxPanel from "@/components/founder/channels/MultiChannelInboxPanel";
+import HumanAccountManagerPanel from "@/components/founder/customer/HumanAccountManagerPanel";
 import CustomerJourneyControlBoard from "@/components/founder/command/CustomerJourneyControlBoard";
 import SocialEngagementInboxPanel from "@/components/founder/social/SocialEngagementInboxPanel";
 import SupportKnowledgeAgentPanel from "@/components/founder/support/SupportKnowledgeAgentPanel";
@@ -225,6 +226,7 @@ const ConversationsDashboard = () => {
         <LiveCommercialAgentsPanel />
         <MultilingualIntelligencePanel />
         <MultiChannelInboxPanel />
+        <HumanAccountManagerPanel />
         <CustomerJourneyControlBoard />
         <SocialEngagementInboxPanel />
         <SupportKnowledgeAgentPanel />
