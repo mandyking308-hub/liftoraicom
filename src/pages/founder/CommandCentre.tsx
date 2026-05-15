@@ -696,6 +696,8 @@ const CommandCentre = () => {
 
             <SystemModeBanner />
 
+            <StartHereOperatingPanel />
+
             {/* SECTION 3 — Current Next Actions */}
             <RunwayHeader n={3} title="Current Next Actions" icon={Sparkles} anchor="sec-next-actions" />
             <Section title="Today's founder actions" icon={Sparkles}>
