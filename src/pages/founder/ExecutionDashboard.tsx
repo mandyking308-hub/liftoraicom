@@ -1,4 +1,5 @@
 import FounderLayout from "@/components/founder/FounderLayout";
+import InternalOperatingSchedulesPanel from "@/components/founder/operations/InternalOperatingSchedulesPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -181,6 +182,7 @@ const ExecutionDashboard = () => {
             </DialogContent>
           </Dialog>
         </div>
+        <InternalOperatingSchedulesPanel />
 
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
