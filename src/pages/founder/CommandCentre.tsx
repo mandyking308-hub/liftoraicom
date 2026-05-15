@@ -6,6 +6,7 @@ import ContractsProcurementControlPanel from "@/components/founder/legal/Contrac
 import PeopleAccessTrainingPanel from "@/components/founder/security/PeopleAccessTrainingPanel";
 import RiskInsuranceIncidentPanel from "@/components/founder/risk/RiskInsuranceIncidentPanel";
 import ProductRoadmapQAReleasePanel from "@/components/founder/product/ProductRoadmapQAReleasePanel";
+import AIGovernanceQualityPanel from "@/components/founder/governance/AIGovernanceQualityPanel";
 import LiftorCapabilities from "@/components/founder/LiftorCapabilities";
 import AgentOrchestration from "@/components/founder/AgentOrchestration";
 import SystemModeBanner from "@/components/founder/SystemModeBanner";
@@ -1589,6 +1590,7 @@ const CommandCentre = () => {
     <div className="max-w-7xl mx-auto px-4 pb-6"><PeopleAccessTrainingPanel /></div>
     <div className="max-w-7xl mx-auto px-4 pb-6"><RiskInsuranceIncidentPanel /></div>
     <div className="max-w-7xl mx-auto px-4 pb-6"><ProductRoadmapQAReleasePanel /></div>
+    <div className="max-w-7xl mx-auto px-4 pb-6"><AIGovernanceQualityPanel /></div>
     </FounderLayout>
   );
 };
