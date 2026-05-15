@@ -977,6 +977,7 @@ const CommandCentre = () => {
               ]} />
             </Section>
             <CommercialHandoffPanel />
+            <RevenueOperationsPanel />
 
             {/* SECTION 11 — Suppliers / Assignments / Delivery */}
             <RunwayHeader n={11} title="Suppliers / Assignments / Delivery" icon={Briefcase} anchor="sec-delivery" />
@@ -988,6 +989,7 @@ const CommandCentre = () => {
                 { to: "/founder/deployments", label: "Deployments", icon: WorkflowIcon },
               ]} />
             </Section>
+            <RevenueOperationsPanel />
 
             {/* SECTION 12 — Integrations / External Systems */}
             <RunwayHeader n={12} title="Integrations / External Systems" icon={Plug} anchor="sec-integrations" />
