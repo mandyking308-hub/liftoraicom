@@ -3052,6 +3052,57 @@ export type Database = {
         }
         Relationships: []
       }
+      client_system_packages: {
+        Row: {
+          active: boolean
+          created_at: string
+          delivery_notes: string | null
+          description: string | null
+          id: string
+          included_modules: Json
+          metadata: Json
+          monthly_fee_max: number | null
+          monthly_fee_min: number | null
+          package_key: string
+          package_name: string
+          setup_fee_max: number | null
+          setup_fee_min: number | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          delivery_notes?: string | null
+          description?: string | null
+          id?: string
+          included_modules?: Json
+          metadata?: Json
+          monthly_fee_max?: number | null
+          monthly_fee_min?: number | null
+          package_key: string
+          package_name: string
+          setup_fee_max?: number | null
+          setup_fee_min?: number | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          delivery_notes?: string | null
+          description?: string | null
+          id?: string
+          included_modules?: Json
+          metadata?: Json
+          monthly_fee_max?: number | null
+          monthly_fee_min?: number | null
+          package_key?: string
+          package_name?: string
+          setup_fee_max?: number | null
+          setup_fee_min?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       commercial_handoff_reviews: {
         Row: {
           apply_status: string
