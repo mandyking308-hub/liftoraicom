@@ -1,5 +1,6 @@
 import FounderLayout from "@/components/founder/FounderLayout";
 import BusinessActivationWizardPanel from "@/components/founder/activation/BusinessActivationWizardPanel";
+import BusinessRehearsalSimulationPanel from "@/components/founder/activation/BusinessRehearsalSimulationPanel";
 import BusinessCapabilityMatrixPanel from "@/components/founder/operations/BusinessCapabilityMatrixPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";

@@ -7,6 +7,7 @@ import ProductRoadmapQAReleasePanel from "@/components/founder/product/ProductRo
 import CommandCentreModuleRegistryPanel from "@/components/founder/command/CommandCentreModuleRegistryPanel";
 import CommandCentreUsabilityReportPanel from "@/components/founder/command/CommandCentreUsabilityReportPanel";
 import BusinessActivationWizardPanel from "@/components/founder/activation/BusinessActivationWizardPanel";
+import BusinessRehearsalSimulationPanel from "@/components/founder/activation/BusinessRehearsalSimulationPanel";
 import BusinessCapabilityMatrixPanel from "@/components/founder/operations/BusinessCapabilityMatrixPanel";
 import CRMHealthIntegrityPanel from "@/components/founder/crm/CRMHealthIntegrityPanel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

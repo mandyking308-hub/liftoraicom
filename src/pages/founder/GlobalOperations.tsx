@@ -1,5 +1,6 @@
 import FounderLayout from "@/components/founder/FounderLayout";
 import BusinessActivationWizardPanel from "@/components/founder/activation/BusinessActivationWizardPanel";
+import BusinessRehearsalSimulationPanel from "@/components/founder/activation/BusinessRehearsalSimulationPanel";
 import GroupHQOperatingPanel from "@/components/founder/group/GroupHQOperatingPanel";
 import TreasuryCashflowControlPanel from "@/components/founder/finance/TreasuryCashflowControlPanel";
 import StrategicProspectingAgentPanel from "@/components/founder/prospecting/StrategicProspectingAgentPanel";
