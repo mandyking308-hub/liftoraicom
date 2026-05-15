@@ -13852,6 +13852,63 @@ export type Database = {
         }
         Relationships: []
       }
+      product_roadmap_items: {
+        Row: {
+          business_id: string | null
+          competitor_signal: boolean | null
+          created_at: string | null
+          customer_requested: boolean | null
+          description: string | null
+          id: string
+          item_type: string
+          metadata: Json | null
+          owner_agent_key: string | null
+          priority_level: string | null
+          product_name: string | null
+          related_contact_id: string | null
+          status: string | null
+          target_release_date: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          business_id?: string | null
+          competitor_signal?: boolean | null
+          created_at?: string | null
+          customer_requested?: boolean | null
+          description?: string | null
+          id?: string
+          item_type: string
+          metadata?: Json | null
+          owner_agent_key?: string | null
+          priority_level?: string | null
+          product_name?: string | null
+          related_contact_id?: string | null
+          status?: string | null
+          target_release_date?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          business_id?: string | null
+          competitor_signal?: boolean | null
+          created_at?: string | null
+          customer_requested?: boolean | null
+          description?: string | null
+          id?: string
+          item_type?: string
+          metadata?: Json | null
+          owner_agent_key?: string | null
+          priority_level?: string | null
+          product_name?: string | null
+          related_contact_id?: string | null
+          status?: string | null
+          target_release_date?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -14554,6 +14611,102 @@ export type Database = {
           secret_present?: boolean
           updated_at?: string
           usage_scope?: string | null
+        }
+        Relationships: []
+      }
+      qa_test_cases: {
+        Row: {
+          business_id: string | null
+          created_at: string | null
+          expected_result: string | null
+          id: string
+          last_result: string | null
+          last_run_at: string | null
+          metadata: Json | null
+          module_key: string | null
+          status: string | null
+          test_name: string
+          test_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string | null
+          expected_result?: string | null
+          id?: string
+          last_result?: string | null
+          last_run_at?: string | null
+          metadata?: Json | null
+          module_key?: string | null
+          status?: string | null
+          test_name: string
+          test_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string | null
+          expected_result?: string | null
+          id?: string
+          last_result?: string | null
+          last_run_at?: string | null
+          metadata?: Json | null
+          module_key?: string | null
+          status?: string | null
+          test_name?: string
+          test_type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      release_plans: {
+        Row: {
+          approved_at: string | null
+          business_id: string | null
+          created_at: string | null
+          deployed_at: string | null
+          founder_approval_required: boolean | null
+          id: string
+          included_items: Json | null
+          metadata: Json | null
+          planned_release_date: string | null
+          qa_status: string | null
+          release_name: string
+          release_status: string | null
+          rollback_plan: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          business_id?: string | null
+          created_at?: string | null
+          deployed_at?: string | null
+          founder_approval_required?: boolean | null
+          id?: string
+          included_items?: Json | null
+          metadata?: Json | null
+          planned_release_date?: string | null
+          qa_status?: string | null
+          release_name: string
+          release_status?: string | null
+          rollback_plan?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          business_id?: string | null
+          created_at?: string | null
+          deployed_at?: string | null
+          founder_approval_required?: boolean | null
+          id?: string
+          included_items?: Json | null
+          metadata?: Json | null
+          planned_release_date?: string | null
+          qa_status?: string | null
+          release_name?: string
+          release_status?: string | null
+          rollback_plan?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }

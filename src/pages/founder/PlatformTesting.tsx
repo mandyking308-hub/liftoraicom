@@ -3,6 +3,7 @@ import LiftorMasterDryRunPanel from "@/components/founder/testing/LiftorMasterDr
 import LiftorMasterReconciliationPanel from "@/components/founder/testing/LiftorMasterReconciliationPanel";
 import FullManualFunctionControlPanel from "@/components/founder/command/FullManualFunctionControlPanel";
 import FounderLayout from "@/components/founder/FounderLayout";
+import ProductRoadmapQAReleasePanel from "@/components/founder/product/ProductRoadmapQAReleasePanel";
 import CommandCentreModuleRegistryPanel from "@/components/founder/command/CommandCentreModuleRegistryPanel";
 import BusinessCapabilityMatrixPanel from "@/components/founder/operations/BusinessCapabilityMatrixPanel";
 import CRMHealthIntegrityPanel from "@/components/founder/crm/CRMHealthIntegrityPanel";
@@ -945,6 +946,7 @@ const PlatformTesting = () => {
         <FullManualFunctionControlPanel />
         <CommandCentreModuleRegistryPanel />
         <BusinessCapabilityMatrixPanel />
+        <ProductRoadmapQAReleasePanel />
       </div>
     </FounderLayout>
   );
