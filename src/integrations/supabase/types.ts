@@ -12404,6 +12404,125 @@ export type Database = {
           },
         ]
       }
+      meeting_action_items: {
+        Row: {
+          action_owner: string | null
+          action_title: string
+          business_id: string | null
+          contact_id: string | null
+          created_at: string
+          due_at: string | null
+          founder_review_required: boolean
+          id: string
+          meeting_id: string | null
+          owner_agent_key: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          action_owner?: string | null
+          action_title: string
+          business_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          due_at?: string | null
+          founder_review_required?: boolean
+          id?: string
+          meeting_id?: string | null
+          owner_agent_key?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          action_owner?: string | null
+          action_title?: string
+          business_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          due_at?: string | null
+          founder_review_required?: boolean
+          id?: string
+          meeting_id?: string | null
+          owner_agent_key?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meeting_action_items_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "meeting_call_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meeting_call_records: {
+        Row: {
+          attendees: Json
+          business_id: string | null
+          calendar_event_id: string | null
+          commitments: Json
+          contact_id: string | null
+          created_at: string
+          decisions: Json
+          followups: Json
+          founder_review_required: boolean
+          id: string
+          meeting_at: string | null
+          meeting_status: string
+          meeting_title: string
+          meeting_type: string | null
+          organisation_id: string | null
+          risk_flags: Json
+          summary: string | null
+          transcript: string | null
+          updated_at: string
+        }
+        Insert: {
+          attendees?: Json
+          business_id?: string | null
+          calendar_event_id?: string | null
+          commitments?: Json
+          contact_id?: string | null
+          created_at?: string
+          decisions?: Json
+          followups?: Json
+          founder_review_required?: boolean
+          id?: string
+          meeting_at?: string | null
+          meeting_status?: string
+          meeting_title: string
+          meeting_type?: string | null
+          organisation_id?: string | null
+          risk_flags?: Json
+          summary?: string | null
+          transcript?: string | null
+          updated_at?: string
+        }
+        Update: {
+          attendees?: Json
+          business_id?: string | null
+          calendar_event_id?: string | null
+          commitments?: Json
+          contact_id?: string | null
+          created_at?: string
+          decisions?: Json
+          followups?: Json
+          founder_review_required?: boolean
+          id?: string
+          meeting_at?: string | null
+          meeting_status?: string
+          meeting_title?: string
+          meeting_type?: string | null
+          organisation_id?: string | null
+          risk_flags?: Json
+          summary?: string | null
+          transcript?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           ai_generated: boolean
