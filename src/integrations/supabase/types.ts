@@ -8403,6 +8403,72 @@ export type Database = {
         }
         Relationships: []
       }
+      revenue_operations_reviews: {
+        Row: {
+          apply_status: string
+          assignment_id: string | null
+          blockers: Json
+          business_id: string | null
+          contact_id: string | null
+          created_at: string
+          current_state: string | null
+          deal_id: string | null
+          estimated_value: number | null
+          founder_review_required: boolean
+          id: string
+          invoice_id: string | null
+          metadata: Json
+          payment_id: string | null
+          priority_level: string
+          recommended_action: string | null
+          review_type: string
+          supplier_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          apply_status?: string
+          assignment_id?: string | null
+          blockers?: Json
+          business_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          current_state?: string | null
+          deal_id?: string | null
+          estimated_value?: number | null
+          founder_review_required?: boolean
+          id?: string
+          invoice_id?: string | null
+          metadata?: Json
+          payment_id?: string | null
+          priority_level?: string
+          recommended_action?: string | null
+          review_type: string
+          supplier_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          apply_status?: string
+          assignment_id?: string | null
+          blockers?: Json
+          business_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          current_state?: string | null
+          deal_id?: string | null
+          estimated_value?: number | null
+          founder_review_required?: boolean
+          id?: string
+          invoice_id?: string | null
+          metadata?: Json
+          payment_id?: string | null
+          priority_level?: string
+          recommended_action?: string | null
+          review_type?: string
+          supplier_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       revenue_records: {
         Row: {
           client_organisation: string

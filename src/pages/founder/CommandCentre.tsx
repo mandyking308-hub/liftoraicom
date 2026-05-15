@@ -49,6 +49,7 @@ import AIAgentOrchestratorPanel from "@/components/founder/agents/AIAgentOrchest
 import AIConversationDraftingPanel from "@/components/founder/agents/AIConversationDraftingPanel";
 import FounderApprovalConsole from "@/components/founder/approvals/FounderApprovalConsole";
 import CommercialHandoffPanel from "@/components/founder/commercial/CommercialHandoffPanel";
+import RevenueOperationsPanel from "@/components/founder/finance/RevenueOperationsPanel";
 import CRMContact360Panel from "@/components/founder/crm/CRMContact360Panel";
 import {
   Building2, Bot, Send, Mail, Inbox as InboxIcon, MessageSquare, FileSignature,
@@ -976,6 +977,7 @@ const CommandCentre = () => {
               ]} />
             </Section>
             <CommercialHandoffPanel />
+            <RevenueOperationsPanel />
 
             {/* SECTION 11 — Suppliers / Assignments / Delivery */}
             <RunwayHeader n={11} title="Suppliers / Assignments / Delivery" icon={Briefcase} anchor="sec-delivery" />
@@ -987,6 +989,7 @@ const CommandCentre = () => {
                 { to: "/founder/deployments", label: "Deployments", icon: WorkflowIcon },
               ]} />
             </Section>
+            <RevenueOperationsPanel />
 
             {/* SECTION 12 — Integrations / External Systems */}
             <RunwayHeader n={12} title="Integrations / External Systems" icon={Plug} anchor="sec-integrations" />
