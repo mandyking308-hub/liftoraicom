@@ -1,6 +1,7 @@
 import FounderLayout from "@/components/founder/FounderLayout";
 import { supabase } from "@/integrations/supabase/client";
 import LearningOptimisationEnginePanel from "@/components/founder/optimisation/LearningOptimisationEnginePanel";
+import SocialAnalyticsTrendPanel from "@/components/founder/social/SocialAnalyticsTrendPanel";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -277,6 +278,7 @@ const OptimisationDashboard = () => {
             )}
           </CardContent>
         </Card>
+        <SocialAnalyticsTrendPanel />
       </div>
     </FounderLayout>
   );

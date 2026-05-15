@@ -4,6 +4,7 @@ import SocialContentFactoryPanel from "@/components/founder/social/SocialContent
 import SocialRepurposingEnginePanel from "@/components/founder/social/SocialRepurposingEnginePanel";
 import SocialSchedulerExportPanel from "@/components/founder/social/SocialSchedulerExportPanel";
 import SocialEngagementInboxPanel from "@/components/founder/social/SocialEngagementInboxPanel";
+import SocialAnalyticsTrendPanel from "@/components/founder/social/SocialAnalyticsTrendPanel";
 
 const SocialBrain = () => {
   return (
@@ -18,6 +19,7 @@ const SocialBrain = () => {
         <SocialRepurposingEnginePanel />
         <SocialSchedulerExportPanel />
         <SocialEngagementInboxPanel />
+        <SocialAnalyticsTrendPanel />
       </div>
     </FounderLayout>
   );

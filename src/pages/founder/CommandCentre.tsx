@@ -78,6 +78,7 @@ import SocialContentFactoryPanel from "@/components/founder/social/SocialContent
 import SocialRepurposingEnginePanel from "@/components/founder/social/SocialRepurposingEnginePanel";
 import SocialSchedulerExportPanel from "@/components/founder/social/SocialSchedulerExportPanel";
 import SocialEngagementInboxPanel from "@/components/founder/social/SocialEngagementInboxPanel";
+import SocialAnalyticsTrendPanel from "@/components/founder/social/SocialAnalyticsTrendPanel";
 import { SecurityGovernancePanel } from "@/components/founder/security/SecurityGovernancePanel";
 import { ProductisationReadinessPanel } from "@/components/founder/revenue/ProductisationReadinessPanel";
 import BusinessLaunchFactoryPanel from "@/components/founder/expansion/BusinessLaunchFactoryPanel";
@@ -1132,6 +1133,7 @@ const CommandCentre = () => {
             <SecurityGovernancePanel />
             <LearningOptimisationEnginePanel />
             <SelfHealingMonitoringPanel />
+            <SocialAnalyticsTrendPanel />
 
             {/* SECTION 14 — Knowledge / Manual / Build Log */}
             <InternalOperatingSchedulesPanel />

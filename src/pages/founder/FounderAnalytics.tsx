@@ -2,6 +2,7 @@ import FounderLayout from "@/components/founder/FounderLayout";
 import { supabase } from "@/integrations/supabase/client";
 import LearningOptimisationEnginePanel from "@/components/founder/optimisation/LearningOptimisationEnginePanel";
 import PortfolioIntelligenceBrainPanel from "@/components/founder/strategy/PortfolioIntelligenceBrainPanel";
+import SocialAnalyticsTrendPanel from "@/components/founder/social/SocialAnalyticsTrendPanel";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -226,6 +227,7 @@ const FounderAnalytics = () => {
             )}
           </CardContent>
         </Card>
+        <SocialAnalyticsTrendPanel />
       </div>
     </FounderLayout>
   );
