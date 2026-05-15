@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import FounderLayout from "@/components/founder/FounderLayout";
 import CRMCustomerLifecyclePanel from "@/components/founder/crm/CRMCustomerLifecyclePanel";
 import AIAgentOrchestratorPanel from "@/components/founder/agents/AIAgentOrchestratorPanel";
+import FounderApprovalConsole from "@/components/founder/approvals/FounderApprovalConsole";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -133,6 +134,7 @@ const PriorityDashboard = () => {
         </Tabs>
         <CRMCustomerLifecyclePanel />
         <AIAgentOrchestratorPanel />
+        <FounderApprovalConsole />
       </div>
     </FounderLayout>
   );
