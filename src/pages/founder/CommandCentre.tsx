@@ -823,6 +823,40 @@ const CommandCentre = () => {
 
             {/* SECTION 5 — AI Agent Control Room */}
             <RunwayHeader n={5} title="AI Agent Control Room" icon={Bot} anchor="sec-agents" />
+            <Section
+              title="Social Brain status (internal-only)"
+              icon={MessageSquare}
+              action={<Link to="/founder/social"><Button size="sm" variant="ghost">Open Social Brain <ArrowRight size={12} /></Button></Link>}
+            >
+              <div className="flex flex-wrap items-center gap-2 mb-3 text-[11px]">
+                <Badge variant="outline" className={socialProfiles.length > 0 ? "border-green-500/40 text-green-400" : "border-yellow-500/40 text-yellow-400"}>
+                  {socialProfiles.length > 0 ? `${socialProfiles.length} profile${socialProfiles.length === 1 ? "" : "s"} configured` : "No profile yet"}
+                </Badge>
+                <Badge variant="outline" className="border-border/60 text-muted-foreground">No-publish · internal-only</Badge>
+                <Badge variant="outline" className={socialBrainSummary?.metricoolEnabled ? "border-green-500/40 text-green-400" : "border-border/60 text-muted-foreground"}>
+                  Metricool gate: {socialBrainSummary?.metricoolEnabled ? "enabled" : "disabled"}
+                </Badge>
+                <Badge variant="outline" className={socialBrainSummary?.manychatEnabled ? "border-green-500/40 text-green-400" : "border-border/60 text-muted-foreground"}>
+                  ManyChat DM gate: {socialBrainSummary?.manychatEnabled ? "enabled" : "disabled"}
+                </Badge>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+                <StatTile label="Profiles" value={socialProfiles.length} icon={MessageSquare} tone={socialProfiles.length > 0 ? "good" : "warn"} to="/founder/social" />
+                <StatTile label="Content drafts" value={socialBrainSummary?.draftsTotal ?? 0} icon={FileSignature} to="/founder/social" />
+                <StatTile label="Pending approvals" value={socialBrainSummary?.approvalsPending ?? 0} icon={ClipboardCheck} tone={(socialBrainSummary?.approvalsPending ?? 0) > 0 ? "warn" : "default"} to="/founder/social" />
+                <StatTile label="Scheduler queue" value={socialBrainSummary?.scheduleQueue ?? 0} icon={Clock} to="/founder/social" />
+                <StatTile label="Engagement events" value={socialBrainSummary?.engagementEvents ?? 0} icon={InboxIcon} to="/founder/conversations" />
+                <StatTile label="Trend watch" value={socialBrainSummary?.trendItems ?? 0} icon={TrendingUp} to="/founder/social" />
+              </div>
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs">
+                <p className="text-muted-foreground">
+                  Next action: {socialProfiles.length > 0
+                    ? "Generate 30-day social content pack for Neon Candy"
+                    : "Create a social profile for a business"}
+                </p>
+                <Link to="/founder/social"><Button size="sm" variant="outline"><Sparkles size={12} /> Open content factory</Button></Link>
+              </div>
+            </Section>
             <Section title="AI workers" icon={Bot} action={<Link to="/founder/agents"><Button size="sm" variant="ghost">Open agents <ArrowRight size={12} /></Button></Link>}>
               <div id="sec-agents" className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2 scroll-mt-24">
                 {workers.map((w) => (
