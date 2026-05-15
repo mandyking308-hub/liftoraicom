@@ -77,6 +77,60 @@ export type Database = {
         }
         Relationships: []
       }
+      accounting_close_tasks: {
+        Row: {
+          adviser_required: boolean | null
+          blockers: Json | null
+          business_id: string | null
+          created_at: string | null
+          due_date: string | null
+          entity_id: string | null
+          evidence_document_id: string | null
+          id: string
+          period_end: string | null
+          period_start: string | null
+          responsible_party: string | null
+          status: string | null
+          task_name: string
+          task_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          adviser_required?: boolean | null
+          blockers?: Json | null
+          business_id?: string | null
+          created_at?: string | null
+          due_date?: string | null
+          entity_id?: string | null
+          evidence_document_id?: string | null
+          id?: string
+          period_end?: string | null
+          period_start?: string | null
+          responsible_party?: string | null
+          status?: string | null
+          task_name: string
+          task_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          adviser_required?: boolean | null
+          blockers?: Json | null
+          business_id?: string | null
+          created_at?: string | null
+          due_date?: string | null
+          entity_id?: string | null
+          evidence_document_id?: string | null
+          id?: string
+          period_end?: string | null
+          period_start?: string | null
+          responsible_party?: string | null
+          status?: string | null
+          task_name?: string
+          task_type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       activity_log: {
         Row: {
           business_name: string
@@ -3563,6 +3617,134 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      cashflow_forecast_items: {
+        Row: {
+          amount: number
+          business_id: string | null
+          confidence: string | null
+          created_at: string | null
+          currency: string | null
+          entity_id: string | null
+          expected_date: string | null
+          forecast_id: string | null
+          id: string
+          item_label: string
+          item_type: string
+          notes: string | null
+          source_id: string | null
+          source_table: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          amount?: number
+          business_id?: string | null
+          confidence?: string | null
+          created_at?: string | null
+          currency?: string | null
+          entity_id?: string | null
+          expected_date?: string | null
+          forecast_id?: string | null
+          id?: string
+          item_label: string
+          item_type: string
+          notes?: string | null
+          source_id?: string | null
+          source_table?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          business_id?: string | null
+          confidence?: string | null
+          created_at?: string | null
+          currency?: string | null
+          entity_id?: string | null
+          expected_date?: string | null
+          forecast_id?: string | null
+          id?: string
+          item_label?: string
+          item_type?: string
+          notes?: string | null
+          source_id?: string | null
+          source_table?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cashflow_forecast_items_forecast_id_fkey"
+            columns: ["forecast_id"]
+            isOneToOne: false
+            referencedRelation: "cashflow_forecasts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cashflow_forecasts: {
+        Row: {
+          assumptions: Json | null
+          business_id: string | null
+          created_at: string | null
+          entity_id: string | null
+          expected_inflows: number | null
+          expected_outflows: number | null
+          forecast_name: string
+          forecast_status: string | null
+          founder_review_required: boolean | null
+          id: string
+          net_cash_position: number | null
+          opening_cash: number | null
+          period_end: string
+          period_start: string
+          risk_level: string | null
+          runway_months: number | null
+          tax_reserve: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          assumptions?: Json | null
+          business_id?: string | null
+          created_at?: string | null
+          entity_id?: string | null
+          expected_inflows?: number | null
+          expected_outflows?: number | null
+          forecast_name: string
+          forecast_status?: string | null
+          founder_review_required?: boolean | null
+          id?: string
+          net_cash_position?: number | null
+          opening_cash?: number | null
+          period_end: string
+          period_start: string
+          risk_level?: string | null
+          runway_months?: number | null
+          tax_reserve?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          assumptions?: Json | null
+          business_id?: string | null
+          created_at?: string | null
+          entity_id?: string | null
+          expected_inflows?: number | null
+          expected_outflows?: number | null
+          forecast_name?: string
+          forecast_status?: string | null
+          founder_review_required?: boolean | null
+          id?: string
+          net_cash_position?: number | null
+          opening_cash?: number | null
+          period_end?: string
+          period_start?: string
+          risk_level?: string | null
+          runway_months?: number | null
+          tax_reserve?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       cleanup_archive: {
         Row: {
@@ -9152,6 +9334,84 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      group_bank_accounts: {
+        Row: {
+          account_label: string
+          account_status: string | null
+          account_type: string | null
+          bank_name: string | null
+          business_id: string | null
+          country: string | null
+          created_at: string | null
+          credentials_stored: boolean | null
+          currency: string | null
+          current_balance_estimate: number | null
+          entity_id: string | null
+          id: string
+          last_reconciled_at: string | null
+          metadata: Json | null
+          never_display_credentials: boolean | null
+          notes: string | null
+          opening_balance: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          account_label: string
+          account_status?: string | null
+          account_type?: string | null
+          bank_name?: string | null
+          business_id?: string | null
+          country?: string | null
+          created_at?: string | null
+          credentials_stored?: boolean | null
+          currency?: string | null
+          current_balance_estimate?: number | null
+          entity_id?: string | null
+          id?: string
+          last_reconciled_at?: string | null
+          metadata?: Json | null
+          never_display_credentials?: boolean | null
+          notes?: string | null
+          opening_balance?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          account_label?: string
+          account_status?: string | null
+          account_type?: string | null
+          bank_name?: string | null
+          business_id?: string | null
+          country?: string | null
+          created_at?: string | null
+          credentials_stored?: boolean | null
+          currency?: string | null
+          current_balance_estimate?: number | null
+          entity_id?: string | null
+          id?: string
+          last_reconciled_at?: string | null
+          metadata?: Json | null
+          never_display_credentials?: boolean | null
+          notes?: string | null
+          opening_balance?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_bank_accounts_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_bank_accounts_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "group_entity_register"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       group_entity_register: {
         Row: {
