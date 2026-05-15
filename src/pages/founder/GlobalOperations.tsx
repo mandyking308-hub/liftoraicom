@@ -2,6 +2,8 @@ import FounderLayout from "@/components/founder/FounderLayout";
 import BusinessActivationWizardPanel from "@/components/founder/activation/BusinessActivationWizardPanel";
 import BusinessRehearsalSimulationPanel from "@/components/founder/activation/BusinessRehearsalSimulationPanel";
 import PreLiveBaselineControlPanel from "@/components/founder/activation/PreLiveBaselineControlPanel";
+import RevenueTargetOperatingPanel from "@/components/founder/revenue/RevenueTargetOperatingPanel";
+import FinalGoToUseReadinessPanel from "@/components/founder/command/FinalGoToUseReadinessPanel";
 import GroupHQOperatingPanel from "@/components/founder/group/GroupHQOperatingPanel";
 import TreasuryCashflowControlPanel from "@/components/founder/finance/TreasuryCashflowControlPanel";
 import StrategicProspectingAgentPanel from "@/components/founder/prospecting/StrategicProspectingAgentPanel";
@@ -168,6 +170,8 @@ const GlobalOperations = () => {
         <BusinessActivationWizardPanel />
         <BusinessRehearsalSimulationPanel />
         <PreLiveBaselineControlPanel />
+        <RevenueTargetOperatingPanel />
+        <FinalGoToUseReadinessPanel />
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2"><Globe size={24} className="text-primary" /> Global AI Operations</h1>
           <p className="text-muted-foreground text-sm mt-1">Platform-wide operational oversight across all client systems</p>
