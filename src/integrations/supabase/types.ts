@@ -5185,6 +5185,168 @@ export type Database = {
         }
         Relationships: []
       }
+      outbound_provider_campaign_mappings: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          last_error: string | null
+          last_synced_at: string | null
+          liftor_campaign_id: string | null
+          mapping_status: string
+          metadata: Json
+          provider_campaign_id: string | null
+          provider_campaign_name: string | null
+          provider_campaign_status: string | null
+          provider_id: string
+          provider_type: string
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_error?: string | null
+          last_synced_at?: string | null
+          liftor_campaign_id?: string | null
+          mapping_status?: string
+          metadata?: Json
+          provider_campaign_id?: string | null
+          provider_campaign_name?: string | null
+          provider_campaign_status?: string | null
+          provider_id: string
+          provider_type?: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_error?: string | null
+          last_synced_at?: string | null
+          liftor_campaign_id?: string | null
+          mapping_status?: string
+          metadata?: Json
+          provider_campaign_id?: string | null
+          provider_campaign_name?: string | null
+          provider_campaign_status?: string | null
+          provider_id?: string
+          provider_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outbound_provider_campaign_mappings_liftor_campaign_id_fkey"
+            columns: ["liftor_campaign_id"]
+            isOneToOne: false
+            referencedRelation: "outreach_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outbound_provider_campaign_mappings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "outbound_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      outbound_provider_events: {
+        Row: {
+          contact_id: string | null
+          created_at: string
+          error: string | null
+          id: string
+          normalized_payload: Json
+          operational_mutation_applied: boolean
+          processing_status: string
+          provider_campaign_id: string | null
+          provider_event_id: string | null
+          provider_event_type: string
+          provider_id: string | null
+          provider_lead_id: string | null
+          provider_type: string
+          queue_id: string | null
+          raw_payload: Json
+          received_at: string
+        }
+        Insert: {
+          contact_id?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          normalized_payload?: Json
+          operational_mutation_applied?: boolean
+          processing_status?: string
+          provider_campaign_id?: string | null
+          provider_event_id?: string | null
+          provider_event_type: string
+          provider_id?: string | null
+          provider_lead_id?: string | null
+          provider_type?: string
+          queue_id?: string | null
+          raw_payload?: Json
+          received_at?: string
+        }
+        Update: {
+          contact_id?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          normalized_payload?: Json
+          operational_mutation_applied?: boolean
+          processing_status?: string
+          provider_campaign_id?: string | null
+          provider_event_id?: string | null
+          provider_event_type?: string
+          provider_id?: string | null
+          provider_lead_id?: string | null
+          provider_type?: string
+          queue_id?: string | null
+          raw_payload?: Json
+          received_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outbound_provider_events_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outbound_provider_events_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+          {
+            foreignKeyName: "outbound_provider_events_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "outbound_providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outbound_provider_events_queue_id_fkey"
+            columns: ["queue_id"]
+            isOneToOne: false
+            referencedRelation: "blocked_sends_24h"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outbound_provider_events_queue_id_fkey"
+            columns: ["queue_id"]
+            isOneToOne: false
+            referencedRelation: "email_queue"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       outbound_providers: {
         Row: {
           created_at: string
