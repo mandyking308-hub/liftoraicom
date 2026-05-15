@@ -145,6 +145,7 @@ const GlobalOperations = () => {
         </div>
 
         <MultiBusinessOperatingLayerPanel />
+        <BusinessOperatingRunbookPanel />
         <BusinessKnowledgeBrainPanel />
         <PortfolioCommandCentrePanel />
         <InternalOperatingSchedulesPanel />
