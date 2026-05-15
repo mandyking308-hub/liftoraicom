@@ -1691,8 +1691,7 @@ function CommandCentreViewModeBar() {
 }
 
 function DiagnosticGate({ children }: { children: React.ReactNode }) {
-  const [, setMode] = useViewMode();
-  const [mode] = useViewMode();
+  const [mode, setMode] = useViewMode();
   if (mode !== "diagnostic") {
     return (
       <div className="max-w-7xl mx-auto px-4 pt-4 pb-8">
