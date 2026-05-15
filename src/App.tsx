@@ -103,6 +103,7 @@ import TemplateDetail from "./pages/founder/TemplateDetail";
 import PlatformExpansion from "./pages/founder/PlatformExpansion";
 import PlatformLaunchDetail from "./pages/founder/PlatformLaunchDetail";
 import FounderManual from "./pages/founder/FounderManual";
+import UserManualPage from "./pages/founder/UserManualPage";
 import ManualPageDetail from "./pages/founder/ManualPageDetail";
 import FullSystemMirror from "./pages/founder/FullSystemMirror";
 import BuildLog from "./pages/founder/BuildLog";
