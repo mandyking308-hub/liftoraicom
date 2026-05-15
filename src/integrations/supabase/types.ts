@@ -6555,6 +6555,80 @@ export type Database = {
           },
         ]
       }
+      provider_event_intake_reviews: {
+        Row: {
+          ai_draft_allowed: boolean
+          apply_status: string
+          business_id: string | null
+          campaign_id: string | null
+          confidence: number | null
+          contact_email: string | null
+          contact_id: string | null
+          created_at: string
+          detected_intent: string | null
+          founder_review_required: boolean
+          id: string
+          metadata: Json
+          normalized_event_type: string | null
+          outbound_send_allowed: boolean
+          provider_campaign_id: string | null
+          provider_event_id: string | null
+          provider_type: string
+          recommended_action: string | null
+          updated_at: string
+        }
+        Insert: {
+          ai_draft_allowed?: boolean
+          apply_status?: string
+          business_id?: string | null
+          campaign_id?: string | null
+          confidence?: number | null
+          contact_email?: string | null
+          contact_id?: string | null
+          created_at?: string
+          detected_intent?: string | null
+          founder_review_required?: boolean
+          id?: string
+          metadata?: Json
+          normalized_event_type?: string | null
+          outbound_send_allowed?: boolean
+          provider_campaign_id?: string | null
+          provider_event_id?: string | null
+          provider_type?: string
+          recommended_action?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ai_draft_allowed?: boolean
+          apply_status?: string
+          business_id?: string | null
+          campaign_id?: string | null
+          confidence?: number | null
+          contact_email?: string | null
+          contact_id?: string | null
+          created_at?: string
+          detected_intent?: string | null
+          founder_review_required?: boolean
+          id?: string
+          metadata?: Json
+          normalized_event_type?: string | null
+          outbound_send_allowed?: boolean
+          provider_campaign_id?: string | null
+          provider_event_id?: string | null
+          provider_type?: string
+          recommended_action?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_event_intake_reviews_provider_event_id_fkey"
+            columns: ["provider_event_id"]
+            isOneToOne: false
+            referencedRelation: "outbound_provider_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reputation_events: {
         Row: {
           contact_id: string | null
