@@ -1,4 +1,5 @@
 import FounderLayout from "@/components/founder/FounderLayout";
+import CostCreditsMarginControlPanel from "@/components/founder/finance/CostCreditsMarginControlPanel";
 import { supabase } from "@/integrations/supabase/client";
 import LearningOptimisationEnginePanel from "@/components/founder/optimisation/LearningOptimisationEnginePanel";
 import HumanAccountManagerPanel from "@/components/founder/customer/HumanAccountManagerPanel";
@@ -234,6 +235,7 @@ const FounderAnalytics = () => {
           </CardContent>
         </Card>
         <SocialAnalyticsTrendPanel />
+        <CostCreditsMarginControlPanel />
       </div>
     </FounderLayout>
   );
