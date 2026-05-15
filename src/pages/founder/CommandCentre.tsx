@@ -43,6 +43,7 @@ import CRMInteractionSourceAdaptersPanel from "@/components/founder/crm/CRMInter
 import CRMConversationBridgePanel from "@/components/founder/crm/CRMConversationBridgePanel";
 import CRMCustomerLifecyclePanel from "@/components/founder/crm/CRMCustomerLifecyclePanel";
 import CRMHealthIntegrityPanel from "@/components/founder/crm/CRMHealthIntegrityPanel";
+import CRMCustomerMemoryDashboard from "@/components/founder/crm/CRMCustomerMemoryDashboard";
 import CRMContact360Panel from "@/components/founder/crm/CRMContact360Panel";
 import {
   Building2, Bot, Send, Mail, Inbox as InboxIcon, MessageSquare, FileSignature,
@@ -910,6 +911,7 @@ const CommandCentre = () => {
                 { to: "/founder/sending", label: "Sending Health / Inboxes", icon: Mail },
                 { to: "/founder/organisations", label: "Organisations", icon: Building2 },
               ]} />
+              <CRMCustomerMemoryDashboard />
               <CRMInteractionLedgerPanel />
               <CRMInteractionMatchPreviewPanel />
               <CRMInteractionSourceAdaptersPanel />
