@@ -942,6 +942,7 @@ const PlatformTesting = () => {
         <CRMHealthIntegrityPanel />
         <LiftorMasterDryRunPanel />
         <LiftorMasterReconciliationPanel />
+        <FullManualFunctionControlPanel />
         <CommandCentreModuleRegistryPanel />
         <BusinessCapabilityMatrixPanel />
       </div>
