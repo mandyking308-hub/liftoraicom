@@ -1,6 +1,6 @@
 // Liftor User Manual — plain-English operating guide (separate from Founder/Technical Manual)
 
-export const LIFTOR_USER_MANUAL_VERSION = "1.2 — Operator + Rehearsal + Reset (15 May 2026)";
+export const LIFTOR_USER_MANUAL_VERSION = "1.3 — Operator + Rehearsal + Reset + Baseline (15 May 2026)";
 
 export interface ManualSection {
   number: number;
@@ -146,3 +146,22 @@ export const REHEARSAL_RESET_FLOW: ManualSection = {
   ].join(" "),
 };
 LIFTOR_FULL_GUIDE.push(REHEARSAL_RESET_FLOW);
+
+export const PRE_LIVE_BASELINE_FLOW: ManualSection = {
+  number: 78,
+  key: "pre-live-baseline",
+  title: "Final pre-live baseline",
+  body: [
+    "1) Run rehearsal (CREATE BUSINESS REHEARSAL → RUN BUSINESS REHEARSAL).",
+    "2) Reset rehearsal data (RESET REHEARSAL DATA) and run cleanliness check until 'Clean Real Mode' is green.",
+    "3) Open Pre-Live Baseline panel → Operating standards → Dry-run, then Create standards (CREATE BUSINESS OPERATING STANDARDS).",
+    "4) Review service / complaint / onboarding / renewal / win-back standards and escalation rules.",
+    "5) Click Dry-run baseline to see readiness score and blockers.",
+    "6) Fix any blockers (training, starter pack, approved templates, integrations).",
+    "7) Click Create baseline (CREATE PRE LIVE BASELINE) when readiness is ≥ 90% and zero blockers.",
+    "8) Confirm external gates remain LOCKED — they do not unlock automatically.",
+    "9) Only then approve internal live use in the Activation Wizard. Go-live is auto-blocked without a baseline.",
+    "10) Use rollback preview/apply (APPLY SAFE BUSINESS ROLLBACK) ONLY for safe internal config issues — real customer, CRM, communications, proposals, deals, invoices, payments, suppliers and documents are protected and never rolled back.",
+  ].join(" "),
+};
+LIFTOR_FULL_GUIDE.push(PRE_LIVE_BASELINE_FLOW);
