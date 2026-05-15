@@ -4620,6 +4620,124 @@ export type Database = {
         }
         Relationships: []
       }
+      creative_asset_library: {
+        Row: {
+          approved_for_ads: boolean
+          approved_for_proposals: boolean
+          approved_for_social: boolean
+          approved_for_website: boolean
+          asset_name: string
+          asset_status: string
+          asset_type: string
+          business_id: string | null
+          created_at: string
+          description: string | null
+          expires_at: string | null
+          external_url: string | null
+          id: string
+          metadata: Json
+          storage_url: string | null
+          tags: Json
+          thumbnail_url: string | null
+          updated_at: string
+          usage_rights: string | null
+        }
+        Insert: {
+          approved_for_ads?: boolean
+          approved_for_proposals?: boolean
+          approved_for_social?: boolean
+          approved_for_website?: boolean
+          asset_name: string
+          asset_status?: string
+          asset_type: string
+          business_id?: string | null
+          created_at?: string
+          description?: string | null
+          expires_at?: string | null
+          external_url?: string | null
+          id?: string
+          metadata?: Json
+          storage_url?: string | null
+          tags?: Json
+          thumbnail_url?: string | null
+          updated_at?: string
+          usage_rights?: string | null
+        }
+        Update: {
+          approved_for_ads?: boolean
+          approved_for_proposals?: boolean
+          approved_for_social?: boolean
+          approved_for_website?: boolean
+          asset_name?: string
+          asset_status?: string
+          asset_type?: string
+          business_id?: string | null
+          created_at?: string
+          description?: string | null
+          expires_at?: string | null
+          external_url?: string | null
+          id?: string
+          metadata?: Json
+          storage_url?: string | null
+          tags?: Json
+          thumbnail_url?: string | null
+          updated_at?: string
+          usage_rights?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creative_asset_library_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      creative_asset_usage: {
+        Row: {
+          asset_id: string
+          business_id: string | null
+          id: string
+          metadata: Json
+          platform_key: string | null
+          usage_type: string | null
+          used_at: string
+          used_in_id: string | null
+          used_in_table: string | null
+        }
+        Insert: {
+          asset_id: string
+          business_id?: string | null
+          id?: string
+          metadata?: Json
+          platform_key?: string | null
+          usage_type?: string | null
+          used_at?: string
+          used_in_id?: string | null
+          used_in_table?: string | null
+        }
+        Update: {
+          asset_id?: string
+          business_id?: string | null
+          id?: string
+          metadata?: Json
+          platform_key?: string | null
+          usage_type?: string | null
+          used_at?: string
+          used_in_id?: string | null
+          used_in_table?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creative_asset_usage_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "creative_asset_library"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_conversation_bridge_reviews: {
         Row: {
           apply_blockers: Json
