@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import FounderLayout from "@/components/founder/FounderLayout";
 import CRMCustomerLifecyclePanel from "@/components/founder/crm/CRMCustomerLifecyclePanel";
+import AIAgentOrchestratorPanel from "@/components/founder/agents/AIAgentOrchestratorPanel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -131,6 +132,7 @@ const PriorityDashboard = () => {
           </TabsContent>
         </Tabs>
         <CRMCustomerLifecyclePanel />
+        <AIAgentOrchestratorPanel />
       </div>
     </FounderLayout>
   );

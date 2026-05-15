@@ -4,6 +4,7 @@ import FounderLayout from "@/components/founder/FounderLayout";
 import CRMInteractionSourceAdaptersPanel from "@/components/founder/crm/CRMInteractionSourceAdaptersPanel";
 import CRMHealthIntegrityPanel from "@/components/founder/crm/CRMHealthIntegrityPanel";
 import AIAgentOperatingModelPanel from "@/components/founder/agents/AIAgentOperatingModelPanel";
+import AIAgentOrchestratorPanel from "@/components/founder/agents/AIAgentOrchestratorPanel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid } from "recharts";
 import { format } from "date-fns";
@@ -104,6 +105,7 @@ const SystemHealth = () => {
         </div>
         <CRMHealthIntegrityPanel />
         <AIAgentOperatingModelPanel />
+        <AIAgentOrchestratorPanel />
       </div>
     </FounderLayout>
   );
