@@ -66,6 +66,7 @@ import GlobalAutonomyControlPanel from "@/components/founder/autonomy/GlobalAuto
 import MultilingualIntelligencePanel from "@/components/founder/global/MultilingualIntelligencePanel";
 import GlobalJurisdictionPolicyPanel from "@/components/founder/compliance/GlobalJurisdictionPolicyPanel";
 import MultiChannelInboxPanel from "@/components/founder/channels/MultiChannelInboxPanel";
+import AgentHandoverProtocolPanel from "@/components/founder/agents/AgentHandoverProtocolPanel";
 import GlobalOperatingClockPanel from "@/components/founder/global/GlobalOperatingClockPanel";
 import { SecurityGovernancePanel } from "@/components/founder/security/SecurityGovernancePanel";
 import { ProductisationReadinessPanel } from "@/components/founder/revenue/ProductisationReadinessPanel";
@@ -790,6 +791,7 @@ const CommandCentre = () => {
               <LiftorBusinessLiveRunPanel />
               <GlobalAutonomyControlPanel />
               <MultilingualIntelligencePanel />
+              <AgentHandoverProtocolPanel />
             </Section>
 
             {/* SECTION 6 — Outreach Runway */}
