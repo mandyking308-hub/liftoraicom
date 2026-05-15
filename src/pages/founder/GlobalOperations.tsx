@@ -3,6 +3,7 @@ import GroupHQOperatingPanel from "@/components/founder/group/GroupHQOperatingPa
 import TreasuryCashflowControlPanel from "@/components/founder/finance/TreasuryCashflowControlPanel";
 import StrategicProspectingAgentPanel from "@/components/founder/prospecting/StrategicProspectingAgentPanel";
 import ProductRoadmapQAReleasePanel from "@/components/founder/product/ProductRoadmapQAReleasePanel";
+import CostCreditsMarginControlPanel from "@/components/founder/finance/CostCreditsMarginControlPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -416,6 +417,7 @@ const GlobalOperations = () => {
     <div className="max-w-7xl mx-auto px-4 pb-6"><GroupHQOperatingPanel /></div>
     <div className="max-w-7xl mx-auto px-4 pb-6"><TreasuryCashflowControlPanel /></div>
    <div className="max-w-7xl mx-auto px-4 pb-6"><ProductRoadmapQAReleasePanel /></div>
+   <div className="max-w-7xl mx-auto px-4 pb-6"><CostCreditsMarginControlPanel /></div>
     </FounderLayout>
   );
 };
