@@ -2801,6 +2801,42 @@ export type Database = {
         }
         Relationships: []
       }
+      crm_hardening_test_runs: {
+        Row: {
+          created_at: string
+          details: Json
+          finished_at: string | null
+          id: string
+          run_label: string
+          started_at: string
+          status: string
+          summary: Json
+          triggered_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          details?: Json
+          finished_at?: string | null
+          id?: string
+          run_label: string
+          started_at?: string
+          status?: string
+          summary?: Json
+          triggered_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          details?: Json
+          finished_at?: string | null
+          id?: string
+          run_label?: string
+          started_at?: string
+          status?: string
+          summary?: Json
+          triggered_by?: string | null
+        }
+        Relationships: []
+      }
       crm_integrity_findings: {
         Row: {
           auto_fix_available: boolean
