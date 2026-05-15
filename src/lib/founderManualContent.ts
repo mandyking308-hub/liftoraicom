@@ -42,6 +42,7 @@ export const generateManualMarkdown = (data: ManualLiveData): string => {
 0e. Full Session Record — Neon Candy Outreach Safety, Compliance, Queue, Tracking (13 May 2026)
 0f. Next Build Order — Do Not Skip (13 May 2026)
 0g. Smartlead Scale Engine Foundation — Read-Only Adapter, Mapping/Lead-Push Preview, Webhook Scaffold, Bulk Send Preview (15 May 2026)
+0h. CRM Customer Memory Backbone — Hardened (15 May 2026)
 0a. Credentials & Secrets Register
 1. Platform Overview
 2. Full Platform Architecture
