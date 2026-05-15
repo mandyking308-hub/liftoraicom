@@ -1,4 +1,5 @@
 import { useState } from "react";
+import LiftorMasterDryRunPanel from "@/components/founder/testing/LiftorMasterDryRunPanel";
 import FounderLayout from "@/components/founder/FounderLayout";
 import CRMHealthIntegrityPanel from "@/components/founder/crm/CRMHealthIntegrityPanel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -935,6 +936,7 @@ const PlatformTesting = () => {
           </TabsContent>
         </Tabs>
         <CRMHealthIntegrityPanel />
+        <LiftorMasterDryRunPanel />
       </div>
     </FounderLayout>
   );

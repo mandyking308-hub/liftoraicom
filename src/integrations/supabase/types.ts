@@ -6379,6 +6379,129 @@ export type Database = {
         }
         Relationships: []
       }
+      liftor_live_readiness_gates: {
+        Row: {
+          blocker_reason: string | null
+          created_at: string
+          gate_area: string
+          gate_key: string
+          gate_label: string
+          id: string
+          last_checked_at: string | null
+          metadata: Json
+          required_for_live: boolean
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          blocker_reason?: string | null
+          created_at?: string
+          gate_area: string
+          gate_key: string
+          gate_label: string
+          id?: string
+          last_checked_at?: string | null
+          metadata?: Json
+          required_for_live?: boolean
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          blocker_reason?: string | null
+          created_at?: string
+          gate_area?: string
+          gate_key?: string
+          gate_label?: string
+          id?: string
+          last_checked_at?: string | null
+          metadata?: Json
+          required_for_live?: boolean
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      liftor_operating_test_runs: {
+        Row: {
+          blockers: Json
+          completed_at: string | null
+          created_at: string
+          forbidden_operations_detected: Json
+          id: string
+          readiness_score: number | null
+          run_scope: string
+          scenario_results: Json
+          started_at: string
+          status: string
+        }
+        Insert: {
+          blockers?: Json
+          completed_at?: string | null
+          created_at?: string
+          forbidden_operations_detected?: Json
+          id?: string
+          readiness_score?: number | null
+          run_scope: string
+          scenario_results?: Json
+          started_at?: string
+          status?: string
+        }
+        Update: {
+          blockers?: Json
+          completed_at?: string | null
+          created_at?: string
+          forbidden_operations_detected?: Json
+          id?: string
+          readiness_score?: number | null
+          run_scope?: string
+          scenario_results?: Json
+          started_at?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      liftor_operating_test_scenarios: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string | null
+          expected_outputs: Json
+          forbidden_operations: Json
+          id: string
+          module_area: string
+          required_objects: Json
+          scenario_key: string
+          scenario_name: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          expected_outputs?: Json
+          forbidden_operations?: Json
+          id?: string
+          module_area: string
+          required_objects?: Json
+          scenario_key: string
+          scenario_name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          expected_outputs?: Json
+          forbidden_operations?: Json
+          id?: string
+          module_area?: string
+          required_objects?: Json
+          scenario_key?: string
+          scenario_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       maintenance_events: {
         Row: {
           created_at: string

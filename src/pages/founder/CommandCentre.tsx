@@ -50,6 +50,7 @@ import AIConversationDraftingPanel from "@/components/founder/agents/AIConversat
 import FounderApprovalConsole from "@/components/founder/approvals/FounderApprovalConsole";
 import CommercialHandoffPanel from "@/components/founder/commercial/CommercialHandoffPanel";
 import RevenueOperationsPanel from "@/components/founder/finance/RevenueOperationsPanel";
+import LiftorMasterDryRunPanel from "@/components/founder/testing/LiftorMasterDryRunPanel";
 import CRMContact360Panel from "@/components/founder/crm/CRMContact360Panel";
 import {
   Building2, Bot, Send, Mail, Inbox as InboxIcon, MessageSquare, FileSignature,
@@ -710,6 +711,7 @@ const CommandCentre = () => {
               </p>
             </Section>
             <FounderApprovalConsole />
+            <LiftorMasterDryRunPanel />
 
             {/* SECTION 4 — Liftor System Map / Master Index (collapsible) */}
             <RunwayHeader n={4} title="Liftor System Map / Master Index" icon={MapIcon} anchor="sec-map" />
@@ -1031,6 +1033,7 @@ const CommandCentre = () => {
                 { to: "/founder/executions", label: "Executions", icon: Activity },
               ]} />
             </Section>
+            <LiftorMasterDryRunPanel />
 
             {/* SECTION 14 — Knowledge / Manual / Build Log */}
             <RunwayHeader n={14} title="Knowledge / Manual / Build Log" icon={BookOpen} anchor="sec-knowledge" />

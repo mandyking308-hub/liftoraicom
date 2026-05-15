@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import LiftorMasterDryRunPanel from "@/components/founder/testing/LiftorMasterDryRunPanel";
 import { supabase } from "@/integrations/supabase/client";
 import FounderLayout from "@/components/founder/FounderLayout";
 import CRMInteractionSourceAdaptersPanel from "@/components/founder/crm/CRMInteractionSourceAdaptersPanel";
@@ -106,6 +107,7 @@ const SystemHealth = () => {
         <CRMHealthIntegrityPanel />
         <AIAgentOperatingModelPanel />
         <AIAgentOrchestratorPanel />
+        <LiftorMasterDryRunPanel />
       </div>
     </FounderLayout>
   );
