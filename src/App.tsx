@@ -103,6 +103,7 @@ import TemplateDetail from "./pages/founder/TemplateDetail";
 import PlatformExpansion from "./pages/founder/PlatformExpansion";
 import PlatformLaunchDetail from "./pages/founder/PlatformLaunchDetail";
 import FounderManual from "./pages/founder/FounderManual";
+import UserManualPage from "./pages/founder/UserManualPage";
 import ManualPageDetail from "./pages/founder/ManualPageDetail";
 import FullSystemMirror from "./pages/founder/FullSystemMirror";
 import BuildLog from "./pages/founder/BuildLog";
@@ -278,6 +279,7 @@ const App = () => (
             <Route path="/founder/expansion/:id" element={<FounderRoute><PlatformLaunchDetail /></FounderRoute>} />
             <Route path="/founder/manual" element={<FounderRoute><FounderManual /></FounderRoute>} />
             <Route path="/founder/manual/full" element={<FounderRoute><FullSystemMirror /></FounderRoute>} />
+            <Route path="/founder/manual/user" element={<FounderRoute><UserManualPage /></FounderRoute>} />
             <Route path="/founder/manual/:id" element={<FounderRoute><ManualPageDetail /></FounderRoute>} />
             <Route path="/founder/build-log" element={<FounderRoute><BuildLog /></FounderRoute>} />
             <Route path="/founder/revenue" element={<FounderRoute><FounderRevenue /></FounderRoute>} />

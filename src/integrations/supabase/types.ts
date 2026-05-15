@@ -3457,6 +3457,99 @@ export type Database = {
         }
         Relationships: []
       }
+      business_execution_starter_packs: {
+        Row: {
+          approved_at: string | null
+          approved_tone: string | null
+          automation_recommendations: Json
+          business_id: string | null
+          business_summary: string | null
+          complaints_flow: Json
+          created_at: string
+          email_templates: Json
+          founder_review_required: boolean
+          go_live_blockers: Json
+          icp_summary: string | null
+          id: string
+          marketing_assets_needed: Json
+          offers: Json
+          onboarding_flow: Json
+          pack_status: string
+          proposal_outline: string | null
+          prospecting_targets: Json
+          social_content_plan: Json
+          support_faqs: Json
+          survey_plan: Json
+          training_run_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_tone?: string | null
+          automation_recommendations?: Json
+          business_id?: string | null
+          business_summary?: string | null
+          complaints_flow?: Json
+          created_at?: string
+          email_templates?: Json
+          founder_review_required?: boolean
+          go_live_blockers?: Json
+          icp_summary?: string | null
+          id?: string
+          marketing_assets_needed?: Json
+          offers?: Json
+          onboarding_flow?: Json
+          pack_status?: string
+          proposal_outline?: string | null
+          prospecting_targets?: Json
+          social_content_plan?: Json
+          support_faqs?: Json
+          survey_plan?: Json
+          training_run_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_tone?: string | null
+          automation_recommendations?: Json
+          business_id?: string | null
+          business_summary?: string | null
+          complaints_flow?: Json
+          created_at?: string
+          email_templates?: Json
+          founder_review_required?: boolean
+          go_live_blockers?: Json
+          icp_summary?: string | null
+          id?: string
+          marketing_assets_needed?: Json
+          offers?: Json
+          onboarding_flow?: Json
+          pack_status?: string
+          proposal_outline?: string | null
+          prospecting_targets?: Json
+          social_content_plan?: Json
+          support_faqs?: Json
+          survey_plan?: Json
+          training_run_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_execution_starter_packs_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_execution_starter_packs_training_run_id_fkey"
+            columns: ["training_run_id"]
+            isOneToOne: false
+            referencedRelation: "business_training_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_knowledge_assets: {
         Row: {
           agent_visible: boolean
@@ -3585,6 +3678,92 @@ export type Database = {
             foreignKeyName: "business_knowledge_profiles_business_id_fkey"
             columns: ["business_id"]
             isOneToOne: true
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_knowledge_uploads: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          customer_visible_allowed: boolean
+          extracted_actions: Json
+          extracted_customer_rules: Json
+          extracted_offers: Json
+          extracted_risks: Json
+          extracted_templates: Json
+          extracted_topics: Json
+          founder_review_required: boolean
+          id: string
+          metadata: Json
+          privacy_level: string
+          processed_at: string | null
+          processing_status: string
+          source_kind: string
+          source_url: string | null
+          storage_url: string | null
+          summary: string | null
+          updated_at: string
+          upload_status: string
+          upload_title: string
+          upload_type: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          customer_visible_allowed?: boolean
+          extracted_actions?: Json
+          extracted_customer_rules?: Json
+          extracted_offers?: Json
+          extracted_risks?: Json
+          extracted_templates?: Json
+          extracted_topics?: Json
+          founder_review_required?: boolean
+          id?: string
+          metadata?: Json
+          privacy_level?: string
+          processed_at?: string | null
+          processing_status?: string
+          source_kind: string
+          source_url?: string | null
+          storage_url?: string | null
+          summary?: string | null
+          updated_at?: string
+          upload_status?: string
+          upload_title: string
+          upload_type: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          customer_visible_allowed?: boolean
+          extracted_actions?: Json
+          extracted_customer_rules?: Json
+          extracted_offers?: Json
+          extracted_risks?: Json
+          extracted_templates?: Json
+          extracted_topics?: Json
+          founder_review_required?: boolean
+          id?: string
+          metadata?: Json
+          privacy_level?: string
+          processed_at?: string | null
+          processing_status?: string
+          source_kind?: string
+          source_url?: string | null
+          storage_url?: string | null
+          summary?: string | null
+          updated_at?: string
+          upload_status?: string
+          upload_title?: string
+          upload_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_knowledge_uploads_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
             referencedRelation: "businesses"
             referencedColumns: ["id"]
           },
@@ -4323,6 +4502,86 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "business_sourcing_briefs_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_training_runs: {
+        Row: {
+          agents_trained: Json
+          approved_at: string | null
+          brand_voice_summary: string | null
+          business_id: string | null
+          business_summary: string | null
+          created_at: string
+          customer_summary: string | null
+          founder_review_required: boolean
+          id: string
+          included_upload_ids: Json
+          marketing_summary: string | null
+          metadata: Json
+          offer_summary: string | null
+          operating_rules_summary: string | null
+          readiness_score: number | null
+          risk_summary: string | null
+          support_summary: string | null
+          templates_created: Json
+          training_name: string
+          training_status: string
+          updated_at: string
+        }
+        Insert: {
+          agents_trained?: Json
+          approved_at?: string | null
+          brand_voice_summary?: string | null
+          business_id?: string | null
+          business_summary?: string | null
+          created_at?: string
+          customer_summary?: string | null
+          founder_review_required?: boolean
+          id?: string
+          included_upload_ids?: Json
+          marketing_summary?: string | null
+          metadata?: Json
+          offer_summary?: string | null
+          operating_rules_summary?: string | null
+          readiness_score?: number | null
+          risk_summary?: string | null
+          support_summary?: string | null
+          templates_created?: Json
+          training_name: string
+          training_status?: string
+          updated_at?: string
+        }
+        Update: {
+          agents_trained?: Json
+          approved_at?: string | null
+          brand_voice_summary?: string | null
+          business_id?: string | null
+          business_summary?: string | null
+          created_at?: string
+          customer_summary?: string | null
+          founder_review_required?: boolean
+          id?: string
+          included_upload_ids?: Json
+          marketing_summary?: string | null
+          metadata?: Json
+          offer_summary?: string | null
+          operating_rules_summary?: string | null
+          readiness_score?: number | null
+          risk_summary?: string | null
+          support_summary?: string | null
+          templates_created?: Json
+          training_name?: string
+          training_status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_training_runs_business_id_fkey"
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
