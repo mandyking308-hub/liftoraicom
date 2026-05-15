@@ -9804,6 +9804,51 @@ export type Database = {
         }
         Relationships: []
       }
+      smartlead_activation_checklist: {
+        Row: {
+          blocker_reason: string | null
+          business_id: string | null
+          checklist_key: string
+          checklist_label: string
+          created_at: string
+          id: string
+          last_checked_at: string | null
+          liftor_campaign_id: string | null
+          metadata: Json
+          provider_campaign_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          blocker_reason?: string | null
+          business_id?: string | null
+          checklist_key: string
+          checklist_label: string
+          created_at?: string
+          id?: string
+          last_checked_at?: string | null
+          liftor_campaign_id?: string | null
+          metadata?: Json
+          provider_campaign_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          blocker_reason?: string | null
+          business_id?: string | null
+          checklist_key?: string
+          checklist_label?: string
+          created_at?: string
+          id?: string
+          last_checked_at?: string | null
+          liftor_campaign_id?: string | null
+          metadata?: Json
+          provider_campaign_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       strategy_insights: {
         Row: {
           category: string

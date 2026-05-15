@@ -16,6 +16,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import OutboundProviderEnginePanel from "@/components/founder/integrations/OutboundProviderEnginePanel";
 import ControlledExternalActionGatesPanel from "@/components/founder/operations/ControlledExternalActionGatesPanel";
+import SmartleadControlledActivationPanel from "@/components/founder/integrations/SmartleadControlledActivationPanel";
 import OutboundChannelPolicyPanel from "@/components/founder/integrations/OutboundChannelPolicyPanel";
 import BulkSendEngineBlueprint from "@/components/founder/integrations/BulkSendEngineBlueprint";
 import SmartleadCampaignMappingPreview from "@/components/founder/integrations/SmartleadCampaignMappingPreview";
@@ -274,6 +275,7 @@ const IntegrationDirectory = () => {
           </Card>
         )}
         <ControlledExternalActionGatesPanel />
+        <SmartleadControlledActivationPanel />
       </div>
     </FounderLayout>
   );
