@@ -4446,6 +4446,91 @@ export type Database = {
           },
         ]
       }
+      complaint_resolution_plans: {
+        Row: {
+          approved_at: string | null
+          business_id: string | null
+          complaint_id: string | null
+          created_at: string
+          customer_facing_response: string | null
+          dispute_id: string | null
+          follow_up_schedule: Json
+          founder_review_required: boolean
+          goodwill_options: Json
+          id: string
+          internal_actions: Json
+          metadata: Json
+          plan_status: string
+          recommended_human_touch: string | null
+          resolution_summary: string | null
+          response_sent_at: string | null
+          retention_risk: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          business_id?: string | null
+          complaint_id?: string | null
+          created_at?: string
+          customer_facing_response?: string | null
+          dispute_id?: string | null
+          follow_up_schedule?: Json
+          founder_review_required?: boolean
+          goodwill_options?: Json
+          id?: string
+          internal_actions?: Json
+          metadata?: Json
+          plan_status?: string
+          recommended_human_touch?: string | null
+          resolution_summary?: string | null
+          response_sent_at?: string | null
+          retention_risk?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          business_id?: string | null
+          complaint_id?: string | null
+          created_at?: string
+          customer_facing_response?: string | null
+          dispute_id?: string | null
+          follow_up_schedule?: Json
+          founder_review_required?: boolean
+          goodwill_options?: Json
+          id?: string
+          internal_actions?: Json
+          metadata?: Json
+          plan_status?: string
+          recommended_human_touch?: string | null
+          resolution_summary?: string | null
+          response_sent_at?: string | null
+          retention_risk?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "complaint_resolution_plans_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "complaint_resolution_plans_complaint_id_fkey"
+            columns: ["complaint_id"]
+            isOneToOne: false
+            referencedRelation: "customer_complaints"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "complaint_resolution_plans_dispute_id_fkey"
+            columns: ["dispute_id"]
+            isOneToOne: false
+            referencedRelation: "customer_disputes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       compliance_documents: {
         Row: {
           category: string
@@ -6203,6 +6288,237 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "customer_quarterly_reports"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_complaints: {
+        Row: {
+          assignment_id: string | null
+          business_id: string | null
+          complaint_category: string | null
+          complaint_reference: string
+          complaint_status: string
+          compliance_review_required: boolean
+          contact_id: string | null
+          conversation_id: string | null
+          created_at: string
+          customer_requested_resolution: string | null
+          customer_summary: string | null
+          evidence: Json
+          founder_review_required: boolean
+          id: string
+          internal_summary: string | null
+          invoice_id: string | null
+          legal_review_recommended: boolean
+          metadata: Json
+          organisation_id: string | null
+          owner_agent_key: string
+          payment_id: string | null
+          resolved_at: string | null
+          response_due_at: string | null
+          risk_flags: Json
+          root_cause: string | null
+          severity: string
+          support_request_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          assignment_id?: string | null
+          business_id?: string | null
+          complaint_category?: string | null
+          complaint_reference?: string
+          complaint_status?: string
+          compliance_review_required?: boolean
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          customer_requested_resolution?: string | null
+          customer_summary?: string | null
+          evidence?: Json
+          founder_review_required?: boolean
+          id?: string
+          internal_summary?: string | null
+          invoice_id?: string | null
+          legal_review_recommended?: boolean
+          metadata?: Json
+          organisation_id?: string | null
+          owner_agent_key?: string
+          payment_id?: string | null
+          resolved_at?: string | null
+          response_due_at?: string | null
+          risk_flags?: Json
+          root_cause?: string | null
+          severity?: string
+          support_request_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assignment_id?: string | null
+          business_id?: string | null
+          complaint_category?: string | null
+          complaint_reference?: string
+          complaint_status?: string
+          compliance_review_required?: boolean
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          customer_requested_resolution?: string | null
+          customer_summary?: string | null
+          evidence?: Json
+          founder_review_required?: boolean
+          id?: string
+          internal_summary?: string | null
+          invoice_id?: string | null
+          legal_review_recommended?: boolean
+          metadata?: Json
+          organisation_id?: string | null
+          owner_agent_key?: string
+          payment_id?: string | null
+          resolved_at?: string | null
+          response_due_at?: string | null
+          risk_flags?: Json
+          root_cause?: string | null
+          severity?: string
+          support_request_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_complaints_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_complaints_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_complaints_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+        ]
+      }
+      customer_disputes: {
+        Row: {
+          assignment_id: string | null
+          business_id: string | null
+          complaint_id: string | null
+          compliance_review_required: boolean
+          contact_id: string | null
+          created_at: string
+          currency: string
+          customer_position: string | null
+          deal_id: string | null
+          dispute_reference: string
+          dispute_status: string
+          dispute_type: string | null
+          disputed_amount: number | null
+          evidence: Json
+          finance_review_required: boolean
+          financial_action_recommended: string | null
+          founder_approval_required: boolean
+          id: string
+          internal_position: string | null
+          invoice_id: string | null
+          legal_review_recommended: boolean
+          metadata: Json
+          payment_id: string | null
+          proposed_resolution: string | null
+          resolved_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          assignment_id?: string | null
+          business_id?: string | null
+          complaint_id?: string | null
+          compliance_review_required?: boolean
+          contact_id?: string | null
+          created_at?: string
+          currency?: string
+          customer_position?: string | null
+          deal_id?: string | null
+          dispute_reference?: string
+          dispute_status?: string
+          dispute_type?: string | null
+          disputed_amount?: number | null
+          evidence?: Json
+          finance_review_required?: boolean
+          financial_action_recommended?: string | null
+          founder_approval_required?: boolean
+          id?: string
+          internal_position?: string | null
+          invoice_id?: string | null
+          legal_review_recommended?: boolean
+          metadata?: Json
+          payment_id?: string | null
+          proposed_resolution?: string | null
+          resolved_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assignment_id?: string | null
+          business_id?: string | null
+          complaint_id?: string | null
+          compliance_review_required?: boolean
+          contact_id?: string | null
+          created_at?: string
+          currency?: string
+          customer_position?: string | null
+          deal_id?: string | null
+          dispute_reference?: string
+          dispute_status?: string
+          dispute_type?: string | null
+          disputed_amount?: number | null
+          evidence?: Json
+          finance_review_required?: boolean
+          financial_action_recommended?: string | null
+          founder_approval_required?: boolean
+          id?: string
+          internal_position?: string | null
+          invoice_id?: string | null
+          legal_review_recommended?: boolean
+          metadata?: Json
+          payment_id?: string | null
+          proposed_resolution?: string | null
+          resolved_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_disputes_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_disputes_complaint_id_fkey"
+            columns: ["complaint_id"]
+            isOneToOne: false
+            referencedRelation: "customer_complaints"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_disputes_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_disputes_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
           },
         ]
       }

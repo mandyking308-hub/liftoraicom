@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import RevenueOperationsPanel from "@/components/founder/finance/RevenueOperationsPanel";
+import ComplaintsDisputesRecoveryPanel from "@/components/founder/customer/ComplaintsDisputesRecoveryPanel";
 import { Link } from "react-router-dom";
 import {
   Target, TrendingUp, Banknote, GitBranch, FileText, AlertTriangle,
@@ -171,6 +172,7 @@ const FinanceDashboard = () => {
           </CardContent>
         </Card>
         <RevenueOperationsPanel />
+        <ComplaintsDisputesRecoveryPanel />
       </div>
     </FounderLayout>
   );
