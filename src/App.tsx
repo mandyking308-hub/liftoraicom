@@ -278,6 +278,7 @@ const App = () => (
             <Route path="/founder/expansion/:id" element={<FounderRoute><PlatformLaunchDetail /></FounderRoute>} />
             <Route path="/founder/manual" element={<FounderRoute><FounderManual /></FounderRoute>} />
             <Route path="/founder/manual/full" element={<FounderRoute><FullSystemMirror /></FounderRoute>} />
+            <Route path="/founder/manual/user" element={<FounderRoute><UserManualPage /></FounderRoute>} />
             <Route path="/founder/manual/:id" element={<FounderRoute><ManualPageDetail /></FounderRoute>} />
             <Route path="/founder/build-log" element={<FounderRoute><BuildLog /></FounderRoute>} />
             <Route path="/founder/revenue" element={<FounderRoute><FounderRevenue /></FounderRoute>} />
