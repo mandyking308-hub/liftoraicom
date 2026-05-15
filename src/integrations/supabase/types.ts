@@ -11345,6 +11345,68 @@ export type Database = {
           },
         ]
       }
+      social_content_calendars: {
+        Row: {
+          approval_status: string
+          approved_at: string | null
+          business_id: string
+          calendar_name: string
+          calendar_period_end: string | null
+          calendar_period_start: string | null
+          calendar_status: string
+          content_pillars: Json
+          created_at: string
+          id: string
+          metadata: Json
+          posting_frequency: Json
+          strategy_summary: string | null
+          target_platforms: Json
+          updated_at: string
+        }
+        Insert: {
+          approval_status?: string
+          approved_at?: string | null
+          business_id: string
+          calendar_name: string
+          calendar_period_end?: string | null
+          calendar_period_start?: string | null
+          calendar_status?: string
+          content_pillars?: Json
+          created_at?: string
+          id?: string
+          metadata?: Json
+          posting_frequency?: Json
+          strategy_summary?: string | null
+          target_platforms?: Json
+          updated_at?: string
+        }
+        Update: {
+          approval_status?: string
+          approved_at?: string | null
+          business_id?: string
+          calendar_name?: string
+          calendar_period_end?: string | null
+          calendar_period_start?: string | null
+          calendar_status?: string
+          content_pillars?: Json
+          created_at?: string
+          id?: string
+          metadata?: Json
+          posting_frequency?: Json
+          strategy_summary?: string | null
+          target_platforms?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_content_calendars_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       social_platform_accounts: {
         Row: {
           account_status: string
@@ -11409,6 +11471,108 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_post_drafts: {
+        Row: {
+          approval_status: string
+          asset_requirements: Json
+          business_id: string
+          calendar_id: string | null
+          caption: string | null
+          carousel_slides: Json
+          content_pillar: string | null
+          created_at: string
+          cta: string | null
+          external_scheduler: string | null
+          founder_review_required: boolean
+          hashtags: Json
+          hook: string | null
+          id: string
+          metadata: Json
+          platform_key: string
+          post_date: string | null
+          post_type: string
+          publish_allowed: boolean
+          repurposed_from_post_id: string | null
+          scheduled_externally: boolean
+          source_asset_id: string | null
+          suggested_time: string | null
+          updated_at: string
+          video_script: string | null
+          visual_direction: string | null
+        }
+        Insert: {
+          approval_status?: string
+          asset_requirements?: Json
+          business_id: string
+          calendar_id?: string | null
+          caption?: string | null
+          carousel_slides?: Json
+          content_pillar?: string | null
+          created_at?: string
+          cta?: string | null
+          external_scheduler?: string | null
+          founder_review_required?: boolean
+          hashtags?: Json
+          hook?: string | null
+          id?: string
+          metadata?: Json
+          platform_key: string
+          post_date?: string | null
+          post_type: string
+          publish_allowed?: boolean
+          repurposed_from_post_id?: string | null
+          scheduled_externally?: boolean
+          source_asset_id?: string | null
+          suggested_time?: string | null
+          updated_at?: string
+          video_script?: string | null
+          visual_direction?: string | null
+        }
+        Update: {
+          approval_status?: string
+          asset_requirements?: Json
+          business_id?: string
+          calendar_id?: string | null
+          caption?: string | null
+          carousel_slides?: Json
+          content_pillar?: string | null
+          created_at?: string
+          cta?: string | null
+          external_scheduler?: string | null
+          founder_review_required?: boolean
+          hashtags?: Json
+          hook?: string | null
+          id?: string
+          metadata?: Json
+          platform_key?: string
+          post_date?: string | null
+          post_type?: string
+          publish_allowed?: boolean
+          repurposed_from_post_id?: string | null
+          scheduled_externally?: boolean
+          source_asset_id?: string | null
+          suggested_time?: string | null
+          updated_at?: string
+          video_script?: string | null
+          visual_direction?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_post_drafts_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_post_drafts_calendar_id_fkey"
+            columns: ["calendar_id"]
+            isOneToOne: false
+            referencedRelation: "social_content_calendars"
             referencedColumns: ["id"]
           },
         ]

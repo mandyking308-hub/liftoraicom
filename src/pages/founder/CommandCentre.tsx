@@ -74,6 +74,7 @@ import LearningOptimisationEnginePanel from "@/components/founder/optimisation/L
 import SelfHealingMonitoringPanel from "@/components/founder/monitoring/SelfHealingMonitoringPanel";
 import PortfolioIntelligenceBrainPanel from "@/components/founder/strategy/PortfolioIntelligenceBrainPanel";
 import SocialMediaBrainPanel from "@/components/founder/social/SocialMediaBrainPanel";
+import SocialContentFactoryPanel from "@/components/founder/social/SocialContentFactoryPanel";
 import { SecurityGovernancePanel } from "@/components/founder/security/SecurityGovernancePanel";
 import { ProductisationReadinessPanel } from "@/components/founder/revenue/ProductisationReadinessPanel";
 import BusinessLaunchFactoryPanel from "@/components/founder/expansion/BusinessLaunchFactoryPanel";
@@ -824,6 +825,7 @@ const CommandCentre = () => {
               <AgentCollaborationBoard />
               <AutopilotActivationGatesPanel />
               <SocialMediaBrainPanel />
+              <SocialContentFactoryPanel />
             </Section>
 
             {/* SECTION 6 — Outreach Runway */}
@@ -1138,6 +1140,7 @@ const CommandCentre = () => {
                 { to: "/founder/documents", label: "Documents", icon: ListChecks },
               ]} />
             </Section>
+            <SocialContentFactoryPanel />
 
             {/* SECTION 15 — Legacy / Historical / Archive (collapsed) */}
             <RunwayHeader n={15} title="Legacy / Historical / Archive" icon={Archive} anchor="sec-legacy" />

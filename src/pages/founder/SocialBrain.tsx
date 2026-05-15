@@ -1,5 +1,6 @@
 import FounderLayout from "@/components/founder/FounderLayout";
 import SocialMediaBrainPanel from "@/components/founder/social/SocialMediaBrainPanel";
+import SocialContentFactoryPanel from "@/components/founder/social/SocialContentFactoryPanel";
 
 const SocialBrain = () => {
   return (
@@ -10,6 +11,7 @@ const SocialBrain = () => {
           <p className="text-sm text-muted-foreground mt-1">Per-business social readiness, agents and content operations. Internal drafts only — no external posts, DMs or provider mutation.</p>
         </div>
         <SocialMediaBrainPanel />
+        <SocialContentFactoryPanel />
       </div>
     </FounderLayout>
   );
