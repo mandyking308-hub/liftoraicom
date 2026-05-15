@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import FounderLayout from "@/components/founder/FounderLayout";
 import GroupHQOperatingPanel from "@/components/founder/group/GroupHQOperatingPanel";
 import TreasuryCashflowControlPanel from "@/components/founder/finance/TreasuryCashflowControlPanel";
@@ -757,6 +757,7 @@ const CommandCentre = () => {
 
   return (
     <FounderLayout>
+      <CommandCentreViewModeBar />
       <div className="max-w-7xl mx-auto px-4 pt-4"><FounderAlertEscalationPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><CommandCentreTruthSyncPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><FinalHardeningStatusPanel /></div>
@@ -768,6 +769,8 @@ const CommandCentre = () => {
       <div className="max-w-7xl mx-auto px-4 pt-4"><RevenueTargetOperatingPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><BusinessKnowledgeUploadTrainingPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><LiftorUserManualPanel /></div>
+      <DailyOperatorNextActionsCard />
+      <DiagnosticGate>
       {(() => {
         const activeBusinessName = activeInboxes[0]?.business_name ?? businesses[0]?.name ?? "Neon Candy";
         const activeSender = activeInboxes[0]?.email_address ?? "hello@neoncandy.online";
@@ -1631,6 +1634,7 @@ const CommandCentre = () => {
     <div className="max-w-7xl mx-auto px-4 pb-6"><FundingExitReadinessPanel /></div>
     <div className="max-w-7xl mx-auto px-4 pb-6"><ReputationCrisisCommsPanel /></div>
     <div className="max-w-7xl mx-auto px-4 pb-6"><KPIOKRPerformancePanel /></div>
+    </DiagnosticGate>
     </FounderLayout>
   );
 };
@@ -1638,6 +1642,109 @@ const CommandCentre = () => {
 export default CommandCentre;
 
 // ===== Local layout helpers (UI-only) =====
+const VIEW_MODE_KEY = "liftor.commandCentre.viewMode";
+function useViewMode() {
+  const [mode, setMode] = useState<"daily" | "diagnostic">(() => {
+    if (typeof window === "undefined") return "daily";
+    return (localStorage.getItem(VIEW_MODE_KEY) as any) === "diagnostic" ? "diagnostic" : "daily";
+  });
+  useEffect(() => {
+    const handler = (e: StorageEvent) => {
+      if (e.key === VIEW_MODE_KEY && e.newValue) setMode(e.newValue as any);
+    };
+    const custom = () => {
+      const v = typeof window !== "undefined" ? localStorage.getItem(VIEW_MODE_KEY) : null;
+      if (v === "daily" || v === "diagnostic") setMode(v);
+    };
+    window.addEventListener("storage", handler);
+    window.addEventListener("liftor:view-mode-changed", custom);
+    return () => {
+      window.removeEventListener("storage", handler);
+      window.removeEventListener("liftor:view-mode-changed", custom);
+    };
+  }, []);
+  const set = (v: "daily" | "diagnostic") => {
+    localStorage.setItem(VIEW_MODE_KEY, v);
+    setMode(v);
+    window.dispatchEvent(new Event("liftor:view-mode-changed"));
+  };
+  return [mode, set] as const;
+}
+
+function CommandCentreViewModeBar() {
+  const [mode, setMode] = useViewMode();
+  return (
+    <div className="max-w-7xl mx-auto px-4 pt-4">
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border/60 bg-card/60 px-3 py-2">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <Sparkles size={12} className="text-primary" />
+          <span className="font-semibold text-foreground">Command Centre mode</span>
+          <Badge variant="outline" className="border-primary/40 text-primary text-[10px]">CURRENT SOURCE OF TRUTH · Truth Sync</Badge>
+        </div>
+        <div className="flex items-center gap-1">
+          <Button size="sm" variant={mode === "daily" ? "default" : "outline"} className="h-7 text-xs" onClick={() => setMode("daily")}>Daily Operator View</Button>
+          <Button size="sm" variant={mode === "diagnostic" ? "default" : "outline"} className="h-7 text-xs" onClick={() => setMode("diagnostic")}>Full Diagnostic View</Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DiagnosticGate({ children }: { children: React.ReactNode }) {
+  const [mode, setMode] = useViewMode();
+  if (mode !== "diagnostic") {
+    return (
+      <div className="max-w-7xl mx-auto px-4 pt-4 pb-8">
+        <Card className="bg-card/60 border-dashed border-border/60">
+          <CardContent className="p-4 flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <Archive size={14} className="text-muted-foreground" />
+              <span>Legacy diagnostics, registry scans, dry-run snapshots, Apollo / IONOS legacy panels and Group HQ are hidden in Daily Operator View.</span>
+              <Badge variant="outline" className="border-yellow-500/40 text-yellow-300 text-[10px]">DIAGNOSTIC · collapsed</Badge>
+            </div>
+            <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => setMode("diagnostic")}>Show Full Diagnostic View</Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+  return <>{children}</>;
+}
+
+function DailyOperatorNextActionsCard() {
+  const actions = [
+    { msg: "Confirm Truth Sync says READY_FOR_INTERNAL_USE", to: "" },
+    { msg: "Run Final Hardening Status check", to: "" },
+    { msg: "Run Clean Real Mode / Rehearsal cleanliness check", to: "" },
+    { msg: "Create Pre-Live Baseline (after dry-run)", to: "" },
+    { msg: "Set Revenue Target and dry-run plan", to: "" },
+    { msg: "Upload / register Neon Candy knowledge assets + manuals", to: "" },
+    { msg: "Create Smartlead draft campaign + enable warmup manually when ready", to: "/founder/integrations#smartlead-scale-setup-checklist" },
+  ];
+  return (
+    <div className="max-w-7xl mx-auto px-4 pt-4">
+      <Card className="bg-card border-primary/30">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Sparkles size={14} className="text-primary" /> What should Mandy do now?
+            <Badge variant="outline" className="border-primary/40 text-primary text-[10px]">CURRENT</Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <ol className="text-xs space-y-1 list-decimal pl-4 text-foreground">
+            {actions.map((a, i) => (
+              <li key={i}>
+                {a.to ? <Link to={a.to} className="text-primary hover:underline">{a.msg}</Link> : a.msg}
+              </li>
+            ))}
+          </ol>
+          <p className="text-[10px] text-muted-foreground mt-2">No external action triggered from this card. Smartlead / Apollo / IONOS sends remain locked behind founder approval + confirmation phrase.</p>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 function RunwayHeader({ n, title, icon: Icon, anchor }: { n: number; title: string; icon: any; anchor: string }) {
   return (
     <div id={anchor} className="scroll-mt-24 flex items-center gap-2 pt-4">
