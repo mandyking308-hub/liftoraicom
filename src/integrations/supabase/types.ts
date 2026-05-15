@@ -9090,6 +9090,51 @@ export type Database = {
           },
         ]
       }
+      provider_secret_registry: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          display_label: string | null
+          id: string
+          last_verified_at: string | null
+          metadata: Json
+          never_display_value: boolean
+          provider_key: string
+          secret_name: string
+          secret_present: boolean
+          updated_at: string
+          usage_scope: string | null
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          display_label?: string | null
+          id?: string
+          last_verified_at?: string | null
+          metadata?: Json
+          never_display_value?: boolean
+          provider_key: string
+          secret_name: string
+          secret_present?: boolean
+          updated_at?: string
+          usage_scope?: string | null
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          display_label?: string | null
+          id?: string
+          last_verified_at?: string | null
+          metadata?: Json
+          never_display_value?: boolean
+          provider_key?: string
+          secret_name?: string
+          secret_present?: boolean
+          updated_at?: string
+          usage_scope?: string | null
+        }
+        Relationships: []
+      }
       reputation_events: {
         Row: {
           contact_id: string | null

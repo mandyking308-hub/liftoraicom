@@ -1,4 +1,5 @@
 import FounderLayout from "@/components/founder/FounderLayout";
+import { SecurityGovernancePanel } from "@/components/founder/security/SecurityGovernancePanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -176,6 +177,8 @@ const AccessControl = () => {
             <p className="text-muted-foreground text-sm mt-1">Manage platform roles, permissions, and user access</p>
           </div>
         </div>
+
+        <SecurityGovernancePanel />
 
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

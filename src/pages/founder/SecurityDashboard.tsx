@@ -1,4 +1,5 @@
 import FounderLayout from "@/components/founder/FounderLayout";
+import { SecurityGovernancePanel } from "@/components/founder/security/SecurityGovernancePanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -178,6 +179,8 @@ const SecurityDashboard = () => {
           </div>
           <Button variant="outline" onClick={generateReport}><Download size={16} className="mr-2" /> Export Report</Button>
         </div>
+
+        <SecurityGovernancePanel />
 
         {/* KPIs */}
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">

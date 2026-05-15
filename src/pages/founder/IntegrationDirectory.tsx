@@ -20,6 +20,7 @@ import BulkSendEngineBlueprint from "@/components/founder/integrations/BulkSendE
 import SmartleadCampaignMappingPreview from "@/components/founder/integrations/SmartleadCampaignMappingPreview";
 import SmartleadCampaignDiscoveryPanel from "@/components/founder/integrations/SmartleadCampaignDiscoveryPanel";
 import SmartleadSequenceMappingPreview from "@/components/founder/integrations/SmartleadSequenceMappingPreview";
+import { SecurityGovernancePanel } from "@/components/founder/security/SecurityGovernancePanel";
 
 const statusIcon = (s: string) => {
   if (s === "connected") return <CheckCircle2 size={14} className="text-green-400" />;
@@ -119,6 +120,7 @@ const IntegrationDirectory = () => {
         </div>
 
         <OutboundProviderEnginePanel />
+        <SecurityGovernancePanel />
         <CRMInteractionMatchPreviewPanel />
         <BulkSendEngineBlueprint />
         <OutboundChannelPolicyPanel />
