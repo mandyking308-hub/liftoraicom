@@ -2788,6 +2788,54 @@ export type Database = {
           },
         ]
       }
+      business_operating_runbooks: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          expected_outputs: Json
+          id: string
+          metadata: Json
+          required_approvals: Json
+          runbook_key: string
+          runbook_name: string
+          runbook_type: string
+          safety_notes: Json
+          status: string
+          steps: Json
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          expected_outputs?: Json
+          id?: string
+          metadata?: Json
+          required_approvals?: Json
+          runbook_key: string
+          runbook_name: string
+          runbook_type: string
+          safety_notes?: Json
+          status?: string
+          steps?: Json
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          expected_outputs?: Json
+          id?: string
+          metadata?: Json
+          required_approvals?: Json
+          runbook_key?: string
+          runbook_name?: string
+          runbook_type?: string
+          safety_notes?: Json
+          status?: string
+          steps?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       business_risk_scores: {
         Row: {
           business_name: string
