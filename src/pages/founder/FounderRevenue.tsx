@@ -1,5 +1,6 @@
 import FounderLayout from "@/components/founder/FounderLayout";
 import PortfolioCommandCentrePanel from "@/components/founder/command/PortfolioCommandCentrePanel";
+import { ProductisationReadinessPanel } from "@/components/founder/revenue/ProductisationReadinessPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -194,6 +195,7 @@ const FounderRevenue = () => {
           </div>
         </div>
         <PortfolioCommandCentrePanel />
+        <ProductisationReadinessPanel />
 
         {/* Top-level metrics */}
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
