@@ -67,6 +67,7 @@ const FounderDocuments = () => {
           </div>
         )}
       </div>
+      <div className="container mx-auto px-4 pb-6"><FundingExitReadinessPanel /></div>
     </FounderLayout>
   );
 };
