@@ -1411,6 +1411,393 @@ is treated as an incident and must be rolled back.
 
 ---
 
+## SECTION 0g — SMARTLEAD SCALE ENGINE FOUNDATION (15 MAY 2026)
+
+> Captures the entire 13–15 May 2026 sprint that introduced Smartlead as
+> the **scale sending provider** alongside (not replacing) the existing
+> IONOS proof path. **Nothing in this section sends email, creates
+> Smartlead campaigns, pushes leads, or mutates outreach operational
+> data.** Every component shipped is read-only or dry-run, gated behind
+> the existing global send brake (\`system_settings.auto_send_enabled = false\`)
+> and the existing controlled manual-send architecture from Section 0d.
+
+### 0g.1 Why Smartlead, why now
+
+- IONOS proved the end-to-end real-SMTP path (Section 0.15: 16 real
+  sends, valid \`provider_message_id\`, no simulated rows). It is
+  capacity-bound, not correctness-bound.
+- IONOS daily ramp cap (\`450 Mail send limit exceeded\`) makes IONOS
+  unsuitable for scale outreach. We keep IONOS as the **proof / audit /
+  reply mailbox**, and add Smartlead as the **scale sending provider**.
+- Smartlead also gives us mailbox warmup, native sequence delivery,
+  per-mailbox sending caps, and webhook-based event ingestion — all of
+  which we would otherwise have to rebuild on top of raw SMTP.
+- Architecture rule: Smartlead is a **provider adapter**, not a
+  replacement for the compliance spine, suppression layer, BCR model,
+  controlled send gate, or audit trail. All of those remain
+  authoritative inside Liftor.
+
+### 0g.2 Sprint scope (what was actually shipped 13–15 May 2026)
+
+Read-only / dry-run only. No mutation endpoints called against
+Smartlead, no operational outreach data mutated.
+
+1. Smartlead read-only connection probe (\`smartlead-test-connection\`).
+2. Smartlead Scale Setup Checklist UI (9 founder-visible readiness
+   steps).
+3. Outbound provider data model (\`outbound_provider_campaign_mappings\`,
+   \`outbound_provider_events\`).
+4. Smartlead campaign mapping preview
+   (\`smartlead-campaign-mapping-preview\`).
+5. Smartlead lead push preview / dry-run
+   (\`smartlead-lead-push-preview\`).
+6. Smartlead webhook scaffold (\`smartlead-webhook\`, log-only).
+7. Bulk send readiness aggregator (\`bulk-send-preview\`).
+8. Founder-facing Scale Engine UI surfaces in Command Centre and
+   Integration Directory.
+9. Smartlead Scale Next Action Banner (founder guidance).
+10. Manual / mailbox configuration: \`hello@neoncandy.online\` connected
+    to Smartlead via SMTP/IMAP (manual UI step in Smartlead, performed
+    by founder).
+
+### 0g.3 Mailbox / sender state in Smartlead (as of 15 May 2026)
+
+- **Connected sending mailbox:** \`hello@neoncandy.online\` (same
+  mailbox as the IONOS proof path; SMTP/IMAP credentials supplied to
+  Smartlead manually by the founder).
+- **\`email_account_count\`:** 1.
+- **\`sending_accounts_present\`:** yes.
+- **\`warmup_account_count\`:** 0 (warmup not yet enabled in Smartlead UI).
+- **Campaigns in Smartlead:** 0 (\`campaign_count = 0\`,
+  \`active_campaign_count = 0\`, \`drafted_campaign_count = 0\`).
+- **Webhooks in Smartlead:** 0 (\`webhook_configured = false\`; global
+  \`GET /webhooks\` returns 404 on this tenant — non-blocking until at
+  least one campaign exists, then we switch to the per-campaign webhook
+  path).
+- **Analytics overview:** not exposed on this tenant
+  (\`GET /analytics/overview\` returns 404; non-blocking until a campaign
+  exists, then we switch to per-campaign analytics).
+- **Smartlead API auth method:** API key passed as query parameter
+  (\`auth_method = "api_key_query_param"\`) against
+  \`https://server.smartlead.ai/api/v1\`.
+
+### 0g.4 Read-only connection probe — \`smartlead-test-connection\`
+
+- Edge function: \`smartlead-test-connection\` (founder-auth required).
+- Calls **only**:
+  - \`GET /campaigns/?include_tags=true\`
+  - \`GET /email-accounts/?offset=0&limit=100\`
+  - \`GET /webhooks\` (global; currently 404 on this tenant)
+  - \`GET /analytics/overview\` (global; currently 404 on this tenant)
+- Returns: \`ok\`, \`tested\`, \`credentials_present\`, \`http_status\`
+  per endpoint, \`campaign_count\`, \`active_campaign_count\`,
+  \`drafted_campaign_count\`, \`email_account_count\`,
+  \`sending_accounts_present\`, \`warmup_account_count\`,
+  \`webhook_configured\`, \`webhook_count\`, \`analytics_overview_ok\`,
+  \`provider_id\` (Liftor-side outbound provider row), \`blockers\`.
+- **No mutation endpoints called. No emails sent. No leads pushed.**
+
+### 0g.5 Smartlead Scale Setup Checklist (UI)
+
+Component: \`src/components/founder/integrations/SmartleadScaleSetupChecklist.tsx\`
+
+Mounted on: \`/founder/command-centre\` (Section 12) and
+\`/founder/integrations\`.
+
+9 founder-visible readiness steps, each with \`StepStatus\`
+(\`complete\` / \`blocked\` / \`unknown\` / \`not_ready\` / \`disabled\`),
+colour-coded badge, current value, reason, and a recommended founder
+action:
+
+1. Smartlead API key configured.
+2. Sending mailbox connected in Smartlead.
+3. Mailbox warmup enabled.
+4. At least one DRAFT campaign exists in Smartlead.
+5. Liftor↔Smartlead campaign sequence mapping recorded.
+6. Lead push dry-run preview clean (no compliance breaches).
+7. Smartlead → Liftor webhook configured (per-campaign once a campaign
+   exists).
+8. Smartlead analytics path available (per-campaign once a campaign
+   exists).
+9. Scale sending unlocked (final gate; remains locked until 1–8 are
+   green AND the global controlled-send architecture from Section 0d is
+   re-armed for the scale path).
+
+The checklist also exposes a **"Re-run Smartlead Readiness Test"**
+button that re-invokes \`smartlead-test-connection\` — read-only.
+
+### 0g.6 Outbound provider data model (new tables)
+
+Migration: \`supabase/migrations/20260515113335_*.sql\`
+
+- \`outbound_provider_campaign_mappings\`
+  - Maps an internal \`outreach_campaigns.id\` to an external Smartlead
+    \`campaign_id\` for a given \`provider_id\`.
+  - Columns: \`id\`, \`provider_id\`, \`internal_campaign_id\`,
+    \`external_campaign_id\`, \`external_campaign_name\`, \`status\`,
+    \`sequence_mapping\` (JSONB; Liftor Step 1/2/3/4 → Smartlead
+    sequence step indices), \`last_synced_at\`, \`created_by\`,
+    \`created_at\`, \`updated_at\`.
+  - RLS: founder-only.
+- \`outbound_provider_events\`
+  - **Append-only** log of every webhook event we receive from any
+    outbound provider. Source of truth for Smartlead engagement
+    ingestion.
+  - Columns: \`id\`, \`provider_id\`, \`event_type\` (\`email_sent\`,
+    \`email_delivered\`, \`email_opened\`, \`email_clicked\`,
+    \`email_replied\`, \`email_bounced\`, \`email_unsubscribed\`,
+    \`mailbox_warmup_status\`, etc.), \`external_campaign_id\`,
+    \`external_lead_id\`, \`external_email_account\`, \`payload\` (raw
+    JSONB), \`signature_valid\`, \`processed_at\`, \`processing_mode\`
+    (\`log_only\` | \`live\`), \`received_at\`.
+  - RLS: founder-only read; service role insert.
+- Both tables are reflected in \`src/integrations/supabase/types.ts\`
+  (auto-generated).
+
+### 0g.7 Campaign mapping preview — \`smartlead-campaign-mapping-preview\`
+
+- Edge function (founder-auth, read-only).
+- Calls Smartlead \`GET /campaigns/?include_tags=true\` and joins
+  against internal \`outreach_campaigns\` to suggest
+  \`internal_campaign_id ↔ external_campaign_id\` matches.
+- Returns suggested mappings, ambiguous mappings, and unmatched
+  internal campaigns.
+- **Does not write** to \`outbound_provider_campaign_mappings\` —
+  preview only.
+- Currently returns 0 suggested mappings because Smartlead has 0
+  campaigns. Will become useful once at least one DRAFT Smartlead
+  campaign exists.
+- UI: \`src/components/founder/integrations/SmartleadCampaignMappingPreview.tsx\`
+  mounted in Command Centre + Integration Directory.
+
+### 0g.8 Lead push preview (dry-run) — \`smartlead-lead-push-preview\`
+
+- Edge function (founder-auth, read-only).
+- Selects candidate \`contacts\` rows linked via
+  \`business_contact_relationships\` to a chosen
+  \`internal_campaign_id\` and applies, **in code**, every existing
+  guardrail before generating the would-be Smartlead payload:
+  - \`contacts.is_globally_suppressed = false\`
+  - \`contacts.hard_bounced = false\`
+  - \`contacts.unsubscribed_at IS NULL\`
+  - \`contact_compliance_events\` shows \`compliance_status = 'cleared'\`
+    and \`lawful_basis\` recorded
+  - BCR \`do_not_contact = false\`
+  - BCR \`campaign_eligible = true\`
+  - Not internal / NeonCandy inbox guard
+  - Not duplicate of a contact already pushed to the same Smartlead
+    campaign (consults \`outbound_provider_events\`)
+  - Domain frequency cap from
+    \`business_autopilot_settings.auto_queue_domain_cap\`
+- Returns the **shape** of the Smartlead \`POST /campaigns/{id}/leads\`
+  payload, the eligible / blocked counts, and per-row block reasons.
+- **Never calls Smartlead. Never inserts into \`email_queue\`. Never
+  mutates \`contacts\`, BCR, compliance, or system_settings.**
+- UI: \`src/components/founder/integrations/SmartleadLeadPushPreview.tsx\`.
+
+### 0g.9 Webhook scaffold — \`smartlead-webhook\`
+
+- Edge function: \`smartlead-webhook\` (\`verify_jwt = false\` in
+  \`supabase/config.toml\` because Smartlead delivers unauthenticated
+  HTTPS callbacks; signature verification is performed in-function).
+- **Currently in \`processing_mode = "log_only"\`.**
+  - Every received event is written to \`outbound_provider_events\`
+    with raw \`payload\`, \`signature_valid\` flag, and
+    \`processing_mode = "log_only"\`.
+  - **Nothing downstream is mutated** — no \`communications\`, no
+    \`email_events\`, no \`email_queue\`, no \`contacts\`, no BCR.
+- Signature verification expects a shared secret in
+  \`SMARTLEAD_WEBHOOK_SECRET\` (currently **not yet set**; webhook
+  remains in log-only mode and is not yet pointed at by Smartlead UI).
+- Public endpoint:
+  \`https://oiwbletmjhrhqksosphi.functions.supabase.co/smartlead-webhook\`
+  (will be registered per-campaign once a Smartlead campaign exists).
+
+### 0g.10 Bulk send readiness aggregator — \`bulk-send-preview\`
+
+- Edge function (founder-auth, read-only).
+- Aggregates: \`smartlead-test-connection\` results, mapping preview,
+  lead push preview, IONOS proof-mode state, global send brake state
+  (\`system_settings.auto_send_enabled\`), warmup state.
+- Returns \`can_send_scale\` boolean + structured \`blockers[]\`.
+- **Currently \`can_send_scale = false\`** with blockers:
+  \`no_campaigns_in_smartlead\`, \`no_campaign_mapping\`,
+  \`no_smartlead_webhook_configured\`, \`warmup_not_enabled\`,
+  \`global_auto_send_disabled\` (intentional — kill-switch must stay
+  off until the scale gate is ratified).
+- UI: \`src/components/founder/integrations/BulkSendPreviewPanel.tsx\`
+  and \`SmartleadScaleNextActionBanner.tsx\`.
+
+### 0g.11 Founder UI surfaces (where to look)
+
+All mounted in \`/founder/command-centre\` (Section 12) and mirrored on
+\`/founder/integrations\`:
+
+- \`SmartleadScaleSetupChecklist\` — 9-step readiness checklist.
+- \`SmartleadCampaignMappingPreview\` — Liftor↔Smartlead mapping
+  suggestions.
+- \`SmartleadLeadPushPreview\` — dry-run lead push with block reasons.
+- \`BulkSendPreviewPanel\` — aggregated scale readiness.
+- \`SmartleadScaleNextActionBanner\` — single recommended next action,
+  founder-facing.
+- \`OutboundProviderEnginePanel\` (existing) — provider-level state.
+- \`BulkSendEngineBlueprint\` (existing) — architectural reference for
+  how the scale path is intended to work end-to-end.
+
+### 0g.12 Latest Smartlead readiness probe result (15 May 2026, 11:40 UTC)
+
+| Check | Result |
+|---|---|
+| Founder auth | passed |
+| \`SMARTLEAD_API_KEY\` detected | yes (\`credentials_present = true\`) |
+| Smartlead connection | succeeded (\`ok = true\`, \`tested = true\`) |
+| \`GET /campaigns/?include_tags=true\` | 200 |
+| \`GET /email-accounts/?offset=0&limit=100\` | 200 |
+| \`GET /webhooks\` | 404 (non-blocking until campaign exists) |
+| \`GET /analytics/overview\` | 404 (non-blocking until campaign exists) |
+| \`campaign_count\` | 0 |
+| \`active_campaign_count\` | 0 |
+| \`drafted_campaign_count\` | 0 |
+| \`email_account_count\` | 1 |
+| \`sending_accounts_present\` | yes (\`hello@neoncandy.online\`) |
+| \`warmup_account_count\` | 0 |
+| \`webhook_configured\` | false |
+| \`analytics_overview_ok\` | false |
+| Smartlead mutation endpoint called | **no** |
+| Email sent | **no** |
+| Apollo called | **no** |
+| \`email_queue\` / \`contacts\` / BCR / compliance / \`system_settings\` / cron mutated | **no** |
+
+### 0g.13 Active blockers (15 May 2026)
+
+- \`no_campaigns_in_smartlead\` — no DRAFT campaign exists yet in
+  Smartlead. Blocks mapping, lead-push, per-campaign webhook, and
+  per-campaign analytics paths.
+- \`warmup_not_enabled\` — \`hello@neoncandy.online\` is connected but
+  warmup is not yet enabled in Smartlead UI. Recommended 14–21 days
+  warmup before any scale send.
+- \`no_smartlead_webhook_configured\` — \`SMARTLEAD_WEBHOOK_SECRET\` is
+  not set, and Smartlead UI has not been pointed at the webhook URL.
+- \`global_auto_send_disabled\` — intentional. The Section 0d kill
+  switch (\`system_settings.auto_send_enabled = false\`) remains the
+  master safety. Scale sending will only be unlocked behind a
+  controlled manual-send gate equivalent to the IONOS proof gate.
+- \`no_campaign_mapping\` — direct consequence of zero Smartlead
+  campaigns; clears automatically once Smartlead has a draft campaign
+  and the mapping preview has been confirmed.
+
+### 0g.14 Safety posture (binding rules for Smartlead path)
+
+- **No code path in this sprint sends email**, creates Smartlead
+  campaigns, pushes leads, creates Smartlead webhooks, or calls SMTP.
+- The send brake from Section 0d (\`system_settings.auto_send_enabled\`)
+  remains the single global kill switch and applies to **both** IONOS
+  and Smartlead paths.
+- Smartlead webhook ingestion remains \`processing_mode = "log_only"\`
+  until the founder explicitly ratifies the engagement-fan-out logic.
+- Smartlead path **must** reuse: compliance spine, suppression layer,
+  BCR, lawful-basis ledger, unsubscribe tokens, controlled manual-send
+  gate, audit / event tables. No parallel "Smartlead-only" copies of
+  any of these systems are permitted.
+- Apollo is **not** called from any Smartlead-path function.
+- All Smartlead writes (mapping confirmations, webhook event ingest)
+  go through founder-auth or service-role with explicit audit logging.
+
+### 0g.15 Files created / edited in this sprint
+
+New components:
+- \`src/components/founder/integrations/SmartleadScaleSetupChecklist.tsx\`
+- \`src/components/founder/integrations/SmartleadCampaignMappingPreview.tsx\`
+- \`src/components/founder/integrations/SmartleadLeadPushPreview.tsx\`
+- \`src/components/founder/integrations/BulkSendPreviewPanel.tsx\`
+- \`src/components/founder/integrations/SmartleadScaleNextActionBanner.tsx\`
+
+New edge functions:
+- \`supabase/functions/smartlead-test-connection/index.ts\` (read-only)
+- \`supabase/functions/smartlead-campaign-mapping-preview/index.ts\`
+- \`supabase/functions/smartlead-lead-push-preview/index.ts\`
+- \`supabase/functions/smartlead-webhook/index.ts\` (\`verify_jwt = false\`,
+  log-only)
+- \`supabase/functions/bulk-send-preview/index.ts\`
+
+Migrations:
+- \`supabase/migrations/20260515113335_*.sql\` — new tables
+  \`outbound_provider_campaign_mappings\` and
+  \`outbound_provider_events\` with RLS.
+
+Edited:
+- \`src/pages/founder/CommandCentre.tsx\` — Section 12 mounts new
+  Smartlead Scale components.
+- \`src/pages/founder/IntegrationDirectory.tsx\` — mirrors the same
+  components for the integrations view.
+- \`supabase/config.toml\` — \`smartlead-webhook\` registered with
+  \`verify_jwt = false\`.
+- \`src/integrations/supabase/types.ts\` — auto-regenerated for the new
+  tables.
+
+### 0g.16 Required secrets (Smartlead path)
+
+- \`SMARTLEAD_API_KEY\` — **set**. Used by all read-only Smartlead
+  edge functions.
+- \`SMARTLEAD_WEBHOOK_SECRET\` — **not yet set**. Required before the
+  Smartlead webhook can leave \`log_only\` mode and before Smartlead UI
+  is pointed at the webhook URL.
+
+### 0g.17 Recommended next build step (binding order)
+
+1. **Founder, in Smartlead UI**: enable warmup on
+   \`hello@neoncandy.online\` (target 14–21 days warmup before any
+   scale send).
+2. **Founder, in Smartlead UI**: create **one DRAFT campaign** (no
+   leads, no schedule, no send) so the per-campaign webhook and
+   analytics paths become available.
+3. **Re-run Smartlead Readiness Test** from the Scale Setup Checklist.
+4. **Confirm campaign mapping** in \`SmartleadCampaignMappingPreview\`
+   (this writes to \`outbound_provider_campaign_mappings\`; still no
+   sends).
+5. **Run \`smartlead-lead-push-preview\`** against the mapped campaign
+   for a small batch (dry-run only; verify zero compliance breaches).
+6. **Set \`SMARTLEAD_WEBHOOK_SECRET\`**, point Smartlead UI at the
+   webhook URL, then flip the webhook function from \`log_only\` to
+   \`live\` (still does not send anything; only ingests engagement
+   signals into \`outbound_provider_events\`).
+7. **Build the Smartlead controlled-send gate** as an exact mirror of
+   the IONOS controlled manual-send gate from Section 0d (preview
+   token in same session, batch size = 1 default, all guardrails
+   enforced in code, full audit trail).
+8. Only then run a **single-lead proof send** through Smartlead.
+9. Only after multiple clean Smartlead proof cycles across multiple
+   sessions: gradually raise batch size. **Autonomous / background
+   Smartlead sending remains forbidden** until the full safety,
+   compliance, preview, and audit architecture has been re-validated
+   on the Smartlead path the same way it was validated on the IONOS
+   path.
+
+### 0g.18 Do-not-do list (Smartlead path)
+
+- Do **not** send any email through Smartlead until the controlled
+  manual-send gate is rebuilt for the Smartlead path.
+- Do **not** call Smartlead mutation endpoints (\`POST\` / \`PUT\` /
+  \`DELETE\`) from any current edge function.
+- Do **not** push leads into Smartlead from any code path. The lead
+  push function is **preview-only** and must remain so until step 7
+  above is complete.
+- Do **not** create Smartlead campaigns from code. Campaigns are
+  created by the founder in Smartlead UI as DRAFT.
+- Do **not** create Smartlead webhooks from code. The webhook URL is
+  registered by the founder in Smartlead UI.
+- Do **not** flip \`system_settings.auto_send_enabled\` to \`true\` to
+  unblock Smartlead. The kill switch protects both paths and must
+  stay off until the scale controlled-send gate exists.
+- Do **not** bypass the compliance spine, suppression layer, BCR
+  model, or audit tables for Smartlead. There is exactly one
+  compliance backbone and Smartlead is a downstream provider on it.
+- Do **not** re-enable \`music@neoncandy.net\` for Smartlead (Section
+  0.3 rule still binds).
+- Do **not** call Apollo from any Smartlead-path function.
+
+---
+
 ## SECTION 0a — CREDENTIALS & SECRETS REGISTER
 
 > **Raw passwords and API keys are not stored in this manual.**
