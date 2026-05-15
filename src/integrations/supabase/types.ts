@@ -7233,6 +7233,81 @@ export type Database = {
           },
         ]
       }
+      jurisdiction_policy_profiles: {
+        Row: {
+          action_type: string
+          allowed: boolean
+          business_type: string | null
+          channel_key: string | null
+          consent_notes: string | null
+          contact_type: string | null
+          created_at: string
+          founder_review_required: boolean
+          id: string
+          jurisdiction_code: string
+          jurisdiction_name: string
+          legal_review_recommended: boolean
+          metadata: Json
+          policy_area: string
+          policy_status: string
+          region: string | null
+          required_disclosures: Json
+          required_suppression_checks: Json
+          retention_notes: string | null
+          risk_level: string
+          source_notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          action_type: string
+          allowed?: boolean
+          business_type?: string | null
+          channel_key?: string | null
+          consent_notes?: string | null
+          contact_type?: string | null
+          created_at?: string
+          founder_review_required?: boolean
+          id?: string
+          jurisdiction_code: string
+          jurisdiction_name: string
+          legal_review_recommended?: boolean
+          metadata?: Json
+          policy_area: string
+          policy_status?: string
+          region?: string | null
+          required_disclosures?: Json
+          required_suppression_checks?: Json
+          retention_notes?: string | null
+          risk_level?: string
+          source_notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          action_type?: string
+          allowed?: boolean
+          business_type?: string | null
+          channel_key?: string | null
+          consent_notes?: string | null
+          contact_type?: string | null
+          created_at?: string
+          founder_review_required?: boolean
+          id?: string
+          jurisdiction_code?: string
+          jurisdiction_name?: string
+          legal_review_recommended?: boolean
+          metadata?: Json
+          policy_area?: string
+          policy_status?: string
+          region?: string | null
+          required_disclosures?: Json
+          required_suppression_checks?: Json
+          retention_notes?: string | null
+          risk_level?: string
+          source_notes?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       jurisdiction_profiles: {
         Row: {
           consent_required: boolean
@@ -7268,6 +7343,57 @@ export type Database = {
           id?: string
           notes?: string
           region?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      jurisdiction_review_queue: {
+        Row: {
+          action_type: string
+          business_id: string | null
+          channel_key: string | null
+          contact_id: string | null
+          created_at: string
+          founder_review_required: boolean
+          id: string
+          jurisdiction_code: string | null
+          legal_review_recommended: boolean
+          metadata: Json
+          review_reason: string
+          risk_level: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          action_type: string
+          business_id?: string | null
+          channel_key?: string | null
+          contact_id?: string | null
+          created_at?: string
+          founder_review_required?: boolean
+          id?: string
+          jurisdiction_code?: string | null
+          legal_review_recommended?: boolean
+          metadata?: Json
+          review_reason: string
+          risk_level?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          action_type?: string
+          business_id?: string | null
+          channel_key?: string | null
+          contact_id?: string | null
+          created_at?: string
+          founder_review_required?: boolean
+          id?: string
+          jurisdiction_code?: string | null
+          legal_review_recommended?: boolean
+          metadata?: Json
+          review_reason?: string
+          risk_level?: string
+          status?: string
           updated_at?: string
         }
         Relationships: []
