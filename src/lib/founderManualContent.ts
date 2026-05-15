@@ -26,7 +26,7 @@ export const generateManualMarkdown = (data: ManualLiveData): string => {
   return `# Liftor AI — Founder Manual
 ## Complete Engineering-Level Platform Documentation
 
-**Version:** 5.0 — Global Operating Brain / Command Centre Edition (15 May 2026)
+**Version:** 5.2 — Build Closeout / Go-To-Use Edition (15 May 2026)
 **Generated:** ${now}
 **Classification:** Founder / Internal Engineering / Investor Documentation
 **Status:** Live — Auto-generated from platform state
@@ -3362,5 +3362,41 @@ The manual can be exported as a formatted PDF document using the browser's nativ
 *End of v5.0 Addendum.*
 *Self-updating documentation generated from live platform state.*
 *${now}*
+
+---
+
+## v5.2 Addendum — Build Closeout / Go-To-Use Edition
+
+This addendum closes the 90+ prompt build sequence. No new architecture is added — only consolidation, indexing and the operator hand-over.
+
+### Final module index (every major build area)
+
+1. Command Centre architecture · 2. Founder Alert Strip · 3. Business Selector · 4. Customer Journey Flow · 5. Human Layer / Customer Success · 6. Growth Layer · 7. Revenue Layer · 8. Group HQ Layer · 9. AI Operations Layer · 10. Manual / Build Log / System Map · 11. Business Activation Wizard · 12. Business Knowledge Upload / Training · 13. Business Execution Starter Packs · 14. User Manual system · 15. Rehearsal / Simulation Mode · 16. Rehearsal Reset / Test Data Purge · 17. Clean Real Mode · 18. Pre-Live Baseline · 19. Business Operating Standards · 20. Final Go-To-Use Acceptance · 21. Revenue Target Operating Mode · 22. Revenue Goal Agent · 23. CRM Total Memory · 24. Customer Memory / CRM Context Guard · 25. Surveys / Voice of Customer · 26. Onboarding / Bedding-In · 27. Support / Customer Service · 28. Complaints / Disputes / Recovery · 29. Win-Back Agent · 30. Customer Success / Upsell Engine · 31. Quarterly Customer Reports · 32. Retention / Recurring Revenue · 33. Prospecting Agent / Target Account Ranking · 34. Smartlead Scale Lane · 35. Native IONOS Controlled Lane · 36. Apollo Sourcing · 37. Social Media Brain · 38. Content Factory · 39. Marketing / Funnels / Lead Magnets / Ads Briefs · 40. Proposals · 41. Demos · 42. Deals · 43. Invoices / Payments · 44. Subscriptions / Renewals · 45. Suppliers / Assignments / Delivery · 46. Partnerships / Referrals / Affiliates · 47. Group Entity Register · 48. Obligation Calendar · 49. Treasury / Cashflow · 50. Accounting Close Tasks · 51. Contracts / Legal / Procurement · 52. People / VA / Access / Training · 53. Risk / Insurance / Incidents / Continuity · 54. Product Roadmap / QA / Releases · 55. AI Governance / Quality Control · 56. Cost / Credits / Margin Control · 57. Privacy / DSAR / Retention · 58. IP / Rights / Brand Assets · 59. Meetings / Calls / Commitments · 60. Knowledge Source Truth Layer · 61. Data Room / Document Vault · 62. Funding / M&A / Exit Readiness · 63. PR / Reputation / Crisis Communications · 64. KPI / OKR / Performance · 65. Founder Notifications / Escalation · 66. Global Autonomy / Autopilot Ladder · 67. Multilingual / Timezone / Jurisdiction / Multi-channel · 68. External Action Gates · 69. Testing / Self-Healing / Monitoring · 70. Security / Secrets / RLS · 71. Link integrity & Command Centre usability · 72. 25-business scalability · 73. First-business readiness for Neon Candy · 74. What remains locked · 75. What is ready for internal use · 76. What must be manually configured before external go-live.
+
+### New-business standard operating flow (canonical)
+1. Create/select business. 2. Upload technical manual. 3. Add website/public brand source. 4. Upload user manual/operating instructions. 5. Upload offers, pricing and packages. 6. Upload customer/support/operations documents. 7. Run Business Training. 8. Review business summary. 9. Generate Execution Starter Pack. 10. Approve tone and templates. 11. Run Business Activation checklist. 12. Run Rehearsal. 13. Reset rehearsal data. 14. Confirm Clean Real Mode. 15. Generate Operating Standards. 16. Create Pre-Live Baseline. 17. Run Go-To-Use Readiness. 18. Start internal use. 19. Approve external actions only when ready.
+
+### Revenue Target Operating Mode (technical)
+- Tables: \`business_revenue_targets\`, \`revenue_target_activity_plans\`, \`revenue_goal_progress_snapshots\`.
+- Functions: \`revenue-target-plan\` (CREATE REVENUE TARGET PLAN), \`revenue-goal-monitor\` (CREATE REVENUE GOAL ACTIONS).
+- Agent: \`revenue_goal_agent\` — works backwards from £/count target → required prospects, outreach, social, proposals, demos, upsells; pace status ahead/on_track/slightly_behind/behind/critical; recommends adjustments; never sends externally.
+
+### Autopilot ladder (technical)
+- L0 Locked / Manual · L1 Draft Only · L2 Internal Autopilot (CRM/tasks/scoring/reports, no customer contact) · L3 Approved External Actions · L4 Limited Autopilot (capped rules) · L5 Full Business Autopilot (Mandy monitors exceptions). Module-by-module and business-by-business. Legal/finance/privacy/complaints/high-risk stay gated. Pause buttons mandatory.
+
+### First Business Under Test — Neon Candy (current state)
+- Business: Neon Candy. Sender: hello@neoncandy.online.
+- Smartlead API connected · Smartlead mailbox connected.
+- Smartlead campaign creation/mapping and warm-up: still to be confirmed unless completed.
+- Native IONOS lane: safe-blocked. \`auto_send\`: disabled. Outbound cron: disabled.
+- Smartlead scale lane = intended future outreach path.
+- All external actions remain gated. Activation/readiness must be checked from Command Centre. No secrets exposed in this manual.
+
+### What remains locked / what is ready / what must be manually configured before external go-live
+- **Locked:** all email send, social publish, DMs, Apollo POST/credit spend, Smartlead POST/lead push/campaign start, proposal/invoice/survey/report/onboarding sends, money movement, filings, private exports, \`auto_send\`, outbound cron.
+- **Ready for internal use:** Command Centre, Activation Wizard, Knowledge Upload + Training, Starter Pack, Rehearsal/Reset/Clean Real Mode, Pre-Live Baseline, Operating Standards, Revenue Target Operating Mode, all internal agents (drafts only).
+- **Manual configuration before external go-live:** per-business + per-channel founder approval to unlock outbound (Smartlead campaign start, Apollo credits, social publish, email send, invoice send, money movement, filings) — each unlock recorded in approval log.
+
+*End of v5.2 Build Closeout addendum.*
 `;
 };
