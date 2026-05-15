@@ -14,6 +14,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { LayoutTemplate, Search, Plus, Package, Workflow, Bot } from "lucide-react";
 import { format } from "date-fns";
+import BusinessLaunchFactoryPanel from "@/components/founder/expansion/BusinessLaunchFactoryPanel";
 
 const typeClass = (t: string) => {
   if (t === "platform") return "bg-primary/20 text-primary";
@@ -145,6 +146,7 @@ const TemplateDirectory = () => {
 
         {/* Directory */}
         <div className="space-y-2">
+          <BusinessLaunchFactoryPanel />
           {filtered.length === 0 ? (
             <Card className="bg-card border-border/50"><CardContent className="p-6 text-muted-foreground text-sm">No templates found.</CardContent></Card>
           ) : filtered.map((t: any) => (
