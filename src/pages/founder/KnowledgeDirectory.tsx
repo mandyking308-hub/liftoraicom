@@ -213,6 +213,7 @@ const KnowledgeDirectory = () => {
           ))
         )}
         <SupportKnowledgeAgentPanel />
+        <KnowledgeSourceTruthPanel />
       </div>
     </FounderLayout>
   );
