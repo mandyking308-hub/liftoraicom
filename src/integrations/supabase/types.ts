@@ -2667,6 +2667,77 @@ export type Database = {
         }
         Relationships: []
       }
+      crm_conversation_bridge_reviews: {
+        Row: {
+          apply_blockers: Json
+          apply_status: string
+          business_id: string | null
+          confidence: number | null
+          contact_id: string | null
+          conversation_id: string | null
+          created_at: string
+          detected_intent: string | null
+          founder_review_required: boolean
+          id: string
+          interaction_id: string | null
+          metadata: Json
+          proposed_body_preview: string | null
+          proposed_communication_direction: string | null
+          proposed_communication_type: string | null
+          proposed_conversation_action: string
+          proposed_subject: string | null
+          updated_at: string
+        }
+        Insert: {
+          apply_blockers?: Json
+          apply_status?: string
+          business_id?: string | null
+          confidence?: number | null
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          detected_intent?: string | null
+          founder_review_required?: boolean
+          id?: string
+          interaction_id?: string | null
+          metadata?: Json
+          proposed_body_preview?: string | null
+          proposed_communication_direction?: string | null
+          proposed_communication_type?: string | null
+          proposed_conversation_action?: string
+          proposed_subject?: string | null
+          updated_at?: string
+        }
+        Update: {
+          apply_blockers?: Json
+          apply_status?: string
+          business_id?: string | null
+          confidence?: number | null
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          detected_intent?: string | null
+          founder_review_required?: boolean
+          id?: string
+          interaction_id?: string | null
+          metadata?: Json
+          proposed_body_preview?: string | null
+          proposed_communication_direction?: string | null
+          proposed_communication_type?: string | null
+          proposed_conversation_action?: string
+          proposed_subject?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_conversation_bridge_reviews_interaction_id_fkey"
+            columns: ["interaction_id"]
+            isOneToOne: false
+            referencedRelation: "crm_interaction_ledger"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_interaction_ledger: {
         Row: {
           ai_action_id: string | null
