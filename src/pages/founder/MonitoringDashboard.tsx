@@ -1,5 +1,6 @@
 import FounderLayout from "@/components/founder/FounderLayout";
 import SelfHealingMonitoringPanel from "@/components/founder/monitoring/SelfHealingMonitoringPanel";
+import AutopilotActivationGatesPanel from "@/components/founder/autonomy/AutopilotActivationGatesPanel";
 import GlobalOperatingClockPanel from "@/components/founder/global/GlobalOperatingClockPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -119,6 +120,7 @@ const MonitoringDashboard = () => {
         </div>
 
         <SelfHealingMonitoringPanel />
+        <AutopilotActivationGatesPanel />
 
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
