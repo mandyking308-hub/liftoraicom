@@ -165,3 +165,39 @@ export const PRE_LIVE_BASELINE_FLOW: ManualSection = {
   ].join(" "),
 };
 LIFTOR_FULL_GUIDE.push(PRE_LIVE_BASELINE_FLOW);
+
+export const REVENUE_TARGET_FLOW: ManualSection = {
+  number: 79,
+  key: "revenue-target",
+  title: "Setting a revenue target",
+  body: [
+    "1) Open Command Centre.",
+    "2) Select the business in the Business Selector.",
+    "3) Open the Revenue Target Operating Mode panel.",
+    "4) Set target name, type (e.g. new_subscriptions), amount (e.g. £1,000) and the period (this month).",
+    "5) Optionally set a target count (e.g. 10 new customers).",
+    "6) Click 'Dry-run plan' to see required prospects, outreach, social actions, proposals, demos and upsells.",
+    "7) Review the assumptions and risk flags. If history is missing, Liftor uses conservative placeholders and tells you.",
+    "8) Click 'Create target + plan' (confirmation phrase CREATE REVENUE TARGET PLAN) to save it.",
+    "9) Click 'Dry-run pace monitor' to see ahead / on_track / slightly_behind / behind / critical.",
+    "10) Click 'Write progress snapshot' (CREATE REVENUE GOAL ACTIONS) when you want a saved checkpoint.",
+    "11) Review recommended agent actions and recommended founder actions.",
+    "12) Keep external sends and credit spend LOCKED until you approve them per item.",
+  ].join(" "),
+};
+LIFTOR_FULL_GUIDE.push(REVENUE_TARGET_FLOW);
+
+export const REVENUE_GOAL_AGENT_FLOW: ManualSection = {
+  number: 80,
+  key: "revenue-goal-agent",
+  title: "How Liftor works toward a target",
+  body: [
+    "Liftor does not magically sell — it works backwards from your goal.",
+    "The Revenue Goal Agent watches each active target and calculates the activity needed to hit it: prospecting volume, outreach drafts, social/content, follow-ups, proposals, demos, upsells, retention and win-back.",
+    "It tracks pace daily and labels you ahead / on_track / slightly_behind / behind / critical.",
+    "If you are behind, it recommends increasing prospecting, generating more content, running win-back drafts, following up open proposals, creating upsell offers, reviewing pricing, improving onboarding/retention or chasing renewals.",
+    "All of this is internal until you approve. No emails, posts, DMs, Apollo calls, Smartlead pushes, money movement or filings happen without explicit founder approval.",
+    "Hand-overs: revenue_target_behind → prospecting / social / outreach / customer_success / winback agents; proposal_gap → proposal agent; renewal_gap → customer_success agent; subscription_gap → revenue_goal_agent.",
+  ].join(" "),
+};
+LIFTOR_FULL_GUIDE.push(REVENUE_GOAL_AGENT_FLOW);
