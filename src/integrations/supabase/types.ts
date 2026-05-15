@@ -5185,6 +5185,81 @@ export type Database = {
         }
         Relationships: []
       }
+      outbound_providers: {
+        Row: {
+          created_at: string
+          credentials_present: boolean
+          daily_send_cap: number | null
+          from_email: string | null
+          from_name: string | null
+          hourly_send_cap: number | null
+          id: string
+          inbox_id: string | null
+          last_error: string | null
+          last_test_at: string | null
+          mailbox_send_cap: number | null
+          mode: string
+          notes: string | null
+          provider_health: string
+          provider_name: string
+          provider_type: string
+          reply_to: string | null
+          sending_domain: string | null
+          status: string
+          updated_at: string
+          warmup_status: string | null
+          webhook_configured: boolean
+        }
+        Insert: {
+          created_at?: string
+          credentials_present?: boolean
+          daily_send_cap?: number | null
+          from_email?: string | null
+          from_name?: string | null
+          hourly_send_cap?: number | null
+          id?: string
+          inbox_id?: string | null
+          last_error?: string | null
+          last_test_at?: string | null
+          mailbox_send_cap?: number | null
+          mode?: string
+          notes?: string | null
+          provider_health?: string
+          provider_name: string
+          provider_type: string
+          reply_to?: string | null
+          sending_domain?: string | null
+          status?: string
+          updated_at?: string
+          warmup_status?: string | null
+          webhook_configured?: boolean
+        }
+        Update: {
+          created_at?: string
+          credentials_present?: boolean
+          daily_send_cap?: number | null
+          from_email?: string | null
+          from_name?: string | null
+          hourly_send_cap?: number | null
+          id?: string
+          inbox_id?: string | null
+          last_error?: string | null
+          last_test_at?: string | null
+          mailbox_send_cap?: number | null
+          mode?: string
+          notes?: string | null
+          provider_health?: string
+          provider_name?: string
+          provider_type?: string
+          reply_to?: string | null
+          sending_domain?: string | null
+          status?: string
+          updated_at?: string
+          warmup_status?: string | null
+          webhook_configured?: boolean
+        }
+        Relationships: []
+      }
       outreach_campaigns: {
         Row: {
           business_name: string
