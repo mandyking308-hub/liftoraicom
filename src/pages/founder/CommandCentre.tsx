@@ -22,6 +22,7 @@ import BusinessActivationWizardPanel from "@/components/founder/activation/Busin
 import BusinessRehearsalSimulationPanel from "@/components/founder/activation/BusinessRehearsalSimulationPanel";
 import PreLiveBaselineControlPanel from "@/components/founder/activation/PreLiveBaselineControlPanel";
 import RevenueTargetOperatingPanel from "@/components/founder/revenue/RevenueTargetOperatingPanel";
+import BusinessValuationIntelligencePanel from "@/components/founder/valuation/BusinessValuationIntelligencePanel";
 import FinalGoToUseReadinessPanel from "@/components/founder/command/FinalGoToUseReadinessPanel";
 import FinalHardeningStatusPanel from "@/components/founder/command/FinalHardeningStatusPanel";
 import CommandCentreTruthSyncPanel from "@/components/founder/command/CommandCentreTruthSyncPanel";
@@ -767,6 +768,7 @@ const CommandCentre = () => {
       <div className="max-w-7xl mx-auto px-4 pt-4"><BusinessRehearsalSimulationPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><PreLiveBaselineControlPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><RevenueTargetOperatingPanel /></div>
+      <div className="max-w-7xl mx-auto px-4 pt-4"><BusinessValuationIntelligencePanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><BusinessKnowledgeUploadTrainingPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><LiftorUserManualPanel /></div>
       <DailyOperatorNextActionsCard />
