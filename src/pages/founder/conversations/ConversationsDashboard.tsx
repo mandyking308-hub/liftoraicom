@@ -6,6 +6,7 @@ import CRMConversationBridgePanel from "@/components/founder/crm/CRMConversation
 import CRMCustomerLifecyclePanel from "@/components/founder/crm/CRMCustomerLifecyclePanel";
 import CRMCustomerMemoryDashboard from "@/components/founder/crm/CRMCustomerMemoryDashboard";
 import CRMContactTimelinePanel from "@/components/founder/crm/CRMContactTimelinePanel";
+import AIConversationDraftingPanel from "@/components/founder/agents/AIConversationDraftingPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -207,6 +208,7 @@ const ConversationsDashboard = () => {
             </Card>
           </TabsContent>
         </Tabs>
+        <AIConversationDraftingPanel />
       </div>
     </FounderLayout>
   );
