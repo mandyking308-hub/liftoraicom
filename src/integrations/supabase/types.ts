@@ -11469,6 +11469,62 @@ export type Database = {
           },
         ]
       }
+      social_competitor_profiles: {
+        Row: {
+          business_id: string
+          competitor_name: string
+          content_pillars: Json
+          created_at: string
+          handle: string | null
+          id: string
+          notes: string | null
+          observed_content_patterns: Json
+          platform_key: string | null
+          profile_url: string | null
+          status: string
+          strong_hooks: Json
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          competitor_name: string
+          content_pillars?: Json
+          created_at?: string
+          handle?: string | null
+          id?: string
+          notes?: string | null
+          observed_content_patterns?: Json
+          platform_key?: string | null
+          profile_url?: string | null
+          status?: string
+          strong_hooks?: Json
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          competitor_name?: string
+          content_pillars?: Json
+          created_at?: string
+          handle?: string | null
+          id?: string
+          notes?: string | null
+          observed_content_patterns?: Json
+          platform_key?: string | null
+          profile_url?: string | null
+          status?: string
+          strong_hooks?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_competitor_profiles_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       social_content_calendars: {
         Row: {
           approval_status: string
@@ -11613,6 +11669,93 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_performance_metrics: {
+        Row: {
+          business_id: string
+          clicks: number
+          comments: number
+          completion_rate: number | null
+          created_at: string
+          engagement_rate: number | null
+          external_post_id: string | null
+          follows: number
+          id: string
+          impressions: number
+          likes: number
+          metadata: Json
+          metric_date: string
+          platform_key: string
+          post_draft_id: string | null
+          reach: number
+          saves: number
+          shares: number
+          source_system: string
+          views: number
+          watch_time_seconds: number | null
+        }
+        Insert: {
+          business_id: string
+          clicks?: number
+          comments?: number
+          completion_rate?: number | null
+          created_at?: string
+          engagement_rate?: number | null
+          external_post_id?: string | null
+          follows?: number
+          id?: string
+          impressions?: number
+          likes?: number
+          metadata?: Json
+          metric_date?: string
+          platform_key: string
+          post_draft_id?: string | null
+          reach?: number
+          saves?: number
+          shares?: number
+          source_system?: string
+          views?: number
+          watch_time_seconds?: number | null
+        }
+        Update: {
+          business_id?: string
+          clicks?: number
+          comments?: number
+          completion_rate?: number | null
+          created_at?: string
+          engagement_rate?: number | null
+          external_post_id?: string | null
+          follows?: number
+          id?: string
+          impressions?: number
+          likes?: number
+          metadata?: Json
+          metric_date?: string
+          platform_key?: string
+          post_draft_id?: string | null
+          reach?: number
+          saves?: number
+          shares?: number
+          source_system?: string
+          views?: number
+          watch_time_seconds?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_performance_metrics_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_performance_metrics_post_draft_id_fkey"
+            columns: ["post_draft_id"]
+            isOneToOne: false
+            referencedRelation: "social_post_drafts"
             referencedColumns: ["id"]
           },
         ]
@@ -11968,6 +12111,65 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "social_source_assets_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_trend_watch_items: {
+        Row: {
+          business_id: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          metadata: Json
+          platform_key: string | null
+          relevance_score: number | null
+          source_notes: string | null
+          status: string
+          suggested_content_angle: string | null
+          trend_key: string | null
+          trend_title: string
+          trend_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          metadata?: Json
+          platform_key?: string | null
+          relevance_score?: number | null
+          source_notes?: string | null
+          status?: string
+          suggested_content_angle?: string | null
+          trend_key?: string | null
+          trend_title: string
+          trend_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          metadata?: Json
+          platform_key?: string | null
+          relevance_score?: number | null
+          source_notes?: string | null
+          status?: string
+          suggested_content_angle?: string | null
+          trend_key?: string | null
+          trend_title?: string
+          trend_type?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_trend_watch_items_business_id_fkey"
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
