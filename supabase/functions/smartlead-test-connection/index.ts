@@ -139,6 +139,13 @@ Deno.serve(async (req) => {
   const draftedCampaignCount = campaignsRes.ok
     ? campaigns.filter((c) => String(c?.status ?? "").toUpperCase() === "DRAFTED").length
     : null;
+  const campaignSummaries = campaignsRes.ok
+    ? campaigns.slice(0, 50).map((c: any) => ({
+        id: c?.id ?? c?.campaign_id ?? null,
+        name: c?.name ?? c?.campaign_name ?? null,
+        status: c?.status ?? null,
+      }))
+    : [];
   const emailAccountCount = accountsRes.ok ? accounts.length : null;
   const warmupAccountCount = accountsRes.ok
     ? accounts.filter(
@@ -193,6 +200,7 @@ Deno.serve(async (req) => {
     campaign_count: campaignCount,
     active_campaign_count: activeCampaignCount,
     drafted_campaign_count: draftedCampaignCount,
+    campaigns: campaignSummaries,
     email_account_count: emailAccountCount,
     warmup_account_count: warmupAccountCount,
     sending_accounts_present: sendingAccountsPresent,
