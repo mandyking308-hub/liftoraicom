@@ -5371,6 +5371,75 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_stewardship_assignments: {
+        Row: {
+          business_id: string | null
+          contact_id: string | null
+          conversation_id: string | null
+          created_at: string
+          current_owner_agent_key: string
+          current_priority: string
+          customer_stage: string | null
+          detected_intent: string | null
+          founder_review_required: boolean
+          handover_summary: string | null
+          id: string
+          last_agent_handover_id: string | null
+          last_interaction_at: string | null
+          metadata: Json
+          next_best_action: string | null
+          next_due_at: string | null
+          previous_owner_agent_key: string | null
+          risk_flags: Json
+          stewardship_status: string
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          current_owner_agent_key: string
+          current_priority?: string
+          customer_stage?: string | null
+          detected_intent?: string | null
+          founder_review_required?: boolean
+          handover_summary?: string | null
+          id?: string
+          last_agent_handover_id?: string | null
+          last_interaction_at?: string | null
+          metadata?: Json
+          next_best_action?: string | null
+          next_due_at?: string | null
+          previous_owner_agent_key?: string | null
+          risk_flags?: Json
+          stewardship_status?: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          current_owner_agent_key?: string
+          current_priority?: string
+          customer_stage?: string | null
+          detected_intent?: string | null
+          founder_review_required?: boolean
+          handover_summary?: string | null
+          id?: string
+          last_agent_handover_id?: string | null
+          last_interaction_at?: string | null
+          metadata?: Json
+          next_best_action?: string | null
+          next_due_at?: string | null
+          previous_owner_agent_key?: string | null
+          risk_flags?: Json
+          stewardship_status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       deals: {
         Row: {
           business_name: string
