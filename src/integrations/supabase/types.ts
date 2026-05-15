@@ -5962,6 +5962,109 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_memory_profiles: {
+        Row: {
+          business_id: string | null
+          buying_signals: Json | null
+          competitor_context: Json | null
+          contact_id: string | null
+          created_at: string | null
+          customer_summary: string | null
+          deal_history_summary: string | null
+          demo_history_summary: string | null
+          id: string
+          invoice_payment_summary: string | null
+          known_needs: Json | null
+          known_pain_points: Json | null
+          last_refreshed_at: string | null
+          metadata: Json | null
+          objections: Json | null
+          preferences: Json | null
+          profile_status: string | null
+          proposal_history_summary: string | null
+          relationship_summary: string | null
+          risk_flags: Json | null
+          satisfaction_summary: string | null
+          support_history_summary: string | null
+          updated_at: string | null
+          upsell_interest_summary: string | null
+        }
+        Insert: {
+          business_id?: string | null
+          buying_signals?: Json | null
+          competitor_context?: Json | null
+          contact_id?: string | null
+          created_at?: string | null
+          customer_summary?: string | null
+          deal_history_summary?: string | null
+          demo_history_summary?: string | null
+          id?: string
+          invoice_payment_summary?: string | null
+          known_needs?: Json | null
+          known_pain_points?: Json | null
+          last_refreshed_at?: string | null
+          metadata?: Json | null
+          objections?: Json | null
+          preferences?: Json | null
+          profile_status?: string | null
+          proposal_history_summary?: string | null
+          relationship_summary?: string | null
+          risk_flags?: Json | null
+          satisfaction_summary?: string | null
+          support_history_summary?: string | null
+          updated_at?: string | null
+          upsell_interest_summary?: string | null
+        }
+        Update: {
+          business_id?: string | null
+          buying_signals?: Json | null
+          competitor_context?: Json | null
+          contact_id?: string | null
+          created_at?: string | null
+          customer_summary?: string | null
+          deal_history_summary?: string | null
+          demo_history_summary?: string | null
+          id?: string
+          invoice_payment_summary?: string | null
+          known_needs?: Json | null
+          known_pain_points?: Json | null
+          last_refreshed_at?: string | null
+          metadata?: Json | null
+          objections?: Json | null
+          preferences?: Json | null
+          profile_status?: string | null
+          proposal_history_summary?: string | null
+          relationship_summary?: string | null
+          risk_flags?: Json | null
+          satisfaction_summary?: string | null
+          support_history_summary?: string | null
+          updated_at?: string | null
+          upsell_interest_summary?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_memory_profiles_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_memory_profiles_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_memory_profiles_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+        ]
+      }
       customer_stewardship_assignments: {
         Row: {
           business_id: string | null
@@ -11789,6 +11892,90 @@ export type Database = {
             referencedColumns: ["inbox_id"]
           },
         ]
+      }
+      response_context_checks: {
+        Row: {
+          action_type: string
+          agent_key: string | null
+          allowed_to_draft: boolean | null
+          allowed_to_send: boolean | null
+          blockers: Json | null
+          business_id: string | null
+          compliance_checked: boolean | null
+          contact_id: string | null
+          context_quality_score: number | null
+          context_summary: string | null
+          conversation_id: string | null
+          created_at: string | null
+          crm_history_checked: boolean | null
+          customer_memory_checked: boolean | null
+          deal_finance_checked: boolean | null
+          demo_history_checked: boolean | null
+          draft_id: string | null
+          founder_review_required: boolean | null
+          id: string
+          interaction_id: string | null
+          missing_context: Json | null
+          proposal_history_checked: boolean | null
+          risk_checked: boolean | null
+          support_history_checked: boolean | null
+          survey_feedback_checked: boolean | null
+        }
+        Insert: {
+          action_type: string
+          agent_key?: string | null
+          allowed_to_draft?: boolean | null
+          allowed_to_send?: boolean | null
+          blockers?: Json | null
+          business_id?: string | null
+          compliance_checked?: boolean | null
+          contact_id?: string | null
+          context_quality_score?: number | null
+          context_summary?: string | null
+          conversation_id?: string | null
+          created_at?: string | null
+          crm_history_checked?: boolean | null
+          customer_memory_checked?: boolean | null
+          deal_finance_checked?: boolean | null
+          demo_history_checked?: boolean | null
+          draft_id?: string | null
+          founder_review_required?: boolean | null
+          id?: string
+          interaction_id?: string | null
+          missing_context?: Json | null
+          proposal_history_checked?: boolean | null
+          risk_checked?: boolean | null
+          support_history_checked?: boolean | null
+          survey_feedback_checked?: boolean | null
+        }
+        Update: {
+          action_type?: string
+          agent_key?: string | null
+          allowed_to_draft?: boolean | null
+          allowed_to_send?: boolean | null
+          blockers?: Json | null
+          business_id?: string | null
+          compliance_checked?: boolean | null
+          contact_id?: string | null
+          context_quality_score?: number | null
+          context_summary?: string | null
+          conversation_id?: string | null
+          created_at?: string | null
+          crm_history_checked?: boolean | null
+          customer_memory_checked?: boolean | null
+          deal_finance_checked?: boolean | null
+          demo_history_checked?: boolean | null
+          draft_id?: string | null
+          founder_review_required?: boolean | null
+          id?: string
+          interaction_id?: string | null
+          missing_context?: Json | null
+          proposal_history_checked?: boolean | null
+          risk_checked?: boolean | null
+          support_history_checked?: boolean | null
+          survey_feedback_checked?: boolean | null
+        }
+        Relationships: []
       }
       retry_queue: {
         Row: {
