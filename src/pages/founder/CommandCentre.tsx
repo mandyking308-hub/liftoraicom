@@ -37,6 +37,7 @@ import SmartleadScaleNextActionBanner from "@/components/founder/integrations/Sm
 import OutboundChannelLanesPanel from "@/components/founder/integrations/OutboundChannelLanesPanel";
 import OutboundChannelPolicyPanel from "@/components/founder/integrations/OutboundChannelPolicyPanel";
 import ScaleOperationsDryRunDashboard from "@/components/founder/command/ScaleOperationsDryRunDashboard";
+import CRMInteractionLedgerPanel from "@/components/founder/crm/CRMInteractionLedgerPanel";
 import {
   Building2, Bot, Send, Mail, Inbox as InboxIcon, MessageSquare, FileSignature,
   Search, Banknote, ShieldCheck, Workflow as WorkflowIcon, Phone, AlertTriangle,
