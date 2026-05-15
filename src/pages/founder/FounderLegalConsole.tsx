@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import FounderLayout from "@/components/founder/FounderLayout";
+import GroupHQOperatingPanel from "@/components/founder/group/GroupHQOperatingPanel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -155,6 +156,7 @@ const FounderLegalConsole = () => {
         </Tabs>
         <GlobalJurisdictionPolicyPanel />
       </div>
+    <div className="max-w-7xl mx-auto px-4 pb-6"><GroupHQOperatingPanel /></div>
     </FounderLayout>
   );
 };
