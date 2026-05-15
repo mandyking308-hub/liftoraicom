@@ -983,6 +983,7 @@ const CommandCentre = () => {
             <SmartleadCampaignDiscoveryPanel />
             <SmartleadLeadPushPreview />
             <BulkSendPreviewPanel />
+            <ScaleOperationsDryRunDashboard />
 
             {/* SECTION 13 — Monitoring / Security / System Health */}
             <RunwayHeader n={13} title="Monitoring / Security / System Health" icon={Monitor} anchor="sec-monitoring" />
