@@ -904,6 +904,7 @@ const CommandCentre = () => {
                 { to: "/founder/sending", label: "Sending Health / Inboxes", icon: Mail },
                 { to: "/founder/organisations", label: "Organisations", icon: Building2 },
               ]} />
+              <CRMInteractionLedgerPanel />
             </Section>
 
             {/* SECTION 8 — Compliance / Legal / Rules */}
