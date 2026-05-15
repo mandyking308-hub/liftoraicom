@@ -733,6 +733,7 @@ const CommandCentre = () => {
               <CollapsibleCard id="sec-agent-capabilities" title="Liftor capabilities (concept map)" icon={Sparkles} defaultOpen={false} flat>
                 <LiftorCapabilities />
               </CollapsibleCard>
+              <AIAgentOperatingModelPanel />
             </Section>
 
             {/* SECTION 6 — Outreach Runway */}
