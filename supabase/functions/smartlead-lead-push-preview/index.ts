@@ -14,9 +14,9 @@ const json = (b: unknown, s = 200) =>
 /**
  * Smartlead Lead Push Preview — DRY-RUN ONLY.
  *
- * Reads contacts/queue locally, applies the same compliance/exclusion rules
- * Liftor would use before pushing to Smartlead, and returns the would-be
- * Smartlead lead payload shape. NEVER calls Smartlead. NEVER mutates DB.
+ * Returns eligible Liftor contacts that COULD be pushed to a mapped Smartlead
+ * campaign, plus the exact Smartlead lead payload preview. No POST to
+ * Smartlead. No DB mutation to operational tables.
  */
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -24,7 +24,6 @@ Deno.serve(async (req) => {
   const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
   const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
-  const SMARTLEAD_API_KEY = Deno.env.get("SMARTLEAD_API_KEY") ?? null;
 
   const auth = req.headers.get("Authorization") ?? "";
   if (!auth.startsWith("Bearer ")) return json({ ok: false, error: "auth_missing" }, 401);
@@ -44,68 +43,54 @@ Deno.serve(async (req) => {
   }
 
   let body: any = {};
-  try {
-    body = await req.json();
-  } catch {
-    body = {};
-  }
+  try { body = await req.json(); } catch { /* */ }
   const limit = Math.min(Math.max(Number(body.limit ?? 25), 1), 100);
-  const liftor_campaign_id: string | null = body.liftor_campaign_id ?? null;
-  const business_id: string | null = body.business_id ?? null;
-  const provider_campaign_id: string | null = body.provider_campaign_id ?? null;
+  const campaign_mapping_id: string | null = body.campaign_mapping_id ?? null;
 
-  // Smartlead campaign existence check (read-only, count only)
-  let smartleadCampaignCount = 0;
-  if (SMARTLEAD_API_KEY && SMARTLEAD_API_KEY.length > 8) {
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 10_000);
-    try {
-      const res = await fetch(
-        `https://server.smartlead.ai/api/v1/campaigns/?include_tags=true&api_key=${encodeURIComponent(
-          SMARTLEAD_API_KEY,
-        )}`,
-        { signal: ctrl.signal },
-      );
-      const txt = await res.text();
-      let parsed: any = null;
-      try {
-        parsed = JSON.parse(txt);
-      } catch {
-        /* */
-      }
-      const arr = Array.isArray(parsed)
-        ? parsed
-        : Array.isArray(parsed?.data)
-          ? parsed.data
-          : [];
-      smartleadCampaignCount = arr.length;
-    } catch {
-      /* swallow */
-    } finally {
-      clearTimeout(t);
-    }
-  }
+  // Resolve mapping (must be active + mapped)
+  let mappingQ = admin
+    .from("outbound_provider_campaign_mappings")
+    .select("id, business_id, liftor_campaign_id, provider_campaign_id, provider_campaign_name, mapping_status, is_active")
+    .eq("provider_type", "smartlead")
+    .eq("mapping_status", "mapped")
+    .eq("is_active", true);
+  if (campaign_mapping_id) mappingQ = mappingQ.eq("id", campaign_mapping_id);
+  const { data: mappings } = await mappingQ.limit(1);
+  const mapping = mappings?.[0] ?? null;
 
-  if (smartleadCampaignCount === 0) {
+  if (!mapping) {
     return json({
       ok: true,
       dry_run: true,
       lead_push_ready: false,
-      blocker: "no_smartlead_campaign",
-      smartlead_campaign_count: 0,
+      blocker: "no_active_campaign_mapping",
       eligible_count: 0,
       excluded_count: 0,
+      excluded_reasons: {},
       preview: [],
-      notes:
-        "No leads pushed — dry-run only. Cannot preview lead push until at least one Smartlead campaign exists.",
+      notes: "No leads pushed. No Smartlead POST calls. No emails sent.",
     });
   }
 
-  // Load candidate contacts (read-only).
+  const business_id = mapping.business_id;
+  const liftor_campaign_id = mapping.liftor_campaign_id;
+  const provider_campaign_id = mapping.provider_campaign_id;
+
+  // Already-pushed guard
+  const { data: alreadyPushed } = await admin
+    .from("outbound_provider_lead_mappings")
+    .select("contact_email, push_status")
+    .eq("provider_type", "smartlead")
+    .eq("provider_campaign_id", provider_campaign_id ?? "")
+    .in("push_status", ["pushed", "pushing"]);
+  const pushedEmails = new Set(
+    (alreadyPushed ?? []).map((r: any) => (r.contact_email ?? "").toLowerCase().trim()),
+  );
+
   let q = admin
     .from("contacts")
     .select(
-      "id, email, first_name, last_name, name, company, linkedin_url, source_platform, lawful_basis, unsubscribe_token, sendable_status, is_globally_suppressed, hard_bounced, unsubscribed_at, archived_at, founder_review_requested_at, assigned_business, active_campaign_id",
+      "id, email, first_name, last_name, name, company, linkedin_url, source_platform, lawful_basis, unsubscribe_token, sendable_status, is_globally_suppressed, hard_bounced, unsubscribed_at, archived_at, founder_review_requested_at, assigned_business, active_campaign_id, compliance_status, do_not_contact",
     )
     .limit(500);
   if (business_id) q = q.eq("assigned_business", business_id);
@@ -117,7 +102,7 @@ Deno.serve(async (req) => {
   const { data: queueRows } = ids.length
     ? await admin
         .from("email_queue")
-        .select("id, contact_id, campaign_id, sequence_step, status")
+        .select("id, contact_id, sequence_step, status")
         .in("contact_id", ids)
     : { data: [] as any[] };
   const queueByContact = new Map<string, any[]>();
@@ -133,55 +118,39 @@ Deno.serve(async (req) => {
 
   for (const c of contacts ?? []) {
     const exclude = (reason: string) => excluded.push({ id: c.id, reason });
-    if (!c.email) {
-      exclude("missing_email");
-      continue;
+    if (!c.email) { exclude("missing_email"); continue; }
+    const emailKey = String(c.email).toLowerCase().trim();
+    if (seenEmails.has(emailKey)) { exclude("duplicate_email"); continue; }
+    if (pushedEmails.has(emailKey)) { exclude("already_pushed_to_smartlead_campaign"); continue; }
+    if (business_id && c.assigned_business && c.assigned_business !== business_id) {
+      exclude("wrong_business"); continue;
     }
-    const emailKey = c.email.toLowerCase().trim();
-    if (seenEmails.has(emailKey)) {
-      exclude("duplicate_email");
-      continue;
+    if (c.archived_at) { exclude("archived"); continue; }
+    if (c.do_not_contact) { exclude("do_not_contact"); continue; }
+    if (c.is_globally_suppressed) { exclude("suppressed"); continue; }
+    if (c.hard_bounced) { exclude("bounced"); continue; }
+    if (c.unsubscribed_at) { exclude("unsubscribed"); continue; }
+    if (c.compliance_status && c.compliance_status !== "outreach_allowed") {
+      exclude(`compliance_${c.compliance_status}`); continue;
     }
-    if (c.archived_at) {
-      exclude("archived");
-      continue;
-    }
-    if (c.is_globally_suppressed) {
-      exclude("globally_suppressed");
-      continue;
-    }
-    if (c.hard_bounced) {
-      exclude("hard_bounced");
-      continue;
-    }
-    if (c.unsubscribed_at) {
-      exclude("unsubscribed");
-      continue;
-    }
-    if (!c.lawful_basis) {
-      exclude("missing_lawful_basis");
-      continue;
-    }
-    if (!c.unsubscribe_token) {
-      exclude("missing_unsubscribe_token");
-      continue;
-    }
+    if (!c.lawful_basis) { exclude("missing_lawful_basis"); continue; }
+    if (!c.unsubscribe_token) { exclude("missing_unsubscribe_token"); continue; }
     if (c.sendable_status && c.sendable_status !== "sendable") {
-      exclude(`sendable_status_${c.sendable_status}`);
-      continue;
+      exclude(`sendable_status_${c.sendable_status}`); continue;
     }
-    if (c.founder_review_requested_at) {
-      exclude("review_required");
-      continue;
-    }
+    if (c.founder_review_requested_at) { exclude("review_required"); continue; }
+
     const queue = queueByContact.get(c.id) ?? [];
-    const unsafeQueue = queue.find((q) =>
+    const step4Review = queue.find((q: any) => q.sequence_step === 4 && q.status === "review_required");
+    if (step4Review) { exclude("review_required_step_4"); continue; }
+    const unsafeQueue = queue.find((q: any) =>
       ["pending", "sending", "sent", "delayed", "throttled"].includes(q.status),
     );
     if (unsafeQueue) {
       exclude(`already_in_queue_${unsafeQueue.status}_step_${unsafeQueue.sequence_step}`);
       continue;
     }
+
     seenEmails.add(emailKey);
     eligible.push(c);
     if (eligible.length >= limit) break;
@@ -200,10 +169,13 @@ Deno.serve(async (req) => {
       company_url: null,
       custom_fields: {
         liftor_contact_id: c.id,
-        liftor_queue_id: null,
+        business_id: c.assigned_business ?? business_id,
         business_name: c.assigned_business ?? null,
+        liftor_campaign_id: c.active_campaign_id ?? liftor_campaign_id,
         source_platform: c.source_platform ?? null,
         lawful_basis: c.lawful_basis,
+        compliance_status: c.compliance_status ?? null,
+        unsubscribe_token_present: !!c.unsubscribe_token,
         campaign_fit: null,
         sequence_step: 1,
       },
@@ -213,9 +185,10 @@ Deno.serve(async (req) => {
   return json({
     ok: true,
     dry_run: true,
-    lead_push_ready: true,
-    smartlead_campaign_count: smartleadCampaignCount,
+    lead_push_ready: eligible.length > 0,
+    campaign_mapping_id: mapping.id,
     provider_campaign_id,
+    provider_campaign_name: mapping.provider_campaign_name,
     liftor_campaign_id,
     business_id,
     eligible_count: eligible.length,
@@ -225,7 +198,8 @@ Deno.serve(async (req) => {
       return acc;
     }, {}),
     preview,
-    notes:
-      "No leads pushed — dry-run only. No POST to /campaigns/{id}/leads. No DB mutation. Smartlead read-only count call only.",
+    apply_disabled: true,
+    apply_disabled_reasons: ["smartlead_lead_push_disabled", "feature_flag_off"],
+    notes: "No leads pushed. No Smartlead POST calls. No emails sent.",
   });
 });
