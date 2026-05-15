@@ -98,7 +98,7 @@ import {
   Search, Banknote, ShieldCheck, Workflow as WorkflowIcon, Phone, AlertTriangle,
   CheckCircle2, Clock, ArrowRight, Sparkles, Activity, TrendingUp, Users, FlaskConical,
   Database, ListChecks, Filter, ChevronDown, Map as MapIcon, Plug, Gavel, BookOpen,
-  Briefcase, ClipboardCheck, Monitor, ShieldAlert, MonitorPlay, Archive,
+  Briefcase, ClipboardCheck, Monitor, ShieldAlert, MonitorPlay, Archive, Image as ImageIcon,
 } from "lucide-react";
 
 const StatTile = ({ label, value, icon: Icon, tone = "default", to }: any) => {
