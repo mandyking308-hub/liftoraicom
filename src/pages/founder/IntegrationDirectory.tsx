@@ -25,6 +25,7 @@ import SmartleadCampaignDiscoveryPanel from "@/components/founder/integrations/S
 import SmartleadSequenceMappingPreview from "@/components/founder/integrations/SmartleadSequenceMappingPreview";
 import { SecurityGovernancePanel } from "@/components/founder/security/SecurityGovernancePanel";
 import SocialSchedulerExportPanel from "@/components/founder/social/SocialSchedulerExportPanel";
+import SocialEngagementInboxPanel from "@/components/founder/social/SocialEngagementInboxPanel";
 
 const statusIcon = (s: string) => {
   if (s === "connected") return <CheckCircle2 size={14} className="text-green-400" />;
@@ -280,6 +281,7 @@ const IntegrationDirectory = () => {
         <SmartleadControlledActivationPanel />
         <MultiChannelInboxPanel />
         <SocialSchedulerExportPanel />
+        <SocialEngagementInboxPanel />
       </div>
     </FounderLayout>
   );
