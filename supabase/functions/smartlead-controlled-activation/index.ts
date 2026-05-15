@@ -70,12 +70,12 @@ Deno.serve(async (req) => {
   // 3) Campaign + mapping
   const { data: mappings } = await admin
     .from('outbound_provider_campaign_mappings')
-    .select('id,business_id,liftor_campaign_id,provider,provider_campaign_id,status,sequence_verified,paused,metadata')
-    .eq('provider', 'smartlead');
+    .select('id,business_id,liftor_campaign_id,provider_type,provider_campaign_id,provider_campaign_status,mapping_status,is_active,metadata')
+    .eq('provider_type', 'smartlead');
 
   const { data: campaigns } = await admin
     .from('outreach_campaigns')
-    .select('id,business_id,name,status,paused,metadata');
+    .select('id,business_name,campaign_name,status');
 
   // 4) Operating profiles for auto_send guard
   const { data: profiles } = await admin
@@ -110,7 +110,6 @@ Deno.serve(async (req) => {
   // Compute per-business readiness
   const businessIds = new Set<string>();
   (mappings ?? []).forEach((m: any) => m.business_id && businessIds.add(m.business_id));
-  (campaigns ?? []).forEach((c: any) => c.business_id && businessIds.add(c.business_id));
   if (businessIds.size === 0) businessIds.add('__global__');
 
   const report: any[] = [];
@@ -118,15 +117,23 @@ Deno.serve(async (req) => {
     const isGlobal = bid === '__global__';
     const businessId = isGlobal ? null : bid;
     const businessMappings = (mappings ?? []).filter((m: any) => m.business_id === businessId);
-    const businessCampaigns = (campaigns ?? []).filter((c: any) => c.business_id === businessId);
+    const businessCampaigns = (campaigns ?? []);
     const profile = (profiles ?? []).find((p: any) => p.business_id === businessId);
     const sendAuthorised = (sendAuth ?? []).some((s: any) => s.business_id === businessId);
 
     const hasMapping = businessMappings.length > 0;
-    const sequenceVerified = businessMappings.some((m: any) => m.sequence_verified === true);
-    const campaignPaused =
-      businessMappings.every((m: any) => m.paused === true || (m.status ?? '') === 'paused' || (m.status ?? '') === 'draft') ||
-      businessCampaigns.every((c: any) => c.paused === true || (c.status ?? '') === 'paused' || (c.status ?? '') === 'draft');
+    const sequenceVerified = businessMappings.some(
+      (m: any) => m.mapping_status === 'verified' || m.is_active === true
+    );
+    const allMappingsPaused =
+      businessMappings.length > 0 &&
+      businessMappings.every(
+        (m: any) =>
+          (m.provider_campaign_status ?? '').toLowerCase() === 'paused' ||
+          (m.provider_campaign_status ?? '').toLowerCase() === 'draft' ||
+          m.is_active === false
+      );
+    const campaignPaused = allMappingsPaused;
 
     const computed: Record<string, { status: string; blocker?: string }> = {
       api_key_connected: { status: apiKeyPresent ? 'passed' : 'pending', blocker: apiKeyPresent ? undefined : 'smartlead_api_key_missing' },
