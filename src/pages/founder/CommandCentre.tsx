@@ -1033,6 +1033,7 @@ const CommandCentre = () => {
                 { to: "/founder/executions", label: "Executions", icon: Activity },
               ]} />
             </Section>
+            <LiftorMasterDryRunPanel />
 
             {/* SECTION 14 — Knowledge / Manual / Build Log */}
             <RunwayHeader n={14} title="Knowledge / Manual / Build Log" icon={BookOpen} anchor="sec-knowledge" />
