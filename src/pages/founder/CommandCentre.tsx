@@ -48,6 +48,7 @@ import AIAgentOperatingModelPanel from "@/components/founder/agents/AIAgentOpera
 import AIAgentOrchestratorPanel from "@/components/founder/agents/AIAgentOrchestratorPanel";
 import AIConversationDraftingPanel from "@/components/founder/agents/AIConversationDraftingPanel";
 import FounderApprovalConsole from "@/components/founder/approvals/FounderApprovalConsole";
+import ApprovedActionExecutionPanel from "@/components/founder/approvals/ApprovedActionExecutionPanel";
 import AgentBusinessLivePanel from "@/components/founder/agents/AgentBusinessLivePanel";
 import AIEngagementAgentLivePanel from "@/components/founder/agents/AIEngagementAgentLivePanel";
 import CommercialHandoffPanel from "@/components/founder/commercial/CommercialHandoffPanel";
@@ -728,6 +729,7 @@ const CommandCentre = () => {
               </p>
             </Section>
             <FounderApprovalConsole />
+            <ApprovedActionExecutionPanel />
             <LiftorMasterDryRunPanel />
             <LiftorBusinessLiveRunPanel />
             <InternalOperatingSchedulesPanel />
@@ -769,6 +771,7 @@ const CommandCentre = () => {
               <AIEngagementAgentLivePanel />
               <AIConversationDraftingPanel />
               <FounderApprovalConsole />
+              <ApprovedActionExecutionPanel />
               <LiftorBusinessLiveRunPanel />
             </Section>
 
