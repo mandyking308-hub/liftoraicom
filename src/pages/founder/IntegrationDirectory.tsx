@@ -13,6 +13,8 @@ import { format } from "date-fns";
 import { Plus, Search, Plug, CheckCircle2, XCircle, AlertCircle, Clock, Wifi } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import OutboundProviderEnginePanel from "@/components/founder/integrations/OutboundProviderEnginePanel";
+import BulkSendEngineBlueprint from "@/components/founder/integrations/BulkSendEngineBlueprint";
 
 const statusIcon = (s: string) => {
   if (s === "connected") return <CheckCircle2 size={14} className="text-green-400" />;
@@ -109,6 +111,13 @@ const IntegrationDirectory = () => {
             <h1 className="text-2xl font-bold">Integrations</h1>
             <p className="text-muted-foreground text-sm mt-1">Manage AI services and API connections</p>
           </div>
+        </div>
+
+        <OutboundProviderEnginePanel />
+        <BulkSendEngineBlueprint />
+
+        <div className="flex items-center justify-between">
+          <div className="text-sm font-semibold">All integrations</div>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
               <Button className="gap-2"><Plus size={16} /> New Integration</Button>
