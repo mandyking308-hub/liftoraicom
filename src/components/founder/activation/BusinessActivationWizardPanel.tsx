@@ -71,6 +71,17 @@ export const BusinessActivationWizardPanel = () => {
 
   const goLive = async () => {
     if (!data?.go_live_allowed) { toast.error("Go-live blocked: readiness < 90% or blockers present"); return; }
+    // Block go-live if rehearsal test data still exists for this business
+    const { data: cc } = await supabase.from("rehearsal_cleanliness_checks")
+      .select("real_mode_ready,test_records_remaining")
+      .eq("business_id", businessId)
+      .order("checked_at", { ascending: false })
+      .limit(1);
+    const latestClean = (cc ?? [])[0] as any;
+    if (!latestClean || latestClean.real_mode_ready !== true) {
+      toast.error("Go-live blocked: run Cleanliness check and Rehearsal Reset first (Clean Real Mode required)");
+      return;
+    }
     setBusy(true);
     try {
       const { data: r, error } = await supabase.functions.invoke("business-go-live-approval", {
