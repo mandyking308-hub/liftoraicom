@@ -28,6 +28,7 @@ import FooterDisclosurePreview from "@/components/founder/safety/FooterDisclosur
 import ManualSendApplyGate from "@/components/founder/safety/ManualSendApplyGate";
 import OutboundProviderEnginePanel from "@/components/founder/integrations/OutboundProviderEnginePanel";
 import BulkSendEngineBlueprint from "@/components/founder/integrations/BulkSendEngineBlueprint";
+import SmartleadScaleSetupChecklist from "@/components/founder/integrations/SmartleadScaleSetupChecklist";
 import {
   Building2, Bot, Send, Mail, Inbox as InboxIcon, MessageSquare, FileSignature,
   Search, Banknote, ShieldCheck, Workflow as WorkflowIcon, Phone, AlertTriangle,
