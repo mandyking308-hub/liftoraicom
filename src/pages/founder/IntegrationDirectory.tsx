@@ -16,6 +16,9 @@ import { toast } from "sonner";
 import OutboundProviderEnginePanel from "@/components/founder/integrations/OutboundProviderEnginePanel";
 import OutboundChannelPolicyPanel from "@/components/founder/integrations/OutboundChannelPolicyPanel";
 import BulkSendEngineBlueprint from "@/components/founder/integrations/BulkSendEngineBlueprint";
+import SmartleadCampaignMappingPreview from "@/components/founder/integrations/SmartleadCampaignMappingPreview";
+import SmartleadCampaignDiscoveryPanel from "@/components/founder/integrations/SmartleadCampaignDiscoveryPanel";
+import SmartleadSequenceMappingPreview from "@/components/founder/integrations/SmartleadSequenceMappingPreview";
 
 const statusIcon = (s: string) => {
   if (s === "connected") return <CheckCircle2 size={14} className="text-green-400" />;
@@ -117,6 +120,9 @@ const IntegrationDirectory = () => {
         <OutboundProviderEnginePanel />
         <BulkSendEngineBlueprint />
         <OutboundChannelPolicyPanel />
+        <SmartleadCampaignMappingPreview />
+        <SmartleadCampaignDiscoveryPanel />
+        <SmartleadSequenceMappingPreview />
 
         <div className="flex items-center justify-between">
           <div className="text-sm font-semibold">All integrations</div>
