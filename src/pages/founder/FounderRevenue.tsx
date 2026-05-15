@@ -198,8 +198,6 @@ const FounderRevenue = () => {
 
         <PortfolioIntelligenceBrainPanel />
 
-        <div className="hidden">
-        </div>
         <PortfolioCommandCentrePanel />
         <ProductisationReadinessPanel />
 
