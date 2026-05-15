@@ -3,6 +3,7 @@ import PortfolioIntelligenceBrainPanel from "@/components/founder/strategy/Portf
 import CompetitorLearningPositioningPanel from "@/components/founder/strategy/CompetitorLearningPositioningPanel";
 import HumanAccountManagerPanel from "@/components/founder/customer/HumanAccountManagerPanel";
 import RetentionRecurringRevenuePanel from "@/components/founder/customer/RetentionRecurringRevenuePanel";
+import CRMTotalMemoryRecoveryPanel from "@/components/founder/customer/CRMTotalMemoryRecoveryPanel";
 import PortfolioCommandCentrePanel from "@/components/founder/command/PortfolioCommandCentrePanel";
 import { ProductisationReadinessPanel } from "@/components/founder/revenue/ProductisationReadinessPanel";
 import { supabase } from "@/integrations/supabase/client";
@@ -203,6 +204,7 @@ const FounderRevenue = () => {
         <CompetitorLearningPositioningPanel />
         <HumanAccountManagerPanel />
         <RetentionRecurringRevenuePanel />
+        <CRMTotalMemoryRecoveryPanel />
 
         <PortfolioCommandCentrePanel />
         <ProductisationReadinessPanel />
