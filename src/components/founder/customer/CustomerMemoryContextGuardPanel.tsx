@@ -65,7 +65,7 @@ export default function CustomerMemoryContextGuardPanel({ businessId, contactId 
           <div className="rounded-lg border border-border/50 p-3 mb-3">
             <div className="text-xs text-muted-foreground mb-1">Profile summary</div>
             <div className="text-sm">{profile.customer_summary ?? '—'}</div>
-            {(profile.risk_flags ?? []).length > 0 && (
+            {Array.isArray(profile.risk_flags) && profile.risk_flags.length > 0 && (
               <div className="mt-2 flex gap-1 flex-wrap">
                 {(profile.risk_flags as any[]).map((f, i) => <Badge key={i} variant="outline" className="border-destructive/40 text-destructive text-[10px]">{String(f)}</Badge>)}
               </div>
