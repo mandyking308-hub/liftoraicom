@@ -256,6 +256,7 @@ const ComplianceDashboard = () => {
           </CardContent>
         </Card>
       </div>
+        <GlobalJurisdictionPolicyPanel />
     </FounderLayout>
   );
 };
