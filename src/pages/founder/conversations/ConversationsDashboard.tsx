@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import FounderLayout from "@/components/founder/FounderLayout";
 import MultilingualIntelligencePanel from "@/components/founder/global/MultilingualIntelligencePanel";
 import MultiChannelInboxPanel from "@/components/founder/channels/MultiChannelInboxPanel";
+import CustomerJourneyControlBoard from "@/components/founder/command/CustomerJourneyControlBoard";
+import AgentCollaborationBoard from "@/components/founder/agents/AgentCollaborationBoard";
 import CRMInteractionMatchPreviewPanel from "@/components/founder/crm/CRMInteractionMatchPreviewPanel";
 import CRMConversationBridgePanel from "@/components/founder/crm/CRMConversationBridgePanel";
 import CRMCustomerLifecyclePanel from "@/components/founder/crm/CRMCustomerLifecyclePanel";
