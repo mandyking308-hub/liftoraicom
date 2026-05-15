@@ -1,3 +1,4 @@
+import KnowledgeSourceTruthPanel from "@/components/founder/knowledge/KnowledgeSourceTruthPanel";
 import FounderLayout from "@/components/founder/FounderLayout";
 import GroupHQOperatingPanel from "@/components/founder/group/GroupHQOperatingPanel";
 import { SecurityGovernancePanel } from "@/components/founder/security/SecurityGovernancePanel";
