@@ -629,7 +629,7 @@ const CommandCentre = () => {
             blocker: sendUnsafe
               ? "Send blocked — outreach brake review required"
               : totals.failedSends > 0 ? `${totals.failedSends} failed sends` : null,
-            next: sendUnsafe ? "Verify outreach brake / cron status" : "Run controlled live batch",
+            next: sendUnsafe ? "Verify outreach brake / cron status" : "Run controlled live batch (native/legacy IONOS only — not Smartlead scale)",
             anchor: sendUnsafe ? "#sec-safety" : "#sec-queue",
           },
           {
