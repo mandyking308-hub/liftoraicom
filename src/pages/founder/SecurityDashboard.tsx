@@ -432,6 +432,7 @@ const SecurityDashboard = () => {
         </Tabs>
         <ControlledExternalActionGatesPanel />
         <GlobalAutonomyControlPanel />
+        <GlobalJurisdictionPolicyPanel />
       </div>
     </FounderLayout>
   );
