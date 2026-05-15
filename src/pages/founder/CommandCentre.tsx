@@ -51,6 +51,7 @@ import FounderApprovalConsole from "@/components/founder/approvals/FounderApprov
 import AgentBusinessLivePanel from "@/components/founder/agents/AgentBusinessLivePanel";
 import AIEngagementAgentLivePanel from "@/components/founder/agents/AIEngagementAgentLivePanel";
 import CommercialHandoffPanel from "@/components/founder/commercial/CommercialHandoffPanel";
+import LiveCommercialAgentsPanel from "@/components/founder/commercial/LiveCommercialAgentsPanel";
 import RevenueOperationsPanel from "@/components/founder/finance/RevenueOperationsPanel";
 import LiftorMasterDryRunPanel from "@/components/founder/testing/LiftorMasterDryRunPanel";
 import CRMContact360Panel from "@/components/founder/crm/CRMContact360Panel";
