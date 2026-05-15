@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Building2, RefreshCw, Lock, ShieldCheck, AlertTriangle, ListChecks, Rocket, TrendingUp, Bot, Save } from "lucide-react";
 
-type Card = {
+type BizCard = {
   business_id: string;
   business_name: string;
   status: string;
