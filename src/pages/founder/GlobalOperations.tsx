@@ -17,6 +17,7 @@ import BusinessKnowledgeBrainPanel from "@/components/founder/knowledge/Business
 import PortfolioCommandCentrePanel from "@/components/founder/command/PortfolioCommandCentrePanel";
 import InternalOperatingSchedulesPanel from "@/components/founder/operations/InternalOperatingSchedulesPanel";
 import ControlledExternalActionGatesPanel from "@/components/founder/operations/ControlledExternalActionGatesPanel";
+import SmartleadControlledActivationPanel from "@/components/founder/integrations/SmartleadControlledActivationPanel";
 import BusinessLaunchFactoryPanel from "@/components/founder/expansion/BusinessLaunchFactoryPanel";
 
 const statusIcon = (s: string) => {
@@ -366,6 +367,7 @@ const GlobalOperations = () => {
           </Card>
         </div>
         <ControlledExternalActionGatesPanel />
+        <SmartleadControlledActivationPanel />
       </div>
     </FounderLayout>
   );
