@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Plug, ServerCog, ShieldAlert, XCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { toast } from "@/hooks/use-toast";
+import { CheckCircle2, Plug, Rocket, ServerCog, ShieldAlert, Webhook, XCircle } from "lucide-react";
 
 const Pill = ({ ok, label }: { ok: boolean; label: string }) => (
   <Badge
@@ -29,21 +31,49 @@ export default function OutboundProviderEnginePanel() {
   const [data, setData] = useState<any>(null);
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState<any>(null);
+
+  const refresh = async () => {
+    setLoading(true);
+    const { data, error } = await supabase.functions.invoke("provider-readiness-check", {
+      body: {},
+    });
+    if (error) setErr(error.message);
+    else setData(data);
+    setLoading(false);
+  };
 
   useEffect(() => {
-    (async () => {
-      setLoading(true);
-      const { data, error } = await supabase.functions.invoke("provider-readiness-check", {
-        body: {},
-      });
-      if (error) setErr(error.message);
-      else setData(data);
-      setLoading(false);
-    })();
+    refresh();
   }, []);
+
+  const runSmartleadTest = async () => {
+    setTesting(true);
+    setTestResult(null);
+    const { data, error } = await supabase.functions.invoke("smartlead-test-connection", {
+      body: {},
+    });
+    setTesting(false);
+    if (error) {
+      setTestResult({ ok: false, error: error.message });
+      toast({ title: "Smartlead test failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    setTestResult(data);
+    toast({
+      title: data?.ok ? "Smartlead connection OK" : "Smartlead test result",
+      description: data?.ok
+        ? `Read-only campaigns list returned${data?.campaign_count != null ? ` (${data.campaign_count} campaigns)` : ""}.`
+        : data?.reason ?? data?.error ?? "See result panel.",
+    });
+    refresh();
+  };
 
   const proof = data?.proof_provider;
   const scale = data?.scale_provider;
+  const smartlead = data?.smartlead_provider ?? scale;
+  const webhook = data?.smartlead_webhook_blueprint;
   const r = data?.readiness ?? {};
 
   return (
@@ -133,6 +163,83 @@ export default function OutboundProviderEnginePanel() {
               )}
             </div>
           </div>
+
+          {smartlead && smartlead.provider_type === "smartlead" && (
+            <div className="rounded-md border border-primary/30 bg-primary/5 p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm font-semibold">
+                  <Rocket className="h-3.5 w-3.5 text-primary" />
+                  Smartlead — scale candidate (cold outreach orchestration)
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={runSmartleadTest}
+                  disabled={testing}
+                  data-testid="smartlead-test-connection-btn"
+                >
+                  {testing ? "Testing…" : "Test Smartlead Connection"}
+                </Button>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-x-4">
+                <KV k="provider" v={smartlead.provider_name} />
+                <KV k="type" v={smartlead.provider_type} />
+                <KV k="status" v={smartlead.status} />
+                <KV k="health" v={smartlead.provider_health} />
+                <KV k="credentials_present" v={String(smartlead.credentials_present)} />
+                <KV k="webhook_configured" v={String(smartlead.webhook_configured)} />
+                <KV k="warmup_status" v={smartlead.warmup_status ?? "not_configured"} />
+                <KV k="sending_accounts" v="unknown (not queried in v1)" />
+                <KV k="campaigns_configured" v="unknown (not queried in v1)" />
+                <KV k="last_test_at" v={smartlead.last_test_at ?? "never"} />
+                <KV k="last_error" v={smartlead.last_error ?? "none"} />
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                Secret name expected: <span className="font-mono">SMARTLEAD_API_KEY</span>. The
+                key is never exposed in the UI. Test runs a read-only campaigns list call —
+                no campaign creation, no leads pushed, no sends.
+              </p>
+              {testResult && (
+                <div className="rounded border border-border/60 bg-background/40 p-2 text-[11px]">
+                  <div className="font-medium mb-1">Last test result</div>
+                  <KV k="ok" v={String(testResult.ok)} />
+                  <KV k="tested" v={String(testResult.tested ?? false)} />
+                  <KV k="http_status" v={testResult.http_status ?? "—"} />
+                  <KV k="campaign_count" v={testResult.campaign_count ?? "—"} />
+                  <KV k="reason" v={testResult.reason ?? "—"} />
+                  <KV k="error" v={testResult.error ?? "none"} />
+                </div>
+              )}
+            </div>
+          )}
+
+          {webhook && (
+            <div className="rounded-md border border-border/60 p-3 space-y-1">
+              <div className="flex items-center gap-2 text-xs font-semibold">
+                <Webhook className="h-3.5 w-3.5 text-primary" />
+                Smartlead webhook blueprint
+                <Badge variant="outline" className="text-[10px]">read-only</Badge>
+                <Badge
+                  variant="outline"
+                  className={
+                    webhook.configured
+                      ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300 text-[10px]"
+                      : "border-amber-500/40 bg-amber-500/10 text-amber-300 text-[10px]"
+                  }
+                >
+                  {webhook.configured ? "configured" : "not configured"}
+                </Badge>
+              </div>
+              <p className="text-[11px] text-muted-foreground">{webhook.note}</p>
+              <div className="flex flex-wrap gap-1 pt-1">
+                {webhook.events.map((e: string) => (
+                  <Badge key={e} variant="outline" className="text-[10px] font-mono">
+                    {e}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="rounded-md border border-border/60 p-3 space-y-1">
             <div className="text-xs font-semibold">Capability matrix</div>
