@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import FounderLayout from "@/components/founder/FounderLayout";
 import CRMInteractionMatchPreviewPanel from "@/components/founder/crm/CRMInteractionMatchPreviewPanel";
+import CRMConversationBridgePanel from "@/components/founder/crm/CRMConversationBridgePanel";
 import CRMContactTimelinePanel from "@/components/founder/crm/CRMContactTimelinePanel";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -99,6 +100,7 @@ const ConversationsDashboard = () => {
         </div>
 
         <CRMInteractionMatchPreviewPanel />
+        <CRMConversationBridgePanel />
         <CRMContactTimelinePanel />
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
