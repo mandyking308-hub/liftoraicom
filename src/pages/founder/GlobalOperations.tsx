@@ -1,5 +1,6 @@
 import FounderLayout from "@/components/founder/FounderLayout";
 import GroupHQOperatingPanel from "@/components/founder/group/GroupHQOperatingPanel";
+import TreasuryCashflowControlPanel from "@/components/founder/finance/TreasuryCashflowControlPanel";
 import StrategicProspectingAgentPanel from "@/components/founder/prospecting/StrategicProspectingAgentPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -412,6 +413,7 @@ const GlobalOperations = () => {
       </div>
     <div className="max-w-7xl mx-auto px-4 pb-6"><StrategicProspectingAgentPanel /></div>
     <div className="max-w-7xl mx-auto px-4 pb-6"><GroupHQOperatingPanel /></div>
+    <div className="max-w-7xl mx-auto px-4 pb-6"><TreasuryCashflowControlPanel /></div>
     </FounderLayout>
   );
 };
