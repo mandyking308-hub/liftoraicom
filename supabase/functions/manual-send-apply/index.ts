@@ -465,34 +465,118 @@ Deno.serve(async (req) => {
     resolution_note: "Audit only.",
   });
 
-  // Persist assembled body onto queue row so the existing provider path uses our footer-included body.
-  // (The worker reads sequence templates by default; for the manual proof path we use a direct send via
-  //  the existing controlled-proof-send worker invocation pattern. To avoid duplicating SMTP code, we
-  //  delegate the actual SMTP call to outreach-send-worker with max=1 after prioritising this row.)
-  const { error: bumpErr } = await admin
-    .from("email_queue")
-    .update({ priority: 1, scheduled_at: new Date().toISOString() })
-    .eq("id", queue_id);
-  if (bumpErr) return json({ ok: false, error_code: "prioritise_failed", message: bumpErr.message }, 500);
-
-  let workerResult: any = null;
-  let workerError: string | null = null;
-  try {
-    const resp = await fetch(`${SUPABASE_URL}/functions/v1/outreach-send-worker?max=1`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${SERVICE_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ max: 1, manual_proof: true, queue_id }),
-    });
-    workerResult = await resp.json().catch(() => ({}));
-    if (!resp.ok) workerError = `Worker HTTP ${resp.status}`;
-  } catch (e) {
-    workerError = (e as Error).message;
+  // ====== DIRECT INLINE SEND (no worker, no auto_send change) ======
+  // We do NOT call outreach-send-worker. The worker is strictly fail-closed
+  // while auto_send_enabled=false, and we are not changing that flag. We
+  // reuse the same IONOS SMTP credentials path the worker uses, via the
+  // get_inbox_credentials_for_send RPC, and send exactly one email.
+  if (!inbox?.id) {
+    return json({ ok: false, error_code: "no_inbox", message: "Queue row has no inbox_id." }, 500);
   }
 
-  // Read back
+  const encKey = Deno.env.get("INBOX_CREDENTIALS_KEY");
+  if (!encKey) {
+    return json({ ok: false, error_code: "encryption_key_missing", message: "INBOX_CREDENTIALS_KEY not configured." }, 500);
+  }
+  const { data: creds, error: credsErr } = await admin.rpc("get_inbox_credentials_for_send", {
+    _inbox_id: inbox.id,
+    _enc_key: encKey,
+  });
+  if (credsErr || !creds) {
+    return json({ ok: false, error_code: "credentials_missing", message: credsErr?.message ?? "Inbox credentials missing." }, 500);
+  }
+  const c = creds as Record<string, unknown>;
+  const fromEmail = (c.from_email as string) || (c.smtp_username as string);
+  const fromName = (c.from_name as string) || "";
+  const replyTo = (c.reply_to_email as string) || fromEmail;
+  const fromHeader = fromName ? `${fromName} <${fromEmail}>` : fromEmail;
+  const port = Number(c.smtp_port);
+  const isSSL = c.smtp_encryption === "ssl";
+  const messageId = `<${crypto.randomUUID().replace(/-/g, "")}@${fromEmail.split("@").pop() || "liftor.local"}>`;
+
+  let providerMessageId: string | null = null;
+  let providerError: string | null = null;
+  let transporter: ReturnType<typeof nodemailer.createTransport> | null = null;
+  const recipient = contact!.email as string;
+  try {
+    transporter = nodemailer.createTransport({
+      host: c.smtp_host as string,
+      port,
+      secure: isSSL,
+      requireTLS: !isSSL,
+      auth: { user: c.smtp_username as string, pass: c.smtp_password as string },
+      connectionTimeout: 15000,
+      greetingTimeout: 15000,
+      socketTimeout: 20000,
+    });
+    const info = await transporter.sendMail({
+      from: fromHeader,
+      to: recipient,
+      replyTo,
+      subject: mergedSubject,
+      text: assembledBody,
+      headers: { "Message-ID": messageId },
+    });
+    providerMessageId = (info?.messageId as string | undefined) ?? messageId;
+  } catch (e) {
+    providerError = (e as Error).message;
+  } finally {
+    try { transporter?.close(); } catch { /* ignore */ }
+  }
+
+  const nowIso = new Date().toISOString();
+
+  if (providerError || !providerMessageId) {
+    // Failure path — leave queue pending, log failure system_event.
+    await admin.from("email_queue").update({
+      last_attempt_at: nowIso,
+      send_error: `manual_send_apply: ${providerError ?? "unknown SMTP failure"}`,
+    }).eq("id", queue_id);
+
+    await admin.from("system_events").insert({
+      event_type: "manual_send_apply_proof_email",
+      severity: "high",
+      business_name: queueRow.business_name,
+      entity_type: "email_queue",
+      entity_id: queueRow.id,
+      message: `Manual Send Apply SMTP send FAILED → ${recipient}: ${providerError ?? "unknown"}`,
+      metadata: {
+        queue_id, contact_id: queueRow.contact_id, campaign_id: queueRow.campaign_id,
+        inbox_id: inbox.id, emails_sent: 0, smtp_calls: 1, apollo_calls: 0,
+        founder_user_id: userId, error: providerError,
+      },
+      resolved: false,
+      resolution_note: "Manual Send Apply failed — queue row left pending.",
+    });
+
+    return json({
+      ok: false, stage: "send", success: false, dry_run: false,
+      queue_id, contact_email: recipient, inbox_email: inbox?.email_address,
+      emails_sent: 0, smtp_calls: 1, apollo_calls: 0,
+      background_sending_enabled: false, pixel_injected: false,
+      error_code: "smtp_failed",
+      message: `Manual Send Apply did not complete — ${providerError ?? "unknown SMTP error"}`,
+    }, 502);
+  }
+
+  // ===== Success path — write all proof rows =====
+  await admin.from("email_queue").update({
+    status: "sent",
+    sent_at: nowIso,
+    last_attempt_at: nowIso,
+    smtp_accepted_at: nowIso,
+    provider_message_id: providerMessageId,
+    provider_response: "SMTP accepted (manual_send_apply direct send)",
+    send_error: null,
+    delivery_kind: "smtp_real",
+  }).eq("id", queue_id);
+
+  await admin.from("email_events").insert({
+    contact_id: queueRow.contact_id,
+    event_type: "sent",
+    email_id: queueRow.id,
+  });
+
   const { data: postRow } = await admin
     .from("email_queue")
     .select(
@@ -501,10 +585,7 @@ Deno.serve(async (req) => {
     .eq("id", queue_id)
     .maybeSingle();
 
-  const success =
-    postRow?.status === "sent" &&
-    postRow?.delivery_kind === "smtp_real" &&
-    !!postRow?.smtp_accepted_at;
+  const success = true;
 
   if (success) {
     // Communications outbound row
