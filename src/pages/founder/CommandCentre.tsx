@@ -11,6 +11,7 @@ import CostCreditsMarginControlPanel from "@/components/founder/finance/CostCred
 import DataPrivacyRetentionPanel from "@/components/founder/compliance/DataPrivacyRetentionPanel";
 import IPRightsBrandControlPanel from "@/components/founder/legal/IPRightsBrandControlPanel";
 import RecurringRevenueRenewalsPanel from "@/components/founder/revenue/RecurringRevenueRenewalsPanel";
+import MeetingCallIntelligencePanel from "@/components/founder/customer/MeetingCallIntelligencePanel";
 import LiftorCapabilities from "@/components/founder/LiftorCapabilities";
 import AgentOrchestration from "@/components/founder/AgentOrchestration";
 import SystemModeBanner from "@/components/founder/SystemModeBanner";
@@ -1599,6 +1600,7 @@ const CommandCentre = () => {
     <div className="max-w-7xl mx-auto px-4 pb-6"><DataPrivacyRetentionPanel /></div>
     <div className="max-w-7xl mx-auto px-4 pb-6"><IPRightsBrandControlPanel /></div>
     <div className="max-w-7xl mx-auto px-4 pb-6"><RecurringRevenueRenewalsPanel /></div>
+    <div className="max-w-7xl mx-auto px-4 pb-6"><MeetingCallIntelligencePanel /></div>
     </FounderLayout>
   );
 };
