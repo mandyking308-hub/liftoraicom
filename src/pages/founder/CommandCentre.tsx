@@ -626,14 +626,18 @@ const CommandCentre = () => {
             </div>
 
             {/* OUTREACH SAFETY / QUEUE BRAKE — read-only, shared source of truth with /founder/outreach/queue-audit */}
-            <div id="sec-safety" className="scroll-mt-24">
+            <RunwayHeader n={2} title="Safety / Brake" icon={ShieldCheck} anchor="sec-safety" />
+            <div id="sec-safety" className="scroll-mt-24 space-y-2">
               <OutreachSafetyPanel />
+              <p className="text-[11px] text-muted-foreground px-1">
+                SAFE_BLOCKED = safe to inspect and clean. NOT safe to send. Manual Send Apply is not built. Live send / queue creation / Apollo reveal that leads to send remain guarded below.
+              </p>
             </div>
 
-            <div className="flex items-end justify-between flex-wrap gap-3">
+            <div className="flex items-end justify-between flex-wrap gap-3 pt-2">
               <div>
                 <h1 className="text-2xl font-bold">Founder Command Centre</h1>
-                <p className="text-muted-foreground text-sm mt-1">Sequence-led cockpit — sourcing → quality → CRM → queue → send → reply → close.</p>
+                <p className="text-muted-foreground text-sm mt-1">Operating runway — work top to bottom: safety → next actions → outreach pipeline → CRM → compliance → revenue → systems.</p>
               </div>
               <div className="flex gap-2">
                 <Link to="/founder/copilot"><Button size="sm" variant="outline"><Sparkles size={14} /> Co-Pilot</Button></Link>
@@ -643,7 +647,8 @@ const CommandCentre = () => {
 
             <SystemModeBanner />
 
-            {/* SECTION 2 — Today's Founder Actions */}
+            {/* SECTION 3 — Current Next Actions */}
+            <RunwayHeader n={3} title="Current Next Actions" icon={Sparkles} anchor="sec-next-actions" />
             <Section title="Today's founder actions" icon={Sparkles}>
               {orderedFounderActions.length === 0 ? (
                 <p className="text-sm text-muted-foreground">No founder decision required right now.</p>
@@ -661,13 +666,44 @@ const CommandCentre = () => {
                   ))}
                 </div>
               )}
+              <p className="text-[11px] text-muted-foreground mt-3">
+                Live batch send, queue creation, Apollo reveal-to-queue, decision-apply and Manual Send Apply are intentionally absent or guarded. Manual Send Apply is not built.
+              </p>
             </Section>
 
-            {/* MASTER INDEX / SYSTEM MAP — read-only navigation map of every Liftor function. */}
-            <CommandCentreMasterIndex />
+            {/* SECTION 4 — Liftor System Map / Master Index (collapsible) */}
+            <RunwayHeader n={4} title="Liftor System Map / Master Index" icon={MapIcon} anchor="sec-map" />
+            <CollapsibleCard id="sec-map" title="Master Index — every Liftor route & concept" icon={MapIcon} defaultOpen={false}>
+              <CommandCentreMasterIndex />
+            </CollapsibleCard>
 
-            {/* SECTION 3 — Business Workflow Rail */}
-            <Section title="Business workflow" icon={WorkflowIcon}>
+            {/* SECTION 5 — AI Agent Control Room */}
+            <RunwayHeader n={5} title="AI Agent Control Room" icon={Bot} anchor="sec-agents" />
+            <Section title="AI workers" icon={Bot} action={<Link to="/founder/agents"><Button size="sm" variant="ghost">Open agents <ArrowRight size={12} /></Button></Link>}>
+              <div id="sec-agents" className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2 scroll-mt-24">
+                {workers.map((w) => (
+                  <Link key={w.key} to={w.to} className="p-2.5 rounded-lg bg-secondary/30 border border-border/40 hover:border-primary/40 transition-colors block">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <w.icon size={14} className="text-primary" />
+                      <Badge variant="secondary" className={`text-[9px] ${workerStatusColor(w.status)}`}>{w.status.replace("_", " ")}</Badge>
+                    </div>
+                    <p className="text-xs font-medium">{w.name}</p>
+                    <p className="text-[10px] text-muted-foreground line-clamp-2">{w.recent}</p>
+                    <p className="text-[10px] text-primary/80 mt-1 line-clamp-1">→ {w.next}</p>
+                  </Link>
+                ))}
+              </div>
+              <CollapsibleCard id="sec-agent-orchestration" title="Agent orchestration (detailed)" icon={Bot} defaultOpen={false} flat>
+                <AgentOrchestration />
+              </CollapsibleCard>
+              <CollapsibleCard id="sec-agent-capabilities" title="Liftor capabilities (concept map)" icon={Sparkles} defaultOpen={false} flat>
+                <LiftorCapabilities />
+              </CollapsibleCard>
+            </Section>
+
+            {/* SECTION 6 — Outreach Runway */}
+            <RunwayHeader n={6} title="Outreach Runway" icon={Send} anchor="sec-outreach-runway" />
+            <Section title="Outreach pipeline (source → reply)" icon={WorkflowIcon}>
               {(() => {
                 const safeToPromote = leadLifecycle?.safe_to_promote_after_reveal ?? leadLifecycle?.safe_to_promote ?? 0;
                 const safeToQueue = leadLifecycle?.safe_to_queue ?? 0;
@@ -701,41 +737,40 @@ const CommandCentre = () => {
               </div>
             </Section>
 
-            {/* SECTION 4 — Source Leads / Apollo */}
-            <div id="sec-source" className="space-y-4 scroll-mt-24">
-              <div className="rounded-md border border-border/50 bg-muted/20 px-3 py-2 text-[11px] text-muted-foreground">
-                Historical Apollo reveal execution shown below — figures may reflect prior runs / completed reconciliations, not the next live action. Always verify against the latest run before approving credit spend.
+            {/* 6a — Source Candidates */}
+            <CollapsibleCard id="sec-source" title="6a · Source Candidates (Apollo pull, candidates, dedupe context)" icon={Search} defaultOpen={false}>
+              <div className="rounded-md border border-yellow-500/30 bg-yellow-500/5 px-3 py-2 text-[11px] text-yellow-200/80 mb-3">
+                Historical Apollo reveal execution panels below — collapsed by default. Apollo reveal that leads to queue/send remains guarded while pending queue rows are unresolved. Verify against latest run before approving credit spend.
               </div>
-              <AutonomousPipelineStatus businessName="Neon Candy" />
-              <ApolloRevealStageStrip lifecycle={leadLifecycle} />
-              <ApolloPullPanel />
-              <SourceQualityBrief />
-            </div>
+              <div className="space-y-4">
+                <AutonomousPipelineStatus businessName="Neon Candy" />
+                <CollapsibleCard id="sec-source-apollo-strip" title="Apollo reveal stage strip (historical)" icon={Search} defaultOpen={false} flat>
+                  <ApolloRevealStageStrip lifecycle={leadLifecycle} />
+                </CollapsibleCard>
+                <CollapsibleCard id="sec-source-apollo-pull" title="Apollo pull panel (guarded)" icon={Search} defaultOpen={false} flat>
+                  <ApolloPullPanel />
+                </CollapsibleCard>
+                <CollapsibleCard id="sec-source-quality-brief" title="Source quality brief" icon={Filter} defaultOpen={false} flat>
+                  <SourceQualityBrief />
+                </CollapsibleCard>
+              </div>
+            </CollapsibleCard>
 
-            {/* SECTION 5 — Lead Quality Autopilot */}
-            <div id="sec-autopilot" className="scroll-mt-24">
+            {/* 6b — Quality / Dedupe / CRM Check + Apollo Email Reveal + Post-Reveal Validation + Promote to CRM */}
+            <CollapsibleCard id="sec-autopilot" title="6b · Quality / Dedupe / CRM Check · Apollo Email Reveal · Post-Reveal Validation · Promote to CRM" icon={Filter} defaultOpen>
               <LeadQualityPanel />
               <div className="mt-4">
                 <AutopilotPolicyPanel businessName="Neon Candy" />
               </div>
-            </div>
+            </CollapsibleCard>
 
-            {/* SECTION 6 — CRM Spine (compact health card) */}
-            <Section title="CRM spine" icon={Database} action={<Link to="/founder/crm"><Button size="sm" variant="ghost">Open CRM <ArrowRight size={12} /></Button></Link>}>
-              <div id="sec-crm" className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm scroll-mt-24">
-                <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Central contacts</p><p className="text-xl font-semibold">{contacts.length}</p></div>
-                <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">With business link</p><p className="text-xl font-semibold">{contacts.filter((c: any) => c.assigned_business).length}</p></div>
-                <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Missing business link</p><p className="text-xl font-semibold">{contacts.filter((c: any) => !c.assigned_business).length}</p></div>
-                <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Internal identities</p><p className="text-xl font-semibold">{internalEmails.length}</p></div>
-                <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Apollo → contacts</p><p className="text-xl font-semibold">{leadQualityCounts?.promoted ?? 0}</p></div>
-                <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Proposals to reconcile</p><p className="text-xl font-semibold">{proposals.length}</p></div>
-                <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Active conversations</p><p className="text-xl font-semibold">{contacts.filter((c: any) => c.conversation_active).length}</p></div>
-                <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Warm leads</p><p className="text-xl font-semibold">{totals.warmLeads}</p></div>
-              </div>
+            {/* 6c — Compliance Approval (link to compliance) handled in section 8 too; here is pipeline-relevant pointer */}
+            <Section title="6c · Compliance Approval (outreach gate)" icon={ShieldCheck} action={<Link to="/founder/compliance"><Button size="sm" variant="ghost">Open compliance <ArrowRight size={12} /></Button></Link>}>
+              <p className="text-sm text-muted-foreground">Contacts must be marked outreach_allowed by compliance before they can be promoted to a sendable queue. This Command Centre never marks contacts outreach_allowed.</p>
             </Section>
 
-            {/* SECTION 7 — Campaign Queue */}
-            <Section title="Campaign queue" icon={Send} action={<Link to="/founder/outreach/queue"><Button size="sm" variant="ghost">Open queue <ArrowRight size={12} /></Button></Link>}>
+            {/* 6d — Stage to Queue + 6e — Queue Audit / Pending Rows + 6f — Queue Creation + 6g — Controlled Send */}
+            <Section title="6d · Stage to Queue · 6e · Queue Audit · 6f · Queue Creation · 6g · Controlled Send" icon={Send} action={<Link to="/founder/outreach/queue"><Button size="sm" variant="ghost">Open queue <ArrowRight size={12} /></Button></Link>}>
               <div id="sec-queue" className="space-y-4 scroll-mt-24">
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
                   <div className="p-2 rounded bg-secondary/40"><p className="text-base font-semibold">{totals.pendingQueue}</p><p className="text-muted-foreground">Queued</p></div>
@@ -750,16 +785,9 @@ const CommandCentre = () => {
                 <div className="text-[11px] text-muted-foreground border-t border-border/40 pt-2">
                   <span className="font-medium text-foreground">Cadence integrity:</span> downstream steps wait until prior step sent (real SMTP, accepted, provider message ID).
                 </div>
-                {/* Guard live send controls. Even when safety_status=SAFE_BLOCKED,
-                 *  live batch sending stays disabled until Manual Send Apply is built,
-                 *  pending queue rows are triaged, and tracking disclosure is injected.
-                 *  SAFE_BLOCKED ≠ safe to send — only safe to inspect and clean. */}
-                <div
-                  data-testid="live-send-guard"
-                  className="rounded-md border border-yellow-500/40 bg-yellow-500/10 p-3 text-xs space-y-2"
-                >
+                <div data-testid="live-send-guard" className="rounded-md border border-yellow-500/40 bg-yellow-500/10 p-3 text-xs space-y-2">
                   <p className="font-medium text-yellow-200">
-                    Send blocked — Manual Send Apply is not built. Existing pending queue rows must be reviewed first.
+                    Controlled Send blocked — Manual Send Apply is not built. Existing pending queue rows must be reviewed first.
                   </p>
                   <ul className="list-disc list-inside text-yellow-100/80 space-y-0.5">
                     <li>safety_status: <span className="font-mono">{safetyStatus ?? "unknown"}</span></li>
@@ -771,30 +799,19 @@ const CommandCentre = () => {
                     <li>Tracking disclosure injected: <span className="font-mono">no</span></li>
                   </ul>
                   <p className="text-yellow-100/70">
-                    Run controlled live batch / Run next live batch / Run batch of N controls are intentionally hidden.
-                    SAFE_BLOCKED means safe to inspect and clean, not safe to send.
+                    Run controlled live batch / Run next live batch / Run batch of N controls are intentionally hidden. SAFE_BLOCKED means safe to inspect and clean, not safe to send.
                   </p>
-                  <Link to="/founder/outreach/queue-audit">
-                    <Button size="sm" variant="outline">Open Queue Audit</Button>
-                  </Link>
+                  <Link to="/founder/outreach/queue-audit"><Button size="sm" variant="outline">Open Queue Audit</Button></Link>
                   {reviewRequired > 0 && (
                     <Link to="/founder/outreach/queue-audit#review-required-decision-gate" className="ml-2">
                       <Button size="sm" variant="outline">Open Review Required Queue Gate</Button>
                     </Link>
                   )}
                 </div>
-                {/* Queue Creation guard */}
-                <div
-                  data-testid="queue-creation-guard"
-                  className="rounded-md border border-yellow-500/40 bg-yellow-500/10 p-3 text-xs space-y-2"
-                >
-                  <p className="font-medium text-yellow-200">
-                    Create queue rows disabled — pending queue review required.
-                  </p>
+                <div data-testid="queue-creation-guard" className="rounded-md border border-yellow-500/40 bg-yellow-500/10 p-3 text-xs space-y-2">
+                  <p className="font-medium text-yellow-200">Create queue rows disabled — pending queue review required.</p>
                   <p className="text-yellow-100/80">
-                    Queue creation is paused until the {totalPendingFromAudit} existing pending row{totalPendingFromAudit === 1 ? "" : "s"} {totalPendingFromAudit === 1 ? "is" : "are"} reviewed
-                    or safely resolved. Auto-send is off and the background send worker is blocked, but queue creation
-                    remains controlled because pending rows can become dangerous if the brake is ever removed.
+                    Queue creation is paused until the {totalPendingFromAudit} existing pending row{totalPendingFromAudit === 1 ? "" : "s"} {totalPendingFromAudit === 1 ? "is" : "are"} reviewed or safely resolved. Auto-send is off and the background send worker is blocked, but queue creation remains controlled because pending rows can become dangerous if the brake is ever removed.
                   </p>
                   <p className="text-yellow-100/70">
                     review_required: {reviewRequired} · valid_future_step_blocked: {validFutureBlocked} · cancel_candidate: {cancelCandidate} · legacy_pending: {legacyPending} · orphan_followup: {orphanFollowup}
@@ -803,8 +820,8 @@ const CommandCentre = () => {
               </div>
             </Section>
 
-            {/* SECTION 8 — Inbox / Approvals */}
-            <Section title="Inbox & approvals" icon={InboxIcon} action={<Link to="/founder/conversations"><Button size="sm" variant="ghost">Open inbox <ArrowRight size={12} /></Button></Link>}>
+            {/* 6h — Replies (inbox / approvals) */}
+            <Section title="6h · Replies & approvals" icon={InboxIcon} action={<Link to="/founder/conversations"><Button size="sm" variant="ghost">Open inbox <ArrowRight size={12} /></Button></Link>}>
               <div id="sec-inbox" className="space-y-3 scroll-mt-24">
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
                   <div className="p-2 rounded bg-secondary/40"><p className="text-base font-semibold">{totals.repliesAll}</p><p className="text-muted-foreground">Replies (7d)</p></div>
@@ -839,7 +856,51 @@ const CommandCentre = () => {
               </div>
             </Section>
 
-            {/* SECTION 9 — Results */}
+            {/* SECTION 7 — CRM / Contacts / Inboxes */}
+            <RunwayHeader n={7} title="CRM / Contacts / Inboxes" icon={Users} anchor="sec-crm" />
+            <Section title="CRM spine" icon={Database} action={<Link to="/founder/crm"><Button size="sm" variant="ghost">Open CRM <ArrowRight size={12} /></Button></Link>}>
+              <div id="sec-crm" className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm scroll-mt-24">
+                <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Central contacts</p><p className="text-xl font-semibold">{contacts.length}</p></div>
+                <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">With business link</p><p className="text-xl font-semibold">{contacts.filter((c: any) => c.assigned_business).length}</p></div>
+                <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Missing business link</p><p className="text-xl font-semibold">{contacts.filter((c: any) => !c.assigned_business).length}</p></div>
+                <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Internal identities</p><p className="text-xl font-semibold">{internalEmails.length}</p></div>
+                <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Apollo → contacts</p><p className="text-xl font-semibold">{leadQualityCounts?.promoted ?? 0}</p></div>
+                <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Proposals to reconcile</p><p className="text-xl font-semibold">{proposals.length}</p></div>
+                <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Active conversations</p><p className="text-xl font-semibold">{contacts.filter((c: any) => c.conversation_active).length}</p></div>
+                <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Warm leads</p><p className="text-xl font-semibold">{totals.warmLeads}</p></div>
+              </div>
+              <LinkGrid items={[
+                { to: "/founder/crm", label: "CRM", icon: Users },
+                { to: "/founder/conversations", label: "Conversations / Inbox", icon: InboxIcon },
+                { to: "/founder/sending", label: "Sending Health / Inboxes", icon: Mail },
+                { to: "/founder/organisations", label: "Organisations", icon: Building2 },
+              ]} />
+            </Section>
+
+            {/* SECTION 8 — Compliance / Legal / Rules */}
+            <RunwayHeader n={8} title="Compliance / Legal / Rules" icon={ShieldCheck} anchor="sec-compliance" />
+            <Section title="Compliance, legal, rules" icon={Gavel} action={<Link to="/founder/compliance"><Button size="sm" variant="ghost">Open compliance <ArrowRight size={12} /></Button></Link>}>
+              <LinkGrid items={[
+                { to: "/founder/compliance", label: "Compliance", icon: ShieldCheck },
+                { to: "/founder/legal", label: "Legal Console", icon: Gavel },
+                { to: "/founder/access-control", label: "Access Control", icon: ShieldAlert },
+                { to: "/founder/security", label: "Security", icon: ShieldAlert },
+              ]} />
+            </Section>
+
+            {/* SECTION 9 — Proposals / Demos / Client Journey */}
+            <RunwayHeader n={9} title="Proposals / Demos / Client Journey" icon={FileSignature} anchor="sec-proposals" />
+            <Section title="Proposals, demos, client journey" icon={FileSignature} action={<Link to="/founder/internal-proposals"><Button size="sm" variant="ghost">Open proposals <ArrowRight size={12} /></Button></Link>}>
+              <LinkGrid items={[
+                { to: "/founder/proposals", label: "Proposals (incoming)", icon: FileSignature },
+                { to: "/founder/internal-proposals", label: "Internal Proposals", icon: FileSignature },
+                { to: "/founder/demos", label: "Demos", icon: MonitorPlay },
+                { to: "/founder/pipeline", label: "Lead Pipeline", icon: TrendingUp },
+              ]} />
+            </Section>
+
+            {/* SECTION 10 — Deals / Finance / Revenue */}
+            <RunwayHeader n={10} title="Deals / Finance / Revenue" icon={Banknote} anchor="sec-finance" />
             <Section title="Results (7-day)" icon={Activity} action={<Link to="/founder/analytics"><Button size="sm" variant="ghost">Analytics <ArrowRight size={12} /></Button></Link>}>
               <div id="sec-results" className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm scroll-mt-24">
                 <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Sent total</p><p className="text-xl font-semibold">{totals.sentTotal}</p></div>
@@ -851,10 +912,66 @@ const CommandCentre = () => {
                 <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Open deals</p><p className="text-xl font-semibold">{deals.filter((d: any) => d.status !== "won" && d.status !== "lost").length}</p></div>
                 <div className="p-3 rounded bg-secondary/40"><p className="text-xs text-muted-foreground">Invoices outstanding</p><p className="text-xl font-semibold">{invoices.filter((i: any) => i.status !== "paid" && i.status !== "void").length}</p></div>
               </div>
+              <LinkGrid items={[
+                { to: "/founder/revenue", label: "Revenue", icon: Banknote },
+                { to: "/founder/finance", label: "Finance", icon: Banknote },
+                { to: "/founder/analytics", label: "Analytics", icon: Activity },
+                { to: "/founder/optimisation", label: "Optimisation", icon: TrendingUp },
+              ]} />
             </Section>
 
-            {/* SECTION 10 — Advanced / Legacy / Diagnostics */}
-            <Section title="Advanced · Legacy · Diagnostics" icon={FlaskConical}>
+            {/* SECTION 11 — Suppliers / Assignments / Delivery */}
+            <RunwayHeader n={11} title="Suppliers / Assignments / Delivery" icon={Briefcase} anchor="sec-delivery" />
+            <Section title="Suppliers, assignments, delivery" icon={Briefcase} action={<Link to="/founder/projects"><Button size="sm" variant="ghost">Open projects <ArrowRight size={12} /></Button></Link>}>
+              <LinkGrid items={[
+                { to: "/founder/suppliers", label: "Suppliers", icon: Briefcase },
+                { to: "/founder/assignments", label: "Assignments", icon: ClipboardCheck },
+                { to: "/founder/projects", label: "Projects", icon: ListChecks },
+                { to: "/founder/deployments", label: "Deployments", icon: WorkflowIcon },
+              ]} />
+            </Section>
+
+            {/* SECTION 12 — Integrations / External Systems */}
+            <RunwayHeader n={12} title="Integrations / External Systems" icon={Plug} anchor="sec-integrations" />
+            <Section title="Integrations & external systems" icon={Plug} action={<Link to="/founder/integrations"><Button size="sm" variant="ghost">Open integrations <ArrowRight size={12} /></Button></Link>}>
+              <LinkGrid items={[
+                { to: "/founder/integrations", label: "Integrations", icon: Plug },
+                { to: "/founder/workflows", label: "Workflows", icon: WorkflowIcon },
+                { to: "/founder/processes", label: "Processes", icon: WorkflowIcon },
+                { to: "/founder/architectures", label: "Architectures", icon: WorkflowIcon },
+              ]} />
+            </Section>
+
+            {/* SECTION 13 — Monitoring / Security / System Health */}
+            <RunwayHeader n={13} title="Monitoring / Security / System Health" icon={Monitor} anchor="sec-monitoring" />
+            <Section title="Monitoring, security, system health" icon={Monitor} action={<Link to="/founder/system"><Button size="sm" variant="ghost">Open system <ArrowRight size={12} /></Button></Link>}>
+              <LinkGrid items={[
+                { to: "/founder/system", label: "System Oversight", icon: ShieldAlert },
+                { to: "/founder/system/modes", label: "Execution Modes", icon: WorkflowIcon },
+                { to: "/founder/monitoring", label: "Monitoring", icon: Monitor },
+                { to: "/founder/sending", label: "Sending Health", icon: Mail },
+                { to: "/founder/priority", label: "Priority", icon: TrendingUp },
+                { to: "/founder/activity", label: "Activity", icon: Activity },
+                { to: "/founder/testing", label: "Platform Testing", icon: FlaskConical },
+                { to: "/founder/executions", label: "Executions", icon: Activity },
+              ]} />
+            </Section>
+
+            {/* SECTION 14 — Knowledge / Manual / Build Log */}
+            <RunwayHeader n={14} title="Knowledge / Manual / Build Log" icon={BookOpen} anchor="sec-knowledge" />
+            <Section title="Knowledge, manual, build log" icon={BookOpen} action={<Link to="/founder/manual"><Button size="sm" variant="ghost">Open manual <ArrowRight size={12} /></Button></Link>}>
+              <LinkGrid items={[
+                { to: "/founder/manual", label: "Founder Manual", icon: BookOpen },
+                { to: "/founder/manual/full", label: "System Mirror", icon: MapIcon },
+                { to: "/founder/build-log", label: "Build Log", icon: ListChecks },
+                { to: "/founder/knowledge", label: "Knowledge", icon: BookOpen },
+                { to: "/founder/documents", label: "Documents", icon: ListChecks },
+              ]} />
+            </Section>
+
+            {/* SECTION 15 — Legacy / Historical / Archive (collapsed) */}
+            <RunwayHeader n={15} title="Legacy / Historical / Archive" icon={Archive} anchor="sec-legacy" />
+            <Section title="Advanced · Legacy · Diagnostics" icon={Archive}>
               <Accordion type="multiple" className="w-full">
                 <AccordionItem value="legacy-apollo">
                   <AccordionTrigger className="text-sm">Legacy Apollo Pool — optional / not recommended</AccordionTrigger>
@@ -883,23 +1000,6 @@ const CommandCentre = () => {
                             <div><p className={`font-semibold text-sm ${(b.failedSends + b.systemWarnings) ? "text-destructive" : ""}`}>{b.failedSends + b.systemWarnings}</p><p className="text-muted-foreground">Issues</p></div>
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="workers">
-                  <AccordionTrigger className="text-sm">AI Workers</AccordionTrigger>
-                  <AccordionContent>
-                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2">
-                      {workers.map((w) => (
-                        <Link key={w.key} to={w.to} className="p-2.5 rounded-lg bg-secondary/30 border border-border/40 hover:border-primary/40 transition-colors block">
-                          <div className="flex items-center justify-between mb-1.5">
-                            <w.icon size={14} className="text-primary" />
-                            <Badge variant="secondary" className={`text-[9px] ${workerStatusColor(w.status)}`}>{w.status.replace("_", " ")}</Badge>
-                          </div>
-                          <p className="text-xs font-medium">{w.name}</p>
-                          <p className="text-[10px] text-muted-foreground line-clamp-1">{w.recent}</p>
-                        </Link>
                       ))}
                     </div>
                   </AccordionContent>
@@ -941,27 +1041,69 @@ const CommandCentre = () => {
                     </div>
                   </AccordionContent>
                 </AccordionItem>
-                <AccordionItem value="orchestration">
-                  <AccordionTrigger className="text-sm">Agent orchestration</AccordionTrigger>
-                  <AccordionContent><AgentOrchestration /></AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="capabilities">
-                  <AccordionTrigger className="text-sm">Liftor capabilities</AccordionTrigger>
-                  <AccordionContent><LiftorCapabilities /></AccordionContent>
+                <AccordionItem value="coverage">
+                  <AccordionTrigger className="text-sm">Coverage baseline / before-refactor snapshot</AccordionTrigger>
+                  <AccordionContent>
+                    <CommandCentreCoverageMap />
+                  </AccordionContent>
                 </AccordionItem>
               </Accordion>
             </Section>
           </div>
         );
       })()}
-      <div className="mt-6">
-        <CommandCentreCoverageMap />
-      </div>
     </FounderLayout>
   );
 };
 
 export default CommandCentre;
+
+// ===== Local layout helpers (UI-only) =====
+function RunwayHeader({ n, title, icon: Icon, anchor }: { n: number; title: string; icon: any; anchor: string }) {
+  return (
+    <div id={anchor} className="scroll-mt-24 flex items-center gap-2 pt-4">
+      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary/15 text-primary text-[11px] font-semibold">{n}</span>
+      <Icon size={14} className="text-primary" />
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">{title}</h2>
+      <div className="flex-1 h-px bg-border/60" />
+    </div>
+  );
+}
+
+function CollapsibleCard({
+  id, title, icon: Icon, defaultOpen = false, flat = false, children,
+}: { id?: string; title: string; icon: any; defaultOpen?: boolean; flat?: boolean; children: React.ReactNode }) {
+  return (
+    <Collapsible defaultOpen={defaultOpen}>
+      <div id={id} className={`scroll-mt-24 ${flat ? "" : "rounded-lg border border-border/50 bg-card"}`}>
+        <CollapsibleTrigger className="w-full flex items-center justify-between gap-2 px-3 py-2 text-left text-sm hover:bg-secondary/30 rounded-t-lg">
+          <span className="flex items-center gap-2">
+            <Icon size={14} className="text-primary" />
+            <span className="font-medium">{title}</span>
+          </span>
+          <ChevronDown size={14} className="text-muted-foreground transition-transform data-[state=open]:rotate-180" />
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <div className={flat ? "pt-2" : "p-3 pt-2 border-t border-border/40"}>{children}</div>
+        </CollapsibleContent>
+      </div>
+    </Collapsible>
+  );
+}
+
+function LinkGrid({ items }: { items: Array<{ to: string; label: string; icon: any }> }) {
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 mt-3">
+      {items.map((it) => (
+        <Link key={it.to} to={it.to} className="flex items-center gap-2 p-2.5 rounded-lg bg-secondary/40 border border-border/40 hover:border-primary/40 hover:bg-secondary text-sm transition-colors">
+          <it.icon size={14} className="text-primary" />
+          <span className="flex-1">{it.label}</span>
+          <ArrowRight size={12} className="text-muted-foreground" />
+        </Link>
+      ))}
+    </div>
+  );
+}
 
 function ApolloRevealStageStrip({ lifecycle }: { lifecycle: any }) {
   const reveal_required =
