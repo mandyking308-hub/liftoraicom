@@ -3386,6 +3386,59 @@ export type Database = {
         }
         Relationships: []
       }
+      business_margin_snapshots: {
+        Row: {
+          business_id: string | null
+          created_at: string | null
+          direct_costs: number | null
+          estimated_gross_margin: number | null
+          id: string
+          margin_status: string | null
+          period_end: string
+          period_start: string
+          revenue: number | null
+          risk_flags: Json | null
+          software_costs: number | null
+          supplier_costs: number | null
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string | null
+          direct_costs?: number | null
+          estimated_gross_margin?: number | null
+          id?: string
+          margin_status?: string | null
+          period_end: string
+          period_start: string
+          revenue?: number | null
+          risk_flags?: Json | null
+          software_costs?: number | null
+          supplier_costs?: number | null
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string | null
+          direct_costs?: number | null
+          estimated_gross_margin?: number | null
+          id?: string
+          margin_status?: string | null
+          period_end?: string
+          period_start?: string
+          revenue?: number | null
+          risk_flags?: Json | null
+          software_costs?: number | null
+          supplier_costs?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_margin_snapshots_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_module_status: {
         Row: {
           blockers: Json
@@ -12433,6 +12486,63 @@ export type Database = {
           },
         ]
       }
+      operating_cost_register: {
+        Row: {
+          amount: number | null
+          billing_frequency: string | null
+          business_id: string | null
+          cost_category: string
+          cost_name: string
+          created_at: string | null
+          currency: string | null
+          entity_id: string | null
+          id: string
+          metadata: Json | null
+          next_billing_date: string | null
+          notes: string | null
+          owner_module: string | null
+          status: string | null
+          updated_at: string | null
+          vendor_name: string | null
+        }
+        Insert: {
+          amount?: number | null
+          billing_frequency?: string | null
+          business_id?: string | null
+          cost_category: string
+          cost_name: string
+          created_at?: string | null
+          currency?: string | null
+          entity_id?: string | null
+          id?: string
+          metadata?: Json | null
+          next_billing_date?: string | null
+          notes?: string | null
+          owner_module?: string | null
+          status?: string | null
+          updated_at?: string | null
+          vendor_name?: string | null
+        }
+        Update: {
+          amount?: number | null
+          billing_frequency?: string | null
+          business_id?: string | null
+          cost_category?: string
+          cost_name?: string
+          created_at?: string | null
+          currency?: string | null
+          entity_id?: string | null
+          id?: string
+          metadata?: Json | null
+          next_billing_date?: string | null
+          notes?: string | null
+          owner_module?: string | null
+          status?: string | null
+          updated_at?: string | null
+          vendor_name?: string | null
+        }
+        Relationships: []
+      }
       optimisation_insights: {
         Row: {
           created_at: string
@@ -18163,6 +18273,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      usage_credit_ledger: {
+        Row: {
+          business_id: string | null
+          credits_used: number | null
+          currency: string | null
+          estimated_cost: number | null
+          founder_approval_required: boolean | null
+          id: string
+          metadata: Json | null
+          provider_key: string
+          source_id: string | null
+          source_table: string | null
+          usage_type: string
+          used_at: string | null
+        }
+        Insert: {
+          business_id?: string | null
+          credits_used?: number | null
+          currency?: string | null
+          estimated_cost?: number | null
+          founder_approval_required?: boolean | null
+          id?: string
+          metadata?: Json | null
+          provider_key: string
+          source_id?: string | null
+          source_table?: string | null
+          usage_type: string
+          used_at?: string | null
+        }
+        Update: {
+          business_id?: string | null
+          credits_used?: number | null
+          currency?: string | null
+          estimated_cost?: number | null
+          founder_approval_required?: boolean | null
+          id?: string
+          metadata?: Json | null
+          provider_key?: string
+          source_id?: string | null
+          source_table?: string | null
+          usage_type?: string
+          used_at?: string | null
+        }
+        Relationships: []
       }
       user_legal_acceptance: {
         Row: {
