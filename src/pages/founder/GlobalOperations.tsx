@@ -30,6 +30,7 @@ import PortfolioIntelligenceBrainPanel from "@/components/founder/strategy/Portf
 import SocialMediaBrainPanel from "@/components/founder/social/SocialMediaBrainPanel";
 import SocialContentFactoryPanel from "@/components/founder/social/SocialContentFactoryPanel";
 import SocialRepurposingEnginePanel from "@/components/founder/social/SocialRepurposingEnginePanel";
+import SocialSchedulerExportPanel from "@/components/founder/social/SocialSchedulerExportPanel";
 import AutopilotActivationGatesPanel from "@/components/founder/autonomy/AutopilotActivationGatesPanel";
 import GlobalAIBrainCommandCentre from "@/components/founder/command/GlobalAIBrainCommandCentre";
 import AgentCollaborationBoard from "@/components/founder/agents/AgentCollaborationBoard";
@@ -399,6 +400,7 @@ const GlobalOperations = () => {
         <SocialMediaBrainPanel />
         <SocialContentFactoryPanel />
         <SocialRepurposingEnginePanel />
+        <SocialSchedulerExportPanel />
         <AgentCollaborationBoard />
         <AutopilotActivationGatesPanel />
       </div>
