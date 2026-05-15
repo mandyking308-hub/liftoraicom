@@ -50,6 +50,7 @@ import AIConversationDraftingPanel from "@/components/founder/agents/AIConversat
 import FounderApprovalConsole from "@/components/founder/approvals/FounderApprovalConsole";
 import ApprovedActionExecutionPanel from "@/components/founder/approvals/ApprovedActionExecutionPanel";
 import ControlledExternalActionGatesPanel from "@/components/founder/operations/ControlledExternalActionGatesPanel";
+import SmartleadControlledActivationPanel from "@/components/founder/integrations/SmartleadControlledActivationPanel";
 import AgentBusinessLivePanel from "@/components/founder/agents/AgentBusinessLivePanel";
 import AIEngagementAgentLivePanel from "@/components/founder/agents/AIEngagementAgentLivePanel";
 import CommercialHandoffPanel from "@/components/founder/commercial/CommercialHandoffPanel";
@@ -733,6 +734,7 @@ const CommandCentre = () => {
             <ApprovedActionExecutionPanel />
             <ControlledExternalActionGatesPanel />
             <LiftorMasterDryRunPanel />
+            <SmartleadControlledActivationPanel />
             <LiftorBusinessLiveRunPanel />
             <InternalOperatingSchedulesPanel />
             <MultiBusinessOperatingLayerPanel />
