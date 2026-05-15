@@ -26,7 +26,7 @@ export const generateManualMarkdown = (data: ManualLiveData): string => {
   return `# Liftor AI — Founder Manual
 ## Complete Engineering-Level Platform Documentation
 
-**Version:** 4.7 — Full Neon Candy Session Record (Apollo→Promotion→Compliance→Queue→Incident→Brake→Audit→Tracking→Preview) (13 May 2026)
+**Version:** 4.9 — Smartlead Scale Engine Foundation Sprint (Read-Only Adapter, Mapping Preview, Lead Push Preview, Webhook Scaffold, Bulk Send Preview) (15 May 2026)
 **Generated:** ${now}
 **Classification:** Founder / Internal Engineering / Investor Documentation
 **Status:** Live — Auto-generated from platform state
@@ -40,6 +40,8 @@ export const generateManualMarkdown = (data: ManualLiveData): string => {
 0c. Compliance Spine, Stage-to-Queue Gate, Queue Creation Gate & Auto-Send Incident (13 May 2026)
 0d. Emergency Outreach Brake, Sent-Email Audit, Engagement Tracking & Controlled Send Preview (13 May 2026)
 0e. Full Session Record — Neon Candy Outreach Safety, Compliance, Queue, Tracking (13 May 2026)
+0f. Next Build Order — Do Not Skip (13 May 2026)
+0g. Smartlead Scale Engine Foundation — Read-Only Adapter, Mapping/Lead-Push Preview, Webhook Scaffold, Bulk Send Preview (15 May 2026)
 0a. Credentials & Secrets Register
 1. Platform Overview
 2. Full Platform Architecture
