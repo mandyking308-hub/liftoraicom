@@ -313,6 +313,7 @@ const StrategyEngine = () => {
             {insights?.map((i) => <InsightCard key={i.id} insight={i} />)}
           </TabsContent>
         </Tabs>
+        <LearningOptimisationEnginePanel />
       </div>
     </FounderLayout>
   );
