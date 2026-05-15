@@ -23,6 +23,7 @@ import GlobalOperatingClockPanel from "@/components/founder/global/GlobalOperati
 import MultilingualIntelligencePanel from "@/components/founder/global/MultilingualIntelligencePanel";
 import GlobalJurisdictionPolicyPanel from "@/components/founder/compliance/GlobalJurisdictionPolicyPanel";
 import MultiChannelInboxPanel from "@/components/founder/channels/MultiChannelInboxPanel";
+import AgentHandoverProtocolPanel from "@/components/founder/agents/AgentHandoverProtocolPanel";
 import SmartleadControlledActivationPanel from "@/components/founder/integrations/SmartleadControlledActivationPanel";
 import BusinessLaunchFactoryPanel from "@/components/founder/expansion/BusinessLaunchFactoryPanel";
 
@@ -380,6 +381,7 @@ const GlobalOperations = () => {
         <SmartleadControlledActivationPanel />
         <GlobalJurisdictionPolicyPanel />
         <MultiChannelInboxPanel />
+        <AgentHandoverProtocolPanel />
       </div>
     </FounderLayout>
   );
