@@ -911,6 +911,7 @@ const CommandCentre = () => {
               <CRMInteractionLedgerPanel />
               <CRMInteractionMatchPreviewPanel />
               <CRMInteractionSourceAdaptersPanel />
+              <CRMConversationBridgePanel />
               <CRMContact360Panel />
             </Section>
 
