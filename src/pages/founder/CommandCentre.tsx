@@ -395,7 +395,7 @@ const CommandCentre = () => {
       { key: "voice", name: "Voice Agent", icon: Phone, status: "needs_setup", recent: "Not yet configured", pending: 0, blocked: 0,
         next: "Connect voice provider", to: "/founder/integrations" },
     ];
-  }, [inboxes, totals, drafts, proposals, hotConvos, highIntent, contacts, deals, invoices, sysEvents, isLiveMode]);
+  }, [inboxes, totals, drafts, proposals, hotConvos, highIntent, contacts, deals, invoices, sysEvents, isLiveMode, socialProfiles]);
 
   // Blockers in plain English — grouped into 4 buckets
   type BlockerItem = { msg: string; severity: string; to?: string };
