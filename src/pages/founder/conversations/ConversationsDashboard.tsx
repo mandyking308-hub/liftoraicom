@@ -221,6 +221,7 @@ const ConversationsDashboard = () => {
         <LiveCommercialAgentsPanel />
         <MultilingualIntelligencePanel />
         <MultiChannelInboxPanel />
+        <CustomerJourneyControlBoard />
       </div>
     </FounderLayout>
   );
