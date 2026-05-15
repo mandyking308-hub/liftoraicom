@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Users, Activity, Ban, Send, Mail, Inbox as InboxIcon, MessageCircle } from "lucide-react";
 import FounderLayout from "@/components/founder/FounderLayout";
 import CRMInteractionLedgerPanel from "@/components/founder/crm/CRMInteractionLedgerPanel";
+import HumanAccountManagerPanel from "@/components/founder/customer/HumanAccountManagerPanel";
 import CRMInteractionMatchPreviewPanel from "@/components/founder/crm/CRMInteractionMatchPreviewPanel";
 import CRMInteractionSourceAdaptersPanel from "@/components/founder/crm/CRMInteractionSourceAdaptersPanel";
 import CRMConversationBridgePanel from "@/components/founder/crm/CRMConversationBridgePanel";
@@ -204,6 +205,7 @@ const CRMDashboard = () => {
         </Card>
         <CRMCustomerMemoryDashboard />
         <CRMInteractionLedgerPanel />
+        <HumanAccountManagerPanel />
         <CRMInteractionMatchPreviewPanel />
         <CRMInteractionSourceAdaptersPanel />
         <CRMConversationBridgePanel />
