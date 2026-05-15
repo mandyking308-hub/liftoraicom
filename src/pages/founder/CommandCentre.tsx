@@ -968,6 +968,7 @@ const CommandCentre = () => {
               ]} />
             </Section>
             <CommercialHandoffPanel />
+            <LiveCommercialAgentsPanel />
 
             {/* SECTION 10 — Deals / Finance / Revenue */}
             <RunwayHeader n={10} title="Deals / Finance / Revenue" icon={Banknote} anchor="sec-finance" />
@@ -991,6 +992,7 @@ const CommandCentre = () => {
             </Section>
             <CommercialHandoffPanel />
             <RevenueOperationsPanel />
+            <LiveCommercialAgentsPanel />
 
             {/* SECTION 11 — Suppliers / Assignments / Delivery */}
             <RunwayHeader n={11} title="Suppliers / Assignments / Delivery" icon={Briefcase} anchor="sec-delivery" />
