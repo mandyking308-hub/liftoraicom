@@ -50,7 +50,7 @@ export function PortfolioCommandCentrePanel() {
   };
   useEffect(() => { load(false); }, []);
 
-  const cards: Card[] = data?.cards ?? [];
+  const cards: BizCard[] = data?.cards ?? [];
   const filtered = useMemo(() => filter === "all" ? cards : cards.filter((c) => c.readiness === filter), [cards, filter]);
   const totals = data?.totals ?? {};
 
