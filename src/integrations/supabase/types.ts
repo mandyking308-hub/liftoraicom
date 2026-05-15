@@ -6065,6 +6065,74 @@ export type Database = {
           },
         ]
       }
+      customer_package_catalog: {
+        Row: {
+          active: boolean | null
+          business_id: string | null
+          created_at: string | null
+          description: string | null
+          founder_approval_required: boolean | null
+          id: string
+          included_features: Json | null
+          metadata: Json | null
+          package_key: string
+          package_name: string
+          package_type: string
+          pain_points_solved: Json | null
+          price_max: number | null
+          price_min: number | null
+          recurring: boolean | null
+          target_customer: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          business_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          founder_approval_required?: boolean | null
+          id?: string
+          included_features?: Json | null
+          metadata?: Json | null
+          package_key: string
+          package_name: string
+          package_type: string
+          pain_points_solved?: Json | null
+          price_max?: number | null
+          price_min?: number | null
+          recurring?: boolean | null
+          target_customer?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          business_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          founder_approval_required?: boolean | null
+          id?: string
+          included_features?: Json | null
+          metadata?: Json | null
+          package_key?: string
+          package_name?: string
+          package_type?: string
+          pain_points_solved?: Json | null
+          price_max?: number | null
+          price_min?: number | null
+          recurring?: boolean | null
+          target_customer?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_package_catalog_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_stewardship_assignments: {
         Row: {
           business_id: string | null
@@ -6133,6 +6201,85 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      customer_success_plans: {
+        Row: {
+          business_id: string | null
+          contact_id: string | null
+          created_at: string | null
+          current_needs: Json | null
+          customer_goal: string | null
+          deal_id: string | null
+          follow_up_due_at: string | null
+          founder_review_required: boolean | null
+          id: string
+          metadata: Json | null
+          next_best_actions: Json | null
+          owner_agent_key: string | null
+          plan_status: string | null
+          risks: Json | null
+          success_criteria: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          business_id?: string | null
+          contact_id?: string | null
+          created_at?: string | null
+          current_needs?: Json | null
+          customer_goal?: string | null
+          deal_id?: string | null
+          follow_up_due_at?: string | null
+          founder_review_required?: boolean | null
+          id?: string
+          metadata?: Json | null
+          next_best_actions?: Json | null
+          owner_agent_key?: string | null
+          plan_status?: string | null
+          risks?: Json | null
+          success_criteria?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          business_id?: string | null
+          contact_id?: string | null
+          created_at?: string | null
+          current_needs?: Json | null
+          customer_goal?: string | null
+          deal_id?: string | null
+          follow_up_due_at?: string | null
+          founder_review_required?: boolean | null
+          id?: string
+          metadata?: Json | null
+          next_best_actions?: Json | null
+          owner_agent_key?: string | null
+          plan_status?: string | null
+          risks?: Json | null
+          success_criteria?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_success_plans_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_plans_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_plans_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+        ]
       }
       customer_survey_requests: {
         Row: {
@@ -6383,6 +6530,98 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_upsell_recommendations: {
+        Row: {
+          approved_at: string | null
+          business_id: string | null
+          contact_id: string | null
+          created_at: string | null
+          customer_need_matched: string | null
+          evidence: Json | null
+          fit_score: number | null
+          founder_approval_required: boolean | null
+          id: string
+          metadata: Json | null
+          package_id: string | null
+          reason: string | null
+          recommendation_status: string | null
+          rejected_at: string | null
+          risk_flags: Json | null
+          suggested_message_angle: string | null
+          suggested_timing: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          business_id?: string | null
+          contact_id?: string | null
+          created_at?: string | null
+          customer_need_matched?: string | null
+          evidence?: Json | null
+          fit_score?: number | null
+          founder_approval_required?: boolean | null
+          id?: string
+          metadata?: Json | null
+          package_id?: string | null
+          reason?: string | null
+          recommendation_status?: string | null
+          rejected_at?: string | null
+          risk_flags?: Json | null
+          suggested_message_angle?: string | null
+          suggested_timing?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          business_id?: string | null
+          contact_id?: string | null
+          created_at?: string | null
+          customer_need_matched?: string | null
+          evidence?: Json | null
+          fit_score?: number | null
+          founder_approval_required?: boolean | null
+          id?: string
+          metadata?: Json | null
+          package_id?: string | null
+          reason?: string | null
+          recommendation_status?: string | null
+          rejected_at?: string | null
+          risk_flags?: Json | null
+          suggested_message_angle?: string | null
+          suggested_timing?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_upsell_recommendations_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_upsell_recommendations_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_upsell_recommendations_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+          {
+            foreignKeyName: "customer_upsell_recommendations_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "customer_package_catalog"
             referencedColumns: ["id"]
           },
         ]
