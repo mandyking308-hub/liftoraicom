@@ -292,6 +292,7 @@ const PlatformTesting = () => {
       <div className="space-y-6">
         <CommandCentreUsabilityReportPanel />
         <BusinessActivationWizardPanel />
+        <BusinessRehearsalSimulationPanel />
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">Platform Testing & Validation</h1>
