@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import FounderLayout from "@/components/founder/FounderLayout";
 import CRMInteractionMatchPreviewPanel from "@/components/founder/crm/CRMInteractionMatchPreviewPanel";
+import CRMContactTimelinePanel from "@/components/founder/crm/CRMContactTimelinePanel";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -98,6 +99,7 @@ const ConversationsDashboard = () => {
         </div>
 
         <CRMInteractionMatchPreviewPanel />
+        <CRMContactTimelinePanel />
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <StatCard icon={<MessageSquare className="h-4 w-4" />} label="Active conversations" value={stats.active} />
