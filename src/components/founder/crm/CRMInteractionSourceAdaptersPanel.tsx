@@ -94,6 +94,21 @@ export default function CRMInteractionSourceAdaptersPanel() {
         <code> CAPTURE CRM INTERACTIONS</code>. No emails, no Apollo, no Smartlead POSTs.
       </p>
 
+      <div className="rounded-md border border-border/60 p-2 text-[11px] space-y-1">
+        <div className="font-semibold text-muted-foreground uppercase tracking-wide text-[10px]">
+          CRM Interaction Capture Coverage
+        </div>
+        <ul className="grid sm:grid-cols-2 gap-x-3 gap-y-0.5">
+          <li>Smartlead / provider events: <Badge variant="outline" className="text-[10px]">preview ready</Badge></li>
+          <li>Native email events: <Badge variant="outline" className="text-[10px]">preview ready</Badge></li>
+          <li>Conversations / communications / inbound: <Badge variant="outline" className="text-[10px]">preview ready</Badge></li>
+          <li>AI actions / drafts: <Badge variant="outline" className="text-[10px]">preview ready</Badge></li>
+          <li>Proposals / demos / deals / finance: <Badge variant="outline" className="text-[10px]">preview ready</Badge></li>
+          <li>Compliance / system / supplier / notes: <Badge variant="outline" className="text-[10px]">preview ready</Badge></li>
+          <li>Capture apply: <Badge variant="destructive" className="text-[10px]">disabled</Badge></li>
+        </ul>
+      </div>
+
       <div className="grid md:grid-cols-2 gap-2">
         {adapters.map((a) => {
           const p = previews[a.adapter_key];
