@@ -9,6 +9,7 @@ import ProductRoadmapQAReleasePanel from "@/components/founder/product/ProductRo
 import AIGovernanceQualityPanel from "@/components/founder/governance/AIGovernanceQualityPanel";
 import CostCreditsMarginControlPanel from "@/components/founder/finance/CostCreditsMarginControlPanel";
 import DataPrivacyRetentionPanel from "@/components/founder/compliance/DataPrivacyRetentionPanel";
+import IPRightsBrandControlPanel from "@/components/founder/legal/IPRightsBrandControlPanel";
 import LiftorCapabilities from "@/components/founder/LiftorCapabilities";
 import AgentOrchestration from "@/components/founder/AgentOrchestration";
 import SystemModeBanner from "@/components/founder/SystemModeBanner";
@@ -1595,6 +1596,7 @@ const CommandCentre = () => {
     <div className="max-w-7xl mx-auto px-4 pb-6"><AIGovernanceQualityPanel /></div>
     <div className="max-w-7xl mx-auto px-4 pb-6"><CostCreditsMarginControlPanel /></div>
     <div className="max-w-7xl mx-auto px-4 pb-6"><DataPrivacyRetentionPanel /></div>
+    <div className="max-w-7xl mx-auto px-4 pb-6"><IPRightsBrandControlPanel /></div>
     </FounderLayout>
   );
 };
