@@ -734,6 +734,7 @@ const CommandCentre = () => {
             <FounderApprovalConsole />
             <ApprovedActionExecutionPanel />
             <ControlledExternalActionGatesPanel />
+            <BusinessOperatingRunbookPanel />
             <LiftorMasterDryRunPanel />
             <SmartleadControlledActivationPanel />
             <LiftorBusinessLiveRunPanel />
