@@ -10,6 +10,7 @@ import AIEngagementAgentLivePanel from "@/components/founder/agents/AIEngagement
 import LiveCommercialAgentsPanel from "@/components/founder/commercial/LiveCommercialAgentsPanel";
 import LiftorBusinessLiveRunPanel from "@/components/founder/command/LiftorBusinessLiveRunPanel";
 import MultiBusinessOperatingLayerPanel from "@/components/founder/operations/MultiBusinessOperatingLayerPanel";
+import BusinessOperatingRunbookPanel from "@/components/founder/operations/BusinessOperatingRunbookPanel";
 import BusinessKnowledgeBrainPanel from "@/components/founder/knowledge/BusinessKnowledgeBrainPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -120,6 +121,7 @@ const AgentDirectory = () => {
         <AIEngagementAgentLivePanel />
         <LiftorBusinessLiveRunPanel />
         <MultiBusinessOperatingLayerPanel />
+        <BusinessOperatingRunbookPanel />
         <BusinessKnowledgeBrainPanel />
 
         {/* Agent Directory */}

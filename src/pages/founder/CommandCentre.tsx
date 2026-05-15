@@ -60,6 +60,7 @@ import MultiBusinessOperatingLayerPanel from "@/components/founder/operations/Mu
 import BusinessKnowledgeBrainPanel from "@/components/founder/knowledge/BusinessKnowledgeBrainPanel";
 import PortfolioCommandCentrePanel from "@/components/founder/command/PortfolioCommandCentrePanel";
 import InternalOperatingSchedulesPanel from "@/components/founder/operations/InternalOperatingSchedulesPanel";
+import BusinessOperatingRunbookPanel from "@/components/founder/operations/BusinessOperatingRunbookPanel";
 import { SecurityGovernancePanel } from "@/components/founder/security/SecurityGovernancePanel";
 import { ProductisationReadinessPanel } from "@/components/founder/revenue/ProductisationReadinessPanel";
 import BusinessLaunchFactoryPanel from "@/components/founder/expansion/BusinessLaunchFactoryPanel";
@@ -733,6 +734,7 @@ const CommandCentre = () => {
             <FounderApprovalConsole />
             <ApprovedActionExecutionPanel />
             <ControlledExternalActionGatesPanel />
+            <BusinessOperatingRunbookPanel />
             <LiftorMasterDryRunPanel />
             <SmartleadControlledActivationPanel />
             <LiftorBusinessLiveRunPanel />
@@ -1075,6 +1077,7 @@ const CommandCentre = () => {
 
             {/* SECTION 14 — Knowledge / Manual / Build Log */}
             <InternalOperatingSchedulesPanel />
+            <BusinessOperatingRunbookPanel />
             <RunwayHeader n={14} title="Knowledge / Manual / Build Log" icon={BookOpen} anchor="sec-knowledge" />
             <Section title="Knowledge, manual, build log" icon={BookOpen} action={<Link to="/founder/manual"><Button size="sm" variant="ghost">Open manual <ArrowRight size={12} /></Button></Link>}>
               <LinkGrid items={[
