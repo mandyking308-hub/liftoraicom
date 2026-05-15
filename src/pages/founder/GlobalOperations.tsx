@@ -13,6 +13,7 @@ import {
   Activity, Play, Search, Shield,
 } from "lucide-react";
 import MultiBusinessOperatingLayerPanel from "@/components/founder/operations/MultiBusinessOperatingLayerPanel";
+import BusinessLaunchFactoryPanel from "@/components/founder/expansion/BusinessLaunchFactoryPanel";
 
 const statusIcon = (s: string) => {
   if (["operational", "active", "connected", "completed", "running", "success"].includes(s)) return <CheckCircle2 size={14} className="text-green-400" />;
@@ -138,6 +139,7 @@ const GlobalOperations = () => {
         </div>
 
         <MultiBusinessOperatingLayerPanel />
+        <BusinessLaunchFactoryPanel />
 
         {/* Global KPIs */}
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
