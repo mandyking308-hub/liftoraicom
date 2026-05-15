@@ -10,6 +10,7 @@ import AIConversationDraftingPanel from "@/components/founder/agents/AIConversat
 import AIEngagementAgentLivePanel from "@/components/founder/agents/AIEngagementAgentLivePanel";
 import FounderApprovalConsole from "@/components/founder/approvals/FounderApprovalConsole";
 import CommercialHandoffPanel from "@/components/founder/commercial/CommercialHandoffPanel";
+import LiveCommercialAgentsPanel from "@/components/founder/commercial/LiveCommercialAgentsPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -215,6 +216,7 @@ const ConversationsDashboard = () => {
         <AIConversationDraftingPanel />
         <FounderApprovalConsole />
         <CommercialHandoffPanel />
+        <LiveCommercialAgentsPanel />
       </div>
     </FounderLayout>
   );

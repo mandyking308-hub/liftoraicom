@@ -6,6 +6,7 @@ import AIConversationDraftingPanel from "@/components/founder/agents/AIConversat
 import FounderApprovalConsole from "@/components/founder/approvals/FounderApprovalConsole";
 import AgentBusinessLivePanel from "@/components/founder/agents/AgentBusinessLivePanel";
 import AIEngagementAgentLivePanel from "@/components/founder/agents/AIEngagementAgentLivePanel";
+import LiveCommercialAgentsPanel from "@/components/founder/commercial/LiveCommercialAgentsPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -217,6 +218,7 @@ const AgentDirectory = () => {
         <AIAgentOrchestratorPanel />
         <AIConversationDraftingPanel />
         <FounderApprovalConsole />
+        <LiveCommercialAgentsPanel />
       </div>
     </FounderLayout>
   );
