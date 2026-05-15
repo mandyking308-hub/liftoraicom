@@ -6,10 +6,15 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { GitBranch, RefreshCw, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+
+const ORCH_PHRASE = "RUN AGENT HANDOVER ORCHESTRATOR";
 
 export default function AgentCollaborationBoard() {
   const [busy, setBusy] = useState(false);
   const [health, setHealth] = useState<any>(null);
+  const [orch, setOrch] = useState<any>(null);
+  const [phrase, setPhrase] = useState("");
 
   const { data: rules } = useQuery({
     queryKey: ["agent_handover_rules"],
@@ -39,6 +44,20 @@ export default function AgentCollaborationBoard() {
     finally { setBusy(false); }
   }
 
+  async function runOrchestrator(live: boolean) {
+    setBusy(true);
+    try {
+      const body: any = { dry_run: !live, max_items: 25 };
+      if (live) body.confirmation_phrase = phrase;
+      const { data, error } = await supabase.functions.invoke("agent-handover-orchestrator", { body });
+      if (error) throw error;
+      setOrch(data);
+      refetchH();
+      toast.success(live ? `Orchestrator live: ${data?.summary?.created ?? 0} handovers` : `Dry-run: ${data?.summary?.proposed ?? 0} proposed`);
+    } catch (e: any) { toast.error(e?.message ?? "error"); }
+    finally { setBusy(false); }
+  }
+
   const pending = (handovers || []).filter((h: any) => ["pending", "open"].includes(h.status));
   const failed = (handovers || []).filter((h: any) => /fail|error|stuck/i.test(h.status || ""));
 
@@ -56,6 +75,28 @@ export default function AgentCollaborationBoard() {
         </Button>
       </CardHeader>
       <CardContent className="space-y-3">
+        <div className="rounded border border-border/60 bg-background/40 p-2 text-[11px]">
+          <div className="font-semibold mb-0.5">Agent flow (plain English)</div>
+          <p className="text-muted-foreground">
+            Outreach Agent → Inbox Agent → AI Engagement Agent → Proposal Agent → Commercial Agent → Finance / Supplier Agent.
+            Compliance Agent can interrupt at any stage. Founder Co-Pilot receives high-value or ambiguous decisions. Ops Agent receives system failures.
+          </p>
+        </div>
+
+        <div className="rounded border border-border/60 bg-background/40 p-2 space-y-1.5">
+          <div className="text-[11px] font-semibold">Run handover orchestrator (no external action)</div>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <Button size="sm" variant="outline" onClick={() => runOrchestrator(false)} disabled={busy} className="h-7 text-xs">Dry-run</Button>
+            <Input value={phrase} onChange={(e) => setPhrase(e.target.value)} placeholder={ORCH_PHRASE} className="h-7 text-xs flex-1 min-w-[260px]" />
+            <Button size="sm" variant="outline" onClick={() => runOrchestrator(true)} disabled={busy || phrase.trim() !== ORCH_PHRASE} className="h-7 text-xs">Run live (internal only)</Button>
+          </div>
+          {orch && (
+            <div className="text-[11px] text-muted-foreground">
+              {orch.dry_run ? "DRY-RUN" : "LIVE"} · proposed {orch.summary?.proposed} · created {orch.summary?.created} · stewardships {orch.summary?.stewardships_upserted} · tasks {orch.summary?.tasks_created} · approvals {orch.summary?.approvals_created} · skipped {orch.summary?.skipped}
+            </div>
+          )}
+        </div>
+
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
           <div className="rounded border border-border/60 bg-background/40 p-2">
             <div className="text-muted-foreground">Rules</div>

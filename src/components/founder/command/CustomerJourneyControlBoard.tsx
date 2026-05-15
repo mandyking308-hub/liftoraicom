@@ -6,6 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Users, RefreshCw, Save } from "lucide-react";
 import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+
+const ORCH_PHRASE = "RUN AGENT HANDOVER ORCHESTRATOR";
 
 const BUCKETS: Array<{ key: string; label: string }> = [
   { key: "new_reply", label: "New reply" },
@@ -24,6 +27,8 @@ const BUCKETS: Array<{ key: string; label: string }> = [
 export default function CustomerJourneyControlBoard() {
   const [busy, setBusy] = useState(false);
   const [data, setData] = useState<any>(null);
+  const [orch, setOrch] = useState<any>(null);
+  const [phrase, setPhrase] = useState("");
 
   async function refresh(persist: boolean) {
     setBusy(true);
@@ -32,6 +37,19 @@ export default function CustomerJourneyControlBoard() {
       if (error) throw error;
       setData(r);
       toast.success(persist ? "Stewardship persisted." : "Stewardship refreshed.");
+    } catch (e: any) { toast.error(e?.message ?? "error"); }
+    finally { setBusy(false); }
+  }
+
+  async function runOrchestrator(live: boolean) {
+    setBusy(true);
+    try {
+      const body: any = { dry_run: !live, max_items: 25 };
+      if (live) body.confirmation_phrase = phrase;
+      const { data: r, error } = await supabase.functions.invoke("agent-handover-orchestrator", { body });
+      if (error) throw error;
+      setOrch(r);
+      toast.success(live ? `Live: ${r?.summary?.created ?? 0} handovers created` : `Dry-run: ${r?.summary?.proposed ?? 0} proposed`);
     } catch (e: any) { toast.error(e?.message ?? "error"); }
     finally { setBusy(false); }
   }
@@ -58,6 +76,20 @@ export default function CustomerJourneyControlBoard() {
         </div>
       </CardHeader>
       <CardContent className="space-y-2">
+        <div className="rounded border border-border/60 bg-background/40 p-2 space-y-1.5">
+          <div className="text-[11px] font-semibold">Run handover orchestrator (no external action)</div>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <Button size="sm" variant="outline" disabled={busy} onClick={() => runOrchestrator(false)} className="h-7 text-xs">Dry-run</Button>
+            <Input value={phrase} onChange={(e) => setPhrase(e.target.value)} placeholder={ORCH_PHRASE} className="h-7 text-xs flex-1 min-w-[260px]" />
+            <Button size="sm" variant="outline" disabled={busy || phrase.trim() !== ORCH_PHRASE} onClick={() => runOrchestrator(true)} className="h-7 text-xs">Run live (internal only)</Button>
+          </div>
+          {orch && (
+            <div className="text-[11px] text-muted-foreground">
+              {orch.dry_run ? "DRY-RUN" : "LIVE"} · proposed {orch.summary?.proposed} · created {orch.summary?.created} · stewardships {orch.summary?.stewardships_upserted} · tasks {orch.summary?.tasks_created} · approvals {orch.summary?.approvals_created}
+            </div>
+          )}
+        </div>
+
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-1.5">
           {totals.map((b) => (
             <div key={b.key} className="rounded border border-border/60 bg-background/40 p-2 text-[11px]">
