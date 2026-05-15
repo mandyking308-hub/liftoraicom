@@ -11239,6 +11239,125 @@ export type Database = {
           },
         ]
       }
+      ip_asset_register: {
+        Row: {
+          asset_name: string
+          asset_type: string
+          business_id: string | null
+          commercial_use_allowed: boolean
+          created_at: string
+          creation_date: string | null
+          creator_name: string | null
+          document_id: string | null
+          id: string
+          licensing_allowed: boolean
+          metadata: Json
+          notes: string | null
+          ownership_status: string
+          public_use_allowed: boolean
+          registration_reference: string | null
+          registration_status: string
+          rights_risk_level: string
+          source_tool: string | null
+          updated_at: string
+          usage_rights: string | null
+        }
+        Insert: {
+          asset_name: string
+          asset_type: string
+          business_id?: string | null
+          commercial_use_allowed?: boolean
+          created_at?: string
+          creation_date?: string | null
+          creator_name?: string | null
+          document_id?: string | null
+          id?: string
+          licensing_allowed?: boolean
+          metadata?: Json
+          notes?: string | null
+          ownership_status?: string
+          public_use_allowed?: boolean
+          registration_reference?: string | null
+          registration_status?: string
+          rights_risk_level?: string
+          source_tool?: string | null
+          updated_at?: string
+          usage_rights?: string | null
+        }
+        Update: {
+          asset_name?: string
+          asset_type?: string
+          business_id?: string | null
+          commercial_use_allowed?: boolean
+          created_at?: string
+          creation_date?: string | null
+          creator_name?: string | null
+          document_id?: string | null
+          id?: string
+          licensing_allowed?: boolean
+          metadata?: Json
+          notes?: string | null
+          ownership_status?: string
+          public_use_allowed?: boolean
+          registration_reference?: string | null
+          registration_status?: string
+          rights_risk_level?: string
+          source_tool?: string | null
+          updated_at?: string
+          usage_rights?: string | null
+        }
+        Relationships: []
+      }
+      ip_rights_checklists: {
+        Row: {
+          asset_id: string | null
+          business_id: string | null
+          checklist_status: string
+          checklist_type: string
+          completed_items: Json
+          created_at: string
+          founder_review_required: boolean
+          id: string
+          missing_items: Json
+          required_items: Json
+          updated_at: string
+        }
+        Insert: {
+          asset_id?: string | null
+          business_id?: string | null
+          checklist_status?: string
+          checklist_type: string
+          completed_items?: Json
+          created_at?: string
+          founder_review_required?: boolean
+          id?: string
+          missing_items?: Json
+          required_items?: Json
+          updated_at?: string
+        }
+        Update: {
+          asset_id?: string | null
+          business_id?: string | null
+          checklist_status?: string
+          checklist_type?: string
+          completed_items?: Json
+          created_at?: string
+          founder_review_required?: boolean
+          id?: string
+          missing_items?: Json
+          required_items?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ip_rights_checklists_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "ip_asset_register"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       jurisdiction_policy_profiles: {
         Row: {
           action_type: string
