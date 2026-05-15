@@ -9908,8 +9908,46 @@ export type Database = {
         Args: { _business_name: string }
         Returns: Json
       }
+      get_crm_contact_360_summary: {
+        Args: { p_business_id?: string; p_contact_id: string }
+        Returns: Json
+      }
+      get_crm_contact_timeline: {
+        Args: { p_business_id?: string; p_contact_id: string; p_limit?: number }
+        Returns: {
+          ai_relevant: boolean
+          business_id: string
+          compliance_status: string
+          contact_id: string
+          conversation_id: string
+          deal_id: string
+          demo_access_id: string
+          direction: string
+          founder_review_required: boolean
+          interaction_type: string
+          invoice_id: string
+          metadata: Json
+          next_step: string
+          occurred_at: string
+          payment_id: string
+          proposal_id: string
+          risk_flags: Json
+          source_channel: string
+          source_id: string
+          source_system: string
+          source_table: string
+          status: string
+          subject: string
+          summary: string
+          timeline_id: string
+        }[]
+      }
       get_crm_interaction_ledger_summary: {
         Args: { p_business_id?: string }
+        Returns: Json
+      }
+      get_crm_relationship_timeline: {
+        Args: { p_business_contact_relationship_id: string; p_limit?: number }
         Returns: Json
       }
       get_inbox_credentials_for_send: {

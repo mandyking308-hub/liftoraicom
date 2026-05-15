@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, ShieldCheck, ShieldAlert, FileText, Loader2 } from "lucide-react";
 import FounderLayout from "@/components/founder/FounderLayout";
+import CRMContact360Panel from "@/components/founder/crm/CRMContact360Panel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -239,6 +240,8 @@ const CRMContactDetail = () => {
         <div className="flex justify-end">
           <Button variant="outline" size="sm" onClick={() => runCheck(contact.id)}>Re-run sanity check</Button>
         </div>
+
+        <CRMContact360Panel contactId={contact.id} />
       </div>
     </FounderLayout>
   );
