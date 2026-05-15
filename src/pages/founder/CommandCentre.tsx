@@ -167,6 +167,10 @@ const CommandCentre = () => {
     queryKey: ["cc2-inboxes"],
     queryFn: async () => (await supabase.from("inboxes").select("*")).data ?? [],
   });
+  const { data: socialProfiles = [] } = useQuery({
+    queryKey: ["cc2-social-profiles"],
+    queryFn: async () => (await (supabase as any).from("social_business_profiles").select("business_id,social_status,primary_platforms,brand_voice,primary_cta")).data ?? [],
+  });
   const { data: activeInboxes = [] } = useQuery({
     queryKey: ["cc2-active-inboxes-view"],
     queryFn: async () => (await (supabase as any).from("command_centre_active_inboxes").select("*")).data ?? [],
