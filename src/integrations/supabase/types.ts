@@ -2973,6 +2973,63 @@ export type Database = {
         }
         Relationships: []
       }
+      business_learning_signals: {
+        Row: {
+          agent_key: string | null
+          business_id: string | null
+          campaign_id: string | null
+          captured_at: string
+          contact_id: string | null
+          created_at: string
+          id: string
+          metadata: Json
+          negative_signal: boolean | null
+          outcome: string | null
+          positive_signal: boolean | null
+          signal_label: string | null
+          signal_type: string
+          signal_value: number | null
+          source_id: string | null
+          source_table: string | null
+        }
+        Insert: {
+          agent_key?: string | null
+          business_id?: string | null
+          campaign_id?: string | null
+          captured_at?: string
+          contact_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          negative_signal?: boolean | null
+          outcome?: string | null
+          positive_signal?: boolean | null
+          signal_label?: string | null
+          signal_type: string
+          signal_value?: number | null
+          source_id?: string | null
+          source_table?: string | null
+        }
+        Update: {
+          agent_key?: string | null
+          business_id?: string | null
+          campaign_id?: string | null
+          captured_at?: string
+          contact_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          negative_signal?: boolean | null
+          outcome?: string | null
+          positive_signal?: boolean | null
+          signal_label?: string | null
+          signal_type?: string
+          signal_value?: number | null
+          source_id?: string | null
+          source_table?: string | null
+        }
+        Relationships: []
+      }
       business_operating_modules: {
         Row: {
           blockers: Json
@@ -8462,6 +8519,60 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      optimisation_recommendations: {
+        Row: {
+          business_id: string | null
+          confidence: number | null
+          created_at: string
+          evidence: Json
+          founder_approval_required: boolean
+          id: string
+          impact_estimate: string | null
+          metadata: Json
+          recommendation_type: string
+          recommended_change: Json
+          risk_level: string
+          status: string
+          summary: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          confidence?: number | null
+          created_at?: string
+          evidence?: Json
+          founder_approval_required?: boolean
+          id?: string
+          impact_estimate?: string | null
+          metadata?: Json
+          recommendation_type: string
+          recommended_change?: Json
+          risk_level?: string
+          status?: string
+          summary?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          confidence?: number | null
+          created_at?: string
+          evidence?: Json
+          founder_approval_required?: boolean
+          id?: string
+          impact_estimate?: string | null
+          metadata?: Json
+          recommendation_type?: string
+          recommended_change?: Json
+          risk_level?: string
+          status?: string
+          summary?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       organisation_documents: {
         Row: {

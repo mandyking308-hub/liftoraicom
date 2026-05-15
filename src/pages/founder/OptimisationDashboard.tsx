@@ -1,5 +1,6 @@
 import FounderLayout from "@/components/founder/FounderLayout";
 import { supabase } from "@/integrations/supabase/client";
+import LearningOptimisationEnginePanel from "@/components/founder/optimisation/LearningOptimisationEnginePanel";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -195,6 +196,8 @@ const OptimisationDashboard = () => {
             Analyse Systems
           </Button>
         </div>
+
+        <LearningOptimisationEnginePanel />
 
         {/* Performance Scores */}
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
