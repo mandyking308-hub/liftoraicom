@@ -25,6 +25,7 @@ import { Link } from "react-router-dom";
 import { format, formatDistanceToNow } from "date-fns";
 import ControlledSendReadinessPreview from "@/components/founder/safety/ControlledSendReadinessPreview";
 import FooterDisclosurePreview from "@/components/founder/safety/FooterDisclosurePreview";
+import ManualSendApplyGate from "@/components/founder/safety/ManualSendApplyGate";
 import {
   Building2, Bot, Send, Mail, Inbox as InboxIcon, MessageSquare, FileSignature,
   Search, Banknote, ShieldCheck, Workflow as WorkflowIcon, Phone, AlertTriangle,
@@ -821,6 +822,7 @@ const CommandCentre = () => {
                 </div>
                 <ControlledSendReadinessPreview />
                 <FooterDisclosurePreview />
+                <ManualSendApplyGate />
               </div>
             </Section>
 
