@@ -176,6 +176,34 @@ const CommandCentre = () => {
     queryKey: ["cc2-social-profiles"],
     queryFn: async () => (await (supabase as any).from("social_business_profiles").select("business_id,social_status,primary_platforms,brand_voice,primary_cta")).data ?? [],
   });
+  const { data: socialBrainSummary } = useQuery({
+    queryKey: ["cc2-social-brain-summary"],
+    refetchInterval: 60000,
+    queryFn: async () => {
+      const sb: any = supabase as any;
+      const [drafts, approvals, queue, batches, engagement, trends, gates] = await Promise.all([
+        sb.from("social_post_drafts").select("id", { count: "exact", head: true }),
+        sb.from("social_post_drafts").select("id", { count: "exact", head: true }).in("approval_status", ["pending", "needs_review"]),
+        sb.from("social_scheduling_queue").select("id", { count: "exact", head: true }),
+        sb.from("metricool_export_batches").select("id", { count: "exact", head: true }),
+        sb.from("social_engagement_events").select("id", { count: "exact", head: true }),
+        sb.from("social_trend_watch_items").select("id", { count: "exact", head: true }),
+        sb.from("external_action_gates").select("gate_key,enabled").in("gate_key", ["metricool_schedule_post_gate", "manychat_dm_send_gate"]),
+      ]);
+      const gateMap: Record<string, boolean> = {};
+      ((gates.data as any[]) ?? []).forEach((g) => { gateMap[g.gate_key] = !!g.enabled; });
+      return {
+        draftsTotal: drafts.count ?? 0,
+        approvalsPending: approvals.count ?? 0,
+        scheduleQueue: queue.count ?? 0,
+        exportBatches: batches.count ?? 0,
+        engagementEvents: engagement.count ?? 0,
+        trendItems: trends.count ?? 0,
+        metricoolEnabled: gateMap["metricool_schedule_post_gate"] ?? false,
+        manychatEnabled: gateMap["manychat_dm_send_gate"] ?? false,
+      };
+    },
+  });
   const { data: activeInboxes = [] } = useQuery({
     queryKey: ["cc2-active-inboxes-view"],
     queryFn: async () => (await (supabase as any).from("command_centre_active_inboxes").select("*")).data ?? [],
