@@ -107,6 +107,7 @@ import FounderRevenue from "./pages/founder/FounderRevenue";
 import BrainCore from "./pages/founder/BrainCore";
 import DecisionEngine from "./pages/founder/DecisionEngine";
 import StrategyEngine from "./pages/founder/StrategyEngine";
+import MarketingHub from "./pages/founder/MarketingHub";
 import SocialBrain from "./pages/founder/SocialBrain";
 import FounderCoPilot from "./pages/founder/FounderCoPilot";
 import PlatformTesting from "./pages/founder/PlatformTesting";
