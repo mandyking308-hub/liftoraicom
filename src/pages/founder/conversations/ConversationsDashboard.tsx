@@ -211,6 +211,7 @@ const ConversationsDashboard = () => {
             </Card>
           </TabsContent>
         </Tabs>
+        <AIEngagementAgentLivePanel />
         <AIConversationDraftingPanel />
         <FounderApprovalConsole />
         <CommercialHandoffPanel />
