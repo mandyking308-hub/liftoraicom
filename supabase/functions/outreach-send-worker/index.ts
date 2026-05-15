@@ -273,30 +273,11 @@ Deno.serve(async (req) => {
 
     const now = new Date();
 
-    // ===== MANUAL PROOF OVERRIDE (founder-controlled, single queue_id only) =====
-    // The Manual Send Apply edge function may invoke this worker with
-    // { manual_proof: true, queue_id: "<uuid>", max: 1 } using the service role.
-    // When all three conditions hold, we bypass the global auto_send_enabled
-    // kill switch AND constrain queue selection to that single row. This does
-    // NOT enable background sending — every other invocation still fail-closes.
-    let manualProof = false;
-    let manualProofQueueId: string | null = null;
-    let manualProofMaxOverride: number | null = null;
-    try {
-      if (req.method === "POST") {
-        const mpBody = await req.clone().json().catch(() => null);
-        if (mpBody && mpBody.manual_proof === true && typeof mpBody.queue_id === "string") {
-          const uuidRe = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-          if (uuidRe.test(mpBody.queue_id)) {
-            manualProof = true;
-            manualProofQueueId = mpBody.queue_id;
-            manualProofMaxOverride = 1;
-          }
-        }
-      }
-    } catch { /* ignore */ }
-
     // ===== GLOBAL AUTO-SEND KILL SWITCH (FAIL CLOSED) =====
+    // The worker is strictly fail-closed for ALL callers. There is NO
+    // manual_proof override and NO bypass path. Manual proof sends are
+    // performed directly inside `manual-send-apply` and never touch this
+    // worker. Only `system_settings.auto_send_enabled === true` unlocks it.
     // The worker MUST NOT select queue rows, call SMTP, mutate email_queue,
     // update contacts/BCRs, or write email_events / communications when the
     // global `system_settings.auto_send_enabled` flag is anything other than
@@ -318,7 +299,7 @@ Deno.serve(async (req) => {
     } catch {
       autoSendEnabled = false;
     }
-    if (autoSendEnabled !== true && !manualProof) {
+    if (autoSendEnabled !== true) {
       console.warn("[outreach-send-worker] blocked: auto_send_disabled — no rows selected, no SMTP, no mutations.");
       return json({
         ok: true,
@@ -349,7 +330,6 @@ Deno.serve(async (req) => {
         }
       }
     } catch { /* ignore */ }
-    if (manualProof) maxOverride = 1;
     const runLimit = maxOverride ?? PER_RUN_LIMIT;
 
     // ===== SYSTEM MODE =====
@@ -369,19 +349,14 @@ Deno.serve(async (req) => {
 
     // Pull due items ordered by priority FIRST (reply-priority items get priority=10),
     // then by scheduled_at. Includes previously delayed/throttled items whose retry time has arrived.
-    let dueQuery = supabase
+    const dueQuery = supabase
       .from("email_queue")
       .select("id, contact_id, campaign_id, sequence_step, inbox_id, business_name, scheduled_at, priority, retry_count")
       .in("status", ["pending", "delayed", "throttled"])
       .order("priority", { ascending: true })
       .order("scheduled_at", { ascending: true })
-      .limit(runLimit);
-    if (manualProof && manualProofQueueId) {
-      // Single-row scope: only the founder-confirmed queue_id, ignore scheduled_at window.
-      dueQuery = dueQuery.eq("id", manualProofQueueId);
-    } else {
-      dueQuery = dueQuery.lte("scheduled_at", now.toISOString());
-    }
+      .limit(runLimit)
+      .lte("scheduled_at", now.toISOString());
     const { data: due, error } = await dueQuery;
     if (error) return json({ error: error.message }, 500);
     if (!due?.length) {
