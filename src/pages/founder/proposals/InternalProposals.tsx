@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import FounderLayout from "@/components/founder/FounderLayout";
 import CommercialHandoffPanel from "@/components/founder/commercial/CommercialHandoffPanel";
+import LiveCommercialAgentsPanel from "@/components/founder/commercial/LiveCommercialAgentsPanel";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
