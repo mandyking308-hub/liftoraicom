@@ -15,6 +15,7 @@ import CommandCentreCoverageMap from "@/components/founder/safety/CommandCentreC
 import CommandCentreMasterIndex from "@/components/founder/command/CommandCentreMasterIndex";
 import { useOutreachSafetyAudit } from "@/hooks/useOutreachSafetyAudit";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,7 +27,8 @@ import {
   Building2, Bot, Send, Mail, Inbox as InboxIcon, MessageSquare, FileSignature,
   Search, Banknote, ShieldCheck, Workflow as WorkflowIcon, Phone, AlertTriangle,
   CheckCircle2, Clock, ArrowRight, Sparkles, Activity, TrendingUp, Users, FlaskConical,
-  Database, ListChecks, Filter,
+  Database, ListChecks, Filter, ChevronDown, Map as MapIcon, Plug, Gavel, BookOpen,
+  Briefcase, ClipboardCheck, Monitor, ShieldAlert, MonitorPlay, Archive,
 } from "lucide-react";
 
 const StatTile = ({ label, value, icon: Icon, tone = "default", to }: any) => {
