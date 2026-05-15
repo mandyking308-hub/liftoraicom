@@ -212,6 +212,7 @@ const CRMDashboard = () => {
         <MultiChannelInboxPanel />
         <CustomerJourneyControlBoard />
         <SocialEngagementInboxPanel />
+        <CustomerFeedbackSurveyPanel />
       </div>
     </FounderLayout>
   );
