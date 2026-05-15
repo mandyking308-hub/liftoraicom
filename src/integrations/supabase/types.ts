@@ -4390,6 +4390,7 @@ export type Database = {
           business_id: string | null
           completed_at: string | null
           created_at: string
+          environment_mode: string
           founder_review_required: boolean
           id: string
           metadata: Json
@@ -4398,6 +4399,8 @@ export type Database = {
           rehearsal_name: string
           rehearsal_status: string
           rehearsal_type: string
+          reset_completed_at: string | null
+          reset_status: string
           results_summary: string | null
           scenario_pack: string | null
           started_at: string | null
@@ -4409,6 +4412,7 @@ export type Database = {
           business_id?: string | null
           completed_at?: string | null
           created_at?: string
+          environment_mode?: string
           founder_review_required?: boolean
           id?: string
           metadata?: Json
@@ -4417,6 +4421,8 @@ export type Database = {
           rehearsal_name: string
           rehearsal_status?: string
           rehearsal_type: string
+          reset_completed_at?: string | null
+          reset_status?: string
           results_summary?: string | null
           scenario_pack?: string | null
           started_at?: string | null
@@ -4428,6 +4434,7 @@ export type Database = {
           business_id?: string | null
           completed_at?: string | null
           created_at?: string
+          environment_mode?: string
           founder_review_required?: boolean
           id?: string
           metadata?: Json
@@ -4436,6 +4443,8 @@ export type Database = {
           rehearsal_name?: string
           rehearsal_status?: string
           rehearsal_type?: string
+          reset_completed_at?: string | null
+          reset_status?: string
           results_summary?: string | null
           scenario_pack?: string | null
           started_at?: string | null
@@ -4457,9 +4466,12 @@ export type Database = {
           blockers: Json
           business_id: string | null
           created_at: string
+          created_by_rehearsal: boolean
+          environment_mode: string
           expected_agent_key: string | null
           expected_output: string | null
           id: string
+          is_test_data: boolean
           metadata: Json
           passed: boolean
           rehearsal_run_id: string | null
@@ -4469,6 +4481,7 @@ export type Database = {
           scenario_stage: string
           scenario_status: string
           scenario_title: string
+          simulation_source: string
           test_contact_id: string | null
           updated_at: string
         }
@@ -4476,9 +4489,12 @@ export type Database = {
           blockers?: Json
           business_id?: string | null
           created_at?: string
+          created_by_rehearsal?: boolean
+          environment_mode?: string
           expected_agent_key?: string | null
           expected_output?: string | null
           id?: string
+          is_test_data?: boolean
           metadata?: Json
           passed?: boolean
           rehearsal_run_id?: string | null
@@ -4488,6 +4504,7 @@ export type Database = {
           scenario_stage: string
           scenario_status?: string
           scenario_title: string
+          simulation_source?: string
           test_contact_id?: string | null
           updated_at?: string
         }
@@ -4495,9 +4512,12 @@ export type Database = {
           blockers?: Json
           business_id?: string | null
           created_at?: string
+          created_by_rehearsal?: boolean
+          environment_mode?: string
           expected_agent_key?: string | null
           expected_output?: string | null
           id?: string
+          is_test_data?: boolean
           metadata?: Json
           passed?: boolean
           rehearsal_run_id?: string | null
@@ -4507,6 +4527,7 @@ export type Database = {
           scenario_stage?: string
           scenario_status?: string
           scenario_title?: string
+          simulation_source?: string
           test_contact_id?: string | null
           updated_at?: string
         }
@@ -17103,6 +17124,93 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      rehearsal_cleanliness_checks: {
+        Row: {
+          blockers: Json
+          business_id: string
+          check_status: string
+          checked_at: string
+          id: string
+          metadata: Json
+          real_mode_ready: boolean
+          rehearsal_run_id: string | null
+          suspicious_records: number
+          test_records_remaining: number
+        }
+        Insert: {
+          blockers?: Json
+          business_id: string
+          check_status?: string
+          checked_at?: string
+          id?: string
+          metadata?: Json
+          real_mode_ready?: boolean
+          rehearsal_run_id?: string | null
+          suspicious_records?: number
+          test_records_remaining?: number
+        }
+        Update: {
+          blockers?: Json
+          business_id?: string
+          check_status?: string
+          checked_at?: string
+          id?: string
+          metadata?: Json
+          real_mode_ready?: boolean
+          rehearsal_run_id?: string | null
+          suspicious_records?: number
+          test_records_remaining?: number
+        }
+        Relationships: []
+      }
+      rehearsal_data_registry: {
+        Row: {
+          archived_at: string | null
+          business_id: string
+          created_at: string
+          data_type: string | null
+          id: string
+          metadata: Json
+          purge_action: string
+          purge_status: string
+          purged_at: string | null
+          record_label: string | null
+          rehearsal_run_id: string
+          source_id: string
+          source_table: string
+        }
+        Insert: {
+          archived_at?: string | null
+          business_id: string
+          created_at?: string
+          data_type?: string | null
+          id?: string
+          metadata?: Json
+          purge_action?: string
+          purge_status?: string
+          purged_at?: string | null
+          record_label?: string | null
+          rehearsal_run_id: string
+          source_id: string
+          source_table: string
+        }
+        Update: {
+          archived_at?: string | null
+          business_id?: string
+          created_at?: string
+          data_type?: string | null
+          id?: string
+          metadata?: Json
+          purge_action?: string
+          purge_status?: string
+          purged_at?: string | null
+          record_label?: string | null
+          rehearsal_run_id?: string
+          source_id?: string
+          source_table?: string
+        }
+        Relationships: []
       }
       release_plans: {
         Row: {

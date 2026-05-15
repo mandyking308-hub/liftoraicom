@@ -1,6 +1,6 @@
 // Liftor User Manual — plain-English operating guide (separate from Founder/Technical Manual)
 
-export const LIFTOR_USER_MANUAL_VERSION = "1.1 — Operator Edition + Rehearsal (15 May 2026)";
+export const LIFTOR_USER_MANUAL_VERSION = "1.2 — Operator + Rehearsal + Reset (15 May 2026)";
 
 export interface ManualSection {
   number: number;
@@ -128,3 +128,21 @@ export const REHEARSAL_FLOW: ManualSection = {
 
 // Append rehearsal section so it appears in the Full Guide listing
 LIFTOR_FULL_GUIDE.push(REHEARSAL_FLOW);
+
+export const REHEARSAL_RESET_FLOW: ManualSection = {
+  number: 77,
+  key: "rehearsal-reset",
+  title: "Resetting after rehearsal before real use",
+  body: [
+    "1) Run rehearsal (CREATE BUSINESS REHEARSAL → RUN BUSINESS REHEARSAL).",
+    "2) Review the scenario results and fix any blockers.",
+    "3) Open Business Rehearsal panel → Rehearsal reset · Clean Real Mode.",
+    "4) Click 'Reset preview' — confirm the list contains ONLY rehearsal_run / rehearsal_scenario / operator_training rows. If anything else appears, stop.",
+    "5) Click 'Apply reset' — confirmation phrase RESET REHEARSAL DATA. Real customer / CRM / proposal / invoice / payment / supplier records are protected and refused by the safe-tables allow-list.",
+    "6) Click 'Cleanliness check' — verifies no test/simulation data remains and the business is back in sandbox mode.",
+    "7) Confirm the 'Clean Real Mode' badge is green in the Rehearsal panel.",
+    "8) Only then unblock go-live in the Business Activation Wizard. Go-live is automatically blocked while test data remains.",
+    "9) External gates (send / publish / push / charge / file) stay LOCKED until founder explicit approval.",
+  ].join(" "),
+};
+LIFTOR_FULL_GUIDE.push(REHEARSAL_RESET_FLOW);

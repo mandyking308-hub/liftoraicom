@@ -128,7 +128,39 @@ Deno.serve(async (req) => {
     const { error: insErr } = await adminClient.from("business_rehearsal_scenarios").insert(scenarios);
     if (insErr) throw insErr;
 
-    return json({ rehearsal_run_id: run.id, scenarios_created: scenarios.length, external_actions: "locked" });
+    // Register every test record in the rehearsal_data_registry for safe reset later
+    const { data: insertedScenarios } = await adminClient
+      .from("business_rehearsal_scenarios")
+      .select("id, scenario_title")
+      .eq("rehearsal_run_id", run.id);
+    const registry = [
+      {
+        rehearsal_run_id: run.id,
+        business_id,
+        source_table: "business_rehearsal_runs",
+        source_id: run.id,
+        record_label: run.rehearsal_name,
+        data_type: "rehearsal_run",
+        purge_action: "delete",
+      },
+      ...((insertedScenarios ?? []) as any[]).map((s) => ({
+        rehearsal_run_id: run.id,
+        business_id,
+        source_table: "business_rehearsal_scenarios",
+        source_id: s.id,
+        record_label: s.scenario_title,
+        data_type: "rehearsal_scenario",
+        purge_action: "delete",
+      })),
+    ];
+    await adminClient.from("rehearsal_data_registry").insert(registry);
+
+    return json({
+      rehearsal_run_id: run.id,
+      scenarios_created: scenarios.length,
+      registry_entries: registry.length,
+      external_actions: "locked",
+    });
   } catch (e: any) {
     return json({ error: e?.message ?? "error" }, 500);
   }
