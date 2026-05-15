@@ -15,6 +15,7 @@ import { Plus, Search, Plug, CheckCircle2, XCircle, AlertCircle, Clock, Wifi } f
 import { useState } from "react";
 import { toast } from "sonner";
 import OutboundProviderEnginePanel from "@/components/founder/integrations/OutboundProviderEnginePanel";
+import ControlledExternalActionGatesPanel from "@/components/founder/operations/ControlledExternalActionGatesPanel";
 import OutboundChannelPolicyPanel from "@/components/founder/integrations/OutboundChannelPolicyPanel";
 import BulkSendEngineBlueprint from "@/components/founder/integrations/BulkSendEngineBlueprint";
 import SmartleadCampaignMappingPreview from "@/components/founder/integrations/SmartleadCampaignMappingPreview";
