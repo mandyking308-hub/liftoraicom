@@ -1,4 +1,5 @@
 import FounderLayout from "@/components/founder/FounderLayout";
+import GroupHQOperatingPanel from "@/components/founder/group/GroupHQOperatingPanel";
 import { SecurityGovernancePanel } from "@/components/founder/security/SecurityGovernancePanel";
 import ControlledExternalActionGatesPanel from "@/components/founder/operations/ControlledExternalActionGatesPanel";
 import GlobalAutonomyControlPanel from "@/components/founder/autonomy/GlobalAutonomyControlPanel";
@@ -437,6 +438,7 @@ const SecurityDashboard = () => {
         <GlobalJurisdictionPolicyPanel />
         <AutopilotActivationGatesPanel />
       </div>
+    <div className="max-w-7xl mx-auto px-4 pb-6"><GroupHQOperatingPanel /></div>
     </FounderLayout>
   );
 };
