@@ -12,6 +12,7 @@ import CRMCustomerMemoryDashboard from "@/components/founder/crm/CRMCustomerMemo
 import CRMContact360Panel from "@/components/founder/crm/CRMContact360Panel";
 import MultiChannelInboxPanel from "@/components/founder/channels/MultiChannelInboxPanel";
 import CustomerJourneyControlBoard from "@/components/founder/command/CustomerJourneyControlBoard";
+import SocialEngagementInboxPanel from "@/components/founder/social/SocialEngagementInboxPanel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -210,6 +211,7 @@ const CRMDashboard = () => {
         <CRMContact360Panel />
         <MultiChannelInboxPanel />
         <CustomerJourneyControlBoard />
+        <SocialEngagementInboxPanel />
       </div>
     </FounderLayout>
   );

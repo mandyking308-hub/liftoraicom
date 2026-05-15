@@ -77,6 +77,7 @@ import SocialMediaBrainPanel from "@/components/founder/social/SocialMediaBrainP
 import SocialContentFactoryPanel from "@/components/founder/social/SocialContentFactoryPanel";
 import SocialRepurposingEnginePanel from "@/components/founder/social/SocialRepurposingEnginePanel";
 import SocialSchedulerExportPanel from "@/components/founder/social/SocialSchedulerExportPanel";
+import SocialEngagementInboxPanel from "@/components/founder/social/SocialEngagementInboxPanel";
 import { SecurityGovernancePanel } from "@/components/founder/security/SecurityGovernancePanel";
 import { ProductisationReadinessPanel } from "@/components/founder/revenue/ProductisationReadinessPanel";
 import BusinessLaunchFactoryPanel from "@/components/founder/expansion/BusinessLaunchFactoryPanel";
@@ -992,6 +993,7 @@ const CommandCentre = () => {
             <AIConversationDraftingPanel />
             <AIEngagementAgentLivePanel />
             <MultiChannelInboxPanel />
+            <SocialEngagementInboxPanel />
 
             {/* SECTION 7 — CRM / Contacts / Inboxes */}
             <RunwayHeader n={7} title="CRM / Contacts / Inboxes" icon={Users} anchor="sec-crm" />

@@ -8419,6 +8419,74 @@ export type Database = {
         }
         Relationships: []
       }
+      manychat_flow_blueprints: {
+        Row: {
+          business_id: string
+          button_text: string | null
+          button_url: string | null
+          created_at: string
+          dm_opening: string | null
+          flow_key: string
+          flow_name: string
+          followup_question: string | null
+          founder_review_required: boolean
+          id: string
+          live_in_manychat: boolean
+          metadata: Json
+          platform_key: string
+          public_reply: string | null
+          qualification_tags: Json
+          trigger_keyword: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          button_text?: string | null
+          button_url?: string | null
+          created_at?: string
+          dm_opening?: string | null
+          flow_key: string
+          flow_name: string
+          followup_question?: string | null
+          founder_review_required?: boolean
+          id?: string
+          live_in_manychat?: boolean
+          metadata?: Json
+          platform_key?: string
+          public_reply?: string | null
+          qualification_tags?: Json
+          trigger_keyword?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          button_text?: string | null
+          button_url?: string | null
+          created_at?: string
+          dm_opening?: string | null
+          flow_key?: string
+          flow_name?: string
+          followup_question?: string | null
+          founder_review_required?: boolean
+          id?: string
+          live_in_manychat?: boolean
+          metadata?: Json
+          platform_key?: string
+          public_reply?: string | null
+          qualification_tags?: Json
+          trigger_keyword?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manychat_flow_blueprints_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           ai_generated: boolean
@@ -11456,6 +11524,92 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "social_content_calendars_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_engagement_events: {
+        Row: {
+          business_id: string
+          contact_email: string | null
+          contact_handle: string | null
+          contact_name: string | null
+          conversation_id: string | null
+          created_at: string
+          creator_signal: boolean
+          crm_contact_id: string | null
+          customer_signal: boolean
+          detected_intent: string | null
+          event_type: string
+          external_event_id: string | null
+          fan_signal: boolean
+          founder_review_required: boolean
+          id: string
+          keyword_detected: string | null
+          message_text: string | null
+          platform_key: string
+          raw_payload: Json
+          received_at: string
+          requires_response: boolean
+          sentiment: string | null
+          spam_signal: boolean
+        }
+        Insert: {
+          business_id: string
+          contact_email?: string | null
+          contact_handle?: string | null
+          contact_name?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          creator_signal?: boolean
+          crm_contact_id?: string | null
+          customer_signal?: boolean
+          detected_intent?: string | null
+          event_type: string
+          external_event_id?: string | null
+          fan_signal?: boolean
+          founder_review_required?: boolean
+          id?: string
+          keyword_detected?: string | null
+          message_text?: string | null
+          platform_key: string
+          raw_payload?: Json
+          received_at?: string
+          requires_response?: boolean
+          sentiment?: string | null
+          spam_signal?: boolean
+        }
+        Update: {
+          business_id?: string
+          contact_email?: string | null
+          contact_handle?: string | null
+          contact_name?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          creator_signal?: boolean
+          crm_contact_id?: string | null
+          customer_signal?: boolean
+          detected_intent?: string | null
+          event_type?: string
+          external_event_id?: string | null
+          fan_signal?: boolean
+          founder_review_required?: boolean
+          id?: string
+          keyword_detected?: string | null
+          message_text?: string | null
+          platform_key?: string
+          raw_payload?: Json
+          received_at?: string
+          requires_response?: boolean
+          sentiment?: string | null
+          spam_signal?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_engagement_events_business_id_fkey"
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
