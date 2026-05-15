@@ -45,7 +45,12 @@ Deno.serve(async (req) => {
     const byCategory: Record<string, any[]> = {}
     for (const m of modules ?? []) {
       const rows = statusByKey[m.module_key] ?? []
-      const aggregated = aggregate(rows)
+      let aggregated = aggregate(rows)
+      // Re-classify: only modules with neither panel nor route count as "missing".
+      // Mounted-but-unconfigured modules are "partial" (visible, setup incomplete).
+      if (!m.component_name && !m.primary_route) {
+        aggregated = { status: 'missing', score: 0, nextAction: `Build panel for ${m.module_name}` }
+      }
       counts[aggregated.status as 'active' | 'partial' | 'blocked' | 'missing'] += 1
       if (!m.component_name) modulesMissingPanel.push(m.module_key)
       if (!m.primary_route) modulesMissingRoute.push(m.module_key)
@@ -88,7 +93,14 @@ Deno.serve(async (req) => {
 })
 
 function aggregate(rows: any[]) {
-  if (!rows.length) return { status: 'missing', score: 0, nextAction: null as string | null }
+  if (!rows.length) {
+    // No per-business status rows yet — treat as visible-but-unconfigured.
+    return {
+      status: 'partial',
+      score: 0,
+      nextAction: 'Setup not started yet — open the panel to configure.' as string | null,
+    }
+  }
   const blockers = rows.filter((r) => Array.isArray(r.blockers) && r.blockers.length > 0).length
   const live = rows.filter((r) => r.live_internal).length
   const configured = rows.filter((r) => r.configured).length
