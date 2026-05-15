@@ -65,6 +65,7 @@ import StartHereOperatingPanel from "@/components/founder/command/StartHereOpera
 import GlobalAutonomyControlPanel from "@/components/founder/autonomy/GlobalAutonomyControlPanel";
 import MultilingualIntelligencePanel from "@/components/founder/global/MultilingualIntelligencePanel";
 import GlobalJurisdictionPolicyPanel from "@/components/founder/compliance/GlobalJurisdictionPolicyPanel";
+import MultiChannelInboxPanel from "@/components/founder/channels/MultiChannelInboxPanel";
 import GlobalOperatingClockPanel from "@/components/founder/global/GlobalOperatingClockPanel";
 import { SecurityGovernancePanel } from "@/components/founder/security/SecurityGovernancePanel";
 import { ProductisationReadinessPanel } from "@/components/founder/revenue/ProductisationReadinessPanel";
@@ -950,6 +951,7 @@ const CommandCentre = () => {
             </Section>
             <AIConversationDraftingPanel />
             <AIEngagementAgentLivePanel />
+            <MultiChannelInboxPanel />
 
             {/* SECTION 7 — CRM / Contacts / Inboxes */}
             <RunwayHeader n={7} title="CRM / Contacts / Inboxes" icon={Users} anchor="sec-crm" />
