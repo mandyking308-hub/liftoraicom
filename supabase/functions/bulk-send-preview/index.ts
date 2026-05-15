@@ -131,6 +131,22 @@ Deno.serve(async (req) => {
     smartlead_campaign_present && sending_accounts_present && smartlead_campaign_mapped;
   const webhook_capture_ready = !!SMARTLEAD_WEBHOOK_SECRET;
   const webhook_ready = webhook_capture_ready && smartlead_campaign_present;
+
+  // Lead push preview readiness — does not call Smartlead. Just checks whether
+  // a mapping exists and the upstream pieces are present so the dry-run preview
+  // would succeed.
+  const lead_push_preview_ready =
+    provider_ready && smartlead_campaign_present && smartlead_campaign_mapped;
+
+  // Have any leads actually been pushed/mapped via lead-push-apply?
+  const { data: pushedRows } = await admin
+    .from("outbound_provider_lead_mappings")
+    .select("id", { count: "exact", head: false })
+    .eq("provider_type", "smartlead")
+    .in("push_status", ["pushed", "pushing"])
+    .limit(1);
+  const any_leads_pushed = (pushedRows ?? []).length > 0;
+
   const batch_preview_ready =
     provider_ready &&
     sending_accounts_present &&
@@ -143,6 +159,7 @@ Deno.serve(async (req) => {
   if (!smartlead_campaign_present) blockers.push("no_campaigns_in_smartlead");
   if (!smartlead_campaign_mapped) blockers.push("no_campaign_mapping");
   if (!lead_push_ready) blockers.push("lead_push_not_ready");
+  if (!any_leads_pushed) blockers.push("no_leads_pushed_yet");
   if (!webhook_ready) blockers.push("no_webhook_configured");
   if (!warmup_enabled) blockers.push("warmup_not_enabled");
   blockers.push("scale_sending_disabled");
@@ -157,6 +174,8 @@ Deno.serve(async (req) => {
     smartlead_campaign_present,
     sending_accounts_present,
     lead_push_ready,
+    lead_push_preview_ready,
+    any_leads_pushed,
     warmup_enabled,
     webhook_ready,
     webhook_capture_ready,
