@@ -1,4 +1,5 @@
 import FounderLayout from "@/components/founder/FounderLayout";
+import SelfHealingMonitoringPanel from "@/components/founder/monitoring/SelfHealingMonitoringPanel";
 import GlobalOperatingClockPanel from "@/components/founder/global/GlobalOperatingClockPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -116,6 +117,8 @@ const MonitoringDashboard = () => {
           <h1 className="text-2xl font-bold">System Monitoring</h1>
           <p className="text-muted-foreground text-sm mt-1">AI operations control center</p>
         </div>
+
+        <SelfHealingMonitoringPanel />
 
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
