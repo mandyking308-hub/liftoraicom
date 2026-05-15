@@ -6339,6 +6339,71 @@ export type Database = {
         }
         Relationships: []
       }
+      internal_operating_schedules: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          cron_expression: string | null
+          enabled: boolean
+          external_actions_allowed: boolean
+          frequency_label: string | null
+          id: string
+          last_run_at: string | null
+          metadata: Json
+          next_run_at: string | null
+          run_scope: string
+          safe_internal_only: boolean
+          schedule_key: string
+          schedule_name: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          cron_expression?: string | null
+          enabled?: boolean
+          external_actions_allowed?: boolean
+          frequency_label?: string | null
+          id?: string
+          last_run_at?: string | null
+          metadata?: Json
+          next_run_at?: string | null
+          run_scope: string
+          safe_internal_only?: boolean
+          schedule_key: string
+          schedule_name: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          cron_expression?: string | null
+          enabled?: boolean
+          external_actions_allowed?: boolean
+          frequency_label?: string | null
+          id?: string
+          last_run_at?: string | null
+          metadata?: Json
+          next_run_at?: string | null
+          run_scope?: string
+          safe_internal_only?: boolean
+          schedule_key?: string
+          schedule_name?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "internal_operating_schedules_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       internal_proposal_versions: {
         Row: {
           changed_by: string
