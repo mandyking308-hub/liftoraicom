@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import RevenueOperationsPanel from "@/components/founder/finance/RevenueOperationsPanel";
+import ContractsProcurementControlPanel from "@/components/founder/legal/ContractsProcurementControlPanel";
 import { Link } from "react-router-dom";
 import { Plus, Loader2, Users, ShieldCheck, CheckCircle2, Clock, XCircle, Activity, RefreshCw, Percent } from "lucide-react";
 import FounderLayout from "@/components/founder/FounderLayout";
@@ -198,6 +199,7 @@ const SuppliersDashboard = () => {
           </CardContent>
         </Card>
         <RevenueOperationsPanel />
+        <ContractsProcurementControlPanel />
       </div>
     </FounderLayout>
   );
