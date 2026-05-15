@@ -273,6 +273,7 @@ const IntegrationDirectory = () => {
             </CardContent>
           </Card>
         )}
+        <ControlledExternalActionGatesPanel />
       </div>
     </FounderLayout>
   );
