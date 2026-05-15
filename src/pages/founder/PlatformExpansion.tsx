@@ -1,6 +1,7 @@
 import FounderLayout from "@/components/founder/FounderLayout";
 import BusinessActivationWizardPanel from "@/components/founder/activation/BusinessActivationWizardPanel";
 import BusinessRehearsalSimulationPanel from "@/components/founder/activation/BusinessRehearsalSimulationPanel";
+import PreLiveBaselineControlPanel from "@/components/founder/activation/PreLiveBaselineControlPanel";
 import BusinessCapabilityMatrixPanel from "@/components/founder/operations/BusinessCapabilityMatrixPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -103,6 +104,7 @@ const PlatformExpansion = () => {
       <div className="space-y-6">
         <BusinessActivationWizardPanel />
         <BusinessRehearsalSimulationPanel />
+        <PreLiveBaselineControlPanel />
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2"><Rocket size={24} className="text-primary" /> Platform Expansion</h1>

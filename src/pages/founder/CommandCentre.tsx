@@ -20,6 +20,7 @@ import FounderAlertEscalationPanel from "@/components/founder/command/FounderAle
 import CommandCentreUsabilityReportPanel from "@/components/founder/command/CommandCentreUsabilityReportPanel";
 import BusinessActivationWizardPanel from "@/components/founder/activation/BusinessActivationWizardPanel";
 import BusinessRehearsalSimulationPanel from "@/components/founder/activation/BusinessRehearsalSimulationPanel";
+import PreLiveBaselineControlPanel from "@/components/founder/activation/PreLiveBaselineControlPanel";
 import LiftorUserManualPanel from "@/components/founder/manual/LiftorUserManualPanel";
 import BusinessKnowledgeUploadTrainingPanel from "@/components/founder/knowledge/BusinessKnowledgeUploadTrainingPanel";
 import LiftorCapabilities from "@/components/founder/LiftorCapabilities";
@@ -756,6 +757,7 @@ const CommandCentre = () => {
       <div className="max-w-7xl mx-auto px-4 pt-4"><CommandCentreUsabilityReportPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><BusinessActivationWizardPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><BusinessRehearsalSimulationPanel /></div>
+      <div className="max-w-7xl mx-auto px-4 pt-4"><PreLiveBaselineControlPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><BusinessKnowledgeUploadTrainingPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><LiftorUserManualPanel /></div>
       {(() => {

@@ -8,6 +8,7 @@ import CommandCentreModuleRegistryPanel from "@/components/founder/command/Comma
 import CommandCentreUsabilityReportPanel from "@/components/founder/command/CommandCentreUsabilityReportPanel";
 import BusinessActivationWizardPanel from "@/components/founder/activation/BusinessActivationWizardPanel";
 import BusinessRehearsalSimulationPanel from "@/components/founder/activation/BusinessRehearsalSimulationPanel";
+import PreLiveBaselineControlPanel from "@/components/founder/activation/PreLiveBaselineControlPanel";
 import BusinessCapabilityMatrixPanel from "@/components/founder/operations/BusinessCapabilityMatrixPanel";
 import CRMHealthIntegrityPanel from "@/components/founder/crm/CRMHealthIntegrityPanel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -293,6 +294,7 @@ const PlatformTesting = () => {
         <CommandCentreUsabilityReportPanel />
         <BusinessActivationWizardPanel />
         <BusinessRehearsalSimulationPanel />
+        <PreLiveBaselineControlPanel />
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">Platform Testing & Validation</h1>
