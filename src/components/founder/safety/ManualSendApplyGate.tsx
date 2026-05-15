@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { AlertTriangle, Lock, Send, ShieldCheck } from "lucide-react";
+import { AlertTriangle, ChevronDown, ChevronRight, Lock, Send, ShieldCheck } from "lucide-react";
+
+const POOJA_ID = "2925f001-efb0-4a69-ae35-eec0621b7ee1";
 
 const ELIGIBLE = [
   { id: "2925f001-efb0-4a69-ae35-eec0621b7ee1", who: "Pooja · gpooja@amazon.com" },
@@ -38,7 +40,7 @@ const KV = ({ k, v }: { k: string; v: React.ReactNode }) => (
 );
 
 export default function ManualSendApplyGate() {
-  const [selected, setSelected] = useState<string>(ELIGIBLE[0].id);
+  const [selected, setSelected] = useState<string>(POOJA_ID);
   const [confirmation, setConfirmation] = useState("");
   const [acknowledged, setAcknowledged] = useState(false);
   const [loading, setLoading] = useState<"preview" | "apply" | null>(null);
@@ -46,6 +48,8 @@ export default function ManualSendApplyGate() {
   const [previewedQueueId, setPreviewedQueueId] = useState<string | null>(null);
   const [applyResult, setApplyResult] = useState<any>(null);
   const [err, setErr] = useState<string | null>(null);
+  const [showTech, setShowTech] = useState(false);
+  const autoRanRef = useRef(false);
 
   const runPreview = async () => {
     setLoading("preview");
@@ -64,6 +68,14 @@ export default function ManualSendApplyGate() {
     setLoading(null);
   };
 
+  // Auto-run dry-run preview for Pooja on mount
+  useEffect(() => {
+    if (autoRanRef.current) return;
+    autoRanRef.current = true;
+    runPreview();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const confirmationExact = confirmation === EXACT_CONFIRMATION;
 
   const canApply = useMemo(() => {
@@ -81,6 +93,37 @@ export default function ManualSendApplyGate() {
     if (preview.send_allowed_if_applied === false) return false;
     return true;
   }, [preview, previewedQueueId, selected, confirmationExact, acknowledged]);
+
+  // Plain-English readiness evaluation (independent of confirmation phrase)
+  const readiness = useMemo(() => {
+    const reasons: string[] = [];
+    if (!preview) {
+      return { ready: false, reasons: ["Preview has not loaded yet."] };
+    }
+    const body = preview.assembled_email?.body ?? preview.merged_email?.body ?? "";
+    if (selected !== POOJA_ID) reasons.push("Selected row is not Pooja.");
+    if (preview.sequence_step !== undefined && preview.sequence_step !== 2)
+      reasons.push(`Sequence step is ${preview.sequence_step}, expected 2.`);
+    if (!/^\s*Hi\s+Pooja\s*,/i.test(body)) reasons.push("Email body does not start with 'Hi Pooja,'.");
+    if ((preview.unresolved_placeholders_count ?? 1) !== 0)
+      reasons.push(`Unresolved placeholders found (${preview.unresolved_placeholders_count}).`);
+    if (!preview.unsubscribe_link_present) reasons.push("Unsubscribe link is missing from the body.");
+    if (preview.send_allowed_if_applied === false) reasons.push("Server says send is not allowed.");
+    if (preview.emails_to_send_if_applied !== 1)
+      reasons.push(`Would send ${preview.emails_to_send_if_applied} emails, expected exactly 1.`);
+    if (preview.smtp_calls_if_applied !== 1)
+      reasons.push(`Would make ${preview.smtp_calls_if_applied} SMTP calls, expected exactly 1.`);
+    if (preview.apollo_calls !== 0) reasons.push("Apollo would be called.");
+    if (preview.review_required_rows_touched !== 0)
+      reasons.push("A review_required row would be touched.");
+    if (preview.pixel_injected) reasons.push("Tracking pixel would be injected.");
+    if (preview.auto_send_enabled !== false) reasons.push("auto_send_enabled is not false.");
+    if (preview.cron_check && preview.cron_check !== "verified_disabled")
+      reasons.push(`cron_check is ${preview.cron_check}, expected verified_disabled.`);
+    if (preview.worker_fail_closed_guard === false)
+      reasons.push("Worker fail-closed guard is not present.");
+    return { ready: reasons.length === 0, reasons };
+  }, [preview, selected]);
 
   const applyChecklist = preview
     ? [
@@ -137,6 +180,44 @@ export default function ManualSendApplyGate() {
         </div>
       </div>
 
+      {/* Top-level plain-English readiness */}
+      <section
+        className={`rounded-md border-2 p-4 ${
+          loading === "preview" && !preview
+            ? "border-border/60 bg-muted/20"
+            : readiness.ready
+              ? "border-emerald-500/50 bg-emerald-500/10"
+              : "border-red-500/50 bg-red-500/10"
+        }`}
+      >
+        <div className="text-sm font-semibold tracking-wide">
+          {loading === "preview" && !preview ? (
+            <span className="text-muted-foreground">Running automatic dry-run preview for Pooja…</span>
+          ) : (
+            <span className={readiness.ready ? "text-emerald-200" : "text-red-200"}>
+              READY TO SEND ONE PROOF EMAIL:&nbsp;
+              {readiness.ready ? "YES" : "NO"}
+            </span>
+          )}
+        </div>
+        {!readiness.ready && preview && (
+          <div className="mt-3 space-y-1">
+            <div className="text-[11px] font-medium text-red-200">NOT READY BECAUSE:</div>
+            <ul className="list-disc pl-5 space-y-0.5 text-[12px] text-red-100">
+              {readiness.reasons.map((r, i) => (
+                <li key={i}>{r}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {readiness.ready && (
+          <p className="mt-2 text-[11px] text-emerald-100/90">
+            All safety checks pass for one proof email to Pooja. Apply is intentionally left disabled —
+            it only unlocks if you later type the exact confirmation phrase below.
+          </p>
+        )}
+      </section>
+
       <div className="rounded-md border border-amber-500/40 bg-amber-500/5 p-3 text-[12px] text-amber-200 flex gap-2 items-start">
         <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
         <span>
@@ -144,52 +225,61 @@ export default function ManualSendApplyGate() {
         </span>
       </div>
 
-      {/* Selection */}
-      <section className="rounded-md border border-border/60 p-3 space-y-2">
-        <h4 className="text-sm font-semibold">Eligible rows (Step 2 only)</h4>
-        <div className="space-y-2">
-          {ELIGIBLE.map((row) => (
-            <label
-              key={row.id}
-              className="flex items-center gap-2 text-xs cursor-pointer"
-            >
-              <input
-                type="radio"
-                name="manual-send-row"
-                value={row.id}
-                checked={selected === row.id}
-                onChange={() => {
-                  setSelected(row.id);
-                  setApplyResult(null);
-                }}
-              />
-              <span className="font-mono">{row.id}</span>
-              <span className="text-muted-foreground">— {row.who}</span>
-            </label>
-          ))}
-        </div>
-        <p className="text-[11px] text-muted-foreground">
-          The 7 review_required Step 4 rows are excluded server-side and cannot be entered here.
-        </p>
-      </section>
-
-      <div className="flex gap-2 flex-wrap">
-        <Button onClick={runPreview} disabled={loading !== null} variant="outline">
-          {loading === "preview" ? "Previewing…" : "Preview Manual Send"}
-        </Button>
-        <Button
-          onClick={apply}
-          disabled={!canApply || loading !== null}
-          className="bg-amber-500 text-amber-950 hover:bg-amber-400"
-        >
-          {loading === "apply" ? "Applying…" : "Apply Manual Send — One Email"}
-        </Button>
-      </div>
-
       {err && <p className="text-xs text-destructive">Error: {err}</p>}
 
-      {preview && (
-        <section className="rounded-md border border-border/60 p-3 space-y-3">
+      {/* Collapsible technical details */}
+      <section className="rounded-md border border-border/60">
+        <button
+          type="button"
+          onClick={() => setShowTech((s) => !s)}
+          className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-muted/30"
+        >
+          {showTech ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+          Show technical details
+        </button>
+        {showTech && (
+          <div className="border-t border-border/60 p-3 space-y-4">
+            {/* Selection */}
+            <div className="rounded-md border border-border/60 p-3 space-y-2">
+              <h4 className="text-sm font-semibold">Eligible rows (Step 2 only)</h4>
+              <div className="space-y-2">
+                {ELIGIBLE.map((row) => (
+                  <label key={row.id} className="flex items-center gap-2 text-xs cursor-pointer">
+                    <input
+                      type="radio"
+                      name="manual-send-row"
+                      value={row.id}
+                      checked={selected === row.id}
+                      onChange={() => {
+                        setSelected(row.id);
+                        setApplyResult(null);
+                      }}
+                    />
+                    <span className="font-mono">{row.id}</span>
+                    <span className="text-muted-foreground">— {row.who}</span>
+                  </label>
+                ))}
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                The 7 review_required Step 4 rows are excluded server-side and cannot be entered here.
+              </p>
+            </div>
+
+            <div className="flex gap-2 flex-wrap">
+              <Button onClick={runPreview} disabled={loading !== null} variant="outline">
+                {loading === "preview" ? "Previewing…" : "Re-run Preview"}
+              </Button>
+              <Button
+                onClick={apply}
+                disabled={!canApply || loading !== null}
+                className="bg-amber-500 text-amber-950 hover:bg-amber-400"
+              >
+                {loading === "apply" ? "Applying…" : "Apply Manual Send — One Email"}
+              </Button>
+            </div>
+
+            {preview && (
+              <div className="rounded-md border border-border/60 p-3 space-y-3">
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-3.5 w-3.5 text-emerald-300" />
             <h4 className="text-sm font-semibold">Preview result (dry-run, no provider call)</h4>
@@ -267,11 +357,11 @@ export default function ManualSendApplyGate() {
               ))}
             </div>
           </div>
-        </section>
-      )}
+              </div>
+            )}
 
-      {/* Confirmation */}
-      <section className="rounded-md border border-border/60 p-3 space-y-3">
+            {/* Confirmation */}
+            <div className="rounded-md border border-border/60 p-3 space-y-3">
         <h4 className="text-sm font-semibold">Confirmation</h4>
         <div className="space-y-1">
           <Label htmlFor="confirm-phrase" className="text-xs">
@@ -310,16 +400,19 @@ export default function ManualSendApplyGate() {
             ))}
           </div>
         )}
-      </section>
+            </div>
 
-      {applyResult && (
-        <section className="rounded-md border border-border/60 p-3 space-y-1">
-          <h4 className="text-sm font-semibold">Apply result</h4>
-          <pre className="text-[11px] bg-muted/30 p-3 rounded overflow-auto max-h-[400px]">
-            {JSON.stringify(applyResult, null, 2)}
-          </pre>
-        </section>
-      )}
+            {applyResult && (
+              <div className="rounded-md border border-border/60 p-3 space-y-1">
+                <h4 className="text-sm font-semibold">Apply result</h4>
+                <pre className="text-[11px] bg-muted/30 p-3 rounded overflow-auto max-h-[400px]">
+                  {JSON.stringify(applyResult, null, 2)}
+                </pre>
+              </div>
+            )}
+          </div>
+        )}
+      </section>
     </Card>
   );
 }
