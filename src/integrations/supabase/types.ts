@@ -217,6 +217,69 @@ export type Database = {
         }
         Relationships: []
       }
+      affiliate_payouts: {
+        Row: {
+          amount: number
+          business_id: string | null
+          created_at: string
+          currency: string
+          founder_approved_at: string | null
+          id: string
+          notes: string | null
+          paid_at: string | null
+          partnership_id: string | null
+          period_end: string
+          period_start: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          business_id?: string | null
+          created_at?: string
+          currency?: string
+          founder_approved_at?: string | null
+          id?: string
+          notes?: string | null
+          paid_at?: string | null
+          partnership_id?: string | null
+          period_end: string
+          period_start: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          business_id?: string | null
+          created_at?: string
+          currency?: string
+          founder_approved_at?: string | null
+          id?: string
+          notes?: string | null
+          paid_at?: string | null
+          partnership_id?: string | null
+          period_end?: string
+          period_start?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_payouts_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "affiliate_payouts_partnership_id_fkey"
+            columns: ["partnership_id"]
+            isOneToOne: false
+            referencedRelation: "partnership_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agent_action_audit_log: {
         Row: {
           action_status: string
@@ -14323,6 +14386,68 @@ export type Database = {
           },
         ]
       }
+      partnership_accounts: {
+        Row: {
+          agreement_summary: string | null
+          business_id: string | null
+          commission_rate: number | null
+          contact_email: string | null
+          contact_person: string | null
+          created_at: string
+          founder_review_required: boolean
+          id: string
+          notes: string | null
+          owner_agent_key: string | null
+          partner_name: string
+          partner_tier: string | null
+          partner_type: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          agreement_summary?: string | null
+          business_id?: string | null
+          commission_rate?: number | null
+          contact_email?: string | null
+          contact_person?: string | null
+          created_at?: string
+          founder_review_required?: boolean
+          id?: string
+          notes?: string | null
+          owner_agent_key?: string | null
+          partner_name: string
+          partner_tier?: string | null
+          partner_type?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          agreement_summary?: string | null
+          business_id?: string | null
+          commission_rate?: number | null
+          contact_email?: string | null
+          contact_person?: string | null
+          created_at?: string
+          founder_review_required?: boolean
+          id?: string
+          notes?: string | null
+          owner_agent_key?: string | null
+          partner_name?: string
+          partner_tier?: string | null
+          partner_type?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partnership_accounts_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_events: {
         Row: {
           business_name: string
@@ -15866,6 +15991,66 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      referral_links: {
+        Row: {
+          business_id: string | null
+          channel: string | null
+          clicks_count: number
+          conversions_count: number
+          created_at: string
+          destination_url: string
+          id: string
+          link_code: string
+          owner_agent_key: string | null
+          partnership_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          channel?: string | null
+          clicks_count?: number
+          conversions_count?: number
+          created_at?: string
+          destination_url: string
+          id?: string
+          link_code: string
+          owner_agent_key?: string | null
+          partnership_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          channel?: string | null
+          clicks_count?: number
+          conversions_count?: number
+          created_at?: string
+          destination_url?: string
+          id?: string
+          link_code?: string
+          owner_agent_key?: string | null
+          partnership_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_links_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referral_links_partnership_id_fkey"
+            columns: ["partnership_id"]
+            isOneToOne: false
+            referencedRelation: "partnership_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       release_plans: {
         Row: {
