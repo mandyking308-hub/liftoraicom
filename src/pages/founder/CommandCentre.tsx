@@ -62,6 +62,7 @@ import PortfolioCommandCentrePanel from "@/components/founder/command/PortfolioC
 import InternalOperatingSchedulesPanel from "@/components/founder/operations/InternalOperatingSchedulesPanel";
 import BusinessOperatingRunbookPanel from "@/components/founder/operations/BusinessOperatingRunbookPanel";
 import StartHereOperatingPanel from "@/components/founder/command/StartHereOperatingPanel";
+import GlobalAIBrainCommandCentre from "@/components/founder/command/GlobalAIBrainCommandCentre";
 import GlobalAutonomyControlPanel from "@/components/founder/autonomy/GlobalAutonomyControlPanel";
 import MultilingualIntelligencePanel from "@/components/founder/global/MultilingualIntelligencePanel";
 import GlobalJurisdictionPolicyPanel from "@/components/founder/compliance/GlobalJurisdictionPolicyPanel";
@@ -707,6 +708,8 @@ const CommandCentre = () => {
             </div>
 
             <SystemModeBanner />
+
+            <GlobalAIBrainCommandCentre />
 
             <StartHereOperatingPanel />
 
