@@ -11265,6 +11265,154 @@ export type Database = {
         }
         Relationships: []
       }
+      social_business_profiles: {
+        Row: {
+          approval_required: boolean
+          audience_profile: string | null
+          auto_publish_allowed: boolean
+          brand_voice: string | null
+          business_id: string
+          content_pillars: Json
+          created_at: string
+          id: string
+          influencer_outreach_enabled: boolean
+          manychat_enabled: boolean
+          metadata: Json
+          metricool_enabled: boolean
+          multilingual_social_enabled: boolean
+          offer_focus: string | null
+          posting_frequency: string | null
+          primary_cta: string | null
+          primary_platforms: Json
+          secondary_platforms: Json
+          social_inbox_enabled: boolean
+          social_status: string
+          updated_at: string
+        }
+        Insert: {
+          approval_required?: boolean
+          audience_profile?: string | null
+          auto_publish_allowed?: boolean
+          brand_voice?: string | null
+          business_id: string
+          content_pillars?: Json
+          created_at?: string
+          id?: string
+          influencer_outreach_enabled?: boolean
+          manychat_enabled?: boolean
+          metadata?: Json
+          metricool_enabled?: boolean
+          multilingual_social_enabled?: boolean
+          offer_focus?: string | null
+          posting_frequency?: string | null
+          primary_cta?: string | null
+          primary_platforms?: Json
+          secondary_platforms?: Json
+          social_inbox_enabled?: boolean
+          social_status?: string
+          updated_at?: string
+        }
+        Update: {
+          approval_required?: boolean
+          audience_profile?: string | null
+          auto_publish_allowed?: boolean
+          brand_voice?: string | null
+          business_id?: string
+          content_pillars?: Json
+          created_at?: string
+          id?: string
+          influencer_outreach_enabled?: boolean
+          manychat_enabled?: boolean
+          metadata?: Json
+          metricool_enabled?: boolean
+          multilingual_social_enabled?: boolean
+          offer_focus?: string | null
+          posting_frequency?: string | null
+          primary_cta?: string | null
+          primary_platforms?: Json
+          secondary_platforms?: Json
+          social_inbox_enabled?: boolean
+          social_status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_business_profiles_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: true
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_platform_accounts: {
+        Row: {
+          account_status: string
+          analytics_enabled: boolean
+          approval_required: boolean
+          auto_reply_allowed: boolean
+          business_id: string
+          connected_via: string | null
+          created_at: string
+          external_account_id: string | null
+          handle: string | null
+          id: string
+          inbox_enabled: boolean
+          metadata: Json
+          platform_key: string
+          platform_label: string
+          posting_enabled: boolean
+          profile_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_status?: string
+          analytics_enabled?: boolean
+          approval_required?: boolean
+          auto_reply_allowed?: boolean
+          business_id: string
+          connected_via?: string | null
+          created_at?: string
+          external_account_id?: string | null
+          handle?: string | null
+          id?: string
+          inbox_enabled?: boolean
+          metadata?: Json
+          platform_key: string
+          platform_label: string
+          posting_enabled?: boolean
+          profile_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_status?: string
+          analytics_enabled?: boolean
+          approval_required?: boolean
+          auto_reply_allowed?: boolean
+          business_id?: string
+          connected_via?: string | null
+          created_at?: string
+          external_account_id?: string | null
+          handle?: string | null
+          id?: string
+          inbox_enabled?: boolean
+          metadata?: Json
+          platform_key?: string
+          platform_label?: string
+          posting_enabled?: boolean
+          profile_url?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_platform_accounts_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       strategy_insights: {
         Row: {
           category: string
