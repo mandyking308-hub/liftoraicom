@@ -914,6 +914,7 @@ const CommandCentre = () => {
               </div>
             </Section>
             <AIConversationDraftingPanel />
+            <AIEngagementAgentLivePanel />
 
             {/* SECTION 7 — CRM / Contacts / Inboxes */}
             <RunwayHeader n={7} title="CRM / Contacts / Inboxes" icon={Users} anchor="sec-crm" />
