@@ -13241,6 +13241,184 @@ export type Database = {
           },
         ]
       }
+      prospect_ranking_models: {
+        Row: {
+          business_id: string | null
+          created_at: string | null
+          exclusion_rules: Json | null
+          id: string
+          model_key: string
+          model_name: string
+          model_status: string | null
+          notes: string | null
+          preferred_channels: Json | null
+          qualification_rules: Json | null
+          scoring_weights: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string | null
+          exclusion_rules?: Json | null
+          id?: string
+          model_key: string
+          model_name: string
+          model_status?: string | null
+          notes?: string | null
+          preferred_channels?: Json | null
+          qualification_rules?: Json | null
+          scoring_weights?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string | null
+          exclusion_rules?: Json | null
+          id?: string
+          model_key?: string
+          model_name?: string
+          model_status?: string | null
+          notes?: string | null
+          preferred_channels?: Json | null
+          qualification_rules?: Json | null
+          scoring_weights?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prospect_ranking_models_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prospecting_search_jobs: {
+        Row: {
+          business_id: string | null
+          created_at: string | null
+          created_by_agent_key: string | null
+          credit_spend_allowed: boolean | null
+          external_search_allowed: boolean | null
+          founder_approval_required: boolean | null
+          founder_brief: string | null
+          id: string
+          job_name: string
+          max_results: number | null
+          metadata: Json | null
+          search_goal: string
+          search_status: string | null
+          source_keys: Json | null
+          target_customer_type: string | null
+          target_geography: Json | null
+          target_industries: Json | null
+          target_market: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string | null
+          created_by_agent_key?: string | null
+          credit_spend_allowed?: boolean | null
+          external_search_allowed?: boolean | null
+          founder_approval_required?: boolean | null
+          founder_brief?: string | null
+          id?: string
+          job_name: string
+          max_results?: number | null
+          metadata?: Json | null
+          search_goal: string
+          search_status?: string | null
+          source_keys?: Json | null
+          target_customer_type?: string | null
+          target_geography?: Json | null
+          target_industries?: Json | null
+          target_market?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string | null
+          created_by_agent_key?: string | null
+          credit_spend_allowed?: boolean | null
+          external_search_allowed?: boolean | null
+          founder_approval_required?: boolean | null
+          founder_brief?: string | null
+          id?: string
+          job_name?: string
+          max_results?: number | null
+          metadata?: Json | null
+          search_goal?: string
+          search_status?: string | null
+          source_keys?: Json | null
+          target_customer_type?: string | null
+          target_geography?: Json | null
+          target_industries?: Json | null
+          target_market?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prospecting_search_jobs_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prospecting_source_registry: {
+        Row: {
+          allowed_without_founder_approval: boolean | null
+          created_at: string | null
+          credentials_present: boolean | null
+          credit_spend_risk: boolean | null
+          enabled: boolean | null
+          external_api: boolean | null
+          id: string
+          metadata: Json | null
+          notes: string | null
+          requires_credentials: boolean | null
+          source_key: string
+          source_name: string
+          source_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          allowed_without_founder_approval?: boolean | null
+          created_at?: string | null
+          credentials_present?: boolean | null
+          credit_spend_risk?: boolean | null
+          enabled?: boolean | null
+          external_api?: boolean | null
+          id?: string
+          metadata?: Json | null
+          notes?: string | null
+          requires_credentials?: boolean | null
+          source_key: string
+          source_name: string
+          source_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          allowed_without_founder_approval?: boolean | null
+          created_at?: string | null
+          credentials_present?: boolean | null
+          credit_spend_risk?: boolean | null
+          enabled?: boolean | null
+          external_api?: boolean | null
+          id?: string
+          metadata?: Json | null
+          notes?: string | null
+          requires_credentials?: boolean | null
+          source_key?: string
+          source_name?: string
+          source_type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       provider_event_intake_reviews: {
         Row: {
           ai_draft_allowed: boolean
@@ -14961,6 +15139,245 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      strategic_account_list_items: {
+        Row: {
+          created_at: string | null
+          id: string
+          list_id: string | null
+          priority_score: number | null
+          rank_order: number | null
+          reason: string | null
+          recommended_channel: string | null
+          target_account_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          list_id?: string | null
+          priority_score?: number | null
+          rank_order?: number | null
+          reason?: string | null
+          recommended_channel?: string | null
+          target_account_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          list_id?: string | null
+          priority_score?: number | null
+          rank_order?: number | null
+          reason?: string | null
+          recommended_channel?: string | null
+          target_account_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "strategic_account_list_items_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "strategic_account_lists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "strategic_account_list_items_target_account_id_fkey"
+            columns: ["target_account_id"]
+            isOneToOne: false
+            referencedRelation: "strategic_target_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      strategic_account_lists: {
+        Row: {
+          business_id: string | null
+          created_at: string | null
+          founder_review_required: boolean | null
+          id: string
+          list_name: string
+          list_status: string | null
+          list_type: string
+          metadata: Json | null
+          strategy_summary: string | null
+          target_count: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string | null
+          founder_review_required?: boolean | null
+          id?: string
+          list_name: string
+          list_status?: string | null
+          list_type: string
+          metadata?: Json | null
+          strategy_summary?: string | null
+          target_count?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string | null
+          founder_review_required?: boolean | null
+          id?: string
+          list_name?: string
+          list_status?: string | null
+          list_type?: string
+          metadata?: Json | null
+          strategy_summary?: string | null
+          target_count?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "strategic_account_lists_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      strategic_target_accounts: {
+        Row: {
+          accessibility_score: number | null
+          account_domain: string | null
+          account_name: string
+          account_type: string | null
+          approval_status: string | null
+          business_id: string | null
+          company_size: string | null
+          compliance_risk: string | null
+          created_at: string | null
+          crm_match_status: string | null
+          do_not_contact_risk: boolean | null
+          duplicate_risk: boolean | null
+          existing_contact_id: string | null
+          existing_organisation_id: string | null
+          founder_review_required: boolean | null
+          geography: string | null
+          icp_fit_score: number | null
+          id: string
+          industry: string | null
+          known_contact_email: string | null
+          known_contact_name: string | null
+          known_contact_title: string | null
+          linkedin_url: string | null
+          metadata: Json | null
+          overall_priority_score: number | null
+          promoted_to_crm: boolean | null
+          prospecting_job_id: string | null
+          ranking_reason: string | null
+          recommended_channel: string | null
+          recommended_next_action: string | null
+          relationship_score: number | null
+          revenue_potential_score: number | null
+          source_key: string | null
+          source_notes: string | null
+          strategic_value_score: number | null
+          target_persona: string | null
+          updated_at: string | null
+          urgency_score: number | null
+          website_url: string | null
+        }
+        Insert: {
+          accessibility_score?: number | null
+          account_domain?: string | null
+          account_name: string
+          account_type?: string | null
+          approval_status?: string | null
+          business_id?: string | null
+          company_size?: string | null
+          compliance_risk?: string | null
+          created_at?: string | null
+          crm_match_status?: string | null
+          do_not_contact_risk?: boolean | null
+          duplicate_risk?: boolean | null
+          existing_contact_id?: string | null
+          existing_organisation_id?: string | null
+          founder_review_required?: boolean | null
+          geography?: string | null
+          icp_fit_score?: number | null
+          id?: string
+          industry?: string | null
+          known_contact_email?: string | null
+          known_contact_name?: string | null
+          known_contact_title?: string | null
+          linkedin_url?: string | null
+          metadata?: Json | null
+          overall_priority_score?: number | null
+          promoted_to_crm?: boolean | null
+          prospecting_job_id?: string | null
+          ranking_reason?: string | null
+          recommended_channel?: string | null
+          recommended_next_action?: string | null
+          relationship_score?: number | null
+          revenue_potential_score?: number | null
+          source_key?: string | null
+          source_notes?: string | null
+          strategic_value_score?: number | null
+          target_persona?: string | null
+          updated_at?: string | null
+          urgency_score?: number | null
+          website_url?: string | null
+        }
+        Update: {
+          accessibility_score?: number | null
+          account_domain?: string | null
+          account_name?: string
+          account_type?: string | null
+          approval_status?: string | null
+          business_id?: string | null
+          company_size?: string | null
+          compliance_risk?: string | null
+          created_at?: string | null
+          crm_match_status?: string | null
+          do_not_contact_risk?: boolean | null
+          duplicate_risk?: boolean | null
+          existing_contact_id?: string | null
+          existing_organisation_id?: string | null
+          founder_review_required?: boolean | null
+          geography?: string | null
+          icp_fit_score?: number | null
+          id?: string
+          industry?: string | null
+          known_contact_email?: string | null
+          known_contact_name?: string | null
+          known_contact_title?: string | null
+          linkedin_url?: string | null
+          metadata?: Json | null
+          overall_priority_score?: number | null
+          promoted_to_crm?: boolean | null
+          prospecting_job_id?: string | null
+          ranking_reason?: string | null
+          recommended_channel?: string | null
+          recommended_next_action?: string | null
+          relationship_score?: number | null
+          revenue_potential_score?: number | null
+          source_key?: string | null
+          source_notes?: string | null
+          strategic_value_score?: number | null
+          target_persona?: string | null
+          updated_at?: string | null
+          urgency_score?: number | null
+          website_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "strategic_target_accounts_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "strategic_target_accounts_prospecting_job_id_fkey"
+            columns: ["prospecting_job_id"]
+            isOneToOne: false
+            referencedRelation: "prospecting_search_jobs"
             referencedColumns: ["id"]
           },
         ]
