@@ -1,6 +1,7 @@
 import FounderLayout from "@/components/founder/FounderLayout";
 import CRMCustomerMemoryDashboard from "@/components/founder/crm/CRMCustomerMemoryDashboard";
 import AIAgentOperatingModelPanel from "@/components/founder/agents/AIAgentOperatingModelPanel";
+import AIAgentOrchestratorPanel from "@/components/founder/agents/AIAgentOrchestratorPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -206,6 +207,7 @@ const AgentDirectory = () => {
         </div>
         <CRMCustomerMemoryDashboard />
         <AIAgentOperatingModelPanel />
+        <AIAgentOrchestratorPanel />
       </div>
     </FounderLayout>
   );
