@@ -808,6 +808,7 @@ const CommandCentre = () => {
               <GlobalAutonomyControlPanel />
               <MultilingualIntelligencePanel />
               <AgentHandoverProtocolPanel />
+              <AgentCollaborationBoard />
               <AutopilotActivationGatesPanel />
             </Section>
 
