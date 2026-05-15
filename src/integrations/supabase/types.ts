@@ -11614,6 +11614,66 @@ export type Database = {
         }
         Relationships: []
       }
+      knowledge_conflict_flags: {
+        Row: {
+          business_id: string | null
+          conflict_summary: string | null
+          conflict_type: string
+          created_at: string
+          founder_review_required: boolean
+          id: string
+          recommended_resolution: string | null
+          severity: string
+          source_a_id: string | null
+          source_b_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          conflict_summary?: string | null
+          conflict_type: string
+          created_at?: string
+          founder_review_required?: boolean
+          id?: string
+          recommended_resolution?: string | null
+          severity?: string
+          source_a_id?: string | null
+          source_b_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          conflict_summary?: string | null
+          conflict_type?: string
+          created_at?: string
+          founder_review_required?: boolean
+          id?: string
+          recommended_resolution?: string | null
+          severity?: string
+          source_a_id?: string | null
+          source_b_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_conflict_flags_source_a_id_fkey"
+            columns: ["source_a_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_source_registry"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "knowledge_conflict_flags_source_b_id_fkey"
+            columns: ["source_b_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_source_registry"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       knowledge_documents: {
         Row: {
           created_at: string
@@ -11704,6 +11764,78 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      knowledge_source_registry: {
+        Row: {
+          agent_visible_allowed: boolean
+          approval_status: string
+          business_id: string | null
+          created_at: string
+          customer_visible_allowed: boolean
+          freshness_status: string
+          id: string
+          internal_only: boolean
+          last_reviewed_at: string | null
+          metadata: Json
+          notes: string | null
+          reliability_score: number | null
+          review_due_at: string | null
+          risk_level: string
+          source_id: string | null
+          source_status: string
+          source_table: string | null
+          source_title: string
+          source_type: string
+          source_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          agent_visible_allowed?: boolean
+          approval_status?: string
+          business_id?: string | null
+          created_at?: string
+          customer_visible_allowed?: boolean
+          freshness_status?: string
+          id?: string
+          internal_only?: boolean
+          last_reviewed_at?: string | null
+          metadata?: Json
+          notes?: string | null
+          reliability_score?: number | null
+          review_due_at?: string | null
+          risk_level?: string
+          source_id?: string | null
+          source_status?: string
+          source_table?: string | null
+          source_title: string
+          source_type: string
+          source_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          agent_visible_allowed?: boolean
+          approval_status?: string
+          business_id?: string | null
+          created_at?: string
+          customer_visible_allowed?: boolean
+          freshness_status?: string
+          id?: string
+          internal_only?: boolean
+          last_reviewed_at?: string | null
+          metadata?: Json
+          notes?: string | null
+          reliability_score?: number | null
+          review_due_at?: string | null
+          risk_level?: string
+          source_id?: string | null
+          source_status?: string
+          source_table?: string | null
+          source_title?: string
+          source_type?: string
+          source_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       launch_checklist: {
         Row: {
