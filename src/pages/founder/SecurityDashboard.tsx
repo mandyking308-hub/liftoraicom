@@ -1,5 +1,6 @@
 import FounderLayout from "@/components/founder/FounderLayout";
 import { SecurityGovernancePanel } from "@/components/founder/security/SecurityGovernancePanel";
+import ControlledExternalActionGatesPanel from "@/components/founder/operations/ControlledExternalActionGatesPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -428,6 +429,7 @@ const SecurityDashboard = () => {
             </Card>
           </TabsContent>
         </Tabs>
+        <ControlledExternalActionGatesPanel />
       </div>
     </FounderLayout>
   );
