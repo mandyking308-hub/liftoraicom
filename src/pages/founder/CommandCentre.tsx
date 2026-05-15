@@ -56,6 +56,7 @@ import LiftorBusinessLiveRunPanel from "@/components/founder/command/LiftorBusin
 import MultiBusinessOperatingLayerPanel from "@/components/founder/operations/MultiBusinessOperatingLayerPanel";
 import BusinessKnowledgeBrainPanel from "@/components/founder/knowledge/BusinessKnowledgeBrainPanel";
 import PortfolioCommandCentrePanel from "@/components/founder/command/PortfolioCommandCentrePanel";
+import InternalOperatingSchedulesPanel from "@/components/founder/operations/InternalOperatingSchedulesPanel";
 import BusinessLaunchFactoryPanel from "@/components/founder/expansion/BusinessLaunchFactoryPanel";
 import RevenueOperationsPanel from "@/components/founder/finance/RevenueOperationsPanel";
 import LiftorMasterDryRunPanel from "@/components/founder/testing/LiftorMasterDryRunPanel";
@@ -727,6 +728,7 @@ const CommandCentre = () => {
             <FounderApprovalConsole />
             <LiftorMasterDryRunPanel />
             <LiftorBusinessLiveRunPanel />
+            <InternalOperatingSchedulesPanel />
             <MultiBusinessOperatingLayerPanel />
             <BusinessLaunchFactoryPanel />
             <BusinessKnowledgeBrainPanel />

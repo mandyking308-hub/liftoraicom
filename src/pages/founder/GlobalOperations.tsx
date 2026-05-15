@@ -15,6 +15,7 @@ import {
 import MultiBusinessOperatingLayerPanel from "@/components/founder/operations/MultiBusinessOperatingLayerPanel";
 import BusinessKnowledgeBrainPanel from "@/components/founder/knowledge/BusinessKnowledgeBrainPanel";
 import PortfolioCommandCentrePanel from "@/components/founder/command/PortfolioCommandCentrePanel";
+import InternalOperatingSchedulesPanel from "@/components/founder/operations/InternalOperatingSchedulesPanel";
 import BusinessLaunchFactoryPanel from "@/components/founder/expansion/BusinessLaunchFactoryPanel";
 
 const statusIcon = (s: string) => {
@@ -143,6 +144,7 @@ const GlobalOperations = () => {
         <MultiBusinessOperatingLayerPanel />
         <BusinessKnowledgeBrainPanel />
         <PortfolioCommandCentrePanel />
+        <InternalOperatingSchedulesPanel />
         <BusinessLaunchFactoryPanel />
 
         {/* Global KPIs */}
