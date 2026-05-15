@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import ControlledSendReadinessPreview from "@/components/founder/safety/ControlledSendReadinessPreview";
 import FooterDisclosurePreview from "@/components/founder/safety/FooterDisclosurePreview";
+import ManualSendApplyGate from "@/components/founder/safety/ManualSendApplyGate";
 
 const DEFAULT_IDS = [
   "8a92edbb-2e61-49b7-a6df-3bac21268fe0",
@@ -77,6 +78,7 @@ export default function ControlledSendPreview() {
 
       <ControlledSendReadinessPreview />
       <FooterDisclosurePreview />
+      <ManualSendApplyGate />
     </div>
   );
 }
