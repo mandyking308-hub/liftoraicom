@@ -5442,6 +5442,60 @@ export type Database = {
           },
         ]
       }
+      execution_result_log: {
+        Row: {
+          action_type: string
+          apollo_called: boolean
+          approved_action_id: string | null
+          blocked_reason: string | null
+          business_id: string | null
+          created_at: string
+          email_sent: boolean
+          execution_status: string
+          external_action_attempted: boolean
+          id: string
+          metadata: Json
+          result_summary: string | null
+          smartlead_post_called: boolean
+          target_id: string | null
+          target_table: string | null
+        }
+        Insert: {
+          action_type: string
+          apollo_called?: boolean
+          approved_action_id?: string | null
+          blocked_reason?: string | null
+          business_id?: string | null
+          created_at?: string
+          email_sent?: boolean
+          execution_status: string
+          external_action_attempted?: boolean
+          id?: string
+          metadata?: Json
+          result_summary?: string | null
+          smartlead_post_called?: boolean
+          target_id?: string | null
+          target_table?: string | null
+        }
+        Update: {
+          action_type?: string
+          apollo_called?: boolean
+          approved_action_id?: string | null
+          blocked_reason?: string | null
+          business_id?: string | null
+          created_at?: string
+          email_sent?: boolean
+          execution_status?: string
+          external_action_attempted?: boolean
+          id?: string
+          metadata?: Json
+          result_summary?: string | null
+          smartlead_post_called?: boolean
+          target_id?: string | null
+          target_table?: string | null
+        }
+        Relationships: []
+      }
       execution_steps: {
         Row: {
           agent_id: string | null
