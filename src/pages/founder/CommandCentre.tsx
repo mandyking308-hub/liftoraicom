@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import FounderLayout from "@/components/founder/FounderLayout";
 import GroupHQOperatingPanel from "@/components/founder/group/GroupHQOperatingPanel";
 import TreasuryCashflowControlPanel from "@/components/founder/finance/TreasuryCashflowControlPanel";
+import ContractsProcurementControlPanel from "@/components/founder/legal/ContractsProcurementControlPanel";
 import LiftorCapabilities from "@/components/founder/LiftorCapabilities";
 import AgentOrchestration from "@/components/founder/AgentOrchestration";
 import SystemModeBanner from "@/components/founder/SystemModeBanner";
@@ -1581,6 +1582,7 @@ const CommandCentre = () => {
       })()}
     <div className="max-w-7xl mx-auto px-4 pb-6"><GroupHQOperatingPanel /></div>
     <div className="max-w-7xl mx-auto px-4 pb-6"><TreasuryCashflowControlPanel /></div>
+    <div className="max-w-7xl mx-auto px-4 pb-6"><ContractsProcurementControlPanel /></div>
     </FounderLayout>
   );
 };
