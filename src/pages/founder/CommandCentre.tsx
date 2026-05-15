@@ -26,6 +26,8 @@ import { format, formatDistanceToNow } from "date-fns";
 import ControlledSendReadinessPreview from "@/components/founder/safety/ControlledSendReadinessPreview";
 import FooterDisclosurePreview from "@/components/founder/safety/FooterDisclosurePreview";
 import ManualSendApplyGate from "@/components/founder/safety/ManualSendApplyGate";
+import OutboundProviderEnginePanel from "@/components/founder/integrations/OutboundProviderEnginePanel";
+import BulkSendEngineBlueprint from "@/components/founder/integrations/BulkSendEngineBlueprint";
 import {
   Building2, Bot, Send, Mail, Inbox as InboxIcon, MessageSquare, FileSignature,
   Search, Banknote, ShieldCheck, Workflow as WorkflowIcon, Phone, AlertTriangle,
@@ -947,6 +949,8 @@ const CommandCentre = () => {
                 { to: "/founder/architectures", label: "Architectures", icon: WorkflowIcon },
               ]} />
             </Section>
+            <OutboundProviderEnginePanel />
+            <BulkSendEngineBlueprint />
 
             {/* SECTION 13 — Monitoring / Security / System Health */}
             <RunwayHeader n={13} title="Monitoring / Security / System Health" icon={Monitor} anchor="sec-monitoring" />
