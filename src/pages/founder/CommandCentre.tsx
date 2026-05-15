@@ -64,6 +64,7 @@ import BusinessOperatingRunbookPanel from "@/components/founder/operations/Busin
 import StartHereOperatingPanel from "@/components/founder/command/StartHereOperatingPanel";
 import GlobalAutonomyControlPanel from "@/components/founder/autonomy/GlobalAutonomyControlPanel";
 import MultilingualIntelligencePanel from "@/components/founder/global/MultilingualIntelligencePanel";
+import GlobalJurisdictionPolicyPanel from "@/components/founder/compliance/GlobalJurisdictionPolicyPanel";
 import GlobalOperatingClockPanel from "@/components/founder/global/GlobalOperatingClockPanel";
 import { SecurityGovernancePanel } from "@/components/founder/security/SecurityGovernancePanel";
 import { ProductisationReadinessPanel } from "@/components/founder/revenue/ProductisationReadinessPanel";
@@ -989,6 +990,7 @@ const CommandCentre = () => {
                 { to: "/founder/security", label: "Security", icon: ShieldAlert },
               ]} />
             </Section>
+            <GlobalJurisdictionPolicyPanel />
 
             {/* SECTION 9 — Proposals / Demos / Client Journey */}
             <RunwayHeader n={9} title="Proposals / Demos / Client Journey" icon={FileSignature} anchor="sec-proposals" />
