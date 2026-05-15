@@ -157,6 +157,7 @@ const FounderLegalConsole = () => {
         <GlobalJurisdictionPolicyPanel />
       </div>
     <div className="max-w-7xl mx-auto px-4 pb-6"><GroupHQOperatingPanel /></div>
+    <div className="max-w-7xl mx-auto px-4 pb-6"><DataPrivacyRetentionPanel /></div>
     </FounderLayout>
   );
 };
