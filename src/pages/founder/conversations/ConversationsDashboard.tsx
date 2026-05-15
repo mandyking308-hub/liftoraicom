@@ -5,6 +5,7 @@ import MultilingualIntelligencePanel from "@/components/founder/global/Multiling
 import MultiChannelInboxPanel from "@/components/founder/channels/MultiChannelInboxPanel";
 import CustomerJourneyControlBoard from "@/components/founder/command/CustomerJourneyControlBoard";
 import SocialEngagementInboxPanel from "@/components/founder/social/SocialEngagementInboxPanel";
+import SupportKnowledgeAgentPanel from "@/components/founder/support/SupportKnowledgeAgentPanel";
 import AgentCollaborationBoard from "@/components/founder/agents/AgentCollaborationBoard";
 import CRMInteractionMatchPreviewPanel from "@/components/founder/crm/CRMInteractionMatchPreviewPanel";
 import CRMConversationBridgePanel from "@/components/founder/crm/CRMConversationBridgePanel";
@@ -226,6 +227,7 @@ const ConversationsDashboard = () => {
         <MultiChannelInboxPanel />
         <CustomerJourneyControlBoard />
         <SocialEngagementInboxPanel />
+        <SupportKnowledgeAgentPanel />
       </div>
     </FounderLayout>
   );
