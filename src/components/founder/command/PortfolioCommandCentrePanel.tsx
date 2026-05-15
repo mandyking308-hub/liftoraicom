@@ -36,6 +36,14 @@ export function PortfolioCommandCentrePanel() {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<any | null>(null);
   const [filter, setFilter] = useState<Filter>("all");
+  const [readiness, setReadiness] = useState<Record<string, any>>({});
+
+  const loadReadiness = async () => {
+    try {
+      const { data: res } = await supabase.functions.invoke("business-capability-matrix", { body: {} });
+      setReadiness((res as any)?.readiness ?? {});
+    } catch (_) { /* silent */ }
+  };
 
   const load = async (persist = false) => {
     setLoading(true);
@@ -49,6 +57,7 @@ export function PortfolioCommandCentrePanel() {
     } finally { setLoading(false); }
   };
   useEffect(() => { load(false); }, []);
+  useEffect(() => { loadReadiness(); }, []);
 
   const cards: BizCard[] = data?.cards ?? [];
   const filtered = useMemo(() => filter === "all" ? cards : cards.filter((c) => c.readiness === filter), [cards, filter]);
@@ -127,6 +136,23 @@ export function PortfolioCommandCentrePanel() {
                 </div>
               )}
               <div className="mt-2 text-[10px] text-primary/90">→ {c.next_action}</div>
+              {readiness[c.business_id] && (
+                <div className="mt-2 flex flex-wrap gap-1 text-[10px]">
+                  {(["internal_use", "social", "outbound", "agents", "revenue"] as const).map((k) => {
+                    const ok = !!readiness[c.business_id][`ready_for_${k}`];
+                    return (
+                      <Badge key={k} variant="outline" className={ok ? "border-green-500/40 text-green-400" : "border-yellow-500/40 text-yellow-400"}>
+                        {k.replace("_", " ")} {ok ? "✓" : "—"}
+                      </Badge>
+                    );
+                  })}
+                  {readiness[c.business_id].missing_count > 0 && (
+                    <Badge variant="outline" className="border-border/60 text-muted-foreground">
+                      {readiness[c.business_id].missing_count} missing modules
+                    </Badge>
+                  )}
+                </div>
+              )}
             </div>
           ))}
           {filtered.length === 0 && <div className="text-sm text-muted-foreground">No businesses match this filter.</div>}
