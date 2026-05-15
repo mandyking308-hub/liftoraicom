@@ -76,6 +76,9 @@ export default function ManualSendApplyGate() {
     if (preview.apollo_calls !== 0) return false;
     if (preview.review_required_rows_touched !== 0) return false;
     if (!preview.all_pass) return false;
+    if ((preview.unresolved_placeholders_count ?? 1) !== 0) return false;
+    if (!preview.unsubscribe_link_present) return false;
+    if (preview.send_allowed_if_applied === false) return false;
     return true;
   }, [preview, previewedQueueId, selected, confirmationExact, acknowledged]);
 
@@ -90,6 +93,11 @@ export default function ManualSendApplyGate() {
         { ok: preview.smtp_calls_if_applied === 1, label: "smtp_calls_if_applied = 1" },
         { ok: preview.apollo_calls === 0, label: "apollo_calls = 0" },
         { ok: preview.review_required_rows_touched === 0, label: "review_required rows touched = 0" },
+        {
+          ok: (preview.unresolved_placeholders_count ?? 1) === 0,
+          label: `unresolved placeholders = ${preview.unresolved_placeholders_count ?? "?"}`,
+        },
+        { ok: !!preview.unsubscribe_link_present, label: "Unsubscribe link present in body" },
         { ok: !!preview.all_pass, label: "All preflight checks passed" },
       ]
     : [];
@@ -191,20 +199,57 @@ export default function ManualSendApplyGate() {
           <div className="grid sm:grid-cols-2 gap-1">
             <KV k="queue_id" v={preview.queue_id} />
             <KV k="contact" v={`${preview.contact?.name ?? "—"} · ${preview.contact?.email ?? "—"}`} />
+            <KV k="merged first_name" v={preview.personalization?.first_name} />
             <KV k="inbox" v={preview.inbox?.email_address} />
             <KV k="campaign" v={preview.campaign?.name} />
             <KV k="emails_to_send_if_applied" v={preview.emails_to_send_if_applied} />
             <KV k="smtp_calls_if_applied" v={preview.smtp_calls_if_applied} />
             <KV k="apollo_calls" v={preview.apollo_calls} />
             <KV k="review_required_rows_touched" v={preview.review_required_rows_touched} />
+            <KV k="unresolved_placeholders" v={preview.unresolved_placeholders_count ?? "?"} />
+            <KV k="unsubscribe_link_present" v={String(!!preview.unsubscribe_link_present)} />
+            <KV k="send_allowed_if_applied" v={preview.send_allowed_if_applied ? "yes" : "no"} />
             <KV k="background_sending_enabled" v={String(preview.background_sending_enabled)} />
             <KV k="pixel_injected" v={String(preview.pixel_injected)} />
           </div>
 
+          {(preview.unresolved_placeholders ?? []).length > 0 && (
+            <div className="rounded-md border border-red-500/40 bg-red-500/5 p-3 space-y-1">
+              <div className="text-[11px] font-medium text-red-300">
+                Unresolved placeholders found — Apply blocked
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {preview.unresolved_placeholders.map((p: string, i: number) => (
+                  <Badge
+                    key={i}
+                    variant="outline"
+                    className="border-red-500/40 bg-red-500/10 text-red-300 font-mono text-[10px]"
+                  >
+                    {p}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="rounded-md border p-3 bg-background/40">
-            <div className="text-[11px] text-muted-foreground">Assembled email — Subject</div>
+            <div className="text-[11px] text-muted-foreground">Raw template body (unchanged in DB)</div>
+            <pre className="mt-1 text-[11px] whitespace-pre-wrap font-mono text-muted-foreground">
+              {preview.raw_template?.body ?? "—"}
+            </pre>
+          </div>
+
+          <div className="rounded-md border p-3 bg-background/40">
+            <div className="text-[11px] text-muted-foreground">Merged final body (placeholders replaced)</div>
+            <pre className="mt-1 text-[11px] whitespace-pre-wrap font-mono text-foreground/90">
+              {preview.merged_email?.body ?? "—"}
+            </pre>
+          </div>
+
+          <div className="rounded-md border p-3 bg-background/40">
+            <div className="text-[11px] text-muted-foreground">Final assembled email — Subject</div>
             <div className="text-sm font-medium">{preview.assembled_email?.subject ?? "—"}</div>
-            <div className="mt-2 text-[11px] text-muted-foreground">Body</div>
+            <div className="mt-2 text-[11px] text-muted-foreground">Body (with footer + optional disclosure)</div>
             <pre className="mt-1 text-[11px] whitespace-pre-wrap font-mono text-foreground/90">
               {preview.assembled_email?.body ?? "—"}
             </pre>
