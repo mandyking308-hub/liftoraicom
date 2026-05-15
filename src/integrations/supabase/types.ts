@@ -14386,6 +14386,51 @@ export type Database = {
           },
         ]
       }
+      partner_referral_records: {
+        Row: {
+          business_id: string | null
+          commission_due: number | null
+          commission_status: string
+          created_at: string
+          estimated_value: number | null
+          founder_review_required: boolean
+          id: string
+          partner_id: string | null
+          referral_status: string
+          referred_contact_id: string | null
+          referred_organisation_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          commission_due?: number | null
+          commission_status?: string
+          created_at?: string
+          estimated_value?: number | null
+          founder_review_required?: boolean
+          id?: string
+          partner_id?: string | null
+          referral_status?: string
+          referred_contact_id?: string | null
+          referred_organisation_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          commission_due?: number | null
+          commission_status?: string
+          created_at?: string
+          estimated_value?: number | null
+          founder_review_required?: boolean
+          id?: string
+          partner_id?: string | null
+          referral_status?: string
+          referred_contact_id?: string | null
+          referred_organisation_name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       partnership_accounts: {
         Row: {
           agreement_summary: string | null
@@ -14441,6 +14486,56 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "partnership_accounts_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partnership_programs: {
+        Row: {
+          business_id: string | null
+          commission_notes: string | null
+          created_at: string
+          founder_review_required: boolean
+          id: string
+          offer_summary: string | null
+          program_name: string
+          program_type: string
+          status: string
+          target_partners: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          commission_notes?: string | null
+          created_at?: string
+          founder_review_required?: boolean
+          id?: string
+          offer_summary?: string | null
+          program_name: string
+          program_type: string
+          status?: string
+          target_partners?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          commission_notes?: string | null
+          created_at?: string
+          founder_review_required?: boolean
+          id?: string
+          offer_summary?: string | null
+          program_name?: string
+          program_type?: string
+          status?: string
+          target_partners?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partnership_programs_business_id_fkey"
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
