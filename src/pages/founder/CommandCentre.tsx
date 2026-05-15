@@ -817,6 +817,7 @@ const CommandCentre = () => {
                     review_required: {reviewRequired} · valid_future_step_blocked: {validFutureBlocked} · cancel_candidate: {cancelCandidate} · legacy_pending: {legacyPending} · orphan_followup: {orphanFollowup}
                   </p>
                 </div>
+                <ControlledSendReadinessPreview />
               </div>
             </Section>
 
