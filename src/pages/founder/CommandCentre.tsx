@@ -90,6 +90,7 @@ import BusinessLaunchFactoryPanel from "@/components/founder/expansion/BusinessL
 import RevenueOperationsPanel from "@/components/founder/finance/RevenueOperationsPanel";
 import LiftorMasterDryRunPanel from "@/components/founder/testing/LiftorMasterDryRunPanel";
 import LiftorMasterReconciliationPanel from "@/components/founder/testing/LiftorMasterReconciliationPanel";
+import FullManualFunctionControlPanel from "@/components/founder/command/FullManualFunctionControlPanel";
 import CRMContact360Panel from "@/components/founder/crm/CRMContact360Panel";
 import CommandCentreMasterControlPlane from "@/components/founder/command/CommandCentreMasterControlPlane";
 import CustomerJourneyControlBoard from "@/components/founder/command/CustomerJourneyControlBoard";
@@ -978,6 +979,7 @@ const CommandCentre = () => {
             <BusinessOperatingRunbookPanel />
             <LiftorMasterDryRunPanel />
             <LiftorMasterReconciliationPanel />
+            <FullManualFunctionControlPanel />
             <SmartleadControlledActivationPanel />
             <LiftorBusinessLiveRunPanel />
             <InternalOperatingSchedulesPanel />

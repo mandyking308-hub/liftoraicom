@@ -3678,6 +3678,144 @@ export type Database = {
         }
         Relationships: []
       }
+      command_centre_data_flow_registry: {
+        Row: {
+          blockers: Json
+          command_centre_section: string | null
+          created_at: string
+          flow_description: string | null
+          flow_key: string
+          id: string
+          metadata: Json
+          next_action: string | null
+          owner_agent_key: string | null
+          readiness_status: string
+          source_object: string
+          target_object: string
+          test_status: string
+          updated_at: string
+          workflow_key: string | null
+        }
+        Insert: {
+          blockers?: Json
+          command_centre_section?: string | null
+          created_at?: string
+          flow_description?: string | null
+          flow_key: string
+          id?: string
+          metadata?: Json
+          next_action?: string | null
+          owner_agent_key?: string | null
+          readiness_status?: string
+          source_object: string
+          target_object: string
+          test_status?: string
+          updated_at?: string
+          workflow_key?: string | null
+        }
+        Update: {
+          blockers?: Json
+          command_centre_section?: string | null
+          created_at?: string
+          flow_description?: string | null
+          flow_key?: string
+          id?: string
+          metadata?: Json
+          next_action?: string | null
+          owner_agent_key?: string | null
+          readiness_status?: string
+          source_object?: string
+          target_object?: string
+          test_status?: string
+          updated_at?: string
+          workflow_key?: string | null
+        }
+        Relationships: []
+      }
+      command_centre_manual_registry: {
+        Row: {
+          blockers: Json
+          business_scoped: boolean
+          command_centre_section: string | null
+          created_at: string
+          data_flow_key: string | null
+          external_action_risk: boolean
+          global_object: boolean
+          id: string
+          manual_source: string
+          metadata: Json
+          module_area: string | null
+          next_action: string | null
+          object_kind: string
+          object_name: string
+          owner_agent_key: string | null
+          purpose: string | null
+          readiness_status: string
+          requires_founder_approval: boolean
+          rls_status: string
+          route_path: string | null
+          route_status: string
+          schema_name: string | null
+          updated_at: string
+          visibility_status: string
+          workflow_key: string | null
+        }
+        Insert: {
+          blockers?: Json
+          business_scoped?: boolean
+          command_centre_section?: string | null
+          created_at?: string
+          data_flow_key?: string | null
+          external_action_risk?: boolean
+          global_object?: boolean
+          id?: string
+          manual_source: string
+          metadata?: Json
+          module_area?: string | null
+          next_action?: string | null
+          object_kind: string
+          object_name: string
+          owner_agent_key?: string | null
+          purpose?: string | null
+          readiness_status?: string
+          requires_founder_approval?: boolean
+          rls_status?: string
+          route_path?: string | null
+          route_status?: string
+          schema_name?: string | null
+          updated_at?: string
+          visibility_status?: string
+          workflow_key?: string | null
+        }
+        Update: {
+          blockers?: Json
+          business_scoped?: boolean
+          command_centre_section?: string | null
+          created_at?: string
+          data_flow_key?: string | null
+          external_action_risk?: boolean
+          global_object?: boolean
+          id?: string
+          manual_source?: string
+          metadata?: Json
+          module_area?: string | null
+          next_action?: string | null
+          object_kind?: string
+          object_name?: string
+          owner_agent_key?: string | null
+          purpose?: string | null
+          readiness_status?: string
+          requires_founder_approval?: boolean
+          rls_status?: string
+          route_path?: string | null
+          route_status?: string
+          schema_name?: string | null
+          updated_at?: string
+          visibility_status?: string
+          workflow_key?: string | null
+        }
+        Relationships: []
+      }
       command_centre_modules: {
         Row: {
           business_scoped: boolean
@@ -3744,6 +3882,69 @@ export type Database = {
           section_number?: number | null
           status_source?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      command_centre_workflow_registry: {
+        Row: {
+          blockers: Json
+          business_scoped: boolean
+          command_centre_section: string | null
+          created_at: string
+          external_action_risk: boolean
+          founder_approval_required: boolean
+          id: string
+          metadata: Json
+          next_action: string | null
+          owner_agent_key: string | null
+          readiness_status: string
+          source_object: string | null
+          target_object: string | null
+          test_status: string
+          updated_at: string
+          workflow_key: string
+          workflow_name: string
+          workflow_summary: string | null
+        }
+        Insert: {
+          blockers?: Json
+          business_scoped?: boolean
+          command_centre_section?: string | null
+          created_at?: string
+          external_action_risk?: boolean
+          founder_approval_required?: boolean
+          id?: string
+          metadata?: Json
+          next_action?: string | null
+          owner_agent_key?: string | null
+          readiness_status?: string
+          source_object?: string | null
+          target_object?: string | null
+          test_status?: string
+          updated_at?: string
+          workflow_key: string
+          workflow_name: string
+          workflow_summary?: string | null
+        }
+        Update: {
+          blockers?: Json
+          business_scoped?: boolean
+          command_centre_section?: string | null
+          created_at?: string
+          external_action_risk?: boolean
+          founder_approval_required?: boolean
+          id?: string
+          metadata?: Json
+          next_action?: string | null
+          owner_agent_key?: string | null
+          readiness_status?: string
+          source_object?: string | null
+          target_object?: string | null
+          test_status?: string
+          updated_at?: string
+          workflow_key?: string
+          workflow_name?: string
+          workflow_summary?: string | null
         }
         Relationships: []
       }
