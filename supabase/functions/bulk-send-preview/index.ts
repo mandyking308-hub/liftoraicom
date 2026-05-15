@@ -129,7 +129,8 @@ Deno.serve(async (req) => {
   const warmup_enabled = warmupCount > 0;
   const lead_push_ready =
     smartlead_campaign_present && sending_accounts_present && smartlead_campaign_mapped;
-  const webhook_ready = !!SMARTLEAD_WEBHOOK_SECRET && smartlead_campaign_present;
+  const webhook_capture_ready = !!SMARTLEAD_WEBHOOK_SECRET;
+  const webhook_ready = webhook_capture_ready && smartlead_campaign_present;
   const batch_preview_ready =
     provider_ready &&
     sending_accounts_present &&
@@ -158,6 +159,7 @@ Deno.serve(async (req) => {
     lead_push_ready,
     warmup_enabled,
     webhook_ready,
+    webhook_capture_ready,
     batch_preview_ready,
     eligible_count: 0,
     excluded_count: 0,
