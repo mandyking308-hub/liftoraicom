@@ -201,3 +201,192 @@ export const REVENUE_GOAL_AGENT_FLOW: ManualSection = {
   ].join(" "),
 };
 LIFTOR_FULL_GUIDE.push(REVENUE_GOAL_AGENT_FLOW);
+
+export const NEW_BUSINESS_ONBOARDING_FLOW: ManualSection = {
+  number: 81,
+  key: "new-business-onboarding",
+  title: "New business onboarding flow",
+  body: [
+    "1) Create/select business.",
+    "2) Upload technical manual.",
+    "3) Add website / public brand source.",
+    "4) Upload user manual / operating instructions.",
+    "5) Upload offers, pricing and packages.",
+    "6) Upload customer / support / operations documents.",
+    "7) Run Business Training (TRAIN BUSINESS KNOWLEDGE).",
+    "8) Review business summary, brand voice, customer summary, risk summary.",
+    "9) Generate Execution Starter Pack (CREATE BUSINESS STARTER PACK).",
+    "10) Approve tone and templates.",
+    "11) Run Business Activation checklist.",
+    "12) Run Rehearsal (CREATE / RUN BUSINESS REHEARSAL).",
+    "13) Reset rehearsal data (RESET REHEARSAL DATA).",
+    "14) Confirm Clean Real Mode badge is green.",
+    "15) Generate Operating Standards (CREATE BUSINESS OPERATING STANDARDS).",
+    "16) Create Pre-Live Baseline (CREATE PRE LIVE BASELINE).",
+    "17) Run Final Go-To-Use Readiness.",
+    "18) Start internal use.",
+    "19) Approve external actions only when ready, channel-by-channel.",
+  ].join(" "),
+};
+LIFTOR_FULL_GUIDE.push(NEW_BUSINESS_ONBOARDING_FLOW);
+
+export const AUTOPILOT_ROADMAP: ManualSection = {
+  number: 82,
+  key: "autopilot-roadmap",
+  title: "Future Autopilot Levels",
+  body: [
+    "Liftor's autonomy grows in levels — module-by-module and business-by-business. Pause buttons stay available at every level.",
+    "Level 0 — Locked / Manual: Liftor watches and reports only. Nothing acts.",
+    "Level 1 — Draft Only: Liftor creates drafts (emails, posts, proposals, replies) but does not act.",
+    "Level 2 — Internal Autopilot: Liftor updates CRM, creates tasks, scores prospects and prepares reports — no customer contact.",
+    "Level 3 — Approved External Actions: Liftor executes only after founder approval per item.",
+    "Level 4 — Limited Autopilot: Liftor can act within strict approved rules and caps (e.g. send up to N approved emails per day).",
+    "Level 5 — Full Business Autopilot: Liftor runs large parts of the business while Mandy monitors exceptions.",
+    "Always gated regardless of level: legal, finance, privacy, complaints, money movement, filings, deletions, exports of private data and any high-risk action.",
+  ].join(" "),
+};
+LIFTOR_FULL_GUIDE.push(AUTOPILOT_ROADMAP);
+
+export const NEON_CANDY_FIRST_BUSINESS: ManualSection = {
+  number: 83,
+  key: "neon-candy-first-business",
+  title: "First business under test: Neon Candy",
+  body: [
+    "Business: Neon Candy. Sender: hello@neoncandy.online.",
+    "Smartlead API connected. Smartlead mailbox connected.",
+    "Smartlead campaign creation/mapping and warm-up still need to be confirmed in Command Centre unless already completed.",
+    "Native IONOS lane is safe-blocked. auto_send is disabled. Outbound cron is disabled.",
+    "Smartlead scale lane is the intended future outreach path.",
+    "All external actions remain gated. Activation/readiness must be checked from Command Centre.",
+    "Secrets and passwords are never displayed in this manual.",
+  ].join(" "),
+};
+LIFTOR_FULL_GUIDE.push(NEON_CANDY_FIRST_BUSINESS);
+
+export const DAILY_WEEKLY_MONTHLY_QUARTERLY_EMERGENCY: ManualSection = {
+  number: 84,
+  key: "operating-checklists",
+  title: "Daily / weekly / monthly / quarterly / emergency checklists",
+  body: [
+    "Daily: open Command Centre, clear Founder Alert Strip, select business, work Today's Actions top-to-bottom, scan Customer Journey for stuck stages, review Human Layer (onboarding/complaints/CSAT), approve / reject in Founder Approvals, run safe internal agents only, check Revenue Target pace.",
+    "Weekly: performance scorecard, retention risks, prospecting list, social/content plan, finance & cashflow, open complaints/disputes, supplier risks, system health, revenue pace + plan adjustments.",
+    "Monthly: customer quarterly reports prep, governance review, cashflow / accounting close, KPI/OKR review, board / founder report, data room check, entity obligations, renewal / churn / upsell review, revenue snapshot.",
+    "Quarterly: customer quarterly reports send (after approval), strategic review, exit-readiness check, contract renewals, security & privacy review, compliance filings (after approval), pricing & offer review.",
+    "Emergency: open Founder Alert Strip → escalate critical alert; pause affected business in Activation Wizard; lock outbound cron and auto_send; open complaint/incident in Risk panel; notify legal/insurance if needed; do not delete real data; capture timeline in Build Log.",
+  ].join(" "),
+};
+LIFTOR_FULL_GUIDE.push(DAILY_WEEKLY_MONTHLY_QUARTERLY_EMERGENCY);
+
+export const FIRST_TEN_ACTIONS: ManualSection = {
+  number: 85,
+  key: "first-10-actions",
+  title: "First 10 actions Mandy should take now",
+  body: [
+    "1) Open /founder/command-centre and select Neon Candy.",
+    "2) Run Final Go-To-Use Readiness → 'Run final acceptance'.",
+    "3) Open Business Rehearsal · Reset · Clean Real Mode → confirm green Clean Real Mode badge (or RESET REHEARSAL DATA).",
+    "4) Open Pre-Live Baseline → Dry-run baseline → fix blockers → CREATE PRE LIVE BASELINE.",
+    "5) Open Revenue Target Operating Mode → set £1,000 new subscriptions this month → Dry-run plan.",
+    "6) Review activity plan + risk flags → CREATE REVENUE TARGET PLAN.",
+    "7) Click Dry-run pace monitor → review recommendations.",
+    "8) Write first progress snapshot (CREATE REVENUE GOAL ACTIONS).",
+    "9) Review Today's Actions and Founder Approval Console.",
+    "10) Keep all external gates LOCKED — approve agent drafts internally only.",
+  ].join(" "),
+};
+LIFTOR_FULL_GUIDE.push(FIRST_TEN_ACTIONS);
+
+export const GLOSSARY: ManualSection = {
+  number: 86,
+  key: "glossary",
+  title: "Glossary in plain English",
+  body: [
+    "Command Centre: the one screen where Mandy operates Liftor.",
+    "Business: a company Liftor runs (e.g. Neon Candy). Each business has its own data, agents and gates.",
+    "Agent: a specialised AI worker (prospecting, outreach, social, proposal, customer success, win-back, revenue goal, etc).",
+    "Draft: something an agent has prepared but not sent. All drafts are internal until approved.",
+    "Approval: Mandy says yes/no on an action before anything external happens.",
+    "Gate: a lock that prevents an external action (send, publish, push, charge, file).",
+    "Rehearsal: simulated customer journey using test data, no external actions.",
+    "Clean Real Mode: confirmation that all rehearsal/test data has been removed.",
+    "Pre-Live Baseline: a snapshot of what is real / locked / approved before going live.",
+    "Operating Standards: the cadences/rules Liftor follows for service, support, complaints, onboarding, renewals.",
+    "Revenue Target: a £/count goal for a period that the Revenue Goal Agent works backwards from.",
+    "Pace status: ahead, on_track, slightly_behind, behind, critical.",
+    "Autopilot Level: how much Liftor is allowed to do without asking (L0–L5).",
+    "Build Log: append-only history of platform changes.",
+    "External lane: any channel that contacts a real person or system (email, social, DM, Apollo, Smartlead, payments, filings).",
+  ].join(" "),
+};
+LIFTOR_FULL_GUIDE.push(GLOSSARY);
+
+export const TROUBLESHOOTING: ManualSection = {
+  number: 87,
+  key: "troubleshooting",
+  title: "Troubleshooting",
+  body: [
+    "Go-live blocked: check Pre-Live Baseline status; run Cleanliness Check; resolve any test data with RESET REHEARSAL DATA.",
+    "Revenue target won't save: confirm period_start ≤ period_end and target amount > 0; check you have founder/admin role.",
+    "Pace shows critical: open recommendations, increase prospecting/content/follow-ups; review pricing/offer with founder.",
+    "Agent stuck: open AI Agents card, check last run + queue; re-run; if still stuck, escalate via Founder Alert Strip.",
+    "Smartlead campaign missing: confirm in Smartlead panel; do NOT push leads or start campaign without explicit approval.",
+    "External send blocked: this is correct — gates remain LOCKED until per-channel founder approval is recorded.",
+    "Lost a page: every major function is reachable from Command Centre cards. Use the sticky nav and the Manual / Build Log card.",
+    "Suspected secret leak: never paste secrets into manuals or Build Log; rotate via Lovable Cloud connectors.",
+  ].join(" "),
+};
+LIFTOR_FULL_GUIDE.push(TROUBLESHOOTING);
+
+export const COMMAND_CENTRE_MANUAL_LINKS: Record<string, string> = {
+  "Business Activation": "new-business-onboarding",
+  "Business Knowledge Upload": "how-it-learns",
+  "User Manual": "what-liftor-is",
+  "Revenue Target": "revenue-target",
+  "Customer Journey": "journey-flow",
+  "Human Layer": "human-layer",
+  "Prospecting": "new-business-onboarding",
+  "Smartlead": "neon-candy-first-business",
+  "CRM Memory": "customers",
+  "Surveys": "operating-checklists",
+  "Onboarding": "operating-checklists",
+  "Complaints": "complaints-winback",
+  "Win-Back": "complaints-winback",
+  "Quarterly Reports": "operating-checklists",
+  "Social / Content": "emails-marketing",
+  "Proposals / Demos / Deals": "proposals-deals",
+  "Invoices / Payments": "proposals-deals",
+  "Suppliers": "proposals-deals",
+  "Group HQ": "operating-checklists",
+  "Treasury / Cashflow": "operating-checklists",
+  "Contracts / Legal": "operating-checklists",
+  "People / Access": "operating-checklists",
+  "Risk / Insurance": "operating-checklists",
+  "Product / QA": "operating-checklists",
+  "AI Governance": "external-locked",
+  "Privacy": "external-locked",
+  "IP / Rights": "operating-checklists",
+  "Data Room": "operating-checklists",
+  "KPI / OKR": "operating-checklists",
+  "Alerts": "alert-strip",
+  "Rehearsal": "rehearsal",
+  "Clean Real Mode": "rehearsal-reset",
+  "Pre-Live Baseline": "pre-live-baseline",
+};
+
+export const BUILD_LOG_CLOSEOUT = {
+  title: "Liftor Build Closeout — Go-To-Use Manuals and Operating System Finalisation",
+  date: "15 May 2026",
+  notes: [
+    "90+ prompt build sequence completed.",
+    "Command Centre consolidated.",
+    "User Manual created and bumped to v1.0 — Operator Go-To-Use Edition.",
+    "Technical Manual updated to v5.2 — Build Closeout / Go-To-Use Edition.",
+    "Business onboarding/training model documented.",
+    "Rehearsal / reset / Clean Real Mode / baseline model documented.",
+    "Revenue target operating mode documented.",
+    "Autopilot roadmap (L0–L5) documented.",
+    "First business Neon Candy readiness path documented.",
+    "External actions remain gated.",
+    "Ready to move from build phase to internal use phase, subject to final acceptance results.",
+  ],
+};
