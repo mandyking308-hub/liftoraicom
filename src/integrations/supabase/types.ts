@@ -5401,6 +5401,71 @@ export type Database = {
           },
         ]
       }
+      outbound_provider_lead_mappings: {
+        Row: {
+          business_id: string
+          campaign_mapping_id: string | null
+          contact_email: string
+          created_at: string
+          id: string
+          last_previewed_at: string | null
+          liftor_campaign_id: string
+          liftor_contact_id: string
+          metadata: Json
+          provider_campaign_id: string | null
+          provider_lead_id: string | null
+          provider_response: Json | null
+          provider_type: string
+          push_status: string
+          pushed_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          campaign_mapping_id?: string | null
+          contact_email: string
+          created_at?: string
+          id?: string
+          last_previewed_at?: string | null
+          liftor_campaign_id: string
+          liftor_contact_id: string
+          metadata?: Json
+          provider_campaign_id?: string | null
+          provider_lead_id?: string | null
+          provider_response?: Json | null
+          provider_type?: string
+          push_status?: string
+          pushed_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          campaign_mapping_id?: string | null
+          contact_email?: string
+          created_at?: string
+          id?: string
+          last_previewed_at?: string | null
+          liftor_campaign_id?: string
+          liftor_contact_id?: string
+          metadata?: Json
+          provider_campaign_id?: string | null
+          provider_lead_id?: string | null
+          provider_response?: Json | null
+          provider_type?: string
+          push_status?: string
+          pushed_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outbound_provider_lead_mappings_campaign_mapping_id_fkey"
+            columns: ["campaign_mapping_id"]
+            isOneToOne: false
+            referencedRelation: "outbound_provider_campaign_mappings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       outbound_providers: {
         Row: {
           created_at: string
