@@ -67,6 +67,7 @@ import MultilingualIntelligencePanel from "@/components/founder/global/Multiling
 import GlobalJurisdictionPolicyPanel from "@/components/founder/compliance/GlobalJurisdictionPolicyPanel";
 import MultiChannelInboxPanel from "@/components/founder/channels/MultiChannelInboxPanel";
 import AgentHandoverProtocolPanel from "@/components/founder/agents/AgentHandoverProtocolPanel";
+import AutopilotActivationGatesPanel from "@/components/founder/autonomy/AutopilotActivationGatesPanel";
 import GlobalOperatingClockPanel from "@/components/founder/global/GlobalOperatingClockPanel";
 import LearningOptimisationEnginePanel from "@/components/founder/optimisation/LearningOptimisationEnginePanel";
 import SelfHealingMonitoringPanel from "@/components/founder/monitoring/SelfHealingMonitoringPanel";
@@ -796,6 +797,7 @@ const CommandCentre = () => {
               <GlobalAutonomyControlPanel />
               <MultilingualIntelligencePanel />
               <AgentHandoverProtocolPanel />
+              <AutopilotActivationGatesPanel />
             </Section>
 
             {/* SECTION 6 — Outreach Runway */}

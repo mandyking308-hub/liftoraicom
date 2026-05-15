@@ -14,6 +14,7 @@ import BusinessOperatingRunbookPanel from "@/components/founder/operations/Busin
 import GlobalAutonomyControlPanel from "@/components/founder/autonomy/GlobalAutonomyControlPanel";
 import GlobalOperatingClockPanel from "@/components/founder/global/GlobalOperatingClockPanel";
 import AgentHandoverProtocolPanel from "@/components/founder/agents/AgentHandoverProtocolPanel";
+import AutopilotActivationGatesPanel from "@/components/founder/autonomy/AutopilotActivationGatesPanel";
 import MultilingualIntelligencePanel from "@/components/founder/global/MultilingualIntelligencePanel";
 import BusinessKnowledgeBrainPanel from "@/components/founder/knowledge/BusinessKnowledgeBrainPanel";
 import { supabase } from "@/integrations/supabase/client";
@@ -237,6 +238,7 @@ const AgentDirectory = () => {
         <ApprovedActionExecutionPanel />
         <LiveCommercialAgentsPanel />
         <AgentHandoverProtocolPanel />
+        <AutopilotActivationGatesPanel />
       </div>
     </FounderLayout>
   );

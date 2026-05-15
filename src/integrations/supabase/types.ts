@@ -2193,6 +2193,75 @@ export type Database = {
         }
         Relationships: []
       }
+      autopilot_activation_gates: {
+        Row: {
+          action_type: string
+          agent_key: string | null
+          business_id: string | null
+          created_at: string
+          current_state: string
+          enabled: boolean
+          external_action: boolean
+          gate_key: string
+          gate_label: string
+          id: string
+          max_allowed_autonomy_level: number
+          metadata: Json
+          requested_autonomy_level: number
+          required_readiness_score: number
+          requires_compliance_pass: boolean
+          requires_founder_final_approval: boolean
+          requires_no_critical_findings: boolean
+          requires_successful_test_runs: number
+          updated_at: string
+          workflow_key: string | null
+        }
+        Insert: {
+          action_type: string
+          agent_key?: string | null
+          business_id?: string | null
+          created_at?: string
+          current_state?: string
+          enabled?: boolean
+          external_action?: boolean
+          gate_key: string
+          gate_label: string
+          id?: string
+          max_allowed_autonomy_level?: number
+          metadata?: Json
+          requested_autonomy_level?: number
+          required_readiness_score?: number
+          requires_compliance_pass?: boolean
+          requires_founder_final_approval?: boolean
+          requires_no_critical_findings?: boolean
+          requires_successful_test_runs?: number
+          updated_at?: string
+          workflow_key?: string | null
+        }
+        Update: {
+          action_type?: string
+          agent_key?: string | null
+          business_id?: string | null
+          created_at?: string
+          current_state?: string
+          enabled?: boolean
+          external_action?: boolean
+          gate_key?: string
+          gate_label?: string
+          id?: string
+          max_allowed_autonomy_level?: number
+          metadata?: Json
+          requested_autonomy_level?: number
+          required_readiness_score?: number
+          requires_compliance_pass?: boolean
+          requires_founder_final_approval?: boolean
+          requires_no_critical_findings?: boolean
+          requires_successful_test_runs?: number
+          updated_at?: string
+          workflow_key?: string | null
+        }
+        Relationships: []
+      }
       autopilot_runs: {
         Row: {
           already_in_crm_matched: number
