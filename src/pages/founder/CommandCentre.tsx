@@ -176,6 +176,34 @@ const CommandCentre = () => {
     queryKey: ["cc2-social-profiles"],
     queryFn: async () => (await (supabase as any).from("social_business_profiles").select("business_id,social_status,primary_platforms,brand_voice,primary_cta")).data ?? [],
   });
+  const { data: socialBrainSummary } = useQuery({
+    queryKey: ["cc2-social-brain-summary"],
+    refetchInterval: 60000,
+    queryFn: async () => {
+      const sb: any = supabase as any;
+      const [drafts, approvals, queue, batches, engagement, trends, gates] = await Promise.all([
+        sb.from("social_post_drafts").select("id", { count: "exact", head: true }),
+        sb.from("social_post_drafts").select("id", { count: "exact", head: true }).in("approval_status", ["pending", "needs_review"]),
+        sb.from("social_scheduling_queue").select("id", { count: "exact", head: true }),
+        sb.from("metricool_export_batches").select("id", { count: "exact", head: true }),
+        sb.from("social_engagement_events").select("id", { count: "exact", head: true }),
+        sb.from("social_trend_watch_items").select("id", { count: "exact", head: true }),
+        sb.from("external_action_gates").select("gate_key,enabled").in("gate_key", ["metricool_schedule_post_gate", "manychat_dm_send_gate"]),
+      ]);
+      const gateMap: Record<string, boolean> = {};
+      ((gates.data as any[]) ?? []).forEach((g) => { gateMap[g.gate_key] = !!g.enabled; });
+      return {
+        draftsTotal: drafts.count ?? 0,
+        approvalsPending: approvals.count ?? 0,
+        scheduleQueue: queue.count ?? 0,
+        exportBatches: batches.count ?? 0,
+        engagementEvents: engagement.count ?? 0,
+        trendItems: trends.count ?? 0,
+        metricoolEnabled: gateMap["metricool_schedule_post_gate"] ?? false,
+        manychatEnabled: gateMap["manychat_dm_send_gate"] ?? false,
+      };
+    },
+  });
   const { data: activeInboxes = [] } = useQuery({
     queryKey: ["cc2-active-inboxes-view"],
     queryFn: async () => (await (supabase as any).from("command_centre_active_inboxes").select("*")).data ?? [],
@@ -795,6 +823,40 @@ const CommandCentre = () => {
 
             {/* SECTION 5 — AI Agent Control Room */}
             <RunwayHeader n={5} title="AI Agent Control Room" icon={Bot} anchor="sec-agents" />
+            <Section
+              title="Social Brain status (internal-only)"
+              icon={MessageSquare}
+              action={<Link to="/founder/social"><Button size="sm" variant="ghost">Open Social Brain <ArrowRight size={12} /></Button></Link>}
+            >
+              <div className="flex flex-wrap items-center gap-2 mb-3 text-[11px]">
+                <Badge variant="outline" className={socialProfiles.length > 0 ? "border-green-500/40 text-green-400" : "border-yellow-500/40 text-yellow-400"}>
+                  {socialProfiles.length > 0 ? `${socialProfiles.length} profile${socialProfiles.length === 1 ? "" : "s"} configured` : "No profile yet"}
+                </Badge>
+                <Badge variant="outline" className="border-border/60 text-muted-foreground">No-publish · internal-only</Badge>
+                <Badge variant="outline" className={socialBrainSummary?.metricoolEnabled ? "border-green-500/40 text-green-400" : "border-border/60 text-muted-foreground"}>
+                  Metricool gate: {socialBrainSummary?.metricoolEnabled ? "enabled" : "disabled"}
+                </Badge>
+                <Badge variant="outline" className={socialBrainSummary?.manychatEnabled ? "border-green-500/40 text-green-400" : "border-border/60 text-muted-foreground"}>
+                  ManyChat DM gate: {socialBrainSummary?.manychatEnabled ? "enabled" : "disabled"}
+                </Badge>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+                <StatTile label="Profiles" value={socialProfiles.length} icon={MessageSquare} tone={socialProfiles.length > 0 ? "good" : "warn"} to="/founder/social" />
+                <StatTile label="Content drafts" value={socialBrainSummary?.draftsTotal ?? 0} icon={FileSignature} to="/founder/social" />
+                <StatTile label="Pending approvals" value={socialBrainSummary?.approvalsPending ?? 0} icon={ClipboardCheck} tone={(socialBrainSummary?.approvalsPending ?? 0) > 0 ? "warn" : "default"} to="/founder/social" />
+                <StatTile label="Scheduler queue" value={socialBrainSummary?.scheduleQueue ?? 0} icon={Clock} to="/founder/social" />
+                <StatTile label="Engagement events" value={socialBrainSummary?.engagementEvents ?? 0} icon={InboxIcon} to="/founder/conversations" />
+                <StatTile label="Trend watch" value={socialBrainSummary?.trendItems ?? 0} icon={TrendingUp} to="/founder/social" />
+              </div>
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs">
+                <p className="text-muted-foreground">
+                  Next action: {socialProfiles.length > 0
+                    ? "Generate 30-day social content pack for Neon Candy"
+                    : "Create a social profile for a business"}
+                </p>
+                <Link to="/founder/social"><Button size="sm" variant="outline"><Sparkles size={12} /> Open content factory</Button></Link>
+              </div>
+            </Section>
             <Section title="AI workers" icon={Bot} action={<Link to="/founder/agents"><Button size="sm" variant="ghost">Open agents <ArrowRight size={12} /></Button></Link>}>
               <div id="sec-agents" className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2 scroll-mt-24">
                 {workers.map((w) => (
