@@ -7031,6 +7031,48 @@ export type Database = {
           },
         ]
       }
+      customer_data_inventory: {
+        Row: {
+          business_id: string | null
+          contact_id: string | null
+          contains_sensitive_data: boolean
+          data_area: string
+          id: string
+          last_scanned_at: string
+          lawful_basis: string | null
+          metadata: Json
+          record_count: number
+          retention_until: string | null
+          source_table: string
+        }
+        Insert: {
+          business_id?: string | null
+          contact_id?: string | null
+          contains_sensitive_data?: boolean
+          data_area: string
+          id?: string
+          last_scanned_at?: string
+          lawful_basis?: string | null
+          metadata?: Json
+          record_count?: number
+          retention_until?: string | null
+          source_table: string
+        }
+        Update: {
+          business_id?: string | null
+          contact_id?: string | null
+          contains_sensitive_data?: boolean
+          data_area?: string
+          id?: string
+          last_scanned_at?: string
+          lawful_basis?: string | null
+          metadata?: Json
+          record_count?: number
+          retention_until?: string | null
+          source_table?: string
+        }
+        Relationships: []
+      }
       customer_disputes: {
         Row: {
           assignment_id: string | null
@@ -8414,6 +8456,57 @@ export type Database = {
             referencedColumns: ["contact_id"]
           },
         ]
+      }
+      data_privacy_requests: {
+        Row: {
+          business_id: string | null
+          completed_at: string | null
+          contact_id: string | null
+          created_at: string
+          due_date: string | null
+          founder_review_required: boolean
+          id: string
+          legal_review_recommended: boolean
+          metadata: Json
+          request_source: string | null
+          request_status: string
+          request_summary: string | null
+          request_type: string
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          completed_at?: string | null
+          contact_id?: string | null
+          created_at?: string
+          due_date?: string | null
+          founder_review_required?: boolean
+          id?: string
+          legal_review_recommended?: boolean
+          metadata?: Json
+          request_source?: string | null
+          request_status?: string
+          request_summary?: string | null
+          request_type: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          completed_at?: string | null
+          contact_id?: string | null
+          created_at?: string
+          due_date?: string | null
+          founder_review_required?: boolean
+          id?: string
+          legal_review_recommended?: boolean
+          metadata?: Json
+          request_source?: string | null
+          request_status?: string
+          request_summary?: string | null
+          request_type?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       deals: {
         Row: {

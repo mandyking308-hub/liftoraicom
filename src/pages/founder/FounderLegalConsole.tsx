@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { FileText, Users, Shield } from "lucide-react";
 import { format } from "date-fns";
 import GlobalJurisdictionPolicyPanel from "@/components/founder/compliance/GlobalJurisdictionPolicyPanel";
+import DataPrivacyRetentionPanel from "@/components/founder/compliance/DataPrivacyRetentionPanel";
 
 const FounderLegalConsole = () => {
   const { data: docVersions = [], isLoading: loadingDocs } = useQuery({
@@ -157,6 +158,7 @@ const FounderLegalConsole = () => {
         <GlobalJurisdictionPolicyPanel />
       </div>
     <div className="max-w-7xl mx-auto px-4 pb-6"><GroupHQOperatingPanel /></div>
+    <div className="max-w-7xl mx-auto px-4 pb-6"><DataPrivacyRetentionPanel /></div>
     </FounderLayout>
   );
 };
