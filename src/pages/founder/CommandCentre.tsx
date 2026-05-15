@@ -42,6 +42,7 @@ import CRMInteractionMatchPreviewPanel from "@/components/founder/crm/CRMInterac
 import CRMInteractionSourceAdaptersPanel from "@/components/founder/crm/CRMInteractionSourceAdaptersPanel";
 import CRMConversationBridgePanel from "@/components/founder/crm/CRMConversationBridgePanel";
 import CRMCustomerLifecyclePanel from "@/components/founder/crm/CRMCustomerLifecyclePanel";
+import CRMHealthIntegrityPanel from "@/components/founder/crm/CRMHealthIntegrityPanel";
 import CRMContact360Panel from "@/components/founder/crm/CRMContact360Panel";
 import {
   Building2, Bot, Send, Mail, Inbox as InboxIcon, MessageSquare, FileSignature,
@@ -914,6 +915,7 @@ const CommandCentre = () => {
               <CRMInteractionSourceAdaptersPanel />
               <CRMConversationBridgePanel />
               <CRMCustomerLifecyclePanel />
+              <CRMHealthIntegrityPanel />
               <CRMContact360Panel />
             </Section>
 

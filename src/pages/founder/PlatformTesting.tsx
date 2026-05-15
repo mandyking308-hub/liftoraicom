@@ -1,5 +1,6 @@
 import { useState } from "react";
 import FounderLayout from "@/components/founder/FounderLayout";
+import CRMHealthIntegrityPanel from "@/components/founder/crm/CRMHealthIntegrityPanel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -933,6 +934,7 @@ const PlatformTesting = () => {
             )}
           </TabsContent>
         </Tabs>
+        <CRMHealthIntegrityPanel />
       </div>
     </FounderLayout>
   );
