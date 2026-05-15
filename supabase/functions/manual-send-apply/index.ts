@@ -594,12 +594,9 @@ Deno.serve(async (req) => {
         direction: "outbound",
         channel: "email",
         contact_id: queueRow.contact_id,
-        campaign_id: queueRow.campaign_id,
-        provider_message_id: postRow?.provider_message_id,
-        subject,
-        body: assembledBody,
-        sent_at: postRow?.sent_at ?? new Date().toISOString(),
-        business_name: queueRow.business_name,
+        message: `[${mergedSubject}] ${assembledBody}`,
+        inbox_id: inbox?.id ?? null,
+        ai_generated: false,
       });
     } catch (_e) {
       /* table shape may differ — non-fatal for manual proof audit */
@@ -663,8 +660,8 @@ Deno.serve(async (req) => {
     apollo_calls: 0,
     background_sending_enabled: false,
     pixel_injected: false,
-    worker_summary: workerResult,
-    worker_error: workerError,
+    worker_used: false,
+    worker_summary: null,
     message: success
       ? "Manual Send Apply: 1 email delivered. Background sending remains OFF."
       : `Manual Send Apply did not complete — status=${postRow?.status ?? "unknown"}, error=${
