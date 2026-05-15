@@ -1604,6 +1604,7 @@ const CommandCentre = () => {
     <div className="max-w-7xl mx-auto px-4 pb-6"><RecurringRevenueRenewalsPanel /></div>
     <div className="max-w-7xl mx-auto px-4 pb-6"><MeetingCallIntelligencePanel /></div>
     <div className="max-w-7xl mx-auto px-4 pb-6"><KnowledgeSourceTruthPanel /></div>
+    <div className="max-w-7xl mx-auto px-4 pb-6"><FundingExitReadinessPanel /></div>
     </FounderLayout>
   );
 };
