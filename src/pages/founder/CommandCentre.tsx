@@ -956,6 +956,29 @@ const CommandCentre = () => {
             {/* SECTION 4 — Customer Journey Control */}
             <CustomerJourneyControlBoard />
 
+            {/* SECTION 4 — Support / Customer Service Knowledge Agent */}
+            <Section
+              title="Support / Customer Service (internal-only)"
+              icon={MessageSquare}
+              action={<Link to="/founder/support"><Button size="sm" variant="outline"><Sparkles size={12} /> Open support</Button></Link>}
+            >
+              <div className="flex flex-wrap items-center gap-2 mb-2 text-[11px]">
+                <Badge variant="outline" className="border-yellow-500/40 text-yellow-300">No external send · No live chat · No customer-record mutation</Badge>
+                <span className="text-muted-foreground">Businesses covered: <span className="text-foreground">{supportSummary?.businessesCovered ?? 0}</span></span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+                <StatTile label="Knowledge articles" value={supportSummary?.articles ?? 0} icon={BookOpen} to="/founder/support" />
+                <StatTile label="FAQ coverage" value={supportSummary?.faqs ?? 0} icon={ListChecks} to="/founder/support" />
+                <StatTile label="Approved" value={supportSummary?.approved ?? 0} icon={CheckCircle2} tone="good" to="/founder/support" />
+                <StatTile label="Open reviews" value={supportSummary?.openReviews ?? 0} icon={ClipboardCheck} tone={(supportSummary?.openReviews ?? 0) > 0 ? "warn" : "default"} to="/founder/support" />
+                <StatTile label="Escalations" value={supportSummary?.escalations ?? 0} icon={AlertTriangle} tone={(supportSummary?.escalations ?? 0) > 0 ? "danger" : "default"} to="/founder/support" />
+                <StatTile label="Send locked" value={supportSummary?.sendLocked ?? 0} icon={ShieldCheck} to="/founder/support" />
+              </div>
+              <div className="mt-3">
+                <SupportKnowledgeAgentPanel />
+              </div>
+            </Section>
+
             {/* SECTION 4 — Liftor System Map / Master Index (collapsible) */}
             <RunwayHeader n={4} title="Liftor System Map / Master Index" icon={MapIcon} anchor="sec-map" />
             <CollapsibleCard id="sec-map" title="Master Index — every Liftor route & concept" icon={MapIcon} defaultOpen={false}>
