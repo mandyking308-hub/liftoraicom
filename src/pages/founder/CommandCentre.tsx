@@ -29,6 +29,10 @@ import ManualSendApplyGate from "@/components/founder/safety/ManualSendApplyGate
 import OutboundProviderEnginePanel from "@/components/founder/integrations/OutboundProviderEnginePanel";
 import BulkSendEngineBlueprint from "@/components/founder/integrations/BulkSendEngineBlueprint";
 import SmartleadScaleSetupChecklist from "@/components/founder/integrations/SmartleadScaleSetupChecklist";
+import SmartleadCampaignMappingPreview from "@/components/founder/integrations/SmartleadCampaignMappingPreview";
+import SmartleadLeadPushPreview from "@/components/founder/integrations/SmartleadLeadPushPreview";
+import BulkSendPreviewPanel from "@/components/founder/integrations/BulkSendPreviewPanel";
+import SmartleadScaleNextActionBanner from "@/components/founder/integrations/SmartleadScaleNextActionBanner";
 import {
   Building2, Bot, Send, Mail, Inbox as InboxIcon, MessageSquare, FileSignature,
   Search, Banknote, ShieldCheck, Workflow as WorkflowIcon, Phone, AlertTriangle,
@@ -656,6 +660,7 @@ const CommandCentre = () => {
             {/* SECTION 3 — Current Next Actions */}
             <RunwayHeader n={3} title="Current Next Actions" icon={Sparkles} anchor="sec-next-actions" />
             <Section title="Today's founder actions" icon={Sparkles}>
+              <SmartleadScaleNextActionBanner />
               {orderedFounderActions.length === 0 ? (
                 <p className="text-sm text-muted-foreground">No founder decision required right now.</p>
               ) : (
@@ -953,6 +958,9 @@ const CommandCentre = () => {
             <OutboundProviderEnginePanel />
             <BulkSendEngineBlueprint />
             <SmartleadScaleSetupChecklist />
+            <SmartleadCampaignMappingPreview />
+            <SmartleadLeadPushPreview />
+            <BulkSendPreviewPanel />
 
             {/* SECTION 13 — Monitoring / Security / System Health */}
             <RunwayHeader n={13} title="Monitoring / Security / System Health" icon={Monitor} anchor="sec-monitoring" />
