@@ -159,6 +159,38 @@ Deno.serve(async (req) => {
       business = await safe(admin.from("businesses").select("id,name").eq("id", contact.assigned_business).maybeSingle());
     }
 
+    // CRM CONTEXT GUARD — block draft when context insufficient or risk flags trip
+    let context_guard: any = { allowed_to_draft: true, allowed_to_send: false, blockers: [], missing_context: [], context_quality_score: null, context_summary: null };
+    try {
+      const guardRes = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/crm-context-guard`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: req.headers.get('Authorization') ?? '', apikey: Deno.env.get('SUPABASE_ANON_KEY')! },
+        body: JSON.stringify({ business_id: business?.id ?? null, contact_id: contact?.id ?? null, conversation_id: conversation_id ?? null, action_type: 'ai_conversation_draft', agent_key: 'ai-conversation-draft-preview', interaction_id }),
+      });
+      context_guard = await guardRes.json();
+    } catch { /* guard optional but recorded */ }
+    if (context_guard?.allowed_to_draft === false) {
+      try {
+        await admin.from('founder_approvals').insert({
+          approval_type: 'context_guard_block',
+          target_table: 'response_context_checks',
+          target_id: context_guard?.check_id ?? null,
+          business_id: business?.id ?? null,
+          status: 'pending',
+          metadata: { agent: 'ai-conversation-draft-preview', blockers: context_guard?.blockers, missing: context_guard?.missing_context },
+        });
+      } catch {}
+      return new Response(JSON.stringify({
+        ok: false,
+        blocked: true,
+        blocked_reason: 'crm_context_guard_blocked',
+        context_guard,
+        founder_review_required: true,
+        send_allowed: false,
+        draft: null,
+      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     const sourceText = interaction?.body_preview || lastInbound?.body_preview || conversation?.last_message_preview || "";
     const { intent, confidence } = classifyIntent(sourceText);
     const tone = pickToneForIntent(intent);
@@ -195,6 +227,7 @@ Deno.serve(async (req) => {
       founder_review_required: true,
       send_allowed: false,
       save_disabled_reason: "ai_draft_save_disabled (preview-only)",
+      context_guard,
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e: any) {
     return new Response(JSON.stringify({ error: e?.message ?? String(e) }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
