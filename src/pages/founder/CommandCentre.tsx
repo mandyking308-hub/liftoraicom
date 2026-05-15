@@ -23,6 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { format, formatDistanceToNow } from "date-fns";
+import ControlledSendReadinessPreview from "@/components/founder/safety/ControlledSendReadinessPreview";
 import {
   Building2, Bot, Send, Mail, Inbox as InboxIcon, MessageSquare, FileSignature,
   Search, Banknote, ShieldCheck, Workflow as WorkflowIcon, Phone, AlertTriangle,
@@ -817,6 +818,7 @@ const CommandCentre = () => {
                     review_required: {reviewRequired} · valid_future_step_blocked: {validFutureBlocked} · cancel_candidate: {cancelCandidate} · legacy_pending: {legacyPending} · orphan_followup: {orphanFollowup}
                   </p>
                 </div>
+                <ControlledSendReadinessPreview />
               </div>
             </Section>
 
