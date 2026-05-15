@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   Rocket, ArrowRight, Bot, ClipboardCheck, PlayCircle, Send,
   FileSignature, Briefcase, Globe, ShieldCheck, CheckCircle2, Circle,
+  Brain, Languages, AlertTriangle, TrendingUp, Lock,
 } from "lucide-react";
 
 type Step = {
@@ -88,6 +89,14 @@ export default function StartHereOperatingPanel() {
   const steps: Step[] = [
     {
       n: 1,
+      label: "Run global brain status",
+      description: "Aggregate worldwide portfolio, agents, approvals, autopilot gates and self-healing — read-only.",
+      to: "/founder/command-centre",
+      icon: Brain,
+      badge: { text: "snapshot", tone: "info" },
+    },
+    {
+      n: 2,
       label: "Choose business",
       description: profileSummary
         ? `${profileSummary.business_name} · ${profileSummary.operating_status}`
@@ -97,14 +106,14 @@ export default function StartHereOperatingPanel() {
       badge: { text: profileSummary ? profileSummary.operating_status : "all", tone: "info" },
     },
     {
-      n: 2,
+      n: 3,
       label: "Run internal AI agents",
       description: "Trigger preview-only agent runs (drafts, suggestions, no external send)",
       to: "/founder/agents",
       icon: Bot,
     },
     {
-      n: 3,
+      n: 4,
       label: "Review approvals",
       description: `${counts.pending} pending · ${counts.approved} approved waiting`,
       to: "/founder/command-centre#sec-actions",
@@ -114,7 +123,42 @@ export default function StartHereOperatingPanel() {
         : { text: "clear", tone: "ok" },
     },
     {
-      n: 4,
+      n: 5,
+      label: "Review market windows",
+      description: "Confirm global operating clock — only act inside permitted send windows.",
+      to: "/founder/operations",
+      icon: Globe,
+    },
+    {
+      n: 6,
+      label: "Review multilingual queue",
+      description: "Inspect translations needing founder review before any reply is queued.",
+      to: "/founder/operations",
+      icon: Languages,
+    },
+    {
+      n: 7,
+      label: "Review self-healing findings",
+      description: "Resolve open critical findings before activating new autopilot gates.",
+      to: "/founder/monitoring",
+      icon: AlertTriangle,
+    },
+    {
+      n: 8,
+      label: "Review portfolio recommendations",
+      description: "Inspect Portfolio Intelligence Brain priorities before scaling or pausing a business.",
+      to: "/founder/strategy",
+      icon: TrendingUp,
+    },
+    {
+      n: 9,
+      label: "Review autopilot gates",
+      description: "Check which gates are eligible and which remain locked. External gates stay locked by default.",
+      to: "/founder/agents",
+      icon: Lock,
+    },
+    {
+      n: 10,
       label: "Execute approved internal actions",
       description: "Materialise drafts, CRM next actions, proposal drafts (no external send)",
       to: "/founder/command-centre#sec-actions",
@@ -124,7 +168,7 @@ export default function StartHereOperatingPanel() {
         : undefined,
     },
     {
-      n: 5,
+      n: 11,
       label: "Review Smartlead activation",
       description: "Inspect campaign mapping, webhook, gate status — no Smartlead POST until gated",
       to: "/founder/integrations",
@@ -132,28 +176,28 @@ export default function StartHereOperatingPanel() {
       badge: { text: `${counts.gatesEnabled}/10 gates on`, tone: counts.gatesEnabled === 0 ? "ok" : "warn" },
     },
     {
-      n: 6,
+      n: 12,
       label: "Review proposals & commercial handoffs",
       description: `${counts.handoffPending} handoff/proposal items in queue`,
       to: "/founder/internal-proposals",
       icon: FileSignature,
     },
     {
-      n: 7,
+      n: 13,
       label: "Review finance & supplier tasks",
       description: `${counts.financePending} finance/supplier items in queue`,
       to: "/founder/projects",
       icon: Briefcase,
     },
     {
-      n: 8,
+      n: 14,
       label: "Check portfolio command centre",
       description: `${counts.totalBusinesses} businesses across the operating layer`,
       to: "/founder/operations",
       icon: Globe,
     },
     {
-      n: 9,
+      n: 15,
       label: "Run final readiness / dry-run test",
       description: "Master dry-run validates the full operating spine end-to-end",
       to: "/founder/system",

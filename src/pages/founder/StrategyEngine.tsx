@@ -2,6 +2,7 @@ import FounderLayout from "@/components/founder/FounderLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import LearningOptimisationEnginePanel from "@/components/founder/optimisation/LearningOptimisationEnginePanel";
 import PortfolioIntelligenceBrainPanel from "@/components/founder/strategy/PortfolioIntelligenceBrainPanel";
+import GlobalAIBrainCommandCentre from "@/components/founder/command/GlobalAIBrainCommandCentre";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -154,6 +155,7 @@ const StrategyEngine = () => {
   return (
     <FounderLayout>
       <div className="space-y-8">
+        <GlobalAIBrainCommandCentre />
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
