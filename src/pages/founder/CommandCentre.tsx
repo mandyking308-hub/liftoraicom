@@ -44,6 +44,7 @@ import CRMConversationBridgePanel from "@/components/founder/crm/CRMConversation
 import CRMCustomerLifecyclePanel from "@/components/founder/crm/CRMCustomerLifecyclePanel";
 import CRMHealthIntegrityPanel from "@/components/founder/crm/CRMHealthIntegrityPanel";
 import CRMCustomerMemoryDashboard from "@/components/founder/crm/CRMCustomerMemoryDashboard";
+import AIAgentOperatingModelPanel from "@/components/founder/agents/AIAgentOperatingModelPanel";
 import CRMContact360Panel from "@/components/founder/crm/CRMContact360Panel";
 import {
   Building2, Bot, Send, Mail, Inbox as InboxIcon, MessageSquare, FileSignature,
@@ -732,6 +733,7 @@ const CommandCentre = () => {
               <CollapsibleCard id="sec-agent-capabilities" title="Liftor capabilities (concept map)" icon={Sparkles} defaultOpen={false} flat>
                 <LiftorCapabilities />
               </CollapsibleCard>
+              <AIAgentOperatingModelPanel />
             </Section>
 
             {/* SECTION 6 — Outreach Runway */}
