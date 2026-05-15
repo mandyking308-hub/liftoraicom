@@ -952,6 +952,7 @@ const CommandCentre = () => {
             </Section>
             <OutboundProviderEnginePanel />
             <BulkSendEngineBlueprint />
+            <SmartleadScaleSetupChecklist />
 
             {/* SECTION 13 — Monitoring / Security / System Health */}
             <RunwayHeader n={13} title="Monitoring / Security / System Health" icon={Monitor} anchor="sec-monitoring" />
