@@ -99,7 +99,7 @@ Deno.serve(async (req) => {
       supplier_id: it.supplier_id ?? null,
       review_type: String(it.review_type ?? "deal_needs_invoice"),
       priority_level: it.priority_level ?? "normal",
-      summary: it.summary ?? null,
+      current_state: it.current_state ?? null,
       recommended_action: it.recommended_action ?? null,
       apply_status: "preview",
       blockers: it.blockers ?? [],
