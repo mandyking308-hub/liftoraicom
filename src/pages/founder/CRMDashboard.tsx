@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Users, Activity, Ban, Send, Mail, Inbox as InboxIcon, MessageCircle } from "lucide-react";
 import FounderLayout from "@/components/founder/FounderLayout";
+import StrategicProspectingAgentPanel from "@/components/founder/prospecting/StrategicProspectingAgentPanel";
 import CRMInteractionLedgerPanel from "@/components/founder/crm/CRMInteractionLedgerPanel";
 import HumanAccountManagerPanel from "@/components/founder/customer/HumanAccountManagerPanel";
 import CustomerOnboardingPanel from "@/components/founder/customer/CustomerOnboardingPanel";
@@ -223,6 +224,7 @@ const CRMDashboard = () => {
         <SocialEngagementInboxPanel />
         <CustomerFeedbackSurveyPanel />
       </div>
+    <div className="max-w-7xl mx-auto px-4 pb-6"><StrategicProspectingAgentPanel /></div>
     </FounderLayout>
   );
 };

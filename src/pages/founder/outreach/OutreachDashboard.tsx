@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import FounderLayout from "@/components/founder/FounderLayout";
+import StrategicProspectingAgentPanel from "@/components/founder/prospecting/StrategicProspectingAgentPanel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -136,6 +137,7 @@ const OutreachDashboard = () => {
           </Card>
         </div>
       </div>
+    <div className="max-w-7xl mx-auto px-4 pb-6"><StrategicProspectingAgentPanel /></div>
     </FounderLayout>
   );
 };

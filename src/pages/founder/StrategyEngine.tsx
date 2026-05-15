@@ -1,4 +1,5 @@
 import FounderLayout from "@/components/founder/FounderLayout";
+import StrategicProspectingAgentPanel from "@/components/founder/prospecting/StrategicProspectingAgentPanel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import LearningOptimisationEnginePanel from "@/components/founder/optimisation/LearningOptimisationEnginePanel";
 import PortfolioIntelligenceBrainPanel from "@/components/founder/strategy/PortfolioIntelligenceBrainPanel";
@@ -323,6 +324,7 @@ const StrategyEngine = () => {
         <LearningOptimisationEnginePanel />
         <SocialMediaBrainPanel />
       </div>
+    <div className="max-w-7xl mx-auto px-4 pb-6"><StrategicProspectingAgentPanel /></div>
     </FounderLayout>
   );
 };
