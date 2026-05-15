@@ -1435,6 +1435,29 @@ const CommandCentre = () => {
             </Section>
             <SocialContentFactoryPanel />
 
+            {/* SECTION 14 — Creative Asset Library */}
+            <Section
+              title="Creative Asset Library (internal-only)"
+              icon={ImageIcon}
+              action={<Link to="/founder/assets"><Button size="sm" variant="outline"><Sparkles size={12} /> Open library</Button></Link>}
+            >
+              <div className="flex flex-wrap items-center gap-2 mb-2 text-[11px]">
+                <Badge variant="outline" className="border-yellow-500/40 text-yellow-300">No external upload · No publish · No delete</Badge>
+                <span className="text-muted-foreground">Businesses covered: <span className="text-foreground">{creativeAssetSummary?.businessesCovered ?? 0}</span></span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+                <StatTile label="Total assets" value={creativeAssetSummary?.total ?? 0} icon={ImageIcon} to="/founder/assets" />
+                <StatTile label="Approved social" value={creativeAssetSummary?.approvedSocial ?? 0} icon={CheckCircle2} tone="good" to="/founder/assets" />
+                <StatTile label="Approved ads" value={creativeAssetSummary?.approvedAds ?? 0} icon={CheckCircle2} tone="good" to="/founder/assets" />
+                <StatTile label="Approved proposals" value={creativeAssetSummary?.approvedProposals ?? 0} icon={CheckCircle2} tone="good" to="/founder/assets" />
+                <StatTile label="Needs approval" value={creativeAssetSummary?.needsApproval ?? 0} icon={ClipboardCheck} tone={(creativeAssetSummary?.needsApproval ?? 0) > 0 ? "warn" : "default"} to="/founder/assets" />
+                <StatTile label="Missing rights / expired" value={(creativeAssetSummary?.missingRights ?? 0) + (creativeAssetSummary?.expired ?? 0)} icon={AlertTriangle} tone={((creativeAssetSummary?.missingRights ?? 0) + (creativeAssetSummary?.expired ?? 0)) > 0 ? "warn" : "default"} to="/founder/assets" />
+              </div>
+              <div className="mt-3">
+                <CreativeAssetLibraryPanel />
+              </div>
+            </Section>
+
             {/* SECTION 15 — Legacy / Historical / Archive (collapsed) */}
             <RunwayHeader n={15} title="Legacy / Historical / Archive" icon={Archive} anchor="sec-legacy" />
             <Section title="Advanced · Legacy · Diagnostics" icon={Archive}>
