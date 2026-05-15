@@ -79,6 +79,9 @@ import BusinessLaunchFactoryPanel from "@/components/founder/expansion/BusinessL
 import RevenueOperationsPanel from "@/components/founder/finance/RevenueOperationsPanel";
 import LiftorMasterDryRunPanel from "@/components/founder/testing/LiftorMasterDryRunPanel";
 import CRMContact360Panel from "@/components/founder/crm/CRMContact360Panel";
+import CommandCentreMasterControlPlane from "@/components/founder/command/CommandCentreMasterControlPlane";
+import CustomerJourneyControlBoard from "@/components/founder/command/CustomerJourneyControlBoard";
+import AgentCollaborationBoard from "@/components/founder/agents/AgentCollaborationBoard";
 import {
   Building2, Bot, Send, Mail, Inbox as InboxIcon, MessageSquare, FileSignature,
   Search, Banknote, ShieldCheck, Workflow as WorkflowIcon, Phone, AlertTriangle,
@@ -626,7 +629,7 @@ const CommandCentre = () => {
             blocker: sendUnsafe
               ? "Send blocked — outreach brake review required"
               : totals.failedSends > 0 ? `${totals.failedSends} failed sends` : null,
-            next: sendUnsafe ? "Verify outreach brake / cron status" : "Run controlled live batch",
+            next: sendUnsafe ? "Verify outreach brake / cron status" : "Run controlled live batch (native/legacy IONOS only — not Smartlead scale)",
             anchor: sendUnsafe ? "#sec-safety" : "#sec-queue",
           },
           {
@@ -709,6 +712,8 @@ const CommandCentre = () => {
 
             <SystemModeBanner />
 
+            <CommandCentreMasterControlPlane />
+
             <GlobalAIBrainCommandCentre />
 
             <StartHereOperatingPanel />
@@ -761,6 +766,9 @@ const CommandCentre = () => {
             <BusinessLaunchFactoryPanel />
             <BusinessKnowledgeBrainPanel />
 
+            {/* SECTION 4 — Customer Journey Control */}
+            <CustomerJourneyControlBoard />
+
             {/* SECTION 4 — Liftor System Map / Master Index (collapsible) */}
             <RunwayHeader n={4} title="Liftor System Map / Master Index" icon={MapIcon} anchor="sec-map" />
             <CollapsibleCard id="sec-map" title="Master Index — every Liftor route & concept" icon={MapIcon} defaultOpen={false}>
@@ -800,6 +808,7 @@ const CommandCentre = () => {
               <GlobalAutonomyControlPanel />
               <MultilingualIntelligencePanel />
               <AgentHandoverProtocolPanel />
+              <AgentCollaborationBoard />
               <AutopilotActivationGatesPanel />
             </Section>
 

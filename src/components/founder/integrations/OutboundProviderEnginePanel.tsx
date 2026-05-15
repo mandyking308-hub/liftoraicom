@@ -154,8 +154,8 @@ export default function OutboundProviderEnginePanel() {
                   <KV k="webhook_configured" v={String(scale.webhook_configured)} />
                   <KV k="last_test_at" v={scale.last_test_at ?? "never"} />
                   <p className="pt-2 text-[11px] text-amber-200">
-                    Next setup action: choose & connect bulk provider, verify domain, store
-                    credentials, configure webhook for bounce/reply tracking.
+                    Scale provider connected, activation incomplete. Continue with
+                    campaign creation, mapping, webhook and warmup before any send.
                   </p>
                 </>
               ) : (
@@ -257,7 +257,7 @@ export default function OutboundProviderEnginePanel() {
                   : !smartlead.last_test_at
                     ? "run Test Smartlead Connection."
                     : (testResult?.email_account_count ?? 0) === 0
-                      ? "add at least one Smartlead sending account (manually in Smartlead) and re-test."
+                      ? "create draft Smartlead campaign and enable warmup."
                       : !smartlead.webhook_configured
                         ? "configure Smartlead webhook (blueprint stage — not built yet)."
                         : "build campaign mapping + lead push preview (next phase)."}

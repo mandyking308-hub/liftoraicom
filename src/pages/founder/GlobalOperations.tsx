@@ -29,6 +29,7 @@ import SelfHealingMonitoringPanel from "@/components/founder/monitoring/SelfHeal
 import PortfolioIntelligenceBrainPanel from "@/components/founder/strategy/PortfolioIntelligenceBrainPanel";
 import AutopilotActivationGatesPanel from "@/components/founder/autonomy/AutopilotActivationGatesPanel";
 import GlobalAIBrainCommandCentre from "@/components/founder/command/GlobalAIBrainCommandCentre";
+import AgentCollaborationBoard from "@/components/founder/agents/AgentCollaborationBoard";
 import SmartleadControlledActivationPanel from "@/components/founder/integrations/SmartleadControlledActivationPanel";
 import BusinessLaunchFactoryPanel from "@/components/founder/expansion/BusinessLaunchFactoryPanel";
 
@@ -392,6 +393,7 @@ const GlobalOperations = () => {
         <LearningOptimisationEnginePanel />
         <SelfHealingMonitoringPanel />
         <PortfolioIntelligenceBrainPanel />
+        <AgentCollaborationBoard />
         <AutopilotActivationGatesPanel />
       </div>
     </FounderLayout>

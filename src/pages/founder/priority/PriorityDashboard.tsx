@@ -6,6 +6,7 @@ import AIAgentOrchestratorPanel from "@/components/founder/agents/AIAgentOrchest
 import FounderApprovalConsole from "@/components/founder/approvals/FounderApprovalConsole";
 import ApprovedActionExecutionPanel from "@/components/founder/approvals/ApprovedActionExecutionPanel";
 import AgentHandoverProtocolPanel from "@/components/founder/agents/AgentHandoverProtocolPanel";
+import AgentCollaborationBoard from "@/components/founder/agents/AgentCollaborationBoard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -139,6 +140,7 @@ const PriorityDashboard = () => {
         <FounderApprovalConsole />
         <ApprovedActionExecutionPanel />
         <AgentHandoverProtocolPanel />
+        <AgentCollaborationBoard />
       </div>
     </FounderLayout>
   );
