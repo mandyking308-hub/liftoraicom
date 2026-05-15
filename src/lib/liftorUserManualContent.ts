@@ -1,6 +1,6 @@
 // Liftor User Manual — plain-English operating guide (separate from Founder/Technical Manual)
 
-export const LIFTOR_USER_MANUAL_VERSION = "1.3 — Operator + Rehearsal + Reset + Baseline (15 May 2026)";
+export const LIFTOR_USER_MANUAL_VERSION = "1.4 — Go-To-Use + Revenue Target Operating Mode (15 May 2026)";
 
 export interface ManualSection {
   number: number;
