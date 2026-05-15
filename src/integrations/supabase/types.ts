@@ -3445,6 +3445,66 @@ export type Database = {
         }
         Relationships: []
       }
+      communication_channels: {
+        Row: {
+          auto_reply_allowed: boolean
+          channel_key: string
+          channel_label: string
+          channel_type: string
+          created_at: string
+          credentials_present: boolean
+          enabled: boolean
+          founder_approval_required: boolean
+          id: string
+          inbound_supported: boolean
+          live_connected: boolean
+          metadata: Json
+          notes: string | null
+          outbound_supported: boolean
+          provider_type: string | null
+          requires_credentials: boolean
+          updated_at: string
+        }
+        Insert: {
+          auto_reply_allowed?: boolean
+          channel_key: string
+          channel_label: string
+          channel_type: string
+          created_at?: string
+          credentials_present?: boolean
+          enabled?: boolean
+          founder_approval_required?: boolean
+          id?: string
+          inbound_supported?: boolean
+          live_connected?: boolean
+          metadata?: Json
+          notes?: string | null
+          outbound_supported?: boolean
+          provider_type?: string | null
+          requires_credentials?: boolean
+          updated_at?: string
+        }
+        Update: {
+          auto_reply_allowed?: boolean
+          channel_key?: string
+          channel_label?: string
+          channel_type?: string
+          created_at?: string
+          credentials_present?: boolean
+          enabled?: boolean
+          founder_approval_required?: boolean
+          id?: string
+          inbound_supported?: boolean
+          live_connected?: boolean
+          metadata?: Json
+          notes?: string | null
+          outbound_supported?: boolean
+          provider_type?: string | null
+          requires_credentials?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       communications: {
         Row: {
           ai_generated: boolean
@@ -8085,6 +8145,78 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      multi_channel_inbound_events: {
+        Row: {
+          business_id: string | null
+          channel_key: string
+          contact_email: string | null
+          contact_handle: string | null
+          contact_name: string | null
+          created_at: string
+          crm_interaction_id: string | null
+          external_event_id: string | null
+          external_thread_id: string | null
+          founder_review_required: boolean
+          id: string
+          matched_contact_id: string | null
+          matched_conversation_id: string | null
+          message_language: string | null
+          message_text: string | null
+          metadata: Json
+          processed_status: string
+          provider_type: string | null
+          raw_payload: Json
+          received_at: string
+          subject: string | null
+        }
+        Insert: {
+          business_id?: string | null
+          channel_key: string
+          contact_email?: string | null
+          contact_handle?: string | null
+          contact_name?: string | null
+          created_at?: string
+          crm_interaction_id?: string | null
+          external_event_id?: string | null
+          external_thread_id?: string | null
+          founder_review_required?: boolean
+          id?: string
+          matched_contact_id?: string | null
+          matched_conversation_id?: string | null
+          message_language?: string | null
+          message_text?: string | null
+          metadata?: Json
+          processed_status?: string
+          provider_type?: string | null
+          raw_payload?: Json
+          received_at?: string
+          subject?: string | null
+        }
+        Update: {
+          business_id?: string | null
+          channel_key?: string
+          contact_email?: string | null
+          contact_handle?: string | null
+          contact_name?: string | null
+          created_at?: string
+          crm_interaction_id?: string | null
+          external_event_id?: string | null
+          external_thread_id?: string | null
+          founder_review_required?: boolean
+          id?: string
+          matched_contact_id?: string | null
+          matched_conversation_id?: string | null
+          message_language?: string | null
+          message_text?: string | null
+          metadata?: Json
+          processed_status?: string
+          provider_type?: string | null
+          raw_payload?: Json
+          received_at?: string
+          subject?: string | null
+        }
+        Relationships: []
       }
       multilingual_interaction_reviews: {
         Row: {
