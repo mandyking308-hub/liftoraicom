@@ -12720,6 +12720,130 @@ export type Database = {
         }
         Relationships: []
       }
+      support_interaction_reviews: {
+        Row: {
+          business_id: string | null
+          contact_id: string | null
+          conversation_id: string | null
+          created_at: string
+          customer_question: string | null
+          escalation_required: boolean
+          founder_review_required: boolean
+          id: string
+          interaction_id: string | null
+          knowledge_article_id: string | null
+          metadata: Json
+          send_allowed: boolean
+          status: string
+          suggested_answer: string | null
+          support_category: string | null
+          updated_at: string
+          urgency: string
+        }
+        Insert: {
+          business_id?: string | null
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          customer_question?: string | null
+          escalation_required?: boolean
+          founder_review_required?: boolean
+          id?: string
+          interaction_id?: string | null
+          knowledge_article_id?: string | null
+          metadata?: Json
+          send_allowed?: boolean
+          status?: string
+          suggested_answer?: string | null
+          support_category?: string | null
+          updated_at?: string
+          urgency?: string
+        }
+        Update: {
+          business_id?: string | null
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          customer_question?: string | null
+          escalation_required?: boolean
+          founder_review_required?: boolean
+          id?: string
+          interaction_id?: string | null
+          knowledge_article_id?: string | null
+          metadata?: Json
+          send_allowed?: boolean
+          status?: string
+          suggested_answer?: string | null
+          support_category?: string | null
+          updated_at?: string
+          urgency?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_interaction_reviews_knowledge_article_id_fkey"
+            columns: ["knowledge_article_id"]
+            isOneToOne: false
+            referencedRelation: "support_knowledge_articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_knowledge_articles: {
+        Row: {
+          agent_visible: boolean
+          approved: boolean
+          article_type: string
+          audience: string
+          business_id: string | null
+          content: string | null
+          created_at: string
+          id: string
+          metadata: Json
+          status: string
+          tags: Json
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          agent_visible?: boolean
+          approved?: boolean
+          article_type: string
+          audience?: string
+          business_id?: string | null
+          content?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          status?: string
+          tags?: Json
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          agent_visible?: boolean
+          approved?: boolean
+          article_type?: string
+          audience?: string
+          business_id?: string | null
+          content?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          status?: string
+          tags?: Json
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_knowledge_articles_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       support_requests: {
         Row: {
           created_at: string
