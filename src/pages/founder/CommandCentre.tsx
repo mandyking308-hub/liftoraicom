@@ -13,6 +13,7 @@ import IPRightsBrandControlPanel from "@/components/founder/legal/IPRightsBrandC
 import RecurringRevenueRenewalsPanel from "@/components/founder/revenue/RecurringRevenueRenewalsPanel";
 import MeetingCallIntelligencePanel from "@/components/founder/customer/MeetingCallIntelligencePanel";
 import KnowledgeSourceTruthPanel from "@/components/founder/knowledge/KnowledgeSourceTruthPanel";
+import FundingExitReadinessPanel from "@/components/founder/strategy/FundingExitReadinessPanel";
 import LiftorCapabilities from "@/components/founder/LiftorCapabilities";
 import AgentOrchestration from "@/components/founder/AgentOrchestration";
 import SystemModeBanner from "@/components/founder/SystemModeBanner";
@@ -1603,6 +1604,7 @@ const CommandCentre = () => {
     <div className="max-w-7xl mx-auto px-4 pb-6"><RecurringRevenueRenewalsPanel /></div>
     <div className="max-w-7xl mx-auto px-4 pb-6"><MeetingCallIntelligencePanel /></div>
     <div className="max-w-7xl mx-auto px-4 pb-6"><KnowledgeSourceTruthPanel /></div>
+    <div className="max-w-7xl mx-auto px-4 pb-6"><FundingExitReadinessPanel /></div>
     </FounderLayout>
   );
 };

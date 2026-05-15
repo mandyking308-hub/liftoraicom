@@ -9774,6 +9774,77 @@ export type Database = {
           },
         ]
       }
+      funding_exit_readiness: {
+        Row: {
+          blockers: Json
+          business_id: string | null
+          created_at: string
+          customer_summary: string | null
+          data_room_status: string | null
+          founder_review_required: boolean
+          id: string
+          ip_summary: string | null
+          legal_summary: string | null
+          margin_summary: string | null
+          readiness_score: number | null
+          readiness_status: string
+          readiness_type: string
+          recommended_actions: Json
+          revenue_summary: string | null
+          risk_summary: string | null
+          traction_summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          blockers?: Json
+          business_id?: string | null
+          created_at?: string
+          customer_summary?: string | null
+          data_room_status?: string | null
+          founder_review_required?: boolean
+          id?: string
+          ip_summary?: string | null
+          legal_summary?: string | null
+          margin_summary?: string | null
+          readiness_score?: number | null
+          readiness_status?: string
+          readiness_type: string
+          recommended_actions?: Json
+          revenue_summary?: string | null
+          risk_summary?: string | null
+          traction_summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          blockers?: Json
+          business_id?: string | null
+          created_at?: string
+          customer_summary?: string | null
+          data_room_status?: string | null
+          founder_review_required?: boolean
+          id?: string
+          ip_summary?: string | null
+          legal_summary?: string | null
+          margin_summary?: string | null
+          readiness_score?: number | null
+          readiness_status?: string
+          readiness_type?: string
+          recommended_actions?: Json
+          revenue_summary?: string | null
+          risk_summary?: string | null
+          traction_summary?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "funding_exit_readiness_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       global_brain_status_snapshots: {
         Row: {
           agent_tasks_pending: number
@@ -11250,6 +11321,65 @@ export type Database = {
           viewed_at?: string | null
         }
         Relationships: []
+      }
+      investor_buyer_targets: {
+        Row: {
+          business_id: string | null
+          contact_email: string | null
+          contact_name: string | null
+          created_at: string
+          fit_score: number | null
+          founder_approval_required: boolean
+          id: string
+          metadata: Json
+          outreach_status: string
+          strategic_reason: string | null
+          target_name: string
+          target_type: string
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          business_id?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          created_at?: string
+          fit_score?: number | null
+          founder_approval_required?: boolean
+          id?: string
+          metadata?: Json
+          outreach_status?: string
+          strategic_reason?: string | null
+          target_name: string
+          target_type: string
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          business_id?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          created_at?: string
+          fit_score?: number | null
+          founder_approval_required?: boolean
+          id?: string
+          metadata?: Json
+          outreach_status?: string
+          strategic_reason?: string | null
+          target_name?: string
+          target_type?: string
+          updated_at?: string
+          website_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "investor_buyer_targets_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       invoices: {
         Row: {

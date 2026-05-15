@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import FounderLayout from "@/components/founder/FounderLayout";
 import { FileText, Download } from "lucide-react";
+import FundingExitReadinessPanel from "@/components/founder/strategy/FundingExitReadinessPanel";
 
 const FounderDocuments = () => {
   const [documents, setDocuments] = useState<any[]>([]);
@@ -66,6 +67,7 @@ const FounderDocuments = () => {
           </div>
         )}
       </div>
+      <div className="container mx-auto px-4 pb-6"><FundingExitReadinessPanel /></div>
     </FounderLayout>
   );
 };

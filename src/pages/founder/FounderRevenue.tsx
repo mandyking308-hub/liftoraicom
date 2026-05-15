@@ -1,5 +1,6 @@
 import FounderLayout from "@/components/founder/FounderLayout";
 import CostCreditsMarginControlPanel from "@/components/founder/finance/CostCreditsMarginControlPanel";
+import FundingExitReadinessPanel from "@/components/founder/strategy/FundingExitReadinessPanel";
 import PortfolioIntelligenceBrainPanel from "@/components/founder/strategy/PortfolioIntelligenceBrainPanel";
 import CompetitorLearningPositioningPanel from "@/components/founder/strategy/CompetitorLearningPositioningPanel";
 import HumanAccountManagerPanel from "@/components/founder/customer/HumanAccountManagerPanel";
@@ -446,6 +447,7 @@ const FounderRevenue = () => {
         </Tabs>
       </div>
       <div className="max-w-7xl mx-auto px-4 pb-6"><CostCreditsMarginControlPanel /></div>
+      <div className="max-w-7xl mx-auto px-4 pb-6"><FundingExitReadinessPanel /></div>
     </FounderLayout>
   );
 };
