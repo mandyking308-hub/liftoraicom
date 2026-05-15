@@ -10,6 +10,7 @@ import CRMCustomerLifecyclePanel from "@/components/founder/crm/CRMCustomerLifec
 import CRMHealthIntegrityPanel from "@/components/founder/crm/CRMHealthIntegrityPanel";
 import CRMCustomerMemoryDashboard from "@/components/founder/crm/CRMCustomerMemoryDashboard";
 import CRMContact360Panel from "@/components/founder/crm/CRMContact360Panel";
+import CustomerFeedbackSurveyPanel from "@/components/founder/customer/CustomerFeedbackSurveyPanel";
 import MultiChannelInboxPanel from "@/components/founder/channels/MultiChannelInboxPanel";
 import CustomerJourneyControlBoard from "@/components/founder/command/CustomerJourneyControlBoard";
 import SocialEngagementInboxPanel from "@/components/founder/social/SocialEngagementInboxPanel";
@@ -212,6 +213,7 @@ const CRMDashboard = () => {
         <MultiChannelInboxPanel />
         <CustomerJourneyControlBoard />
         <SocialEngagementInboxPanel />
+        <CustomerFeedbackSurveyPanel />
       </div>
     </FounderLayout>
   );

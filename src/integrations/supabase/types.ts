@@ -6031,6 +6031,259 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_survey_requests: {
+        Row: {
+          assignment_id: string | null
+          business_id: string | null
+          completed_at: string | null
+          contact_id: string | null
+          conversation_id: string | null
+          created_at: string | null
+          deal_id: string | null
+          demo_access_id: string | null
+          expires_at: string | null
+          founder_approval_required: boolean | null
+          id: string
+          invoice_id: string | null
+          metadata: Json | null
+          proposal_id: string | null
+          request_status: string | null
+          send_allowed: boolean | null
+          send_channel: string | null
+          sent_at: string | null
+          support_review_id: string | null
+          survey_token: string | null
+          template_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          assignment_id?: string | null
+          business_id?: string | null
+          completed_at?: string | null
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string | null
+          deal_id?: string | null
+          demo_access_id?: string | null
+          expires_at?: string | null
+          founder_approval_required?: boolean | null
+          id?: string
+          invoice_id?: string | null
+          metadata?: Json | null
+          proposal_id?: string | null
+          request_status?: string | null
+          send_allowed?: boolean | null
+          send_channel?: string | null
+          sent_at?: string | null
+          support_review_id?: string | null
+          survey_token?: string | null
+          template_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          assignment_id?: string | null
+          business_id?: string | null
+          completed_at?: string | null
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string | null
+          deal_id?: string | null
+          demo_access_id?: string | null
+          expires_at?: string | null
+          founder_approval_required?: boolean | null
+          id?: string
+          invoice_id?: string | null
+          metadata?: Json | null
+          proposal_id?: string | null
+          request_status?: string | null
+          send_allowed?: boolean | null
+          send_channel?: string | null
+          sent_at?: string | null
+          support_review_id?: string | null
+          survey_token?: string | null
+          template_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_survey_requests_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_survey_requests_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_survey_requests_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+          {
+            foreignKeyName: "customer_survey_requests_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_survey_requests_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "customer_survey_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_survey_responses: {
+        Row: {
+          business_id: string | null
+          competitor_mentions: Json | null
+          contact_id: string | null
+          created_at: string | null
+          csat_score: number | null
+          effort_score: number | null
+          follow_up_required: boolean | null
+          founder_review_required: boolean | null
+          id: string
+          key_needs: Json | null
+          nps_score: number | null
+          objections: Json | null
+          raw_text_feedback: string | null
+          requested_improvements: Json | null
+          response_payload: Json | null
+          score: number | null
+          sentiment: string | null
+          survey_request_id: string | null
+          survey_type: string | null
+          testimonial_permission: boolean | null
+          upsell_interest: Json | null
+        }
+        Insert: {
+          business_id?: string | null
+          competitor_mentions?: Json | null
+          contact_id?: string | null
+          created_at?: string | null
+          csat_score?: number | null
+          effort_score?: number | null
+          follow_up_required?: boolean | null
+          founder_review_required?: boolean | null
+          id?: string
+          key_needs?: Json | null
+          nps_score?: number | null
+          objections?: Json | null
+          raw_text_feedback?: string | null
+          requested_improvements?: Json | null
+          response_payload?: Json | null
+          score?: number | null
+          sentiment?: string | null
+          survey_request_id?: string | null
+          survey_type?: string | null
+          testimonial_permission?: boolean | null
+          upsell_interest?: Json | null
+        }
+        Update: {
+          business_id?: string | null
+          competitor_mentions?: Json | null
+          contact_id?: string | null
+          created_at?: string | null
+          csat_score?: number | null
+          effort_score?: number | null
+          follow_up_required?: boolean | null
+          founder_review_required?: boolean | null
+          id?: string
+          key_needs?: Json | null
+          nps_score?: number | null
+          objections?: Json | null
+          raw_text_feedback?: string | null
+          requested_improvements?: Json | null
+          response_payload?: Json | null
+          score?: number | null
+          sentiment?: string | null
+          survey_request_id?: string | null
+          survey_type?: string | null
+          testimonial_permission?: boolean | null
+          upsell_interest?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_survey_responses_survey_request_id_fkey"
+            columns: ["survey_request_id"]
+            isOneToOne: false
+            referencedRelation: "customer_survey_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_survey_templates: {
+        Row: {
+          active: boolean | null
+          auto_send_allowed: boolean | null
+          business_id: string | null
+          created_at: string | null
+          description: string | null
+          founder_approval_required: boolean | null
+          id: string
+          metadata: Json | null
+          questions: Json | null
+          scoring_model: string | null
+          survey_type: string
+          template_key: string
+          template_name: string
+          trigger_event: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          auto_send_allowed?: boolean | null
+          business_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          founder_approval_required?: boolean | null
+          id?: string
+          metadata?: Json | null
+          questions?: Json | null
+          scoring_model?: string | null
+          survey_type: string
+          template_key: string
+          template_name: string
+          trigger_event?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          auto_send_allowed?: boolean | null
+          business_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          founder_approval_required?: boolean | null
+          id?: string
+          metadata?: Json | null
+          questions?: Json | null
+          scoring_model?: string | null
+          survey_type?: string
+          template_key?: string
+          template_name?: string
+          trigger_event?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_survey_templates_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deals: {
         Row: {
           business_name: string

@@ -98,6 +98,7 @@ import AgentCollaborationBoard from "@/components/founder/agents/AgentCollaborat
 import CustomerJourneyFlowMap from "@/components/founder/command/CustomerJourneyFlowMap";
 import CommandCentreStickyNav from "@/components/founder/command/CommandCentreStickyNav";
 import CustomerJourneyPositionPanel from "@/components/founder/command/CustomerJourneyPositionPanel";
+import CustomerFeedbackSurveyPanel from "@/components/founder/customer/CustomerFeedbackSurveyPanel";
 import {
   Building2, Bot, Send, Mail, Inbox as InboxIcon, MessageSquare, FileSignature,
   Search, Banknote, ShieldCheck, Workflow as WorkflowIcon, Phone, AlertTriangle,
@@ -918,6 +919,8 @@ const CommandCentre = () => {
               </div>
               <CustomerJourneyPositionPanel />
             </div>
+
+            <CustomerFeedbackSurveyPanel />
 
             {/* Top: Module Registry summary */}
             <Card className="bg-card border-border/50">
