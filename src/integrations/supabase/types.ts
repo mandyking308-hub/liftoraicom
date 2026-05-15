@@ -4303,6 +4303,149 @@ export type Database = {
           },
         ]
       }
+      competitor_business_profiles: {
+        Row: {
+          business_id: string | null
+          competitor_name: string
+          content_patterns: Json
+          created_at: string
+          customer_objections: Json
+          differentiation_notes: string | null
+          id: string
+          market_category: string | null
+          metadata: Json
+          offer_summary: string | null
+          pricing_notes: string | null
+          social_urls: Json
+          source_notes: string | null
+          status: string
+          strengths: Json
+          updated_at: string
+          weaknesses: Json
+          website_url: string | null
+        }
+        Insert: {
+          business_id?: string | null
+          competitor_name: string
+          content_patterns?: Json
+          created_at?: string
+          customer_objections?: Json
+          differentiation_notes?: string | null
+          id?: string
+          market_category?: string | null
+          metadata?: Json
+          offer_summary?: string | null
+          pricing_notes?: string | null
+          social_urls?: Json
+          source_notes?: string | null
+          status?: string
+          strengths?: Json
+          updated_at?: string
+          weaknesses?: Json
+          website_url?: string | null
+        }
+        Update: {
+          business_id?: string | null
+          competitor_name?: string
+          content_patterns?: Json
+          created_at?: string
+          customer_objections?: Json
+          differentiation_notes?: string | null
+          id?: string
+          market_category?: string | null
+          metadata?: Json
+          offer_summary?: string | null
+          pricing_notes?: string | null
+          social_urls?: Json
+          source_notes?: string | null
+          status?: string
+          strengths?: Json
+          updated_at?: string
+          weaknesses?: Json
+          website_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competitor_business_profiles_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      competitor_learning_insights: {
+        Row: {
+          business_id: string | null
+          competitor_id: string | null
+          created_at: string
+          evidence: Json
+          founder_review_required: boolean
+          id: string
+          insight_summary: string | null
+          insight_title: string
+          insight_type: string
+          recommended_content_angle: string | null
+          recommended_offer_change: string | null
+          recommended_response: string | null
+          recommended_sales_angle: string | null
+          risk_level: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          competitor_id?: string | null
+          created_at?: string
+          evidence?: Json
+          founder_review_required?: boolean
+          id?: string
+          insight_summary?: string | null
+          insight_title: string
+          insight_type: string
+          recommended_content_angle?: string | null
+          recommended_offer_change?: string | null
+          recommended_response?: string | null
+          recommended_sales_angle?: string | null
+          risk_level?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          competitor_id?: string | null
+          created_at?: string
+          evidence?: Json
+          founder_review_required?: boolean
+          id?: string
+          insight_summary?: string | null
+          insight_title?: string
+          insight_type?: string
+          recommended_content_angle?: string | null
+          recommended_offer_change?: string | null
+          recommended_response?: string | null
+          recommended_sales_angle?: string | null
+          risk_level?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competitor_learning_insights_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competitor_learning_insights_competitor_id_fkey"
+            columns: ["competitor_id"]
+            isOneToOne: false
+            referencedRelation: "competitor_business_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       compliance_documents: {
         Row: {
           category: string
