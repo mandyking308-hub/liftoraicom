@@ -1,4 +1,5 @@
 import FounderLayout from "@/components/founder/FounderLayout";
+import { SecurityGovernancePanel } from "@/components/founder/security/SecurityGovernancePanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
