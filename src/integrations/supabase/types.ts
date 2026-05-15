@@ -1957,6 +1957,71 @@ export type Database = {
         }
         Relationships: []
       }
+      approved_template_library: {
+        Row: {
+          approval_status: string
+          approved_for_external_use: boolean
+          business_id: string | null
+          created_at: string
+          id: string
+          last_reviewed_at: string | null
+          metadata: Json
+          requires_context_guard: boolean
+          requires_founder_approval: boolean
+          risk_level: string
+          template_body: string | null
+          template_key: string
+          template_name: string
+          template_subject: string | null
+          template_type: string
+          updated_at: string
+        }
+        Insert: {
+          approval_status?: string
+          approved_for_external_use?: boolean
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          last_reviewed_at?: string | null
+          metadata?: Json
+          requires_context_guard?: boolean
+          requires_founder_approval?: boolean
+          risk_level?: string
+          template_body?: string | null
+          template_key: string
+          template_name: string
+          template_subject?: string | null
+          template_type: string
+          updated_at?: string
+        }
+        Update: {
+          approval_status?: string
+          approved_for_external_use?: boolean
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          last_reviewed_at?: string | null
+          metadata?: Json
+          requires_context_guard?: boolean
+          requires_founder_approval?: boolean
+          risk_level?: string
+          template_body?: string | null
+          template_key?: string
+          template_name?: string
+          template_subject?: string | null
+          template_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "approved_template_library_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       architecture_components: {
         Row: {
           agent_id: string | null
@@ -2858,6 +2923,209 @@ export type Database = {
           title?: string
         }
         Relationships: []
+      }
+      business_activation_checklist_items: {
+        Row: {
+          activation_profile_id: string | null
+          blocker: string | null
+          business_id: string | null
+          checklist_area: string
+          checklist_item: string
+          completed_at: string | null
+          created_at: string
+          external_action_risk: boolean
+          founder_approval_required: boolean
+          id: string
+          item_status: string
+          metadata: Json
+          next_action: string | null
+          owner_agent_key: string | null
+          required_for_go_live: boolean
+          updated_at: string
+        }
+        Insert: {
+          activation_profile_id?: string | null
+          blocker?: string | null
+          business_id?: string | null
+          checklist_area: string
+          checklist_item: string
+          completed_at?: string | null
+          created_at?: string
+          external_action_risk?: boolean
+          founder_approval_required?: boolean
+          id?: string
+          item_status?: string
+          metadata?: Json
+          next_action?: string | null
+          owner_agent_key?: string | null
+          required_for_go_live?: boolean
+          updated_at?: string
+        }
+        Update: {
+          activation_profile_id?: string | null
+          blocker?: string | null
+          business_id?: string | null
+          checklist_area?: string
+          checklist_item?: string
+          completed_at?: string | null
+          created_at?: string
+          external_action_risk?: boolean
+          founder_approval_required?: boolean
+          id?: string
+          item_status?: string
+          metadata?: Json
+          next_action?: string | null
+          owner_agent_key?: string | null
+          required_for_go_live?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_activation_checklist_items_activation_profile_id_fkey"
+            columns: ["activation_profile_id"]
+            isOneToOne: false
+            referencedRelation: "business_activation_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_activation_checklist_items_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_activation_profiles: {
+        Row: {
+          activated_at: string | null
+          activation_status: string
+          apollo_status: string | null
+          brand_profile_status: string | null
+          business_id: string | null
+          complaints_status: string | null
+          compliance_status: string | null
+          content_status: string | null
+          created_at: string
+          crm_status: string | null
+          customer_memory_status: string | null
+          demo_status: string | null
+          founder_approval_required: boolean
+          go_live_allowed: boolean
+          id: string
+          invoice_payment_status: string | null
+          legal_entity_status: string | null
+          marketing_status: string | null
+          metadata: Json
+          native_email_status: string | null
+          offer_catalog_status: string | null
+          onboarding_status: string | null
+          operating_mode: string
+          outreach_status: string | null
+          paused_at: string | null
+          pricing_status: string | null
+          privacy_status: string | null
+          proposal_status: string | null
+          readiness_score: number
+          retention_status: string | null
+          security_status: string | null
+          smartlead_status: string | null
+          social_status: string | null
+          supplier_status: string | null
+          support_status: string | null
+          survey_status: string | null
+          updated_at: string
+          winback_status: string | null
+        }
+        Insert: {
+          activated_at?: string | null
+          activation_status?: string
+          apollo_status?: string | null
+          brand_profile_status?: string | null
+          business_id?: string | null
+          complaints_status?: string | null
+          compliance_status?: string | null
+          content_status?: string | null
+          created_at?: string
+          crm_status?: string | null
+          customer_memory_status?: string | null
+          demo_status?: string | null
+          founder_approval_required?: boolean
+          go_live_allowed?: boolean
+          id?: string
+          invoice_payment_status?: string | null
+          legal_entity_status?: string | null
+          marketing_status?: string | null
+          metadata?: Json
+          native_email_status?: string | null
+          offer_catalog_status?: string | null
+          onboarding_status?: string | null
+          operating_mode?: string
+          outreach_status?: string | null
+          paused_at?: string | null
+          pricing_status?: string | null
+          privacy_status?: string | null
+          proposal_status?: string | null
+          readiness_score?: number
+          retention_status?: string | null
+          security_status?: string | null
+          smartlead_status?: string | null
+          social_status?: string | null
+          supplier_status?: string | null
+          support_status?: string | null
+          survey_status?: string | null
+          updated_at?: string
+          winback_status?: string | null
+        }
+        Update: {
+          activated_at?: string | null
+          activation_status?: string
+          apollo_status?: string | null
+          brand_profile_status?: string | null
+          business_id?: string | null
+          complaints_status?: string | null
+          compliance_status?: string | null
+          content_status?: string | null
+          created_at?: string
+          crm_status?: string | null
+          customer_memory_status?: string | null
+          demo_status?: string | null
+          founder_approval_required?: boolean
+          go_live_allowed?: boolean
+          id?: string
+          invoice_payment_status?: string | null
+          legal_entity_status?: string | null
+          marketing_status?: string | null
+          metadata?: Json
+          native_email_status?: string | null
+          offer_catalog_status?: string | null
+          onboarding_status?: string | null
+          operating_mode?: string
+          outreach_status?: string | null
+          paused_at?: string | null
+          pricing_status?: string | null
+          privacy_status?: string | null
+          proposal_status?: string | null
+          readiness_score?: number
+          retention_status?: string | null
+          security_status?: string | null
+          smartlead_status?: string | null
+          social_status?: string | null
+          supplier_status?: string | null
+          support_status?: string | null
+          survey_status?: string | null
+          updated_at?: string
+          winback_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_activation_profiles_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       business_agent_assignments_v2: {
         Row: {
@@ -7337,6 +7605,71 @@ export type Database = {
           },
         ]
       }
+      customer_data_import_readiness: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          data_quality_score: number | null
+          data_type: string
+          founder_review_required: boolean
+          id: string
+          import_status: string
+          metadata: Json
+          next_action: string | null
+          privacy_review_required: boolean
+          records_expected: number | null
+          records_imported: number
+          records_matched: number
+          records_unmatched: number
+          source_name: string
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          data_quality_score?: number | null
+          data_type: string
+          founder_review_required?: boolean
+          id?: string
+          import_status?: string
+          metadata?: Json
+          next_action?: string | null
+          privacy_review_required?: boolean
+          records_expected?: number | null
+          records_imported?: number
+          records_matched?: number
+          records_unmatched?: number
+          source_name: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          data_quality_score?: number | null
+          data_type?: string
+          founder_review_required?: boolean
+          id?: string
+          import_status?: string
+          metadata?: Json
+          next_action?: string | null
+          privacy_review_required?: boolean
+          records_expected?: number | null
+          records_imported?: number
+          records_matched?: number
+          records_unmatched?: number
+          source_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_data_import_readiness_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_data_inventory: {
         Row: {
           business_id: string | null
@@ -11340,6 +11673,68 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      integration_activation_status: {
+        Row: {
+          business_id: string | null
+          connection_tested: boolean
+          created_at: string
+          credentials_present: boolean
+          external_mutation_allowed: boolean
+          id: string
+          integration_key: string
+          integration_name: string
+          integration_status: string
+          last_error: string | null
+          last_test_at: string | null
+          live_action_enabled: boolean
+          metadata: Json
+          next_action: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          connection_tested?: boolean
+          created_at?: string
+          credentials_present?: boolean
+          external_mutation_allowed?: boolean
+          id?: string
+          integration_key: string
+          integration_name: string
+          integration_status?: string
+          last_error?: string | null
+          last_test_at?: string | null
+          live_action_enabled?: boolean
+          metadata?: Json
+          next_action?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          connection_tested?: boolean
+          created_at?: string
+          credentials_present?: boolean
+          external_mutation_allowed?: boolean
+          id?: string
+          integration_key?: string
+          integration_name?: string
+          integration_status?: string
+          last_error?: string | null
+          last_test_at?: string | null
+          live_action_enabled?: boolean
+          metadata?: Json
+          next_action?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_activation_status_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       integration_activity_logs: {
         Row: {
