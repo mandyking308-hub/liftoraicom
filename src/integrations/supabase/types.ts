@@ -2801,6 +2801,60 @@ export type Database = {
         }
         Relationships: []
       }
+      crm_integrity_findings: {
+        Row: {
+          auto_fix_available: boolean
+          business_id: string | null
+          contact_id: string | null
+          created_at: string
+          description: string
+          finding_type: string
+          founder_review_required: boolean
+          id: string
+          metadata: Json
+          recommended_fix: string | null
+          related_id: string | null
+          related_table: string | null
+          severity: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          auto_fix_available?: boolean
+          business_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          description: string
+          finding_type: string
+          founder_review_required?: boolean
+          id?: string
+          metadata?: Json
+          recommended_fix?: string | null
+          related_id?: string | null
+          related_table?: string | null
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          auto_fix_available?: boolean
+          business_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          description?: string
+          finding_type?: string
+          founder_review_required?: boolean
+          id?: string
+          metadata?: Json
+          recommended_fix?: string | null
+          related_id?: string | null
+          related_table?: string | null
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       crm_interaction_ledger: {
         Row: {
           ai_action_id: string | null
