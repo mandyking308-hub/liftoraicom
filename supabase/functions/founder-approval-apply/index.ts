@@ -1,16 +1,15 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 
-// Disabled-by-default writer for founder_approval_items decisions.
-// Requires:
-//   FOUNDER_APPROVAL_RECORDING_ENABLED=true (env)
-//   confirmation_phrase === "RECORD FOUNDER DECISION"
-//   dry_run === false
-// Even when enabled, only records the decision in founder_approval_items.
-// NEVER sends email. NEVER calls Apollo or Smartlead. NEVER creates
-// proposals/deals/invoices automatically.
+// Business-live writer (founder-approved internal record creation only).
+// Requires: founder/admin auth, business-live setting "founder_approval_item_creation_enabled" enabled,
+// confirmation_phrase === "CREATE FOUNDER APPROVAL ITEMS", and dry_run === false.
+// NEVER sends email. NEVER calls Apollo. NEVER POSTs to Smartlead.
 
-const CONFIRMATION_PHRASE = "RECORD FOUNDER DECISION";
+const CONFIRMATION_PHRASE = "CREATE FOUNDER APPROVAL ITEMS";
+const SETTING_KEY = "founder_approval_item_creation_enabled";
+const TARGET_TABLE = "founder_approval_items";
+const SOURCE_FUNCTION = "founder-approval-apply";
 
 async function authPriv(req: Request) {
   const authHeader = req.headers.get("Authorization");
@@ -28,11 +27,32 @@ async function authPriv(req: Request) {
     return { error: new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }) };
   }
   const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-  const { data: roles } = await admin.from("user_roles").select("role").eq("user_id", data.claims.sub);
+  const userId = data.claims.sub as string;
+  const { data: roles } = await admin.from("user_roles").select("role").eq("user_id", userId);
   if (!(roles ?? []).some((r: any) => r.role === "admin" || r.role === "founder")) {
     return { error: new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }) };
   }
-  return { admin, userId: data.claims.sub as string };
+  return { admin, userId };
+}
+
+async function logAudit(admin: any, userId: string, status: string, blockedReason: string | null, dryRun: boolean, phrase: string, targetId: string | null, metadata: any = {}) {
+  await admin.from("agent_action_audit_log").insert({
+    agent_key: "founder_console",
+    action_type: SETTING_KEY,
+    source_function: SOURCE_FUNCTION,
+    target_table: TARGET_TABLE,
+    target_id: targetId,
+    founder_user_id: userId,
+    confirmation_phrase: phrase,
+    dry_run: dryRun,
+    action_status: status,
+    blocked_reason: blockedReason,
+    external_provider_called: false,
+    email_sent: false,
+    apollo_called: false,
+    smartlead_post_called: false,
+    metadata,
+  });
 }
 
 Deno.serve(async (req) => {
@@ -40,48 +60,76 @@ Deno.serve(async (req) => {
   try {
     const auth = await authPriv(req);
     if ("error" in auth) return auth.error;
+    const { admin, userId } = auth;
 
     const body = await req.json().catch(() => ({}));
     const dryRun = body?.dry_run !== false;
     const phrase = String(body?.confirmation_phrase ?? "");
-    const enabled = (Deno.env.get("FOUNDER_APPROVAL_RECORDING_ENABLED") ?? "").toLowerCase() === "true";
 
-    const baseAudit = {
-      decisions_recorded: 0,
-      downstream_actions_executed: 0,
-      emails_sent: 0,
-      provider_calls: 0,
-      proposals_created: 0,
-      deals_created: 0,
-      invoices_created: 0,
-    };
+    const { data: settingRow } = await admin.rpc("is_agent_live_setting_enabled", { _setting_key: SETTING_KEY });
+    const enabled = settingRow === true;
+
+    const baseAudit = { records_created: 0, emails_sent: 0, provider_calls: 0 };
 
     if (!enabled) {
-      return new Response(JSON.stringify({
-        ok: true, blocked: true,
-        reason: "founder_approval_apply_disabled",
-        feature_flag_name: "FOUNDER_APPROVAL_RECORDING_ENABLED",
-        ...baseAudit,
-      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      await logAudit(admin, userId, "blocked", "setting_disabled", dryRun, phrase, null, { body });
+      return new Response(JSON.stringify({ ok: true, blocked: true, reason: "setting_disabled", setting_key: SETTING_KEY, ...baseAudit }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
     if (phrase !== CONFIRMATION_PHRASE) {
-      return new Response(JSON.stringify({
-        ok: true, blocked: true, reason: "missing_confirmation_phrase",
-        required_phrase: CONFIRMATION_PHRASE, ...baseAudit,
-      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      await logAudit(admin, userId, "blocked", "missing_confirmation_phrase", dryRun, phrase, null, { body });
+      return new Response(JSON.stringify({ ok: true, blocked: true, reason: "missing_confirmation_phrase", required_phrase: CONFIRMATION_PHRASE, ...baseAudit }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
     if (dryRun) {
-      return new Response(JSON.stringify({
-        ok: true, blocked: true, reason: "dry_run_only", ...baseAudit,
-      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      await logAudit(admin, userId, "preview", "dry_run", dryRun, phrase, null, { body });
+      return new Response(JSON.stringify({ ok: true, blocked: true, reason: "dry_run_only", ...baseAudit }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Decision recorder is intentionally not implemented yet — keep blocked.
-    return new Response(JSON.stringify({
-      ok: true, blocked: true,
-      reason: "decision_recorder_not_yet_implemented",
-      ...baseAudit,
-    }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+
+    const decision = body?.decision ?? null;
+    if (decision && body?.item_id) {
+      const update: any = { founder_decision: decision, status: decision === "approved" ? "approved" : decision === "rejected" ? "rejected" : "pending", founder_notes: body?.founder_notes ?? null };
+      const { data: upd, error } = await admin.from("founder_approval_items").update(update).eq("id", body.item_id).select("id").maybeSingle();
+      if (error) {
+        await logAudit(admin, userId, "error", error.message, dryRun, phrase, body.item_id, { body });
+        return new Response(JSON.stringify({ ok: false, error: error.message }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      await logAudit(admin, userId, "applied", null, false, phrase, upd?.id ?? null, { decision });
+      return new Response(JSON.stringify({ ok: true, blocked: false, records_created: 0, decision_recorded: true, id: upd?.id, emails_sent: 0, provider_calls: 0, downstream_actions_executed: 0 }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    const items = Array.isArray(body?.items) ? body.items : [];
+    if (items.length === 0) {
+      return new Response(JSON.stringify({ ok: true, blocked: true, reason: "no_items_or_decision", ...baseAudit }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    const rows = items.slice(0, 50).map((it: any) => ({
+      business_id: it.business_id ?? null,
+      approval_type: String(it.approval_type ?? "general_review"),
+      source_system: it.source_system ?? null,
+      source_table: it.source_table ?? null,
+      source_id: it.source_id ?? null,
+      agent_key: it.agent_key ?? null,
+      contact_id: it.contact_id ?? null,
+      conversation_id: it.conversation_id ?? null,
+      title: String(it.title ?? "Untitled approval").slice(0, 500),
+      summary: it.summary ?? null,
+      recommended_action: it.recommended_action ?? null,
+      draft_subject: it.draft_subject ?? null,
+      draft_body: it.draft_body ?? null,
+      priority_level: it.priority_level ?? "normal",
+      risk_flags: it.risk_flags ?? [],
+      compliance_flags: it.compliance_flags ?? [],
+      status: "pending",
+      execution_enabled: false,
+      auto_execute_allowed: false,
+      send_allowed: false,
+    }));
+    const { data: inserted, error } = await admin.from("founder_approval_items").insert(rows).select("id");
+    if (error) {
+      await logAudit(admin, userId, "error", error.message, dryRun, phrase, null, { body });
+      return new Response(JSON.stringify({ ok: false, error: error.message }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    for (const r of inserted ?? []) await logAudit(admin, userId, "applied", null, false, phrase, r.id, {});
+    return new Response(JSON.stringify({ ok: true, blocked: false, records_created: inserted?.length ?? 0, ids: inserted?.map((r: any) => r.id) ?? [], emails_sent: 0, provider_calls: 0, downstream_actions_executed: 0 }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+
   } catch (e: any) {
     return new Response(JSON.stringify({ error: e?.message ?? String(e) }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }

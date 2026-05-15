@@ -107,6 +107,75 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_action_audit_log: {
+        Row: {
+          action_status: string
+          action_type: string
+          agent_key: string | null
+          apollo_called: boolean
+          blocked_reason: string | null
+          business_id: string | null
+          confirmation_phrase: string | null
+          created_at: string
+          dry_run: boolean
+          email_sent: boolean
+          external_provider_called: boolean
+          founder_user_id: string | null
+          id: string
+          metadata: Json
+          smartlead_post_called: boolean
+          source_function: string | null
+          source_id: string | null
+          source_table: string | null
+          target_id: string | null
+          target_table: string | null
+        }
+        Insert: {
+          action_status: string
+          action_type: string
+          agent_key?: string | null
+          apollo_called?: boolean
+          blocked_reason?: string | null
+          business_id?: string | null
+          confirmation_phrase?: string | null
+          created_at?: string
+          dry_run?: boolean
+          email_sent?: boolean
+          external_provider_called?: boolean
+          founder_user_id?: string | null
+          id?: string
+          metadata?: Json
+          smartlead_post_called?: boolean
+          source_function?: string | null
+          source_id?: string | null
+          source_table?: string | null
+          target_id?: string | null
+          target_table?: string | null
+        }
+        Update: {
+          action_status?: string
+          action_type?: string
+          agent_key?: string | null
+          apollo_called?: boolean
+          blocked_reason?: string | null
+          business_id?: string | null
+          confirmation_phrase?: string | null
+          created_at?: string
+          dry_run?: boolean
+          email_sent?: boolean
+          external_provider_called?: boolean
+          founder_user_id?: string | null
+          id?: string
+          metadata?: Json
+          smartlead_post_called?: boolean
+          source_function?: string | null
+          source_id?: string | null
+          source_table?: string | null
+          target_id?: string | null
+          target_table?: string | null
+        }
+        Relationships: []
+      }
       agent_activity_logs: {
         Row: {
           action: string
@@ -182,6 +251,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      agent_business_live_settings: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          description: string | null
+          founder_approval_required: boolean
+          id: string
+          metadata: Json
+          risk_level: string
+          setting_key: string
+          setting_value: boolean
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          description?: string | null
+          founder_approval_required?: boolean
+          id?: string
+          metadata?: Json
+          risk_level?: string
+          setting_key: string
+          setting_value?: boolean
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          description?: string | null
+          founder_approval_required?: boolean
+          id?: string
+          metadata?: Json
+          risk_level?: string
+          setting_key?: string
+          setting_value?: boolean
+          updated_at?: string
+        }
+        Relationships: []
       }
       agent_system_assignments: {
         Row: {
@@ -11242,6 +11350,10 @@ export type Database = {
         Returns: undefined
       }
       inbox_warmup_limit: { Args: { _inbox_id: string }; Returns: number }
+      is_agent_live_setting_enabled: {
+        Args: { _setting_key: string }
+        Returns: boolean
+      }
       is_feature_enabled: {
         Args: { _business_name?: string; _feature_name: string }
         Returns: boolean

@@ -1,16 +1,15 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 
-// Disabled-by-default writer for commercial_handoff_reviews.
-// Requires:
-//   COMMERCIAL_HANDOFF_APPLY_ENABLED=true (env)
-//   confirmation_phrase === "APPLY COMMERCIAL HANDOFF"
-//   dry_run === false
-// Even when enabled, only writes commercial_handoff_reviews rows.
-// NEVER creates proposals/demos/deals/invoices. NEVER sends email.
-// NEVER calls Apollo or Smartlead.
+// Business-live writer (founder-approved internal record creation only).
+// Requires: founder/admin auth, business-live setting "commercial_handoff_review_enabled" enabled,
+// confirmation_phrase === "CREATE COMMERCIAL HANDOFF REVIEW", and dry_run === false.
+// NEVER sends email. NEVER calls Apollo. NEVER POSTs to Smartlead.
 
-const CONFIRMATION_PHRASE = "APPLY COMMERCIAL HANDOFF";
+const CONFIRMATION_PHRASE = "CREATE COMMERCIAL HANDOFF REVIEW";
+const SETTING_KEY = "commercial_handoff_review_enabled";
+const TARGET_TABLE = "commercial_handoff_reviews";
+const SOURCE_FUNCTION = "commercial-handoff-apply";
 
 async function authPriv(req: Request) {
   const authHeader = req.headers.get("Authorization");
@@ -28,11 +27,32 @@ async function authPriv(req: Request) {
     return { error: new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }) };
   }
   const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-  const { data: roles } = await admin.from("user_roles").select("role").eq("user_id", data.claims.sub);
+  const userId = data.claims.sub as string;
+  const { data: roles } = await admin.from("user_roles").select("role").eq("user_id", userId);
   if (!(roles ?? []).some((r: any) => r.role === "admin" || r.role === "founder")) {
     return { error: new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }) };
   }
-  return { admin };
+  return { admin, userId };
+}
+
+async function logAudit(admin: any, userId: string, status: string, blockedReason: string | null, dryRun: boolean, phrase: string, targetId: string | null, metadata: any = {}) {
+  await admin.from("agent_action_audit_log").insert({
+    agent_key: "founder_console",
+    action_type: SETTING_KEY,
+    source_function: SOURCE_FUNCTION,
+    target_table: TARGET_TABLE,
+    target_id: targetId,
+    founder_user_id: userId,
+    confirmation_phrase: phrase,
+    dry_run: dryRun,
+    action_status: status,
+    blocked_reason: blockedReason,
+    external_provider_called: false,
+    email_sent: false,
+    apollo_called: false,
+    smartlead_post_called: false,
+    metadata,
+  });
 }
 
 Deno.serve(async (req) => {
@@ -40,47 +60,63 @@ Deno.serve(async (req) => {
   try {
     const auth = await authPriv(req);
     if ("error" in auth) return auth.error;
+    const { admin, userId } = auth;
 
     const body = await req.json().catch(() => ({}));
     const dryRun = body?.dry_run !== false;
     const phrase = String(body?.confirmation_phrase ?? "");
-    const enabled = (Deno.env.get("COMMERCIAL_HANDOFF_APPLY_ENABLED") ?? "").toLowerCase() === "true";
 
-    const baseAudit = {
-      handoff_reviews_created: 0,
-      proposals_created: 0,
-      demos_created: 0,
-      deals_created: 0,
-      invoices_created: 0,
-      emails_sent: 0,
-      provider_calls: 0,
-    };
+    const { data: settingRow } = await admin.rpc("is_agent_live_setting_enabled", { _setting_key: SETTING_KEY });
+    const enabled = settingRow === true;
+
+    const baseAudit = { records_created: 0, emails_sent: 0, provider_calls: 0 };
 
     if (!enabled) {
-      return new Response(JSON.stringify({
-        ok: true, blocked: true,
-        reason: "commercial_handoff_apply_disabled",
-        feature_flag_name: "COMMERCIAL_HANDOFF_APPLY_ENABLED",
-        ...baseAudit,
-      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      await logAudit(admin, userId, "blocked", "setting_disabled", dryRun, phrase, null, { body });
+      return new Response(JSON.stringify({ ok: true, blocked: true, reason: "setting_disabled", setting_key: SETTING_KEY, ...baseAudit }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
     if (phrase !== CONFIRMATION_PHRASE) {
-      return new Response(JSON.stringify({
-        ok: true, blocked: true, reason: "missing_confirmation_phrase",
-        required_phrase: CONFIRMATION_PHRASE, ...baseAudit,
-      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      await logAudit(admin, userId, "blocked", "missing_confirmation_phrase", dryRun, phrase, null, { body });
+      return new Response(JSON.stringify({ ok: true, blocked: true, reason: "missing_confirmation_phrase", required_phrase: CONFIRMATION_PHRASE, ...baseAudit }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
     if (dryRun) {
-      return new Response(JSON.stringify({
-        ok: true, blocked: true, reason: "dry_run_only", ...baseAudit,
-      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      await logAudit(admin, userId, "preview", "dry_run", dryRun, phrase, null, { body });
+      return new Response(JSON.stringify({ ok: true, blocked: true, reason: "dry_run_only", ...baseAudit }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    return new Response(JSON.stringify({
-      ok: true, blocked: true,
-      reason: "handoff_writer_not_yet_implemented",
-      ...baseAudit,
-    }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+
+    const items = Array.isArray(body?.items) ? body.items : [];
+    if (items.length === 0) {
+      return new Response(JSON.stringify({ ok: true, blocked: true, reason: "no_items_provided", ...baseAudit }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    const rows = items.slice(0, 50).map((it: any) => ({
+      business_id: it.business_id ?? null,
+      contact_id: it.contact_id ?? null,
+      conversation_id: it.conversation_id ?? null,
+      interaction_id: it.interaction_id ?? null,
+      handoff_type: String(it.handoff_type ?? "qualification"),
+      qualification_summary: it.qualification_summary ?? null,
+      detected_need: it.detected_need ?? null,
+      proposed_offer: it.proposed_offer ?? null,
+      proposed_next_step: it.proposed_next_step ?? null,
+      estimated_value_min: it.estimated_value_min ?? null,
+      estimated_value_max: it.estimated_value_max ?? null,
+      proposal_allowed: false,
+      demo_allowed: false,
+      deal_allowed: false,
+      founder_review_required: true,
+      apply_status: "preview",
+      blockers: it.blockers ?? [],
+      metadata: it.metadata ?? {},
+    }));
+    const { data: inserted, error } = await admin.from("commercial_handoff_reviews").insert(rows).select("id");
+    if (error) {
+      await logAudit(admin, userId, "error", error.message, dryRun, phrase, null, { body });
+      return new Response(JSON.stringify({ ok: false, error: error.message }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    for (const r of inserted ?? []) await logAudit(admin, userId, "applied", null, false, phrase, r.id, {});
+    return new Response(JSON.stringify({ ok: true, blocked: false, records_created: inserted?.length ?? 0, ids: inserted?.map((r: any) => r.id) ?? [], emails_sent: 0, provider_calls: 0, proposals_created: 0, deals_created: 0, invoices_created: 0 }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+
   } catch (e: any) {
     return new Response(JSON.stringify({ error: e?.message ?? String(e) }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
