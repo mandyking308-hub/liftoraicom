@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import FounderLayout from "@/components/founder/FounderLayout";
+import MultilingualIntelligencePanel from "@/components/founder/global/MultilingualIntelligencePanel";
 import CRMInteractionMatchPreviewPanel from "@/components/founder/crm/CRMInteractionMatchPreviewPanel";
 import CRMConversationBridgePanel from "@/components/founder/crm/CRMConversationBridgePanel";
 import CRMCustomerLifecyclePanel from "@/components/founder/crm/CRMCustomerLifecyclePanel";
@@ -217,6 +218,7 @@ const ConversationsDashboard = () => {
         <FounderApprovalConsole />
         <CommercialHandoffPanel />
         <LiveCommercialAgentsPanel />
+        <MultilingualIntelligencePanel />
       </div>
     </FounderLayout>
   );
