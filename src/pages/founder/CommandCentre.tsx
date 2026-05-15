@@ -1063,6 +1063,7 @@ const CommandCentre = () => {
             <LiftorBusinessLiveRunPanel />
 
             {/* SECTION 14 — Knowledge / Manual / Build Log */}
+            <InternalOperatingSchedulesPanel />
             <RunwayHeader n={14} title="Knowledge / Manual / Build Log" icon={BookOpen} anchor="sec-knowledge" />
             <Section title="Knowledge, manual, build log" icon={BookOpen} action={<Link to="/founder/manual"><Button size="sm" variant="ghost">Open manual <ArrowRight size={12} /></Button></Link>}>
               <LinkGrid items={[
