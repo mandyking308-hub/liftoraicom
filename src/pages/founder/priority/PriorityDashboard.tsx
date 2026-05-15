@@ -5,6 +5,7 @@ import CRMCustomerLifecyclePanel from "@/components/founder/crm/CRMCustomerLifec
 import AIAgentOrchestratorPanel from "@/components/founder/agents/AIAgentOrchestratorPanel";
 import FounderApprovalConsole from "@/components/founder/approvals/FounderApprovalConsole";
 import ApprovedActionExecutionPanel from "@/components/founder/approvals/ApprovedActionExecutionPanel";
+import AgentHandoverProtocolPanel from "@/components/founder/agents/AgentHandoverProtocolPanel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -137,6 +138,7 @@ const PriorityDashboard = () => {
         <AIAgentOrchestratorPanel />
         <FounderApprovalConsole />
         <ApprovedActionExecutionPanel />
+        <AgentHandoverProtocolPanel />
       </div>
     </FounderLayout>
   );
