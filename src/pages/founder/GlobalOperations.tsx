@@ -27,6 +27,7 @@ import AgentHandoverProtocolPanel from "@/components/founder/agents/AgentHandove
 import LearningOptimisationEnginePanel from "@/components/founder/optimisation/LearningOptimisationEnginePanel";
 import SelfHealingMonitoringPanel from "@/components/founder/monitoring/SelfHealingMonitoringPanel";
 import PortfolioIntelligenceBrainPanel from "@/components/founder/strategy/PortfolioIntelligenceBrainPanel";
+import SocialMediaBrainPanel from "@/components/founder/social/SocialMediaBrainPanel";
 import AutopilotActivationGatesPanel from "@/components/founder/autonomy/AutopilotActivationGatesPanel";
 import GlobalAIBrainCommandCentre from "@/components/founder/command/GlobalAIBrainCommandCentre";
 import AgentCollaborationBoard from "@/components/founder/agents/AgentCollaborationBoard";
@@ -393,6 +394,7 @@ const GlobalOperations = () => {
         <LearningOptimisationEnginePanel />
         <SelfHealingMonitoringPanel />
         <PortfolioIntelligenceBrainPanel />
+        <SocialMediaBrainPanel />
         <AgentCollaborationBoard />
         <AutopilotActivationGatesPanel />
       </div>
