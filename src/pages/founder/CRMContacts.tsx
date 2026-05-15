@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Plus, Search } from "lucide-react";
 import FounderLayout from "@/components/founder/FounderLayout";
+import CRMContact360Panel from "@/components/founder/crm/CRMContact360Panel";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -101,6 +102,7 @@ const CRMContacts = () => {
 
   return (
     <FounderLayout>
+      <div className="mb-4"><CRMContact360Panel /></div>
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
