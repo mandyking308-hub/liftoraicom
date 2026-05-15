@@ -1860,6 +1860,225 @@ export type Database = {
           },
         ]
       }
+      autonomy_action_audit: {
+        Row: {
+          action_type: string
+          agent_key: string | null
+          allowed: boolean
+          blocked_reason: string | null
+          business_id: string | null
+          channel_key: string | null
+          created_at: string
+          credit_spend: boolean
+          email_sent: boolean
+          external_action: boolean
+          founder_approval_required: boolean
+          id: string
+          jurisdiction_code: string | null
+          language_code: string | null
+          metadata: Json
+          policy_id: string | null
+          provider_mutation: boolean
+          requested_autonomy_level: number | null
+          resolved_autonomy_level: number | null
+          source_id: string | null
+          source_table: string | null
+          target_id: string | null
+          target_table: string | null
+        }
+        Insert: {
+          action_type: string
+          agent_key?: string | null
+          allowed?: boolean
+          blocked_reason?: string | null
+          business_id?: string | null
+          channel_key?: string | null
+          created_at?: string
+          credit_spend?: boolean
+          email_sent?: boolean
+          external_action?: boolean
+          founder_approval_required?: boolean
+          id?: string
+          jurisdiction_code?: string | null
+          language_code?: string | null
+          metadata?: Json
+          policy_id?: string | null
+          provider_mutation?: boolean
+          requested_autonomy_level?: number | null
+          resolved_autonomy_level?: number | null
+          source_id?: string | null
+          source_table?: string | null
+          target_id?: string | null
+          target_table?: string | null
+        }
+        Update: {
+          action_type?: string
+          agent_key?: string | null
+          allowed?: boolean
+          blocked_reason?: string | null
+          business_id?: string | null
+          channel_key?: string | null
+          created_at?: string
+          credit_spend?: boolean
+          email_sent?: boolean
+          external_action?: boolean
+          founder_approval_required?: boolean
+          id?: string
+          jurisdiction_code?: string | null
+          language_code?: string | null
+          metadata?: Json
+          policy_id?: string | null
+          provider_mutation?: boolean
+          requested_autonomy_level?: number | null
+          resolved_autonomy_level?: number | null
+          source_id?: string | null
+          source_table?: string | null
+          target_id?: string | null
+          target_table?: string | null
+        }
+        Relationships: []
+      }
+      autonomy_levels: {
+        Row: {
+          ai_draft_creation_allowed: boolean
+          compliance_mutation_allowed: boolean
+          created_at: string
+          credit_spend_allowed: boolean
+          description: string | null
+          external_send_allowed: boolean
+          founder_approval_required: boolean
+          id: string
+          internal_record_creation_allowed: boolean
+          level_key: string
+          level_label: string
+          level_number: number
+          max_risk_level: string
+          metadata: Json
+          money_movement_allowed: boolean
+          provider_mutation_allowed: boolean
+          updated_at: string
+        }
+        Insert: {
+          ai_draft_creation_allowed?: boolean
+          compliance_mutation_allowed?: boolean
+          created_at?: string
+          credit_spend_allowed?: boolean
+          description?: string | null
+          external_send_allowed?: boolean
+          founder_approval_required?: boolean
+          id?: string
+          internal_record_creation_allowed?: boolean
+          level_key: string
+          level_label: string
+          level_number: number
+          max_risk_level?: string
+          metadata?: Json
+          money_movement_allowed?: boolean
+          provider_mutation_allowed?: boolean
+          updated_at?: string
+        }
+        Update: {
+          ai_draft_creation_allowed?: boolean
+          compliance_mutation_allowed?: boolean
+          created_at?: string
+          credit_spend_allowed?: boolean
+          description?: string | null
+          external_send_allowed?: boolean
+          founder_approval_required?: boolean
+          id?: string
+          internal_record_creation_allowed?: boolean
+          level_key?: string
+          level_label?: string
+          level_number?: number
+          max_risk_level?: string
+          metadata?: Json
+          money_movement_allowed?: boolean
+          provider_mutation_allowed?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      autonomy_policies: {
+        Row: {
+          action_type: string
+          agent_key: string | null
+          allowed_countries: Json
+          allowed_languages: Json
+          autonomy_level: number
+          blocked_countries: Json
+          blocked_languages: Json
+          business_id: string | null
+          channel_key: string | null
+          created_at: string
+          enabled: boolean
+          id: string
+          jurisdiction_code: string | null
+          max_batch_size: number
+          max_daily_actions: number
+          max_monthly_actions: number
+          metadata: Json
+          policy_notes: string | null
+          requires_business_hours: boolean
+          requires_compliance_pass: boolean
+          requires_founder_approval: boolean
+          requires_human_review_for_high_risk: boolean
+          risk_level: string
+          updated_at: string
+        }
+        Insert: {
+          action_type: string
+          agent_key?: string | null
+          allowed_countries?: Json
+          allowed_languages?: Json
+          autonomy_level?: number
+          blocked_countries?: Json
+          blocked_languages?: Json
+          business_id?: string | null
+          channel_key?: string | null
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          jurisdiction_code?: string | null
+          max_batch_size?: number
+          max_daily_actions?: number
+          max_monthly_actions?: number
+          metadata?: Json
+          policy_notes?: string | null
+          requires_business_hours?: boolean
+          requires_compliance_pass?: boolean
+          requires_founder_approval?: boolean
+          requires_human_review_for_high_risk?: boolean
+          risk_level?: string
+          updated_at?: string
+        }
+        Update: {
+          action_type?: string
+          agent_key?: string | null
+          allowed_countries?: Json
+          allowed_languages?: Json
+          autonomy_level?: number
+          blocked_countries?: Json
+          blocked_languages?: Json
+          business_id?: string | null
+          channel_key?: string | null
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          jurisdiction_code?: string | null
+          max_batch_size?: number
+          max_daily_actions?: number
+          max_monthly_actions?: number
+          metadata?: Json
+          policy_notes?: string | null
+          requires_business_hours?: boolean
+          requires_compliance_pass?: boolean
+          requires_founder_approval?: boolean
+          requires_human_review_for_high_risk?: boolean
+          risk_level?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       autopilot_runs: {
         Row: {
           already_in_crm_matched: number

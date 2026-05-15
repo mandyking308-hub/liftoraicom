@@ -11,6 +11,7 @@ import LiveCommercialAgentsPanel from "@/components/founder/commercial/LiveComme
 import LiftorBusinessLiveRunPanel from "@/components/founder/command/LiftorBusinessLiveRunPanel";
 import MultiBusinessOperatingLayerPanel from "@/components/founder/operations/MultiBusinessOperatingLayerPanel";
 import BusinessOperatingRunbookPanel from "@/components/founder/operations/BusinessOperatingRunbookPanel";
+import GlobalAutonomyControlPanel from "@/components/founder/autonomy/GlobalAutonomyControlPanel";
 import BusinessKnowledgeBrainPanel from "@/components/founder/knowledge/BusinessKnowledgeBrainPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -122,6 +123,7 @@ const AgentDirectory = () => {
         <LiftorBusinessLiveRunPanel />
         <MultiBusinessOperatingLayerPanel />
         <BusinessOperatingRunbookPanel />
+        <GlobalAutonomyControlPanel />
         <BusinessKnowledgeBrainPanel />
 
         {/* Agent Directory */}
