@@ -61,6 +61,109 @@ export const generateManualMarkdown = (data: ManualLiveData): string => {
 
 ---
 
+## SECTION 0z — OUTBOUND ARCHITECTURE: NATIVE LANE vs SMARTLEAD SCALE LANE (15 MAY 2026)
+
+> This section supersedes any earlier wording that implies IONOS is the cold
+> outreach engine. Liftor now operates two distinct outbound lanes. The
+> Smartlead lane owns cold scale outreach. The Native (IONOS) lane is for
+> low-volume, high-trust founder-controlled mail only.
+
+### 0z.1 Native Liftor / IONOS lane
+
+Used for:
+
+- Proof / low-volume founder-approved sends.
+- Existing customer emails.
+- Proposal sends.
+- Invoice chasers.
+- Supplier messages.
+- Founder-approved replies.
+
+Not used for:
+
+- Cold outreach at scale.
+- High-volume sequencing.
+- Warmup-dependent sending.
+
+Worker is fail-closed. \`auto_send_enabled=false\`. Cron disabled. The native
+queue only releases through the Manual Send Apply Gate after explicit founder
+confirmation.
+
+### 0z.2 Smartlead scale lane
+
+Used for:
+
+- Cold outreach at scale.
+- Campaign sequencing (Smartlead-owned cadence).
+- Mailbox warmup.
+- Campaign mapping (Liftor campaign ⇄ Smartlead campaign).
+- Lead push (Liftor-compliant contacts → Smartlead campaign).
+- Webhook / event capture (sends, opens, clicks, replies, unsubscribes).
+- Replies flowing back into Liftor for AI sales process.
+
+Today the Smartlead lane is wired but not live. No campaign is mapped, no
+leads are pushed, the webhook secret is not configured, and the lead push
+apply path is gated behind \`SMARTLEAD_LEAD_PUSH_ENABLED=true\` plus a
+confirmation phrase.
+
+### 0z.3 Liftor's role across both lanes
+
+- Source control (Apollo reveal, founder-approved promotion).
+- Compliance spine (lawful basis, suppression, unsubscribe tokens, BCR gate).
+- CRM truth (contacts, businesses, conversations).
+- Provider routing (\`outbound_channel_policies\` chooses native vs smartlead per intent).
+- Event memory (\`outbound_provider_events\` captures every Smartlead webhook).
+- AI classification (intake preview maps replies → conversations / suppressions).
+- Proposal / deal / finance journey (internal proposals → demos → deals → invoices).
+- Founder command cockpit (Command Centre, Scale Operations Dry-Run Dashboard).
+
+### 0z.4 Current safety status (15 May 2026)
+
+| Setting | State |
+|---|---|
+| \`auto_send_enabled\` | false |
+| Outbound cron | disabled |
+| Native worker | fail-closed |
+| IONOS usage | proof / low-volume only |
+| Smartlead API key | connected |
+| Smartlead mailbox | connected (\`hello@neoncandy.online\`) |
+| Smartlead campaign | not created (founder action) |
+| Smartlead campaign mapping | none active |
+| Smartlead webhook secret | not set |
+| Smartlead lead push | apply disabled by feature flag |
+| Scale sending | disabled |
+| AI intake apply | disabled by feature flag |
+
+### 0z.5 Routing intents
+
+| Intent | Lane |
+|---|---|
+| \`cold_outreach\` | smartlead |
+| \`proposal_send\` | native (IONOS) |
+| \`invoice_chaser\` | native (IONOS) |
+| \`supplier_message\` | native (IONOS) |
+| \`founder_reply\` | native (IONOS) |
+| \`existing_customer\` | native (IONOS) |
+
+### 0z.6 Hard rules for future agents
+
+- Do not route cold outreach through IONOS.
+- Do not raise IONOS daily caps to "scale" levels.
+- Do not enable \`auto_send_enabled\` to push Smartlead-shaped volume through native SMTP.
+- Do not call Smartlead POST endpoints (campaign create, lead push, sequence write, webhook create) without (a) the matching feature flag, (b) the exact confirmation phrase, and (c) an active mapping.
+- Do not regress the Command Centre to the old IONOS-only proof-send loop.
+- Do not call Apollo unless the founder explicitly initiates a reveal.
+
+### 0z.7 Documented next step
+
+Founder creates the draft Smartlead campaign, applies the campaign mapping in
+the Discovery panel, sets \`SMARTLEAD_WEBHOOK_SECRET\`, registers the webhook
+URL inside Smartlead, then re-runs the Scale Operations Dry-Run Dashboard.
+Only after every stage flips to ready/deferred do we consider enabling the
+lead push feature flag for a controlled first batch.
+
+---
+
 ## SECTION 0 — OPERATIONAL HANDOVER — NEONCANDY / OUTREACH (1 MAY 2026)
 
 > This section is the single source of truth for the current live state of the
