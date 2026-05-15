@@ -704,6 +704,93 @@ export type Database = {
           },
         ]
       }
+      ai_conversation_draft_reviews: {
+        Row: {
+          agent_task_id: string | null
+          approval_status: string
+          approved_at: string | null
+          approved_by: string | null
+          business_id: string | null
+          compliance_flags: Json
+          contact_id: string | null
+          context_summary: string | null
+          conversation_id: string | null
+          created_at: string
+          customer_summary: string | null
+          detected_intent: string | null
+          draft_body: string | null
+          draft_subject: string | null
+          founder_review_required: boolean
+          id: string
+          intent_confidence: number | null
+          interaction_id: string | null
+          metadata: Json
+          recommended_reply_strategy: string | null
+          rejected_at: string | null
+          rejection_reason: string | null
+          risk_flags: Json
+          send_allowed: boolean
+          tone_profile: string | null
+          updated_at: string
+        }
+        Insert: {
+          agent_task_id?: string | null
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          business_id?: string | null
+          compliance_flags?: Json
+          contact_id?: string | null
+          context_summary?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          customer_summary?: string | null
+          detected_intent?: string | null
+          draft_body?: string | null
+          draft_subject?: string | null
+          founder_review_required?: boolean
+          id?: string
+          intent_confidence?: number | null
+          interaction_id?: string | null
+          metadata?: Json
+          recommended_reply_strategy?: string | null
+          rejected_at?: string | null
+          rejection_reason?: string | null
+          risk_flags?: Json
+          send_allowed?: boolean
+          tone_profile?: string | null
+          updated_at?: string
+        }
+        Update: {
+          agent_task_id?: string | null
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          business_id?: string | null
+          compliance_flags?: Json
+          contact_id?: string | null
+          context_summary?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          customer_summary?: string | null
+          detected_intent?: string | null
+          draft_body?: string | null
+          draft_subject?: string | null
+          founder_review_required?: boolean
+          id?: string
+          intent_confidence?: number | null
+          interaction_id?: string | null
+          metadata?: Json
+          recommended_reply_strategy?: string | null
+          rejected_at?: string | null
+          rejection_reason?: string | null
+          risk_flags?: Json
+          send_allowed?: boolean
+          tone_profile?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ai_drafts: {
         Row: {
           approved_at: string | null
@@ -817,6 +904,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      ai_reply_tone_profiles: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string | null
+          forbidden_phrases: Json
+          id: string
+          label: string
+          required_checks: Json
+          style_rules: Json
+          tone_key: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          forbidden_phrases?: Json
+          id?: string
+          label: string
+          required_checks?: Json
+          style_rules?: Json
+          tone_key: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          forbidden_phrases?: Json
+          id?: string
+          label?: string
+          required_checks?: Json
+          style_rules?: Json
+          tone_key?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       apollo_automation_runs: {
         Row: {

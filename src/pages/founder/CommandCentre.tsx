@@ -46,6 +46,7 @@ import CRMHealthIntegrityPanel from "@/components/founder/crm/CRMHealthIntegrity
 import CRMCustomerMemoryDashboard from "@/components/founder/crm/CRMCustomerMemoryDashboard";
 import AIAgentOperatingModelPanel from "@/components/founder/agents/AIAgentOperatingModelPanel";
 import AIAgentOrchestratorPanel from "@/components/founder/agents/AIAgentOrchestratorPanel";
+import AIConversationDraftingPanel from "@/components/founder/agents/AIConversationDraftingPanel";
 import CRMContact360Panel from "@/components/founder/crm/CRMContact360Panel";
 import {
   Building2, Bot, Send, Mail, Inbox as InboxIcon, MessageSquare, FileSignature,
@@ -736,6 +737,7 @@ const CommandCentre = () => {
               </CollapsibleCard>
               <AIAgentOperatingModelPanel />
               <AIAgentOrchestratorPanel />
+              <AIConversationDraftingPanel />
             </Section>
 
             {/* SECTION 6 — Outreach Runway */}
@@ -895,6 +897,7 @@ const CommandCentre = () => {
                 )}
               </div>
             </Section>
+            <AIConversationDraftingPanel />
 
             {/* SECTION 7 — CRM / Contacts / Inboxes */}
             <RunwayHeader n={7} title="CRM / Contacts / Inboxes" icon={Users} anchor="sec-crm" />
