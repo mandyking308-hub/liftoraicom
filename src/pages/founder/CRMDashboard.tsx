@@ -8,6 +8,7 @@ import CRMInteractionSourceAdaptersPanel from "@/components/founder/crm/CRMInter
 import CRMConversationBridgePanel from "@/components/founder/crm/CRMConversationBridgePanel";
 import CRMCustomerLifecyclePanel from "@/components/founder/crm/CRMCustomerLifecyclePanel";
 import CRMHealthIntegrityPanel from "@/components/founder/crm/CRMHealthIntegrityPanel";
+import CRMCustomerMemoryDashboard from "@/components/founder/crm/CRMCustomerMemoryDashboard";
 import CRMContact360Panel from "@/components/founder/crm/CRMContact360Panel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
