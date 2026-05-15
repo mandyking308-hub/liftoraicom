@@ -182,30 +182,107 @@ export default function OutboundProviderEnginePanel() {
                 </Button>
               </div>
               <div className="grid sm:grid-cols-2 gap-x-4">
-                <KV k="provider" v={smartlead.provider_name} />
-                <KV k="type" v={smartlead.provider_type} />
+                <KV k="provider_name" v="Smartlead" />
+                <KV k="base_url" v="https://server.smartlead.ai/api/v1" />
+                <KV k="auth_method" v="api_key query param (secret-backed)" />
+                <KV k="secret_name" v="SMARTLEAD_API_KEY" />
                 <KV k="status" v={smartlead.status} />
                 <KV k="health" v={smartlead.provider_health} />
                 <KV k="credentials_present" v={String(smartlead.credentials_present)} />
+                <KV
+                  k="connection_test_result"
+                  v={
+                    testResult?.tested
+                      ? testResult.ok
+                        ? "ok"
+                        : "error"
+                      : (data?.smartlead_summary?.connection_test_result ?? "not_run")
+                  }
+                />
+                <KV
+                  k="campaign_count"
+                  v={testResult?.campaign_count ?? "run test to fetch"}
+                />
+                <KV
+                  k="active_campaign_count"
+                  v={testResult?.active_campaign_count ?? "—"}
+                />
+                <KV
+                  k="drafted_campaign_count"
+                  v={testResult?.drafted_campaign_count ?? "—"}
+                />
+                <KV
+                  k="email_account_count"
+                  v={testResult?.email_account_count ?? "run test to fetch"}
+                />
+                <KV
+                  k="sending_accounts_present"
+                  v={
+                    testResult?.sending_accounts_present == null
+                      ? "—"
+                      : String(testResult.sending_accounts_present)
+                  }
+                />
+                <KV
+                  k="warmup_account_count"
+                  v={testResult?.warmup_account_count ?? "—"}
+                />
                 <KV k="webhook_configured" v={String(smartlead.webhook_configured)} />
                 <KV k="warmup_status" v={smartlead.warmup_status ?? "not_configured"} />
-                <KV k="sending_accounts" v="unknown (not queried in v1)" />
-                <KV k="campaigns_configured" v="unknown (not queried in v1)" />
+                <KV k="scale_sending_enabled" v="no" />
                 <KV k="last_test_at" v={smartlead.last_test_at ?? "never"} />
                 <KV k="last_error" v={smartlead.last_error ?? "none"} />
               </div>
               <p className="text-[11px] text-muted-foreground">
-                Secret name expected: <span className="font-mono">SMARTLEAD_API_KEY</span>. The
-                key is never exposed in the UI. Test runs a read-only campaigns list call —
-                no campaign creation, no leads pushed, no sends.
+                Test runs read-only Smartlead endpoints only:
+                <span className="font-mono"> /campaigns/?include_tags=true</span>,
+                <span className="font-mono"> /email-accounts/?offset=0&limit=100</span>,
+                <span className="font-mono"> /webhooks</span>,
+                <span className="font-mono"> /analytics/overview</span>. No campaign
+                creation, no leads pushed, no email-account creation, no webhook creation,
+                no sends. SMARTLEAD_API_KEY stays server-side.
+              </p>
+              {testResult?.blockers?.length > 0 && (
+                <div className="rounded border border-amber-500/30 bg-amber-500/5 p-2 text-[11px]">
+                  <div className="font-medium text-amber-300 mb-1">Blockers</div>
+                  <ul className="list-disc pl-4 text-amber-100 space-y-0.5">
+                    {testResult.blockers.map((b: string) => <li key={b}>{b}</li>)}
+                  </ul>
+                </div>
+              )}
+              <p className="text-[11px] text-muted-foreground">
+                Next setup action:{" "}
+                {!smartlead.credentials_present
+                  ? "add SMARTLEAD_API_KEY secret, then run Test Smartlead Connection."
+                  : !smartlead.last_test_at
+                    ? "run Test Smartlead Connection."
+                    : (testResult?.email_account_count ?? 0) === 0
+                      ? "add at least one Smartlead sending account (manually in Smartlead) and re-test."
+                      : !smartlead.webhook_configured
+                        ? "configure Smartlead webhook (blueprint stage — not built yet)."
+                        : "build campaign mapping + lead push preview (next phase)."}
               </p>
               {testResult && (
                 <div className="rounded border border-border/60 bg-background/40 p-2 text-[11px]">
-                  <div className="font-medium mb-1">Last test result</div>
+                  <div className="font-medium mb-1">Last test result (raw)</div>
                   <KV k="ok" v={String(testResult.ok)} />
                   <KV k="tested" v={String(testResult.tested ?? false)} />
-                  <KV k="http_status" v={testResult.http_status ?? "—"} />
-                  <KV k="campaign_count" v={testResult.campaign_count ?? "—"} />
+                  <KV
+                    k="http campaigns"
+                    v={testResult.http_status?.campaigns ?? "—"}
+                  />
+                  <KV
+                    k="http email-accounts"
+                    v={testResult.http_status?.email_accounts ?? "—"}
+                  />
+                  <KV
+                    k="http webhooks"
+                    v={testResult.http_status?.webhooks ?? "—"}
+                  />
+                  <KV
+                    k="http analytics"
+                    v={testResult.http_status?.analytics_overview ?? "—"}
+                  />
                   <KV k="reason" v={testResult.reason ?? "—"} />
                   <KV k="error" v={testResult.error ?? "none"} />
                 </div>
