@@ -19,6 +19,7 @@ import { Download, GitCompare, Activity } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import LiftorMasterReconciliationPanel from "@/components/founder/testing/LiftorMasterReconciliationPanel";
+import FullManualFunctionControlPanel from "@/components/founder/command/FullManualFunctionControlPanel";
 
 const FullSystemMirror = () => {
   const qc = useQueryClient();
