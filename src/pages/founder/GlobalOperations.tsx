@@ -21,6 +21,7 @@ import BusinessOperatingRunbookPanel from "@/components/founder/operations/Busin
 import GlobalAutonomyControlPanel from "@/components/founder/autonomy/GlobalAutonomyControlPanel";
 import GlobalOperatingClockPanel from "@/components/founder/global/GlobalOperatingClockPanel";
 import MultilingualIntelligencePanel from "@/components/founder/global/MultilingualIntelligencePanel";
+import GlobalJurisdictionPolicyPanel from "@/components/founder/compliance/GlobalJurisdictionPolicyPanel";
 import SmartleadControlledActivationPanel from "@/components/founder/integrations/SmartleadControlledActivationPanel";
 import BusinessLaunchFactoryPanel from "@/components/founder/expansion/BusinessLaunchFactoryPanel";
 
@@ -376,6 +377,7 @@ const GlobalOperations = () => {
         </div>
         <ControlledExternalActionGatesPanel />
         <SmartleadControlledActivationPanel />
+        <GlobalJurisdictionPolicyPanel />
       </div>
     </FounderLayout>
   );

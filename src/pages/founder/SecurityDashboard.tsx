@@ -2,6 +2,7 @@ import FounderLayout from "@/components/founder/FounderLayout";
 import { SecurityGovernancePanel } from "@/components/founder/security/SecurityGovernancePanel";
 import ControlledExternalActionGatesPanel from "@/components/founder/operations/ControlledExternalActionGatesPanel";
 import GlobalAutonomyControlPanel from "@/components/founder/autonomy/GlobalAutonomyControlPanel";
+import GlobalJurisdictionPolicyPanel from "@/components/founder/compliance/GlobalJurisdictionPolicyPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -432,6 +433,7 @@ const SecurityDashboard = () => {
         </Tabs>
         <ControlledExternalActionGatesPanel />
         <GlobalAutonomyControlPanel />
+        <GlobalJurisdictionPolicyPanel />
       </div>
     </FounderLayout>
   );

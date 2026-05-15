@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ShieldAlert, AlertTriangle, Globe, Activity, TrendingUp, TrendingDown, Minus, Building2 } from "lucide-react";
 import { format } from "date-fns";
+import GlobalJurisdictionPolicyPanel from "@/components/founder/compliance/GlobalJurisdictionPolicyPanel";
 
 type EventRow = {
   id: string; severity: "low" | "medium" | "high" | "critical";
@@ -254,6 +255,7 @@ const ComplianceDashboard = () => {
             )}
           </CardContent>
         </Card>
+        <GlobalJurisdictionPolicyPanel />
       </div>
     </FounderLayout>
   );

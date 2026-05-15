@@ -136,6 +136,46 @@ Deno.serve(async (req) => {
       ? (matched.requires_founder_approval || (levelRow?.founder_approval_required ?? true))
       : true;
 
+    // Jurisdiction policy integration
+    let jurisdiction: any = null;
+    let jurisdictionRequired = false;
+    const jurisdictionRelevant = [
+      "cold_b2b_email","warm_customer_email","proposal_send","invoice_send",
+      "marketing_followup","ai_generated_reply","multilingual_reply",
+      "donor_outreach","property_investment_message","health_related_message",
+      "education_child_related_message","native_email_send","smartlead_lead_push",
+    ].includes(input.action_type);
+    if (jurisdictionRelevant) {
+      jurisdictionRequired = true;
+      const jcode = input.jurisdiction_code ?? "XX";
+      const { data: profiles } = await admin
+        .from("jurisdiction_policy_profiles")
+        .select("*")
+        .in("jurisdiction_code", [jcode, "XX"])
+        .eq("action_type", input.action_type);
+      const sorted = (profiles ?? []).sort((a: any, b: any) =>
+        (b.jurisdiction_code === jcode ? 1 : 0) - (a.jurisdiction_code === jcode ? 1 : 0)
+      );
+      jurisdiction = sorted[0] ?? null;
+      const fallback = !jurisdiction || jurisdiction.jurisdiction_code === "XX";
+      if (!jurisdiction || !jurisdiction.allowed) {
+        blockers.push(`Jurisdiction policy (${jurisdiction?.jurisdiction_name ?? "unknown"}) does not permit auto-action.`);
+        allowed = false;
+      }
+      if (fallback && externalAction) {
+        blockers.push("Unknown jurisdiction — auto-send blocked, founder review required.");
+        allowed = false;
+      }
+      const r = (jurisdiction?.risk_level ?? "critical").toLowerCase();
+      if ((r === "high" || r === "critical") && externalAction) {
+        blockers.push(`Jurisdiction risk ${r} requires founder/legal review.`);
+        allowed = false;
+      }
+    }
+    const jurisdictionFounderReview = jurisdiction?.founder_review_required ?? jurisdictionRequired;
+    const jurisdictionLegalReview = jurisdiction?.legal_review_recommended ?? jurisdictionRequired;
+    const finalFounderApproval = founderApprovalRequired || jurisdictionFounderReview;
+
     // Audit
     await admin.from("autonomy_action_audit").insert({
       business_id: input.business_id ?? null,
@@ -147,26 +187,38 @@ Deno.serve(async (req) => {
       requested_autonomy_level: matched?.autonomy_level ?? null,
       resolved_autonomy_level: level,
       allowed,
-      founder_approval_required: founderApprovalRequired,
+      founder_approval_required: finalFounderApproval,
       blocked_reason: blockers.length ? blockers.join(" | ") : null,
       policy_id: matched?.id ?? null,
       external_action: externalAction,
       email_sent: false,
       provider_mutation: false,
       credit_spend: false,
-      metadata: { evaluator: "autonomy-policy-evaluate", evaluated_by: userId },
+      metadata: {
+        evaluator: "autonomy-policy-evaluate",
+        evaluated_by: userId,
+        jurisdiction_profile_id: jurisdiction?.id ?? null,
+        jurisdiction_required: jurisdictionRequired,
+        jurisdiction_legal_review: jurisdictionLegalReview,
+      },
     });
 
     return new Response(JSON.stringify({
       allowed,
       autonomy_level: level,
       autonomy_level_label: levelRow?.level_label ?? null,
-      founder_approval_required: founderApprovalRequired,
+      founder_approval_required: finalFounderApproval,
       blockers,
       policy_matched: matched,
+      jurisdiction_policy: jurisdiction,
+      jurisdiction_required: jurisdictionRequired,
+      jurisdiction_legal_review_recommended: jurisdictionLegalReview,
       safe_internal_action: safeInternal,
       external_action: externalAction,
       audit_required: true,
+      compliance_notes: jurisdictionRequired
+        ? "Operational compliance guidance only. Not legal advice."
+        : null,
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e) {
     return new Response(JSON.stringify({ error: String(e) }), {
