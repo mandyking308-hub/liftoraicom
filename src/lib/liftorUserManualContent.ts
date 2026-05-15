@@ -109,7 +109,7 @@ export const NEW_BUSINESS_OPERATING_FLOW: string[] = [
 ];
 
 export const REHEARSAL_FLOW: ManualSection = {
-  number: 999,
+  number: 76,
   key: "rehearsal",
   title: "How to rehearse a business before go-live",
   body: [
@@ -125,3 +125,6 @@ export const REHEARSAL_FLOW: ManualSection = {
     "10) Only then consider go-live gates (Approve go-live → still LOCKED until 'limited_external_live' is explicitly chosen).",
   ].join(" "),
 };
+
+// Append rehearsal section so it appears in the Full Guide listing
+LIFTOR_FULL_GUIDE.push(REHEARSAL_FLOW);
