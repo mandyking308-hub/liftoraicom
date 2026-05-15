@@ -81,6 +81,7 @@ import SocialRepurposingEnginePanel from "@/components/founder/social/SocialRepu
 import SocialSchedulerExportPanel from "@/components/founder/social/SocialSchedulerExportPanel";
 import SocialEngagementInboxPanel from "@/components/founder/social/SocialEngagementInboxPanel";
 import SocialAnalyticsTrendPanel from "@/components/founder/social/SocialAnalyticsTrendPanel";
+import MarketingContentFunnelPanel from "@/components/founder/marketing/MarketingContentFunnelPanel";
 import { SecurityGovernancePanel } from "@/components/founder/security/SecurityGovernancePanel";
 import { ProductisationReadinessPanel } from "@/components/founder/revenue/ProductisationReadinessPanel";
 import BusinessLaunchFactoryPanel from "@/components/founder/expansion/BusinessLaunchFactoryPanel";
@@ -257,6 +258,36 @@ const CommandCentre = () => {
         businessesMissing,
         nextModuleName: nextModule?.module_name ?? "All modules registered",
         nextModuleRoute: nextModule?.primary_route ?? "/founder/system/health",
+      };
+    },
+  });
+  const { data: marketingSummary } = useQuery({
+    queryKey: ["cc2-marketing-summary"],
+    refetchInterval: 60000,
+    queryFn: async () => {
+      const sb: any = supabase as any;
+      const [assetsR, briefsR] = await Promise.all([
+        sb.from("marketing_content_assets").select("id,asset_type,approval_status,publish_allowed,business_id"),
+        sb.from("marketing_campaign_briefs").select("id,campaign_type,approval_status,launch_allowed,business_id"),
+      ]);
+      const assets = (assetsR.data ?? []) as any[];
+      const briefs = (briefsR.data ?? []) as any[];
+      const countBy = (arr: any[], pred: (x: any) => boolean) => arr.filter(pred).length;
+      const businessIds = new Set<string>();
+      assets.forEach((a) => a.business_id && businessIds.add(a.business_id));
+      briefs.forEach((b) => b.business_id && businessIds.add(b.business_id));
+      return {
+        assetsTotal: assets.length,
+        briefsTotal: briefs.length,
+        blogs: countBy(assets, (a) => a.asset_type === "blog_post"),
+        newsletters: countBy(assets, (a) => a.asset_type === "newsletter"),
+        landingPages: countBy(assets, (a) => a.asset_type === "landing_page_copy" || a.asset_type === "sales_page"),
+        leadMagnets: countBy(assets, (a) => a.asset_type === "lead_magnet"),
+        adBriefs: countBy(assets, (a) => a.asset_type === "ad_copy"),
+        approvalsPending: countBy(assets, (a) => a.approval_status === "pending_review") + countBy(briefs, (b) => b.approval_status === "pending_review"),
+        publishLocked: countBy(assets, (a) => !a.publish_allowed),
+        launchLocked: countBy(briefs, (b) => !b.launch_allowed),
+        businessesCovered: businessIds.size,
       };
     },
   });
