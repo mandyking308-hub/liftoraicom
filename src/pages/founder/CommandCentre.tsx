@@ -757,6 +757,7 @@ const CommandCentre = () => {
 
   return (
     <FounderLayout>
+      <CommandCentreViewModeBar />
       <div className="max-w-7xl mx-auto px-4 pt-4"><FounderAlertEscalationPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><CommandCentreTruthSyncPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><FinalHardeningStatusPanel /></div>
@@ -768,6 +769,8 @@ const CommandCentre = () => {
       <div className="max-w-7xl mx-auto px-4 pt-4"><RevenueTargetOperatingPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><BusinessKnowledgeUploadTrainingPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><LiftorUserManualPanel /></div>
+      <DailyOperatorNextActionsCard />
+      <DiagnosticGate>
       {(() => {
         const activeBusinessName = activeInboxes[0]?.business_name ?? businesses[0]?.name ?? "Neon Candy";
         const activeSender = activeInboxes[0]?.email_address ?? "hello@neoncandy.online";
