@@ -805,6 +805,33 @@ const CommandCentre = () => {
 
             <CommandCentreMasterControlPlane />
 
+            {/* Top: Module Registry summary */}
+            <Card className="bg-card border-border/50">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center justify-between gap-2">
+                  <span className="flex items-center gap-2">
+                    <Database size={14} className="text-primary" /> Module Registry — system coverage
+                  </span>
+                  <Link to="/founder/system/health" className="text-[10px] text-primary hover:underline">Open registry →</Link>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 text-center text-xs">
+                  <Tile label="Registered" value={moduleRegistrySummary?.total ?? 0} />
+                  <Tile label="Active" value={moduleRegistrySummary?.active ?? 0} tone="good" />
+                  <Tile label="Partial" value={moduleRegistrySummary?.partial ?? 0} tone="warn" />
+                  <Tile label="Blocked" value={moduleRegistrySummary?.blocked ?? 0} tone="danger" />
+                  <Tile label="Missing" value={moduleRegistrySummary?.missing ?? 0} tone="warn" />
+                  <Tile label="Lost pages" value={moduleRegistrySummary?.lostPages ?? 0} tone={(moduleRegistrySummary?.lostPages ?? 0) > 0 ? "warn" : "default"} />
+                  <Tile label="Businesses missing setup" value={moduleRegistrySummary?.businessesMissing ?? 0} tone={(moduleRegistrySummary?.businessesMissing ?? 0) > 0 ? "warn" : "default"} />
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-2">
+                  Next module to configure: <span className="text-foreground font-medium">{moduleRegistrySummary?.nextModuleName}</span>{" "}
+                  <Link to={moduleRegistrySummary?.nextModuleRoute ?? "/founder/system/health"} className="text-primary hover:underline">→ open</Link>
+                </p>
+              </CardContent>
+            </Card>
+
             <GlobalAIBrainCommandCentre />
 
             <StartHereOperatingPanel />
