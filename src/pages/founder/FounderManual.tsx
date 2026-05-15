@@ -1,3 +1,4 @@
+import KnowledgeSourceTruthPanel from "@/components/founder/knowledge/KnowledgeSourceTruthPanel";
 import FounderLayout from "@/components/founder/FounderLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";

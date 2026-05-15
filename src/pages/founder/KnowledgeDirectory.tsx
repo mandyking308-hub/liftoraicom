@@ -1,3 +1,4 @@
+import KnowledgeSourceTruthPanel from "@/components/founder/knowledge/KnowledgeSourceTruthPanel";
 import FounderLayout from "@/components/founder/FounderLayout";
 import BusinessKnowledgeBrainPanel from "@/components/founder/knowledge/BusinessKnowledgeBrainPanel";
 import SupportKnowledgeAgentPanel from "@/components/founder/support/SupportKnowledgeAgentPanel";

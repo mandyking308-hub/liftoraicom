@@ -1,3 +1,4 @@
+import KnowledgeSourceTruthPanel from "@/components/founder/knowledge/KnowledgeSourceTruthPanel";
 import FounderLayout from "@/components/founder/FounderLayout";
 import StrategicProspectingAgentPanel from "@/components/founder/prospecting/StrategicProspectingAgentPanel";
 import MeetingCallIntelligencePanel from "@/components/founder/customer/MeetingCallIntelligencePanel";
