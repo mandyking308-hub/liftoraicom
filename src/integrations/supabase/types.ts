@@ -2666,6 +2666,71 @@ export type Database = {
         }
         Relationships: []
       }
+      brand_reputation_events: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          customer_related: boolean
+          event_summary: string | null
+          event_title: string
+          event_type: string
+          founder_review_required: boolean
+          id: string
+          metadata: Json
+          public_response_needed: boolean
+          sentiment: string | null
+          severity: string
+          source_channel: string | null
+          source_url: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          customer_related?: boolean
+          event_summary?: string | null
+          event_title: string
+          event_type: string
+          founder_review_required?: boolean
+          id?: string
+          metadata?: Json
+          public_response_needed?: boolean
+          sentiment?: string | null
+          severity?: string
+          source_channel?: string | null
+          source_url?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          customer_related?: boolean
+          event_summary?: string | null
+          event_title?: string
+          event_type?: string
+          founder_review_required?: boolean
+          id?: string
+          metadata?: Json
+          public_response_needed?: boolean
+          sentiment?: string | null
+          severity?: string
+          source_channel?: string | null
+          source_url?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brand_reputation_events_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       brief_audit_log: {
         Row: {
           brief_id: string
@@ -5852,6 +5917,72 @@ export type Database = {
             columns: ["asset_id"]
             isOneToOne: false
             referencedRelation: "creative_asset_library"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crisis_response_plans: {
+        Row: {
+          approved_at: string | null
+          business_id: string | null
+          created_at: string
+          escalation_required: boolean
+          founder_review_required: boolean
+          holding_statement: string | null
+          id: string
+          internal_summary: string | null
+          key_messages: Json
+          legal_review_recommended: boolean
+          plan_status: string
+          public_response_draft: string | null
+          reputation_event_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          business_id?: string | null
+          created_at?: string
+          escalation_required?: boolean
+          founder_review_required?: boolean
+          holding_statement?: string | null
+          id?: string
+          internal_summary?: string | null
+          key_messages?: Json
+          legal_review_recommended?: boolean
+          plan_status?: string
+          public_response_draft?: string | null
+          reputation_event_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          business_id?: string | null
+          created_at?: string
+          escalation_required?: boolean
+          founder_review_required?: boolean
+          holding_statement?: string | null
+          id?: string
+          internal_summary?: string | null
+          key_messages?: Json
+          legal_review_recommended?: boolean
+          plan_status?: string
+          public_response_draft?: string | null
+          reputation_event_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crisis_response_plans_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crisis_response_plans_reputation_event_id_fkey"
+            columns: ["reputation_event_id"]
+            isOneToOne: false
+            referencedRelation: "brand_reputation_events"
             referencedColumns: ["id"]
           },
         ]
