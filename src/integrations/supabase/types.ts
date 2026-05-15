@@ -3034,6 +3034,129 @@ export type Database = {
         }
         Relationships: []
       }
+      crm_match_candidates: {
+        Row: {
+          apply_status: string
+          business_contact_relationship_id: string | null
+          business_id: string | null
+          campaign_id: string | null
+          contact_email: string | null
+          contact_id: string | null
+          conversation_id: string | null
+          created_at: string
+          id: string
+          interaction_id: string | null
+          match_confidence: number
+          match_method: string
+          match_rank: number | null
+          metadata: Json
+          provider_campaign_id: string | null
+          provider_event_id: string | null
+          recommended: boolean
+          updated_at: string
+          warnings: Json
+        }
+        Insert: {
+          apply_status?: string
+          business_contact_relationship_id?: string | null
+          business_id?: string | null
+          campaign_id?: string | null
+          contact_email?: string | null
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          interaction_id?: string | null
+          match_confidence?: number
+          match_method: string
+          match_rank?: number | null
+          metadata?: Json
+          provider_campaign_id?: string | null
+          provider_event_id?: string | null
+          recommended?: boolean
+          updated_at?: string
+          warnings?: Json
+        }
+        Update: {
+          apply_status?: string
+          business_contact_relationship_id?: string | null
+          business_id?: string | null
+          campaign_id?: string | null
+          contact_email?: string | null
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          interaction_id?: string | null
+          match_confidence?: number
+          match_method?: string
+          match_rank?: number | null
+          metadata?: Json
+          provider_campaign_id?: string | null
+          provider_event_id?: string | null
+          recommended?: boolean
+          updated_at?: string
+          warnings?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_match_candidates_business_contact_relationship_id_fkey"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_match_candidates_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_match_candidates_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "outreach_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_match_candidates_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_match_candidates_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+          {
+            foreignKeyName: "crm_match_candidates_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_match_candidates_interaction_id_fkey"
+            columns: ["interaction_id"]
+            isOneToOne: false
+            referencedRelation: "crm_interaction_ledger"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_match_candidates_provider_event_id_fkey"
+            columns: ["provider_event_id"]
+            isOneToOne: false
+            referencedRelation: "outbound_provider_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deals: {
         Row: {
           business_name: string
@@ -9643,6 +9766,17 @@ export type Database = {
       compute_intent_score: { Args: { _contact_id: string }; Returns: number }
       compute_system_health: { Args: never; Returns: undefined }
       country_to_timezone: { Args: { _country: string }; Returns: string }
+      crm_match_interaction_preview: {
+        Args: {
+          p_business_id?: string
+          p_contact_email?: string
+          p_interaction_id?: string
+          p_provider_campaign_id?: string
+          p_provider_event_id?: string
+          p_provider_message_id?: string
+        }
+        Returns: Json
+      }
       detect_anomalies: { Args: never; Returns: Json }
       detect_orphan_content: { Args: never; Returns: Json }
       domain_for_inbox: { Args: { _inbox_id: string }; Returns: string }
