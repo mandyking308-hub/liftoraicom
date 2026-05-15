@@ -18,6 +18,7 @@ import {
 import { Download, GitCompare, Activity } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import LiftorMasterReconciliationPanel from "@/components/founder/testing/LiftorMasterReconciliationPanel";
 
 const FullSystemMirror = () => {
   const qc = useQueryClient();
@@ -423,6 +424,7 @@ const FullSystemMirror = () => {
         </div>
 
         {/* Coverage strip */}
+        <LiftorMasterReconciliationPanel />
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           <Card className="bg-card border-border/50">
             <CardContent className="pt-4">

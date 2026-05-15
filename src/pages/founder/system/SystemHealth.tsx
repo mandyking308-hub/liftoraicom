@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import LiftorMasterDryRunPanel from "@/components/founder/testing/LiftorMasterDryRunPanel";
+import LiftorMasterReconciliationPanel from "@/components/founder/testing/LiftorMasterReconciliationPanel";
 import { supabase } from "@/integrations/supabase/client";
 import FounderLayout from "@/components/founder/FounderLayout";
 import CommandCentreModuleRegistryPanel from "@/components/founder/command/CommandCentreModuleRegistryPanel";
@@ -113,6 +114,7 @@ const SystemHealth = () => {
         <AIAgentOperatingModelPanel />
         <AIAgentOrchestratorPanel />
         <LiftorMasterDryRunPanel />
+        <LiftorMasterReconciliationPanel />
         <CommandCentreModuleRegistryPanel />
       </div>
     </FounderLayout>
