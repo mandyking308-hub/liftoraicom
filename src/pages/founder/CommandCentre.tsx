@@ -15,6 +15,7 @@ import MeetingCallIntelligencePanel from "@/components/founder/customer/MeetingC
 import KnowledgeSourceTruthPanel from "@/components/founder/knowledge/KnowledgeSourceTruthPanel";
 import FundingExitReadinessPanel from "@/components/founder/strategy/FundingExitReadinessPanel";
 import ReputationCrisisCommsPanel from "@/components/founder/brand/ReputationCrisisCommsPanel";
+import KPIOKRPerformancePanel from "@/components/founder/analytics/KPIOKRPerformancePanel";
 import LiftorCapabilities from "@/components/founder/LiftorCapabilities";
 import AgentOrchestration from "@/components/founder/AgentOrchestration";
 import SystemModeBanner from "@/components/founder/SystemModeBanner";
