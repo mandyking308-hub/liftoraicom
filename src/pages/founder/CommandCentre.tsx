@@ -31,6 +31,7 @@ import BulkSendEngineBlueprint from "@/components/founder/integrations/BulkSendE
 import SmartleadScaleSetupChecklist from "@/components/founder/integrations/SmartleadScaleSetupChecklist";
 import SmartleadCampaignMappingPreview from "@/components/founder/integrations/SmartleadCampaignMappingPreview";
 import SmartleadLeadPushPreview from "@/components/founder/integrations/SmartleadLeadPushPreview";
+import SmartleadCampaignDiscoveryPanel from "@/components/founder/integrations/SmartleadCampaignDiscoveryPanel";
 import BulkSendPreviewPanel from "@/components/founder/integrations/BulkSendPreviewPanel";
 import SmartleadScaleNextActionBanner from "@/components/founder/integrations/SmartleadScaleNextActionBanner";
 import OutboundChannelLanesPanel from "@/components/founder/integrations/OutboundChannelLanesPanel";
@@ -978,6 +979,7 @@ const CommandCentre = () => {
             </p>
             <SmartleadScaleSetupChecklist />
             <SmartleadCampaignMappingPreview />
+            <SmartleadCampaignDiscoveryPanel />
             <SmartleadLeadPushPreview />
             <BulkSendPreviewPanel />
 
