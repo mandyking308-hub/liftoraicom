@@ -89,6 +89,7 @@ import { ProductisationReadinessPanel } from "@/components/founder/revenue/Produ
 import BusinessLaunchFactoryPanel from "@/components/founder/expansion/BusinessLaunchFactoryPanel";
 import RevenueOperationsPanel from "@/components/founder/finance/RevenueOperationsPanel";
 import LiftorMasterDryRunPanel from "@/components/founder/testing/LiftorMasterDryRunPanel";
+import LiftorMasterReconciliationPanel from "@/components/founder/testing/LiftorMasterReconciliationPanel";
 import CRMContact360Panel from "@/components/founder/crm/CRMContact360Panel";
 import CommandCentreMasterControlPlane from "@/components/founder/command/CommandCentreMasterControlPlane";
 import CustomerJourneyControlBoard from "@/components/founder/command/CustomerJourneyControlBoard";
