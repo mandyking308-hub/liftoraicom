@@ -117,6 +117,16 @@ const StatTile = ({ label, value, icon: Icon, tone = "default", to }: any) => {
   return to ? <Link to={to}>{inner}</Link> : inner;
 };
 
+const RegistryTile = ({ label, value, tone = "default" }: { label: string; value: number; tone?: "default" | "good" | "warn" | "danger" }) => {
+  const toneCls = tone === "danger" ? "text-destructive" : tone === "warn" ? "text-yellow-400" : tone === "good" ? "text-green-400" : "text-primary";
+  return (
+    <div className="p-2 rounded-md border border-border/50 bg-background/40">
+      <p className={`text-lg font-bold ${toneCls}`}>{value}</p>
+      <p className="text-[10px] text-muted-foreground">{label}</p>
+    </div>
+  );
+};
+
 const Section = ({ title, icon: Icon, action, children }: any) => (
   <Card className="bg-card border-border/50">
     <CardHeader className="flex flex-row items-center justify-between pb-3">
@@ -817,13 +827,13 @@ const CommandCentre = () => {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 text-center text-xs">
-                  <Tile label="Registered" value={moduleRegistrySummary?.total ?? 0} />
-                  <Tile label="Active" value={moduleRegistrySummary?.active ?? 0} tone="good" />
-                  <Tile label="Partial" value={moduleRegistrySummary?.partial ?? 0} tone="warn" />
-                  <Tile label="Blocked" value={moduleRegistrySummary?.blocked ?? 0} tone="danger" />
-                  <Tile label="Missing" value={moduleRegistrySummary?.missing ?? 0} tone="warn" />
-                  <Tile label="Lost pages" value={moduleRegistrySummary?.lostPages ?? 0} tone={(moduleRegistrySummary?.lostPages ?? 0) > 0 ? "warn" : "default"} />
-                  <Tile label="Businesses missing setup" value={moduleRegistrySummary?.businessesMissing ?? 0} tone={(moduleRegistrySummary?.businessesMissing ?? 0) > 0 ? "warn" : "default"} />
+                  <RegistryTile label="Registered" value={moduleRegistrySummary?.total ?? 0} />
+                  <RegistryTile label="Active" value={moduleRegistrySummary?.active ?? 0} tone="good" />
+                  <RegistryTile label="Partial" value={moduleRegistrySummary?.partial ?? 0} tone="warn" />
+                  <RegistryTile label="Blocked" value={moduleRegistrySummary?.blocked ?? 0} tone="danger" />
+                  <RegistryTile label="Missing" value={moduleRegistrySummary?.missing ?? 0} tone="warn" />
+                  <RegistryTile label="Lost pages" value={moduleRegistrySummary?.lostPages ?? 0} tone={(moduleRegistrySummary?.lostPages ?? 0) > 0 ? "warn" : "default"} />
+                  <RegistryTile label="Businesses missing setup" value={moduleRegistrySummary?.businessesMissing ?? 0} tone={(moduleRegistrySummary?.businessesMissing ?? 0) > 0 ? "warn" : "default"} />
                 </div>
                 <p className="text-[11px] text-muted-foreground mt-2">
                   Next module to configure: <span className="text-foreground font-medium">{moduleRegistrySummary?.nextModuleName}</span>{" "}
