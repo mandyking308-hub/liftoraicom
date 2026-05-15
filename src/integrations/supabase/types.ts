@@ -2738,6 +2738,69 @@ export type Database = {
           },
         ]
       }
+      crm_founder_review_queue: {
+        Row: {
+          business_id: string | null
+          contact_id: string | null
+          conversation_id: string | null
+          created_at: string
+          current_stage: string | null
+          decided_at: string | null
+          founder_decision: string | null
+          id: string
+          interaction_id: string | null
+          metadata: Json
+          priority_level: string
+          recommended_action: string | null
+          recommended_stage: string | null
+          review_type: string
+          risk_flags: Json
+          status: string
+          summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          current_stage?: string | null
+          decided_at?: string | null
+          founder_decision?: string | null
+          id?: string
+          interaction_id?: string | null
+          metadata?: Json
+          priority_level?: string
+          recommended_action?: string | null
+          recommended_stage?: string | null
+          review_type: string
+          risk_flags?: Json
+          status?: string
+          summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          current_stage?: string | null
+          decided_at?: string | null
+          founder_decision?: string | null
+          id?: string
+          interaction_id?: string | null
+          metadata?: Json
+          priority_level?: string
+          recommended_action?: string | null
+          recommended_stage?: string | null
+          review_type?: string
+          risk_flags?: Json
+          status?: string
+          summary?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       crm_interaction_ledger: {
         Row: {
           ai_action_id: string | null
@@ -3156,6 +3219,66 @@ export type Database = {
         }
         Relationships: []
       }
+      crm_lifecycle_stages: {
+        Row: {
+          ai_draft_allowed: boolean
+          applies_to: string
+          auto_send_allowed: boolean
+          closed_stage: boolean
+          created_at: string
+          deal_allowed: boolean
+          demo_allowed: boolean
+          description: string | null
+          founder_review_required: boolean
+          id: string
+          metadata: Json
+          proposal_allowed: boolean
+          sort_order: number
+          stage_key: string
+          stage_label: string
+          suppression_stage: boolean
+          updated_at: string
+        }
+        Insert: {
+          ai_draft_allowed?: boolean
+          applies_to?: string
+          auto_send_allowed?: boolean
+          closed_stage?: boolean
+          created_at?: string
+          deal_allowed?: boolean
+          demo_allowed?: boolean
+          description?: string | null
+          founder_review_required?: boolean
+          id?: string
+          metadata?: Json
+          proposal_allowed?: boolean
+          sort_order?: number
+          stage_key: string
+          stage_label: string
+          suppression_stage?: boolean
+          updated_at?: string
+        }
+        Update: {
+          ai_draft_allowed?: boolean
+          applies_to?: string
+          auto_send_allowed?: boolean
+          closed_stage?: boolean
+          created_at?: string
+          deal_allowed?: boolean
+          demo_allowed?: boolean
+          description?: string | null
+          founder_review_required?: boolean
+          id?: string
+          metadata?: Json
+          proposal_allowed?: boolean
+          sort_order?: number
+          stage_key?: string
+          stage_label?: string
+          suppression_stage?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       crm_match_candidates: {
         Row: {
           apply_status: string
@@ -3278,6 +3401,69 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      crm_next_action_rules: {
+        Row: {
+          ai_draft_allowed: boolean
+          created_at: string
+          deal_trigger_allowed: boolean
+          demo_trigger_allowed: boolean
+          detected_intent: string | null
+          founder_review_required: boolean
+          id: string
+          interaction_type: string | null
+          metadata: Json
+          notes: string | null
+          priority_level: string
+          proposal_trigger_allowed: boolean
+          recommended_action: string
+          recommended_stage: string | null
+          rule_key: string
+          source_stage: string | null
+          suppression_trigger_allowed: boolean
+          updated_at: string
+        }
+        Insert: {
+          ai_draft_allowed?: boolean
+          created_at?: string
+          deal_trigger_allowed?: boolean
+          demo_trigger_allowed?: boolean
+          detected_intent?: string | null
+          founder_review_required?: boolean
+          id?: string
+          interaction_type?: string | null
+          metadata?: Json
+          notes?: string | null
+          priority_level?: string
+          proposal_trigger_allowed?: boolean
+          recommended_action: string
+          recommended_stage?: string | null
+          rule_key: string
+          source_stage?: string | null
+          suppression_trigger_allowed?: boolean
+          updated_at?: string
+        }
+        Update: {
+          ai_draft_allowed?: boolean
+          created_at?: string
+          deal_trigger_allowed?: boolean
+          demo_trigger_allowed?: boolean
+          detected_intent?: string | null
+          founder_review_required?: boolean
+          id?: string
+          interaction_type?: string | null
+          metadata?: Json
+          notes?: string | null
+          priority_level?: string
+          proposal_trigger_allowed?: boolean
+          recommended_action?: string
+          recommended_stage?: string | null
+          rule_key?: string
+          source_stage?: string | null
+          suppression_trigger_allowed?: boolean
+          updated_at?: string
+        }
+        Relationships: []
       }
       deals: {
         Row: {
