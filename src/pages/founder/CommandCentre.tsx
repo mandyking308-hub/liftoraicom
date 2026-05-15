@@ -365,8 +365,16 @@ const CommandCentre = () => {
       { key: "inbox", name: "Inbox Agent", icon: InboxIcon, status: inboundOk ? "active" : "needs_setup",
         recent: `${drafts.length} AI draft${drafts.length === 1 ? "" : "s"} pending · ${totals.repliesAll} replies (7d)`, pending: drafts.length, blocked: 0,
         next: drafts.length ? `Approve ${drafts.length} AI reply draft${drafts.length === 1 ? "" : "s"}` : "Monitor inbound mailboxes", to: "/founder/conversations" },
-      { key: "social", name: "Social Agent", icon: MessageSquare, status: "needs_setup", recent: "Not yet configured", pending: 0, blocked: 0,
-        next: "Generate 30-day social content pack for Neon Candy", to: "/founder/social" },
+      { key: "social", name: "Social Agent", icon: MessageSquare,
+        status: socialProfiles.length > 0 ? "active" : "needs_setup",
+        recent: socialProfiles.length > 0
+          ? `${socialProfiles.length} social profile${socialProfiles.length === 1 ? "" : "s"} configured (internal-only)`
+          : "Not yet configured",
+        pending: 0, blocked: 0,
+        next: socialProfiles.length > 0
+          ? "Generate 30-day social content pack for Neon Candy"
+          : "Create a social profile for a business",
+        to: "/founder/social" },
       { key: "research", name: "Research Agent", icon: Search, status: highIntent.length ? "active" : "idle",
         recent: `${highIntent.length} high-intent leads flagged`, pending: highIntent.length, blocked: 0,
         next: highIntent.length ? "Review high-intent leads" : "Run lead enrichment", to: "/founder/priority" },
