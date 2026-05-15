@@ -16,6 +16,7 @@ import { Rocket, Search, Plus, LayoutTemplate, Building2, Activity, CheckCircle2
 import { format } from "date-fns";
 import MultiBusinessOperatingLayerPanel from "@/components/founder/operations/MultiBusinessOperatingLayerPanel";
 import BusinessKnowledgeBrainPanel from "@/components/founder/knowledge/BusinessKnowledgeBrainPanel";
+import PortfolioCommandCentrePanel from "@/components/founder/command/PortfolioCommandCentrePanel";
 import BusinessLaunchFactoryPanel from "@/components/founder/expansion/BusinessLaunchFactoryPanel";
 
 const statusClass = (s: string) => {
@@ -129,6 +130,7 @@ const PlatformExpansion = () => {
 
         <MultiBusinessOperatingLayerPanel />
         <BusinessKnowledgeBrainPanel />
+        <PortfolioCommandCentrePanel />
         <BusinessLaunchFactoryPanel />
 
         {/* Stats */}

@@ -55,6 +55,7 @@ import LiveCommercialAgentsPanel from "@/components/founder/commercial/LiveComme
 import LiftorBusinessLiveRunPanel from "@/components/founder/command/LiftorBusinessLiveRunPanel";
 import MultiBusinessOperatingLayerPanel from "@/components/founder/operations/MultiBusinessOperatingLayerPanel";
 import BusinessKnowledgeBrainPanel from "@/components/founder/knowledge/BusinessKnowledgeBrainPanel";
+import PortfolioCommandCentrePanel from "@/components/founder/command/PortfolioCommandCentrePanel";
 import BusinessLaunchFactoryPanel from "@/components/founder/expansion/BusinessLaunchFactoryPanel";
 import RevenueOperationsPanel from "@/components/founder/finance/RevenueOperationsPanel";
 import LiftorMasterDryRunPanel from "@/components/founder/testing/LiftorMasterDryRunPanel";
@@ -659,6 +660,7 @@ const CommandCentre = () => {
                 </Link>
               </div>
             </div>
+            <PortfolioCommandCentrePanel />
 
             {/* OUTREACH SAFETY / QUEUE BRAKE — read-only, shared source of truth with /founder/outreach/queue-audit */}
             <RunwayHeader n={2} title="Safety / Brake — Native Liftor / IONOS queue (not Smartlead scale)" icon={ShieldCheck} anchor="sec-safety" />

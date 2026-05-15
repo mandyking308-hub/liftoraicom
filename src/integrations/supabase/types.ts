@@ -8315,6 +8315,60 @@ export type Database = {
         }
         Relationships: []
       }
+      portfolio_operating_snapshots: {
+        Row: {
+          active_businesses: number
+          agent_tasks_pending: number
+          approvals_pending: number
+          blocked_businesses: number
+          created_at: string
+          critical_blockers: Json
+          id: string
+          invoices_outstanding: number
+          metadata: Json
+          open_deals: number
+          proposals_pending: number
+          revenue_last_30_days: number
+          setup_businesses: number
+          snapshot_date: string
+          total_businesses: number
+        }
+        Insert: {
+          active_businesses?: number
+          agent_tasks_pending?: number
+          approvals_pending?: number
+          blocked_businesses?: number
+          created_at?: string
+          critical_blockers?: Json
+          id?: string
+          invoices_outstanding?: number
+          metadata?: Json
+          open_deals?: number
+          proposals_pending?: number
+          revenue_last_30_days?: number
+          setup_businesses?: number
+          snapshot_date?: string
+          total_businesses?: number
+        }
+        Update: {
+          active_businesses?: number
+          agent_tasks_pending?: number
+          approvals_pending?: number
+          blocked_businesses?: number
+          created_at?: string
+          critical_blockers?: Json
+          id?: string
+          invoices_outstanding?: number
+          metadata?: Json
+          open_deals?: number
+          proposals_pending?: number
+          revenue_last_30_days?: number
+          setup_businesses?: number
+          snapshot_date?: string
+          total_businesses?: number
+        }
+        Relationships: []
+      }
       priority_scores: {
         Row: {
           business_name: string
