@@ -1,4 +1,5 @@
 import FounderLayout from "@/components/founder/FounderLayout";
+import BusinessCapabilityMatrixPanel from "@/components/founder/operations/BusinessCapabilityMatrixPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -191,6 +192,7 @@ const PlatformExpansion = () => {
             );
           })}
         </div>
+        <BusinessCapabilityMatrixPanel />
       </div>
     </FounderLayout>
   );
