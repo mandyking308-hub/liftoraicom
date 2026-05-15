@@ -334,7 +334,7 @@ export default function SmartleadScaleSetupChecklist() {
             </div>
             <p className="text-[11px] text-muted-foreground mt-1">
               {headlineBlocked
-                ? "Reason: No sending mailbox and no campaign exist in Smartlead yet."
+                ? "Smartlead mailbox exists, but no campaign exists yet."
                 : "Mailbox and campaign exist. Continue with sequence mapping, lead push preview and webhook setup."}
             </p>
           </div>
