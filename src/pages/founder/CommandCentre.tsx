@@ -660,6 +660,7 @@ const CommandCentre = () => {
             {/* SECTION 3 — Current Next Actions */}
             <RunwayHeader n={3} title="Current Next Actions" icon={Sparkles} anchor="sec-next-actions" />
             <Section title="Today's founder actions" icon={Sparkles}>
+              <SmartleadScaleNextActionBanner />
               {orderedFounderActions.length === 0 ? (
                 <p className="text-sm text-muted-foreground">No founder decision required right now.</p>
               ) : (
