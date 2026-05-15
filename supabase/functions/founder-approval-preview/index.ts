@@ -186,6 +186,32 @@ Deno.serve(async (req) => {
       if (it.agent_key) byAgent[it.agent_key] = (byAgent[it.agent_key] ?? 0) + 1;
     }
 
+    // Decision-recording readiness + approved-action queue summary
+    const { data: decEnabled } = await admin.rpc("is_agent_live_setting_enabled", { _setting_key: "founder_approval_decision_recording_enabled" });
+    const { data: queueEnabled } = await admin.rpc("is_agent_live_setting_enabled", { _setting_key: "approved_action_queue_creation_enabled" });
+
+    const queueRows = await safe(
+      admin.from("approved_action_queue")
+        .select("id, action_type, action_label, agent_key, contact_id, conversation_id, execution_status, execution_allowed, external_send_required, provider_mutation_required, blocked_reason, approved_at, approval_item_id, payload")
+        .order("approved_at", { ascending: false }).limit(50),
+      []
+    );
+    const queueByStatus: Record<string, number> = {};
+    let externalSendWaiting = 0;
+    let providerWaiting = 0;
+    for (const q of queueRows as any[]) {
+      queueByStatus[q.execution_status] = (queueByStatus[q.execution_status] ?? 0) + 1;
+      if (q.external_send_required && !q.execution_allowed) externalSendWaiting++;
+      if (q.provider_mutation_required && !q.execution_allowed) providerWaiting++;
+    }
+
+    const decisionsRecent = await safe(
+      admin.from("founder_approval_items")
+        .select("id,title,founder_decision,status,decided_at,approval_type,agent_key")
+        .neq("status", "pending").order("decided_at", { ascending: false }).limit(25),
+      []
+    );
+
     return new Response(JSON.stringify({
       ok: true,
       preview_only: true,
@@ -194,14 +220,25 @@ Deno.serve(async (req) => {
       provider_calls: 0,
       send_enabled: false,
       auto_execute_enabled: false,
-      apply_enabled: false,
-      apply_disabled_reason: "founder_approval_apply_disabled",
+      apply_enabled: decEnabled === true,
+      apply_disabled_reason: decEnabled === true ? null : "founder_approval_decision_recording_disabled",
+      decision_recording_enabled: decEnabled === true,
+      approved_action_queue_enabled: queueEnabled === true,
+      decision_confirmation_phrase: "RECORD FOUNDER DECISION",
       total_pending: items.length,
       by_type: byType,
       by_priority: byPriority,
       by_agent: byAgent,
       types,
       items: items.slice(0, 100),
+      approved_actions: {
+        total: (queueRows as any[]).length,
+        by_status: queueByStatus,
+        external_send_waiting: externalSendWaiting,
+        provider_waiting: providerWaiting,
+        recent: queueRows,
+      },
+      decisions_recent: decisionsRecent,
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e: any) {
     return new Response(JSON.stringify({ error: e?.message ?? String(e) }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
