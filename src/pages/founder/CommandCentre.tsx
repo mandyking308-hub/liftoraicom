@@ -15,6 +15,7 @@ import MeetingCallIntelligencePanel from "@/components/founder/customer/MeetingC
 import KnowledgeSourceTruthPanel from "@/components/founder/knowledge/KnowledgeSourceTruthPanel";
 import FundingExitReadinessPanel from "@/components/founder/strategy/FundingExitReadinessPanel";
 import ReputationCrisisCommsPanel from "@/components/founder/brand/ReputationCrisisCommsPanel";
+import KPIOKRPerformancePanel from "@/components/founder/analytics/KPIOKRPerformancePanel";
 import LiftorCapabilities from "@/components/founder/LiftorCapabilities";
 import AgentOrchestration from "@/components/founder/AgentOrchestration";
 import SystemModeBanner from "@/components/founder/SystemModeBanner";
@@ -1607,6 +1608,7 @@ const CommandCentre = () => {
     <div className="max-w-7xl mx-auto px-4 pb-6"><KnowledgeSourceTruthPanel /></div>
     <div className="max-w-7xl mx-auto px-4 pb-6"><FundingExitReadinessPanel /></div>
     <div className="max-w-7xl mx-auto px-4 pb-6"><ReputationCrisisCommsPanel /></div>
+    <div className="max-w-7xl mx-auto px-4 pb-6"><KPIOKRPerformancePanel /></div>
     </FounderLayout>
   );
 };

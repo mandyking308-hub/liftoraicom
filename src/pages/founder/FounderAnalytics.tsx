@@ -7,6 +7,7 @@ import RetentionRecurringRevenuePanel from "@/components/founder/customer/Retent
 import CRMTotalMemoryRecoveryPanel from "@/components/founder/customer/CRMTotalMemoryRecoveryPanel";
 import PortfolioIntelligenceBrainPanel from "@/components/founder/strategy/PortfolioIntelligenceBrainPanel";
 import SocialAnalyticsTrendPanel from "@/components/founder/social/SocialAnalyticsTrendPanel";
+import KPIOKRPerformancePanel from "@/components/founder/analytics/KPIOKRPerformancePanel";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -236,6 +237,7 @@ const FounderAnalytics = () => {
         </Card>
         <SocialAnalyticsTrendPanel />
         <CostCreditsMarginControlPanel />
+        <KPIOKRPerformancePanel />
       </div>
     </FounderLayout>
   );
