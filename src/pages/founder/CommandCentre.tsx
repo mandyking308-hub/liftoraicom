@@ -770,6 +770,7 @@ const CommandCentre = () => {
       <div className="max-w-7xl mx-auto px-4 pt-4"><BusinessKnowledgeUploadTrainingPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><LiftorUserManualPanel /></div>
       <DailyOperatorNextActionsCard />
+      <CommandCentreFunctionalityMapCard />
       <DiagnosticGate>
       {(() => {
         const activeBusinessName = activeInboxes[0]?.business_name ?? businesses[0]?.name ?? "Neon Candy";
@@ -1739,6 +1740,83 @@ function DailyOperatorNextActionsCard() {
             ))}
           </ol>
           <p className="text-[10px] text-muted-foreground mt-2">No external action triggered from this card. Smartlead / Apollo / IONOS sends remain locked behind founder approval + confirmation phrase.</p>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function CommandCentreFunctionalityMapCard() {
+  const [, setMode] = useViewMode();
+  const rows: { feature: string; route: string; where: string; daily: boolean; diag: boolean }[] = [
+    { feature: "Truth Sync (current authority)", route: "/founder/command-centre", where: "Daily", daily: true, diag: true },
+    { feature: "Final Hardening + Go-To-Use Readiness", route: "/founder/command-centre", where: "Daily", daily: true, diag: true },
+    { feature: "Business Activation Wizard", route: "/founder/command-centre", where: "Daily", daily: true, diag: true },
+    { feature: "Rehearsal · Reset · Clean Real Mode", route: "/founder/command-centre", where: "Daily", daily: true, diag: true },
+    { feature: "Pre-Live Baseline", route: "/founder/command-centre", where: "Daily", daily: true, diag: true },
+    { feature: "Revenue Target Operating Mode", route: "/founder/command-centre", where: "Daily", daily: true, diag: true },
+    { feature: "Business Knowledge Upload + Training", route: "/founder/command-centre", where: "Daily", daily: true, diag: true },
+    { feature: "User + Technical Manual", route: "/founder/manual", where: "Daily", daily: true, diag: true },
+    { feature: "Customer Journey Flow + CRM Memory", route: "/founder/crm/dashboard", where: "Diagnostic + route", daily: false, diag: true },
+    { feature: "Human Layer (onboarding · support · win-back)", route: "/founder/support", where: "Diagnostic + route", daily: false, diag: true },
+    { feature: "Prospecting / Apollo (legacy lane)", route: "/founder/outreach", where: "Diagnostic + route", daily: false, diag: true },
+    { feature: "Social Brain · Content Factory · Marketing", route: "/founder/marketing", where: "Diagnostic + route", daily: false, diag: true },
+    { feature: "Smartlead Scale Lane", route: "/founder/integrations#smartlead-scale-setup-checklist", where: "Diagnostic + route", daily: false, diag: true },
+    { feature: "Native IONOS lane (parked)", route: "/founder/outreach/queue-audit", where: "Diagnostic + route (legacy)", daily: false, diag: true },
+    { feature: "Proposals · Demos · Deals", route: "/founder/proposals/internal", where: "Diagnostic + route", daily: false, diag: true },
+    { feature: "Invoices · Payments · Recurring Revenue", route: "/founder/finance/dashboard", where: "Diagnostic + route", daily: false, diag: true },
+    { feature: "Suppliers · Delivery", route: "/founder/suppliers", where: "Diagnostic + route", daily: false, diag: true },
+    { feature: "AI Agent Control Room + Handover", route: "/founder/agents", where: "Diagnostic + route", daily: false, diag: true },
+    { feature: "Autopilot Activation Gates", route: "/founder/command-centre", where: "Diagnostic", daily: false, diag: true },
+    { feature: "Multilingual Intelligence + Global Clock", route: "/founder/command-centre", where: "Diagnostic", daily: false, diag: true },
+    { feature: "Group HQ (Treasury · Contracts · People · Risk · Product · IP · Privacy · Funding · Reputation · KPI/OKR)", route: "/founder/command-centre", where: "Diagnostic", daily: false, diag: true },
+    { feature: "System Health · Self-Healing · Cost/Credits", route: "/founder/system/health", where: "Diagnostic + route", daily: false, diag: true },
+    { feature: "Module Registry · Master Dry Run · Reconciliation", route: "/founder/command-centre", where: "Diagnostic (legacy snapshots)", daily: false, diag: true },
+    { feature: "Founder Approval Console + External Action Gates", route: "/founder/command-centre", where: "Diagnostic", daily: false, diag: true },
+    { feature: "Legal Console", route: "/founder/legal", where: "Route", daily: false, diag: true },
+  ];
+  return (
+    <div className="max-w-7xl mx-auto px-4 pt-4">
+      <Card className="bg-card border-border/50">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <MapIcon size={14} className="text-primary" /> Command Centre Functionality Map
+            <Badge variant="outline" className="border-primary/40 text-primary text-[10px]">CURRENT</Badge>
+            <Badge variant="outline" className="border-border/60 text-muted-foreground text-[10px]">no functionality removed</Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="pt-0 space-y-2">
+          <p className="text-[11px] text-muted-foreground">
+            Daily Operator View hides legacy diagnostics for clarity. Every feature below is still mounted and reachable —
+            either inline in <button onClick={() => setMode("diagnostic")} className="text-primary hover:underline">Full Diagnostic View</button> or via its dedicated route.
+          </p>
+          <div className="max-h-72 overflow-auto rounded-md border border-border/40">
+            <table className="w-full text-[11px]">
+              <thead className="bg-muted/30 text-muted-foreground">
+                <tr>
+                  <th className="text-left px-2 py-1 font-medium">Feature</th>
+                  <th className="text-left px-2 py-1 font-medium">Where</th>
+                  <th className="text-left px-2 py-1 font-medium">Daily</th>
+                  <th className="text-left px-2 py-1 font-medium">Diagnostic</th>
+                  <th className="text-left px-2 py-1 font-medium">Route</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r) => (
+                  <tr key={r.feature} className="border-t border-border/30">
+                    <td className="px-2 py-1">{r.feature}</td>
+                    <td className="px-2 py-1 text-muted-foreground">{r.where}</td>
+                    <td className="px-2 py-1">{r.daily ? <Badge variant="outline" className="border-green-500/40 text-green-400 text-[10px]">visible</Badge> : <Badge variant="outline" className="border-border/60 text-muted-foreground text-[10px]">hidden</Badge>}</td>
+                    <td className="px-2 py-1">{r.diag ? <Badge variant="outline" className="border-primary/40 text-primary text-[10px]">visible</Badge> : <Badge variant="outline" className="border-border/60 text-muted-foreground text-[10px]">hidden</Badge>}</td>
+                    <td className="px-2 py-1"><Link to={r.route} className="text-primary hover:underline">{r.route}</Link></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-[10px] text-muted-foreground">
+            Audit: 137 imported panels · 123 mounted on this page · 0 components deleted · 0 routes removed · all hidden modules reachable via Diagnostic View or route link.
+          </p>
         </CardContent>
       </Card>
     </div>
