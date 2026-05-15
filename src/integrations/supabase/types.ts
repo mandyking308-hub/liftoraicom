@@ -5071,6 +5071,165 @@ export type Database = {
           },
         ]
       }
+      business_valuation_assumptions: {
+        Row: {
+          automation_strength: string | null
+          business_id: string
+          business_model: string | null
+          created_at: string
+          customer_quality: string | null
+          founder_dependency: string | null
+          growth_quality: string | null
+          id: string
+          ip_strength: string | null
+          margin_quality: string | null
+          notes: string | null
+          recurring_revenue_strength: string | null
+          revenue_quality: string | null
+          risk_score: number | null
+          sector: string | null
+          stage: string | null
+          strategic_value: string | null
+          updated_at: string
+        }
+        Insert: {
+          automation_strength?: string | null
+          business_id: string
+          business_model?: string | null
+          created_at?: string
+          customer_quality?: string | null
+          founder_dependency?: string | null
+          growth_quality?: string | null
+          id?: string
+          ip_strength?: string | null
+          margin_quality?: string | null
+          notes?: string | null
+          recurring_revenue_strength?: string | null
+          revenue_quality?: string | null
+          risk_score?: number | null
+          sector?: string | null
+          stage?: string | null
+          strategic_value?: string | null
+          updated_at?: string
+        }
+        Update: {
+          automation_strength?: string | null
+          business_id?: string
+          business_model?: string | null
+          created_at?: string
+          customer_quality?: string | null
+          founder_dependency?: string | null
+          growth_quality?: string | null
+          id?: string
+          ip_strength?: string | null
+          margin_quality?: string | null
+          notes?: string | null
+          recurring_revenue_strength?: string | null
+          revenue_quality?: string | null
+          risk_score?: number | null
+          sector?: string | null
+          stage?: string | null
+          strategic_value?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      business_valuation_snapshots: {
+        Row: {
+          active_subscriptions: number | null
+          adviser_review_required: boolean
+          annual_recurring_revenue: number | null
+          assumptions: Json | null
+          base_estimate: number | null
+          blockers: Json | null
+          business_id: string
+          churn_rate: number | null
+          confidence_level: string | null
+          created_at: string
+          currency: string
+          customer_count: number | null
+          ebitda: number | null
+          founder_notes: string | null
+          gross_margin: number | null
+          gross_profit: number | null
+          growth_rate: number | null
+          high_estimate: number | null
+          id: string
+          low_estimate: number | null
+          monthly_recurring_revenue: number | null
+          net_profit: number | null
+          revenue_amount: number | null
+          updated_at: string
+          valuation_method: string | null
+          valuation_multiple_base: number | null
+          valuation_multiple_high: number | null
+          valuation_multiple_low: number | null
+          valuation_stage: string
+        }
+        Insert: {
+          active_subscriptions?: number | null
+          adviser_review_required?: boolean
+          annual_recurring_revenue?: number | null
+          assumptions?: Json | null
+          base_estimate?: number | null
+          blockers?: Json | null
+          business_id: string
+          churn_rate?: number | null
+          confidence_level?: string | null
+          created_at?: string
+          currency?: string
+          customer_count?: number | null
+          ebitda?: number | null
+          founder_notes?: string | null
+          gross_margin?: number | null
+          gross_profit?: number | null
+          growth_rate?: number | null
+          high_estimate?: number | null
+          id?: string
+          low_estimate?: number | null
+          monthly_recurring_revenue?: number | null
+          net_profit?: number | null
+          revenue_amount?: number | null
+          updated_at?: string
+          valuation_method?: string | null
+          valuation_multiple_base?: number | null
+          valuation_multiple_high?: number | null
+          valuation_multiple_low?: number | null
+          valuation_stage: string
+        }
+        Update: {
+          active_subscriptions?: number | null
+          adviser_review_required?: boolean
+          annual_recurring_revenue?: number | null
+          assumptions?: Json | null
+          base_estimate?: number | null
+          blockers?: Json | null
+          business_id?: string
+          churn_rate?: number | null
+          confidence_level?: string | null
+          created_at?: string
+          currency?: string
+          customer_count?: number | null
+          ebitda?: number | null
+          founder_notes?: string | null
+          gross_margin?: number | null
+          gross_profit?: number | null
+          growth_rate?: number | null
+          high_estimate?: number | null
+          id?: string
+          low_estimate?: number | null
+          monthly_recurring_revenue?: number | null
+          net_profit?: number | null
+          revenue_amount?: number | null
+          updated_at?: string
+          valuation_method?: string | null
+          valuation_multiple_base?: number | null
+          valuation_multiple_high?: number | null
+          valuation_multiple_low?: number | null
+          valuation_stage?: string
+        }
+        Relationships: []
+      }
       businesses: {
         Row: {
           created_at: string
