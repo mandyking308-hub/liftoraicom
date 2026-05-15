@@ -316,6 +316,194 @@ export type Database = {
           },
         ]
       }
+      ai_agent_operating_status: {
+        Row: {
+          agent_key: string
+          auto_action_status: boolean
+          blocked_items: number
+          completed_items: number
+          created_at: string
+          current_blockers: Json
+          error_count: number
+          health: string
+          id: string
+          last_checked_at: string | null
+          last_run_at: string | null
+          metadata: Json
+          no_send_status: boolean
+          pending_items: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          agent_key: string
+          auto_action_status?: boolean
+          blocked_items?: number
+          completed_items?: number
+          created_at?: string
+          current_blockers?: Json
+          error_count?: number
+          health?: string
+          id?: string
+          last_checked_at?: string | null
+          last_run_at?: string | null
+          metadata?: Json
+          no_send_status?: boolean
+          pending_items?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          agent_key?: string
+          auto_action_status?: boolean
+          blocked_items?: number
+          completed_items?: number
+          created_at?: string
+          current_blockers?: Json
+          error_count?: number
+          health?: string
+          id?: string
+          last_checked_at?: string | null
+          last_run_at?: string | null
+          metadata?: Json
+          no_send_status?: boolean
+          pending_items?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ai_agent_permissions: {
+        Row: {
+          agent_role_id: string
+          allowed: boolean
+          created_at: string
+          feature_flag_required: string | null
+          id: string
+          metadata: Json
+          notes: string | null
+          permission_key: string
+          permission_label: string
+          requires_founder_approval: boolean
+          updated_at: string
+        }
+        Insert: {
+          agent_role_id: string
+          allowed?: boolean
+          created_at?: string
+          feature_flag_required?: string | null
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          permission_key: string
+          permission_label: string
+          requires_founder_approval?: boolean
+          updated_at?: string
+        }
+        Update: {
+          agent_role_id?: string
+          allowed?: boolean
+          created_at?: string
+          feature_flag_required?: string | null
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          permission_key?: string
+          permission_label?: string
+          requires_founder_approval?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_agent_permissions_agent_role_id_fkey"
+            columns: ["agent_role_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agent_roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_agent_roles: {
+        Row: {
+          agent_category: string
+          agent_key: string
+          agent_name: string
+          auto_action_allowed: boolean
+          can_call_external_providers: boolean
+          can_create_deals: boolean
+          can_create_invoices: boolean
+          can_create_proposals: boolean
+          can_mutate_operational_data: boolean
+          can_read_conversations: boolean
+          can_read_crm: boolean
+          can_read_finance: boolean
+          can_read_suppliers: boolean
+          can_send_email: boolean
+          created_at: string
+          default_status: string
+          description: string | null
+          founder_approval_required: boolean
+          guardrails: Json
+          id: string
+          metadata: Json
+          primary_module: string | null
+          risk_level: string
+          updated_at: string
+        }
+        Insert: {
+          agent_category: string
+          agent_key: string
+          agent_name: string
+          auto_action_allowed?: boolean
+          can_call_external_providers?: boolean
+          can_create_deals?: boolean
+          can_create_invoices?: boolean
+          can_create_proposals?: boolean
+          can_mutate_operational_data?: boolean
+          can_read_conversations?: boolean
+          can_read_crm?: boolean
+          can_read_finance?: boolean
+          can_read_suppliers?: boolean
+          can_send_email?: boolean
+          created_at?: string
+          default_status?: string
+          description?: string | null
+          founder_approval_required?: boolean
+          guardrails?: Json
+          id?: string
+          metadata?: Json
+          primary_module?: string | null
+          risk_level?: string
+          updated_at?: string
+        }
+        Update: {
+          agent_category?: string
+          agent_key?: string
+          agent_name?: string
+          auto_action_allowed?: boolean
+          can_call_external_providers?: boolean
+          can_create_deals?: boolean
+          can_create_invoices?: boolean
+          can_create_proposals?: boolean
+          can_mutate_operational_data?: boolean
+          can_read_conversations?: boolean
+          can_read_crm?: boolean
+          can_read_finance?: boolean
+          can_read_suppliers?: boolean
+          can_send_email?: boolean
+          created_at?: string
+          default_status?: string
+          description?: string | null
+          founder_approval_required?: boolean
+          guardrails?: Json
+          id?: string
+          metadata?: Json
+          primary_module?: string | null
+          risk_level?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ai_agents: {
         Row: {
           agent_function: string
