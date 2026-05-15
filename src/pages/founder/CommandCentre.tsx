@@ -73,6 +73,7 @@ import GlobalOperatingClockPanel from "@/components/founder/global/GlobalOperati
 import LearningOptimisationEnginePanel from "@/components/founder/optimisation/LearningOptimisationEnginePanel";
 import SelfHealingMonitoringPanel from "@/components/founder/monitoring/SelfHealingMonitoringPanel";
 import PortfolioIntelligenceBrainPanel from "@/components/founder/strategy/PortfolioIntelligenceBrainPanel";
+import SocialMediaBrainPanel from "@/components/founder/social/SocialMediaBrainPanel";
 import { SecurityGovernancePanel } from "@/components/founder/security/SecurityGovernancePanel";
 import { ProductisationReadinessPanel } from "@/components/founder/revenue/ProductisationReadinessPanel";
 import BusinessLaunchFactoryPanel from "@/components/founder/expansion/BusinessLaunchFactoryPanel";
@@ -361,7 +362,7 @@ const CommandCentre = () => {
         recent: `${drafts.length} AI draft${drafts.length === 1 ? "" : "s"} pending · ${totals.repliesAll} replies (7d)`, pending: drafts.length, blocked: 0,
         next: drafts.length ? `Approve ${drafts.length} AI reply draft${drafts.length === 1 ? "" : "s"}` : "Monitor inbound mailboxes", to: "/founder/conversations" },
       { key: "social", name: "Social Agent", icon: MessageSquare, status: "needs_setup", recent: "Not yet configured", pending: 0, blocked: 0,
-        next: "Connect a social channel", to: "/founder/integrations" },
+        next: "Generate 30-day social content pack for Neon Candy", to: "/founder/social" },
       { key: "research", name: "Research Agent", icon: Search, status: highIntent.length ? "active" : "idle",
         recent: `${highIntent.length} high-intent leads flagged`, pending: highIntent.length, blocked: 0,
         next: highIntent.length ? "Review high-intent leads" : "Run lead enrichment", to: "/founder/priority" },
@@ -810,6 +811,7 @@ const CommandCentre = () => {
               <AgentHandoverProtocolPanel />
               <AgentCollaborationBoard />
               <AutopilotActivationGatesPanel />
+              <SocialMediaBrainPanel />
             </Section>
 
             {/* SECTION 6 — Outreach Runway */}
@@ -1089,6 +1091,7 @@ const CommandCentre = () => {
             <SmartleadLeadPushPreview />
             <BulkSendPreviewPanel />
             <ScaleOperationsDryRunDashboard />
+            <SocialMediaBrainPanel />
 
             {/* SECTION 13 — Monitoring / Security / System Health */}
             <RunwayHeader n={13} title="Monitoring / Security / System Health" icon={Monitor} anchor="sec-monitoring" />
