@@ -95,6 +95,9 @@ import CRMContact360Panel from "@/components/founder/crm/CRMContact360Panel";
 import CommandCentreMasterControlPlane from "@/components/founder/command/CommandCentreMasterControlPlane";
 import CustomerJourneyControlBoard from "@/components/founder/command/CustomerJourneyControlBoard";
 import AgentCollaborationBoard from "@/components/founder/agents/AgentCollaborationBoard";
+import CustomerJourneyFlowMap from "@/components/founder/command/CustomerJourneyFlowMap";
+import CommandCentreStickyNav from "@/components/founder/command/CommandCentreStickyNav";
+import CustomerJourneyPositionPanel from "@/components/founder/command/CustomerJourneyPositionPanel";
 import {
   Building2, Bot, Send, Mail, Inbox as InboxIcon, MessageSquare, FileSignature,
   Search, Banknote, ShieldCheck, Workflow as WorkflowIcon, Phone, AlertTriangle,
@@ -905,6 +908,16 @@ const CommandCentre = () => {
             <SystemModeBanner />
 
             <CommandCentreMasterControlPlane />
+
+            <div id="top" />
+            <CommandCentreStickyNav />
+
+            <div className="grid lg:grid-cols-3 gap-3">
+              <div className="lg:col-span-2">
+                <CustomerJourneyFlowMap />
+              </div>
+              <CustomerJourneyPositionPanel />
+            </div>
 
             {/* Top: Module Registry summary */}
             <Card className="bg-card border-border/50">

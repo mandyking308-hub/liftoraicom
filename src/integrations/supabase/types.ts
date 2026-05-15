@@ -3678,6 +3678,66 @@ export type Database = {
         }
         Relationships: []
       }
+      command_centre_customer_journey_steps: {
+        Row: {
+          business_scoped: boolean | null
+          command_centre_anchor: string | null
+          created_at: string | null
+          description: string | null
+          enabled: boolean | null
+          external_action_risk: boolean | null
+          founder_approval_required: boolean | null
+          id: string
+          journey_stage_group: string
+          metadata: Json | null
+          owner_agent_key: string | null
+          primary_module_key: string | null
+          primary_route: string | null
+          step_key: string
+          step_label: string
+          step_order: number
+          updated_at: string | null
+        }
+        Insert: {
+          business_scoped?: boolean | null
+          command_centre_anchor?: string | null
+          created_at?: string | null
+          description?: string | null
+          enabled?: boolean | null
+          external_action_risk?: boolean | null
+          founder_approval_required?: boolean | null
+          id?: string
+          journey_stage_group: string
+          metadata?: Json | null
+          owner_agent_key?: string | null
+          primary_module_key?: string | null
+          primary_route?: string | null
+          step_key: string
+          step_label: string
+          step_order: number
+          updated_at?: string | null
+        }
+        Update: {
+          business_scoped?: boolean | null
+          command_centre_anchor?: string | null
+          created_at?: string | null
+          description?: string | null
+          enabled?: boolean | null
+          external_action_risk?: boolean | null
+          founder_approval_required?: boolean | null
+          id?: string
+          journey_stage_group?: string
+          metadata?: Json | null
+          owner_agent_key?: string | null
+          primary_module_key?: string | null
+          primary_route?: string | null
+          step_key?: string
+          step_label?: string
+          step_order?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       command_centre_data_flow_registry: {
         Row: {
           blockers: Json
@@ -3729,6 +3789,81 @@ export type Database = {
           test_status?: string
           updated_at?: string
           workflow_key?: string | null
+        }
+        Relationships: []
+      }
+      command_centre_link_audit: {
+        Row: {
+          audit_scope: string
+          blocker: string | null
+          checked_at: string | null
+          component_exists: boolean | null
+          created_at: string | null
+          expected_to_exist: boolean | null
+          id: string
+          link_label: string | null
+          link_type: string | null
+          metadata: Json | null
+          opens_external: boolean | null
+          opens_in_command_centre: boolean | null
+          permission_required: boolean | null
+          recommended_fix: string | null
+          route_exists: boolean | null
+          source_component: string | null
+          source_section: string | null
+          status: string | null
+          target_anchor: string | null
+          target_module_key: string | null
+          target_route: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          audit_scope: string
+          blocker?: string | null
+          checked_at?: string | null
+          component_exists?: boolean | null
+          created_at?: string | null
+          expected_to_exist?: boolean | null
+          id?: string
+          link_label?: string | null
+          link_type?: string | null
+          metadata?: Json | null
+          opens_external?: boolean | null
+          opens_in_command_centre?: boolean | null
+          permission_required?: boolean | null
+          recommended_fix?: string | null
+          route_exists?: boolean | null
+          source_component?: string | null
+          source_section?: string | null
+          status?: string | null
+          target_anchor?: string | null
+          target_module_key?: string | null
+          target_route?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          audit_scope?: string
+          blocker?: string | null
+          checked_at?: string | null
+          component_exists?: boolean | null
+          created_at?: string | null
+          expected_to_exist?: boolean | null
+          id?: string
+          link_label?: string | null
+          link_type?: string | null
+          metadata?: Json | null
+          opens_external?: boolean | null
+          opens_in_command_centre?: boolean | null
+          permission_required?: boolean | null
+          recommended_fix?: string | null
+          route_exists?: boolean | null
+          source_component?: string | null
+          source_section?: string | null
+          status?: string | null
+          target_anchor?: string | null
+          target_module_key?: string | null
+          target_route?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
