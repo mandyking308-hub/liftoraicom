@@ -58,6 +58,7 @@ import BusinessKnowledgeBrainPanel from "@/components/founder/knowledge/Business
 import PortfolioCommandCentrePanel from "@/components/founder/command/PortfolioCommandCentrePanel";
 import InternalOperatingSchedulesPanel from "@/components/founder/operations/InternalOperatingSchedulesPanel";
 import { SecurityGovernancePanel } from "@/components/founder/security/SecurityGovernancePanel";
+import { ProductisationReadinessPanel } from "@/components/founder/revenue/ProductisationReadinessPanel";
 import BusinessLaunchFactoryPanel from "@/components/founder/expansion/BusinessLaunchFactoryPanel";
 import RevenueOperationsPanel from "@/components/founder/finance/RevenueOperationsPanel";
 import LiftorMasterDryRunPanel from "@/components/founder/testing/LiftorMasterDryRunPanel";
@@ -983,6 +984,7 @@ const CommandCentre = () => {
             </Section>
             <CommercialHandoffPanel />
             <LiveCommercialAgentsPanel />
+            <ProductisationReadinessPanel />
 
             {/* SECTION 10 — Deals / Finance / Revenue */}
             <RunwayHeader n={10} title="Deals / Finance / Revenue" icon={Banknote} anchor="sec-finance" />
