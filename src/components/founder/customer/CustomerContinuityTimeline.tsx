@@ -16,7 +16,6 @@ export default function CustomerContinuityTimeline({ contactId }: { contactId?: 
         supabase.from('proposals').select('id,status,created_at').eq('contact_id', contactId).order('created_at', { ascending: false }).limit(20),
         supabase.from('deals').select('id,status,value,created_at').eq('contact_id', contactId).order('created_at', { ascending: false }).limit(20),
         supabase.from('invoices').select('id,status,amount,created_at').eq('contact_id', contactId).order('created_at', { ascending: false }).limit(20),
-        supabase.from('payments').select('id,amount,received_at').eq('contact_id', contactId).order('received_at', { ascending: false }).limit(20),
         supabase.from('customer_quarterly_reports').select('id,report_quarter,report_year,report_status,created_at').eq('contact_id', contactId).order('created_at', { ascending: false }).limit(20),
         supabase.from('customer_account_reviews').select('id,review_type,review_status,recommended_next_action,created_at').eq('contact_id', contactId).order('created_at', { ascending: false }).limit(20),
       ]);
@@ -29,9 +28,8 @@ export default function CustomerContinuityTimeline({ contactId }: { contactId?: 
         ...tag('proposal', queries[3].data, (r) => r.created_at, (r) => `Proposal · ${r.status}`),
         ...tag('deal', queries[4].data, (r) => r.created_at, (r) => `Deal · ${r.status} · ${r.value ?? ''}`),
         ...tag('invoice', queries[5].data, (r) => r.created_at, (r) => `Invoice · ${r.status} · ${r.amount ?? ''}`),
-        ...tag('payment', queries[6].data, (r) => r.received_at, (r) => `Payment · ${r.amount ?? ''}`),
-        ...tag('quarterly_report', queries[7].data, (r) => r.created_at, (r) => `Report · ${r.report_quarter} ${r.report_year} · ${r.report_status}`),
-        ...tag('account_review', queries[8].data, (r) => r.created_at, (r) => `Review · ${r.review_status} · ${r.recommended_next_action ?? ''}`),
+        ...tag('quarterly_report', queries[6].data, (r) => r.created_at, (r) => `Report · ${r.report_quarter} ${r.report_year} · ${r.report_status}`),
+        ...tag('account_review', queries[7].data, (r) => r.created_at, (r) => `Review · ${r.review_status} · ${r.recommended_next_action ?? ''}`),
       ].filter((e) => e.date).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 80);
       return { events };
     },
