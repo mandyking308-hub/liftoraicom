@@ -318,12 +318,17 @@ Deno.serve(async (req) => {
         .single();
       await admin.from('agent_action_audit_log').insert({
         agent_key: 'approved_action_executor',
-        action_kind: 'execution_blocked',
+        source_function: 'approved-action-executor',
+        action_type: 'execution_blocked',
         action_status: 'blocked',
         business_id: item.business_id,
         target_table: 'founder_approval_items',
         target_id: item.id,
-        details: { action_type: actionType, reason, log_id: logRow?.id },
+        founder_user_id: userId,
+        confirmation_phrase: confirmation,
+        dry_run: false,
+        blocked_reason: reason,
+        metadata: { action_type: actionType, log_id: logRow?.id },
       });
       results.push({
         approved_action_id: item.id,
@@ -379,16 +384,20 @@ Deno.serve(async (req) => {
 
     await admin.from('agent_action_audit_log').insert({
       agent_key: 'approved_action_executor',
-      action_kind: out.status === 'executed' ? 'internal_action_executed' : 'execution_failed',
+      source_function: 'approved-action-executor',
+      action_type: out.status === 'executed' ? 'internal_action_executed' : 'execution_failed',
       action_status: out.status,
       business_id: item.business_id,
       target_table: out.target_table ?? 'founder_approval_items',
       target_id: out.target_id ?? item.id,
-      details: {
+      founder_user_id: userId,
+      confirmation_phrase: confirmation,
+      dry_run: false,
+      blocked_reason: out.blocked_reason ?? null,
+      metadata: {
         action_type: actionType,
         approval_id: item.id,
         result_summary: out.result_summary,
-        blocked_reason: out.blocked_reason,
         log_id: logRow?.id,
       },
     });
