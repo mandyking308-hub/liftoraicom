@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import LiftorMasterDryRunPanel from "@/components/founder/testing/LiftorMasterDryRunPanel";
 import { supabase } from "@/integrations/supabase/client";
 import FounderLayout from "@/components/founder/FounderLayout";
+import SelfHealingMonitoringPanel from "@/components/founder/monitoring/SelfHealingMonitoringPanel";
 import CRMInteractionSourceAdaptersPanel from "@/components/founder/crm/CRMInteractionSourceAdaptersPanel";
 import CRMHealthIntegrityPanel from "@/components/founder/crm/CRMHealthIntegrityPanel";
 import AIAgentOperatingModelPanel from "@/components/founder/agents/AIAgentOperatingModelPanel";
@@ -58,6 +59,9 @@ const SystemHealth = () => {
           <p className="text-muted-foreground mt-1">
             7-day metric history sampled every 15 minutes.
           </p>
+        </div>
+        <SelfHealingMonitoringPanel />
+        <div>
         </div>
 
         <CRMInteractionSourceAdaptersPanel />
