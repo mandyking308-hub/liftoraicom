@@ -5276,6 +5276,98 @@ export type Database = {
           },
         ]
       }
+      contract_register: {
+        Row: {
+          business_id: string | null
+          contract_name: string
+          contract_type: string
+          counterparty_name: string | null
+          created_at: string | null
+          currency: string | null
+          document_id: string | null
+          effective_date: string | null
+          entity_id: string | null
+          expiry_date: string | null
+          founder_review_required: boolean | null
+          id: string
+          key_terms_summary: string | null
+          legal_review_recommended: boolean | null
+          metadata: Json | null
+          obligations: Json | null
+          related_contact_id: string | null
+          related_supplier_id: string | null
+          renewal_date: string | null
+          risk_level: string | null
+          signed: boolean | null
+          status: string | null
+          termination_notice_days: number | null
+          updated_at: string | null
+          value_estimate: number | null
+        }
+        Insert: {
+          business_id?: string | null
+          contract_name: string
+          contract_type: string
+          counterparty_name?: string | null
+          created_at?: string | null
+          currency?: string | null
+          document_id?: string | null
+          effective_date?: string | null
+          entity_id?: string | null
+          expiry_date?: string | null
+          founder_review_required?: boolean | null
+          id?: string
+          key_terms_summary?: string | null
+          legal_review_recommended?: boolean | null
+          metadata?: Json | null
+          obligations?: Json | null
+          related_contact_id?: string | null
+          related_supplier_id?: string | null
+          renewal_date?: string | null
+          risk_level?: string | null
+          signed?: boolean | null
+          status?: string | null
+          termination_notice_days?: number | null
+          updated_at?: string | null
+          value_estimate?: number | null
+        }
+        Update: {
+          business_id?: string | null
+          contract_name?: string
+          contract_type?: string
+          counterparty_name?: string | null
+          created_at?: string | null
+          currency?: string | null
+          document_id?: string | null
+          effective_date?: string | null
+          entity_id?: string | null
+          expiry_date?: string | null
+          founder_review_required?: boolean | null
+          id?: string
+          key_terms_summary?: string | null
+          legal_review_recommended?: boolean | null
+          metadata?: Json | null
+          obligations?: Json | null
+          related_contact_id?: string | null
+          related_supplier_id?: string | null
+          renewal_date?: string | null
+          risk_level?: string | null
+          signed?: boolean | null
+          status?: string | null
+          termination_notice_days?: number | null
+          updated_at?: string | null
+          value_estimate?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_register_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contract_templates: {
         Row: {
           active: boolean
@@ -13335,6 +13427,69 @@ export type Database = {
         }
         Relationships: []
       }
+      procurement_requests: {
+        Row: {
+          approved_at: string | null
+          business_id: string | null
+          business_reason: string | null
+          contract_required: boolean | null
+          created_at: string | null
+          currency: string | null
+          entity_id: string | null
+          estimated_cost: number | null
+          founder_approval_required: boolean | null
+          id: string
+          metadata: Json | null
+          rejected_at: string | null
+          request_name: string
+          request_type: string
+          risk_level: string | null
+          status: string | null
+          supplier_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          business_id?: string | null
+          business_reason?: string | null
+          contract_required?: boolean | null
+          created_at?: string | null
+          currency?: string | null
+          entity_id?: string | null
+          estimated_cost?: number | null
+          founder_approval_required?: boolean | null
+          id?: string
+          metadata?: Json | null
+          rejected_at?: string | null
+          request_name: string
+          request_type: string
+          risk_level?: string | null
+          status?: string | null
+          supplier_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          business_id?: string | null
+          business_reason?: string | null
+          contract_required?: boolean | null
+          created_at?: string | null
+          currency?: string | null
+          entity_id?: string | null
+          estimated_cost?: number | null
+          founder_approval_required?: boolean | null
+          id?: string
+          metadata?: Json | null
+          rejected_at?: string | null
+          request_name?: string
+          request_type?: string
+          risk_level?: string | null
+          status?: string | null
+          supplier_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -16046,6 +16201,74 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "supplier_pipeline_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      supplier_risk_reviews: {
+        Row: {
+          backup_supplier_needed: boolean | null
+          business_id: string | null
+          capacity_score: number | null
+          compliance_score: number | null
+          cost_score: number | null
+          created_at: string | null
+          founder_review_required: boolean | null
+          id: string
+          performance_score: number | null
+          recommended_action: string | null
+          reliability_score: number | null
+          review_status: string | null
+          reviewed_at: string | null
+          risk_level: string | null
+          risks: Json | null
+          supplier_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          backup_supplier_needed?: boolean | null
+          business_id?: string | null
+          capacity_score?: number | null
+          compliance_score?: number | null
+          cost_score?: number | null
+          created_at?: string | null
+          founder_review_required?: boolean | null
+          id?: string
+          performance_score?: number | null
+          recommended_action?: string | null
+          reliability_score?: number | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          risk_level?: string | null
+          risks?: Json | null
+          supplier_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          backup_supplier_needed?: boolean | null
+          business_id?: string | null
+          capacity_score?: number | null
+          compliance_score?: number | null
+          cost_score?: number | null
+          created_at?: string | null
+          founder_review_required?: boolean | null
+          id?: string
+          performance_score?: number | null
+          recommended_action?: string | null
+          reliability_score?: number | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          risk_level?: string | null
+          risks?: Json | null
+          supplier_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_risk_reviews_supplier_id_fkey"
             columns: ["supplier_id"]
             isOneToOne: false
             referencedRelation: "suppliers"
