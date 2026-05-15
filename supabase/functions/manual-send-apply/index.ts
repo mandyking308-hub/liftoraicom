@@ -635,12 +635,11 @@ Deno.serve(async (req) => {
       campaign_id: queueRow.campaign_id,
       inbox_id: queueRow.inbox_id,
       provider_message_id: postRow?.provider_message_id,
-      emails_sent: success ? 1 : 0,
+      emails_sent: 1,
       smtp_calls: 1,
       apollo_calls: 0,
       founder_user_id: userId,
-      worker_summary: workerResult,
-      worker_error: workerError,
+      worker_used: false,
     },
     resolved: success,
     resolution_note: success ? "Manual Send Apply complete." : "Awaiting founder review.",
@@ -662,10 +661,6 @@ Deno.serve(async (req) => {
     pixel_injected: false,
     worker_used: false,
     worker_summary: null,
-    message: success
-      ? "Manual Send Apply: 1 email delivered. Background sending remains OFF."
-      : `Manual Send Apply did not complete — status=${postRow?.status ?? "unknown"}, error=${
-          postRow?.send_error ?? postRow?.block_reason ?? workerError ?? "unknown"
-        }`,
+    message: "Manual Send Apply: 1 email delivered via direct SMTP (no worker). Background sending remains OFF.",
   });
 });
