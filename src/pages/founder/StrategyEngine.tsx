@@ -318,6 +318,7 @@ const StrategyEngine = () => {
         </Tabs>
         <PortfolioIntelligenceBrainPanel />
         <LearningOptimisationEnginePanel />
+        <SocialMediaBrainPanel />
       </div>
     </FounderLayout>
   );
