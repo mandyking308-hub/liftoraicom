@@ -390,3 +390,20 @@ export const BUILD_LOG_CLOSEOUT = {
     "Ready to move from build phase to internal use phase, subject to final acceptance results.",
   ],
 };
+
+export const BUILD_LOG_HARDENING = {
+  title: "Final Hardening Pass — Liftor Ready for Internal Use Review",
+  date: "15 May 2026",
+  notes: [
+    "Command Centre hardened — Final Hardening Status panel mounted top of Command Centre, Testing, User Manual and System Health.",
+    "Manuals checked — Technical v5.2 and User v1.0 both present and rendered.",
+    "Safety gates checked — auto_send disabled, outbound cron disabled, all external lanes default LOCKED with confirmation phrases.",
+    "External actions confirmed locked — no emails, posts, DMs, Apollo calls/credits, Smartlead pushes/campaigns, proposal/invoice/survey/report sends, money movement or filings occurred.",
+    "First business (Neon Candy) readiness checked via liftor-final-go-to-use-acceptance.",
+    "Revenue Target Operating Mode checked — tables, plan + monitor functions and panel verified.",
+    "Rehearsal / Reset / Clean Real Mode / Pre-Live Baseline pipeline verified.",
+    "No forbidden actions occurred during this pass.",
+    "Remaining blockers (if any) surface in Final Hardening Status panel as 'Blockers'.",
+    "Next phase: internal use from Command Centre — external go-live remains gated until per-channel founder approval.",
+  ],
+};
