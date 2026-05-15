@@ -198,6 +198,28 @@ Deno.serve(async (req) => {
     const compliance = complianceFlags(intent, reply.body);
     const risks = riskFlags(intent, confidence, Boolean(contact?.id));
 
+    // COMPETITOR CAUTION — only allow founder-reviewed/low-risk insights to influence drafts.
+    let competitor_caution: any = { used: false, allowed_insights: 0, blocked_insights: 0, notes: [] as string[] };
+    try {
+      const { data: cInsights } = await admin
+        .from('competitor_learning_insights')
+        .select('id,insight_title,risk_level,status,founder_review_required')
+        .limit(20);
+      const all = cInsights ?? [];
+      const allowed = all.filter((i: any) => i.status === 'approved' || i.risk_level === 'low');
+      const blocked = all.length - allowed.length;
+      competitor_caution = {
+        used: allowed.length > 0,
+        allowed_insights: allowed.length,
+        blocked_insights: blocked,
+        notes: [
+          'No defamatory or unsupported competitor claims permitted in customer-facing drafts.',
+          'Differentiation framed positively only — focus on Liftor outcomes.',
+        ],
+      };
+      if (blocked > 0) risks.push('competitor_insights_pending_review');
+    } catch {}
+
     const customerSummary = contact
       ? `${contact.name ?? contact.email ?? "Unknown contact"}${business?.name ? ` · ${business.name}` : ""} · status=${contact.status ?? "n/a"}`
       : "No contact context available.";
@@ -228,6 +250,7 @@ Deno.serve(async (req) => {
       send_allowed: false,
       save_disabled_reason: "ai_draft_save_disabled (preview-only)",
       context_guard,
+      competitor_caution,
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e: any) {
     return new Response(JSON.stringify({ error: e?.message ?? String(e) }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
