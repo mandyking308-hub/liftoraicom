@@ -49,6 +49,7 @@ import AIAgentOrchestratorPanel from "@/components/founder/agents/AIAgentOrchest
 import AIConversationDraftingPanel from "@/components/founder/agents/AIConversationDraftingPanel";
 import FounderApprovalConsole from "@/components/founder/approvals/FounderApprovalConsole";
 import CommercialHandoffPanel from "@/components/founder/commercial/CommercialHandoffPanel";
+import RevenueOperationsPanel from "@/components/founder/finance/RevenueOperationsPanel";
 import CRMContact360Panel from "@/components/founder/crm/CRMContact360Panel";
 import {
   Building2, Bot, Send, Mail, Inbox as InboxIcon, MessageSquare, FileSignature,
