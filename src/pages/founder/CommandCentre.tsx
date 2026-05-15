@@ -77,6 +77,8 @@ import CompetitorLearningPositioningPanel from "@/components/founder/strategy/Co
 import HumanAccountManagerPanel from "@/components/founder/customer/HumanAccountManagerPanel";
 import CustomerOnboardingPanel from "@/components/founder/customer/CustomerOnboardingPanel";
 import RetentionRecurringRevenuePanel from "@/components/founder/customer/RetentionRecurringRevenuePanel";
+import HumanLayerCustomerMemoryCard from "@/components/founder/customer/HumanLayerCustomerMemoryCard";
+import CRMTotalMemoryRecoveryPanel from "@/components/founder/customer/CRMTotalMemoryRecoveryPanel";
 import CommandCentreModuleRegistryPanel from "@/components/founder/command/CommandCentreModuleRegistryPanel";
 import BusinessCapabilityMatrixPanel from "@/components/founder/operations/BusinessCapabilityMatrixPanel";
 import SocialMediaBrainPanel from "@/components/founder/social/SocialMediaBrainPanel";
@@ -888,6 +890,8 @@ const CommandCentre = () => {
             <PortfolioIntelligenceBrainPanel />
             <CompetitorLearningPositioningPanel />
             <RetentionRecurringRevenuePanel />
+            <HumanLayerCustomerMemoryCard />
+            <CRMTotalMemoryRecoveryPanel />
             <HumanAccountManagerPanel />
             <CustomerOnboardingPanel />
 

@@ -6,6 +6,7 @@ import CRMInteractionLedgerPanel from "@/components/founder/crm/CRMInteractionLe
 import HumanAccountManagerPanel from "@/components/founder/customer/HumanAccountManagerPanel";
 import CustomerOnboardingPanel from "@/components/founder/customer/CustomerOnboardingPanel";
 import RetentionRecurringRevenuePanel from "@/components/founder/customer/RetentionRecurringRevenuePanel";
+import CRMTotalMemoryRecoveryPanel from "@/components/founder/customer/CRMTotalMemoryRecoveryPanel";
 import CRMInteractionMatchPreviewPanel from "@/components/founder/crm/CRMInteractionMatchPreviewPanel";
 import CRMInteractionSourceAdaptersPanel from "@/components/founder/crm/CRMInteractionSourceAdaptersPanel";
 import CRMConversationBridgePanel from "@/components/founder/crm/CRMConversationBridgePanel";
@@ -210,6 +211,7 @@ const CRMDashboard = () => {
         <HumanAccountManagerPanel />
         <CustomerOnboardingPanel />
         <RetentionRecurringRevenuePanel />
+        <CRMTotalMemoryRecoveryPanel />
         <CRMInteractionMatchPreviewPanel />
         <CRMInteractionSourceAdaptersPanel />
         <CRMConversationBridgePanel />

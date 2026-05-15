@@ -9,6 +9,7 @@ import SocialEngagementInboxPanel from "@/components/founder/social/SocialEngage
 import SupportKnowledgeAgentPanel from "@/components/founder/support/SupportKnowledgeAgentPanel";
 import CustomerOnboardingPanel from "@/components/founder/customer/CustomerOnboardingPanel";
 import ComplaintsDisputesRecoveryPanel from "@/components/founder/customer/ComplaintsDisputesRecoveryPanel";
+import CRMTotalMemoryRecoveryPanel from "@/components/founder/customer/CRMTotalMemoryRecoveryPanel";
 import AgentCollaborationBoard from "@/components/founder/agents/AgentCollaborationBoard";
 import CRMInteractionMatchPreviewPanel from "@/components/founder/crm/CRMInteractionMatchPreviewPanel";
 import CRMConversationBridgePanel from "@/components/founder/crm/CRMConversationBridgePanel";
@@ -234,6 +235,7 @@ const ConversationsDashboard = () => {
         <SupportKnowledgeAgentPanel />
         <CustomerOnboardingPanel />
         <ComplaintsDisputesRecoveryPanel />
+        <CRMTotalMemoryRecoveryPanel />
       </div>
     </FounderLayout>
   );

@@ -3,6 +3,7 @@ import SupportKnowledgeAgentPanel from "@/components/founder/support/SupportKnow
 import HumanAccountManagerPanel from "@/components/founder/customer/HumanAccountManagerPanel";
 import CustomerOnboardingPanel from "@/components/founder/customer/CustomerOnboardingPanel";
 import RetentionRecurringRevenuePanel from "@/components/founder/customer/RetentionRecurringRevenuePanel";
+import CRMTotalMemoryRecoveryPanel from "@/components/founder/customer/CRMTotalMemoryRecoveryPanel";
 
 export default function SupportHub() {
   return (
@@ -16,6 +17,7 @@ export default function SupportHub() {
         <HumanAccountManagerPanel />
         <CustomerOnboardingPanel />
         <RetentionRecurringRevenuePanel />
+        <CRMTotalMemoryRecoveryPanel />
       </div>
     </FounderLayout>
   );

@@ -5371,6 +5371,13 @@ export type Database = {
             referencedRelation: "crm_interaction_ledger"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "crm_conversation_bridge_reviews_interaction_id_fkey"
+            columns: ["interaction_id"]
+            isOneToOne: false
+            referencedRelation: "crm_universal_interaction_log"
+            referencedColumns: ["id"]
+          },
         ]
       }
       crm_founder_review_queue: {
@@ -5538,7 +5545,11 @@ export type Database = {
           business_contact_relationship_id: string | null
           business_id: string | null
           captured_at: string
+          channel_key: string | null
+          churn_risk_signal: boolean | null
           communication_id: string | null
+          competitor_signal: boolean | null
+          complaint_signal: boolean | null
           compliance_relevant: boolean
           compliance_status_snapshot: string | null
           contact_email: string | null
@@ -5547,12 +5558,16 @@ export type Database = {
           contact_status_snapshot: string | null
           conversation_id: string | null
           created_at: string
+          customer_need: string | null
+          customer_pain_point: string | null
           deal_id: string | null
           deal_relevant: boolean
           dedupe_key: string | null
           demo_access_id: string | null
           demo_event_id: string | null
+          detected_intent: string | null
           direction: string | null
+          dispute_signal: boolean | null
           email_event_id: string | null
           external_event_id: string | null
           external_thread_id: string | null
@@ -5565,9 +5580,12 @@ export type Database = {
           matched_status: string
           metadata: Json
           next_step: string | null
+          objection: string | null
           occurred_at: string
+          organisation_id: string | null
           payment_id: string | null
           priority_relevant: boolean
+          privacy_level: string | null
           processing_status: string
           proposal_relevant: boolean
           provider_campaign_id: string | null
@@ -5576,13 +5594,21 @@ export type Database = {
           provider_message_id: string | null
           provider_type: string | null
           raw_payload: Json
+          raw_text: string | null
           risk_flags: Json
+          satisfaction_signal: boolean | null
+          sentiment: string | null
           source_channel: string
+          source_id: string | null
           source_system: string
+          source_table: string | null
           subject: string | null
           summary: string | null
           supplier_id: string | null
+          support_signal: boolean | null
           updated_at: string
+          upsell_signal: boolean | null
+          winback_signal: boolean | null
         }
         Insert: {
           ai_action_id?: string | null
@@ -5595,7 +5621,11 @@ export type Database = {
           business_contact_relationship_id?: string | null
           business_id?: string | null
           captured_at?: string
+          channel_key?: string | null
+          churn_risk_signal?: boolean | null
           communication_id?: string | null
+          competitor_signal?: boolean | null
+          complaint_signal?: boolean | null
           compliance_relevant?: boolean
           compliance_status_snapshot?: string | null
           contact_email?: string | null
@@ -5604,12 +5634,16 @@ export type Database = {
           contact_status_snapshot?: string | null
           conversation_id?: string | null
           created_at?: string
+          customer_need?: string | null
+          customer_pain_point?: string | null
           deal_id?: string | null
           deal_relevant?: boolean
           dedupe_key?: string | null
           demo_access_id?: string | null
           demo_event_id?: string | null
+          detected_intent?: string | null
           direction?: string | null
+          dispute_signal?: boolean | null
           email_event_id?: string | null
           external_event_id?: string | null
           external_thread_id?: string | null
@@ -5622,9 +5656,12 @@ export type Database = {
           matched_status?: string
           metadata?: Json
           next_step?: string | null
+          objection?: string | null
           occurred_at?: string
+          organisation_id?: string | null
           payment_id?: string | null
           priority_relevant?: boolean
+          privacy_level?: string | null
           processing_status?: string
           proposal_relevant?: boolean
           provider_campaign_id?: string | null
@@ -5633,13 +5670,21 @@ export type Database = {
           provider_message_id?: string | null
           provider_type?: string | null
           raw_payload?: Json
+          raw_text?: string | null
           risk_flags?: Json
+          satisfaction_signal?: boolean | null
+          sentiment?: string | null
           source_channel: string
+          source_id?: string | null
           source_system: string
+          source_table?: string | null
           subject?: string | null
           summary?: string | null
           supplier_id?: string | null
+          support_signal?: boolean | null
           updated_at?: string
+          upsell_signal?: boolean | null
+          winback_signal?: boolean | null
         }
         Update: {
           ai_action_id?: string | null
@@ -5652,7 +5697,11 @@ export type Database = {
           business_contact_relationship_id?: string | null
           business_id?: string | null
           captured_at?: string
+          channel_key?: string | null
+          churn_risk_signal?: boolean | null
           communication_id?: string | null
+          competitor_signal?: boolean | null
+          complaint_signal?: boolean | null
           compliance_relevant?: boolean
           compliance_status_snapshot?: string | null
           contact_email?: string | null
@@ -5661,12 +5710,16 @@ export type Database = {
           contact_status_snapshot?: string | null
           conversation_id?: string | null
           created_at?: string
+          customer_need?: string | null
+          customer_pain_point?: string | null
           deal_id?: string | null
           deal_relevant?: boolean
           dedupe_key?: string | null
           demo_access_id?: string | null
           demo_event_id?: string | null
+          detected_intent?: string | null
           direction?: string | null
+          dispute_signal?: boolean | null
           email_event_id?: string | null
           external_event_id?: string | null
           external_thread_id?: string | null
@@ -5679,9 +5732,12 @@ export type Database = {
           matched_status?: string
           metadata?: Json
           next_step?: string | null
+          objection?: string | null
           occurred_at?: string
+          organisation_id?: string | null
           payment_id?: string | null
           priority_relevant?: boolean
+          privacy_level?: string | null
           processing_status?: string
           proposal_relevant?: boolean
           provider_campaign_id?: string | null
@@ -5690,13 +5746,21 @@ export type Database = {
           provider_message_id?: string | null
           provider_type?: string | null
           raw_payload?: Json
+          raw_text?: string | null
           risk_flags?: Json
+          satisfaction_signal?: boolean | null
+          sentiment?: string | null
           source_channel?: string
+          source_id?: string | null
           source_system?: string
+          source_table?: string | null
           subject?: string | null
           summary?: string | null
           supplier_id?: string | null
+          support_signal?: boolean | null
           updated_at?: string
+          upsell_signal?: boolean | null
+          winback_signal?: boolean | null
         }
         Relationships: [
           {
@@ -6116,6 +6180,13 @@ export type Database = {
             columns: ["interaction_id"]
             isOneToOne: false
             referencedRelation: "crm_interaction_ledger"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_match_candidates_interaction_id_fkey"
+            columns: ["interaction_id"]
+            isOneToOne: false
+            referencedRelation: "crm_universal_interaction_log"
             referencedColumns: ["id"]
           },
           {
@@ -7677,6 +7748,112 @@ export type Database = {
           },
           {
             foreignKeyName: "customer_usage_snapshots_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+        ]
+      }
+      customer_winback_plans: {
+        Row: {
+          approved_at: string | null
+          business_id: string | null
+          churn_risk_level: string | null
+          contact_id: string | null
+          created_at: string | null
+          customer_history_summary: string | null
+          founder_review_required: boolean | null
+          goodwill_options: Json | null
+          id: string
+          inactivity_days: number | null
+          last_negative_interaction_at: string | null
+          last_positive_interaction_at: string | null
+          metadata: Json | null
+          offer_or_package_recommendation: Json | null
+          organisation_id: string | null
+          plan_status: string | null
+          proposed_message_body: string | null
+          proposed_message_subject: string | null
+          proposed_next_action: string | null
+          recommended_human_touch: string | null
+          recommended_recovery_angle: string | null
+          root_cause_summary: string | null
+          send_allowed: boolean | null
+          updated_at: string | null
+          winback_reason: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          business_id?: string | null
+          churn_risk_level?: string | null
+          contact_id?: string | null
+          created_at?: string | null
+          customer_history_summary?: string | null
+          founder_review_required?: boolean | null
+          goodwill_options?: Json | null
+          id?: string
+          inactivity_days?: number | null
+          last_negative_interaction_at?: string | null
+          last_positive_interaction_at?: string | null
+          metadata?: Json | null
+          offer_or_package_recommendation?: Json | null
+          organisation_id?: string | null
+          plan_status?: string | null
+          proposed_message_body?: string | null
+          proposed_message_subject?: string | null
+          proposed_next_action?: string | null
+          recommended_human_touch?: string | null
+          recommended_recovery_angle?: string | null
+          root_cause_summary?: string | null
+          send_allowed?: boolean | null
+          updated_at?: string | null
+          winback_reason?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          business_id?: string | null
+          churn_risk_level?: string | null
+          contact_id?: string | null
+          created_at?: string | null
+          customer_history_summary?: string | null
+          founder_review_required?: boolean | null
+          goodwill_options?: Json | null
+          id?: string
+          inactivity_days?: number | null
+          last_negative_interaction_at?: string | null
+          last_positive_interaction_at?: string | null
+          metadata?: Json | null
+          offer_or_package_recommendation?: Json | null
+          organisation_id?: string | null
+          plan_status?: string | null
+          proposed_message_body?: string | null
+          proposed_message_subject?: string | null
+          proposed_next_action?: string | null
+          recommended_human_touch?: string | null
+          recommended_recovery_angle?: string | null
+          root_cause_summary?: string | null
+          send_allowed?: boolean | null
+          updated_at?: string | null
+          winback_reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_winback_plans_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_winback_plans_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_winback_plans_contact_id_fkey"
             columns: ["contact_id"]
             isOneToOne: false
             referencedRelation: "high_intent_review_queue"
@@ -16673,6 +16850,143 @@ export type Database = {
           suppressed_contacts: number | null
         }
         Relationships: []
+      }
+      crm_universal_interaction_log: {
+        Row: {
+          ai_relevant: boolean | null
+          business_id: string | null
+          channel_key: string | null
+          churn_risk_signal: boolean | null
+          competitor_signal: boolean | null
+          complaint_signal: boolean | null
+          contact_id: string | null
+          conversation_id: string | null
+          created_at: string | null
+          customer_need: string | null
+          customer_pain_point: string | null
+          detected_intent: string | null
+          dispute_signal: boolean | null
+          founder_review_required: boolean | null
+          id: string | null
+          interaction_direction: string | null
+          interaction_type: string | null
+          metadata: Json | null
+          objection: string | null
+          occurred_at: string | null
+          organisation_id: string | null
+          privacy_level: string | null
+          raw_text: string | null
+          satisfaction_signal: boolean | null
+          sentiment: string | null
+          source_id: string | null
+          source_system: string | null
+          source_table: string | null
+          subject: string | null
+          summary: string | null
+          support_signal: boolean | null
+          upsell_signal: boolean | null
+          winback_signal: boolean | null
+        }
+        Insert: {
+          ai_relevant?: boolean | null
+          business_id?: string | null
+          channel_key?: never
+          churn_risk_signal?: boolean | null
+          competitor_signal?: boolean | null
+          complaint_signal?: boolean | null
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string | null
+          customer_need?: string | null
+          customer_pain_point?: string | null
+          detected_intent?: string | null
+          dispute_signal?: boolean | null
+          founder_review_required?: boolean | null
+          id?: string | null
+          interaction_direction?: string | null
+          interaction_type?: string | null
+          metadata?: Json | null
+          objection?: string | null
+          occurred_at?: string | null
+          organisation_id?: string | null
+          privacy_level?: string | null
+          raw_text?: string | null
+          satisfaction_signal?: boolean | null
+          sentiment?: string | null
+          source_id?: string | null
+          source_system?: string | null
+          source_table?: string | null
+          subject?: string | null
+          summary?: string | null
+          support_signal?: boolean | null
+          upsell_signal?: boolean | null
+          winback_signal?: boolean | null
+        }
+        Update: {
+          ai_relevant?: boolean | null
+          business_id?: string | null
+          channel_key?: never
+          churn_risk_signal?: boolean | null
+          competitor_signal?: boolean | null
+          complaint_signal?: boolean | null
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string | null
+          customer_need?: string | null
+          customer_pain_point?: string | null
+          detected_intent?: string | null
+          dispute_signal?: boolean | null
+          founder_review_required?: boolean | null
+          id?: string | null
+          interaction_direction?: string | null
+          interaction_type?: string | null
+          metadata?: Json | null
+          objection?: string | null
+          occurred_at?: string | null
+          organisation_id?: string | null
+          privacy_level?: string | null
+          raw_text?: string | null
+          satisfaction_signal?: boolean | null
+          sentiment?: string | null
+          source_id?: string | null
+          source_system?: string | null
+          source_table?: string | null
+          subject?: string | null
+          summary?: string | null
+          support_signal?: boolean | null
+          upsell_signal?: boolean | null
+          winback_signal?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_interaction_ledger_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_interaction_ledger_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_interaction_ledger_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+          {
+            foreignKeyName: "crm_interaction_ledger_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       domain_usage_summary: {
         Row: {
