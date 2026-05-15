@@ -52,6 +52,7 @@ import AgentBusinessLivePanel from "@/components/founder/agents/AgentBusinessLiv
 import AIEngagementAgentLivePanel from "@/components/founder/agents/AIEngagementAgentLivePanel";
 import CommercialHandoffPanel from "@/components/founder/commercial/CommercialHandoffPanel";
 import LiveCommercialAgentsPanel from "@/components/founder/commercial/LiveCommercialAgentsPanel";
+import LiftorBusinessLiveRunPanel from "@/components/founder/command/LiftorBusinessLiveRunPanel";
 import RevenueOperationsPanel from "@/components/founder/finance/RevenueOperationsPanel";
 import LiftorMasterDryRunPanel from "@/components/founder/testing/LiftorMasterDryRunPanel";
 import CRMContact360Panel from "@/components/founder/crm/CRMContact360Panel";
@@ -720,6 +721,7 @@ const CommandCentre = () => {
             </Section>
             <FounderApprovalConsole />
             <LiftorMasterDryRunPanel />
+            <LiftorBusinessLiveRunPanel />
 
             {/* SECTION 4 — Liftor System Map / Master Index (collapsible) */}
             <RunwayHeader n={4} title="Liftor System Map / Master Index" icon={MapIcon} anchor="sec-map" />
@@ -755,6 +757,7 @@ const CommandCentre = () => {
               <AIEngagementAgentLivePanel />
               <AIConversationDraftingPanel />
               <FounderApprovalConsole />
+              <LiftorBusinessLiveRunPanel />
             </Section>
 
             {/* SECTION 6 — Outreach Runway */}
@@ -1047,6 +1050,7 @@ const CommandCentre = () => {
               ]} />
             </Section>
             <LiftorMasterDryRunPanel />
+            <LiftorBusinessLiveRunPanel />
 
             {/* SECTION 14 — Knowledge / Manual / Build Log */}
             <RunwayHeader n={14} title="Knowledge / Manual / Build Log" icon={BookOpen} anchor="sec-knowledge" />
