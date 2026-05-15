@@ -1,5 +1,6 @@
 import FounderLayout from "@/components/founder/FounderLayout";
 import BusinessKnowledgeBrainPanel from "@/components/founder/knowledge/BusinessKnowledgeBrainPanel";
+import SupportKnowledgeAgentPanel from "@/components/founder/support/SupportKnowledgeAgentPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -211,6 +212,7 @@ const KnowledgeDirectory = () => {
             </Card>
           ))
         )}
+        <SupportKnowledgeAgentPanel />
       </div>
     </FounderLayout>
   );
