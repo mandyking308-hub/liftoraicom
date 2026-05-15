@@ -1,6 +1,7 @@
 import FounderLayout from "@/components/founder/FounderLayout";
 import { supabase } from "@/integrations/supabase/client";
 import LearningOptimisationEnginePanel from "@/components/founder/optimisation/LearningOptimisationEnginePanel";
+import PortfolioIntelligenceBrainPanel from "@/components/founder/strategy/PortfolioIntelligenceBrainPanel";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -99,6 +100,7 @@ const FounderAnalytics = () => {
         </div>
 
         <LearningOptimisationEnginePanel />
+        <PortfolioIntelligenceBrainPanel />
 
         {/* KPIs */}
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
