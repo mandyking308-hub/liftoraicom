@@ -114,6 +114,7 @@ const SystemHealth = () => {
         <AIAgentOperatingModelPanel />
         <AIAgentOrchestratorPanel />
         <LiftorMasterDryRunPanel />
+        <LiftorMasterReconciliationPanel />
         <CommandCentreModuleRegistryPanel />
       </div>
     </FounderLayout>
