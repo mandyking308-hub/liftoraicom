@@ -160,12 +160,32 @@ Deno.serve(async (req) => {
     }
 
     const candidates = interactions ?? [];
+    // Preload per-business knowledge brain (no external calls)
+    const uniqueBizIds = Array.from(new Set(candidates.map((c: any) => c.business_id).filter(Boolean)));
+    const knowledgeByBiz = new Map<string, any>();
+    if (uniqueBizIds.length) {
+      const { data: kprofs } = await admin.from("business_knowledge_profiles").select("*").in("business_id", uniqueBizIds);
+      for (const p of (kprofs ?? [])) knowledgeByBiz.set((p as any).business_id, p);
+    }
+    const knowledgeCtx = (bizId: string | null) => {
+      const p = bizId ? knowledgeByBiz.get(bizId) : null;
+      if (!p) return null;
+      return {
+        approved_tone: p.approved_tone,
+        offer_summary: p.offer_summary,
+        target_customer: p.target_customer,
+        forbidden_claims: p.forbidden_claims ?? [],
+        required_disclaimers: p.required_disclaimers ?? [],
+        outreach_rules: p.outreach_rules ?? {},
+      };
+    };
     const result: any = {
       ok: true, blocked: false, dry_run: dryRun,
       candidates_found: candidates.length,
       candidates_preview: candidates.slice(0, 10).map((c: any) => ({ id: c.id, subject: c.subject, contact_email: c.contact_email, occurred_at: c.occurred_at })),
       classifications: [], tasks_created: 0, drafts_created: 0, approvals_created: 0, next_actions_created: 0,
       settings: settingsMap, emails_sent: 0, apollo_called: false, smartlead_post_called: false,
+      business_knowledge_loaded: knowledgeByBiz.size,
     };
 
     for (const c of candidates as any[]) {
@@ -184,13 +204,17 @@ Deno.serve(async (req) => {
           priority_level: HIGH_VALUE_INTENTS.has(cls.intent) || NEGATIVE_INTENTS.has(cls.intent) ? "high" : "normal",
           status: "queued", founder_approval_required: true,
           auto_execute_allowed: false, execution_enabled: false, dry_run_only: true,
-          recommended_action: cls.intent, agent_output: { classification: cls },
+          recommended_action: cls.intent, agent_output: { classification: cls, business_knowledge: knowledgeCtx(c.business_id) },
         }).select("id").maybeSingle();
         if (t?.id) { result.tasks_created++; await audit("applied", null, "ai_agent_task_queue", t.id, { intent: cls.intent }); }
       }
 
       const shouldDraft = settingsMap.ai_draft_creation_enabled && !NEGATIVE_INTENTS.has(cls.intent) && cls.intent !== "unsubscribe";
       if (shouldDraft && (cls.draft_body || cls.draft_subject)) {
+        const k = knowledgeCtx(c.business_id);
+        const complianceFlags: string[] = [];
+        if (k?.forbidden_claims?.length) complianceFlags.push("business_forbidden_claims_loaded");
+        if (k?.required_disclaimers?.length) complianceFlags.push("business_required_disclaimers_loaded");
         const { data: d } = await admin.from("ai_conversation_draft_reviews").insert({
           business_id: c.business_id, contact_id: c.contact_id, conversation_id: c.conversation_id, interaction_id: c.id,
           detected_intent: cls.intent, intent_confidence: cls.confidence,
@@ -199,10 +223,10 @@ Deno.serve(async (req) => {
           recommended_reply_strategy: cls.rationale,
           draft_subject: cls.draft_subject ?? (c.subject ? `Re: ${c.subject}` : null),
           draft_body: cls.draft_body ?? "",
-          tone_profile: "warm_confident_concise",
-          risk_flags: cls.risk_flags ?? [], compliance_flags: [],
+          tone_profile: k?.approved_tone || "warm_confident_concise",
+          risk_flags: cls.risk_flags ?? [], compliance_flags: complianceFlags,
           founder_review_required: true, send_allowed: false, approval_status: "draft",
-          metadata: { classifier: cls },
+          metadata: { classifier: cls, business_knowledge: k },
         }).select("id").maybeSingle();
         if (d?.id) { result.drafts_created++; await audit("applied", null, "ai_conversation_draft_reviews", d.id, { intent: cls.intent }); }
       }
