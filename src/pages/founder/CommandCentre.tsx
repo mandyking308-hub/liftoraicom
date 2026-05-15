@@ -73,6 +73,7 @@ import GlobalOperatingClockPanel from "@/components/founder/global/GlobalOperati
 import LearningOptimisationEnginePanel from "@/components/founder/optimisation/LearningOptimisationEnginePanel";
 import SelfHealingMonitoringPanel from "@/components/founder/monitoring/SelfHealingMonitoringPanel";
 import PortfolioIntelligenceBrainPanel from "@/components/founder/strategy/PortfolioIntelligenceBrainPanel";
+import SocialMediaBrainPanel from "@/components/founder/social/SocialMediaBrainPanel";
 import { SecurityGovernancePanel } from "@/components/founder/security/SecurityGovernancePanel";
 import { ProductisationReadinessPanel } from "@/components/founder/revenue/ProductisationReadinessPanel";
 import BusinessLaunchFactoryPanel from "@/components/founder/expansion/BusinessLaunchFactoryPanel";
@@ -165,6 +166,10 @@ const CommandCentre = () => {
   const { data: inboxes = [] } = useQuery({
     queryKey: ["cc2-inboxes"],
     queryFn: async () => (await supabase.from("inboxes").select("*")).data ?? [],
+  });
+  const { data: socialProfiles = [] } = useQuery({
+    queryKey: ["cc2-social-profiles"],
+    queryFn: async () => (await (supabase as any).from("social_business_profiles").select("business_id,social_status,primary_platforms,brand_voice,primary_cta")).data ?? [],
   });
   const { data: activeInboxes = [] } = useQuery({
     queryKey: ["cc2-active-inboxes-view"],
@@ -360,8 +365,16 @@ const CommandCentre = () => {
       { key: "inbox", name: "Inbox Agent", icon: InboxIcon, status: inboundOk ? "active" : "needs_setup",
         recent: `${drafts.length} AI draft${drafts.length === 1 ? "" : "s"} pending · ${totals.repliesAll} replies (7d)`, pending: drafts.length, blocked: 0,
         next: drafts.length ? `Approve ${drafts.length} AI reply draft${drafts.length === 1 ? "" : "s"}` : "Monitor inbound mailboxes", to: "/founder/conversations" },
-      { key: "social", name: "Social Agent", icon: MessageSquare, status: "needs_setup", recent: "Not yet configured", pending: 0, blocked: 0,
-        next: "Connect a social channel", to: "/founder/integrations" },
+      { key: "social", name: "Social Agent", icon: MessageSquare,
+        status: socialProfiles.length > 0 ? "active" : "needs_setup",
+        recent: socialProfiles.length > 0
+          ? `${socialProfiles.length} social profile${socialProfiles.length === 1 ? "" : "s"} configured (internal-only)`
+          : "Not yet configured",
+        pending: 0, blocked: 0,
+        next: socialProfiles.length > 0
+          ? "Generate 30-day social content pack for Neon Candy"
+          : "Create a social profile for a business",
+        to: "/founder/social" },
       { key: "research", name: "Research Agent", icon: Search, status: highIntent.length ? "active" : "idle",
         recent: `${highIntent.length} high-intent leads flagged`, pending: highIntent.length, blocked: 0,
         next: highIntent.length ? "Review high-intent leads" : "Run lead enrichment", to: "/founder/priority" },
@@ -382,7 +395,7 @@ const CommandCentre = () => {
       { key: "voice", name: "Voice Agent", icon: Phone, status: "needs_setup", recent: "Not yet configured", pending: 0, blocked: 0,
         next: "Connect voice provider", to: "/founder/integrations" },
     ];
-  }, [inboxes, totals, drafts, proposals, hotConvos, highIntent, contacts, deals, invoices, sysEvents, isLiveMode]);
+  }, [inboxes, totals, drafts, proposals, hotConvos, highIntent, contacts, deals, invoices, sysEvents, isLiveMode, socialProfiles]);
 
   // Blockers in plain English — grouped into 4 buckets
   type BlockerItem = { msg: string; severity: string; to?: string };
@@ -810,6 +823,7 @@ const CommandCentre = () => {
               <AgentHandoverProtocolPanel />
               <AgentCollaborationBoard />
               <AutopilotActivationGatesPanel />
+              <SocialMediaBrainPanel />
             </Section>
 
             {/* SECTION 6 — Outreach Runway */}
@@ -1089,6 +1103,7 @@ const CommandCentre = () => {
             <SmartleadLeadPushPreview />
             <BulkSendPreviewPanel />
             <ScaleOperationsDryRunDashboard />
+            <SocialMediaBrainPanel />
 
             {/* SECTION 13 — Monitoring / Security / System Health */}
             <RunwayHeader n={13} title="Monitoring / Security / System Health" icon={Monitor} anchor="sec-monitoring" />

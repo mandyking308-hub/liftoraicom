@@ -2,6 +2,7 @@ import FounderLayout from "@/components/founder/FounderLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import LearningOptimisationEnginePanel from "@/components/founder/optimisation/LearningOptimisationEnginePanel";
 import PortfolioIntelligenceBrainPanel from "@/components/founder/strategy/PortfolioIntelligenceBrainPanel";
+import SocialMediaBrainPanel from "@/components/founder/social/SocialMediaBrainPanel";
 import GlobalAIBrainCommandCentre from "@/components/founder/command/GlobalAIBrainCommandCentre";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -318,6 +319,7 @@ const StrategyEngine = () => {
         </Tabs>
         <PortfolioIntelligenceBrainPanel />
         <LearningOptimisationEnginePanel />
+        <SocialMediaBrainPanel />
       </div>
     </FounderLayout>
   );
