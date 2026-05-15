@@ -8,6 +8,7 @@ import CompetitorLearningPositioningPanel from "@/components/founder/strategy/Co
 import SocialMediaBrainPanel from "@/components/founder/social/SocialMediaBrainPanel";
 import GlobalAIBrainCommandCentre from "@/components/founder/command/GlobalAIBrainCommandCentre";
 import FundingExitReadinessPanel from "@/components/founder/strategy/FundingExitReadinessPanel";
+import ReputationCrisisCommsPanel from "@/components/founder/brand/ReputationCrisisCommsPanel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -329,6 +330,7 @@ const StrategyEngine = () => {
     <div className="max-w-7xl mx-auto px-4 pb-6"><StrategicProspectingAgentPanel /></div>
    <div className="max-w-7xl mx-auto px-4 pb-6"><ProductRoadmapQAReleasePanel /></div>
    <div className="max-w-7xl mx-auto px-4 pb-6"><FundingExitReadinessPanel /></div>
+   <div className="max-w-7xl mx-auto px-4 pb-6"><ReputationCrisisCommsPanel /></div>
     </FounderLayout>
   );
 };
