@@ -26,6 +26,7 @@ import MultiChannelInboxPanel from "@/components/founder/channels/MultiChannelIn
 import AgentHandoverProtocolPanel from "@/components/founder/agents/AgentHandoverProtocolPanel";
 import LearningOptimisationEnginePanel from "@/components/founder/optimisation/LearningOptimisationEnginePanel";
 import SelfHealingMonitoringPanel from "@/components/founder/monitoring/SelfHealingMonitoringPanel";
+import PortfolioIntelligenceBrainPanel from "@/components/founder/strategy/PortfolioIntelligenceBrainPanel";
 import SmartleadControlledActivationPanel from "@/components/founder/integrations/SmartleadControlledActivationPanel";
 import BusinessLaunchFactoryPanel from "@/components/founder/expansion/BusinessLaunchFactoryPanel";
 
@@ -386,6 +387,7 @@ const GlobalOperations = () => {
         <AgentHandoverProtocolPanel />
         <LearningOptimisationEnginePanel />
         <SelfHealingMonitoringPanel />
+        <PortfolioIntelligenceBrainPanel />
       </div>
     </FounderLayout>
   );
