@@ -3259,6 +3259,65 @@ export type Database = {
           },
         ]
       }
+      business_kpis: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          current_value: number | null
+          id: string
+          kpi_category: string
+          kpi_name: string
+          owner_agent_key: string | null
+          owner_person_id: string | null
+          period_end: string | null
+          period_start: string | null
+          status: string
+          target_value: number | null
+          unit: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          current_value?: number | null
+          id?: string
+          kpi_category: string
+          kpi_name: string
+          owner_agent_key?: string | null
+          owner_person_id?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          status?: string
+          target_value?: number | null
+          unit?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          current_value?: number | null
+          id?: string
+          kpi_category?: string
+          kpi_name?: string
+          owner_agent_key?: string | null
+          owner_person_id?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          status?: string
+          target_value?: number | null
+          unit?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_kpis_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_launch_plans: {
         Row: {
           approved_at: string | null
@@ -3559,6 +3618,59 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "business_module_status_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_okrs: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          founder_review_required: boolean
+          id: string
+          key_results: Json
+          objective: string
+          owner_agent_key: string | null
+          period_end: string | null
+          period_start: string | null
+          progress_score: number | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          founder_review_required?: boolean
+          id?: string
+          key_results?: Json
+          objective: string
+          owner_agent_key?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          progress_score?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          founder_review_required?: boolean
+          id?: string
+          key_results?: Json
+          objective?: string
+          owner_agent_key?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          progress_score?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_okrs_business_id_fkey"
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
@@ -14347,6 +14459,57 @@ export type Database = {
           status?: string | null
           system_access_required?: boolean | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      performance_scorecards: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          customer_score: number | null
+          id: string
+          next_actions: Json
+          operations_score: number | null
+          overall_score: number | null
+          revenue_score: number | null
+          risk_score: number | null
+          scorecard_period_end: string
+          scorecard_period_start: string
+          scorecard_type: string
+          social_score: number | null
+          summary: string | null
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          customer_score?: number | null
+          id?: string
+          next_actions?: Json
+          operations_score?: number | null
+          overall_score?: number | null
+          revenue_score?: number | null
+          risk_score?: number | null
+          scorecard_period_end: string
+          scorecard_period_start: string
+          scorecard_type?: string
+          social_score?: number | null
+          summary?: string | null
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          customer_score?: number | null
+          id?: string
+          next_actions?: Json
+          operations_score?: number | null
+          overall_score?: number | null
+          revenue_score?: number | null
+          risk_score?: number | null
+          scorecard_period_end?: string
+          scorecard_period_start?: string
+          scorecard_type?: string
+          social_score?: number | null
+          summary?: string | null
         }
         Relationships: []
       }
