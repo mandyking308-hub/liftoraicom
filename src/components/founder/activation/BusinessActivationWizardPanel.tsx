@@ -82,6 +82,17 @@ export const BusinessActivationWizardPanel = () => {
       toast.error("Go-live blocked: run Cleanliness check and Rehearsal Reset first (Clean Real Mode required)");
       return;
     }
+    // Block go-live if no pre-live baseline exists or it has blockers
+    const { data: bl } = await supabase.from("business_pre_live_baselines")
+      .select("baseline_status,readiness_score,blockers")
+      .eq("business_id", businessId)
+      .order("created_at", { ascending: false })
+      .limit(1);
+    const latestBaseline = (bl ?? [])[0] as any;
+    if (!latestBaseline || (latestBaseline.readiness_score ?? 0) < 90 || (latestBaseline.blockers?.length ?? 0) > 0) {
+      toast.error("Go-live blocked: create a Pre-Live Baseline (readiness ≥ 90%, zero blockers) first");
+      return;
+    }
     setBusy(true);
     try {
       const { data: r, error } = await supabase.functions.invoke("business-go-live-approval", {
