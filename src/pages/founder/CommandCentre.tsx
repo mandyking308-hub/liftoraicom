@@ -99,6 +99,7 @@ import CustomerJourneyFlowMap from "@/components/founder/command/CustomerJourney
 import CommandCentreStickyNav from "@/components/founder/command/CommandCentreStickyNav";
 import CustomerJourneyPositionPanel from "@/components/founder/command/CustomerJourneyPositionPanel";
 import CustomerFeedbackSurveyPanel from "@/components/founder/customer/CustomerFeedbackSurveyPanel";
+import CustomerMemoryContextGuardPanel from "@/components/founder/customer/CustomerMemoryContextGuardPanel";
 import {
   Building2, Bot, Send, Mail, Inbox as InboxIcon, MessageSquare, FileSignature,
   Search, Banknote, ShieldCheck, Workflow as WorkflowIcon, Phone, AlertTriangle,
@@ -921,6 +922,7 @@ const CommandCentre = () => {
             </div>
 
             <CustomerFeedbackSurveyPanel />
+            <CustomerMemoryContextGuardPanel />
 
             {/* Top: Module Registry summary */}
             <Card className="bg-card border-border/50">
