@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import RevenueOperationsPanel from "@/components/founder/finance/RevenueOperationsPanel";
 import { Plus } from "lucide-react";
 import FounderLayout from "@/components/founder/FounderLayout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -135,6 +136,7 @@ const FinancePayments = () => {
             )}
           </CardContent>
         </Card>
+        <RevenueOperationsPanel />
       </div>
     </FounderLayout>
   );

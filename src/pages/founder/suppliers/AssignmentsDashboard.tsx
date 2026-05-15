@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import RevenueOperationsPanel from "@/components/founder/finance/RevenueOperationsPanel";
 import { Link } from "react-router-dom";
 import { Plus, Loader2, ShieldCheck, Clock, AlertTriangle, RefreshCw, CheckCheck } from "lucide-react";
 import FounderLayout from "@/components/founder/FounderLayout";
@@ -340,6 +341,7 @@ const AssignmentsDashboard = () => {
             )}
           </CardContent>
         </Card>
+        <RevenueOperationsPanel />
       </div>
 
       <Dialog open={!!suggestFor} onOpenChange={(o) => !o && setSuggestFor(null)}>
