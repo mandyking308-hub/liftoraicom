@@ -3,6 +3,7 @@ import SelfHealingMonitoringPanel from "@/components/founder/monitoring/SelfHeal
 import AutopilotActivationGatesPanel from "@/components/founder/autonomy/AutopilotActivationGatesPanel";
 import GlobalAIBrainCommandCentre from "@/components/founder/command/GlobalAIBrainCommandCentre";
 import GlobalOperatingClockPanel from "@/components/founder/global/GlobalOperatingClockPanel";
+import ReputationCrisisCommsPanel from "@/components/founder/brand/ReputationCrisisCommsPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -292,6 +293,7 @@ const MonitoringDashboard = () => {
           </CardContent>
         </Card>
         <GlobalOperatingClockPanel />
+        <ReputationCrisisCommsPanel />
       </div>
     </FounderLayout>
   );
