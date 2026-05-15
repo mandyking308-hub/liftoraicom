@@ -36,6 +36,7 @@ import BulkSendPreviewPanel from "@/components/founder/integrations/BulkSendPrev
 import SmartleadScaleNextActionBanner from "@/components/founder/integrations/SmartleadScaleNextActionBanner";
 import OutboundChannelLanesPanel from "@/components/founder/integrations/OutboundChannelLanesPanel";
 import OutboundChannelPolicyPanel from "@/components/founder/integrations/OutboundChannelPolicyPanel";
+import ScaleOperationsDryRunDashboard from "@/components/founder/command/ScaleOperationsDryRunDashboard";
 import {
   Building2, Bot, Send, Mail, Inbox as InboxIcon, MessageSquare, FileSignature,
   Search, Banknote, ShieldCheck, Workflow as WorkflowIcon, Phone, AlertTriangle,
@@ -982,6 +983,7 @@ const CommandCentre = () => {
             <SmartleadCampaignDiscoveryPanel />
             <SmartleadLeadPushPreview />
             <BulkSendPreviewPanel />
+            <ScaleOperationsDryRunDashboard />
 
             {/* SECTION 13 — Monitoring / Security / System Health */}
             <RunwayHeader n={13} title="Monitoring / Security / System Health" icon={Monitor} anchor="sec-monitoring" />
