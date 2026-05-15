@@ -1634,6 +1634,7 @@ const CommandCentre = () => {
     <div className="max-w-7xl mx-auto px-4 pb-6"><FundingExitReadinessPanel /></div>
     <div className="max-w-7xl mx-auto px-4 pb-6"><ReputationCrisisCommsPanel /></div>
     <div className="max-w-7xl mx-auto px-4 pb-6"><KPIOKRPerformancePanel /></div>
+    </DiagnosticGate>
     </FounderLayout>
   );
 };
