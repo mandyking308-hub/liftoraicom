@@ -29,6 +29,41 @@ const TRACKING_DISCLOSURE =
 
 const UNSUB_BASE = "https://liftorai.com/u/";
 
+const FALLBACK_FIRST_NAME = "there";
+
+const deriveFirstName = (contact: any): string => {
+  const raw =
+    contact?.first_name ??
+    (typeof contact?.name === "string" ? contact.name.trim().split(/\s+/)[0] : null) ??
+    null;
+  const v = typeof raw === "string" ? raw.trim() : "";
+  return v.length > 0 ? v : FALLBACK_FIRST_NAME;
+};
+
+const mergePersonalization = (text: string, vars: Record<string, string>): string => {
+  if (!text) return text;
+  let out = text;
+  for (const [k, v] of Object.entries(vars)) {
+    // Bracket placeholders: [First Name], case-insensitive, allow spaces.
+    const bracketRe = new RegExp(`\\[\\s*${k.replace(/\s+/g, "\\s+")}\\s*\\]`, "gi");
+    out = out.replace(bracketRe, v);
+    // Mustache placeholders: {{first_name}}, {{ firstName }}.
+    const snake = k.toLowerCase().replace(/\s+/g, "_");
+    const mustacheRe = new RegExp(`\\{\\{\\s*${snake}\\s*\\}\\}`, "gi");
+    out = out.replace(mustacheRe, v);
+  }
+  return out;
+};
+
+// Detect leftover [Word ...] or {{anything}} placeholders.
+const PLACEHOLDER_RE = /\[[A-Za-z][^\]\n]{0,60}\]|\{\{[^}\n]{1,80}\}\}/g;
+const findUnresolved = (text: string | null | undefined): string[] => {
+  if (!text) return [];
+  const matches = text.match(PLACEHOLDER_RE) ?? [];
+  // Filter out things that look like markdown links or em-dashes etc.
+  return matches.filter((m) => !/^\[[\s—-]*\]$/.test(m));
+};
+
 interface Payload {
   dry_run?: boolean;
   queue_id?: string;
@@ -274,16 +309,63 @@ Deno.serve(async (req) => {
 
   // Build assembled body preview
   const includeDisclosure = body.include_tracking_disclosure !== false;
+
+  const firstName = deriveFirstName(contact);
+  const mergeVars: Record<string, string> = {
+    "First Name": firstName,
+    "first_name": firstName,
+    "firstName": firstName,
+    "FirstName": firstName,
+    "unsubscribe_link": unsubUrl ?? "",
+  };
+
+  const rawBody = bodyTpl ?? "";
+  const mergedSubject = mergePersonalization(subject ?? "", mergeVars);
+  const mergedBody = mergePersonalization(rawBody, mergeVars);
+  const mergedFooter = footer ? mergePersonalization(footer, mergeVars) : null;
+
   const assembledBody = [
-    bodyTpl ?? "(template body missing)",
+    mergedBody || "(template body missing)",
     "",
     "—",
-    footer ?? "(footer missing)",
+    mergedFooter ?? "(footer missing)",
     includeDisclosure ? "" : null,
     includeDisclosure ? TRACKING_DISCLOSURE : null,
   ]
     .filter((x) => x !== null)
     .join("\n");
+
+  const unresolvedSubject = findUnresolved(mergedSubject);
+  const unresolvedBody = findUnresolved(mergedBody);
+  const unresolvedFooter = findUnresolved(mergedFooter ?? "");
+  const unresolvedAssembled = findUnresolved(assembledBody);
+  const unresolvedAll = Array.from(
+    new Set([...unresolvedSubject, ...unresolvedBody, ...unresolvedFooter, ...unresolvedAssembled]),
+  );
+
+  if (unresolvedAll.length > 0) {
+    fail(
+      "no_unresolved_placeholders",
+      "No unresolved placeholders in merged email",
+      `unresolved=${unresolvedAll.join(", ")}`,
+    );
+  } else {
+    pass("no_unresolved_placeholders", "No unresolved placeholders in merged email", "0");
+  }
+
+  if (!unsubUrl || !assembledBody.includes(unsubUrl)) {
+    fail(
+      "unsub_link_in_body",
+      "Unsubscribe link present in assembled body",
+      unsubUrl ? "missing from assembled body" : "no token to assemble link",
+    );
+  } else {
+    pass("unsub_link_in_body", "Unsubscribe link present in assembled body", "ok");
+  }
+
+  // Recompute blockers/allPass AFTER placeholder + unsub-link checks.
+  const blockers2 = checks.filter((c) => !c.pass);
+  const allPass2 = blockers2.length === 0;
 
   const previewPayload = {
     ok: true,
@@ -294,6 +376,7 @@ Deno.serve(async (req) => {
     contact: contact && {
       id: contact.id,
       name: contact.name,
+      first_name: firstName,
       email: contact.email,
       company: contact.company,
     },
@@ -308,17 +391,24 @@ Deno.serve(async (req) => {
       subject,
       body_preview: (bodyTpl ?? "").slice(0, 320),
     },
-    assembled_email: { subject: subject ?? null, body: assembledBody },
+    raw_template: { subject: subject ?? null, body: rawBody },
+    merged_email: { subject: mergedSubject, body: mergedBody, footer: mergedFooter },
+    assembled_email: { subject: mergedSubject, body: assembledBody },
+    personalization: { first_name: firstName, fallback_used: firstName === FALLBACK_FIRST_NAME },
+    unresolved_placeholders: unresolvedAll,
+    unresolved_placeholders_count: unresolvedAll.length,
+    unsubscribe_link_present: !!unsubUrl && assembledBody.includes(unsubUrl),
+    send_allowed_if_applied: allPass2,
     checks,
-    blockers,
-    all_pass: allPass,
+    blockers: blockers2,
+    all_pass: allPass2,
     review_required_rows_touched: 0,
     apollo_calls: 0,
     apollo_calls_if_applied: 0,
     emails_sent: 0,
     smtp_calls: 0,
-    emails_to_send_if_applied: allPass ? 1 : 0,
-    smtp_calls_if_applied: allPass ? 1 : 0,
+    emails_to_send_if_applied: allPass2 ? 1 : 0,
+    smtp_calls_if_applied: allPass2 ? 1 : 0,
     background_sending_enabled: false,
     pixel_injected: false,
     confirmation_phrase: EXACT_CONFIRMATION,
@@ -341,14 +431,14 @@ Deno.serve(async (req) => {
     );
   }
 
-  if (!allPass) {
+  if (!allPass2) {
     return json(
       {
         ...previewPayload,
         ok: false,
         stage: "blocked",
         error_code: "preflight_failed",
-        message: `Cannot send: ${blockers.map((b) => b.label).join(", ")}`,
+        message: `Cannot send: ${blockers2.map((b) => b.label).join(", ")}`,
       },
       200,
     );
