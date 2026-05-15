@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { FileText, Users, Shield } from "lucide-react";
 import { format } from "date-fns";
+import GlobalJurisdictionPolicyPanel from "@/components/founder/compliance/GlobalJurisdictionPolicyPanel";
 
 const FounderLegalConsole = () => {
   const { data: docVersions = [], isLoading: loadingDocs } = useQuery({
@@ -152,6 +153,7 @@ const FounderLegalConsole = () => {
             </Card>
           </TabsContent>
         </Tabs>
+        <GlobalJurisdictionPolicyPanel />
       </div>
     </FounderLayout>
   );
