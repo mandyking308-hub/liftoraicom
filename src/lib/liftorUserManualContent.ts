@@ -1,6 +1,6 @@
 // Liftor User Manual — plain-English operating guide (separate from Founder/Technical Manual)
 
-export const LIFTOR_USER_MANUAL_VERSION = "1.0 — Operator Edition (15 May 2026)";
+export const LIFTOR_USER_MANUAL_VERSION = "1.1 — Operator Edition + Rehearsal (15 May 2026)";
 
 export interface ManualSection {
   number: number;
@@ -107,3 +107,24 @@ export const NEW_BUSINESS_OPERATING_FLOW: string[] = [
   "Review external action gates — they remain LOCKED.",
   "Approve limited go-live only when readiness ≥ 90% and zero blockers.",
 ];
+
+export const REHEARSAL_FLOW: ManualSection = {
+  number: 76,
+  key: "rehearsal",
+  title: "How to rehearse a business before go-live",
+  body: [
+    "1) Select the business in the Business Selector.",
+    "2) Open Business Activation → Business Rehearsal · Simulation · Operator Training.",
+    "3) Pick rehearsal type (start with full_customer_journey) and click Dry-run, then Create rehearsal (CREATE BUSINESS REHEARSAL).",
+    "4) Run internal-only rehearsal: Dry-run latest, then Run latest (RUN BUSINESS REHEARSAL). No external send / publish / push occurs.",
+    "5) Read the scenario list — anything 'blocked' shows the missing prerequisite.",
+    "6) Fix blockers: upload missing brand/offer/pricing sources, run training, generate starter pack, approve templates.",
+    "7) Generate operator checklist for each training area (CREATE OPERATOR TRAINING CHECKLIST).",
+    "8) Train helper / operator using the checklist.",
+    "9) Re-run rehearsal until score ≥ 80% with zero blockers.",
+    "10) Only then consider go-live gates (Approve go-live → still LOCKED until 'limited_external_live' is explicitly chosen).",
+  ].join(" "),
+};
+
+// Append rehearsal section so it appears in the Full Guide listing
+LIFTOR_FULL_GUIDE.push(REHEARSAL_FLOW);
