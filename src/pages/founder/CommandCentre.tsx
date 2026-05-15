@@ -1012,6 +1012,34 @@ const CommandCentre = () => {
               <SocialSchedulerExportPanel />
             </Section>
 
+            {/* SECTION 5b — Marketing / Content / Funnel */}
+            <Section
+              title="Marketing / Content / Funnel (internal-only)"
+              icon={FileSignature}
+              action={<Link to="/founder/marketing"><Button size="sm" variant="outline"><Sparkles size={12} /> Open marketing</Button></Link>}
+            >
+              <div className="flex flex-wrap items-center gap-2 mb-2 text-[11px]">
+                <Badge variant="outline" className="border-yellow-500/40 text-yellow-300">No publish · No send · No ad spend</Badge>
+                <span className="text-muted-foreground">Businesses covered: <span className="text-foreground">{marketingSummary?.businessesCovered ?? 0}</span></span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+                <StatTile label="Content assets" value={marketingSummary?.assetsTotal ?? 0} icon={FileSignature} to="/founder/marketing" />
+                <StatTile label="Campaign briefs" value={marketingSummary?.briefsTotal ?? 0} icon={Briefcase} to="/founder/marketing" />
+                <StatTile label="Blogs / Newsletters" value={(marketingSummary?.blogs ?? 0) + (marketingSummary?.newsletters ?? 0)} icon={BookOpen} to="/founder/marketing" />
+                <StatTile label="Landing pages" value={marketingSummary?.landingPages ?? 0} icon={MonitorPlay} to="/founder/marketing" />
+                <StatTile label="Lead magnets" value={marketingSummary?.leadMagnets ?? 0} icon={Archive} to="/founder/marketing" />
+                <StatTile label="Ad briefs" value={marketingSummary?.adBriefs ?? 0} icon={TrendingUp} to="/founder/marketing" />
+              </div>
+              <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+                <span>Pending approvals: <span className={`${(marketingSummary?.approvalsPending ?? 0) > 0 ? "text-yellow-400" : "text-green-400"} font-medium`}>{marketingSummary?.approvalsPending ?? 0}</span></span>
+                <span>Publish locked: <span className="text-foreground">{marketingSummary?.publishLocked ?? 0}</span></span>
+                <span>Launch locked: <span className="text-foreground">{marketingSummary?.launchLocked ?? 0}</span></span>
+              </div>
+              <div className="mt-3">
+                <MarketingContentFunnelPanel />
+              </div>
+            </Section>
+
             {/* SECTION 6 — Outreach Runway */}
             <RunwayHeader n={6} title="Outreach Runway" icon={Send} anchor="sec-outreach-runway" />
             <Section title="Outreach pipeline (source → reply)" icon={WorkflowIcon}>
