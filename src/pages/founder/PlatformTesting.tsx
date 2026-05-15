@@ -946,6 +946,7 @@ const PlatformTesting = () => {
         <FullManualFunctionControlPanel />
         <CommandCentreModuleRegistryPanel />
         <BusinessCapabilityMatrixPanel />
+        <ProductRoadmapQAReleasePanel />
       </div>
     </FounderLayout>
   );
