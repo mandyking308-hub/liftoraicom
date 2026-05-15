@@ -179,8 +179,7 @@ Deno.serve(async (req) => {
         founder_review_required: true,
         apply_status: "draft_pending_founder_review",
         blockers: ["awaiting_founder_proposal_generation", "no_external_send"],
-        metadata: { source: SOURCE_FUNCTION, source_table: c.source, source_id: c.source_id, payload: c.payload },
-        ...(businessKnowledge ? { metadata: { source: SOURCE_FUNCTION, source_table: c.source, source_id: c.source_id, payload: c.payload, business_knowledge: businessKnowledge } } : {}),
+        metadata: { source: SOURCE_FUNCTION, source_table: c.source, source_id: c.source_id, payload: c.payload, business_knowledge: businessKnowledge },
       }).select("id").maybeSingle();
 
       if (chrErr) {
@@ -210,8 +209,7 @@ Deno.serve(async (req) => {
         execution_enabled: false,
         auto_execute_allowed: false,
         send_allowed: false,
-        metadata: { handoff_review_id: chr!.id, source_function: SOURCE_FUNCTION },
-        ...(businessKnowledge ? { metadata: { handoff_review_id: chr!.id, source_function: SOURCE_FUNCTION, business_knowledge: businessKnowledge } } : {}),
+        metadata: { handoff_review_id: chr!.id, source_function: SOURCE_FUNCTION, business_knowledge: businessKnowledge },
       }).select("id").maybeSingle();
       if (!faiErr && fai) {
         approvalsCreated++;
