@@ -257,7 +257,7 @@ export default function OutboundProviderEnginePanel() {
                   : !smartlead.last_test_at
                     ? "run Test Smartlead Connection."
                     : (testResult?.email_account_count ?? 0) === 0
-                      ? "add at least one Smartlead sending account (manually in Smartlead) and re-test."
+                      ? "create draft Smartlead campaign and enable warmup."
                       : !smartlead.webhook_configured
                         ? "configure Smartlead webhook (blueprint stage — not built yet)."
                         : "build campaign mapping + lead push preview (next phase)."}
