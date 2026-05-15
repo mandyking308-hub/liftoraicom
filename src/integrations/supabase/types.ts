@@ -2890,6 +2890,57 @@ export type Database = {
           },
         ]
       }
+      business_continuity_plans: {
+        Row: {
+          backup_processes: Json | null
+          business_id: string | null
+          created_at: string | null
+          critical_systems: Json | null
+          entity_id: string | null
+          founder_review_required: boolean | null
+          id: string
+          key_contacts: Json | null
+          last_tested_at: string | null
+          next_test_due_at: string | null
+          plan_name: string
+          plan_status: string | null
+          recovery_steps: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          backup_processes?: Json | null
+          business_id?: string | null
+          created_at?: string | null
+          critical_systems?: Json | null
+          entity_id?: string | null
+          founder_review_required?: boolean | null
+          id?: string
+          key_contacts?: Json | null
+          last_tested_at?: string | null
+          next_test_due_at?: string | null
+          plan_name: string
+          plan_status?: string | null
+          recovery_steps?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          backup_processes?: Json | null
+          business_id?: string | null
+          created_at?: string | null
+          critical_systems?: Json | null
+          entity_id?: string | null
+          founder_review_required?: boolean | null
+          id?: string
+          key_contacts?: Json | null
+          last_tested_at?: string | null
+          next_test_due_at?: string | null
+          plan_name?: string
+          plan_status?: string | null
+          recovery_steps?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       business_knowledge_assets: {
         Row: {
           agent_visible: boolean
@@ -9803,6 +9854,66 @@ export type Database = {
           },
         ]
       }
+      group_risk_register: {
+        Row: {
+          business_id: string | null
+          created_at: string | null
+          entity_id: string | null
+          id: string
+          impact: string | null
+          likelihood: string | null
+          metadata: Json | null
+          mitigation_plan: string | null
+          owner_agent_key: string | null
+          owner_person_id: string | null
+          review_due_at: string | null
+          risk_category: string
+          risk_description: string | null
+          risk_score: number | null
+          risk_title: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string | null
+          entity_id?: string | null
+          id?: string
+          impact?: string | null
+          likelihood?: string | null
+          metadata?: Json | null
+          mitigation_plan?: string | null
+          owner_agent_key?: string | null
+          owner_person_id?: string | null
+          review_due_at?: string | null
+          risk_category: string
+          risk_description?: string | null
+          risk_score?: number | null
+          risk_title: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string | null
+          entity_id?: string | null
+          id?: string
+          impact?: string | null
+          likelihood?: string | null
+          metadata?: Json | null
+          mitigation_plan?: string | null
+          owner_agent_key?: string | null
+          owner_person_id?: string | null
+          review_due_at?: string | null
+          risk_category?: string
+          risk_description?: string | null
+          risk_score?: number | null
+          risk_title?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       import_batches: {
         Row: {
           business_name: string
@@ -10259,6 +10370,138 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      incident_register: {
+        Row: {
+          business_id: string | null
+          corrective_actions: Json | null
+          created_at: string | null
+          customer_impact: boolean | null
+          data_impact: boolean | null
+          detected_at: string | null
+          entity_id: string | null
+          financial_impact: boolean | null
+          founder_review_required: boolean | null
+          id: string
+          incident_summary: string | null
+          incident_title: string
+          incident_type: string
+          insurance_review_required: boolean | null
+          metadata: Json | null
+          regulatory_review_required: boolean | null
+          resolved_at: string | null
+          root_cause: string | null
+          severity: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          business_id?: string | null
+          corrective_actions?: Json | null
+          created_at?: string | null
+          customer_impact?: boolean | null
+          data_impact?: boolean | null
+          detected_at?: string | null
+          entity_id?: string | null
+          financial_impact?: boolean | null
+          founder_review_required?: boolean | null
+          id?: string
+          incident_summary?: string | null
+          incident_title: string
+          incident_type: string
+          insurance_review_required?: boolean | null
+          metadata?: Json | null
+          regulatory_review_required?: boolean | null
+          resolved_at?: string | null
+          root_cause?: string | null
+          severity?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          business_id?: string | null
+          corrective_actions?: Json | null
+          created_at?: string | null
+          customer_impact?: boolean | null
+          data_impact?: boolean | null
+          detected_at?: string | null
+          entity_id?: string | null
+          financial_impact?: boolean | null
+          founder_review_required?: boolean | null
+          id?: string
+          incident_summary?: string | null
+          incident_title?: string
+          incident_type?: string
+          insurance_review_required?: boolean | null
+          metadata?: Json | null
+          regulatory_review_required?: boolean | null
+          resolved_at?: string | null
+          root_cause?: string | null
+          severity?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      insurance_policy_register: {
+        Row: {
+          broker_name: string | null
+          business_id: string | null
+          coverage_summary: string | null
+          created_at: string | null
+          currency: string | null
+          document_id: string | null
+          entity_id: string | null
+          id: string
+          insurer_name: string | null
+          metadata: Json | null
+          policy_number: string | null
+          policy_status: string | null
+          policy_type: string
+          premium_amount: number | null
+          renewal_date: string | null
+          review_due_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          broker_name?: string | null
+          business_id?: string | null
+          coverage_summary?: string | null
+          created_at?: string | null
+          currency?: string | null
+          document_id?: string | null
+          entity_id?: string | null
+          id?: string
+          insurer_name?: string | null
+          metadata?: Json | null
+          policy_number?: string | null
+          policy_status?: string | null
+          policy_type: string
+          premium_amount?: number | null
+          renewal_date?: string | null
+          review_due_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          broker_name?: string | null
+          business_id?: string | null
+          coverage_summary?: string | null
+          created_at?: string | null
+          currency?: string | null
+          document_id?: string | null
+          entity_id?: string | null
+          id?: string
+          insurer_name?: string | null
+          metadata?: Json | null
+          policy_number?: string | null
+          policy_status?: string | null
+          policy_type?: string
+          premium_amount?: number | null
+          renewal_date?: string | null
+          review_due_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       integration_activity_logs: {
         Row: {
