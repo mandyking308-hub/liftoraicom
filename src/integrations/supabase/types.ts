@@ -4384,6 +4384,149 @@ export type Database = {
         }
         Relationships: []
       }
+      business_rehearsal_runs: {
+        Row: {
+          blockers: Json
+          business_id: string | null
+          completed_at: string | null
+          created_at: string
+          founder_review_required: boolean
+          id: string
+          metadata: Json
+          pass_fail_status: string
+          readiness_score: number | null
+          rehearsal_name: string
+          rehearsal_status: string
+          rehearsal_type: string
+          results_summary: string | null
+          scenario_pack: string | null
+          started_at: string | null
+          test_data_only: boolean
+          updated_at: string
+        }
+        Insert: {
+          blockers?: Json
+          business_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          founder_review_required?: boolean
+          id?: string
+          metadata?: Json
+          pass_fail_status?: string
+          readiness_score?: number | null
+          rehearsal_name: string
+          rehearsal_status?: string
+          rehearsal_type: string
+          results_summary?: string | null
+          scenario_pack?: string | null
+          started_at?: string | null
+          test_data_only?: boolean
+          updated_at?: string
+        }
+        Update: {
+          blockers?: Json
+          business_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          founder_review_required?: boolean
+          id?: string
+          metadata?: Json
+          pass_fail_status?: string
+          readiness_score?: number | null
+          rehearsal_name?: string
+          rehearsal_status?: string
+          rehearsal_type?: string
+          results_summary?: string | null
+          scenario_pack?: string | null
+          started_at?: string | null
+          test_data_only?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_rehearsal_runs_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_rehearsal_scenarios: {
+        Row: {
+          blockers: Json
+          business_id: string | null
+          created_at: string
+          expected_agent_key: string | null
+          expected_output: string | null
+          id: string
+          metadata: Json
+          passed: boolean
+          rehearsal_run_id: string | null
+          result_summary: string | null
+          scenario_description: string | null
+          scenario_key: string
+          scenario_stage: string
+          scenario_status: string
+          scenario_title: string
+          test_contact_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          blockers?: Json
+          business_id?: string | null
+          created_at?: string
+          expected_agent_key?: string | null
+          expected_output?: string | null
+          id?: string
+          metadata?: Json
+          passed?: boolean
+          rehearsal_run_id?: string | null
+          result_summary?: string | null
+          scenario_description?: string | null
+          scenario_key: string
+          scenario_stage: string
+          scenario_status?: string
+          scenario_title: string
+          test_contact_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          blockers?: Json
+          business_id?: string | null
+          created_at?: string
+          expected_agent_key?: string | null
+          expected_output?: string | null
+          id?: string
+          metadata?: Json
+          passed?: boolean
+          rehearsal_run_id?: string | null
+          result_summary?: string | null
+          scenario_description?: string | null
+          scenario_key?: string
+          scenario_stage?: string
+          scenario_status?: string
+          scenario_title?: string
+          test_contact_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_rehearsal_scenarios_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_rehearsal_scenarios_rehearsal_run_id_fkey"
+            columns: ["rehearsal_run_id"]
+            isOneToOne: false
+            referencedRelation: "business_rehearsal_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_risk_scores: {
         Row: {
           business_name: string
@@ -14290,6 +14433,62 @@ export type Database = {
           vendor_name?: string | null
         }
         Relationships: []
+      }
+      operator_training_checklists: {
+        Row: {
+          business_id: string | null
+          checklist_name: string
+          checklist_status: string
+          completed_tasks: Json
+          confidence_score: number | null
+          created_at: string
+          founder_review_required: boolean
+          id: string
+          operator_name: string | null
+          signed_off_at: string | null
+          tasks: Json
+          training_area: string
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          checklist_name: string
+          checklist_status?: string
+          completed_tasks?: Json
+          confidence_score?: number | null
+          created_at?: string
+          founder_review_required?: boolean
+          id?: string
+          operator_name?: string | null
+          signed_off_at?: string | null
+          tasks?: Json
+          training_area: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          checklist_name?: string
+          checklist_status?: string
+          completed_tasks?: Json
+          confidence_score?: number | null
+          created_at?: string
+          founder_review_required?: boolean
+          id?: string
+          operator_name?: string | null
+          signed_off_at?: string | null
+          tasks?: Json
+          training_area?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "operator_training_checklists_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       optimisation_insights: {
         Row: {
