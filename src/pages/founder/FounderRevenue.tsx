@@ -1,4 +1,5 @@
 import FounderLayout from "@/components/founder/FounderLayout";
+import PortfolioIntelligenceBrainPanel from "@/components/founder/strategy/PortfolioIntelligenceBrainPanel";
 import PortfolioCommandCentrePanel from "@/components/founder/command/PortfolioCommandCentrePanel";
 import { ProductisationReadinessPanel } from "@/components/founder/revenue/ProductisationReadinessPanel";
 import { supabase } from "@/integrations/supabase/client";
@@ -194,6 +195,9 @@ const FounderRevenue = () => {
             <Button variant="outline" onClick={exportReportMarkdown}><Download size={16} className="mr-2" /> Report</Button>
           </div>
         </div>
+
+        <PortfolioIntelligenceBrainPanel />
+
         <PortfolioCommandCentrePanel />
         <ProductisationReadinessPanel />
 

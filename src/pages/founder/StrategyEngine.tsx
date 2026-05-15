@@ -1,6 +1,7 @@
 import FounderLayout from "@/components/founder/FounderLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import LearningOptimisationEnginePanel from "@/components/founder/optimisation/LearningOptimisationEnginePanel";
+import PortfolioIntelligenceBrainPanel from "@/components/founder/strategy/PortfolioIntelligenceBrainPanel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -313,6 +314,7 @@ const StrategyEngine = () => {
             {insights?.map((i) => <InsightCard key={i.id} insight={i} />)}
           </TabsContent>
         </Tabs>
+        <PortfolioIntelligenceBrainPanel />
         <LearningOptimisationEnginePanel />
       </div>
     </FounderLayout>

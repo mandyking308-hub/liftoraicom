@@ -9533,6 +9533,68 @@ export type Database = {
         }
         Relationships: []
       }
+      portfolio_intelligence_scores: {
+        Row: {
+          attention_score: number
+          business_id: string | null
+          created_at: string
+          evidence: Json
+          growth_score: number
+          id: string
+          metadata: Json
+          opportunity_score: number
+          overall_priority_score: number
+          readiness_score: number
+          recommended_action: string | null
+          recommended_status: string | null
+          revenue_score: number
+          risk_score: number
+          score_date: string
+        }
+        Insert: {
+          attention_score?: number
+          business_id?: string | null
+          created_at?: string
+          evidence?: Json
+          growth_score?: number
+          id?: string
+          metadata?: Json
+          opportunity_score?: number
+          overall_priority_score?: number
+          readiness_score?: number
+          recommended_action?: string | null
+          recommended_status?: string | null
+          revenue_score?: number
+          risk_score?: number
+          score_date?: string
+        }
+        Update: {
+          attention_score?: number
+          business_id?: string | null
+          created_at?: string
+          evidence?: Json
+          growth_score?: number
+          id?: string
+          metadata?: Json
+          opportunity_score?: number
+          overall_priority_score?: number
+          readiness_score?: number
+          recommended_action?: string | null
+          recommended_status?: string | null
+          revenue_score?: number
+          risk_score?: number
+          score_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portfolio_intelligence_scores_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       portfolio_operating_snapshots: {
         Row: {
           active_businesses: number
@@ -9584,6 +9646,60 @@ export type Database = {
           setup_businesses?: number
           snapshot_date?: string
           total_businesses?: number
+        }
+        Relationships: []
+      }
+      portfolio_strategy_recommendations: {
+        Row: {
+          business_id: string | null
+          confidence: number | null
+          created_at: string
+          evidence: Json
+          expected_impact: string | null
+          founder_approval_required: boolean
+          id: string
+          metadata: Json
+          priority_level: string
+          recommendation_key: string
+          recommendation_summary: string | null
+          recommendation_title: string
+          recommendation_type: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          confidence?: number | null
+          created_at?: string
+          evidence?: Json
+          expected_impact?: string | null
+          founder_approval_required?: boolean
+          id?: string
+          metadata?: Json
+          priority_level?: string
+          recommendation_key: string
+          recommendation_summary?: string | null
+          recommendation_title: string
+          recommendation_type: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          confidence?: number | null
+          created_at?: string
+          evidence?: Json
+          expected_impact?: string | null
+          founder_approval_required?: boolean
+          id?: string
+          metadata?: Json
+          priority_level?: string
+          recommendation_key?: string
+          recommendation_summary?: string | null
+          recommendation_title?: string
+          recommendation_type?: string
+          status?: string
+          updated_at?: string
         }
         Relationships: []
       }
