@@ -28,6 +28,7 @@ import LearningOptimisationEnginePanel from "@/components/founder/optimisation/L
 import SelfHealingMonitoringPanel from "@/components/founder/monitoring/SelfHealingMonitoringPanel";
 import PortfolioIntelligenceBrainPanel from "@/components/founder/strategy/PortfolioIntelligenceBrainPanel";
 import AutopilotActivationGatesPanel from "@/components/founder/autonomy/AutopilotActivationGatesPanel";
+import GlobalAIBrainCommandCentre from "@/components/founder/command/GlobalAIBrainCommandCentre";
 import SmartleadControlledActivationPanel from "@/components/founder/integrations/SmartleadControlledActivationPanel";
 import BusinessLaunchFactoryPanel from "@/components/founder/expansion/BusinessLaunchFactoryPanel";
 
@@ -153,6 +154,8 @@ const GlobalOperations = () => {
           <h1 className="text-2xl font-bold flex items-center gap-2"><Globe size={24} className="text-primary" /> Global AI Operations</h1>
           <p className="text-muted-foreground text-sm mt-1">Platform-wide operational oversight across all client systems</p>
         </div>
+
+        <GlobalAIBrainCommandCentre />
 
         <MultiBusinessOperatingLayerPanel />
         <BusinessOperatingRunbookPanel />
