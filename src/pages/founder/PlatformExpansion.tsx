@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { Rocket, Search, Plus, LayoutTemplate, Building2, Activity, CheckCircle2, Clock } from "lucide-react";
 import { format } from "date-fns";
 import MultiBusinessOperatingLayerPanel from "@/components/founder/operations/MultiBusinessOperatingLayerPanel";
+import BusinessLaunchFactoryPanel from "@/components/founder/expansion/BusinessLaunchFactoryPanel";
 
 const statusClass = (s: string) => {
   if (s === "active") return "bg-green-500/20 text-green-400";
@@ -126,6 +127,7 @@ const PlatformExpansion = () => {
         </div>
 
         <MultiBusinessOperatingLayerPanel />
+        <BusinessLaunchFactoryPanel />
 
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
