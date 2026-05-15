@@ -606,14 +606,20 @@ Deno.serve(async (req) => {
     try {
       await admin.from("contact_compliance_events").insert({
         contact_id: queueRow.contact_id,
+        business_name: queueRow.business_name ?? "Neon Candy",
         event_type: "outreach_email_sent",
-        metadata: {
+        event_source: "manual_send_apply",
+        event_notes: `Manual Send Apply direct SMTP proof email delivered (queue_id=${queue_id}, step ${queueRow.sequence_step}).`,
+        old_value: {},
+        new_value: {
           queue_id,
           campaign_id: queueRow.campaign_id,
           sequence_step: queueRow.sequence_step,
           provider_message_id: postRow?.provider_message_id,
+          sent_at: postRow?.sent_at,
           source: "manual_send_apply",
         },
+        actor: userEmail ?? userId,
       });
     } catch (_e) {
       /* non-fatal */
