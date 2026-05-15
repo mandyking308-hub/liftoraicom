@@ -104,6 +104,11 @@ export default function SmartleadScaleSetupChecklist() {
 
   useEffect(() => {
     loadReadiness();
+    // Auto-run readiness test once on mount so the checklist reflects live
+    // Smartlead state (mailbox count, campaign count, warmup) instead of
+    // showing "unknown" until the founder clicks Re-run.
+    rerunTest();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const rerunTest = async () => {
@@ -137,6 +142,7 @@ export default function SmartleadScaleSetupChecklist() {
   const campaignCount: number | null = test?.campaign_count ?? null;
   const sendingAccountsPresent =
     test?.sending_accounts_present ?? (emailAccountCount != null ? emailAccountCount > 0 : null);
+  const warmupAccountCount: number | null = test?.warmup_account_count ?? null;
   const webhooks404 = test?.http_status?.webhooks === 404;
   const analytics404 = test?.http_status?.analytics_overview === 404;
 
@@ -151,7 +157,13 @@ export default function SmartleadScaleSetupChecklist() {
     campaignCount == null ? "unknown" : campaignCount > 0 ? "complete" : "blocked";
 
   const warmupStatus: StepStatus =
-    sendingAccountsPresent === true ? "unknown" : "unknown";
+    sendingAccountsPresent === true
+      ? warmupAccountCount === 0
+        ? "blocked"
+        : warmupAccountCount && warmupAccountCount > 0
+          ? "complete"
+          : "unknown"
+      : "unknown";
 
   const sequenceStatus: StepStatus =
     campaignStatus === "complete" ? "unknown" : "not_ready";
@@ -195,9 +207,13 @@ export default function SmartleadScaleSetupChecklist() {
       title: "Warmup configured",
       status: warmupStatus,
       reason:
-        sendingAccountsPresent === true
-          ? "Mailbox exists — verify warmup is enabled in Smartlead per mailbox."
-          : "Unknown until at least one email account exists.",
+        warmupStatus === "complete"
+          ? `Warmup detected on ${warmupAccountCount} mailbox(es).`
+          : warmupStatus === "blocked"
+            ? "warmup_account_count = 0 — enable warmup in Smartlead per mailbox."
+            : sendingAccountsPresent === true
+              ? "Mailbox exists — verify warmup is enabled in Smartlead per mailbox."
+              : "Unknown until at least one email account exists.",
       action:
         sendingAccountsPresent === true
           ? "Enable / confirm warmup in Smartlead for each connected mailbox."

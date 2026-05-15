@@ -54,7 +54,9 @@ export default function BulkSendPreviewPanel() {
         <div>
           <div className="text-sm font-semibold text-rose-200">NO SEND POSSIBLE YET</div>
           <p className="text-[11px] text-muted-foreground mt-1">
-            Reason: Smartlead has no sending mailbox and no campaign.
+            {data?.sending_accounts_present
+              ? "Reason: Smartlead mailbox exists, but no Smartlead campaign, no mapping, no webhook, no lead push approval, and scale sending is disabled."
+              : "Reason: Smartlead has no sending mailbox and no campaign yet."}
           </p>
         </div>
       </div>
