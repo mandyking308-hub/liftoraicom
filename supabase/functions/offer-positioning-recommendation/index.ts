@@ -20,7 +20,7 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const { business_id, dry_run = true, confirmation } = body ?? {};
 
-    const competitors = await safe(async () => (await admin.from('competitor_business_profiles').select('*').limit(50).maybeOrder?.('updated_at', { ascending: false })).data ?? [], [] as any[]);
+    const competitors = await safe(async () => (await admin.from('competitor_business_profiles').select('*').order('updated_at', { ascending: false }).limit(50)).data ?? [], [] as any[]);
     const insights = await safe(async () => {
       let q = admin.from('competitor_learning_insights').select('*').limit(100);
       if (business_id) q = q.eq('business_id', business_id);
