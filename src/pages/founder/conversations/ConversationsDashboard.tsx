@@ -4,6 +4,7 @@ import FounderLayout from "@/components/founder/FounderLayout";
 import CRMInteractionMatchPreviewPanel from "@/components/founder/crm/CRMInteractionMatchPreviewPanel";
 import CRMConversationBridgePanel from "@/components/founder/crm/CRMConversationBridgePanel";
 import CRMCustomerLifecyclePanel from "@/components/founder/crm/CRMCustomerLifecyclePanel";
+import CRMCustomerMemoryDashboard from "@/components/founder/crm/CRMCustomerMemoryDashboard";
 import CRMContactTimelinePanel from "@/components/founder/crm/CRMContactTimelinePanel";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -101,6 +102,7 @@ const ConversationsDashboard = () => {
         </div>
 
         <CRMInteractionMatchPreviewPanel />
+        <CRMCustomerMemoryDashboard />
         <CRMConversationBridgePanel />
         <CRMCustomerLifecyclePanel />
         <CRMContactTimelinePanel />
