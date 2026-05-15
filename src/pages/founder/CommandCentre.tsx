@@ -711,6 +711,7 @@ const CommandCentre = () => {
               </p>
             </Section>
             <FounderApprovalConsole />
+            <LiftorMasterDryRunPanel />
 
             {/* SECTION 4 — Liftor System Map / Master Index (collapsible) */}
             <RunwayHeader n={4} title="Liftor System Map / Master Index" icon={MapIcon} anchor="sec-map" />
