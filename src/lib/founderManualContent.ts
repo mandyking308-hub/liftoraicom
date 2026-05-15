@@ -42,6 +42,7 @@ export const generateManualMarkdown = (data: ManualLiveData): string => {
 0e. Full Session Record — Neon Candy Outreach Safety, Compliance, Queue, Tracking (13 May 2026)
 0f. Next Build Order — Do Not Skip (13 May 2026)
 0g. Smartlead Scale Engine Foundation — Read-Only Adapter, Mapping/Lead-Push Preview, Webhook Scaffold, Bulk Send Preview (15 May 2026)
+0h. CRM Customer Memory Backbone — Hardened (15 May 2026)
 0a. Credentials & Secrets Register
 1. Platform Overview
 2. Full Platform Architecture
@@ -1898,6 +1899,201 @@ Edited:
 - Do **not** re-enable \`music@neoncandy.net\` for Smartlead (Section
   0.3 rule still binds).
 - Do **not** call Apollo from any Smartlead-path function.
+
+---
+
+## SECTION 0h — CRM CUSTOMER MEMORY BACKBONE (15 MAY 2026)
+
+> This section documents the CRM hardening sprint that established a
+> canonical customer-memory layer beneath every outbound and inbound
+> surface (Smartlead, native IONOS, AI agents, proposals, demos, deals,
+> finance, suppliers, compliance). It is **read-only / preview-only**.
+> No sends, no Apollo calls, no Smartlead POSTs, no queue mutation, no
+> auto conversation/proposal/deal creation. All apply / repair / capture
+> writers are gated behind explicit feature flags + confirmation phrases
+> and are currently disabled.
+
+### 0h.1 Why this exists
+
+Before the CRM hardening sprint, customer memory was scattered across
+\`communications\`, \`email_events\`, \`conversations\`, \`deals\`,
+\`invoices\`, \`payments\`, \`proposals\`, \`demos\`, \`compliance_*\`
+and per-source provider tables. AI agents could not safely act because
+there was no single canonical interaction history per contact / business.
+0h establishes that backbone so future agent activation is gated on a
+measurable readiness score, not a hunch.
+
+### 0h.2 Canonical interaction memory — \`crm_interaction_ledger\`
+
+- Single append-only record of every customer touchpoint.
+- One row per source event with a stable \`source_dedupe_key\` for
+  idempotent backfill.
+- Foreign-keyed (soft) to \`contacts\`, \`businesses\`, and the
+  optional \`business_contact_relationships\` (BCR) row.
+- Founder/admin RLS only.
+- Writers are **off** unless \`CRM_INTERACTION_CAPTURE_APPLY_ENABLED=true\`
+  and the request carries the phrase \`APPLY CRM INTERACTION CAPTURE\`.
+
+### 0h.3 Controlled type model — \`crm_interaction_types\`
+
+- Enum-style table of allowed interaction types
+  (\`email_outbound\`, \`email_inbound\`, \`provider_event\`,
+  \`ai_draft\`, \`ai_action\`, \`proposal_*\`, \`demo_*\`, \`deal_*\`,
+  \`invoice_*\`, \`payment_*\`, \`supplier_*\`, \`compliance_*\`, etc.).
+- Anything not in this table cannot be written into the ledger.
+
+### 0h.4 Identity matching — \`crm_match_candidates\`
+
+- Preview table that proposes contact / business / BCR matches for a
+  raw event before it is promoted into the ledger.
+- Match preview is read-only; promotion is gated.
+
+### 0h.5 Source adapters (preview-only)
+
+Adapters that can *read* a source and propose ledger rows. None of
+them mutate the source or send anything:
+
+- Smartlead (provider events, replies, bounces) — read-only.
+- Native / IONOS email (sent + inbound) — read-only.
+- AI actions and AI drafts (\`ai_actions\`, draft tables) — read-only.
+- Proposals (created, sent, viewed, accepted, declined).
+- Demos (booked, attended, no-show, follow-up).
+- Deals (created, stage change, won, lost).
+- Finance (invoice issued, payment received, refund).
+- Suppliers (message in / out, status change).
+- Compliance (consent recorded, suppression added, complaint).
+
+Edge functions:
+
+- \`crm-interaction-source-preview\` — dry-run preview per source.
+- \`crm-interaction-capture-apply\` — gated writer (disabled).
+
+### 0h.6 Unified contact timeline
+
+- View / RPC that returns every ledger row for a given contact /
+  business in chronological order, joined to source labels.
+- Rendered by \`CRMContactTimelinePanel\`.
+
+### 0h.7 Contact 360 summary
+
+- \`CRMContact360Panel\` summarises identity, BCR(s), compliance spine
+  status, last inbound, last outbound, last AI action, open
+  proposals/demos/deals, finance state, lifecycle stage, and next
+  recommended action.
+
+### 0h.8 Conversation bridge — disabled by default
+
+- \`crm-conversation-bridge-preview\` shows which inbound ledger rows
+  *would* be promoted into \`communications\` + \`conversations\` for
+  AI agent handling.
+- \`crm-conversation-bridge-apply\` is gated by
+  \`CRM_CONVERSATION_BRIDGE_APPLY_ENABLED=true\` and the phrase
+  \`APPLY CRM CONVERSATION BRIDGE\`. Currently disabled — no
+  communications, conversations, or AI replies are created or sent.
+
+### 0h.9 Lifecycle stages & next-action rules
+
+- \`crm_lifecycle_stages\` (23 stages, all with
+  \`auto_send_allowed=false\`).
+- \`crm_next_action_rules\` (10 rules) maps interaction type + intent
+  to a recommended next stage and action.
+- \`crm-next-action-preview\` is read-only.
+- \`crm-next-action-apply\` is gated by
+  \`CRM_NEXT_ACTION_APPLY_ENABLED=true\` and the phrase
+  \`APPLY CRM NEXT ACTION\`. Currently disabled.
+
+### 0h.10 Founder review queue — \`crm_founder_review_queue\`
+
+- Centralised log of pending lifecycle decisions awaiting human
+  approval. Writers are gated; nothing is auto-actioned.
+
+### 0h.11 CRM health & integrity diagnostics
+
+- \`crm-health-integrity-check\` computes a **CRM Readiness Score
+  (0–100)** across 21 metrics (compliance spine coverage, BCR
+  completeness, ledger coverage, unmatched events, duplicate contacts,
+  conversation linkage, lifecycle coverage, etc.).
+- Findings persist in \`crm_integrity_findings\` (founder/admin RLS).
+- \`crm-backfill-preview\` scans 10 source tables and reports rows
+  eligible for ledger backfill — preview only.
+- \`crm-repair-apply\` is gated by
+  \`CRM_REPAIR_APPLY_ENABLED=true\` and the phrase
+  \`APPLY CRM REPAIR\`. Currently disabled. When eventually enabled it
+  is scope-restricted to ledger + findings only — it cannot touch
+  contacts, BCRs, compliance, communications, deals, finance, or
+  outreach queues.
+
+### 0h.12 Command Centre — Customer Memory Dashboard
+
+- \`CRMCustomerMemoryDashboard\` is the single-truth panel showing 10
+  readiness stages: Contacts/BCR spine, Compliance spine, Interaction
+  ledger, Source adapters, Identity matching, Unified timeline,
+  Conversation bridge, Lifecycle/next action, Founder review queue,
+  Agent readiness.
+- Mounted on Command Centre §7, \`/founder/crm\`,
+  \`/founder/conversations\`, and \`/founder/agents\` (read-only).
+- Surfaces an **Agent Readiness Badge** (\`yes\` / \`partial\` /
+  \`no\`) computed from ledger size, adapters seeded, lifecycle stages
+  + rules seeded, and zero critical health blockers. AI agents must
+  not be activated for live customer engagement until this reads
+  \`yes\`.
+
+### 0h.13 Safety state (binding)
+
+The CRM hardening sprint did **not** and must not:
+
+- send any email (native or Smartlead).
+- call Apollo for reveal, enrichment, or anything else.
+- call any Smartlead POST endpoint (no campaigns created, no leads
+  pushed, no sends triggered).
+- mutate the outbound queue, suppression list, BCRs, compliance
+  records, communications, conversations, deals, invoices, payments,
+  proposals, or demos.
+- auto-create conversations, proposals, or deals.
+- enable \`auto_send\` anywhere.
+- enable any cron schedule.
+
+All apply / repair / capture / bridge / next-action writers stay
+disabled until each corresponding feature flag is set to \`true\`
+**and** the explicit confirmation phrase is supplied. Founder/admin
+RLS only on every new table.
+
+### 0h.14 Files / surfaces created in this sprint
+
+Database:
+
+- \`crm_interaction_ledger\`, \`crm_interaction_types\`,
+  \`crm_match_candidates\`, \`crm_lifecycle_stages\`,
+  \`crm_next_action_rules\`, \`crm_founder_review_queue\`,
+  \`crm_integrity_findings\`.
+
+Edge functions (all preview-only or gated-disabled):
+
+- \`crm-interaction-source-preview\`,
+  \`crm-interaction-capture-apply\`,
+  \`crm-conversation-bridge-preview\`,
+  \`crm-conversation-bridge-apply\`,
+  \`crm-next-action-preview\`, \`crm-next-action-apply\`,
+  \`crm-health-integrity-check\`, \`crm-backfill-preview\`,
+  \`crm-repair-apply\`.
+
+UI components:
+
+- \`CRMInteractionSourceAdaptersPanel\`,
+  \`CRMContact360Panel\`, \`CRMContactTimelinePanel\`,
+  \`CRMConversationBridgePanel\`,
+  \`CRMCustomerLifecyclePanel\`,
+  \`CRMHealthIntegrityPanel\`,
+  \`CRMCustomerMemoryDashboard\`.
+
+### 0h.15 Recommended next build step
+
+Ship a read-only **CRM Agent Activation Checklist** wired to the
+Customer Memory Dashboard's readiness signal, gated by an explicit
+founder phrase (\`ACTIVATE CRM AGENT <agent_key>\`), recording each
+agent's enable/disable state into a new \`crm_agent_activation_log\`
+table — without flipping any \`auto_send\`, cron, or Smartlead POST
+switch.
 
 ---
 
