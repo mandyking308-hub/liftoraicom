@@ -208,6 +208,7 @@ const CRMDashboard = () => {
         <CRMHealthIntegrityPanel />
         <CRMContact360Panel />
         <MultiChannelInboxPanel />
+        <CustomerJourneyControlBoard />
       </div>
     </FounderLayout>
   );
