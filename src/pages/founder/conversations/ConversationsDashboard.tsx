@@ -7,6 +7,7 @@ import CRMCustomerLifecyclePanel from "@/components/founder/crm/CRMCustomerLifec
 import CRMCustomerMemoryDashboard from "@/components/founder/crm/CRMCustomerMemoryDashboard";
 import CRMContactTimelinePanel from "@/components/founder/crm/CRMContactTimelinePanel";
 import AIConversationDraftingPanel from "@/components/founder/agents/AIConversationDraftingPanel";
+import AIEngagementAgentLivePanel from "@/components/founder/agents/AIEngagementAgentLivePanel";
 import FounderApprovalConsole from "@/components/founder/approvals/FounderApprovalConsole";
 import CommercialHandoffPanel from "@/components/founder/commercial/CommercialHandoffPanel";
 import { supabase } from "@/integrations/supabase/client";
@@ -210,6 +211,7 @@ const ConversationsDashboard = () => {
             </Card>
           </TabsContent>
         </Tabs>
+        <AIEngagementAgentLivePanel />
         <AIConversationDraftingPanel />
         <FounderApprovalConsole />
         <CommercialHandoffPanel />
