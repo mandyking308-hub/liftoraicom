@@ -4,6 +4,7 @@ import AIAgentOperatingModelPanel from "@/components/founder/agents/AIAgentOpera
 import AIAgentOrchestratorPanel from "@/components/founder/agents/AIAgentOrchestratorPanel";
 import AIConversationDraftingPanel from "@/components/founder/agents/AIConversationDraftingPanel";
 import FounderApprovalConsole from "@/components/founder/approvals/FounderApprovalConsole";
+import ApprovedActionExecutionPanel from "@/components/founder/approvals/ApprovedActionExecutionPanel";
 import AgentBusinessLivePanel from "@/components/founder/agents/AgentBusinessLivePanel";
 import AIEngagementAgentLivePanel from "@/components/founder/agents/AIEngagementAgentLivePanel";
 import LiveCommercialAgentsPanel from "@/components/founder/commercial/LiveCommercialAgentsPanel";
@@ -224,6 +225,7 @@ const AgentDirectory = () => {
         <AIAgentOrchestratorPanel />
         <AIConversationDraftingPanel />
         <FounderApprovalConsole />
+        <ApprovedActionExecutionPanel />
         <LiveCommercialAgentsPanel />
       </div>
     </FounderLayout>
