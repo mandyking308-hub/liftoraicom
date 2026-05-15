@@ -198,6 +198,7 @@ const CRMDashboard = () => {
             </ul>
           </CardContent>
         </Card>
+        <CRMCustomerMemoryDashboard />
         <CRMInteractionLedgerPanel />
         <CRMInteractionMatchPreviewPanel />
         <CRMInteractionSourceAdaptersPanel />
