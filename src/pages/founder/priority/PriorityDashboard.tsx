@@ -7,6 +7,7 @@ import FounderApprovalConsole from "@/components/founder/approvals/FounderApprov
 import ApprovedActionExecutionPanel from "@/components/founder/approvals/ApprovedActionExecutionPanel";
 import AgentHandoverProtocolPanel from "@/components/founder/agents/AgentHandoverProtocolPanel";
 import AgentCollaborationBoard from "@/components/founder/agents/AgentCollaborationBoard";
+import FounderAlertEscalationPanel from "@/components/founder/command/FounderAlertEscalationPanel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -77,7 +78,7 @@ const PriorityDashboard = () => {
 
   return (
     <FounderLayout>
-      <FounderAlertMount />
+      <div className="mb-4"><FounderAlertEscalationPanel /></div>
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Priority Engine</h1>
