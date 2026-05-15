@@ -1,4 +1,5 @@
 import FounderLayout from "@/components/founder/FounderLayout";
+import CommandCentreUsabilityReportPanel from "@/components/founder/command/CommandCentreUsabilityReportPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -426,6 +427,7 @@ const FullSystemMirror = () => {
 
         {/* Coverage strip */}
         <LiftorMasterReconciliationPanel />
+        <CommandCentreUsabilityReportPanel />
         <FullManualFunctionControlPanel />
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           <Card className="bg-card border-border/50">

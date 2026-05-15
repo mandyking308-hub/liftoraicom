@@ -5,6 +5,7 @@ import FullManualFunctionControlPanel from "@/components/founder/command/FullMan
 import { supabase } from "@/integrations/supabase/client";
 import FounderLayout from "@/components/founder/FounderLayout";
 import CommandCentreModuleRegistryPanel from "@/components/founder/command/CommandCentreModuleRegistryPanel";
+import CommandCentreUsabilityReportPanel from "@/components/founder/command/CommandCentreUsabilityReportPanel";
 import SelfHealingMonitoringPanel from "@/components/founder/monitoring/SelfHealingMonitoringPanel";
 import CRMInteractionSourceAdaptersPanel from "@/components/founder/crm/CRMInteractionSourceAdaptersPanel";
 import CRMHealthIntegrityPanel from "@/components/founder/crm/CRMHealthIntegrityPanel";
@@ -64,6 +65,7 @@ const SystemHealth = () => {
           </p>
         </div>
         <SelfHealingMonitoringPanel />
+        <CommandCentreUsabilityReportPanel />
         <div>
         </div>
 
