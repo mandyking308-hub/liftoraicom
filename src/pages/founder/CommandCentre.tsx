@@ -28,6 +28,7 @@ import FooterDisclosurePreview from "@/components/founder/safety/FooterDisclosur
 import ManualSendApplyGate from "@/components/founder/safety/ManualSendApplyGate";
 import OutboundProviderEnginePanel from "@/components/founder/integrations/OutboundProviderEnginePanel";
 import BulkSendEngineBlueprint from "@/components/founder/integrations/BulkSendEngineBlueprint";
+import SmartleadScaleSetupChecklist from "@/components/founder/integrations/SmartleadScaleSetupChecklist";
 import {
   Building2, Bot, Send, Mail, Inbox as InboxIcon, MessageSquare, FileSignature,
   Search, Banknote, ShieldCheck, Workflow as WorkflowIcon, Phone, AlertTriangle,
@@ -951,6 +952,7 @@ const CommandCentre = () => {
             </Section>
             <OutboundProviderEnginePanel />
             <BulkSendEngineBlueprint />
+            <SmartleadScaleSetupChecklist />
 
             {/* SECTION 13 — Monitoring / Security / System Health */}
             <RunwayHeader n={13} title="Monitoring / Security / System Health" icon={Monitor} anchor="sec-monitoring" />
