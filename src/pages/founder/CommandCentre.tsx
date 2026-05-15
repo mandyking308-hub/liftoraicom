@@ -636,11 +636,15 @@ const CommandCentre = () => {
             </div>
 
             {/* OUTREACH SAFETY / QUEUE BRAKE — read-only, shared source of truth with /founder/outreach/queue-audit */}
-            <RunwayHeader n={2} title="Safety / Brake" icon={ShieldCheck} anchor="sec-safety" />
+            <RunwayHeader n={2} title="Safety / Brake — Native Liftor / IONOS queue (not Smartlead scale)" icon={ShieldCheck} anchor="sec-safety" />
             <div id="sec-safety" className="scroll-mt-24 space-y-2">
               <OutreachSafetyPanel />
               <p className="text-[11px] text-muted-foreground px-1">
-                SAFE_BLOCKED = safe to inspect and clean. NOT safe to send. Manual Send Apply is not built. Live send / queue creation / Apollo reveal that leads to send remain guarded below.
+                Native Liftor / IONOS queue safety — not Smartlead scale path.
+                SAFE_BLOCKED = safe to inspect and clean on the IONOS lane only.
+                It does NOT mean Smartlead scale is ready or blocked. Smartlead
+                scale is independently gated by campaign / mapping / webhook /
+                lead-push / scale-enable readiness (see Outbound Channel Lanes).
               </p>
             </div>
 
@@ -661,6 +665,9 @@ const CommandCentre = () => {
             <RunwayHeader n={3} title="Current Next Actions" icon={Sparkles} anchor="sec-next-actions" />
             <Section title="Today's founder actions" icon={Sparkles}>
               <SmartleadScaleNextActionBanner />
+              <div className="mt-3">
+                <OutboundChannelLanesPanel />
+              </div>
               {orderedFounderActions.length === 0 ? (
                 <p className="text-sm text-muted-foreground">No founder decision required right now.</p>
               ) : (
@@ -678,7 +685,11 @@ const CommandCentre = () => {
                 </div>
               )}
               <p className="text-[11px] text-muted-foreground mt-3">
-                Live batch send, queue creation, Apollo reveal-to-queue, decision-apply and Manual Send Apply are intentionally absent or guarded. Manual Send Apply is not built.
+                Smartlead scale lane is the active outreach build path. Native
+                IONOS live batch send, queue creation, Apollo reveal-to-queue,
+                decision-apply, Manual Send Apply / Pooja proof-send and the 7
+                review_required Step 4 rows are intentionally parked on the
+                native lane and are not the global top action.
               </p>
             </Section>
 
@@ -780,8 +791,8 @@ const CommandCentre = () => {
               <p className="text-sm text-muted-foreground">Contacts must be marked outreach_allowed by compliance before they can be promoted to a sendable queue. This Command Centre never marks contacts outreach_allowed.</p>
             </Section>
 
-            {/* 6d — Stage to Queue + 6e — Queue Audit / Pending Rows + 6f — Queue Creation + 6g — Controlled Send */}
-            <Section title="6d · Stage to Queue · 6e · Queue Audit · 6f · Queue Creation · 6g · Controlled Send" icon={Send} action={<Link to="/founder/outreach/queue"><Button size="sm" variant="ghost">Open queue <ArrowRight size={12} /></Button></Link>}>
+            {/* 6d — Stage to Queue + 6e — Queue Audit / Pending Rows + 6f — Queue Creation + 6g — Controlled Send (NATIVE IONOS LANE) */}
+            <Section title="6d–6g · Native Liftor / IONOS queue (Stage · Audit · Creation · Controlled Send) — not Smartlead scale" icon={Send} action={<Link to="/founder/outreach/queue"><Button size="sm" variant="ghost">Open queue <ArrowRight size={12} /></Button></Link>}>
               <div id="sec-queue" className="space-y-4 scroll-mt-24">
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
                   <div className="p-2 rounded bg-secondary/40"><p className="text-base font-semibold">{totals.pendingQueue}</p><p className="text-muted-foreground">Queued</p></div>
