@@ -31,11 +31,12 @@ export default function CustomerOnboardingView() {
         .not('approved_at', 'is', null)
         .maybeSingle();
       if (error || !data) { setState('unavailable'); return; }
-      setPlan(data);
+      const planData = data as any;
+      setPlan(planData);
       const { data: t } = await supabase
         .from('customer_onboarding_tasks')
         .select('id,task_title,task_description,due_at,task_status,task_owner,priority_level')
-        .eq('onboarding_plan_id', data.id)
+        .eq('onboarding_plan_id', planData.id)
         .eq('customer_visible', true)
         .order('due_at', { ascending: true });
       setTasks(t ?? []);
