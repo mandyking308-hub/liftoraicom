@@ -198,6 +198,7 @@ const CRMDashboard = () => {
         <CRMInteractionLedgerPanel />
         <CRMInteractionMatchPreviewPanel />
         <CRMInteractionSourceAdaptersPanel />
+        <CRMConversationBridgePanel />
         <CRMContact360Panel />
       </div>
     </FounderLayout>
