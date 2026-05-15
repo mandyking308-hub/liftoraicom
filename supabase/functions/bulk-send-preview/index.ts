@@ -62,6 +62,7 @@ Deno.serve(async (req) => {
   // Read-only Smartlead checks (count campaigns + accounts)
   let campaignCount = 0;
   let accountCount = 0;
+  let warmupCount = 0;
   if (credentialsPresent) {
     try {
       const ctrl = new AbortController();
@@ -91,7 +92,18 @@ Deno.serve(async (req) => {
       }
       try {
         const a = JSON.parse(aTxt);
-        accountCount = Array.isArray(a) ? a.length : Array.isArray(a?.data) ? a.data.length : 0;
+        const accountsArr: any[] = Array.isArray(a)
+          ? a
+          : Array.isArray(a?.data)
+            ? a.data
+            : [];
+        accountCount = accountsArr.length;
+        warmupCount = accountsArr.filter(
+          (acc: any) =>
+            acc?.warmup_details?.status === "ACTIVE" ||
+            acc?.warmup_status === "ACTIVE" ||
+            acc?.warmup_enabled === true,
+        ).length;
       } catch {
         /* */
       }
@@ -114,7 +126,9 @@ Deno.serve(async (req) => {
   const sending_accounts_present = accountCount > 0;
   const smartlead_campaign_present = campaignCount > 0;
   const smartlead_campaign_mapped = mappedCount > 0;
-  const lead_push_ready = smartlead_campaign_present && sending_accounts_present;
+  const warmup_enabled = warmupCount > 0;
+  const lead_push_ready =
+    smartlead_campaign_present && sending_accounts_present && smartlead_campaign_mapped;
   const webhook_ready = !!SMARTLEAD_WEBHOOK_SECRET && smartlead_campaign_present;
   const batch_preview_ready =
     provider_ready &&
@@ -127,7 +141,9 @@ Deno.serve(async (req) => {
   if (!sending_accounts_present) blockers.push("no_sending_accounts_in_smartlead");
   if (!smartlead_campaign_present) blockers.push("no_campaigns_in_smartlead");
   if (!smartlead_campaign_mapped) blockers.push("no_campaign_mapping");
+  if (!lead_push_ready) blockers.push("lead_push_not_ready");
   if (!webhook_ready) blockers.push("no_webhook_configured");
+  if (!warmup_enabled) blockers.push("warmup_not_enabled");
   blockers.push("scale_sending_disabled");
 
   return json({
@@ -140,6 +156,7 @@ Deno.serve(async (req) => {
     smartlead_campaign_present,
     sending_accounts_present,
     lead_push_ready,
+    warmup_enabled,
     webhook_ready,
     batch_preview_ready,
     eligible_count: 0,
@@ -147,6 +164,7 @@ Deno.serve(async (req) => {
     counts: {
       smartlead_campaigns: campaignCount,
       smartlead_email_accounts: accountCount,
+      smartlead_warmup_accounts: warmupCount,
       active_mappings: mappedCount,
     },
     limit,
