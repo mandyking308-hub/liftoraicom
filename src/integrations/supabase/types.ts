@@ -2667,6 +2667,373 @@ export type Database = {
         }
         Relationships: []
       }
+      crm_interaction_ledger: {
+        Row: {
+          ai_action_id: string | null
+          ai_action_recommended: string | null
+          ai_draft_id: string | null
+          ai_relevant: boolean
+          assignment_id: string | null
+          bcr_stage_snapshot: string | null
+          body_preview: string | null
+          business_contact_relationship_id: string | null
+          business_id: string | null
+          captured_at: string
+          communication_id: string | null
+          compliance_relevant: boolean
+          compliance_status_snapshot: string | null
+          contact_email: string | null
+          contact_id: string | null
+          contact_name: string | null
+          contact_status_snapshot: string | null
+          conversation_id: string | null
+          created_at: string
+          deal_id: string | null
+          deal_relevant: boolean
+          dedupe_key: string | null
+          demo_access_id: string | null
+          demo_event_id: string | null
+          direction: string | null
+          email_event_id: string | null
+          external_event_id: string | null
+          external_thread_id: string | null
+          founder_review_required: boolean
+          id: string
+          interaction_type: string
+          internal_proposal_id: string | null
+          invoice_id: string | null
+          match_confidence: number | null
+          matched_status: string
+          metadata: Json
+          next_step: string | null
+          occurred_at: string
+          payment_id: string | null
+          priority_relevant: boolean
+          processing_status: string
+          proposal_relevant: boolean
+          provider_campaign_id: string | null
+          provider_event_id: string | null
+          provider_lead_id: string | null
+          provider_message_id: string | null
+          provider_type: string | null
+          raw_payload: Json
+          risk_flags: Json
+          source_channel: string
+          source_system: string
+          subject: string | null
+          summary: string | null
+          supplier_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          ai_action_id?: string | null
+          ai_action_recommended?: string | null
+          ai_draft_id?: string | null
+          ai_relevant?: boolean
+          assignment_id?: string | null
+          bcr_stage_snapshot?: string | null
+          body_preview?: string | null
+          business_contact_relationship_id?: string | null
+          business_id?: string | null
+          captured_at?: string
+          communication_id?: string | null
+          compliance_relevant?: boolean
+          compliance_status_snapshot?: string | null
+          contact_email?: string | null
+          contact_id?: string | null
+          contact_name?: string | null
+          contact_status_snapshot?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          deal_id?: string | null
+          deal_relevant?: boolean
+          dedupe_key?: string | null
+          demo_access_id?: string | null
+          demo_event_id?: string | null
+          direction?: string | null
+          email_event_id?: string | null
+          external_event_id?: string | null
+          external_thread_id?: string | null
+          founder_review_required?: boolean
+          id?: string
+          interaction_type: string
+          internal_proposal_id?: string | null
+          invoice_id?: string | null
+          match_confidence?: number | null
+          matched_status?: string
+          metadata?: Json
+          next_step?: string | null
+          occurred_at?: string
+          payment_id?: string | null
+          priority_relevant?: boolean
+          processing_status?: string
+          proposal_relevant?: boolean
+          provider_campaign_id?: string | null
+          provider_event_id?: string | null
+          provider_lead_id?: string | null
+          provider_message_id?: string | null
+          provider_type?: string | null
+          raw_payload?: Json
+          risk_flags?: Json
+          source_channel: string
+          source_system: string
+          subject?: string | null
+          summary?: string | null
+          supplier_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ai_action_id?: string | null
+          ai_action_recommended?: string | null
+          ai_draft_id?: string | null
+          ai_relevant?: boolean
+          assignment_id?: string | null
+          bcr_stage_snapshot?: string | null
+          body_preview?: string | null
+          business_contact_relationship_id?: string | null
+          business_id?: string | null
+          captured_at?: string
+          communication_id?: string | null
+          compliance_relevant?: boolean
+          compliance_status_snapshot?: string | null
+          contact_email?: string | null
+          contact_id?: string | null
+          contact_name?: string | null
+          contact_status_snapshot?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          deal_id?: string | null
+          deal_relevant?: boolean
+          dedupe_key?: string | null
+          demo_access_id?: string | null
+          demo_event_id?: string | null
+          direction?: string | null
+          email_event_id?: string | null
+          external_event_id?: string | null
+          external_thread_id?: string | null
+          founder_review_required?: boolean
+          id?: string
+          interaction_type?: string
+          internal_proposal_id?: string | null
+          invoice_id?: string | null
+          match_confidence?: number | null
+          matched_status?: string
+          metadata?: Json
+          next_step?: string | null
+          occurred_at?: string
+          payment_id?: string | null
+          priority_relevant?: boolean
+          processing_status?: string
+          proposal_relevant?: boolean
+          provider_campaign_id?: string | null
+          provider_event_id?: string | null
+          provider_lead_id?: string | null
+          provider_message_id?: string | null
+          provider_type?: string | null
+          raw_payload?: Json
+          risk_flags?: Json
+          source_channel?: string
+          source_system?: string
+          subject?: string | null
+          summary?: string | null
+          supplier_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_interaction_ledger_ai_action_id_fkey"
+            columns: ["ai_action_id"]
+            isOneToOne: false
+            referencedRelation: "ai_actions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_interaction_ledger_ai_draft_id_fkey"
+            columns: ["ai_draft_id"]
+            isOneToOne: false
+            referencedRelation: "ai_drafts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_interaction_ledger_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_interaction_ledger_business_contact_relationship_id_fkey"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_interaction_ledger_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_interaction_ledger_communication_id_fkey"
+            columns: ["communication_id"]
+            isOneToOne: false
+            referencedRelation: "communications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_interaction_ledger_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_interaction_ledger_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+          {
+            foreignKeyName: "crm_interaction_ledger_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_interaction_ledger_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_interaction_ledger_demo_access_id_fkey"
+            columns: ["demo_access_id"]
+            isOneToOne: false
+            referencedRelation: "demo_access"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_interaction_ledger_demo_event_id_fkey"
+            columns: ["demo_event_id"]
+            isOneToOne: false
+            referencedRelation: "demo_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_interaction_ledger_email_event_id_fkey"
+            columns: ["email_event_id"]
+            isOneToOne: false
+            referencedRelation: "email_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_interaction_ledger_internal_proposal_id_fkey"
+            columns: ["internal_proposal_id"]
+            isOneToOne: false
+            referencedRelation: "internal_proposals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_interaction_ledger_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_interaction_ledger_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_interaction_ledger_provider_event_id_fkey"
+            columns: ["provider_event_id"]
+            isOneToOne: false
+            referencedRelation: "outbound_provider_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_interaction_ledger_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_interaction_types: {
+        Row: {
+          ai_relevant: boolean
+          compliance_relevant: boolean
+          created_at: string
+          creates_conversation_candidate: boolean
+          deal_relevant: boolean
+          default_direction: string | null
+          default_source_channel: string | null
+          default_source_system: string | null
+          description: string | null
+          founder_review_required: boolean
+          id: string
+          interaction_type: string
+          label: string
+          metadata: Json
+          priority_relevant: boolean
+          proposal_relevant: boolean
+          suppression_relevant: boolean
+          unsubscribe_relevant: boolean
+          updated_at: string
+        }
+        Insert: {
+          ai_relevant?: boolean
+          compliance_relevant?: boolean
+          created_at?: string
+          creates_conversation_candidate?: boolean
+          deal_relevant?: boolean
+          default_direction?: string | null
+          default_source_channel?: string | null
+          default_source_system?: string | null
+          description?: string | null
+          founder_review_required?: boolean
+          id?: string
+          interaction_type: string
+          label: string
+          metadata?: Json
+          priority_relevant?: boolean
+          proposal_relevant?: boolean
+          suppression_relevant?: boolean
+          unsubscribe_relevant?: boolean
+          updated_at?: string
+        }
+        Update: {
+          ai_relevant?: boolean
+          compliance_relevant?: boolean
+          created_at?: string
+          creates_conversation_candidate?: boolean
+          deal_relevant?: boolean
+          default_direction?: string | null
+          default_source_channel?: string | null
+          default_source_system?: string | null
+          description?: string | null
+          founder_review_required?: boolean
+          id?: string
+          interaction_type?: string
+          label?: string
+          metadata?: Json
+          priority_relevant?: boolean
+          proposal_relevant?: boolean
+          suppression_relevant?: boolean
+          unsubscribe_relevant?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       deals: {
         Row: {
           business_name: string
@@ -9354,6 +9721,10 @@ export type Database = {
       }
       get_business_outbound_status: {
         Args: { _business_name: string }
+        Returns: Json
+      }
+      get_crm_interaction_ledger_summary: {
+        Args: { p_business_id?: string }
         Returns: Json
       }
       get_inbox_credentials_for_send: {
