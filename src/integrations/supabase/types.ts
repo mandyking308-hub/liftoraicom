@@ -10729,6 +10729,108 @@ export type Database = {
         }
         Relationships: []
       }
+      self_healing_findings: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          finding_summary: string | null
+          finding_title: string
+          founder_approval_required: boolean
+          id: string
+          metadata: Json
+          recommended_repair: string | null
+          repair_safe: boolean
+          repair_status: string
+          rule_key: string
+          severity: string
+          source_id: string | null
+          source_table: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          finding_summary?: string | null
+          finding_title: string
+          founder_approval_required?: boolean
+          id?: string
+          metadata?: Json
+          recommended_repair?: string | null
+          repair_safe?: boolean
+          repair_status?: string
+          rule_key: string
+          severity?: string
+          source_id?: string | null
+          source_table?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          finding_summary?: string | null
+          finding_title?: string
+          founder_approval_required?: boolean
+          id?: string
+          metadata?: Json
+          recommended_repair?: string | null
+          repair_safe?: boolean
+          repair_status?: string
+          rule_key?: string
+          severity?: string
+          source_id?: string | null
+          source_table?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      self_healing_rules: {
+        Row: {
+          created_at: string
+          detection_query_description: string | null
+          enabled: boolean
+          founder_approval_required: boolean
+          id: string
+          metadata: Json
+          monitored_area: string
+          repair_action_type: string | null
+          rule_key: string
+          rule_label: string
+          safe_auto_repair_allowed: boolean
+          severity: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          detection_query_description?: string | null
+          enabled?: boolean
+          founder_approval_required?: boolean
+          id?: string
+          metadata?: Json
+          monitored_area: string
+          repair_action_type?: string | null
+          rule_key: string
+          rule_label: string
+          safe_auto_repair_allowed?: boolean
+          severity?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          detection_query_description?: string | null
+          enabled?: boolean
+          founder_approval_required?: boolean
+          id?: string
+          metadata?: Json
+          monitored_area?: string
+          repair_action_type?: string | null
+          rule_key?: string
+          rule_label?: string
+          safe_auto_repair_allowed?: boolean
+          severity?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       send_windows: {
         Row: {
           created_at: string
