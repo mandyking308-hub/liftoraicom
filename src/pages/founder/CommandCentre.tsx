@@ -24,6 +24,7 @@ import PreLiveBaselineControlPanel from "@/components/founder/activation/PreLive
 import RevenueTargetOperatingPanel from "@/components/founder/revenue/RevenueTargetOperatingPanel";
 import FinalGoToUseReadinessPanel from "@/components/founder/command/FinalGoToUseReadinessPanel";
 import FinalHardeningStatusPanel from "@/components/founder/command/FinalHardeningStatusPanel";
+import CommandCentreTruthSyncPanel from "@/components/founder/command/CommandCentreTruthSyncPanel";
 import LiftorUserManualPanel from "@/components/founder/manual/LiftorUserManualPanel";
 import BusinessKnowledgeUploadTrainingPanel from "@/components/founder/knowledge/BusinessKnowledgeUploadTrainingPanel";
 import LiftorCapabilities from "@/components/founder/LiftorCapabilities";
@@ -757,13 +758,14 @@ const CommandCentre = () => {
   return (
     <FounderLayout>
       <div className="max-w-7xl mx-auto px-4 pt-4"><FounderAlertEscalationPanel /></div>
+      <div className="max-w-7xl mx-auto px-4 pt-4"><CommandCentreTruthSyncPanel /></div>
+      <div className="max-w-7xl mx-auto px-4 pt-4"><FinalHardeningStatusPanel /></div>
+      <div className="max-w-7xl mx-auto px-4 pt-4"><FinalGoToUseReadinessPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><CommandCentreUsabilityReportPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><BusinessActivationWizardPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><BusinessRehearsalSimulationPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><PreLiveBaselineControlPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><RevenueTargetOperatingPanel /></div>
-      <div className="max-w-7xl mx-auto px-4 pt-4"><FinalGoToUseReadinessPanel /></div>
-      <div className="max-w-7xl mx-auto px-4 pt-4"><FinalHardeningStatusPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><BusinessKnowledgeUploadTrainingPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><LiftorUserManualPanel /></div>
       {(() => {
