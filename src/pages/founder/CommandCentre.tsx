@@ -50,6 +50,7 @@ import AIConversationDraftingPanel from "@/components/founder/agents/AIConversat
 import FounderApprovalConsole from "@/components/founder/approvals/FounderApprovalConsole";
 import CommercialHandoffPanel from "@/components/founder/commercial/CommercialHandoffPanel";
 import RevenueOperationsPanel from "@/components/founder/finance/RevenueOperationsPanel";
+import LiftorMasterDryRunPanel from "@/components/founder/testing/LiftorMasterDryRunPanel";
 import CRMContact360Panel from "@/components/founder/crm/CRMContact360Panel";
 import {
   Building2, Bot, Send, Mail, Inbox as InboxIcon, MessageSquare, FileSignature,
