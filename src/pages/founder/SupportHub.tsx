@@ -1,5 +1,6 @@
 import FounderLayout from "@/components/founder/FounderLayout";
 import SupportKnowledgeAgentPanel from "@/components/founder/support/SupportKnowledgeAgentPanel";
+import HumanAccountManagerPanel from "@/components/founder/customer/HumanAccountManagerPanel";
 
 export default function SupportHub() {
   return (
@@ -10,6 +11,7 @@ export default function SupportHub() {
           <p className="text-sm text-muted-foreground">FAQs, help articles, support drafts, triage and escalation — internal only, no external send.</p>
         </div>
         <SupportKnowledgeAgentPanel />
+        <HumanAccountManagerPanel />
       </div>
     </FounderLayout>
   );
