@@ -3016,7 +3016,7 @@ The manual can be exported as a formatted PDF document using the browser's nativ
 
 ---
 
-*End of Liftor AI Founder Manual v4.8 — Next Build Order Locked (13 May 2026)*
+*End of Liftor AI Founder Manual v4.9 — Smartlead Scale Engine Foundation Sprint (15 May 2026)*
 *Self-updating documentation generated from live platform state.*
 *${now}*
 `;
