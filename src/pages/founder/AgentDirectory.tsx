@@ -3,6 +3,7 @@ import CRMCustomerMemoryDashboard from "@/components/founder/crm/CRMCustomerMemo
 import AIAgentOperatingModelPanel from "@/components/founder/agents/AIAgentOperatingModelPanel";
 import AIAgentOrchestratorPanel from "@/components/founder/agents/AIAgentOrchestratorPanel";
 import AIConversationDraftingPanel from "@/components/founder/agents/AIConversationDraftingPanel";
+import FounderApprovalConsole from "@/components/founder/approvals/FounderApprovalConsole";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -210,6 +211,7 @@ const AgentDirectory = () => {
         <AIAgentOperatingModelPanel />
         <AIAgentOrchestratorPanel />
         <AIConversationDraftingPanel />
+        <FounderApprovalConsole />
       </div>
     </FounderLayout>
   );
