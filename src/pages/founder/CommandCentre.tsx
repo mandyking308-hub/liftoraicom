@@ -83,6 +83,7 @@ import SocialEngagementInboxPanel from "@/components/founder/social/SocialEngage
 import SocialAnalyticsTrendPanel from "@/components/founder/social/SocialAnalyticsTrendPanel";
 import MarketingContentFunnelPanel from "@/components/founder/marketing/MarketingContentFunnelPanel";
 import SupportKnowledgeAgentPanel from "@/components/founder/support/SupportKnowledgeAgentPanel";
+import CreativeAssetLibraryPanel from "@/components/founder/assets/CreativeAssetLibraryPanel";
 import { SecurityGovernancePanel } from "@/components/founder/security/SecurityGovernancePanel";
 import { ProductisationReadinessPanel } from "@/components/founder/revenue/ProductisationReadinessPanel";
 import BusinessLaunchFactoryPanel from "@/components/founder/expansion/BusinessLaunchFactoryPanel";
@@ -97,7 +98,7 @@ import {
   Search, Banknote, ShieldCheck, Workflow as WorkflowIcon, Phone, AlertTriangle,
   CheckCircle2, Clock, ArrowRight, Sparkles, Activity, TrendingUp, Users, FlaskConical,
   Database, ListChecks, Filter, ChevronDown, Map as MapIcon, Plug, Gavel, BookOpen,
-  Briefcase, ClipboardCheck, Monitor, ShieldAlert, MonitorPlay, Archive,
+  Briefcase, ClipboardCheck, Monitor, ShieldAlert, MonitorPlay, Archive, Image as ImageIcon,
 } from "lucide-react";
 
 const StatTile = ({ label, value, icon: Icon, tone = "default", to }: any) => {
@@ -313,6 +314,35 @@ const CommandCentre = () => {
         openReviews: revs.filter((r) => r.status !== "resolved").length,
         escalations: revs.filter((r) => r.escalation_required).length,
         sendLocked: revs.filter((r) => !r.send_allowed).length,
+        businessesCovered: businessIds.size,
+      };
+    },
+  });
+  const { data: creativeAssetSummary } = useQuery({
+    queryKey: ["cc2-creative-asset-summary"],
+    refetchInterval: 60000,
+    queryFn: async () => {
+      const sb: any = supabase as any;
+      const [aR, uR] = await Promise.all([
+        sb.from("creative_asset_library").select("id,asset_type,asset_status,approved_for_social,approved_for_ads,approved_for_proposals,approved_for_website,usage_rights,expires_at,business_id"),
+        sb.from("creative_asset_usage").select("id,used_at"),
+      ]);
+      const a = (aR.data ?? []) as any[];
+      const u = (uR.data ?? []) as any[];
+      const businessIds = new Set<string>();
+      a.forEach((x) => x.business_id && businessIds.add(x.business_id));
+      const needsApproval = a.filter((x) => !x.approved_for_social && !x.approved_for_ads && !x.approved_for_proposals && !x.approved_for_website).length;
+      const expired = a.filter((x) => x.expires_at && new Date(x.expires_at) < new Date()).length;
+      return {
+        total: a.length,
+        approvedSocial: a.filter((x) => x.approved_for_social).length,
+        approvedAds: a.filter((x) => x.approved_for_ads).length,
+        approvedProposals: a.filter((x) => x.approved_for_proposals).length,
+        approvedWebsite: a.filter((x) => x.approved_for_website).length,
+        missingRights: a.filter((x) => !x.usage_rights).length,
+        needsApproval,
+        expired,
+        usageEvents: u.length,
         businessesCovered: businessIds.size,
       };
     },
@@ -1404,6 +1434,29 @@ const CommandCentre = () => {
               ]} />
             </Section>
             <SocialContentFactoryPanel />
+
+            {/* SECTION 14 — Creative Asset Library */}
+            <Section
+              title="Creative Asset Library (internal-only)"
+              icon={ImageIcon}
+              action={<Link to="/founder/assets"><Button size="sm" variant="outline"><Sparkles size={12} /> Open library</Button></Link>}
+            >
+              <div className="flex flex-wrap items-center gap-2 mb-2 text-[11px]">
+                <Badge variant="outline" className="border-yellow-500/40 text-yellow-300">No external upload · No publish · No delete</Badge>
+                <span className="text-muted-foreground">Businesses covered: <span className="text-foreground">{creativeAssetSummary?.businessesCovered ?? 0}</span></span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+                <StatTile label="Total assets" value={creativeAssetSummary?.total ?? 0} icon={ImageIcon} to="/founder/assets" />
+                <StatTile label="Approved social" value={creativeAssetSummary?.approvedSocial ?? 0} icon={CheckCircle2} tone="good" to="/founder/assets" />
+                <StatTile label="Approved ads" value={creativeAssetSummary?.approvedAds ?? 0} icon={CheckCircle2} tone="good" to="/founder/assets" />
+                <StatTile label="Approved proposals" value={creativeAssetSummary?.approvedProposals ?? 0} icon={CheckCircle2} tone="good" to="/founder/assets" />
+                <StatTile label="Needs approval" value={creativeAssetSummary?.needsApproval ?? 0} icon={ClipboardCheck} tone={(creativeAssetSummary?.needsApproval ?? 0) > 0 ? "warn" : "default"} to="/founder/assets" />
+                <StatTile label="Missing rights / expired" value={(creativeAssetSummary?.missingRights ?? 0) + (creativeAssetSummary?.expired ?? 0)} icon={AlertTriangle} tone={((creativeAssetSummary?.missingRights ?? 0) + (creativeAssetSummary?.expired ?? 0)) > 0 ? "warn" : "default"} to="/founder/assets" />
+              </div>
+              <div className="mt-3">
+                <CreativeAssetLibraryPanel />
+              </div>
+            </Section>
 
             {/* SECTION 15 — Legacy / Historical / Archive (collapsed) */}
             <RunwayHeader n={15} title="Legacy / Historical / Archive" icon={Archive} anchor="sec-legacy" />
