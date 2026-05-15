@@ -7827,6 +7827,97 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_subscriptions: {
+        Row: {
+          amount: number | null
+          billing_frequency: string | null
+          business_id: string | null
+          cancellation_date: string | null
+          churn_risk: string | null
+          contact_id: string | null
+          created_at: string
+          currency: string
+          founder_review_required: boolean
+          id: string
+          metadata: Json
+          next_invoice_due: string | null
+          organisation_id: string | null
+          package_id: string | null
+          payment_status: string | null
+          renewal_date: string | null
+          start_date: string | null
+          subscription_name: string
+          subscription_status: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number | null
+          billing_frequency?: string | null
+          business_id?: string | null
+          cancellation_date?: string | null
+          churn_risk?: string | null
+          contact_id?: string | null
+          created_at?: string
+          currency?: string
+          founder_review_required?: boolean
+          id?: string
+          metadata?: Json
+          next_invoice_due?: string | null
+          organisation_id?: string | null
+          package_id?: string | null
+          payment_status?: string | null
+          renewal_date?: string | null
+          start_date?: string | null
+          subscription_name: string
+          subscription_status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number | null
+          billing_frequency?: string | null
+          business_id?: string | null
+          cancellation_date?: string | null
+          churn_risk?: string | null
+          contact_id?: string | null
+          created_at?: string
+          currency?: string
+          founder_review_required?: boolean
+          id?: string
+          metadata?: Json
+          next_invoice_due?: string | null
+          organisation_id?: string | null
+          package_id?: string | null
+          payment_status?: string | null
+          renewal_date?: string | null
+          start_date?: string | null
+          subscription_name?: string
+          subscription_status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_subscriptions_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_subscriptions_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_subscriptions_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+        ]
+      }
       customer_success_plans: {
         Row: {
           business_id: string | null
@@ -15151,6 +15242,62 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      renewal_review_tasks: {
+        Row: {
+          business_id: string | null
+          contact_id: string | null
+          created_at: string
+          due_at: string | null
+          founder_review_required: boolean
+          id: string
+          owner_agent_key: string
+          recommendation: string | null
+          review_status: string
+          review_type: string
+          risk_flags: Json
+          subscription_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          due_at?: string | null
+          founder_review_required?: boolean
+          id?: string
+          owner_agent_key?: string
+          recommendation?: string | null
+          review_status?: string
+          review_type: string
+          risk_flags?: Json
+          subscription_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          due_at?: string | null
+          founder_review_required?: boolean
+          id?: string
+          owner_agent_key?: string
+          recommendation?: string | null
+          review_status?: string
+          review_type?: string
+          risk_flags?: Json
+          subscription_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "renewal_review_tasks_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "customer_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reputation_events: {
         Row: {
