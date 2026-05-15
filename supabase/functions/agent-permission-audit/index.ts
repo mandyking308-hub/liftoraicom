@@ -78,13 +78,12 @@ Deno.serve(async (req) => {
 
     const { data: profiles } = await admin
       .from("business_operating_profiles")
-      .select("business_id, business_name, auto_send_enabled, smartlead_post_allowed, apollo_credits_unlocked, compliance_bulk_approval_locked, dry_run_only");
+      .select("business_id, business_name, auto_send_allowed, external_provider_mutation_allowed, smartlead_enabled, apollo_enabled, founder_approval_required");
 
     const externalActionLocks = {
-      auto_send_enabled_anywhere: (profiles ?? []).some((p: any) => p.auto_send_enabled === true),
-      smartlead_post_allowed_anywhere: (profiles ?? []).some((p: any) => p.smartlead_post_allowed === true),
-      apollo_credits_unlocked_anywhere: (profiles ?? []).some((p: any) => p.apollo_credits_unlocked === true),
-      compliance_bulk_approval_locked_everywhere: (profiles ?? []).every((p: any) => p.compliance_bulk_approval_locked !== false),
+      auto_send_allowed_anywhere: (profiles ?? []).some((p: any) => p.auto_send_allowed === true),
+      external_provider_mutation_allowed_anywhere: (profiles ?? []).some((p: any) => p.external_provider_mutation_allowed === true),
+      founder_approval_required_everywhere: (profiles ?? []).every((p: any) => p.founder_approval_required !== false),
       schedules_external_actions_allowed: (schedules ?? []).filter((s: any) => s.external_actions_allowed === true).map((s: any) => s.schedule_key),
       schedules_safe_internal_only_off: (schedules ?? []).filter((s: any) => s.safe_internal_only === false).map((s: any) => s.schedule_key),
     };
@@ -107,9 +106,9 @@ Deno.serve(async (req) => {
 
     // 6) Risky settings summary
     const risky: string[] = [];
-    if (externalActionLocks.auto_send_enabled_anywhere) risky.push("auto_send is enabled on at least one business");
-    if (externalActionLocks.smartlead_post_allowed_anywhere) risky.push("smartlead POST is allowed on at least one business");
-    if (externalActionLocks.apollo_credits_unlocked_anywhere) risky.push("Apollo credit spend is unlocked on at least one business");
+    if (externalActionLocks.auto_send_allowed_anywhere) risky.push("auto_send is enabled on at least one business");
+    if (externalActionLocks.external_provider_mutation_allowed_anywhere) risky.push("External provider mutations allowed on at least one business");
+    if (!externalActionLocks.founder_approval_required_everywhere) risky.push("Founder approval is NOT required on at least one business");
     if (externalActionLocks.schedules_external_actions_allowed.length) risky.push(`Schedules with external actions allowed: ${externalActionLocks.schedules_external_actions_allowed.join(", ")}`);
     if (externalActionLocks.schedules_safe_internal_only_off.length) risky.push(`Schedules with safe_internal_only OFF: ${externalActionLocks.schedules_safe_internal_only_off.join(", ")}`);
     const missingSecrets = secrets.filter((s) => !s.present).map((s) => s.secret_name);
@@ -138,10 +137,9 @@ Deno.serve(async (req) => {
       risky_settings: risky,
       missing_secrets: missingSecrets,
       external_actions_locked_summary: {
-        sends_locked_unless_approved: !externalActionLocks.auto_send_enabled_anywhere,
-        apollo_spend_locked: !externalActionLocks.apollo_credits_unlocked_anywhere,
-        smartlead_post_locked: !externalActionLocks.smartlead_post_allowed_anywhere,
-        compliance_bulk_approval_locked: externalActionLocks.compliance_bulk_approval_locked_everywhere,
+        sends_locked_unless_approved: !externalActionLocks.auto_send_allowed_anywhere,
+        provider_mutations_locked: !externalActionLocks.external_provider_mutation_allowed_anywhere,
+        founder_approval_required_everywhere: externalActionLocks.founder_approval_required_everywhere,
       },
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e: any) {
