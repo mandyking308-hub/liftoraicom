@@ -12,6 +12,7 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Building2, Search, Plus, Server, Users, CheckCircle2 } from "lucide-react";
+import MultiBusinessOperatingLayerPanel from "@/components/founder/operations/MultiBusinessOperatingLayerPanel";
 
 const statusClass = (s: string) => {
   if (s === "active") return "bg-green-500/20 text-green-400";
@@ -90,6 +91,8 @@ const OrganisationDirectory = () => {
             </DialogContent>
           </Dialog>
         </div>
+
+        <MultiBusinessOperatingLayerPanel />
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4">
