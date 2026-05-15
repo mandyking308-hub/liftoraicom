@@ -238,6 +238,7 @@ const AgentDirectory = () => {
         <ApprovedActionExecutionPanel />
         <LiveCommercialAgentsPanel />
         <AgentHandoverProtocolPanel />
+        <AutopilotActivationGatesPanel />
       </div>
     </FounderLayout>
   );
