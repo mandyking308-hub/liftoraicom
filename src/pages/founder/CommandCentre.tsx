@@ -703,11 +703,16 @@ const CommandCentre = () => {
                 </div>
               )}
               <p className="text-[11px] text-muted-foreground mt-3">
-                Smartlead scale lane is the active outreach build path. Native
-                IONOS live batch send, queue creation, Apollo reveal-to-queue,
-                decision-apply, Manual Send Apply / Pooja proof-send and the 7
-                review_required Step 4 rows are intentionally parked on the
-                native lane and are not the global top action.
+                Current architecture: Smartlead is the cold-outreach scale lane;
+                native Liftor/IONOS is reserved for small controlled business
+                email only. Liftor is the control/brain layer above both.
+                CRM customer memory, AI agents, founder approval, commercial
+                handoff and finance/supplier orchestration all run preview-only
+                and require founder approval — no auto-send, no cron, no live
+                Apollo/Smartlead POSTs. Legacy IONOS live batch send, Apollo
+                reveal-to-queue, Manual Send Apply / Pooja proof-send and the 7
+                review_required Step 4 rows are archived and are not the build
+                path or top action.
               </p>
             </Section>
             <FounderApprovalConsole />
