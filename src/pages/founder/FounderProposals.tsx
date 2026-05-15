@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import CreativeAssetLibraryPanel from "@/components/founder/assets/CreativeAssetLibraryPanel";
 import FounderLayout from "@/components/founder/FounderLayout";
 import { ArrowRight } from "lucide-react";
 import { ProductisationReadinessPanel } from "@/components/founder/revenue/ProductisationReadinessPanel";
@@ -72,6 +73,7 @@ const FounderProposals = () => {
             ))}
           </div>
         )}
+        <CreativeAssetLibraryPanel />
       </div>
     </FounderLayout>
   );
