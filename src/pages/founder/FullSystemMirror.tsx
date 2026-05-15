@@ -424,6 +424,7 @@ const FullSystemMirror = () => {
         </div>
 
         {/* Coverage strip */}
+        <LiftorMasterReconciliationPanel />
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           <Card className="bg-card border-border/50">
             <CardContent className="pt-4">
