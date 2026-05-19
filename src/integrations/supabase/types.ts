@@ -8426,6 +8426,8 @@ export type Database = {
           subject: string | null
           summary: string | null
           supplier_id: string | null
+          support_question_intake_id: string | null
+          support_reply_draft_id: string | null
           support_signal: boolean | null
           updated_at: string
           upsell_signal: boolean | null
@@ -8502,6 +8504,8 @@ export type Database = {
           subject?: string | null
           summary?: string | null
           supplier_id?: string | null
+          support_question_intake_id?: string | null
+          support_reply_draft_id?: string | null
           support_signal?: boolean | null
           updated_at?: string
           upsell_signal?: boolean | null
@@ -8578,6 +8582,8 @@ export type Database = {
           subject?: string | null
           summary?: string | null
           supplier_id?: string | null
+          support_question_intake_id?: string | null
+          support_reply_draft_id?: string | null
           support_signal?: boolean | null
           updated_at?: string
           upsell_signal?: boolean | null
@@ -10019,12 +10025,14 @@ export type Database = {
           health_status: string | null
           id: string
           onboarding_score: number | null
+          open_support_escalations: number
           overall_health_score: number | null
           payment_score: number | null
           recommended_action: string | null
           renewal_risk_score: number | null
           satisfaction_score: number | null
           score_date: string | null
+          support_risk_status: string
           support_score: number | null
           upsell_fit_score: number | null
         }
@@ -10038,12 +10046,14 @@ export type Database = {
           health_status?: string | null
           id?: string
           onboarding_score?: number | null
+          open_support_escalations?: number
           overall_health_score?: number | null
           payment_score?: number | null
           recommended_action?: string | null
           renewal_risk_score?: number | null
           satisfaction_score?: number | null
           score_date?: string | null
+          support_risk_status?: string
           support_score?: number | null
           upsell_fit_score?: number | null
         }
@@ -10057,12 +10067,14 @@ export type Database = {
           health_status?: string | null
           id?: string
           onboarding_score?: number | null
+          open_support_escalations?: number
           overall_health_score?: number | null
           payment_score?: number | null
           recommended_action?: string | null
           renewal_risk_score?: number | null
           satisfaction_score?: number | null
           score_date?: string | null
+          support_risk_status?: string
           support_score?: number | null
           upsell_fit_score?: number | null
         }
@@ -15111,6 +15123,8 @@ export type Database = {
           suggested_cta: string | null
           suggested_destination_url: string | null
           suggested_slug: string | null
+          support_article_id: string | null
+          support_content_status: string
           target_audience: string | null
           unsupported_claims: string[] | null
           updated_at: string | null
@@ -15150,6 +15164,8 @@ export type Database = {
           suggested_cta?: string | null
           suggested_destination_url?: string | null
           suggested_slug?: string | null
+          support_article_id?: string | null
+          support_content_status?: string
           target_audience?: string | null
           unsupported_claims?: string[] | null
           updated_at?: string | null
@@ -15189,6 +15205,8 @@ export type Database = {
           suggested_cta?: string | null
           suggested_destination_url?: string | null
           suggested_slug?: string | null
+          support_article_id?: string | null
+          support_content_status?: string
           target_audience?: string | null
           unsupported_claims?: string[] | null
           updated_at?: string | null
@@ -25319,6 +25337,8 @@ export type Database = {
           social_handle: string | null
           source_type: string
           spam_signal: boolean
+          support_question_intake_id: string | null
+          support_triage_status: string
           updated_at: string
           urgency: string
         }
@@ -25374,6 +25394,8 @@ export type Database = {
           social_handle?: string | null
           source_type?: string
           spam_signal?: boolean
+          support_question_intake_id?: string | null
+          support_triage_status?: string
           updated_at?: string
           urgency?: string
         }
@@ -25429,6 +25451,8 @@ export type Database = {
           social_handle?: string | null
           source_type?: string
           spam_signal?: boolean
+          support_question_intake_id?: string | null
+          support_triage_status?: string
           updated_at?: string
           urgency?: string
         }
@@ -28974,6 +28998,279 @@ export type Database = {
         }
         Relationships: []
       }
+      support_audit: {
+        Row: {
+          action: string
+          action_status: string
+          after_json: Json
+          article_id: string | null
+          before_json: Json
+          business_id: string
+          created_at: string
+          created_by: string | null
+          customer_replies_sent: number
+          error_message: string | null
+          escalation_id: string | null
+          export_pack_id: string | null
+          external_api_calls: number
+          fake_tickets_created: number
+          faq_id: string | null
+          id: string
+          is_test_data: boolean
+          live_chats_started: number
+          metadata: Json
+          question_intake_id: string | null
+          reply_draft_id: string | null
+          result_json: Json
+          source_id: string | null
+          tickets_created_externally: number
+        }
+        Insert: {
+          action: string
+          action_status?: string
+          after_json?: Json
+          article_id?: string | null
+          before_json?: Json
+          business_id: string
+          created_at?: string
+          created_by?: string | null
+          customer_replies_sent?: number
+          error_message?: string | null
+          escalation_id?: string | null
+          export_pack_id?: string | null
+          external_api_calls?: number
+          fake_tickets_created?: number
+          faq_id?: string | null
+          id?: string
+          is_test_data?: boolean
+          live_chats_started?: number
+          metadata?: Json
+          question_intake_id?: string | null
+          reply_draft_id?: string | null
+          result_json?: Json
+          source_id?: string | null
+          tickets_created_externally?: number
+        }
+        Update: {
+          action?: string
+          action_status?: string
+          after_json?: Json
+          article_id?: string | null
+          before_json?: Json
+          business_id?: string
+          created_at?: string
+          created_by?: string | null
+          customer_replies_sent?: number
+          error_message?: string | null
+          escalation_id?: string | null
+          export_pack_id?: string | null
+          external_api_calls?: number
+          fake_tickets_created?: number
+          faq_id?: string | null
+          id?: string
+          is_test_data?: boolean
+          live_chats_started?: number
+          metadata?: Json
+          question_intake_id?: string | null
+          reply_draft_id?: string | null
+          result_json?: Json
+          source_id?: string | null
+          tickets_created_externally?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_audit_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "support_knowledge_articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_audit_escalation_id_fkey"
+            columns: ["escalation_id"]
+            isOneToOne: false
+            referencedRelation: "support_escalations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_audit_export_pack_id_fkey"
+            columns: ["export_pack_id"]
+            isOneToOne: false
+            referencedRelation: "support_manual_export_packs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_audit_faq_id_fkey"
+            columns: ["faq_id"]
+            isOneToOne: false
+            referencedRelation: "support_faq_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_audit_question_intake_id_fkey"
+            columns: ["question_intake_id"]
+            isOneToOne: false
+            referencedRelation: "support_question_intake"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_audit_reply_draft_id_fkey"
+            columns: ["reply_draft_id"]
+            isOneToOne: false
+            referencedRelation: "support_reply_drafts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_audit_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "support_knowledge_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_escalations: {
+        Row: {
+          assigned_agent: string | null
+          assigned_to: string | null
+          business_id: string
+          created_at: string
+          due_at: string | null
+          escalation_status: string
+          escalation_type: string
+          founder_review_required: boolean
+          id: string
+          is_test_data: boolean
+          metadata: Json
+          priority: string
+          question_intake_id: string | null
+          reason: string | null
+          recommended_action: string | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          assigned_agent?: string | null
+          assigned_to?: string | null
+          business_id: string
+          created_at?: string
+          due_at?: string | null
+          escalation_status?: string
+          escalation_type: string
+          founder_review_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          priority?: string
+          question_intake_id?: string | null
+          reason?: string | null
+          recommended_action?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assigned_agent?: string | null
+          assigned_to?: string | null
+          business_id?: string
+          created_at?: string
+          due_at?: string | null
+          escalation_status?: string
+          escalation_type?: string
+          founder_review_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          priority?: string
+          question_intake_id?: string | null
+          reason?: string | null
+          recommended_action?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_escalations_question_intake_id_fkey"
+            columns: ["question_intake_id"]
+            isOneToOne: false
+            referencedRelation: "support_question_intake"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_faq_items: {
+        Row: {
+          answer: string | null
+          approval_status: string
+          business_id: string
+          compliance_warnings: string[]
+          created_at: string
+          display_order: number
+          faq_category: string | null
+          faq_status: string
+          founder_review_required: boolean
+          id: string
+          is_test_data: boolean
+          metadata: Json
+          missing_source_flags: string[]
+          question: string
+          risk_flags: string[]
+          source_id: string | null
+          source_references: string[]
+          updated_at: string
+        }
+        Insert: {
+          answer?: string | null
+          approval_status?: string
+          business_id: string
+          compliance_warnings?: string[]
+          created_at?: string
+          display_order?: number
+          faq_category?: string | null
+          faq_status?: string
+          founder_review_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          missing_source_flags?: string[]
+          question: string
+          risk_flags?: string[]
+          source_id?: string | null
+          source_references?: string[]
+          updated_at?: string
+        }
+        Update: {
+          answer?: string | null
+          approval_status?: string
+          business_id?: string
+          compliance_warnings?: string[]
+          created_at?: string
+          display_order?: number
+          faq_category?: string | null
+          faq_status?: string
+          founder_review_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          missing_source_flags?: string[]
+          question?: string
+          risk_flags?: string[]
+          source_id?: string | null
+          source_references?: string[]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_faq_items_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "support_knowledge_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       support_interaction_reviews: {
         Row: {
           business_id: string | null
@@ -29045,45 +29342,93 @@ export type Database = {
       support_knowledge_articles: {
         Row: {
           agent_visible: boolean
+          approval_status: string
           approved: boolean
+          article_status: string | null
+          article_title: string | null
           article_type: string
           audience: string
           business_id: string | null
+          compliance_warnings: string[]
           content: string | null
           created_at: string
+          customer_question: string | null
+          founder_approval_review_id: string | null
+          full_answer: string | null
           id: string
+          is_test_data: boolean
           metadata: Json
+          missing_source_flags: string[]
+          publish_status: string
+          related_faq_ids: string[]
+          risk_flags: string[]
+          short_answer: string | null
+          source_id: string | null
+          source_references: string[]
           status: string
+          step_by_step: Json
           tags: Json
           title: string
           updated_at: string
         }
         Insert: {
           agent_visible?: boolean
+          approval_status?: string
           approved?: boolean
+          article_status?: string | null
+          article_title?: string | null
           article_type: string
           audience?: string
           business_id?: string | null
+          compliance_warnings?: string[]
           content?: string | null
           created_at?: string
+          customer_question?: string | null
+          founder_approval_review_id?: string | null
+          full_answer?: string | null
           id?: string
+          is_test_data?: boolean
           metadata?: Json
+          missing_source_flags?: string[]
+          publish_status?: string
+          related_faq_ids?: string[]
+          risk_flags?: string[]
+          short_answer?: string | null
+          source_id?: string | null
+          source_references?: string[]
           status?: string
+          step_by_step?: Json
           tags?: Json
           title: string
           updated_at?: string
         }
         Update: {
           agent_visible?: boolean
+          approval_status?: string
           approved?: boolean
+          article_status?: string | null
+          article_title?: string | null
           article_type?: string
           audience?: string
           business_id?: string | null
+          compliance_warnings?: string[]
           content?: string | null
           created_at?: string
+          customer_question?: string | null
+          founder_approval_review_id?: string | null
+          full_answer?: string | null
           id?: string
+          is_test_data?: boolean
           metadata?: Json
+          missing_source_flags?: string[]
+          publish_status?: string
+          related_faq_ids?: string[]
+          risk_flags?: string[]
+          short_answer?: string | null
+          source_id?: string | null
+          source_references?: string[]
           status?: string
+          step_by_step?: Json
           tags?: Json
           title?: string
           updated_at?: string
@@ -29094,6 +29439,402 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_knowledge_sources: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          approved_for_support: boolean
+          business_id: string
+          created_at: string
+          freshness_status: string
+          id: string
+          is_test_data: boolean
+          metadata: Json
+          reliability_level: string
+          review_notes: string | null
+          risk_flags: string[]
+          source_category: string | null
+          source_name: string
+          source_status: string
+          source_summary: string | null
+          source_text: string | null
+          source_type: string
+          source_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          approved_for_support?: boolean
+          business_id: string
+          created_at?: string
+          freshness_status?: string
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          reliability_level?: string
+          review_notes?: string | null
+          risk_flags?: string[]
+          source_category?: string | null
+          source_name: string
+          source_status?: string
+          source_summary?: string | null
+          source_text?: string | null
+          source_type: string
+          source_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          approved_for_support?: boolean
+          business_id?: string
+          created_at?: string
+          freshness_status?: string
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          reliability_level?: string
+          review_notes?: string | null
+          risk_flags?: string[]
+          source_category?: string | null
+          source_name?: string
+          source_status?: string
+          source_summary?: string | null
+          source_text?: string | null
+          source_type?: string
+          source_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      support_manual_export_packs: {
+        Row: {
+          article_ids: string[]
+          business_id: string
+          confirmed_external_at: string | null
+          confirmed_external_by: string | null
+          created_at: string
+          export_name: string
+          export_payload: Json
+          export_status: string
+          export_type: string
+          faq_ids: string[]
+          helpcentre_instructions: string | null
+          id: string
+          is_test_data: boolean
+          metadata: Json
+          operator_instructions: string | null
+          updated_at: string
+          validation_errors: string[]
+          validation_status: string
+          validation_warnings: string[]
+        }
+        Insert: {
+          article_ids?: string[]
+          business_id: string
+          confirmed_external_at?: string | null
+          confirmed_external_by?: string | null
+          created_at?: string
+          export_name: string
+          export_payload?: Json
+          export_status?: string
+          export_type: string
+          faq_ids?: string[]
+          helpcentre_instructions?: string | null
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          operator_instructions?: string | null
+          updated_at?: string
+          validation_errors?: string[]
+          validation_status?: string
+          validation_warnings?: string[]
+        }
+        Update: {
+          article_ids?: string[]
+          business_id?: string
+          confirmed_external_at?: string | null
+          confirmed_external_by?: string | null
+          created_at?: string
+          export_name?: string
+          export_payload?: Json
+          export_status?: string
+          export_type?: string
+          faq_ids?: string[]
+          helpcentre_instructions?: string | null
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          operator_instructions?: string | null
+          updated_at?: string
+          validation_errors?: string[]
+          validation_status?: string
+          validation_warnings?: string[]
+        }
+        Relationships: []
+      }
+      support_quality_reviews: {
+        Row: {
+          article_id: string | null
+          business_id: string
+          clarity_score: number
+          compliance_score: number
+          compliance_warnings: string[]
+          created_at: string
+          faq_id: string | null
+          founder_review_required: boolean
+          grounding_score: number
+          id: string
+          is_test_data: boolean
+          metadata: Json
+          missing_sources: string[]
+          passed_internal: boolean
+          recommended_edits: string[]
+          reply_draft_id: string | null
+          review_status: string
+          source_truth_score: number
+          tone_score: number
+          unsupported_claims: string[]
+          updated_at: string
+        }
+        Insert: {
+          article_id?: string | null
+          business_id: string
+          clarity_score?: number
+          compliance_score?: number
+          compliance_warnings?: string[]
+          created_at?: string
+          faq_id?: string | null
+          founder_review_required?: boolean
+          grounding_score?: number
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          missing_sources?: string[]
+          passed_internal?: boolean
+          recommended_edits?: string[]
+          reply_draft_id?: string | null
+          review_status?: string
+          source_truth_score?: number
+          tone_score?: number
+          unsupported_claims?: string[]
+          updated_at?: string
+        }
+        Update: {
+          article_id?: string | null
+          business_id?: string
+          clarity_score?: number
+          compliance_score?: number
+          compliance_warnings?: string[]
+          created_at?: string
+          faq_id?: string | null
+          founder_review_required?: boolean
+          grounding_score?: number
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          missing_sources?: string[]
+          passed_internal?: boolean
+          recommended_edits?: string[]
+          reply_draft_id?: string | null
+          review_status?: string
+          source_truth_score?: number
+          tone_score?: number
+          unsupported_claims?: string[]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_quality_reviews_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "support_knowledge_articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_quality_reviews_faq_id_fkey"
+            columns: ["faq_id"]
+            isOneToOne: false
+            referencedRelation: "support_faq_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_quality_reviews_reply_draft_id_fkey"
+            columns: ["reply_draft_id"]
+            isOneToOne: false
+            referencedRelation: "support_reply_drafts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_question_intake: {
+        Row: {
+          answerable_from_kb: boolean
+          business_id: string
+          conversation_id: string | null
+          created_at: string
+          crm_contact_id: string | null
+          crm_match_status: string
+          customer_email: string | null
+          customer_handle: string | null
+          customer_name: string | null
+          detected_category: string | null
+          detected_intent: string | null
+          detected_language: string
+          founder_review_required: boolean
+          id: string
+          is_test_data: boolean
+          metadata: Json
+          question_status: string
+          question_text: string
+          risk_level: string
+          sentiment: string
+          source_channel: string
+          source_event_id: string | null
+          source_truth_status: string
+          updated_at: string
+          urgency: string
+        }
+        Insert: {
+          answerable_from_kb?: boolean
+          business_id: string
+          conversation_id?: string | null
+          created_at?: string
+          crm_contact_id?: string | null
+          crm_match_status?: string
+          customer_email?: string | null
+          customer_handle?: string | null
+          customer_name?: string | null
+          detected_category?: string | null
+          detected_intent?: string | null
+          detected_language?: string
+          founder_review_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          question_status?: string
+          question_text: string
+          risk_level?: string
+          sentiment?: string
+          source_channel?: string
+          source_event_id?: string | null
+          source_truth_status?: string
+          updated_at?: string
+          urgency?: string
+        }
+        Update: {
+          answerable_from_kb?: boolean
+          business_id?: string
+          conversation_id?: string | null
+          created_at?: string
+          crm_contact_id?: string | null
+          crm_match_status?: string
+          customer_email?: string | null
+          customer_handle?: string | null
+          customer_name?: string | null
+          detected_category?: string | null
+          detected_intent?: string | null
+          detected_language?: string
+          founder_review_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          question_status?: string
+          question_text?: string
+          risk_level?: string
+          sentiment?: string
+          source_channel?: string
+          source_event_id?: string | null
+          source_truth_status?: string
+          updated_at?: string
+          urgency?: string
+        }
+        Relationships: []
+      }
+      support_reply_drafts: {
+        Row: {
+          business_id: string
+          compliance_warnings: string[]
+          conversation_id: string | null
+          created_at: string
+          crm_contact_id: string | null
+          external_send_allowed: boolean
+          founder_approval_review_id: string | null
+          founder_review_required: boolean
+          id: string
+          is_test_data: boolean
+          metadata: Json
+          missing_source_flags: string[]
+          question_intake_id: string | null
+          reply_body: string
+          reply_channel: string
+          reply_status: string
+          reply_type: string
+          risk_flags: string[]
+          source_references: string[]
+          subject_line: string | null
+          tone_notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          compliance_warnings?: string[]
+          conversation_id?: string | null
+          created_at?: string
+          crm_contact_id?: string | null
+          external_send_allowed?: boolean
+          founder_approval_review_id?: string | null
+          founder_review_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          missing_source_flags?: string[]
+          question_intake_id?: string | null
+          reply_body: string
+          reply_channel?: string
+          reply_status?: string
+          reply_type: string
+          risk_flags?: string[]
+          source_references?: string[]
+          subject_line?: string | null
+          tone_notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          compliance_warnings?: string[]
+          conversation_id?: string | null
+          created_at?: string
+          crm_contact_id?: string | null
+          external_send_allowed?: boolean
+          founder_approval_review_id?: string | null
+          founder_review_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          missing_source_flags?: string[]
+          question_intake_id?: string | null
+          reply_body?: string
+          reply_channel?: string
+          reply_status?: string
+          reply_type?: string
+          risk_flags?: string[]
+          source_references?: string[]
+          subject_line?: string | null
+          tone_notes?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_reply_drafts_question_intake_id_fkey"
+            columns: ["question_intake_id"]
+            isOneToOne: false
+            referencedRelation: "support_question_intake"
             referencedColumns: ["id"]
           },
         ]
@@ -29141,6 +29882,103 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_triage_reviews: {
+        Row: {
+          business_id: string
+          category: string | null
+          compliance_review_required: boolean
+          confidence_score: number
+          created_at: string
+          customer_success_review_required: boolean
+          founder_review_required: boolean
+          id: string
+          intent: string | null
+          is_test_data: boolean
+          kb_match_article_id: string | null
+          kb_match_faq_id: string | null
+          legal_review_required: boolean
+          metadata: Json
+          question_intake_id: string
+          recommended_agent: string | null
+          recommended_next_action: string | null
+          risk_level: string
+          source_truth_status: string
+          triage_status: string
+          updated_at: string
+          urgency: string
+        }
+        Insert: {
+          business_id: string
+          category?: string | null
+          compliance_review_required?: boolean
+          confidence_score?: number
+          created_at?: string
+          customer_success_review_required?: boolean
+          founder_review_required?: boolean
+          id?: string
+          intent?: string | null
+          is_test_data?: boolean
+          kb_match_article_id?: string | null
+          kb_match_faq_id?: string | null
+          legal_review_required?: boolean
+          metadata?: Json
+          question_intake_id: string
+          recommended_agent?: string | null
+          recommended_next_action?: string | null
+          risk_level?: string
+          source_truth_status?: string
+          triage_status?: string
+          updated_at?: string
+          urgency?: string
+        }
+        Update: {
+          business_id?: string
+          category?: string | null
+          compliance_review_required?: boolean
+          confidence_score?: number
+          created_at?: string
+          customer_success_review_required?: boolean
+          founder_review_required?: boolean
+          id?: string
+          intent?: string | null
+          is_test_data?: boolean
+          kb_match_article_id?: string | null
+          kb_match_faq_id?: string | null
+          legal_review_required?: boolean
+          metadata?: Json
+          question_intake_id?: string
+          recommended_agent?: string | null
+          recommended_next_action?: string | null
+          risk_level?: string
+          source_truth_status?: string
+          triage_status?: string
+          updated_at?: string
+          urgency?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_triage_reviews_kb_match_article_id_fkey"
+            columns: ["kb_match_article_id"]
+            isOneToOne: false
+            referencedRelation: "support_knowledge_articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_triage_reviews_kb_match_faq_id_fkey"
+            columns: ["kb_match_faq_id"]
+            isOneToOne: false
+            referencedRelation: "support_faq_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_triage_reviews_question_intake_id_fkey"
+            columns: ["question_intake_id"]
+            isOneToOne: false
+            referencedRelation: "support_question_intake"
             referencedColumns: ["id"]
           },
         ]
@@ -30456,6 +31294,7 @@ export type Database = {
           strategy_name: string
           strategy_status: string
           strategy_type: string
+          support_path_status: string
           supporting_blog_draft_id: string | null
           target_audience: string | null
           traffic_sources: string[]
@@ -30492,6 +31331,7 @@ export type Database = {
           strategy_name: string
           strategy_status?: string
           strategy_type: string
+          support_path_status?: string
           supporting_blog_draft_id?: string | null
           target_audience?: string | null
           traffic_sources?: string[]
@@ -30528,6 +31368,7 @@ export type Database = {
           strategy_name?: string
           strategy_status?: string
           strategy_type?: string
+          support_path_status?: string
           supporting_blog_draft_id?: string | null
           target_audience?: string | null
           traffic_sources?: string[]
