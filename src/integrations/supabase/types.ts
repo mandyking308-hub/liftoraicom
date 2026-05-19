@@ -19407,89 +19407,457 @@ export type Database = {
         }
         Relationships: []
       }
-      social_assets: {
+      social_asset_collection_items: {
         Row: {
-          ai_notes: string | null
-          approved_for_ads: boolean | null
-          approved_for_proposals: boolean | null
-          approved_for_social: boolean | null
+          asset_id: string
+          business_id: string
+          collection_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          sort_order: number
+        }
+        Insert: {
+          asset_id: string
+          business_id: string
+          collection_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          sort_order?: number
+        }
+        Update: {
+          asset_id?: string
+          business_id?: string
+          collection_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_asset_collection_items_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "social_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_asset_collection_items_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "social_asset_collections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_asset_collections: {
+        Row: {
+          approval_status: string
+          business_id: string
+          campaign_id: string | null
+          collection_name: string
+          collection_type: string
+          created_at: string
+          description: string | null
+          id: string
+          is_test_data: boolean
+          metadata: Json
+          platform: string | null
+          updated_at: string
+        }
+        Insert: {
+          approval_status?: string
+          business_id: string
+          campaign_id?: string | null
+          collection_name: string
+          collection_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          platform?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approval_status?: string
+          business_id?: string
+          campaign_id?: string | null
+          collection_name?: string
+          collection_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          platform?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      social_asset_requirements: {
+        Row: {
           asset_type: string
           business_id: string
           campaign_id: string | null
+          created_at: string
+          due_date: string | null
+          id: string
+          is_test_data: boolean
+          matched_asset_id: string | null
+          metadata: Json
+          notes: string | null
+          platform: string | null
+          priority: string
+          required_for: string
+          requirement_name: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          asset_type: string
+          business_id: string
+          campaign_id?: string | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          is_test_data?: boolean
+          matched_asset_id?: string | null
+          metadata?: Json
+          notes?: string | null
+          platform?: string | null
+          priority?: string
+          required_for: string
+          requirement_name: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          asset_type?: string
+          business_id?: string
+          campaign_id?: string | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          is_test_data?: boolean
+          matched_asset_id?: string | null
+          metadata?: Json
+          notes?: string | null
+          platform?: string | null
+          priority?: string
+          required_for?: string
+          requirement_name?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_asset_requirements_matched_asset_id_fkey"
+            columns: ["matched_asset_id"]
+            isOneToOne: false
+            referencedRelation: "social_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_asset_rights_reviews: {
+        Row: {
+          asset_id: string
+          business_id: string
+          commercial_use_allowed: boolean | null
+          consent_status: string | null
+          created_at: string
+          derivative_use_allowed: boolean | null
+          founder_review_required: boolean
+          id: string
+          is_test_data: boolean
+          legal_review_required: boolean
+          metadata: Json
+          paid_ads_allowed: boolean | null
+          public_use_allowed: boolean | null
+          review_notes: string | null
+          review_status: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          rights_status_after: string | null
+          rights_status_before: string | null
+          updated_at: string
+        }
+        Insert: {
+          asset_id: string
+          business_id: string
+          commercial_use_allowed?: boolean | null
+          consent_status?: string | null
+          created_at?: string
+          derivative_use_allowed?: boolean | null
+          founder_review_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          legal_review_required?: boolean
+          metadata?: Json
+          paid_ads_allowed?: boolean | null
+          public_use_allowed?: boolean | null
+          review_notes?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          rights_status_after?: string | null
+          rights_status_before?: string | null
+          updated_at?: string
+        }
+        Update: {
+          asset_id?: string
+          business_id?: string
+          commercial_use_allowed?: boolean | null
+          consent_status?: string | null
+          created_at?: string
+          derivative_use_allowed?: boolean | null
+          founder_review_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          legal_review_required?: boolean
+          metadata?: Json
+          paid_ads_allowed?: boolean | null
+          public_use_allowed?: boolean | null
+          review_notes?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          rights_status_after?: string | null
+          rights_status_before?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_asset_rights_reviews_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "social_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_asset_usage_log: {
+        Row: {
+          asset_id: string
+          business_id: string
+          campaign_id: string | null
+          content_item_id: string | null
+          created_at: string
+          id: string
+          is_test_data: boolean
+          metadata: Json
+          notes: string | null
+          platform: string | null
+          publish_job_id: string | null
+          updated_at: string
+          usage_context: string
+          usage_status: string
+          used_at: string
+        }
+        Insert: {
+          asset_id: string
+          business_id: string
+          campaign_id?: string | null
+          content_item_id?: string | null
+          created_at?: string
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          notes?: string | null
+          platform?: string | null
+          publish_job_id?: string | null
+          updated_at?: string
+          usage_context: string
+          usage_status?: string
+          used_at?: string
+        }
+        Update: {
+          asset_id?: string
+          business_id?: string
+          campaign_id?: string | null
+          content_item_id?: string | null
+          created_at?: string
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          notes?: string | null
+          platform?: string | null
+          publish_job_id?: string | null
+          updated_at?: string
+          usage_context?: string
+          usage_status?: string
+          used_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_asset_usage_log_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "social_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_asset_usage_log_content_item_id_fkey"
+            columns: ["content_item_id"]
+            isOneToOne: false
+            referencedRelation: "social_content_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_asset_usage_log_publish_job_id_fkey"
+            columns: ["publish_job_id"]
+            isOneToOne: false
+            referencedRelation: "social_publish_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_assets: {
+        Row: {
+          ai_notes: string | null
+          alt_text: string | null
+          approved_for_ads: boolean | null
+          approved_for_proposals: boolean | null
+          approved_for_social: boolean | null
+          asset_category: string | null
+          asset_subtype: string | null
+          asset_type: string
+          business_id: string
+          campaign_id: string | null
+          commercial_use_allowed: boolean
+          consent_required: boolean
+          consent_status: string
           created_at: string | null
+          derivative_use_allowed: boolean
           description: string | null
           duration_seconds: number | null
+          expiry_review_required: boolean
           file_url: string | null
           format_notes: string | null
+          founder_review_required: boolean
           id: string
           is_test_data: boolean | null
           last_used_at: string | null
+          legal_review_required: boolean
+          licence_document_url: string | null
+          licence_reference: string | null
           metadata: Json | null
+          owner_name: string | null
+          paid_ads_allowed: boolean
           platform_fit: string[] | null
+          platform_limitations: string[]
+          public_use_allowed: boolean
           rights_expiry_date: string | null
           rights_status: string | null
+          searchable_text: string | null
           source_notes: string | null
           storage_path: string | null
+          territory_limitations: string | null
           thumbnail_url: string | null
           title: string
+          transcript: string | null
           updated_at: string | null
           usage_count: number | null
+          usage_notes: string | null
           usage_status: string | null
         }
         Insert: {
           ai_notes?: string | null
+          alt_text?: string | null
           approved_for_ads?: boolean | null
           approved_for_proposals?: boolean | null
           approved_for_social?: boolean | null
+          asset_category?: string | null
+          asset_subtype?: string | null
           asset_type: string
           business_id: string
           campaign_id?: string | null
+          commercial_use_allowed?: boolean
+          consent_required?: boolean
+          consent_status?: string
           created_at?: string | null
+          derivative_use_allowed?: boolean
           description?: string | null
           duration_seconds?: number | null
+          expiry_review_required?: boolean
           file_url?: string | null
           format_notes?: string | null
+          founder_review_required?: boolean
           id?: string
           is_test_data?: boolean | null
           last_used_at?: string | null
+          legal_review_required?: boolean
+          licence_document_url?: string | null
+          licence_reference?: string | null
           metadata?: Json | null
+          owner_name?: string | null
+          paid_ads_allowed?: boolean
           platform_fit?: string[] | null
+          platform_limitations?: string[]
+          public_use_allowed?: boolean
           rights_expiry_date?: string | null
           rights_status?: string | null
+          searchable_text?: string | null
           source_notes?: string | null
           storage_path?: string | null
+          territory_limitations?: string | null
           thumbnail_url?: string | null
           title: string
+          transcript?: string | null
           updated_at?: string | null
           usage_count?: number | null
+          usage_notes?: string | null
           usage_status?: string | null
         }
         Update: {
           ai_notes?: string | null
+          alt_text?: string | null
           approved_for_ads?: boolean | null
           approved_for_proposals?: boolean | null
           approved_for_social?: boolean | null
+          asset_category?: string | null
+          asset_subtype?: string | null
           asset_type?: string
           business_id?: string
           campaign_id?: string | null
+          commercial_use_allowed?: boolean
+          consent_required?: boolean
+          consent_status?: string
           created_at?: string | null
+          derivative_use_allowed?: boolean
           description?: string | null
           duration_seconds?: number | null
+          expiry_review_required?: boolean
           file_url?: string | null
           format_notes?: string | null
+          founder_review_required?: boolean
           id?: string
           is_test_data?: boolean | null
           last_used_at?: string | null
+          legal_review_required?: boolean
+          licence_document_url?: string | null
+          licence_reference?: string | null
           metadata?: Json | null
+          owner_name?: string | null
+          paid_ads_allowed?: boolean
           platform_fit?: string[] | null
+          platform_limitations?: string[]
+          public_use_allowed?: boolean
           rights_expiry_date?: string | null
           rights_status?: string | null
+          searchable_text?: string | null
           source_notes?: string | null
           storage_path?: string | null
+          territory_limitations?: string | null
           thumbnail_url?: string | null
           title?: string
+          transcript?: string | null
           updated_at?: string | null
           usage_count?: number | null
+          usage_notes?: string | null
           usage_status?: string | null
         }
         Relationships: []
@@ -19944,6 +20312,66 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      social_hook_caption_bank: {
+        Row: {
+          approval_status: string
+          bank_type: string
+          business_id: string
+          content_pillar_id: string | null
+          created_at: string
+          id: string
+          is_test_data: boolean
+          last_used_at: string | null
+          metadata: Json
+          notes: string | null
+          offer_mapping_id: string | null
+          performance_score: number | null
+          platform: string | null
+          text_value: string
+          tone: string | null
+          updated_at: string
+          usage_count: number
+        }
+        Insert: {
+          approval_status?: string
+          bank_type: string
+          business_id: string
+          content_pillar_id?: string | null
+          created_at?: string
+          id?: string
+          is_test_data?: boolean
+          last_used_at?: string | null
+          metadata?: Json
+          notes?: string | null
+          offer_mapping_id?: string | null
+          performance_score?: number | null
+          platform?: string | null
+          text_value: string
+          tone?: string | null
+          updated_at?: string
+          usage_count?: number
+        }
+        Update: {
+          approval_status?: string
+          bank_type?: string
+          business_id?: string
+          content_pillar_id?: string | null
+          created_at?: string
+          id?: string
+          is_test_data?: boolean
+          last_used_at?: string | null
+          metadata?: Json
+          notes?: string | null
+          offer_mapping_id?: string | null
+          performance_score?: number | null
+          platform?: string | null
+          text_value?: string
+          tone?: string | null
+          updated_at?: string
+          usage_count?: number
+        }
+        Relationships: []
       }
       social_inbox_messages: {
         Row: {
