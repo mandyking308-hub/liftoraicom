@@ -785,6 +785,7 @@ const CommandCentre = () => {
       <div className="max-w-7xl mx-auto px-4 pt-4"><SocialAutopilotDiagnosticsPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><CustomerSuccessDiagnosticsPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><LiftorFinalHandoverPanel /></div>
+      <div className="max-w-7xl mx-auto px-4 pt-4"><LiftorFunctionalWiringMatrixPanel /></div>
       {(() => {
         const activeBusinessName = activeInboxes[0]?.business_name ?? businesses[0]?.name ?? "Neon Candy";
         const activeSender = activeInboxes[0]?.email_address ?? "hello@neoncandy.online";
