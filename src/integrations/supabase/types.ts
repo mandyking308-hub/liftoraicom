@@ -16441,6 +16441,66 @@ export type Database = {
           },
         ]
       }
+      liftor_brain_constitution_versions: {
+        Row: {
+          allowed_actions: Json
+          constitution_name: string
+          constitution_text: string
+          created_at: string
+          email_reply_rules: Json
+          forbidden_actions: Json
+          founder_preferences: Json
+          id: string
+          identity_rules: Json
+          metadata: Json
+          operating_style_rules: Json
+          output_style_rules: Json
+          safety_rules: Json
+          status: string
+          tool_use_rules: Json
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          allowed_actions?: Json
+          constitution_name?: string
+          constitution_text: string
+          created_at?: string
+          email_reply_rules?: Json
+          forbidden_actions?: Json
+          founder_preferences?: Json
+          id?: string
+          identity_rules?: Json
+          metadata?: Json
+          operating_style_rules?: Json
+          output_style_rules?: Json
+          safety_rules?: Json
+          status?: string
+          tool_use_rules?: Json
+          updated_at?: string
+          version?: string
+        }
+        Update: {
+          allowed_actions?: Json
+          constitution_name?: string
+          constitution_text?: string
+          created_at?: string
+          email_reply_rules?: Json
+          forbidden_actions?: Json
+          founder_preferences?: Json
+          id?: string
+          identity_rules?: Json
+          metadata?: Json
+          operating_style_rules?: Json
+          output_style_rules?: Json
+          safety_rules?: Json
+          status?: string
+          tool_use_rules?: Json
+          updated_at?: string
+          version?: string
+        }
+        Relationships: []
+      }
       liftor_brain_context_packs: {
         Row: {
           agent_autonomy_summary: Json
