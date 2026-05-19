@@ -12,14 +12,13 @@ Deno.serve(async (req) => {
   const days = Number(body.days_count ?? 30);
   const platforms: string[] = (body.platforms?.length ? body.platforms : ["instagram", "tiktok"]);
 
-  const [profile, pillars, rules, offers, risks, assets, hooks, brain] = await Promise.all([
-    admin.from("business_social_brain_profiles").select("*").eq("business_id", business_id).maybeSingle(),
+  const [pillars, rules, offers, risks, assets, hooks, brain] = await Promise.all([
     admin.from("business_social_content_pillars").select("id,name,funnel_stage").eq("business_id", business_id),
     admin.from("business_social_platform_rules").select("platform,suitability,cadence").eq("business_id", business_id),
     admin.from("business_social_offer_mappings").select("id,offer_name,cta,pain_point").eq("business_id", business_id),
     admin.from("business_social_risk_flags").select("category,severity,rule").eq("business_id", business_id),
     admin.from("social_assets").select("id,consent_status,asset_type,title").eq("business_id", business_id).limit(50),
-    admin.from("social_hook_caption_bank").select("hook,platform").eq("business_id", business_id).limit(50),
+    admin.from("social_hook_caption_bank").select("text_value,platform").eq("business_id", business_id).limit(50),
     admin.from("business_social_brain_profiles").select("brand_voice,icp_summary").eq("business_id", business_id).maybeSingle(),
   ]);
 
@@ -34,7 +33,7 @@ Deno.serve(async (req) => {
       offers: offers.data || [],
       riskFlags: risks.data || [],
       assets: assets.data || [],
-      hookBank: hooks.data || [],
+      hookBank: (hooks.data || []).map((h: any) => ({ hook: h.text_value, platform: h.platform })),
       knowledgeSummary: (brain.data as any)?.icp_summary,
     },
     days, platforms,
