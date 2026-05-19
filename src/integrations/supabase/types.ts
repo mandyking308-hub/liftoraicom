@@ -20008,6 +20008,287 @@ export type Database = {
           },
         ]
       }
+      social_campaign_content_map: {
+        Row: {
+          asset_id: string | null
+          business_id: string
+          campaign_plan_id: string
+          content_item_id: string | null
+          content_pack_id: string | null
+          content_variant_id: string | null
+          created_at: string
+          customer_journey_stage: string | null
+          funnel_stage: string | null
+          id: string
+          is_test_data: boolean
+          map_role: string
+          metadata: Json
+          notes: string | null
+          platform: string | null
+          priority_score: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          asset_id?: string | null
+          business_id: string
+          campaign_plan_id: string
+          content_item_id?: string | null
+          content_pack_id?: string | null
+          content_variant_id?: string | null
+          created_at?: string
+          customer_journey_stage?: string | null
+          funnel_stage?: string | null
+          id?: string
+          is_test_data?: boolean
+          map_role: string
+          metadata?: Json
+          notes?: string | null
+          platform?: string | null
+          priority_score?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          asset_id?: string | null
+          business_id?: string
+          campaign_plan_id?: string
+          content_item_id?: string | null
+          content_pack_id?: string | null
+          content_variant_id?: string | null
+          created_at?: string
+          customer_journey_stage?: string | null
+          funnel_stage?: string | null
+          id?: string
+          is_test_data?: boolean
+          map_role?: string
+          metadata?: Json
+          notes?: string | null
+          platform?: string | null
+          priority_score?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_campaign_content_map_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "social_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_campaign_content_map_campaign_plan_id_fkey"
+            columns: ["campaign_plan_id"]
+            isOneToOne: false
+            referencedRelation: "social_campaign_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_campaign_content_map_content_item_id_fkey"
+            columns: ["content_item_id"]
+            isOneToOne: false
+            referencedRelation: "social_content_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_campaign_content_map_content_pack_id_fkey"
+            columns: ["content_pack_id"]
+            isOneToOne: false
+            referencedRelation: "social_content_packs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_campaign_content_map_content_variant_id_fkey"
+            columns: ["content_variant_id"]
+            isOneToOne: false
+            referencedRelation: "social_content_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_campaign_plans: {
+        Row: {
+          approval_status: string
+          business_id: string
+          campaign_goal: string | null
+          campaign_name: string
+          campaign_status: string
+          campaign_summary: string | null
+          campaign_type: string
+          compliance_warnings: string[]
+          created_at: string
+          customer_journey_stage: string | null
+          end_date: string | null
+          founder_notes: string | null
+          funnel_stage: string | null
+          id: string
+          is_test_data: boolean
+          key_message: string | null
+          linked_revenue_target_id: string | null
+          linked_social_content_pack_id: string | null
+          metadata: Json
+          missing_assets: string[]
+          platforms: string[]
+          primary_cta: string | null
+          primary_offer: string | null
+          proof_needed: string[]
+          readiness_score: number
+          required_assets: string[]
+          risk_flags: string[]
+          secondary_cta: string | null
+          secondary_offer: string | null
+          start_date: string | null
+          target_audience: string | null
+          updated_at: string
+        }
+        Insert: {
+          approval_status?: string
+          business_id: string
+          campaign_goal?: string | null
+          campaign_name: string
+          campaign_status?: string
+          campaign_summary?: string | null
+          campaign_type?: string
+          compliance_warnings?: string[]
+          created_at?: string
+          customer_journey_stage?: string | null
+          end_date?: string | null
+          founder_notes?: string | null
+          funnel_stage?: string | null
+          id?: string
+          is_test_data?: boolean
+          key_message?: string | null
+          linked_revenue_target_id?: string | null
+          linked_social_content_pack_id?: string | null
+          metadata?: Json
+          missing_assets?: string[]
+          platforms?: string[]
+          primary_cta?: string | null
+          primary_offer?: string | null
+          proof_needed?: string[]
+          readiness_score?: number
+          required_assets?: string[]
+          risk_flags?: string[]
+          secondary_cta?: string | null
+          secondary_offer?: string | null
+          start_date?: string | null
+          target_audience?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approval_status?: string
+          business_id?: string
+          campaign_goal?: string | null
+          campaign_name?: string
+          campaign_status?: string
+          campaign_summary?: string | null
+          campaign_type?: string
+          compliance_warnings?: string[]
+          created_at?: string
+          customer_journey_stage?: string | null
+          end_date?: string | null
+          founder_notes?: string | null
+          funnel_stage?: string | null
+          id?: string
+          is_test_data?: boolean
+          key_message?: string | null
+          linked_revenue_target_id?: string | null
+          linked_social_content_pack_id?: string | null
+          metadata?: Json
+          missing_assets?: string[]
+          platforms?: string[]
+          primary_cta?: string | null
+          primary_offer?: string | null
+          proof_needed?: string[]
+          readiness_score?: number
+          required_assets?: string[]
+          risk_flags?: string[]
+          secondary_cta?: string | null
+          secondary_offer?: string | null
+          start_date?: string | null
+          target_audience?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      social_campaign_readiness_reviews: {
+        Row: {
+          asset_readiness_score: number
+          blockers: string[]
+          business_id: string
+          campaign_plan_id: string
+          compliance_score: number
+          content_coverage_score: number
+          created_at: string
+          founder_review_required: boolean
+          id: string
+          is_test_data: boolean
+          legal_review_required: boolean
+          metadata: Json
+          offer_clarity_score: number
+          proof_readiness_score: number
+          readiness_score: number
+          recommendations: string[]
+          revenue_alignment_score: number
+          review_status: string
+          reviewed_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          asset_readiness_score?: number
+          blockers?: string[]
+          business_id: string
+          campaign_plan_id: string
+          compliance_score?: number
+          content_coverage_score?: number
+          created_at?: string
+          founder_review_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          legal_review_required?: boolean
+          metadata?: Json
+          offer_clarity_score?: number
+          proof_readiness_score?: number
+          readiness_score?: number
+          recommendations?: string[]
+          revenue_alignment_score?: number
+          review_status?: string
+          reviewed_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          asset_readiness_score?: number
+          blockers?: string[]
+          business_id?: string
+          campaign_plan_id?: string
+          compliance_score?: number
+          content_coverage_score?: number
+          created_at?: string
+          founder_review_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          legal_review_required?: boolean
+          metadata?: Json
+          offer_clarity_score?: number
+          proof_readiness_score?: number
+          readiness_score?: number
+          recommendations?: string[]
+          revenue_alignment_score?: number
+          review_status?: string
+          reviewed_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_campaign_readiness_reviews_campaign_plan_id_fkey"
+            columns: ["campaign_plan_id"]
+            isOneToOne: false
+            referencedRelation: "social_campaign_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       social_competitor_profiles: {
         Row: {
           business_id: string
@@ -20126,33 +20407,119 @@ export type Database = {
           },
         ]
       }
+      social_content_generation_runs: {
+        Row: {
+          blocked_count: number
+          business_id: string
+          compliance_warnings: string[]
+          confidence_score: number
+          created_at: string
+          created_pack_id: string | null
+          founder_review_required: boolean
+          generated_count: number
+          id: string
+          is_test_data: boolean
+          metadata: Json
+          missing_assets: string[]
+          model_notes: string | null
+          output_summary: Json
+          requested_days: number | null
+          requested_platforms: string[]
+          run_status: string
+          run_type: string
+          source_summary: Json
+          updated_at: string
+        }
+        Insert: {
+          blocked_count?: number
+          business_id: string
+          compliance_warnings?: string[]
+          confidence_score?: number
+          created_at?: string
+          created_pack_id?: string | null
+          founder_review_required?: boolean
+          generated_count?: number
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          missing_assets?: string[]
+          model_notes?: string | null
+          output_summary?: Json
+          requested_days?: number | null
+          requested_platforms?: string[]
+          run_status?: string
+          run_type: string
+          source_summary?: Json
+          updated_at?: string
+        }
+        Update: {
+          blocked_count?: number
+          business_id?: string
+          compliance_warnings?: string[]
+          confidence_score?: number
+          created_at?: string
+          created_pack_id?: string | null
+          founder_review_required?: boolean
+          generated_count?: number
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          missing_assets?: string[]
+          model_notes?: string | null
+          output_summary?: Json
+          requested_days?: number | null
+          requested_platforms?: string[]
+          run_status?: string
+          run_type?: string
+          source_summary?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       social_content_items: {
         Row: {
           ai_prompt_source: string | null
           approval_status: string | null
           asset_id: string | null
+          asset_readiness_status: string
           automation_status: string | null
           business_id: string
           campaign_id: string | null
+          campaign_plan_id: string | null
           caption: string | null
+          carousel_outline: Json
+          compliance_status: string
+          content_goal: string | null
           content_pillar: string | null
+          content_pillar_id: string | null
           content_type: string
+          conversion_goal: string | null
           created_at: string | null
           cta: string | null
+          customer_journey_stage: string | null
           founder_notes: string | null
           funnel_stage: string | null
           generated_by_ai: boolean | null
           hashtags: string | null
+          hook: string | null
           id: string
           is_test_data: boolean | null
           link_url: string | null
           metadata: Json | null
           offer_angle: string | null
+          offer_mapping_id: string | null
           operator_notes: string | null
+          pack_id: string | null
           platform: string
           provider: string | null
+          publish_readiness: string
+          quality_status: string
+          revenue_alignment_status: string
+          revenue_strategy_id: string | null
           scheduled_date: string | null
           scheduled_time: string | null
+          script: string | null
+          target_audience: string | null
           timezone: string | null
           title: string | null
           updated_at: string | null
@@ -20161,28 +20528,45 @@ export type Database = {
           ai_prompt_source?: string | null
           approval_status?: string | null
           asset_id?: string | null
+          asset_readiness_status?: string
           automation_status?: string | null
           business_id: string
           campaign_id?: string | null
+          campaign_plan_id?: string | null
           caption?: string | null
+          carousel_outline?: Json
+          compliance_status?: string
+          content_goal?: string | null
           content_pillar?: string | null
+          content_pillar_id?: string | null
           content_type: string
+          conversion_goal?: string | null
           created_at?: string | null
           cta?: string | null
+          customer_journey_stage?: string | null
           founder_notes?: string | null
           funnel_stage?: string | null
           generated_by_ai?: boolean | null
           hashtags?: string | null
+          hook?: string | null
           id?: string
           is_test_data?: boolean | null
           link_url?: string | null
           metadata?: Json | null
           offer_angle?: string | null
+          offer_mapping_id?: string | null
           operator_notes?: string | null
+          pack_id?: string | null
           platform: string
           provider?: string | null
+          publish_readiness?: string
+          quality_status?: string
+          revenue_alignment_status?: string
+          revenue_strategy_id?: string | null
           scheduled_date?: string | null
           scheduled_time?: string | null
+          script?: string | null
+          target_audience?: string | null
           timezone?: string | null
           title?: string | null
           updated_at?: string | null
@@ -20191,28 +20575,45 @@ export type Database = {
           ai_prompt_source?: string | null
           approval_status?: string | null
           asset_id?: string | null
+          asset_readiness_status?: string
           automation_status?: string | null
           business_id?: string
           campaign_id?: string | null
+          campaign_plan_id?: string | null
           caption?: string | null
+          carousel_outline?: Json
+          compliance_status?: string
+          content_goal?: string | null
           content_pillar?: string | null
+          content_pillar_id?: string | null
           content_type?: string
+          conversion_goal?: string | null
           created_at?: string | null
           cta?: string | null
+          customer_journey_stage?: string | null
           founder_notes?: string | null
           funnel_stage?: string | null
           generated_by_ai?: boolean | null
           hashtags?: string | null
+          hook?: string | null
           id?: string
           is_test_data?: boolean | null
           link_url?: string | null
           metadata?: Json | null
           offer_angle?: string | null
+          offer_mapping_id?: string | null
           operator_notes?: string | null
+          pack_id?: string | null
           platform?: string
           provider?: string | null
+          publish_readiness?: string
+          quality_status?: string
+          revenue_alignment_status?: string
+          revenue_strategy_id?: string | null
           scheduled_date?: string | null
           scheduled_time?: string | null
+          script?: string | null
+          target_audience?: string | null
           timezone?: string | null
           title?: string | null
           updated_at?: string | null
@@ -20226,6 +20627,434 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      social_content_pack_items: {
+        Row: {
+          asset_id: string | null
+          business_id: string
+          content_item_id: string
+          content_pillar_id: string | null
+          created_at: string
+          day_number: number | null
+          id: string
+          is_test_data: boolean
+          metadata: Json
+          notes: string | null
+          offer_mapping_id: string | null
+          pack_id: string
+          planned_date: string | null
+          planned_time: string | null
+          platform: string | null
+          sort_order: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          asset_id?: string | null
+          business_id: string
+          content_item_id: string
+          content_pillar_id?: string | null
+          created_at?: string
+          day_number?: number | null
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          notes?: string | null
+          offer_mapping_id?: string | null
+          pack_id: string
+          planned_date?: string | null
+          planned_time?: string | null
+          platform?: string | null
+          sort_order?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          asset_id?: string | null
+          business_id?: string
+          content_item_id?: string
+          content_pillar_id?: string | null
+          created_at?: string
+          day_number?: number | null
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          notes?: string | null
+          offer_mapping_id?: string | null
+          pack_id?: string
+          planned_date?: string | null
+          planned_time?: string | null
+          platform?: string | null
+          sort_order?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_content_pack_items_content_item_id_fkey"
+            columns: ["content_item_id"]
+            isOneToOne: false
+            referencedRelation: "social_content_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_content_pack_items_pack_id_fkey"
+            columns: ["pack_id"]
+            isOneToOne: false
+            referencedRelation: "social_content_packs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_content_packs: {
+        Row: {
+          approval_status: string
+          business_id: string
+          campaign_id: string | null
+          campaign_plan_id: string | null
+          compliance_warnings: string[]
+          created_at: string
+          customer_journey_stage: string | null
+          days_count: number
+          end_date: string | null
+          founder_notes: string | null
+          funnel_stage: string | null
+          generated_from_sources: Json
+          id: string
+          is_test_data: boolean
+          metadata: Json
+          missing_assets: string[]
+          offer_mapping_id: string | null
+          pack_name: string
+          pack_status: string
+          pack_summary: string | null
+          pack_type: string
+          platforms: string[]
+          primary_goal: string | null
+          revenue_alignment_status: string
+          revenue_strategy_id: string | null
+          revenue_target_id: string | null
+          risk_level: string
+          social_brain_profile_id: string | null
+          start_date: string | null
+          target_audience: string | null
+          updated_at: string
+        }
+        Insert: {
+          approval_status?: string
+          business_id: string
+          campaign_id?: string | null
+          campaign_plan_id?: string | null
+          compliance_warnings?: string[]
+          created_at?: string
+          customer_journey_stage?: string | null
+          days_count?: number
+          end_date?: string | null
+          founder_notes?: string | null
+          funnel_stage?: string | null
+          generated_from_sources?: Json
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          missing_assets?: string[]
+          offer_mapping_id?: string | null
+          pack_name: string
+          pack_status?: string
+          pack_summary?: string | null
+          pack_type?: string
+          platforms?: string[]
+          primary_goal?: string | null
+          revenue_alignment_status?: string
+          revenue_strategy_id?: string | null
+          revenue_target_id?: string | null
+          risk_level?: string
+          social_brain_profile_id?: string | null
+          start_date?: string | null
+          target_audience?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approval_status?: string
+          business_id?: string
+          campaign_id?: string | null
+          campaign_plan_id?: string | null
+          compliance_warnings?: string[]
+          created_at?: string
+          customer_journey_stage?: string | null
+          days_count?: number
+          end_date?: string | null
+          founder_notes?: string | null
+          funnel_stage?: string | null
+          generated_from_sources?: Json
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          missing_assets?: string[]
+          offer_mapping_id?: string | null
+          pack_name?: string
+          pack_status?: string
+          pack_summary?: string | null
+          pack_type?: string
+          platforms?: string[]
+          primary_goal?: string | null
+          revenue_alignment_status?: string
+          revenue_strategy_id?: string | null
+          revenue_target_id?: string | null
+          risk_level?: string
+          social_brain_profile_id?: string | null
+          start_date?: string | null
+          target_audience?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      social_content_quality_reviews: {
+        Row: {
+          asset_readiness_score: number
+          brand_fit_score: number
+          business_id: string
+          compliance_score: number
+          content_item_id: string | null
+          created_at: string
+          founder_review_required: boolean
+          id: string
+          is_test_data: boolean
+          issues: string[]
+          legal_review_required: boolean
+          metadata: Json
+          pack_id: string | null
+          quality_score: number
+          recommendations: string[]
+          review_status: string
+          reviewed_at: string | null
+          risk_level: string
+          updated_at: string
+          variant_id: string | null
+        }
+        Insert: {
+          asset_readiness_score?: number
+          brand_fit_score?: number
+          business_id: string
+          compliance_score?: number
+          content_item_id?: string | null
+          created_at?: string
+          founder_review_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          issues?: string[]
+          legal_review_required?: boolean
+          metadata?: Json
+          pack_id?: string | null
+          quality_score?: number
+          recommendations?: string[]
+          review_status?: string
+          reviewed_at?: string | null
+          risk_level?: string
+          updated_at?: string
+          variant_id?: string | null
+        }
+        Update: {
+          asset_readiness_score?: number
+          brand_fit_score?: number
+          business_id?: string
+          compliance_score?: number
+          content_item_id?: string | null
+          created_at?: string
+          founder_review_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          issues?: string[]
+          legal_review_required?: boolean
+          metadata?: Json
+          pack_id?: string | null
+          quality_score?: number
+          recommendations?: string[]
+          review_status?: string
+          reviewed_at?: string | null
+          risk_level?: string
+          updated_at?: string
+          variant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_content_quality_reviews_content_item_id_fkey"
+            columns: ["content_item_id"]
+            isOneToOne: false
+            referencedRelation: "social_content_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_content_quality_reviews_pack_id_fkey"
+            columns: ["pack_id"]
+            isOneToOne: false
+            referencedRelation: "social_content_packs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_content_quality_reviews_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "social_content_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_content_variants: {
+        Row: {
+          approval_status: string
+          asset_id: string | null
+          business_id: string
+          caption: string | null
+          carousel_outline: Json
+          content_item_id: string | null
+          created_at: string
+          cta: string | null
+          hashtags: string | null
+          hook: string | null
+          id: string
+          is_test_data: boolean
+          link_url: string | null
+          metadata: Json
+          missing_requirements: string[]
+          pack_id: string | null
+          platform: string
+          risk_flags: string[]
+          script: string | null
+          title: string | null
+          updated_at: string
+          variant_type: string
+        }
+        Insert: {
+          approval_status?: string
+          asset_id?: string | null
+          business_id: string
+          caption?: string | null
+          carousel_outline?: Json
+          content_item_id?: string | null
+          created_at?: string
+          cta?: string | null
+          hashtags?: string | null
+          hook?: string | null
+          id?: string
+          is_test_data?: boolean
+          link_url?: string | null
+          metadata?: Json
+          missing_requirements?: string[]
+          pack_id?: string | null
+          platform: string
+          risk_flags?: string[]
+          script?: string | null
+          title?: string | null
+          updated_at?: string
+          variant_type: string
+        }
+        Update: {
+          approval_status?: string
+          asset_id?: string | null
+          business_id?: string
+          caption?: string | null
+          carousel_outline?: Json
+          content_item_id?: string | null
+          created_at?: string
+          cta?: string | null
+          hashtags?: string | null
+          hook?: string | null
+          id?: string
+          is_test_data?: boolean
+          link_url?: string | null
+          metadata?: Json
+          missing_requirements?: string[]
+          pack_id?: string | null
+          platform?: string
+          risk_flags?: string[]
+          script?: string | null
+          title?: string | null
+          updated_at?: string
+          variant_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_content_variants_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "social_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_content_variants_content_item_id_fkey"
+            columns: ["content_item_id"]
+            isOneToOne: false
+            referencedRelation: "social_content_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_content_variants_pack_id_fkey"
+            columns: ["pack_id"]
+            isOneToOne: false
+            referencedRelation: "social_content_packs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_customer_journey_content_rules: {
+        Row: {
+          approval_required: boolean
+          business_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          is_test_data: boolean
+          journey_stage: string
+          metadata: Json
+          proof_needed: string[]
+          recommended_content_types: string[]
+          recommended_ctas: string[]
+          recommended_platforms: string[]
+          risk_notes: string | null
+          rule_description: string | null
+          rule_name: string
+          tone_notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          approval_required?: boolean
+          business_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_test_data?: boolean
+          journey_stage: string
+          metadata?: Json
+          proof_needed?: string[]
+          recommended_content_types?: string[]
+          recommended_ctas?: string[]
+          recommended_platforms?: string[]
+          risk_notes?: string | null
+          rule_description?: string | null
+          rule_name: string
+          tone_notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approval_required?: boolean
+          business_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_test_data?: boolean
+          journey_stage?: string
+          metadata?: Json
+          proof_needed?: string[]
+          recommended_content_types?: string[]
+          recommended_ctas?: string[]
+          recommended_platforms?: string[]
+          risk_notes?: string | null
+          rule_description?: string | null
+          rule_name?: string
+          tone_notes?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       social_engagement_events: {
         Row: {
@@ -21095,6 +21924,104 @@ export type Database = {
             columns: ["source_asset_id"]
             isOneToOne: false
             referencedRelation: "social_source_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_revenue_content_strategy: {
+        Row: {
+          approval_status: string
+          blockers: string[]
+          business_id: string
+          campaign_plan_id: string | null
+          confidence_score: number
+          created_at: string
+          currency: string
+          estimated_content_volume: number | null
+          estimated_conversion_rate: number | null
+          estimated_leads_needed: number | null
+          founder_notes: string | null
+          id: string
+          is_test_data: boolean
+          metadata: Json
+          period_end: string | null
+          period_start: string | null
+          primary_offer: string | null
+          recommended_campaigns: string[]
+          recommended_content_mix: Json
+          recommended_platforms: string[]
+          revenue_assumptions: Json
+          revenue_target_id: string | null
+          strategy_status: string
+          target_amount: number | null
+          target_count: number | null
+          target_summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          approval_status?: string
+          blockers?: string[]
+          business_id: string
+          campaign_plan_id?: string | null
+          confidence_score?: number
+          created_at?: string
+          currency?: string
+          estimated_content_volume?: number | null
+          estimated_conversion_rate?: number | null
+          estimated_leads_needed?: number | null
+          founder_notes?: string | null
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          period_end?: string | null
+          period_start?: string | null
+          primary_offer?: string | null
+          recommended_campaigns?: string[]
+          recommended_content_mix?: Json
+          recommended_platforms?: string[]
+          revenue_assumptions?: Json
+          revenue_target_id?: string | null
+          strategy_status?: string
+          target_amount?: number | null
+          target_count?: number | null
+          target_summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approval_status?: string
+          blockers?: string[]
+          business_id?: string
+          campaign_plan_id?: string | null
+          confidence_score?: number
+          created_at?: string
+          currency?: string
+          estimated_content_volume?: number | null
+          estimated_conversion_rate?: number | null
+          estimated_leads_needed?: number | null
+          founder_notes?: string | null
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          period_end?: string | null
+          period_start?: string | null
+          primary_offer?: string | null
+          recommended_campaigns?: string[]
+          recommended_content_mix?: Json
+          recommended_platforms?: string[]
+          revenue_assumptions?: Json
+          revenue_target_id?: string | null
+          strategy_status?: string
+          target_amount?: number | null
+          target_count?: number | null
+          target_summary?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_revenue_content_strategy_campaign_plan_id_fkey"
+            columns: ["campaign_plan_id"]
+            isOneToOne: false
+            referencedRelation: "social_campaign_plans"
             referencedColumns: ["id"]
           },
         ]
@@ -24044,6 +24971,7 @@ export type Database = {
       }
     }
     Functions: {
+      _is_founder_or_admin: { Args: never; Returns: boolean }
       accept_proposal_by_token: { Args: { _token: string }; Returns: Json }
       activate_outreach_campaign: {
         Args: { _campaign_id: string }
