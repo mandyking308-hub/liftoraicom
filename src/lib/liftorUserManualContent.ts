@@ -939,3 +939,39 @@ export const LIFTOR_FINAL_HANDOVER = {
   recommendation:
     "Stop building core Liftor. Begin internal daily use. Future work should be controlled external activation prompts or per-business onboarding, not more foundation building.",
 };
+
+export const LIFTOR_COMMAND_CENTRE_PARITY = {
+  title: "Command Centre ↔ Manual Parity Map (Prompt C)",
+  updated: "2026-05-19",
+  status: "PARITY_AUDITED",
+  description:
+    "Every operating route registered in the app router is reachable from the Daily Operator View or its in-section link grids. The Full Diagnostic View additionally exposes raw module registry, acceptance, wiring matrix, legacy panels and diagnostics. Truth Sync remains authoritative — any stale 'missing' wording in legacy panels is superseded by the per-layer wiring matrix.",
+  reachable_from_command_centre: [
+    "/founder/command-centre (canonical; /founder/command-center → 301 → /founder/command-centre)",
+    "/founder/copilot, /founder/testing, /founder/system, /founder/system/health, /founder/system/events, /founder/system/modes, /founder/monitoring, /founder/activity, /founder/executions, /founder/priority, /founder/security, /founder/sending",
+    "/founder/crm, /founder/crm/contacts, /founder/crm/inboxes, /founder/conversations, /founder/organisations",
+    "/founder/outreach, /founder/outreach/queue, /founder/outreach/queue-audit, /founder/outreach/campaigns, /founder/outreach/imports, /founder/outreach/engagement, /founder/outreach/apollo, /founder/outreach/live-monitor, /founder/outreach/send-preview",
+    "/founder/social, /founder/social-autopilot/*, /founder/assets, /founder/marketing",
+    "/founder/support, /founder/support/knowledge-agent",
+    "/founder/customer-success, /founder/clients",
+    "/founder/proposals, /founder/internal-proposals, /founder/demos, /founder/pipeline",
+    "/founder/revenue, /founder/finance, /founder/finance/targets, /founder/finance/deals, /founder/finance/invoices, /founder/finance/payments, /founder/analytics, /founder/optimisation",
+    "/founder/suppliers, /founder/assignments, /founder/projects, /founder/deployments",
+    "/founder/integrations, /founder/workflows, /founder/processes, /founder/architectures, /founder/templates, /founder/expansion",
+    "/founder/compliance, /founder/compliance/events, /founder/compliance/rules, /founder/legal, /founder/access-control",
+    "/founder/manual, /founder/manual/full, /founder/manual/user, /founder/build-log, /founder/knowledge, /founder/documents",
+    "/founder/agents, /founder/brain, /founder/strategy, /founder/decisions",
+  ],
+  intentional_legacy_routes: [
+    "/founder/command-center/legacy — kept for diagnostic comparison only; superseded by /founder/command-centre.",
+  ],
+  not_a_command_centre_concern: [
+    "/founder/manual/:id, /founder/knowledge/:id, /founder/agents/:id, /founder/processes/:id, /founder/workflows/:id, /founder/architectures/:id, /founder/templates/:id, /founder/proposals/:id, /founder/internal-proposals/:id, /founder/integrations/:id, /founder/monitoring/:id, /founder/expansion/:id, /founder/conversations/:id, /founder/crm/contacts/:id, /founder/crm/inboxes/:id/configure, /founder/projects/:id, /founder/deployments/:id, /founder/executions/:id, /founder/suppliers/:id, /founder/organisations/:id — these are detail pages reached from their parent list.",
+  ],
+  authority_rules: [
+    "Truth Sync is the single source of truth for connection / readiness state. Any 'missing module' wording in legacy diagnostic panels does NOT override Truth Sync.",
+    "Every external action surface is described as locked / future / manual-confirmation in both manuals. No manual claim implies external go-live unless a controlled activation prompt has been executed.",
+    "Test/rehearsal records always carry is_test_data=true. Every *-rehearsal-purge function only deletes is_test_data=true rows.",
+    "Liftor-wide wording is generic. No 'NeonCandy-only' phrasing remains in cross-tenant manuals; NeonCandy is one tenant of many.",
+  ],
+};

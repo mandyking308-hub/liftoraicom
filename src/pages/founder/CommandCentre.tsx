@@ -1082,7 +1082,12 @@ const CommandCentre = () => {
             <Section
               title="Support / Customer Service (internal-only)"
               icon={MessageSquare}
-              action={<Link to="/founder/support"><Button size="sm" variant="outline"><Sparkles size={12} /> Open support</Button></Link>}
+              action={
+                <div className="flex items-center gap-2">
+                  <Link to="/founder/support"><Button size="sm" variant="outline"><Sparkles size={12} /> Open support</Button></Link>
+                  <Link to="/founder/support/knowledge-agent"><Button size="sm" variant="ghost">Knowledge Agent <ArrowRight size={12} /></Button></Link>
+                </div>
+              }
             >
               <div className="flex flex-wrap items-center gap-2 mb-2 text-[11px]">
                 <Badge variant="outline" className="border-yellow-500/40 text-yellow-300">No external send · No live chat · No customer-record mutation</Badge>
@@ -1410,6 +1415,8 @@ const CommandCentre = () => {
                 { to: "/founder/legal", label: "Legal Console", icon: Gavel },
                 { to: "/founder/access-control", label: "Access Control", icon: ShieldAlert },
                 { to: "/founder/security", label: "Security", icon: ShieldAlert },
+                { to: "/founder/compliance/events", label: "Compliance Events", icon: Activity },
+                { to: "/founder/compliance/rules", label: "Compliance Rules", icon: ListChecks },
               ]} />
             </Section>
             <GlobalJurisdictionPolicyPanel />
@@ -1422,6 +1429,8 @@ const CommandCentre = () => {
                 { to: "/founder/internal-proposals", label: "Internal Proposals", icon: FileSignature },
                 { to: "/founder/demos", label: "Demos", icon: MonitorPlay },
                 { to: "/founder/pipeline", label: "Lead Pipeline", icon: TrendingUp },
+                { to: "/founder/customer-success", label: "Customer Success", icon: Users },
+                { to: "/founder/clients", label: "Client Portal Blueprints", icon: Building2 },
               ]} />
             </Section>
             <CommercialHandoffPanel />
@@ -1446,6 +1455,10 @@ const CommandCentre = () => {
                 { to: "/founder/finance", label: "Finance", icon: Banknote },
                 { to: "/founder/analytics", label: "Analytics", icon: Activity },
                 { to: "/founder/optimisation", label: "Optimisation", icon: TrendingUp },
+                { to: "/founder/finance/targets", label: "Revenue Targets", icon: TrendingUp },
+                { to: "/founder/finance/deals", label: "Deals", icon: Banknote },
+                { to: "/founder/finance/invoices", label: "Invoices", icon: Banknote },
+                { to: "/founder/finance/payments", label: "Payments", icon: Banknote },
               ]} />
             </Section>
             <CommercialHandoffPanel />
@@ -1503,6 +1516,8 @@ const CommandCentre = () => {
                 { to: "/founder/activity", label: "Activity", icon: Activity },
                 { to: "/founder/testing", label: "Platform Testing", icon: FlaskConical },
                 { to: "/founder/executions", label: "Executions", icon: Activity },
+                { to: "/founder/system/events", label: "System Events", icon: Activity },
+                { to: "/founder/system/health", label: "System Health Registry", icon: Monitor },
               ]} />
             </Section>
             <LiftorMasterDryRunPanel />
