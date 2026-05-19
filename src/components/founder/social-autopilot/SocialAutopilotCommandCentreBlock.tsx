@@ -13,6 +13,7 @@ export default function SocialAutopilotCommandCentreBlock() {
   const [factory, setFactory] = useState<any>(null);
   const [calendar, setCalendar] = useState<any>(null);
   const [approval, setApproval] = useState<any>(null);
+  const [publishing, setPublishing] = useState<any>(null);
   const businessId = typeof window !== "undefined" ? localStorage.getItem("liftor.activeBusinessId") || "" : "";
 
   useEffect(() => {
@@ -38,6 +39,9 @@ export default function SocialAutopilotCommandCentreBlock() {
           const ap = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/social-approval-healthcheck?business_id=${businessId}`,
             { headers: { Authorization: `Bearer ${session?.access_token ?? ""}` } });
           setApproval(await ap.json());
+          const pub = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/social-publishing-healthcheck?business_id=${businessId}`,
+            { headers: { Authorization: `Bearer ${session?.access_token ?? ""}` } });
+          setPublishing(await pub.json());
         }
       } catch { /* ignore */ }
     })();
