@@ -18772,6 +18772,213 @@ export type Database = {
         }
         Relationships: []
       }
+      social_accounts: {
+        Row: {
+          account_external_id: string | null
+          business_id: string
+          capabilities_json: Json | null
+          connection_notes: string | null
+          connection_status: string | null
+          created_at: string | null
+          handle: string | null
+          id: string
+          last_sync_at: string | null
+          metadata: Json | null
+          platform: string
+          profile_url: string | null
+          provider: string
+          token_reference: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          account_external_id?: string | null
+          business_id: string
+          capabilities_json?: Json | null
+          connection_notes?: string | null
+          connection_status?: string | null
+          created_at?: string | null
+          handle?: string | null
+          id?: string
+          last_sync_at?: string | null
+          metadata?: Json | null
+          platform: string
+          profile_url?: string | null
+          provider: string
+          token_reference?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          account_external_id?: string | null
+          business_id?: string
+          capabilities_json?: Json | null
+          connection_notes?: string | null
+          connection_status?: string | null
+          created_at?: string | null
+          handle?: string | null
+          id?: string
+          last_sync_at?: string | null
+          metadata?: Json | null
+          platform?: string
+          profile_url?: string | null
+          provider?: string
+          token_reference?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      social_assets: {
+        Row: {
+          ai_notes: string | null
+          approved_for_ads: boolean | null
+          approved_for_proposals: boolean | null
+          approved_for_social: boolean | null
+          asset_type: string
+          business_id: string
+          campaign_id: string | null
+          created_at: string | null
+          description: string | null
+          duration_seconds: number | null
+          file_url: string | null
+          format_notes: string | null
+          id: string
+          is_test_data: boolean | null
+          last_used_at: string | null
+          metadata: Json | null
+          platform_fit: string[] | null
+          rights_expiry_date: string | null
+          rights_status: string | null
+          source_notes: string | null
+          storage_path: string | null
+          thumbnail_url: string | null
+          title: string
+          updated_at: string | null
+          usage_count: number | null
+          usage_status: string | null
+        }
+        Insert: {
+          ai_notes?: string | null
+          approved_for_ads?: boolean | null
+          approved_for_proposals?: boolean | null
+          approved_for_social?: boolean | null
+          asset_type: string
+          business_id: string
+          campaign_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          duration_seconds?: number | null
+          file_url?: string | null
+          format_notes?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          last_used_at?: string | null
+          metadata?: Json | null
+          platform_fit?: string[] | null
+          rights_expiry_date?: string | null
+          rights_status?: string | null
+          source_notes?: string | null
+          storage_path?: string | null
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string | null
+          usage_count?: number | null
+          usage_status?: string | null
+        }
+        Update: {
+          ai_notes?: string | null
+          approved_for_ads?: boolean | null
+          approved_for_proposals?: boolean | null
+          approved_for_social?: boolean | null
+          asset_type?: string
+          business_id?: string
+          campaign_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          duration_seconds?: number | null
+          file_url?: string | null
+          format_notes?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          last_used_at?: string | null
+          metadata?: Json | null
+          platform_fit?: string[] | null
+          rights_expiry_date?: string | null
+          rights_status?: string | null
+          source_notes?: string | null
+          storage_path?: string | null
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string | null
+          usage_count?: number | null
+          usage_status?: string | null
+        }
+        Relationships: []
+      }
+      social_automation_settings: {
+        Row: {
+          approval_rules_json: Json | null
+          auto_publish_allowed: boolean | null
+          auto_reply_allowed: boolean | null
+          brand_voice: string | null
+          business_id: string
+          cold_dm_allowed: boolean | null
+          core_cta: string | null
+          created_at: string | null
+          default_links_json: Json | null
+          dm_rules_json: Json | null
+          escalation_rules: Json | null
+          forbidden_phrases: string[] | null
+          id: string
+          metadata: Json | null
+          platform_rules_json: Json | null
+          posting_cadence_json: Json | null
+          rehearsal_mode_enabled: boolean | null
+          social_automation_mode: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          approval_rules_json?: Json | null
+          auto_publish_allowed?: boolean | null
+          auto_reply_allowed?: boolean | null
+          brand_voice?: string | null
+          business_id: string
+          cold_dm_allowed?: boolean | null
+          core_cta?: string | null
+          created_at?: string | null
+          default_links_json?: Json | null
+          dm_rules_json?: Json | null
+          escalation_rules?: Json | null
+          forbidden_phrases?: string[] | null
+          id?: string
+          metadata?: Json | null
+          platform_rules_json?: Json | null
+          posting_cadence_json?: Json | null
+          rehearsal_mode_enabled?: boolean | null
+          social_automation_mode?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          approval_rules_json?: Json | null
+          auto_publish_allowed?: boolean | null
+          auto_reply_allowed?: boolean | null
+          brand_voice?: string | null
+          business_id?: string
+          cold_dm_allowed?: boolean | null
+          core_cta?: string | null
+          created_at?: string | null
+          default_links_json?: Json | null
+          dm_rules_json?: Json | null
+          escalation_rules?: Json | null
+          forbidden_phrases?: string[] | null
+          id?: string
+          metadata?: Json | null
+          platform_rules_json?: Json | null
+          posting_cadence_json?: Json | null
+          rehearsal_mode_enabled?: boolean | null
+          social_automation_mode?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       social_business_profiles: {
         Row: {
           approval_required: boolean
@@ -18970,6 +19177,107 @@ export type Database = {
           },
         ]
       }
+      social_content_items: {
+        Row: {
+          ai_prompt_source: string | null
+          approval_status: string | null
+          asset_id: string | null
+          automation_status: string | null
+          business_id: string
+          campaign_id: string | null
+          caption: string | null
+          content_pillar: string | null
+          content_type: string
+          created_at: string | null
+          cta: string | null
+          founder_notes: string | null
+          funnel_stage: string | null
+          generated_by_ai: boolean | null
+          hashtags: string | null
+          id: string
+          is_test_data: boolean | null
+          link_url: string | null
+          metadata: Json | null
+          offer_angle: string | null
+          operator_notes: string | null
+          platform: string
+          provider: string | null
+          scheduled_date: string | null
+          scheduled_time: string | null
+          timezone: string | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          ai_prompt_source?: string | null
+          approval_status?: string | null
+          asset_id?: string | null
+          automation_status?: string | null
+          business_id: string
+          campaign_id?: string | null
+          caption?: string | null
+          content_pillar?: string | null
+          content_type: string
+          created_at?: string | null
+          cta?: string | null
+          founder_notes?: string | null
+          funnel_stage?: string | null
+          generated_by_ai?: boolean | null
+          hashtags?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          link_url?: string | null
+          metadata?: Json | null
+          offer_angle?: string | null
+          operator_notes?: string | null
+          platform: string
+          provider?: string | null
+          scheduled_date?: string | null
+          scheduled_time?: string | null
+          timezone?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          ai_prompt_source?: string | null
+          approval_status?: string | null
+          asset_id?: string | null
+          automation_status?: string | null
+          business_id?: string
+          campaign_id?: string | null
+          caption?: string | null
+          content_pillar?: string | null
+          content_type?: string
+          created_at?: string | null
+          cta?: string | null
+          founder_notes?: string | null
+          funnel_stage?: string | null
+          generated_by_ai?: boolean | null
+          hashtags?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          link_url?: string | null
+          metadata?: Json | null
+          offer_angle?: string | null
+          operator_notes?: string | null
+          platform?: string
+          provider?: string | null
+          scheduled_date?: string | null
+          scheduled_time?: string | null
+          timezone?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_content_items_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "social_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       social_engagement_events: {
         Row: {
           business_id: string
@@ -19052,6 +19360,185 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_inbox_messages: {
+        Row: {
+          business_id: string
+          created_at: string | null
+          crm_contact_id: string | null
+          escalation_reason: string | null
+          escalation_required: boolean | null
+          external_message_id: string | null
+          external_thread_id: string | null
+          id: string
+          incoming_text: string | null
+          is_test_data: boolean | null
+          lead_score: number | null
+          message_type: string | null
+          metadata: Json | null
+          platform: string
+          provider: string
+          received_at: string | null
+          sender_handle: string | null
+          sender_name: string | null
+          sender_profile_url: string | null
+          sentiment: string | null
+          social_account_id: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          business_id: string
+          created_at?: string | null
+          crm_contact_id?: string | null
+          escalation_reason?: string | null
+          escalation_required?: boolean | null
+          external_message_id?: string | null
+          external_thread_id?: string | null
+          id?: string
+          incoming_text?: string | null
+          is_test_data?: boolean | null
+          lead_score?: number | null
+          message_type?: string | null
+          metadata?: Json | null
+          platform: string
+          provider: string
+          received_at?: string | null
+          sender_handle?: string | null
+          sender_name?: string | null
+          sender_profile_url?: string | null
+          sentiment?: string | null
+          social_account_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          business_id?: string
+          created_at?: string | null
+          crm_contact_id?: string | null
+          escalation_reason?: string | null
+          escalation_required?: boolean | null
+          external_message_id?: string | null
+          external_thread_id?: string | null
+          id?: string
+          incoming_text?: string | null
+          is_test_data?: boolean | null
+          lead_score?: number | null
+          message_type?: string | null
+          metadata?: Json | null
+          platform?: string
+          provider?: string
+          received_at?: string | null
+          sender_handle?: string | null
+          sender_name?: string | null
+          sender_profile_url?: string | null
+          sentiment?: string | null
+          social_account_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_inbox_messages_social_account_id_fkey"
+            columns: ["social_account_id"]
+            isOneToOne: false
+            referencedRelation: "social_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_performance_logs: {
+        Row: {
+          business_id: string
+          clicks: number | null
+          comments: number | null
+          content_item_id: string | null
+          created_at: string | null
+          follows: number | null
+          id: string
+          is_test_data: boolean | null
+          leads_created: number | null
+          likes: number | null
+          metadata: Json | null
+          notes: string | null
+          platform: string | null
+          posted_at: string | null
+          provider: string | null
+          replies: number | null
+          revenue_attributed: number | null
+          saves: number | null
+          shares: number | null
+          social_account_id: string | null
+          source: string | null
+          updated_at: string | null
+          views: number | null
+        }
+        Insert: {
+          business_id: string
+          clicks?: number | null
+          comments?: number | null
+          content_item_id?: string | null
+          created_at?: string | null
+          follows?: number | null
+          id?: string
+          is_test_data?: boolean | null
+          leads_created?: number | null
+          likes?: number | null
+          metadata?: Json | null
+          notes?: string | null
+          platform?: string | null
+          posted_at?: string | null
+          provider?: string | null
+          replies?: number | null
+          revenue_attributed?: number | null
+          saves?: number | null
+          shares?: number | null
+          social_account_id?: string | null
+          source?: string | null
+          updated_at?: string | null
+          views?: number | null
+        }
+        Update: {
+          business_id?: string
+          clicks?: number | null
+          comments?: number | null
+          content_item_id?: string | null
+          created_at?: string | null
+          follows?: number | null
+          id?: string
+          is_test_data?: boolean | null
+          leads_created?: number | null
+          likes?: number | null
+          metadata?: Json | null
+          notes?: string | null
+          platform?: string | null
+          posted_at?: string | null
+          provider?: string | null
+          replies?: number | null
+          revenue_attributed?: number | null
+          saves?: number | null
+          shares?: number | null
+          social_account_id?: string | null
+          source?: string | null
+          updated_at?: string | null
+          views?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_performance_logs_content_item_id_fkey"
+            columns: ["content_item_id"]
+            isOneToOne: false
+            referencedRelation: "social_content_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_performance_logs_social_account_id_fkey"
+            columns: ["social_account_id"]
+            isOneToOne: false
+            referencedRelation: "social_accounts"
             referencedColumns: ["id"]
           },
         ]
@@ -19309,6 +19796,236 @@ export type Database = {
             columns: ["calendar_id"]
             isOneToOne: false
             referencedRelation: "social_content_calendars"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_provider_adapters: {
+        Row: {
+          adapter_status: string | null
+          can_publish_carousels: boolean | null
+          can_publish_posts: boolean | null
+          can_publish_reels: boolean | null
+          can_publish_shorts: boolean | null
+          can_publish_stories: boolean | null
+          can_read_comments: boolean | null
+          can_read_dms: boolean | null
+          can_receive_webhooks: boolean | null
+          can_reply_to_comments: boolean | null
+          can_schedule: boolean | null
+          can_send_dms: boolean | null
+          can_sync_analytics: boolean | null
+          created_at: string | null
+          display_name: string
+          id: string
+          metadata: Json | null
+          notes: string | null
+          provider: string
+          requires_app_review: boolean | null
+          requires_oauth: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          adapter_status?: string | null
+          can_publish_carousels?: boolean | null
+          can_publish_posts?: boolean | null
+          can_publish_reels?: boolean | null
+          can_publish_shorts?: boolean | null
+          can_publish_stories?: boolean | null
+          can_read_comments?: boolean | null
+          can_read_dms?: boolean | null
+          can_receive_webhooks?: boolean | null
+          can_reply_to_comments?: boolean | null
+          can_schedule?: boolean | null
+          can_send_dms?: boolean | null
+          can_sync_analytics?: boolean | null
+          created_at?: string | null
+          display_name: string
+          id?: string
+          metadata?: Json | null
+          notes?: string | null
+          provider: string
+          requires_app_review?: boolean | null
+          requires_oauth?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          adapter_status?: string | null
+          can_publish_carousels?: boolean | null
+          can_publish_posts?: boolean | null
+          can_publish_reels?: boolean | null
+          can_publish_shorts?: boolean | null
+          can_publish_stories?: boolean | null
+          can_read_comments?: boolean | null
+          can_read_dms?: boolean | null
+          can_receive_webhooks?: boolean | null
+          can_reply_to_comments?: boolean | null
+          can_schedule?: boolean | null
+          can_send_dms?: boolean | null
+          can_sync_analytics?: boolean | null
+          created_at?: string | null
+          display_name?: string
+          id?: string
+          metadata?: Json | null
+          notes?: string | null
+          provider?: string
+          requires_app_review?: boolean | null
+          requires_oauth?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      social_publish_jobs: {
+        Row: {
+          block_reason: string | null
+          business_id: string
+          content_item_id: string | null
+          created_at: string | null
+          error_message: string | null
+          id: string
+          idempotency_key: string | null
+          is_test_data: boolean | null
+          job_type: string
+          last_attempt_at: string | null
+          metadata: Json | null
+          platform: string
+          provider: string
+          provider_external_id: string | null
+          response_json: Json | null
+          retry_count: number | null
+          scheduled_for: string | null
+          social_account_id: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          block_reason?: string | null
+          business_id: string
+          content_item_id?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          idempotency_key?: string | null
+          is_test_data?: boolean | null
+          job_type: string
+          last_attempt_at?: string | null
+          metadata?: Json | null
+          platform: string
+          provider: string
+          provider_external_id?: string | null
+          response_json?: Json | null
+          retry_count?: number | null
+          scheduled_for?: string | null
+          social_account_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          block_reason?: string | null
+          business_id?: string
+          content_item_id?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          idempotency_key?: string | null
+          is_test_data?: boolean | null
+          job_type?: string
+          last_attempt_at?: string | null
+          metadata?: Json | null
+          platform?: string
+          provider?: string
+          provider_external_id?: string | null
+          response_json?: Json | null
+          retry_count?: number | null
+          scheduled_for?: string | null
+          social_account_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_publish_jobs_content_item_id_fkey"
+            columns: ["content_item_id"]
+            isOneToOne: false
+            referencedRelation: "social_content_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_publish_jobs_social_account_id_fkey"
+            columns: ["social_account_id"]
+            isOneToOne: false
+            referencedRelation: "social_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_reply_jobs: {
+        Row: {
+          approval_status: string | null
+          block_reason: string | null
+          business_id: string
+          created_at: string | null
+          error_message: string | null
+          id: string
+          idempotency_key: string | null
+          inbox_message_id: string | null
+          is_test_data: boolean | null
+          metadata: Json | null
+          platform: string
+          provider: string
+          provider_external_id: string | null
+          reply_text: string
+          reply_type: string
+          retry_count: number | null
+          send_status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          approval_status?: string | null
+          block_reason?: string | null
+          business_id: string
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          idempotency_key?: string | null
+          inbox_message_id?: string | null
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          platform: string
+          provider: string
+          provider_external_id?: string | null
+          reply_text: string
+          reply_type: string
+          retry_count?: number | null
+          send_status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          approval_status?: string | null
+          block_reason?: string | null
+          business_id?: string
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          idempotency_key?: string | null
+          inbox_message_id?: string | null
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          platform?: string
+          provider?: string
+          provider_external_id?: string | null
+          reply_text?: string
+          reply_type?: string
+          retry_count?: number | null
+          send_status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_reply_jobs_inbox_message_id_fkey"
+            columns: ["inbox_message_id"]
+            isOneToOne: false
+            referencedRelation: "social_inbox_messages"
             referencedColumns: ["id"]
           },
         ]
