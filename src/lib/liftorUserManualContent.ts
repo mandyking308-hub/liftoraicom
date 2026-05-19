@@ -878,3 +878,63 @@ export const CUSTOMER_SUCCESS_PORTAL_ENGINE = {
   command_centre:
     "Daily Operator View Customer Success / Portal / Retention block shows profiles, onboarding needing review, welcome packs, portal blueprints, content packs, bedding reviews due, check-ins due, surveys awaiting, quarterly reports needing review, renewals due in 60 days, high-risk customers, upsells, win-backs, manual exports ready, hard-zero send/invite/charge counters, and a single next recommended action. Full Diagnostic View shows raw table counts, external action placeholder status, acceptance result and test-data purge control.",
 };
+
+export const LIFTOR_FINAL_HANDOVER = {
+  title: "Final Handover — Liftor Ready for Internal Daily Use",
+  classification: "READY_FOR_INTERNAL_DAILY_USE",
+  external_go_live: "LOCKED_BY_DESIGN",
+  summary:
+    "Liftor's foundation build is complete. Every operating layer (Command Centre, business activation, knowledge/training, starter packs, CRM memory, outreach lanes, social autopilot, marketing/funnel/long-form, paid media, support, customer success/portal/retention, approvals, finance/supplier, group HQ, agents/autonomy, manuals) is mounted and visible. All external provider actions (email send, social publish, Metricool/ManyChat APIs, Apollo/Smartlead POST, ad platforms, Stripe/Paddle/GoCardless, portal account/invite creation, helpdesk APIs, filings) remain LOCKED BY DESIGN. Daily Operator View is calm; Full Diagnostic View carries raw diagnostics; Command Centre Truth Sync is the source of truth. Future external activation must go through separate, deliberately gated activation prompts.",
+  first_15_actions: [
+    "Open /founder/command-centre.",
+    "Confirm Truth Sync says READY_FOR_INTERNAL_DAILY_USE and EXTERNAL_ACTIONS_LOCKED.",
+    "Run Final Hardening checks.",
+    "Run Final Go-To-Use readiness.",
+    "Confirm Clean Real Mode (no test data lingering).",
+    "Create or confirm Pre-Live Baseline.",
+    "Set / review Revenue Target Operating Mode for the active business.",
+    "Select the first real business (or create it via Business Activation).",
+    "Upload business knowledge (manuals, brand, offers, customers, conversations, policies).",
+    "Run knowledge training (dry-run first).",
+    "Generate the starter pack (templates, social profile, content, funnel, support, customer success drafts).",
+    "Review internal agent drafts and Founder Approvals queue.",
+    "Confirm every External Gate badge still reads LOCKED.",
+    "Run liftor-wide-final-acceptance and review the report.",
+    "Begin operating Liftor internally — external sends remain off until controlled activation prompts are run.",
+  ],
+  weekly_rhythm: [
+    "Monday: Truth Sync, alerts, approvals queue, weekly priorities.",
+    "Tuesday-Thursday: knowledge updates, content/calendar drafts, CRM hygiene, support drafts, customer success check-ins.",
+    "Friday: revenue target progress, retention/win-back review, manual export packs for any external work, baseline snapshot.",
+    "Always: keep external gates locked unless a controlled activation prompt is being run.",
+  ],
+  do_not_touch_legacy: [
+    "Legacy IONOS / Pooja loop panels in Full Diagnostic View are diagnostic-only and superseded by the current Operating Spine.",
+    "Apollo legacy pool surfaces remain visible for audit but no calls or credits can be spent without a controlled activation prompt.",
+    "Old reconciliation/registry dumps live in Full Diagnostic only; Truth Sync is authoritative.",
+  ],
+  intentional_locks: [
+    "Smartlead campaign start, warmup, mapping push, webhook create.",
+    "Apollo candidate pull, reveal, credit spend.",
+    "Native email send. Proposal/invoice send. Customer onboarding/quarterly report share.",
+    "Survey send, complaint/dispute/win-back send.",
+    "Metricool schedule post, ManyChat live DMs, social publish.",
+    "Paid media external launch, ad platform API.",
+    "Support external reply, live chat API.",
+    "Portal account/invite creation, customer success external action.",
+    "Payment create, subscription change, filings/regulatory submission.",
+    "High-risk autopilot — L5 never default.",
+  ],
+  acceptance_function: "liftor-wide-final-acceptance — read-only, founder-gated, verifies core tables, external placeholder fail-closed status, all per-layer acceptance functions, and no-forbidden-action audit counters.",
+  next_business_onboarding: [
+    "Open Business Activation Wizard from Command Centre.",
+    "Create or pick the business; mark as test (is_test_data=true) for rehearsal first.",
+    "Upload knowledge sources; run training dry-run.",
+    "Generate starter pack (internal drafts only).",
+    "Run rehearsal and review readiness checks.",
+    "Run pre-live baseline; keep external gates locked.",
+    "When ready, purge the rehearsal test data with the confirmation phrase, then onboard the real business with the same flow.",
+  ],
+  recommendation:
+    "Stop building core Liftor. Begin internal daily use. Future work should be controlled external activation prompts or per-business onboarding, not more foundation building.",
+};

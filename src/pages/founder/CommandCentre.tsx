@@ -30,6 +30,7 @@ import SocialAutopilotCommandCentreBlock from "@/components/founder/social-autop
 import SocialAutopilotDiagnosticsPanel from "@/components/founder/social-autopilot/SocialAutopilotDiagnosticsPanel";
 import CustomerSuccessCommandCentreBlock from "@/components/founder/customer-success/CustomerSuccessCommandCentreBlock";
 import CustomerSuccessDiagnosticsPanel from "@/components/founder/customer-success/CustomerSuccessDiagnosticsPanel";
+import LiftorFinalHandoverPanel from "@/components/founder/final/LiftorFinalHandoverPanel";
 import LiftorUserManualPanel from "@/components/founder/manual/LiftorUserManualPanel";
 import BusinessKnowledgeUploadTrainingPanel from "@/components/founder/knowledge/BusinessKnowledgeUploadTrainingPanel";
 import LiftorCapabilities from "@/components/founder/LiftorCapabilities";
@@ -782,6 +783,7 @@ const CommandCentre = () => {
       <DiagnosticGate>
       <div className="max-w-7xl mx-auto px-4 pt-4"><SocialAutopilotDiagnosticsPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><CustomerSuccessDiagnosticsPanel /></div>
+      <div className="max-w-7xl mx-auto px-4 pt-4"><LiftorFinalHandoverPanel /></div>
       {(() => {
         const activeBusinessName = activeInboxes[0]?.business_name ?? businesses[0]?.name ?? "Neon Candy";
         const activeSender = activeInboxes[0]?.email_address ?? "hello@neoncandy.online";
