@@ -16,6 +16,15 @@ import {
   SocialBrainSettingsApplyPanel,
   SocialBrainHealthPanel,
 } from "@/components/founder/social-autopilot/SocialBrainPanels";
+import {
+  SocialProfileGeneratorPanel,
+  SocialContentPillarsPanel,
+  SocialPlatformRulesPanel,
+  SocialOfferMappingsPanel,
+  SocialRiskFlagsPanel,
+  SocialProfileReadinessPanel,
+  SocialProfileVersionHistoryPanel,
+} from "@/components/founder/social-autopilot/SocialProfilePanels";
 
 const TAB_BY_PATH: Record<string, string> = {
   "/founder/social-autopilot": "dashboard",
@@ -265,6 +274,18 @@ export default function SocialAutopilotPage() {
           <SocialBrainProfilePanel businessId={businessId} />
           <SocialBrainApprovalPanel businessId={businessId} />
           <SocialBrainSettingsApplyPanel businessId={businessId} />
+        </div>
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold mt-6">Social Operating Profile</h2>
+          <SocialProfileReadinessPanel businessId={businessId} />
+          <SocialProfileGeneratorPanel businessId={businessId} />
+          <div className="grid md:grid-cols-2 gap-4">
+            <SocialContentPillarsPanel businessId={businessId} />
+            <SocialPlatformRulesPanel businessId={businessId} />
+            <SocialOfferMappingsPanel businessId={businessId} />
+            <SocialRiskFlagsPanel businessId={businessId} />
+          </div>
+          <SocialProfileVersionHistoryPanel businessId={businessId} />
         </div>
       </div>
     </FounderLayout>
