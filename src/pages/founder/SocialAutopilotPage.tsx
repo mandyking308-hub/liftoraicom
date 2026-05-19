@@ -34,6 +34,7 @@ import { SocialSchedulerBridgeDashboard } from "@/components/founder/social-auto
 import { SocialEngagementFlowDashboard } from "@/components/founder/social-autopilot/SocialEngagementFlowPanels";
 import { SocialEngagementInboxDashboard } from "@/components/founder/social-autopilot/SocialEngagementInboxPanels";
 import { SocialAnalyticsDashboard } from "@/components/founder/social-autopilot/SocialAnalyticsPanels";
+import { SocialCompetitorTrendDashboard } from "@/components/founder/social-autopilot/SocialCompetitorTrendPanels";
 
 const TAB_BY_PATH: Record<string, string> = {
   "/founder/social-autopilot": "dashboard",
@@ -329,6 +330,10 @@ export default function SocialAutopilotPage() {
         <div className="space-y-4">
           <h2 className="text-lg font-semibold mt-6">Social Analytics + Learning Signals</h2>
           <SocialAnalyticsDashboard businessId={businessId} />
+        </div>
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold mt-6">Competitor Watch + Trend Intelligence</h2>
+          <SocialCompetitorTrendDashboard businessId={businessId} />
         </div>
       </div>
     </FounderLayout>
