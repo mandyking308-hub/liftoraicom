@@ -243,6 +243,7 @@ const TAB_LABELS: Array<[string, string, string]> = [
   ["engagement", "Engagement", "/founder/social-autopilot/engagement"],
   ["performance", "Performance", "/founder/social-autopilot/performance"],
   ["analytics", "Analytics", "/founder/social-autopilot/analytics"],
+  ["funnels", "Funnels", "/founder/social-autopilot/funnels"],
   ["settings", "Settings", "/founder/social-autopilot/settings"],
 ];
 
@@ -282,6 +283,7 @@ export default function SocialAutopilotPage() {
           <TabsContent value="engagement"><SocialEngagementFlowDashboard businessId={businessId} /></TabsContent>
           <TabsContent value="performance"><GenericListPanel table="social_performance_logs" businessId={businessId} title="Performance Logs" /></TabsContent>
           <TabsContent value="analytics"><SocialAnalyticsDashboard businessId={businessId} /></TabsContent>
+          <TabsContent value="funnels"><WebsiteFunnelDashboard businessId={businessId} /></TabsContent>
           <TabsContent value="settings"><SettingsPanel businessId={businessId} /></TabsContent>
         </Tabs>
         <div className="space-y-4">
