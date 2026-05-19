@@ -302,6 +302,7 @@ const App = () => (
             <Route path="/founder/social-autopilot/engagement" element={<FounderRoute><SocialAutopilotPage /></FounderRoute>} />
             <Route path="/founder/social-autopilot/performance" element={<FounderRoute><SocialAutopilotPage /></FounderRoute>} />
             <Route path="/founder/social-autopilot/settings" element={<FounderRoute><SocialAutopilotPage /></FounderRoute>} />
+            <Route path="/founder/social-autopilot/funnels" element={<FounderRoute><SocialAutopilotPage /></FounderRoute>} />
             <Route path="/founder/copilot" element={<FounderRoute><FounderCoPilot /></FounderRoute>} />
             <Route path="/founder/testing" element={<FounderRoute><PlatformTesting /></FounderRoute>} />
             <Route path="/founder/legal" element={<FounderRoute><FounderLegalConsole /></FounderRoute>} />
