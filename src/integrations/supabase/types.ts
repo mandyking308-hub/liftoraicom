@@ -22181,9 +22181,16 @@ export type Database = {
       }
       social_manual_export_batches: {
         Row: {
+          blocked_rows: number | null
           business_id: string
+          confirmed_scheduled_at: string | null
+          confirmed_scheduled_by: string | null
           created_at: string
           created_by: string | null
+          csv_text: string | null
+          date_range_end: string | null
+          date_range_start: string | null
+          download_ready: boolean | null
           export_name: string
           export_payload: Json
           export_status: string
@@ -22191,19 +22198,34 @@ export type Database = {
           exported_at: string | null
           exported_rows: number
           file_url: string | null
+          founder_notes: string | null
           id: string
           is_test_data: boolean
+          manual_scheduling_status: string | null
           metadata: Json
+          operator_notes: string | null
           platform: string | null
           provider: string | null
           queue_batch_id: string | null
+          row_count: number | null
           storage_path: string | null
+          timezone: string | null
           updated_at: string
+          validation_errors: string[] | null
+          validation_status: string | null
+          validation_warnings: string[] | null
         }
         Insert: {
+          blocked_rows?: number | null
           business_id: string
+          confirmed_scheduled_at?: string | null
+          confirmed_scheduled_by?: string | null
           created_at?: string
           created_by?: string | null
+          csv_text?: string | null
+          date_range_end?: string | null
+          date_range_start?: string | null
+          download_ready?: boolean | null
           export_name: string
           export_payload?: Json
           export_status?: string
@@ -22211,19 +22233,34 @@ export type Database = {
           exported_at?: string | null
           exported_rows?: number
           file_url?: string | null
+          founder_notes?: string | null
           id?: string
           is_test_data?: boolean
+          manual_scheduling_status?: string | null
           metadata?: Json
+          operator_notes?: string | null
           platform?: string | null
           provider?: string | null
           queue_batch_id?: string | null
+          row_count?: number | null
           storage_path?: string | null
+          timezone?: string | null
           updated_at?: string
+          validation_errors?: string[] | null
+          validation_status?: string | null
+          validation_warnings?: string[] | null
         }
         Update: {
+          blocked_rows?: number | null
           business_id?: string
+          confirmed_scheduled_at?: string | null
+          confirmed_scheduled_by?: string | null
           created_at?: string
           created_by?: string | null
+          csv_text?: string | null
+          date_range_end?: string | null
+          date_range_start?: string | null
+          download_ready?: boolean | null
           export_name?: string
           export_payload?: Json
           export_status?: string
@@ -22231,14 +22268,22 @@ export type Database = {
           exported_at?: string | null
           exported_rows?: number
           file_url?: string | null
+          founder_notes?: string | null
           id?: string
           is_test_data?: boolean
+          manual_scheduling_status?: string | null
           metadata?: Json
+          operator_notes?: string | null
           platform?: string | null
           provider?: string | null
           queue_batch_id?: string | null
+          row_count?: number | null
           storage_path?: string | null
+          timezone?: string | null
           updated_at?: string
+          validation_errors?: string[] | null
+          validation_status?: string | null
+          validation_warnings?: string[] | null
         }
         Relationships: [
           {
@@ -22246,6 +22291,77 @@ export type Database = {
             columns: ["queue_batch_id"]
             isOneToOne: false
             referencedRelation: "social_publish_queue_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_operator_scheduling_tasks: {
+        Row: {
+          assigned_to: string | null
+          business_id: string
+          checklist: Json | null
+          completed_at: string | null
+          completed_by: string | null
+          completion_notes: string | null
+          created_at: string | null
+          export_batch_id: string | null
+          id: string
+          instructions: string | null
+          is_test_data: boolean | null
+          metadata: Json | null
+          platform: string | null
+          provider: string | null
+          scheduled_for: string | null
+          task_status: string | null
+          task_title: string
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          business_id: string
+          checklist?: Json | null
+          completed_at?: string | null
+          completed_by?: string | null
+          completion_notes?: string | null
+          created_at?: string | null
+          export_batch_id?: string | null
+          id?: string
+          instructions?: string | null
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          platform?: string | null
+          provider?: string | null
+          scheduled_for?: string | null
+          task_status?: string | null
+          task_title: string
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          business_id?: string
+          checklist?: Json | null
+          completed_at?: string | null
+          completed_by?: string | null
+          completion_notes?: string | null
+          created_at?: string | null
+          export_batch_id?: string | null
+          id?: string
+          instructions?: string | null
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          platform?: string | null
+          provider?: string | null
+          scheduled_for?: string | null
+          task_status?: string | null
+          task_title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_operator_scheduling_tasks_export_batch_id_fkey"
+            columns: ["export_batch_id"]
+            isOneToOne: false
+            referencedRelation: "social_manual_export_batches"
             referencedColumns: ["id"]
           },
         ]
@@ -23331,6 +23447,268 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      social_scheduler_export_audit: {
+        Row: {
+          action: string
+          action_status: string | null
+          after_json: Json | null
+          before_json: Json | null
+          business_id: string
+          created_at: string | null
+          created_by: string | null
+          error_message: string | null
+          export_batch_id: string | null
+          export_row_id: string | null
+          id: string
+          is_test_data: boolean | null
+          metadata: Json | null
+          posts_published: number | null
+          posts_scheduled_externally: number | null
+          provider_calls: number | null
+          publish_job_id: string | null
+          result_json: Json | null
+        }
+        Insert: {
+          action: string
+          action_status?: string | null
+          after_json?: Json | null
+          before_json?: Json | null
+          business_id: string
+          created_at?: string | null
+          created_by?: string | null
+          error_message?: string | null
+          export_batch_id?: string | null
+          export_row_id?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          posts_published?: number | null
+          posts_scheduled_externally?: number | null
+          provider_calls?: number | null
+          publish_job_id?: string | null
+          result_json?: Json | null
+        }
+        Update: {
+          action?: string
+          action_status?: string | null
+          after_json?: Json | null
+          before_json?: Json | null
+          business_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          error_message?: string | null
+          export_batch_id?: string | null
+          export_row_id?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          posts_published?: number | null
+          posts_scheduled_externally?: number | null
+          provider_calls?: number | null
+          publish_job_id?: string | null
+          result_json?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_scheduler_export_audit_export_batch_id_fkey"
+            columns: ["export_batch_id"]
+            isOneToOne: false
+            referencedRelation: "social_manual_export_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_scheduler_export_audit_export_row_id_fkey"
+            columns: ["export_row_id"]
+            isOneToOne: false
+            referencedRelation: "social_scheduler_export_rows"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_scheduler_export_audit_publish_job_id_fkey"
+            columns: ["publish_job_id"]
+            isOneToOne: false
+            referencedRelation: "social_publish_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_scheduler_export_rows: {
+        Row: {
+          asset_id: string | null
+          business_id: string
+          calendar_item_id: string | null
+          caption: string | null
+          content_item_id: string | null
+          content_variant_id: string | null
+          created_at: string | null
+          csv_row_json: Json | null
+          export_batch_id: string
+          hashtags: string | null
+          id: string
+          is_test_data: boolean | null
+          link_url: string | null
+          media_url: string | null
+          metadata: Json | null
+          platform: string
+          provider: string | null
+          publish_job_id: string | null
+          row_status: string | null
+          scheduled_date: string | null
+          scheduled_time: string | null
+          sort_order: number | null
+          thumbnail_url: string | null
+          timezone: string | null
+          title: string | null
+          updated_at: string | null
+          validation_errors: string[] | null
+          validation_status: string | null
+          validation_warnings: string[] | null
+        }
+        Insert: {
+          asset_id?: string | null
+          business_id: string
+          calendar_item_id?: string | null
+          caption?: string | null
+          content_item_id?: string | null
+          content_variant_id?: string | null
+          created_at?: string | null
+          csv_row_json?: Json | null
+          export_batch_id: string
+          hashtags?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          link_url?: string | null
+          media_url?: string | null
+          metadata?: Json | null
+          platform: string
+          provider?: string | null
+          publish_job_id?: string | null
+          row_status?: string | null
+          scheduled_date?: string | null
+          scheduled_time?: string | null
+          sort_order?: number | null
+          thumbnail_url?: string | null
+          timezone?: string | null
+          title?: string | null
+          updated_at?: string | null
+          validation_errors?: string[] | null
+          validation_status?: string | null
+          validation_warnings?: string[] | null
+        }
+        Update: {
+          asset_id?: string | null
+          business_id?: string
+          calendar_item_id?: string | null
+          caption?: string | null
+          content_item_id?: string | null
+          content_variant_id?: string | null
+          created_at?: string | null
+          csv_row_json?: Json | null
+          export_batch_id?: string
+          hashtags?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          link_url?: string | null
+          media_url?: string | null
+          metadata?: Json | null
+          platform?: string
+          provider?: string | null
+          publish_job_id?: string | null
+          row_status?: string | null
+          scheduled_date?: string | null
+          scheduled_time?: string | null
+          sort_order?: number | null
+          thumbnail_url?: string | null
+          timezone?: string | null
+          title?: string | null
+          updated_at?: string | null
+          validation_errors?: string[] | null
+          validation_status?: string | null
+          validation_warnings?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_scheduler_export_rows_export_batch_id_fkey"
+            columns: ["export_batch_id"]
+            isOneToOne: false
+            referencedRelation: "social_manual_export_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_scheduler_export_rows_publish_job_id_fkey"
+            columns: ["publish_job_id"]
+            isOneToOne: false
+            referencedRelation: "social_publish_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_scheduler_export_templates: {
+        Row: {
+          business_id: string | null
+          column_mapping: Json
+          created_at: string | null
+          date_format: string | null
+          export_type: string
+          id: string
+          is_global: boolean | null
+          is_test_data: boolean | null
+          metadata: Json | null
+          notes: string | null
+          optional_fields: string[] | null
+          platform: string | null
+          provider: string | null
+          required_fields: string[] | null
+          template_name: string
+          template_status: string | null
+          time_format: string | null
+          timezone_handling: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          business_id?: string | null
+          column_mapping?: Json
+          created_at?: string | null
+          date_format?: string | null
+          export_type: string
+          id?: string
+          is_global?: boolean | null
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          notes?: string | null
+          optional_fields?: string[] | null
+          platform?: string | null
+          provider?: string | null
+          required_fields?: string[] | null
+          template_name: string
+          template_status?: string | null
+          time_format?: string | null
+          timezone_handling?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          business_id?: string | null
+          column_mapping?: Json
+          created_at?: string | null
+          date_format?: string | null
+          export_type?: string
+          id?: string
+          is_global?: boolean | null
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          notes?: string | null
+          optional_fields?: string[] | null
+          platform?: string | null
+          provider?: string | null
+          required_fields?: string[] | null
+          template_name?: string
+          template_status?: string | null
+          time_format?: string | null
+          timezone_handling?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       social_scheduling_queue: {
         Row: {
