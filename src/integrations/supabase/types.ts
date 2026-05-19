@@ -16250,6 +16250,780 @@ export type Database = {
         }
         Relationships: []
       }
+      liftor_brain_access_map_snapshots: {
+        Row: {
+          agents_autonomy_map: Json
+          approvals_map: Json
+          blocker_list: Json
+          business_knowledge_map: Json
+          command_centre_map: Json
+          created_at: string
+          crm_map: Json
+          customer_success_map: Json
+          external_gates_map: Json
+          group_hq_security_map: Json
+          id: string
+          inbox_email_map: Json
+          is_test_data: boolean
+          manual_map: Json
+          metadata: Json
+          no_forbidden_action_audit: Json
+          proposed_context_pack_shape: Json
+          proposed_tool_registry: Json
+          revenue_finance_map: Json
+          snapshot_name: string
+          snapshot_status: string
+          social_marketing_map: Json
+          source_prompt: string
+          support_map: Json
+          updated_at: string
+        }
+        Insert: {
+          agents_autonomy_map?: Json
+          approvals_map?: Json
+          blocker_list?: Json
+          business_knowledge_map?: Json
+          command_centre_map?: Json
+          created_at?: string
+          crm_map?: Json
+          customer_success_map?: Json
+          external_gates_map?: Json
+          group_hq_security_map?: Json
+          id?: string
+          inbox_email_map?: Json
+          is_test_data?: boolean
+          manual_map?: Json
+          metadata?: Json
+          no_forbidden_action_audit?: Json
+          proposed_context_pack_shape?: Json
+          proposed_tool_registry?: Json
+          revenue_finance_map?: Json
+          snapshot_name: string
+          snapshot_status?: string
+          social_marketing_map?: Json
+          source_prompt?: string
+          support_map?: Json
+          updated_at?: string
+        }
+        Update: {
+          agents_autonomy_map?: Json
+          approvals_map?: Json
+          blocker_list?: Json
+          business_knowledge_map?: Json
+          command_centre_map?: Json
+          created_at?: string
+          crm_map?: Json
+          customer_success_map?: Json
+          external_gates_map?: Json
+          group_hq_security_map?: Json
+          id?: string
+          inbox_email_map?: Json
+          is_test_data?: boolean
+          manual_map?: Json
+          metadata?: Json
+          no_forbidden_action_audit?: Json
+          proposed_context_pack_shape?: Json
+          proposed_tool_registry?: Json
+          revenue_finance_map?: Json
+          snapshot_name?: string
+          snapshot_status?: string
+          social_marketing_map?: Json
+          source_prompt?: string
+          support_map?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      liftor_brain_audit: {
+        Row: {
+          action: string
+          action_status: string
+          ad_platform_mutations: number
+          apollo_calls: number
+          apollo_credits_spent: number
+          auto_send_changed: boolean
+          business_id: string | null
+          created_at: string
+          cron_changed: boolean
+          details: Json
+          dms_sent: number
+          emails_sent: number
+          error_message: string | null
+          external_api_calls: number
+          external_provider_mutations: number
+          id: string
+          is_test_data: boolean
+          manychat_mutations: number
+          metricool_mutations: number
+          payment_mutations: number
+          portal_accounts_created: number
+          portal_invites_sent: number
+          posts_published: number
+          real_data_deleted: number
+          reports_shared: number
+          secrets_exposed: number
+          session_id: string | null
+          smartlead_campaign_starts: number
+          smartlead_posts: number
+          surveys_sent: number
+        }
+        Insert: {
+          action: string
+          action_status?: string
+          ad_platform_mutations?: number
+          apollo_calls?: number
+          apollo_credits_spent?: number
+          auto_send_changed?: boolean
+          business_id?: string | null
+          created_at?: string
+          cron_changed?: boolean
+          details?: Json
+          dms_sent?: number
+          emails_sent?: number
+          error_message?: string | null
+          external_api_calls?: number
+          external_provider_mutations?: number
+          id?: string
+          is_test_data?: boolean
+          manychat_mutations?: number
+          metricool_mutations?: number
+          payment_mutations?: number
+          portal_accounts_created?: number
+          portal_invites_sent?: number
+          posts_published?: number
+          real_data_deleted?: number
+          reports_shared?: number
+          secrets_exposed?: number
+          session_id?: string | null
+          smartlead_campaign_starts?: number
+          smartlead_posts?: number
+          surveys_sent?: number
+        }
+        Update: {
+          action?: string
+          action_status?: string
+          ad_platform_mutations?: number
+          apollo_calls?: number
+          apollo_credits_spent?: number
+          auto_send_changed?: boolean
+          business_id?: string | null
+          created_at?: string
+          cron_changed?: boolean
+          details?: Json
+          dms_sent?: number
+          emails_sent?: number
+          error_message?: string | null
+          external_api_calls?: number
+          external_provider_mutations?: number
+          id?: string
+          is_test_data?: boolean
+          manychat_mutations?: number
+          metricool_mutations?: number
+          payment_mutations?: number
+          portal_accounts_created?: number
+          portal_invites_sent?: number
+          posts_published?: number
+          real_data_deleted?: number
+          reports_shared?: number
+          secrets_exposed?: number
+          session_id?: string | null
+          smartlead_campaign_starts?: number
+          smartlead_posts?: number
+          surveys_sent?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "liftor_brain_audit_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "liftor_brain_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      liftor_brain_context_packs: {
+        Row: {
+          agent_autonomy_summary: Json
+          approvals_summary: Json
+          business_id: string | null
+          business_knowledge_summary: Json
+          command_centre_truth: Json
+          context_status: string
+          context_type: string
+          conversation_summary: Json
+          cost_usage_summary: Json
+          created_at: string
+          crm_summary: Json
+          customer_journey_summary: Json
+          customer_success_summary: Json
+          diagnostics_summary: Json
+          external_gates_summary: Json
+          finance_commercial_summary: Json
+          forbidden_actions: string[]
+          group_hq_summary: Json
+          id: string
+          is_test_data: boolean
+          metadata: Json
+          missing_context: string[]
+          paid_media_summary: Json
+          portfolio_summary: Json
+          recommended_tools: string[]
+          retrieved_records: Json
+          revenue_target_summary: Json
+          risk_warnings: string[]
+          security_safety_summary: Json
+          selected_business_snapshot: Json
+          session_id: string | null
+          social_marketing_summary: Json
+          supplier_summary: Json
+          support_summary: Json
+          technical_manual_summary: Json
+          token_estimate: number
+          user_manual_summary: Json
+        }
+        Insert: {
+          agent_autonomy_summary?: Json
+          approvals_summary?: Json
+          business_id?: string | null
+          business_knowledge_summary?: Json
+          command_centre_truth?: Json
+          context_status?: string
+          context_type?: string
+          conversation_summary?: Json
+          cost_usage_summary?: Json
+          created_at?: string
+          crm_summary?: Json
+          customer_journey_summary?: Json
+          customer_success_summary?: Json
+          diagnostics_summary?: Json
+          external_gates_summary?: Json
+          finance_commercial_summary?: Json
+          forbidden_actions?: string[]
+          group_hq_summary?: Json
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          missing_context?: string[]
+          paid_media_summary?: Json
+          portfolio_summary?: Json
+          recommended_tools?: string[]
+          retrieved_records?: Json
+          revenue_target_summary?: Json
+          risk_warnings?: string[]
+          security_safety_summary?: Json
+          selected_business_snapshot?: Json
+          session_id?: string | null
+          social_marketing_summary?: Json
+          supplier_summary?: Json
+          support_summary?: Json
+          technical_manual_summary?: Json
+          token_estimate?: number
+          user_manual_summary?: Json
+        }
+        Update: {
+          agent_autonomy_summary?: Json
+          approvals_summary?: Json
+          business_id?: string | null
+          business_knowledge_summary?: Json
+          command_centre_truth?: Json
+          context_status?: string
+          context_type?: string
+          conversation_summary?: Json
+          cost_usage_summary?: Json
+          created_at?: string
+          crm_summary?: Json
+          customer_journey_summary?: Json
+          customer_success_summary?: Json
+          diagnostics_summary?: Json
+          external_gates_summary?: Json
+          finance_commercial_summary?: Json
+          forbidden_actions?: string[]
+          group_hq_summary?: Json
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          missing_context?: string[]
+          paid_media_summary?: Json
+          portfolio_summary?: Json
+          recommended_tools?: string[]
+          retrieved_records?: Json
+          revenue_target_summary?: Json
+          risk_warnings?: string[]
+          security_safety_summary?: Json
+          selected_business_snapshot?: Json
+          session_id?: string | null
+          social_marketing_summary?: Json
+          supplier_summary?: Json
+          support_summary?: Json
+          technical_manual_summary?: Json
+          token_estimate?: number
+          user_manual_summary?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "liftor_brain_context_packs_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "liftor_brain_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      liftor_brain_drafts: {
+        Row: {
+          approval_status: string
+          body: string
+          business_id: string | null
+          conversation_id: string | null
+          created_at: string
+          crm_contact_id: string | null
+          draft_status: string
+          draft_type: string
+          external_action_blocked: boolean
+          external_send_allowed: boolean
+          founder_approval_review_id: string | null
+          id: string
+          is_test_data: boolean
+          metadata: Json
+          missing_context: string[]
+          rationale: string | null
+          risk_warnings: string[]
+          session_id: string | null
+          source_message_id: string | null
+          source_object_id: string | null
+          source_object_type: string | null
+          subject: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          approval_status?: string
+          body: string
+          business_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          crm_contact_id?: string | null
+          draft_status?: string
+          draft_type: string
+          external_action_blocked?: boolean
+          external_send_allowed?: boolean
+          founder_approval_review_id?: string | null
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          missing_context?: string[]
+          rationale?: string | null
+          risk_warnings?: string[]
+          session_id?: string | null
+          source_message_id?: string | null
+          source_object_id?: string | null
+          source_object_type?: string | null
+          subject?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approval_status?: string
+          body?: string
+          business_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          crm_contact_id?: string | null
+          draft_status?: string
+          draft_type?: string
+          external_action_blocked?: boolean
+          external_send_allowed?: boolean
+          founder_approval_review_id?: string | null
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          missing_context?: string[]
+          rationale?: string | null
+          risk_warnings?: string[]
+          session_id?: string | null
+          source_message_id?: string | null
+          source_object_id?: string | null
+          source_object_type?: string | null
+          subject?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "liftor_brain_drafts_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "liftor_brain_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "liftor_brain_drafts_source_message_id_fkey"
+            columns: ["source_message_id"]
+            isOneToOne: false
+            referencedRelation: "liftor_brain_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      liftor_brain_messages: {
+        Row: {
+          business_id: string | null
+          context_pack_id: string | null
+          cost_estimate: number
+          created_at: string
+          external_action_blocked: boolean
+          external_action_requested: boolean
+          founder_approval_required: boolean
+          id: string
+          is_test_data: boolean
+          message_status: string
+          message_text: string
+          metadata: Json
+          role: string
+          session_id: string
+          source_object_id: string | null
+          source_object_type: string | null
+          tokens_completion: number
+          tokens_prompt: number
+          tool_call_batch_id: string | null
+        }
+        Insert: {
+          business_id?: string | null
+          context_pack_id?: string | null
+          cost_estimate?: number
+          created_at?: string
+          external_action_blocked?: boolean
+          external_action_requested?: boolean
+          founder_approval_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          message_status?: string
+          message_text: string
+          metadata?: Json
+          role: string
+          session_id: string
+          source_object_id?: string | null
+          source_object_type?: string | null
+          tokens_completion?: number
+          tokens_prompt?: number
+          tool_call_batch_id?: string | null
+        }
+        Update: {
+          business_id?: string | null
+          context_pack_id?: string | null
+          cost_estimate?: number
+          created_at?: string
+          external_action_blocked?: boolean
+          external_action_requested?: boolean
+          founder_approval_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          message_status?: string
+          message_text?: string
+          metadata?: Json
+          role?: string
+          session_id?: string
+          source_object_id?: string | null
+          source_object_type?: string | null
+          tokens_completion?: number
+          tokens_prompt?: number
+          tool_call_batch_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "liftor_brain_messages_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "liftor_brain_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      liftor_brain_provider_config: {
+        Row: {
+          allow_streaming: boolean
+          created_at: string
+          default_model: string | null
+          fallback_model: string | null
+          id: string
+          last_checked_at: string | null
+          max_context_tokens: number
+          max_output_tokens: number
+          metadata: Json
+          provider_key: string
+          provider_name: string
+          provider_status: string
+          reasoning_effort: string | null
+          secret_name: string
+          secret_value_stored: boolean
+          temperature: number
+          updated_at: string
+          usage_budget_daily: number | null
+          usage_budget_monthly: number | null
+        }
+        Insert: {
+          allow_streaming?: boolean
+          created_at?: string
+          default_model?: string | null
+          fallback_model?: string | null
+          id?: string
+          last_checked_at?: string | null
+          max_context_tokens?: number
+          max_output_tokens?: number
+          metadata?: Json
+          provider_key: string
+          provider_name: string
+          provider_status?: string
+          reasoning_effort?: string | null
+          secret_name: string
+          secret_value_stored?: boolean
+          temperature?: number
+          updated_at?: string
+          usage_budget_daily?: number | null
+          usage_budget_monthly?: number | null
+        }
+        Update: {
+          allow_streaming?: boolean
+          created_at?: string
+          default_model?: string | null
+          fallback_model?: string | null
+          id?: string
+          last_checked_at?: string | null
+          max_context_tokens?: number
+          max_output_tokens?: number
+          metadata?: Json
+          provider_key?: string
+          provider_name?: string
+          provider_status?: string
+          reasoning_effort?: string | null
+          secret_name?: string
+          secret_value_stored?: boolean
+          temperature?: number
+          updated_at?: string
+          usage_budget_daily?: number | null
+          usage_budget_monthly?: number | null
+        }
+        Relationships: []
+      }
+      liftor_brain_sessions: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          external_actions_allowed: boolean
+          founder_user_id: string | null
+          id: string
+          is_test_data: boolean
+          last_ai_message_at: string | null
+          last_context_pack_id: string | null
+          last_user_message_at: string | null
+          message_count: number
+          metadata: Json
+          model_name: string | null
+          model_provider: string
+          selected_scope: string
+          session_name: string | null
+          session_status: string
+          session_type: string
+          total_completion_tokens: number
+          total_cost_estimate: number
+          total_prompt_tokens: number
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          external_actions_allowed?: boolean
+          founder_user_id?: string | null
+          id?: string
+          is_test_data?: boolean
+          last_ai_message_at?: string | null
+          last_context_pack_id?: string | null
+          last_user_message_at?: string | null
+          message_count?: number
+          metadata?: Json
+          model_name?: string | null
+          model_provider?: string
+          selected_scope?: string
+          session_name?: string | null
+          session_status?: string
+          session_type?: string
+          total_completion_tokens?: number
+          total_cost_estimate?: number
+          total_prompt_tokens?: number
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          external_actions_allowed?: boolean
+          founder_user_id?: string | null
+          id?: string
+          is_test_data?: boolean
+          last_ai_message_at?: string | null
+          last_context_pack_id?: string | null
+          last_user_message_at?: string | null
+          message_count?: number
+          metadata?: Json
+          model_name?: string | null
+          model_provider?: string
+          selected_scope?: string
+          session_name?: string | null
+          session_status?: string
+          session_type?: string
+          total_completion_tokens?: number
+          total_cost_estimate?: number
+          total_prompt_tokens?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      liftor_brain_tool_calls: {
+        Row: {
+          business_id: string | null
+          confirmation_phrase_required: boolean
+          created_at: string
+          error_message: string | null
+          external_action: boolean
+          external_action_blocked: boolean
+          founder_approval_required: boolean
+          id: string
+          is_test_data: boolean
+          message_id: string | null
+          request_payload: Json
+          response_payload: Json
+          risk_level: string
+          session_id: string | null
+          tool_key: string
+          tool_status: string
+        }
+        Insert: {
+          business_id?: string | null
+          confirmation_phrase_required?: boolean
+          created_at?: string
+          error_message?: string | null
+          external_action?: boolean
+          external_action_blocked?: boolean
+          founder_approval_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          message_id?: string | null
+          request_payload?: Json
+          response_payload?: Json
+          risk_level?: string
+          session_id?: string | null
+          tool_key: string
+          tool_status?: string
+        }
+        Update: {
+          business_id?: string | null
+          confirmation_phrase_required?: boolean
+          created_at?: string
+          error_message?: string | null
+          external_action?: boolean
+          external_action_blocked?: boolean
+          founder_approval_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          message_id?: string | null
+          request_payload?: Json
+          response_payload?: Json
+          risk_level?: string
+          session_id?: string | null
+          tool_key?: string
+          tool_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "liftor_brain_tool_calls_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "liftor_brain_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "liftor_brain_tool_calls_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "liftor_brain_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      liftor_brain_tool_registry: {
+        Row: {
+          allowed_scopes: string[]
+          blocked_reason: string | null
+          confirmation_phrase: string | null
+          created_at: string
+          data_source_hint: string | null
+          edge_function_name: string | null
+          external_action: boolean
+          forbidden_outputs: string[]
+          id: string
+          internal_mutation_allowed: boolean
+          max_batch_size: number
+          metadata: Json
+          read_only: boolean
+          requires_confirmation_phrase: boolean
+          requires_founder_approval: boolean
+          risk_level: string
+          tool_category: string
+          tool_description: string | null
+          tool_key: string
+          tool_name: string
+          tool_status: string
+          updated_at: string
+        }
+        Insert: {
+          allowed_scopes?: string[]
+          blocked_reason?: string | null
+          confirmation_phrase?: string | null
+          created_at?: string
+          data_source_hint?: string | null
+          edge_function_name?: string | null
+          external_action?: boolean
+          forbidden_outputs?: string[]
+          id?: string
+          internal_mutation_allowed?: boolean
+          max_batch_size?: number
+          metadata?: Json
+          read_only?: boolean
+          requires_confirmation_phrase?: boolean
+          requires_founder_approval?: boolean
+          risk_level?: string
+          tool_category: string
+          tool_description?: string | null
+          tool_key: string
+          tool_name: string
+          tool_status?: string
+          updated_at?: string
+        }
+        Update: {
+          allowed_scopes?: string[]
+          blocked_reason?: string | null
+          confirmation_phrase?: string | null
+          created_at?: string
+          data_source_hint?: string | null
+          edge_function_name?: string | null
+          external_action?: boolean
+          forbidden_outputs?: string[]
+          id?: string
+          internal_mutation_allowed?: boolean
+          max_batch_size?: number
+          metadata?: Json
+          read_only?: boolean
+          requires_confirmation_phrase?: boolean
+          requires_founder_approval?: boolean
+          risk_level?: string
+          tool_category?: string
+          tool_description?: string | null
+          tool_key?: string
+          tool_name?: string
+          tool_status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       liftor_live_readiness_gates: {
         Row: {
           blocker_reason: string | null
