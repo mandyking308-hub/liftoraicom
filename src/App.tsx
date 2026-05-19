@@ -115,6 +115,7 @@ import MarketingHub from "./pages/founder/MarketingHub";
 import SupportHub from "./pages/founder/SupportHub";
 import CreativeAssetsHub from "./pages/founder/CreativeAssetsHub";
 import SocialBrain from "./pages/founder/SocialBrain";
+import SocialAutopilotPage from "./pages/founder/SocialAutopilotPage";
 import FounderCoPilot from "./pages/founder/FounderCoPilot";
 import PlatformTesting from "./pages/founder/PlatformTesting";
 import FounderLegalConsole from "./pages/founder/FounderLegalConsole";
@@ -290,6 +291,16 @@ const App = () => (
             <Route path="/founder/support" element={<FounderRoute><SupportHub /></FounderRoute>} />
             <Route path="/founder/assets" element={<FounderRoute><CreativeAssetsHub /></FounderRoute>} />
             <Route path="/founder/social" element={<FounderRoute><SocialBrain /></FounderRoute>} />
+            <Route path="/founder/social-autopilot" element={<FounderRoute><SocialAutopilotPage /></FounderRoute>} />
+            <Route path="/founder/social-autopilot/accounts" element={<FounderRoute><SocialAutopilotPage /></FounderRoute>} />
+            <Route path="/founder/social-autopilot/assets" element={<FounderRoute><SocialAutopilotPage /></FounderRoute>} />
+            <Route path="/founder/social-autopilot/content" element={<FounderRoute><SocialAutopilotPage /></FounderRoute>} />
+            <Route path="/founder/social-autopilot/calendar" element={<FounderRoute><SocialAutopilotPage /></FounderRoute>} />
+            <Route path="/founder/social-autopilot/publishing" element={<FounderRoute><SocialAutopilotPage /></FounderRoute>} />
+            <Route path="/founder/social-autopilot/inbox" element={<FounderRoute><SocialAutopilotPage /></FounderRoute>} />
+            <Route path="/founder/social-autopilot/replies" element={<FounderRoute><SocialAutopilotPage /></FounderRoute>} />
+            <Route path="/founder/social-autopilot/performance" element={<FounderRoute><SocialAutopilotPage /></FounderRoute>} />
+            <Route path="/founder/social-autopilot/settings" element={<FounderRoute><SocialAutopilotPage /></FounderRoute>} />
             <Route path="/founder/copilot" element={<FounderRoute><FounderCoPilot /></FounderRoute>} />
             <Route path="/founder/testing" element={<FounderRoute><PlatformTesting /></FounderRoute>} />
             <Route path="/founder/legal" element={<FounderRoute><FounderLegalConsole /></FounderRoute>} />
