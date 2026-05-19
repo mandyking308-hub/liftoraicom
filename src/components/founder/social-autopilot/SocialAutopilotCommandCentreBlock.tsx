@@ -20,6 +20,7 @@ export default function SocialAutopilotCommandCentreBlock() {
   const [analytics, setAnalytics] = useState<any>(null);
   const [competitor, setCompetitor] = useState<any>(null);
   const [funnel, setFunnel] = useState<any>(null);
+  const [paidMedia, setPaidMedia] = useState<any>(null);
   const businessId = typeof window !== "undefined" ? localStorage.getItem("liftor.activeBusinessId") || "" : "";
 
   useEffect(() => {
@@ -66,6 +67,9 @@ export default function SocialAutopilotCommandCentreBlock() {
           const fn = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/website-funnel-healthcheck?business_id=${businessId}`,
             { headers: { Authorization: `Bearer ${session?.access_token ?? ""}` } });
           setFunnel(await fn.json());
+          const pm = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/paid-media-healthcheck`,
+            { method: "POST", headers: { Authorization: `Bearer ${session?.access_token ?? ""}`, "Content-Type": "application/json" }, body: JSON.stringify({ business_id: businessId }) });
+          setPaidMedia(await pm.json());
         }
       } catch { /* ignore */ }
     })();
