@@ -774,6 +774,7 @@ const CommandCentre = () => {
       <div className="max-w-7xl mx-auto px-4 pt-4"><BusinessKnowledgeUploadTrainingPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><LiftorUserManualPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><SocialAutopilotCommandCentreBlock /></div>
+      <div className="max-w-7xl mx-auto px-4 pt-4"><CustomerSuccessCommandCentreBlock /></div>
       <DailyOperatorNextActionsCard />
       <CommandCentreFunctionalityMapCard />
       <DiagnosticGate>
