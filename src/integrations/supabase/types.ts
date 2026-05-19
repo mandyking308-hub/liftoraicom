@@ -5094,6 +5094,66 @@ export type Database = {
         }
         Relationships: []
       }
+      business_social_content_pillars: {
+        Row: {
+          approval_status: string
+          business_id: string
+          created_at: string
+          example_hooks: string[]
+          example_topics: string[]
+          funnel_stage: string | null
+          id: string
+          is_test_data: boolean
+          linked_offer: string | null
+          metadata: Json
+          pillar_description: string | null
+          pillar_name: string
+          priority_score: number
+          recommended_platforms: string[]
+          social_brain_profile_id: string | null
+          target_audience: string | null
+          updated_at: string
+        }
+        Insert: {
+          approval_status?: string
+          business_id: string
+          created_at?: string
+          example_hooks?: string[]
+          example_topics?: string[]
+          funnel_stage?: string | null
+          id?: string
+          is_test_data?: boolean
+          linked_offer?: string | null
+          metadata?: Json
+          pillar_description?: string | null
+          pillar_name: string
+          priority_score?: number
+          recommended_platforms?: string[]
+          social_brain_profile_id?: string | null
+          target_audience?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approval_status?: string
+          business_id?: string
+          created_at?: string
+          example_hooks?: string[]
+          example_topics?: string[]
+          funnel_stage?: string | null
+          id?: string
+          is_test_data?: boolean
+          linked_offer?: string | null
+          metadata?: Json
+          pillar_description?: string | null
+          pillar_name?: string
+          priority_score?: number
+          recommended_platforms?: string[]
+          social_brain_profile_id?: string | null
+          target_audience?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       business_social_knowledge_sources: {
         Row: {
           approved_for_social_training: boolean | null
@@ -5151,6 +5211,144 @@ export type Database = {
         }
         Relationships: []
       }
+      business_social_offer_mappings: {
+        Row: {
+          approval_status: string
+          business_id: string
+          content_angles: string[]
+          created_at: string
+          funnel_stage: string
+          id: string
+          is_test_data: boolean
+          linked_revenue_goal_id: string | null
+          metadata: Json
+          offer_name: string
+          offer_summary: string | null
+          pain_points: string[]
+          priority_score: number
+          proof_needed: string[]
+          social_brain_profile_id: string | null
+          suggested_ctas: string[]
+          target_customer: string | null
+          updated_at: string
+          value_props: string[]
+        }
+        Insert: {
+          approval_status?: string
+          business_id: string
+          content_angles?: string[]
+          created_at?: string
+          funnel_stage?: string
+          id?: string
+          is_test_data?: boolean
+          linked_revenue_goal_id?: string | null
+          metadata?: Json
+          offer_name: string
+          offer_summary?: string | null
+          pain_points?: string[]
+          priority_score?: number
+          proof_needed?: string[]
+          social_brain_profile_id?: string | null
+          suggested_ctas?: string[]
+          target_customer?: string | null
+          updated_at?: string
+          value_props?: string[]
+        }
+        Update: {
+          approval_status?: string
+          business_id?: string
+          content_angles?: string[]
+          created_at?: string
+          funnel_stage?: string
+          id?: string
+          is_test_data?: boolean
+          linked_revenue_goal_id?: string | null
+          metadata?: Json
+          offer_name?: string
+          offer_summary?: string | null
+          pain_points?: string[]
+          priority_score?: number
+          proof_needed?: string[]
+          social_brain_profile_id?: string | null
+          suggested_ctas?: string[]
+          target_customer?: string | null
+          updated_at?: string
+          value_props?: string[]
+        }
+        Relationships: []
+      }
+      business_social_platform_rules: {
+        Row: {
+          approval_required: boolean
+          best_time_notes: string | null
+          business_id: string
+          caption_rules: string | null
+          content_types: string[]
+          created_at: string
+          engagement_rules: string | null
+          hashtag_rules: string | null
+          id: string
+          is_active: boolean
+          is_test_data: boolean
+          link_rules: string | null
+          metadata: Json
+          platform: string
+          posting_frequency: string | null
+          recommended_use: string | null
+          risk_notes: string | null
+          social_brain_profile_id: string | null
+          suitability_score: number
+          tone_adjustments: string | null
+          updated_at: string
+        }
+        Insert: {
+          approval_required?: boolean
+          best_time_notes?: string | null
+          business_id: string
+          caption_rules?: string | null
+          content_types?: string[]
+          created_at?: string
+          engagement_rules?: string | null
+          hashtag_rules?: string | null
+          id?: string
+          is_active?: boolean
+          is_test_data?: boolean
+          link_rules?: string | null
+          metadata?: Json
+          platform: string
+          posting_frequency?: string | null
+          recommended_use?: string | null
+          risk_notes?: string | null
+          social_brain_profile_id?: string | null
+          suitability_score?: number
+          tone_adjustments?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approval_required?: boolean
+          best_time_notes?: string | null
+          business_id?: string
+          caption_rules?: string | null
+          content_types?: string[]
+          created_at?: string
+          engagement_rules?: string | null
+          hashtag_rules?: string | null
+          id?: string
+          is_active?: boolean
+          is_test_data?: boolean
+          link_rules?: string | null
+          metadata?: Json
+          platform?: string
+          posting_frequency?: string | null
+          recommended_use?: string | null
+          risk_notes?: string | null
+          social_brain_profile_id?: string | null
+          suitability_score?: number
+          tone_adjustments?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       business_social_profile_approval_log: {
         Row: {
           action: string
@@ -5191,6 +5389,99 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      business_social_profile_versions: {
+        Row: {
+          business_id: string
+          change_summary: string | null
+          created_at: string
+          founder_notes: string | null
+          generated_from_sources: string[]
+          id: string
+          profile_id: string | null
+          profile_snapshot: Json
+          version_number: number
+          version_status: string
+        }
+        Insert: {
+          business_id: string
+          change_summary?: string | null
+          created_at?: string
+          founder_notes?: string | null
+          generated_from_sources?: string[]
+          id?: string
+          profile_id?: string | null
+          profile_snapshot?: Json
+          version_number?: number
+          version_status?: string
+        }
+        Update: {
+          business_id?: string
+          change_summary?: string | null
+          created_at?: string
+          founder_notes?: string | null
+          generated_from_sources?: string[]
+          id?: string
+          profile_id?: string | null
+          profile_snapshot?: Json
+          version_number?: number
+          version_status?: string
+        }
+        Relationships: []
+      }
+      business_social_risk_flags: {
+        Row: {
+          affected_platforms: string[]
+          business_id: string
+          created_at: string
+          founder_review_required: boolean
+          id: string
+          is_test_data: boolean
+          legal_review_required: boolean
+          metadata: Json
+          risk_description: string
+          risk_level: string
+          risk_type: string
+          social_brain_profile_id: string | null
+          status: string
+          suggested_guardrail: string | null
+          updated_at: string
+        }
+        Insert: {
+          affected_platforms?: string[]
+          business_id: string
+          created_at?: string
+          founder_review_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          legal_review_required?: boolean
+          metadata?: Json
+          risk_description: string
+          risk_level?: string
+          risk_type: string
+          social_brain_profile_id?: string | null
+          status?: string
+          suggested_guardrail?: string | null
+          updated_at?: string
+        }
+        Update: {
+          affected_platforms?: string[]
+          business_id?: string
+          created_at?: string
+          founder_review_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          legal_review_required?: boolean
+          metadata?: Json
+          risk_description?: string
+          risk_level?: string
+          risk_type?: string
+          social_brain_profile_id?: string | null
+          status?: string
+          suggested_guardrail?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       business_sourcing_briefs: {
         Row: {
