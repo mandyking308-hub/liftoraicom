@@ -501,6 +501,33 @@ export const USING_SOCIAL_CALENDAR = {
 };
 
 export const USING_SOCIAL_BRAIN_CONNECTOR = {
+  // (placeholder anchor)
+};
+
+export const APPROVING_SOCIAL_CONTENT = {
+  title: "Approving Social Content",
+  summary:
+    "Founder approval is required before any social content, calendar item, reply or campaign can move forward. Approval is internal only — it does not publish, schedule externally, or send anything.",
+  rules: [
+    "Social Autopilot drafts content first; nothing moves without founder approval.",
+    "Approval does not publish, schedule, or DM.",
+    "Compliance-blocked, rights-blocked, or asset-blocked items cannot be approved until fixed.",
+    "Critical-risk items require the explicit phrase APPROVE HIGH RISK SOCIAL ITEM.",
+    "Batch approval only applies to safe, low/normal-risk items; high/critical/blocked items are excluded and must be reviewed individually.",
+    "Approved items become ready_for_queue but are not added to any publishing queue in this sprint.",
+  ],
+  technical: [
+    "Tables: social_approval_reviews, social_approval_decisions, social_approval_batches, social_approval_batch_items, social_approval_rules.",
+    "Extended: social_content_items/_variants/_packs and social_calendars/_calendar_items with founder_approval_review_id, approval_decision_at, approval_blockers, ready_for_queue_at.",
+    "Edge functions: social-approval-queue-preview, -review-create, -decision-preview, -decision-apply, -batch-preview, -batch-create, -batch-decision-apply, -rules-generate, -healthcheck, -rehearsal-purge, -flow-acceptance.",
+    "Confirmation phrases: CREATE SOCIAL APPROVAL REVIEWS / APPLY SOCIAL APPROVAL DECISION / APPROVE HIGH RISK SOCIAL ITEM / CREATE SOCIAL APPROVAL BATCH / APPLY SOCIAL BATCH APPROVAL / CREATE SOCIAL APPROVAL RULES / PURGE SOCIAL APPROVAL TEST DATA.",
+    "Command Centre Daily Operator View shows the Approval tile; Full Diagnostic View shows raw reviews, decisions, batches, rules.",
+    "Integrates with founder_approval_items via the founder_approval_item_id foreign key for cross-console visibility.",
+    "Safety: no provider API call, no publish job creation, no DM/comment, no external scheduling, no real-data deletion (purge gated to is_test_data=true).",
+  ],
+};
+
+const _USING_SOCIAL_BRAIN_CONNECTOR_ORIG = {
   title: "Business Knowledge → Social Brain",
   summary:
     "Each business in Liftor gets its own Social Brain, generated from its uploaded manuals, brand guide, FAQs and other knowledge sources. NeonCandy is only the first example.",
