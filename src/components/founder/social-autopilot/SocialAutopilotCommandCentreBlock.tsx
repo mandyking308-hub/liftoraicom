@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export default function SocialAutopilotCommandCentreBlock() {
   const [data, setData] = useState<any>(null);
+  const [brain, setBrain] = useState<any>(null);
   const businessId = typeof window !== "undefined" ? localStorage.getItem("liftor.activeBusinessId") || "" : "";
 
   useEffect(() => {
@@ -17,6 +18,11 @@ export default function SocialAutopilotCommandCentreBlock() {
         const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/social-autopilot-healthcheck${businessId ? `?business_id=${businessId}` : ""}`;
         const res = await fetch(url, { headers: { Authorization: `Bearer ${session?.access_token ?? ""}` } });
         setData(await res.json());
+        if (businessId) {
+          const b = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/social-brain-healthcheck?business_id=${businessId}`,
+            { headers: { Authorization: `Bearer ${session?.access_token ?? ""}` } });
+          setBrain(await b.json());
+        }
       } catch { /* ignore */ }
     })();
   }, [businessId]);
@@ -56,6 +62,27 @@ export default function SocialAutopilotCommandCentreBlock() {
           {stat("Ext publish", "OFF")}
           {stat("DM send", "OFF")}
         </div>
+        {businessId && (
+          <div className="mt-3 p-3 rounded bg-secondary/40">
+            <p className="text-xs font-semibold mb-1">Social Brain</p>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-[11px]">
+              <span>Status: <Badge variant="secondary">{brain?.profile_status ?? "no_profile"}</Badge></span>
+              <span>Sources: {brain?.sources_count ?? 0} ({brain?.approved_sources_count ?? 0} approved)</span>
+              <span>Confidence: {brain?.confidence_score ?? 0}</span>
+              <span>Settings applied: {brain?.settings_applied ? "yes" : "no"}</span>
+              <span>Ready: {brain?.ready_for_content_generation ? "YES" : "no"}</span>
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-2">
+              Next: {(() => {
+                if (!brain || !brain.profile_exists) return "Register manuals/assets → run extraction → generate Social Brain profile.";
+                if (brain.profile_status === "draft" || brain.profile_status === "needs_review") return "Review & approve Social Brain profile.";
+                if (brain.profile_status === "approved") return "Apply Social Brain to settings.";
+                if (brain.ready_for_content_generation) return "Generate first content pack (Prompt 3).";
+                return "Address missing inputs and regenerate.";
+              })()}
+            </p>
+          </div>
+        )}
         <p className="mt-3 text-xs text-muted-foreground">
           Next: upload business knowledge + manuals so the Social Brain can generate per-business content.
         </p>

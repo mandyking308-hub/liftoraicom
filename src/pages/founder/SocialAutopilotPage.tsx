@@ -8,6 +8,14 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { Shield, Lock, AlertTriangle, CheckCircle2 } from "lucide-react";
+import {
+  SocialKnowledgeSourcePanel,
+  SocialKnowledgeExtractionPanel,
+  SocialBrainProfilePanel,
+  SocialBrainApprovalPanel,
+  SocialBrainSettingsApplyPanel,
+  SocialBrainHealthPanel,
+} from "@/components/founder/social-autopilot/SocialBrainPanels";
 
 const TAB_BY_PATH: Record<string, string> = {
   "/founder/social-autopilot": "dashboard",
@@ -249,6 +257,15 @@ export default function SocialAutopilotPage() {
           <TabsContent value="performance"><GenericListPanel table="social_performance_logs" businessId={businessId} title="Performance Logs" /></TabsContent>
           <TabsContent value="settings"><SettingsPanel businessId={businessId} /></TabsContent>
         </Tabs>
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold mt-6">Business Knowledge → Social Brain</h2>
+          <SocialBrainHealthPanel businessId={businessId} />
+          <SocialKnowledgeSourcePanel businessId={businessId} />
+          <SocialKnowledgeExtractionPanel businessId={businessId} />
+          <SocialBrainProfilePanel businessId={businessId} />
+          <SocialBrainApprovalPanel businessId={businessId} />
+          <SocialBrainSettingsApplyPanel businessId={businessId} />
+        </div>
       </div>
     </FounderLayout>
   );

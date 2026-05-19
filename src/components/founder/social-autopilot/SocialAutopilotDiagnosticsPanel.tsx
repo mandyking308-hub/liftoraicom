@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 export default function SocialAutopilotDiagnosticsPanel() {
   const [providers, setProviders] = useState<any[]>([]);
   const [health, setHealth] = useState<any>(null);
+  const [brain, setBrain] = useState<{ sources: number; extractions: number; logs: number; profile: any } | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -20,6 +21,15 @@ export default function SocialAutopilotDiagnosticsPanel() {
         const h = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/social-autopilot-healthcheck${businessId ? `?business_id=${businessId}` : ""}`, { headers });
         setHealth(await h.json());
       } catch { /* */ }
+      if (businessId) {
+        const [{ count: sc }, { count: ec }, { count: lc }, { data: prof }] = await Promise.all([
+          supabase.from("business_social_knowledge_sources").select("id", { count: "exact", head: true }).eq("business_id", businessId),
+          supabase.from("business_social_brain_extractions").select("id", { count: "exact", head: true }).eq("business_id", businessId),
+          supabase.from("business_social_profile_approval_log").select("id", { count: "exact", head: true }).eq("business_id", businessId),
+          supabase.from("business_social_brain_profiles").select("*").eq("business_id", businessId).maybeSingle().then((r: any) => r),
+        ]);
+        setBrain({ sources: sc ?? 0, extractions: ec ?? 0, logs: lc ?? 0, profile: prof.data });
+      }
     })();
   }, []);
 
@@ -59,6 +69,26 @@ export default function SocialAutopilotDiagnosticsPanel() {
             <span>Provider execution</span><span className="text-yellow-400">LOCKED</span>
           </div>
         </div>
+        {brain && (
+          <div>
+            <p className="text-xs text-muted-foreground mb-2">Social Brain (current business)</p>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <span>Sources</span><span>{brain.sources}</span>
+              <span>Extractions</span><span>{brain.extractions}</span>
+              <span>Approval log entries</span><span>{brain.logs}</span>
+              <span>Profile status</span><span>{brain.profile?.profile_status ?? "—"}</span>
+              <span>Settings sync</span><span>{brain.profile?.profile_status === "applied_to_settings" ? "synced" : "not synced"}</span>
+            </div>
+            {brain.profile && (
+              <details className="mt-2">
+                <summary className="text-[10px] cursor-pointer">Raw profile JSON</summary>
+                <pre className="text-[10px] p-2 bg-secondary/40 rounded mt-1 overflow-x-auto">
+                  {JSON.stringify(brain.profile, null, 2)}
+                </pre>
+              </details>
+            )}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
