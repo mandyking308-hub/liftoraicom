@@ -438,3 +438,31 @@ export const UNDERSTANDING_BUSINESS_VALUATION = {
     ],
   },
 };
+export const USING_SOCIAL_AUTOPILOT = {
+  title: "Using Social Autopilot",
+  summary:
+    "Social Autopilot is the multi-business social media spine. It is the same engine across every business added to Liftor. Neon Candy is just the first test case.",
+  how_it_works: [
+    "Per business, Liftor reads the uploaded technical manual, user manual, website, brand rules, offer/pricing sheet, customer profile, policies, FAQs, sales scripts and social/content assets.",
+    "From those inputs it builds the social operating profile, content plan, calendar, approval flow, publishing queue, inbox capture, reply drafts and CRM-linked engagement.",
+    "Everything stays internal until the founder configures provider gates and approves go-live.",
+  ],
+  what_is_locked_in_v1: [
+    "No posts are published.",
+    "No DMs are sent.",
+    "No comments are sent.",
+    "No Instagram / Facebook / TikTok / YouTube / LinkedIn / X / Metricool / Buffer / Hootsuite / ManyChat API call is made.",
+    "Provider execution is fail-closed across the publish queue and the reply queue.",
+  ],
+  where_to_look: [
+    "Daily Operator View shows the Social Autopilot block with automation mode, accounts, assets, drafts, blocked jobs, inbox and reply drafts.",
+    "Full Diagnostic View shows the provider adapter capability matrix, queue health and rehearsal/test data counts.",
+    "Open `/founder/social-autopilot` for the full Social Autopilot console.",
+  ],
+  before_go_live: [
+    "Purge all rehearsal/test data via Social Autopilot → Settings → Rehearsal Purge.",
+    "Confirm automation_mode = approval_required (default).",
+    "Register at least one social account per platform per business.",
+    "Approve content drafts and reply drafts individually before any send is enabled.",
+  ],
+};
