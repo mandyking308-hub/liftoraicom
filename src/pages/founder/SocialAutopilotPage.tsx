@@ -29,6 +29,7 @@ import { SocialContentFactoryDashboard } from "@/components/founder/social-autop
 import { SocialCampaignEngineDashboard } from "@/components/founder/social-autopilot/SocialCampaignEnginePanels";
 import { SocialCalendarDashboard } from "@/components/founder/social-autopilot/SocialCalendarPanels";
 import { SocialApprovalDashboard } from "@/components/founder/social-autopilot/SocialApprovalPanels";
+import { SocialPublishingDashboard } from "@/components/founder/social-autopilot/SocialPublishingPanels";
 
 const TAB_BY_PATH: Record<string, string> = {
   "/founder/social-autopilot": "dashboard",
@@ -298,6 +299,10 @@ export default function SocialAutopilotPage() {
         <div className="space-y-4">
           <h2 className="text-lg font-semibold mt-6">Founder Approval Flow</h2>
           <SocialApprovalDashboard businessId={businessId} />
+        </div>
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold mt-6">Publishing Queue + Fail-Closed Provider Layer</h2>
+          <SocialPublishingDashboard businessId={businessId} />
         </div>
       </div>
     </FounderLayout>
