@@ -386,6 +386,37 @@ export default function SocialAutopilotCommandCentreBlock() {
             })()}</p>
           </div>
         )}
+        {businessId && funnel && (
+          <div className="mt-3 p-3 rounded bg-secondary/40">
+            <p className="text-xs font-semibold mb-1 flex items-center gap-1"><Lock size={12} /> Website / Funnel (internal drafts only — no publish/deploy/payments/emails)</p>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-[11px]">
+              <span>Strategies: {funnel.funnel_strategies_total ?? 0}</span>
+              <span>Approved: {funnel.approved_funnels ?? 0}</span>
+              <span>Pages: {funnel.landing_pages_total ?? 0}</span>
+              <span>Lead magnets: {funnel.lead_magnets_total ?? 0}</span>
+              <span>CTA maps: {funnel.cta_maps_total ?? 0}</span>
+              <span>Asset packs: {funnel.conversion_asset_packs_total ?? 0}</span>
+              <span>Open gaps: {funnel.open_gap_reviews ?? 0}</span>
+              <span>Content w/o CTA: {funnel.social_content_without_cta_map ?? 0}</span>
+              <span>Campaigns w/o funnel: {funnel.campaigns_without_funnel ?? 0}</span>
+              <span>Export-ready: {funnel.pages_export_ready ?? 0}</span>
+              <span>Manually built: {funnel.manually_built_count ?? 0}</span>
+              <span>Live confirmed: {funnel.live_confirmed_external_count ?? 0}</span>
+              <span>External API: {funnel.external_api_calls_total ?? 0}</span>
+              <span>Pages published: {funnel.pages_published_total ?? 0}</span>
+              <span>Payments: {funnel.payments_created_total ?? 0}</span>
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-2">Next: {(() => {
+              if ((funnel.funnel_strategies_total ?? 0) === 0) return "Create first funnel strategy.";
+              if ((funnel.landing_pages_total ?? 0) === 0) return "Draft first landing page.";
+              if ((funnel.cta_maps_total ?? 0) === 0) return "Map social content to a destination.";
+              if ((funnel.lead_magnets_total ?? 0) === 0) return "Plan a lead magnet.";
+              if ((funnel.open_gap_reviews ?? 0) > 0) return `Resolve ${funnel.open_gap_reviews} open funnel gaps.`;
+              if ((funnel.pages_export_ready ?? 0) === 0) return "Create a builder export pack.";
+              return "Funnel healthy — keep mapping content to destinations.";
+            })()}</p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
