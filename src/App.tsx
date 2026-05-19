@@ -113,6 +113,7 @@ import DecisionEngine from "./pages/founder/DecisionEngine";
 import StrategyEngine from "./pages/founder/StrategyEngine";
 import MarketingHub from "./pages/founder/MarketingHub";
 import SupportHub from "./pages/founder/SupportHub";
+import SupportKnowledgeAgent from "./pages/founder/SupportKnowledgeAgent";
 import CreativeAssetsHub from "./pages/founder/CreativeAssetsHub";
 import SocialBrain from "./pages/founder/SocialBrain";
 import SocialAutopilotPage from "./pages/founder/SocialAutopilotPage";
