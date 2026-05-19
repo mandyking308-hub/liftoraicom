@@ -7832,6 +7832,7 @@ export type Database = {
       }
       conversion_cta_maps: {
         Row: {
+          ads_destination_status: string | null
           approval_status: string
           business_id: string
           calendar_item_id: string | null
@@ -7851,6 +7852,7 @@ export type Database = {
           map_status: string
           metadata: Json
           page_draft_id: string | null
+          paid_media_campaign_plan_id: string | null
           platform: string | null
           risk_warnings: string[]
           source_id: string | null
@@ -7858,6 +7860,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          ads_destination_status?: string | null
           approval_status?: string
           business_id: string
           calendar_item_id?: string | null
@@ -7877,6 +7880,7 @@ export type Database = {
           map_status?: string
           metadata?: Json
           page_draft_id?: string | null
+          paid_media_campaign_plan_id?: string | null
           platform?: string | null
           risk_warnings?: string[]
           source_id?: string | null
@@ -7884,6 +7888,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          ads_destination_status?: string | null
           approval_status?: string
           business_id?: string
           calendar_item_id?: string | null
@@ -7903,6 +7908,7 @@ export type Database = {
           map_status?: string
           metadata?: Json
           page_draft_id?: string | null
+          paid_media_campaign_plan_id?: string | null
           platform?: string | null
           risk_warnings?: string[]
           source_id?: string | null
@@ -17260,6 +17266,936 @@ export type Database = {
           },
         ]
       }
+      paid_media_audience_segments: {
+        Row: {
+          age_range: string | null
+          approval_status: string | null
+          audience_description: string | null
+          behaviours: string[] | null
+          business_id: string
+          campaign_plan_id: string | null
+          created_at: string | null
+          customer_list_required: boolean | null
+          exclusion_criteria: string[] | null
+          geo_targets: string[] | null
+          id: string
+          inclusion_criteria: string[] | null
+          interests: string[] | null
+          is_test_data: boolean | null
+          keywords: string[] | null
+          lookalike_source: string | null
+          metadata: Json | null
+          platform: string | null
+          privacy_warnings: string[] | null
+          retargeting_source: string | null
+          risk_warnings: string[] | null
+          segment_name: string
+          segment_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          age_range?: string | null
+          approval_status?: string | null
+          audience_description?: string | null
+          behaviours?: string[] | null
+          business_id: string
+          campaign_plan_id?: string | null
+          created_at?: string | null
+          customer_list_required?: boolean | null
+          exclusion_criteria?: string[] | null
+          geo_targets?: string[] | null
+          id?: string
+          inclusion_criteria?: string[] | null
+          interests?: string[] | null
+          is_test_data?: boolean | null
+          keywords?: string[] | null
+          lookalike_source?: string | null
+          metadata?: Json | null
+          platform?: string | null
+          privacy_warnings?: string[] | null
+          retargeting_source?: string | null
+          risk_warnings?: string[] | null
+          segment_name: string
+          segment_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          age_range?: string | null
+          approval_status?: string | null
+          audience_description?: string | null
+          behaviours?: string[] | null
+          business_id?: string
+          campaign_plan_id?: string | null
+          created_at?: string | null
+          customer_list_required?: boolean | null
+          exclusion_criteria?: string[] | null
+          geo_targets?: string[] | null
+          id?: string
+          inclusion_criteria?: string[] | null
+          interests?: string[] | null
+          is_test_data?: boolean | null
+          keywords?: string[] | null
+          lookalike_source?: string | null
+          metadata?: Json | null
+          platform?: string | null
+          privacy_warnings?: string[] | null
+          retargeting_source?: string | null
+          risk_warnings?: string[] | null
+          segment_name?: string
+          segment_type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "paid_media_audience_segments_campaign_plan_id_fkey"
+            columns: ["campaign_plan_id"]
+            isOneToOne: false
+            referencedRelation: "paid_media_campaign_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      paid_media_audit: {
+        Row: {
+          action: string
+          action_status: string | null
+          ads_created_externally: number | null
+          after_json: Json | null
+          audience_segment_id: string | null
+          before_json: Json | null
+          budget_guard_id: string | null
+          business_id: string
+          campaign_plan_id: string | null
+          campaigns_launched: number | null
+          created_at: string | null
+          created_by: string | null
+          creative_variant_id: string | null
+          error_message: string | null
+          export_pack_id: string | null
+          external_api_calls: number | null
+          fake_metrics_created: number | null
+          id: string
+          is_test_data: boolean | null
+          metadata: Json | null
+          money_spent: number | null
+          payment_methods_created: number | null
+          pixels_created: number | null
+          readiness_check_id: string | null
+          result_json: Json | null
+          risk_review_id: string | null
+          spend_scenario_id: string | null
+        }
+        Insert: {
+          action: string
+          action_status?: string | null
+          ads_created_externally?: number | null
+          after_json?: Json | null
+          audience_segment_id?: string | null
+          before_json?: Json | null
+          budget_guard_id?: string | null
+          business_id: string
+          campaign_plan_id?: string | null
+          campaigns_launched?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          creative_variant_id?: string | null
+          error_message?: string | null
+          export_pack_id?: string | null
+          external_api_calls?: number | null
+          fake_metrics_created?: number | null
+          id?: string
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          money_spent?: number | null
+          payment_methods_created?: number | null
+          pixels_created?: number | null
+          readiness_check_id?: string | null
+          result_json?: Json | null
+          risk_review_id?: string | null
+          spend_scenario_id?: string | null
+        }
+        Update: {
+          action?: string
+          action_status?: string | null
+          ads_created_externally?: number | null
+          after_json?: Json | null
+          audience_segment_id?: string | null
+          before_json?: Json | null
+          budget_guard_id?: string | null
+          business_id?: string
+          campaign_plan_id?: string | null
+          campaigns_launched?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          creative_variant_id?: string | null
+          error_message?: string | null
+          export_pack_id?: string | null
+          external_api_calls?: number | null
+          fake_metrics_created?: number | null
+          id?: string
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          money_spent?: number | null
+          payment_methods_created?: number | null
+          pixels_created?: number | null
+          readiness_check_id?: string | null
+          result_json?: Json | null
+          risk_review_id?: string | null
+          spend_scenario_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "paid_media_audit_audience_segment_id_fkey"
+            columns: ["audience_segment_id"]
+            isOneToOne: false
+            referencedRelation: "paid_media_audience_segments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "paid_media_audit_budget_guard_id_fkey"
+            columns: ["budget_guard_id"]
+            isOneToOne: false
+            referencedRelation: "paid_media_budget_guards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "paid_media_audit_campaign_plan_id_fkey"
+            columns: ["campaign_plan_id"]
+            isOneToOne: false
+            referencedRelation: "paid_media_campaign_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "paid_media_audit_creative_variant_id_fkey"
+            columns: ["creative_variant_id"]
+            isOneToOne: false
+            referencedRelation: "paid_media_creative_variants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "paid_media_audit_export_pack_id_fkey"
+            columns: ["export_pack_id"]
+            isOneToOne: false
+            referencedRelation: "paid_media_manual_export_packs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "paid_media_audit_readiness_check_id_fkey"
+            columns: ["readiness_check_id"]
+            isOneToOne: false
+            referencedRelation: "paid_media_readiness_checks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "paid_media_audit_risk_review_id_fkey"
+            columns: ["risk_review_id"]
+            isOneToOne: false
+            referencedRelation: "paid_media_risk_reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "paid_media_audit_spend_scenario_id_fkey"
+            columns: ["spend_scenario_id"]
+            isOneToOne: false
+            referencedRelation: "paid_media_spend_scenarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      paid_media_budget_guards: {
+        Row: {
+          approval_required_for_spend: boolean | null
+          approval_status: string | null
+          assumptions: string[] | null
+          business_id: string
+          campaign_plan_id: string | null
+          caveats: string[] | null
+          created_at: string | null
+          currency: string | null
+          daily_budget_cap: number | null
+          founder_approval_required: boolean | null
+          guard_name: string
+          guard_status: string | null
+          id: string
+          is_test_data: boolean | null
+          max_cac_target: number | null
+          max_cpl_target: number | null
+          metadata: Json | null
+          min_roas_target: number | null
+          monthly_budget_cap: number | null
+          risk_level: string | null
+          stop_loss_rules: Json | null
+          test_budget_cap: number | null
+          total_budget_cap: number | null
+          updated_at: string | null
+          weekly_budget_cap: number | null
+        }
+        Insert: {
+          approval_required_for_spend?: boolean | null
+          approval_status?: string | null
+          assumptions?: string[] | null
+          business_id: string
+          campaign_plan_id?: string | null
+          caveats?: string[] | null
+          created_at?: string | null
+          currency?: string | null
+          daily_budget_cap?: number | null
+          founder_approval_required?: boolean | null
+          guard_name: string
+          guard_status?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          max_cac_target?: number | null
+          max_cpl_target?: number | null
+          metadata?: Json | null
+          min_roas_target?: number | null
+          monthly_budget_cap?: number | null
+          risk_level?: string | null
+          stop_loss_rules?: Json | null
+          test_budget_cap?: number | null
+          total_budget_cap?: number | null
+          updated_at?: string | null
+          weekly_budget_cap?: number | null
+        }
+        Update: {
+          approval_required_for_spend?: boolean | null
+          approval_status?: string | null
+          assumptions?: string[] | null
+          business_id?: string
+          campaign_plan_id?: string | null
+          caveats?: string[] | null
+          created_at?: string | null
+          currency?: string | null
+          daily_budget_cap?: number | null
+          founder_approval_required?: boolean | null
+          guard_name?: string
+          guard_status?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          max_cac_target?: number | null
+          max_cpl_target?: number | null
+          metadata?: Json | null
+          min_roas_target?: number | null
+          monthly_budget_cap?: number | null
+          risk_level?: string | null
+          stop_loss_rules?: Json | null
+          test_budget_cap?: number | null
+          total_budget_cap?: number | null
+          updated_at?: string | null
+          weekly_budget_cap?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "paid_media_budget_guards_campaign_plan_id_fkey"
+            columns: ["campaign_plan_id"]
+            isOneToOne: false
+            referencedRelation: "paid_media_campaign_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      paid_media_campaign_plans: {
+        Row: {
+          approval_status: string | null
+          assumptions: string[] | null
+          budget_total: number | null
+          business_id: string
+          campaign_name: string
+          campaign_status: string | null
+          campaign_type: string
+          caveats: string[] | null
+          created_at: string | null
+          currency: string | null
+          daily_budget: number | null
+          end_date: string | null
+          expected_result_notes: string | null
+          founder_notes: string | null
+          funnel_destination_url: string | null
+          id: string
+          is_test_data: boolean | null
+          linked_funnel_strategy_id: string | null
+          linked_landing_page_id: string | null
+          linked_lead_magnet_id: string | null
+          linked_learning_signal_id: string | null
+          linked_market_signal_id: string | null
+          linked_revenue_target_id: string | null
+          linked_social_campaign_plan_id: string | null
+          manual_launch_status: string | null
+          metadata: Json | null
+          offer_name: string | null
+          platform_list: string[] | null
+          primary_goal: string | null
+          readiness_score: number | null
+          risk_warnings: string[] | null
+          start_date: string | null
+          success_metric: string | null
+          target_audience: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          approval_status?: string | null
+          assumptions?: string[] | null
+          budget_total?: number | null
+          business_id: string
+          campaign_name: string
+          campaign_status?: string | null
+          campaign_type: string
+          caveats?: string[] | null
+          created_at?: string | null
+          currency?: string | null
+          daily_budget?: number | null
+          end_date?: string | null
+          expected_result_notes?: string | null
+          founder_notes?: string | null
+          funnel_destination_url?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          linked_funnel_strategy_id?: string | null
+          linked_landing_page_id?: string | null
+          linked_lead_magnet_id?: string | null
+          linked_learning_signal_id?: string | null
+          linked_market_signal_id?: string | null
+          linked_revenue_target_id?: string | null
+          linked_social_campaign_plan_id?: string | null
+          manual_launch_status?: string | null
+          metadata?: Json | null
+          offer_name?: string | null
+          platform_list?: string[] | null
+          primary_goal?: string | null
+          readiness_score?: number | null
+          risk_warnings?: string[] | null
+          start_date?: string | null
+          success_metric?: string | null
+          target_audience?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          approval_status?: string | null
+          assumptions?: string[] | null
+          budget_total?: number | null
+          business_id?: string
+          campaign_name?: string
+          campaign_status?: string | null
+          campaign_type?: string
+          caveats?: string[] | null
+          created_at?: string | null
+          currency?: string | null
+          daily_budget?: number | null
+          end_date?: string | null
+          expected_result_notes?: string | null
+          founder_notes?: string | null
+          funnel_destination_url?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          linked_funnel_strategy_id?: string | null
+          linked_landing_page_id?: string | null
+          linked_lead_magnet_id?: string | null
+          linked_learning_signal_id?: string | null
+          linked_market_signal_id?: string | null
+          linked_revenue_target_id?: string | null
+          linked_social_campaign_plan_id?: string | null
+          manual_launch_status?: string | null
+          metadata?: Json | null
+          offer_name?: string | null
+          platform_list?: string[] | null
+          primary_goal?: string | null
+          readiness_score?: number | null
+          risk_warnings?: string[] | null
+          start_date?: string | null
+          success_metric?: string | null
+          target_audience?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "paid_media_campaign_plans_linked_funnel_strategy_id_fkey"
+            columns: ["linked_funnel_strategy_id"]
+            isOneToOne: false
+            referencedRelation: "website_funnel_strategies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "paid_media_campaign_plans_linked_landing_page_id_fkey"
+            columns: ["linked_landing_page_id"]
+            isOneToOne: false
+            referencedRelation: "website_landing_page_drafts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "paid_media_campaign_plans_linked_lead_magnet_id_fkey"
+            columns: ["linked_lead_magnet_id"]
+            isOneToOne: false
+            referencedRelation: "lead_magnet_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "paid_media_campaign_plans_linked_social_campaign_plan_id_fkey"
+            columns: ["linked_social_campaign_plan_id"]
+            isOneToOne: false
+            referencedRelation: "social_campaign_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      paid_media_creative_variants: {
+        Row: {
+          approval_status: string | null
+          asset_id: string | null
+          asset_requirements: string[] | null
+          business_id: string
+          campaign_plan_id: string | null
+          claims_to_verify: string[] | null
+          compliance_warnings: string[] | null
+          created_at: string | null
+          creative_status: string | null
+          creative_type: string
+          cta_text: string | null
+          description: string | null
+          destination_url: string | null
+          headline: string | null
+          hook: string | null
+          id: string
+          is_test_data: boolean | null
+          metadata: Json | null
+          missing_assets: string[] | null
+          platform: string | null
+          primary_text: string | null
+          risk_flags: string[] | null
+          script_text: string | null
+          unsupported_claims: string[] | null
+          updated_at: string | null
+          variant_name: string
+          visual_brief: string | null
+        }
+        Insert: {
+          approval_status?: string | null
+          asset_id?: string | null
+          asset_requirements?: string[] | null
+          business_id: string
+          campaign_plan_id?: string | null
+          claims_to_verify?: string[] | null
+          compliance_warnings?: string[] | null
+          created_at?: string | null
+          creative_status?: string | null
+          creative_type: string
+          cta_text?: string | null
+          description?: string | null
+          destination_url?: string | null
+          headline?: string | null
+          hook?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          missing_assets?: string[] | null
+          platform?: string | null
+          primary_text?: string | null
+          risk_flags?: string[] | null
+          script_text?: string | null
+          unsupported_claims?: string[] | null
+          updated_at?: string | null
+          variant_name: string
+          visual_brief?: string | null
+        }
+        Update: {
+          approval_status?: string | null
+          asset_id?: string | null
+          asset_requirements?: string[] | null
+          business_id?: string
+          campaign_plan_id?: string | null
+          claims_to_verify?: string[] | null
+          compliance_warnings?: string[] | null
+          created_at?: string | null
+          creative_status?: string | null
+          creative_type?: string
+          cta_text?: string | null
+          description?: string | null
+          destination_url?: string | null
+          headline?: string | null
+          hook?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          missing_assets?: string[] | null
+          platform?: string | null
+          primary_text?: string | null
+          risk_flags?: string[] | null
+          script_text?: string | null
+          unsupported_claims?: string[] | null
+          updated_at?: string | null
+          variant_name?: string
+          visual_brief?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "paid_media_creative_variants_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "social_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "paid_media_creative_variants_campaign_plan_id_fkey"
+            columns: ["campaign_plan_id"]
+            isOneToOne: false
+            referencedRelation: "paid_media_campaign_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      paid_media_manual_export_packs: {
+        Row: {
+          audience_blocks: Json | null
+          budget_blocks: Json | null
+          business_id: string
+          campaign_plan_id: string | null
+          confirmed_external_at: string | null
+          confirmed_external_by: string | null
+          copy_blocks: Json | null
+          created_at: string | null
+          creative_blocks: Json | null
+          export_name: string
+          export_payload: Json | null
+          export_status: string | null
+          export_type: string
+          id: string
+          is_test_data: boolean | null
+          metadata: Json | null
+          operator_checklist: Json | null
+          platform: string | null
+          setup_instructions: string | null
+          updated_at: string | null
+          validation_errors: string[] | null
+          validation_status: string | null
+          validation_warnings: string[] | null
+        }
+        Insert: {
+          audience_blocks?: Json | null
+          budget_blocks?: Json | null
+          business_id: string
+          campaign_plan_id?: string | null
+          confirmed_external_at?: string | null
+          confirmed_external_by?: string | null
+          copy_blocks?: Json | null
+          created_at?: string | null
+          creative_blocks?: Json | null
+          export_name: string
+          export_payload?: Json | null
+          export_status?: string | null
+          export_type: string
+          id?: string
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          operator_checklist?: Json | null
+          platform?: string | null
+          setup_instructions?: string | null
+          updated_at?: string | null
+          validation_errors?: string[] | null
+          validation_status?: string | null
+          validation_warnings?: string[] | null
+        }
+        Update: {
+          audience_blocks?: Json | null
+          budget_blocks?: Json | null
+          business_id?: string
+          campaign_plan_id?: string | null
+          confirmed_external_at?: string | null
+          confirmed_external_by?: string | null
+          copy_blocks?: Json | null
+          created_at?: string | null
+          creative_blocks?: Json | null
+          export_name?: string
+          export_payload?: Json | null
+          export_status?: string | null
+          export_type?: string
+          id?: string
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          operator_checklist?: Json | null
+          platform?: string | null
+          setup_instructions?: string | null
+          updated_at?: string | null
+          validation_errors?: string[] | null
+          validation_status?: string | null
+          validation_warnings?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "paid_media_manual_export_packs_campaign_plan_id_fkey"
+            columns: ["campaign_plan_id"]
+            isOneToOne: false
+            referencedRelation: "paid_media_campaign_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      paid_media_readiness_checks: {
+        Row: {
+          approval_status: string | null
+          audience_ready: boolean | null
+          blockers: string[] | null
+          budget_guard_ready: boolean | null
+          business_id: string
+          campaign_plan_id: string | null
+          check_name: string
+          check_status: string | null
+          compliance_ready: boolean | null
+          created_at: string | null
+          creative_ready: boolean | null
+          funnel_ready: boolean | null
+          id: string
+          is_test_data: boolean | null
+          landing_page_ready: boolean | null
+          metadata: Json | null
+          missing_items: string[] | null
+          platform_readiness: Json | null
+          privacy_ready: boolean | null
+          readiness_score: number | null
+          recommended_next_actions: string[] | null
+          tracking_plan_ready: boolean | null
+          updated_at: string | null
+          warnings: string[] | null
+        }
+        Insert: {
+          approval_status?: string | null
+          audience_ready?: boolean | null
+          blockers?: string[] | null
+          budget_guard_ready?: boolean | null
+          business_id: string
+          campaign_plan_id?: string | null
+          check_name: string
+          check_status?: string | null
+          compliance_ready?: boolean | null
+          created_at?: string | null
+          creative_ready?: boolean | null
+          funnel_ready?: boolean | null
+          id?: string
+          is_test_data?: boolean | null
+          landing_page_ready?: boolean | null
+          metadata?: Json | null
+          missing_items?: string[] | null
+          platform_readiness?: Json | null
+          privacy_ready?: boolean | null
+          readiness_score?: number | null
+          recommended_next_actions?: string[] | null
+          tracking_plan_ready?: boolean | null
+          updated_at?: string | null
+          warnings?: string[] | null
+        }
+        Update: {
+          approval_status?: string | null
+          audience_ready?: boolean | null
+          blockers?: string[] | null
+          budget_guard_ready?: boolean | null
+          business_id?: string
+          campaign_plan_id?: string | null
+          check_name?: string
+          check_status?: string | null
+          compliance_ready?: boolean | null
+          created_at?: string | null
+          creative_ready?: boolean | null
+          funnel_ready?: boolean | null
+          id?: string
+          is_test_data?: boolean | null
+          landing_page_ready?: boolean | null
+          metadata?: Json | null
+          missing_items?: string[] | null
+          platform_readiness?: Json | null
+          privacy_ready?: boolean | null
+          readiness_score?: number | null
+          recommended_next_actions?: string[] | null
+          tracking_plan_ready?: boolean | null
+          updated_at?: string | null
+          warnings?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "paid_media_readiness_checks_campaign_plan_id_fkey"
+            columns: ["campaign_plan_id"]
+            isOneToOne: false
+            referencedRelation: "paid_media_campaign_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      paid_media_risk_reviews: {
+        Row: {
+          approval_status: string | null
+          business_id: string
+          campaign_plan_id: string | null
+          created_at: string | null
+          creative_variant_id: string | null
+          founder_review_required: boolean | null
+          id: string
+          is_test_data: boolean | null
+          landing_page_issues: string[] | null
+          legal_review_required: boolean | null
+          metadata: Json | null
+          privacy_issues: string[] | null
+          recommended_fixes: string[] | null
+          regulated_claims_present: boolean | null
+          required_disclaimers: string[] | null
+          review_name: string
+          review_status: string | null
+          risk_level: string | null
+          targeting_issues: string[] | null
+          unsupported_claims: string[] | null
+          updated_at: string | null
+        }
+        Insert: {
+          approval_status?: string | null
+          business_id: string
+          campaign_plan_id?: string | null
+          created_at?: string | null
+          creative_variant_id?: string | null
+          founder_review_required?: boolean | null
+          id?: string
+          is_test_data?: boolean | null
+          landing_page_issues?: string[] | null
+          legal_review_required?: boolean | null
+          metadata?: Json | null
+          privacy_issues?: string[] | null
+          recommended_fixes?: string[] | null
+          regulated_claims_present?: boolean | null
+          required_disclaimers?: string[] | null
+          review_name: string
+          review_status?: string | null
+          risk_level?: string | null
+          targeting_issues?: string[] | null
+          unsupported_claims?: string[] | null
+          updated_at?: string | null
+        }
+        Update: {
+          approval_status?: string | null
+          business_id?: string
+          campaign_plan_id?: string | null
+          created_at?: string | null
+          creative_variant_id?: string | null
+          founder_review_required?: boolean | null
+          id?: string
+          is_test_data?: boolean | null
+          landing_page_issues?: string[] | null
+          legal_review_required?: boolean | null
+          metadata?: Json | null
+          privacy_issues?: string[] | null
+          recommended_fixes?: string[] | null
+          regulated_claims_present?: boolean | null
+          required_disclaimers?: string[] | null
+          review_name?: string
+          review_status?: string | null
+          risk_level?: string | null
+          targeting_issues?: string[] | null
+          unsupported_claims?: string[] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "paid_media_risk_reviews_campaign_plan_id_fkey"
+            columns: ["campaign_plan_id"]
+            isOneToOne: false
+            referencedRelation: "paid_media_campaign_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "paid_media_risk_reviews_creative_variant_id_fkey"
+            columns: ["creative_variant_id"]
+            isOneToOne: false
+            referencedRelation: "paid_media_creative_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      paid_media_spend_scenarios: {
+        Row: {
+          assumptions: string[] | null
+          business_id: string
+          campaign_plan_id: string | null
+          caveats: string[] | null
+          confidence_score: number | null
+          created_at: string | null
+          currency: string | null
+          daily_spend: number | null
+          evidence_level: string | null
+          expected_cac: number | null
+          expected_clicks: number | null
+          expected_conversions: number | null
+          expected_cpc: number | null
+          expected_cpl: number | null
+          expected_leads: number | null
+          expected_revenue: number | null
+          expected_roas: number | null
+          id: string
+          is_test_data: boolean | null
+          metadata: Json | null
+          planned_spend: number | null
+          scenario_name: string
+          scenario_status: string | null
+          updated_at: string | null
+          warning_text: string | null
+        }
+        Insert: {
+          assumptions?: string[] | null
+          business_id: string
+          campaign_plan_id?: string | null
+          caveats?: string[] | null
+          confidence_score?: number | null
+          created_at?: string | null
+          currency?: string | null
+          daily_spend?: number | null
+          evidence_level?: string | null
+          expected_cac?: number | null
+          expected_clicks?: number | null
+          expected_conversions?: number | null
+          expected_cpc?: number | null
+          expected_cpl?: number | null
+          expected_leads?: number | null
+          expected_revenue?: number | null
+          expected_roas?: number | null
+          id?: string
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          planned_spend?: number | null
+          scenario_name: string
+          scenario_status?: string | null
+          updated_at?: string | null
+          warning_text?: string | null
+        }
+        Update: {
+          assumptions?: string[] | null
+          business_id?: string
+          campaign_plan_id?: string | null
+          caveats?: string[] | null
+          confidence_score?: number | null
+          created_at?: string | null
+          currency?: string | null
+          daily_spend?: number | null
+          evidence_level?: string | null
+          expected_cac?: number | null
+          expected_clicks?: number | null
+          expected_conversions?: number | null
+          expected_cpc?: number | null
+          expected_cpl?: number | null
+          expected_leads?: number | null
+          expected_revenue?: number | null
+          expected_roas?: number | null
+          id?: string
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          planned_spend?: number | null
+          scenario_name?: string
+          scenario_status?: string | null
+          updated_at?: string | null
+          warning_text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "paid_media_spend_scenarios_campaign_plan_id_fkey"
+            columns: ["campaign_plan_id"]
+            isOneToOne: false
+            referencedRelation: "paid_media_campaign_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partner_applications: {
         Row: {
           company_name: string
@@ -22277,6 +23213,8 @@ export type Database = {
           metadata: Json
           missing_assets: string[]
           newsletter_sequence_id: string | null
+          paid_media_campaign_plan_id: string | null
+          paid_media_status: string | null
           performance_rating: string | null
           performance_summary_id: string | null
           platforms: string[]
@@ -22328,6 +23266,8 @@ export type Database = {
           metadata?: Json
           missing_assets?: string[]
           newsletter_sequence_id?: string | null
+          paid_media_campaign_plan_id?: string | null
+          paid_media_status?: string | null
           performance_rating?: string | null
           performance_summary_id?: string | null
           platforms?: string[]
@@ -22379,6 +23319,8 @@ export type Database = {
           metadata?: Json
           missing_assets?: string[]
           newsletter_sequence_id?: string | null
+          paid_media_campaign_plan_id?: string | null
+          paid_media_status?: string | null
           performance_rating?: string | null
           performance_summary_id?: string | null
           platforms?: string[]
@@ -27234,6 +28176,7 @@ export type Database = {
           linked_revenue_target_id: string | null
           market_learning_signal_id: string | null
           metadata: Json | null
+          paid_media_campaign_plan_id: string | null
           priority: string | null
           rationale: string | null
           recommendation_status: string | null
@@ -27262,6 +28205,7 @@ export type Database = {
           linked_revenue_target_id?: string | null
           market_learning_signal_id?: string | null
           metadata?: Json | null
+          paid_media_campaign_plan_id?: string | null
           priority?: string | null
           rationale?: string | null
           recommendation_status?: string | null
@@ -27290,6 +28234,7 @@ export type Database = {
           linked_revenue_target_id?: string | null
           market_learning_signal_id?: string | null
           metadata?: Json | null
+          paid_media_campaign_plan_id?: string | null
           priority?: string | null
           rationale?: string | null
           recommendation_status?: string | null
@@ -29483,6 +30428,7 @@ export type Database = {
       }
       website_funnel_strategies: {
         Row: {
+          ads_readiness_status: string | null
           approval_status: string
           business_id: string
           created_at: string
@@ -29499,6 +30445,7 @@ export type Database = {
           missing_proof: string[]
           newsletter_sequence_id: string | null
           page_goal: string | null
+          paid_media_campaign_plan_id: string | null
           primary_goal: string | null
           primary_offer: string | null
           proof_required: string[]
@@ -29517,6 +30464,7 @@ export type Database = {
           website_url: string | null
         }
         Insert: {
+          ads_readiness_status?: string | null
           approval_status?: string
           business_id: string
           created_at?: string
@@ -29533,6 +30481,7 @@ export type Database = {
           missing_proof?: string[]
           newsletter_sequence_id?: string | null
           page_goal?: string | null
+          paid_media_campaign_plan_id?: string | null
           primary_goal?: string | null
           primary_offer?: string | null
           proof_required?: string[]
@@ -29551,6 +30500,7 @@ export type Database = {
           website_url?: string | null
         }
         Update: {
+          ads_readiness_status?: string | null
           approval_status?: string
           business_id?: string
           created_at?: string
@@ -29567,6 +30517,7 @@ export type Database = {
           missing_proof?: string[]
           newsletter_sequence_id?: string | null
           page_goal?: string | null
+          paid_media_campaign_plan_id?: string | null
           primary_goal?: string | null
           primary_offer?: string | null
           proof_required?: string[]
@@ -29588,6 +30539,7 @@ export type Database = {
       }
       website_landing_page_drafts: {
         Row: {
+          ads_readiness_status: string | null
           approval_status: string
           asset_requirements: string[]
           builder_export_status: string
@@ -29609,6 +30561,7 @@ export type Database = {
           page_status: string
           page_type: string
           page_url_intended: string | null
+          paid_media_campaign_plan_id: string | null
           primary_cta: string | null
           primary_goal: string | null
           proof_blocks: Json
@@ -29619,6 +30572,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          ads_readiness_status?: string | null
           approval_status?: string
           asset_requirements?: string[]
           builder_export_status?: string
@@ -29640,6 +30594,7 @@ export type Database = {
           page_status?: string
           page_type: string
           page_url_intended?: string | null
+          paid_media_campaign_plan_id?: string | null
           primary_cta?: string | null
           primary_goal?: string | null
           proof_blocks?: Json
@@ -29650,6 +30605,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          ads_readiness_status?: string | null
           approval_status?: string
           asset_requirements?: string[]
           builder_export_status?: string
@@ -29671,6 +30627,7 @@ export type Database = {
           page_status?: string
           page_type?: string
           page_url_intended?: string | null
+          paid_media_campaign_plan_id?: string | null
           primary_cta?: string | null
           primary_goal?: string | null
           proof_blocks?: Json

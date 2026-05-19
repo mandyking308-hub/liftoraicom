@@ -20,6 +20,7 @@ export default function SocialAutopilotCommandCentreBlock() {
   const [analytics, setAnalytics] = useState<any>(null);
   const [competitor, setCompetitor] = useState<any>(null);
   const [funnel, setFunnel] = useState<any>(null);
+  const [paidMedia, setPaidMedia] = useState<any>(null);
   const businessId = typeof window !== "undefined" ? localStorage.getItem("liftor.activeBusinessId") || "" : "";
 
   useEffect(() => {
@@ -66,6 +67,9 @@ export default function SocialAutopilotCommandCentreBlock() {
           const fn = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/website-funnel-healthcheck?business_id=${businessId}`,
             { headers: { Authorization: `Bearer ${session?.access_token ?? ""}` } });
           setFunnel(await fn.json());
+          const pm = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/paid-media-healthcheck`,
+            { method: "POST", headers: { Authorization: `Bearer ${session?.access_token ?? ""}`, "Content-Type": "application/json" }, body: JSON.stringify({ business_id: businessId }) });
+          setPaidMedia(await pm.json());
         }
       } catch { /* ignore */ }
     })();
@@ -414,6 +418,38 @@ export default function SocialAutopilotCommandCentreBlock() {
               if ((funnel.open_gap_reviews ?? 0) > 0) return `Resolve ${funnel.open_gap_reviews} open funnel gaps.`;
               if ((funnel.pages_export_ready ?? 0) === 0) return "Create a builder export pack.";
               return "Funnel healthy — keep mapping content to destinations.";
+            })()}</p>
+          </div>
+        )}
+        {businessId && paidMedia && (
+          <div className="mt-3 p-3 rounded bg-secondary/40">
+            <p className="text-xs font-semibold mb-1 flex items-center gap-1"><Lock size={12} /> Ads / Paid Media (internal plans only — no ad API, no spend, no launches)</p>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-[11px]">
+              <span>Campaigns: {paidMedia.campaign_plans_total ?? 0}</span>
+              <span>Needs review: {paidMedia.plans_needing_review ?? 0}</span>
+              <span>Audiences: {paidMedia.audience_segments_total ?? 0}</span>
+              <span>Creatives: {paidMedia.creative_variants_total ?? 0}</span>
+              <span>Budget guards: {paidMedia.budget_guards_total ?? 0}</span>
+              <span>Scenarios: {paidMedia.spend_scenarios_total ?? 0}</span>
+              <span>Readiness: {paidMedia.readiness_checks_total ?? 0}</span>
+              <span>Risk reviews: {paidMedia.risk_reviews_total ?? 0}</span>
+              <span>Export packs: {paidMedia.manual_exports_total ?? 0}</span>
+              <span>Manually launched: {paidMedia.manually_launched_external_count ?? 0}</span>
+              <span>Blocked: {paidMedia.blocked_campaigns ?? 0}</span>
+              <span>External API: {paidMedia.external_api_calls_total ?? 0}</span>
+              <span>Campaigns launched: {paidMedia.campaigns_launched_total ?? 0}</span>
+              <span>Money spent: £{paidMedia.money_spent_total ?? 0}</span>
+              <span>Pixels created: {paidMedia.pixels_created_total ?? 0}</span>
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-2">Next: {(() => {
+              if ((paidMedia.campaign_plans_total ?? 0) === 0) return "Create first paid campaign plan.";
+              if ((paidMedia.audience_segments_total ?? 0) === 0) return "Add audience segments.";
+              if ((paidMedia.creative_variants_total ?? 0) === 0) return "Draft creative variants.";
+              if ((paidMedia.budget_guards_total ?? 0) === 0) return "Set a budget guard.";
+              if ((paidMedia.risk_reviews_total ?? 0) === 0) return "Generate risk/compliance review.";
+              if ((paidMedia.readiness_checks_total ?? 0) === 0) return "Run readiness check.";
+              if ((paidMedia.manual_exports_total ?? 0) === 0) return "Create manual ad platform export pack.";
+              return "Hand export pack to operator for manual setup.";
             })()}</p>
           </div>
         )}
