@@ -842,3 +842,39 @@ export const WEBSITE_FUNNEL_ENGINE = {
   command_centre:
     "Daily Operator View Social Autopilot block shows Website/Funnel tile: strategies, approved, pages, lead magnets, CTA maps, asset packs, open gaps, content w/o CTA, campaigns w/o funnel, export-ready, manually built, live confirmed, and next action.",
 };
+
+export const CUSTOMER_SUCCESS_PORTAL_ENGINE = {
+  title: "Client Portal, Onboarding and Customer Success",
+  summary:
+    "Liftor drafts internal customer success profiles, onboarding plans, welcome packs, client portal blueprints and content packs, bedding-in reviews, check-ins, satisfaction surveys, quarterly reports, renewal reviews, retention risk reviews, upsell opportunities, win-back plans and manual export packs for any business. Liftor does NOT create portal accounts, send portal invitations, send customer messages, send surveys, share quarterly reports, charge customers, change subscriptions or call Stripe/Paddle/GoCardless/Intercom/Zendesk/HubSpot. Customer-facing actions require founder approval and manual external action, recorded back into Liftor as manual confirmations. Customer health and retention signals are internal guidance only — Liftor does not invent satisfaction, results, revenue, usage or renewal probability. Test customer success data must be purged before real use.",
+  tables: [
+    "customer_success_profiles, customer_onboarding_plans, customer_welcome_packs, client_portal_blueprints, client_portal_content_packs, customer_bedding_in_reviews, customer_success_checkins, customer_satisfaction_surveys, customer_quarterly_reports, customer_renewal_reviews, customer_retention_risk_reviews, customer_upsell_opportunities, customer_winback_plans, customer_success_manual_export_packs, customer_success_audit.",
+    "contacts, customer_retention_scores, support_question_intake, support_escalations, invoices, payments, deals, internal_proposals extended with customer success / onboarding links.",
+  ],
+  functions: [
+    "customer-success-profile-preview/create (CREATE CUSTOMER SUCCESS PROFILE)",
+    "customer-onboarding-plan-preview/create (CREATE CUSTOMER ONBOARDING PLAN)",
+    "customer-welcome-pack-preview/create (CREATE CUSTOMER WELCOME PACK)",
+    "client-portal-blueprint-preview/create (CREATE CLIENT PORTAL BLUEPRINT)",
+    "client-portal-content-pack-preview/create (CREATE CLIENT PORTAL CONTENT PACK)",
+    "customer-bedding-in-review-generate (CREATE CUSTOMER BEDDING IN REVIEW)",
+    "customer-success-checkin-create (CREATE CUSTOMER SUCCESS CHECKIN)",
+    "customer-survey-draft-create (CREATE CUSTOMER SURVEY DRAFT)",
+    "customer-survey-response-record (RECORD CUSTOMER SURVEY RESPONSE — verbatim only)",
+    "customer-quarterly-report-preview/create (CREATE CUSTOMER QUARTERLY REPORT)",
+    "customer-renewal-review-generate (CREATE CUSTOMER RENEWAL REVIEW)",
+    "customer-retention-risk-review-generate (CREATE CUSTOMER RETENTION RISK REVIEW)",
+    "customer-upsell-opportunity-generate (CREATE CUSTOMER UPSELL OPPORTUNITY)",
+    "customer-winback-plan-generate (CREATE CUSTOMER WINBACK PLAN)",
+    "customer-success-manual-export-preview/create (CREATE CUSTOMER SUCCESS MANUAL EXPORT)",
+    "customer-success-manual-confirmation-record (CONFIRM CUSTOMER SUCCESS MANUAL ACTION)",
+    "customer-success-healthcheck (read-only)",
+    "customer-success-rehearsal-purge (PURGE CUSTOMER SUCCESS TEST DATA)",
+    "customer-success-external-action-placeholder — fails closed (403)",
+    "customer-success-backend-acceptance and customer-success-portal-acceptance — verify schema/functions/safety.",
+  ],
+  safety:
+    "No customer messages, no portal accounts, no portal invites, no logins, no Auth admin customer creation, no surveys sent, no reports shared, no renewal/win-back emails, no payment links, no charges, no subscription changes, no Stripe/Paddle/GoCardless, no Intercom/Zendesk/HubSpot, no Apollo, no Smartlead POST, no social provider API, no auto_send, no cron. external_api_calls/customer_messages_sent/portal_accounts_created/portal_invites_sent/surveys_sent/reports_shared/payments_created/subscriptions_changed/fake_customer_data_created always 0. RLS founder/admin-only. Confirmation-phrase gated. Fake/test customers must carry is_test_data=true and be purged before real use.",
+  command_centre:
+    "Daily Operator View Customer Success / Portal / Retention block shows profiles, onboarding needing review, welcome packs, portal blueprints, content packs, bedding reviews due, check-ins due, surveys awaiting, quarterly reports needing review, renewals due in 60 days, high-risk customers, upsells, win-backs, manual exports ready, hard-zero send/invite/charge counters, and a single next recommended action. Full Diagnostic View shows raw table counts, external action placeholder status, acceptance result and test-data purge control.",
+};
