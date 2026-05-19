@@ -4902,6 +4902,296 @@ export type Database = {
         }
         Relationships: []
       }
+      business_social_brain_extractions: {
+        Row: {
+          business_id: string
+          confidence_score: number | null
+          created_at: string | null
+          extracted_audience: string | null
+          extracted_brand_voice: string | null
+          extracted_compliance_notes: string | null
+          extracted_content_pillars: Json | null
+          extracted_ctas: Json | null
+          extracted_escalation_rules: Json | null
+          extracted_forbidden_claims: string[] | null
+          extracted_offers: Json | null
+          extracted_platform_rules: Json | null
+          extraction_status: string | null
+          founder_review_required: boolean | null
+          id: string
+          is_test_data: boolean | null
+          metadata: Json | null
+          missing_inputs: string[] | null
+          model_notes: string | null
+          source_ids: string[] | null
+          updated_at: string | null
+        }
+        Insert: {
+          business_id: string
+          confidence_score?: number | null
+          created_at?: string | null
+          extracted_audience?: string | null
+          extracted_brand_voice?: string | null
+          extracted_compliance_notes?: string | null
+          extracted_content_pillars?: Json | null
+          extracted_ctas?: Json | null
+          extracted_escalation_rules?: Json | null
+          extracted_forbidden_claims?: string[] | null
+          extracted_offers?: Json | null
+          extracted_platform_rules?: Json | null
+          extraction_status?: string | null
+          founder_review_required?: boolean | null
+          id?: string
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          missing_inputs?: string[] | null
+          model_notes?: string | null
+          source_ids?: string[] | null
+          updated_at?: string | null
+        }
+        Update: {
+          business_id?: string
+          confidence_score?: number | null
+          created_at?: string | null
+          extracted_audience?: string | null
+          extracted_brand_voice?: string | null
+          extracted_compliance_notes?: string | null
+          extracted_content_pillars?: Json | null
+          extracted_ctas?: Json | null
+          extracted_escalation_rules?: Json | null
+          extracted_forbidden_claims?: string[] | null
+          extracted_offers?: Json | null
+          extracted_platform_rules?: Json | null
+          extraction_status?: string | null
+          founder_review_required?: boolean | null
+          id?: string
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          missing_inputs?: string[] | null
+          model_notes?: string | null
+          source_ids?: string[] | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      business_social_brain_profiles: {
+        Row: {
+          audience_summary: string | null
+          brand_voice: string | null
+          business_id: string
+          business_summary: string | null
+          compliance_notes: string | null
+          confidence_score: number | null
+          content_do: string[] | null
+          content_do_not: string[] | null
+          content_pillars: Json | null
+          created_at: string | null
+          dm_rules: Json | null
+          engagement_rules: Json | null
+          escalation_rules: Json | null
+          forbidden_claims: string[] | null
+          forbidden_phrases: string[] | null
+          founder_notes: string | null
+          funnel_stage_rules: Json | null
+          hashtag_bank: Json | null
+          hook_bank: Json | null
+          id: string
+          ideal_customer_profile: string | null
+          is_test_data: boolean | null
+          last_approved_at: string | null
+          last_generated_at: string | null
+          metadata: Json | null
+          missing_inputs: string[] | null
+          objection_bank: Json | null
+          offer_angles: Json | null
+          platform_recommendations: Json | null
+          posting_cadence: Json | null
+          primary_cta: string | null
+          primary_offer_summary: string | null
+          profile_status: string | null
+          required_disclaimers: string[] | null
+          secondary_cta: string | null
+          secondary_offer_summary: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          audience_summary?: string | null
+          brand_voice?: string | null
+          business_id: string
+          business_summary?: string | null
+          compliance_notes?: string | null
+          confidence_score?: number | null
+          content_do?: string[] | null
+          content_do_not?: string[] | null
+          content_pillars?: Json | null
+          created_at?: string | null
+          dm_rules?: Json | null
+          engagement_rules?: Json | null
+          escalation_rules?: Json | null
+          forbidden_claims?: string[] | null
+          forbidden_phrases?: string[] | null
+          founder_notes?: string | null
+          funnel_stage_rules?: Json | null
+          hashtag_bank?: Json | null
+          hook_bank?: Json | null
+          id?: string
+          ideal_customer_profile?: string | null
+          is_test_data?: boolean | null
+          last_approved_at?: string | null
+          last_generated_at?: string | null
+          metadata?: Json | null
+          missing_inputs?: string[] | null
+          objection_bank?: Json | null
+          offer_angles?: Json | null
+          platform_recommendations?: Json | null
+          posting_cadence?: Json | null
+          primary_cta?: string | null
+          primary_offer_summary?: string | null
+          profile_status?: string | null
+          required_disclaimers?: string[] | null
+          secondary_cta?: string | null
+          secondary_offer_summary?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          audience_summary?: string | null
+          brand_voice?: string | null
+          business_id?: string
+          business_summary?: string | null
+          compliance_notes?: string | null
+          confidence_score?: number | null
+          content_do?: string[] | null
+          content_do_not?: string[] | null
+          content_pillars?: Json | null
+          created_at?: string | null
+          dm_rules?: Json | null
+          engagement_rules?: Json | null
+          escalation_rules?: Json | null
+          forbidden_claims?: string[] | null
+          forbidden_phrases?: string[] | null
+          founder_notes?: string | null
+          funnel_stage_rules?: Json | null
+          hashtag_bank?: Json | null
+          hook_bank?: Json | null
+          id?: string
+          ideal_customer_profile?: string | null
+          is_test_data?: boolean | null
+          last_approved_at?: string | null
+          last_generated_at?: string | null
+          metadata?: Json | null
+          missing_inputs?: string[] | null
+          objection_bank?: Json | null
+          offer_angles?: Json | null
+          platform_recommendations?: Json | null
+          posting_cadence?: Json | null
+          primary_cta?: string | null
+          primary_offer_summary?: string | null
+          profile_status?: string | null
+          required_disclaimers?: string[] | null
+          secondary_cta?: string | null
+          secondary_offer_summary?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      business_social_knowledge_sources: {
+        Row: {
+          approved_for_social_training: boolean | null
+          business_id: string
+          created_at: string | null
+          founder_notes: string | null
+          id: string
+          is_test_data: boolean | null
+          metadata: Json | null
+          pasted_text: string | null
+          reliability_level: string | null
+          source_status: string | null
+          source_type: string
+          source_url: string | null
+          storage_path: string | null
+          summary: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          approved_for_social_training?: boolean | null
+          business_id: string
+          created_at?: string | null
+          founder_notes?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          pasted_text?: string | null
+          reliability_level?: string | null
+          source_status?: string | null
+          source_type: string
+          source_url?: string | null
+          storage_path?: string | null
+          summary?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          approved_for_social_training?: boolean | null
+          business_id?: string
+          created_at?: string | null
+          founder_notes?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          pasted_text?: string | null
+          reliability_level?: string | null
+          source_status?: string | null
+          source_type?: string
+          source_url?: string | null
+          storage_path?: string | null
+          summary?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      business_social_profile_approval_log: {
+        Row: {
+          action: string
+          after_json: Json | null
+          before_json: Json | null
+          business_id: string
+          created_at: string | null
+          founder_notes: string | null
+          id: string
+          profile_id: string | null
+        }
+        Insert: {
+          action: string
+          after_json?: Json | null
+          before_json?: Json | null
+          business_id: string
+          created_at?: string | null
+          founder_notes?: string | null
+          id?: string
+          profile_id?: string | null
+        }
+        Update: {
+          action?: string
+          after_json?: Json | null
+          before_json?: Json | null
+          business_id?: string
+          created_at?: string | null
+          founder_notes?: string | null
+          id?: string
+          profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_social_profile_approval_log_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "business_social_brain_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_sourcing_briefs: {
         Row: {
           apollo_credit_protection: Json
