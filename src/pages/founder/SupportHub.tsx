@@ -1,5 +1,6 @@
 import FounderLayout from "@/components/founder/FounderLayout";
 import SupportKnowledgeAgentPanel from "@/components/founder/support/SupportKnowledgeAgentPanel";
+import { SupportKnowledgeDashboard } from "@/components/founder/support/SupportKnowledgePanels";
 import HumanAccountManagerPanel from "@/components/founder/customer/HumanAccountManagerPanel";
 import CustomerOnboardingPanel from "@/components/founder/customer/CustomerOnboardingPanel";
 import RetentionRecurringRevenuePanel from "@/components/founder/customer/RetentionRecurringRevenuePanel";
@@ -15,6 +16,7 @@ export default function SupportHub() {
           <p className="text-sm text-muted-foreground">FAQs, help articles, support drafts, triage and escalation — internal only, no external send.</p>
         </div>
         <SupportKnowledgeAgentPanel />
+        <SupportKnowledgeDashboard />
         <HumanAccountManagerPanel />
         <CustomerOnboardingPanel />
         <RetentionRecurringRevenuePanel />
