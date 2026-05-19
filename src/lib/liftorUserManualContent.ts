@@ -551,6 +551,35 @@ export const SOCIAL_PUBLISHING_QUEUE = {
   ],
 };
 
+export const SOCIAL_SCHEDULER_BRIDGE = {
+  title: "Scheduler Export / Metricool Bridge",
+  summary:
+    "Liftor can prepare a Metricool-ready / operator-check CSV (and Buffer/Hootsuite/Generic CSV, plus an Operator Pack and a Manual Copy Pack) from approved internal publish jobs. This sprint does NOT call Metricool, Buffer, Hootsuite or any social provider API. A human operator uploads the file manually, then confirms it back inside Liftor.",
+  rules: [
+    "No external API call. No external publish. No external schedule. No DM, no comment.",
+    "Only approved-internal publish jobs become export rows. Blocked/cancelled/compliance-blocked/rights-blocked items are excluded.",
+    "Manually scheduled means a human uploaded it to a scheduler — it does NOT mean published.",
+    "Provider APIs (Metricool/Buffer/Hootsuite/Meta/etc.) can be wired later in a future prompt.",
+    "All actions write to social_scheduler_export_audit with provider_calls=0 and posts_scheduled_externally=0.",
+  ],
+  steps: [
+    "Open Social Autopilot → Scheduler Bridge / Metricool + Operator Export.",
+    "Preview export from publish jobs / queue batches / calendar.",
+    "Create the export batch with the phrase CREATE SOCIAL SCHEDULER EXPORT.",
+    "Validate the batch with the phrase VALIDATE SOCIAL SCHEDULER EXPORT.",
+    "Generate the CSV with the phrase GENERATE SOCIAL SCHEDULER CSV, then download it.",
+    "Create an operator pack with the phrase CREATE SOCIAL OPERATOR PACK to assign the manual upload checklist.",
+    "After the operator uploads externally, confirm with CONFIRM SOCIAL MANUAL SCHEDULING. Use MARK SOCIAL EXPORT DOWNLOADED to track download handoff.",
+    "Purge test data only with PURGE SOCIAL SCHEDULER EXPORT TEST DATA.",
+  ],
+  technical: [
+    "Tables: social_manual_export_batches (extended with date_range, timezone, validation, manual_scheduling, csv_text, download_ready, confirmation), social_scheduler_export_rows, social_scheduler_export_templates (Metricool/Generic/Operator/Manual Copy seeded), social_operator_scheduling_tasks, social_scheduler_export_audit.",
+    "Edge functions: social-scheduler-export-preview, -create, -validate, social-scheduler-csv-generate, social-operator-pack-create, social-manual-copy-pack-preview, social-export-mark-downloaded, social-manual-scheduling-confirm, social-scheduler-export-healthcheck, -rehearsal-purge, social-scheduler-bridge-acceptance.",
+    "CSV labels: 'Metricool-ready export — operator must verify import columns before upload.' Generic, Operator and Manual Copy packs use their own column/grouping conventions.",
+    "Command Centre Daily Operator View renders a Scheduler/Export tile showing batches, rows, ready, downloaded, manually scheduled, blocked rows, validation failures, operator tasks open, provider calls=0 and external schedules=0.",
+  ],
+};
+
 export const USING_SOCIAL_BRAIN_CONNECTOR = {
   title: "Business Knowledge → Social Brain",
   summary:
