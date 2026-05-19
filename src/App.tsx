@@ -84,6 +84,11 @@ import ExecutionDetail from "./pages/founder/ExecutionDetail";
 import CommandCenter from "./pages/founder/CommandCenter";
 import CommandCentre from "./pages/founder/CommandCentre";
 import LiftorBrain from "./pages/founder/LiftorBrain";
+import BrainSessions from "./pages/founder/BrainSessions";
+import BrainDrafts from "./pages/founder/BrainDrafts";
+import BrainAudit from "./pages/founder/BrainAudit";
+import BrainTools from "./pages/founder/BrainTools";
+import BrainProvider from "./pages/founder/BrainProvider";
 import ProcessDirectory from "./pages/founder/ProcessDirectory";
 import ProcessDetail from "./pages/founder/ProcessDetail";
 import ArchitectureDirectory from "./pages/founder/ArchitectureDirectory";
@@ -263,6 +268,11 @@ const App = () => (
             <Route path="/founder/command-centre" element={<FounderRoute><CommandCentre /></FounderRoute>} />
             <Route path="/founder/command-center" element={<Navigate to="/founder/command-centre" replace />} />
             <Route path="/founder/brain" element={<FounderRoute><LiftorBrain /></FounderRoute>} />
+            <Route path="/founder/brain/sessions" element={<FounderRoute><BrainSessions /></FounderRoute>} />
+            <Route path="/founder/brain/drafts" element={<FounderRoute><BrainDrafts /></FounderRoute>} />
+            <Route path="/founder/brain/audit" element={<FounderRoute><BrainAudit /></FounderRoute>} />
+            <Route path="/founder/brain/tools" element={<FounderRoute><BrainTools /></FounderRoute>} />
+            <Route path="/founder/brain/provider" element={<FounderRoute><BrainProvider /></FounderRoute>} />
             <Route path="/founder/command-center/legacy" element={<FounderRoute><CommandCenter /></FounderRoute>} />
             <Route path="/founder/processes" element={<FounderRoute><ProcessDirectory /></FounderRoute>} />
             <Route path="/founder/processes/:id" element={<FounderRoute><ProcessDetail /></FounderRoute>} />
@@ -289,7 +299,7 @@ const App = () => (
             <Route path="/founder/manual/:id" element={<FounderRoute><ManualPageDetail /></FounderRoute>} />
             <Route path="/founder/build-log" element={<FounderRoute><BuildLog /></FounderRoute>} />
             <Route path="/founder/revenue" element={<FounderRoute><FounderRevenue /></FounderRoute>} />
-            <Route path="/founder/brain" element={<FounderRoute><BrainCore /></FounderRoute>} />
+            <Route path="/founder/brain-core" element={<FounderRoute><BrainCore /></FounderRoute>} />
             <Route path="/founder/decisions" element={<FounderRoute><DecisionEngine /></FounderRoute>} />
             <Route path="/founder/strategy" element={<FounderRoute><StrategyEngine /></FounderRoute>} />
             <Route path="/founder/marketing" element={<FounderRoute><MarketingHub /></FounderRoute>} />
