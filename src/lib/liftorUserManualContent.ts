@@ -500,10 +500,6 @@ export const USING_SOCIAL_CALENDAR = {
   ],
 };
 
-export const USING_SOCIAL_BRAIN_CONNECTOR = {
-  // (placeholder anchor)
-};
-
 export const APPROVING_SOCIAL_CONTENT = {
   title: "Approving Social Content",
   summary:
@@ -527,7 +523,7 @@ export const APPROVING_SOCIAL_CONTENT = {
   ],
 };
 
-const _USING_SOCIAL_BRAIN_CONNECTOR_ORIG = {
+export const USING_SOCIAL_BRAIN_CONNECTOR = {
   title: "Business Knowledge → Social Brain",
   summary:
     "Each business in Liftor gets its own Social Brain, generated from its uploaded manuals, brand guide, FAQs and other knowledge sources. NeonCandy is only the first example.",
