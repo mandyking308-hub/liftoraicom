@@ -19407,6 +19407,396 @@ export type Database = {
         }
         Relationships: []
       }
+      social_approval_batch_items: {
+        Row: {
+          batch_id: string
+          business_id: string
+          created_at: string
+          id: string
+          item_status: string | null
+          notes: string | null
+          review_id: string
+          sort_order: number | null
+        }
+        Insert: {
+          batch_id: string
+          business_id: string
+          created_at?: string
+          id?: string
+          item_status?: string | null
+          notes?: string | null
+          review_id: string
+          sort_order?: number | null
+        }
+        Update: {
+          batch_id?: string
+          business_id?: string
+          created_at?: string
+          id?: string
+          item_status?: string | null
+          notes?: string | null
+          review_id?: string
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_approval_batch_items_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "social_approval_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_approval_batch_items_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "social_approval_reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_approval_batches: {
+        Row: {
+          approved_count: number | null
+          batch_name: string
+          batch_notes: string | null
+          batch_status: string | null
+          batch_type: string
+          blocked_count: number | null
+          business_id: string
+          confirmation_required: boolean | null
+          created_at: string
+          critical_risk_count: number | null
+          high_risk_count: number | null
+          id: string
+          is_test_data: boolean | null
+          item_count: number | null
+          metadata: Json | null
+          rejected_count: number | null
+          updated_at: string
+        }
+        Insert: {
+          approved_count?: number | null
+          batch_name: string
+          batch_notes?: string | null
+          batch_status?: string | null
+          batch_type: string
+          blocked_count?: number | null
+          business_id: string
+          confirmation_required?: boolean | null
+          created_at?: string
+          critical_risk_count?: number | null
+          high_risk_count?: number | null
+          id?: string
+          is_test_data?: boolean | null
+          item_count?: number | null
+          metadata?: Json | null
+          rejected_count?: number | null
+          updated_at?: string
+        }
+        Update: {
+          approved_count?: number | null
+          batch_name?: string
+          batch_notes?: string | null
+          batch_status?: string | null
+          batch_type?: string
+          blocked_count?: number | null
+          business_id?: string
+          confirmation_required?: boolean | null
+          created_at?: string
+          critical_risk_count?: number | null
+          high_risk_count?: number | null
+          id?: string
+          is_test_data?: boolean | null
+          item_count?: number | null
+          metadata?: Json | null
+          rejected_count?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      social_approval_decisions: {
+        Row: {
+          after_json: Json | null
+          before_json: Json | null
+          business_id: string
+          created_at: string
+          decided_at: string
+          decided_by: string | null
+          decision: string
+          decision_reason: string | null
+          founder_notes: string | null
+          id: string
+          is_test_data: boolean | null
+          metadata: Json | null
+          review_id: string
+        }
+        Insert: {
+          after_json?: Json | null
+          before_json?: Json | null
+          business_id: string
+          created_at?: string
+          decided_at?: string
+          decided_by?: string | null
+          decision: string
+          decision_reason?: string | null
+          founder_notes?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          review_id: string
+        }
+        Update: {
+          after_json?: Json | null
+          before_json?: Json | null
+          business_id?: string
+          created_at?: string
+          decided_at?: string
+          decided_by?: string | null
+          decision?: string
+          decision_reason?: string | null
+          founder_notes?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          review_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_approval_decisions_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "social_approval_reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_approval_reviews: {
+        Row: {
+          approval_blockers: string[] | null
+          asset_id: string | null
+          asset_status: string | null
+          business_id: string
+          calendar_id: string | null
+          calendar_item_id: string | null
+          campaign_plan_id: string | null
+          compliance_status: string | null
+          content_item_id: string | null
+          content_pack_id: string | null
+          content_variant_id: string | null
+          created_at: string
+          decided_at: string | null
+          decision_by: string | null
+          edit_request: string | null
+          founder_approval_item_id: string | null
+          founder_notes: string | null
+          id: string
+          is_test_data: boolean | null
+          metadata: Json | null
+          priority: string | null
+          recommended_decision: string | null
+          reply_job_id: string | null
+          review_status: string | null
+          review_type: string
+          rights_status: string | null
+          risk_level: string | null
+          summary: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          approval_blockers?: string[] | null
+          asset_id?: string | null
+          asset_status?: string | null
+          business_id: string
+          calendar_id?: string | null
+          calendar_item_id?: string | null
+          campaign_plan_id?: string | null
+          compliance_status?: string | null
+          content_item_id?: string | null
+          content_pack_id?: string | null
+          content_variant_id?: string | null
+          created_at?: string
+          decided_at?: string | null
+          decision_by?: string | null
+          edit_request?: string | null
+          founder_approval_item_id?: string | null
+          founder_notes?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          priority?: string | null
+          recommended_decision?: string | null
+          reply_job_id?: string | null
+          review_status?: string | null
+          review_type: string
+          rights_status?: string | null
+          risk_level?: string | null
+          summary?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approval_blockers?: string[] | null
+          asset_id?: string | null
+          asset_status?: string | null
+          business_id?: string
+          calendar_id?: string | null
+          calendar_item_id?: string | null
+          campaign_plan_id?: string | null
+          compliance_status?: string | null
+          content_item_id?: string | null
+          content_pack_id?: string | null
+          content_variant_id?: string | null
+          created_at?: string
+          decided_at?: string | null
+          decision_by?: string | null
+          edit_request?: string | null
+          founder_approval_item_id?: string | null
+          founder_notes?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          priority?: string | null
+          recommended_decision?: string | null
+          reply_job_id?: string | null
+          review_status?: string | null
+          review_type?: string
+          rights_status?: string | null
+          risk_level?: string | null
+          summary?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_approval_reviews_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "social_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_approval_reviews_calendar_id_fkey"
+            columns: ["calendar_id"]
+            isOneToOne: false
+            referencedRelation: "social_calendars"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_approval_reviews_calendar_item_id_fkey"
+            columns: ["calendar_item_id"]
+            isOneToOne: false
+            referencedRelation: "social_calendar_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_approval_reviews_campaign_plan_id_fkey"
+            columns: ["campaign_plan_id"]
+            isOneToOne: false
+            referencedRelation: "social_campaign_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_approval_reviews_content_item_id_fkey"
+            columns: ["content_item_id"]
+            isOneToOne: false
+            referencedRelation: "social_content_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_approval_reviews_content_pack_id_fkey"
+            columns: ["content_pack_id"]
+            isOneToOne: false
+            referencedRelation: "social_content_packs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_approval_reviews_content_variant_id_fkey"
+            columns: ["content_variant_id"]
+            isOneToOne: false
+            referencedRelation: "social_content_variants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_approval_reviews_founder_approval_item_id_fkey"
+            columns: ["founder_approval_item_id"]
+            isOneToOne: false
+            referencedRelation: "founder_approval_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_approval_reviews_reply_job_id_fkey"
+            columns: ["reply_job_id"]
+            isOneToOne: false
+            referencedRelation: "social_reply_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_approval_rules: {
+        Row: {
+          applies_to: string[] | null
+          auto_block_if_asset_blocked: boolean | null
+          auto_block_if_claim_unverified: boolean | null
+          auto_block_if_compliance_blocked: boolean | null
+          auto_block_if_rights_unknown: boolean | null
+          business_id: string
+          created_at: string
+          founder_approval_required: boolean | null
+          id: string
+          is_test_data: boolean | null
+          legal_review_required: boolean | null
+          metadata: Json | null
+          notes: string | null
+          risk_threshold: string | null
+          rule_name: string
+          rule_status: string | null
+          rule_type: string
+          updated_at: string
+        }
+        Insert: {
+          applies_to?: string[] | null
+          auto_block_if_asset_blocked?: boolean | null
+          auto_block_if_claim_unverified?: boolean | null
+          auto_block_if_compliance_blocked?: boolean | null
+          auto_block_if_rights_unknown?: boolean | null
+          business_id: string
+          created_at?: string
+          founder_approval_required?: boolean | null
+          id?: string
+          is_test_data?: boolean | null
+          legal_review_required?: boolean | null
+          metadata?: Json | null
+          notes?: string | null
+          risk_threshold?: string | null
+          rule_name: string
+          rule_status?: string | null
+          rule_type: string
+          updated_at?: string
+        }
+        Update: {
+          applies_to?: string[] | null
+          auto_block_if_asset_blocked?: boolean | null
+          auto_block_if_claim_unverified?: boolean | null
+          auto_block_if_compliance_blocked?: boolean | null
+          auto_block_if_rights_unknown?: boolean | null
+          business_id?: string
+          created_at?: string
+          founder_approval_required?: boolean | null
+          id?: string
+          is_test_data?: boolean | null
+          legal_review_required?: boolean | null
+          metadata?: Json | null
+          notes?: string | null
+          risk_threshold?: string | null
+          rule_name?: string
+          rule_status?: string | null
+          rule_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       social_asset_collection_items: {
         Row: {
           asset_id: string
@@ -20213,6 +20603,8 @@ export type Database = {
       }
       social_calendar_items: {
         Row: {
+          approval_blockers: string[] | null
+          approval_decision_at: string | null
           approval_status: string | null
           asset_id: string | null
           asset_status: string | null
@@ -20228,6 +20620,7 @@ export type Database = {
           created_at: string
           customer_journey_stage: string | null
           day_number: number | null
+          founder_approval_review_id: string | null
           funnel_stage: string | null
           id: string
           is_test_data: boolean | null
@@ -20239,6 +20632,7 @@ export type Database = {
           platform: string
           provider: string | null
           queue_readiness: string | null
+          ready_for_queue_at: string | null
           slot_label: string | null
           status: string | null
           timezone: string | null
@@ -20246,6 +20640,8 @@ export type Database = {
           week_number: number | null
         }
         Insert: {
+          approval_blockers?: string[] | null
+          approval_decision_at?: string | null
           approval_status?: string | null
           asset_id?: string | null
           asset_status?: string | null
@@ -20261,6 +20657,7 @@ export type Database = {
           created_at?: string
           customer_journey_stage?: string | null
           day_number?: number | null
+          founder_approval_review_id?: string | null
           funnel_stage?: string | null
           id?: string
           is_test_data?: boolean | null
@@ -20272,6 +20669,7 @@ export type Database = {
           platform: string
           provider?: string | null
           queue_readiness?: string | null
+          ready_for_queue_at?: string | null
           slot_label?: string | null
           status?: string | null
           timezone?: string | null
@@ -20279,6 +20677,8 @@ export type Database = {
           week_number?: number | null
         }
         Update: {
+          approval_blockers?: string[] | null
+          approval_decision_at?: string | null
           approval_status?: string | null
           asset_id?: string | null
           asset_status?: string | null
@@ -20294,6 +20694,7 @@ export type Database = {
           created_at?: string
           customer_journey_stage?: string | null
           day_number?: number | null
+          founder_approval_review_id?: string | null
           funnel_stage?: string | null
           id?: string
           is_test_data?: boolean | null
@@ -20305,6 +20706,7 @@ export type Database = {
           platform?: string
           provider?: string | null
           queue_readiness?: string | null
+          ready_for_queue_at?: string | null
           slot_label?: string | null
           status?: string | null
           timezone?: string | null
@@ -20344,6 +20746,8 @@ export type Database = {
       }
       social_calendars: {
         Row: {
+          approval_blockers: string[] | null
+          approval_decision_at: string | null
           approval_status: string | null
           blocked_reasons: string[] | null
           business_id: string
@@ -20357,6 +20761,7 @@ export type Database = {
           content_pack_id: string | null
           created_at: string
           end_date: string
+          founder_approval_review_id: string | null
           founder_notes: string | null
           id: string
           is_test_data: boolean | null
@@ -20371,6 +20776,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          approval_blockers?: string[] | null
+          approval_decision_at?: string | null
           approval_status?: string | null
           blocked_reasons?: string[] | null
           business_id: string
@@ -20384,6 +20791,7 @@ export type Database = {
           content_pack_id?: string | null
           created_at?: string
           end_date: string
+          founder_approval_review_id?: string | null
           founder_notes?: string | null
           id?: string
           is_test_data?: boolean | null
@@ -20398,6 +20806,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          approval_blockers?: string[] | null
+          approval_decision_at?: string | null
           approval_status?: string | null
           blocked_reasons?: string[] | null
           business_id?: string
@@ -20411,6 +20821,7 @@ export type Database = {
           content_pack_id?: string | null
           created_at?: string
           end_date?: string
+          founder_approval_review_id?: string | null
           founder_notes?: string | null
           id?: string
           is_test_data?: boolean | null
@@ -20905,6 +21316,9 @@ export type Database = {
       social_content_items: {
         Row: {
           ai_prompt_source: string | null
+          approval_blockers: string[] | null
+          approval_decision_at: string | null
+          approval_decision_by: string | null
           approval_status: string | null
           asset_id: string | null
           asset_readiness_status: string
@@ -20926,6 +21340,7 @@ export type Database = {
           created_at: string | null
           cta: string | null
           customer_journey_stage: string | null
+          founder_approval_review_id: string | null
           founder_notes: string | null
           funnel_stage: string | null
           generated_by_ai: boolean | null
@@ -20944,6 +21359,7 @@ export type Database = {
           provider: string | null
           publish_readiness: string
           quality_status: string
+          ready_for_queue_at: string | null
           revenue_alignment_status: string
           revenue_strategy_id: string | null
           scheduled_date: string | null
@@ -20956,6 +21372,9 @@ export type Database = {
         }
         Insert: {
           ai_prompt_source?: string | null
+          approval_blockers?: string[] | null
+          approval_decision_at?: string | null
+          approval_decision_by?: string | null
           approval_status?: string | null
           asset_id?: string | null
           asset_readiness_status?: string
@@ -20977,6 +21396,7 @@ export type Database = {
           created_at?: string | null
           cta?: string | null
           customer_journey_stage?: string | null
+          founder_approval_review_id?: string | null
           founder_notes?: string | null
           funnel_stage?: string | null
           generated_by_ai?: boolean | null
@@ -20995,6 +21415,7 @@ export type Database = {
           provider?: string | null
           publish_readiness?: string
           quality_status?: string
+          ready_for_queue_at?: string | null
           revenue_alignment_status?: string
           revenue_strategy_id?: string | null
           scheduled_date?: string | null
@@ -21007,6 +21428,9 @@ export type Database = {
         }
         Update: {
           ai_prompt_source?: string | null
+          approval_blockers?: string[] | null
+          approval_decision_at?: string | null
+          approval_decision_by?: string | null
           approval_status?: string | null
           asset_id?: string | null
           asset_readiness_status?: string
@@ -21028,6 +21452,7 @@ export type Database = {
           created_at?: string | null
           cta?: string | null
           customer_journey_stage?: string | null
+          founder_approval_review_id?: string | null
           founder_notes?: string | null
           funnel_stage?: string | null
           generated_by_ai?: boolean | null
@@ -21046,6 +21471,7 @@ export type Database = {
           provider?: string | null
           publish_readiness?: string
           quality_status?: string
+          ready_for_queue_at?: string | null
           revenue_alignment_status?: string
           revenue_strategy_id?: string | null
           scheduled_date?: string | null
@@ -21146,6 +21572,8 @@ export type Database = {
       }
       social_content_packs: {
         Row: {
+          approval_blockers: string[] | null
+          approval_decision_at: string | null
           approval_status: string
           business_id: string
           calendar_generation_status: string | null
@@ -21157,6 +21585,7 @@ export type Database = {
           customer_journey_stage: string | null
           days_count: number
           end_date: string | null
+          founder_approval_review_id: string | null
           founder_notes: string | null
           funnel_stage: string | null
           generated_from_sources: Json
@@ -21181,6 +21610,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          approval_blockers?: string[] | null
+          approval_decision_at?: string | null
           approval_status?: string
           business_id: string
           calendar_generation_status?: string | null
@@ -21192,6 +21623,7 @@ export type Database = {
           customer_journey_stage?: string | null
           days_count?: number
           end_date?: string | null
+          founder_approval_review_id?: string | null
           founder_notes?: string | null
           funnel_stage?: string | null
           generated_from_sources?: Json
@@ -21216,6 +21648,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          approval_blockers?: string[] | null
+          approval_decision_at?: string | null
           approval_status?: string
           business_id?: string
           calendar_generation_status?: string | null
@@ -21227,6 +21661,7 @@ export type Database = {
           customer_journey_stage?: string | null
           days_count?: number
           end_date?: string | null
+          founder_approval_review_id?: string | null
           founder_notes?: string | null
           funnel_stage?: string | null
           generated_from_sources?: Json
@@ -21345,6 +21780,8 @@ export type Database = {
       }
       social_content_variants: {
         Row: {
+          approval_blockers: string[] | null
+          approval_decision_at: string | null
           approval_status: string
           asset_id: string | null
           business_id: string
@@ -21353,6 +21790,7 @@ export type Database = {
           content_item_id: string | null
           created_at: string
           cta: string | null
+          founder_approval_review_id: string | null
           hashtags: string | null
           hook: string | null
           id: string
@@ -21362,6 +21800,7 @@ export type Database = {
           missing_requirements: string[]
           pack_id: string | null
           platform: string
+          ready_for_queue_at: string | null
           risk_flags: string[]
           script: string | null
           title: string | null
@@ -21369,6 +21808,8 @@ export type Database = {
           variant_type: string
         }
         Insert: {
+          approval_blockers?: string[] | null
+          approval_decision_at?: string | null
           approval_status?: string
           asset_id?: string | null
           business_id: string
@@ -21377,6 +21818,7 @@ export type Database = {
           content_item_id?: string | null
           created_at?: string
           cta?: string | null
+          founder_approval_review_id?: string | null
           hashtags?: string | null
           hook?: string | null
           id?: string
@@ -21386,6 +21828,7 @@ export type Database = {
           missing_requirements?: string[]
           pack_id?: string | null
           platform: string
+          ready_for_queue_at?: string | null
           risk_flags?: string[]
           script?: string | null
           title?: string | null
@@ -21393,6 +21836,8 @@ export type Database = {
           variant_type: string
         }
         Update: {
+          approval_blockers?: string[] | null
+          approval_decision_at?: string | null
           approval_status?: string
           asset_id?: string | null
           business_id?: string
@@ -21401,6 +21846,7 @@ export type Database = {
           content_item_id?: string | null
           created_at?: string
           cta?: string | null
+          founder_approval_review_id?: string | null
           hashtags?: string | null
           hook?: string | null
           id?: string
@@ -21410,6 +21856,7 @@ export type Database = {
           missing_requirements?: string[]
           pack_id?: string | null
           platform?: string
+          ready_for_queue_at?: string | null
           risk_flags?: string[]
           script?: string | null
           title?: string | null

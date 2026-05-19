@@ -12,6 +12,7 @@ export default function SocialAutopilotCommandCentreBlock() {
   const [readiness, setReadiness] = useState<any>(null);
   const [factory, setFactory] = useState<any>(null);
   const [calendar, setCalendar] = useState<any>(null);
+  const [approval, setApproval] = useState<any>(null);
   const businessId = typeof window !== "undefined" ? localStorage.getItem("liftor.activeBusinessId") || "" : "";
 
   useEffect(() => {
@@ -34,6 +35,9 @@ export default function SocialAutopilotCommandCentreBlock() {
           const c = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/social-calendar-healthcheck?business_id=${businessId}`,
             { headers: { Authorization: `Bearer ${session?.access_token ?? ""}` } });
           setCalendar(await c.json());
+          const ap = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/social-approval-healthcheck?business_id=${businessId}`,
+            { headers: { Authorization: `Bearer ${session?.access_token ?? ""}` } });
+          setApproval(await ap.json());
         }
       } catch { /* ignore */ }
     })();
@@ -159,6 +163,32 @@ export default function SocialAutopilotCommandCentreBlock() {
               if ((calendar.items_needing_review ?? 0) > 0) return "Run founder approval on calendar items.";
               if (calendar.ready_for_publish_queue) return "Move approved items to publishing queue (later prompt).";
               return "Calendar ready.";
+            })()}</p>
+          </div>
+        )}
+        {businessId && approval && (
+          <div className="mt-3 p-3 rounded bg-secondary/40">
+            <p className="text-xs font-semibold mb-1">Founder Approval Flow</p>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-[11px]">
+              <span>Pending: {approval.pending_reviews ?? 0}</span>
+              <span>High risk: {approval.high_risk_pending ?? 0}</span>
+              <span>Critical: {approval.critical_risk_pending ?? 0}</span>
+              <span>Blocked: {approval.blocked_reviews ?? 0}</span>
+              <span>Needs edit: {approval.needs_edit_reviews ?? 0}</span>
+              <span>Approved: {approval.approved_reviews ?? 0}</span>
+              <span>Batches: {approval.batch_count ?? 0}</span>
+              <span>Rules: {approval.rules_count ?? 0}</span>
+              <span>Content→queue: {approval.content_ready_for_queue ?? 0}</span>
+              <span>Calendar→queue: {approval.calendar_items_ready_for_queue ?? 0}</span>
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-2">Next: {(() => {
+              if ((approval.rules_count ?? 0) === 0) return "Generate approval rules.";
+              if ((approval.pending_reviews ?? 0) === 0) return "Create approval reviews from drafts.";
+              if ((approval.critical_risk_pending ?? 0) > 0) return "Review critical-risk items individually.";
+              if ((approval.high_risk_pending ?? 0) > 0) return "Review high-risk items individually.";
+              if ((approval.blocked_reviews ?? 0) > 0) return "Resolve blockers on blocked reviews.";
+              if ((approval.pending_reviews ?? 0) > 0) return "Create low-risk approval batch.";
+              return "Move approved items to publishing queue (next prompt).";
             })()}</p>
           </div>
         )}
