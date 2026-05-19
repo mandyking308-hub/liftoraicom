@@ -13,6 +13,7 @@ export default function SocialAutopilotCommandCentreBlock() {
   const [factory, setFactory] = useState<any>(null);
   const [calendar, setCalendar] = useState<any>(null);
   const [approval, setApproval] = useState<any>(null);
+  const [publishing, setPublishing] = useState<any>(null);
   const businessId = typeof window !== "undefined" ? localStorage.getItem("liftor.activeBusinessId") || "" : "";
 
   useEffect(() => {
@@ -38,6 +39,9 @@ export default function SocialAutopilotCommandCentreBlock() {
           const ap = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/social-approval-healthcheck?business_id=${businessId}`,
             { headers: { Authorization: `Bearer ${session?.access_token ?? ""}` } });
           setApproval(await ap.json());
+          const pub = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/social-publishing-healthcheck?business_id=${businessId}`,
+            { headers: { Authorization: `Bearer ${session?.access_token ?? ""}` } });
+          setPublishing(await pub.json());
         }
       } catch { /* ignore */ }
     })();
@@ -189,6 +193,30 @@ export default function SocialAutopilotCommandCentreBlock() {
               if ((approval.blocked_reviews ?? 0) > 0) return "Resolve blockers on blocked reviews.";
               if ((approval.pending_reviews ?? 0) > 0) return "Create low-risk approval batch.";
               return "Move approved items to publishing queue (next prompt).";
+            })()}</p>
+          </div>
+        )}
+        {businessId && publishing && (
+          <div className="mt-3 p-3 rounded bg-secondary/40">
+            <p className="text-xs font-semibold mb-1 flex items-center gap-1"><Lock size={12} /> Publishing Queue (provider execution locked)</p>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-[11px]">
+              <span>Jobs: {publishing.publish_jobs_total ?? 0}</span>
+              <span>Queued: {publishing.queued_jobs ?? 0}</span>
+              <span>Provider locked: {publishing.provider_locked_jobs ?? 0}</span>
+              <span>Blocked: {publishing.blocked_jobs ?? 0}</span>
+              <span>Failed: {publishing.failed_jobs ?? 0}</span>
+              <span>Batches: {publishing.batches_total ?? 0}</span>
+              <span>Exports: {publishing.export_batches_total ?? 0}</span>
+              <span>Connections: {publishing.provider_connections_count ?? 0}</span>
+              <span>Gates locked: {(publishing.provider_gates_count ?? 0) - (publishing.unlocked_gates_count ?? 0)}</span>
+              <span>Provider calls: {publishing.provider_calls_total ?? 0}</span>
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-2">Next: {(() => {
+              if ((publishing.publish_jobs_total ?? 0) === 0) return "Preview publish queue and create internal jobs.";
+              if ((publishing.blocked_jobs ?? 0) > 0) return "Review blocked jobs.";
+              if ((publishing.batches_total ?? 0) === 0) return "Create publish batch.";
+              if ((publishing.export_batches_total ?? 0) === 0) return "Create manual/operator export.";
+              return "Keep provider execution locked until later prompts wire APIs.";
             })()}</p>
           </div>
         )}

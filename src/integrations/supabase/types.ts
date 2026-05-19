@@ -22179,6 +22179,77 @@ export type Database = {
           },
         ]
       }
+      social_manual_export_batches: {
+        Row: {
+          business_id: string
+          created_at: string
+          created_by: string | null
+          export_name: string
+          export_payload: Json
+          export_status: string
+          export_type: string
+          exported_at: string | null
+          exported_rows: number
+          file_url: string | null
+          id: string
+          is_test_data: boolean
+          metadata: Json
+          platform: string | null
+          provider: string | null
+          queue_batch_id: string | null
+          storage_path: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          created_by?: string | null
+          export_name: string
+          export_payload?: Json
+          export_status?: string
+          export_type: string
+          exported_at?: string | null
+          exported_rows?: number
+          file_url?: string | null
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          platform?: string | null
+          provider?: string | null
+          queue_batch_id?: string | null
+          storage_path?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          created_by?: string | null
+          export_name?: string
+          export_payload?: Json
+          export_status?: string
+          export_type?: string
+          exported_at?: string | null
+          exported_rows?: number
+          file_url?: string | null
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          platform?: string | null
+          provider?: string | null
+          queue_batch_id?: string | null
+          storage_path?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_manual_export_batches_queue_batch_id_fkey"
+            columns: ["queue_batch_id"]
+            isOneToOne: false
+            referencedRelation: "social_publish_queue_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       social_performance_logs: {
         Row: {
           business_id: string
@@ -22604,22 +22675,177 @@ export type Database = {
         }
         Relationships: []
       }
+      social_provider_connections: {
+        Row: {
+          account_reference: string | null
+          business_id: string
+          capabilities_json: Json
+          connected_account_id: string | null
+          connection_name: string
+          connection_status: string
+          created_at: string
+          id: string
+          is_test_data: boolean
+          last_checked_at: string | null
+          last_error: string | null
+          metadata: Json
+          notes: string | null
+          provider: string
+          token_reference: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_reference?: string | null
+          business_id: string
+          capabilities_json?: Json
+          connected_account_id?: string | null
+          connection_name: string
+          connection_status?: string
+          created_at?: string
+          id?: string
+          is_test_data?: boolean
+          last_checked_at?: string | null
+          last_error?: string | null
+          metadata?: Json
+          notes?: string | null
+          provider: string
+          token_reference?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_reference?: string | null
+          business_id?: string
+          capabilities_json?: Json
+          connected_account_id?: string | null
+          connection_name?: string
+          connection_status?: string
+          created_at?: string
+          id?: string
+          is_test_data?: boolean
+          last_checked_at?: string | null
+          last_error?: string | null
+          metadata?: Json
+          notes?: string | null
+          provider?: string
+          token_reference?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_provider_connections_connected_account_id_fkey"
+            columns: ["connected_account_id"]
+            isOneToOne: false
+            referencedRelation: "social_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_provider_execution_gates: {
+        Row: {
+          action_type: string
+          approval_required: boolean
+          business_id: string
+          confirmation_phrase: string | null
+          created_at: string
+          enabled_by: string | null
+          gate_name: string
+          gate_status: string
+          id: string
+          is_test_data: boolean
+          last_checked_at: string | null
+          last_enabled_at: string | null
+          max_batch_size: number
+          metadata: Json
+          notes: string | null
+          provider: string
+          provider_connection_required: boolean
+          rehearsal_runs_required: number
+          requires_founder_phrase: boolean
+          successful_rehearsal_runs: number
+          updated_at: string
+        }
+        Insert: {
+          action_type: string
+          approval_required?: boolean
+          business_id: string
+          confirmation_phrase?: string | null
+          created_at?: string
+          enabled_by?: string | null
+          gate_name: string
+          gate_status?: string
+          id?: string
+          is_test_data?: boolean
+          last_checked_at?: string | null
+          last_enabled_at?: string | null
+          max_batch_size?: number
+          metadata?: Json
+          notes?: string | null
+          provider: string
+          provider_connection_required?: boolean
+          rehearsal_runs_required?: number
+          requires_founder_phrase?: boolean
+          successful_rehearsal_runs?: number
+          updated_at?: string
+        }
+        Update: {
+          action_type?: string
+          approval_required?: boolean
+          business_id?: string
+          confirmation_phrase?: string | null
+          created_at?: string
+          enabled_by?: string | null
+          gate_name?: string
+          gate_status?: string
+          id?: string
+          is_test_data?: boolean
+          last_checked_at?: string | null
+          last_enabled_at?: string | null
+          max_batch_size?: number
+          metadata?: Json
+          notes?: string | null
+          provider?: string
+          provider_connection_required?: boolean
+          rehearsal_runs_required?: number
+          requires_founder_phrase?: boolean
+          successful_rehearsal_runs?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       social_publish_jobs: {
         Row: {
+          approval_review_id: string | null
           block_reason: string | null
           business_id: string
+          calendar_item_id: string | null
+          campaign_plan_id: string | null
           content_item_id: string | null
+          content_pack_id: string | null
+          content_variant_id: string | null
           created_at: string | null
           error_message: string | null
+          execution_attempt_allowed: boolean
+          execution_gate_status: string
+          exported_at: string | null
+          exported_by: string | null
+          external_execution_at: string | null
+          external_execution_attempted: boolean
+          founder_final_approval_required: boolean
           id: string
           idempotency_key: string | null
           is_test_data: boolean | null
           job_type: string
           last_attempt_at: string | null
+          manual_export_status: string
           metadata: Json | null
           platform: string
           provider: string
+          provider_adapter_id: string | null
+          provider_capability_required: string | null
+          provider_connection_id: string | null
           provider_external_id: string | null
+          publish_payload: Json
+          queue_batch_id: string | null
           response_json: Json | null
           retry_count: number | null
           scheduled_for: string | null
@@ -22628,20 +22854,38 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          approval_review_id?: string | null
           block_reason?: string | null
           business_id: string
+          calendar_item_id?: string | null
+          campaign_plan_id?: string | null
           content_item_id?: string | null
+          content_pack_id?: string | null
+          content_variant_id?: string | null
           created_at?: string | null
           error_message?: string | null
+          execution_attempt_allowed?: boolean
+          execution_gate_status?: string
+          exported_at?: string | null
+          exported_by?: string | null
+          external_execution_at?: string | null
+          external_execution_attempted?: boolean
+          founder_final_approval_required?: boolean
           id?: string
           idempotency_key?: string | null
           is_test_data?: boolean | null
           job_type: string
           last_attempt_at?: string | null
+          manual_export_status?: string
           metadata?: Json | null
           platform: string
           provider: string
+          provider_adapter_id?: string | null
+          provider_capability_required?: string | null
+          provider_connection_id?: string | null
           provider_external_id?: string | null
+          publish_payload?: Json
+          queue_batch_id?: string | null
           response_json?: Json | null
           retry_count?: number | null
           scheduled_for?: string | null
@@ -22650,20 +22894,38 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          approval_review_id?: string | null
           block_reason?: string | null
           business_id?: string
+          calendar_item_id?: string | null
+          campaign_plan_id?: string | null
           content_item_id?: string | null
+          content_pack_id?: string | null
+          content_variant_id?: string | null
           created_at?: string | null
           error_message?: string | null
+          execution_attempt_allowed?: boolean
+          execution_gate_status?: string
+          exported_at?: string | null
+          exported_by?: string | null
+          external_execution_at?: string | null
+          external_execution_attempted?: boolean
+          founder_final_approval_required?: boolean
           id?: string
           idempotency_key?: string | null
           is_test_data?: boolean | null
           job_type?: string
           last_attempt_at?: string | null
+          manual_export_status?: string
           metadata?: Json | null
           platform?: string
           provider?: string
+          provider_adapter_id?: string | null
+          provider_capability_required?: string | null
+          provider_connection_id?: string | null
           provider_external_id?: string | null
+          publish_payload?: Json
+          queue_batch_id?: string | null
           response_json?: Json | null
           retry_count?: number | null
           scheduled_for?: string | null
@@ -22687,6 +22949,159 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      social_publish_queue_audit: {
+        Row: {
+          action: string
+          action_status: string
+          after_json: Json
+          before_json: Json
+          business_id: string
+          comments_sent: number
+          created_at: string
+          created_by: string | null
+          dms_sent: number
+          error_message: string | null
+          id: string
+          is_test_data: boolean
+          metadata: Json
+          platform: string | null
+          posts_published: number
+          posts_scheduled: number
+          provider: string | null
+          provider_calls: number
+          publish_job_id: string | null
+          queue_batch_id: string | null
+          result_json: Json
+        }
+        Insert: {
+          action: string
+          action_status?: string
+          after_json?: Json
+          before_json?: Json
+          business_id: string
+          comments_sent?: number
+          created_at?: string
+          created_by?: string | null
+          dms_sent?: number
+          error_message?: string | null
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          platform?: string | null
+          posts_published?: number
+          posts_scheduled?: number
+          provider?: string | null
+          provider_calls?: number
+          publish_job_id?: string | null
+          queue_batch_id?: string | null
+          result_json?: Json
+        }
+        Update: {
+          action?: string
+          action_status?: string
+          after_json?: Json
+          before_json?: Json
+          business_id?: string
+          comments_sent?: number
+          created_at?: string
+          created_by?: string | null
+          dms_sent?: number
+          error_message?: string | null
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          platform?: string | null
+          posts_published?: number
+          posts_scheduled?: number
+          provider?: string | null
+          provider_calls?: number
+          publish_job_id?: string | null
+          queue_batch_id?: string | null
+          result_json?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_publish_queue_audit_publish_job_id_fkey"
+            columns: ["publish_job_id"]
+            isOneToOne: false
+            referencedRelation: "social_publish_jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_publish_queue_audit_queue_batch_id_fkey"
+            columns: ["queue_batch_id"]
+            isOneToOne: false
+            referencedRelation: "social_publish_queue_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_publish_queue_batches: {
+        Row: {
+          batch_name: string
+          batch_status: string
+          batch_type: string
+          blocked_count: number
+          business_id: string
+          confirmation_required: boolean
+          created_at: string
+          exported_count: number
+          founder_notes: string | null
+          high_risk_count: number
+          id: string
+          is_test_data: boolean
+          job_count: number
+          metadata: Json
+          platform: string | null
+          provider: string | null
+          ready_count: number
+          scheduled_for: string | null
+          updated_at: string
+        }
+        Insert: {
+          batch_name: string
+          batch_status?: string
+          batch_type: string
+          blocked_count?: number
+          business_id: string
+          confirmation_required?: boolean
+          created_at?: string
+          exported_count?: number
+          founder_notes?: string | null
+          high_risk_count?: number
+          id?: string
+          is_test_data?: boolean
+          job_count?: number
+          metadata?: Json
+          platform?: string | null
+          provider?: string | null
+          ready_count?: number
+          scheduled_for?: string | null
+          updated_at?: string
+        }
+        Update: {
+          batch_name?: string
+          batch_status?: string
+          batch_type?: string
+          blocked_count?: number
+          business_id?: string
+          confirmation_required?: boolean
+          created_at?: string
+          exported_count?: number
+          founder_notes?: string | null
+          high_risk_count?: number
+          id?: string
+          is_test_data?: boolean
+          job_count?: number
+          metadata?: Json
+          platform?: string | null
+          provider?: string | null
+          ready_count?: number
+          scheduled_for?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       social_reply_jobs: {
         Row: {

@@ -523,6 +523,34 @@ export const APPROVING_SOCIAL_CONTENT = {
   ],
 };
 
+export const SOCIAL_PUBLISHING_QUEUE = {
+  title: "Publishing Queue (Provider Execution Locked)",
+  summary:
+    "Approved content and approved calendar items can be turned into internal publish jobs. Publish jobs are NOT publishing — they are a queue Liftor manages internally. Provider execution (Meta/TikTok/YouTube/LinkedIn/X/Metricool/Buffer/Hootsuite) is fail-closed in this sprint.",
+  rules: [
+    "Only approved-internal items become publish jobs.",
+    "Every publish job is created with execution_gate_status=locked, founder_final_approval_required=true.",
+    "No external scheduling, no DMs, no comments, no provider API calls.",
+    "Manual/operator exports are allowed (Metricool/Buffer/Hootsuite CSV format) and are internal-only payloads — no file is sent externally.",
+    "Provider connections are registered without storing raw tokens (token_reference only).",
+    "Every provider execution attempt is logged and blocked with reason 'provider_execution_not_enabled'.",
+  ],
+  steps: [
+    "Open Social Autopilot → Publishing Queue + Fail-Closed Provider Layer.",
+    "Preview eligibility from approved content or approved calendar items.",
+    "Create internal publish jobs with the phrase CREATE SOCIAL PUBLISH JOBS.",
+    "Group jobs into a queue batch with the phrase CREATE SOCIAL PUBLISH BATCH.",
+    "Generate a manual/operator export with the phrase CREATE SOCIAL MANUAL EXPORT.",
+    "Cancel jobs with the phrase CANCEL SOCIAL PUBLISH JOB. Purge test data with PURGE SOCIAL PUBLISHING TEST DATA.",
+  ],
+  technical: [
+    "Tables: social_publish_jobs (extended), social_provider_connections, social_provider_execution_gates, social_publish_queue_batches, social_publish_queue_audit, social_manual_export_batches.",
+    "Edge functions: social-publish-queue-preview, -job-create, -batch-preview, -batch-create, social-provider-router-preview, -execution-gate-check, -execution-attempt (always blocked), social-manual-export-preview, -create, social-publish-job-cancel, social-publishing-healthcheck, -rehearsal-purge, -queue-acceptance.",
+    "Idempotency: deterministic key per business/content/calendar/platform/provider/scheduled_for/job_type.",
+    "Command Centre publishes a Daily Operator View tile with job counts and the next recommended action; provider_calls_total and posts_published_total remain 0 by policy.",
+  ],
+};
+
 export const USING_SOCIAL_BRAIN_CONNECTOR = {
   title: "Business Knowledge → Social Brain",
   summary:
