@@ -1,6 +1,6 @@
 // Liftor User Manual — plain-English operating guide (separate from Founder/Technical Manual)
 
-export const LIFTOR_USER_MANUAL_VERSION = "1.0 — Operator Go-To-Use Edition (15 May 2026)";
+export const LIFTOR_USER_MANUAL_VERSION = "1.1 — Liftor Brain / Mandy Co-Pilot Edition (19 May 2026)";
 
 export interface ManualSection {
   number: number;
@@ -35,6 +35,7 @@ export const LIFTOR_SIMPLE_GUIDE: ManualSection[] = [
   { number: 22, key: "do-not-click", title: "What not to click unless ready", body: "Anything with a red 'External' or 'Locked' badge: Smartlead lead push, Apollo reveal, native email send, social publish, DM send, proposal/invoice/survey/onboarding share, payments, filings, exports." },
   { number: 23, key: "emergency-pause", title: "Emergency pause / stop", body: "Activation Wizard → Pause business. This sets activation_status=paused, go_live_allowed=false, mode=sandbox. No data deleted, no external notification." },
   { number: 24, key: "first-10", title: "First 10 things to do when opening Liftor", body: "1) /founder/command-centre. 2) Read Alert Strip. 3) Pick business. 4) Work Today's Actions. 5) Scan Journey Map. 6) Check Human Layer. 7) Approvals. 8) Run safe internal agents. 9) Revenue/Risk glance. 10) Refresh Usability Report." },
+  { number: 25, key: "liftor-brain", title: "Liftor Brain / Mandy Co-Pilot", body: "The Liftor Brain is the central AI co-pilot at /founder/brain and inside Command Centre. It reads Command Centre, manuals, business knowledge, CRM, approvals, revenue, social, support, customer success, diagnostics and gates. It answers founder questions, explains blockers, suggests next actions, and drafts internal plans, replies, social content, support responses and revenue actions — and inbound email replies. It NEVER sends emails, publishes posts, calls Apollo, calls Smartlead, charges customers, creates portal accounts, or sends surveys/reports. Drafts always remain internal (external_send_allowed=false). OPENAI_API_KEY must be configured as a Supabase Edge Function secret for live answers; the key is never displayed in Liftor. Daily use: /founder/command-centre → 'What should I do now?' → review suggested actions → approve or edit in Founder Approval Console. Inbound reply use: open a conversation, click 'Draft reply with Liftor Brain', review source / missing context / risk, save internal draft with confirmation phrase, review and send only via correct external gate." },
 ];
 
 export const LIFTOR_FULL_GUIDE: ManualSection[] = [
