@@ -20008,6 +20008,432 @@ export type Database = {
           },
         ]
       }
+      social_calendar_cadence_rules: {
+        Row: {
+          avoid_days: string[] | null
+          business_id: string
+          created_at: string
+          id: string
+          is_test_data: boolean | null
+          max_posts_per_day: number | null
+          metadata: Json | null
+          min_gap_minutes: number | null
+          notes: string | null
+          platform: string
+          posts_per_day: number | null
+          posts_per_week: number | null
+          preferred_days: string[] | null
+          preferred_times: string[] | null
+          rule_name: string
+          rule_status: string | null
+          source: string | null
+          timezone: string | null
+          updated_at: string
+        }
+        Insert: {
+          avoid_days?: string[] | null
+          business_id: string
+          created_at?: string
+          id?: string
+          is_test_data?: boolean | null
+          max_posts_per_day?: number | null
+          metadata?: Json | null
+          min_gap_minutes?: number | null
+          notes?: string | null
+          platform: string
+          posts_per_day?: number | null
+          posts_per_week?: number | null
+          preferred_days?: string[] | null
+          preferred_times?: string[] | null
+          rule_name: string
+          rule_status?: string | null
+          source?: string | null
+          timezone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avoid_days?: string[] | null
+          business_id?: string
+          created_at?: string
+          id?: string
+          is_test_data?: boolean | null
+          max_posts_per_day?: number | null
+          metadata?: Json | null
+          min_gap_minutes?: number | null
+          notes?: string | null
+          platform?: string
+          posts_per_day?: number | null
+          posts_per_week?: number | null
+          preferred_days?: string[] | null
+          preferred_times?: string[] | null
+          rule_name?: string
+          rule_status?: string | null
+          source?: string | null
+          timezone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      social_calendar_gap_reviews: {
+        Row: {
+          affected_date: string | null
+          affected_platform: string | null
+          business_id: string
+          calendar_id: string | null
+          created_at: string
+          gap_description: string
+          gap_type: string
+          id: string
+          is_test_data: boolean | null
+          metadata: Json | null
+          recommended_fix: string | null
+          severity: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          affected_date?: string | null
+          affected_platform?: string | null
+          business_id: string
+          calendar_id?: string | null
+          created_at?: string
+          gap_description: string
+          gap_type: string
+          id?: string
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          recommended_fix?: string | null
+          severity?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          affected_date?: string | null
+          affected_platform?: string | null
+          business_id?: string
+          calendar_id?: string | null
+          created_at?: string
+          gap_description?: string
+          gap_type?: string
+          id?: string
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          recommended_fix?: string | null
+          severity?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_calendar_gap_reviews_calendar_id_fkey"
+            columns: ["calendar_id"]
+            isOneToOne: false
+            referencedRelation: "social_calendars"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_calendar_generation_runs: {
+        Row: {
+          blocked_items_count: number | null
+          business_id: string
+          compliance_warnings: string[] | null
+          confidence_score: number | null
+          created_at: string
+          generated_calendar_id: string | null
+          id: string
+          is_test_data: boolean | null
+          metadata: Json | null
+          missing_assets: string[] | null
+          model_notes: string | null
+          proposed_items_count: number | null
+          requested_days: number | null
+          requested_end_date: string | null
+          requested_platforms: string[] | null
+          requested_start_date: string | null
+          run_status: string | null
+          run_type: string
+          saved_items_count: number | null
+          source_campaign_id: string | null
+          source_pack_id: string | null
+          source_revenue_strategy_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          blocked_items_count?: number | null
+          business_id: string
+          compliance_warnings?: string[] | null
+          confidence_score?: number | null
+          created_at?: string
+          generated_calendar_id?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          missing_assets?: string[] | null
+          model_notes?: string | null
+          proposed_items_count?: number | null
+          requested_days?: number | null
+          requested_end_date?: string | null
+          requested_platforms?: string[] | null
+          requested_start_date?: string | null
+          run_status?: string | null
+          run_type: string
+          saved_items_count?: number | null
+          source_campaign_id?: string | null
+          source_pack_id?: string | null
+          source_revenue_strategy_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          blocked_items_count?: number | null
+          business_id?: string
+          compliance_warnings?: string[] | null
+          confidence_score?: number | null
+          created_at?: string
+          generated_calendar_id?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          missing_assets?: string[] | null
+          model_notes?: string | null
+          proposed_items_count?: number | null
+          requested_days?: number | null
+          requested_end_date?: string | null
+          requested_platforms?: string[] | null
+          requested_start_date?: string | null
+          run_status?: string | null
+          run_type?: string
+          saved_items_count?: number | null
+          source_campaign_id?: string | null
+          source_pack_id?: string | null
+          source_revenue_strategy_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      social_calendar_items: {
+        Row: {
+          approval_status: string | null
+          asset_id: string | null
+          asset_status: string | null
+          block_reason: string | null
+          business_id: string
+          calendar_id: string
+          campaign_plan_id: string | null
+          compliance_status: string | null
+          content_goal: string | null
+          content_item_id: string | null
+          content_pack_id: string | null
+          content_variant_id: string | null
+          created_at: string
+          customer_journey_stage: string | null
+          day_number: number | null
+          funnel_stage: string | null
+          id: string
+          is_test_data: boolean | null
+          metadata: Json | null
+          notes: string | null
+          offer_mapping_id: string | null
+          planned_date: string
+          planned_time: string | null
+          platform: string
+          provider: string | null
+          queue_readiness: string | null
+          slot_label: string | null
+          status: string | null
+          timezone: string | null
+          updated_at: string
+          week_number: number | null
+        }
+        Insert: {
+          approval_status?: string | null
+          asset_id?: string | null
+          asset_status?: string | null
+          block_reason?: string | null
+          business_id: string
+          calendar_id: string
+          campaign_plan_id?: string | null
+          compliance_status?: string | null
+          content_goal?: string | null
+          content_item_id?: string | null
+          content_pack_id?: string | null
+          content_variant_id?: string | null
+          created_at?: string
+          customer_journey_stage?: string | null
+          day_number?: number | null
+          funnel_stage?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          notes?: string | null
+          offer_mapping_id?: string | null
+          planned_date: string
+          planned_time?: string | null
+          platform: string
+          provider?: string | null
+          queue_readiness?: string | null
+          slot_label?: string | null
+          status?: string | null
+          timezone?: string | null
+          updated_at?: string
+          week_number?: number | null
+        }
+        Update: {
+          approval_status?: string | null
+          asset_id?: string | null
+          asset_status?: string | null
+          block_reason?: string | null
+          business_id?: string
+          calendar_id?: string
+          campaign_plan_id?: string | null
+          compliance_status?: string | null
+          content_goal?: string | null
+          content_item_id?: string | null
+          content_pack_id?: string | null
+          content_variant_id?: string | null
+          created_at?: string
+          customer_journey_stage?: string | null
+          day_number?: number | null
+          funnel_stage?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          notes?: string | null
+          offer_mapping_id?: string | null
+          planned_date?: string
+          planned_time?: string | null
+          platform?: string
+          provider?: string | null
+          queue_readiness?: string | null
+          slot_label?: string | null
+          status?: string | null
+          timezone?: string | null
+          updated_at?: string
+          week_number?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_calendar_items_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "social_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_calendar_items_calendar_id_fkey"
+            columns: ["calendar_id"]
+            isOneToOne: false
+            referencedRelation: "social_calendars"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_calendar_items_content_item_id_fkey"
+            columns: ["content_item_id"]
+            isOneToOne: false
+            referencedRelation: "social_content_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_calendar_items_content_variant_id_fkey"
+            columns: ["content_variant_id"]
+            isOneToOne: false
+            referencedRelation: "social_content_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_calendars: {
+        Row: {
+          approval_status: string | null
+          blocked_reasons: string[] | null
+          business_id: string
+          calendar_goal: string | null
+          calendar_name: string
+          calendar_status: string | null
+          calendar_summary: string | null
+          calendar_type: string
+          campaign_plan_id: string | null
+          compliance_warnings: string[] | null
+          content_pack_id: string | null
+          created_at: string
+          end_date: string
+          founder_notes: string | null
+          id: string
+          is_test_data: boolean | null
+          metadata: Json | null
+          missing_assets: string[] | null
+          platforms: string[] | null
+          posting_cadence: Json | null
+          readiness_score: number | null
+          revenue_strategy_id: string | null
+          start_date: string
+          timezone: string | null
+          updated_at: string
+        }
+        Insert: {
+          approval_status?: string | null
+          blocked_reasons?: string[] | null
+          business_id: string
+          calendar_goal?: string | null
+          calendar_name: string
+          calendar_status?: string | null
+          calendar_summary?: string | null
+          calendar_type: string
+          campaign_plan_id?: string | null
+          compliance_warnings?: string[] | null
+          content_pack_id?: string | null
+          created_at?: string
+          end_date: string
+          founder_notes?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          missing_assets?: string[] | null
+          platforms?: string[] | null
+          posting_cadence?: Json | null
+          readiness_score?: number | null
+          revenue_strategy_id?: string | null
+          start_date: string
+          timezone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approval_status?: string | null
+          blocked_reasons?: string[] | null
+          business_id?: string
+          calendar_goal?: string | null
+          calendar_name?: string
+          calendar_status?: string | null
+          calendar_summary?: string | null
+          calendar_type?: string
+          campaign_plan_id?: string | null
+          compliance_warnings?: string[] | null
+          content_pack_id?: string | null
+          created_at?: string
+          end_date?: string
+          founder_notes?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          missing_assets?: string[] | null
+          platforms?: string[] | null
+          posting_cadence?: Json | null
+          readiness_score?: number | null
+          revenue_strategy_id?: string | null
+          start_date?: string
+          timezone?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_calendars_content_pack_id_fkey"
+            columns: ["content_pack_id"]
+            isOneToOne: false
+            referencedRelation: "social_content_packs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       social_campaign_content_map: {
         Row: {
           asset_id: string | null
@@ -20484,6 +20910,9 @@ export type Database = {
           asset_readiness_status: string
           automation_status: string | null
           business_id: string
+          calendar_id: string | null
+          calendar_item_id: string | null
+          calendar_status: string | null
           campaign_id: string | null
           campaign_plan_id: string | null
           caption: string | null
@@ -20510,6 +20939,7 @@ export type Database = {
           offer_mapping_id: string | null
           operator_notes: string | null
           pack_id: string | null
+          planned_at: string | null
           platform: string
           provider: string | null
           publish_readiness: string
@@ -20531,6 +20961,9 @@ export type Database = {
           asset_readiness_status?: string
           automation_status?: string | null
           business_id: string
+          calendar_id?: string | null
+          calendar_item_id?: string | null
+          calendar_status?: string | null
           campaign_id?: string | null
           campaign_plan_id?: string | null
           caption?: string | null
@@ -20557,6 +20990,7 @@ export type Database = {
           offer_mapping_id?: string | null
           operator_notes?: string | null
           pack_id?: string | null
+          planned_at?: string | null
           platform: string
           provider?: string | null
           publish_readiness?: string
@@ -20578,6 +21012,9 @@ export type Database = {
           asset_readiness_status?: string
           automation_status?: string | null
           business_id?: string
+          calendar_id?: string | null
+          calendar_item_id?: string | null
+          calendar_status?: string | null
           campaign_id?: string | null
           campaign_plan_id?: string | null
           caption?: string | null
@@ -20604,6 +21041,7 @@ export type Database = {
           offer_mapping_id?: string | null
           operator_notes?: string | null
           pack_id?: string | null
+          planned_at?: string | null
           platform?: string
           provider?: string | null
           publish_readiness?: string
@@ -20710,6 +21148,8 @@ export type Database = {
         Row: {
           approval_status: string
           business_id: string
+          calendar_generation_status: string | null
+          calendar_id: string | null
           campaign_id: string | null
           campaign_plan_id: string | null
           compliance_warnings: string[]
@@ -20743,6 +21183,8 @@ export type Database = {
         Insert: {
           approval_status?: string
           business_id: string
+          calendar_generation_status?: string | null
+          calendar_id?: string | null
           campaign_id?: string | null
           campaign_plan_id?: string | null
           compliance_warnings?: string[]
@@ -20776,6 +21218,8 @@ export type Database = {
         Update: {
           approval_status?: string
           business_id?: string
+          calendar_generation_status?: string | null
+          calendar_id?: string | null
           campaign_id?: string | null
           campaign_plan_id?: string | null
           compliance_warnings?: string[]

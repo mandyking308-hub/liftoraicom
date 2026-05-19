@@ -27,6 +27,7 @@ import {
 } from "@/components/founder/social-autopilot/SocialProfilePanels";
 import { SocialContentFactoryDashboard } from "@/components/founder/social-autopilot/SocialContentFactoryPanels";
 import { SocialCampaignEngineDashboard } from "@/components/founder/social-autopilot/SocialCampaignEnginePanels";
+import { SocialCalendarDashboard } from "@/components/founder/social-autopilot/SocialCalendarPanels";
 
 const TAB_BY_PATH: Record<string, string> = {
   "/founder/social-autopilot": "dashboard",
@@ -261,7 +262,7 @@ export default function SocialAutopilotPage() {
           <TabsContent value="accounts"><AccountsPanel businessId={businessId} /></TabsContent>
           <TabsContent value="assets"><GenericListPanel table="social_assets" businessId={businessId} title="Social Asset Library" /></TabsContent>
           <TabsContent value="content"><SocialContentFactoryDashboard businessId={businessId} /></TabsContent>
-          <TabsContent value="calendar"><GenericListPanel table="social_content_items" businessId={businessId} title="Calendar (scheduled drafts)" /></TabsContent>
+          <TabsContent value="calendar"><SocialCalendarDashboard businessId={businessId} /></TabsContent>
           <TabsContent value="publishing"><GenericListPanel table="social_publish_jobs" businessId={businessId} title="Publishing Queue (locked)" /></TabsContent>
           <TabsContent value="inbox"><GenericListPanel table="social_inbox_messages" businessId={businessId} title="Social Inbox" /></TabsContent>
           <TabsContent value="replies"><GenericListPanel table="social_reply_jobs" businessId={businessId} title="Reply Drafts (locked)" /></TabsContent>
