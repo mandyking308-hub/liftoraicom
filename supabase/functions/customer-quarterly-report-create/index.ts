@@ -10,12 +10,9 @@ Deno.serve(async (req) => {
   if ((confirm as any).dry_run) {
     return json({ ok: true, dry_run: true, no_records_mutated: true, would_insert_into: 'customer_quarterly_reports', confirmation_required: 'CREATE CUSTOMER QUARTERLY REPORT', ...SAFETY });
   }
-  const { record, ...rest } = body;
-  const row = { business_id: body.business_id, ...(record ?? {}), ...rest };
-  delete (row as any).dry_run;
-  delete (row as any).confirmation;
-  row.external_share_allowed = row.external_share_allowed ?? false;
-  row.external_send_allowed = row.external_send_allowed ?? false;
+  const row: Record<string, any> = { business_id: body.business_id, ...(body?.record ?? {}) };
+  if ("external_share_allowed" in row) row.external_share_allowed = false;
+  if ("external_send_allowed" in row) row.external_send_allowed = false;
   const { data, error } = await auth.admin.from('customer_quarterly_reports').insert(row).select('*').single();
   if (error) return json({ error: error.message }, 400);
   await audit(auth.admin, { business_id: body.business_id, action: 'quarterly_report_created', after_json: data, is_test_data: row.is_test_data ?? false });
