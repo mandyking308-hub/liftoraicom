@@ -467,6 +467,39 @@ export const USING_SOCIAL_AUTOPILOT = {
   ],
 };
 
+export const USING_SOCIAL_CALENDAR = {
+  title: "Using the Social Calendar",
+  summary:
+    "The Social Calendar turns approved or draft content packs, campaigns, revenue strategies and platform/cadence rules into a planned schedule. It supports day, week and month views. It remains internal only — Liftor does not post or schedule with any external provider from this layer.",
+  views: [
+    "Day view — slots by time with platform, status, asset and approval markers.",
+    "Week view — 7-day grid with per-day platform counts and blocked markers.",
+    "Month view — month grid with gap and blocked markers.",
+    "Calendar types: 7, 14, 30, 90 day, plus campaign, revenue_goal, evergreen, launch, retention, custom.",
+  ],
+  safety: [
+    "No posts published from the calendar.",
+    "No external scheduling, no Metricool/Buffer/Hootsuite/ManyChat/IG/TikTok/FB/YT/LinkedIn/X API calls.",
+    "No cron, no auto_send, no provider scheduled jobs.",
+    "Blocked items must have assets/compliance/approval resolved before they can move to the publishing queue (later prompt).",
+  ],
+  flow: [
+    "Generate cadence rules per business and platform (CREATE SOCIAL CADENCE RULES).",
+    "Preview calendar from a content pack / campaign / revenue strategy.",
+    "Create calendar with confirmation phrase CREATE SOCIAL CALENDAR.",
+    "Run readiness check (SAVE SOCIAL CALENDAR READINESS REVIEW) and gap analysis (SAVE SOCIAL CALENDAR GAPS).",
+    "Reschedule internally with APPLY SOCIAL CALENDAR RESCHEDULE — no external schedules are touched.",
+    "Purge test calendars with PURGE SOCIAL CALENDAR TEST DATA before real use.",
+  ],
+  technical: [
+    "Tables: social_calendars, social_calendar_items, social_calendar_generation_runs, social_calendar_cadence_rules, social_calendar_gap_reviews.",
+    "Extended: social_content_items.calendar_id/calendar_item_id/planned_at/calendar_status; social_content_packs.calendar_id/calendar_generation_status.",
+    "Edge functions: social-calendar-preview, -create, -day-view, -week-view, -month-view, -cadence-generate, -readiness-check, -gap-analysis, -reschedule-preview, -reschedule-apply, -healthcheck, -rehearsal-purge, -acceptance.",
+    "Command Centre: Daily Operator View shows the Calendar tile (calendars, items, blocked, queue ready, cadence rules, open gaps, next action). Full Diagnostic View shows raw calendar diagnostics.",
+    "Safety rule: no external scheduling, no provider API calls, no real-data deletion (purge gated to is_test_data=true).",
+  ],
+};
+
 export const USING_SOCIAL_BRAIN_CONNECTOR = {
   title: "Business Knowledge → Social Brain",
   summary:
