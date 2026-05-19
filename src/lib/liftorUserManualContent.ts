@@ -544,3 +544,48 @@ export const TECHNICAL_SOCIAL_OPERATING_PROFILE = {
   command_centre:
     "Daily Operator View shows Social Operating Profile summary (confidence, approved pillars, active platforms, offers, open/critical risks, ready-for-content, next action). Full editing happens on /founder/social-autopilot.",
 };
+
+export const socialContentFactoryUserManual = {
+  title: "Creating Social Content Packs",
+  what_it_does:
+    "The Content Factory generates 7/14/30/90-day social packs per business from the Social Brain, content pillars, platform rules, offers, asset library and hook/caption bank. All output is internal draft only — nothing publishes, schedules or DMs.",
+  how_to_use: [
+    "Select the business and make sure its Social Brain and Social Operating Profile are approved.",
+    "Register social assets so rights/consent can be checked (missing assets are flagged, not auto-filled).",
+    "Open Social Autopilot → Content. Choose days (7/14/30/90), platforms, goal and start date. Click Preview.",
+    "Review proposed posts, variants, missing-asset list and compliance warnings.",
+    "Type CREATE SOCIAL CONTENT PACK to save the draft pack. Items are draft / not_queued / not_ready by default.",
+    "Run Content Quality Check on each item. Approve only after founder review. Publishing queue and calendar are handled in later prompts.",
+  ],
+  safety:
+    "No external publish, no provider API call, no DM/email/comment send, no auto_send, no cron. Sensitive sectors (health/finance/legal/education/property) auto-flag for founder/legal review.",
+};
+
+export const socialContentFactoryTechnicalManual = {
+  title: "Content Factory — Technical",
+  tables: [
+    "social_content_packs — pack header, status, days, platforms, risk, warnings.",
+    "social_content_pack_items — links posts to packs with day/order/platform/asset.",
+    "social_content_generation_runs — audit of every preview/save with source/output summaries and confidence.",
+    "social_content_variants — per-platform variations (hook/caption/script/carousel/hashtags/CTA).",
+    "social_content_quality_reviews — quality/brand/compliance/asset readiness scores + issues/recs.",
+    "social_content_items extended with hook, script, carousel_outline, content_goal, target_audience, content_pillar_id, offer_mapping_id, pack_id, quality_status, asset_readiness_status, compliance_status, publish_readiness.",
+  ],
+  functions: [
+    "social-content-pack-preview / social-content-pack-create (CREATE SOCIAL CONTENT PACK)",
+    "social-platform-variants-preview / social-platform-variants-create (CREATE SOCIAL PLATFORM VARIANTS)",
+    "social-hooks-captions-generate (SAVE GENERATED SOCIAL COPY)",
+    "social-reel-script-generate (SAVE SOCIAL REEL SCRIPTS)",
+    "social-carousel-outline-generate (SAVE SOCIAL CAROUSEL OUTLINES)",
+    "social-content-quality-check (SAVE SOCIAL CONTENT QUALITY REVIEW)",
+    "social-content-factory-healthcheck — read-only summary.",
+    "social-content-pack-rehearsal-purge (PURGE SOCIAL CONTENT TEST DATA) — test-data only.",
+    "social-content-factory-acceptance — verifies tables/columns/functions.",
+  ],
+  asset_readiness:
+    "Items with no usable asset → asset_readiness_status=missing_asset / publish_readiness=not_ready. Unknown rights → rights_review_required / blocked. Blocked assets never marked ready.",
+  safety:
+    "All confirmation-phrase gated. No provider calls. RLS founder/admin-only. is_test_data flag isolates rehearsal data; purge only removes is_test_data=true rows.",
+  command_centre:
+    "Daily Operator View Social Autopilot block shows Content Factory tiles (packs, drafts, need-review, blocked, missing assets, variants, hooks, quality warnings, ready→calendar) and the next action.",
+};

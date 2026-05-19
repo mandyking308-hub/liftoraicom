@@ -10,6 +10,7 @@ export default function SocialAutopilotCommandCentreBlock() {
   const [data, setData] = useState<any>(null);
   const [brain, setBrain] = useState<any>(null);
   const [readiness, setReadiness] = useState<any>(null);
+  const [factory, setFactory] = useState<any>(null);
   const businessId = typeof window !== "undefined" ? localStorage.getItem("liftor.activeBusinessId") || "" : "";
 
   useEffect(() => {
@@ -26,6 +27,9 @@ export default function SocialAutopilotCommandCentreBlock() {
           const r = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/social-profile-readiness-check?business_id=${businessId}`,
             { headers: { Authorization: `Bearer ${session?.access_token ?? ""}` } });
           setReadiness(await r.json());
+          const f = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/social-content-factory-healthcheck?business_id=${businessId}`,
+            { headers: { Authorization: `Bearer ${session?.access_token ?? ""}` } });
+          setFactory(await f.json());
         }
       } catch { /* ignore */ }
     })();
@@ -109,6 +113,23 @@ export default function SocialAutopilotCommandCentreBlock() {
                 return "Resolve missing inputs.";
               })()}
             </p>
+          </div>
+        )}
+        {businessId && factory && (
+          <div className="mt-3 p-3 rounded bg-secondary/40">
+            <p className="text-xs font-semibold mb-1">Content Factory</p>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-[11px]">
+              <span>Packs: {factory.content_packs_count ?? 0}</span>
+              <span>Drafts: {factory.draft_items_count ?? 0}</span>
+              <span>Need review: {factory.items_needing_review ?? 0}</span>
+              <span>Blocked: {factory.blocked_content_count ?? 0}</span>
+              <span>Missing assets: {factory.missing_asset_count ?? 0}</span>
+              <span>Variants: {factory.variants_count ?? 0}</span>
+              <span>Hooks/captions: {factory.hooks_bank_count ?? 0}</span>
+              <span>Quality warn.: {factory.compliance_warning_count ?? 0}</span>
+              <span>Ready→calendar: {factory.ready_for_calendar_generation ? "YES" : "no"}</span>
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-2">Next: {factory.next_action}</p>
           </div>
         )}
         <p className="mt-3 text-xs text-muted-foreground">

@@ -25,6 +25,7 @@ import {
   SocialProfileReadinessPanel,
   SocialProfileVersionHistoryPanel,
 } from "@/components/founder/social-autopilot/SocialProfilePanels";
+import { SocialContentFactoryDashboard } from "@/components/founder/social-autopilot/SocialContentFactoryPanels";
 
 const TAB_BY_PATH: Record<string, string> = {
   "/founder/social-autopilot": "dashboard",
@@ -258,7 +259,7 @@ export default function SocialAutopilotPage() {
           <TabsContent value="dashboard"><DashboardPanel businessId={businessId} /></TabsContent>
           <TabsContent value="accounts"><AccountsPanel businessId={businessId} /></TabsContent>
           <TabsContent value="assets"><GenericListPanel table="social_assets" businessId={businessId} title="Social Asset Library" /></TabsContent>
-          <TabsContent value="content"><GenericListPanel table="social_content_items" businessId={businessId} title="Content Studio (drafts)" /></TabsContent>
+          <TabsContent value="content"><SocialContentFactoryDashboard businessId={businessId} /></TabsContent>
           <TabsContent value="calendar"><GenericListPanel table="social_content_items" businessId={businessId} title="Calendar (scheduled drafts)" /></TabsContent>
           <TabsContent value="publishing"><GenericListPanel table="social_publish_jobs" businessId={businessId} title="Publishing Queue (locked)" /></TabsContent>
           <TabsContent value="inbox"><GenericListPanel table="social_inbox_messages" businessId={businessId} title="Social Inbox" /></TabsContent>
