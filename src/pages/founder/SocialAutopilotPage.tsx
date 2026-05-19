@@ -32,6 +32,7 @@ import { SocialApprovalDashboard } from "@/components/founder/social-autopilot/S
 import { SocialPublishingDashboard } from "@/components/founder/social-autopilot/SocialPublishingPanels";
 import { SocialSchedulerBridgeDashboard } from "@/components/founder/social-autopilot/SocialSchedulerBridgePanels";
 import { SocialEngagementFlowDashboard } from "@/components/founder/social-autopilot/SocialEngagementFlowPanels";
+import { SocialEngagementInboxDashboard } from "@/components/founder/social-autopilot/SocialEngagementInboxPanels";
 
 const TAB_BY_PATH: Record<string, string> = {
   "/founder/social-autopilot": "dashboard",
@@ -270,7 +271,7 @@ export default function SocialAutopilotPage() {
           <TabsContent value="content"><SocialContentFactoryDashboard businessId={businessId} /></TabsContent>
           <TabsContent value="calendar"><SocialCalendarDashboard businessId={businessId} /></TabsContent>
           <TabsContent value="publishing"><GenericListPanel table="social_publish_jobs" businessId={businessId} title="Publishing Queue (locked)" /></TabsContent>
-          <TabsContent value="inbox"><GenericListPanel table="social_inbox_messages" businessId={businessId} title="Social Inbox" /></TabsContent>
+          <TabsContent value="inbox"><SocialEngagementInboxDashboard businessId={businessId} /></TabsContent>
           <TabsContent value="replies"><GenericListPanel table="social_reply_jobs" businessId={businessId} title="Reply Drafts (locked)" /></TabsContent>
           <TabsContent value="engagement"><SocialEngagementFlowDashboard businessId={businessId} /></TabsContent>
           <TabsContent value="performance"><GenericListPanel table="social_performance_logs" businessId={businessId} title="Performance Logs" /></TabsContent>
@@ -316,6 +317,10 @@ export default function SocialAutopilotPage() {
         <div className="space-y-4">
           <h2 className="text-lg font-semibold mt-6">ManyChat / Keyword + DM Flow Planner</h2>
           <SocialEngagementFlowDashboard businessId={businessId} />
+        </div>
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold mt-6">Social Engagement Inbox</h2>
+          <SocialEngagementInboxDashboard businessId={businessId} />
         </div>
       </div>
     </FounderLayout>

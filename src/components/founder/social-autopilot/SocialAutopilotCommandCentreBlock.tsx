@@ -16,6 +16,7 @@ export default function SocialAutopilotCommandCentreBlock() {
   const [publishing, setPublishing] = useState<any>(null);
   const [bridge, setBridge] = useState<any>(null);
   const [engagement, setEngagement] = useState<any>(null);
+  const [inbox, setInbox] = useState<any>(null);
   const businessId = typeof window !== "undefined" ? localStorage.getItem("liftor.activeBusinessId") || "" : "";
 
   useEffect(() => {
@@ -50,6 +51,9 @@ export default function SocialAutopilotCommandCentreBlock() {
           const en = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/social-engagement-flow-healthcheck?business_id=${businessId}`,
             { headers: { Authorization: `Bearer ${session?.access_token ?? ""}` } });
           setEngagement(await en.json());
+          const inb = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/social-engagement-inbox-healthcheck?business_id=${businessId}`,
+            { headers: { Authorization: `Bearer ${session?.access_token ?? ""}` } });
+          setInbox(await inb.json());
         }
       } catch { /* ignore */ }
     })();
@@ -276,6 +280,37 @@ export default function SocialAutopilotCommandCentreBlock() {
               if ((engagement.validation_failed_count ?? 0) > 0) return "Fix flow validation failures.";
               if ((engagement.manually_configured_count ?? 0) === 0) return "Configure flow manually in ManyChat, then confirm in Liftor.";
               return "Mark configured flows live after operator verifies them externally.";
+            })()}</p>
+          </div>
+        )}
+        {businessId && inbox && (
+          <div className="mt-3 p-3 rounded bg-secondary/40">
+            <p className="text-xs font-semibold mb-1 flex items-center gap-1"><Lock size={12} /> Engagement Inbox (capture only — no DMs/comments sent)</p>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-[11px]">
+              <span>Events: {inbox.engagement_events_total ?? 0}</span>
+              <span>Unclassified: {inbox.unclassified_count ?? 0}</span>
+              <span>Unmatched: {inbox.unmatched_count ?? 0}</span>
+              <span>Possible CRM: {inbox.possible_crm_matches ?? 0}</span>
+              <span>Drafts pending: {inbox.reply_drafts_count ?? 0}</span>
+              <span>Escalations open: {inbox.escalations_open ?? 0}</span>
+              <span>Complaints: {inbox.complaints_detected ?? 0}</span>
+              <span>Support: {inbox.support_detected ?? 0}</span>
+              <span>Creator: {inbox.creator_interest_detected ?? 0}</span>
+              <span>Lead: {inbox.lead_interest_detected ?? 0}</span>
+              <span>Spam/abuse: {inbox.spam_abuse_count ?? 0}</span>
+              <span>DMs sent: {inbox.dms_sent_total ?? 0}</span>
+              <span>Comments sent: {inbox.comments_sent_total ?? 0}</span>
+              <span>Provider calls: {inbox.provider_calls_total ?? 0}</span>
+              <span>Ext actions: {inbox.external_actions_total ?? 0}</span>
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-2">Next: {(() => {
+              if ((inbox.engagement_events_total ?? 0) === 0) return "Capture or import first engagement event.";
+              if ((inbox.unclassified_count ?? 0) > 0) return `Classify ${inbox.unclassified_count} captured events.`;
+              if ((inbox.unmatched_count ?? 0) > 0) return `Match ${inbox.unmatched_count} events to CRM.`;
+              if ((inbox.complaints_detected ?? 0) > 0 || (inbox.support_detected ?? 0) > 0) return "Escalate complaints/support to the right human layer.";
+              if ((inbox.reply_drafts_count ?? 0) === 0) return "Draft internal replies for high-priority events.";
+              if ((inbox.test_data_count ?? 0) > 0) return "Purge test engagement before real use.";
+              return "Inbox healthy — keep capturing and reviewing.";
             })()}</p>
           </div>
         )}

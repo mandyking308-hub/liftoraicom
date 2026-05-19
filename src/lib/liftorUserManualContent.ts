@@ -609,6 +609,32 @@ export const SOCIAL_ENGAGEMENT_FLOW_PLANNER = {
   ],
 };
 
+export const SOCIAL_ENGAGEMENT_INBOX = {
+  title: "Social Engagement Inbox",
+  summary:
+    "Liftor captures comments, DMs, keyword events and other social engagement signals — manually entered, imported (CSV/operator) or via the future fail-closed provider receiver. It classifies intent/sentiment/urgency/risk, tries to match the person to CRM memory, and drafts internal replies. Liftor never sends DMs or comments and never calls ManyChat/Meta/TikTok/YouTube/LinkedIn/X APIs.",
+  rules: [
+    "No DMs sent. No comments sent. No auto-replies. No provider API calls. No external publishing or scheduling.",
+    "No real CRM contact is created from a social handle alone — possible matches go to founder review.",
+    "Complaints, support requests and high-value creator/press/licensing signals are escalated internally to the right human/agent layer.",
+    "Test engagement (is_test_data=true) must be purged before real use via PURGE SOCIAL ENGAGEMENT TEST DATA.",
+    "Each business has its own engagement inbox.",
+  ],
+  steps: [
+    "Open Social Autopilot → Inbox.",
+    "Capture a single event (CAPTURE SOCIAL ENGAGEMENT) or import a batch (IMPORT SOCIAL ENGAGEMENT).",
+    "Run Classification preview, then save with CLASSIFY SOCIAL ENGAGEMENT.",
+    "Preview CRM matches; apply safe matches with APPLY SOCIAL CRM MATCH (unmatched/possible go to founder review).",
+    "Preview a reply draft and save with CREATE SOCIAL REPLY DRAFT (external send stays disabled).",
+    "Escalate complaints/support/leads with CREATE SOCIAL ENGAGEMENT ESCALATION.",
+  ],
+  technical: [
+    "Tables: social_engagement_events (extended), social_engagement_classifications, social_engagement_crm_matches, social_engagement_reply_drafts, social_engagement_escalations, social_engagement_import_batches, social_engagement_audit. Counters added to keyword rules, DM flows, content items and calendar items.",
+    "Edge functions: social-engagement-capture-preview/-create, -import-preview/-create, -classify-preview/-create, -crm-match-preview/-apply, -reply-draft-preview/-create, -escalation-create, -provider-event-receiver (fail-closed), -inbox-healthcheck, -rehearsal-purge, -inbox-acceptance.",
+    "Command Centre Daily Operator View renders an Engagement Inbox tile with events, unclassified, unmatched, possible CRM matches, drafts, escalations, complaints/support/creator/lead/spam counts and provider_calls=0, dms_sent=0, comments_sent=0, external_actions=0.",
+  ],
+};
+
 export const USING_SOCIAL_BRAIN_CONNECTOR = {
   title: "Business Knowledge → Social Brain",
   summary:
