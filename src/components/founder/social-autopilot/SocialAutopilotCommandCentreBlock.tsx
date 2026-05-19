@@ -15,6 +15,7 @@ export default function SocialAutopilotCommandCentreBlock() {
   const [approval, setApproval] = useState<any>(null);
   const [publishing, setPublishing] = useState<any>(null);
   const [bridge, setBridge] = useState<any>(null);
+  const [engagement, setEngagement] = useState<any>(null);
   const businessId = typeof window !== "undefined" ? localStorage.getItem("liftor.activeBusinessId") || "" : "";
 
   useEffect(() => {
@@ -46,6 +47,9 @@ export default function SocialAutopilotCommandCentreBlock() {
           const br = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/social-scheduler-export-healthcheck`,
             { method: "POST", headers: { Authorization: `Bearer ${session?.access_token ?? ""}`, "Content-Type": "application/json" }, body: JSON.stringify({ business_id: businessId }) });
           setBridge(await br.json());
+          const en = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/social-engagement-flow-healthcheck?business_id=${businessId}`,
+            { headers: { Authorization: `Bearer ${session?.access_token ?? ""}` } });
+          setEngagement(await en.json());
         }
       } catch { /* ignore */ }
     })();
@@ -246,6 +250,32 @@ export default function SocialAutopilotCommandCentreBlock() {
               if ((bridge.downloaded_count ?? 0) === 0) return "Generate CSV and mark downloaded.";
               if ((bridge.operator_tasks_open ?? 0) === 0) return "Create operator pack.";
               return "Confirm manual scheduling after external upload.";
+            })()}</p>
+          </div>
+        )}
+        {businessId && engagement && (
+          <div className="mt-3 p-3 rounded bg-secondary/40">
+            <p className="text-xs font-semibold mb-1 flex items-center gap-1"><Lock size={12} /> Engagement / ManyChat (planning only — no DMs sent)</p>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-[11px]">
+              <span>Keyword rules: {engagement.keyword_rules_total ?? 0} ({engagement.keyword_rules_approved ?? 0} approved)</span>
+              <span>DM flows: {engagement.dm_flows_total ?? 0} ({engagement.dm_flows_approved ?? 0} approved)</span>
+              <span>Manual exports: {engagement.manual_exports_total ?? 0}</span>
+              <span>Manually configured: {engagement.manually_configured_count ?? 0}</span>
+              <span>Manually live: {engagement.manually_live_count ?? 0}</span>
+              <span>Validation failed: {engagement.validation_failed_count ?? 0}</span>
+              <span>Blocked flows: {engagement.blocked_flows ?? 0}</span>
+              <span>DMs sent: {engagement.dms_sent_total ?? 0}</span>
+              <span>Comments sent: {engagement.comments_sent_total ?? 0}</span>
+              <span>Provider calls: {engagement.provider_calls_total ?? 0}</span>
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-2">Next: {(() => {
+              if ((engagement.keyword_rules_total ?? 0) === 0) return "Create first keyword trigger rule (e.g. CANDY).";
+              if ((engagement.dm_flows_total ?? 0) === 0) return "Create first DM flow blueprint.";
+              if ((engagement.dm_flows_approved ?? 0) === 0) return "Approve a DM flow internally.";
+              if ((engagement.manual_exports_total ?? 0) === 0) return "Create ManyChat manual setup export.";
+              if ((engagement.validation_failed_count ?? 0) > 0) return "Fix flow validation failures.";
+              if ((engagement.manually_configured_count ?? 0) === 0) return "Configure flow manually in ManyChat, then confirm in Liftor.";
+              return "Mark configured flows live after operator verifies them externally.";
             })()}</p>
           </div>
         )}

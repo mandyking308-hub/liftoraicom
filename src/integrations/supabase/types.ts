@@ -20620,10 +20620,13 @@ export type Database = {
           created_at: string
           customer_journey_stage: string | null
           day_number: number | null
+          dm_flow_id: string | null
+          engagement_flow_status: string | null
           founder_approval_review_id: string | null
           funnel_stage: string | null
           id: string
           is_test_data: boolean | null
+          keyword_trigger: string | null
           metadata: Json | null
           notes: string | null
           offer_mapping_id: string | null
@@ -20657,10 +20660,13 @@ export type Database = {
           created_at?: string
           customer_journey_stage?: string | null
           day_number?: number | null
+          dm_flow_id?: string | null
+          engagement_flow_status?: string | null
           founder_approval_review_id?: string | null
           funnel_stage?: string | null
           id?: string
           is_test_data?: boolean | null
+          keyword_trigger?: string | null
           metadata?: Json | null
           notes?: string | null
           offer_mapping_id?: string | null
@@ -20694,10 +20700,13 @@ export type Database = {
           created_at?: string
           customer_journey_stage?: string | null
           day_number?: number | null
+          dm_flow_id?: string | null
+          engagement_flow_status?: string | null
           founder_approval_review_id?: string | null
           funnel_stage?: string | null
           id?: string
           is_test_data?: boolean | null
+          keyword_trigger?: string | null
           metadata?: Json | null
           notes?: string | null
           offer_mapping_id?: string | null
@@ -20956,12 +20965,15 @@ export type Database = {
           compliance_warnings: string[]
           created_at: string
           customer_journey_stage: string | null
+          dm_flow_id: string | null
           end_date: string | null
+          engagement_flow_status: string | null
           founder_notes: string | null
           funnel_stage: string | null
           id: string
           is_test_data: boolean
           key_message: string | null
+          keyword_flow_id: string | null
           linked_revenue_target_id: string | null
           linked_social_content_pack_id: string | null
           metadata: Json
@@ -20990,12 +21002,15 @@ export type Database = {
           compliance_warnings?: string[]
           created_at?: string
           customer_journey_stage?: string | null
+          dm_flow_id?: string | null
           end_date?: string | null
+          engagement_flow_status?: string | null
           founder_notes?: string | null
           funnel_stage?: string | null
           id?: string
           is_test_data?: boolean
           key_message?: string | null
+          keyword_flow_id?: string | null
           linked_revenue_target_id?: string | null
           linked_social_content_pack_id?: string | null
           metadata?: Json
@@ -21024,12 +21039,15 @@ export type Database = {
           compliance_warnings?: string[]
           created_at?: string
           customer_journey_stage?: string | null
+          dm_flow_id?: string | null
           end_date?: string | null
+          engagement_flow_status?: string | null
           founder_notes?: string | null
           funnel_stage?: string | null
           id?: string
           is_test_data?: boolean
           key_message?: string | null
+          keyword_flow_id?: string | null
           linked_revenue_target_id?: string | null
           linked_social_content_pack_id?: string | null
           metadata?: Json
@@ -21340,6 +21358,8 @@ export type Database = {
           created_at: string | null
           cta: string | null
           customer_journey_stage: string | null
+          dm_flow_id: string | null
+          engagement_flow_status: string | null
           founder_approval_review_id: string | null
           founder_notes: string | null
           funnel_stage: string | null
@@ -21348,6 +21368,7 @@ export type Database = {
           hook: string | null
           id: string
           is_test_data: boolean | null
+          keyword_trigger: string | null
           link_url: string | null
           metadata: Json | null
           offer_angle: string | null
@@ -21396,6 +21417,8 @@ export type Database = {
           created_at?: string | null
           cta?: string | null
           customer_journey_stage?: string | null
+          dm_flow_id?: string | null
+          engagement_flow_status?: string | null
           founder_approval_review_id?: string | null
           founder_notes?: string | null
           funnel_stage?: string | null
@@ -21404,6 +21427,7 @@ export type Database = {
           hook?: string | null
           id?: string
           is_test_data?: boolean | null
+          keyword_trigger?: string | null
           link_url?: string | null
           metadata?: Json | null
           offer_angle?: string | null
@@ -21452,6 +21476,8 @@ export type Database = {
           created_at?: string | null
           cta?: string | null
           customer_journey_stage?: string | null
+          dm_flow_id?: string | null
+          engagement_flow_status?: string | null
           founder_approval_review_id?: string | null
           founder_notes?: string | null
           funnel_stage?: string | null
@@ -21460,6 +21486,7 @@ export type Database = {
           hook?: string | null
           id?: string
           is_test_data?: boolean | null
+          keyword_trigger?: string | null
           link_url?: string | null
           metadata?: Json | null
           offer_angle?: string | null
@@ -21947,6 +21974,185 @@ export type Database = {
         }
         Relationships: []
       }
+      social_dm_flow_blueprints: {
+        Row: {
+          approval_status: string | null
+          business_id: string
+          button_label: string | null
+          button_url: string | null
+          campaign_plan_id: string | null
+          compliance_warnings: string[] | null
+          created_at: string | null
+          dm_opening_text: string | null
+          escalation_rules: Json | null
+          flow_name: string
+          flow_status: string | null
+          flow_type: string
+          follow_up_question: string | null
+          founder_notes: string | null
+          id: string
+          is_test_data: boolean | null
+          keyword_rule_id: string | null
+          metadata: Json | null
+          platform: string
+          primary_goal: string | null
+          public_reply_text: string | null
+          qualification_questions: Json | null
+          risk_flags: string[] | null
+          routing_rules: Json | null
+          stop_conditions: Json | null
+          target_audience: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          approval_status?: string | null
+          business_id: string
+          button_label?: string | null
+          button_url?: string | null
+          campaign_plan_id?: string | null
+          compliance_warnings?: string[] | null
+          created_at?: string | null
+          dm_opening_text?: string | null
+          escalation_rules?: Json | null
+          flow_name: string
+          flow_status?: string | null
+          flow_type: string
+          follow_up_question?: string | null
+          founder_notes?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          keyword_rule_id?: string | null
+          metadata?: Json | null
+          platform: string
+          primary_goal?: string | null
+          public_reply_text?: string | null
+          qualification_questions?: Json | null
+          risk_flags?: string[] | null
+          routing_rules?: Json | null
+          stop_conditions?: Json | null
+          target_audience?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          approval_status?: string | null
+          business_id?: string
+          button_label?: string | null
+          button_url?: string | null
+          campaign_plan_id?: string | null
+          compliance_warnings?: string[] | null
+          created_at?: string | null
+          dm_opening_text?: string | null
+          escalation_rules?: Json | null
+          flow_name?: string
+          flow_status?: string | null
+          flow_type?: string
+          follow_up_question?: string | null
+          founder_notes?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          keyword_rule_id?: string | null
+          metadata?: Json | null
+          platform?: string
+          primary_goal?: string | null
+          public_reply_text?: string | null
+          qualification_questions?: Json | null
+          risk_flags?: string[] | null
+          routing_rules?: Json | null
+          stop_conditions?: Json | null
+          target_audience?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_dm_flow_blueprints_campaign_plan_id_fkey"
+            columns: ["campaign_plan_id"]
+            isOneToOne: false
+            referencedRelation: "social_campaign_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_dm_flow_blueprints_keyword_rule_id_fkey"
+            columns: ["keyword_rule_id"]
+            isOneToOne: false
+            referencedRelation: "social_keyword_trigger_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_dm_flow_steps: {
+        Row: {
+          business_id: string
+          button_label: string | null
+          button_url: string | null
+          created_at: string | null
+          escalation_required: boolean | null
+          expected_response_type: string | null
+          flow_id: string
+          founder_review_required: boolean | null
+          id: string
+          is_test_data: boolean | null
+          message_text: string | null
+          metadata: Json | null
+          next_step_id: string | null
+          routing_condition: string | null
+          status: string | null
+          step_name: string | null
+          step_order: number
+          step_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          business_id: string
+          button_label?: string | null
+          button_url?: string | null
+          created_at?: string | null
+          escalation_required?: boolean | null
+          expected_response_type?: string | null
+          flow_id: string
+          founder_review_required?: boolean | null
+          id?: string
+          is_test_data?: boolean | null
+          message_text?: string | null
+          metadata?: Json | null
+          next_step_id?: string | null
+          routing_condition?: string | null
+          status?: string | null
+          step_name?: string | null
+          step_order?: number
+          step_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          business_id?: string
+          button_label?: string | null
+          button_url?: string | null
+          created_at?: string | null
+          escalation_required?: boolean | null
+          expected_response_type?: string | null
+          flow_id?: string
+          founder_review_required?: boolean | null
+          id?: string
+          is_test_data?: boolean | null
+          message_text?: string | null
+          metadata?: Json | null
+          next_step_id?: string | null
+          routing_condition?: string | null
+          status?: string | null
+          step_name?: string | null
+          step_order?: number
+          step_type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_dm_flow_steps_flow_id_fkey"
+            columns: ["flow_id"]
+            isOneToOne: false
+            referencedRelation: "social_dm_flow_blueprints"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       social_engagement_events: {
         Row: {
           business_id: string
@@ -22029,6 +22235,94 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_engagement_flow_audit: {
+        Row: {
+          action: string
+          action_status: string | null
+          after_json: Json | null
+          before_json: Json | null
+          business_id: string
+          comments_sent: number | null
+          created_at: string | null
+          created_by: string | null
+          dms_sent: number | null
+          error_message: string | null
+          export_id: string | null
+          flow_id: string | null
+          flows_created_externally: number | null
+          id: string
+          is_test_data: boolean | null
+          keyword_rule_id: string | null
+          metadata: Json | null
+          provider_calls: number | null
+          result_json: Json | null
+        }
+        Insert: {
+          action: string
+          action_status?: string | null
+          after_json?: Json | null
+          before_json?: Json | null
+          business_id: string
+          comments_sent?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          dms_sent?: number | null
+          error_message?: string | null
+          export_id?: string | null
+          flow_id?: string | null
+          flows_created_externally?: number | null
+          id?: string
+          is_test_data?: boolean | null
+          keyword_rule_id?: string | null
+          metadata?: Json | null
+          provider_calls?: number | null
+          result_json?: Json | null
+        }
+        Update: {
+          action?: string
+          action_status?: string | null
+          after_json?: Json | null
+          before_json?: Json | null
+          business_id?: string
+          comments_sent?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          dms_sent?: number | null
+          error_message?: string | null
+          export_id?: string | null
+          flow_id?: string | null
+          flows_created_externally?: number | null
+          id?: string
+          is_test_data?: boolean | null
+          keyword_rule_id?: string | null
+          metadata?: Json | null
+          provider_calls?: number | null
+          result_json?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_engagement_flow_audit_export_id_fkey"
+            columns: ["export_id"]
+            isOneToOne: false
+            referencedRelation: "social_manychat_manual_exports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_engagement_flow_audit_flow_id_fkey"
+            columns: ["flow_id"]
+            isOneToOne: false
+            referencedRelation: "social_dm_flow_blueprints"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_engagement_flow_audit_keyword_rule_id_fkey"
+            columns: ["keyword_rule_id"]
+            isOneToOne: false
+            referencedRelation: "social_keyword_trigger_rules"
             referencedColumns: ["id"]
           },
         ]
@@ -22179,6 +22473,103 @@ export type Database = {
           },
         ]
       }
+      social_keyword_trigger_rules: {
+        Row: {
+          business_id: string
+          calendar_item_id: string | null
+          campaign_plan_id: string | null
+          compliance_review_required: boolean | null
+          content_item_id: string | null
+          created_at: string | null
+          dm_flow_required: boolean | null
+          flow_id: string | null
+          founder_approval_required: boolean | null
+          id: string
+          is_test_data: boolean | null
+          keyword: string
+          keyword_normalized: string | null
+          metadata: Json | null
+          notes: string | null
+          platform: string
+          public_reply_required: boolean | null
+          risk_level: string | null
+          rule_name: string
+          rule_status: string | null
+          trigger_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          business_id: string
+          calendar_item_id?: string | null
+          campaign_plan_id?: string | null
+          compliance_review_required?: boolean | null
+          content_item_id?: string | null
+          created_at?: string | null
+          dm_flow_required?: boolean | null
+          flow_id?: string | null
+          founder_approval_required?: boolean | null
+          id?: string
+          is_test_data?: boolean | null
+          keyword: string
+          keyword_normalized?: string | null
+          metadata?: Json | null
+          notes?: string | null
+          platform: string
+          public_reply_required?: boolean | null
+          risk_level?: string | null
+          rule_name: string
+          rule_status?: string | null
+          trigger_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          business_id?: string
+          calendar_item_id?: string | null
+          campaign_plan_id?: string | null
+          compliance_review_required?: boolean | null
+          content_item_id?: string | null
+          created_at?: string | null
+          dm_flow_required?: boolean | null
+          flow_id?: string | null
+          founder_approval_required?: boolean | null
+          id?: string
+          is_test_data?: boolean | null
+          keyword?: string
+          keyword_normalized?: string | null
+          metadata?: Json | null
+          notes?: string | null
+          platform?: string
+          public_reply_required?: boolean | null
+          risk_level?: string | null
+          rule_name?: string
+          rule_status?: string | null
+          trigger_type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_keyword_trigger_rules_calendar_item_id_fkey"
+            columns: ["calendar_item_id"]
+            isOneToOne: false
+            referencedRelation: "social_calendar_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_keyword_trigger_rules_campaign_plan_id_fkey"
+            columns: ["campaign_plan_id"]
+            isOneToOne: false
+            referencedRelation: "social_campaign_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_keyword_trigger_rules_content_item_id_fkey"
+            columns: ["content_item_id"]
+            isOneToOne: false
+            referencedRelation: "social_content_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       social_manual_export_batches: {
         Row: {
           blocked_rows: number | null
@@ -22291,6 +22682,96 @@ export type Database = {
             columns: ["queue_batch_id"]
             isOneToOne: false
             referencedRelation: "social_publish_queue_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_manychat_manual_exports: {
+        Row: {
+          business_id: string
+          checklist: Json | null
+          confirmed_live_at: string | null
+          confirmed_live_by: string | null
+          copy_blocks: Json | null
+          created_at: string | null
+          export_name: string
+          export_payload: Json | null
+          export_status: string | null
+          flow_id: string | null
+          founder_notes: string | null
+          id: string
+          is_test_data: boolean | null
+          keyword_rule_id: string | null
+          manual_setup_status: string | null
+          metadata: Json | null
+          platform: string
+          setup_instructions: string | null
+          updated_at: string | null
+          validation_errors: string[] | null
+          validation_status: string | null
+          validation_warnings: string[] | null
+        }
+        Insert: {
+          business_id: string
+          checklist?: Json | null
+          confirmed_live_at?: string | null
+          confirmed_live_by?: string | null
+          copy_blocks?: Json | null
+          created_at?: string | null
+          export_name: string
+          export_payload?: Json | null
+          export_status?: string | null
+          flow_id?: string | null
+          founder_notes?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          keyword_rule_id?: string | null
+          manual_setup_status?: string | null
+          metadata?: Json | null
+          platform: string
+          setup_instructions?: string | null
+          updated_at?: string | null
+          validation_errors?: string[] | null
+          validation_status?: string | null
+          validation_warnings?: string[] | null
+        }
+        Update: {
+          business_id?: string
+          checklist?: Json | null
+          confirmed_live_at?: string | null
+          confirmed_live_by?: string | null
+          copy_blocks?: Json | null
+          created_at?: string | null
+          export_name?: string
+          export_payload?: Json | null
+          export_status?: string | null
+          flow_id?: string | null
+          founder_notes?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          keyword_rule_id?: string | null
+          manual_setup_status?: string | null
+          metadata?: Json | null
+          platform?: string
+          setup_instructions?: string | null
+          updated_at?: string | null
+          validation_errors?: string[] | null
+          validation_status?: string | null
+          validation_warnings?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_manychat_manual_exports_flow_id_fkey"
+            columns: ["flow_id"]
+            isOneToOne: false
+            referencedRelation: "social_dm_flow_blueprints"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_manychat_manual_exports_keyword_rule_id_fkey"
+            columns: ["keyword_rule_id"]
+            isOneToOne: false
+            referencedRelation: "social_keyword_trigger_rules"
             referencedColumns: ["id"]
           },
         ]
