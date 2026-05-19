@@ -11,6 +11,7 @@ export default function SocialAutopilotCommandCentreBlock() {
   const [brain, setBrain] = useState<any>(null);
   const [readiness, setReadiness] = useState<any>(null);
   const [factory, setFactory] = useState<any>(null);
+  const [calendar, setCalendar] = useState<any>(null);
   const businessId = typeof window !== "undefined" ? localStorage.getItem("liftor.activeBusinessId") || "" : "";
 
   useEffect(() => {
@@ -30,6 +31,9 @@ export default function SocialAutopilotCommandCentreBlock() {
           const f = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/social-content-factory-healthcheck?business_id=${businessId}`,
             { headers: { Authorization: `Bearer ${session?.access_token ?? ""}` } });
           setFactory(await f.json());
+          const c = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/social-calendar-healthcheck?business_id=${businessId}`,
+            { headers: { Authorization: `Bearer ${session?.access_token ?? ""}` } });
+          setCalendar(await c.json());
         }
       } catch { /* ignore */ }
     })();
@@ -130,6 +134,32 @@ export default function SocialAutopilotCommandCentreBlock() {
               <span>Ready→calendar: {factory.ready_for_calendar_generation ? "YES" : "no"}</span>
             </div>
             <p className="text-[10px] text-muted-foreground mt-2">Next: {factory.next_action}</p>
+          </div>
+        )}
+        {businessId && calendar && (
+          <div className="mt-3 p-3 rounded bg-secondary/40">
+            <p className="text-xs font-semibold mb-1">Social Calendar</p>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-[11px]">
+              <span>Calendars: {calendar.calendars_count ?? 0} ({calendar.active_calendars_count ?? 0} active)</span>
+              <span>Items: {calendar.calendar_items_count ?? 0}</span>
+              <span>Need review: {calendar.items_needing_review ?? 0}</span>
+              <span>Blocked: {calendar.items_blocked ?? 0}</span>
+              <span>Queue ready: {calendar.items_ready_for_queue_review ?? 0}</span>
+              <span>Cadence rules: {calendar.cadence_rules_count ?? 0}</span>
+              <span>Open gaps: {calendar.gap_reviews_open ?? 0} ({calendar.critical_gaps ?? 0} crit)</span>
+              <span>Missing assets: {calendar.missing_assets_count ?? 0}</span>
+              <span>Approval flow: {calendar.ready_for_approval_flow ? "YES" : "no"}</span>
+              <span>Queue ready: {calendar.ready_for_publish_queue ? "YES" : "no"}</span>
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-2">Next: {(() => {
+              if ((calendar.cadence_rules_count ?? 0) === 0) return "Generate cadence rules.";
+              if ((calendar.calendars_count ?? 0) === 0) return "Generate first social calendar.";
+              if ((calendar.items_blocked ?? 0) > 0) return "Resolve blocked calendar items.";
+              if ((calendar.missing_assets_count ?? 0) > 0) return "Add missing assets.";
+              if ((calendar.items_needing_review ?? 0) > 0) return "Run founder approval on calendar items.";
+              if (calendar.ready_for_publish_queue) return "Move approved items to publishing queue (later prompt).";
+              return "Calendar ready.";
+            })()}</p>
           </div>
         )}
         <p className="mt-3 text-xs text-muted-foreground">
