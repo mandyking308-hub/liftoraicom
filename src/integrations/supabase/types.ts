@@ -6078,6 +6078,174 @@ export type Database = {
         }
         Relationships: []
       }
+      client_portal_blueprints: {
+        Row: {
+          approval_status: string | null
+          blueprint_name: string
+          blueprint_status: string | null
+          build_notes: string | null
+          business_id: string
+          created_at: string | null
+          customer_data_to_hide: string[] | null
+          customer_data_to_show: string[] | null
+          external_portal_status: string | null
+          founder_approval_review_id: string | null
+          id: string
+          is_test_data: boolean | null
+          metadata: Json | null
+          portal_goal: string | null
+          portal_type: string
+          privacy_warnings: string[] | null
+          proposed_sections: Json | null
+          required_documents: string[] | null
+          required_features: string[] | null
+          required_pages: string[] | null
+          required_permissions: string[] | null
+          security_warnings: string[] | null
+          target_customer_type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          approval_status?: string | null
+          blueprint_name: string
+          blueprint_status?: string | null
+          build_notes?: string | null
+          business_id: string
+          created_at?: string | null
+          customer_data_to_hide?: string[] | null
+          customer_data_to_show?: string[] | null
+          external_portal_status?: string | null
+          founder_approval_review_id?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          portal_goal?: string | null
+          portal_type: string
+          privacy_warnings?: string[] | null
+          proposed_sections?: Json | null
+          required_documents?: string[] | null
+          required_features?: string[] | null
+          required_pages?: string[] | null
+          required_permissions?: string[] | null
+          security_warnings?: string[] | null
+          target_customer_type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          approval_status?: string | null
+          blueprint_name?: string
+          blueprint_status?: string | null
+          build_notes?: string | null
+          business_id?: string
+          created_at?: string | null
+          customer_data_to_hide?: string[] | null
+          customer_data_to_show?: string[] | null
+          external_portal_status?: string | null
+          founder_approval_review_id?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          portal_goal?: string | null
+          portal_type?: string
+          privacy_warnings?: string[] | null
+          proposed_sections?: Json | null
+          required_documents?: string[] | null
+          required_features?: string[] | null
+          required_pages?: string[] | null
+          required_permissions?: string[] | null
+          security_warnings?: string[] | null
+          target_customer_type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      client_portal_content_packs: {
+        Row: {
+          approval_status: string | null
+          asset_requirements: string[] | null
+          blueprint_id: string | null
+          business_id: string
+          created_at: string | null
+          document_requirements: string[] | null
+          founder_approval_review_id: string | null
+          id: string
+          is_test_data: boolean | null
+          manual_export_status: string | null
+          metadata: Json | null
+          operator_instructions: string | null
+          pack_name: string
+          pack_status: string | null
+          page_copy: Json | null
+          permissions_notes: string[] | null
+          portal_sections: Json | null
+          privacy_warnings: string[] | null
+          security_warnings: string[] | null
+          success_profile_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          approval_status?: string | null
+          asset_requirements?: string[] | null
+          blueprint_id?: string | null
+          business_id: string
+          created_at?: string | null
+          document_requirements?: string[] | null
+          founder_approval_review_id?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          manual_export_status?: string | null
+          metadata?: Json | null
+          operator_instructions?: string | null
+          pack_name: string
+          pack_status?: string | null
+          page_copy?: Json | null
+          permissions_notes?: string[] | null
+          portal_sections?: Json | null
+          privacy_warnings?: string[] | null
+          security_warnings?: string[] | null
+          success_profile_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          approval_status?: string | null
+          asset_requirements?: string[] | null
+          blueprint_id?: string | null
+          business_id?: string
+          created_at?: string | null
+          document_requirements?: string[] | null
+          founder_approval_review_id?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          manual_export_status?: string | null
+          metadata?: Json | null
+          operator_instructions?: string | null
+          pack_name?: string
+          pack_status?: string | null
+          page_copy?: Json | null
+          permissions_notes?: string[] | null
+          portal_sections?: Json | null
+          privacy_warnings?: string[] | null
+          security_warnings?: string[] | null
+          success_profile_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_portal_content_packs_blueprint_id_fkey"
+            columns: ["blueprint_id"]
+            isOneToOne: false
+            referencedRelation: "client_portal_blueprints"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_portal_content_packs_success_profile_id_fkey"
+            columns: ["success_profile_id"]
+            isOneToOne: false
+            referencedRelation: "customer_success_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_system_packages: {
         Row: {
           active: boolean
@@ -7338,6 +7506,8 @@ export type Database = {
           conversation_active: boolean
           country: string | null
           created_at: string
+          customer_success_profile_id: string | null
+          customer_success_status: string | null
           data_source: string | null
           do_not_contact_at: string | null
           do_not_contact_reason: string | null
@@ -7402,6 +7572,8 @@ export type Database = {
           conversation_active?: boolean
           country?: string | null
           created_at?: string
+          customer_success_profile_id?: string | null
+          customer_success_status?: string | null
           data_source?: string | null
           do_not_contact_at?: string | null
           do_not_contact_reason?: string | null
@@ -7466,6 +7638,8 @@ export type Database = {
           conversation_active?: boolean
           country?: string | null
           created_at?: string
+          customer_success_profile_id?: string | null
+          customer_success_status?: string | null
           data_source?: string | null
           do_not_contact_at?: string | null
           do_not_contact_reason?: string | null
@@ -9189,6 +9363,99 @@ export type Database = {
           },
         ]
       }
+      customer_bedding_in_reviews: {
+        Row: {
+          approval_status: string | null
+          bedding_in_day: number | null
+          business_id: string
+          completed_at: string | null
+          created_at: string | null
+          customer_message_draft: string | null
+          customer_sentiment: string | null
+          external_send_allowed: boolean | null
+          founder_approval_review_id: string | null
+          founder_attention_needed: boolean | null
+          id: string
+          is_test_data: boolean | null
+          issues_found: string[] | null
+          metadata: Json | null
+          onboarding_plan_id: string | null
+          progress_status: string | null
+          recommended_next_actions: string[] | null
+          review_name: string
+          review_status: string | null
+          scheduled_for: string | null
+          success_profile_id: string | null
+          support_needed: string[] | null
+          updated_at: string | null
+        }
+        Insert: {
+          approval_status?: string | null
+          bedding_in_day?: number | null
+          business_id: string
+          completed_at?: string | null
+          created_at?: string | null
+          customer_message_draft?: string | null
+          customer_sentiment?: string | null
+          external_send_allowed?: boolean | null
+          founder_approval_review_id?: string | null
+          founder_attention_needed?: boolean | null
+          id?: string
+          is_test_data?: boolean | null
+          issues_found?: string[] | null
+          metadata?: Json | null
+          onboarding_plan_id?: string | null
+          progress_status?: string | null
+          recommended_next_actions?: string[] | null
+          review_name: string
+          review_status?: string | null
+          scheduled_for?: string | null
+          success_profile_id?: string | null
+          support_needed?: string[] | null
+          updated_at?: string | null
+        }
+        Update: {
+          approval_status?: string | null
+          bedding_in_day?: number | null
+          business_id?: string
+          completed_at?: string | null
+          created_at?: string | null
+          customer_message_draft?: string | null
+          customer_sentiment?: string | null
+          external_send_allowed?: boolean | null
+          founder_approval_review_id?: string | null
+          founder_attention_needed?: boolean | null
+          id?: string
+          is_test_data?: boolean | null
+          issues_found?: string[] | null
+          metadata?: Json | null
+          onboarding_plan_id?: string | null
+          progress_status?: string | null
+          recommended_next_actions?: string[] | null
+          review_name?: string
+          review_status?: string | null
+          scheduled_for?: string | null
+          success_profile_id?: string | null
+          support_needed?: string[] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_bedding_in_reviews_onboarding_plan_id_fkey"
+            columns: ["onboarding_plan_id"]
+            isOneToOne: false
+            referencedRelation: "customer_onboarding_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_bedding_in_reviews_success_profile_id_fkey"
+            columns: ["success_profile_id"]
+            isOneToOne: false
+            referencedRelation: "customer_success_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_complaints: {
         Row: {
           assignment_id: string | null
@@ -9632,96 +9899,147 @@ export type Database = {
       }
       customer_onboarding_plans: {
         Row: {
+          approval_status: string | null
           approved_at: string | null
           business_id: string | null
           check_in_schedule: Json
+          completion_date: string | null
           contact_id: string | null
           created_at: string
+          crm_contact_id: string | null
           customer_facing_instructions: string | null
           customer_goal: string | null
           customer_share_allowed: boolean
           deal_id: string | null
+          external_share_allowed: boolean | null
+          founder_approval_review_id: string | null
           founder_review_required: boolean
           id: string
           internal_notes: string | null
+          internal_owner: string | null
+          is_test_data: boolean | null
           key_contacts: Json
           metadata: Json
           milestones: Json
+          missing_information: string[] | null
           onboarding_status: string
+          onboarding_steps: Json | null
           onboarding_token: string
           onboarding_type: string | null
           organisation_id: string | null
           owner_agent_key: string
+          plan_name: string | null
           proposal_id: string | null
+          required_assets: string[] | null
           required_company_actions: Json
           required_customer_actions: Json
+          required_customer_inputs: string[] | null
+          risk_flags: string[] | null
           risks: Json
+          start_date: string | null
           success_definition: string | null
+          success_profile_id: string | null
           support_route: string | null
+          target_completion_date: string | null
           timeline: Json
           updated_at: string
+          welcome_message_draft: string | null
           welcome_summary: string | null
         }
         Insert: {
+          approval_status?: string | null
           approved_at?: string | null
           business_id?: string | null
           check_in_schedule?: Json
+          completion_date?: string | null
           contact_id?: string | null
           created_at?: string
+          crm_contact_id?: string | null
           customer_facing_instructions?: string | null
           customer_goal?: string | null
           customer_share_allowed?: boolean
           deal_id?: string | null
+          external_share_allowed?: boolean | null
+          founder_approval_review_id?: string | null
           founder_review_required?: boolean
           id?: string
           internal_notes?: string | null
+          internal_owner?: string | null
+          is_test_data?: boolean | null
           key_contacts?: Json
           metadata?: Json
           milestones?: Json
+          missing_information?: string[] | null
           onboarding_status?: string
+          onboarding_steps?: Json | null
           onboarding_token?: string
           onboarding_type?: string | null
           organisation_id?: string | null
           owner_agent_key?: string
+          plan_name?: string | null
           proposal_id?: string | null
+          required_assets?: string[] | null
           required_company_actions?: Json
           required_customer_actions?: Json
+          required_customer_inputs?: string[] | null
+          risk_flags?: string[] | null
           risks?: Json
+          start_date?: string | null
           success_definition?: string | null
+          success_profile_id?: string | null
           support_route?: string | null
+          target_completion_date?: string | null
           timeline?: Json
           updated_at?: string
+          welcome_message_draft?: string | null
           welcome_summary?: string | null
         }
         Update: {
+          approval_status?: string | null
           approved_at?: string | null
           business_id?: string | null
           check_in_schedule?: Json
+          completion_date?: string | null
           contact_id?: string | null
           created_at?: string
+          crm_contact_id?: string | null
           customer_facing_instructions?: string | null
           customer_goal?: string | null
           customer_share_allowed?: boolean
           deal_id?: string | null
+          external_share_allowed?: boolean | null
+          founder_approval_review_id?: string | null
           founder_review_required?: boolean
           id?: string
           internal_notes?: string | null
+          internal_owner?: string | null
+          is_test_data?: boolean | null
           key_contacts?: Json
           metadata?: Json
           milestones?: Json
+          missing_information?: string[] | null
           onboarding_status?: string
+          onboarding_steps?: Json | null
           onboarding_token?: string
           onboarding_type?: string | null
           organisation_id?: string | null
           owner_agent_key?: string
+          plan_name?: string | null
           proposal_id?: string | null
+          required_assets?: string[] | null
           required_company_actions?: Json
           required_customer_actions?: Json
+          required_customer_inputs?: string[] | null
+          risk_flags?: string[] | null
           risks?: Json
+          start_date?: string | null
           success_definition?: string | null
+          success_profile_id?: string | null
           support_route?: string | null
+          target_completion_date?: string | null
           timeline?: Json
           updated_at?: string
+          welcome_message_draft?: string | null
           welcome_summary?: string | null
         }
         Relationships: [
@@ -9745,6 +10063,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "high_intent_review_queue"
             referencedColumns: ["contact_id"]
+          },
+          {
+            foreignKeyName: "customer_onboarding_plans_success_profile_id_fkey"
+            columns: ["success_profile_id"]
+            isOneToOne: false
+            referencedRelation: "customer_success_profiles"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -9889,106 +10214,157 @@ export type Database = {
       }
       customer_quarterly_reports: {
         Row: {
+          approval_status: string | null
           approved_at: string | null
           business_id: string | null
           completed_actions: Json
           contact_id: string | null
           created_at: string
           customer_facing_summary: string | null
+          customer_message_draft: string | null
           customer_share_allowed: boolean
           deal_id: string | null
           engagement_summary: string | null
+          executive_summary: string | null
+          external_share_allowed: boolean | null
           feedback_summary: string | null
+          founder_approval_review_id: string | null
           founder_review_required: boolean
           id: string
           internal_summary: string | null
+          is_test_data: boolean | null
+          manual_export_status: string | null
           metadata: Json
+          metrics: Json | null
+          missing_evidence: string[] | null
           next_quarter_plan: Json
           open_issues: Json
+          open_items: Json | null
           organisation_id: string | null
+          outcomes: Json | null
           recommendations: Json
+          renewal_notes: string | null
           renewal_risk_flags: Json
+          report_name: string | null
           report_quarter: string | null
           report_status: string
           report_token: string
           report_year: number | null
           reporting_period_end: string
           reporting_period_start: string
+          risks: Json | null
           satisfaction_summary: string | null
           shared_at: string | null
+          success_profile_id: string | null
           support_summary: string | null
+          unsupported_claims: string[] | null
           updated_at: string
           upsell_opportunities: Json
           usage_summary: string | null
           value_summary: string | null
+          work_completed: Json | null
         }
         Insert: {
+          approval_status?: string | null
           approved_at?: string | null
           business_id?: string | null
           completed_actions?: Json
           contact_id?: string | null
           created_at?: string
           customer_facing_summary?: string | null
+          customer_message_draft?: string | null
           customer_share_allowed?: boolean
           deal_id?: string | null
           engagement_summary?: string | null
+          executive_summary?: string | null
+          external_share_allowed?: boolean | null
           feedback_summary?: string | null
+          founder_approval_review_id?: string | null
           founder_review_required?: boolean
           id?: string
           internal_summary?: string | null
+          is_test_data?: boolean | null
+          manual_export_status?: string | null
           metadata?: Json
+          metrics?: Json | null
+          missing_evidence?: string[] | null
           next_quarter_plan?: Json
           open_issues?: Json
+          open_items?: Json | null
           organisation_id?: string | null
+          outcomes?: Json | null
           recommendations?: Json
+          renewal_notes?: string | null
           renewal_risk_flags?: Json
+          report_name?: string | null
           report_quarter?: string | null
           report_status?: string
           report_token?: string
           report_year?: number | null
           reporting_period_end: string
           reporting_period_start: string
+          risks?: Json | null
           satisfaction_summary?: string | null
           shared_at?: string | null
+          success_profile_id?: string | null
           support_summary?: string | null
+          unsupported_claims?: string[] | null
           updated_at?: string
           upsell_opportunities?: Json
           usage_summary?: string | null
           value_summary?: string | null
+          work_completed?: Json | null
         }
         Update: {
+          approval_status?: string | null
           approved_at?: string | null
           business_id?: string | null
           completed_actions?: Json
           contact_id?: string | null
           created_at?: string
           customer_facing_summary?: string | null
+          customer_message_draft?: string | null
           customer_share_allowed?: boolean
           deal_id?: string | null
           engagement_summary?: string | null
+          executive_summary?: string | null
+          external_share_allowed?: boolean | null
           feedback_summary?: string | null
+          founder_approval_review_id?: string | null
           founder_review_required?: boolean
           id?: string
           internal_summary?: string | null
+          is_test_data?: boolean | null
+          manual_export_status?: string | null
           metadata?: Json
+          metrics?: Json | null
+          missing_evidence?: string[] | null
           next_quarter_plan?: Json
           open_issues?: Json
+          open_items?: Json | null
           organisation_id?: string | null
+          outcomes?: Json | null
           recommendations?: Json
+          renewal_notes?: string | null
           renewal_risk_flags?: Json
+          report_name?: string | null
           report_quarter?: string | null
           report_status?: string
           report_token?: string
           report_year?: number | null
           reporting_period_end?: string
           reporting_period_start?: string
+          risks?: Json | null
           satisfaction_summary?: string | null
           shared_at?: string | null
+          success_profile_id?: string | null
           support_summary?: string | null
+          unsupported_claims?: string[] | null
           updated_at?: string
           upsell_opportunities?: Json
           usage_summary?: string | null
           value_summary?: string | null
+          work_completed?: Json | null
         }
         Relationships: [
           {
@@ -10012,6 +10388,173 @@ export type Database = {
             referencedRelation: "high_intent_review_queue"
             referencedColumns: ["contact_id"]
           },
+          {
+            foreignKeyName: "customer_quarterly_reports_success_profile_id_fkey"
+            columns: ["success_profile_id"]
+            isOneToOne: false
+            referencedRelation: "customer_success_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_renewal_reviews: {
+        Row: {
+          approval_status: string | null
+          business_id: string
+          created_at: string | null
+          currency: string | null
+          current_value: number | null
+          external_send_allowed: boolean | null
+          founder_approval_review_id: string | null
+          id: string
+          is_test_data: boolean | null
+          metadata: Json | null
+          missing_success_evidence: string[] | null
+          reasons_to_renew: string[] | null
+          recommended_actions: string[] | null
+          renewal_date: string | null
+          renewal_message_draft: string | null
+          renewal_name: string
+          renewal_probability: string | null
+          renewal_status: string | null
+          retention_risk_level: string | null
+          risks_to_renewal: string[] | null
+          success_profile_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          approval_status?: string | null
+          business_id: string
+          created_at?: string | null
+          currency?: string | null
+          current_value?: number | null
+          external_send_allowed?: boolean | null
+          founder_approval_review_id?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          missing_success_evidence?: string[] | null
+          reasons_to_renew?: string[] | null
+          recommended_actions?: string[] | null
+          renewal_date?: string | null
+          renewal_message_draft?: string | null
+          renewal_name: string
+          renewal_probability?: string | null
+          renewal_status?: string | null
+          retention_risk_level?: string | null
+          risks_to_renewal?: string[] | null
+          success_profile_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          approval_status?: string | null
+          business_id?: string
+          created_at?: string | null
+          currency?: string | null
+          current_value?: number | null
+          external_send_allowed?: boolean | null
+          founder_approval_review_id?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          missing_success_evidence?: string[] | null
+          reasons_to_renew?: string[] | null
+          recommended_actions?: string[] | null
+          renewal_date?: string | null
+          renewal_message_draft?: string | null
+          renewal_name?: string
+          renewal_probability?: string | null
+          renewal_status?: string | null
+          retention_risk_level?: string | null
+          risks_to_renewal?: string[] | null
+          success_profile_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_renewal_reviews_success_profile_id_fkey"
+            columns: ["success_profile_id"]
+            isOneToOne: false
+            referencedRelation: "customer_success_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_retention_risk_reviews: {
+        Row: {
+          approval_status: string | null
+          business_id: string
+          complaint_signals: string[] | null
+          created_at: string | null
+          engagement_signals: string[] | null
+          external_send_allowed: boolean | null
+          finance_signals: string[] | null
+          founder_attention_needed: boolean | null
+          id: string
+          is_test_data: boolean | null
+          metadata: Json | null
+          recommended_recovery_actions: string[] | null
+          recovery_message_draft: string | null
+          review_name: string
+          review_status: string | null
+          risk_level: string | null
+          risk_reasons: string[] | null
+          success_profile_id: string | null
+          support_signals: string[] | null
+          updated_at: string | null
+        }
+        Insert: {
+          approval_status?: string | null
+          business_id: string
+          complaint_signals?: string[] | null
+          created_at?: string | null
+          engagement_signals?: string[] | null
+          external_send_allowed?: boolean | null
+          finance_signals?: string[] | null
+          founder_attention_needed?: boolean | null
+          id?: string
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          recommended_recovery_actions?: string[] | null
+          recovery_message_draft?: string | null
+          review_name: string
+          review_status?: string | null
+          risk_level?: string | null
+          risk_reasons?: string[] | null
+          success_profile_id?: string | null
+          support_signals?: string[] | null
+          updated_at?: string | null
+        }
+        Update: {
+          approval_status?: string | null
+          business_id?: string
+          complaint_signals?: string[] | null
+          created_at?: string | null
+          engagement_signals?: string[] | null
+          external_send_allowed?: boolean | null
+          finance_signals?: string[] | null
+          founder_attention_needed?: boolean | null
+          id?: string
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          recommended_recovery_actions?: string[] | null
+          recovery_message_draft?: string | null
+          review_name?: string
+          review_status?: string | null
+          risk_level?: string | null
+          risk_reasons?: string[] | null
+          success_profile_id?: string | null
+          support_signals?: string[] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_retention_risk_reviews_success_profile_id_fkey"
+            columns: ["success_profile_id"]
+            isOneToOne: false
+            referencedRelation: "customer_success_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       customer_retention_scores: {
@@ -10020,10 +10563,14 @@ export type Database = {
           complaint_risk_score: number | null
           contact_id: string | null
           created_at: string | null
+          customer_success_profile_id: string | null
           engagement_score: number | null
           evidence: Json | null
           health_status: string | null
           id: string
+          latest_renewal_review_id: string | null
+          latest_retention_risk_review_id: string | null
+          latest_success_checkin_id: string | null
           onboarding_score: number | null
           open_support_escalations: number
           overall_health_score: number | null
@@ -10041,10 +10588,14 @@ export type Database = {
           complaint_risk_score?: number | null
           contact_id?: string | null
           created_at?: string | null
+          customer_success_profile_id?: string | null
           engagement_score?: number | null
           evidence?: Json | null
           health_status?: string | null
           id?: string
+          latest_renewal_review_id?: string | null
+          latest_retention_risk_review_id?: string | null
+          latest_success_checkin_id?: string | null
           onboarding_score?: number | null
           open_support_escalations?: number
           overall_health_score?: number | null
@@ -10062,10 +10613,14 @@ export type Database = {
           complaint_risk_score?: number | null
           contact_id?: string | null
           created_at?: string | null
+          customer_success_profile_id?: string | null
           engagement_score?: number | null
           evidence?: Json | null
           health_status?: string | null
           id?: string
+          latest_renewal_review_id?: string | null
+          latest_retention_risk_review_id?: string | null
+          latest_success_checkin_id?: string | null
           onboarding_score?: number | null
           open_support_escalations?: number
           overall_health_score?: number | null
@@ -10099,6 +10654,101 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "high_intent_review_queue"
             referencedColumns: ["contact_id"]
+          },
+        ]
+      }
+      customer_satisfaction_surveys: {
+        Row: {
+          approval_status: string | null
+          business_id: string
+          complaint_signals: string[] | null
+          created_at: string | null
+          csat_score: number | null
+          external_send_allowed: boolean | null
+          follow_up_actions: string[] | null
+          id: string
+          improvement_requests: string[] | null
+          is_test_data: boolean | null
+          message_draft: string | null
+          metadata: Json | null
+          nps_score: number | null
+          questions: Json | null
+          response_received_at: string | null
+          response_summary: string | null
+          retention_risk_signals: string[] | null
+          scheduled_for: string | null
+          sent_manually_external_at: string | null
+          sentiment: string | null
+          success_profile_id: string | null
+          survey_name: string
+          survey_status: string | null
+          survey_type: string
+          updated_at: string | null
+          upsell_signals: string[] | null
+        }
+        Insert: {
+          approval_status?: string | null
+          business_id: string
+          complaint_signals?: string[] | null
+          created_at?: string | null
+          csat_score?: number | null
+          external_send_allowed?: boolean | null
+          follow_up_actions?: string[] | null
+          id?: string
+          improvement_requests?: string[] | null
+          is_test_data?: boolean | null
+          message_draft?: string | null
+          metadata?: Json | null
+          nps_score?: number | null
+          questions?: Json | null
+          response_received_at?: string | null
+          response_summary?: string | null
+          retention_risk_signals?: string[] | null
+          scheduled_for?: string | null
+          sent_manually_external_at?: string | null
+          sentiment?: string | null
+          success_profile_id?: string | null
+          survey_name: string
+          survey_status?: string | null
+          survey_type: string
+          updated_at?: string | null
+          upsell_signals?: string[] | null
+        }
+        Update: {
+          approval_status?: string | null
+          business_id?: string
+          complaint_signals?: string[] | null
+          created_at?: string | null
+          csat_score?: number | null
+          external_send_allowed?: boolean | null
+          follow_up_actions?: string[] | null
+          id?: string
+          improvement_requests?: string[] | null
+          is_test_data?: boolean | null
+          message_draft?: string | null
+          metadata?: Json | null
+          nps_score?: number | null
+          questions?: Json | null
+          response_received_at?: string | null
+          response_summary?: string | null
+          retention_risk_signals?: string[] | null
+          scheduled_for?: string | null
+          sent_manually_external_at?: string | null
+          sentiment?: string | null
+          success_profile_id?: string | null
+          survey_name?: string
+          survey_status?: string | null
+          survey_type?: string
+          updated_at?: string | null
+          upsell_signals?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_satisfaction_surveys_success_profile_id_fkey"
+            columns: ["success_profile_id"]
+            isOneToOne: false
+            referencedRelation: "customer_success_profiles"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -10262,6 +10912,430 @@ export type Database = {
           },
         ]
       }
+      customer_success_audit: {
+        Row: {
+          action: string
+          action_status: string | null
+          after_json: Json | null
+          bedding_review_id: string | null
+          before_json: Json | null
+          business_id: string
+          checkin_id: string | null
+          created_at: string | null
+          created_by: string | null
+          customer_messages_sent: number | null
+          error_message: string | null
+          export_pack_id: string | null
+          external_api_calls: number | null
+          fake_customer_data_created: number | null
+          id: string
+          is_test_data: boolean | null
+          metadata: Json | null
+          onboarding_plan_id: string | null
+          payments_created: number | null
+          portal_accounts_created: number | null
+          portal_blueprint_id: string | null
+          portal_content_pack_id: string | null
+          portal_invites_sent: number | null
+          quarterly_report_id: string | null
+          renewal_review_id: string | null
+          reports_shared: number | null
+          result_json: Json | null
+          retention_review_id: string | null
+          subscriptions_changed: number | null
+          success_profile_id: string | null
+          survey_id: string | null
+          surveys_sent: number | null
+          upsell_opportunity_id: string | null
+          welcome_pack_id: string | null
+          winback_plan_id: string | null
+        }
+        Insert: {
+          action: string
+          action_status?: string | null
+          after_json?: Json | null
+          bedding_review_id?: string | null
+          before_json?: Json | null
+          business_id: string
+          checkin_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          customer_messages_sent?: number | null
+          error_message?: string | null
+          export_pack_id?: string | null
+          external_api_calls?: number | null
+          fake_customer_data_created?: number | null
+          id?: string
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          onboarding_plan_id?: string | null
+          payments_created?: number | null
+          portal_accounts_created?: number | null
+          portal_blueprint_id?: string | null
+          portal_content_pack_id?: string | null
+          portal_invites_sent?: number | null
+          quarterly_report_id?: string | null
+          renewal_review_id?: string | null
+          reports_shared?: number | null
+          result_json?: Json | null
+          retention_review_id?: string | null
+          subscriptions_changed?: number | null
+          success_profile_id?: string | null
+          survey_id?: string | null
+          surveys_sent?: number | null
+          upsell_opportunity_id?: string | null
+          welcome_pack_id?: string | null
+          winback_plan_id?: string | null
+        }
+        Update: {
+          action?: string
+          action_status?: string | null
+          after_json?: Json | null
+          bedding_review_id?: string | null
+          before_json?: Json | null
+          business_id?: string
+          checkin_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          customer_messages_sent?: number | null
+          error_message?: string | null
+          export_pack_id?: string | null
+          external_api_calls?: number | null
+          fake_customer_data_created?: number | null
+          id?: string
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          onboarding_plan_id?: string | null
+          payments_created?: number | null
+          portal_accounts_created?: number | null
+          portal_blueprint_id?: string | null
+          portal_content_pack_id?: string | null
+          portal_invites_sent?: number | null
+          quarterly_report_id?: string | null
+          renewal_review_id?: string | null
+          reports_shared?: number | null
+          result_json?: Json | null
+          retention_review_id?: string | null
+          subscriptions_changed?: number | null
+          success_profile_id?: string | null
+          survey_id?: string | null
+          surveys_sent?: number | null
+          upsell_opportunity_id?: string | null
+          welcome_pack_id?: string | null
+          winback_plan_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_success_audit_bedding_review_id_fkey"
+            columns: ["bedding_review_id"]
+            isOneToOne: false
+            referencedRelation: "customer_bedding_in_reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_audit_checkin_id_fkey"
+            columns: ["checkin_id"]
+            isOneToOne: false
+            referencedRelation: "customer_success_checkins"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_audit_export_pack_id_fkey"
+            columns: ["export_pack_id"]
+            isOneToOne: false
+            referencedRelation: "customer_success_manual_export_packs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_audit_onboarding_plan_id_fkey"
+            columns: ["onboarding_plan_id"]
+            isOneToOne: false
+            referencedRelation: "customer_onboarding_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_audit_portal_blueprint_id_fkey"
+            columns: ["portal_blueprint_id"]
+            isOneToOne: false
+            referencedRelation: "client_portal_blueprints"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_audit_portal_content_pack_id_fkey"
+            columns: ["portal_content_pack_id"]
+            isOneToOne: false
+            referencedRelation: "client_portal_content_packs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_audit_quarterly_report_id_fkey"
+            columns: ["quarterly_report_id"]
+            isOneToOne: false
+            referencedRelation: "customer_quarterly_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_audit_renewal_review_id_fkey"
+            columns: ["renewal_review_id"]
+            isOneToOne: false
+            referencedRelation: "customer_renewal_reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_audit_retention_review_id_fkey"
+            columns: ["retention_review_id"]
+            isOneToOne: false
+            referencedRelation: "customer_retention_risk_reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_audit_success_profile_id_fkey"
+            columns: ["success_profile_id"]
+            isOneToOne: false
+            referencedRelation: "customer_success_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_audit_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "customer_satisfaction_surveys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_audit_upsell_opportunity_id_fkey"
+            columns: ["upsell_opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "customer_upsell_opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_audit_welcome_pack_id_fkey"
+            columns: ["welcome_pack_id"]
+            isOneToOne: false
+            referencedRelation: "customer_welcome_packs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_audit_winback_plan_id_fkey"
+            columns: ["winback_plan_id"]
+            isOneToOne: false
+            referencedRelation: "customer_winback_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_success_checkins: {
+        Row: {
+          approval_status: string | null
+          business_id: string
+          checkin_goal: string | null
+          checkin_name: string
+          checkin_status: string | null
+          checkin_type: string
+          completed_at: string | null
+          created_at: string | null
+          customer_message_draft: string | null
+          external_send_allowed: boolean | null
+          founder_attention_needed: boolean | null
+          id: string
+          internal_notes: string | null
+          is_test_data: boolean | null
+          metadata: Json | null
+          next_actions: string[] | null
+          outcome_summary: string | null
+          question_prompts: Json | null
+          risk_flags: string[] | null
+          scheduled_for: string | null
+          success_profile_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          approval_status?: string | null
+          business_id: string
+          checkin_goal?: string | null
+          checkin_name: string
+          checkin_status?: string | null
+          checkin_type: string
+          completed_at?: string | null
+          created_at?: string | null
+          customer_message_draft?: string | null
+          external_send_allowed?: boolean | null
+          founder_attention_needed?: boolean | null
+          id?: string
+          internal_notes?: string | null
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          next_actions?: string[] | null
+          outcome_summary?: string | null
+          question_prompts?: Json | null
+          risk_flags?: string[] | null
+          scheduled_for?: string | null
+          success_profile_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          approval_status?: string | null
+          business_id?: string
+          checkin_goal?: string | null
+          checkin_name?: string
+          checkin_status?: string | null
+          checkin_type?: string
+          completed_at?: string | null
+          created_at?: string | null
+          customer_message_draft?: string | null
+          external_send_allowed?: boolean | null
+          founder_attention_needed?: boolean | null
+          id?: string
+          internal_notes?: string | null
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          next_actions?: string[] | null
+          outcome_summary?: string | null
+          question_prompts?: Json | null
+          risk_flags?: string[] | null
+          scheduled_for?: string | null
+          success_profile_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_success_checkins_success_profile_id_fkey"
+            columns: ["success_profile_id"]
+            isOneToOne: false
+            referencedRelation: "customer_success_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_success_manual_export_packs: {
+        Row: {
+          business_id: string
+          confirmed_external_at: string | null
+          confirmed_external_by: string | null
+          created_at: string | null
+          export_name: string
+          export_payload: Json | null
+          export_status: string | null
+          export_type: string
+          id: string
+          is_test_data: boolean | null
+          metadata: Json | null
+          onboarding_plan_id: string | null
+          operator_instructions: string | null
+          portal_blueprint_id: string | null
+          quarterly_report_id: string | null
+          renewal_review_id: string | null
+          success_profile_id: string | null
+          survey_id: string | null
+          updated_at: string | null
+          validation_errors: string[] | null
+          validation_status: string | null
+          validation_warnings: string[] | null
+          welcome_pack_id: string | null
+        }
+        Insert: {
+          business_id: string
+          confirmed_external_at?: string | null
+          confirmed_external_by?: string | null
+          created_at?: string | null
+          export_name: string
+          export_payload?: Json | null
+          export_status?: string | null
+          export_type: string
+          id?: string
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          onboarding_plan_id?: string | null
+          operator_instructions?: string | null
+          portal_blueprint_id?: string | null
+          quarterly_report_id?: string | null
+          renewal_review_id?: string | null
+          success_profile_id?: string | null
+          survey_id?: string | null
+          updated_at?: string | null
+          validation_errors?: string[] | null
+          validation_status?: string | null
+          validation_warnings?: string[] | null
+          welcome_pack_id?: string | null
+        }
+        Update: {
+          business_id?: string
+          confirmed_external_at?: string | null
+          confirmed_external_by?: string | null
+          created_at?: string | null
+          export_name?: string
+          export_payload?: Json | null
+          export_status?: string | null
+          export_type?: string
+          id?: string
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          onboarding_plan_id?: string | null
+          operator_instructions?: string | null
+          portal_blueprint_id?: string | null
+          quarterly_report_id?: string | null
+          renewal_review_id?: string | null
+          success_profile_id?: string | null
+          survey_id?: string | null
+          updated_at?: string | null
+          validation_errors?: string[] | null
+          validation_status?: string | null
+          validation_warnings?: string[] | null
+          welcome_pack_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_success_manual_export_packs_onboarding_plan_id_fkey"
+            columns: ["onboarding_plan_id"]
+            isOneToOne: false
+            referencedRelation: "customer_onboarding_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_manual_export_packs_portal_blueprint_id_fkey"
+            columns: ["portal_blueprint_id"]
+            isOneToOne: false
+            referencedRelation: "client_portal_blueprints"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_manual_export_packs_quarterly_report_id_fkey"
+            columns: ["quarterly_report_id"]
+            isOneToOne: false
+            referencedRelation: "customer_quarterly_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_manual_export_packs_renewal_review_id_fkey"
+            columns: ["renewal_review_id"]
+            isOneToOne: false
+            referencedRelation: "customer_renewal_reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_manual_export_packs_success_profile_id_fkey"
+            columns: ["success_profile_id"]
+            isOneToOne: false
+            referencedRelation: "customer_success_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_manual_export_packs_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "customer_satisfaction_surveys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_manual_export_packs_welcome_pack_id_fkey"
+            columns: ["welcome_pack_id"]
+            isOneToOne: false
+            referencedRelation: "customer_welcome_packs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_success_plans: {
         Row: {
           business_id: string | null
@@ -10340,6 +11414,105 @@ export type Database = {
             referencedColumns: ["contact_id"]
           },
         ]
+      }
+      customer_success_profiles: {
+        Row: {
+          account_name: string | null
+          assigned_account_manager: string | null
+          business_id: string
+          conversation_id: string | null
+          created_at: string | null
+          crm_contact_id: string | null
+          customer_email: string | null
+          customer_goal: string | null
+          customer_name: string | null
+          customer_type: string | null
+          founder_notes: string | null
+          health_score: number | null
+          id: string
+          is_test_data: boolean | null
+          last_contact_at: string | null
+          lifecycle_stage: string | null
+          metadata: Json | null
+          next_check_in_at: string | null
+          onboarding_due_date: string | null
+          organisation_id: string | null
+          purchased_offer: string | null
+          renewal_date: string | null
+          retention_risk_level: string | null
+          satisfaction_score: number | null
+          start_date: string | null
+          subscription_status: string | null
+          success_status: string | null
+          support_risk_status: string | null
+          updated_at: string | null
+          upsell_potential: string | null
+        }
+        Insert: {
+          account_name?: string | null
+          assigned_account_manager?: string | null
+          business_id: string
+          conversation_id?: string | null
+          created_at?: string | null
+          crm_contact_id?: string | null
+          customer_email?: string | null
+          customer_goal?: string | null
+          customer_name?: string | null
+          customer_type?: string | null
+          founder_notes?: string | null
+          health_score?: number | null
+          id?: string
+          is_test_data?: boolean | null
+          last_contact_at?: string | null
+          lifecycle_stage?: string | null
+          metadata?: Json | null
+          next_check_in_at?: string | null
+          onboarding_due_date?: string | null
+          organisation_id?: string | null
+          purchased_offer?: string | null
+          renewal_date?: string | null
+          retention_risk_level?: string | null
+          satisfaction_score?: number | null
+          start_date?: string | null
+          subscription_status?: string | null
+          success_status?: string | null
+          support_risk_status?: string | null
+          updated_at?: string | null
+          upsell_potential?: string | null
+        }
+        Update: {
+          account_name?: string | null
+          assigned_account_manager?: string | null
+          business_id?: string
+          conversation_id?: string | null
+          created_at?: string | null
+          crm_contact_id?: string | null
+          customer_email?: string | null
+          customer_goal?: string | null
+          customer_name?: string | null
+          customer_type?: string | null
+          founder_notes?: string | null
+          health_score?: number | null
+          id?: string
+          is_test_data?: boolean | null
+          last_contact_at?: string | null
+          lifecycle_stage?: string | null
+          metadata?: Json | null
+          next_check_in_at?: string | null
+          onboarding_due_date?: string | null
+          organisation_id?: string | null
+          purchased_offer?: string | null
+          renewal_date?: string | null
+          retention_risk_level?: string | null
+          satisfaction_score?: number | null
+          start_date?: string | null
+          subscription_status?: string | null
+          success_status?: string | null
+          support_risk_status?: string | null
+          updated_at?: string | null
+          upsell_potential?: string | null
+        }
+        Relationships: []
       }
       customer_survey_requests: {
         Row: {
@@ -10594,6 +11767,92 @@ export type Database = {
           },
         ]
       }
+      customer_upsell_opportunities: {
+        Row: {
+          approval_status: string | null
+          business_id: string
+          confidence_score: number | null
+          created_at: string | null
+          currency: string | null
+          current_offer: string | null
+          customer_message_draft: string | null
+          estimated_value: number | null
+          evidence_summary: string | null
+          external_send_allowed: boolean | null
+          founder_approval_review_id: string | null
+          id: string
+          is_test_data: boolean | null
+          metadata: Json | null
+          opportunity_name: string
+          opportunity_status: string | null
+          opportunity_type: string
+          rationale: string | null
+          recommended_next_actions: string[] | null
+          risk_warnings: string[] | null
+          success_profile_id: string | null
+          suggested_offer: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          approval_status?: string | null
+          business_id: string
+          confidence_score?: number | null
+          created_at?: string | null
+          currency?: string | null
+          current_offer?: string | null
+          customer_message_draft?: string | null
+          estimated_value?: number | null
+          evidence_summary?: string | null
+          external_send_allowed?: boolean | null
+          founder_approval_review_id?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          opportunity_name: string
+          opportunity_status?: string | null
+          opportunity_type: string
+          rationale?: string | null
+          recommended_next_actions?: string[] | null
+          risk_warnings?: string[] | null
+          success_profile_id?: string | null
+          suggested_offer?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          approval_status?: string | null
+          business_id?: string
+          confidence_score?: number | null
+          created_at?: string | null
+          currency?: string | null
+          current_offer?: string | null
+          customer_message_draft?: string | null
+          estimated_value?: number | null
+          evidence_summary?: string | null
+          external_send_allowed?: boolean | null
+          founder_approval_review_id?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          opportunity_name?: string
+          opportunity_status?: string | null
+          opportunity_type?: string
+          rationale?: string | null
+          recommended_next_actions?: string[] | null
+          risk_warnings?: string[] | null
+          success_profile_id?: string | null
+          suggested_offer?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_upsell_opportunities_success_profile_id_fkey"
+            columns: ["success_profile_id"]
+            isOneToOne: false
+            referencedRelation: "customer_success_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_upsell_recommendations: {
         Row: {
           approved_at: string | null
@@ -10786,85 +12045,211 @@ export type Database = {
           },
         ]
       }
+      customer_welcome_packs: {
+        Row: {
+          approval_status: string | null
+          business_id: string
+          created_at: string | null
+          customer_actions_required: string[] | null
+          expectations: string[] | null
+          external_share_allowed: boolean | null
+          founder_approval_review_id: string | null
+          getting_started_steps: Json | null
+          id: string
+          internal_actions_required: string[] | null
+          is_test_data: boolean | null
+          manual_export_status: string | null
+          metadata: Json | null
+          onboarding_plan_id: string | null
+          pack_name: string
+          pack_status: string | null
+          pack_type: string
+          risk_warnings: string[] | null
+          success_profile_id: string | null
+          support_routes: Json | null
+          updated_at: string | null
+          useful_links: Json | null
+          welcome_copy: string | null
+        }
+        Insert: {
+          approval_status?: string | null
+          business_id: string
+          created_at?: string | null
+          customer_actions_required?: string[] | null
+          expectations?: string[] | null
+          external_share_allowed?: boolean | null
+          founder_approval_review_id?: string | null
+          getting_started_steps?: Json | null
+          id?: string
+          internal_actions_required?: string[] | null
+          is_test_data?: boolean | null
+          manual_export_status?: string | null
+          metadata?: Json | null
+          onboarding_plan_id?: string | null
+          pack_name: string
+          pack_status?: string | null
+          pack_type: string
+          risk_warnings?: string[] | null
+          success_profile_id?: string | null
+          support_routes?: Json | null
+          updated_at?: string | null
+          useful_links?: Json | null
+          welcome_copy?: string | null
+        }
+        Update: {
+          approval_status?: string | null
+          business_id?: string
+          created_at?: string | null
+          customer_actions_required?: string[] | null
+          expectations?: string[] | null
+          external_share_allowed?: boolean | null
+          founder_approval_review_id?: string | null
+          getting_started_steps?: Json | null
+          id?: string
+          internal_actions_required?: string[] | null
+          is_test_data?: boolean | null
+          manual_export_status?: string | null
+          metadata?: Json | null
+          onboarding_plan_id?: string | null
+          pack_name?: string
+          pack_status?: string | null
+          pack_type?: string
+          risk_warnings?: string[] | null
+          success_profile_id?: string | null
+          support_routes?: Json | null
+          updated_at?: string | null
+          useful_links?: Json | null
+          welcome_copy?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_welcome_packs_onboarding_plan_id_fkey"
+            columns: ["onboarding_plan_id"]
+            isOneToOne: false
+            referencedRelation: "customer_onboarding_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_welcome_packs_success_profile_id_fkey"
+            columns: ["success_profile_id"]
+            isOneToOne: false
+            referencedRelation: "customer_success_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_winback_plans: {
         Row: {
+          approval_status: string | null
           approved_at: string | null
           business_id: string | null
+          churn_reason: string | null
           churn_risk_level: string | null
           contact_id: string | null
           created_at: string | null
           customer_history_summary: string | null
+          external_send_allowed: boolean | null
+          founder_attention_needed: boolean | null
           founder_review_required: boolean | null
           goodwill_options: Json | null
           id: string
           inactivity_days: number | null
+          is_test_data: boolean | null
           last_negative_interaction_at: string | null
           last_positive_interaction_at: string | null
           metadata: Json | null
           offer_or_package_recommendation: Json | null
           organisation_id: string | null
+          plan_name: string | null
           plan_status: string | null
           proposed_message_body: string | null
+          proposed_message_draft: string | null
           proposed_message_subject: string | null
           proposed_next_action: string | null
+          proposed_offer: string | null
           recommended_human_touch: string | null
           recommended_recovery_angle: string | null
+          recommended_timing: string | null
+          risk_warnings: string[] | null
           root_cause_summary: string | null
           send_allowed: boolean | null
+          success_profile_id: string | null
           updated_at: string | null
           winback_reason: string | null
         }
         Insert: {
+          approval_status?: string | null
           approved_at?: string | null
           business_id?: string | null
+          churn_reason?: string | null
           churn_risk_level?: string | null
           contact_id?: string | null
           created_at?: string | null
           customer_history_summary?: string | null
+          external_send_allowed?: boolean | null
+          founder_attention_needed?: boolean | null
           founder_review_required?: boolean | null
           goodwill_options?: Json | null
           id?: string
           inactivity_days?: number | null
+          is_test_data?: boolean | null
           last_negative_interaction_at?: string | null
           last_positive_interaction_at?: string | null
           metadata?: Json | null
           offer_or_package_recommendation?: Json | null
           organisation_id?: string | null
+          plan_name?: string | null
           plan_status?: string | null
           proposed_message_body?: string | null
+          proposed_message_draft?: string | null
           proposed_message_subject?: string | null
           proposed_next_action?: string | null
+          proposed_offer?: string | null
           recommended_human_touch?: string | null
           recommended_recovery_angle?: string | null
+          recommended_timing?: string | null
+          risk_warnings?: string[] | null
           root_cause_summary?: string | null
           send_allowed?: boolean | null
+          success_profile_id?: string | null
           updated_at?: string | null
           winback_reason?: string | null
         }
         Update: {
+          approval_status?: string | null
           approved_at?: string | null
           business_id?: string | null
+          churn_reason?: string | null
           churn_risk_level?: string | null
           contact_id?: string | null
           created_at?: string | null
           customer_history_summary?: string | null
+          external_send_allowed?: boolean | null
+          founder_attention_needed?: boolean | null
           founder_review_required?: boolean | null
           goodwill_options?: Json | null
           id?: string
           inactivity_days?: number | null
+          is_test_data?: boolean | null
           last_negative_interaction_at?: string | null
           last_positive_interaction_at?: string | null
           metadata?: Json | null
           offer_or_package_recommendation?: Json | null
           organisation_id?: string | null
+          plan_name?: string | null
           plan_status?: string | null
           proposed_message_body?: string | null
+          proposed_message_draft?: string | null
           proposed_message_subject?: string | null
           proposed_next_action?: string | null
+          proposed_offer?: string | null
           recommended_human_touch?: string | null
           recommended_recovery_angle?: string | null
+          recommended_timing?: string | null
+          risk_warnings?: string[] | null
           root_cause_summary?: string | null
           send_allowed?: boolean | null
+          success_profile_id?: string | null
           updated_at?: string | null
           winback_reason?: string | null
         }
@@ -10889,6 +12274,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "high_intent_review_queue"
             referencedColumns: ["contact_id"]
+          },
+          {
+            foreignKeyName: "customer_winback_plans_success_profile_id_fkey"
+            columns: ["success_profile_id"]
+            isOneToOne: false
+            referencedRelation: "customer_success_profiles"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -10950,12 +12342,14 @@ export type Database = {
           contact_id: string | null
           created_at: string
           currency: string
+          customer_success_profile_id: string | null
           deal_name: string
           estimated_value_max: number
           estimated_value_min: number
           id: string
           lost_at: string | null
           notes: string
+          onboarding_plan_id: string | null
           probability: number
           required_skills: string[]
           status: Database["public"]["Enums"]["deal_status"]
@@ -10968,12 +12362,14 @@ export type Database = {
           contact_id?: string | null
           created_at?: string
           currency?: string
+          customer_success_profile_id?: string | null
           deal_name: string
           estimated_value_max?: number
           estimated_value_min?: number
           id?: string
           lost_at?: string | null
           notes?: string
+          onboarding_plan_id?: string | null
           probability?: number
           required_skills?: string[]
           status?: Database["public"]["Enums"]["deal_status"]
@@ -10986,12 +12382,14 @@ export type Database = {
           contact_id?: string | null
           created_at?: string
           currency?: string
+          customer_success_profile_id?: string | null
           deal_name?: string
           estimated_value_max?: number
           estimated_value_min?: number
           id?: string
           lost_at?: string | null
           notes?: string
+          onboarding_plan_id?: string | null
           probability?: number
           required_skills?: string[]
           status?: Database["public"]["Enums"]["deal_status"]
@@ -13721,6 +15119,7 @@ export type Database = {
           business_problem: string
           contact_id: string
           created_at: string
+          customer_success_profile_id: string | null
           deal_id: string | null
           estimated_annual_savings: string
           estimated_cost_breakdown: Json
@@ -13735,6 +15134,7 @@ export type Database = {
           id: string
           include_demo: boolean
           industry: string
+          onboarding_plan_id: string | null
           processes_to_automate: string[]
           project_scale: string
           project_types: string[]
@@ -13760,6 +15160,7 @@ export type Database = {
           business_problem?: string
           contact_id: string
           created_at?: string
+          customer_success_profile_id?: string | null
           deal_id?: string | null
           estimated_annual_savings?: string
           estimated_cost_breakdown?: Json
@@ -13774,6 +15175,7 @@ export type Database = {
           id?: string
           include_demo?: boolean
           industry?: string
+          onboarding_plan_id?: string | null
           processes_to_automate?: string[]
           project_scale?: string
           project_types?: string[]
@@ -13799,6 +15201,7 @@ export type Database = {
           business_problem?: string
           contact_id?: string
           created_at?: string
+          customer_success_profile_id?: string | null
           deal_id?: string | null
           estimated_annual_savings?: string
           estimated_cost_breakdown?: Json
@@ -13813,6 +15216,7 @@ export type Database = {
           id?: string
           include_demo?: boolean
           industry?: string
+          onboarding_plan_id?: string | null
           processes_to_automate?: string[]
           project_scale?: string
           project_types?: string[]
@@ -13899,6 +15303,7 @@ export type Database = {
           contact_id: string | null
           created_at: string
           currency: string
+          customer_success_profile_id: string | null
           deal_id: string | null
           due_date: string
           expected_amount: number | null
@@ -13907,6 +15312,7 @@ export type Database = {
           issued_date: string
           notes: string
           payment_risk_flag: boolean
+          renewal_review_id: string | null
           status: Database["public"]["Enums"]["invoice_status"]
           updated_at: string
         }
@@ -13917,6 +15323,7 @@ export type Database = {
           contact_id?: string | null
           created_at?: string
           currency?: string
+          customer_success_profile_id?: string | null
           deal_id?: string | null
           due_date?: string
           expected_amount?: number | null
@@ -13925,6 +15332,7 @@ export type Database = {
           issued_date?: string
           notes?: string
           payment_risk_flag?: boolean
+          renewal_review_id?: string | null
           status?: Database["public"]["Enums"]["invoice_status"]
           updated_at?: string
         }
@@ -13935,6 +15343,7 @@ export type Database = {
           contact_id?: string | null
           created_at?: string
           currency?: string
+          customer_success_profile_id?: string | null
           deal_id?: string | null
           due_date?: string
           expected_amount?: number | null
@@ -13943,6 +15352,7 @@ export type Database = {
           issued_date?: string
           notes?: string
           payment_risk_flag?: boolean
+          renewal_review_id?: string | null
           status?: Database["public"]["Enums"]["invoice_status"]
           updated_at?: string
         }
@@ -18627,6 +20037,7 @@ export type Database = {
           amount_received: number
           business_name: string
           created_at: string
+          customer_success_profile_id: string | null
           id: string
           invoice_id: string
           method: Database["public"]["Enums"]["payment_method"]
@@ -18637,6 +20048,7 @@ export type Database = {
           amount_received?: number
           business_name?: string
           created_at?: string
+          customer_success_profile_id?: string | null
           id?: string
           invoice_id: string
           method?: Database["public"]["Enums"]["payment_method"]
@@ -18647,6 +20059,7 @@ export type Database = {
           amount_received?: number
           business_name?: string
           created_at?: string
+          customer_success_profile_id?: string | null
           id?: string
           invoice_id?: string
           method?: Database["public"]["Enums"]["payment_method"]
@@ -29135,6 +30548,8 @@ export type Database = {
           assigned_to: string | null
           business_id: string
           created_at: string
+          customer_success_handoff_status: string | null
+          customer_success_profile_id: string | null
           due_at: string | null
           escalation_status: string
           escalation_type: string
@@ -29155,6 +30570,8 @@ export type Database = {
           assigned_to?: string | null
           business_id: string
           created_at?: string
+          customer_success_handoff_status?: string | null
+          customer_success_profile_id?: string | null
           due_at?: string | null
           escalation_status?: string
           escalation_type: string
@@ -29175,6 +30592,8 @@ export type Database = {
           assigned_to?: string | null
           business_id?: string
           created_at?: string
+          customer_success_handoff_status?: string | null
+          customer_success_profile_id?: string | null
           due_at?: string | null
           escalation_status?: string
           escalation_type?: string
@@ -29683,6 +31102,8 @@ export type Database = {
           customer_email: string | null
           customer_handle: string | null
           customer_name: string | null
+          customer_success_handoff_status: string | null
+          customer_success_profile_id: string | null
           detected_category: string | null
           detected_intent: string | null
           detected_language: string
@@ -29710,6 +31131,8 @@ export type Database = {
           customer_email?: string | null
           customer_handle?: string | null
           customer_name?: string | null
+          customer_success_handoff_status?: string | null
+          customer_success_profile_id?: string | null
           detected_category?: string | null
           detected_intent?: string | null
           detected_language?: string
@@ -29737,6 +31160,8 @@ export type Database = {
           customer_email?: string | null
           customer_handle?: string | null
           customer_name?: string | null
+          customer_success_handoff_status?: string | null
+          customer_success_profile_id?: string | null
           detected_category?: string | null
           detected_intent?: string | null
           detected_language?: string
@@ -32699,6 +34124,7 @@ export type Database = {
           business_problem: string
           contact_id: string
           created_at: string
+          customer_success_profile_id: string | null
           deal_id: string | null
           estimated_annual_savings: string
           estimated_cost_breakdown: Json
@@ -32713,6 +34139,7 @@ export type Database = {
           id: string
           include_demo: boolean
           industry: string
+          onboarding_plan_id: string | null
           processes_to_automate: string[]
           project_scale: string
           project_types: string[]
@@ -32881,6 +34308,7 @@ export type Database = {
           business_problem: string
           contact_id: string
           created_at: string
+          customer_success_profile_id: string | null
           deal_id: string | null
           estimated_annual_savings: string
           estimated_cost_breakdown: Json
@@ -32895,6 +34323,7 @@ export type Database = {
           id: string
           include_demo: boolean
           industry: string
+          onboarding_plan_id: string | null
           processes_to_automate: string[]
           project_scale: string
           project_types: string[]
@@ -33156,6 +34585,8 @@ export type Database = {
           conversation_active: boolean
           country: string | null
           created_at: string
+          customer_success_profile_id: string | null
+          customer_success_status: string | null
           data_source: string | null
           do_not_contact_at: string | null
           do_not_contact_reason: string | null
