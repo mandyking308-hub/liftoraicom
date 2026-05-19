@@ -23,13 +23,13 @@ Deno.serve(async (req) => {
       ? admin.from("business_social_knowledge_sources").select("id,source_type,title,pasted_text,summary,approved_for_social_training")
           .eq("business_id", business_id)
       : Promise.resolve({ data: [] } as any),
-    admin.from("businesses").select("id,name,category").eq("id", business_id).maybeSingle().then((r: any) => r).catch(() => ({ data: null })),
+    admin.from("businesses").select("id,name").eq("id", business_id).maybeSingle().then((r: any) => r).catch(() => ({ data: null })),
   ]);
 
   const generated = buildSocialOperatingProfile({
     business_id,
     business_name: biz?.name ?? body.business_name,
-    business_category: biz?.category ?? body.business_category,
+    business_category: body.business_category,
     brain,
     sources: (sources ?? []).filter((s: any) => s.approved_for_social_training !== false),
     founder_notes: body.founder_notes ?? null,
