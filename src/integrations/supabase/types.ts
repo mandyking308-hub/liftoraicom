@@ -7727,6 +7727,212 @@ export type Database = {
         }
         Relationships: []
       }
+      conversion_asset_packs: {
+        Row: {
+          asset_ids: string[]
+          asset_requirements: string[]
+          builder_instructions: string | null
+          business_id: string
+          campaign_plan_id: string | null
+          copy_blocks: Json
+          created_at: string
+          export_payload: Json
+          founder_notes: string | null
+          funnel_strategy_id: string | null
+          id: string
+          is_test_data: boolean
+          lead_magnet_id: string | null
+          manual_export_status: string
+          metadata: Json
+          operator_checklist: Json
+          pack_name: string
+          pack_status: string
+          pack_type: string
+          page_draft_id: string | null
+          updated_at: string
+          validation_errors: string[]
+          validation_status: string
+          validation_warnings: string[]
+        }
+        Insert: {
+          asset_ids?: string[]
+          asset_requirements?: string[]
+          builder_instructions?: string | null
+          business_id: string
+          campaign_plan_id?: string | null
+          copy_blocks?: Json
+          created_at?: string
+          export_payload?: Json
+          founder_notes?: string | null
+          funnel_strategy_id?: string | null
+          id?: string
+          is_test_data?: boolean
+          lead_magnet_id?: string | null
+          manual_export_status?: string
+          metadata?: Json
+          operator_checklist?: Json
+          pack_name: string
+          pack_status?: string
+          pack_type: string
+          page_draft_id?: string | null
+          updated_at?: string
+          validation_errors?: string[]
+          validation_status?: string
+          validation_warnings?: string[]
+        }
+        Update: {
+          asset_ids?: string[]
+          asset_requirements?: string[]
+          builder_instructions?: string | null
+          business_id?: string
+          campaign_plan_id?: string | null
+          copy_blocks?: Json
+          created_at?: string
+          export_payload?: Json
+          founder_notes?: string | null
+          funnel_strategy_id?: string | null
+          id?: string
+          is_test_data?: boolean
+          lead_magnet_id?: string | null
+          manual_export_status?: string
+          metadata?: Json
+          operator_checklist?: Json
+          pack_name?: string
+          pack_status?: string
+          pack_type?: string
+          page_draft_id?: string | null
+          updated_at?: string
+          validation_errors?: string[]
+          validation_status?: string
+          validation_warnings?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversion_asset_packs_funnel_strategy_id_fkey"
+            columns: ["funnel_strategy_id"]
+            isOneToOne: false
+            referencedRelation: "website_funnel_strategies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversion_asset_packs_lead_magnet_id_fkey"
+            columns: ["lead_magnet_id"]
+            isOneToOne: false
+            referencedRelation: "lead_magnet_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversion_asset_packs_page_draft_id_fkey"
+            columns: ["page_draft_id"]
+            isOneToOne: false
+            referencedRelation: "website_landing_page_drafts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversion_cta_maps: {
+        Row: {
+          approval_status: string
+          business_id: string
+          calendar_item_id: string | null
+          campaign_plan_id: string | null
+          content_item_id: string | null
+          created_at: string
+          cta_text: string | null
+          cta_url: string | null
+          destination_status: string
+          destination_type: string | null
+          funnel_strategy_id: string | null
+          id: string
+          is_test_data: boolean
+          keyword_rule_id: string | null
+          lead_magnet_id: string | null
+          map_name: string
+          map_status: string
+          metadata: Json
+          page_draft_id: string | null
+          platform: string | null
+          risk_warnings: string[]
+          source_id: string | null
+          source_type: string
+          updated_at: string
+        }
+        Insert: {
+          approval_status?: string
+          business_id: string
+          calendar_item_id?: string | null
+          campaign_plan_id?: string | null
+          content_item_id?: string | null
+          created_at?: string
+          cta_text?: string | null
+          cta_url?: string | null
+          destination_status?: string
+          destination_type?: string | null
+          funnel_strategy_id?: string | null
+          id?: string
+          is_test_data?: boolean
+          keyword_rule_id?: string | null
+          lead_magnet_id?: string | null
+          map_name: string
+          map_status?: string
+          metadata?: Json
+          page_draft_id?: string | null
+          platform?: string | null
+          risk_warnings?: string[]
+          source_id?: string | null
+          source_type: string
+          updated_at?: string
+        }
+        Update: {
+          approval_status?: string
+          business_id?: string
+          calendar_item_id?: string | null
+          campaign_plan_id?: string | null
+          content_item_id?: string | null
+          created_at?: string
+          cta_text?: string | null
+          cta_url?: string | null
+          destination_status?: string
+          destination_type?: string | null
+          funnel_strategy_id?: string | null
+          id?: string
+          is_test_data?: boolean
+          keyword_rule_id?: string | null
+          lead_magnet_id?: string | null
+          map_name?: string
+          map_status?: string
+          metadata?: Json
+          page_draft_id?: string | null
+          platform?: string | null
+          risk_warnings?: string[]
+          source_id?: string | null
+          source_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversion_cta_maps_funnel_strategy_id_fkey"
+            columns: ["funnel_strategy_id"]
+            isOneToOne: false
+            referencedRelation: "website_funnel_strategies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversion_cta_maps_lead_magnet_id_fkey"
+            columns: ["lead_magnet_id"]
+            isOneToOne: false
+            referencedRelation: "lead_magnet_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversion_cta_maps_page_draft_id_fkey"
+            columns: ["page_draft_id"]
+            isOneToOne: false
+            referencedRelation: "website_landing_page_drafts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       creative_asset_library: {
         Row: {
           approved_for_ads: boolean
@@ -14341,6 +14547,101 @@ export type Database = {
           },
         ]
       }
+      lead_magnet_assets: {
+        Row: {
+          approval_status: string
+          business_id: string
+          campaign_plan_id: string | null
+          compliance_warnings: string[]
+          cover_asset_id: string | null
+          created_at: string
+          delivery_method: string | null
+          draft_content: string | null
+          follow_up_needed: boolean
+          founder_approval_review_id: string | null
+          funnel_strategy_id: string | null
+          id: string
+          is_test_data: boolean
+          lead_magnet_name: string
+          lead_magnet_status: string
+          lead_magnet_type: string
+          metadata: Json
+          opt_in_copy: string | null
+          outline: Json
+          promised_outcome: string | null
+          proof_required: string[]
+          risk_flags: string[]
+          target_audience: string | null
+          thank_you_copy: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          approval_status?: string
+          business_id: string
+          campaign_plan_id?: string | null
+          compliance_warnings?: string[]
+          cover_asset_id?: string | null
+          created_at?: string
+          delivery_method?: string | null
+          draft_content?: string | null
+          follow_up_needed?: boolean
+          founder_approval_review_id?: string | null
+          funnel_strategy_id?: string | null
+          id?: string
+          is_test_data?: boolean
+          lead_magnet_name: string
+          lead_magnet_status?: string
+          lead_magnet_type: string
+          metadata?: Json
+          opt_in_copy?: string | null
+          outline?: Json
+          promised_outcome?: string | null
+          proof_required?: string[]
+          risk_flags?: string[]
+          target_audience?: string | null
+          thank_you_copy?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approval_status?: string
+          business_id?: string
+          campaign_plan_id?: string | null
+          compliance_warnings?: string[]
+          cover_asset_id?: string | null
+          created_at?: string
+          delivery_method?: string | null
+          draft_content?: string | null
+          follow_up_needed?: boolean
+          founder_approval_review_id?: string | null
+          funnel_strategy_id?: string | null
+          id?: string
+          is_test_data?: boolean
+          lead_magnet_name?: string
+          lead_magnet_status?: string
+          lead_magnet_type?: string
+          metadata?: Json
+          opt_in_copy?: string | null
+          outline?: Json
+          promised_outcome?: string | null
+          proof_required?: string[]
+          risk_flags?: string[]
+          target_audience?: string | null
+          thank_you_copy?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_magnet_assets_funnel_strategy_id_fkey"
+            columns: ["funnel_strategy_id"]
+            isOneToOne: false
+            referencedRelation: "website_funnel_strategies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lead_quality_profiles: {
         Row: {
           apollo_lead_id: string
@@ -20732,11 +21033,13 @@ export type Database = {
           content_pack_id: string | null
           content_variant_id: string | null
           created_at: string
+          cta_map_id: string | null
           customer_journey_stage: string | null
           day_number: number | null
           dm_flow_id: string | null
           engagement_flow_status: string | null
           founder_approval_review_id: string | null
+          funnel_destination_status: string | null
           funnel_stage: string | null
           id: string
           is_test_data: boolean | null
@@ -20774,11 +21077,13 @@ export type Database = {
           content_pack_id?: string | null
           content_variant_id?: string | null
           created_at?: string
+          cta_map_id?: string | null
           customer_journey_stage?: string | null
           day_number?: number | null
           dm_flow_id?: string | null
           engagement_flow_status?: string | null
           founder_approval_review_id?: string | null
+          funnel_destination_status?: string | null
           funnel_stage?: string | null
           id?: string
           is_test_data?: boolean | null
@@ -20816,11 +21121,13 @@ export type Database = {
           content_pack_id?: string | null
           content_variant_id?: string | null
           created_at?: string
+          cta_map_id?: string | null
           customer_journey_stage?: string | null
           day_number?: number | null
           dm_flow_id?: string | null
           engagement_flow_status?: string | null
           founder_approval_review_id?: string | null
+          funnel_destination_status?: string | null
           funnel_stage?: string | null
           id?: string
           is_test_data?: boolean | null
@@ -21083,6 +21390,8 @@ export type Database = {
           campaign_summary: string | null
           campaign_type: string
           compliance_warnings: string[]
+          conversion_asset_pack_id: string | null
+          conversion_page_id: string | null
           created_at: string
           customer_journey_stage: string | null
           dm_flow_id: string | null
@@ -21090,10 +21399,13 @@ export type Database = {
           engagement_flow_status: string | null
           founder_notes: string | null
           funnel_stage: string | null
+          funnel_status: string | null
+          funnel_strategy_id: string | null
           id: string
           is_test_data: boolean
           key_message: string | null
           keyword_flow_id: string | null
+          lead_magnet_id: string | null
           learning_status: string | null
           linked_revenue_target_id: string | null
           linked_social_content_pack_id: string | null
@@ -21125,6 +21437,8 @@ export type Database = {
           campaign_summary?: string | null
           campaign_type?: string
           compliance_warnings?: string[]
+          conversion_asset_pack_id?: string | null
+          conversion_page_id?: string | null
           created_at?: string
           customer_journey_stage?: string | null
           dm_flow_id?: string | null
@@ -21132,10 +21446,13 @@ export type Database = {
           engagement_flow_status?: string | null
           founder_notes?: string | null
           funnel_stage?: string | null
+          funnel_status?: string | null
+          funnel_strategy_id?: string | null
           id?: string
           is_test_data?: boolean
           key_message?: string | null
           keyword_flow_id?: string | null
+          lead_magnet_id?: string | null
           learning_status?: string | null
           linked_revenue_target_id?: string | null
           linked_social_content_pack_id?: string | null
@@ -21167,6 +21484,8 @@ export type Database = {
           campaign_summary?: string | null
           campaign_type?: string
           compliance_warnings?: string[]
+          conversion_asset_pack_id?: string | null
+          conversion_page_id?: string | null
           created_at?: string
           customer_journey_stage?: string | null
           dm_flow_id?: string | null
@@ -21174,10 +21493,13 @@ export type Database = {
           engagement_flow_status?: string | null
           founder_notes?: string | null
           funnel_stage?: string | null
+          funnel_status?: string | null
+          funnel_strategy_id?: string | null
           id?: string
           is_test_data?: boolean
           key_message?: string | null
           keyword_flow_id?: string | null
+          lead_magnet_id?: string | null
           learning_status?: string | null
           linked_revenue_target_id?: string | null
           linked_social_content_pack_id?: string | null
@@ -21852,11 +22174,13 @@ export type Database = {
           conversion_goal: string | null
           created_at: string | null
           cta: string | null
+          cta_map_id: string | null
           customer_journey_stage: string | null
           dm_flow_id: string | null
           engagement_flow_status: string | null
           founder_approval_review_id: string | null
           founder_notes: string | null
+          funnel_destination_status: string | null
           funnel_stage: string | null
           generated_by_ai: boolean | null
           hashtags: string | null
@@ -21922,11 +22246,13 @@ export type Database = {
           conversion_goal?: string | null
           created_at?: string | null
           cta?: string | null
+          cta_map_id?: string | null
           customer_journey_stage?: string | null
           dm_flow_id?: string | null
           engagement_flow_status?: string | null
           founder_approval_review_id?: string | null
           founder_notes?: string | null
+          funnel_destination_status?: string | null
           funnel_stage?: string | null
           generated_by_ai?: boolean | null
           hashtags?: string | null
@@ -21992,11 +22318,13 @@ export type Database = {
           conversion_goal?: string | null
           created_at?: string | null
           cta?: string | null
+          cta_map_id?: string | null
           customer_journey_stage?: string | null
           dm_flow_id?: string | null
           engagement_flow_status?: string | null
           founder_approval_review_id?: string | null
           founder_notes?: string | null
+          funnel_destination_status?: string | null
           funnel_stage?: string | null
           generated_by_ai?: boolean | null
           hashtags?: string | null
@@ -26014,11 +26342,13 @@ export type Database = {
           business_id: string
           competitor_pattern_id: string | null
           confidence_score: number | null
+          conversion_asset_pack_id: string | null
           created_at: string | null
           description: string | null
           evidence_level: string | null
           expected_impact: string | null
           founder_approval_required: boolean | null
+          funnel_strategy_id: string | null
           id: string
           is_test_data: boolean | null
           linked_campaign_plan_id: string | null
@@ -26040,11 +26370,13 @@ export type Database = {
           business_id: string
           competitor_pattern_id?: string | null
           confidence_score?: number | null
+          conversion_asset_pack_id?: string | null
           created_at?: string | null
           description?: string | null
           evidence_level?: string | null
           expected_impact?: string | null
           founder_approval_required?: boolean | null
+          funnel_strategy_id?: string | null
           id?: string
           is_test_data?: boolean | null
           linked_campaign_plan_id?: string | null
@@ -26066,11 +26398,13 @@ export type Database = {
           business_id?: string
           competitor_pattern_id?: string | null
           confidence_score?: number | null
+          conversion_asset_pack_id?: string | null
           created_at?: string | null
           description?: string | null
           evidence_level?: string | null
           expected_impact?: string | null
           founder_approval_required?: boolean | null
+          funnel_strategy_id?: string | null
           id?: string
           is_test_data?: boolean | null
           linked_campaign_plan_id?: string | null
@@ -28094,6 +28428,454 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      website_funnel_audit: {
+        Row: {
+          action: string
+          action_status: string
+          after_json: Json
+          asset_pack_id: string | null
+          before_json: Json
+          business_id: string
+          created_at: string
+          created_by: string | null
+          cta_map_id: string | null
+          emails_sent: number
+          error_message: string | null
+          external_api_calls: number
+          funnel_strategy_id: string | null
+          id: string
+          is_test_data: boolean
+          lead_magnet_id: string | null
+          live_forms_created: number
+          metadata: Json
+          page_draft_id: string | null
+          pages_published: number
+          payments_created: number
+          result_json: Json
+        }
+        Insert: {
+          action: string
+          action_status?: string
+          after_json?: Json
+          asset_pack_id?: string | null
+          before_json?: Json
+          business_id: string
+          created_at?: string
+          created_by?: string | null
+          cta_map_id?: string | null
+          emails_sent?: number
+          error_message?: string | null
+          external_api_calls?: number
+          funnel_strategy_id?: string | null
+          id?: string
+          is_test_data?: boolean
+          lead_magnet_id?: string | null
+          live_forms_created?: number
+          metadata?: Json
+          page_draft_id?: string | null
+          pages_published?: number
+          payments_created?: number
+          result_json?: Json
+        }
+        Update: {
+          action?: string
+          action_status?: string
+          after_json?: Json
+          asset_pack_id?: string | null
+          before_json?: Json
+          business_id?: string
+          created_at?: string
+          created_by?: string | null
+          cta_map_id?: string | null
+          emails_sent?: number
+          error_message?: string | null
+          external_api_calls?: number
+          funnel_strategy_id?: string | null
+          id?: string
+          is_test_data?: boolean
+          lead_magnet_id?: string | null
+          live_forms_created?: number
+          metadata?: Json
+          page_draft_id?: string | null
+          pages_published?: number
+          payments_created?: number
+          result_json?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "website_funnel_audit_asset_pack_id_fkey"
+            columns: ["asset_pack_id"]
+            isOneToOne: false
+            referencedRelation: "conversion_asset_packs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "website_funnel_audit_cta_map_id_fkey"
+            columns: ["cta_map_id"]
+            isOneToOne: false
+            referencedRelation: "conversion_cta_maps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "website_funnel_audit_funnel_strategy_id_fkey"
+            columns: ["funnel_strategy_id"]
+            isOneToOne: false
+            referencedRelation: "website_funnel_strategies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "website_funnel_audit_lead_magnet_id_fkey"
+            columns: ["lead_magnet_id"]
+            isOneToOne: false
+            referencedRelation: "lead_magnet_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "website_funnel_audit_page_draft_id_fkey"
+            columns: ["page_draft_id"]
+            isOneToOne: false
+            referencedRelation: "website_landing_page_drafts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      website_funnel_gap_reviews: {
+        Row: {
+          business_id: string
+          created_at: string
+          funnel_strategy_id: string | null
+          gap_description: string
+          gap_type: string
+          id: string
+          is_test_data: boolean
+          metadata: Json
+          page_draft_id: string | null
+          recommended_fix: string | null
+          severity: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          funnel_strategy_id?: string | null
+          gap_description: string
+          gap_type: string
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          page_draft_id?: string | null
+          recommended_fix?: string | null
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          funnel_strategy_id?: string | null
+          gap_description?: string
+          gap_type?: string
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          page_draft_id?: string | null
+          recommended_fix?: string | null
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "website_funnel_gap_reviews_funnel_strategy_id_fkey"
+            columns: ["funnel_strategy_id"]
+            isOneToOne: false
+            referencedRelation: "website_funnel_strategies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "website_funnel_gap_reviews_page_draft_id_fkey"
+            columns: ["page_draft_id"]
+            isOneToOne: false
+            referencedRelation: "website_landing_page_drafts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      website_funnel_strategies: {
+        Row: {
+          approval_status: string
+          business_id: string
+          created_at: string
+          founder_notes: string | null
+          funnel_stage: string | null
+          id: string
+          is_test_data: boolean
+          linked_campaign_plan_id: string | null
+          linked_learning_signal_id: string | null
+          linked_market_signal_id: string | null
+          linked_revenue_target_id: string | null
+          metadata: Json
+          missing_proof: string[]
+          page_goal: string | null
+          primary_goal: string | null
+          primary_offer: string | null
+          proof_required: string[]
+          readiness_score: number
+          recommended_assets: string[]
+          recommended_pages: string[]
+          risk_warnings: string[]
+          strategy_name: string
+          strategy_status: string
+          strategy_type: string
+          target_audience: string | null
+          traffic_sources: string[]
+          updated_at: string
+          value_proposition: string | null
+          website_url: string | null
+        }
+        Insert: {
+          approval_status?: string
+          business_id: string
+          created_at?: string
+          founder_notes?: string | null
+          funnel_stage?: string | null
+          id?: string
+          is_test_data?: boolean
+          linked_campaign_plan_id?: string | null
+          linked_learning_signal_id?: string | null
+          linked_market_signal_id?: string | null
+          linked_revenue_target_id?: string | null
+          metadata?: Json
+          missing_proof?: string[]
+          page_goal?: string | null
+          primary_goal?: string | null
+          primary_offer?: string | null
+          proof_required?: string[]
+          readiness_score?: number
+          recommended_assets?: string[]
+          recommended_pages?: string[]
+          risk_warnings?: string[]
+          strategy_name: string
+          strategy_status?: string
+          strategy_type: string
+          target_audience?: string | null
+          traffic_sources?: string[]
+          updated_at?: string
+          value_proposition?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          approval_status?: string
+          business_id?: string
+          created_at?: string
+          founder_notes?: string | null
+          funnel_stage?: string | null
+          id?: string
+          is_test_data?: boolean
+          linked_campaign_plan_id?: string | null
+          linked_learning_signal_id?: string | null
+          linked_market_signal_id?: string | null
+          linked_revenue_target_id?: string | null
+          metadata?: Json
+          missing_proof?: string[]
+          page_goal?: string | null
+          primary_goal?: string | null
+          primary_offer?: string | null
+          proof_required?: string[]
+          readiness_score?: number
+          recommended_assets?: string[]
+          recommended_pages?: string[]
+          risk_warnings?: string[]
+          strategy_name?: string
+          strategy_status?: string
+          strategy_type?: string
+          target_audience?: string | null
+          traffic_sources?: string[]
+          updated_at?: string
+          value_proposition?: string | null
+          website_url?: string | null
+        }
+        Relationships: []
+      }
+      website_landing_page_drafts: {
+        Row: {
+          approval_status: string
+          asset_requirements: string[]
+          builder_export_status: string
+          business_id: string
+          compliance_warnings: string[]
+          copy_risk_flags: string[]
+          created_at: string
+          faq_blocks: Json
+          founder_approval_review_id: string | null
+          funnel_strategy_id: string | null
+          hero_headline: string | null
+          hero_subheadline: string | null
+          id: string
+          is_test_data: boolean
+          metadata: Json
+          missing_assets: string[]
+          page_name: string
+          page_outline: Json
+          page_status: string
+          page_type: string
+          page_url_intended: string | null
+          primary_cta: string | null
+          primary_goal: string | null
+          proof_blocks: Json
+          risk_disclaimers: string[]
+          secondary_cta: string | null
+          section_copy: Json
+          target_audience: string | null
+          updated_at: string
+        }
+        Insert: {
+          approval_status?: string
+          asset_requirements?: string[]
+          builder_export_status?: string
+          business_id: string
+          compliance_warnings?: string[]
+          copy_risk_flags?: string[]
+          created_at?: string
+          faq_blocks?: Json
+          founder_approval_review_id?: string | null
+          funnel_strategy_id?: string | null
+          hero_headline?: string | null
+          hero_subheadline?: string | null
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          missing_assets?: string[]
+          page_name: string
+          page_outline?: Json
+          page_status?: string
+          page_type: string
+          page_url_intended?: string | null
+          primary_cta?: string | null
+          primary_goal?: string | null
+          proof_blocks?: Json
+          risk_disclaimers?: string[]
+          secondary_cta?: string | null
+          section_copy?: Json
+          target_audience?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approval_status?: string
+          asset_requirements?: string[]
+          builder_export_status?: string
+          business_id?: string
+          compliance_warnings?: string[]
+          copy_risk_flags?: string[]
+          created_at?: string
+          faq_blocks?: Json
+          founder_approval_review_id?: string | null
+          funnel_strategy_id?: string | null
+          hero_headline?: string | null
+          hero_subheadline?: string | null
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          missing_assets?: string[]
+          page_name?: string
+          page_outline?: Json
+          page_status?: string
+          page_type?: string
+          page_url_intended?: string | null
+          primary_cta?: string | null
+          primary_goal?: string | null
+          proof_blocks?: Json
+          risk_disclaimers?: string[]
+          secondary_cta?: string | null
+          section_copy?: Json
+          target_audience?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "website_landing_page_drafts_funnel_strategy_id_fkey"
+            columns: ["funnel_strategy_id"]
+            isOneToOne: false
+            referencedRelation: "website_funnel_strategies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      website_page_sections: {
+        Row: {
+          asset_id: string | null
+          asset_requirement: string | null
+          business_id: string
+          compliance_warnings: string[]
+          created_at: string
+          cta_text: string | null
+          cta_url: string | null
+          id: string
+          is_test_data: boolean
+          metadata: Json
+          page_draft_id: string
+          risk_flags: string[]
+          section_copy: string | null
+          section_goal: string | null
+          section_order: number
+          section_title: string | null
+          section_type: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          asset_id?: string | null
+          asset_requirement?: string | null
+          business_id: string
+          compliance_warnings?: string[]
+          created_at?: string
+          cta_text?: string | null
+          cta_url?: string | null
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          page_draft_id: string
+          risk_flags?: string[]
+          section_copy?: string | null
+          section_goal?: string | null
+          section_order?: number
+          section_title?: string | null
+          section_type: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          asset_id?: string | null
+          asset_requirement?: string | null
+          business_id?: string
+          compliance_warnings?: string[]
+          created_at?: string
+          cta_text?: string | null
+          cta_url?: string | null
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          page_draft_id?: string
+          risk_flags?: string[]
+          section_copy?: string | null
+          section_goal?: string | null
+          section_order?: number
+          section_title?: string | null
+          section_type?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "website_page_sections_page_draft_id_fkey"
+            columns: ["page_draft_id"]
+            isOneToOne: false
+            referencedRelation: "website_landing_page_drafts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       workflow_activity_logs: {
         Row: {
