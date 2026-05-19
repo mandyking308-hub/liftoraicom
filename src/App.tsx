@@ -83,6 +83,7 @@ import ExecutionDashboard from "./pages/founder/ExecutionDashboard";
 import ExecutionDetail from "./pages/founder/ExecutionDetail";
 import CommandCenter from "./pages/founder/CommandCenter";
 import CommandCentre from "./pages/founder/CommandCentre";
+import LiftorBrain from "./pages/founder/LiftorBrain";
 import ProcessDirectory from "./pages/founder/ProcessDirectory";
 import ProcessDetail from "./pages/founder/ProcessDetail";
 import ArchitectureDirectory from "./pages/founder/ArchitectureDirectory";
@@ -261,6 +262,7 @@ const App = () => (
             <Route path="/founder/executions/:id" element={<FounderRoute><ExecutionDetail /></FounderRoute>} />
             <Route path="/founder/command-centre" element={<FounderRoute><CommandCentre /></FounderRoute>} />
             <Route path="/founder/command-center" element={<Navigate to="/founder/command-centre" replace />} />
+            <Route path="/founder/brain" element={<FounderRoute><LiftorBrain /></FounderRoute>} />
             <Route path="/founder/command-center/legacy" element={<FounderRoute><CommandCenter /></FounderRoute>} />
             <Route path="/founder/processes" element={<FounderRoute><ProcessDirectory /></FounderRoute>} />
             <Route path="/founder/processes/:id" element={<FounderRoute><ProcessDetail /></FounderRoute>} />
