@@ -114,6 +114,8 @@ import StrategyEngine from "./pages/founder/StrategyEngine";
 import MarketingHub from "./pages/founder/MarketingHub";
 import SupportHub from "./pages/founder/SupportHub";
 import SupportKnowledgeAgent from "./pages/founder/SupportKnowledgeAgent";
+import CustomerSuccess from "./pages/founder/CustomerSuccess";
+import ClientPortal from "./pages/founder/ClientPortal";
 import CreativeAssetsHub from "./pages/founder/CreativeAssetsHub";
 import SocialBrain from "./pages/founder/SocialBrain";
 import SocialAutopilotPage from "./pages/founder/SocialAutopilotPage";
@@ -291,6 +293,8 @@ const App = () => (
             <Route path="/founder/marketing" element={<FounderRoute><MarketingHub /></FounderRoute>} />
             <Route path="/founder/support" element={<FounderRoute><SupportHub /></FounderRoute>} />
             <Route path="/founder/support/knowledge-agent" element={<FounderRoute><SupportKnowledgeAgent /></FounderRoute>} />
+            <Route path="/founder/customer-success" element={<FounderRoute><CustomerSuccess /></FounderRoute>} />
+            <Route path="/founder/clients" element={<FounderRoute><ClientPortal /></FounderRoute>} />
             <Route path="/founder/assets" element={<FounderRoute><CreativeAssetsHub /></FounderRoute>} />
             <Route path="/founder/social" element={<FounderRoute><SocialBrain /></FounderRoute>} />
             <Route path="/founder/social-autopilot" element={<FounderRoute><SocialAutopilotPage /></FounderRoute>} />
