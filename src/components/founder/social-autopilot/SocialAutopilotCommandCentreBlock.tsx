@@ -18,6 +18,7 @@ export default function SocialAutopilotCommandCentreBlock() {
   const [engagement, setEngagement] = useState<any>(null);
   const [inbox, setInbox] = useState<any>(null);
   const [analytics, setAnalytics] = useState<any>(null);
+  const [competitor, setCompetitor] = useState<any>(null);
   const businessId = typeof window !== "undefined" ? localStorage.getItem("liftor.activeBusinessId") || "" : "";
 
   useEffect(() => {
@@ -58,6 +59,9 @@ export default function SocialAutopilotCommandCentreBlock() {
           const an = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/social-analytics-healthcheck?business_id=${businessId}`,
             { headers: { Authorization: `Bearer ${session?.access_token ?? ""}` } });
           setAnalytics(await an.json());
+          const ct = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/social-competitor-trend-healthcheck?business_id=${businessId}`,
+            { headers: { Authorization: `Bearer ${session?.access_token ?? ""}` } });
+          setCompetitor(await ct.json());
         }
       } catch { /* ignore */ }
     })();
@@ -345,6 +349,36 @@ export default function SocialAutopilotCommandCentreBlock() {
               if ((analytics.learning_signals_total ?? 0) === 0) return "Create learning signals from summaries.";
               if ((analytics.recommendations_needing_review ?? 0) > 0) return "Review pending strategy recommendations.";
               return "Analytics healthy — keep importing and reviewing.";
+            })()}</p>
+          </div>
+        )}
+        {businessId && competitor && (
+          <div className="mt-3 p-3 rounded bg-secondary/40">
+            <p className="text-xs font-semibold mb-1 flex items-center gap-1"><Lock size={12} /> Competitor / Trend (manual research only — no scraping/API)</p>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-[11px]">
+              <span>Competitors: {competitor.competitors_total ?? 0}</span>
+              <span>Observations: {competitor.observations_total ?? 0}</span>
+              <span>Obs review: {competitor.observations_needing_review ?? 0}</span>
+              <span>Trends: {competitor.trends_total ?? 0}</span>
+              <span>Trends review: {competitor.trends_needing_review ?? 0}</span>
+              <span>Patterns: {competitor.patterns_total ?? 0}</span>
+              <span>Patterns review: {competitor.patterns_needing_review ?? 0}</span>
+              <span>Positioning reviews: {competitor.positioning_reviews_total ?? 0}</span>
+              <span>Signals review: {competitor.market_learning_needing_review ?? 0}</span>
+              <span>Recs: {competitor.recommendations_total ?? 0}</span>
+              <span>Provider calls: {competitor.provider_calls_total ?? 0}</span>
+              <span>Scraped: {competitor.scraped_pages_total ?? 0}</span>
+              <span>Copied assets: {competitor.copied_assets_created_total ?? 0}</span>
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-2">Next: {(() => {
+              if ((competitor.competitors_total ?? 0) === 0) return "Add first competitor profile.";
+              if ((competitor.observations_total ?? 0) === 0) return "Add first competitor observation.";
+              if ((competitor.trends_total ?? 0) === 0) return "Add first trend signal.";
+              if ((competitor.patterns_total ?? 0) === 0) return "Generate competitor patterns.";
+              if ((competitor.positioning_reviews_total ?? 0) === 0) return "Generate positioning review.";
+              if ((competitor.market_learning_signals_total ?? 0) === 0) return "Create market learning signals.";
+              if ((competitor.market_learning_needing_review ?? 0) > 0) return "Review market learning signals.";
+              return "Review market recommendations.";
             })()}</p>
           </div>
         )}

@@ -662,6 +662,35 @@ export const SOCIAL_ANALYTICS_LEARNING = {
   ],
 };
 
+export const SOCIAL_COMPETITOR_TREND = {
+  title: "Competitor Watch and Trend Learning",
+  summary:
+    "Liftor can store manual competitor and trend observations per business, infer patterns, generate positioning reviews and market learning signals, and propose strategy recommendations. It never scrapes, never calls social/Metricool/Buffer/Hootsuite/Meta/TikTok/YouTube/LinkedIn/X APIs, never publishes competitor claims and never copies competitor wording, designs or assets. All recommendations require founder approval.",
+  rules: [
+    "No scraping. No social/search/Apollo/Smartlead API calls. No publish, schedule, DM, comment or email send.",
+    "Competitor notes are evidence-limited (manual_unverified) until founder marks them checked.",
+    "Liftor produces legally distinct adaptations only — no copied wording, captions, scripts, visuals or assets.",
+    "No automatic strategy change — every market learning signal and recommendation needs founder approval.",
+    "Test data (is_test_data=true) must be purged before real use via PURGE SOCIAL COMPETITOR TREND TEST DATA.",
+  ],
+  steps: [
+    "Open Social Autopilot → Competitor Watch + Trend Intelligence.",
+    "Add competitor profile with CREATE SOCIAL COMPETITOR PROFILE.",
+    "Capture observations manually with CREATE SOCIAL COMPETITOR OBSERVATION (paste only — never copyrighted assets).",
+    "Add trend signals with CREATE SOCIAL TREND SIGNAL.",
+    "Generate patterns with GENERATE SOCIAL COMPETITOR PATTERNS.",
+    "Generate positioning review with GENERATE SOCIAL MARKET POSITIONING REVIEW.",
+    "Preview & save market learning signals with CREATE SOCIAL MARKET LEARNING SIGNALS.",
+    "Preview & save strategy recommendations with CREATE SOCIAL MARKET RECOMMENDATIONS.",
+    "Approve/reject/park/archive with APPLY SOCIAL MARKET LEARNING DECISION.",
+  ],
+  technical: [
+    "Tables: social_competitor_profiles, social_competitor_accounts, social_competitor_observations, social_competitor_content_patterns, social_trend_signals, social_market_positioning_reviews, social_market_learning_signals, social_competitor_trend_audit. Extensions on social_content_packs/_items, social_campaign_plans, social_strategy_recommendations.",
+    "Edge functions: social-competitor-profile-create, social-competitor-observation-preview/-create, social-trend-signal-preview/-create, social-competitor-patterns-generate, social-market-positioning-review-generate, social-market-learning-signals-preview/-create, social-market-recommendations-preview/-create, social-market-learning-decision, social-competitor-trend-healthcheck, social-competitor-external-research-placeholder (fail-closed), social-competitor-trend-rehearsal-purge, social-competitor-trend-acceptance.",
+    "Command Centre Daily Operator View renders a Competitor/Trend tile with provider_calls=0, scraped_pages=0, competitor_claims_published=0, copied_assets_created=0.",
+  ],
+};
+
 export const USING_SOCIAL_BRAIN_CONNECTOR = {
   title: "Business Knowledge → Social Brain",
   summary:

@@ -21097,6 +21097,8 @@ export type Database = {
           learning_status: string | null
           linked_revenue_target_id: string | null
           linked_social_content_pack_id: string | null
+          market_learning_status: string | null
+          market_positioning_review_id: string | null
           metadata: Json
           missing_assets: string[]
           performance_rating: string | null
@@ -21137,6 +21139,8 @@ export type Database = {
           learning_status?: string | null
           linked_revenue_target_id?: string | null
           linked_social_content_pack_id?: string | null
+          market_learning_status?: string | null
+          market_positioning_review_id?: string | null
           metadata?: Json
           missing_assets?: string[]
           performance_rating?: string | null
@@ -21177,6 +21181,8 @@ export type Database = {
           learning_status?: string | null
           linked_revenue_target_id?: string | null
           linked_social_content_pack_id?: string | null
+          market_learning_status?: string | null
+          market_positioning_review_id?: string | null
           metadata?: Json
           missing_assets?: string[]
           performance_rating?: string | null
@@ -21273,6 +21279,247 @@ export type Database = {
           },
         ]
       }
+      social_competitor_accounts: {
+        Row: {
+          account_handle: string | null
+          account_status: string
+          account_url: string | null
+          business_id: string
+          competitor_id: string
+          created_at: string
+          evidence_level: string
+          follower_count: number | null
+          follower_count_observed_at: string | null
+          id: string
+          is_test_data: boolean
+          metadata: Json
+          notes: string | null
+          platform: string
+          updated_at: string
+        }
+        Insert: {
+          account_handle?: string | null
+          account_status?: string
+          account_url?: string | null
+          business_id: string
+          competitor_id: string
+          created_at?: string
+          evidence_level?: string
+          follower_count?: number | null
+          follower_count_observed_at?: string | null
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          notes?: string | null
+          platform: string
+          updated_at?: string
+        }
+        Update: {
+          account_handle?: string | null
+          account_status?: string
+          account_url?: string | null
+          business_id?: string
+          competitor_id?: string
+          created_at?: string
+          evidence_level?: string
+          follower_count?: number | null
+          follower_count_observed_at?: string | null
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          notes?: string | null
+          platform?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_competitor_accounts_competitor_id_fkey"
+            columns: ["competitor_id"]
+            isOneToOne: false
+            referencedRelation: "social_competitor_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_competitor_content_patterns: {
+        Row: {
+          approved_for_strategy: boolean
+          business_id: string
+          competitor_id: string | null
+          confidence_score: number
+          created_at: string
+          evidence_observation_ids: string[]
+          example_summary: string | null
+          founder_review_required: boolean
+          id: string
+          is_test_data: boolean
+          legally_distinct_adaptation: string | null
+          metadata: Json
+          pattern_description: string | null
+          pattern_status: string
+          pattern_title: string
+          pattern_type: string
+          platform: string | null
+          risk_flags: string[]
+          updated_at: string
+          why_it_may_work: string | null
+        }
+        Insert: {
+          approved_for_strategy?: boolean
+          business_id: string
+          competitor_id?: string | null
+          confidence_score?: number
+          created_at?: string
+          evidence_observation_ids?: string[]
+          example_summary?: string | null
+          founder_review_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          legally_distinct_adaptation?: string | null
+          metadata?: Json
+          pattern_description?: string | null
+          pattern_status?: string
+          pattern_title: string
+          pattern_type: string
+          platform?: string | null
+          risk_flags?: string[]
+          updated_at?: string
+          why_it_may_work?: string | null
+        }
+        Update: {
+          approved_for_strategy?: boolean
+          business_id?: string
+          competitor_id?: string | null
+          confidence_score?: number
+          created_at?: string
+          evidence_observation_ids?: string[]
+          example_summary?: string | null
+          founder_review_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          legally_distinct_adaptation?: string | null
+          metadata?: Json
+          pattern_description?: string | null
+          pattern_status?: string
+          pattern_title?: string
+          pattern_type?: string
+          platform?: string | null
+          risk_flags?: string[]
+          updated_at?: string
+          why_it_may_work?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_competitor_content_patterns_competitor_id_fkey"
+            columns: ["competitor_id"]
+            isOneToOne: false
+            referencedRelation: "social_competitor_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_competitor_observations: {
+        Row: {
+          apparent_strength: string | null
+          apparent_weakness: string | null
+          audience_reaction_notes: string | null
+          business_id: string
+          competitor_account_id: string | null
+          competitor_id: string | null
+          content_format: string | null
+          created_at: string
+          cta_observed: string | null
+          evidence_level: string
+          founder_notes: string | null
+          hook_observed: string | null
+          id: string
+          is_test_data: boolean
+          metadata: Json
+          observation_status: string
+          observation_text: string
+          observation_title: string | null
+          observation_type: string
+          observed_at: string | null
+          offer_observed: string | null
+          platform: string | null
+          risk_flags: string[]
+          source_label: string | null
+          source_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          apparent_strength?: string | null
+          apparent_weakness?: string | null
+          audience_reaction_notes?: string | null
+          business_id: string
+          competitor_account_id?: string | null
+          competitor_id?: string | null
+          content_format?: string | null
+          created_at?: string
+          cta_observed?: string | null
+          evidence_level?: string
+          founder_notes?: string | null
+          hook_observed?: string | null
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          observation_status?: string
+          observation_text: string
+          observation_title?: string | null
+          observation_type: string
+          observed_at?: string | null
+          offer_observed?: string | null
+          platform?: string | null
+          risk_flags?: string[]
+          source_label?: string | null
+          source_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          apparent_strength?: string | null
+          apparent_weakness?: string | null
+          audience_reaction_notes?: string | null
+          business_id?: string
+          competitor_account_id?: string | null
+          competitor_id?: string | null
+          content_format?: string | null
+          created_at?: string
+          cta_observed?: string | null
+          evidence_level?: string
+          founder_notes?: string | null
+          hook_observed?: string | null
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          observation_status?: string
+          observation_text?: string
+          observation_title?: string | null
+          observation_type?: string
+          observed_at?: string | null
+          offer_observed?: string | null
+          platform?: string | null
+          risk_flags?: string[]
+          source_label?: string | null
+          source_url?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_competitor_observations_competitor_account_id_fkey"
+            columns: ["competitor_account_id"]
+            isOneToOne: false
+            referencedRelation: "social_competitor_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_competitor_observations_competitor_id_fkey"
+            columns: ["competitor_id"]
+            isOneToOne: false
+            referencedRelation: "social_competitor_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       social_competitor_profiles: {
         Row: {
           business_id: string
@@ -21325,6 +21572,124 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_competitor_trend_audit: {
+        Row: {
+          action: string
+          action_status: string
+          after_json: Json
+          before_json: Json
+          business_id: string
+          competitor_claims_published: number
+          competitor_id: string | null
+          copied_assets_created: number
+          created_at: string
+          created_by: string | null
+          error_message: string | null
+          id: string
+          is_test_data: boolean
+          market_signal_id: string | null
+          metadata: Json
+          observation_id: string | null
+          pattern_id: string | null
+          positioning_review_id: string | null
+          provider_calls: number
+          result_json: Json
+          scraped_pages: number
+          trend_id: string | null
+        }
+        Insert: {
+          action: string
+          action_status?: string
+          after_json?: Json
+          before_json?: Json
+          business_id: string
+          competitor_claims_published?: number
+          competitor_id?: string | null
+          copied_assets_created?: number
+          created_at?: string
+          created_by?: string | null
+          error_message?: string | null
+          id?: string
+          is_test_data?: boolean
+          market_signal_id?: string | null
+          metadata?: Json
+          observation_id?: string | null
+          pattern_id?: string | null
+          positioning_review_id?: string | null
+          provider_calls?: number
+          result_json?: Json
+          scraped_pages?: number
+          trend_id?: string | null
+        }
+        Update: {
+          action?: string
+          action_status?: string
+          after_json?: Json
+          before_json?: Json
+          business_id?: string
+          competitor_claims_published?: number
+          competitor_id?: string | null
+          copied_assets_created?: number
+          created_at?: string
+          created_by?: string | null
+          error_message?: string | null
+          id?: string
+          is_test_data?: boolean
+          market_signal_id?: string | null
+          metadata?: Json
+          observation_id?: string | null
+          pattern_id?: string | null
+          positioning_review_id?: string | null
+          provider_calls?: number
+          result_json?: Json
+          scraped_pages?: number
+          trend_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_competitor_trend_audit_competitor_id_fkey"
+            columns: ["competitor_id"]
+            isOneToOne: false
+            referencedRelation: "social_competitor_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_competitor_trend_audit_market_signal_id_fkey"
+            columns: ["market_signal_id"]
+            isOneToOne: false
+            referencedRelation: "social_market_learning_signals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_competitor_trend_audit_observation_id_fkey"
+            columns: ["observation_id"]
+            isOneToOne: false
+            referencedRelation: "social_competitor_observations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_competitor_trend_audit_pattern_id_fkey"
+            columns: ["pattern_id"]
+            isOneToOne: false
+            referencedRelation: "social_competitor_content_patterns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_competitor_trend_audit_positioning_review_id_fkey"
+            columns: ["positioning_review_id"]
+            isOneToOne: false
+            referencedRelation: "social_market_positioning_reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_competitor_trend_audit_trend_id_fkey"
+            columns: ["trend_id"]
+            isOneToOne: false
+            referencedRelation: "social_trend_signals"
             referencedColumns: ["id"]
           },
         ]
@@ -21478,6 +21843,7 @@ export type Database = {
           campaign_plan_id: string | null
           caption: string | null
           carousel_outline: Json
+          competitor_inspiration_status: string | null
           compliance_status: string
           content_goal: string | null
           content_pillar: string | null
@@ -21502,6 +21868,7 @@ export type Database = {
           last_social_engagement_at: string | null
           learning_status: string | null
           link_url: string | null
+          market_learning_signal_id: string | null
           metadata: Json | null
           offer_angle: string | null
           offer_mapping_id: string | null
@@ -21526,6 +21893,7 @@ export type Database = {
           title: string | null
           total_engagement: number | null
           total_views: number | null
+          trend_signal_id: string | null
           updated_at: string | null
         }
         Insert: {
@@ -21545,6 +21913,7 @@ export type Database = {
           campaign_plan_id?: string | null
           caption?: string | null
           carousel_outline?: Json
+          competitor_inspiration_status?: string | null
           compliance_status?: string
           content_goal?: string | null
           content_pillar?: string | null
@@ -21569,6 +21938,7 @@ export type Database = {
           last_social_engagement_at?: string | null
           learning_status?: string | null
           link_url?: string | null
+          market_learning_signal_id?: string | null
           metadata?: Json | null
           offer_angle?: string | null
           offer_mapping_id?: string | null
@@ -21593,6 +21963,7 @@ export type Database = {
           title?: string | null
           total_engagement?: number | null
           total_views?: number | null
+          trend_signal_id?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -21612,6 +21983,7 @@ export type Database = {
           campaign_plan_id?: string | null
           caption?: string | null
           carousel_outline?: Json
+          competitor_inspiration_status?: string | null
           compliance_status?: string
           content_goal?: string | null
           content_pillar?: string | null
@@ -21636,6 +22008,7 @@ export type Database = {
           last_social_engagement_at?: string | null
           learning_status?: string | null
           link_url?: string | null
+          market_learning_signal_id?: string | null
           metadata?: Json | null
           offer_angle?: string | null
           offer_mapping_id?: string | null
@@ -21660,6 +22033,7 @@ export type Database = {
           title?: string | null
           total_engagement?: number | null
           total_views?: number | null
+          trend_signal_id?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -21760,6 +22134,7 @@ export type Database = {
           calendar_id: string | null
           campaign_id: string | null
           campaign_plan_id: string | null
+          competitor_inspiration_status: string | null
           compliance_warnings: string[]
           created_at: string
           customer_journey_stage: string | null
@@ -21771,6 +22146,7 @@ export type Database = {
           generated_from_sources: Json
           id: string
           is_test_data: boolean
+          market_learning_signal_id: string | null
           metadata: Json
           missing_assets: string[]
           offer_mapping_id: string | null
@@ -21798,6 +22174,7 @@ export type Database = {
           calendar_id?: string | null
           campaign_id?: string | null
           campaign_plan_id?: string | null
+          competitor_inspiration_status?: string | null
           compliance_warnings?: string[]
           created_at?: string
           customer_journey_stage?: string | null
@@ -21809,6 +22186,7 @@ export type Database = {
           generated_from_sources?: Json
           id?: string
           is_test_data?: boolean
+          market_learning_signal_id?: string | null
           metadata?: Json
           missing_assets?: string[]
           offer_mapping_id?: string | null
@@ -21836,6 +22214,7 @@ export type Database = {
           calendar_id?: string | null
           campaign_id?: string | null
           campaign_plan_id?: string | null
+          competitor_inspiration_status?: string | null
           compliance_warnings?: string[]
           created_at?: string
           customer_journey_stage?: string | null
@@ -21847,6 +22226,7 @@ export type Database = {
           generated_from_sources?: Json
           id?: string
           is_test_data?: boolean
+          market_learning_signal_id?: string | null
           metadata?: Json
           missing_assets?: string[]
           offer_mapping_id?: string | null
@@ -23749,6 +24129,188 @@ export type Database = {
           },
         ]
       }
+      social_market_learning_signals: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          approved_for_strategy: boolean
+          business_id: string
+          confidence_score: number
+          created_at: string
+          evidence_summary: string | null
+          founder_review_required: boolean
+          id: string
+          impact_area: string | null
+          is_test_data: boolean
+          legally_distinct_adaptation: string | null
+          metadata: Json
+          positioning_review_id: string | null
+          recommendation: string | null
+          signal_description: string | null
+          signal_status: string
+          signal_title: string
+          signal_type: string
+          source_competitor_id: string | null
+          source_observation_id: string | null
+          source_trend_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          approved_for_strategy?: boolean
+          business_id: string
+          confidence_score?: number
+          created_at?: string
+          evidence_summary?: string | null
+          founder_review_required?: boolean
+          id?: string
+          impact_area?: string | null
+          is_test_data?: boolean
+          legally_distinct_adaptation?: string | null
+          metadata?: Json
+          positioning_review_id?: string | null
+          recommendation?: string | null
+          signal_description?: string | null
+          signal_status?: string
+          signal_title: string
+          signal_type: string
+          source_competitor_id?: string | null
+          source_observation_id?: string | null
+          source_trend_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          approved_for_strategy?: boolean
+          business_id?: string
+          confidence_score?: number
+          created_at?: string
+          evidence_summary?: string | null
+          founder_review_required?: boolean
+          id?: string
+          impact_area?: string | null
+          is_test_data?: boolean
+          legally_distinct_adaptation?: string | null
+          metadata?: Json
+          positioning_review_id?: string | null
+          recommendation?: string | null
+          signal_description?: string | null
+          signal_status?: string
+          signal_title?: string
+          signal_type?: string
+          source_competitor_id?: string | null
+          source_observation_id?: string | null
+          source_trend_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_market_learning_signals_positioning_review_id_fkey"
+            columns: ["positioning_review_id"]
+            isOneToOne: false
+            referencedRelation: "social_market_positioning_reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_market_learning_signals_source_competitor_id_fkey"
+            columns: ["source_competitor_id"]
+            isOneToOne: false
+            referencedRelation: "social_competitor_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_market_learning_signals_source_observation_id_fkey"
+            columns: ["source_observation_id"]
+            isOneToOne: false
+            referencedRelation: "social_competitor_observations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_market_learning_signals_source_trend_id_fkey"
+            columns: ["source_trend_id"]
+            isOneToOne: false
+            referencedRelation: "social_trend_signals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_market_positioning_reviews: {
+        Row: {
+          approval_status: string
+          business_id: string
+          competitors_reviewed: number
+          confidence_score: number
+          content_gaps: string[]
+          created_at: string
+          founder_review_required: boolean
+          id: string
+          is_test_data: boolean
+          metadata: Json
+          observations_reviewed: number
+          offer_gaps: string[]
+          period_end: string | null
+          period_start: string | null
+          positioning_opportunities: string[]
+          proof_gaps: string[]
+          recommended_actions: string[]
+          review_name: string
+          review_status: string
+          risk_warnings: string[]
+          trends_reviewed: number
+          updated_at: string
+        }
+        Insert: {
+          approval_status?: string
+          business_id: string
+          competitors_reviewed?: number
+          confidence_score?: number
+          content_gaps?: string[]
+          created_at?: string
+          founder_review_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          observations_reviewed?: number
+          offer_gaps?: string[]
+          period_end?: string | null
+          period_start?: string | null
+          positioning_opportunities?: string[]
+          proof_gaps?: string[]
+          recommended_actions?: string[]
+          review_name: string
+          review_status?: string
+          risk_warnings?: string[]
+          trends_reviewed?: number
+          updated_at?: string
+        }
+        Update: {
+          approval_status?: string
+          business_id?: string
+          competitors_reviewed?: number
+          confidence_score?: number
+          content_gaps?: string[]
+          created_at?: string
+          founder_review_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          observations_reviewed?: number
+          offer_gaps?: string[]
+          period_end?: string | null
+          period_start?: string | null
+          positioning_opportunities?: string[]
+          proof_gaps?: string[]
+          recommended_actions?: string[]
+          review_name?: string
+          review_status?: string
+          risk_warnings?: string[]
+          trends_reviewed?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       social_operator_scheduling_tasks: {
         Row: {
           assigned_to: string | null
@@ -25450,6 +26012,7 @@ export type Database = {
         Row: {
           approval_status: string | null
           business_id: string
+          competitor_pattern_id: string | null
           confidence_score: number | null
           created_at: string | null
           description: string | null
@@ -25461,6 +26024,7 @@ export type Database = {
           linked_campaign_plan_id: string | null
           linked_learning_signal_id: string | null
           linked_revenue_target_id: string | null
+          market_learning_signal_id: string | null
           metadata: Json | null
           priority: string | null
           rationale: string | null
@@ -25468,11 +26032,13 @@ export type Database = {
           recommendation_type: string
           recommended_action: string | null
           title: string
+          trend_signal_id: string | null
           updated_at: string | null
         }
         Insert: {
           approval_status?: string | null
           business_id: string
+          competitor_pattern_id?: string | null
           confidence_score?: number | null
           created_at?: string | null
           description?: string | null
@@ -25484,6 +26050,7 @@ export type Database = {
           linked_campaign_plan_id?: string | null
           linked_learning_signal_id?: string | null
           linked_revenue_target_id?: string | null
+          market_learning_signal_id?: string | null
           metadata?: Json | null
           priority?: string | null
           rationale?: string | null
@@ -25491,11 +26058,13 @@ export type Database = {
           recommendation_type: string
           recommended_action?: string | null
           title: string
+          trend_signal_id?: string | null
           updated_at?: string | null
         }
         Update: {
           approval_status?: string | null
           business_id?: string
+          competitor_pattern_id?: string | null
           confidence_score?: number | null
           created_at?: string | null
           description?: string | null
@@ -25507,6 +26076,7 @@ export type Database = {
           linked_campaign_plan_id?: string | null
           linked_learning_signal_id?: string | null
           linked_revenue_target_id?: string | null
+          market_learning_signal_id?: string | null
           metadata?: Json | null
           priority?: string | null
           rationale?: string | null
@@ -25514,6 +26084,7 @@ export type Database = {
           recommendation_type?: string
           recommended_action?: string | null
           title?: string
+          trend_signal_id?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -25525,6 +26096,81 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      social_trend_signals: {
+        Row: {
+          approved_for_strategy: boolean
+          audience_notes: string | null
+          business_id: string
+          confidence_score: number
+          created_at: string
+          evidence_level: string
+          founder_review_required: boolean
+          id: string
+          is_test_data: boolean
+          metadata: Json
+          observed_at: string | null
+          platform: string | null
+          relevance_to_business: string | null
+          risk_flags: string[]
+          source_label: string | null
+          source_url: string | null
+          suggested_use: string | null
+          trend_description: string | null
+          trend_status: string
+          trend_title: string
+          trend_type: string
+          updated_at: string
+        }
+        Insert: {
+          approved_for_strategy?: boolean
+          audience_notes?: string | null
+          business_id: string
+          confidence_score?: number
+          created_at?: string
+          evidence_level?: string
+          founder_review_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          observed_at?: string | null
+          platform?: string | null
+          relevance_to_business?: string | null
+          risk_flags?: string[]
+          source_label?: string | null
+          source_url?: string | null
+          suggested_use?: string | null
+          trend_description?: string | null
+          trend_status?: string
+          trend_title: string
+          trend_type: string
+          updated_at?: string
+        }
+        Update: {
+          approved_for_strategy?: boolean
+          audience_notes?: string | null
+          business_id?: string
+          confidence_score?: number
+          created_at?: string
+          evidence_level?: string
+          founder_review_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          observed_at?: string | null
+          platform?: string | null
+          relevance_to_business?: string | null
+          risk_flags?: string[]
+          source_label?: string | null
+          source_url?: string | null
+          suggested_use?: string | null
+          trend_description?: string | null
+          trend_status?: string
+          trend_title?: string
+          trend_type?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       social_trend_watch_items: {
         Row: {
