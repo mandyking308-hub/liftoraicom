@@ -635,6 +635,33 @@ export const SOCIAL_ENGAGEMENT_INBOX = {
   ],
 };
 
+export const SOCIAL_ANALYTICS_LEARNING = {
+  title: "Social Analytics & Learning Signals",
+  summary:
+    "Liftor can learn from manually imported or pasted social performance data (Metricool/platform exports, operator entry). It never connects to social APIs, never scrapes, never invents performance, and never auto-changes live strategy. Learning signals and strategy recommendations are suggestions only and require founder approval.",
+  rules: [
+    "No Metricool/Buffer/Hootsuite/Meta/TikTok/YouTube/LinkedIn/X API calls. No scraping.",
+    "No fake metrics, revenue or conversions. Revenue/conversion attribution is unverified unless manually confirmed or system-matched.",
+    "No automatic strategy changes — all recommendations need founder approval.",
+    "Test analytics (is_test_data=true) must be purged before real use via PURGE SOCIAL ANALYTICS TEST DATA.",
+  ],
+  steps: [
+    "Open Social Autopilot → Analytics.",
+    "Preview an import (paste CSV/TSV) then commit with IMPORT SOCIAL PERFORMANCE METRICS.",
+    "Or add one metric with CREATE SOCIAL MANUAL METRIC.",
+    "Match metrics to content/campaign/asset with APPLY SOCIAL PERFORMANCE MATCH.",
+    "Generate summaries with GENERATE SOCIAL PERFORMANCE SUMMARY.",
+    "Preview learning signals → save with CREATE SOCIAL LEARNING SIGNALS.",
+    "Preview strategy recommendations → save with CREATE SOCIAL STRATEGY RECOMMENDATIONS.",
+    "Approve/reject/action with APPLY SOCIAL ANALYTICS DECISION.",
+  ],
+  technical: [
+    "Tables: social_performance_import_batches, social_performance_metrics (extended), social_content_performance_summaries, social_learning_signals, social_strategy_recommendations, social_analytics_audit. Performance fields added to social_content_items/_variants/_campaign_plans/_assets.",
+    "Edge functions: social-performance-import-preview/-create, social-manual-metric-create, social-performance-match-preview/-apply, social-performance-summary-generate, social-learning-signals-preview/-create, social-strategy-recommendations-preview/-create, social-analytics-recommendation-decision, social-analytics-healthcheck, social-analytics-provider-sync-placeholder (fail-closed), social-analytics-rehearsal-purge, social-analytics-learning-acceptance.",
+    "Command Centre Daily Operator View renders an Analytics/Learning tile with imports, metrics, unmatched, summaries, signals/recs needing review, top platform/content type, data quality score and provider_calls=0, scraped_pages=0, fake_metrics_created=0.",
+  ],
+};
+
 export const USING_SOCIAL_BRAIN_CONNECTOR = {
   title: "Business Knowledge → Social Brain",
   summary:

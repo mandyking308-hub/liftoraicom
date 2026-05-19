@@ -19407,6 +19407,111 @@ export type Database = {
         }
         Relationships: []
       }
+      social_analytics_audit: {
+        Row: {
+          action: string
+          action_status: string | null
+          after_json: Json | null
+          before_json: Json | null
+          business_id: string
+          created_at: string | null
+          created_by: string | null
+          error_message: string | null
+          fake_metrics_created: number | null
+          id: string
+          import_batch_id: string | null
+          is_test_data: boolean | null
+          learning_signal_id: string | null
+          metadata: Json | null
+          metric_id: string | null
+          provider_calls: number | null
+          recommendation_id: string | null
+          result_json: Json | null
+          scraped_pages: number | null
+          summary_id: string | null
+        }
+        Insert: {
+          action: string
+          action_status?: string | null
+          after_json?: Json | null
+          before_json?: Json | null
+          business_id: string
+          created_at?: string | null
+          created_by?: string | null
+          error_message?: string | null
+          fake_metrics_created?: number | null
+          id?: string
+          import_batch_id?: string | null
+          is_test_data?: boolean | null
+          learning_signal_id?: string | null
+          metadata?: Json | null
+          metric_id?: string | null
+          provider_calls?: number | null
+          recommendation_id?: string | null
+          result_json?: Json | null
+          scraped_pages?: number | null
+          summary_id?: string | null
+        }
+        Update: {
+          action?: string
+          action_status?: string | null
+          after_json?: Json | null
+          before_json?: Json | null
+          business_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          error_message?: string | null
+          fake_metrics_created?: number | null
+          id?: string
+          import_batch_id?: string | null
+          is_test_data?: boolean | null
+          learning_signal_id?: string | null
+          metadata?: Json | null
+          metric_id?: string | null
+          provider_calls?: number | null
+          recommendation_id?: string | null
+          result_json?: Json | null
+          scraped_pages?: number | null
+          summary_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_analytics_audit_import_batch_id_fkey"
+            columns: ["import_batch_id"]
+            isOneToOne: false
+            referencedRelation: "social_performance_import_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_analytics_audit_learning_signal_id_fkey"
+            columns: ["learning_signal_id"]
+            isOneToOne: false
+            referencedRelation: "social_learning_signals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_analytics_audit_metric_id_fkey"
+            columns: ["metric_id"]
+            isOneToOne: false
+            referencedRelation: "social_performance_metrics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_analytics_audit_recommendation_id_fkey"
+            columns: ["recommendation_id"]
+            isOneToOne: false
+            referencedRelation: "social_strategy_recommendations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_analytics_audit_summary_id_fkey"
+            columns: ["summary_id"]
+            isOneToOne: false
+            referencedRelation: "social_content_performance_summaries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       social_approval_batch_items: {
         Row: {
           batch_id: string
@@ -20137,6 +20242,8 @@ export type Database = {
           metadata: Json | null
           owner_name: string | null
           paid_ads_allowed: boolean
+          performance_rating: string | null
+          performance_summary_id: string | null
           platform_fit: string[] | null
           platform_limitations: string[]
           public_use_allowed: boolean
@@ -20152,6 +20259,7 @@ export type Database = {
           updated_at: string | null
           usage_count: number | null
           usage_notes: string | null
+          usage_performance_notes: string | null
           usage_status: string | null
         }
         Insert: {
@@ -20185,6 +20293,8 @@ export type Database = {
           metadata?: Json | null
           owner_name?: string | null
           paid_ads_allowed?: boolean
+          performance_rating?: string | null
+          performance_summary_id?: string | null
           platform_fit?: string[] | null
           platform_limitations?: string[]
           public_use_allowed?: boolean
@@ -20200,6 +20310,7 @@ export type Database = {
           updated_at?: string | null
           usage_count?: number | null
           usage_notes?: string | null
+          usage_performance_notes?: string | null
           usage_status?: string | null
         }
         Update: {
@@ -20233,6 +20344,8 @@ export type Database = {
           metadata?: Json | null
           owner_name?: string | null
           paid_ads_allowed?: boolean
+          performance_rating?: string | null
+          performance_summary_id?: string | null
           platform_fit?: string[] | null
           platform_limitations?: string[]
           public_use_allowed?: boolean
@@ -20248,6 +20361,7 @@ export type Database = {
           updated_at?: string | null
           usage_count?: number | null
           usage_notes?: string | null
+          usage_performance_notes?: string | null
           usage_status?: string | null
         }
         Relationships: []
@@ -20980,10 +21094,13 @@ export type Database = {
           is_test_data: boolean
           key_message: string | null
           keyword_flow_id: string | null
+          learning_status: string | null
           linked_revenue_target_id: string | null
           linked_social_content_pack_id: string | null
           metadata: Json
           missing_assets: string[]
+          performance_rating: string | null
+          performance_summary_id: string | null
           platforms: string[]
           primary_cta: string | null
           primary_offer: string | null
@@ -21017,10 +21134,13 @@ export type Database = {
           is_test_data?: boolean
           key_message?: string | null
           keyword_flow_id?: string | null
+          learning_status?: string | null
           linked_revenue_target_id?: string | null
           linked_social_content_pack_id?: string | null
           metadata?: Json
           missing_assets?: string[]
+          performance_rating?: string | null
+          performance_summary_id?: string | null
           platforms?: string[]
           primary_cta?: string | null
           primary_offer?: string | null
@@ -21054,10 +21174,13 @@ export type Database = {
           is_test_data?: boolean
           key_message?: string | null
           keyword_flow_id?: string | null
+          learning_status?: string | null
           linked_revenue_target_id?: string | null
           linked_social_content_pack_id?: string | null
           metadata?: Json
           missing_assets?: string[]
+          performance_rating?: string | null
+          performance_summary_id?: string | null
           platforms?: string[]
           primary_cta?: string | null
           primary_offer?: string | null
@@ -21375,13 +21498,17 @@ export type Database = {
           id: string
           is_test_data: boolean | null
           keyword_trigger: string | null
+          last_performance_import_at: string | null
           last_social_engagement_at: string | null
+          learning_status: string | null
           link_url: string | null
           metadata: Json | null
           offer_angle: string | null
           offer_mapping_id: string | null
           operator_notes: string | null
           pack_id: string | null
+          performance_rating: string | null
+          performance_summary_id: string | null
           planned_at: string | null
           platform: string
           provider: string | null
@@ -21397,6 +21524,8 @@ export type Database = {
           target_audience: string | null
           timezone: string | null
           title: string | null
+          total_engagement: number | null
+          total_views: number | null
           updated_at: string | null
         }
         Insert: {
@@ -21436,13 +21565,17 @@ export type Database = {
           id?: string
           is_test_data?: boolean | null
           keyword_trigger?: string | null
+          last_performance_import_at?: string | null
           last_social_engagement_at?: string | null
+          learning_status?: string | null
           link_url?: string | null
           metadata?: Json | null
           offer_angle?: string | null
           offer_mapping_id?: string | null
           operator_notes?: string | null
           pack_id?: string | null
+          performance_rating?: string | null
+          performance_summary_id?: string | null
           planned_at?: string | null
           platform: string
           provider?: string | null
@@ -21458,6 +21591,8 @@ export type Database = {
           target_audience?: string | null
           timezone?: string | null
           title?: string | null
+          total_engagement?: number | null
+          total_views?: number | null
           updated_at?: string | null
         }
         Update: {
@@ -21497,13 +21632,17 @@ export type Database = {
           id?: string
           is_test_data?: boolean | null
           keyword_trigger?: string | null
+          last_performance_import_at?: string | null
           last_social_engagement_at?: string | null
+          learning_status?: string | null
           link_url?: string | null
           metadata?: Json | null
           offer_angle?: string | null
           offer_mapping_id?: string | null
           operator_notes?: string | null
           pack_id?: string | null
+          performance_rating?: string | null
+          performance_summary_id?: string | null
           planned_at?: string | null
           platform?: string
           provider?: string | null
@@ -21519,6 +21658,8 @@ export type Database = {
           target_audience?: string | null
           timezone?: string | null
           title?: string | null
+          total_engagement?: number | null
+          total_views?: number | null
           updated_at?: string | null
         }
         Relationships: [
@@ -21726,6 +21867,111 @@ export type Database = {
         }
         Relationships: []
       }
+      social_content_performance_summaries: {
+        Row: {
+          asset_id: string | null
+          avg_click_through_rate: number | null
+          avg_engagement_rate: number | null
+          business_id: string
+          campaign_plan_id: string | null
+          caveats: string[] | null
+          confidence_score: number | null
+          content_item_id: string | null
+          content_pack_id: string | null
+          content_variant_id: string | null
+          created_at: string | null
+          id: string
+          is_test_data: boolean | null
+          key_findings: string[] | null
+          metadata: Json | null
+          performance_rating: string | null
+          period_end: string | null
+          period_start: string | null
+          platform: string | null
+          summary_status: string | null
+          summary_type: string
+          top_performing_metric: string | null
+          total_clicks: number | null
+          total_conversions: number | null
+          total_engagement: number | null
+          total_impressions: number | null
+          total_leads: number | null
+          total_posts: number | null
+          total_reach: number | null
+          total_revenue_attributed: number | null
+          total_views: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          asset_id?: string | null
+          avg_click_through_rate?: number | null
+          avg_engagement_rate?: number | null
+          business_id: string
+          campaign_plan_id?: string | null
+          caveats?: string[] | null
+          confidence_score?: number | null
+          content_item_id?: string | null
+          content_pack_id?: string | null
+          content_variant_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          key_findings?: string[] | null
+          metadata?: Json | null
+          performance_rating?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          platform?: string | null
+          summary_status?: string | null
+          summary_type: string
+          top_performing_metric?: string | null
+          total_clicks?: number | null
+          total_conversions?: number | null
+          total_engagement?: number | null
+          total_impressions?: number | null
+          total_leads?: number | null
+          total_posts?: number | null
+          total_reach?: number | null
+          total_revenue_attributed?: number | null
+          total_views?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          asset_id?: string | null
+          avg_click_through_rate?: number | null
+          avg_engagement_rate?: number | null
+          business_id?: string
+          campaign_plan_id?: string | null
+          caveats?: string[] | null
+          confidence_score?: number | null
+          content_item_id?: string | null
+          content_pack_id?: string | null
+          content_variant_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_test_data?: boolean | null
+          key_findings?: string[] | null
+          metadata?: Json | null
+          performance_rating?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          platform?: string | null
+          summary_status?: string | null
+          summary_type?: string
+          top_performing_metric?: string | null
+          total_clicks?: number | null
+          total_conversions?: number | null
+          total_engagement?: number | null
+          total_impressions?: number | null
+          total_leads?: number | null
+          total_posts?: number | null
+          total_reach?: number | null
+          total_revenue_attributed?: number | null
+          total_views?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       social_content_quality_reviews: {
         Row: {
           asset_readiness_score: number
@@ -21834,15 +22080,19 @@ export type Database = {
           hook: string | null
           id: string
           is_test_data: boolean
+          learning_status: string | null
           link_url: string | null
           metadata: Json
           missing_requirements: string[]
           pack_id: string | null
+          performance_rating: string | null
           platform: string
           ready_for_queue_at: string | null
           risk_flags: string[]
           script: string | null
           title: string | null
+          total_engagement: number | null
+          total_views: number | null
           updated_at: string
           variant_type: string
         }
@@ -21862,15 +22112,19 @@ export type Database = {
           hook?: string | null
           id?: string
           is_test_data?: boolean
+          learning_status?: string | null
           link_url?: string | null
           metadata?: Json
           missing_requirements?: string[]
           pack_id?: string | null
+          performance_rating?: string | null
           platform: string
           ready_for_queue_at?: string | null
           risk_flags?: string[]
           script?: string | null
           title?: string | null
+          total_engagement?: number | null
+          total_views?: number | null
           updated_at?: string
           variant_type: string
         }
@@ -21890,15 +22144,19 @@ export type Database = {
           hook?: string | null
           id?: string
           is_test_data?: boolean
+          learning_status?: string | null
           link_url?: string | null
           metadata?: Json
           missing_requirements?: string[]
           pack_id?: string | null
+          performance_rating?: string | null
           platform?: string
           ready_for_queue_at?: string | null
           risk_flags?: string[]
           script?: string | null
           title?: string | null
+          total_engagement?: number | null
+          total_views?: number | null
           updated_at?: string
           variant_type?: string
         }
@@ -23189,6 +23447,102 @@ export type Database = {
           },
         ]
       }
+      social_learning_signals: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          approved_for_strategy: boolean | null
+          asset_id: string | null
+          business_id: string
+          campaign_plan_id: string | null
+          confidence_score: number | null
+          content_item_id: string | null
+          created_at: string | null
+          evidence_summary: string | null
+          founder_review_required: boolean | null
+          id: string
+          impact_area: string | null
+          is_test_data: boolean | null
+          metadata: Json | null
+          platform: string | null
+          recommendation: string | null
+          signal_description: string | null
+          signal_status: string | null
+          signal_title: string
+          signal_type: string
+          source_metric_id: string | null
+          source_summary_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          approved_for_strategy?: boolean | null
+          asset_id?: string | null
+          business_id: string
+          campaign_plan_id?: string | null
+          confidence_score?: number | null
+          content_item_id?: string | null
+          created_at?: string | null
+          evidence_summary?: string | null
+          founder_review_required?: boolean | null
+          id?: string
+          impact_area?: string | null
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          platform?: string | null
+          recommendation?: string | null
+          signal_description?: string | null
+          signal_status?: string | null
+          signal_title: string
+          signal_type: string
+          source_metric_id?: string | null
+          source_summary_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          approved_for_strategy?: boolean | null
+          asset_id?: string | null
+          business_id?: string
+          campaign_plan_id?: string | null
+          confidence_score?: number | null
+          content_item_id?: string | null
+          created_at?: string | null
+          evidence_summary?: string | null
+          founder_review_required?: boolean | null
+          id?: string
+          impact_area?: string | null
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          platform?: string | null
+          recommendation?: string | null
+          signal_description?: string | null
+          signal_status?: string | null
+          signal_title?: string
+          signal_type?: string
+          source_metric_id?: string | null
+          source_summary_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_learning_signals_source_metric_id_fkey"
+            columns: ["source_metric_id"]
+            isOneToOne: false
+            referencedRelation: "social_performance_metrics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_learning_signals_source_summary_id_fkey"
+            columns: ["source_summary_id"]
+            isOneToOne: false
+            referencedRelation: "social_content_performance_summaries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       social_manual_export_batches: {
         Row: {
           blocked_rows: number | null
@@ -23466,6 +23820,75 @@ export type Database = {
           },
         ]
       }
+      social_performance_import_batches: {
+        Row: {
+          blocked_count: number | null
+          business_id: string
+          created_at: string | null
+          date_range_end: string | null
+          date_range_start: string | null
+          duplicate_count: number | null
+          id: string
+          import_name: string
+          import_source: string | null
+          import_status: string | null
+          import_type: string | null
+          imported_count: number | null
+          is_test_data: boolean | null
+          metadata: Json | null
+          platform: string | null
+          row_count: number | null
+          source_notes: string | null
+          updated_at: string | null
+          validation_errors: string[] | null
+          validation_warnings: string[] | null
+        }
+        Insert: {
+          blocked_count?: number | null
+          business_id: string
+          created_at?: string | null
+          date_range_end?: string | null
+          date_range_start?: string | null
+          duplicate_count?: number | null
+          id?: string
+          import_name: string
+          import_source?: string | null
+          import_status?: string | null
+          import_type?: string | null
+          imported_count?: number | null
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          platform?: string | null
+          row_count?: number | null
+          source_notes?: string | null
+          updated_at?: string | null
+          validation_errors?: string[] | null
+          validation_warnings?: string[] | null
+        }
+        Update: {
+          blocked_count?: number | null
+          business_id?: string
+          created_at?: string | null
+          date_range_end?: string | null
+          date_range_start?: string | null
+          duplicate_count?: number | null
+          id?: string
+          import_name?: string
+          import_source?: string | null
+          import_status?: string | null
+          import_type?: string | null
+          imported_count?: number | null
+          is_test_data?: boolean | null
+          metadata?: Json | null
+          platform?: string | null
+          row_count?: number | null
+          source_notes?: string | null
+          updated_at?: string | null
+          validation_errors?: string[] | null
+          validation_warnings?: string[] | null
+        }
+        Relationships: []
+      }
       social_performance_logs: {
         Row: {
           business_id: string
@@ -23561,71 +23984,149 @@ export type Database = {
       }
       social_performance_metrics: {
         Row: {
+          asset_id: string | null
+          attribution_status: string | null
+          average_watch_seconds: number | null
           business_id: string
+          calendar_item_id: string | null
+          campaign_plan_id: string | null
+          caption_snippet: string | null
+          click_through_rate: number | null
           clicks: number
           comments: number
           completion_rate: number | null
+          content_item_id: string | null
+          content_type: string | null
+          content_variant_id: string | null
+          conversion_count: number | null
           created_at: string
+          currency: string | null
           engagement_rate: number | null
           external_post_id: string | null
           follows: number
           id: string
+          import_batch_id: string | null
           impressions: number
+          is_test_data: boolean | null
+          lead_count: number | null
           likes: number
           metadata: Json
+          metric_confidence: string | null
           metric_date: string
+          metric_period_end: string | null
+          metric_period_start: string | null
+          platform: string | null
           platform_key: string
           post_draft_id: string | null
+          post_url: string | null
+          profile_visits: number | null
+          provider: string | null
           reach: number
+          revenue_attributed: number | null
           saves: number
           shares: number
           source_system: string
+          title: string | null
+          unsubscribes: number | null
+          updated_at: string | null
           views: number
           watch_time_seconds: number | null
         }
         Insert: {
+          asset_id?: string | null
+          attribution_status?: string | null
+          average_watch_seconds?: number | null
           business_id: string
+          calendar_item_id?: string | null
+          campaign_plan_id?: string | null
+          caption_snippet?: string | null
+          click_through_rate?: number | null
           clicks?: number
           comments?: number
           completion_rate?: number | null
+          content_item_id?: string | null
+          content_type?: string | null
+          content_variant_id?: string | null
+          conversion_count?: number | null
           created_at?: string
+          currency?: string | null
           engagement_rate?: number | null
           external_post_id?: string | null
           follows?: number
           id?: string
+          import_batch_id?: string | null
           impressions?: number
+          is_test_data?: boolean | null
+          lead_count?: number | null
           likes?: number
           metadata?: Json
+          metric_confidence?: string | null
           metric_date?: string
+          metric_period_end?: string | null
+          metric_period_start?: string | null
+          platform?: string | null
           platform_key: string
           post_draft_id?: string | null
+          post_url?: string | null
+          profile_visits?: number | null
+          provider?: string | null
           reach?: number
+          revenue_attributed?: number | null
           saves?: number
           shares?: number
           source_system?: string
+          title?: string | null
+          unsubscribes?: number | null
+          updated_at?: string | null
           views?: number
           watch_time_seconds?: number | null
         }
         Update: {
+          asset_id?: string | null
+          attribution_status?: string | null
+          average_watch_seconds?: number | null
           business_id?: string
+          calendar_item_id?: string | null
+          campaign_plan_id?: string | null
+          caption_snippet?: string | null
+          click_through_rate?: number | null
           clicks?: number
           comments?: number
           completion_rate?: number | null
+          content_item_id?: string | null
+          content_type?: string | null
+          content_variant_id?: string | null
+          conversion_count?: number | null
           created_at?: string
+          currency?: string | null
           engagement_rate?: number | null
           external_post_id?: string | null
           follows?: number
           id?: string
+          import_batch_id?: string | null
           impressions?: number
+          is_test_data?: boolean | null
+          lead_count?: number | null
           likes?: number
           metadata?: Json
+          metric_confidence?: string | null
           metric_date?: string
+          metric_period_end?: string | null
+          metric_period_start?: string | null
+          platform?: string | null
           platform_key?: string
           post_draft_id?: string | null
+          post_url?: string | null
+          profile_visits?: number | null
+          provider?: string | null
           reach?: number
+          revenue_attributed?: number | null
           saves?: number
           shares?: number
           source_system?: string
+          title?: string | null
+          unsubscribes?: number | null
+          updated_at?: string | null
           views?: number
           watch_time_seconds?: number | null
         }
@@ -23635,6 +24136,13 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_performance_metrics_import_batch_id_fkey"
+            columns: ["import_batch_id"]
+            isOneToOne: false
+            referencedRelation: "social_performance_import_batches"
             referencedColumns: ["id"]
           },
           {
@@ -24934,6 +25442,86 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_strategy_recommendations: {
+        Row: {
+          approval_status: string | null
+          business_id: string
+          confidence_score: number | null
+          created_at: string | null
+          description: string | null
+          evidence_level: string | null
+          expected_impact: string | null
+          founder_approval_required: boolean | null
+          id: string
+          is_test_data: boolean | null
+          linked_campaign_plan_id: string | null
+          linked_learning_signal_id: string | null
+          linked_revenue_target_id: string | null
+          metadata: Json | null
+          priority: string | null
+          rationale: string | null
+          recommendation_status: string | null
+          recommendation_type: string
+          recommended_action: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          approval_status?: string | null
+          business_id: string
+          confidence_score?: number | null
+          created_at?: string | null
+          description?: string | null
+          evidence_level?: string | null
+          expected_impact?: string | null
+          founder_approval_required?: boolean | null
+          id?: string
+          is_test_data?: boolean | null
+          linked_campaign_plan_id?: string | null
+          linked_learning_signal_id?: string | null
+          linked_revenue_target_id?: string | null
+          metadata?: Json | null
+          priority?: string | null
+          rationale?: string | null
+          recommendation_status?: string | null
+          recommendation_type: string
+          recommended_action?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          approval_status?: string | null
+          business_id?: string
+          confidence_score?: number | null
+          created_at?: string | null
+          description?: string | null
+          evidence_level?: string | null
+          expected_impact?: string | null
+          founder_approval_required?: boolean | null
+          id?: string
+          is_test_data?: boolean | null
+          linked_campaign_plan_id?: string | null
+          linked_learning_signal_id?: string | null
+          linked_revenue_target_id?: string | null
+          metadata?: Json | null
+          priority?: string | null
+          rationale?: string | null
+          recommendation_status?: string | null
+          recommendation_type?: string
+          recommended_action?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_strategy_recommendations_linked_learning_signal_id_fkey"
+            columns: ["linked_learning_signal_id"]
+            isOneToOne: false
+            referencedRelation: "social_learning_signals"
             referencedColumns: ["id"]
           },
         ]

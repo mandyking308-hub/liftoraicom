@@ -33,6 +33,7 @@ import { SocialPublishingDashboard } from "@/components/founder/social-autopilot
 import { SocialSchedulerBridgeDashboard } from "@/components/founder/social-autopilot/SocialSchedulerBridgePanels";
 import { SocialEngagementFlowDashboard } from "@/components/founder/social-autopilot/SocialEngagementFlowPanels";
 import { SocialEngagementInboxDashboard } from "@/components/founder/social-autopilot/SocialEngagementInboxPanels";
+import { SocialAnalyticsDashboard } from "@/components/founder/social-autopilot/SocialAnalyticsPanels";
 
 const TAB_BY_PATH: Record<string, string> = {
   "/founder/social-autopilot": "dashboard",
@@ -45,6 +46,7 @@ const TAB_BY_PATH: Record<string, string> = {
   "/founder/social-autopilot/replies": "replies",
   "/founder/social-autopilot/engagement": "engagement",
   "/founder/social-autopilot/performance": "performance",
+  "/founder/social-autopilot/analytics": "analytics",
   "/founder/social-autopilot/settings": "settings",
 };
 
@@ -237,6 +239,7 @@ const TAB_LABELS: Array<[string, string, string]> = [
   ["replies", "Replies", "/founder/social-autopilot/replies"],
   ["engagement", "Engagement", "/founder/social-autopilot/engagement"],
   ["performance", "Performance", "/founder/social-autopilot/performance"],
+  ["analytics", "Analytics", "/founder/social-autopilot/analytics"],
   ["settings", "Settings", "/founder/social-autopilot/settings"],
 ];
 
@@ -275,6 +278,7 @@ export default function SocialAutopilotPage() {
           <TabsContent value="replies"><GenericListPanel table="social_reply_jobs" businessId={businessId} title="Reply Drafts (locked)" /></TabsContent>
           <TabsContent value="engagement"><SocialEngagementFlowDashboard businessId={businessId} /></TabsContent>
           <TabsContent value="performance"><GenericListPanel table="social_performance_logs" businessId={businessId} title="Performance Logs" /></TabsContent>
+          <TabsContent value="analytics"><SocialAnalyticsDashboard businessId={businessId} /></TabsContent>
           <TabsContent value="settings"><SettingsPanel businessId={businessId} /></TabsContent>
         </Tabs>
         <div className="space-y-4">
@@ -321,6 +325,10 @@ export default function SocialAutopilotPage() {
         <div className="space-y-4">
           <h2 className="text-lg font-semibold mt-6">Social Engagement Inbox</h2>
           <SocialEngagementInboxDashboard businessId={businessId} />
+        </div>
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold mt-6">Social Analytics + Learning Signals</h2>
+          <SocialAnalyticsDashboard businessId={businessId} />
         </div>
       </div>
     </FounderLayout>
