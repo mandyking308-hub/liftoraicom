@@ -20627,6 +20627,7 @@ export type Database = {
           id: string
           is_test_data: boolean | null
           keyword_trigger: string | null
+          last_social_engagement_at: string | null
           metadata: Json | null
           notes: string | null
           offer_mapping_id: string | null
@@ -20637,6 +20638,7 @@ export type Database = {
           queue_readiness: string | null
           ready_for_queue_at: string | null
           slot_label: string | null
+          social_engagement_count: number
           status: string | null
           timezone: string | null
           updated_at: string
@@ -20667,6 +20669,7 @@ export type Database = {
           id?: string
           is_test_data?: boolean | null
           keyword_trigger?: string | null
+          last_social_engagement_at?: string | null
           metadata?: Json | null
           notes?: string | null
           offer_mapping_id?: string | null
@@ -20677,6 +20680,7 @@ export type Database = {
           queue_readiness?: string | null
           ready_for_queue_at?: string | null
           slot_label?: string | null
+          social_engagement_count?: number
           status?: string | null
           timezone?: string | null
           updated_at?: string
@@ -20707,6 +20711,7 @@ export type Database = {
           id?: string
           is_test_data?: boolean | null
           keyword_trigger?: string | null
+          last_social_engagement_at?: string | null
           metadata?: Json | null
           notes?: string | null
           offer_mapping_id?: string | null
@@ -20717,6 +20722,7 @@ export type Database = {
           queue_readiness?: string | null
           ready_for_queue_at?: string | null
           slot_label?: string | null
+          social_engagement_count?: number
           status?: string | null
           timezone?: string | null
           updated_at?: string
@@ -21369,6 +21375,7 @@ export type Database = {
           id: string
           is_test_data: boolean | null
           keyword_trigger: string | null
+          last_social_engagement_at: string | null
           link_url: string | null
           metadata: Json | null
           offer_angle: string | null
@@ -21386,6 +21393,7 @@ export type Database = {
           scheduled_date: string | null
           scheduled_time: string | null
           script: string | null
+          social_engagement_count: number
           target_audience: string | null
           timezone: string | null
           title: string | null
@@ -21428,6 +21436,7 @@ export type Database = {
           id?: string
           is_test_data?: boolean | null
           keyword_trigger?: string | null
+          last_social_engagement_at?: string | null
           link_url?: string | null
           metadata?: Json | null
           offer_angle?: string | null
@@ -21445,6 +21454,7 @@ export type Database = {
           scheduled_date?: string | null
           scheduled_time?: string | null
           script?: string | null
+          social_engagement_count?: number
           target_audience?: string | null
           timezone?: string | null
           title?: string | null
@@ -21487,6 +21497,7 @@ export type Database = {
           id?: string
           is_test_data?: boolean | null
           keyword_trigger?: string | null
+          last_social_engagement_at?: string | null
           link_url?: string | null
           metadata?: Json | null
           offer_angle?: string | null
@@ -21504,6 +21515,7 @@ export type Database = {
           scheduled_date?: string | null
           scheduled_time?: string | null
           script?: string | null
+          social_engagement_count?: number
           target_audience?: string | null
           timezone?: string | null
           title?: string | null
@@ -21984,6 +21996,7 @@ export type Database = {
           compliance_warnings: string[] | null
           created_at: string | null
           dm_opening_text: string | null
+          engagement_count: number
           escalation_rules: Json | null
           flow_name: string
           flow_status: string | null
@@ -21993,6 +22006,7 @@ export type Database = {
           id: string
           is_test_data: boolean | null
           keyword_rule_id: string | null
+          last_engagement_at: string | null
           metadata: Json | null
           platform: string
           primary_goal: string | null
@@ -22013,6 +22027,7 @@ export type Database = {
           compliance_warnings?: string[] | null
           created_at?: string | null
           dm_opening_text?: string | null
+          engagement_count?: number
           escalation_rules?: Json | null
           flow_name: string
           flow_status?: string | null
@@ -22022,6 +22037,7 @@ export type Database = {
           id?: string
           is_test_data?: boolean | null
           keyword_rule_id?: string | null
+          last_engagement_at?: string | null
           metadata?: Json | null
           platform: string
           primary_goal?: string | null
@@ -22042,6 +22058,7 @@ export type Database = {
           compliance_warnings?: string[] | null
           created_at?: string | null
           dm_opening_text?: string | null
+          engagement_count?: number
           escalation_rules?: Json | null
           flow_name?: string
           flow_status?: string | null
@@ -22051,6 +22068,7 @@ export type Database = {
           id?: string
           is_test_data?: boolean | null
           keyword_rule_id?: string | null
+          last_engagement_at?: string | null
           metadata?: Json | null
           platform?: string
           primary_goal?: string | null
@@ -22153,81 +22171,480 @@ export type Database = {
           },
         ]
       }
-      social_engagement_events: {
+      social_engagement_audit: {
+        Row: {
+          action: string
+          action_status: string
+          after_json: Json
+          before_json: Json
+          business_id: string
+          comments_sent: number
+          created_at: string
+          created_by: string | null
+          crm_records_created: number
+          dms_sent: number
+          engagement_event_id: string | null
+          error_message: string | null
+          external_actions: number
+          id: string
+          import_batch_id: string | null
+          is_test_data: boolean
+          metadata: Json
+          provider_calls: number
+          result_json: Json
+        }
+        Insert: {
+          action: string
+          action_status?: string
+          after_json?: Json
+          before_json?: Json
+          business_id: string
+          comments_sent?: number
+          created_at?: string
+          created_by?: string | null
+          crm_records_created?: number
+          dms_sent?: number
+          engagement_event_id?: string | null
+          error_message?: string | null
+          external_actions?: number
+          id?: string
+          import_batch_id?: string | null
+          is_test_data?: boolean
+          metadata?: Json
+          provider_calls?: number
+          result_json?: Json
+        }
+        Update: {
+          action?: string
+          action_status?: string
+          after_json?: Json
+          before_json?: Json
+          business_id?: string
+          comments_sent?: number
+          created_at?: string
+          created_by?: string | null
+          crm_records_created?: number
+          dms_sent?: number
+          engagement_event_id?: string | null
+          error_message?: string | null
+          external_actions?: number
+          id?: string
+          import_batch_id?: string | null
+          is_test_data?: boolean
+          metadata?: Json
+          provider_calls?: number
+          result_json?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_engagement_audit_engagement_event_id_fkey"
+            columns: ["engagement_event_id"]
+            isOneToOne: false
+            referencedRelation: "social_engagement_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_engagement_audit_import_batch_id_fkey"
+            columns: ["import_batch_id"]
+            isOneToOne: false
+            referencedRelation: "social_engagement_import_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_engagement_classifications: {
         Row: {
           business_id: string
+          classification_status: string
+          compliance_review_required: boolean
+          confidence_score: number
+          created_at: string
+          customer_success_review_required: boolean
+          detected_customer_stage: string | null
+          detected_intent: string | null
+          detected_keyword: string | null
+          detected_language: string | null
+          detected_opportunities: string[]
+          detected_risk_flags: string[]
+          detected_sentiment: string | null
+          detected_value_signal: string | null
+          engagement_event_id: string
+          founder_review_required: boolean
+          id: string
+          is_test_data: boolean
+          metadata: Json
+          recommended_agent: string | null
+          recommended_next_action: string | null
+          support_review_required: boolean
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          classification_status?: string
+          compliance_review_required?: boolean
+          confidence_score?: number
+          created_at?: string
+          customer_success_review_required?: boolean
+          detected_customer_stage?: string | null
+          detected_intent?: string | null
+          detected_keyword?: string | null
+          detected_language?: string | null
+          detected_opportunities?: string[]
+          detected_risk_flags?: string[]
+          detected_sentiment?: string | null
+          detected_value_signal?: string | null
+          engagement_event_id: string
+          founder_review_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          recommended_agent?: string | null
+          recommended_next_action?: string | null
+          support_review_required?: boolean
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          classification_status?: string
+          compliance_review_required?: boolean
+          confidence_score?: number
+          created_at?: string
+          customer_success_review_required?: boolean
+          detected_customer_stage?: string | null
+          detected_intent?: string | null
+          detected_keyword?: string | null
+          detected_language?: string | null
+          detected_opportunities?: string[]
+          detected_risk_flags?: string[]
+          detected_sentiment?: string | null
+          detected_value_signal?: string | null
+          engagement_event_id?: string
+          founder_review_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          recommended_agent?: string | null
+          recommended_next_action?: string | null
+          support_review_required?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_engagement_classifications_engagement_event_id_fkey"
+            columns: ["engagement_event_id"]
+            isOneToOne: false
+            referencedRelation: "social_engagement_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_engagement_crm_matches: {
+        Row: {
+          applied_at: string | null
+          applied_to_crm: boolean
+          business_id: string
+          created_at: string
+          crm_contact_id: string | null
+          engagement_event_id: string
+          founder_review_required: boolean
+          id: string
+          is_test_data: boolean
+          match_confidence: number
+          match_reason: string | null
+          match_status: string
+          matched_fields: string[]
+          metadata: Json
+          updated_at: string
+        }
+        Insert: {
+          applied_at?: string | null
+          applied_to_crm?: boolean
+          business_id: string
+          created_at?: string
+          crm_contact_id?: string | null
+          engagement_event_id: string
+          founder_review_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          match_confidence?: number
+          match_reason?: string | null
+          match_status?: string
+          matched_fields?: string[]
+          metadata?: Json
+          updated_at?: string
+        }
+        Update: {
+          applied_at?: string | null
+          applied_to_crm?: boolean
+          business_id?: string
+          created_at?: string
+          crm_contact_id?: string | null
+          engagement_event_id?: string
+          founder_review_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          match_confidence?: number
+          match_reason?: string | null
+          match_status?: string
+          matched_fields?: string[]
+          metadata?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_engagement_crm_matches_engagement_event_id_fkey"
+            columns: ["engagement_event_id"]
+            isOneToOne: false
+            referencedRelation: "social_engagement_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_engagement_escalations: {
+        Row: {
+          assigned_agent: string | null
+          assigned_to: string | null
+          business_id: string
+          created_at: string
+          engagement_event_id: string
+          escalation_status: string
+          escalation_type: string
+          founder_review_required: boolean
+          id: string
+          is_test_data: boolean
+          linked_complaint_id: string | null
+          linked_customer_success_item_id: string | null
+          linked_support_item_id: string | null
+          linked_winback_item_id: string | null
+          metadata: Json
+          priority: string
+          reason: string | null
+          recommended_action: string | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          assigned_agent?: string | null
+          assigned_to?: string | null
+          business_id: string
+          created_at?: string
+          engagement_event_id: string
+          escalation_status?: string
+          escalation_type: string
+          founder_review_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          linked_complaint_id?: string | null
+          linked_customer_success_item_id?: string | null
+          linked_support_item_id?: string | null
+          linked_winback_item_id?: string | null
+          metadata?: Json
+          priority?: string
+          reason?: string | null
+          recommended_action?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assigned_agent?: string | null
+          assigned_to?: string | null
+          business_id?: string
+          created_at?: string
+          engagement_event_id?: string
+          escalation_status?: string
+          escalation_type?: string
+          founder_review_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          linked_complaint_id?: string | null
+          linked_customer_success_item_id?: string | null
+          linked_support_item_id?: string | null
+          linked_winback_item_id?: string | null
+          metadata?: Json
+          priority?: string
+          reason?: string | null
+          recommended_action?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_engagement_escalations_engagement_event_id_fkey"
+            columns: ["engagement_event_id"]
+            isOneToOne: false
+            referencedRelation: "social_engagement_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_engagement_events: {
+        Row: {
+          ai_reply_allowed: boolean
+          business_id: string
+          calendar_item_id: string | null
+          campaign_plan_id: string | null
           contact_email: string | null
           contact_handle: string | null
           contact_name: string | null
+          content_item_id: string | null
           conversation_id: string | null
           created_at: string
           creator_signal: boolean
           crm_contact_id: string | null
+          crm_match_status: string
           customer_signal: boolean
           detected_intent: string | null
+          detected_keyword: string | null
+          display_name: string | null
+          dm_flow_id: string | null
+          event_status: string
           event_type: string
           external_event_id: string | null
+          external_reply_allowed: boolean
+          external_thread_id: string | null
+          external_user_id: string | null
           fan_signal: boolean
           founder_review_required: boolean
+          handled_at: string | null
+          handled_by_agent: string | null
           id: string
+          intent: string | null
+          is_test_data: boolean
           keyword_detected: string | null
+          keyword_rule_id: string | null
+          media_url: string | null
           message_text: string | null
+          message_url: string | null
+          metadata: Json
+          parent_post_id: string | null
+          parent_post_url: string | null
+          phone: string | null
+          platform: string | null
           platform_key: string
+          provider: string | null
           raw_payload: Json
           received_at: string
           requires_response: boolean
+          risk_level: string
           sentiment: string | null
+          social_handle: string | null
+          source_type: string
           spam_signal: boolean
+          updated_at: string
+          urgency: string
         }
         Insert: {
+          ai_reply_allowed?: boolean
           business_id: string
+          calendar_item_id?: string | null
+          campaign_plan_id?: string | null
           contact_email?: string | null
           contact_handle?: string | null
           contact_name?: string | null
+          content_item_id?: string | null
           conversation_id?: string | null
           created_at?: string
           creator_signal?: boolean
           crm_contact_id?: string | null
+          crm_match_status?: string
           customer_signal?: boolean
           detected_intent?: string | null
+          detected_keyword?: string | null
+          display_name?: string | null
+          dm_flow_id?: string | null
+          event_status?: string
           event_type: string
           external_event_id?: string | null
+          external_reply_allowed?: boolean
+          external_thread_id?: string | null
+          external_user_id?: string | null
           fan_signal?: boolean
           founder_review_required?: boolean
+          handled_at?: string | null
+          handled_by_agent?: string | null
           id?: string
+          intent?: string | null
+          is_test_data?: boolean
           keyword_detected?: string | null
+          keyword_rule_id?: string | null
+          media_url?: string | null
           message_text?: string | null
+          message_url?: string | null
+          metadata?: Json
+          parent_post_id?: string | null
+          parent_post_url?: string | null
+          phone?: string | null
+          platform?: string | null
           platform_key: string
+          provider?: string | null
           raw_payload?: Json
           received_at?: string
           requires_response?: boolean
+          risk_level?: string
           sentiment?: string | null
+          social_handle?: string | null
+          source_type?: string
           spam_signal?: boolean
+          updated_at?: string
+          urgency?: string
         }
         Update: {
+          ai_reply_allowed?: boolean
           business_id?: string
+          calendar_item_id?: string | null
+          campaign_plan_id?: string | null
           contact_email?: string | null
           contact_handle?: string | null
           contact_name?: string | null
+          content_item_id?: string | null
           conversation_id?: string | null
           created_at?: string
           creator_signal?: boolean
           crm_contact_id?: string | null
+          crm_match_status?: string
           customer_signal?: boolean
           detected_intent?: string | null
+          detected_keyword?: string | null
+          display_name?: string | null
+          dm_flow_id?: string | null
+          event_status?: string
           event_type?: string
           external_event_id?: string | null
+          external_reply_allowed?: boolean
+          external_thread_id?: string | null
+          external_user_id?: string | null
           fan_signal?: boolean
           founder_review_required?: boolean
+          handled_at?: string | null
+          handled_by_agent?: string | null
           id?: string
+          intent?: string | null
+          is_test_data?: boolean
           keyword_detected?: string | null
+          keyword_rule_id?: string | null
+          media_url?: string | null
           message_text?: string | null
+          message_url?: string | null
+          metadata?: Json
+          parent_post_id?: string | null
+          parent_post_url?: string | null
+          phone?: string | null
+          platform?: string | null
           platform_key?: string
+          provider?: string | null
           raw_payload?: Json
           received_at?: string
           requires_response?: boolean
+          risk_level?: string
           sentiment?: string | null
+          social_handle?: string | null
+          source_type?: string
           spam_signal?: boolean
+          updated_at?: string
+          urgency?: string
         }
         Relationships: [
           {
@@ -22235,6 +22652,41 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_engagement_events_calendar_item_id_fkey"
+            columns: ["calendar_item_id"]
+            isOneToOne: false
+            referencedRelation: "social_calendar_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_engagement_events_campaign_plan_id_fkey"
+            columns: ["campaign_plan_id"]
+            isOneToOne: false
+            referencedRelation: "social_campaign_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_engagement_events_content_item_id_fkey"
+            columns: ["content_item_id"]
+            isOneToOne: false
+            referencedRelation: "social_content_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_engagement_events_dm_flow_id_fkey"
+            columns: ["dm_flow_id"]
+            isOneToOne: false
+            referencedRelation: "social_dm_flow_blueprints"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_engagement_events_keyword_rule_id_fkey"
+            columns: ["keyword_rule_id"]
+            isOneToOne: false
+            referencedRelation: "social_keyword_trigger_rules"
             referencedColumns: ["id"]
           },
         ]
@@ -22321,6 +22773,167 @@ export type Database = {
           {
             foreignKeyName: "social_engagement_flow_audit_keyword_rule_id_fkey"
             columns: ["keyword_rule_id"]
+            isOneToOne: false
+            referencedRelation: "social_keyword_trigger_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_engagement_import_batches: {
+        Row: {
+          blocked_count: number
+          business_id: string
+          created_at: string
+          duplicate_count: number
+          id: string
+          import_name: string
+          import_status: string
+          import_type: string
+          imported_count: number
+          is_test_data: boolean
+          metadata: Json
+          platform: string | null
+          row_count: number
+          source_notes: string | null
+          updated_at: string
+          validation_errors: string[]
+          validation_warnings: string[]
+        }
+        Insert: {
+          blocked_count?: number
+          business_id: string
+          created_at?: string
+          duplicate_count?: number
+          id?: string
+          import_name: string
+          import_status?: string
+          import_type?: string
+          imported_count?: number
+          is_test_data?: boolean
+          metadata?: Json
+          platform?: string | null
+          row_count?: number
+          source_notes?: string | null
+          updated_at?: string
+          validation_errors?: string[]
+          validation_warnings?: string[]
+        }
+        Update: {
+          blocked_count?: number
+          business_id?: string
+          created_at?: string
+          duplicate_count?: number
+          id?: string
+          import_name?: string
+          import_status?: string
+          import_type?: string
+          imported_count?: number
+          is_test_data?: boolean
+          metadata?: Json
+          platform?: string | null
+          row_count?: number
+          source_notes?: string | null
+          updated_at?: string
+          validation_errors?: string[]
+          validation_warnings?: string[]
+        }
+        Relationships: []
+      }
+      social_engagement_reply_drafts: {
+        Row: {
+          business_id: string
+          classification_id: string | null
+          compliance_warnings: string[]
+          created_at: string
+          draft_status: string
+          draft_text: string
+          draft_type: string
+          engagement_event_id: string
+          external_send_allowed: boolean
+          founder_approval_review_id: string | null
+          founder_review_required: boolean
+          id: string
+          is_test_data: boolean
+          linked_flow_id: string | null
+          linked_keyword_rule_id: string | null
+          metadata: Json
+          platform: string
+          reply_channel: string
+          risk_flags: string[]
+          suggested_tone: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          classification_id?: string | null
+          compliance_warnings?: string[]
+          created_at?: string
+          draft_status?: string
+          draft_text: string
+          draft_type: string
+          engagement_event_id: string
+          external_send_allowed?: boolean
+          founder_approval_review_id?: string | null
+          founder_review_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          linked_flow_id?: string | null
+          linked_keyword_rule_id?: string | null
+          metadata?: Json
+          platform: string
+          reply_channel: string
+          risk_flags?: string[]
+          suggested_tone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          classification_id?: string | null
+          compliance_warnings?: string[]
+          created_at?: string
+          draft_status?: string
+          draft_text?: string
+          draft_type?: string
+          engagement_event_id?: string
+          external_send_allowed?: boolean
+          founder_approval_review_id?: string | null
+          founder_review_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          linked_flow_id?: string | null
+          linked_keyword_rule_id?: string | null
+          metadata?: Json
+          platform?: string
+          reply_channel?: string
+          risk_flags?: string[]
+          suggested_tone?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_engagement_reply_drafts_classification_id_fkey"
+            columns: ["classification_id"]
+            isOneToOne: false
+            referencedRelation: "social_engagement_classifications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_engagement_reply_drafts_engagement_event_id_fkey"
+            columns: ["engagement_event_id"]
+            isOneToOne: false
+            referencedRelation: "social_engagement_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_engagement_reply_drafts_linked_flow_id_fkey"
+            columns: ["linked_flow_id"]
+            isOneToOne: false
+            referencedRelation: "social_dm_flow_blueprints"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_engagement_reply_drafts_linked_keyword_rule_id_fkey"
+            columns: ["linked_keyword_rule_id"]
             isOneToOne: false
             referencedRelation: "social_keyword_trigger_rules"
             referencedColumns: ["id"]
@@ -22482,12 +23095,14 @@ export type Database = {
           content_item_id: string | null
           created_at: string | null
           dm_flow_required: boolean | null
+          engagement_count: number
           flow_id: string | null
           founder_approval_required: boolean | null
           id: string
           is_test_data: boolean | null
           keyword: string
           keyword_normalized: string | null
+          last_engagement_at: string | null
           metadata: Json | null
           notes: string | null
           platform: string
@@ -22506,12 +23121,14 @@ export type Database = {
           content_item_id?: string | null
           created_at?: string | null
           dm_flow_required?: boolean | null
+          engagement_count?: number
           flow_id?: string | null
           founder_approval_required?: boolean | null
           id?: string
           is_test_data?: boolean | null
           keyword: string
           keyword_normalized?: string | null
+          last_engagement_at?: string | null
           metadata?: Json | null
           notes?: string | null
           platform: string
@@ -22530,12 +23147,14 @@ export type Database = {
           content_item_id?: string | null
           created_at?: string | null
           dm_flow_required?: boolean | null
+          engagement_count?: number
           flow_id?: string | null
           founder_approval_required?: boolean | null
           id?: string
           is_test_data?: boolean | null
           keyword?: string
           keyword_normalized?: string | null
+          last_engagement_at?: string | null
           metadata?: Json | null
           notes?: string | null
           platform?: string
