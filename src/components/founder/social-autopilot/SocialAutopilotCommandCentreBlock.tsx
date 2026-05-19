@@ -18,6 +18,7 @@ export default function SocialAutopilotCommandCentreBlock() {
   const [engagement, setEngagement] = useState<any>(null);
   const [inbox, setInbox] = useState<any>(null);
   const [analytics, setAnalytics] = useState<any>(null);
+  const [competitor, setCompetitor] = useState<any>(null);
   const businessId = typeof window !== "undefined" ? localStorage.getItem("liftor.activeBusinessId") || "" : "";
 
   useEffect(() => {
@@ -58,6 +59,9 @@ export default function SocialAutopilotCommandCentreBlock() {
           const an = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/social-analytics-healthcheck?business_id=${businessId}`,
             { headers: { Authorization: `Bearer ${session?.access_token ?? ""}` } });
           setAnalytics(await an.json());
+          const ct = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/social-competitor-trend-healthcheck?business_id=${businessId}`,
+            { headers: { Authorization: `Bearer ${session?.access_token ?? ""}` } });
+          setCompetitor(await ct.json());
         }
       } catch { /* ignore */ }
     })();
