@@ -14,6 +14,7 @@ export default function SocialAutopilotCommandCentreBlock() {
   const [calendar, setCalendar] = useState<any>(null);
   const [approval, setApproval] = useState<any>(null);
   const [publishing, setPublishing] = useState<any>(null);
+  const [bridge, setBridge] = useState<any>(null);
   const businessId = typeof window !== "undefined" ? localStorage.getItem("liftor.activeBusinessId") || "" : "";
 
   useEffect(() => {
@@ -42,6 +43,9 @@ export default function SocialAutopilotCommandCentreBlock() {
           const pub = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/social-publishing-healthcheck?business_id=${businessId}`,
             { headers: { Authorization: `Bearer ${session?.access_token ?? ""}` } });
           setPublishing(await pub.json());
+          const br = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/social-scheduler-export-healthcheck`,
+            { method: "POST", headers: { Authorization: `Bearer ${session?.access_token ?? ""}`, "Content-Type": "application/json" }, body: JSON.stringify({ business_id: businessId }) });
+          setBridge(await br.json());
         }
       } catch { /* ignore */ }
     })();
@@ -217,6 +221,31 @@ export default function SocialAutopilotCommandCentreBlock() {
               if ((publishing.batches_total ?? 0) === 0) return "Create publish batch.";
               if ((publishing.export_batches_total ?? 0) === 0) return "Create manual/operator export.";
               return "Keep provider execution locked until later prompts wire APIs.";
+            })()}</p>
+          </div>
+        )}
+        {businessId && bridge && (
+          <div className="mt-3 p-3 rounded bg-secondary/40">
+            <p className="text-xs font-semibold mb-1 flex items-center gap-1"><Lock size={12} /> Scheduler / Export Bridge (manual only — no provider API)</p>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-[11px]">
+              <span>Batches: {bridge.export_batches_total ?? 0}</span>
+              <span>Rows: {bridge.export_rows_total ?? 0}</span>
+              <span>Ready: {bridge.export_ready_count ?? 0}</span>
+              <span>Downloaded: {bridge.downloaded_count ?? 0}</span>
+              <span>Manually scheduled: {bridge.manually_scheduled_count ?? 0}</span>
+              <span>Blocked rows: {bridge.blocked_rows ?? 0}</span>
+              <span>Validation failed: {bridge.validation_failed_count ?? 0}</span>
+              <span>Operator open: {bridge.operator_tasks_open ?? 0}</span>
+              <span>Provider calls: {bridge.provider_calls_total ?? 0}</span>
+              <span>Ext schedules: {bridge.posts_scheduled_externally_total ?? 0}</span>
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-2">Next: {(() => {
+              if ((bridge.export_batches_total ?? 0) === 0) return "Preview Metricool-ready export.";
+              if ((bridge.export_ready_count ?? 0) === 0) return "Create scheduler export batch.";
+              if ((bridge.validation_failed_count ?? 0) > 0) return "Validate export and fix blocked rows.";
+              if ((bridge.downloaded_count ?? 0) === 0) return "Generate CSV and mark downloaded.";
+              if ((bridge.operator_tasks_open ?? 0) === 0) return "Create operator pack.";
+              return "Confirm manual scheduling after external upload.";
             })()}</p>
           </div>
         )}
