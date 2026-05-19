@@ -26,6 +26,7 @@ import BusinessValuationIntelligencePanel from "@/components/founder/valuation/B
 import FinalGoToUseReadinessPanel from "@/components/founder/command/FinalGoToUseReadinessPanel";
 import FinalHardeningStatusPanel from "@/components/founder/command/FinalHardeningStatusPanel";
 import CommandCentreTruthSyncPanel from "@/components/founder/command/CommandCentreTruthSyncPanel";
+import LiftorBrainPanel from "@/components/founder/brain/LiftorBrainPanel";
 import SocialAutopilotCommandCentreBlock from "@/components/founder/social-autopilot/SocialAutopilotCommandCentreBlock";
 import SocialAutopilotDiagnosticsPanel from "@/components/founder/social-autopilot/SocialAutopilotDiagnosticsPanel";
 import CustomerSuccessCommandCentreBlock from "@/components/founder/customer-success/CustomerSuccessCommandCentreBlock";
@@ -779,6 +780,7 @@ const CommandCentre = () => {
       <div className="max-w-7xl mx-auto px-4 pt-4"><LiftorUserManualPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><SocialAutopilotCommandCentreBlock /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><CustomerSuccessCommandCentreBlock /></div>
+      <LiftorBrainPanel businessName={activeInboxes[0]?.business_name ?? businesses[0]?.name ?? null} />
       <DailyOperatorNextActionsCard />
       <CommandCentreFunctionalityMapCard />
       <DiagnosticGate>
