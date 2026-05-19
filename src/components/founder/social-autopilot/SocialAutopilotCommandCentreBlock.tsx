@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 export default function SocialAutopilotCommandCentreBlock() {
   const [data, setData] = useState<any>(null);
   const [brain, setBrain] = useState<any>(null);
+  const [readiness, setReadiness] = useState<any>(null);
   const businessId = typeof window !== "undefined" ? localStorage.getItem("liftor.activeBusinessId") || "" : "";
 
   useEffect(() => {
@@ -22,6 +23,9 @@ export default function SocialAutopilotCommandCentreBlock() {
           const b = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/social-brain-healthcheck?business_id=${businessId}`,
             { headers: { Authorization: `Bearer ${session?.access_token ?? ""}` } });
           setBrain(await b.json());
+          const r = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/social-profile-readiness-check?business_id=${businessId}`,
+            { headers: { Authorization: `Bearer ${session?.access_token ?? ""}` } });
+          setReadiness(await r.json());
         }
       } catch { /* ignore */ }
     })();
@@ -79,6 +83,30 @@ export default function SocialAutopilotCommandCentreBlock() {
                 if (brain.profile_status === "approved") return "Apply Social Brain to settings.";
                 if (brain.ready_for_content_generation) return "Generate first content pack (Prompt 3).";
                 return "Address missing inputs and regenerate.";
+              })()}
+            </p>
+          </div>
+        )}
+        {businessId && readiness && (
+          <div className="mt-3 p-3 rounded bg-secondary/40">
+            <p className="text-xs font-semibold mb-1">Social Operating Profile</p>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-[11px]">
+              <span>Confidence: {readiness.confidence_score ?? 0}</span>
+              <span>Pillars: {readiness.approved_pillars_count ?? 0}/{readiness.content_pillars_count ?? 0}</span>
+              <span>Active platforms: {readiness.active_platform_rules_count ?? 0}</span>
+              <span>Offers: {readiness.offer_mappings_count ?? 0}</span>
+              <span>Open risks: {readiness.risk_flags_open ?? 0} ({readiness.critical_risk_flags ?? 0} crit)</span>
+              <span>Content gen ready: {readiness.ready_for_content_generation ? "YES" : "no"}</span>
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-2">
+              Next: {(() => {
+                if (!readiness.profile_exists || (readiness.content_pillars_count ?? 0) === 0) return "Generate Social Operating Profile.";
+                if ((readiness.critical_risk_flags ?? 0) > 0) return "Resolve critical risk flags.";
+                if ((readiness.approved_pillars_count ?? 0) < 3) return "Review & approve content pillars.";
+                if ((readiness.active_platform_rules_count ?? 0) === 0) return "Activate at least one platform rule.";
+                if ((readiness.offer_mappings_count ?? 0) === 0) return "Add offer/pricing/proof.";
+                if (readiness.ready_for_content_generation) return "Proceed to content pack generation (Prompt 4).";
+                return "Resolve missing inputs.";
               })()}
             </p>
           </div>
