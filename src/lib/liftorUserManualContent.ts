@@ -813,3 +813,32 @@ export const socialContentFactoryTechnicalManual = {
   command_centre:
     "Daily Operator View Social Autopilot block shows Content Factory tiles (packs, drafts, need-review, blocked, missing assets, variants, hooks, quality warnings, ready→calendar) and the next action.",
 };
+
+export const WEBSITE_FUNNEL_ENGINE = {
+  title: "Website, Funnels and Lead Magnets",
+  summary:
+    "Liftor drafts internal funnel strategy, landing pages, lead magnets, CTA maps and operator/builder export packs for any business. It does NOT publish pages, deploy websites, edit Shopify/Lovable/Wix/Webflow/WordPress, create live forms, create payment links, charge customers, or send emails. A human/founder must build or publish externally and then manually confirm 'manually built' or 'live'. Test funnel data must be purged before real use.",
+  tables: [
+    "website_funnel_strategies, website_landing_page_drafts, website_page_sections, lead_magnet_assets, conversion_cta_maps, conversion_asset_packs, website_funnel_gap_reviews, website_funnel_audit.",
+    "social_campaign_plans / social_content_items / social_calendar_items / social_strategy_recommendations extended with funnel_strategy_id / cta_map_id / funnel_status / funnel_destination_status fields.",
+  ],
+  functions: [
+    "website-funnel-strategy-preview/create (CREATE WEBSITE FUNNEL STRATEGY)",
+    "website-landing-page-preview/create (CREATE WEBSITE LANDING PAGE DRAFT)",
+    "website-lead-magnet-preview/create (CREATE WEBSITE LEAD MAGNET)",
+    "conversion-cta-map-preview/create (CREATE CONVERSION CTA MAP)",
+    "conversion-asset-pack-preview/create (CREATE CONVERSION ASSET PACK)",
+    "website-builder-export-preview/create (CREATE WEBSITE BUILDER EXPORT)",
+    "website-funnel-readiness-check (SAVE WEBSITE FUNNEL READINESS REVIEW)",
+    "website-funnel-gap-analysis (SAVE WEBSITE FUNNEL GAP ANALYSIS)",
+    "website-live-confirmation-record (CONFIRM WEBSITE ASSET MANUALLY BUILT / CONFIRM WEBSITE ASSET IS LIVE)",
+    "website-funnel-healthcheck (read-only).",
+    "website-external-publish-placeholder — fails closed (403).",
+    "website-funnel-rehearsal-purge (PURGE WEBSITE FUNNEL TEST DATA).",
+    "website-funnel-engine-acceptance — verifies schema/extensions/functions.",
+  ],
+  safety:
+    "No publish, no deploy, no provider/builder API, no payment links, no live forms, no emails. external_api_calls/pages_published/live_forms_created/payments_created/emails_sent always 0. RLS founder/admin-only. Confirmation-phrase gated.",
+  command_centre:
+    "Daily Operator View Social Autopilot block shows Website/Funnel tile: strategies, approved, pages, lead magnets, CTA maps, asset packs, open gaps, content w/o CTA, campaigns w/o funnel, export-ready, manually built, live confirmed, and next action.",
+};

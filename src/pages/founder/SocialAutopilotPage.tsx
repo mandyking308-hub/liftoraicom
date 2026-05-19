@@ -35,6 +35,7 @@ import { SocialEngagementFlowDashboard } from "@/components/founder/social-autop
 import { SocialEngagementInboxDashboard } from "@/components/founder/social-autopilot/SocialEngagementInboxPanels";
 import { SocialAnalyticsDashboard } from "@/components/founder/social-autopilot/SocialAnalyticsPanels";
 import { SocialCompetitorTrendDashboard } from "@/components/founder/social-autopilot/SocialCompetitorTrendPanels";
+import { WebsiteFunnelDashboard } from "@/components/founder/social-autopilot/WebsiteFunnelPanels";
 
 const TAB_BY_PATH: Record<string, string> = {
   "/founder/social-autopilot": "dashboard",
@@ -48,6 +49,7 @@ const TAB_BY_PATH: Record<string, string> = {
   "/founder/social-autopilot/engagement": "engagement",
   "/founder/social-autopilot/performance": "performance",
   "/founder/social-autopilot/analytics": "analytics",
+  "/founder/social-autopilot/funnels": "funnels",
   "/founder/social-autopilot/settings": "settings",
 };
 
@@ -241,6 +243,7 @@ const TAB_LABELS: Array<[string, string, string]> = [
   ["engagement", "Engagement", "/founder/social-autopilot/engagement"],
   ["performance", "Performance", "/founder/social-autopilot/performance"],
   ["analytics", "Analytics", "/founder/social-autopilot/analytics"],
+  ["funnels", "Funnels", "/founder/social-autopilot/funnels"],
   ["settings", "Settings", "/founder/social-autopilot/settings"],
 ];
 
@@ -280,6 +283,7 @@ export default function SocialAutopilotPage() {
           <TabsContent value="engagement"><SocialEngagementFlowDashboard businessId={businessId} /></TabsContent>
           <TabsContent value="performance"><GenericListPanel table="social_performance_logs" businessId={businessId} title="Performance Logs" /></TabsContent>
           <TabsContent value="analytics"><SocialAnalyticsDashboard businessId={businessId} /></TabsContent>
+          <TabsContent value="funnels"><WebsiteFunnelDashboard businessId={businessId} /></TabsContent>
           <TabsContent value="settings"><SettingsPanel businessId={businessId} /></TabsContent>
         </Tabs>
         <div className="space-y-4">
@@ -334,6 +338,10 @@ export default function SocialAutopilotPage() {
         <div className="space-y-4">
           <h2 className="text-lg font-semibold mt-6">Competitor Watch + Trend Intelligence</h2>
           <SocialCompetitorTrendDashboard businessId={businessId} />
+        </div>
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold mt-6">Website / Funnel / Lead Magnet Engine</h2>
+          <WebsiteFunnelDashboard businessId={businessId} />
         </div>
       </div>
     </FounderLayout>
