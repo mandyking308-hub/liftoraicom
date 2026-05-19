@@ -926,6 +926,7 @@ export const LIFTOR_FINAL_HANDOVER = {
     "High-risk autopilot — L5 never default.",
   ],
   acceptance_function: "liftor-wide-final-acceptance — read-only, founder-gated, verifies core tables, external placeholder fail-closed status, all per-layer acceptance functions, and no-forbidden-action audit counters.",
+  wiring_matrix_function: "liftor-functional-wiring-matrix — read-only, founder-gated. Returns a per-layer status (WIRED / PARTIAL / BROKEN_FUNCTION / BACKEND_ONLY / FAIL_CLOSED_OK / BLOCKED) confirming every layer has a real table + edge function + fail-closed placeholder where external action exists. Mounted in Command Centre Full Diagnostic View as 'Functional Wiring Matrix'. Used to prove panels are not UI-only.",
   next_business_onboarding: [
     "Open Business Activation Wizard from Command Centre.",
     "Create or pick the business; mark as test (is_test_data=true) for rehearsal first.",
