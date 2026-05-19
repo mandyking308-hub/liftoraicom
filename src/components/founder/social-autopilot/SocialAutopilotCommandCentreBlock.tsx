@@ -10,6 +10,7 @@ export default function SocialAutopilotCommandCentreBlock() {
   const [data, setData] = useState<any>(null);
   const [brain, setBrain] = useState<any>(null);
   const [readiness, setReadiness] = useState<any>(null);
+  const [factory, setFactory] = useState<any>(null);
   const businessId = typeof window !== "undefined" ? localStorage.getItem("liftor.activeBusinessId") || "" : "";
 
   useEffect(() => {
@@ -26,6 +27,9 @@ export default function SocialAutopilotCommandCentreBlock() {
           const r = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/social-profile-readiness-check?business_id=${businessId}`,
             { headers: { Authorization: `Bearer ${session?.access_token ?? ""}` } });
           setReadiness(await r.json());
+          const f = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/social-content-factory-healthcheck?business_id=${businessId}`,
+            { headers: { Authorization: `Bearer ${session?.access_token ?? ""}` } });
+          setFactory(await f.json());
         }
       } catch { /* ignore */ }
     })();
