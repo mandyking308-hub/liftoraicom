@@ -17,6 +17,7 @@ export default function SocialAutopilotCommandCentreBlock() {
   const [bridge, setBridge] = useState<any>(null);
   const [engagement, setEngagement] = useState<any>(null);
   const [inbox, setInbox] = useState<any>(null);
+  const [analytics, setAnalytics] = useState<any>(null);
   const businessId = typeof window !== "undefined" ? localStorage.getItem("liftor.activeBusinessId") || "" : "";
 
   useEffect(() => {
@@ -54,6 +55,9 @@ export default function SocialAutopilotCommandCentreBlock() {
           const inb = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/social-engagement-inbox-healthcheck?business_id=${businessId}`,
             { headers: { Authorization: `Bearer ${session?.access_token ?? ""}` } });
           setInbox(await inb.json());
+          const an = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/social-analytics-healthcheck?business_id=${businessId}`,
+            { headers: { Authorization: `Bearer ${session?.access_token ?? ""}` } });
+          setAnalytics(await an.json());
         }
       } catch { /* ignore */ }
     })();
@@ -317,6 +321,33 @@ export default function SocialAutopilotCommandCentreBlock() {
         <p className="mt-3 text-xs text-muted-foreground">
           Next: upload business knowledge + manuals so the Social Brain can generate per-business content.
         </p>
+        {businessId && analytics && (
+          <div className="mt-3 p-3 rounded bg-secondary/40">
+            <p className="text-xs font-semibold mb-1 flex items-center gap-1"><Lock size={12} /> Analytics / Learning (internal only — no provider/scrape)</p>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-[11px]">
+              <span>Imports: {analytics.import_batches_total ?? 0}</span>
+              <span>Metrics: {analytics.metrics_total ?? 0}</span>
+              <span>Unmatched: {analytics.metrics_unmatched ?? 0}</span>
+              <span>Summaries: {analytics.summaries_total ?? 0}</span>
+              <span>Signals review: {analytics.learning_signals_needing_review ?? 0}</span>
+              <span>Recs review: {analytics.recommendations_needing_review ?? 0}</span>
+              <span>Top platform: {analytics.top_platform_by_engagement ?? "—"}</span>
+              <span>Top type: {analytics.top_content_type ?? "—"}</span>
+              <span>Data quality: {analytics.data_quality_score ?? 0}</span>
+              <span>Provider calls: {analytics.provider_calls_total ?? 0}</span>
+              <span>Scraped: {analytics.scraped_pages_total ?? 0}</span>
+              <span>Fake metrics: {analytics.fake_metrics_created_total ?? 0}</span>
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-2">Next: {(() => {
+              if ((analytics.metrics_total ?? 0) === 0) return "Import or paste first performance metrics.";
+              if ((analytics.metrics_unmatched ?? 0) > 0) return `Match ${analytics.metrics_unmatched} metrics to content/campaign.`;
+              if ((analytics.summaries_total ?? 0) === 0) return "Generate first performance summary.";
+              if ((analytics.learning_signals_total ?? 0) === 0) return "Create learning signals from summaries.";
+              if ((analytics.recommendations_needing_review ?? 0) > 0) return "Review pending strategy recommendations.";
+              return "Analytics healthy — keep importing and reviewing.";
+            })()}</p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
