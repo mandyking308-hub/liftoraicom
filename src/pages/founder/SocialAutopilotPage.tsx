@@ -31,6 +31,7 @@ import { SocialCalendarDashboard } from "@/components/founder/social-autopilot/S
 import { SocialApprovalDashboard } from "@/components/founder/social-autopilot/SocialApprovalPanels";
 import { SocialPublishingDashboard } from "@/components/founder/social-autopilot/SocialPublishingPanels";
 import { SocialSchedulerBridgeDashboard } from "@/components/founder/social-autopilot/SocialSchedulerBridgePanels";
+import { SocialEngagementFlowDashboard } from "@/components/founder/social-autopilot/SocialEngagementFlowPanels";
 
 const TAB_BY_PATH: Record<string, string> = {
   "/founder/social-autopilot": "dashboard",
@@ -41,6 +42,7 @@ const TAB_BY_PATH: Record<string, string> = {
   "/founder/social-autopilot/publishing": "publishing",
   "/founder/social-autopilot/inbox": "inbox",
   "/founder/social-autopilot/replies": "replies",
+  "/founder/social-autopilot/engagement": "engagement",
   "/founder/social-autopilot/performance": "performance",
   "/founder/social-autopilot/settings": "settings",
 };
@@ -232,6 +234,7 @@ const TAB_LABELS: Array<[string, string, string]> = [
   ["publishing", "Publishing", "/founder/social-autopilot/publishing"],
   ["inbox", "Inbox", "/founder/social-autopilot/inbox"],
   ["replies", "Replies", "/founder/social-autopilot/replies"],
+  ["engagement", "Engagement", "/founder/social-autopilot/engagement"],
   ["performance", "Performance", "/founder/social-autopilot/performance"],
   ["settings", "Settings", "/founder/social-autopilot/settings"],
 ];
@@ -269,6 +272,7 @@ export default function SocialAutopilotPage() {
           <TabsContent value="publishing"><GenericListPanel table="social_publish_jobs" businessId={businessId} title="Publishing Queue (locked)" /></TabsContent>
           <TabsContent value="inbox"><GenericListPanel table="social_inbox_messages" businessId={businessId} title="Social Inbox" /></TabsContent>
           <TabsContent value="replies"><GenericListPanel table="social_reply_jobs" businessId={businessId} title="Reply Drafts (locked)" /></TabsContent>
+          <TabsContent value="engagement"><SocialEngagementFlowDashboard businessId={businessId} /></TabsContent>
           <TabsContent value="performance"><GenericListPanel table="social_performance_logs" businessId={businessId} title="Performance Logs" /></TabsContent>
           <TabsContent value="settings"><SettingsPanel businessId={businessId} /></TabsContent>
         </Tabs>
@@ -308,6 +312,10 @@ export default function SocialAutopilotPage() {
         <div className="space-y-4">
           <h2 className="text-lg font-semibold mt-6">Scheduler Bridge / Metricool + Operator Export</h2>
           <SocialSchedulerBridgeDashboard businessId={businessId} />
+        </div>
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold mt-6">ManyChat / Keyword + DM Flow Planner</h2>
+          <SocialEngagementFlowDashboard businessId={businessId} />
         </div>
       </div>
     </FounderLayout>
