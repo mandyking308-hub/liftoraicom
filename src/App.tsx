@@ -290,6 +290,7 @@ const App = () => (
             <Route path="/founder/strategy" element={<FounderRoute><StrategyEngine /></FounderRoute>} />
             <Route path="/founder/marketing" element={<FounderRoute><MarketingHub /></FounderRoute>} />
             <Route path="/founder/support" element={<FounderRoute><SupportHub /></FounderRoute>} />
+            <Route path="/founder/support/knowledge-agent" element={<FounderRoute><SupportKnowledgeAgent /></FounderRoute>} />
             <Route path="/founder/assets" element={<FounderRoute><CreativeAssetsHub /></FounderRoute>} />
             <Route path="/founder/social" element={<FounderRoute><SocialBrain /></FounderRoute>} />
             <Route path="/founder/social-autopilot" element={<FounderRoute><SocialAutopilotPage /></FounderRoute>} />
