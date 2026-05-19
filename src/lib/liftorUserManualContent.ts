@@ -580,6 +580,35 @@ export const SOCIAL_SCHEDULER_BRIDGE = {
   ],
 };
 
+export const SOCIAL_ENGAGEMENT_FLOW_PLANNER = {
+  title: "Comment Keywords and DM Flow Planning",
+  summary:
+    "Liftor can plan keyword triggers (e.g. CANDY, BOOK, DEMO, QUOTE, GUIDE, HELP) and design the public reply + DM flow that goes with them. This sprint does NOT connect to ManyChat, Meta, Instagram, TikTok, YouTube, LinkedIn or X — and Liftor never sends DMs or comments. A human operator must configure the flow manually in ManyChat (or chosen tool) and then confirm it back in Liftor.",
+  rules: [
+    "No DMs sent. No comments sent. No ManyChat API call. No Meta/Instagram/TikTok/YouTube/LinkedIn/X API call.",
+    "No external flow created. No external publish. No external schedule. No Apollo / Smartlead POST / email send.",
+    "Liftor only stores internal blueprints, exports and operator checklists. No raw provider tokens.",
+    "Manually live means a human/operator confirmed the flow was set up outside Liftor — it does NOT mean Liftor sent anything.",
+    "Every business has its own keyword rules and DM flows.",
+  ],
+  steps: [
+    "Open Social Autopilot → Engagement.",
+    "Create a keyword trigger rule with the phrase CREATE SOCIAL KEYWORD RULE.",
+    "Use the DM Flow Planner to preview a blueprint, then create it with CREATE SOCIAL DM FLOW BLUEPRINT.",
+    "Validate the flow (public reply, DM opening, button, follow-up, escalation, opt-out).",
+    "Create the ManyChat manual setup export with CREATE MANYCHAT MANUAL SETUP EXPORT.",
+    "Operator configures the flow manually in ManyChat (or chosen tool) using the copy blocks and checklist.",
+    "Confirm with CONFIRM MANYCHAT MANUAL SETUP. To mark live, also use CONFIRM MANYCHAT FLOW IS LIVE.",
+    "Purge test data only with PURGE SOCIAL ENGAGEMENT FLOW TEST DATA.",
+  ],
+  technical: [
+    "Tables: social_keyword_trigger_rules, social_dm_flow_blueprints, social_dm_flow_steps, social_manychat_manual_exports, social_engagement_flow_audit. Engagement fields added to social_campaign_plans, social_content_items and social_calendar_items.",
+    "Edge functions: social-keyword-rule-preview, social-keyword-rule-create, social-dm-flow-preview, social-dm-flow-create, social-dm-flow-validate, social-manychat-manual-export-preview, social-manychat-manual-export-create, social-manychat-manual-setup-confirm, social-engagement-flow-healthcheck, -rehearsal-purge, social-engagement-flow-acceptance.",
+    "NeonCandy CANDY example is a seed only: keyword CANDY → public reply 'Nice — sent you the NeonCandy link 🍭' → DM opening with neoncandy.net/music → button 'Send me the link' → follow-up 'Which drop are you feeling most?'. Same engine supports lead magnet, booking, demo, quote, support, onboarding, upsell, win-back and FAQ flows.",
+    "Command Centre Daily Operator View renders an Engagement/ManyChat tile with keyword rules, DM flows, manual exports, manually configured/live counts, validation failures, blocked flows and provider_calls=0, dms_sent=0, comments_sent=0.",
+  ],
+};
+
 export const USING_SOCIAL_BRAIN_CONNECTOR = {
   title: "Business Knowledge → Social Brain",
   summary:
