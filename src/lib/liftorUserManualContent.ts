@@ -466,3 +466,24 @@ export const USING_SOCIAL_AUTOPILOT = {
     "Approve content drafts and reply drafts individually before any send is enabled.",
   ],
 };
+
+export const USING_SOCIAL_BRAIN_CONNECTOR = {
+  title: "Business Knowledge → Social Brain",
+  summary:
+    "Each business in Liftor gets its own Social Brain, generated from its uploaded manuals, brand guide, FAQs and other knowledge sources. NeonCandy is only the first example.",
+  steps: [
+    "Register business knowledge sources (manuals, website, brand guide, offer sheet, customer profile, FAQs, sales scripts, marketing plan, founder notes).",
+    "Approve each source for social training.",
+    "Run extraction preview to see inferred voice, audience, offers, CTAs, pillars, platform rules, forbidden claims and compliance notes.",
+    "Save extraction, then Generate Social Brain profile (draft).",
+    "Review and Approve the profile. Sensitive sectors (health/finance/legal/children/property/charity/medical/employment) default to extra caution.",
+    "Apply the approved profile to social_automation_settings. Auto-publish, auto-reply and cold DM stay locked off.",
+    "Only then proceed to content pack generation (Prompt 3).",
+  ],
+  safety: [
+    "No posts, DMs, comments or provider API calls.",
+    "No auto-crawl of websites.",
+    "Approved profiles cannot be overwritten without an explicit regeneration phrase.",
+    "social_automation_mode stays approval_required.",
+  ],
+};
