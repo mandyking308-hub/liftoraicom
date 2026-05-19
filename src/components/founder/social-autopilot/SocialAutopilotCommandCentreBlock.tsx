@@ -421,6 +421,38 @@ export default function SocialAutopilotCommandCentreBlock() {
             })()}</p>
           </div>
         )}
+        {businessId && paidMedia && (
+          <div className="mt-3 p-3 rounded bg-secondary/40">
+            <p className="text-xs font-semibold mb-1 flex items-center gap-1"><Lock size={12} /> Ads / Paid Media (internal plans only — no ad API, no spend, no launches)</p>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-[11px]">
+              <span>Campaigns: {paidMedia.campaign_plans_total ?? 0}</span>
+              <span>Needs review: {paidMedia.plans_needing_review ?? 0}</span>
+              <span>Audiences: {paidMedia.audience_segments_total ?? 0}</span>
+              <span>Creatives: {paidMedia.creative_variants_total ?? 0}</span>
+              <span>Budget guards: {paidMedia.budget_guards_total ?? 0}</span>
+              <span>Scenarios: {paidMedia.spend_scenarios_total ?? 0}</span>
+              <span>Readiness: {paidMedia.readiness_checks_total ?? 0}</span>
+              <span>Risk reviews: {paidMedia.risk_reviews_total ?? 0}</span>
+              <span>Export packs: {paidMedia.manual_exports_total ?? 0}</span>
+              <span>Manually launched: {paidMedia.manually_launched_external_count ?? 0}</span>
+              <span>Blocked: {paidMedia.blocked_campaigns ?? 0}</span>
+              <span>External API: {paidMedia.external_api_calls_total ?? 0}</span>
+              <span>Campaigns launched: {paidMedia.campaigns_launched_total ?? 0}</span>
+              <span>Money spent: £{paidMedia.money_spent_total ?? 0}</span>
+              <span>Pixels created: {paidMedia.pixels_created_total ?? 0}</span>
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-2">Next: {(() => {
+              if ((paidMedia.campaign_plans_total ?? 0) === 0) return "Create first paid campaign plan.";
+              if ((paidMedia.audience_segments_total ?? 0) === 0) return "Add audience segments.";
+              if ((paidMedia.creative_variants_total ?? 0) === 0) return "Draft creative variants.";
+              if ((paidMedia.budget_guards_total ?? 0) === 0) return "Set a budget guard.";
+              if ((paidMedia.risk_reviews_total ?? 0) === 0) return "Generate risk/compliance review.";
+              if ((paidMedia.readiness_checks_total ?? 0) === 0) return "Run readiness check.";
+              if ((paidMedia.manual_exports_total ?? 0) === 0) return "Create manual ad platform export pack.";
+              return "Hand export pack to operator for manual setup.";
+            })()}</p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
