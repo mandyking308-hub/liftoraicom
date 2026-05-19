@@ -256,9 +256,6 @@ export default function SocialAutopilotPage() {
           <TabsContent value="replies"><GenericListPanel table="social_reply_jobs" businessId={businessId} title="Reply Drafts (locked)" /></TabsContent>
           <TabsContent value="performance"><GenericListPanel table="social_performance_logs" businessId={businessId} title="Performance Logs" /></TabsContent>
           <TabsContent value="settings"><SettingsPanel businessId={businessId} /></TabsContent>
-          <TabsContent value="settings" forceMount className="hidden data-[state=active]:block">
-            {/* second pass: brain workflow lives in settings tab too */}
-          </TabsContent>
         </Tabs>
         <div className="space-y-4">
           <h2 className="text-lg font-semibold mt-6">Business Knowledge → Social Brain</h2>
