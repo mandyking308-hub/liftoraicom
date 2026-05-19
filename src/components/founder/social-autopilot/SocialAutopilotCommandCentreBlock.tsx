@@ -196,6 +196,30 @@ export default function SocialAutopilotCommandCentreBlock() {
             })()}</p>
           </div>
         )}
+        {businessId && publishing && (
+          <div className="mt-3 p-3 rounded bg-secondary/40">
+            <p className="text-xs font-semibold mb-1 flex items-center gap-1"><Lock size={12} /> Publishing Queue (provider execution locked)</p>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-[11px]">
+              <span>Jobs: {publishing.publish_jobs_total ?? 0}</span>
+              <span>Queued: {publishing.queued_jobs ?? 0}</span>
+              <span>Provider locked: {publishing.provider_locked_jobs ?? 0}</span>
+              <span>Blocked: {publishing.blocked_jobs ?? 0}</span>
+              <span>Failed: {publishing.failed_jobs ?? 0}</span>
+              <span>Batches: {publishing.batches_total ?? 0}</span>
+              <span>Exports: {publishing.export_batches_total ?? 0}</span>
+              <span>Connections: {publishing.provider_connections_count ?? 0}</span>
+              <span>Gates locked: {(publishing.provider_gates_count ?? 0) - (publishing.unlocked_gates_count ?? 0)}</span>
+              <span>Provider calls: {publishing.provider_calls_total ?? 0}</span>
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-2">Next: {(() => {
+              if ((publishing.publish_jobs_total ?? 0) === 0) return "Preview publish queue and create internal jobs.";
+              if ((publishing.blocked_jobs ?? 0) > 0) return "Review blocked jobs.";
+              if ((publishing.batches_total ?? 0) === 0) return "Create publish batch.";
+              if ((publishing.export_batches_total ?? 0) === 0) return "Create manual/operator export.";
+              return "Keep provider execution locked until later prompts wire APIs.";
+            })()}</p>
+          </div>
+        )}
         <p className="mt-3 text-xs text-muted-foreground">
           Next: upload business knowledge + manuals so the Social Brain can generate per-business content.
         </p>
