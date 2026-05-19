@@ -31,6 +31,7 @@ import SocialAutopilotDiagnosticsPanel from "@/components/founder/social-autopil
 import CustomerSuccessCommandCentreBlock from "@/components/founder/customer-success/CustomerSuccessCommandCentreBlock";
 import CustomerSuccessDiagnosticsPanel from "@/components/founder/customer-success/CustomerSuccessDiagnosticsPanel";
 import LiftorFinalHandoverPanel from "@/components/founder/final/LiftorFinalHandoverPanel";
+import LiftorFunctionalWiringMatrixPanel from "@/components/founder/final/LiftorFunctionalWiringMatrixPanel";
 import LiftorUserManualPanel from "@/components/founder/manual/LiftorUserManualPanel";
 import BusinessKnowledgeUploadTrainingPanel from "@/components/founder/knowledge/BusinessKnowledgeUploadTrainingPanel";
 import LiftorCapabilities from "@/components/founder/LiftorCapabilities";
