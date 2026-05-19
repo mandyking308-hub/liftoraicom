@@ -8,6 +8,9 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, AlertTriangle, Bot, User, Send, X } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import LiftorBrainInboundReplyPanel from "@/components/founder/brain/LiftorBrainInboundReplyPanel";
+import { Brain } from "lucide-react";
 
 type Conv = any; type Msg = any; type Action = any; type Contact = any;
 type Draft = any;
@@ -22,6 +25,7 @@ const ConversationDetail = () => {
   const [editing, setEditing] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [brainOpen, setBrainOpen] = useState(false);
 
   const load = async () => {
     if (!id) return;
@@ -89,8 +93,24 @@ const ConversationDetail = () => {
           <div className="flex gap-2 items-center">
             <Badge variant="outline">{conv.status}</Badge>
             <Badge variant="outline">Contact: {contact?.status}</Badge>
+            <Button size="sm" variant="outline" onClick={() => setBrainOpen(true)} className="gap-1">
+              <Brain className="h-3.5 w-3.5" /> Draft reply with Liftor Brain
+            </Button>
           </div>
         </div>
+
+        <Dialog open={brainOpen} onOpenChange={setBrainOpen}>
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader><DialogTitle>Liftor Brain — Inbound reply drafting</DialogTitle></DialogHeader>
+            <LiftorBrainInboundReplyPanel
+              conversationId={conv.id}
+              crmContactId={contact?.id ?? null}
+              initialSenderEmail={contact?.email ?? ""}
+              initialSubject={msgs.filter((m: any) => m.direction === "inbound").slice(-1)[0] ? `Re: conversation ${conv.id.slice(0,8)}` : ""}
+              initialBody={msgs.filter((m: any) => m.direction === "inbound").slice(-1)[0]?.content ?? ""}
+            />
+          </DialogContent>
+        </Dialog>
 
         {conv.escalation_pending && (
           <Card className="tech-card p-4 border-destructive/40 bg-destructive/5">
