@@ -487,3 +487,60 @@ export const USING_SOCIAL_BRAIN_CONNECTOR = {
     "social_automation_mode stays approval_required.",
   ],
 };
+
+export const USING_SOCIAL_OPERATING_PROFILE = {
+  title: "Social Operating Profile",
+  summary:
+    "Each business gets its own Social Operating Profile — content pillars, platform rules, offer→content mappings, risk flags and a confidence score — generated from the Social Brain plus uploaded knowledge. Liftor reviews the profile before any content pack is trusted.",
+  steps: [
+    "Open Social Autopilot → select business → Social Operating Profile section.",
+    "Run the generator preview to see inferred business type, pillars, platform rules, offers and risks.",
+    "Save profile (founder confirmation required). Replacing an approved profile requires the explicit replace phrase.",
+    "Review content pillars and approve the ones that fit (target 5–9 approved pillars).",
+    "Activate the platform rules that fit the business; deactivate any you do not want Liftor to suggest content for.",
+    "Check offer mappings — add missing pricing/proof/CTAs so revenue-led content is grounded.",
+    "Run the risk scan — acknowledge or mitigate flagged risks. Regulated sectors (health/finance/legal/children/property/charity) need extra caution and may require legal review.",
+    "Use Snapshot to keep a version every time you make a meaningful change.",
+  ],
+  scoring: [
+    "0–30 = poor / not enough knowledge — keep registering sources.",
+    "31–60 = draft usable with founder review.",
+    "61–80 = good internal draft.",
+    "81–95 = strong profile — still needs founder approval to count as ready.",
+    "Sensitive sectors automatically lower confidence and raise approval requirements.",
+  ],
+  safety: [
+    "Internal only — no publish, no DM, no comments, no provider API calls.",
+    "auto_publish_allowed / auto_reply_allowed / cold_dm_allowed stay locked off.",
+    "Approved profile cannot be overwritten without explicit replace phrase.",
+    "Risk flags must be acknowledged or mitigated before downstream content generation is considered ready.",
+  ],
+};
+
+export const TECHNICAL_SOCIAL_OPERATING_PROFILE = {
+  title: "Social Operating Profile — Technical",
+  summary: "Generator architecture, scoring, platform suitability, risk scan, versioning, Command Centre integration.",
+  tables: [
+    "business_social_content_pillars — pillars with funnel_stage, recommended_platforms, approval_status.",
+    "business_social_platform_rules — per-platform rules (unique per business_id+platform).",
+    "business_social_offer_mappings — offer→content map with pains, value props, proof, CTAs.",
+    "business_social_risk_flags — sensitive sector / compliance flags with risk_level and guardrails.",
+    "business_social_profile_versions — JSON snapshots with version_number history.",
+  ],
+  functions: [
+    "social-profile-generator-preview — dry-run build of full Social Operating Profile.",
+    "social-profile-generator-save — persists pillars, platform rules (upsert by platform), offers, risks + version snapshot. Requires SAVE SOCIAL OPERATING PROFILE (or REPLACE APPROVED SOCIAL OPERATING PROFILE).",
+    "social-profile-version-create — manual snapshot, requires CREATE SOCIAL PROFILE VERSION.",
+    "social-profile-readiness-check — read-only readiness counters + ready_for_content_generation / calendar / reply drafting.",
+    "social-profile-risk-scan — dry-run or save flags with SAVE SOCIAL RISK FLAGS.",
+    "social-profile-generator-acceptance — table + safety acceptance test.",
+  ],
+  scoring_logic:
+    "brain_score (0–60) + source_score (0–30) + base 20 − missing_inputs penalty − sensitive_sector penalty, capped at 95.",
+  platform_logic:
+    "Business type inferred from corpus (music/saas/ecommerce/service/charity/health/finance/property/education/generic) → per-type platform suitability map with score, content types and risk notes.",
+  versioning:
+    "Every save inserts a new business_social_profile_versions row. Manual snapshots also allowed. No destructive deletes — archived only.",
+  command_centre:
+    "Daily Operator View shows Social Operating Profile summary (confidence, approved pillars, active platforms, offers, open/critical risks, ready-for-content, next action). Full editing happens on /founder/social-autopilot.",
+};
