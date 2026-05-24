@@ -141,7 +141,66 @@ export default function PortfolioExitManual() {
           <CardHeader><CardTitle>Technical Manual</CardTitle></CardHeader>
           <CardContent className="space-y-4 text-sm">
             <Section title="Database tables (all prefixed ma_)">
-              <code className="text-xs">ma_portfolio_assets, ma_companies, ma_investors, ma_buyer_matches, ma_deals, ma_competitor_profiles, ma_adviser_channels, ma_intelligence_sources, ma_weekly_signals, ma_build_candidates, ma_exit_targets, ma_execution_targets, ma_valuation_benchmarks, ma_data_room_items, ma_ai_recommendations, ma_ai_briefings, ma_audit_logs</code>
+              <code className="text-xs">ma_portfolio_assets, ma_companies, ma_investors, ma_buyer_matches, ma_deals, ma_competitor_profiles, ma_adviser_channels, ma_intelligence_sources, ma_weekly_signals, ma_build_candidates, ma_exit_targets, ma_execution_targets, ma_valuation_benchmarks, ma_data_room_items, ma_ai_recommendations, ma_ai_briefings, ma_audit_logs,
+              <br/>ma_lifecycle_gates, ma_lifecycle_transitions, ma_kpi_dictionary, ma_prompt_versions, ma_cost_entries, ma_budgets, ma_data_classifications, ma_backup_events, ma_alerts, ma_workload_capacity, ma_mock_diligence_runs, ma_agent_contracts, ma_capital_allocation, ma_do_not_build_patterns</code>
+            </Section>
+            <Section title="Lifecycle state machine">
+              <code>ma_lifecycle_gates(from_stage,to_stage,required_evidence jsonb,requires_founder_approval)</code> defines allowed transitions and required evidence keys.
+              <code>ma_lifecycle_transitions</code> stores every proposal with status pending|approved|rejected, captured evidence JSON, warnings (missing keys) and approval audit. On approve, <code>ma_portfolio_assets.current_stage</code> is updated.
+            </Section>
+            <Section title="KPI dictionary schema">
+              <code>ma_kpi_dictionary(kpi_name PK, definition, formula, source_table, source_field, update_frequency, owner, ai_estimate_allowed bool, human_confirmation_required bool, confidence_rules)</code>. UI cards/tables that surface a KPI should look up its row to display its provenance.
+            </Section>
+            <Section title="Confidence decay logic">
+              Freshness derived from <code>updated_at</code> or domain date field. Bands: 0–30d fresh, 31–90 current, 91–180 stale, 180+ archived. Displayed confidence = base_confidence × {`{1, 0.85, 0.6, 0.3}`}. A reconfirm action (touching updated_at) resets the band. The Controls Centre Freshness tab is the live monitor.
+            </Section>
+            <Section title="Challenge mode design">
+              <code>ma_ai_recommendations.challenge jsonb</code> stores eight named fields (why_might_fail, weakest_assumption, buyer_rejection, missing_evidence, too_expensive, legal_ip_risk, simpler_test, kill_park_triggers).
+              The orchestrator <code>mode=challenge</code> generates them; users can also save a manual challenge. Build/scale/sale approval UIs should require a non-null challenge before allowing approval.
+            </Section>
+            <Section title="Cost-control architecture">
+              <code>ma_cost_entries(portfolio_asset_id, category, amount, currency, incurred_at, related_recommendation_id)</code> and <code>ma_budgets(portfolio_asset_id, scope, category, monthly_budget)</code>. Spend rolled up per asset/category per month; UI warns &gt;80% and &gt;100%.
+              No automatic charging — purely tracking.
+            </Section>
+            <Section title="Data classification model">
+              <code>ma_data_classifications(record_type, record_id, classification, do_not_export bool)</code> tags any record. Exporters must check this table before writing to CSV/PDF. Adviser-privileged rows are excluded from buyer-facing surfaces.
+            </Section>
+            <Section title="Backup, export & recovery">
+              <code>ma_backup_events</code> logs admin-initiated backup/export/restore/rollback events. Automated cross-region backup is provided by the managed database — see the Emergency Export Checklist for the manual procedure. Deleted record recovery uses point-in-time restore from the managed backend.
+            </Section>
+            <Section title="AI prompt versioning">
+              <code>ma_prompt_versions(prompt_name, version UNIQUE per name, model, provider, active, prompt_body)</code>. Only one version per name should be active. Every <code>ma_ai_recommendations</code> row stores <code>prompt_version_id</code>, <code>data_snapshot_at</code>, <code>freshness_score</code>.
+            </Section>
+            <Section title="Notification / exception schema">
+              <code>ma_alerts(alert_type, severity {`{low,medium,high,critical}`}, status, owner, due_date, portfolio_asset_id, related_record_type/id, recommended_action)</code>. Background generators (cron) can insert rows; resolution writes resolved_at + resolved_by.
+            </Section>
+            <Section title="Human capacity scoring model">
+              <code>ma_workload_capacity</code> rolling weekly snapshots. Utilisation = hours_required / hours_capacity. Build Selector reads the latest snapshot; if utilisation &gt;100, candidate must specify a delay, scope reduction, asset to park, or oversight assignment.
+            </Section>
+            <Section title="Data room document policy">
+              <code>ma_data_room_items</code> extended with <code>classification, doc_version, buyer_safe, adviser_reviewed, last_reviewed_at, missing_evidence_notes, expiry_at</code>. <code>buyer_safe=true</code> requires <code>adviser_reviewed=true</code>.
+            </Section>
+            <Section title="Mock buyer diligence logic">
+              <code>ma_mock_diligence_runs(portfolio_asset_id, prompt_version_id, red_flags jsonb, missing_evidence jsonb, buyer_objections jsonb, valuation_weaknesses jsonb, urgent_fixes jsonb, cleanup_plan_30d jsonb, readiness_score)</code>.
+              Orchestrator mode <code>mock_buyer_diligence</code> assembles input from portfolio_assets + buyer_matches + data_room_items + valuation_benchmarks + execution_targets, then produces structured output via tool calls.
+            </Section>
+            <Section title="Agent integration contracts">
+              <code>ma_agent_contracts(agent_name UNIQUE, data_received, actions_allowed, actions_prohibited, approval_requirements, output_expected, completion_criteria, escalation_rules, active)</code>. Agents read their own contract at start of every run; violations are logged to <code>ma_audit_logs</code> and escalated.
+            </Section>
+            <Section title="Capital allocation model">
+              <code>ma_capital_allocation</code> (one row per asset, UNIQUE) with five budgets + priority_score (0–100) + resource_recommendation ∈ {`{increase,hold,reduce,park,kill,adviser_review}`}. Portfolio Commander surfaces this alongside operating snapshots.
+            </Section>
+            <Section title="Do-not-build library logic">
+              <code>ma_do_not_build_patterns(category, reason, examples, severity {`{low,medium,high,blocker}`}, active)</code>. Build Selector pipeline runs a string/keyword + AI semantic check of every candidate brief against active rows. Severity=blocker stops the candidate; high attaches a warning + requires founder over-ride.
+            </Section>
+            <Section title="Limitations & future improvements">
+              <ul className="list-disc pl-5 text-muted-foreground space-y-1">
+                <li>Alerts are not yet auto-generated — manual create or future cron jobs.</li>
+                <li>Cost tracking is manual log; tying directly to AI Gateway metering is a future integration.</li>
+                <li>Classification tags are advisory in the UI — full export-time enforcement is a future check.</li>
+                <li>Mock diligence and challenge modes require orchestrator support for those modes; manual entry covers both meanwhile.</li>
+                <li>Backups rely on the managed database's built-in PITR — off-platform replication is not enabled.</li>
+              </ul>
             </Section>
             <Section title="Relationships">
               <ul className="list-disc pl-5 text-muted-foreground space-y-1">
