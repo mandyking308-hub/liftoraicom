@@ -26,6 +26,7 @@ const navItems = [
   { label: "AI Approval Gates", to: "/founder/ai-cost/approvals", icon: ShieldCheck },
   { label: "Prompt Templates", to: "/founder/ai-cost/templates", icon: Sparkles },
   { label: "Cached Context", to: "/founder/ai-cost/context", icon: BookOpen },
+  { label: "Provider Pricing", to: "/founder/ai-cost/pricing", icon: Coins },
   { label: "AI Co-Pilot", to: "/founder/copilot", icon: MessageSquare },
   { label: "AI Brain", to: "/founder/brain", icon: Brain },
   { label: "Decisions", to: "/founder/decisions", icon: Scale },
