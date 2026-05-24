@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 import FounderLayout from "@/components/founder/FounderLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -6,6 +7,12 @@ import { Button } from "@/components/ui/button";
 import { BookOpen, ArrowLeft, ShieldCheck, Lock, AlertTriangle } from "lucide-react";
 
 export default function PortfolioExitManual() {
+  const { hash } = useLocation();
+  useEffect(() => {
+    if (!hash) return;
+    const el = document.getElementById(hash.slice(1));
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [hash]);
   return (
     <FounderLayout>
       <div className="space-y-6 max-w-5xl">
