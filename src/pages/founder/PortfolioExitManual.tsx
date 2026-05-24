@@ -281,6 +281,31 @@ export default function PortfolioExitManual() {
             </div>
           </CardContent>
         </Card>
+
+        {/* RELEASE GATE ADDENDUM */}
+        <Card className="tech-card">
+          <CardHeader><CardTitle className="flex items-center gap-2"><ShieldCheck className="h-5 w-5 text-primary" /> Release Readiness Gate (final hardening)</CardTitle></CardHeader>
+          <CardContent className="text-sm space-y-3">
+            <Section title="What 'release ready' means">
+              The module moves through four states: <b>not ready</b> → <b>internal testing</b> → <b>controlled live use</b> → <b>blocked</b>. A single critical failing check forces <i>Blocked: do not use live until resolved.</i>
+            </Section>
+            <Section title="AI evidence guardrails">
+              Every AI recommendation must carry evidence references, confidence, source freshness, missing-information, assumptions and risk level. If evidence is weak it must read <i>“Evidence is weak. Treat this as a hypothesis, not a decision.”</i> The AI never invents revenue, valuations, acquisition history, buyer/investor interest, legal/tax conclusions, customer traction or deal multiples.
+            </Section>
+            <Section title="Red team review">
+              Any quarterly build, scale, sale, kill, valuation or buyer-outreach decision can be challenged. The red-team asks why this could fail, why the buyer may not care, why valuation may be too high, what legal/IP risk exists, what cheaper test should run first, and what would make us stop.
+            </Section>
+            <Section title="Privacy / GDPR">
+              Personal data carries lawful basis, consent, subject type, retention and export restriction. Imports and exports involving personal data show a privacy warning.
+            </Section>
+            <Section title="Dual approval, immutable audit, allowlist, rate &amp; cost, safe exports, system health, disaster recovery, acceptance tests, lockdown">
+              All documented in the Release Gate page. Audit-log deletion is restricted to admin; true immutability is a known limitation and is mitigated by admin-only RLS plus append-style writes.
+            </Section>
+            <Section title="What must never be automated" warn>
+              External outreach, buyer/investor/adviser contact, legal/tax/entity decisions, data exports, paid API activation, spend commitments and build/kill/sale decisions remain founder-approved.
+            </Section>
+          </CardContent>
+        </Card>
       </div>
     </FounderLayout>
   );

@@ -15,6 +15,8 @@ const navItems = [
   { label: "Data Ingestion", to: "/founder/portfolio-exit/ingestion", icon: FileInput },
   { label: "Portfolio Manual", to: "/founder/portfolio-exit/manual", icon: BookOpenCheck },
   { label: "Controls Centre", to: "/founder/portfolio-exit/controls", icon: ShieldCheck },
+  { label: "Hardening Centre", to: "/founder/portfolio-exit/hardening", icon: ShieldAlert },
+  { label: "Release Gate", to: "/founder/portfolio-exit/release-gate", icon: Siren },
   { label: "AI Co-Pilot", to: "/founder/copilot", icon: MessageSquare },
   { label: "AI Brain", to: "/founder/brain", icon: Brain },
   { label: "Decisions", to: "/founder/decisions", icon: Scale },
