@@ -3709,5 +3709,64 @@ CSV / manual / connector → staging table → de-dup + golden-record → review
 - Buyer warm-up signal feed from public filings and news sources, scored and de-duplicated.
 
 *End of Portfolio & Exit Architecture Engine technical addendum (v5.6).*
+
+---
+
+## Founder Action Board — Technical Design (v5.7 addendum)
+
+### Purpose
+The Founder Action Board is the daily live cockpit for the AI Cost Governor + ROI Engine. It lives inside the Command Centre at `/founder/ai-cost/action-board` and is linked from the AI Cost Governor hub. It is not a detached page. It runs live by default — no readiness gate, no simulation-only switch.
+
+### Data sources (read-only aggregation, live)
+- `ai_usage_ledger` — today and month-to-date rows. Drives spend, ROI, gateway/bypass counts, failed actions, per-business and per-agent aggregates, cost-per-approved/rejected/useful action.
+- `ai_cost_alerts` (status=open) — drives the attention cards (budget warnings, cost alerts, prompt injection, redaction, pricing missing, duplicate prevented) and the open-alerts quick-action list.
+- `founder_approval_items` (status=pending) — drives the approvals-waiting card and the Approve recommendation.
+- `ai_agent_cost_controls` — drives paused-agents count, per-agent pause/resume action.
+- `ai_business_budgets` — drives the businesses-with-no-budget card.
+- `ai_quality_scores` — drives the poor-quality-agent card.
+- `businesses` — provides human-readable business names.
+
+### Recommendation logic
+- Scale: best-ROI agent with ROI > 3x and spend > GBP 1 this month.
+- Keep: highest-ROI business with ROI > 2x.
+- Watch: lowest-ROI business with spend > GBP 1 and ROI < 0.5x.
+- Configure: any pricing_missing alert open, or any active business with no ai_business_budgets row.
+- Reduce: low-ROI agent (ROI < 1x) that still has some linked value — recommend downgrading model tier.
+- Pause: low-ROI agent with zero linked revenue, pipeline and human-saving this month.
+- Approve: any pending founder_approval_items row.
+- Investigate: status=failed rows today, or any prompt_injection alert open.
+- Retire: best-ROI agent still below break-even with material spend (> GBP 5).
+- ROI formula: (revenue_linked + pipeline_linked * 0.2 + human_equivalent_cost) / estimated_cost.
+
+### Linked screens (one-click actions from the board)
+- Review approval -> /founder/ai-cost/approvals
+- View ledger -> /founder/ai-cost/ledger
+- Open budget settings -> /founder/ai-cost/budgets
+- Open provider pricing -> /founder/ai-cost/pricing
+- Open agent controls -> /founder/ai-cost/agent-controls
+- Open alerts -> /founder/ai-cost/alerts
+- Open Finance Pack -> /founder/ai-cost/finance
+- Open ROI engine -> /founder/ai-cost/roi
+- Open quality scoring -> /founder/ai-cost/quality
+- Open security centre -> /founder/ai-cost/security
+
+### Action button writes
+- Pause agent: update ai_agent_cost_controls set active=false where agent_id=$1.
+- Resume agent: update ai_agent_cost_controls set active=true where agent_id=$1.
+- Acknowledge alert: update ai_cost_alerts set status=acknowledged, acknowledged_at=now() where id=$1.
+- Resolve alert: routed to /founder/ai-cost/alerts detail action (status=resolved, resolved_at, resolved_by).
+- Approve / reject approval: routed to /founder/ai-cost/approvals — writes founder_approval_items.founder_decision, status, decided_at and, only when explicitly approved, flips send_allowed / execution_enabled. The board itself never sends external traffic.
+- Downgrade model recommendation: routed to /founder/ai-cost/agent-controls to edit default_model_tier / allowed_model_tiers.
+
+### Refresh
+- React Query key founder_action_board, refetchInterval=60000 (60s polling). Invalidated immediately on Pause/Resume/Acknowledge.
+
+### Empty states
+Every card and tile renders a useful message when no data exists yet (e.g. "Will appear once agents create linked value"). No placeholder numbers are ever displayed.
+
+### Status labels used
+Live — Healthy / Watch / Budget Warning / Cost Alert / Risk Alert / Founder Pause Active. No "Not Ready", "Simulation Only", "Ready for…" or release-gate language.
+
+*End of Founder Action Board technical addendum (v5.7).*
 `;
 };
