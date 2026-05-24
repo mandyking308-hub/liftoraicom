@@ -380,6 +380,12 @@ export async function roiByDimension(
         ? "AI cost rising without matching value. Review model routing, prompt reuse or agent activity."
         : null,
       estimated_flag: revenue_linked === 0 && pipeline_linked === 0,
+      quality_factor: 1,
+      quality_avg: null,
+      quality_sample_size: 0,
+      quality_adjusted_human_cost_saved: round(estimated_human_cost_saved),
+      quality_adjusted_net_saving: round(net_saving),
+      quality_warning: null,
     });
   }
   out.sort((x, y) => y.total_ai_spend - x.total_ai_spend);
