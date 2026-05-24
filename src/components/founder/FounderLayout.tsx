@@ -30,6 +30,7 @@ const navItems = [
   { label: "AI Quality Scoring", to: "/founder/ai-cost/quality", icon: Sparkles },
   { label: "AI Security Centre", to: "/founder/ai-cost/security", icon: ShieldCheck },
   { label: "AI Queue Control", to: "/founder/ai-cost/queue", icon: PauseCircle },
+  { label: "AI Sandbox", to: "/founder/ai-cost/sandbox", icon: FlaskConical },
   { label: "AI Co-Pilot", to: "/founder/copilot", icon: MessageSquare },
   { label: "AI Brain", to: "/founder/brain", icon: Brain },
   { label: "Decisions", to: "/founder/decisions", icon: Scale },
