@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import FounderLayout from "@/components/founder/FounderLayout";
+import AIUsageMiniWidget from "@/components/founder/ai/AIUsageMiniWidget";
 import GroupHQOperatingPanel from "@/components/founder/group/GroupHQOperatingPanel";
 import TreasuryCashflowControlPanel from "@/components/founder/finance/TreasuryCashflowControlPanel";
 import ContractsProcurementControlPanel from "@/components/founder/legal/ContractsProcurementControlPanel";
