@@ -791,6 +791,7 @@ const CommandCentre = () => {
       <div className="max-w-7xl mx-auto px-4 pt-4"><ControlledExternalActivationReadinessPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><ControlledMicroBatchPreparationPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><LiftorBuildPhaseCloseoutPanel /></div>
+      <div className="max-w-7xl mx-auto px-4 pt-4"><ManualsHierarchyPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><BusinessRehearsalSimulationPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><PreLiveBaselineControlPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><RevenueTargetOperatingPanel /></div>
