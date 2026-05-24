@@ -17,6 +17,7 @@ const navItems = [
   { label: "Controls Centre", to: "/founder/portfolio-exit/controls", icon: ShieldCheck },
   { label: "Hardening Centre", to: "/founder/portfolio-exit/hardening", icon: ShieldAlert },
   { label: "Release Gate", to: "/founder/portfolio-exit/release-gate", icon: Siren },
+  { label: "AI Usage Ledger", to: "/founder/ai-cost/ledger", icon: Activity },
   { label: "AI Co-Pilot", to: "/founder/copilot", icon: MessageSquare },
   { label: "AI Brain", to: "/founder/brain", icon: Brain },
   { label: "Decisions", to: "/founder/decisions", icon: Scale },
