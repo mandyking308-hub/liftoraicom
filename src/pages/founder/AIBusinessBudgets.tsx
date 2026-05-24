@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import FounderLayout from "@/components/founder/FounderLayout";
+import AICostBreadcrumb from "@/components/founder/ai/AICostBreadcrumb";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -133,7 +134,7 @@ export default function AIBusinessBudgets() {
 
   return (
     <FounderLayout>
-      <div className="p-6 space-y-6">
+      <AICostBreadcrumb page="Business Budgets" description="Per-business AI budgets, caps and stop-loss settings." /><div className="p-6 space-y-6">
         <header>
           <h1 className="text-2xl font-semibold flex items-center gap-2">
             <PoundSterling className="h-6 w-6 text-primary" /> Business AI Budgets

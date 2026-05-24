@@ -3715,16 +3715,16 @@ CSV / manual / connector → staging table → de-dup + golden-record → review
 ## Founder Action Board — Technical Design (v5.7 addendum)
 
 ### Purpose
-The Founder Action Board is the daily live cockpit for the AI Cost Governor + ROI Engine. It lives inside the Command Centre at `/founder/ai-cost/action-board` and is linked from the AI Cost Governor hub. It is not a detached page. It runs live by default — no readiness gate, no simulation-only switch.
+The Founder Action Board is the daily live cockpit for the AI Cost Governor + ROI Engine. It lives inside the Command Centre at \`/founder/ai-cost/action-board\` and is linked from the AI Cost Governor hub. It is not a detached page. It runs live by default — no readiness gate, no simulation-only switch.
 
 ### Data sources (read-only aggregation, live)
-- `ai_usage_ledger` — today and month-to-date rows. Drives spend, ROI, gateway/bypass counts, failed actions, per-business and per-agent aggregates, cost-per-approved/rejected/useful action.
-- `ai_cost_alerts` (status=open) — drives the attention cards (budget warnings, cost alerts, prompt injection, redaction, pricing missing, duplicate prevented) and the open-alerts quick-action list.
-- `founder_approval_items` (status=pending) — drives the approvals-waiting card and the Approve recommendation.
-- `ai_agent_cost_controls` — drives paused-agents count, per-agent pause/resume action.
-- `ai_business_budgets` — drives the businesses-with-no-budget card.
-- `ai_quality_scores` — drives the poor-quality-agent card.
-- `businesses` — provides human-readable business names.
+- \`ai_usage_ledger\` — today and month-to-date rows. Drives spend, ROI, gateway/bypass counts, failed actions, per-business and per-agent aggregates, cost-per-approved/rejected/useful action.
+- \`ai_cost_alerts\` (status=open) — drives the attention cards (budget warnings, cost alerts, prompt injection, redaction, pricing missing, duplicate prevented) and the open-alerts quick-action list.
+- \`founder_approval_items\` (status=pending) — drives the approvals-waiting card and the Approve recommendation.
+- \`ai_agent_cost_controls\` — drives paused-agents count, per-agent pause/resume action.
+- \`ai_business_budgets\` — drives the businesses-with-no-budget card.
+- \`ai_quality_scores\` — drives the poor-quality-agent card.
+- \`businesses\` — provides human-readable business names.
 
 ### Recommendation logic
 - Scale: best-ROI agent with ROI > 3x and spend > GBP 1 this month.

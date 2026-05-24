@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import FounderLayout from "@/components/founder/FounderLayout";
+import AICostBreadcrumb from "@/components/founder/ai/AICostBreadcrumb";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -98,7 +99,7 @@ export default function AIProviderPricing() {
 
   return (
     <FounderLayout>
-      <div className="space-y-6 p-6">
+      <AICostBreadcrumb page="Provider Pricing" description="Pricing registry per model so costs are calculated accurately." /><div className="space-y-6 p-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-semibold flex items-center gap-2">

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import FounderLayout from "@/components/founder/FounderLayout";
+import AICostBreadcrumb from "@/components/founder/ai/AICostBreadcrumb";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -70,7 +71,7 @@ export default function AISandbox() {
 
   return (
     <FounderLayout>
-      <div className="space-y-6 p-4 md:p-6">
+      <AICostBreadcrumb page="Sandbox (optional testing)" description="Optional sandbox for safe internal AI testing. Live system is unaffected." /><div className="space-y-6 p-4 md:p-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
             <h1 className="text-2xl md:text-3xl font-semibold flex items-center gap-2">

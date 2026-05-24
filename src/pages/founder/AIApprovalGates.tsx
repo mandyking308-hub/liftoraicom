@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import FounderLayout from "@/components/founder/FounderLayout";
+import AICostBreadcrumb from "@/components/founder/ai/AICostBreadcrumb";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -107,7 +108,7 @@ export default function AIApprovalGates() {
 
   return (
     <FounderLayout>
-      <div className="space-y-6">
+      <AICostBreadcrumb page="Human Approval Queue" description="External and high-risk AI actions awaiting founder approval." /><div className="space-y-6">
         <div>
           <h1 className="text-2xl font-semibold flex items-center gap-2">
             <ShieldCheck className="h-6 w-6 text-primary" /> AI Human Approval Gates

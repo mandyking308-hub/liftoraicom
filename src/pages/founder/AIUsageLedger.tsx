@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { format } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
 import FounderLayout from "@/components/founder/FounderLayout";
+import AICostBreadcrumb from "@/components/founder/ai/AICostBreadcrumb";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -154,7 +155,7 @@ export default function AIUsageLedger() {
 
   return (
     <FounderLayout>
-      <div className="space-y-6 max-w-7xl">
+      <AICostBreadcrumb page="AI Usage Ledger" description="Every AI call, traced and audited through the central AI Gateway." /><div className="space-y-6 max-w-7xl">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">

@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Loader2, RefreshCw, Activity, ShieldCheck, AlertTriangle, PoundSterling, Bot, TrendingDown, Bell, Lock } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import AICostBreadcrumb from "@/components/founder/ai/AICostBreadcrumb";
 import {
   loadLiveSignals,
   deriveLiveStatus,
@@ -94,6 +95,7 @@ export default function AILiveOperations() {
 
   return (
     <div className="space-y-6 p-6 max-w-7xl mx-auto">
+      <AICostBreadcrumb page="Live Operations" description="Real-time AI activity, gateway calls, recommendations and operating status." />
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-3xl font-semibold flex items-center gap-2">
