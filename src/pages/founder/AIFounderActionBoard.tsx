@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import FounderLayout from "@/components/founder/FounderLayout";
@@ -57,7 +57,7 @@ function useActionBoardData() {
         supabase.from("ai_agent_cost_controls").select("*").limit(500),
         supabase.from("ai_business_budgets").select("*").limit(500),
         supabase.from("businesses").select("id,name").limit(500),
-        supabase.from("ai_quality_scores").select("agent_id,business_id,score,verdict,created_at").gte("created_at", monthIso).limit(1000),
+        supabase.from("ai_quality_scores").select("agent_id,business_id,output_quality_score,usefulness_score,rejected,feedback_label,created_at").gte("created_at", monthIso).limit(1000),
       ]);
 
       const bizName = new Map<string, string>();
@@ -140,7 +140,7 @@ function StatTile({ label, value, hint, tone }: { label: string; value: string |
 
 export default function AIFounderActionBoard() {
   const qc = useQueryClient();
-  const navigate = useNavigate();
+
   const { data, isLoading } = useActionBoardData();
 
   // Derived metrics
