@@ -1079,3 +1079,20 @@ const PORTFOLIO_EXIT_COMMAND_CENTRE_GUIDE: ManualSection = {
   ].join(" "),
 };
 LIFTOR_FULL_GUIDE.push(PORTFOLIO_EXIT_COMMAND_CENTRE_GUIDE);
+
+const FOUNDER_ACTION_BOARD_GUIDE: ManualSection = {
+  number: 84,
+  key: "founder-action-board",
+  title: "Founder Action Board — Daily AI Operating Cockpit",
+  body: [
+    "Where to find it. Command Centre → AI Cost Governor → Founder Action Board (/founder/ai-cost/action-board). It is also linked from the AI Cost Governor hub.",
+    "What it is. A single live screen that shows what needs attention today, what is working, the live AI operating summary, recommended decisions and today's AI finance snapshot. Internal preparation, logging and recommendations run live. External or high-risk actions still require explicit founder approval.",
+    "What to check daily. (1) Approvals waiting — review and approve or reject. (2) Budget warnings — open budget settings if a business is over cap. (3) Cost alerts — open alerts and act on the recommended action. (4) Paused agents — confirm whether to resume. (5) Low ROI agents and workflows costing money but no value — downgrade tier or pause. (6) Missing provider pricing — add pricing so costs stay accurate. (7) Prompt injection / redaction events — confirm source. (8) Failed actions — open the ledger for the trace. (9) Duplicate prevented — informational, money saved.",
+    "How to act on warnings. Each card carries a plain-English explanation, severity, the affected business/agent where relevant, a recommended action and one-click buttons (Review approval, View ledger, Open budget settings, Open provider pricing, Open agent controls, Open alert, Open finance pack, Pause/Resume agent, Acknowledge alert). Dangerous external actions are never possible from this screen without going through the founder approval queue.",
+    "How to read recommendations. The Recommended founder decisions panel surfaces practical calls: Scale (agent with strong ROI), Keep (best-performing business), Watch (spend rising faster than value), Configure (missing pricing or budget), Reduce (low ROI agent — downgrade tier), Pause (cost with no linked value), Retire (workflow that cannot reach break-even), Approve (queue items waiting), Investigate (failed or injection events). Every recommendation explains why and links to the right page.",
+    "How to use it as the daily control panel. Open it every morning. Clear approvals. Acknowledge or resolve any alerts. Action one Scale, one Watch and one Configure recommendation. Spot-check the AI finance snapshot (spend today by business and agent, cost per approved / rejected / useful action, best and worst ROI today).",
+    "Status meanings. Live — Healthy / Watch / Budget Warning / Cost Alert / Risk Alert / Founder Pause. The board never uses 'Not Ready', 'Simulation Only' or release-gate language. The system stays live; only individual flagged actions are restricted.",
+    "Cross-references: /founder/ai-cost (hub), /founder/ai-cost/live, /founder/ai-cost/ledger, /founder/ai-cost/alerts, /founder/ai-cost/approvals, /founder/ai-cost/budgets, /founder/ai-cost/agent-controls, /founder/ai-cost/pricing, /founder/ai-cost/quality, /founder/ai-cost/security, /founder/ai-cost/finance, /founder/ai-cost/roi.",
+  ].join(" "),
+};
+LIFTOR_FULL_GUIDE.push(FOUNDER_ACTION_BOARD_GUIDE);
