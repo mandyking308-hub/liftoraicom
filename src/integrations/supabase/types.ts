@@ -3520,6 +3520,177 @@ export type Database = {
         }
         Relationships: []
       }
+      business_daily_operating_outputs: {
+        Row: {
+          activation_record_id: string | null
+          body: string | null
+          business_id: string
+          created_at: string
+          daily_run_id: string | null
+          destination_module: string | null
+          external_action_blocked: boolean
+          external_action_required: boolean
+          founder_approval_id: string | null
+          id: string
+          is_test_data: boolean
+          metadata: Json
+          missing_context: Json
+          output_status: string
+          output_type: string
+          owner_agent: string | null
+          priority: string
+          requires_founder_review: boolean
+          risk_level: string
+          risk_warnings: Json
+          source_action_id: string | null
+          structured_payload: Json
+          summary: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          activation_record_id?: string | null
+          body?: string | null
+          business_id: string
+          created_at?: string
+          daily_run_id?: string | null
+          destination_module?: string | null
+          external_action_blocked?: boolean
+          external_action_required?: boolean
+          founder_approval_id?: string | null
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          missing_context?: Json
+          output_status?: string
+          output_type: string
+          owner_agent?: string | null
+          priority?: string
+          requires_founder_review?: boolean
+          risk_level?: string
+          risk_warnings?: Json
+          source_action_id?: string | null
+          structured_payload?: Json
+          summary?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          activation_record_id?: string | null
+          body?: string | null
+          business_id?: string
+          created_at?: string
+          daily_run_id?: string | null
+          destination_module?: string | null
+          external_action_blocked?: boolean
+          external_action_required?: boolean
+          founder_approval_id?: string | null
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          missing_context?: Json
+          output_status?: string
+          output_type?: string
+          owner_agent?: string | null
+          priority?: string
+          requires_founder_review?: boolean
+          risk_level?: string
+          risk_warnings?: Json
+          source_action_id?: string | null
+          structured_payload?: Json
+          summary?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      business_daily_operating_runs: {
+        Row: {
+          actions_blocked: number
+          actions_completed: number
+          actions_loaded: number
+          actions_parked: number
+          activation_record_id: string | null
+          auto_send_enabled: boolean
+          business_id: string
+          created_at: string
+          cron_enabled: boolean
+          drafts_created: number
+          external_actions_locked: boolean
+          founder_review_items_created: number
+          id: string
+          internal_run_summary: string | null
+          is_test_data: boolean
+          metadata: Json
+          missing_context_count: number
+          no_forbidden_action_audit: Json
+          provider_status: string
+          recommendations_created: number
+          risk_warning_count: number
+          run_date: string
+          run_status: string
+          run_type: string
+          runbook_items_loaded: number
+          updated_at: string
+        }
+        Insert: {
+          actions_blocked?: number
+          actions_completed?: number
+          actions_loaded?: number
+          actions_parked?: number
+          activation_record_id?: string | null
+          auto_send_enabled?: boolean
+          business_id: string
+          created_at?: string
+          cron_enabled?: boolean
+          drafts_created?: number
+          external_actions_locked?: boolean
+          founder_review_items_created?: number
+          id?: string
+          internal_run_summary?: string | null
+          is_test_data?: boolean
+          metadata?: Json
+          missing_context_count?: number
+          no_forbidden_action_audit?: Json
+          provider_status?: string
+          recommendations_created?: number
+          risk_warning_count?: number
+          run_date?: string
+          run_status?: string
+          run_type?: string
+          runbook_items_loaded?: number
+          updated_at?: string
+        }
+        Update: {
+          actions_blocked?: number
+          actions_completed?: number
+          actions_loaded?: number
+          actions_parked?: number
+          activation_record_id?: string | null
+          auto_send_enabled?: boolean
+          business_id?: string
+          created_at?: string
+          cron_enabled?: boolean
+          drafts_created?: number
+          external_actions_locked?: boolean
+          founder_review_items_created?: number
+          id?: string
+          internal_run_summary?: string | null
+          is_test_data?: boolean
+          metadata?: Json
+          missing_context_count?: number
+          no_forbidden_action_audit?: Json
+          provider_status?: string
+          recommendations_created?: number
+          risk_warning_count?: number
+          run_date?: string
+          run_status?: string
+          run_type?: string
+          runbook_items_loaded?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       business_execution_starter_packs: {
         Row: {
           approved_at: string | null

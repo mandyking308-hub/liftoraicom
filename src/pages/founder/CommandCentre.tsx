@@ -23,6 +23,7 @@ import BusinessOnboardingBrainPanel from "@/components/founder/activation/Busine
 import StarterPackMaterialiserPanel from "@/components/founder/activation/StarterPackMaterialiserPanel";
 import BusinessOnboardingFactoryPanel from "@/components/founder/activation/BusinessOnboardingFactoryPanel";
 import BusinessInternalActivationPanel from "@/components/founder/activation/BusinessInternalActivationPanel";
+import BusinessDailyOperatingLoopPanel from "@/components/founder/activation/BusinessDailyOperatingLoopPanel";
 import BusinessRehearsalSimulationPanel from "@/components/founder/activation/BusinessRehearsalSimulationPanel";
 import PreLiveBaselineControlPanel from "@/components/founder/activation/PreLiveBaselineControlPanel";
 import RevenueTargetOperatingPanel from "@/components/founder/revenue/RevenueTargetOperatingPanel";
@@ -780,6 +781,7 @@ const CommandCentre = () => {
       <div className="max-w-7xl mx-auto px-4 pt-4"><StarterPackMaterialiserPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><BusinessOnboardingFactoryPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><BusinessInternalActivationPanel /></div>
+      <div className="max-w-7xl mx-auto px-4 pt-4"><BusinessDailyOperatingLoopPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><BusinessRehearsalSimulationPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><PreLiveBaselineControlPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><RevenueTargetOperatingPanel /></div>
