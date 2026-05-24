@@ -296,6 +296,7 @@ const App = () => (
             <Route path="/founder/portfolio-exit/intelligence" element={<FounderRoute><MAIntelligenceWorkspace /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/valuation" element={<FounderRoute><ExitValuationEngine /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/build-selector" element={<FounderRoute><QuarterlyBuildSelector /></FounderRoute>} />
+            <Route path="/founder/portfolio-exit/execution-handoff" element={<FounderRoute><ExecutionHandoff /></FounderRoute>} />
             <Route path="/founder/brain" element={<FounderRoute><LiftorBrain /></FounderRoute>} />
             <Route path="/founder/brain/sessions" element={<FounderRoute><BrainSessions /></FounderRoute>} />
             <Route path="/founder/brain/drafts" element={<FounderRoute><BrainDrafts /></FounderRoute>} />
