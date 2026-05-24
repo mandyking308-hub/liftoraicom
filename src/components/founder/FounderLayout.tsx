@@ -12,6 +12,7 @@ const navItems = [
   { label: "Exit Valuation", to: "/founder/portfolio-exit/valuation", icon: Calculator },
   { label: "Build Selector", to: "/founder/portfolio-exit/build-selector", icon: Trophy },
   { label: "Execution Handoff", to: "/founder/portfolio-exit/execution-handoff", icon: Handshake },
+  { label: "Data Ingestion", to: "/founder/portfolio-exit/ingestion", icon: FileInput },
   { label: "Portfolio Manual", to: "/founder/portfolio-exit/manual", icon: BookOpenCheck },
   { label: "AI Co-Pilot", to: "/founder/copilot", icon: MessageSquare },
   { label: "AI Brain", to: "/founder/brain", icon: Brain },

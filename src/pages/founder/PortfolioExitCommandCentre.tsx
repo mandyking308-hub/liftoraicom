@@ -239,6 +239,11 @@ export default function PortfolioExitCommandCentre() {
                 <ArrowUpRight className="h-4 w-4 mr-1" /> Manual &amp; Technical Docs
               </Link>
             </Button>
+            <Button asChild size="sm" variant="outline">
+              <Link to="/founder/portfolio-exit/ingestion">
+                <ArrowUpRight className="h-4 w-4 mr-1" /> Open Data Ingestion Centre
+              </Link>
+            </Button>
             <Badge variant="outline" className="gap-1">
               <Lock className="h-3 w-3" /> External outreach LOCKED_BY_DESIGN
             </Badge>
