@@ -37784,6 +37784,10 @@ export type Database = {
         }
         Returns: string
       }
+      ma_generate_default_data_room: {
+        Args: { _asset_id: string }
+        Returns: number
+      }
       mark_contact_for_founder_review: {
         Args: { _contact_id: string; _note?: string }
         Returns: string
