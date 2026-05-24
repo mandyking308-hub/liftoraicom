@@ -22,6 +22,7 @@ const navItems = [
   { label: "AI Budgets", to: "/founder/ai-cost/budgets", icon: PoundSterling },
   { label: "Agent Cost Controls", to: "/founder/ai-cost/agent-controls", icon: Bot },
   { label: "AI Cost Alerts", to: "/founder/ai-cost/alerts", icon: Siren },
+  { label: "AI ROI Engine", to: "/founder/ai-cost/roi", icon: TrendingUp },
   { label: "AI Co-Pilot", to: "/founder/copilot", icon: MessageSquare },
   { label: "AI Brain", to: "/founder/brain", icon: Brain },
   { label: "Decisions", to: "/founder/decisions", icon: Scale },
