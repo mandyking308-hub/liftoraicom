@@ -27,6 +27,58 @@ export default function PortfolioExitManual() {
         <Card className="tech-card">
           <CardHeader><CardTitle>User Manual</CardTitle></CardHeader>
           <CardContent className="space-y-4 text-sm">
+            <Section title="Carrier-grade Controls Centre (new)">
+              The Controls Centre is the single place to manage operational discipline across all portfolio assets. It contains 14 panels — each is described below. Open it from the Command Centre header or the sidebar.
+            </Section>
+            <Section title="Lifecycle stages & gates">
+              Every asset moves through: idea → watch → validate → build → launch → operate → scale → warm_buyers → sale_prep → sale_process → sold. Any asset can also go to <b>parked</b> or <b>killed</b> with a written decision-memory.
+              Each transition requires named evidence (e.g. <i>distribution_path, lovable_buildability_score</i>) and founder approval. Missing evidence becomes a warning on the proposed transition.
+            </Section>
+            <Section title="KPI dictionary">
+              Every KPI has one definition, one formula, one source field, one owner, and a rule on whether AI may estimate or whether a human must confirm. If a number doesn't appear in the dictionary, it is not a KPI.
+            </Section>
+            <Section title="Confidence & freshness">
+              Every signal, buyer match, competitor profile and valuation benchmark is scored: <b>fresh (≤30d), current (≤90d), stale (≤180d), archived (&gt;180d)</b>. Confidence is multiplied by a freshness factor (1.0 / 0.85 / 0.6 / 0.3). Reconfirm a record to reset its factor.
+            </Section>
+            <Section title="Challenge mode">
+              Before approving any build, scale, park, kill or sale decision, run Challenge. It forces the system to answer eight questions including the weakest assumption, what a buyer would reject, and the simplest validation test. Challenges are stored against the recommendation.
+            </Section>
+            <Section title="Cost & budget control">
+              Log AI runs, paid data, outreach tools, oversight and adviser hours per asset. Set monthly budgets per asset and per category. The dashboard warns when projected spend &gt;80% or actual spend &gt;100% of budget.
+            </Section>
+            <Section title="Data classification">
+              Tag any record as public, internal, confidential, highly_confidential, personal_data, adviser_privileged, paid_source_restricted, or do_not_export. The platform shows the tag everywhere the record is surfaced and blocks export of <code>do_not_export</code> rows.
+            </Section>
+            <Section title="Backup, export & recovery">
+              The platform logs every export, backup, restore and rollback. The "Emergency Export Checklist" lists the exact tables to download in a crisis. Full automatic off-platform backup is documented as a future integration.
+            </Section>
+            <Section title="AI prompt versions">
+              Every recommendation records which prompt name + version produced it, what data snapshot it used, and its freshness score. Roll back by activating an earlier version.
+            </Section>
+            <Section title="Alerts & exceptions">
+              Alerts cover overdue approvals, missed execution targets, stale signals, legal/IP risk, paid-source warnings, capacity exceeded, build/exit reviews due, import or scheduled-run failures. Each has severity, owner, due date and recommended action.
+            </Section>
+            <Section title="Human workload ceiling">
+              Capacity snapshots track active assets, pending approvals, oversight hours required vs capacity. When utilisation exceeds 100%, the Build Selector must delay, scope down, or pair a new build with parking a weaker asset.
+            </Section>
+            <Section title="Data room document policy">
+              Each data-room item now carries classification, version, owner, storage location, buyer-safe flag, adviser-reviewed flag, last-reviewed date, missing-evidence notes and expiry. Items must be adviser-reviewed before they are marked buyer-safe.
+            </Section>
+            <Section title="Mock buyer diligence">
+              Run a simulated buyer-side review per asset. Output: red flags, missing evidence, likely buyer objections, valuation weaknesses, urgent fixes, readiness score, 30-day cleanup plan.
+            </Section>
+            <Section title="Agent integration contracts">
+              Each Liftor agent (Outreach, CRM, Inbox, Content, Reporting, Compliance, Buyer Warm-Up, Data Room, Founder Approval) has a published contract listing data it receives, actions allowed/prohibited, approval requirements, expected output, completion criteria, and escalation rules.
+            </Section>
+            <Section title="Capital allocation">
+              Per-asset budgets for monthly opex, oversight, adviser, outreach and data/API spend, plus priority score and a recommended resource action (increase / hold / reduce / park / kill / adviser_review).
+            </Section>
+            <Section title="Do-not-build pattern library">
+              The Build Selector must check candidates against this list (warehouse-heavy, manufacturing-heavy, stocked fashion, moonshots, deep hardware, heavily-regulated without adviser, large pre-revenue teams, anything not buildable in Lovable, no distribution path, no buyer thesis, high IP-copy risk). Blockers stop the recommendation outright.
+            </Section>
+            <Section title="How to read alerts">
+              Critical/high alerts at the top; severity colour-coded. Each alert lists owner, due date, related asset and recommended action. Resolve only when the underlying record is fixed — alerts are auditable.
+            </Section>
             <Section title="What this module does">
               The Portfolio &amp; Exit Architecture Engine is the single cockpit for managing each Liftor business as an exit-grade asset.
               It tracks valuation targets, buyer warm-up, data-room readiness, execution targets per agent, and AI-generated recommendations.
