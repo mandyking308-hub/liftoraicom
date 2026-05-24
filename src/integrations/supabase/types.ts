@@ -19308,6 +19308,111 @@ export type Database = {
         }
         Relationships: []
       }
+      manual_source_layers: {
+        Row: {
+          created_at: string
+          current_version: string | null
+          id: string
+          is_portable: boolean
+          last_reviewed_at: string | null
+          layer_key: string
+          layer_name: string
+          metadata: Json
+          purpose: string
+          retrieval_priority: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_version?: string | null
+          id?: string
+          is_portable?: boolean
+          last_reviewed_at?: string | null
+          layer_key: string
+          layer_name: string
+          metadata?: Json
+          purpose: string
+          retrieval_priority: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_version?: string | null
+          id?: string
+          is_portable?: boolean
+          last_reviewed_at?: string | null
+          layer_key?: string
+          layer_name?: string
+          metadata?: Json
+          purpose?: string
+          retrieval_priority?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      manual_update_drafts: {
+        Row: {
+          change_type: string
+          created_at: string
+          id: string
+          layer_key: string
+          merged_at: string | null
+          metadata: Json
+          new_content: string
+          old_content: string | null
+          reason: string | null
+          requires_founder_review: boolean
+          reviewed_at: string | null
+          reviewed_by: string | null
+          section_key: string | null
+          source: string
+          status: string
+          title: string
+          updated_at: string
+          version_after_merge: string | null
+        }
+        Insert: {
+          change_type?: string
+          created_at?: string
+          id?: string
+          layer_key: string
+          merged_at?: string | null
+          metadata?: Json
+          new_content: string
+          old_content?: string | null
+          reason?: string | null
+          requires_founder_review?: boolean
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          section_key?: string | null
+          source?: string
+          status?: string
+          title: string
+          updated_at?: string
+          version_after_merge?: string | null
+        }
+        Update: {
+          change_type?: string
+          created_at?: string
+          id?: string
+          layer_key?: string
+          merged_at?: string | null
+          metadata?: Json
+          new_content?: string
+          old_content?: string | null
+          reason?: string | null
+          requires_founder_review?: boolean
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          section_key?: string | null
+          source?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          version_after_merge?: string | null
+        }
+        Relationships: []
+      }
       manual_versions: {
         Row: {
           created_at: string
