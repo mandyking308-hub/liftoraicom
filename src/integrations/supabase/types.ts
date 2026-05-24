@@ -19216,6 +19216,1092 @@ export type Database = {
           },
         ]
       }
+      ma_adviser_channels: {
+        Row: {
+          adviser_name: string
+          adviser_type: Database["public"]["Enums"]["ma_adviser_type"]
+          best_for: string | null
+          buyer_network_notes: string | null
+          chemistry_score: number | null
+          country: string | null
+          created_at: string
+          fee_model_notes: string | null
+          firm_name: string | null
+          id: string
+          minimum_deal_size_notes: string | null
+          nda_readiness: string | null
+          next_step: string | null
+          not_suitable_for: string | null
+          sector_strengths: string | null
+          status: Database["public"]["Enums"]["ma_adviser_status"]
+          trust_score: number | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          adviser_name: string
+          adviser_type?: Database["public"]["Enums"]["ma_adviser_type"]
+          best_for?: string | null
+          buyer_network_notes?: string | null
+          chemistry_score?: number | null
+          country?: string | null
+          created_at?: string
+          fee_model_notes?: string | null
+          firm_name?: string | null
+          id?: string
+          minimum_deal_size_notes?: string | null
+          nda_readiness?: string | null
+          next_step?: string | null
+          not_suitable_for?: string | null
+          sector_strengths?: string | null
+          status?: Database["public"]["Enums"]["ma_adviser_status"]
+          trust_score?: number | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          adviser_name?: string
+          adviser_type?: Database["public"]["Enums"]["ma_adviser_type"]
+          best_for?: string | null
+          buyer_network_notes?: string | null
+          chemistry_score?: number | null
+          country?: string | null
+          created_at?: string
+          fee_model_notes?: string | null
+          firm_name?: string | null
+          id?: string
+          minimum_deal_size_notes?: string | null
+          nda_readiness?: string | null
+          next_step?: string | null
+          not_suitable_for?: string | null
+          sector_strengths?: string | null
+          status?: Database["public"]["Enums"]["ma_adviser_status"]
+          trust_score?: number | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
+      ma_audit_logs: {
+        Row: {
+          action_type: string
+          actor_user_id: string | null
+          created_at: string
+          id: string
+          new_value: Json | null
+          old_value: Json | null
+          record_id: string | null
+          table_name: string
+        }
+        Insert: {
+          action_type: string
+          actor_user_id?: string | null
+          created_at?: string
+          id?: string
+          new_value?: Json | null
+          old_value?: Json | null
+          record_id?: string | null
+          table_name: string
+        }
+        Update: {
+          action_type?: string
+          actor_user_id?: string | null
+          created_at?: string
+          id?: string
+          new_value?: Json | null
+          old_value?: Json | null
+          record_id?: string | null
+          table_name?: string
+        }
+        Relationships: []
+      }
+      ma_build_candidates: {
+        Row: {
+          buyer_clarity_score: number | null
+          candidate_name: string
+          created_at: string
+          description: string | null
+          distribution_score: number | null
+          id: string
+          legal_ip_safety_score: number | null
+          liftor_operability_score: number | null
+          lovable_buildability_score: number | null
+          low_capex_score: number | null
+          ninety_day_proof_score: number | null
+          quarter: number | null
+          recommendation_status: Database["public"]["Enums"]["ma_recommendation_status"]
+          regulatory_friction_score: number | null
+          rejection_reason: string | null
+          revenue_model: string | null
+          source_signal: string | null
+          target_buyer_type: Database["public"]["Enums"]["ma_buyer_type"] | null
+          target_customer: string | null
+          total_build_score: number | null
+          updated_at: string
+          year: number | null
+        }
+        Insert: {
+          buyer_clarity_score?: number | null
+          candidate_name: string
+          created_at?: string
+          description?: string | null
+          distribution_score?: number | null
+          id?: string
+          legal_ip_safety_score?: number | null
+          liftor_operability_score?: number | null
+          lovable_buildability_score?: number | null
+          low_capex_score?: number | null
+          ninety_day_proof_score?: number | null
+          quarter?: number | null
+          recommendation_status?: Database["public"]["Enums"]["ma_recommendation_status"]
+          regulatory_friction_score?: number | null
+          rejection_reason?: string | null
+          revenue_model?: string | null
+          source_signal?: string | null
+          target_buyer_type?:
+            | Database["public"]["Enums"]["ma_buyer_type"]
+            | null
+          target_customer?: string | null
+          total_build_score?: number | null
+          updated_at?: string
+          year?: number | null
+        }
+        Update: {
+          buyer_clarity_score?: number | null
+          candidate_name?: string
+          created_at?: string
+          description?: string | null
+          distribution_score?: number | null
+          id?: string
+          legal_ip_safety_score?: number | null
+          liftor_operability_score?: number | null
+          lovable_buildability_score?: number | null
+          low_capex_score?: number | null
+          ninety_day_proof_score?: number | null
+          quarter?: number | null
+          recommendation_status?: Database["public"]["Enums"]["ma_recommendation_status"]
+          regulatory_friction_score?: number | null
+          rejection_reason?: string | null
+          revenue_model?: string | null
+          source_signal?: string | null
+          target_buyer_type?:
+            | Database["public"]["Enums"]["ma_buyer_type"]
+            | null
+          target_customer?: string | null
+          total_build_score?: number | null
+          updated_at?: string
+          year?: number | null
+        }
+        Relationships: []
+      }
+      ma_buyer_matches: {
+        Row: {
+          buyer_company_id: string
+          buyer_type: Database["public"]["Enums"]["ma_buyer_type"]
+          buyer_warmth_status: Database["public"]["Enums"]["ma_buyer_warmth"]
+          created_at: string
+          decision_makers_notes: string | null
+          fit_score: number | null
+          id: string
+          last_contacted_at: string | null
+          likely_deal_size_base: number | null
+          likely_deal_size_high: number | null
+          likely_deal_size_low: number | null
+          next_contact_due_at: string | null
+          next_warmup_action: string | null
+          portfolio_asset_id: string
+          risk_notes: string | null
+          strategic_reason: string | null
+          updated_at: string
+          warm_route: string | null
+        }
+        Insert: {
+          buyer_company_id: string
+          buyer_type?: Database["public"]["Enums"]["ma_buyer_type"]
+          buyer_warmth_status?: Database["public"]["Enums"]["ma_buyer_warmth"]
+          created_at?: string
+          decision_makers_notes?: string | null
+          fit_score?: number | null
+          id?: string
+          last_contacted_at?: string | null
+          likely_deal_size_base?: number | null
+          likely_deal_size_high?: number | null
+          likely_deal_size_low?: number | null
+          next_contact_due_at?: string | null
+          next_warmup_action?: string | null
+          portfolio_asset_id: string
+          risk_notes?: string | null
+          strategic_reason?: string | null
+          updated_at?: string
+          warm_route?: string | null
+        }
+        Update: {
+          buyer_company_id?: string
+          buyer_type?: Database["public"]["Enums"]["ma_buyer_type"]
+          buyer_warmth_status?: Database["public"]["Enums"]["ma_buyer_warmth"]
+          created_at?: string
+          decision_makers_notes?: string | null
+          fit_score?: number | null
+          id?: string
+          last_contacted_at?: string | null
+          likely_deal_size_base?: number | null
+          likely_deal_size_high?: number | null
+          likely_deal_size_low?: number | null
+          next_contact_due_at?: string | null
+          next_warmup_action?: string | null
+          portfolio_asset_id?: string
+          risk_notes?: string | null
+          strategic_reason?: string | null
+          updated_at?: string
+          warm_route?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ma_buyer_matches_buyer_company_id_fkey"
+            columns: ["buyer_company_id"]
+            isOneToOne: false
+            referencedRelation: "ma_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ma_buyer_matches_portfolio_asset_id_fkey"
+            columns: ["portfolio_asset_id"]
+            isOneToOne: false
+            referencedRelation: "ma_portfolio_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ma_companies: {
+        Row: {
+          acquisition_history_notes: string | null
+          aliases: string[] | null
+          buyer_appetite_score: number | null
+          cash_capacity_notes: string | null
+          company_name: string
+          company_type: Database["public"]["Enums"]["ma_company_type"]
+          confidence_score: number | null
+          country: string | null
+          created_at: string
+          estimated_revenue: number | null
+          expansion_signals: string | null
+          id: string
+          last_researched_at: string | null
+          legal_name: string | null
+          market_cap: number | null
+          public_private_status: string | null
+          region: string | null
+          relevance_score: number | null
+          sector: string | null
+          source_id: string | null
+          strategic_gaps: string | null
+          subsector: string | null
+          ticker: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          acquisition_history_notes?: string | null
+          aliases?: string[] | null
+          buyer_appetite_score?: number | null
+          cash_capacity_notes?: string | null
+          company_name: string
+          company_type?: Database["public"]["Enums"]["ma_company_type"]
+          confidence_score?: number | null
+          country?: string | null
+          created_at?: string
+          estimated_revenue?: number | null
+          expansion_signals?: string | null
+          id?: string
+          last_researched_at?: string | null
+          legal_name?: string | null
+          market_cap?: number | null
+          public_private_status?: string | null
+          region?: string | null
+          relevance_score?: number | null
+          sector?: string | null
+          source_id?: string | null
+          strategic_gaps?: string | null
+          subsector?: string | null
+          ticker?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          acquisition_history_notes?: string | null
+          aliases?: string[] | null
+          buyer_appetite_score?: number | null
+          cash_capacity_notes?: string | null
+          company_name?: string
+          company_type?: Database["public"]["Enums"]["ma_company_type"]
+          confidence_score?: number | null
+          country?: string | null
+          created_at?: string
+          estimated_revenue?: number | null
+          expansion_signals?: string | null
+          id?: string
+          last_researched_at?: string | null
+          legal_name?: string | null
+          market_cap?: number | null
+          public_private_status?: string | null
+          region?: string | null
+          relevance_score?: number | null
+          sector?: string | null
+          source_id?: string | null
+          strategic_gaps?: string | null
+          subsector?: string | null
+          ticker?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ma_companies_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "ma_intelligence_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ma_competitor_profiles: {
+        Row: {
+          company_id: string
+          created_at: string
+          funding_notes: string | null
+          growth_signals: string | null
+          id: string
+          legal_copy_risk: Database["public"]["Enums"]["ma_legal_copy_risk"]
+          liftor_advantage_notes: string | null
+          portfolio_asset_match_id: string | null
+          positioning_notes: string | null
+          pricing_notes: string | null
+          problem_solved: string | null
+          target_customer: string | null
+          updated_at: string
+          weaknesses: string | null
+          what_we_can_learn: string | null
+          what_we_must_not_copy: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          funding_notes?: string | null
+          growth_signals?: string | null
+          id?: string
+          legal_copy_risk?: Database["public"]["Enums"]["ma_legal_copy_risk"]
+          liftor_advantage_notes?: string | null
+          portfolio_asset_match_id?: string | null
+          positioning_notes?: string | null
+          pricing_notes?: string | null
+          problem_solved?: string | null
+          target_customer?: string | null
+          updated_at?: string
+          weaknesses?: string | null
+          what_we_can_learn?: string | null
+          what_we_must_not_copy?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          funding_notes?: string | null
+          growth_signals?: string | null
+          id?: string
+          legal_copy_risk?: Database["public"]["Enums"]["ma_legal_copy_risk"]
+          liftor_advantage_notes?: string | null
+          portfolio_asset_match_id?: string | null
+          positioning_notes?: string | null
+          pricing_notes?: string | null
+          problem_solved?: string | null
+          target_customer?: string | null
+          updated_at?: string
+          weaknesses?: string | null
+          what_we_can_learn?: string | null
+          what_we_must_not_copy?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ma_competitor_profiles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "ma_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ma_competitor_profiles_portfolio_asset_match_id_fkey"
+            columns: ["portfolio_asset_match_id"]
+            isOneToOne: false
+            referencedRelation: "ma_portfolio_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ma_data_room_items: {
+        Row: {
+          created_at: string
+          due_date: string | null
+          id: string
+          item_category: Database["public"]["Enums"]["ma_data_room_category"]
+          item_name: string
+          notes: string | null
+          owner: string | null
+          portfolio_asset_id: string
+          status: Database["public"]["Enums"]["ma_data_room_status"]
+          storage_location: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          item_category?: Database["public"]["Enums"]["ma_data_room_category"]
+          item_name: string
+          notes?: string | null
+          owner?: string | null
+          portfolio_asset_id: string
+          status?: Database["public"]["Enums"]["ma_data_room_status"]
+          storage_location?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          item_category?: Database["public"]["Enums"]["ma_data_room_category"]
+          item_name?: string
+          notes?: string | null
+          owner?: string | null
+          portfolio_asset_id?: string
+          status?: Database["public"]["Enums"]["ma_data_room_status"]
+          storage_location?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ma_data_room_items_portfolio_asset_id_fkey"
+            columns: ["portfolio_asset_id"]
+            isOneToOne: false
+            referencedRelation: "ma_portfolio_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ma_deals: {
+        Row: {
+          amount: number | null
+          announced_date: string | null
+          arr_at_deal: number | null
+          buyer_company_id: string | null
+          confidence_score: number | null
+          created_at: string
+          currency: string | null
+          deal_date: string | null
+          deal_notes: string | null
+          deal_type: Database["public"]["Enums"]["ma_deal_type"]
+          ebitda_at_deal: number | null
+          id: string
+          implied_arr_multiple: number | null
+          implied_ebitda_multiple: number | null
+          implied_revenue_multiple: number | null
+          investor_id: string | null
+          revenue_at_deal: number | null
+          source_id: string | null
+          target_company_id: string | null
+          updated_at: string
+          valuation: number | null
+        }
+        Insert: {
+          amount?: number | null
+          announced_date?: string | null
+          arr_at_deal?: number | null
+          buyer_company_id?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          currency?: string | null
+          deal_date?: string | null
+          deal_notes?: string | null
+          deal_type?: Database["public"]["Enums"]["ma_deal_type"]
+          ebitda_at_deal?: number | null
+          id?: string
+          implied_arr_multiple?: number | null
+          implied_ebitda_multiple?: number | null
+          implied_revenue_multiple?: number | null
+          investor_id?: string | null
+          revenue_at_deal?: number | null
+          source_id?: string | null
+          target_company_id?: string | null
+          updated_at?: string
+          valuation?: number | null
+        }
+        Update: {
+          amount?: number | null
+          announced_date?: string | null
+          arr_at_deal?: number | null
+          buyer_company_id?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          currency?: string | null
+          deal_date?: string | null
+          deal_notes?: string | null
+          deal_type?: Database["public"]["Enums"]["ma_deal_type"]
+          ebitda_at_deal?: number | null
+          id?: string
+          implied_arr_multiple?: number | null
+          implied_ebitda_multiple?: number | null
+          implied_revenue_multiple?: number | null
+          investor_id?: string | null
+          revenue_at_deal?: number | null
+          source_id?: string | null
+          target_company_id?: string | null
+          updated_at?: string
+          valuation?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ma_deals_buyer_company_id_fkey"
+            columns: ["buyer_company_id"]
+            isOneToOne: false
+            referencedRelation: "ma_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ma_deals_investor_id_fkey"
+            columns: ["investor_id"]
+            isOneToOne: false
+            referencedRelation: "ma_investors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ma_deals_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "ma_intelligence_sources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ma_deals_target_company_id_fkey"
+            columns: ["target_company_id"]
+            isOneToOne: false
+            referencedRelation: "ma_companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ma_execution_targets: {
+        Row: {
+          assigned_agent:
+            | Database["public"]["Enums"]["ma_assigned_agent"]
+            | null
+          buyer_warmup_target: number | null
+          content_output_target: number | null
+          created_at: string
+          crm_opportunity_target: number | null
+          exit_target_id: string | null
+          id: string
+          inbox_response_sla: string | null
+          monthly_profit_target: number | null
+          monthly_revenue_target: number | null
+          notes: string | null
+          outreach_target: number | null
+          pipeline_target: number | null
+          portfolio_asset_id: string
+          qualified_leads_target: number | null
+          status: Database["public"]["Enums"]["ma_execution_target_status"]
+          target_period_end: string | null
+          target_period_start: string | null
+          updated_at: string
+        }
+        Insert: {
+          assigned_agent?:
+            | Database["public"]["Enums"]["ma_assigned_agent"]
+            | null
+          buyer_warmup_target?: number | null
+          content_output_target?: number | null
+          created_at?: string
+          crm_opportunity_target?: number | null
+          exit_target_id?: string | null
+          id?: string
+          inbox_response_sla?: string | null
+          monthly_profit_target?: number | null
+          monthly_revenue_target?: number | null
+          notes?: string | null
+          outreach_target?: number | null
+          pipeline_target?: number | null
+          portfolio_asset_id: string
+          qualified_leads_target?: number | null
+          status?: Database["public"]["Enums"]["ma_execution_target_status"]
+          target_period_end?: string | null
+          target_period_start?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assigned_agent?:
+            | Database["public"]["Enums"]["ma_assigned_agent"]
+            | null
+          buyer_warmup_target?: number | null
+          content_output_target?: number | null
+          created_at?: string
+          crm_opportunity_target?: number | null
+          exit_target_id?: string | null
+          id?: string
+          inbox_response_sla?: string | null
+          monthly_profit_target?: number | null
+          monthly_revenue_target?: number | null
+          notes?: string | null
+          outreach_target?: number | null
+          pipeline_target?: number | null
+          portfolio_asset_id?: string
+          qualified_leads_target?: number | null
+          status?: Database["public"]["Enums"]["ma_execution_target_status"]
+          target_period_end?: string | null
+          target_period_start?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ma_execution_targets_exit_target_id_fkey"
+            columns: ["exit_target_id"]
+            isOneToOne: false
+            referencedRelation: "ma_exit_targets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ma_execution_targets_portfolio_asset_id_fkey"
+            columns: ["portfolio_asset_id"]
+            isOneToOne: false
+            referencedRelation: "ma_portfolio_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ma_exit_targets: {
+        Row: {
+          assumed_multiple: number | null
+          created_at: string
+          currency: string | null
+          desired_exit_value: number | null
+          id: string
+          notes: string | null
+          portfolio_asset_id: string
+          required_annual_profit: number | null
+          required_annual_revenue: number | null
+          required_buyer_warmth_level:
+            | Database["public"]["Enums"]["ma_buyer_warmth"]
+            | null
+          required_customer_count: number | null
+          required_growth_rate: number | null
+          required_monthly_profit: number | null
+          required_monthly_revenue: number | null
+          required_pipeline_value: number | null
+          target_exit_timeline_months: number | null
+          updated_at: string
+          valuation_method:
+            | Database["public"]["Enums"]["ma_valuation_method"]
+            | null
+        }
+        Insert: {
+          assumed_multiple?: number | null
+          created_at?: string
+          currency?: string | null
+          desired_exit_value?: number | null
+          id?: string
+          notes?: string | null
+          portfolio_asset_id: string
+          required_annual_profit?: number | null
+          required_annual_revenue?: number | null
+          required_buyer_warmth_level?:
+            | Database["public"]["Enums"]["ma_buyer_warmth"]
+            | null
+          required_customer_count?: number | null
+          required_growth_rate?: number | null
+          required_monthly_profit?: number | null
+          required_monthly_revenue?: number | null
+          required_pipeline_value?: number | null
+          target_exit_timeline_months?: number | null
+          updated_at?: string
+          valuation_method?:
+            | Database["public"]["Enums"]["ma_valuation_method"]
+            | null
+        }
+        Update: {
+          assumed_multiple?: number | null
+          created_at?: string
+          currency?: string | null
+          desired_exit_value?: number | null
+          id?: string
+          notes?: string | null
+          portfolio_asset_id?: string
+          required_annual_profit?: number | null
+          required_annual_revenue?: number | null
+          required_buyer_warmth_level?:
+            | Database["public"]["Enums"]["ma_buyer_warmth"]
+            | null
+          required_customer_count?: number | null
+          required_growth_rate?: number | null
+          required_monthly_profit?: number | null
+          required_monthly_revenue?: number | null
+          required_pipeline_value?: number | null
+          target_exit_timeline_months?: number | null
+          updated_at?: string
+          valuation_method?:
+            | Database["public"]["Enums"]["ma_valuation_method"]
+            | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ma_exit_targets_portfolio_asset_id_fkey"
+            columns: ["portfolio_asset_id"]
+            isOneToOne: false
+            referencedRelation: "ma_portfolio_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ma_intelligence_sources: {
+        Row: {
+          access_method: string | null
+          api_secret_name: string | null
+          confidence_default: number | null
+          created_at: string
+          id: string
+          licence_status: Database["public"]["Enums"]["ma_licence_status"]
+          notes: string | null
+          provider_name: string | null
+          refresh_frequency: string | null
+          reuse_allowed: boolean
+          source_name: string
+          source_type: Database["public"]["Enums"]["ma_source_type"]
+          source_url: string | null
+          storage_allowed: boolean
+          updated_at: string
+        }
+        Insert: {
+          access_method?: string | null
+          api_secret_name?: string | null
+          confidence_default?: number | null
+          created_at?: string
+          id?: string
+          licence_status?: Database["public"]["Enums"]["ma_licence_status"]
+          notes?: string | null
+          provider_name?: string | null
+          refresh_frequency?: string | null
+          reuse_allowed?: boolean
+          source_name: string
+          source_type?: Database["public"]["Enums"]["ma_source_type"]
+          source_url?: string | null
+          storage_allowed?: boolean
+          updated_at?: string
+        }
+        Update: {
+          access_method?: string | null
+          api_secret_name?: string | null
+          confidence_default?: number | null
+          created_at?: string
+          id?: string
+          licence_status?: Database["public"]["Enums"]["ma_licence_status"]
+          notes?: string | null
+          provider_name?: string | null
+          refresh_frequency?: string | null
+          reuse_allowed?: boolean
+          source_name?: string
+          source_type?: Database["public"]["Enums"]["ma_source_type"]
+          source_url?: string | null
+          storage_allowed?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ma_investors: {
+        Row: {
+          cheque_size_notes: string | null
+          confidence_score: number | null
+          country: string | null
+          created_at: string
+          exit_history_notes: string | null
+          id: string
+          investor_name: string
+          investor_type: Database["public"]["Enums"]["ma_investor_type"]
+          likely_end_buyer_notes: string | null
+          portfolio_notes: string | null
+          relevance_score: number | null
+          sectors: string[] | null
+          source_id: string | null
+          stage_focus: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          cheque_size_notes?: string | null
+          confidence_score?: number | null
+          country?: string | null
+          created_at?: string
+          exit_history_notes?: string | null
+          id?: string
+          investor_name: string
+          investor_type?: Database["public"]["Enums"]["ma_investor_type"]
+          likely_end_buyer_notes?: string | null
+          portfolio_notes?: string | null
+          relevance_score?: number | null
+          sectors?: string[] | null
+          source_id?: string | null
+          stage_focus?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          cheque_size_notes?: string | null
+          confidence_score?: number | null
+          country?: string | null
+          created_at?: string
+          exit_history_notes?: string | null
+          id?: string
+          investor_name?: string
+          investor_type?: Database["public"]["Enums"]["ma_investor_type"]
+          likely_end_buyer_notes?: string | null
+          portfolio_notes?: string | null
+          relevance_score?: number | null
+          sectors?: string[] | null
+          source_id?: string | null
+          stage_focus?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ma_investors_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "ma_intelligence_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ma_portfolio_assets: {
+        Row: {
+          asset_name: string
+          asset_type: Database["public"]["Enums"]["ma_asset_type"]
+          created_at: string
+          current_annual_profit: number | null
+          current_annual_revenue: number | null
+          current_monthly_profit: number | null
+          current_monthly_revenue: number | null
+          current_pipeline_value: number | null
+          current_stage: string | null
+          data_room_readiness_score: number | null
+          description: string | null
+          exit_readiness_score: number | null
+          founder_dependency_score: number | null
+          id: string
+          jurisdiction_notes: string | null
+          liftor_operability_score: number | null
+          needs_review: boolean
+          next_action: string | null
+          next_decision: Database["public"]["Enums"]["ma_next_decision"] | null
+          owner_entity: string | null
+          status: Database["public"]["Enums"]["ma_asset_status"]
+          target_buyer_market: string | null
+          target_customer_market: string | null
+          target_exit_value_base: number | null
+          target_exit_value_high: number | null
+          target_exit_value_low: number | null
+          updated_at: string
+        }
+        Insert: {
+          asset_name: string
+          asset_type?: Database["public"]["Enums"]["ma_asset_type"]
+          created_at?: string
+          current_annual_profit?: number | null
+          current_annual_revenue?: number | null
+          current_monthly_profit?: number | null
+          current_monthly_revenue?: number | null
+          current_pipeline_value?: number | null
+          current_stage?: string | null
+          data_room_readiness_score?: number | null
+          description?: string | null
+          exit_readiness_score?: number | null
+          founder_dependency_score?: number | null
+          id?: string
+          jurisdiction_notes?: string | null
+          liftor_operability_score?: number | null
+          needs_review?: boolean
+          next_action?: string | null
+          next_decision?: Database["public"]["Enums"]["ma_next_decision"] | null
+          owner_entity?: string | null
+          status?: Database["public"]["Enums"]["ma_asset_status"]
+          target_buyer_market?: string | null
+          target_customer_market?: string | null
+          target_exit_value_base?: number | null
+          target_exit_value_high?: number | null
+          target_exit_value_low?: number | null
+          updated_at?: string
+        }
+        Update: {
+          asset_name?: string
+          asset_type?: Database["public"]["Enums"]["ma_asset_type"]
+          created_at?: string
+          current_annual_profit?: number | null
+          current_annual_revenue?: number | null
+          current_monthly_profit?: number | null
+          current_monthly_revenue?: number | null
+          current_pipeline_value?: number | null
+          current_stage?: string | null
+          data_room_readiness_score?: number | null
+          description?: string | null
+          exit_readiness_score?: number | null
+          founder_dependency_score?: number | null
+          id?: string
+          jurisdiction_notes?: string | null
+          liftor_operability_score?: number | null
+          needs_review?: boolean
+          next_action?: string | null
+          next_decision?: Database["public"]["Enums"]["ma_next_decision"] | null
+          owner_entity?: string | null
+          status?: Database["public"]["Enums"]["ma_asset_status"]
+          target_buyer_market?: string | null
+          target_customer_market?: string | null
+          target_exit_value_base?: number | null
+          target_exit_value_high?: number | null
+          target_exit_value_low?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ma_valuation_benchmarks: {
+        Row: {
+          asset_type: Database["public"]["Enums"]["ma_asset_type"] | null
+          base_multiple: number | null
+          created_at: string
+          high_multiple: number | null
+          id: string
+          low_multiple: number | null
+          notes: string | null
+          sector: string | null
+          source_id: string | null
+          subsector: string | null
+          updated_at: string
+          valuation_method: Database["public"]["Enums"]["ma_valuation_method"]
+        }
+        Insert: {
+          asset_type?: Database["public"]["Enums"]["ma_asset_type"] | null
+          base_multiple?: number | null
+          created_at?: string
+          high_multiple?: number | null
+          id?: string
+          low_multiple?: number | null
+          notes?: string | null
+          sector?: string | null
+          source_id?: string | null
+          subsector?: string | null
+          updated_at?: string
+          valuation_method?: Database["public"]["Enums"]["ma_valuation_method"]
+        }
+        Update: {
+          asset_type?: Database["public"]["Enums"]["ma_asset_type"] | null
+          base_multiple?: number | null
+          created_at?: string
+          high_multiple?: number | null
+          id?: string
+          low_multiple?: number | null
+          notes?: string | null
+          sector?: string | null
+          source_id?: string | null
+          subsector?: string | null
+          updated_at?: string
+          valuation_method?: Database["public"]["Enums"]["ma_valuation_method"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ma_valuation_benchmarks_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "ma_intelligence_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ma_weekly_signals: {
+        Row: {
+          confidence_score: number | null
+          created_at: string
+          id: string
+          recommended_action: string | null
+          related_company_id: string | null
+          related_investor_id: string | null
+          related_portfolio_asset_id: string | null
+          relevance_score: number | null
+          signal_date: string | null
+          signal_type: Database["public"]["Enums"]["ma_signal_type"]
+          source_id: string | null
+          status: Database["public"]["Enums"]["ma_signal_status"]
+          summary: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          confidence_score?: number | null
+          created_at?: string
+          id?: string
+          recommended_action?: string | null
+          related_company_id?: string | null
+          related_investor_id?: string | null
+          related_portfolio_asset_id?: string | null
+          relevance_score?: number | null
+          signal_date?: string | null
+          signal_type?: Database["public"]["Enums"]["ma_signal_type"]
+          source_id?: string | null
+          status?: Database["public"]["Enums"]["ma_signal_status"]
+          summary?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          confidence_score?: number | null
+          created_at?: string
+          id?: string
+          recommended_action?: string | null
+          related_company_id?: string | null
+          related_investor_id?: string | null
+          related_portfolio_asset_id?: string | null
+          relevance_score?: number | null
+          signal_date?: string | null
+          signal_type?: Database["public"]["Enums"]["ma_signal_type"]
+          source_id?: string | null
+          status?: Database["public"]["Enums"]["ma_signal_status"]
+          summary?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ma_weekly_signals_related_company_id_fkey"
+            columns: ["related_company_id"]
+            isOneToOne: false
+            referencedRelation: "ma_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ma_weekly_signals_related_investor_id_fkey"
+            columns: ["related_investor_id"]
+            isOneToOne: false
+            referencedRelation: "ma_investors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ma_weekly_signals_related_portfolio_asset_id_fkey"
+            columns: ["related_portfolio_asset_id"]
+            isOneToOne: false
+            referencedRelation: "ma_portfolio_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ma_weekly_signals_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "ma_intelligence_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       maintenance_events: {
         Row: {
           created_at: string
@@ -37268,6 +38354,179 @@ export type Database = {
         | "risky"
         | "invalid"
         | "catch_all"
+      ma_adviser_status:
+        | "watch"
+        | "active_contact"
+        | "promising"
+        | "parked"
+        | "not_fit"
+      ma_adviser_type:
+        | "m_and_a_adviser"
+        | "corporate_finance"
+        | "exit_prep"
+        | "capital_raiser"
+        | "broker"
+        | "pe_adviser"
+        | "sector_specialist"
+        | "legal"
+        | "tax"
+        | "other"
+      ma_asset_status:
+        | "idea"
+        | "validating"
+        | "building"
+        | "active"
+        | "scaling"
+        | "parked"
+        | "exit_warmup"
+        | "sale_process"
+        | "sold"
+        | "killed"
+      ma_asset_type:
+        | "brand"
+        | "SaaS"
+        | "service_business"
+        | "media_ip"
+        | "ecommerce"
+        | "marketplace"
+        | "ai_tool"
+        | "other"
+      ma_assigned_agent:
+        | "outreach"
+        | "crm"
+        | "inbox"
+        | "content"
+        | "reporting"
+        | "compliance"
+        | "buyer_warmup"
+        | "founder_approval"
+        | "data_room"
+      ma_buyer_type:
+        | "strategic"
+        | "pe"
+        | "pe_backed_platform"
+        | "competitor"
+        | "corporate_venture"
+        | "media_group"
+        | "aggregator"
+        | "other"
+      ma_buyer_warmth:
+        | "cold"
+        | "aware"
+        | "engaged"
+        | "warm"
+        | "strategic_conversation"
+        | "exit_ready"
+      ma_company_type:
+        | "strategic_acquirer"
+        | "competitor"
+        | "comparable"
+        | "portfolio_company"
+        | "pe_backed_platform"
+        | "corporate_venture"
+        | "supplier"
+        | "partner"
+        | "unknown"
+      ma_data_room_category:
+        | "ip"
+        | "legal"
+        | "finance"
+        | "contracts"
+        | "domain"
+        | "brand"
+        | "customer_data"
+        | "crm"
+        | "campaign_metrics"
+        | "supplier"
+        | "agent_logs"
+        | "approval_logs"
+        | "compliance"
+        | "buyer_map"
+        | "valuation"
+        | "other"
+      ma_data_room_status:
+        | "missing"
+        | "requested"
+        | "in_progress"
+        | "complete"
+        | "needs_review"
+      ma_deal_type:
+        | "funding_round"
+        | "acquisition"
+        | "merger"
+        | "asset_purchase"
+        | "strategic_partnership"
+        | "ipo"
+        | "shutdown"
+        | "other"
+      ma_execution_target_status:
+        | "planned"
+        | "active"
+        | "completed"
+        | "missed"
+        | "revised"
+      ma_investor_type:
+        | "angel"
+        | "vc"
+        | "pe"
+        | "family_office"
+        | "corporate_venture"
+        | "accelerator"
+        | "strategic_investor"
+        | "other"
+      ma_legal_copy_risk: "low" | "medium" | "high"
+      ma_licence_status:
+        | "unknown"
+        | "public_allowed"
+        | "internal_use_only"
+        | "paid_restricted"
+        | "api_allowed"
+        | "do_not_store"
+      ma_next_decision:
+        | "build"
+        | "scale"
+        | "iterate"
+        | "park"
+        | "warm_buyers"
+        | "sell"
+        | "kill"
+        | "adviser_review"
+      ma_recommendation_status:
+        | "candidate"
+        | "shortlisted"
+        | "selected"
+        | "rejected"
+        | "parked"
+      ma_signal_status: "new" | "reviewed" | "actioned" | "ignored" | "archived"
+      ma_signal_type:
+        | "acquisition"
+        | "funding"
+        | "expansion"
+        | "hiring"
+        | "strategic_review"
+        | "product_launch"
+        | "partnership"
+        | "regulation"
+        | "competitor_move"
+        | "investor_move"
+        | "buyer_signal"
+        | "other"
+      ma_source_type:
+        | "public"
+        | "paid_database"
+        | "manual_upload"
+        | "adviser_input"
+        | "news"
+        | "filing"
+        | "api"
+        | "internal"
+      ma_valuation_method:
+        | "revenue_multiple"
+        | "arr_multiple"
+        | "ebitda_multiple"
+        | "ip_premium"
+        | "strategic_premium"
+        | "mixed"
       outreach_campaign_status: "active" | "paused"
       payment_event_type:
         | "reminder_sent"
@@ -37634,6 +38893,198 @@ export const Constants = {
         "risky",
         "invalid",
         "catch_all",
+      ],
+      ma_adviser_status: [
+        "watch",
+        "active_contact",
+        "promising",
+        "parked",
+        "not_fit",
+      ],
+      ma_adviser_type: [
+        "m_and_a_adviser",
+        "corporate_finance",
+        "exit_prep",
+        "capital_raiser",
+        "broker",
+        "pe_adviser",
+        "sector_specialist",
+        "legal",
+        "tax",
+        "other",
+      ],
+      ma_asset_status: [
+        "idea",
+        "validating",
+        "building",
+        "active",
+        "scaling",
+        "parked",
+        "exit_warmup",
+        "sale_process",
+        "sold",
+        "killed",
+      ],
+      ma_asset_type: [
+        "brand",
+        "SaaS",
+        "service_business",
+        "media_ip",
+        "ecommerce",
+        "marketplace",
+        "ai_tool",
+        "other",
+      ],
+      ma_assigned_agent: [
+        "outreach",
+        "crm",
+        "inbox",
+        "content",
+        "reporting",
+        "compliance",
+        "buyer_warmup",
+        "founder_approval",
+        "data_room",
+      ],
+      ma_buyer_type: [
+        "strategic",
+        "pe",
+        "pe_backed_platform",
+        "competitor",
+        "corporate_venture",
+        "media_group",
+        "aggregator",
+        "other",
+      ],
+      ma_buyer_warmth: [
+        "cold",
+        "aware",
+        "engaged",
+        "warm",
+        "strategic_conversation",
+        "exit_ready",
+      ],
+      ma_company_type: [
+        "strategic_acquirer",
+        "competitor",
+        "comparable",
+        "portfolio_company",
+        "pe_backed_platform",
+        "corporate_venture",
+        "supplier",
+        "partner",
+        "unknown",
+      ],
+      ma_data_room_category: [
+        "ip",
+        "legal",
+        "finance",
+        "contracts",
+        "domain",
+        "brand",
+        "customer_data",
+        "crm",
+        "campaign_metrics",
+        "supplier",
+        "agent_logs",
+        "approval_logs",
+        "compliance",
+        "buyer_map",
+        "valuation",
+        "other",
+      ],
+      ma_data_room_status: [
+        "missing",
+        "requested",
+        "in_progress",
+        "complete",
+        "needs_review",
+      ],
+      ma_deal_type: [
+        "funding_round",
+        "acquisition",
+        "merger",
+        "asset_purchase",
+        "strategic_partnership",
+        "ipo",
+        "shutdown",
+        "other",
+      ],
+      ma_execution_target_status: [
+        "planned",
+        "active",
+        "completed",
+        "missed",
+        "revised",
+      ],
+      ma_investor_type: [
+        "angel",
+        "vc",
+        "pe",
+        "family_office",
+        "corporate_venture",
+        "accelerator",
+        "strategic_investor",
+        "other",
+      ],
+      ma_legal_copy_risk: ["low", "medium", "high"],
+      ma_licence_status: [
+        "unknown",
+        "public_allowed",
+        "internal_use_only",
+        "paid_restricted",
+        "api_allowed",
+        "do_not_store",
+      ],
+      ma_next_decision: [
+        "build",
+        "scale",
+        "iterate",
+        "park",
+        "warm_buyers",
+        "sell",
+        "kill",
+        "adviser_review",
+      ],
+      ma_recommendation_status: [
+        "candidate",
+        "shortlisted",
+        "selected",
+        "rejected",
+        "parked",
+      ],
+      ma_signal_status: ["new", "reviewed", "actioned", "ignored", "archived"],
+      ma_signal_type: [
+        "acquisition",
+        "funding",
+        "expansion",
+        "hiring",
+        "strategic_review",
+        "product_launch",
+        "partnership",
+        "regulation",
+        "competitor_move",
+        "investor_move",
+        "buyer_signal",
+        "other",
+      ],
+      ma_source_type: [
+        "public",
+        "paid_database",
+        "manual_upload",
+        "adviser_input",
+        "news",
+        "filing",
+        "api",
+        "internal",
+      ],
+      ma_valuation_method: [
+        "revenue_multiple",
+        "arr_multiple",
+        "ebitda_multiple",
+        "ip_premium",
+        "strategic_premium",
+        "mixed",
       ],
       outreach_campaign_status: ["active", "paused"],
       payment_event_type: [
