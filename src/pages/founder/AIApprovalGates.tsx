@@ -19,6 +19,7 @@ import {
   listPendingApprovals, decideApproval, isStale,
   type ApprovalRecord, type ApprovalStatus,
 } from "@/services/aiApprovalGate";
+import AISecurityBadges from "@/components/founder/ai/AISecurityBadges";
 
 function statusColor(s: string) {
   switch (s) {
@@ -204,6 +205,7 @@ export default function AIApprovalGates() {
                 <Field label="Proposed action">
                   {(selected.metadata as any)?.proposed_action ?? selected.recommended_action ?? "—"}
                 </Field>
+                <AISecurityBadges audit_metadata={selected.metadata} />
                 {(selected.draft_subject || selected.draft_body) && (
                   <div className="rounded-md border border-border p-3 bg-muted/20 space-y-1">
                     <div className="text-xs uppercase text-muted-foreground">Draft (will NOT send until approved)</div>
