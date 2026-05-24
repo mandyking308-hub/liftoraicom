@@ -118,7 +118,7 @@ import AISecurityCentre from "./pages/founder/AISecurityCentre";
 import AIQueueControl from "./pages/founder/AIQueueControl";
 import AISandbox from "./pages/founder/AISandbox";
 import AIFinancePack from "./pages/founder/AIFinancePack";
-import AIGoLiveReadiness from "./pages/founder/AIGoLiveReadiness";
+import AILiveOperations from "./pages/founder/AILiveOperations";
 import DataIngestionCentre from "./pages/founder/DataIngestionCentre";
 import BrainSessions from "./pages/founder/BrainSessions";
 import BrainDrafts from "./pages/founder/BrainDrafts";
@@ -338,7 +338,7 @@ const App = () => (
             <Route path="/founder/ai-cost/queue" element={<FounderRoute><AIQueueControl /></FounderRoute>} />
             <Route path="/founder/ai-cost/sandbox" element={<FounderRoute><AISandbox /></FounderRoute>} />
             <Route path="/founder/ai-cost/finance" element={<FounderRoute><AIFinancePack /></FounderRoute>} />
-            <Route path="/founder/ai-cost/readiness" element={<FounderRoute><AIGoLiveReadiness /></FounderRoute>} />
+            <Route path="/founder/ai-cost/live" element={<FounderRoute><AILiveOperations /></FounderRoute>} />
             <Route path="/founder/brain" element={<FounderRoute><LiftorBrain /></FounderRoute>} />
             <Route path="/founder/brain/sessions" element={<FounderRoute><BrainSessions /></FounderRoute>} />
             <Route path="/founder/brain/drafts" element={<FounderRoute><BrainDrafts /></FounderRoute>} />
