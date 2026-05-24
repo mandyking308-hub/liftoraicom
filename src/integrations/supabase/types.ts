@@ -717,6 +717,66 @@ export type Database = {
           },
         ]
       }
+      ai_agent_cost_controls: {
+        Row: {
+          active: boolean | null
+          agent_id: string
+          allowed_model_tiers: string[] | null
+          allowed_task_categories: string[] | null
+          blocked_task_categories: string[] | null
+          business_id: string | null
+          created_at: string
+          daily_spend_cap: number | null
+          default_model_tier: string | null
+          escalation_rules: Json | null
+          id: string
+          max_actions_per_hour: number | null
+          max_retries: number | null
+          monthly_spend_cap: number | null
+          requires_human_approval: boolean | null
+          updated_at: string
+          weekly_spend_cap: number | null
+        }
+        Insert: {
+          active?: boolean | null
+          agent_id: string
+          allowed_model_tiers?: string[] | null
+          allowed_task_categories?: string[] | null
+          blocked_task_categories?: string[] | null
+          business_id?: string | null
+          created_at?: string
+          daily_spend_cap?: number | null
+          default_model_tier?: string | null
+          escalation_rules?: Json | null
+          id?: string
+          max_actions_per_hour?: number | null
+          max_retries?: number | null
+          monthly_spend_cap?: number | null
+          requires_human_approval?: boolean | null
+          updated_at?: string
+          weekly_spend_cap?: number | null
+        }
+        Update: {
+          active?: boolean | null
+          agent_id?: string
+          allowed_model_tiers?: string[] | null
+          allowed_task_categories?: string[] | null
+          blocked_task_categories?: string[] | null
+          business_id?: string | null
+          created_at?: string
+          daily_spend_cap?: number | null
+          default_model_tier?: string | null
+          escalation_rules?: Json | null
+          id?: string
+          max_actions_per_hour?: number | null
+          max_retries?: number | null
+          monthly_spend_cap?: number | null
+          requires_human_approval?: boolean | null
+          updated_at?: string
+          weekly_spend_cap?: number | null
+        }
+        Relationships: []
+      }
       ai_agent_operating_status: {
         Row: {
           agent_key: string
@@ -1105,6 +1165,108 @@ export type Database = {
           },
         ]
       }
+      ai_business_budgets: {
+        Row: {
+          active: boolean | null
+          business_id: string
+          campaign_ai_budget: number | null
+          created_at: string
+          currency: string | null
+          daily_ai_budget: number | null
+          id: string
+          max_cost_per_agent_per_day: number | null
+          max_cost_per_content_asset: number | null
+          max_cost_per_customer: number | null
+          max_cost_per_lead: number | null
+          max_cost_per_opportunity: number | null
+          monthly_ai_budget: number | null
+          require_founder_approval_when_exceeded: boolean | null
+          stop_when_budget_exceeded: boolean | null
+          updated_at: string
+          weekly_ai_budget: number | null
+        }
+        Insert: {
+          active?: boolean | null
+          business_id: string
+          campaign_ai_budget?: number | null
+          created_at?: string
+          currency?: string | null
+          daily_ai_budget?: number | null
+          id?: string
+          max_cost_per_agent_per_day?: number | null
+          max_cost_per_content_asset?: number | null
+          max_cost_per_customer?: number | null
+          max_cost_per_lead?: number | null
+          max_cost_per_opportunity?: number | null
+          monthly_ai_budget?: number | null
+          require_founder_approval_when_exceeded?: boolean | null
+          stop_when_budget_exceeded?: boolean | null
+          updated_at?: string
+          weekly_ai_budget?: number | null
+        }
+        Update: {
+          active?: boolean | null
+          business_id?: string
+          campaign_ai_budget?: number | null
+          created_at?: string
+          currency?: string | null
+          daily_ai_budget?: number | null
+          id?: string
+          max_cost_per_agent_per_day?: number | null
+          max_cost_per_content_asset?: number | null
+          max_cost_per_customer?: number | null
+          max_cost_per_lead?: number | null
+          max_cost_per_opportunity?: number | null
+          monthly_ai_budget?: number | null
+          require_founder_approval_when_exceeded?: boolean | null
+          stop_when_budget_exceeded?: boolean | null
+          updated_at?: string
+          weekly_ai_budget?: number | null
+        }
+        Relationships: []
+      }
+      ai_cached_context_blocks: {
+        Row: {
+          active: boolean | null
+          business_id: string | null
+          context_type: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          last_verified_at: string | null
+          source_reference: string | null
+          summary: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean | null
+          business_id?: string | null
+          context_type: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          last_verified_at?: string | null
+          source_reference?: string | null
+          summary: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean | null
+          business_id?: string | null
+          context_type?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          last_verified_at?: string | null
+          source_reference?: string | null
+          summary?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ai_conversation_draft_reviews: {
         Row: {
           agent_task_id: string | null
@@ -1189,6 +1351,60 @@ export type Database = {
           send_allowed?: boolean
           tone_profile?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      ai_cost_alerts: {
+        Row: {
+          acknowledged_at: string | null
+          agent_id: string | null
+          alert_type: string | null
+          audit_metadata: Json
+          business_id: string | null
+          campaign_id: string | null
+          created_at: string
+          id: string
+          message: string
+          recommended_action: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string | null
+          status: string | null
+          task_id: string | null
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          agent_id?: string | null
+          alert_type?: string | null
+          audit_metadata?: Json
+          business_id?: string | null
+          campaign_id?: string | null
+          created_at?: string
+          id?: string
+          message: string
+          recommended_action?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string | null
+          status?: string | null
+          task_id?: string | null
+        }
+        Update: {
+          acknowledged_at?: string | null
+          agent_id?: string | null
+          alert_type?: string | null
+          audit_metadata?: Json
+          business_id?: string | null
+          campaign_id?: string | null
+          created_at?: string
+          id?: string
+          message?: string
+          recommended_action?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string | null
+          status?: string | null
+          task_id?: string | null
         }
         Relationships: []
       }
@@ -1372,6 +1588,54 @@ export type Database = {
           },
         ]
       }
+      ai_model_routing_rules: {
+        Row: {
+          action_type: string | null
+          active: boolean | null
+          business_id: string | null
+          created_at: string
+          default_model_tier: string | null
+          fallback_model_tier: string | null
+          id: string
+          max_cost_per_action: number | null
+          requires_human_approval: boolean | null
+          risk_level: string | null
+          rule_priority: number | null
+          task_category: string
+          updated_at: string
+        }
+        Insert: {
+          action_type?: string | null
+          active?: boolean | null
+          business_id?: string | null
+          created_at?: string
+          default_model_tier?: string | null
+          fallback_model_tier?: string | null
+          id?: string
+          max_cost_per_action?: number | null
+          requires_human_approval?: boolean | null
+          risk_level?: string | null
+          rule_priority?: number | null
+          task_category: string
+          updated_at?: string
+        }
+        Update: {
+          action_type?: string | null
+          active?: boolean | null
+          business_id?: string | null
+          created_at?: string
+          default_model_tier?: string | null
+          fallback_model_tier?: string | null
+          id?: string
+          max_cost_per_action?: number | null
+          requires_human_approval?: boolean | null
+          risk_level?: string | null
+          rule_priority?: number | null
+          task_category?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ai_prompt_registry: {
         Row: {
           agent_key: string | null
@@ -1426,6 +1690,51 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_prompt_templates: {
+        Row: {
+          active: boolean | null
+          approved_prompt: string
+          average_cost: number | null
+          average_roi_score: number | null
+          business_id: string | null
+          created_at: string
+          id: string
+          model_tier: string | null
+          task_category: string
+          template_name: string
+          updated_at: string
+          usage_count: number | null
+        }
+        Insert: {
+          active?: boolean | null
+          approved_prompt: string
+          average_cost?: number | null
+          average_roi_score?: number | null
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          model_tier?: string | null
+          task_category: string
+          template_name: string
+          updated_at?: string
+          usage_count?: number | null
+        }
+        Update: {
+          active?: boolean | null
+          approved_prompt?: string
+          average_cost?: number | null
+          average_roi_score?: number | null
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          model_tier?: string | null
+          task_category?: string
+          template_name?: string
+          updated_at?: string
+          usage_count?: number | null
+        }
+        Relationships: []
+      }
       ai_reply_tone_profiles: {
         Row: {
           active: boolean
@@ -1462,6 +1771,192 @@ export type Database = {
           style_rules?: Json
           tone_key?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      ai_roi_snapshots: {
+        Row: {
+          agent_id: string | null
+          ai_cost_to_pipeline_ratio: number | null
+          ai_cost_to_revenue_ratio: number | null
+          audit_metadata: Json
+          business_id: string | null
+          campaign_id: string | null
+          cost_per_content_asset: number | null
+          cost_per_customer_interaction: number | null
+          cost_per_lead: number | null
+          cost_per_opportunity: number | null
+          cost_per_sale: number | null
+          created_at: string
+          estimated_human_cost_saved: number | null
+          id: string
+          net_saving: number | null
+          period_end: string
+          period_start: string
+          period_type: string | null
+          pipeline_linked: number | null
+          revenue_linked: number | null
+          roi_score: number | null
+          roi_status: string | null
+          time_saved_minutes: number | null
+          total_ai_spend: number | null
+        }
+        Insert: {
+          agent_id?: string | null
+          ai_cost_to_pipeline_ratio?: number | null
+          ai_cost_to_revenue_ratio?: number | null
+          audit_metadata?: Json
+          business_id?: string | null
+          campaign_id?: string | null
+          cost_per_content_asset?: number | null
+          cost_per_customer_interaction?: number | null
+          cost_per_lead?: number | null
+          cost_per_opportunity?: number | null
+          cost_per_sale?: number | null
+          created_at?: string
+          estimated_human_cost_saved?: number | null
+          id?: string
+          net_saving?: number | null
+          period_end: string
+          period_start: string
+          period_type?: string | null
+          pipeline_linked?: number | null
+          revenue_linked?: number | null
+          roi_score?: number | null
+          roi_status?: string | null
+          time_saved_minutes?: number | null
+          total_ai_spend?: number | null
+        }
+        Update: {
+          agent_id?: string | null
+          ai_cost_to_pipeline_ratio?: number | null
+          ai_cost_to_revenue_ratio?: number | null
+          audit_metadata?: Json
+          business_id?: string | null
+          campaign_id?: string | null
+          cost_per_content_asset?: number | null
+          cost_per_customer_interaction?: number | null
+          cost_per_lead?: number | null
+          cost_per_opportunity?: number | null
+          cost_per_sale?: number | null
+          created_at?: string
+          estimated_human_cost_saved?: number | null
+          id?: string
+          net_saving?: number | null
+          period_end?: string
+          period_start?: string
+          period_type?: string | null
+          pipeline_linked?: number | null
+          revenue_linked?: number | null
+          roi_score?: number | null
+          roi_status?: string | null
+          time_saved_minutes?: number | null
+          total_ai_spend?: number | null
+        }
+        Relationships: []
+      }
+      ai_usage_ledger: {
+        Row: {
+          action_type: string | null
+          agent_id: string | null
+          audit_metadata: Json
+          business_id: string | null
+          campaign_id: string | null
+          completed_at: string | null
+          completion_tokens: number | null
+          confidence_score: number | null
+          created_at: string
+          currency: string | null
+          error_message: string | null
+          estimated_cost: number | null
+          human_approved: boolean | null
+          human_equivalent_cost: number | null
+          id: string
+          input_summary: string | null
+          model_provider: string | null
+          model_tier: string | null
+          model_used: string | null
+          output_summary: string | null
+          pipeline_linked_amount: number | null
+          prompt_purpose: string | null
+          prompt_tokens: number | null
+          revenue_linked_amount: number | null
+          roi_score: number | null
+          status: string | null
+          task_category: string | null
+          task_id: string | null
+          time_saved_minutes: number | null
+          total_tokens: number | null
+          user_id: string | null
+          workflow_id: string | null
+        }
+        Insert: {
+          action_type?: string | null
+          agent_id?: string | null
+          audit_metadata?: Json
+          business_id?: string | null
+          campaign_id?: string | null
+          completed_at?: string | null
+          completion_tokens?: number | null
+          confidence_score?: number | null
+          created_at?: string
+          currency?: string | null
+          error_message?: string | null
+          estimated_cost?: number | null
+          human_approved?: boolean | null
+          human_equivalent_cost?: number | null
+          id?: string
+          input_summary?: string | null
+          model_provider?: string | null
+          model_tier?: string | null
+          model_used?: string | null
+          output_summary?: string | null
+          pipeline_linked_amount?: number | null
+          prompt_purpose?: string | null
+          prompt_tokens?: number | null
+          revenue_linked_amount?: number | null
+          roi_score?: number | null
+          status?: string | null
+          task_category?: string | null
+          task_id?: string | null
+          time_saved_minutes?: number | null
+          total_tokens?: number | null
+          user_id?: string | null
+          workflow_id?: string | null
+        }
+        Update: {
+          action_type?: string | null
+          agent_id?: string | null
+          audit_metadata?: Json
+          business_id?: string | null
+          campaign_id?: string | null
+          completed_at?: string | null
+          completion_tokens?: number | null
+          confidence_score?: number | null
+          created_at?: string
+          currency?: string | null
+          error_message?: string | null
+          estimated_cost?: number | null
+          human_approved?: boolean | null
+          human_equivalent_cost?: number | null
+          id?: string
+          input_summary?: string | null
+          model_provider?: string | null
+          model_tier?: string | null
+          model_used?: string | null
+          output_summary?: string | null
+          pipeline_linked_amount?: number | null
+          prompt_purpose?: string | null
+          prompt_tokens?: number | null
+          revenue_linked_amount?: number | null
+          roi_score?: number | null
+          status?: string | null
+          task_category?: string | null
+          task_id?: string | null
+          time_saved_minutes?: number | null
+          total_tokens?: number | null
+          user_id?: string | null
+          workflow_id?: string | null
         }
         Relationships: []
       }
