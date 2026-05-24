@@ -119,6 +119,7 @@ import AIQueueControl from "./pages/founder/AIQueueControl";
 import AISandbox from "./pages/founder/AISandbox";
 import AIFinancePack from "./pages/founder/AIFinancePack";
 import AILiveOperations from "./pages/founder/AILiveOperations";
+import AICostGovernorHub from "./pages/founder/AICostGovernorHub";
 import DataIngestionCentre from "./pages/founder/DataIngestionCentre";
 import BrainSessions from "./pages/founder/BrainSessions";
 import BrainDrafts from "./pages/founder/BrainDrafts";
