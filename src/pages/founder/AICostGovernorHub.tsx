@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import FounderLayout from "@/components/founder/FounderLayout";
 import AICostGovernorPortfolio from "@/components/founder/ai/AICostGovernorPortfolio";
 import AICostBreadcrumb from "@/components/founder/ai/AICostBreadcrumb";
+import AIGatewayHealthPanel from "@/components/founder/ai/AIGatewayHealthPanel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -127,6 +128,9 @@ export default function AICostGovernorHub() {
 
         {/* Live portfolio overview embedded */}
         <AICostGovernorPortfolio />
+
+        {/* AI Gateway enforcement health */}
+        <AIGatewayHealthPanel />
 
         {/* Section cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
