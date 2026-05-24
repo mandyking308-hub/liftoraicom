@@ -96,6 +96,7 @@ import LiftorBrain from "./pages/founder/LiftorBrain";
 import PortfolioExitCommandCentre from "./pages/founder/PortfolioExitCommandCentre";
 import PortfolioExitAssetDetail from "./pages/founder/PortfolioExitAssetDetail";
 import MAIntelligenceWorkspace from "./pages/founder/MAIntelligenceWorkspace";
+import ExitValuationEngine from "./pages/founder/ExitValuationEngine";
 import BrainSessions from "./pages/founder/BrainSessions";
 import BrainDrafts from "./pages/founder/BrainDrafts";
 import BrainAudit from "./pages/founder/BrainAudit";
@@ -291,6 +292,7 @@ const App = () => (
             <Route path="/founder/portfolio-exit" element={<FounderRoute><PortfolioExitCommandCentre /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/:assetId" element={<FounderRoute><PortfolioExitAssetDetail /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/intelligence" element={<FounderRoute><MAIntelligenceWorkspace /></FounderRoute>} />
+            <Route path="/founder/portfolio-exit/valuation" element={<FounderRoute><ExitValuationEngine /></FounderRoute>} />
             <Route path="/founder/brain" element={<FounderRoute><LiftorBrain /></FounderRoute>} />
             <Route path="/founder/brain/sessions" element={<FounderRoute><BrainSessions /></FounderRoute>} />
             <Route path="/founder/brain/drafts" element={<FounderRoute><BrainDrafts /></FounderRoute>} />
