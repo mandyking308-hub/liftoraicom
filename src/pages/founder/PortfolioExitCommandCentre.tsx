@@ -218,6 +218,11 @@ export default function PortfolioExitCommandCentre() {
                 <ArrowUpRight className="h-4 w-4 mr-1" /> Open M&amp;A Intelligence Workspace
               </Link>
             </Button>
+            <Button asChild size="sm" variant="outline">
+              <Link to="/founder/portfolio-exit/valuation">
+                <ArrowUpRight className="h-4 w-4 mr-1" /> Open Exit Valuation Engine
+              </Link>
+            </Button>
             <Badge variant="outline" className="gap-1">
               <Lock className="h-3 w-3" /> External outreach LOCKED_BY_DESIGN
             </Badge>
