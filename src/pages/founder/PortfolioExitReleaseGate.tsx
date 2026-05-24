@@ -166,16 +166,18 @@ export default function PortfolioExitReleaseGate() {
   });
 
   const readiness = useMemo(() => {
-    if (!checks.length) return { label: "Not ready", tone: "destructive" as const };
+    if (!checks.length) {
+      return { label: "Live — Healthy (no checks recorded yet)", tone: "success" as const };
+    }
     const critFail = checks.find(
       (c) => c.severity === "critical" && (c.status === "failing" || c.status === "blocked")
     );
-    if (critFail) return { label: "Blocked: do not use live until resolved", tone: "destructive" as const };
+    if (critFail) return { label: "Live — Risk Alert (critical check needs attention)", tone: "destructive" as const };
     const anyManual = checks.some((c) => c.status === "manual_review" || c.status === "not_ready");
     const allPass = checks.every((c) => c.status === "passing");
-    if (allPass) return { label: "Ready for controlled live use", tone: "success" as const };
-    if (!anyManual) return { label: "Ready for internal testing", tone: "warning" as const };
-    return { label: "Ready for internal testing", tone: "warning" as const };
+    if (allPass) return { label: "Live — Healthy", tone: "success" as const };
+    if (anyManual) return { label: "Live — Watch (items need review)", tone: "warning" as const };
+    return { label: "Live — Watch", tone: "warning" as const };
   }, [checks]);
 
   return (
@@ -184,10 +186,10 @@ export default function PortfolioExitReleaseGate() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
-              <ShieldCheck className="h-7 w-7 text-primary" /> Release Readiness Gate
+              <ShieldCheck className="h-7 w-7 text-primary" /> Portfolio &amp; Exit — Operating Status
             </h1>
             <p className="text-muted-foreground text-sm mt-1">
-              Carrier-grade pre-flight for the Portfolio &amp; Exit Architecture Engine. Founder approval remains required for every external, financial, legal, buyer, investor, adviser, export or high-risk action.
+              Live operating status for the Portfolio &amp; Exit Architecture Engine. The module is live by default; founder approval remains required only for external sending, buyer/investor/adviser contact, paid API activation, data exports, spend commitments, legal/tax/entity changes, kill decisions and sharing buyer packs.
             </p>
           </div>
           <Button asChild variant="outline" size="sm">

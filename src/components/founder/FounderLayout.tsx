@@ -16,7 +16,7 @@ const navItems = [
   { label: "Portfolio Manual", to: "/founder/portfolio-exit/manual", icon: BookOpenCheck },
   { label: "Controls Centre", to: "/founder/portfolio-exit/controls", icon: ShieldCheck },
   { label: "Hardening Centre", to: "/founder/portfolio-exit/hardening", icon: ShieldAlert },
-  { label: "Release Gate", to: "/founder/portfolio-exit/release-gate", icon: Siren },
+  { label: "Operating Status", to: "/founder/portfolio-exit/release-gate", icon: Activity },
   { label: "AI Cost Governor", to: "/founder/ai-cost", icon: Activity },
   { label: "AI Co-Pilot", to: "/founder/copilot", icon: MessageSquare },
   { label: "AI Brain", to: "/founder/brain", icon: Brain },

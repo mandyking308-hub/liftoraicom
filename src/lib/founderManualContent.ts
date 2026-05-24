@@ -3606,5 +3606,108 @@ Revenue and pipeline values are pulled only from explicitly linked ledger rows; 
 - Confirm no external send: tail \`function_edge_logs\` for outbound functions — no calls should appear during these tests.
 
 *End of AI Cost Governor + ROI Engine technical addendum (v5.5).*
+
+---
+
+## Portfolio & Exit Architecture Engine — Technical Design (v5.6 addendum)
+
+### Purpose
+Live operating engine that tracks every portfolio asset against its exit target, scores build candidates, manages buyer/investor/competitor/adviser intelligence, drives the data room, hands execution targets to agents and gates only high-risk external action behind founder approval. The module is live by default and is mounted inside the Command Centre — it is not a detached documentation area.
+
+### Tables (created / extended in earlier migrations)
+- \`ma_portfolio_assets\` — one row per business/asset. Fields include stage, current_monthly_revenue, current_annual_revenue, current_pipeline_value, target_exit_value_base, target_multiple_basis, liftor_operability_score, founder_dependency_score, data_room_readiness_score, exit_readiness_score, next_decision, next_action, needs_review.
+- \`ma_exit_targets\` — target valuations per asset (required revenue, profit, pipeline; multiple basis; adviser benchmarks).
+- \`ma_valuation_benchmarks\` — comparable / adviser benchmark inputs that drive the valuation calculation.
+- \`ma_build_candidates\` — candidates scored by the Quarterly Build Selector against the Buildability Constitution.
+- \`ma_buyer_matches\` — buyer / investor profiles, warmth, mock-diligence outputs, owner.
+- \`investor_buyer_targets\` — investor and buyer target list, source attribution, confidence.
+- \`ma_data_room_items\` — per-asset checklist with owner, status, evidence pointer.
+- \`ma_execution_targets\` — targets handed to agents/workflows with status and ownership.
+- \`ma_portfolio_lessons\` — decision memory (approvals, rejections, overrides, challenges) feeding the AI Orchestrator.
+- \`portfolio_intelligence_scores\` / \`portfolio_operating_snapshots\` / \`portfolio_strategy_recommendations\` — rolling intelligence layer.
+- \`business_valuation_snapshots\` / \`business_valuation_assumptions\` / \`funding_exit_readiness\` — supporting valuation history.
+- \`ma_release_gate_checks\` — repurposed as the live Operating Status feed (no longer used as a release blocker).
+- \`ma_lockdown_controls\` / \`ma_integration_allowlist\` / \`ma_rate_cost_limits\` / \`ma_privacy_records\` / \`ma_red_team_reviews\` — controls plane.
+
+### Relationships
+\`ma_portfolio_assets\` (1) ←→ (many) \`ma_exit_targets\`, \`ma_data_room_items\`, \`ma_execution_targets\`, \`ma_buyer_matches\`, \`ma_build_candidates\`, \`portfolio_operating_snapshots\`, \`business_valuation_snapshots\`. Decisions log via \`ma_portfolio_lessons\`. Approvals route into \`ai_action_queue\` (shared with AI Cost Governor) and back to \`ma_portfolio_lessons\`.
+
+### RLS / security model
+- Every \`ma_*\` and \`portfolio_*\` table is RLS-enabled.
+- Founder/admin (\`has_role(auth.uid(),'admin')\`) full read/write on the founder console.
+- Business-scoped users see only their own \`business_id\` rows; cross-business reads blocked at policy level.
+- Buyer/investor/adviser personal data flagged in \`ma_privacy_records\` with lawful basis, consent, retention and export restriction.
+- No client-side service-role key. Sensitive operations execute via edge functions with JWT verification + role check.
+
+### Audit logging
+- Every write goes through standard audit triggers (\`updated_at\`, change actor) and, for approval-gated paths, mirrors into \`ai_action_queue\` and \`ma_portfolio_lessons\` with \`audit_metadata\`.
+- External-action attempts always create a queue row first; the actual send only fires after a founder approval row exists.
+
+### Source governance
+- Imports tagged with \`source_type\` (manual, csv, apollo, hubspot, adviser, etc.), \`source_licence\`, \`source_freshness_at\`, \`imported_by\`.
+- Golden-record / de-duplication runs at ingestion: deterministic key on (\`domain\`, \`canonical_name\`) plus fuzzy match on company name + region; conflicts produce a review row, never an automatic merge.
+- Personal-data imports raise a privacy warning at the ingestion step and create \`ma_privacy_records\` rows.
+
+### Ingestion flow
+CSV / manual / connector → staging table → de-dup + golden-record → review queue → promote to \`ma_buyer_matches\` / \`investor_buyer_targets\` / asset record. Connector placeholders use secret references only; no API keys in client code.
+
+### Recommendation engine
+- Orchestrated by the AI Intelligence Orchestrator. Inputs: assets, exit targets, valuation benchmarks, build candidates, buyer/investor signals, decision memory, market sources, intelligence gaps.
+- Output rows in \`portfolio_strategy_recommendations\` carry: evidence references, confidence score, source freshness, missing-information notes, assumption list, risk level, approval-flag.
+- Weak evidence is labelled \"hypothesis, not decision\"; missing source is labelled \"no verified source attached\". The model is forbidden from inventing revenue, valuation, customer traction, buyer interest, legal conclusions or deal multiples.
+
+### Valuation calculation
+- Inputs: current revenue, profit, ARR, pipeline; target_exit_value_base; multiple basis; adviser benchmarks; risk discount.
+- Logic: required_revenue = target / multiple, required_profit = required_revenue × margin_assumption, required_pipeline = required_revenue / conversion_assumption × pipeline_coverage. Variants stored in \`business_valuation_snapshots\` for audit.
+
+### Quarterly Build Selector
+- Each candidate scored on: market pull, founder leverage, Liftor reusability, exit pathway clarity, risk, capital efficiency.
+- Weighted sum + tie-breakers → ranked list; founder approves the winner before any spend or external commitment.
+
+### Execution-target handoff
+- From an approved exit target, the engine generates execution targets (revenue, pipeline, content, retention, hiring, infra) and writes them into \`ma_execution_targets\` with an \`assigned_agent_id\` / \`assigned_workflow_id\`. Agents surface them in their own queues; status is reported back live.
+
+### Data-room readiness
+- Checklist seeded from asset type + exit target; readiness % = Σ(weight × completed) / Σ(weight). Each item carries an owner, status and required evidence link.
+
+### Buyer warm-up
+- Warmth driven by mock diligence runs + adviser notes + intent signals. No real buyer contact happens automatically. Sending a buyer pack, contacting a buyer, or starting a sale process always creates an approval queue row.
+
+### Founder approval workflow
+- \`requiresPortfolioApproval(action)\` rules (mirrors AI Cost Governor conventions): true for external outreach, buyer/investor/adviser contact, paid API activation, data exports, spend commitments, legal/tax/entity changes, sale process start, kill decisions, sharing buyer packs externally. False for dashboards, internal records, imports for review, calculations, internal recommendations, execution-target generation, data-room item creation, build-candidate scoring, internal AI analysis, manual updates.
+- Approval rows live in \`ai_action_queue\` with \`task_category='portfolio_external_action'\` and link back to the originating asset/recommendation.
+
+### AI Intelligence Orchestrator design
+- Reads assets, targets, recommendations, decision memory, intelligence gaps. Routes prompts through the AI Cost Governor (model tier, redaction, prompt-injection check, budget). Writes outputs to the recommendation tables with evidence + confidence. Never sends externally.
+
+### Manual upload / import workflow
+- Uploads land in a staging bucket with object-level RLS. The ingestion edge function validates schema, runs de-dup, writes review rows, and only the founder/admin can promote a row to live.
+
+### Connector placeholders & secrets
+- Apollo, HubSpot, market data providers etc. live as connector placeholders. Activation is approval-gated (paid API activation). Secrets are stored via Lovable Cloud secrets and read only inside edge functions.
+
+### Scheduled runs
+- Weekly: intelligence-gap sweep, asset health refresh, approval-queue digest.
+- Monthly: revenue / pipeline vs target review, data-room movement, valuation refresh.
+- Quarterly: build candidate re-scoring, exit target review, buyer/investor map refresh.
+
+### Live dashboard routes / components
+- \`/founder/command-centre\` mounts \`<PortfolioExitLivePanel/>\` as the live hero tile (live counts + asset table + manual links).
+- \`/founder/portfolio-exit\` → \`PortfolioExitCommandCentre\` (full module).
+- \`/founder/portfolio-exit/:assetId\` → asset detail with progress-against-target.
+- \`/founder/portfolio-exit/intelligence|valuation|build-selector|execution-handoff|ingestion|controls|hardening|release-gate|manual\` — supporting workspaces.
+- Sidebar group \"Portfolio & Exit\" exposes all of the above. \"Release Gate\" is renamed \"Operating Status\" and shows live operating state (Live — Healthy / Watch / Budget Warning / Cost Alert / Risk Alert / Approval Required).
+
+### Known limitations
+- No real buyer/investor outreach is wired in. Connectors are placeholders until founder activates them (approval-gated).
+- Valuation calculations are directional, not accounting truth; unlinked revenue is treated as zero.
+- Some imports require manual review before promotion; auto-merge is intentionally disabled.
+
+### Future integration points
+- Adviser portal read-only share links (signed, scoped, time-bound).
+- Direct CRM / cap-table / accounting connectors gated behind approval + privacy review.
+- Buyer warm-up signal feed from public filings and news sources, scored and de-duplicated.
+
+*End of Portfolio & Exit Architecture Engine technical addendum (v5.6).*
 `;
 };
