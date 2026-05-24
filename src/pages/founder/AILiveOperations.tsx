@@ -94,6 +94,7 @@ export default function AILiveOperations() {
 
   return (
     <div className="space-y-6 p-6 max-w-7xl mx-auto">
+      <AICostBreadcrumb page="Live Operations" description="Real-time AI activity, gateway calls, recommendations and operating status." />
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-3xl font-semibold flex items-center gap-2">
