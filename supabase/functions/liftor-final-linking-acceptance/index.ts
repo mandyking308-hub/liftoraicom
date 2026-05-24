@@ -81,7 +81,7 @@ Deno.serve(async (req) => {
       manual_hierarchy_ok: manualHierarchyOk,
       manual_update_drafts_reachable: draftsTableReachable,
       closeout_records: closeoutCount ?? 0,
-      modules,
+      modules: MODULES,
       module_function_checks: fnChecks,
       linked_modules_count: linkedModules,
       unlinked_modules_count: unlinkedModules,
