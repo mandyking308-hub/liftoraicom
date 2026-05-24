@@ -1735,6 +1735,54 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_provider_pricing: {
+        Row: {
+          active: boolean
+          created_at: string
+          currency: string
+          effective_from: string
+          effective_to: string | null
+          id: string
+          input_cost_per_1m_tokens: number
+          model_name: string
+          model_tier: string | null
+          notes: string | null
+          output_cost_per_1m_tokens: number
+          provider_name: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          currency?: string
+          effective_from?: string
+          effective_to?: string | null
+          id?: string
+          input_cost_per_1m_tokens?: number
+          model_name: string
+          model_tier?: string | null
+          notes?: string | null
+          output_cost_per_1m_tokens?: number
+          provider_name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          currency?: string
+          effective_from?: string
+          effective_to?: string | null
+          id?: string
+          input_cost_per_1m_tokens?: number
+          model_name?: string
+          model_tier?: string | null
+          notes?: string | null
+          output_cost_per_1m_tokens?: number
+          provider_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ai_reply_tone_profiles: {
         Row: {
           active: boolean
