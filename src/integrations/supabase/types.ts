@@ -19282,6 +19282,51 @@ export type Database = {
         }
         Relationships: []
       }
+      ma_agent_contracts: {
+        Row: {
+          actions_allowed: string | null
+          actions_prohibited: string | null
+          active: boolean
+          agent_name: string
+          approval_requirements: string | null
+          completion_criteria: string | null
+          created_at: string
+          data_received: string | null
+          escalation_rules: string | null
+          id: string
+          output_expected: string | null
+          updated_at: string
+        }
+        Insert: {
+          actions_allowed?: string | null
+          actions_prohibited?: string | null
+          active?: boolean
+          agent_name: string
+          approval_requirements?: string | null
+          completion_criteria?: string | null
+          created_at?: string
+          data_received?: string | null
+          escalation_rules?: string | null
+          id?: string
+          output_expected?: string | null
+          updated_at?: string
+        }
+        Update: {
+          actions_allowed?: string | null
+          actions_prohibited?: string | null
+          active?: boolean
+          agent_name?: string
+          approval_requirements?: string | null
+          completion_criteria?: string | null
+          created_at?: string
+          data_received?: string | null
+          escalation_rules?: string | null
+          id?: string
+          output_expected?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ma_ai_briefings: {
         Row: {
           ai_model: string | null
@@ -19354,11 +19399,15 @@ export type Database = {
           ai_model: string | null
           approved_at: string | null
           approved_by: string | null
+          challenge: Json | null
           confidence_score: number | null
           created_at: string
+          data_snapshot_at: string | null
           due_date: string | null
+          freshness_score: number | null
           id: string
           portfolio_asset_id: string | null
+          prompt_version_id: string | null
           reasoning: string | null
           recommendation_type: Database["public"]["Enums"]["ma_recommendation_type"]
           recommended_owner: string | null
@@ -19376,11 +19425,15 @@ export type Database = {
           ai_model?: string | null
           approved_at?: string | null
           approved_by?: string | null
+          challenge?: Json | null
           confidence_score?: number | null
           created_at?: string
+          data_snapshot_at?: string | null
           due_date?: string | null
+          freshness_score?: number | null
           id?: string
           portfolio_asset_id?: string | null
+          prompt_version_id?: string | null
           reasoning?: string | null
           recommendation_type: Database["public"]["Enums"]["ma_recommendation_type"]
           recommended_owner?: string | null
@@ -19398,11 +19451,15 @@ export type Database = {
           ai_model?: string | null
           approved_at?: string | null
           approved_by?: string | null
+          challenge?: Json | null
           confidence_score?: number | null
           created_at?: string
+          data_snapshot_at?: string | null
           due_date?: string | null
+          freshness_score?: number | null
           id?: string
           portfolio_asset_id?: string | null
+          prompt_version_id?: string | null
           reasoning?: string | null
           recommendation_type?: Database["public"]["Enums"]["ma_recommendation_type"]
           recommended_owner?: string | null
@@ -19418,6 +19475,78 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "ma_ai_recommendations_portfolio_asset_id_fkey"
+            columns: ["portfolio_asset_id"]
+            isOneToOne: false
+            referencedRelation: "ma_portfolio_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ma_ai_recommendations_prompt_version_id_fkey"
+            columns: ["prompt_version_id"]
+            isOneToOne: false
+            referencedRelation: "ma_prompt_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ma_alerts: {
+        Row: {
+          alert_type: string
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          owner: string | null
+          portfolio_asset_id: string | null
+          recommended_action: string | null
+          related_record_id: string | null
+          related_record_type: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          alert_type: string
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          owner?: string | null
+          portfolio_asset_id?: string | null
+          recommended_action?: string | null
+          related_record_id?: string | null
+          related_record_type?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          alert_type?: string
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          owner?: string | null
+          portfolio_asset_id?: string | null
+          recommended_action?: string | null
+          related_record_id?: string | null
+          related_record_type?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ma_alerts_portfolio_asset_id_fkey"
             columns: ["portfolio_asset_id"]
             isOneToOne: false
             referencedRelation: "ma_portfolio_assets"
@@ -19627,6 +19756,80 @@ export type Database = {
           table_name?: string
         }
         Relationships: []
+      }
+      ma_backup_events: {
+        Row: {
+          event_type: string
+          id: string
+          location_note: string | null
+          notes: string | null
+          performed_at: string
+          performed_by: string | null
+          status: string
+        }
+        Insert: {
+          event_type: string
+          id?: string
+          location_note?: string | null
+          notes?: string | null
+          performed_at?: string
+          performed_by?: string | null
+          status?: string
+        }
+        Update: {
+          event_type?: string
+          id?: string
+          location_note?: string | null
+          notes?: string | null
+          performed_at?: string
+          performed_by?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
+      ma_budgets: {
+        Row: {
+          category: string
+          created_at: string
+          currency: string
+          id: string
+          monthly_budget: number
+          notes: string | null
+          portfolio_asset_id: string | null
+          scope: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          currency?: string
+          id?: string
+          monthly_budget?: number
+          notes?: string | null
+          portfolio_asset_id?: string | null
+          scope?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          monthly_budget?: number
+          notes?: string | null
+          portfolio_asset_id?: string | null
+          scope?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ma_budgets_portfolio_asset_id_fkey"
+            columns: ["portfolio_asset_id"]
+            isOneToOne: false
+            referencedRelation: "ma_portfolio_assets"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ma_build_candidates: {
         Row: {
@@ -19842,6 +20045,62 @@ export type Database = {
         }
         Relationships: []
       }
+      ma_capital_allocation: {
+        Row: {
+          adviser_budget: number | null
+          created_at: string
+          currency: string
+          data_api_budget: number | null
+          human_oversight_budget: number | null
+          id: string
+          monthly_budget: number | null
+          outreach_budget: number | null
+          portfolio_asset_id: string
+          priority_score: number | null
+          rationale: string | null
+          resource_recommendation: string | null
+          updated_at: string
+        }
+        Insert: {
+          adviser_budget?: number | null
+          created_at?: string
+          currency?: string
+          data_api_budget?: number | null
+          human_oversight_budget?: number | null
+          id?: string
+          monthly_budget?: number | null
+          outreach_budget?: number | null
+          portfolio_asset_id: string
+          priority_score?: number | null
+          rationale?: string | null
+          resource_recommendation?: string | null
+          updated_at?: string
+        }
+        Update: {
+          adviser_budget?: number | null
+          created_at?: string
+          currency?: string
+          data_api_budget?: number | null
+          human_oversight_budget?: number | null
+          id?: string
+          monthly_budget?: number | null
+          outreach_budget?: number | null
+          portfolio_asset_id?: string
+          priority_score?: number | null
+          rationale?: string | null
+          resource_recommendation?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ma_capital_allocation_portfolio_asset_id_fkey"
+            columns: ["portfolio_asset_id"]
+            isOneToOne: true
+            referencedRelation: "ma_portfolio_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ma_companies: {
         Row: {
           acquisition_history_notes: string | null
@@ -20006,6 +20265,99 @@ export type Database = {
           },
         ]
       }
+      ma_cost_entries: {
+        Row: {
+          amount: number
+          category: string
+          created_at: string
+          currency: string
+          description: string | null
+          id: string
+          incurred_at: string
+          notes: string | null
+          portfolio_asset_id: string | null
+          related_recommendation_id: string | null
+          source: string | null
+        }
+        Insert: {
+          amount?: number
+          category: string
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          incurred_at?: string
+          notes?: string | null
+          portfolio_asset_id?: string | null
+          related_recommendation_id?: string | null
+          source?: string | null
+        }
+        Update: {
+          amount?: number
+          category?: string
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          incurred_at?: string
+          notes?: string | null
+          portfolio_asset_id?: string | null
+          related_recommendation_id?: string | null
+          source?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ma_cost_entries_portfolio_asset_id_fkey"
+            columns: ["portfolio_asset_id"]
+            isOneToOne: false
+            referencedRelation: "ma_portfolio_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ma_cost_entries_related_recommendation_id_fkey"
+            columns: ["related_recommendation_id"]
+            isOneToOne: false
+            referencedRelation: "ma_ai_recommendations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ma_data_classifications: {
+        Row: {
+          classification: string
+          created_at: string
+          do_not_export: boolean
+          id: string
+          notes: string | null
+          record_id: string
+          record_type: string
+          set_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          classification: string
+          created_at?: string
+          do_not_export?: boolean
+          id?: string
+          notes?: string | null
+          record_id: string
+          record_type: string
+          set_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          classification?: string
+          created_at?: string
+          do_not_export?: boolean
+          id?: string
+          notes?: string | null
+          record_id?: string
+          record_type?: string
+          set_by?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ma_data_imports: {
         Row: {
           approved_at: string | null
@@ -20095,11 +20447,18 @@ export type Database = {
       }
       ma_data_room_items: {
         Row: {
+          adviser_reviewed: boolean | null
+          buyer_safe: boolean | null
+          classification: string | null
           created_at: string
+          doc_version: string | null
           due_date: string | null
+          expiry_at: string | null
           id: string
           item_category: Database["public"]["Enums"]["ma_data_room_category"]
           item_name: string
+          last_reviewed_at: string | null
+          missing_evidence_notes: string | null
           notes: string | null
           owner: string | null
           portfolio_asset_id: string
@@ -20108,11 +20467,18 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          adviser_reviewed?: boolean | null
+          buyer_safe?: boolean | null
+          classification?: string | null
           created_at?: string
+          doc_version?: string | null
           due_date?: string | null
+          expiry_at?: string | null
           id?: string
           item_category?: Database["public"]["Enums"]["ma_data_room_category"]
           item_name: string
+          last_reviewed_at?: string | null
+          missing_evidence_notes?: string | null
           notes?: string | null
           owner?: string | null
           portfolio_asset_id: string
@@ -20121,11 +20487,18 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          adviser_reviewed?: boolean | null
+          buyer_safe?: boolean | null
+          classification?: string | null
           created_at?: string
+          doc_version?: string | null
           due_date?: string | null
+          expiry_at?: string | null
           id?: string
           item_category?: Database["public"]["Enums"]["ma_data_room_category"]
           item_name?: string
+          last_reviewed_at?: string | null
+          missing_evidence_notes?: string | null
           notes?: string | null
           owner?: string | null
           portfolio_asset_id?: string
@@ -20297,6 +20670,45 @@ export type Database = {
           suggested_action?: string
           target_record_id?: string
           target_table?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ma_do_not_build_patterns: {
+        Row: {
+          active: boolean
+          added_by: string | null
+          category: string
+          created_at: string
+          examples: string | null
+          id: string
+          notes: string | null
+          reason: string
+          severity: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          added_by?: string | null
+          category: string
+          created_at?: string
+          examples?: string | null
+          id?: string
+          notes?: string | null
+          reason: string
+          severity?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          added_by?: string | null
+          category?: string
+          created_at?: string
+          examples?: string | null
+          id?: string
+          notes?: string | null
+          reason?: string
+          severity?: string
           updated_at?: string
         }
         Relationships: []
@@ -20892,6 +21304,212 @@ export type Database = {
           },
         ]
       }
+      ma_kpi_dictionary: {
+        Row: {
+          ai_estimate_allowed: boolean
+          confidence_rules: string | null
+          created_at: string
+          definition: string
+          formula: string | null
+          human_confirmation_required: boolean
+          id: string
+          kpi_name: string
+          notes: string | null
+          owner: string | null
+          source_field: string | null
+          source_table: string | null
+          update_frequency: string | null
+          updated_at: string
+        }
+        Insert: {
+          ai_estimate_allowed?: boolean
+          confidence_rules?: string | null
+          created_at?: string
+          definition: string
+          formula?: string | null
+          human_confirmation_required?: boolean
+          id?: string
+          kpi_name: string
+          notes?: string | null
+          owner?: string | null
+          source_field?: string | null
+          source_table?: string | null
+          update_frequency?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ai_estimate_allowed?: boolean
+          confidence_rules?: string | null
+          created_at?: string
+          definition?: string
+          formula?: string | null
+          human_confirmation_required?: boolean
+          id?: string
+          kpi_name?: string
+          notes?: string | null
+          owner?: string | null
+          source_field?: string | null
+          source_table?: string | null
+          update_frequency?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ma_lifecycle_gates: {
+        Row: {
+          created_at: string
+          from_stage: string
+          id: string
+          notes: string | null
+          required_evidence: Json
+          requires_founder_approval: boolean
+          to_stage: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          from_stage: string
+          id?: string
+          notes?: string | null
+          required_evidence?: Json
+          requires_founder_approval?: boolean
+          to_stage: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          from_stage?: string
+          id?: string
+          notes?: string | null
+          required_evidence?: Json
+          requires_founder_approval?: boolean
+          to_stage?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ma_lifecycle_transitions: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          evidence: Json
+          from_stage: string | null
+          id: string
+          portfolio_asset_id: string
+          rationale: string | null
+          requested_by: string | null
+          status: string
+          to_stage: string
+          updated_at: string
+          warnings: Json
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          evidence?: Json
+          from_stage?: string | null
+          id?: string
+          portfolio_asset_id: string
+          rationale?: string | null
+          requested_by?: string | null
+          status?: string
+          to_stage: string
+          updated_at?: string
+          warnings?: Json
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          evidence?: Json
+          from_stage?: string | null
+          id?: string
+          portfolio_asset_id?: string
+          rationale?: string | null
+          requested_by?: string | null
+          status?: string
+          to_stage?: string
+          updated_at?: string
+          warnings?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ma_lifecycle_transitions_portfolio_asset_id_fkey"
+            columns: ["portfolio_asset_id"]
+            isOneToOne: false
+            referencedRelation: "ma_portfolio_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ma_mock_diligence_runs: {
+        Row: {
+          ai_model: string | null
+          buyer_objections: Json
+          cleanup_plan_30d: Json
+          created_at: string
+          id: string
+          missing_evidence: Json
+          portfolio_asset_id: string
+          prompt_version_id: string | null
+          readiness_score: number | null
+          red_flags: Json
+          run_by: string | null
+          summary: string | null
+          urgent_fixes: Json
+          valuation_weaknesses: Json
+        }
+        Insert: {
+          ai_model?: string | null
+          buyer_objections?: Json
+          cleanup_plan_30d?: Json
+          created_at?: string
+          id?: string
+          missing_evidence?: Json
+          portfolio_asset_id: string
+          prompt_version_id?: string | null
+          readiness_score?: number | null
+          red_flags?: Json
+          run_by?: string | null
+          summary?: string | null
+          urgent_fixes?: Json
+          valuation_weaknesses?: Json
+        }
+        Update: {
+          ai_model?: string | null
+          buyer_objections?: Json
+          cleanup_plan_30d?: Json
+          created_at?: string
+          id?: string
+          missing_evidence?: Json
+          portfolio_asset_id?: string
+          prompt_version_id?: string | null
+          readiness_score?: number | null
+          red_flags?: Json
+          run_by?: string | null
+          summary?: string | null
+          urgent_fixes?: Json
+          valuation_weaknesses?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ma_mock_diligence_runs_portfolio_asset_id_fkey"
+            columns: ["portfolio_asset_id"]
+            isOneToOne: false
+            referencedRelation: "ma_portfolio_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ma_mock_diligence_runs_prompt_version_id_fkey"
+            columns: ["prompt_version_id"]
+            isOneToOne: false
+            referencedRelation: "ma_prompt_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ma_paid_connectors: {
         Row: {
           allowed_use_notes: string | null
@@ -21096,6 +21714,51 @@ export type Database = {
           },
         ]
       }
+      ma_prompt_versions: {
+        Row: {
+          active: boolean
+          changed_by: string | null
+          created_at: string
+          id: string
+          model: string | null
+          notes: string | null
+          prompt_body: string | null
+          prompt_name: string
+          provider: string | null
+          purpose: string | null
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          active?: boolean
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          model?: string | null
+          notes?: string | null
+          prompt_body?: string | null
+          prompt_name: string
+          provider?: string | null
+          purpose?: string | null
+          updated_at?: string
+          version: string
+        }
+        Update: {
+          active?: boolean
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          model?: string | null
+          notes?: string | null
+          prompt_body?: string | null
+          prompt_name?: string
+          provider?: string | null
+          purpose?: string | null
+          updated_at?: string
+          version?: string
+        }
+        Relationships: []
+      }
       ma_valuation_benchmarks: {
         Row: {
           asset_type: Database["public"]["Enums"]["ma_asset_type"] | null
@@ -21231,6 +21894,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      ma_workload_capacity: {
+        Row: {
+          active_assets: number
+          created_at: string
+          high_risk_escalations: number
+          id: string
+          manual_tasks_open: number
+          notes: string | null
+          overdue_decisions: number
+          pending_adviser_reviews: number
+          pending_founder_approvals: number
+          period_end: string
+          period_start: string
+          updated_at: string
+          weekly_oversight_hours_capacity: number
+          weekly_oversight_hours_required: number
+        }
+        Insert: {
+          active_assets?: number
+          created_at?: string
+          high_risk_escalations?: number
+          id?: string
+          manual_tasks_open?: number
+          notes?: string | null
+          overdue_decisions?: number
+          pending_adviser_reviews?: number
+          pending_founder_approvals?: number
+          period_end: string
+          period_start: string
+          updated_at?: string
+          weekly_oversight_hours_capacity?: number
+          weekly_oversight_hours_required?: number
+        }
+        Update: {
+          active_assets?: number
+          created_at?: string
+          high_risk_escalations?: number
+          id?: string
+          manual_tasks_open?: number
+          notes?: string | null
+          overdue_decisions?: number
+          pending_adviser_reviews?: number
+          pending_founder_approvals?: number
+          period_end?: string
+          period_start?: string
+          updated_at?: string
+          weekly_oversight_hours_capacity?: number
+          weekly_oversight_hours_required?: number
+        }
+        Relationships: []
       }
       maintenance_events: {
         Row: {

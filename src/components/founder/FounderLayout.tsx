@@ -14,6 +14,7 @@ const navItems = [
   { label: "Execution Handoff", to: "/founder/portfolio-exit/execution-handoff", icon: Handshake },
   { label: "Data Ingestion", to: "/founder/portfolio-exit/ingestion", icon: FileInput },
   { label: "Portfolio Manual", to: "/founder/portfolio-exit/manual", icon: BookOpenCheck },
+  { label: "Controls Centre", to: "/founder/portfolio-exit/controls", icon: ShieldCheck },
   { label: "AI Co-Pilot", to: "/founder/copilot", icon: MessageSquare },
   { label: "AI Brain", to: "/founder/brain", icon: Brain },
   { label: "Decisions", to: "/founder/decisions", icon: Scale },

@@ -239,6 +239,11 @@ export default function PortfolioExitCommandCentre() {
                 <ArrowUpRight className="h-4 w-4 mr-1" /> Manual &amp; Technical Docs
               </Link>
             </Button>
+            <Button asChild size="sm" variant="default">
+              <Link to="/founder/portfolio-exit/controls">
+                <ArrowUpRight className="h-4 w-4 mr-1" /> Carrier-Grade Controls
+              </Link>
+            </Button>
             <Button asChild size="sm" variant="outline">
               <Link to="/founder/portfolio-exit/ingestion">
                 <ArrowUpRight className="h-4 w-4 mr-1" /> Open Data Ingestion Centre
