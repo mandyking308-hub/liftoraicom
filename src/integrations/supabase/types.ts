@@ -6303,6 +6303,195 @@ export type Database = {
         }
         Relationships: []
       }
+      business_weekly_review_outputs: {
+        Row: {
+          activation_record_id: string | null
+          body: string | null
+          business_id: string
+          created_at: string
+          destination_module: string | null
+          external_action_blocked: boolean
+          external_action_required: boolean
+          founder_approval_id: string | null
+          id: string
+          is_test_data: boolean
+          metadata: Json
+          missing_context: Json
+          output_status: string
+          output_type: string
+          owner_agent: string | null
+          priority: string
+          requires_founder_review: boolean
+          risk_level: string
+          risk_warnings: Json
+          structured_payload: Json
+          summary: string | null
+          title: string
+          updated_at: string
+          weekly_review_run_id: string | null
+        }
+        Insert: {
+          activation_record_id?: string | null
+          body?: string | null
+          business_id: string
+          created_at?: string
+          destination_module?: string | null
+          external_action_blocked?: boolean
+          external_action_required?: boolean
+          founder_approval_id?: string | null
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          missing_context?: Json
+          output_status?: string
+          output_type: string
+          owner_agent?: string | null
+          priority?: string
+          requires_founder_review?: boolean
+          risk_level?: string
+          risk_warnings?: Json
+          structured_payload?: Json
+          summary?: string | null
+          title: string
+          updated_at?: string
+          weekly_review_run_id?: string | null
+        }
+        Update: {
+          activation_record_id?: string | null
+          body?: string | null
+          business_id?: string
+          created_at?: string
+          destination_module?: string | null
+          external_action_blocked?: boolean
+          external_action_required?: boolean
+          founder_approval_id?: string | null
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          missing_context?: Json
+          output_status?: string
+          output_type?: string
+          owner_agent?: string | null
+          priority?: string
+          requires_founder_review?: boolean
+          risk_level?: string
+          risk_warnings?: Json
+          structured_payload?: Json
+          summary?: string | null
+          title?: string
+          updated_at?: string
+          weekly_review_run_id?: string | null
+        }
+        Relationships: []
+      }
+      business_weekly_review_runs: {
+        Row: {
+          activation_record_id: string | null
+          blocked_actions: number
+          business_id: string
+          completed_actions: number
+          created_at: string
+          daily_actions_reviewed: number
+          daily_runs_reviewed: number
+          external_actions_locked: boolean
+          external_ready: boolean
+          founder_reviews_open: number
+          id: string
+          internal_ready: boolean
+          is_test_data: boolean
+          metadata: Json
+          missing_context_count: number
+          no_forbidden_action_audit: Json
+          outputs_reviewed: number
+          parked_actions: number
+          provider_status: string
+          recommendations_created: number
+          risk_warning_count: number
+          run_status: string
+          score_content: number
+          score_customer: number
+          score_knowledge: number
+          score_operations: number
+          score_overall: number
+          score_readiness: number
+          score_revenue: number
+          updated_at: string
+          week_end: string
+          week_start: string
+          weekly_summary: string | null
+        }
+        Insert: {
+          activation_record_id?: string | null
+          blocked_actions?: number
+          business_id: string
+          completed_actions?: number
+          created_at?: string
+          daily_actions_reviewed?: number
+          daily_runs_reviewed?: number
+          external_actions_locked?: boolean
+          external_ready?: boolean
+          founder_reviews_open?: number
+          id?: string
+          internal_ready?: boolean
+          is_test_data?: boolean
+          metadata?: Json
+          missing_context_count?: number
+          no_forbidden_action_audit?: Json
+          outputs_reviewed?: number
+          parked_actions?: number
+          provider_status?: string
+          recommendations_created?: number
+          risk_warning_count?: number
+          run_status?: string
+          score_content?: number
+          score_customer?: number
+          score_knowledge?: number
+          score_operations?: number
+          score_overall?: number
+          score_readiness?: number
+          score_revenue?: number
+          updated_at?: string
+          week_end: string
+          week_start: string
+          weekly_summary?: string | null
+        }
+        Update: {
+          activation_record_id?: string | null
+          blocked_actions?: number
+          business_id?: string
+          completed_actions?: number
+          created_at?: string
+          daily_actions_reviewed?: number
+          daily_runs_reviewed?: number
+          external_actions_locked?: boolean
+          external_ready?: boolean
+          founder_reviews_open?: number
+          id?: string
+          internal_ready?: boolean
+          is_test_data?: boolean
+          metadata?: Json
+          missing_context_count?: number
+          no_forbidden_action_audit?: Json
+          outputs_reviewed?: number
+          parked_actions?: number
+          provider_status?: string
+          recommendations_created?: number
+          risk_warning_count?: number
+          run_status?: string
+          score_content?: number
+          score_customer?: number
+          score_knowledge?: number
+          score_operations?: number
+          score_overall?: number
+          score_readiness?: number
+          score_revenue?: number
+          updated_at?: string
+          week_end?: string
+          week_start?: string
+          weekly_summary?: string | null
+        }
+        Relationships: []
+      }
       businesses: {
         Row: {
           created_at: string
