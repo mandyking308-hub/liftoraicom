@@ -38405,6 +38405,7 @@ export type Database = {
         | "buyer_warmup"
         | "founder_approval"
         | "data_room"
+      ma_briefing_kind: "portfolio" | "asset" | "build_memo"
       ma_buyer_type:
         | "strategic"
         | "pe"
@@ -38501,6 +38502,19 @@ export type Database = {
         | "selected"
         | "rejected"
         | "parked"
+      ma_recommendation_type:
+        | "build"
+        | "scale"
+        | "iterate"
+        | "park"
+        | "kill"
+        | "warm_buyer"
+        | "adviser_review"
+        | "improve_data_room"
+        | "increase_outreach"
+        | "adjust_positioning"
+        | "update_jurisdiction_review"
+      ma_risk_level: "low" | "medium" | "high"
       ma_signal_status: "new" | "reviewed" | "actioned" | "ignored" | "archived"
       ma_signal_type:
         | "acquisition"
@@ -38950,6 +38964,7 @@ export const Constants = {
         "founder_approval",
         "data_room",
       ],
+      ma_briefing_kind: ["portfolio", "asset", "build_memo"],
       ma_buyer_type: [
         "strategic",
         "pe",
@@ -39057,6 +39072,20 @@ export const Constants = {
         "rejected",
         "parked",
       ],
+      ma_recommendation_type: [
+        "build",
+        "scale",
+        "iterate",
+        "park",
+        "kill",
+        "warm_buyer",
+        "adviser_review",
+        "improve_data_room",
+        "increase_outreach",
+        "adjust_positioning",
+        "update_jurisdiction_review",
+      ],
+      ma_risk_level: ["low", "medium", "high"],
       ma_signal_status: ["new", "reviewed", "actioned", "ignored", "archived"],
       ma_signal_type: [
         "acquisition",
