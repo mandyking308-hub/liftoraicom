@@ -238,7 +238,7 @@ export default function AIFounderActionBoard() {
     const noBudgetBiz = (data.businesses as any[]).filter((b) => !budgetByBiz.has(b.id));
 
     // Quality scores — poor agents
-    const poorQuality = (data.quality as any[]).filter((q) => Number(q.score) < 0.5 || q.verdict === "poor" || q.verdict === "stop");
+    const poorQuality = (data.quality as any[]).filter((q) => q.rejected === true || Number(q.output_quality_score ?? 1) < 0.5 || Number(q.usefulness_score ?? 1) < 0.5 || q.feedback_label === "poor" || q.feedback_label === "reject");
 
     // High cost campaigns today
     const campaignSpendToday = new Map<string, number>();
