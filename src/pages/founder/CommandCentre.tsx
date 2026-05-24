@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import FounderLayout from "@/components/founder/FounderLayout";
+import AIUsageMiniWidget from "@/components/founder/ai/AIUsageMiniWidget";
 import GroupHQOperatingPanel from "@/components/founder/group/GroupHQOperatingPanel";
 import TreasuryCashflowControlPanel from "@/components/founder/finance/TreasuryCashflowControlPanel";
 import ContractsProcurementControlPanel from "@/components/founder/legal/ContractsProcurementControlPanel";
@@ -777,6 +778,7 @@ const CommandCentre = () => {
   return (
     <FounderLayout>
       <CommandCentreViewModeBar />
+      <div className="max-w-7xl mx-auto px-4 pt-4"><AIUsageMiniWidget /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><FounderAlertEscalationPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><CommandCentreTruthSyncPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><FinalHardeningStatusPanel /></div>
