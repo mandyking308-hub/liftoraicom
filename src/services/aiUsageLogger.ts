@@ -41,6 +41,7 @@ export type LogAIUsageInput = {
   confidence_score?: number | null;
   error_message?: string | null;
   audit_metadata?: Record<string, unknown>;
+  is_simulation?: boolean;
 };
 
 function clipSummary(value: string | null | undefined, max = 500): string | null {
@@ -136,6 +137,7 @@ export async function logAIUsage(input: LogAIUsageInput) {
       (input.status ?? "completed") === "completed" || input.status === "failed"
         ? new Date().toISOString()
         : null,
+    is_simulation: !!input.is_simulation,
   };
 
   // PII / secret redaction — never write raw sensitive content to the ledger.
