@@ -4766,6 +4766,291 @@ export type Database = {
           },
         ]
       }
+      business_micro_batch_approval_packets: {
+        Row: {
+          blocked_candidate_count: number
+          business_id: string
+          candidate_ids: Json
+          channel_key: string
+          created_at: string
+          eligible_candidate_count: number
+          execution_allowed: boolean
+          external_action_blocked: boolean
+          founder_approval_id: string | null
+          founder_review_required: boolean
+          id: string
+          is_test_data: boolean
+          max_batch_size: number
+          metadata: Json
+          packet_status: string
+          packet_summary: string | null
+          packet_title: string
+          preparation_run_id: string | null
+          proposed_batch_size: number
+          required_confirmation_phrase: string | null
+          required_fixes_before_execution: Json
+          required_founder_decisions: Json
+          required_gate_key: string | null
+          rollback_plan: Json
+          stop_conditions: Json
+          success_metrics: Json
+          updated_at: string
+          warning_count: number
+        }
+        Insert: {
+          blocked_candidate_count?: number
+          business_id: string
+          candidate_ids?: Json
+          channel_key: string
+          created_at?: string
+          eligible_candidate_count?: number
+          execution_allowed?: boolean
+          external_action_blocked?: boolean
+          founder_approval_id?: string | null
+          founder_review_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          max_batch_size?: number
+          metadata?: Json
+          packet_status?: string
+          packet_summary?: string | null
+          packet_title: string
+          preparation_run_id?: string | null
+          proposed_batch_size?: number
+          required_confirmation_phrase?: string | null
+          required_fixes_before_execution?: Json
+          required_founder_decisions?: Json
+          required_gate_key?: string | null
+          rollback_plan?: Json
+          stop_conditions?: Json
+          success_metrics?: Json
+          updated_at?: string
+          warning_count?: number
+        }
+        Update: {
+          blocked_candidate_count?: number
+          business_id?: string
+          candidate_ids?: Json
+          channel_key?: string
+          created_at?: string
+          eligible_candidate_count?: number
+          execution_allowed?: boolean
+          external_action_blocked?: boolean
+          founder_approval_id?: string | null
+          founder_review_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          max_batch_size?: number
+          metadata?: Json
+          packet_status?: string
+          packet_summary?: string | null
+          packet_title?: string
+          preparation_run_id?: string | null
+          proposed_batch_size?: number
+          required_confirmation_phrase?: string | null
+          required_fixes_before_execution?: Json
+          required_founder_decisions?: Json
+          required_gate_key?: string | null
+          rollback_plan?: Json
+          stop_conditions?: Json
+          success_metrics?: Json
+          updated_at?: string
+          warning_count?: number
+        }
+        Relationships: []
+      }
+      business_micro_batch_candidates: {
+        Row: {
+          blocker_reasons: Json
+          business_id: string
+          candidate_status: string
+          candidate_type: string
+          channel_key: string
+          compliance_status: string
+          consent_or_lawful_basis_ready: boolean
+          created_at: string
+          crm_status: string
+          evidence: Json
+          execution_allowed: boolean
+          external_action_blocked: boolean
+          founder_review_required: boolean
+          gate_status: string
+          id: string
+          is_test_data: boolean
+          metadata: Json
+          preparation_run_id: string | null
+          preview_body: string | null
+          provider_status: string
+          recipient_or_target: string | null
+          source_module: string | null
+          source_record_id: string | null
+          structured_payload: Json
+          subject_or_title: string | null
+          tracking_disclosure_ready: boolean
+          unsubscribe_ready: boolean
+          updated_at: string
+          warnings: Json
+        }
+        Insert: {
+          blocker_reasons?: Json
+          business_id: string
+          candidate_status?: string
+          candidate_type: string
+          channel_key: string
+          compliance_status?: string
+          consent_or_lawful_basis_ready?: boolean
+          created_at?: string
+          crm_status?: string
+          evidence?: Json
+          execution_allowed?: boolean
+          external_action_blocked?: boolean
+          founder_review_required?: boolean
+          gate_status?: string
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          preparation_run_id?: string | null
+          preview_body?: string | null
+          provider_status?: string
+          recipient_or_target?: string | null
+          source_module?: string | null
+          source_record_id?: string | null
+          structured_payload?: Json
+          subject_or_title?: string | null
+          tracking_disclosure_ready?: boolean
+          unsubscribe_ready?: boolean
+          updated_at?: string
+          warnings?: Json
+        }
+        Update: {
+          blocker_reasons?: Json
+          business_id?: string
+          candidate_status?: string
+          candidate_type?: string
+          channel_key?: string
+          compliance_status?: string
+          consent_or_lawful_basis_ready?: boolean
+          created_at?: string
+          crm_status?: string
+          evidence?: Json
+          execution_allowed?: boolean
+          external_action_blocked?: boolean
+          founder_review_required?: boolean
+          gate_status?: string
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          preparation_run_id?: string | null
+          preview_body?: string | null
+          provider_status?: string
+          recipient_or_target?: string | null
+          source_module?: string | null
+          source_record_id?: string | null
+          structured_payload?: Json
+          subject_or_title?: string | null
+          tracking_disclosure_ready?: boolean
+          unsubscribe_ready?: boolean
+          updated_at?: string
+          warnings?: Json
+        }
+        Relationships: []
+      }
+      business_micro_batch_preparation_runs: {
+        Row: {
+          activation_plan_id: string | null
+          blocked_count: number
+          business_id: string
+          candidate_count: number
+          channel_key: string
+          channel_status: string
+          created_at: string
+          eligible_count: number
+          execution_allowed: boolean
+          external_action_blocked: boolean
+          founder_approval_id: string | null
+          founder_approval_packet_created: boolean
+          gate_enabled: boolean
+          gate_exists: boolean
+          gate_key: string | null
+          gate_locked: boolean
+          id: string
+          is_test_data: boolean
+          max_allowed_batch_size: number
+          metadata: Json
+          no_forbidden_action_audit: Json
+          preparation_mode: string
+          prepared_batch_size: number
+          provider_status: string
+          readiness_run_id: string | null
+          recommended_next_step: string | null
+          run_status: string
+          updated_at: string
+          warning_count: number
+        }
+        Insert: {
+          activation_plan_id?: string | null
+          blocked_count?: number
+          business_id: string
+          candidate_count?: number
+          channel_key: string
+          channel_status?: string
+          created_at?: string
+          eligible_count?: number
+          execution_allowed?: boolean
+          external_action_blocked?: boolean
+          founder_approval_id?: string | null
+          founder_approval_packet_created?: boolean
+          gate_enabled?: boolean
+          gate_exists?: boolean
+          gate_key?: string | null
+          gate_locked?: boolean
+          id?: string
+          is_test_data?: boolean
+          max_allowed_batch_size?: number
+          metadata?: Json
+          no_forbidden_action_audit?: Json
+          preparation_mode?: string
+          prepared_batch_size?: number
+          provider_status?: string
+          readiness_run_id?: string | null
+          recommended_next_step?: string | null
+          run_status?: string
+          updated_at?: string
+          warning_count?: number
+        }
+        Update: {
+          activation_plan_id?: string | null
+          blocked_count?: number
+          business_id?: string
+          candidate_count?: number
+          channel_key?: string
+          channel_status?: string
+          created_at?: string
+          eligible_count?: number
+          execution_allowed?: boolean
+          external_action_blocked?: boolean
+          founder_approval_id?: string | null
+          founder_approval_packet_created?: boolean
+          gate_enabled?: boolean
+          gate_exists?: boolean
+          gate_key?: string | null
+          gate_locked?: boolean
+          id?: string
+          is_test_data?: boolean
+          max_allowed_batch_size?: number
+          metadata?: Json
+          no_forbidden_action_audit?: Json
+          preparation_mode?: string
+          prepared_batch_size?: number
+          provider_status?: string
+          readiness_run_id?: string | null
+          recommended_next_step?: string | null
+          run_status?: string
+          updated_at?: string
+          warning_count?: number
+        }
+        Relationships: []
+      }
       business_module_status: {
         Row: {
           blockers: Json
