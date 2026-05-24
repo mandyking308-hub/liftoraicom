@@ -1672,6 +1672,45 @@ export type Database = {
           },
         ]
       }
+      ai_go_live_readiness: {
+        Row: {
+          confirmed_at: string | null
+          confirmed_by: string | null
+          created_at: string
+          current_status: string
+          evaluated_at: string | null
+          evaluation_results: Json
+          founder_confirmations: Json
+          id: string
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          current_status?: string
+          evaluated_at?: string | null
+          evaluation_results?: Json
+          founder_confirmations?: Json
+          id?: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          current_status?: string
+          evaluated_at?: string | null
+          evaluation_results?: Json
+          founder_confirmations?: Json
+          id?: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ai_kill_switch_state: {
         Row: {
           global_ai_paused: boolean
