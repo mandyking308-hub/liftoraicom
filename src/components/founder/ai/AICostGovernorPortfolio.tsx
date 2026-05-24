@@ -235,7 +235,7 @@ export default function AICostGovernorPortfolio() {
                 <TableHeader><TableRow><TableHead>Business</TableHead><TableHead>Monthly used</TableHead><TableHead>Status</TableHead><TableHead>Top agent</TableHead></TableRow></TableHeader>
                 <TableBody>
                   {budgetUsage.map((r) => {
-                    const pct = r.usage?.monthly_pct ?? 0;
+                    const pct = (r.usage?.pct_monthly ?? 0) as number;
                     return (
                       <TableRow key={r.id}>
                         <TableCell>{r.name}</TableCell>
@@ -253,7 +253,7 @@ export default function AICostGovernorPortfolio() {
                             : "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
                           }>{r.usage?.status ?? "unknown"}</Badge>
                         </TableCell>
-                        <TableCell className="text-xs">{r.usage?.top_spending_agent ?? "—"}</TableCell>
+                        <TableCell className="text-xs">{r.usage?.top_agent?.agent_id ?? "—"}</TableCell>
                       </TableRow>
                     );
                   })}
