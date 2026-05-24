@@ -19216,6 +19216,48 @@ export type Database = {
           },
         ]
       }
+      ma_acceptance_criteria: {
+        Row: {
+          completion_status: string
+          created_at: string
+          id: string
+          issues: string | null
+          last_checked: string | null
+          module: string
+          next_action: string | null
+          notes: string | null
+          owner: string | null
+          test_status: string
+          updated_at: string
+        }
+        Insert: {
+          completion_status?: string
+          created_at?: string
+          id?: string
+          issues?: string | null
+          last_checked?: string | null
+          module: string
+          next_action?: string | null
+          notes?: string | null
+          owner?: string | null
+          test_status?: string
+          updated_at?: string
+        }
+        Update: {
+          completion_status?: string
+          created_at?: string
+          id?: string
+          issues?: string | null
+          last_checked?: string | null
+          module?: string
+          next_action?: string | null
+          notes?: string | null
+          owner?: string | null
+          test_status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ma_adviser_channels: {
         Row: {
           adviser_name: string
@@ -19406,6 +19448,7 @@ export type Database = {
           due_date: string | null
           freshness_score: number | null
           id: string
+          is_test_data: boolean
           portfolio_asset_id: string | null
           prompt_version_id: string | null
           reasoning: string | null
@@ -19432,6 +19475,7 @@ export type Database = {
           due_date?: string | null
           freshness_score?: number | null
           id?: string
+          is_test_data?: boolean
           portfolio_asset_id?: string | null
           prompt_version_id?: string | null
           reasoning?: string | null
@@ -19458,6 +19502,7 @@ export type Database = {
           due_date?: string | null
           freshness_score?: number | null
           id?: string
+          is_test_data?: boolean
           portfolio_asset_id?: string | null
           prompt_version_id?: string | null
           reasoning?: string | null
@@ -19919,6 +19964,7 @@ export type Database = {
           decision_makers_notes: string | null
           fit_score: number | null
           id: string
+          is_test_data: boolean
           last_contacted_at: string | null
           likely_deal_size_base: number | null
           likely_deal_size_high: number | null
@@ -19939,6 +19985,7 @@ export type Database = {
           decision_makers_notes?: string | null
           fit_score?: number | null
           id?: string
+          is_test_data?: boolean
           last_contacted_at?: string | null
           likely_deal_size_base?: number | null
           likely_deal_size_high?: number | null
@@ -19959,6 +20006,7 @@ export type Database = {
           decision_makers_notes?: string | null
           fit_score?: number | null
           id?: string
+          is_test_data?: boolean
           last_contacted_at?: string | null
           likely_deal_size_base?: number | null
           likely_deal_size_high?: number | null
@@ -20115,6 +20163,7 @@ export type Database = {
           estimated_revenue: number | null
           expansion_signals: string | null
           id: string
+          is_test_data: boolean
           last_researched_at: string | null
           legal_name: string | null
           market_cap: number | null
@@ -20142,6 +20191,7 @@ export type Database = {
           estimated_revenue?: number | null
           expansion_signals?: string | null
           id?: string
+          is_test_data?: boolean
           last_researched_at?: string | null
           legal_name?: string | null
           market_cap?: number | null
@@ -20169,6 +20219,7 @@ export type Database = {
           estimated_revenue?: number | null
           expansion_signals?: string | null
           id?: string
+          is_test_data?: boolean
           last_researched_at?: string | null
           legal_name?: string | null
           market_cap?: number | null
@@ -20445,6 +20496,57 @@ export type Database = {
         }
         Relationships: []
       }
+      ma_data_quality_scores: {
+        Row: {
+          completeness: number | null
+          computed_at: string
+          confidence: number | null
+          created_at: string
+          duplicate_risk: number | null
+          freshness: number | null
+          human_review_required: boolean
+          id: string
+          licence_risk: string | null
+          missing_required: Json
+          record_id: string
+          record_type: string
+          source_quality: number | null
+          warnings: Json
+        }
+        Insert: {
+          completeness?: number | null
+          computed_at?: string
+          confidence?: number | null
+          created_at?: string
+          duplicate_risk?: number | null
+          freshness?: number | null
+          human_review_required?: boolean
+          id?: string
+          licence_risk?: string | null
+          missing_required?: Json
+          record_id: string
+          record_type: string
+          source_quality?: number | null
+          warnings?: Json
+        }
+        Update: {
+          completeness?: number | null
+          computed_at?: string
+          confidence?: number | null
+          created_at?: string
+          duplicate_risk?: number | null
+          freshness?: number | null
+          human_review_required?: boolean
+          id?: string
+          licence_risk?: string | null
+          missing_required?: Json
+          record_id?: string
+          record_type?: string
+          source_quality?: number | null
+          warnings?: Json
+        }
+        Relationships: []
+      }
       ma_data_room_items: {
         Row: {
           adviser_reviewed: boolean | null
@@ -20462,6 +20564,7 @@ export type Database = {
           notes: string | null
           owner: string | null
           portfolio_asset_id: string
+          sharing_level: string
           status: Database["public"]["Enums"]["ma_data_room_status"]
           storage_location: string | null
           updated_at: string
@@ -20482,6 +20585,7 @@ export type Database = {
           notes?: string | null
           owner?: string | null
           portfolio_asset_id: string
+          sharing_level?: string
           status?: Database["public"]["Enums"]["ma_data_room_status"]
           storage_location?: string | null
           updated_at?: string
@@ -20502,6 +20606,7 @@ export type Database = {
           notes?: string | null
           owner?: string | null
           portfolio_asset_id?: string
+          sharing_level?: string
           status?: Database["public"]["Enums"]["ma_data_room_status"]
           storage_location?: string | null
           updated_at?: string
@@ -20534,6 +20639,7 @@ export type Database = {
           implied_ebitda_multiple: number | null
           implied_revenue_multiple: number | null
           investor_id: string | null
+          is_test_data: boolean
           revenue_at_deal: number | null
           source_id: string | null
           target_company_id: string | null
@@ -20557,6 +20663,7 @@ export type Database = {
           implied_ebitda_multiple?: number | null
           implied_revenue_multiple?: number | null
           investor_id?: string | null
+          is_test_data?: boolean
           revenue_at_deal?: number | null
           source_id?: string | null
           target_company_id?: string | null
@@ -20580,6 +20687,7 @@ export type Database = {
           implied_ebitda_multiple?: number | null
           implied_revenue_multiple?: number | null
           investor_id?: string | null
+          is_test_data?: boolean
           revenue_at_deal?: number | null
           source_id?: string | null
           target_company_id?: string | null
@@ -20710,6 +20818,81 @@ export type Database = {
           reason?: string
           severity?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      ma_environment_mode: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          current_mode: string
+          id: string
+          notes: string | null
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          current_mode?: string
+          id?: string
+          notes?: string | null
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          current_mode?: string
+          id?: string
+          notes?: string | null
+        }
+        Relationships: []
+      }
+      ma_error_queue: {
+        Row: {
+          created_at: string
+          error_type: string
+          id: string
+          message: string
+          module: string | null
+          notes: string | null
+          occurred_at: string
+          related_record_id: string | null
+          related_record_type: string | null
+          resolved: boolean
+          resolved_at: string | null
+          resolved_by: string | null
+          retry_available: boolean
+          severity: string
+        }
+        Insert: {
+          created_at?: string
+          error_type: string
+          id?: string
+          message: string
+          module?: string | null
+          notes?: string | null
+          occurred_at?: string
+          related_record_id?: string | null
+          related_record_type?: string | null
+          resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
+          retry_available?: boolean
+          severity?: string
+        }
+        Update: {
+          created_at?: string
+          error_type?: string
+          id?: string
+          message?: string
+          module?: string | null
+          notes?: string | null
+          occurred_at?: string
+          related_record_id?: string | null
+          related_record_type?: string | null
+          resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
+          retry_available?: boolean
+          severity?: string
         }
         Relationships: []
       }
@@ -21124,6 +21307,71 @@ export type Database = {
             columns: ["import_id"]
             isOneToOne: false
             referencedRelation: "ma_data_imports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ma_incidents: {
+        Row: {
+          created_at: string
+          description: string | null
+          escalation_path: string | null
+          id: string
+          incident_type: string
+          mitigation: string | null
+          opened_at: string
+          owner: string | null
+          portfolio_asset_id: string | null
+          related_record_id: string | null
+          related_record_type: string | null
+          resolved_at: string | null
+          severity: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          escalation_path?: string | null
+          id?: string
+          incident_type: string
+          mitigation?: string | null
+          opened_at?: string
+          owner?: string | null
+          portfolio_asset_id?: string | null
+          related_record_id?: string | null
+          related_record_type?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          escalation_path?: string | null
+          id?: string
+          incident_type?: string
+          mitigation?: string | null
+          opened_at?: string
+          owner?: string | null
+          portfolio_asset_id?: string | null
+          related_record_id?: string | null
+          related_record_type?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ma_incidents_portfolio_asset_id_fkey"
+            columns: ["portfolio_asset_id"]
+            isOneToOne: false
+            referencedRelation: "ma_portfolio_assets"
             referencedColumns: ["id"]
           },
         ]
@@ -21549,6 +21797,36 @@ export type Database = {
         }
         Relationships: []
       }
+      ma_permissions_matrix: {
+        Row: {
+          allowed: boolean
+          capability: string
+          created_at: string
+          id: string
+          notes: string | null
+          role_name: string
+          updated_at: string
+        }
+        Insert: {
+          allowed?: boolean
+          capability: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          role_name: string
+          updated_at?: string
+        }
+        Update: {
+          allowed?: boolean
+          capability?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          role_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ma_portfolio_assets: {
         Row: {
           asset_name: string
@@ -21565,6 +21843,7 @@ export type Database = {
           exit_readiness_score: number | null
           founder_dependency_score: number | null
           id: string
+          is_test_data: boolean
           jurisdiction_notes: string | null
           liftor_operability_score: number | null
           needs_review: boolean
@@ -21594,6 +21873,7 @@ export type Database = {
           exit_readiness_score?: number | null
           founder_dependency_score?: number | null
           id?: string
+          is_test_data?: boolean
           jurisdiction_notes?: string | null
           liftor_operability_score?: number | null
           needs_review?: boolean
@@ -21623,6 +21903,7 @@ export type Database = {
           exit_readiness_score?: number | null
           founder_dependency_score?: number | null
           id?: string
+          is_test_data?: boolean
           jurisdiction_notes?: string | null
           liftor_operability_score?: number | null
           needs_review?: boolean
@@ -21759,6 +22040,154 @@ export type Database = {
         }
         Relationships: []
       }
+      ma_reporting_packs: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          approved_for_export: boolean
+          contents: Json
+          created_at: string
+          generated_at: string
+          generated_by: string | null
+          id: string
+          notes: string | null
+          pack_type: string
+          period_end: string | null
+          period_start: string | null
+          portfolio_asset_id: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          approved_for_export?: boolean
+          contents?: Json
+          created_at?: string
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          notes?: string | null
+          pack_type: string
+          period_end?: string | null
+          period_start?: string | null
+          portfolio_asset_id?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          approved_for_export?: boolean
+          contents?: Json
+          created_at?: string
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          notes?: string | null
+          pack_type?: string
+          period_end?: string | null
+          period_start?: string | null
+          portfolio_asset_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ma_reporting_packs_portfolio_asset_id_fkey"
+            columns: ["portfolio_asset_id"]
+            isOneToOne: false
+            referencedRelation: "ma_portfolio_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ma_retention_policies: {
+        Row: {
+          action: string
+          created_at: string
+          do_not_delete: boolean
+          id: string
+          legal_hold: boolean
+          manual_review_required: boolean
+          notes: string | null
+          period_months: number | null
+          record_class: string
+          updated_at: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          do_not_delete?: boolean
+          id?: string
+          legal_hold?: boolean
+          manual_review_required?: boolean
+          notes?: string | null
+          period_months?: number | null
+          record_class: string
+          updated_at?: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          do_not_delete?: boolean
+          id?: string
+          legal_hold?: boolean
+          manual_review_required?: boolean
+          notes?: string | null
+          period_months?: number | null
+          record_class?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ma_strategic_assumptions: {
+        Row: {
+          assumption: string
+          confidence: number | null
+          created_at: string
+          evidence: string | null
+          id: string
+          outcome: string | null
+          owner: string | null
+          portfolio_asset_id: string | null
+          review_date: string | null
+          status: string
+          test_method: string | null
+          updated_at: string
+        }
+        Insert: {
+          assumption: string
+          confidence?: number | null
+          created_at?: string
+          evidence?: string | null
+          id?: string
+          outcome?: string | null
+          owner?: string | null
+          portfolio_asset_id?: string | null
+          review_date?: string | null
+          status?: string
+          test_method?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assumption?: string
+          confidence?: number | null
+          created_at?: string
+          evidence?: string | null
+          id?: string
+          outcome?: string | null
+          owner?: string | null
+          portfolio_asset_id?: string | null
+          review_date?: string | null
+          status?: string
+          test_method?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ma_strategic_assumptions_portfolio_asset_id_fkey"
+            columns: ["portfolio_asset_id"]
+            isOneToOne: false
+            referencedRelation: "ma_portfolio_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ma_valuation_benchmarks: {
         Row: {
           asset_type: Database["public"]["Enums"]["ma_asset_type"] | null
@@ -21817,6 +22246,7 @@ export type Database = {
           confidence_score: number | null
           created_at: string
           id: string
+          is_test_data: boolean
           recommended_action: string | null
           related_company_id: string | null
           related_investor_id: string | null
@@ -21834,6 +22264,7 @@ export type Database = {
           confidence_score?: number | null
           created_at?: string
           id?: string
+          is_test_data?: boolean
           recommended_action?: string | null
           related_company_id?: string | null
           related_investor_id?: string | null
@@ -21851,6 +22282,7 @@ export type Database = {
           confidence_score?: number | null
           created_at?: string
           id?: string
+          is_test_data?: boolean
           recommended_action?: string | null
           related_company_id?: string | null
           related_investor_id?: string | null
