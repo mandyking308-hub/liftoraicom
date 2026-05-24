@@ -3784,6 +3784,309 @@ export type Database = {
           },
         ]
       }
+      business_external_activation_channel_checks: {
+        Row: {
+          batch_limit: number
+          blocker_reasons: Json
+          business_id: string
+          channel_key: string
+          channel_name: string
+          channel_status: string
+          compliance_ready: boolean
+          confirmation_phrase: string | null
+          created_at: string
+          crm_ready: boolean
+          draft_ready: boolean
+          external_action_blocked: boolean
+          founder_approval_present: boolean
+          founder_approval_required: boolean
+          gate_enabled: boolean
+          gate_exists: boolean
+          gate_key: string | null
+          gate_locked: boolean
+          id: string
+          is_test_data: boolean
+          metadata: Json
+          next_safe_action: string | null
+          provider_key: string | null
+          provider_status: string
+          readiness_run_id: string | null
+          recommended_first_batch_size: number
+          secret_present: boolean
+          secret_required: boolean
+          secret_value_returned: boolean
+          tracking_disclosure_ready: boolean
+          unsubscribe_ready: boolean
+          updated_at: string
+          warnings: Json
+          webhook_ready: boolean
+        }
+        Insert: {
+          batch_limit?: number
+          blocker_reasons?: Json
+          business_id: string
+          channel_key: string
+          channel_name: string
+          channel_status?: string
+          compliance_ready?: boolean
+          confirmation_phrase?: string | null
+          created_at?: string
+          crm_ready?: boolean
+          draft_ready?: boolean
+          external_action_blocked?: boolean
+          founder_approval_present?: boolean
+          founder_approval_required?: boolean
+          gate_enabled?: boolean
+          gate_exists?: boolean
+          gate_key?: string | null
+          gate_locked?: boolean
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          next_safe_action?: string | null
+          provider_key?: string | null
+          provider_status?: string
+          readiness_run_id?: string | null
+          recommended_first_batch_size?: number
+          secret_present?: boolean
+          secret_required?: boolean
+          secret_value_returned?: boolean
+          tracking_disclosure_ready?: boolean
+          unsubscribe_ready?: boolean
+          updated_at?: string
+          warnings?: Json
+          webhook_ready?: boolean
+        }
+        Update: {
+          batch_limit?: number
+          blocker_reasons?: Json
+          business_id?: string
+          channel_key?: string
+          channel_name?: string
+          channel_status?: string
+          compliance_ready?: boolean
+          confirmation_phrase?: string | null
+          created_at?: string
+          crm_ready?: boolean
+          draft_ready?: boolean
+          external_action_blocked?: boolean
+          founder_approval_present?: boolean
+          founder_approval_required?: boolean
+          gate_enabled?: boolean
+          gate_exists?: boolean
+          gate_key?: string | null
+          gate_locked?: boolean
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          next_safe_action?: string | null
+          provider_key?: string | null
+          provider_status?: string
+          readiness_run_id?: string | null
+          recommended_first_batch_size?: number
+          secret_present?: boolean
+          secret_required?: boolean
+          secret_value_returned?: boolean
+          tracking_disclosure_ready?: boolean
+          unsubscribe_ready?: boolean
+          updated_at?: string
+          warnings?: Json
+          webhook_ready?: boolean
+        }
+        Relationships: []
+      }
+      business_external_activation_plans: {
+        Row: {
+          blocked_channels: Json
+          business_id: string
+          created_at: string
+          external_action_blocked: boolean
+          external_activation_allowed: boolean
+          founder_approval_id: string | null
+          founder_review_required: boolean
+          id: string
+          is_test_data: boolean
+          max_first_batch: number
+          metadata: Json
+          plan_status: string
+          plan_summary: string | null
+          plan_title: string
+          plan_type: string
+          readiness_run_id: string | null
+          ready_channels: Json
+          recommended_sequence: Json
+          required_compliance_fixes: Json
+          required_crm_fixes: Json
+          required_draft_reviews: Json
+          required_founder_decisions: Json
+          required_provider_setup: Json
+          rollback_plan: Json
+          stop_conditions: Json
+          success_metrics: Json
+          updated_at: string
+        }
+        Insert: {
+          blocked_channels?: Json
+          business_id: string
+          created_at?: string
+          external_action_blocked?: boolean
+          external_activation_allowed?: boolean
+          founder_approval_id?: string | null
+          founder_review_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          max_first_batch?: number
+          metadata?: Json
+          plan_status?: string
+          plan_summary?: string | null
+          plan_title: string
+          plan_type?: string
+          readiness_run_id?: string | null
+          ready_channels?: Json
+          recommended_sequence?: Json
+          required_compliance_fixes?: Json
+          required_crm_fixes?: Json
+          required_draft_reviews?: Json
+          required_founder_decisions?: Json
+          required_provider_setup?: Json
+          rollback_plan?: Json
+          stop_conditions?: Json
+          success_metrics?: Json
+          updated_at?: string
+        }
+        Update: {
+          blocked_channels?: Json
+          business_id?: string
+          created_at?: string
+          external_action_blocked?: boolean
+          external_activation_allowed?: boolean
+          founder_approval_id?: string | null
+          founder_review_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          max_first_batch?: number
+          metadata?: Json
+          plan_status?: string
+          plan_summary?: string | null
+          plan_title?: string
+          plan_type?: string
+          readiness_run_id?: string | null
+          ready_channels?: Json
+          recommended_sequence?: Json
+          required_compliance_fixes?: Json
+          required_crm_fixes?: Json
+          required_draft_reviews?: Json
+          required_founder_decisions?: Json
+          required_provider_setup?: Json
+          rollback_plan?: Json
+          stop_conditions?: Json
+          success_metrics?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      business_external_activation_readiness_runs: {
+        Row: {
+          activation_record_id: string | null
+          all_external_gates_locked: boolean
+          blocker_count: number
+          business_id: string
+          channel_count: number
+          channels_blocked: number
+          channels_ready: number
+          channels_warning: number
+          compliance_ready: boolean
+          created_at: string
+          crm_ready: boolean
+          draft_assets_ready: boolean
+          external_activation_allowed: boolean
+          external_ready: boolean
+          founder_approval_ready: boolean
+          id: string
+          internal_ready: boolean
+          is_test_data: boolean
+          knowledge_ready: boolean
+          latest_weekly_review_id: string | null
+          metadata: Json
+          no_forbidden_action_audit: Json
+          provider_lanes_ready: boolean
+          provider_status: string
+          readiness_mode: string
+          readiness_score: number
+          recommended_first_batch_size: number
+          recommended_mode: string
+          run_status: string
+          updated_at: string
+          warning_count: number
+        }
+        Insert: {
+          activation_record_id?: string | null
+          all_external_gates_locked?: boolean
+          blocker_count?: number
+          business_id: string
+          channel_count?: number
+          channels_blocked?: number
+          channels_ready?: number
+          channels_warning?: number
+          compliance_ready?: boolean
+          created_at?: string
+          crm_ready?: boolean
+          draft_assets_ready?: boolean
+          external_activation_allowed?: boolean
+          external_ready?: boolean
+          founder_approval_ready?: boolean
+          id?: string
+          internal_ready?: boolean
+          is_test_data?: boolean
+          knowledge_ready?: boolean
+          latest_weekly_review_id?: string | null
+          metadata?: Json
+          no_forbidden_action_audit?: Json
+          provider_lanes_ready?: boolean
+          provider_status?: string
+          readiness_mode?: string
+          readiness_score?: number
+          recommended_first_batch_size?: number
+          recommended_mode?: string
+          run_status?: string
+          updated_at?: string
+          warning_count?: number
+        }
+        Update: {
+          activation_record_id?: string | null
+          all_external_gates_locked?: boolean
+          blocker_count?: number
+          business_id?: string
+          channel_count?: number
+          channels_blocked?: number
+          channels_ready?: number
+          channels_warning?: number
+          compliance_ready?: boolean
+          created_at?: string
+          crm_ready?: boolean
+          draft_assets_ready?: boolean
+          external_activation_allowed?: boolean
+          external_ready?: boolean
+          founder_approval_ready?: boolean
+          id?: string
+          internal_ready?: boolean
+          is_test_data?: boolean
+          knowledge_ready?: boolean
+          latest_weekly_review_id?: string | null
+          metadata?: Json
+          no_forbidden_action_audit?: Json
+          provider_lanes_ready?: boolean
+          provider_status?: string
+          readiness_mode?: string
+          readiness_score?: number
+          recommended_first_batch_size?: number
+          recommended_mode?: string
+          run_status?: string
+          updated_at?: string
+          warning_count?: number
+        }
+        Relationships: []
+      }
       business_internal_activation_records: {
         Row: {
           activation_mode: string
