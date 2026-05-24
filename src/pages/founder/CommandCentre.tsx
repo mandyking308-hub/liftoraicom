@@ -778,6 +778,7 @@ const CommandCentre = () => {
   return (
     <FounderLayout>
       <CommandCentreViewModeBar />
+      <div className="max-w-7xl mx-auto px-4 pt-4"><AIUsageMiniWidget /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><FounderAlertEscalationPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><CommandCentreTruthSyncPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><FinalHardeningStatusPanel /></div>
