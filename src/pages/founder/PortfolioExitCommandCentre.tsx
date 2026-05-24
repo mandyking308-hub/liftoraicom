@@ -212,9 +212,16 @@ export default function PortfolioExitCommandCentre() {
               isolated M&amp;A schema; visibility is unified here.
             </p>
           </div>
-          <Badge variant="outline" className="gap-1">
-            <Lock className="h-3 w-3" /> External outreach LOCKED_BY_DESIGN
-          </Badge>
+          <div className="flex flex-col items-end gap-2">
+            <Button asChild size="sm" variant="outline">
+              <Link to="/founder/portfolio-exit/intelligence">
+                <ArrowUpRight className="h-4 w-4 mr-1" /> Open M&amp;A Intelligence Workspace
+              </Link>
+            </Button>
+            <Badge variant="outline" className="gap-1">
+              <Lock className="h-3 w-3" /> External outreach LOCKED_BY_DESIGN
+            </Badge>
+          </div>
         </div>
 
         {/* Overview cards */}
