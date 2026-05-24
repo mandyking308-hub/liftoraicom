@@ -138,5 +138,3 @@ Deno.serve(async (req) => {
     );
   }
 });
-
-const modules = MODULES;
