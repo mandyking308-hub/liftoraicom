@@ -225,7 +225,7 @@ export async function decideApproval(input: DecideApprovalInput): Promise<void> 
       founder_notes: input.founder_notes ?? null,
       decided_at: new Date().toISOString(),
     };
-    await supabase.from("ai_usage_ledger").update(ledgerPatch).eq("id", ledgerId);
+    await supabase.from("ai_usage_ledger").update(ledgerPatch as any).eq("id", ledgerId);
   }
 }
 
