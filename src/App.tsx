@@ -115,6 +115,7 @@ import AICachedContext from "./pages/founder/AICachedContext";
 import AIProviderPricing from "./pages/founder/AIProviderPricing";
 import AIQualityScoring from "./pages/founder/AIQualityScoring";
 import AISecurityCentre from "./pages/founder/AISecurityCentre";
+import AIQueueControl from "./pages/founder/AIQueueControl";
 import DataIngestionCentre from "./pages/founder/DataIngestionCentre";
 import BrainSessions from "./pages/founder/BrainSessions";
 import BrainDrafts from "./pages/founder/BrainDrafts";
