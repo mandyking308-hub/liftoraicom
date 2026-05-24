@@ -27,6 +27,7 @@ const navItems = [
   { label: "Prompt Templates", to: "/founder/ai-cost/templates", icon: Sparkles },
   { label: "Cached Context", to: "/founder/ai-cost/context", icon: BookOpen },
   { label: "Provider Pricing", to: "/founder/ai-cost/pricing", icon: Coins },
+  { label: "AI Quality Scoring", to: "/founder/ai-cost/quality", icon: Sparkles },
   { label: "AI Co-Pilot", to: "/founder/copilot", icon: MessageSquare },
   { label: "AI Brain", to: "/founder/brain", icon: Brain },
   { label: "Decisions", to: "/founder/decisions", icon: Scale },

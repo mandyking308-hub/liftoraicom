@@ -113,6 +113,7 @@ import AIApprovalGates from "./pages/founder/AIApprovalGates";
 import AIPromptTemplates from "./pages/founder/AIPromptTemplates";
 import AICachedContext from "./pages/founder/AICachedContext";
 import AIProviderPricing from "./pages/founder/AIProviderPricing";
+import AIQualityScoring from "./pages/founder/AIQualityScoring";
 import DataIngestionCentre from "./pages/founder/DataIngestionCentre";
 import BrainSessions from "./pages/founder/BrainSessions";
 import BrainDrafts from "./pages/founder/BrainDrafts";
@@ -327,6 +328,7 @@ const App = () => (
             <Route path="/founder/ai-cost/templates" element={<FounderRoute><AIPromptTemplates /></FounderRoute>} />
             <Route path="/founder/ai-cost/context" element={<FounderRoute><AICachedContext /></FounderRoute>} />
             <Route path="/founder/ai-cost/pricing" element={<FounderRoute><AIProviderPricing /></FounderRoute>} />
+            <Route path="/founder/ai-cost/quality" element={<FounderRoute><AIQualityScoring /></FounderRoute>} />
             <Route path="/founder/brain" element={<FounderRoute><LiftorBrain /></FounderRoute>} />
             <Route path="/founder/brain/sessions" element={<FounderRoute><BrainSessions /></FounderRoute>} />
             <Route path="/founder/brain/drafts" element={<FounderRoute><BrainDrafts /></FounderRoute>} />
