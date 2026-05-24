@@ -3613,6 +3613,162 @@ export type Database = {
           },
         ]
       }
+      business_internal_activation_records: {
+        Row: {
+          activation_mode: string
+          activation_source: string
+          activation_status: string
+          auto_send_enabled: boolean
+          blocker_count: number
+          business_id: string
+          created_at: string
+          cron_enabled: boolean
+          external_actions_locked: boolean
+          external_ready: boolean
+          factory_run_id: string | null
+          founder_review_required: boolean
+          founder_review_status: string
+          id: string
+          internal_ready: boolean
+          is_test_data: boolean
+          materialisation_run_id: string | null
+          metadata: Json
+          missing_context_count: number
+          onboarding_run_id: string | null
+          operating_end_date: string | null
+          operating_start_date: string | null
+          readiness_score: number
+          risk_warning_count: number
+          starter_pack_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          activation_mode?: string
+          activation_source?: string
+          activation_status?: string
+          auto_send_enabled?: boolean
+          blocker_count?: number
+          business_id: string
+          created_at?: string
+          cron_enabled?: boolean
+          external_actions_locked?: boolean
+          external_ready?: boolean
+          factory_run_id?: string | null
+          founder_review_required?: boolean
+          founder_review_status?: string
+          id?: string
+          internal_ready?: boolean
+          is_test_data?: boolean
+          materialisation_run_id?: string | null
+          metadata?: Json
+          missing_context_count?: number
+          onboarding_run_id?: string | null
+          operating_end_date?: string | null
+          operating_start_date?: string | null
+          readiness_score?: number
+          risk_warning_count?: number
+          starter_pack_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          activation_mode?: string
+          activation_source?: string
+          activation_status?: string
+          auto_send_enabled?: boolean
+          blocker_count?: number
+          business_id?: string
+          created_at?: string
+          cron_enabled?: boolean
+          external_actions_locked?: boolean
+          external_ready?: boolean
+          factory_run_id?: string | null
+          founder_review_required?: boolean
+          founder_review_status?: string
+          id?: string
+          internal_ready?: boolean
+          is_test_data?: boolean
+          materialisation_run_id?: string | null
+          metadata?: Json
+          missing_context_count?: number
+          onboarding_run_id?: string | null
+          operating_end_date?: string | null
+          operating_start_date?: string | null
+          readiness_score?: number
+          risk_warning_count?: number
+          starter_pack_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      business_internal_daily_actions: {
+        Row: {
+          action_category: string
+          action_date: string
+          action_description: string | null
+          action_title: string
+          activation_record_id: string | null
+          business_id: string
+          created_at: string
+          external_action_blocked: boolean
+          external_action_required: boolean
+          founder_review_required: boolean
+          id: string
+          is_test_data: boolean
+          metadata: Json
+          owner_agent: string | null
+          priority: string
+          route_hint: string | null
+          source_id: string | null
+          source_type: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          action_category?: string
+          action_date?: string
+          action_description?: string | null
+          action_title: string
+          activation_record_id?: string | null
+          business_id: string
+          created_at?: string
+          external_action_blocked?: boolean
+          external_action_required?: boolean
+          founder_review_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          owner_agent?: string | null
+          priority?: string
+          route_hint?: string | null
+          source_id?: string | null
+          source_type?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          action_category?: string
+          action_date?: string
+          action_description?: string | null
+          action_title?: string
+          activation_record_id?: string | null
+          business_id?: string
+          created_at?: string
+          external_action_blocked?: boolean
+          external_action_required?: boolean
+          founder_review_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          metadata?: Json
+          owner_agent?: string | null
+          priority?: string
+          route_hint?: string | null
+          source_id?: string | null
+          source_type?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       business_knowledge_assets: {
         Row: {
           agent_visible: boolean
@@ -4485,6 +4641,84 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      business_operating_runbook_items: {
+        Row: {
+          activation_record_id: string | null
+          business_id: string
+          cadence: string
+          completion_notes: string | null
+          created_at: string
+          description: string | null
+          due_at: string | null
+          external_action_blocked: boolean
+          external_action_required: boolean
+          id: string
+          is_test_data: boolean
+          item_type: string
+          metadata: Json
+          owner_agent: string | null
+          owner_role: string | null
+          priority: string
+          requires_founder_review: boolean
+          route_hint: string | null
+          source_module: string | null
+          source_record_id: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          activation_record_id?: string | null
+          business_id: string
+          cadence?: string
+          completion_notes?: string | null
+          created_at?: string
+          description?: string | null
+          due_at?: string | null
+          external_action_blocked?: boolean
+          external_action_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          item_type: string
+          metadata?: Json
+          owner_agent?: string | null
+          owner_role?: string | null
+          priority?: string
+          requires_founder_review?: boolean
+          route_hint?: string | null
+          source_module?: string | null
+          source_record_id?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          activation_record_id?: string | null
+          business_id?: string
+          cadence?: string
+          completion_notes?: string | null
+          created_at?: string
+          description?: string | null
+          due_at?: string | null
+          external_action_blocked?: boolean
+          external_action_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          item_type?: string
+          metadata?: Json
+          owner_agent?: string | null
+          owner_role?: string | null
+          priority?: string
+          requires_founder_review?: boolean
+          route_hint?: string | null
+          source_module?: string | null
+          source_record_id?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       business_operating_runbooks: {
         Row: {
