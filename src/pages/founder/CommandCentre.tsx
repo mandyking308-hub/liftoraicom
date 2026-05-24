@@ -27,6 +27,7 @@ import BusinessDailyOperatingLoopPanel from "@/components/founder/activation/Bus
 import BusinessWeeklyReviewPanel from "@/components/founder/activation/BusinessWeeklyReviewPanel";
 import ControlledExternalActivationReadinessPanel from "@/components/founder/activation/ControlledExternalActivationReadinessPanel";
 import ControlledMicroBatchPreparationPanel from "@/components/founder/activation/ControlledMicroBatchPreparationPanel";
+import LiftorBuildPhaseCloseoutPanel from "@/components/founder/activation/LiftorBuildPhaseCloseoutPanel";
 import BusinessRehearsalSimulationPanel from "@/components/founder/activation/BusinessRehearsalSimulationPanel";
 import PreLiveBaselineControlPanel from "@/components/founder/activation/PreLiveBaselineControlPanel";
 import RevenueTargetOperatingPanel from "@/components/founder/revenue/RevenueTargetOperatingPanel";
