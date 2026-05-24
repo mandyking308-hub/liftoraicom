@@ -658,6 +658,84 @@ export type Database = {
           },
         ]
       }
+      ai_action_queue: {
+        Row: {
+          action_type: string
+          agent_id: string | null
+          audit_metadata: Json
+          block_reason: string | null
+          business_id: string | null
+          campaign_id: string | null
+          completed_at: string | null
+          created_at: string
+          estimated_cost: number
+          id: string
+          idempotency_key: string | null
+          linked_ledger_id: string | null
+          max_retries: number
+          priority: string
+          requested_model_tier: string | null
+          retry_count: number
+          scheduled_for: string | null
+          selected_model_tier: string | null
+          started_at: string | null
+          status: string
+          task_category: string
+          task_id: string | null
+          workflow_id: string | null
+        }
+        Insert: {
+          action_type: string
+          agent_id?: string | null
+          audit_metadata?: Json
+          block_reason?: string | null
+          business_id?: string | null
+          campaign_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          estimated_cost?: number
+          id?: string
+          idempotency_key?: string | null
+          linked_ledger_id?: string | null
+          max_retries?: number
+          priority?: string
+          requested_model_tier?: string | null
+          retry_count?: number
+          scheduled_for?: string | null
+          selected_model_tier?: string | null
+          started_at?: string | null
+          status?: string
+          task_category: string
+          task_id?: string | null
+          workflow_id?: string | null
+        }
+        Update: {
+          action_type?: string
+          agent_id?: string | null
+          audit_metadata?: Json
+          block_reason?: string | null
+          business_id?: string | null
+          campaign_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          estimated_cost?: number
+          id?: string
+          idempotency_key?: string | null
+          linked_ledger_id?: string | null
+          max_retries?: number
+          priority?: string
+          requested_model_tier?: string | null
+          retry_count?: number
+          scheduled_for?: string | null
+          selected_model_tier?: string | null
+          started_at?: string | null
+          status?: string
+          task_category?: string
+          task_id?: string | null
+          workflow_id?: string | null
+        }
+        Relationships: []
+      }
       ai_actions: {
         Row: {
           action_type: Database["public"]["Enums"]["ai_action_type"]
@@ -1588,6 +1666,51 @@ export type Database = {
           },
         ]
       }
+      ai_kill_switch_state: {
+        Row: {
+          global_ai_paused: boolean
+          id: string
+          pause_reason: string | null
+          paused_agent_ids: string[]
+          paused_at: string | null
+          paused_business_ids: string[]
+          paused_by: string | null
+          paused_campaign_ids: string[]
+          resumed_at: string | null
+          resumed_by: string | null
+          singleton: boolean
+          updated_at: string
+        }
+        Insert: {
+          global_ai_paused?: boolean
+          id?: string
+          pause_reason?: string | null
+          paused_agent_ids?: string[]
+          paused_at?: string | null
+          paused_business_ids?: string[]
+          paused_by?: string | null
+          paused_campaign_ids?: string[]
+          resumed_at?: string | null
+          resumed_by?: string | null
+          singleton?: boolean
+          updated_at?: string
+        }
+        Update: {
+          global_ai_paused?: boolean
+          id?: string
+          pause_reason?: string | null
+          paused_agent_ids?: string[]
+          paused_at?: string | null
+          paused_business_ids?: string[]
+          paused_by?: string | null
+          paused_campaign_ids?: string[]
+          resumed_at?: string | null
+          resumed_by?: string | null
+          singleton?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ai_model_routing_rules: {
         Row: {
           action_type: string | null
@@ -1867,6 +1990,45 @@ export type Database = {
           risk_score?: number | null
           task_category?: string | null
           usefulness_score?: number | null
+        }
+        Relationships: []
+      }
+      ai_rate_limits: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          id: string
+          notes: string | null
+          per_day_limit: number | null
+          per_hour_limit: number | null
+          scope_id: string | null
+          scope_type: string
+          task_category: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          notes?: string | null
+          per_day_limit?: number | null
+          per_hour_limit?: number | null
+          scope_id?: string | null
+          scope_type: string
+          task_category?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          notes?: string | null
+          per_day_limit?: number | null
+          per_hour_limit?: number | null
+          scope_id?: string | null
+          scope_type?: string
+          task_category?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
