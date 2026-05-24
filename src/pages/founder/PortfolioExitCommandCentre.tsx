@@ -244,6 +244,16 @@ export default function PortfolioExitCommandCentre() {
                 <ArrowUpRight className="h-4 w-4 mr-1" /> Carrier-Grade Controls
               </Link>
             </Button>
+            <Button asChild size="sm" variant="default">
+              <Link to="/founder/portfolio-exit/release-gate">
+                <ArrowUpRight className="h-4 w-4 mr-1" /> Release Readiness Gate
+              </Link>
+            </Button>
+            <Button asChild size="sm" variant="outline">
+              <Link to="/founder/portfolio-exit/hardening">
+                <ArrowUpRight className="h-4 w-4 mr-1" /> Hardening Centre
+              </Link>
+            </Button>
             <Button asChild size="sm" variant="outline">
               <Link to="/founder/portfolio-exit/ingestion">
                 <ArrowUpRight className="h-4 w-4 mr-1" /> Open Data Ingestion Centre
