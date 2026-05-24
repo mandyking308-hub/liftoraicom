@@ -14,6 +14,7 @@ const navItems = [
   { label: "Execution Handoff", to: "/founder/portfolio-exit/execution-handoff", icon: Handshake },
   { label: "Data Ingestion", to: "/founder/portfolio-exit/ingestion", icon: FileInput },
   { label: "Portfolio Manual", to: "/founder/portfolio-exit/manual", icon: BookOpenCheck },
+  { label: "Approval Queue", to: "/founder/ai-cost/approvals", icon: ClipboardCheck },
   { label: "Controls Centre", to: "/founder/portfolio-exit/controls", icon: ShieldCheck },
   { label: "Hardening Centre", to: "/founder/portfolio-exit/hardening", icon: ShieldAlert },
   { label: "Operating Status", to: "/founder/portfolio-exit/release-gate", icon: Activity },
