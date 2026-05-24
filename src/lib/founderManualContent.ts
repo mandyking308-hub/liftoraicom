@@ -3481,5 +3481,48 @@ All new tables are RLS-enabled. Founder role has full access via \`has_role(auth
 - No automatic external action is added by this module under any circumstance.
 
 *End of AI Cost Governor + ROI Engine addendum (v5.3).*
+
+## Addendum v5.4 — Monthly AI Finance Pack & Unit Economics
+
+### Purpose
+Produces a self-contained monthly report that answers a single question for each business, agent, campaign and task category: is AI spend creating measurable value, and what should change next month?
+
+### Data sources
+- \`ai_usage_ledger\` — every AI action with \`estimated_cost\`, \`human_equivalent_cost\`, \`revenue_linked_amount\`, \`pipeline_linked_amount\`, \`human_approved\`.
+- \`ai_quality_scores\` — \`approved_without_edit\`, \`edited_before_approval\`, \`rejected\` joined on \`ai_usage_ledger_id\`.
+- \`ai_business_budgets\` — \`monthly_ai_budget\` used to compute remaining budget per business.
+- Simulated rows (\`is_simulation = true\`) are always excluded.
+
+### Service
+\`src/services/aiFinancePack.ts\`:
+- \`buildFinancePack(yyyyMm)\` — returns totals, four breakdown buckets (business, agent, campaign, task category), business unit economics and a founder summary.
+- \`financePackToCSV(pack)\` / \`downloadCSV(filename, csv)\` — single-file export covering all sections.
+- \`monthRange(yyyyMm)\` / \`currentMonth()\` — UTC-aligned month boundaries.
+
+### Metrics
+- **Net saving** = human cost saved − AI spend.
+- **Quality-adjusted ROI** = (human cost saved × approval_rate × (1 − rejection_rate)) ÷ AI spend.
+- **Cost per outcome** = AI spend ÷ count of ledger rows whose \`task_category\` maps to lead / opportunity / sale / content / interaction.
+- **Recommended next-month budget** = scale 1.3×, reduce/pause 0.5×, retire 0×, keep 1.05×.
+- **Estimated payback months** = AI spend ÷ net saving (when net > 0).
+
+### Decision rubric
+Per bucket: \`pause\` if rejection ≥ 40%, \`retire\` if net < 0 with spend > £5, \`scale\` if QROI > 5× and approval ≥ 70%, \`reduce\` if QROI < 1×, \`watch\` if approval < 50% or sample < 3, else \`keep\`.
+
+### Estimation honesty
+Revenue and pipeline values are pulled only from explicitly linked ledger rows; unlinked work contributes zero. The UI labels the summary as containing estimates and surfaces the disclaimer beneath the founder summary card.
+
+### Routes & UI
+- Page: \`/founder/ai-cost/finance\` (admin-only via \`FounderRoute\`).
+- Sidebar entry: "AI Finance Pack".
+- Exports: CSV button on the page header; PDF deferred to a follow-up addendum (CSV-first by design).
+
+### Limitations / future work
+- Outcome mapping (\`CATEGORY_OUTCOME\`) is a static table; future work will let founders edit category → outcome mappings per business.
+- PDF export will reuse the existing proposal PDF pipeline.
+- Quality factor uses approved-without-edit and rejected flags only; future work will weight edited outputs partially.
+- Time-saved minutes are not yet rolled up to FTE-equivalent; planned for v5.5.
+
+*End of Monthly AI Finance Pack addendum (v5.4).*
 `;
 };
