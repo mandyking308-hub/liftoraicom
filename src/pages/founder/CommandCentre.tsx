@@ -966,6 +966,19 @@ const CommandCentre = () => {
               </div>
             </div>
             <PortfolioCommandCentrePanel />
+            <div className="rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+              <div className="text-sm">
+                <span className="font-semibold text-primary">Portfolio &amp; Exit Architecture Engine</span>
+                <span className="text-muted-foreground ml-2">Exit valuation, buyer warm-up, data room readiness and quarterly build selection.</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Link to="/founder/portfolio-exit" className="text-xs px-3 py-1.5 rounded border border-primary/40 text-primary hover:bg-primary/10">Command Centre</Link>
+                <Link to="/founder/portfolio-exit/valuation" className="text-xs px-3 py-1.5 rounded border border-border hover:border-primary/40">Valuation</Link>
+                <Link to="/founder/portfolio-exit/intelligence" className="text-xs px-3 py-1.5 rounded border border-border hover:border-primary/40">M&amp;A Intel</Link>
+                <Link to="/founder/portfolio-exit/execution-handoff" className="text-xs px-3 py-1.5 rounded border border-border hover:border-primary/40">Execution Handoff</Link>
+                <Link to="/founder/portfolio-exit/build-selector" className="text-xs px-3 py-1.5 rounded border border-border hover:border-primary/40">Build Selector</Link>
+              </div>
+            </div>
             <BusinessCapabilityMatrixPanel />
             <GlobalOperatingClockPanel />
             <PortfolioIntelligenceBrainPanel />
