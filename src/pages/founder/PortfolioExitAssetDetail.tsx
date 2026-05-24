@@ -405,6 +405,11 @@ export default function PortfolioExitAssetDetail() {
               />
             </CardContent></Card>
           </TabsContent>
+
+          {/* AI Analysis */}
+          <TabsContent value="ai">
+            <AssetAIAnalysisPanel assetId={asset.id} assetName={asset.asset_name} />
+          </TabsContent>
         </Tabs>
       </div>
     </FounderLayout>
