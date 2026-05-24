@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { format } from "date-fns";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import FounderLayout from "@/components/founder/FounderLayout";
+import AICostBreadcrumb from "@/components/founder/ai/AICostBreadcrumb";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -179,7 +180,7 @@ export default function AIQueueControl() {
 
   return (
     <FounderLayout>
-      <div className="space-y-6 p-4 md:p-6">
+      <AICostBreadcrumb page="Queue Control & Kill Switch" description="Global queue controls and the founder kill switch." /><div className="space-y-6 p-4 md:p-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
             <h1 className="text-2xl md:text-3xl font-semibold flex items-center gap-2">

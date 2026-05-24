@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import FounderLayout from "@/components/founder/FounderLayout";
+import AICostBreadcrumb from "@/components/founder/ai/AICostBreadcrumb";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -160,7 +161,7 @@ export default function AIModelRouting() {
 
   return (
     <FounderLayout>
-      <div className="p-6 space-y-6">
+      <AICostBreadcrumb page="Model Router" description="Routing rules selecting the right model tier per task category." /><div className="p-6 space-y-6">
         <header className="flex items-center justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-2xl font-semibold flex items-center gap-2">

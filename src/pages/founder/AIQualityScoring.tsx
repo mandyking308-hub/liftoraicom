@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import FounderLayout from "@/components/founder/FounderLayout";
+import AICostBreadcrumb from "@/components/founder/ai/AICostBreadcrumb";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -115,7 +116,7 @@ export default function AIQualityScoring() {
 
   return (
     <FounderLayout>
-      <div className="space-y-6">
+      <AICostBreadcrumb page="Quality Scoring" description="Per-output quality scores feeding ROI and recommendations." /><div className="space-y-6">
         <div>
           <h1 className="text-2xl font-semibold flex items-center gap-2">
             <Sparkles className="h-6 w-6 text-primary" /> AI Quality Scoring &amp; Feedback Loop

@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import FounderLayout from "@/components/founder/FounderLayout";
+import AICostBreadcrumb from "@/components/founder/ai/AICostBreadcrumb";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -155,7 +156,7 @@ export default function AIROIEngine() {
 
   return (
     <FounderLayout>
-      <div className="space-y-6">
+      <AICostBreadcrumb page="ROI Engine" description="Per-agent / per-business ROI calculated from linked value vs AI spend." /><div className="space-y-6">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
             <h1 className="text-2xl font-semibold flex items-center gap-2">
