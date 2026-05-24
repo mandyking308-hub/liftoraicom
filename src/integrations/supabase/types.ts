@@ -4251,6 +4251,93 @@ export type Database = {
           },
         ]
       }
+      business_onboarding_factory_runs: {
+        Row: {
+          blocked_items_count: number
+          business_created: boolean
+          business_id: string
+          command_centre_visible: boolean
+          created_at: string
+          external_ready: boolean
+          fallback_items_count: number
+          founder_review_created: boolean
+          id: string
+          internal_ready: boolean
+          is_test_data: boolean
+          knowledge_registered: boolean
+          materialisation_completed: boolean
+          materialised_items_count: number
+          metadata: Json
+          missing_context_count: number
+          no_forbidden_action_audit: Json
+          profile_created: boolean
+          provider_status: string
+          readiness_score: number
+          risk_warning_count: number
+          run_status: string
+          run_type: string
+          skipped_duplicate_count: number
+          starter_pack_created: boolean
+          updated_at: string
+        }
+        Insert: {
+          blocked_items_count?: number
+          business_created?: boolean
+          business_id: string
+          command_centre_visible?: boolean
+          created_at?: string
+          external_ready?: boolean
+          fallback_items_count?: number
+          founder_review_created?: boolean
+          id?: string
+          internal_ready?: boolean
+          is_test_data?: boolean
+          knowledge_registered?: boolean
+          materialisation_completed?: boolean
+          materialised_items_count?: number
+          metadata?: Json
+          missing_context_count?: number
+          no_forbidden_action_audit?: Json
+          profile_created?: boolean
+          provider_status?: string
+          readiness_score?: number
+          risk_warning_count?: number
+          run_status?: string
+          run_type?: string
+          skipped_duplicate_count?: number
+          starter_pack_created?: boolean
+          updated_at?: string
+        }
+        Update: {
+          blocked_items_count?: number
+          business_created?: boolean
+          business_id?: string
+          command_centre_visible?: boolean
+          created_at?: string
+          external_ready?: boolean
+          fallback_items_count?: number
+          founder_review_created?: boolean
+          id?: string
+          internal_ready?: boolean
+          is_test_data?: boolean
+          knowledge_registered?: boolean
+          materialisation_completed?: boolean
+          materialised_items_count?: number
+          metadata?: Json
+          missing_context_count?: number
+          no_forbidden_action_audit?: Json
+          profile_created?: boolean
+          provider_status?: string
+          readiness_score?: number
+          risk_warning_count?: number
+          run_status?: string
+          run_type?: string
+          skipped_duplicate_count?: number
+          starter_pack_created?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       business_operating_modules: {
         Row: {
           blockers: Json
