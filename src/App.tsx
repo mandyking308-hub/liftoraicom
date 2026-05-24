@@ -90,6 +90,7 @@ import BusinessDailyOperatingLoopPage from "./pages/founder/BusinessDailyOperati
 import BusinessWeeklyReviewPage from "./pages/founder/BusinessWeeklyReview";
 import ExternalActivationReadinessPage from "./pages/founder/ExternalActivationReadiness";
 import MicroBatchPreparationPage from "./pages/founder/MicroBatchPreparation";
+import BuildPhaseCloseoutPage from "./pages/founder/BuildPhaseCloseout";
 import LiftorBrain from "./pages/founder/LiftorBrain";
 import BrainSessions from "./pages/founder/BrainSessions";
 import BrainDrafts from "./pages/founder/BrainDrafts";
