@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { calculateActualAICost, flagPricingMissing } from "@/services/aiPricingRegistry";
 
 export type AIModelTier = "no_ai" | "cheap" | "standard" | "premium" | "human_required";
 export type AIUsageStatus =
@@ -57,6 +58,50 @@ function clipSummary(value: string | null | undefined, max = 500): string | null
 export async function logAIUsage(input: LogAIUsageInput) {
   const prompt = Math.max(0, Math.floor(input.prompt_tokens ?? 0));
   const completion = Math.max(0, Math.floor(input.completion_tokens ?? 0));
+
+  // Auto-cost from the pricing registry when caller did not supply a cost
+  // and we know the provider+model. This keeps the ledger honest even when
+  // upstream code forgets to compute cost.
+  let estimatedCost = input.estimated_cost;
+  let currency = input.currency ?? "GBP";
+  const auditExtras: Record<string, unknown> = {};
+  if (
+    (estimatedCost == null || estimatedCost === 0) &&
+    input.model_provider &&
+    input.model_used &&
+    (prompt > 0 || completion > 0)
+  ) {
+    try {
+      const cost = await calculateActualAICost({
+        provider_name: input.model_provider,
+        model_name: input.model_used,
+        prompt_tokens: prompt,
+        completion_tokens: completion,
+        currency_preference: currency,
+      });
+      if (cost.pricing_missing) {
+        auditExtras.pricing_missing = true;
+        auditExtras.pricing_warning = cost.warning;
+        await flagPricingMissing({
+          provider_name: input.model_provider,
+          model_name: input.model_used,
+          business_id: input.business_id ?? null,
+          agent_id: input.agent_id ?? null,
+        });
+      } else {
+        estimatedCost = cost.display_total_cost;
+        currency = cost.display_currency;
+        auditExtras.pricing_rule_id = cost.pricing_rule_used?.id ?? null;
+        auditExtras.pricing_provider_currency = cost.currency;
+        auditExtras.pricing_native_total_cost = cost.estimated_total_cost;
+        auditExtras.fx_converted = cost.fx_converted;
+      }
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn("[aiUsageLogger] pricing lookup failed", e);
+    }
+  }
+
   const row = {
     business_id: input.business_id ?? null,
     agent_id: input.agent_id ?? null,
@@ -72,8 +117,8 @@ export async function logAIUsage(input: LogAIUsageInput) {
     prompt_tokens: prompt,
     completion_tokens: completion,
     total_tokens: prompt + completion,
-    estimated_cost: input.estimated_cost ?? 0,
-    currency: input.currency ?? "GBP",
+    estimated_cost: estimatedCost ?? 0,
+    currency,
     prompt_purpose: input.prompt_purpose ?? null,
     input_summary: clipSummary(input.input_summary),
     output_summary: clipSummary(input.output_summary),
@@ -85,7 +130,7 @@ export async function logAIUsage(input: LogAIUsageInput) {
     human_equivalent_cost: input.human_equivalent_cost ?? 0,
     confidence_score: input.confidence_score ?? null,
     error_message: input.error_message ?? null,
-    audit_metadata: input.audit_metadata ?? {},
+    audit_metadata: { ...(input.audit_metadata ?? {}), ...auditExtras },
     completed_at:
       (input.status ?? "completed") === "completed" || input.status === "failed"
         ? new Date().toISOString()
