@@ -21376,6 +21376,51 @@ export type Database = {
           },
         ]
       }
+      ma_integration_allowlist: {
+        Row: {
+          approval_owner: string | null
+          created_at: string
+          data_accessed: string | null
+          id: string
+          integration_name: string
+          last_reviewed_at: string | null
+          licence_status: string | null
+          notes: string | null
+          risk_rating: string | null
+          secret_reference: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          approval_owner?: string | null
+          created_at?: string
+          data_accessed?: string | null
+          id?: string
+          integration_name: string
+          last_reviewed_at?: string | null
+          licence_status?: string | null
+          notes?: string | null
+          risk_rating?: string | null
+          secret_reference?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          approval_owner?: string | null
+          created_at?: string
+          data_accessed?: string | null
+          id?: string
+          integration_name?: string
+          last_reviewed_at?: string | null
+          licence_status?: string | null
+          notes?: string | null
+          risk_rating?: string | null
+          secret_reference?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ma_intelligence_runs: {
         Row: {
           completed_at: string | null
@@ -21692,6 +21737,39 @@ export type Database = {
           },
         ]
       }
+      ma_lockdown_controls: {
+        Row: {
+          control_key: string
+          description: string | null
+          enabled: boolean
+          id: string
+          label: string
+          reason: string | null
+          set_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          control_key: string
+          description?: string | null
+          enabled?: boolean
+          id?: string
+          label: string
+          reason?: string | null
+          set_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          control_key?: string
+          description?: string | null
+          enabled?: boolean
+          id?: string
+          label?: string
+          reason?: string | null
+          set_by?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ma_mock_diligence_runs: {
         Row: {
           ai_model: string | null
@@ -21995,6 +22073,54 @@ export type Database = {
           },
         ]
       }
+      ma_privacy_records: {
+        Row: {
+          consent_status: string | null
+          created_at: string
+          data_subject_type: string | null
+          delete_review_date: string | null
+          export_restricted: boolean
+          id: string
+          lawful_basis_notes: string | null
+          notes: string | null
+          personal_data: boolean
+          retention_period: string | null
+          source_record_id: string | null
+          source_table: string
+          updated_at: string
+        }
+        Insert: {
+          consent_status?: string | null
+          created_at?: string
+          data_subject_type?: string | null
+          delete_review_date?: string | null
+          export_restricted?: boolean
+          id?: string
+          lawful_basis_notes?: string | null
+          notes?: string | null
+          personal_data?: boolean
+          retention_period?: string | null
+          source_record_id?: string | null
+          source_table: string
+          updated_at?: string
+        }
+        Update: {
+          consent_status?: string | null
+          created_at?: string
+          data_subject_type?: string | null
+          delete_review_date?: string | null
+          export_restricted?: boolean
+          id?: string
+          lawful_basis_notes?: string | null
+          notes?: string | null
+          personal_data?: boolean
+          retention_period?: string | null
+          source_record_id?: string | null
+          source_table?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ma_prompt_versions: {
         Row: {
           active: boolean
@@ -22037,6 +22163,141 @@ export type Database = {
           purpose?: string | null
           updated_at?: string
           version?: string
+        }
+        Relationships: []
+      }
+      ma_rate_cost_limits: {
+        Row: {
+          alert_threshold_pct: number | null
+          current_usage: number | null
+          daily_limit: number | null
+          enrichment_limit: number | null
+          id: string
+          monthly_spend_limit_usd: number | null
+          notes: string | null
+          paid_api_call_limit: number | null
+          scheduled_job_limit: number | null
+          scope: string
+          status: string | null
+          updated_at: string
+          weekly_limit: number | null
+        }
+        Insert: {
+          alert_threshold_pct?: number | null
+          current_usage?: number | null
+          daily_limit?: number | null
+          enrichment_limit?: number | null
+          id?: string
+          monthly_spend_limit_usd?: number | null
+          notes?: string | null
+          paid_api_call_limit?: number | null
+          scheduled_job_limit?: number | null
+          scope: string
+          status?: string | null
+          updated_at?: string
+          weekly_limit?: number | null
+        }
+        Update: {
+          alert_threshold_pct?: number | null
+          current_usage?: number | null
+          daily_limit?: number | null
+          enrichment_limit?: number | null
+          id?: string
+          monthly_spend_limit_usd?: number | null
+          notes?: string | null
+          paid_api_call_limit?: number | null
+          scheduled_job_limit?: number | null
+          scope?: string
+          status?: string | null
+          updated_at?: string
+          weekly_limit?: number | null
+        }
+        Relationships: []
+      }
+      ma_red_team_reviews: {
+        Row: {
+          asset_id: string | null
+          created_at: string
+          created_by: string | null
+          findings: Json | null
+          id: string
+          prompt: string | null
+          severity: string | null
+          status: string | null
+          target_id: string | null
+          target_type: string
+          updated_at: string
+        }
+        Insert: {
+          asset_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          findings?: Json | null
+          id?: string
+          prompt?: string | null
+          severity?: string | null
+          status?: string | null
+          target_id?: string | null
+          target_type: string
+          updated_at?: string
+        }
+        Update: {
+          asset_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          findings?: Json | null
+          id?: string
+          prompt?: string | null
+          severity?: string | null
+          status?: string | null
+          target_id?: string | null
+          target_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ma_release_gate_checks: {
+        Row: {
+          category: string
+          check_key: string
+          created_at: string
+          description: string | null
+          evidence_ref: string | null
+          id: string
+          label: string
+          last_checked_at: string | null
+          notes: string | null
+          severity: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          check_key: string
+          created_at?: string
+          description?: string | null
+          evidence_ref?: string | null
+          id?: string
+          label: string
+          last_checked_at?: string | null
+          notes?: string | null
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          check_key?: string
+          created_at?: string
+          description?: string | null
+          evidence_ref?: string | null
+          id?: string
+          label?: string
+          last_checked_at?: string | null
+          notes?: string | null
+          severity?: string
+          status?: string
+          updated_at?: string
         }
         Relationships: []
       }
