@@ -324,6 +324,7 @@ const App = () => (
             <Route path="/founder/portfolio-exit/ingestion" element={<FounderRoute><DataIngestionCentre /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/hardening" element={<FounderRoute><PortfolioExitHardening /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/release-gate" element={<FounderRoute><PortfolioExitReleaseGate /></FounderRoute>} />
+            <Route path="/founder/ai-cost" element={<FounderRoute><AICostGovernorHub /></FounderRoute>} />
             <Route path="/founder/ai-cost/ledger" element={<FounderRoute><AIUsageLedger /></FounderRoute>} />
             <Route path="/founder/ai-cost/routing" element={<FounderRoute><AIModelRouting /></FounderRoute>} />
             <Route path="/founder/ai-cost/budgets" element={<FounderRoute><AIBusinessBudgets /></FounderRoute>} />
