@@ -19282,6 +19282,149 @@ export type Database = {
         }
         Relationships: []
       }
+      ma_ai_briefings: {
+        Row: {
+          ai_model: string | null
+          body: Json
+          build_candidate_id: string | null
+          confidence_score: number | null
+          created_at: string
+          evidence_strength: string | null
+          generated_at: string
+          id: string
+          kind: Database["public"]["Enums"]["ma_briefing_kind"]
+          portfolio_asset_id: string | null
+          source_count: number | null
+          summary: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          ai_model?: string | null
+          body?: Json
+          build_candidate_id?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          evidence_strength?: string | null
+          generated_at?: string
+          id?: string
+          kind: Database["public"]["Enums"]["ma_briefing_kind"]
+          portfolio_asset_id?: string | null
+          source_count?: number | null
+          summary?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          ai_model?: string | null
+          body?: Json
+          build_candidate_id?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          evidence_strength?: string | null
+          generated_at?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["ma_briefing_kind"]
+          portfolio_asset_id?: string | null
+          source_count?: number | null
+          summary?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ma_ai_briefings_build_candidate_id_fkey"
+            columns: ["build_candidate_id"]
+            isOneToOne: false
+            referencedRelation: "ma_build_candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ma_ai_briefings_portfolio_asset_id_fkey"
+            columns: ["portfolio_asset_id"]
+            isOneToOne: false
+            referencedRelation: "ma_portfolio_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ma_ai_recommendations: {
+        Row: {
+          ai_generated: boolean
+          ai_model: string | null
+          approved_at: string | null
+          approved_by: string | null
+          confidence_score: number | null
+          created_at: string
+          due_date: string | null
+          id: string
+          portfolio_asset_id: string | null
+          reasoning: string | null
+          recommendation_type: Database["public"]["Enums"]["ma_recommendation_type"]
+          recommended_owner: string | null
+          rejection_reason: string | null
+          required_human_approval: boolean
+          risk_level: Database["public"]["Enums"]["ma_risk_level"]
+          status: Database["public"]["Enums"]["ma_ai_rec_status"]
+          summary: string
+          supporting_signals: Json
+          updated_at: string
+          urgency_score: number | null
+        }
+        Insert: {
+          ai_generated?: boolean
+          ai_model?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          portfolio_asset_id?: string | null
+          reasoning?: string | null
+          recommendation_type: Database["public"]["Enums"]["ma_recommendation_type"]
+          recommended_owner?: string | null
+          rejection_reason?: string | null
+          required_human_approval?: boolean
+          risk_level?: Database["public"]["Enums"]["ma_risk_level"]
+          status?: Database["public"]["Enums"]["ma_ai_rec_status"]
+          summary: string
+          supporting_signals?: Json
+          updated_at?: string
+          urgency_score?: number | null
+        }
+        Update: {
+          ai_generated?: boolean
+          ai_model?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          portfolio_asset_id?: string | null
+          reasoning?: string | null
+          recommendation_type?: Database["public"]["Enums"]["ma_recommendation_type"]
+          recommended_owner?: string | null
+          rejection_reason?: string | null
+          required_human_approval?: boolean
+          risk_level?: Database["public"]["Enums"]["ma_risk_level"]
+          status?: Database["public"]["Enums"]["ma_ai_rec_status"]
+          summary?: string
+          supporting_signals?: Json
+          updated_at?: string
+          urgency_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ma_ai_recommendations_portfolio_asset_id_fkey"
+            columns: ["portfolio_asset_id"]
+            isOneToOne: false
+            referencedRelation: "ma_portfolio_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ma_audit_logs: {
         Row: {
           action_type: string
