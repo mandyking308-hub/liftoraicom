@@ -29,6 +29,7 @@ import ControlledExternalActivationReadinessPanel from "@/components/founder/act
 import ControlledMicroBatchPreparationPanel from "@/components/founder/activation/ControlledMicroBatchPreparationPanel";
 import LiftorBuildPhaseCloseoutPanel from "@/components/founder/activation/LiftorBuildPhaseCloseoutPanel";
 import ManualsHierarchyPanel from "@/components/founder/manual/ManualsHierarchyPanel";
+import Phase23LaunchPathPanel from "@/components/founder/activation/Phase23LaunchPathPanel";
 import BusinessRehearsalSimulationPanel from "@/components/founder/activation/BusinessRehearsalSimulationPanel";
 import PreLiveBaselineControlPanel from "@/components/founder/activation/PreLiveBaselineControlPanel";
 import RevenueTargetOperatingPanel from "@/components/founder/revenue/RevenueTargetOperatingPanel";
@@ -791,6 +792,7 @@ const CommandCentre = () => {
       <div className="max-w-7xl mx-auto px-4 pt-4"><ControlledExternalActivationReadinessPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><ControlledMicroBatchPreparationPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><LiftorBuildPhaseCloseoutPanel /></div>
+      <div className="max-w-7xl mx-auto px-4 pt-4"><Phase23LaunchPathPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><ManualsHierarchyPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><BusinessRehearsalSimulationPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><PreLiveBaselineControlPanel /></div>
