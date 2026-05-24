@@ -94,7 +94,7 @@ export async function logAIUsage(input: LogAIUsageInput) {
 
   const { data, error } = await supabase
     .from("ai_usage_ledger")
-    .insert(row)
+    .insert(row as any)
     .select("id")
     .single();
 
