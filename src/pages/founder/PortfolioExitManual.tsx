@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 import FounderLayout from "@/components/founder/FounderLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -6,6 +7,12 @@ import { Button } from "@/components/ui/button";
 import { BookOpen, ArrowLeft, ShieldCheck, Lock, AlertTriangle } from "lucide-react";
 
 export default function PortfolioExitManual() {
+  const { hash } = useLocation();
+  useEffect(() => {
+    if (!hash) return;
+    const el = document.getElementById(hash.slice(1));
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [hash]);
   return (
     <FounderLayout>
       <div className="space-y-6 max-w-5xl">
@@ -24,7 +31,7 @@ export default function PortfolioExitManual() {
         </div>
 
         {/* USER MANUAL */}
-        <Card className="tech-card">
+        <Card id="user-manual" className="tech-card scroll-mt-24">
           <CardHeader><CardTitle>User Manual</CardTitle></CardHeader>
           <CardContent className="space-y-4 text-sm">
             <Section title="Carrier-grade Controls Centre (new)">
@@ -137,7 +144,7 @@ export default function PortfolioExitManual() {
         </Card>
 
         {/* TECHNICAL MANUAL */}
-        <Card className="tech-card">
+        <Card id="technical-manual" className="tech-card scroll-mt-24">
           <CardHeader><CardTitle>Technical Manual</CardTitle></CardHeader>
           <CardContent className="space-y-4 text-sm">
             <Section title="Database tables (all prefixed ma_)">
@@ -266,7 +273,26 @@ export default function PortfolioExitManual() {
           </CardContent>
         </Card>
 
-        <Card className="tech-card">
+        {/* BUILDABILITY CONSTITUTION */}
+        <Card id="buildability-constitution" className="tech-card scroll-mt-24">
+          <CardHeader><CardTitle className="flex items-center gap-2"><ShieldCheck className="h-5 w-5 text-primary" /> Buildability Constitution</CardTitle></CardHeader>
+          <CardContent className="text-sm space-y-2">
+            <p>Any candidate that fails the Constitution cannot be promoted to a portfolio asset, regardless of upside.</p>
+            <ul className="list-disc pl-5 text-muted-foreground space-y-1">
+              <li><b>Must be buildable inside Lovable</b> — no bespoke infrastructure, no native mobile shell, no heavy on-prem dependencies.</li>
+              <li><b>Must have a distribution path</b> we already own, can build, or can buy without venture funding.</li>
+              <li><b>Must have a credible buyer thesis</b> — at least one named buyer category with comparable transactions.</li>
+              <li><b>Must not require warehousing, manufacturing, stocked inventory, or hardware</b>.</li>
+              <li><b>Must not require a regulated licence</b> without an adviser pre-engaged.</li>
+              <li><b>Must not depend on copying a protected asset</b> — adopt the market signal, never the protected expression.</li>
+              <li><b>Must fit founder capacity</b> — checked against <code>ma_workload_capacity</code> before approval.</li>
+              <li><b>Must declare a 90-day kill / park / scale trigger</b> at promotion time.</li>
+            </ul>
+            <p className="text-xs text-muted-foreground">Enforced by the Build Selector against <code>ma_do_not_build_patterns</code> and the Lovable Buildability score on each candidate.</p>
+          </CardContent>
+        </Card>
+
+        <Card id="founder-approval-rules" className="tech-card scroll-mt-24">
           <CardHeader><CardTitle className="flex items-center gap-2"><ShieldCheck className="h-5 w-5 text-primary" /> Founder Approval Rules</CardTitle></CardHeader>
           <CardContent className="text-sm space-y-2">
             <p>Founder approval is the final gate. The platform may suggest, draft and queue — never send.</p>
@@ -276,9 +302,41 @@ export default function PortfolioExitManual() {
               <li>Legal / tax / jurisdiction items are routed to <code>adviser_review</code>, never decided by AI.</li>
               <li>Promoting a build candidate to a portfolio asset marks the asset <code>needs_review=true</code>.</li>
             </ul>
+            <p className="text-xs font-semibold mt-2">Approval IS required for:</p>
+            <ul className="list-disc pl-5 text-muted-foreground text-xs space-y-1">
+              <li>External outreach / sending</li>
+              <li>Buyer / investor / adviser contact</li>
+              <li>Paid API activation</li>
+              <li>Data export</li>
+              <li>Spend commitments</li>
+              <li>Legal / tax / entity decisions</li>
+              <li>Sale process start, kill decision, sharing buyer packs externally</li>
+            </ul>
+            <p className="text-xs font-semibold mt-2">Approval is NOT required for:</p>
+            <ul className="list-disc pl-5 text-muted-foreground text-xs space-y-1">
+              <li>Viewing dashboards, internal recommendations, valuation calculations</li>
+              <li>Data entry, imports staged for review</li>
+              <li>Execution-target generation, data-room checklist generation, AI analysis, internal reporting</li>
+            </ul>
             <div className="text-[10px] italic text-muted-foreground border-t pt-2 flex items-start gap-1">
               <AlertTriangle className="h-3 w-3 mt-0.5" /> Adopt the market signal, do not copy protected assets.
             </div>
+          </CardContent>
+        </Card>
+
+        {/* DATA SOURCE GOVERNANCE */}
+        <Card id="data-source-governance" className="tech-card scroll-mt-24">
+          <CardHeader><CardTitle className="flex items-center gap-2"><ShieldCheck className="h-5 w-5 text-primary" /> Data Source Governance Notes</CardTitle></CardHeader>
+          <CardContent className="text-sm space-y-2">
+            <ul className="list-disc pl-5 text-muted-foreground space-y-1">
+              <li>Every external source registered in <code>ma_intelligence_sources</code> with: source_type, licence, paid/free, do_not_store flag, refresh frequency, owner.</li>
+              <li><b>Paid sources</b> (PitchBook, CB Insights, Crunchbase, Apollo, Owler, S&amp;P CapIQ) are <i>off by default</i>. Activation requires founder approval and is logged.</li>
+              <li>Sources flagged <code>do_not_store</code> may be queried but never persisted into Liftor tables.</li>
+              <li>Every <code>ma_weekly_signals</code>, <code>ma_buyer_matches</code>, <code>ma_competitor_profiles</code> and <code>ma_valuation_benchmarks</code> row carries source attribution and a freshness band.</li>
+              <li>Personal data is classified per row with lawful basis, consent, retention and export restriction. Subject-access exports run through the audit log.</li>
+              <li>The AI is never permitted to invent revenue, valuations, acquisition history, buyer or investor interest, legal/tax conclusions, customer traction, or deal multiples — weak evidence must read <i>“Evidence is weak. Treat this as a hypothesis, not a decision.”</i></li>
+              <li>Adviser-privileged rows are excluded from buyer-facing surfaces and from any export.</li>
+            </ul>
           </CardContent>
         </Card>
 

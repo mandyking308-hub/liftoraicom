@@ -235,8 +235,33 @@ export default function PortfolioExitCommandCentre() {
               </Link>
             </Button>
             <Button asChild size="sm" variant="outline">
-              <Link to="/founder/portfolio-exit/manual">
-                <ArrowUpRight className="h-4 w-4 mr-1" /> Manual &amp; Technical Docs
+              <Link to="/founder/portfolio-exit/manual#user-manual">
+                <ArrowUpRight className="h-4 w-4 mr-1" /> Open User Manual
+              </Link>
+            </Button>
+            <Button asChild size="sm" variant="outline">
+              <Link to="/founder/portfolio-exit/manual#technical-manual">
+                <ArrowUpRight className="h-4 w-4 mr-1" /> Open Technical Manual
+              </Link>
+            </Button>
+            <Button asChild size="sm" variant="outline">
+              <Link to="/founder/portfolio-exit/manual#buildability-constitution">
+                <ArrowUpRight className="h-4 w-4 mr-1" /> Buildability Constitution
+              </Link>
+            </Button>
+            <Button asChild size="sm" variant="outline">
+              <Link to="/founder/portfolio-exit/manual#founder-approval-rules">
+                <ArrowUpRight className="h-4 w-4 mr-1" /> Founder Approval Rules
+              </Link>
+            </Button>
+            <Button asChild size="sm" variant="outline">
+              <Link to="/founder/portfolio-exit/manual#data-source-governance">
+                <ArrowUpRight className="h-4 w-4 mr-1" /> Data Source Governance Notes
+              </Link>
+            </Button>
+            <Button asChild size="sm" variant="outline">
+              <Link to="/founder/ai-cost/approvals">
+                <ArrowUpRight className="h-4 w-4 mr-1" /> Founder Approval Queue
               </Link>
             </Button>
             <Button asChild size="sm" variant="default">
