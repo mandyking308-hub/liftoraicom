@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { calculateActualAICost, flagPricingMissing } from "@/services/aiPricingRegistry";
+import { sanitiseForPersistence, raiseSecurityAlert } from "@/services/aiSecurityGuard";
 
 export type AIModelTier = "no_ai" | "cheap" | "standard" | "premium" | "human_required";
 export type AIUsageStatus =
@@ -136,6 +137,36 @@ export async function logAIUsage(input: LogAIUsageInput) {
         ? new Date().toISOString()
         : null,
   };
+
+  // PII / secret redaction — never write raw sensitive content to the ledger.
+  const sanitised = sanitiseForPersistence({
+    input_summary: row.input_summary,
+    output_summary: row.output_summary,
+    error_message: row.error_message,
+    audit_metadata: row.audit_metadata as Record<string, unknown>,
+  });
+  row.input_summary = sanitised.payload.input_summary ?? null;
+  row.output_summary = sanitised.payload.output_summary ?? null;
+  row.error_message = sanitised.payload.error_message ?? null;
+  row.audit_metadata = sanitised.payload.audit_metadata as any;
+
+  if (sanitised.flags.has_secrets) {
+    // fire-and-forget: do not block logging on alert insert
+    raiseSecurityAlert({
+      alert_type: "secret_detected_in_prompt",
+      severity: "high",
+      business_id: row.business_id, agent_id: row.agent_id,
+      metadata: { categories: sanitised.flags.has_secrets ? ["secret"] : [] },
+    }).catch(() => {});
+  }
+  if (sanitised.redaction_changed && !sanitised.flags.has_secrets) {
+    raiseSecurityAlert({
+      alert_type: "sensitive_data_blocked_from_logging",
+      severity: "warning",
+      business_id: row.business_id, agent_id: row.agent_id,
+      metadata: { categories: sanitised.flags },
+    }).catch(() => {});
+  }
 
   const { data, error } = await supabase
     .from("ai_usage_ledger")
