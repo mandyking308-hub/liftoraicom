@@ -129,6 +129,9 @@ export default function AICostGovernorHub() {
         {/* Live portfolio overview embedded */}
         <AICostGovernorPortfolio />
 
+        {/* AI Gateway enforcement health */}
+        <AIGatewayHealthPanel />
+
         {/* Section cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {SECTIONS.map((s) => (
