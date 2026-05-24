@@ -104,6 +104,7 @@ import PortfolioExitControls from "./pages/founder/PortfolioExitControls";
 import PortfolioExitHardening from "./pages/founder/PortfolioExitHardening";
 import PortfolioExitReleaseGate from "./pages/founder/PortfolioExitReleaseGate";
 import AIUsageLedger from "./pages/founder/AIUsageLedger";
+import AIModelRouting from "./pages/founder/AIModelRouting";
 import DataIngestionCentre from "./pages/founder/DataIngestionCentre";
 import BrainSessions from "./pages/founder/BrainSessions";
 import BrainDrafts from "./pages/founder/BrainDrafts";
@@ -309,6 +310,7 @@ const App = () => (
             <Route path="/founder/portfolio-exit/hardening" element={<FounderRoute><PortfolioExitHardening /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/release-gate" element={<FounderRoute><PortfolioExitReleaseGate /></FounderRoute>} />
             <Route path="/founder/ai-cost/ledger" element={<FounderRoute><AIUsageLedger /></FounderRoute>} />
+            <Route path="/founder/ai-cost/routing" element={<FounderRoute><AIModelRouting /></FounderRoute>} />
             <Route path="/founder/brain" element={<FounderRoute><LiftorBrain /></FounderRoute>} />
             <Route path="/founder/brain/sessions" element={<FounderRoute><BrainSessions /></FounderRoute>} />
             <Route path="/founder/brain/drafts" element={<FounderRoute><BrainDrafts /></FounderRoute>} />
