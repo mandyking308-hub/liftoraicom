@@ -38375,6 +38375,12 @@ export type Database = {
         | "legal"
         | "tax"
         | "other"
+      ma_ai_rec_status:
+        | "proposed"
+        | "approved"
+        | "rejected"
+        | "actioned"
+        | "archived"
       ma_asset_status:
         | "idea"
         | "validating"
@@ -38930,6 +38936,13 @@ export const Constants = {
         "legal",
         "tax",
         "other",
+      ],
+      ma_ai_rec_status: [
+        "proposed",
+        "approved",
+        "rejected",
+        "actioned",
+        "archived",
       ],
       ma_asset_status: [
         "idea",
