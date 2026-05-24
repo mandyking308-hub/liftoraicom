@@ -13,6 +13,8 @@ import { useToast } from "@/hooks/use-toast";
 import { ShieldCheck, ShieldAlert, Clock, CheckCircle2, XCircle, Pencil, Lock } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatGBP } from "@/services/aiUsageLogger";
+import AIQualityFeedbackDialog from "@/components/founder/ai/AIQualityFeedbackDialog";
+import { Sparkles } from "lucide-react";
 import {
   listPendingApprovals, decideApproval, isStale,
   type ApprovalRecord, type ApprovalStatus,
@@ -44,6 +46,7 @@ export default function AIApprovalGates() {
   const { user } = useAuth();
   const [selected, setSelected] = useState<ApprovalRecord | null>(null);
   const [notes, setNotes] = useState("");
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   const { data: businesses = [] } = useQuery({
     queryKey: ["approvals-businesses"],
@@ -238,11 +241,22 @@ export default function AIApprovalGates() {
                 ) : (
                   <span className="text-xs text-muted-foreground">Decision already recorded.</span>
                 )}
+                {(selected.metadata as any)?.ai_usage_ledger_id && (
+                  <Button variant="outline" onClick={() => setFeedbackOpen(true)}>
+                    <Sparkles className="h-4 w-4 mr-1" /> Rate output
+                  </Button>
+                )}
               </DialogFooter>
             </>
           )}
         </DialogContent>
       </Dialog>
+      <AIQualityFeedbackDialog
+        open={feedbackOpen}
+        onOpenChange={setFeedbackOpen}
+        ai_usage_ledger_id={(selected?.metadata as any)?.ai_usage_ledger_id ?? null}
+        context_title={selected?.title}
+      />
     </FounderLayout>
   );
 }
