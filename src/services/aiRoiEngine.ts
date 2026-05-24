@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { qualityFactorForScope, type QualityFactor } from "@/services/aiQualityScores";
 
 /**
  * ROI Engine for Liftor AI Cost Governor.
@@ -62,6 +63,12 @@ export interface RoiResult {
   used_default_assumptions: boolean;
   warning: string | null;
   estimated_flag: boolean;
+  quality_factor: number;
+  quality_avg: number | null;
+  quality_sample_size: number;
+  quality_adjusted_human_cost_saved: number;
+  quality_adjusted_net_saving: number;
+  quality_warning: string | null;
 }
 
 function categoryHourlyRate(category: string | null | undefined, a: RoiAssumptions): number {
@@ -177,6 +184,29 @@ export async function calculateAIROI(input: CalculateRoiInput): Promise<RoiResul
 
   const estimated_flag = revenue_linked === 0 && pipeline_linked === 0;
 
+  // Quality-adjusted ROI — dampen value when feedback shows low quality / high rejection.
+  const quality: QualityFactor = await qualityFactorForScope({
+    period_start: input.period_start,
+    period_end: input.period_end,
+    business_id: input.business_id ?? null,
+    agent_id: input.agent_id ?? null,
+    campaign_id: input.campaign_id ?? null,
+    task_category: input.task_category ?? null,
+  });
+  const qualityFactor = quality.factor;
+  const quality_adjusted_human_cost_saved = round(estimated_human_cost_saved * qualityFactor);
+  const quality_adjusted_net_saving = round(quality_adjusted_human_cost_saved - total_ai_spend);
+  let quality_warning: string | null = null;
+  if (quality.sample_size >= 5 && qualityFactor < 0.5) {
+    quality_warning = `Quality-adjusted value is ${(qualityFactor * 100).toFixed(0)}% of raw — rejection ${(quality.rejection_rate * 100).toFixed(0)}%, avg quality ${quality.avg_quality}. Cheap outputs without quality do not count as ROI.`;
+  }
+  // Override status when quality-adjusted is poor.
+  const { roi_score: qa_score, roi_status: qa_status } = scoreRoi(
+    total_ai_spend, quality_adjusted_net_saving, revenue_linked, pipeline_linked, rows.length,
+  );
+  const final_score = quality.sample_size >= 5 ? qa_score : roi_score;
+  const final_status = quality.sample_size >= 5 ? qa_status : roi_status;
+
   return {
     period_start: input.period_start,
     period_end: input.period_end,
@@ -194,12 +224,18 @@ export async function calculateAIROI(input: CalculateRoiInput): Promise<RoiResul
     cost_per_content_asset: cost_per_content_asset !== null ? round(cost_per_content_asset) : null,
     cost_per_customer_interaction: cost_per_customer_interaction !== null ? round(cost_per_customer_interaction) : null,
     time_saved_minutes: Math.round(time_saved_minutes),
-    roi_score,
-    roi_status,
+    roi_score: final_score,
+    roi_status: final_status,
     action_count: rows.length,
     used_default_assumptions: usedDefaults,
-    warning,
+    warning: warning ?? quality_warning,
     estimated_flag,
+    quality_factor: qualityFactor,
+    quality_avg: quality.avg_quality,
+    quality_sample_size: quality.sample_size,
+    quality_adjusted_human_cost_saved,
+    quality_adjusted_net_saving,
+    quality_warning,
   };
 }
 
