@@ -1,20 +1,17 @@
-import { supabase } from "@/integrations/supabase/client";
 import { routeAIModel, type RouteAIModelInput, type RouteAIModelDecision } from "@/services/aiModelRouter";
 import { logAIUsage, type AIModelTier, type LogAIUsageInput } from "@/services/aiUsageLogger";
-import { estimateActionCost, flagPricingMissing } from "@/services/aiPricingRegistry";
-import { checkBusinessBudget } from "@/services/aiBudgetService";
-import { checkAgentCostControl } from "@/services/aiAgentCostService";
-import { evaluateStopLoss } from "@/services/aiStopLossService";
+import { estimateAICost, flagPricingMissing } from "@/services/aiPricingRegistry";
+import { checkAIBudgetBeforeAction } from "@/services/aiBudgetService";
+import { checkAgentCostControlBeforeAction } from "@/services/aiAgentCostService";
+import { evaluateAIStopLoss } from "@/services/aiStopLossService";
 import {
-  detectSensitiveContent,
+  classifySensitive,
   detectPromptInjection,
   redactSensitive,
   raiseSecurityAlert,
   type ContextTrust,
 } from "@/services/aiSecurityGuard";
-import { requiresHumanApproval, queueApprovalItem } from "@/services/aiApprovalGate";
-import { acquireIdempotencyLock } from "@/services/aiQueueControl";
-import { recordROISignal } from "@/services/aiRoiEngine";
+import { requiresHumanApproval, createApprovalRequest, type RiskLevel as ApprovalRiskLevel } from "@/services/aiApprovalGate";
 
 /**
  * Liftor AI Gateway — central enforcement layer for EVERY AI action.
@@ -34,6 +31,8 @@ export type GatewayContextBlock = {
   content: string;
 };
 
+export type AIGatewayRiskLevel = "low" | "medium" | "high" | "critical";
+
 export type AIGatewayInput = {
   business_id?: string | null;
   agent_id?: string | null;
@@ -44,7 +43,7 @@ export type AIGatewayInput = {
   action_type: string;
   task_category: string;
   requested_model_tier?: AIModelTier | null;
-  risk_level?: "low" | "medium" | "high" | "critical" | null;
+  risk_level?: AIGatewayRiskLevel | null;
   requires_external_action?: boolean;
   contains_legal_financial_or_compliance_content?: boolean;
   input_summary: string;
@@ -99,13 +98,12 @@ export type AIGatewayResult = {
 };
 
 function newTraceId(): string {
-  // RFC4122-ish trace id; safe in browser + edge.
   const g: any = globalThis as any;
   if (g.crypto?.randomUUID) return `trc_${g.crypto.randomUUID()}`;
   return `trc_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
 }
 
-function mapTierToProviderModel(tier: AIModelTier): { provider: string; model: string } {
+function tierToProviderModel(tier: AIModelTier): { provider: string; model: string } {
   switch (tier) {
     case "premium": return { provider: "google", model: "google/gemini-2.5-pro" };
     case "standard": return { provider: "google", model: "google/gemini-3-flash-preview" };
@@ -114,6 +112,13 @@ function mapTierToProviderModel(tier: AIModelTier): { provider: string; model: s
     case "no_ai": return { provider: "none", model: "none" };
     default: return { provider: "google", model: "google/gemini-3-flash-preview" };
   }
+}
+
+function mapRisk(level: AIGatewayRiskLevel | null | undefined): ApprovalRiskLevel {
+  if (level === "critical") return "critical";
+  if (level === "high") return "high";
+  if (level === "low") return "low";
+  return "standard";
 }
 
 /** Single typed entry point. ALL AI actions in Liftor must call this. */
@@ -149,141 +154,169 @@ export async function execute(input: AIGatewayInput): Promise<AIGatewayResult> {
   }
   audit_metadata.routing = routing;
 
-  const tier: AIModelTier = (input.requested_model_tier && routing.selected_model_tier !== "human_required")
-    ? input.requested_model_tier
-    : routing.selected_model_tier;
+  const tier: AIModelTier =
+    input.requested_model_tier && routing.selected_model_tier !== "human_required"
+      ? input.requested_model_tier
+      : routing.selected_model_tier;
 
-  // 2. Security: redact prompt + context, detect injection
-  const redactedPrompt = redactSensitive(input.prompt_or_instruction);
-  const redactedContext: GatewayContextBlock[] = (input.context_blocks ?? []).map((b) => ({
-    source: b.source,
-    trust: b.trust,
-    content: redactSensitive(b.content),
-  }));
-  const redaction_events =
-    (redactedPrompt !== input.prompt_or_instruction ? 1 : 0) +
-    redactedContext.filter((b, i) => b.content !== (input.context_blocks?.[i]?.content ?? "")).length;
+  // 2. Security: redact + injection detection
+  const promptRedaction = redactSensitive(input.prompt_or_instruction);
+  const redactedPrompt = promptRedaction.redacted ?? "";
+  const redactedContext: GatewayContextBlock[] = (input.context_blocks ?? []).map((b) => {
+    const r = redactSensitive(b.content);
+    return { source: b.source, trust: b.trust, content: r.redacted ?? "" };
+  });
+  let redaction_events = promptRedaction.changed ? 1 : 0;
+  redaction_events += redactedContext.reduce((n, b, i) => {
+    const original = input.context_blocks?.[i]?.content ?? "";
+    return n + (b.content !== original ? 1 : 0);
+  }, 0);
   if (redaction_events) risk_flags.push("redaction_applied");
 
-  const untrusted = (input.context_blocks ?? []).filter((b) => b.trust === "untrusted_external");
+  const classification = classifySensitive(input.prompt_or_instruction);
+  if (classification.findings.length) {
+    risk_flags.push("sensitive_content_detected");
+    audit_metadata.sensitive = classification.findings.map((f) => f.category);
+  }
+
   let prompt_injection_detected = false;
-  for (const u of untrusted) {
-    if (detectPromptInjection(u.content)) {
+  for (const u of (input.context_blocks ?? []).filter((b) => b.trust === "untrusted_external")) {
+    const inj = detectPromptInjection(u.content);
+    if (inj.detected) {
       prompt_injection_detected = true;
       risk_flags.push("prompt_injection_in_untrusted_context");
       await raiseSecurityAlert({
-        business_id: input.business_id ?? null,
-        category: "prompt_injection",
+        alert_type: "prompt_injection_detected",
         severity: "high",
-        summary: `Prompt injection detected in untrusted context (${u.source}) on ${input.action_type}`,
-        metadata: { trace_id, source: u.source },
+        business_id: input.business_id ?? null,
+        agent_id: input.agent_id ?? null,
+        metadata: { trace_id, source: u.source, action_type: input.action_type },
       }).catch(() => {});
-      alerts.push("prompt_injection");
+      alerts.push("prompt_injection_detected");
       break;
     }
   }
 
-  const sensitive = detectSensitiveContent(input.prompt_or_instruction);
-  if (sensitive.length) {
-    risk_flags.push("sensitive_content_detected");
-    audit_metadata.sensitive = sensitive.map((s) => s.category);
+  // 3. Estimate cost
+  const { provider, model } = tierToProviderModel(tier);
+  const promptTokensEstimate = Math.max(1, Math.ceil(input.prompt_or_instruction.length / 4));
+  let estimated_cost_before_run = 0;
+  try {
+    const est = await estimateAICost({
+      provider_name: provider,
+      model_name: model,
+      estimated_input_tokens: promptTokensEstimate,
+      estimated_output_tokens: 400,
+    });
+    estimated_cost_before_run = Number(est.estimated_total_cost ?? 0);
+    if (est.pricing_missing) {
+      alerts.push("pricing_missing");
+      risk_flags.push("pricing_missing");
+      await flagPricingMissing({ provider_name: provider, model_name: model, business_id: input.business_id ?? null, agent_id: input.agent_id ?? null }).catch(() => {});
+    }
+  } catch (_) {
+    alerts.push("pricing_missing");
+    risk_flags.push("pricing_missing");
   }
 
-  // 3. Idempotency
-  if (input.idempotency_key) {
-    const lock = await acquireIdempotencyLock(input.idempotency_key).catch(() => ({ acquired: true } as any));
-    if (!lock.acquired) {
-      return {
-        trace_id, status: "duplicate_prevented",
-        estimated_cost_before_run: 0, actual_estimated_cost_after_run: 0,
-        prompt_tokens: 0, completion_tokens: 0, total_tokens: 0,
-        approval_required: false, blocked: true, blocked_reason: "duplicate_prevented",
-        alerts_created: alerts, risk_flags, redaction_events,
-        prompt_injection_detected, audit_metadata,
-      };
+  // 4. Budget check (business)
+  if (input.business_id) {
+    const budget = await checkAIBudgetBeforeAction({
+      business_id: input.business_id,
+      agent_id: input.agent_id ?? null,
+      campaign_id: input.campaign_id ?? null,
+      estimated_action_cost: estimated_cost_before_run,
+      task_category: input.task_category,
+    }).catch(() => null);
+    if (budget) {
+      if (budget.status === "near_limit" || budget.status === "watch") {
+        alerts.push("budget_warning");
+        risk_flags.push("budget_warning");
+      }
+      if (!budget.allowed) {
+        return blockedResult(trace_id, `budget_hard_stop:${budget.status}`, {
+          tier, provider, model, estimated_cost_before_run, alerts, risk_flags,
+          redaction_events, prompt_injection_detected, audit_metadata,
+        });
+      }
     }
   }
 
-  // 4. Estimate cost
-  const { provider, model } = mapTierToProviderModel(tier);
-  const est = await estimateActionCost({
-    model_provider: provider,
-    model_used: model,
-    model_tier: tier,
-    prompt_tokens_estimate: Math.ceil(input.prompt_or_instruction.length / 4),
-    completion_tokens_estimate: 400,
-  }).catch(async (e) => {
-    await flagPricingMissing({ model_provider: provider, model_used: model }).catch(() => {});
-    alerts.push("pricing_missing");
-    risk_flags.push("pricing_missing");
-    return { estimated_cost: 0, currency: "GBP" } as any;
-  });
-  const estimated_cost_before_run = Number(est?.estimated_cost ?? 0);
-
-  // 5. Budget + agent cap + stop-loss
-  const budget = await checkBusinessBudget({
-    business_id: input.business_id ?? null,
-    estimated_cost: estimated_cost_before_run,
-  }).catch(() => ({ allowed: true, severity: "ok" } as any));
-  if (budget.severity === "warning") { alerts.push("budget_warning"); risk_flags.push("budget_warning"); }
-  if (!budget.allowed) {
-    return blockedResult(trace_id, "budget_hard_stop", { tier, provider, model, estimated_cost_before_run, alerts, risk_flags, redaction_events, prompt_injection_detected, audit_metadata });
+  // 5. Agent cap
+  if (input.agent_id) {
+    const agentCap = await checkAgentCostControlBeforeAction({
+      agent_id: input.agent_id,
+      business_id: input.business_id ?? null,
+      task_category: input.task_category,
+      estimated_action_cost: estimated_cost_before_run,
+      requested_model_tier: tier,
+    }).catch(() => null);
+    if (agentCap && !agentCap.allowed) {
+      return blockedResult(trace_id, `agent_hard_cap:${agentCap.blocked_reason ?? "capped"}`, {
+        tier, provider, model, estimated_cost_before_run, alerts, risk_flags,
+        redaction_events, prompt_injection_detected, audit_metadata,
+      });
+    }
   }
 
-  const agentCap = await checkAgentCostControl({
-    agent_id: input.agent_id ?? null,
-    estimated_cost: estimated_cost_before_run,
-  }).catch(() => ({ allowed: true } as any));
-  if (!agentCap.allowed) {
-    return blockedResult(trace_id, "agent_hard_cap", { tier, provider, model, estimated_cost_before_run, alerts, risk_flags, redaction_events, prompt_injection_detected, audit_metadata });
-  }
-
-  const stop = await evaluateStopLoss({
+  // 6. Stop-loss
+  const stop = await evaluateAIStopLoss({
     business_id: input.business_id ?? null,
     agent_id: input.agent_id ?? null,
     campaign_id: input.campaign_id ?? null,
+    task_id: input.task_id ?? null,
     task_category: input.task_category,
-  }).catch(() => ({ paused: false } as any));
-  if (stop.paused) {
-    alerts.push("stop_loss_active");
-    return blockedResult(trace_id, `stop_loss:${stop.scope ?? "unknown"}`, { tier, provider, model, estimated_cost_before_run, alerts, risk_flags, redaction_events, prompt_injection_detected, audit_metadata });
+    estimated_action_cost: estimated_cost_before_run,
+  }).catch(() => null);
+  if (stop && stop.stop_loss_triggered && !stop.action_allowed) {
+    alerts.push(`stop_loss:${stop.trigger_type ?? "unknown"}`);
+    return blockedResult(trace_id, `stop_loss:${stop.trigger_type ?? "unknown"}`, {
+      tier, provider, model, estimated_cost_before_run, alerts, risk_flags,
+      redaction_events, prompt_injection_detected, audit_metadata,
+    });
   }
 
-  // 6. Approval requirement
+  // 7. Approval requirement
   const needsApproval =
     routing.requires_human_approval ||
-    requiresHumanApproval(input.task_category, (input.risk_level as any) ?? null) ||
-    (!!input.requires_external_action) ||
-    (!!input.contains_legal_financial_or_compliance_content);
+    requiresHumanApproval(input.task_category, mapRisk(input.risk_level)) ||
+    !!input.requires_external_action ||
+    !!input.contains_legal_financial_or_compliance_content;
 
   if (needsApproval) {
-    const queued = await queueApprovalItem({
-      business_id: input.business_id ?? null,
-      agent_id: input.agent_id ?? null,
-      category: input.task_category,
-      risk_level: (input.risk_level as any) ?? "high",
-      summary: input.input_summary,
-      trace_id,
-      estimated_cost: estimated_cost_before_run,
-    }).catch(() => ({ id: null } as any));
     const ledger = await logAIUsage({
       ...baseLedgerInput(input, tier, provider, model, trace_id),
       estimated_cost: estimated_cost_before_run,
       status: "human_review_required",
     }).catch(() => ({ id: undefined } as any));
+    const queued = await createApprovalRequest({
+      business_id: input.business_id ?? null,
+      agent_id: input.agent_id ?? null,
+      campaign_id: input.campaign_id ?? null,
+      task_id: input.task_id ?? null,
+      ai_usage_ledger_id: ledger?.id ?? null,
+      approval_type: input.task_category,
+      risk_level: mapRisk(input.risk_level),
+      title: input.action_type,
+      summary: input.input_summary,
+      estimated_cost: estimated_cost_before_run,
+      value_at_stake: input.estimated_value ?? null,
+    }).catch(() => ({ id: "" } as any));
     return {
       trace_id, status: "approval_required",
       selected_model_provider: provider, selected_model: model, selected_model_tier: tier,
       estimated_cost_before_run, actual_estimated_cost_after_run: 0,
       prompt_tokens: 0, completion_tokens: 0, total_tokens: 0,
-      ledger_id: ledger?.id, approval_required: true, approval_queue_id: queued?.id ?? undefined,
-      blocked: false, alerts_created: alerts, routing_reason: routing.routing_reason,
+      ledger_id: ledger?.id, approval_required: true,
+      approval_queue_id: queued?.id || undefined,
+      blocked: false, alerts_created: alerts,
+      routing_reason: routing.routing_reason,
       risk_flags, redaction_events, prompt_injection_detected,
       audit_metadata: { ...audit_metadata, approval_queue_id: queued?.id ?? null },
     };
   }
 
-  // 7. Run provider call (caller-supplied invoke)
+  // 8. Run provider call
   let providerResult: Awaited<ReturnType<typeof input.invoke>>;
   try {
     providerResult = await input.invoke({
@@ -307,25 +340,28 @@ export async function execute(input: AIGatewayInput): Promise<AIGatewayResult> {
       prompt_tokens: 0, completion_tokens: 0, total_tokens: 0,
       approval_required: false, blocked: false, alerts_created: alerts,
       routing_reason: routing.routing_reason,
-      risk_flags: [...risk_flags, "provider_failure"], redaction_events,
-      prompt_injection_detected, audit_metadata: { ...audit_metadata, error: String(e?.message ?? e) },
+      risk_flags: [...risk_flags, "provider_failure"],
+      redaction_events, prompt_injection_detected,
+      audit_metadata: { ...audit_metadata, error: String(e?.message ?? e) },
     };
   }
 
   const prompt_tokens = providerResult.prompt_tokens ?? 0;
   const completion_tokens = providerResult.completion_tokens ?? 0;
 
-  // 8. Actual cost
-  const actual = await estimateActionCost({
-    model_provider: providerResult.model_provider,
-    model_used: providerResult.model_used,
-    model_tier: tier,
-    prompt_tokens_estimate: prompt_tokens,
-    completion_tokens_estimate: completion_tokens,
-  }).catch(() => ({ estimated_cost: estimated_cost_before_run } as any));
-  const actual_estimated_cost_after_run = Number(actual?.estimated_cost ?? estimated_cost_before_run);
+  // 9. Actual cost
+  let actual_estimated_cost_after_run = estimated_cost_before_run;
+  try {
+    const actual = await estimateAICost({
+      provider_name: providerResult.model_provider,
+      model_name: providerResult.model_used,
+      estimated_input_tokens: prompt_tokens,
+      estimated_output_tokens: completion_tokens,
+    });
+    actual_estimated_cost_after_run = Number(actual.estimated_total_cost ?? estimated_cost_before_run);
+  } catch (_) { /* keep estimate */ }
 
-  // 9. Ledger row
+  // 10. Final ledger row
   const ledger = await logAIUsage({
     ...baseLedgerInput(input, tier, providerResult.model_provider, providerResult.model_used, trace_id),
     prompt_tokens, completion_tokens,
@@ -333,16 +369,6 @@ export async function execute(input: AIGatewayInput): Promise<AIGatewayResult> {
     output_summary: providerResult.output_summary ?? input.input_summary,
     status: "completed",
   }).catch(() => ({ id: undefined } as any));
-
-  // 10. ROI hook (non-blocking)
-  recordROISignal({
-    ledger_id: ledger?.id,
-    business_id: input.business_id ?? null,
-    agent_id: input.agent_id ?? null,
-    estimated_value: input.estimated_value ?? 0,
-    actual_cost: actual_estimated_cost_after_run,
-    trace_id,
-  }).catch(() => {});
 
   return {
     trace_id, status: "completed",
@@ -400,9 +426,11 @@ function baseFailure(trace_id: string, reason: string, detail: string, audit_met
 function blockedResult(
   trace_id: string,
   reason: string,
-  ctx: { tier: AIModelTier; provider: string; model: string; estimated_cost_before_run: number;
+  ctx: {
+    tier: AIModelTier; provider: string; model: string; estimated_cost_before_run: number;
     alerts: string[]; risk_flags: string[]; redaction_events: number;
-    prompt_injection_detected: boolean; audit_metadata: Record<string, unknown> },
+    prompt_injection_detected: boolean; audit_metadata: Record<string, unknown>;
+  },
 ): AIGatewayResult {
   return {
     trace_id, status: "blocked",
