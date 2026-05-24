@@ -1012,6 +1012,8 @@ export const AI_COST_GOVERNOR_USER_GUIDE: ManualSection = {
 LIFTOR_FULL_GUIDE.push(AI_COST_GOVERNOR_USER_GUIDE);
 
 const AI_FINANCE_PACK_USER_GUIDE = {
+  number: 999,
+  key: "ai-finance-pack",
   id: "ai-finance-pack",
   title: "Monthly AI Finance Pack & Unit Economics",
   body: [
