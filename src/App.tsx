@@ -99,6 +99,7 @@ import MAIntelligenceWorkspace from "./pages/founder/MAIntelligenceWorkspace";
 import ExitValuationEngine from "./pages/founder/ExitValuationEngine";
 import QuarterlyBuildSelector from "./pages/founder/QuarterlyBuildSelector";
 import ExecutionHandoff from "./pages/founder/ExecutionHandoff";
+import PortfolioExitManual from "./pages/founder/PortfolioExitManual";
 import BrainSessions from "./pages/founder/BrainSessions";
 import BrainDrafts from "./pages/founder/BrainDrafts";
 import BrainAudit from "./pages/founder/BrainAudit";
