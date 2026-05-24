@@ -1783,6 +1783,93 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_quality_scores: {
+        Row: {
+          accuracy_score: number | null
+          agent_id: string | null
+          ai_usage_ledger_id: string
+          approved_without_edit: boolean
+          brand_fit_score: number | null
+          business_id: string | null
+          campaign_id: string | null
+          created_at: string
+          edit_summary: string | null
+          edited_before_approval: boolean
+          feedback_label: string | null
+          founder_rating: number | null
+          id: string
+          model_provider: string | null
+          model_tier: string | null
+          model_used: string | null
+          notes: string | null
+          output_quality_score: number | null
+          prompt_template_id: string | null
+          rejected: boolean
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewer_id: string | null
+          risk_score: number | null
+          task_category: string | null
+          usefulness_score: number | null
+        }
+        Insert: {
+          accuracy_score?: number | null
+          agent_id?: string | null
+          ai_usage_ledger_id: string
+          approved_without_edit?: boolean
+          brand_fit_score?: number | null
+          business_id?: string | null
+          campaign_id?: string | null
+          created_at?: string
+          edit_summary?: string | null
+          edited_before_approval?: boolean
+          feedback_label?: string | null
+          founder_rating?: number | null
+          id?: string
+          model_provider?: string | null
+          model_tier?: string | null
+          model_used?: string | null
+          notes?: string | null
+          output_quality_score?: number | null
+          prompt_template_id?: string | null
+          rejected?: boolean
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          risk_score?: number | null
+          task_category?: string | null
+          usefulness_score?: number | null
+        }
+        Update: {
+          accuracy_score?: number | null
+          agent_id?: string | null
+          ai_usage_ledger_id?: string
+          approved_without_edit?: boolean
+          brand_fit_score?: number | null
+          business_id?: string | null
+          campaign_id?: string | null
+          created_at?: string
+          edit_summary?: string | null
+          edited_before_approval?: boolean
+          feedback_label?: string | null
+          founder_rating?: number | null
+          id?: string
+          model_provider?: string | null
+          model_tier?: string | null
+          model_used?: string | null
+          notes?: string | null
+          output_quality_score?: number | null
+          prompt_template_id?: string | null
+          rejected?: boolean
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          risk_score?: number | null
+          task_category?: string | null
+          usefulness_score?: number | null
+        }
+        Relationships: []
+      }
       ai_reply_tone_profiles: {
         Row: {
           active: boolean
