@@ -335,7 +335,6 @@ Deno.serve(async (req) => {
         approval_type: "business_internal_activation_review",
         source_system: "business-internal-activate",
         source_table: "business_internal_activation_records",
-        source_record_id: rec.id,
         title: `Review internal activation for ${biz.name}`,
         summary: `Readiness ${score}/100. Mode: ${activation_mode}. Runbook items: ${runbookRows.length}. Daily actions: ${dailyRows.length}. Missing context: ${missing_context.length}. Blockers: ${blockers.length}. External actions locked.`,
         recommended_action: "Review runbook + first 7-day plan. External send remains locked.",
