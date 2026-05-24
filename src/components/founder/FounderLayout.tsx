@@ -20,6 +20,7 @@ const navItems = [
   { label: "AI Usage Ledger", to: "/founder/ai-cost/ledger", icon: Activity },
   { label: "AI Model Routing", to: "/founder/ai-cost/routing", icon: Route },
   { label: "AI Budgets", to: "/founder/ai-cost/budgets", icon: PoundSterling },
+  { label: "Agent Cost Controls", to: "/founder/ai-cost/agent-controls", icon: Bot },
   { label: "AI Co-Pilot", to: "/founder/copilot", icon: MessageSquare },
   { label: "AI Brain", to: "/founder/brain", icon: Brain },
   { label: "Decisions", to: "/founder/decisions", icon: Scale },
