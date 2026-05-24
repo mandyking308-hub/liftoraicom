@@ -107,6 +107,7 @@ import AIUsageLedger from "./pages/founder/AIUsageLedger";
 import AIModelRouting from "./pages/founder/AIModelRouting";
 import AIBusinessBudgets from "./pages/founder/AIBusinessBudgets";
 import AIAgentCostControls from "./pages/founder/AIAgentCostControls";
+import AICostAlerts from "./pages/founder/AICostAlerts";
 import DataIngestionCentre from "./pages/founder/DataIngestionCentre";
 import BrainSessions from "./pages/founder/BrainSessions";
 import BrainDrafts from "./pages/founder/BrainDrafts";
@@ -315,6 +316,7 @@ const App = () => (
             <Route path="/founder/ai-cost/routing" element={<FounderRoute><AIModelRouting /></FounderRoute>} />
             <Route path="/founder/ai-cost/budgets" element={<FounderRoute><AIBusinessBudgets /></FounderRoute>} />
             <Route path="/founder/ai-cost/agent-controls" element={<FounderRoute><AIAgentCostControls /></FounderRoute>} />
+            <Route path="/founder/ai-cost/alerts" element={<FounderRoute><AICostAlerts /></FounderRoute>} />
             <Route path="/founder/brain" element={<FounderRoute><LiftorBrain /></FounderRoute>} />
             <Route path="/founder/brain/sessions" element={<FounderRoute><BrainSessions /></FounderRoute>} />
             <Route path="/founder/brain/drafts" element={<FounderRoute><BrainDrafts /></FounderRoute>} />
