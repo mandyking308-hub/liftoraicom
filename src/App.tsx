@@ -284,6 +284,7 @@ const App = () => (
             <Route path="/founder/external-activation-readiness" element={<FounderRoute><ExternalActivationReadinessPage /></FounderRoute>} />
             <Route path="/founder/micro-batch-preparation" element={<FounderRoute><MicroBatchPreparationPage /></FounderRoute>} />
             <Route path="/founder/build-phase-closeout" element={<FounderRoute><BuildPhaseCloseoutPage /></FounderRoute>} />
+            <Route path="/founder/manuals-hub" element={<FounderRoute><ManualsHubPage /></FounderRoute>} />
             <Route path="/founder/brain" element={<FounderRoute><LiftorBrain /></FounderRoute>} />
             <Route path="/founder/brain/sessions" element={<FounderRoute><BrainSessions /></FounderRoute>} />
             <Route path="/founder/brain/drafts" element={<FounderRoute><BrainDrafts /></FounderRoute>} />
