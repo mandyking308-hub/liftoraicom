@@ -671,6 +671,7 @@ export type Database = {
           estimated_cost: number
           id: string
           idempotency_key: string | null
+          is_simulation: boolean
           linked_ledger_id: string | null
           max_retries: number
           priority: string
@@ -696,6 +697,7 @@ export type Database = {
           estimated_cost?: number
           id?: string
           idempotency_key?: string | null
+          is_simulation?: boolean
           linked_ledger_id?: string | null
           max_retries?: number
           priority?: string
@@ -721,6 +723,7 @@ export type Database = {
           estimated_cost?: number
           id?: string
           idempotency_key?: string | null
+          is_simulation?: boolean
           linked_ledger_id?: string | null
           max_retries?: number
           priority?: string
@@ -1442,6 +1445,7 @@ export type Database = {
           campaign_id: string | null
           created_at: string
           id: string
+          is_simulation: boolean
           message: string
           recommended_action: string | null
           resolved_at: string | null
@@ -1459,6 +1463,7 @@ export type Database = {
           campaign_id?: string | null
           created_at?: string
           id?: string
+          is_simulation?: boolean
           message: string
           recommended_action?: string | null
           resolved_at?: string | null
@@ -1476,6 +1481,7 @@ export type Database = {
           campaign_id?: string | null
           created_at?: string
           id?: string
+          is_simulation?: boolean
           message?: string
           recommended_action?: string | null
           resolved_at?: string | null
@@ -1678,6 +1684,8 @@ export type Database = {
           paused_campaign_ids: string[]
           resumed_at: string | null
           resumed_by: string | null
+          simulation_label: string | null
+          simulation_mode: boolean
           singleton: boolean
           updated_at: string
         }
@@ -1692,6 +1700,8 @@ export type Database = {
           paused_campaign_ids?: string[]
           resumed_at?: string | null
           resumed_by?: string | null
+          simulation_label?: string | null
+          simulation_mode?: boolean
           singleton?: boolean
           updated_at?: string
         }
@@ -1706,6 +1716,8 @@ export type Database = {
           paused_campaign_ids?: string[]
           resumed_at?: string | null
           resumed_by?: string | null
+          simulation_label?: string | null
+          simulation_mode?: boolean
           singleton?: boolean
           updated_at?: string
         }
@@ -1921,6 +1933,7 @@ export type Database = {
           feedback_label: string | null
           founder_rating: number | null
           id: string
+          is_simulation: boolean
           model_provider: string | null
           model_tier: string | null
           model_used: string | null
@@ -1949,6 +1962,7 @@ export type Database = {
           feedback_label?: string | null
           founder_rating?: number | null
           id?: string
+          is_simulation?: boolean
           model_provider?: string | null
           model_tier?: string | null
           model_used?: string | null
@@ -1977,6 +1991,7 @@ export type Database = {
           feedback_label?: string | null
           founder_rating?: number | null
           id?: string
+          is_simulation?: boolean
           model_provider?: string | null
           model_tier?: string | null
           model_used?: string | null
@@ -2152,6 +2167,36 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_sandbox_runs: {
+        Row: {
+          action: string
+          affected_rows: number
+          created_at: string
+          id: string
+          performed_by: string | null
+          scope: string | null
+          summary: Json
+        }
+        Insert: {
+          action: string
+          affected_rows?: number
+          created_at?: string
+          id?: string
+          performed_by?: string | null
+          scope?: string | null
+          summary?: Json
+        }
+        Update: {
+          action?: string
+          affected_rows?: number
+          created_at?: string
+          id?: string
+          performed_by?: string | null
+          scope?: string | null
+          summary?: Json
+        }
+        Relationships: []
+      }
       ai_usage_ledger: {
         Row: {
           action_type: string | null
@@ -2170,6 +2215,7 @@ export type Database = {
           human_equivalent_cost: number | null
           id: string
           input_summary: string | null
+          is_simulation: boolean
           model_provider: string | null
           model_tier: string | null
           model_used: string | null
@@ -2204,6 +2250,7 @@ export type Database = {
           human_equivalent_cost?: number | null
           id?: string
           input_summary?: string | null
+          is_simulation?: boolean
           model_provider?: string | null
           model_tier?: string | null
           model_used?: string | null
@@ -2238,6 +2285,7 @@ export type Database = {
           human_equivalent_cost?: number | null
           id?: string
           input_summary?: string | null
+          is_simulation?: boolean
           model_provider?: string | null
           model_tier?: string | null
           model_used?: string | null
