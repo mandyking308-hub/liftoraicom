@@ -88,6 +88,7 @@ import BusinessOnboardingFactoryPage from "./pages/founder/BusinessOnboardingFac
 import BusinessInternalActivationPage from "./pages/founder/BusinessInternalActivation";
 import BusinessDailyOperatingLoopPage from "./pages/founder/BusinessDailyOperatingLoop";
 import BusinessWeeklyReviewPage from "./pages/founder/BusinessWeeklyReview";
+import ExternalActivationReadinessPage from "./pages/founder/ExternalActivationReadiness";
 import LiftorBrain from "./pages/founder/LiftorBrain";
 import BrainSessions from "./pages/founder/BrainSessions";
 import BrainDrafts from "./pages/founder/BrainDrafts";
@@ -277,6 +278,7 @@ const App = () => (
             <Route path="/founder/business-internal-activation" element={<FounderRoute><BusinessInternalActivationPage /></FounderRoute>} />
             <Route path="/founder/business-daily-operating-loop" element={<FounderRoute><BusinessDailyOperatingLoopPage /></FounderRoute>} />
             <Route path="/founder/business-weekly-review" element={<FounderRoute><BusinessWeeklyReviewPage /></FounderRoute>} />
+            <Route path="/founder/external-activation-readiness" element={<FounderRoute><ExternalActivationReadinessPage /></FounderRoute>} />
             <Route path="/founder/brain" element={<FounderRoute><LiftorBrain /></FounderRoute>} />
             <Route path="/founder/brain/sessions" element={<FounderRoute><BrainSessions /></FounderRoute>} />
             <Route path="/founder/brain/drafts" element={<FounderRoute><BrainDrafts /></FounderRoute>} />
