@@ -1010,3 +1010,23 @@ export const AI_COST_GOVERNOR_USER_GUIDE: ManualSection = {
   ].join(" "),
 };
 LIFTOR_FULL_GUIDE.push(AI_COST_GOVERNOR_USER_GUIDE);
+
+const AI_FINANCE_PACK_USER_GUIDE = {
+  id: "ai-finance-pack",
+  title: "Monthly AI Finance Pack & Unit Economics",
+  body: [
+    "Plain-English guide. Open /founder/ai-cost/finance.",
+    "What it is. A single monthly report that tells you whether AI spend is producing value across every business, agent, campaign and task category — and which AI work to scale, keep, watch, reduce, pause or retire next month.",
+    "How to read the founder summary. The top card translates the month's numbers into one or two paragraphs: where AI made money, where it lost money, which agents to scale, which to pause, which categories should switch to cheaper models, and a recommended budget direction for next month.",
+    "Top totals. AI spend, estimated human cost saved, net saving, revenue linked, pipeline linked, quality-adjusted ROI, approval/rejection/edit rates, and cost-per-outcome (lead, opportunity, sale, content asset, customer interaction).",
+    "Quality-adjusted ROI. Standard ROI can look great even when AI output is rejected by humans. Quality-adjusted ROI multiplies the headline saving by approval rate × (1 − rejection rate), so AI work that needs to be redone is correctly discounted.",
+    "Breakdowns. Tabs for Business, Agent, Campaign and Task category show the same metrics so you can localise wins and losses. Each row carries a decision label — scale / keep / watch / reduce / pause / retire — with a short reason.",
+    "Business unit economics. AI spend as % of revenue and pipeline, AI spend per active campaign, per customer/prospect interaction, per approved output, per rejected output, budget remaining, recommended monthly AI budget, estimated payback months.",
+    "Estimates label. Revenue and pipeline values count only records linked into the ledger. Where no link exists they are treated as 0 and the report is clearly labelled as containing estimates. Treat them as directional, not as accounting truth.",
+    "Export. The 'Export CSV' button produces a single file containing the founder summary, totals, all breakdowns and business unit economics. Use it for finance reviews and board updates.",
+    "When to act. Scale = increase budget or volume. Keep = no change. Watch = monitor next month. Reduce = downgrade model tier or cut volume. Pause = stop new actions, investigate. Retire = remove the workflow or template.",
+    "Principle: AI investment decisions must be made monthly using this pack; do not rely on gut feel or single-day spend spikes.",
+    "Cross-references: AI Cost Governor, ROI Engine, Quality Scoring, Approval Gates, Business Budgets.",
+  ].join(" "),
+};
+LIFTOR_FULL_GUIDE.push(AI_FINANCE_PACK_USER_GUIDE);
