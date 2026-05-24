@@ -18353,6 +18353,87 @@ export type Database = {
         }
         Relationships: []
       }
+      liftor_build_phase_closeout_records: {
+        Row: {
+          brain_status: string | null
+          build_end_reference: string | null
+          build_start_reference: string | null
+          business_factory_status: string | null
+          classification: string | null
+          closeout_name: string
+          closeout_phase: string
+          closeout_status: string
+          command_centre_status: string | null
+          created_at: string
+          external_go_live_status: string | null
+          handover_summary: string | null
+          id: string
+          is_test_data: boolean
+          locked_items: Json
+          manual_status: string | null
+          metadata: Json
+          next_actions: Json
+          next_phase: string | null
+          no_forbidden_action_audit: Json
+          open_warnings: Json
+          provider_status: string | null
+          safety_status: string | null
+          updated_at: string
+        }
+        Insert: {
+          brain_status?: string | null
+          build_end_reference?: string | null
+          build_start_reference?: string | null
+          business_factory_status?: string | null
+          classification?: string | null
+          closeout_name: string
+          closeout_phase: string
+          closeout_status?: string
+          command_centre_status?: string | null
+          created_at?: string
+          external_go_live_status?: string | null
+          handover_summary?: string | null
+          id?: string
+          is_test_data?: boolean
+          locked_items?: Json
+          manual_status?: string | null
+          metadata?: Json
+          next_actions?: Json
+          next_phase?: string | null
+          no_forbidden_action_audit?: Json
+          open_warnings?: Json
+          provider_status?: string | null
+          safety_status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          brain_status?: string | null
+          build_end_reference?: string | null
+          build_start_reference?: string | null
+          business_factory_status?: string | null
+          classification?: string | null
+          closeout_name?: string
+          closeout_phase?: string
+          closeout_status?: string
+          command_centre_status?: string | null
+          created_at?: string
+          external_go_live_status?: string | null
+          handover_summary?: string | null
+          id?: string
+          is_test_data?: boolean
+          locked_items?: Json
+          manual_status?: string | null
+          metadata?: Json
+          next_actions?: Json
+          next_phase?: string | null
+          no_forbidden_action_audit?: Json
+          open_warnings?: Json
+          provider_status?: string | null
+          safety_status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       liftor_live_readiness_gates: {
         Row: {
           blocker_reason: string | null

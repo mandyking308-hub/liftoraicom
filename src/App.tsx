@@ -90,6 +90,7 @@ import BusinessDailyOperatingLoopPage from "./pages/founder/BusinessDailyOperati
 import BusinessWeeklyReviewPage from "./pages/founder/BusinessWeeklyReview";
 import ExternalActivationReadinessPage from "./pages/founder/ExternalActivationReadiness";
 import MicroBatchPreparationPage from "./pages/founder/MicroBatchPreparation";
+import BuildPhaseCloseoutPage from "./pages/founder/BuildPhaseCloseout";
 import LiftorBrain from "./pages/founder/LiftorBrain";
 import BrainSessions from "./pages/founder/BrainSessions";
 import BrainDrafts from "./pages/founder/BrainDrafts";
@@ -281,6 +282,7 @@ const App = () => (
             <Route path="/founder/business-weekly-review" element={<FounderRoute><BusinessWeeklyReviewPage /></FounderRoute>} />
             <Route path="/founder/external-activation-readiness" element={<FounderRoute><ExternalActivationReadinessPage /></FounderRoute>} />
             <Route path="/founder/micro-batch-preparation" element={<FounderRoute><MicroBatchPreparationPage /></FounderRoute>} />
+            <Route path="/founder/build-phase-closeout" element={<FounderRoute><BuildPhaseCloseoutPage /></FounderRoute>} />
             <Route path="/founder/brain" element={<FounderRoute><LiftorBrain /></FounderRoute>} />
             <Route path="/founder/brain/sessions" element={<FounderRoute><BrainSessions /></FounderRoute>} />
             <Route path="/founder/brain/drafts" element={<FounderRoute><BrainDrafts /></FounderRoute>} />
