@@ -19425,6 +19425,176 @@ export type Database = {
           },
         ]
       }
+      ma_approval_queue: {
+        Row: {
+          actioned_at: string | null
+          build_candidate_id: string | null
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decision_notes: string | null
+          due_date: string | null
+          evidence: Json | null
+          id: string
+          portfolio_asset_id: string | null
+          proposed_action: string | null
+          request_type: string
+          requested_by: string | null
+          risk_level: string
+          status: string
+          subject_id: string | null
+          subject_table: string | null
+          summary: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          actioned_at?: string | null
+          build_candidate_id?: string | null
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_notes?: string | null
+          due_date?: string | null
+          evidence?: Json | null
+          id?: string
+          portfolio_asset_id?: string | null
+          proposed_action?: string | null
+          request_type: string
+          requested_by?: string | null
+          risk_level?: string
+          status?: string
+          subject_id?: string | null
+          subject_table?: string | null
+          summary?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          actioned_at?: string | null
+          build_candidate_id?: string | null
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_notes?: string | null
+          due_date?: string | null
+          evidence?: Json | null
+          id?: string
+          portfolio_asset_id?: string | null
+          proposed_action?: string | null
+          request_type?: string
+          requested_by?: string | null
+          risk_level?: string
+          status?: string
+          subject_id?: string | null
+          subject_table?: string | null
+          summary?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ma_approval_queue_build_candidate_id_fkey"
+            columns: ["build_candidate_id"]
+            isOneToOne: false
+            referencedRelation: "ma_build_candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ma_approval_queue_portfolio_asset_id_fkey"
+            columns: ["portfolio_asset_id"]
+            isOneToOne: false
+            referencedRelation: "ma_portfolio_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ma_asset_playbooks: {
+        Row: {
+          ai_model: string | null
+          business_thesis: string | null
+          compliance_rules: string | null
+          content_rules: string | null
+          created_at: string
+          crm_stages: string | null
+          data_room_checklist: string | null
+          exit_target_summary: string | null
+          generated_by_ai: boolean | null
+          human_approval_points: string | null
+          id: string
+          inbox_rules: string | null
+          kill_scale_criteria: string | null
+          lead_sources: string | null
+          outreach_rules: string | null
+          portfolio_asset_id: string
+          revenue_model: string | null
+          sales_process: string | null
+          status: string | null
+          target_buyer: string | null
+          target_customer: string | null
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          ai_model?: string | null
+          business_thesis?: string | null
+          compliance_rules?: string | null
+          content_rules?: string | null
+          created_at?: string
+          crm_stages?: string | null
+          data_room_checklist?: string | null
+          exit_target_summary?: string | null
+          generated_by_ai?: boolean | null
+          human_approval_points?: string | null
+          id?: string
+          inbox_rules?: string | null
+          kill_scale_criteria?: string | null
+          lead_sources?: string | null
+          outreach_rules?: string | null
+          portfolio_asset_id: string
+          revenue_model?: string | null
+          sales_process?: string | null
+          status?: string | null
+          target_buyer?: string | null
+          target_customer?: string | null
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          ai_model?: string | null
+          business_thesis?: string | null
+          compliance_rules?: string | null
+          content_rules?: string | null
+          created_at?: string
+          crm_stages?: string | null
+          data_room_checklist?: string | null
+          exit_target_summary?: string | null
+          generated_by_ai?: boolean | null
+          human_approval_points?: string | null
+          id?: string
+          inbox_rules?: string | null
+          kill_scale_criteria?: string | null
+          lead_sources?: string | null
+          outreach_rules?: string | null
+          portfolio_asset_id?: string
+          revenue_model?: string | null
+          sales_process?: string | null
+          status?: string | null
+          target_buyer?: string | null
+          target_customer?: string | null
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ma_asset_playbooks_portfolio_asset_id_fkey"
+            columns: ["portfolio_asset_id"]
+            isOneToOne: false
+            referencedRelation: "ma_portfolio_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ma_audit_logs: {
         Row: {
           action_type: string
@@ -19615,6 +19785,63 @@ export type Database = {
           },
         ]
       }
+      ma_capacity_snapshots: {
+        Row: {
+          active_businesses: number | null
+          adviser_bottleneck_count: number | null
+          agent_readiness_score: number | null
+          capacity_score: number | null
+          capacity_verdict: string | null
+          created_at: string
+          data_room_gaps: number | null
+          id: string
+          notes: string | null
+          open_execution_targets: number | null
+          overdue_execution_targets: number | null
+          oversight_hours_per_week: number | null
+          pending_approvals: number | null
+          recommendation: string | null
+          revenue_assets_needing_attention: number | null
+          snapshot_date: string
+        }
+        Insert: {
+          active_businesses?: number | null
+          adviser_bottleneck_count?: number | null
+          agent_readiness_score?: number | null
+          capacity_score?: number | null
+          capacity_verdict?: string | null
+          created_at?: string
+          data_room_gaps?: number | null
+          id?: string
+          notes?: string | null
+          open_execution_targets?: number | null
+          overdue_execution_targets?: number | null
+          oversight_hours_per_week?: number | null
+          pending_approvals?: number | null
+          recommendation?: string | null
+          revenue_assets_needing_attention?: number | null
+          snapshot_date?: string
+        }
+        Update: {
+          active_businesses?: number | null
+          adviser_bottleneck_count?: number | null
+          agent_readiness_score?: number | null
+          capacity_score?: number | null
+          capacity_verdict?: string | null
+          created_at?: string
+          data_room_gaps?: number | null
+          id?: string
+          notes?: string | null
+          open_execution_targets?: number | null
+          overdue_execution_targets?: number | null
+          oversight_hours_per_week?: number | null
+          pending_approvals?: number | null
+          recommendation?: string | null
+          revenue_assets_needing_attention?: number | null
+          snapshot_date?: string
+        }
+        Relationships: []
+      }
       ma_companies: {
         Row: {
           acquisition_history_notes: string | null
@@ -19779,6 +20006,93 @@ export type Database = {
           },
         ]
       }
+      ma_data_imports: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          confidence_level: string
+          created_at: string
+          date_imported: string
+          error_message: string | null
+          field_mapping: Json | null
+          file_storage_path: string | null
+          id: string
+          import_name: string
+          import_owner_id: string
+          licence_status: string
+          notes: string | null
+          raw_paste_excerpt: string | null
+          reuse_allowed: boolean
+          row_count_created: number | null
+          row_count_mapped: number | null
+          row_count_rejected: number | null
+          row_count_total: number | null
+          row_count_updated: number | null
+          source_name: string
+          source_type: string
+          status: string
+          storage_allowed: boolean
+          target_entity: string
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          confidence_level?: string
+          created_at?: string
+          date_imported?: string
+          error_message?: string | null
+          field_mapping?: Json | null
+          file_storage_path?: string | null
+          id?: string
+          import_name: string
+          import_owner_id: string
+          licence_status?: string
+          notes?: string | null
+          raw_paste_excerpt?: string | null
+          reuse_allowed?: boolean
+          row_count_created?: number | null
+          row_count_mapped?: number | null
+          row_count_rejected?: number | null
+          row_count_total?: number | null
+          row_count_updated?: number | null
+          source_name: string
+          source_type: string
+          status?: string
+          storage_allowed?: boolean
+          target_entity: string
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          confidence_level?: string
+          created_at?: string
+          date_imported?: string
+          error_message?: string | null
+          field_mapping?: Json | null
+          file_storage_path?: string | null
+          id?: string
+          import_name?: string
+          import_owner_id?: string
+          licence_status?: string
+          notes?: string | null
+          raw_paste_excerpt?: string | null
+          reuse_allowed?: boolean
+          row_count_created?: number | null
+          row_count_mapped?: number | null
+          row_count_rejected?: number | null
+          row_count_total?: number | null
+          row_count_updated?: number | null
+          source_name?: string
+          source_type?: string
+          status?: string
+          storage_allowed?: boolean
+          target_entity?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ma_data_room_items: {
         Row: {
           created_at: string
@@ -19929,6 +20243,117 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      ma_dedupe_suggestions: {
+        Row: {
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          diff_fields: Json | null
+          id: string
+          match_signals: Json | null
+          notes: string | null
+          record_type: string
+          similarity_score: number
+          source_record_id: string
+          source_table: string
+          status: string
+          suggested_action: string
+          target_record_id: string
+          target_table: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          diff_fields?: Json | null
+          id?: string
+          match_signals?: Json | null
+          notes?: string | null
+          record_type: string
+          similarity_score: number
+          source_record_id: string
+          source_table: string
+          status?: string
+          suggested_action?: string
+          target_record_id: string
+          target_table: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          diff_fields?: Json | null
+          id?: string
+          match_signals?: Json | null
+          notes?: string | null
+          record_type?: string
+          similarity_score?: number
+          source_record_id?: string
+          source_table?: string
+          status?: string
+          suggested_action?: string
+          target_record_id?: string
+          target_table?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ma_evidence_links: {
+        Row: {
+          adviser_review_required: boolean | null
+          confidence_score: number | null
+          created_at: string
+          evidence_id: string
+          evidence_table: string
+          freshness_score: number | null
+          id: string
+          licence_status: string | null
+          missing_data_notes: string | null
+          notes: string | null
+          paid_source: boolean | null
+          source_date: string | null
+          source_name: string | null
+          subject_id: string
+          subject_table: string
+        }
+        Insert: {
+          adviser_review_required?: boolean | null
+          confidence_score?: number | null
+          created_at?: string
+          evidence_id: string
+          evidence_table: string
+          freshness_score?: number | null
+          id?: string
+          licence_status?: string | null
+          missing_data_notes?: string | null
+          notes?: string | null
+          paid_source?: boolean | null
+          source_date?: string | null
+          source_name?: string | null
+          subject_id: string
+          subject_table: string
+        }
+        Update: {
+          adviser_review_required?: boolean | null
+          confidence_score?: number | null
+          created_at?: string
+          evidence_id?: string
+          evidence_table?: string
+          freshness_score?: number | null
+          id?: string
+          licence_status?: string | null
+          missing_data_notes?: string | null
+          notes?: string | null
+          paid_source?: boolean | null
+          source_date?: string | null
+          source_name?: string | null
+          subject_id?: string
+          subject_table?: string
+        }
+        Relationships: []
       }
       ma_execution_targets: {
         Row: {
@@ -20100,6 +20525,254 @@ export type Database = {
           },
         ]
       }
+      ma_golden_records: {
+        Row: {
+          aliases: string[] | null
+          canonical_name: string
+          confidence_score: number | null
+          country: string | null
+          created_at: string
+          external_ids: Json | null
+          id: string
+          legal_name: string | null
+          linked_adviser_id: string | null
+          linked_company_id: string | null
+          linked_investor_id: string | null
+          notes: string | null
+          primary_domain: string | null
+          record_type: string
+          ticker: string | null
+          updated_at: string
+        }
+        Insert: {
+          aliases?: string[] | null
+          canonical_name: string
+          confidence_score?: number | null
+          country?: string | null
+          created_at?: string
+          external_ids?: Json | null
+          id?: string
+          legal_name?: string | null
+          linked_adviser_id?: string | null
+          linked_company_id?: string | null
+          linked_investor_id?: string | null
+          notes?: string | null
+          primary_domain?: string | null
+          record_type: string
+          ticker?: string | null
+          updated_at?: string
+        }
+        Update: {
+          aliases?: string[] | null
+          canonical_name?: string
+          confidence_score?: number | null
+          country?: string | null
+          created_at?: string
+          external_ids?: Json | null
+          id?: string
+          legal_name?: string | null
+          linked_adviser_id?: string | null
+          linked_company_id?: string | null
+          linked_investor_id?: string | null
+          notes?: string | null
+          primary_domain?: string | null
+          record_type?: string
+          ticker?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ma_governance_decisions: {
+        Row: {
+          approved_by: string | null
+          build_candidate_id: string | null
+          created_at: string
+          decision_date: string
+          decision_summary: string
+          decision_type: string
+          id: string
+          lessons_learned: string | null
+          outcome_notes: string | null
+          portfolio_asset_id: string | null
+          reasoning: string | null
+          rejected_alternatives: Json | null
+          review_date: string | null
+          supporting_signals: Json | null
+          updated_at: string
+        }
+        Insert: {
+          approved_by?: string | null
+          build_candidate_id?: string | null
+          created_at?: string
+          decision_date?: string
+          decision_summary: string
+          decision_type: string
+          id?: string
+          lessons_learned?: string | null
+          outcome_notes?: string | null
+          portfolio_asset_id?: string | null
+          reasoning?: string | null
+          rejected_alternatives?: Json | null
+          review_date?: string | null
+          supporting_signals?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          approved_by?: string | null
+          build_candidate_id?: string | null
+          created_at?: string
+          decision_date?: string
+          decision_summary?: string
+          decision_type?: string
+          id?: string
+          lessons_learned?: string | null
+          outcome_notes?: string | null
+          portfolio_asset_id?: string | null
+          reasoning?: string | null
+          rejected_alternatives?: Json | null
+          review_date?: string | null
+          supporting_signals?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ma_governance_decisions_build_candidate_id_fkey"
+            columns: ["build_candidate_id"]
+            isOneToOne: false
+            referencedRelation: "ma_build_candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ma_governance_decisions_portfolio_asset_id_fkey"
+            columns: ["portfolio_asset_id"]
+            isOneToOne: false
+            referencedRelation: "ma_portfolio_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ma_import_records: {
+        Row: {
+          action: string
+          created_at: string
+          dedupe_status: string
+          id: string
+          import_id: string
+          mapped_payload: Json | null
+          matched_record_id: string | null
+          matched_record_table: string | null
+          notes: string | null
+          raw_payload: Json
+          reviewed_at: string | null
+          reviewed_by: string | null
+          row_index: number
+          status: string
+          updated_at: string
+          validation_errors: Json | null
+        }
+        Insert: {
+          action?: string
+          created_at?: string
+          dedupe_status?: string
+          id?: string
+          import_id: string
+          mapped_payload?: Json | null
+          matched_record_id?: string | null
+          matched_record_table?: string | null
+          notes?: string | null
+          raw_payload: Json
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          row_index: number
+          status?: string
+          updated_at?: string
+          validation_errors?: Json | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          dedupe_status?: string
+          id?: string
+          import_id?: string
+          mapped_payload?: Json | null
+          matched_record_id?: string | null
+          matched_record_table?: string | null
+          notes?: string | null
+          raw_payload?: Json
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          row_index?: number
+          status?: string
+          updated_at?: string
+          validation_errors?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ma_import_records_import_id_fkey"
+            columns: ["import_id"]
+            isOneToOne: false
+            referencedRelation: "ma_data_imports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ma_intelligence_runs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          errors: Json | null
+          id: string
+          next_actions: Json | null
+          recommendations_generated: number | null
+          records_added: number | null
+          records_reviewed: number | null
+          records_updated: number | null
+          run_type: string
+          scheduled_for: string | null
+          started_at: string | null
+          status: string
+          summary: string | null
+          triggered_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          errors?: Json | null
+          id?: string
+          next_actions?: Json | null
+          recommendations_generated?: number | null
+          records_added?: number | null
+          records_reviewed?: number | null
+          records_updated?: number | null
+          run_type: string
+          scheduled_for?: string | null
+          started_at?: string | null
+          status?: string
+          summary?: string | null
+          triggered_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          errors?: Json | null
+          id?: string
+          next_actions?: Json | null
+          recommendations_generated?: number | null
+          records_added?: number | null
+          records_reviewed?: number | null
+          records_updated?: number | null
+          run_type?: string
+          scheduled_for?: string | null
+          started_at?: string | null
+          status?: string
+          summary?: string | null
+          triggered_by?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ma_intelligence_sources: {
         Row: {
           access_method: string | null
@@ -20219,6 +20892,45 @@ export type Database = {
           },
         ]
       }
+      ma_paid_connectors: {
+        Row: {
+          allowed_use_notes: string | null
+          connector_name: string
+          created_at: string
+          id: string
+          last_error: string | null
+          last_run_at: string | null
+          licence_status: string | null
+          secret_reference_name: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          allowed_use_notes?: string | null
+          connector_name: string
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          last_run_at?: string | null
+          licence_status?: string | null
+          secret_reference_name?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          allowed_use_notes?: string | null
+          connector_name?: string
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          last_run_at?: string | null
+          licence_status?: string | null
+          secret_reference_name?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ma_portfolio_assets: {
         Row: {
           asset_name: string
@@ -20308,6 +21020,81 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      ma_portfolio_lessons: {
+        Row: {
+          actual_vs_expected_buyer_interest: string | null
+          actual_vs_expected_operability: string | null
+          actual_vs_expected_revenue: string | null
+          best_converting_outreach: string | null
+          biggest_operational_burden: string | null
+          build_candidate_id: string | null
+          created_at: string
+          id: string
+          kill_or_scale_lessons: string | null
+          portfolio_asset_id: string | null
+          reusable_playbook_notes: string | null
+          strongest_acquisition_signal: string | null
+          strongest_sales_channel: string | null
+          updated_at: string
+          weakest_assumption: string | null
+          what_failed: string | null
+          what_worked: string | null
+        }
+        Insert: {
+          actual_vs_expected_buyer_interest?: string | null
+          actual_vs_expected_operability?: string | null
+          actual_vs_expected_revenue?: string | null
+          best_converting_outreach?: string | null
+          biggest_operational_burden?: string | null
+          build_candidate_id?: string | null
+          created_at?: string
+          id?: string
+          kill_or_scale_lessons?: string | null
+          portfolio_asset_id?: string | null
+          reusable_playbook_notes?: string | null
+          strongest_acquisition_signal?: string | null
+          strongest_sales_channel?: string | null
+          updated_at?: string
+          weakest_assumption?: string | null
+          what_failed?: string | null
+          what_worked?: string | null
+        }
+        Update: {
+          actual_vs_expected_buyer_interest?: string | null
+          actual_vs_expected_operability?: string | null
+          actual_vs_expected_revenue?: string | null
+          best_converting_outreach?: string | null
+          biggest_operational_burden?: string | null
+          build_candidate_id?: string | null
+          created_at?: string
+          id?: string
+          kill_or_scale_lessons?: string | null
+          portfolio_asset_id?: string | null
+          reusable_playbook_notes?: string | null
+          strongest_acquisition_signal?: string | null
+          strongest_sales_channel?: string | null
+          updated_at?: string
+          weakest_assumption?: string | null
+          what_failed?: string | null
+          what_worked?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ma_portfolio_lessons_build_candidate_id_fkey"
+            columns: ["build_candidate_id"]
+            isOneToOne: false
+            referencedRelation: "ma_build_candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ma_portfolio_lessons_portfolio_asset_id_fkey"
+            columns: ["portfolio_asset_id"]
+            isOneToOne: false
+            referencedRelation: "ma_portfolio_assets"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ma_valuation_benchmarks: {
         Row: {
@@ -37466,6 +38253,90 @@ export type Database = {
           total_leads: number | null
         }
         Relationships: []
+      }
+      ma_approval_queue_open: {
+        Row: {
+          actioned_at: string | null
+          build_candidate_id: string | null
+          created_at: string | null
+          decided_at: string | null
+          decided_by: string | null
+          decision_notes: string | null
+          due_date: string | null
+          evidence: Json | null
+          id: string | null
+          portfolio_asset_id: string | null
+          proposed_action: string | null
+          request_type: string | null
+          requested_by: string | null
+          risk_level: string | null
+          status: string | null
+          subject_id: string | null
+          subject_table: string | null
+          summary: string | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          actioned_at?: string | null
+          build_candidate_id?: string | null
+          created_at?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_notes?: string | null
+          due_date?: string | null
+          evidence?: Json | null
+          id?: string | null
+          portfolio_asset_id?: string | null
+          proposed_action?: string | null
+          request_type?: string | null
+          requested_by?: string | null
+          risk_level?: string | null
+          status?: string | null
+          subject_id?: string | null
+          subject_table?: string | null
+          summary?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          actioned_at?: string | null
+          build_candidate_id?: string | null
+          created_at?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_notes?: string | null
+          due_date?: string | null
+          evidence?: Json | null
+          id?: string | null
+          portfolio_asset_id?: string | null
+          proposed_action?: string | null
+          request_type?: string | null
+          requested_by?: string | null
+          risk_level?: string | null
+          status?: string | null
+          subject_id?: string | null
+          subject_table?: string | null
+          summary?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ma_approval_queue_build_candidate_id_fkey"
+            columns: ["build_candidate_id"]
+            isOneToOne: false
+            referencedRelation: "ma_build_candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ma_approval_queue_portfolio_asset_id_fkey"
+            columns: ["portfolio_asset_id"]
+            isOneToOne: false
+            referencedRelation: "ma_portfolio_assets"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       proposal_crm_reconciliation: {
         Row: {

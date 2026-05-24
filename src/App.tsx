@@ -100,6 +100,7 @@ import ExitValuationEngine from "./pages/founder/ExitValuationEngine";
 import QuarterlyBuildSelector from "./pages/founder/QuarterlyBuildSelector";
 import ExecutionHandoff from "./pages/founder/ExecutionHandoff";
 import PortfolioExitManual from "./pages/founder/PortfolioExitManual";
+import DataIngestionCentre from "./pages/founder/DataIngestionCentre";
 import BrainSessions from "./pages/founder/BrainSessions";
 import BrainDrafts from "./pages/founder/BrainDrafts";
 import BrainAudit from "./pages/founder/BrainAudit";
@@ -299,6 +300,7 @@ const App = () => (
             <Route path="/founder/portfolio-exit/build-selector" element={<FounderRoute><QuarterlyBuildSelector /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/execution-handoff" element={<FounderRoute><ExecutionHandoff /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/manual" element={<FounderRoute><PortfolioExitManual /></FounderRoute>} />
+            <Route path="/founder/portfolio-exit/ingestion" element={<FounderRoute><DataIngestionCentre /></FounderRoute>} />
             <Route path="/founder/brain" element={<FounderRoute><LiftorBrain /></FounderRoute>} />
             <Route path="/founder/brain/sessions" element={<FounderRoute><BrainSessions /></FounderRoute>} />
             <Route path="/founder/brain/drafts" element={<FounderRoute><BrainDrafts /></FounderRoute>} />
