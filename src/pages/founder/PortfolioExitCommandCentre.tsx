@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import FounderLayout from "@/components/founder/FounderLayout";
 import { supabase } from "@/integrations/supabase/client";
+import IntelligenceOrchestratorPanel from "@/components/founder/portfolio/IntelligenceOrchestratorPanel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -233,6 +234,11 @@ export default function PortfolioExitCommandCentre() {
                 <ArrowUpRight className="h-4 w-4 mr-1" /> Open Execution Handoff
               </Link>
             </Button>
+            <Button asChild size="sm" variant="outline">
+              <Link to="/founder/portfolio-exit/manual">
+                <ArrowUpRight className="h-4 w-4 mr-1" /> Manual &amp; Technical Docs
+              </Link>
+            </Button>
             <Badge variant="outline" className="gap-1">
               <Lock className="h-3 w-3" /> External outreach LOCKED_BY_DESIGN
             </Badge>
@@ -254,6 +260,9 @@ export default function PortfolioExitCommandCentre() {
           <StatCard label="Avg exit readiness" value={`${stats.avgExitReadiness}%`} icon={<ShieldCheck className="h-4 w-4" />} />
           <StatCard label="Avg data room" value={`${stats.avgDataRoom}%`} />
         </div>
+
+        {/* AI Intelligence Orchestrator */}
+        <IntelligenceOrchestratorPanel />
 
         {/* Filters */}
         <Card className="tech-card">
