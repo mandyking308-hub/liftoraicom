@@ -164,15 +164,13 @@ export async function routeAIModel(
     reasons.push("content flagged legal/financial/compliance — human required");
   }
 
-  // Hard human-required categories at elevated risk.
-  if (
-    HUMAN_REQUIRED_CATEGORIES.has(input.task_category) &&
-    (risk === "high" || risk === "critical")
-  ) {
+  // Hard human-required categories — never bypass approval regardless of risk.
+  if (HUMAN_REQUIRED_CATEGORIES.has(input.task_category)) {
     selected = "human_required";
     requiresHuman = true;
+    if (risk === "low" || risk === "medium") risk = "high";
     reasons.push(
-      `category "${input.task_category}" requires human handling at ${risk} risk`,
+      `category "${input.task_category}" is hard-locked to human_required (risk=${risk})`,
     );
   }
 
