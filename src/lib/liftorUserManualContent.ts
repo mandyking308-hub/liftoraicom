@@ -986,3 +986,27 @@ export const LIFTOR_COMMAND_CENTRE_PARITY = {
     "Liftor-wide wording is generic. No 'NeonCandy-only' phrasing remains in cross-tenant manuals; NeonCandy is one tenant of many.",
   ],
 };
+
+export const AI_COST_GOVERNOR_USER_GUIDE: ManualSection = {
+  number: 80,
+  key: "ai-cost-governor-roi-engine",
+  title: "AI Cost Governor + ROI Engine",
+  body: [
+    "Plain-English guide. Open Command Centre → AI Cost Governor section (anchor #ai-cost) or the /founder/ai-cost/* pages.",
+    "1) What the module does. It controls how much AI Liftor uses, which model handles each task, and whether the spend is creating value. Every AI call is recorded in the AI Usage Ledger; budgets, routing, ROI scoring and human approval gates run on top of it.",
+    "2) Why Liftor does not use expensive AI for every task. Premium models are slow and costly. Most tasks (tagging, summarising, drafting boilerplate, classification, simple replies) work just as well on cheap or standard tiers. Premium is reserved for genuine reasoning — valuations, investor analysis, complex legal/financial work.",
+    "3) Model tiers. no_ai = deterministic rule, no model call. cheap = small fast models for tagging/classification/short drafts. standard = mid-tier for normal drafting, summaries, replies. premium = top-tier reasoning for strategy, valuations, complex analysis. human_required = AI must not act; a human writes/decides.",
+    "4) Business AI budgets. Each business has daily / weekly / monthly / per-campaign caps in /founder/ai-cost/budgets. Near a cap = amber alert. At the cap = non-essential AI pauses and routing drops to a cheaper tier. Businesses without a configured budget get a conservative default and a 'Budget not configured' flag — never unlimited spend.",
+    "5) Agent cost controls. Each agent (/founder/ai-cost/agents) has allowed tiers, default tier, daily/weekly spend caps, max retries, max tokens per action and disallowed categories. An agent cannot exceed its caps, request a tier it is not allowed, or run a forbidden category without founder approval.",
+    "6) Stop-loss rules. If spend rises without matching value (pipeline / revenue / time-saved flat), Liftor downgrades the tier, pauses the workflow, or requests founder review. Stop-loss never deletes work — it blocks further spend until you decide.",
+    "7) How to read AI ROI. /founder/ai-cost/roi shows AI spend, estimated human cost saved, net saving, pipeline linked, revenue linked and an ROI score. Green = AI is paying for itself. Amber = unclear, review. Red = AI is costing more than the value it produced.",
+    "8) Estimated human cost saved. Liftor estimates the minutes of human work each AI action replaced, multiplied by a standard hourly rate. It is an estimate and is labelled as such — never treat it as exact revenue.",
+    "9) Human approval gates. Any sensitive category (legal, financial, compliance, investor, M&A, partnership, high-value external comms, reputational) is blocked at the gate. AI prepares the draft; the ledger entry becomes human_review_required and a Founder Approval item is created. Nothing leaves Liftor until you approve.",
+    "10) What to do when an alert appears. Open /founder/ai-cost/alerts. Each alert states what happened, why it matters, what Liftor recommends, and whether founder action is required. Work top-down by severity.",
+    "11) Action vocabulary. Pause = stop new AI calls for that scope, keep existing data. Downgrade = continue on a cheaper tier. Review = founder must look before more spend happens. Stop = hard block until you re-enable.",
+    "12) Why this matters for multiple businesses. With 25+ businesses, uncontrolled AI spend would silently destroy margin. The Cost Governor + ROI Engine gives every business its own ceiling, every agent its own discipline, and every pound of AI spend a measurable value comparison.",
+    "Principle: AI can recommend and prepare actions, but high-risk external actions require founder approval.",
+    "Cross-references: Command Centre (#ai-cost), Founder Approvals, Agent detail pages, Revenue/ROI panels, Build Log entries for AI Cost Governor.",
+  ].join(" "),
+};
+LIFTOR_FULL_GUIDE.push(AI_COST_GOVERNOR_USER_GUIDE);

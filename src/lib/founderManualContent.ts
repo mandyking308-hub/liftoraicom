@@ -3398,5 +3398,88 @@ This addendum closes the 90+ prompt build sequence. No new architecture is added
 - **Manual configuration before external go-live:** per-business + per-channel founder approval to unlock outbound (Smartlead campaign start, Apollo credits, social publish, email send, invoice send, money movement, filings) — each unlock recorded in approval log.
 
 *End of v5.2 Build Closeout addendum.*
+
+---
+
+## Addendum — AI Cost Governor + ROI Engine (Technical)
+
+**Version:** 5.3 — AI Cost Governor + ROI Engine (24 May 2026)
+**Status:** Live — internal only. No external sends introduced.
+**Cross-references:** User Manual §80 "AI Cost Governor + ROI Engine"; Command Centre anchor \`#ai-cost\`; routes \`/founder/ai-cost/{ledger,router,budgets,agents,alerts,roi,templates,context,approvals}\`.
+
+**Operating principle (must appear in every related screen):** *AI can recommend and prepare actions, but high-risk external actions require founder approval.*
+
+### 1. Database tables added
+- \`ai_usage_ledger\` — every AI call (input/output tokens, cost_gbp, model, tier, agent_id, business_id, campaign_id, task_category, status, audit_metadata, human_approved, value_estimates).
+- \`ai_model_routing_rules\` — per task_category / business_id rules selecting tier and model with fallbacks.
+- \`ai_business_budgets\` — daily / weekly / monthly / per-campaign caps, soft + hard thresholds, default-conservative flag.
+- \`ai_agent_cost_controls\` — allowed_tiers[], default_tier, daily/weekly caps, max_retries, max_tokens_per_action, disallowed_categories[], requires_approval_categories[].
+- \`ai_cost_alerts\` — alert_type, severity, scope (business/agent/campaign/portfolio), recommended_action, explanation, resolved_at.
+- \`ai_roi_snapshots\` — period, scope, spend, estimated_human_cost_saved, pipeline_linked, revenue_linked, net_saving, roi_score, status.
+- \`ai_prompt_templates\` — approved templates with category, business_id, body, tier_hint, usage_count, est_savings.
+- \`ai_cached_context_blocks\` — reusable summaries (brand_voice, market_research, …), expires_at, last_verified_at, source refs.
+- Hooks into existing \`founder_approval_items\` (no new approval queue created).
+
+### 2. \`ai_usage_ledger\` — how it works
+Single source of truth. Every service call writes one row with provider, model, tier, prompt/completion tokens, cost_gbp, latency_ms, agent_id, business_id, campaign_id, task_category, status (\`completed | failed | human_review_required | blocked_by_budget | blocked_by_agent_cap | blocked_by_gate\`), audit_metadata (routing_rule_id, template_id, context_block_ids, downgraded_from_tier, retry_count) and value_estimates (estimated_minutes_saved, estimated_human_cost_saved_gbp).
+
+### 3. \`ai_model_routing_rules\`
+Resolved in this order: (a) exact match on (business_id, task_category); (b) global rule for task_category; (c) default fallback. Each rule names a primary tier+model and an ordered list of fallbacks (used on quota, failure, or budget downgrade). Routing always records \`audit_metadata.routing_rule_id\` and \`downgraded_from_tier\` if applicable.
+
+### 4. \`ai_business_budgets\` — enforcement
+On every request the service sums \`ai_usage_ledger.cost_gbp\` for the relevant window (day / week / month / campaign) and compares to the cap. Soft threshold (default 80%) raises an amber alert and starts preferring cheaper tiers. Hard threshold (100%) sets ledger status to \`blocked_by_budget\` for non-essential categories; essential safety/approval flows continue. Missing budget → conservative default record auto-created and the business is flagged \`budget_not_configured\`.
+
+### 5. \`ai_agent_cost_controls\` — enforcement
+Before dispatch the service checks: requested tier ∈ allowed_tiers (else downgrade or block per rule); daily/weekly cap not exceeded; retry count ≤ max_retries; token estimate ≤ max_tokens_per_action; task_category not in disallowed_categories; if in requires_approval_categories → route to gate. All decisions written to \`audit_metadata\`.
+
+### 6. \`ai_cost_alerts\`
+Alert types include: \`budget_soft_threshold\`, \`budget_exceeded\`, \`agent_cap_exceeded\`, \`stop_loss_triggered\`, \`spend_without_value\`, \`human_review_queue_overloaded\`, \`tier_downgrade_applied\`, \`budget_not_configured\`. Each alert is plain-English: *what happened · why it matters · recommended action · founder action required (y/n)*.
+
+### 7. \`ai_roi_snapshots\`
+Written by \`calculateAIROI({ business_id?, agent_id?, campaign_id?, period })\`. Formula: \`net_saving = estimated_human_cost_saved + revenue_linked_share + pipeline_linked_share*confidence − spend\`. \`roi_score\` is a 0–100 bounded composite. Status: green ≥ threshold_g, amber between, red ≤ threshold_r. Pipeline/revenue contributions only count when records are explicitly linked; otherwise marked \`estimated\`. No claim of exact ROI without linkage.
+
+### 8. \`ai_prompt_templates\`
+Approved templates per category/business with body, tier_hint and ROI metrics. \`findApprovedTemplate\` prefers active high-ROI matches. Selection is written to \`ai_usage_ledger.audit_metadata.template_id\` and \`usage_count\` is incremented.
+
+### 9. \`ai_cached_context_blocks\`
+Reusable summaries with \`expires_at\` and \`last_verified_at\`. Block is stale when \`expires_at\` past OR \`last_verified_at\` > 30 days. Stored references and summaries only — never raw confidential content (defers to existing secure stores). Duplicate research detection uses token-overlap on cached blocks within 90 days.
+
+### 10. Routing logic (summary)
+\`route(task) → resolveRule → checkAgentControls → checkBusinessBudget → maybeDowngrade → maybeRequireApproval → dispatch → writeLedger → maybeRaiseAlerts\`.
+
+### 11. Budget enforcement logic
+Window aggregation is per business_id and per campaign_id. Essential categories (safety, approval prep, diagnostics) are exempt from hard-block but still logged. Hard-block returns a structured refusal with \`recommended_action\`: \`pause | downgrade | review | stop\`.
+
+### 12. Stop-loss logic
+Triggered when, over a rolling window, \`spend\` increases ≥ X% while \`pipeline_linked + revenue_linked + estimated_human_cost_saved\` does not. Action ladder: downgrade tier → pause non-essential workflows → require founder review → stop. Never mutates campaign records; only blocks further AI spend.
+
+### 13. ROI scoring logic
+Inputs: ledger costs, value_estimates, linked CRM/pipeline/revenue rows. Outputs: snapshot row + dimension breakdowns (by business, agent, task_category, campaign). Always emits \`estimated\` flag where revenue/pipeline isn't linked. Avoids false precision.
+
+### 14. Human approval gate logic
+Sensitive categories (\`legal_sensitive\`, \`financial_sensitive\`, \`compliance_sensitive\`, \`investor_analysis\`, \`valuation_analysis\`, \`m_and_a_research\`, \`partnership_offer\`, \`external_sending\`, high-value \`founder_strategy\`) hard-route through \`gateAIAction\`. Ledger status becomes \`human_review_required\`; a \`founder_approval_items\` row is created. Decisions (\`approved | rejected | needs_changes\`) sync back to the ledger and audit_metadata. Queue overload raises \`human_review_queue_overloaded\`.
+
+### 15. Audit trail requirements
+Every call must record: request scope (business/agent/campaign/task_category), tier requested vs used, routing rule applied, template + context block ids, retry count, budget window snapshot, agent cap snapshot, gate decision, value_estimates, final status. No deletes — corrections are append-only with a \`supersedes\` link in audit_metadata.
+
+### 16. Security & RLS
+All new tables are RLS-enabled. Founder role has full access via \`has_role(auth.uid(),'admin')\`. Per-business operator access is restricted to rows where \`business_id\` matches their assigned tenant. No service-role key is ever exposed in the client; all writes go through edge functions or service modules using anon + RLS. Sensitive bodies (prompts/responses) are stored only as references/summaries; raw confidential content remains in the existing secure store.
+
+### 17. Integration points
+- **Command Centre:** Portfolio AI Cost Governor section anchored \`#ai-cost\` with stat cards, dimension tabs, founder-attention callouts and a Prompt Reuse widget.
+- **Agents:** detail pages show cost controls, recent spend, tier usage, high-cost actions, failed actions, stop-loss alerts.
+- **Campaigns:** per-campaign budget and ROI surface on campaign pages; blocked actions surface as \`requires_approval\`.
+- **CRM / Inbox:** drafts costing AI usage are logged with conversation_id in audit_metadata; sends remain gated by existing external locks.
+- **Approval queue:** uses existing \`founder_approval_items\`; no parallel queue introduced.
+
+### 18. Known limitations and future extension points
+- Estimated human cost saved is heuristic (minutes × rate); future work: per-task calibrated estimates.
+- Pipeline/revenue linkage requires explicit attribution; future work: assisted attribution suggestions with founder confirmation.
+- Duplicate research detection is token-overlap only; future work: embeddings-based dedupe.
+- Stop-loss thresholds are global defaults; future work: per-business tuning + ML-based anomaly detection.
+- Cost data assumes provider list prices; future work: ingest real invoices for reconciliation.
+- No automatic external action is added by this module under any circumstance.
+
+*End of AI Cost Governor + ROI Engine addendum (v5.3).*
 `;
 };
