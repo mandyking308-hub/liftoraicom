@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Loader2, RefreshCw, Activity, ShieldCheck, AlertTriangle, PoundSterling, Bot, TrendingDown, Bell, Lock } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import AICostBreadcrumb from "@/components/founder/ai/AICostBreadcrumb";
 import {
   loadLiveSignals,
   deriveLiveStatus,
