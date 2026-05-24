@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { redactSensitive } from "@/services/aiSecurityGuard";
 
 /**
  * AI Quality Scoring + Human Feedback Loop.
@@ -93,6 +94,11 @@ export async function recordFeedback(input: RecordFeedbackInput): Promise<{ id: 
   const meta = (ledger?.audit_metadata as any) ?? {};
   const prompt_template_id: string | null = meta.prompt_template_id ?? meta.template_id ?? null;
 
+  // Redact founder-supplied free text before persisting to scores table.
+  const safeNotes = redactSensitive(input.notes ?? null).redacted;
+  const safeEdit = redactSensitive(input.edit_summary ?? null).redacted;
+  const safeReason = redactSensitive(input.rejection_reason ?? null).redacted;
+
   const row = {
     ai_usage_ledger_id: ledger!.id,
     business_id: ledger!.business_id,
@@ -113,9 +119,9 @@ export async function recordFeedback(input: RecordFeedbackInput): Promise<{ id: 
     approved_without_edit: mapped.approved_without_edit,
     edited_before_approval: mapped.edited_before_approval,
     rejected: mapped.rejected,
-    rejection_reason: mapped.rejected ? (input.rejection_reason ?? input.notes ?? input.label) : null,
-    edit_summary: mapped.edited_before_approval ? (input.edit_summary ?? input.notes ?? null) : null,
-    notes: input.notes ?? null,
+    rejection_reason: mapped.rejected ? (safeReason ?? safeNotes ?? input.label) : null,
+    edit_summary: mapped.edited_before_approval ? (safeEdit ?? safeNotes ?? null) : null,
+    notes: safeNotes,
     reviewer_id: input.reviewer_id ?? null,
     reviewed_at: new Date().toISOString(),
   };
