@@ -103,6 +103,7 @@ import PortfolioExitManual from "./pages/founder/PortfolioExitManual";
 import PortfolioExitControls from "./pages/founder/PortfolioExitControls";
 import PortfolioExitHardening from "./pages/founder/PortfolioExitHardening";
 import PortfolioExitReleaseGate from "./pages/founder/PortfolioExitReleaseGate";
+import AIUsageLedger from "./pages/founder/AIUsageLedger";
 import DataIngestionCentre from "./pages/founder/DataIngestionCentre";
 import BrainSessions from "./pages/founder/BrainSessions";
 import BrainDrafts from "./pages/founder/BrainDrafts";
