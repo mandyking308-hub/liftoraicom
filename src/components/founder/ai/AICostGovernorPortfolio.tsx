@@ -19,7 +19,9 @@ import {
 import { getBusinessBudgetUsage } from "@/services/aiBudgetService";
 
 const NAV = [
-  { label: "AI Cost Overview", to: "/founder/command-centre#ai-cost", icon: Activity, primary: true },
+  { label: "Open AI Cost Governor hub", to: "/founder/ai-cost", icon: Activity, primary: true },
+  { label: "Live Operations", to: "/founder/ai-cost/live", icon: Activity },
+  { label: "Finance Pack", to: "/founder/ai-cost/finance", icon: TrendingUp },
   { label: "Usage Ledger", to: "/founder/ai-cost/ledger", icon: Activity },
   { label: "Model Router", to: "/founder/ai-cost/routing", icon: RouteIcon },
   { label: "Business Budgets", to: "/founder/ai-cost/budgets", icon: PoundSterling },
