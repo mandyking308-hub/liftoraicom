@@ -83,6 +83,7 @@ import ExecutionDashboard from "./pages/founder/ExecutionDashboard";
 import ExecutionDetail from "./pages/founder/ExecutionDetail";
 import CommandCenter from "./pages/founder/CommandCenter";
 import CommandCentre from "./pages/founder/CommandCentre";
+import StarterPackMaterialiserPage from "./pages/founder/StarterPackMaterialiser";
 import LiftorBrain from "./pages/founder/LiftorBrain";
 import BrainSessions from "./pages/founder/BrainSessions";
 import BrainDrafts from "./pages/founder/BrainDrafts";
@@ -267,6 +268,7 @@ const App = () => (
             <Route path="/founder/executions/:id" element={<FounderRoute><ExecutionDetail /></FounderRoute>} />
             <Route path="/founder/command-centre" element={<FounderRoute><CommandCentre /></FounderRoute>} />
             <Route path="/founder/command-center" element={<Navigate to="/founder/command-centre" replace />} />
+            <Route path="/founder/starter-pack-materialiser" element={<FounderRoute><StarterPackMaterialiserPage /></FounderRoute>} />
             <Route path="/founder/brain" element={<FounderRoute><LiftorBrain /></FounderRoute>} />
             <Route path="/founder/brain/sessions" element={<FounderRoute><BrainSessions /></FounderRoute>} />
             <Route path="/founder/brain/drafts" element={<FounderRoute><BrainDrafts /></FounderRoute>} />

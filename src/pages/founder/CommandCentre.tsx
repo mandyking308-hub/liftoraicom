@@ -20,6 +20,7 @@ import FounderAlertEscalationPanel from "@/components/founder/command/FounderAle
 import CommandCentreUsabilityReportPanel from "@/components/founder/command/CommandCentreUsabilityReportPanel";
 import BusinessActivationWizardPanel from "@/components/founder/activation/BusinessActivationWizardPanel";
 import BusinessOnboardingBrainPanel from "@/components/founder/activation/BusinessOnboardingBrainPanel";
+import StarterPackMaterialiserPanel from "@/components/founder/activation/StarterPackMaterialiserPanel";
 import BusinessRehearsalSimulationPanel from "@/components/founder/activation/BusinessRehearsalSimulationPanel";
 import PreLiveBaselineControlPanel from "@/components/founder/activation/PreLiveBaselineControlPanel";
 import RevenueTargetOperatingPanel from "@/components/founder/revenue/RevenueTargetOperatingPanel";
@@ -774,6 +775,7 @@ const CommandCentre = () => {
       <div className="max-w-7xl mx-auto px-4 pt-4"><CommandCentreUsabilityReportPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><BusinessActivationWizardPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><BusinessOnboardingBrainPanel /></div>
+      <div className="max-w-7xl mx-auto px-4 pt-4"><StarterPackMaterialiserPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><BusinessRehearsalSimulationPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><PreLiveBaselineControlPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><RevenueTargetOperatingPanel /></div>
