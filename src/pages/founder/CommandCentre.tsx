@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import FounderLayout from "@/components/founder/FounderLayout";
 import AIUsageMiniWidget from "@/components/founder/ai/AIUsageMiniWidget";
 import AIPromptReuseWidget from "@/components/founder/ai/AIPromptReuseWidget";
+import AICostGovernorPortfolio from "@/components/founder/ai/AICostGovernorPortfolio";
 import AIAlertsMiniWidget from "@/components/founder/ai/AIAlertsMiniWidget";
 import GroupHQOperatingPanel from "@/components/founder/group/GroupHQOperatingPanel";
 import TreasuryCashflowControlPanel from "@/components/founder/finance/TreasuryCashflowControlPanel";
@@ -780,6 +781,7 @@ const CommandCentre = () => {
   return (
     <FounderLayout>
       <CommandCentreViewModeBar />
+      <AICostGovernorPortfolio />
       <div className="max-w-7xl mx-auto px-4 pt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
         <AIUsageMiniWidget />
         <AIPromptReuseWidget />
