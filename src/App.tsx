@@ -108,6 +108,7 @@ import AIModelRouting from "./pages/founder/AIModelRouting";
 import AIBusinessBudgets from "./pages/founder/AIBusinessBudgets";
 import AIAgentCostControls from "./pages/founder/AIAgentCostControls";
 import AICostAlerts from "./pages/founder/AICostAlerts";
+import AIROIEngine from "./pages/founder/AIROIEngine";
 import DataIngestionCentre from "./pages/founder/DataIngestionCentre";
 import BrainSessions from "./pages/founder/BrainSessions";
 import BrainDrafts from "./pages/founder/BrainDrafts";
