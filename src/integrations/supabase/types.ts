@@ -30659,6 +30659,156 @@ export type Database = {
           },
         ]
       }
+      starter_pack_materialisation_runs: {
+        Row: {
+          blocked_items: number
+          business_id: string
+          created_at: string
+          dry_run: boolean
+          external_actions_allowed: boolean
+          fallback_items: number
+          founder_approval_items: number
+          id: string
+          is_test_data: boolean
+          materialised_items: number
+          metadata: Json
+          missing_context_count: number
+          risk_warning_count: number
+          run_status: string
+          skipped_duplicates: number
+          starter_pack_id: string
+          total_items: number
+          updated_at: string
+        }
+        Insert: {
+          blocked_items?: number
+          business_id: string
+          created_at?: string
+          dry_run?: boolean
+          external_actions_allowed?: boolean
+          fallback_items?: number
+          founder_approval_items?: number
+          id?: string
+          is_test_data?: boolean
+          materialised_items?: number
+          metadata?: Json
+          missing_context_count?: number
+          risk_warning_count?: number
+          run_status?: string
+          skipped_duplicates?: number
+          starter_pack_id: string
+          total_items?: number
+          updated_at?: string
+        }
+        Update: {
+          blocked_items?: number
+          business_id?: string
+          created_at?: string
+          dry_run?: boolean
+          external_actions_allowed?: boolean
+          fallback_items?: number
+          founder_approval_items?: number
+          id?: string
+          is_test_data?: boolean
+          materialised_items?: number
+          metadata?: Json
+          missing_context_count?: number
+          risk_warning_count?: number
+          run_status?: string
+          skipped_duplicates?: number
+          starter_pack_id?: string
+          total_items?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      starter_pack_materialised_items: {
+        Row: {
+          body: string | null
+          business_id: string
+          created_at: string
+          destination_module: string
+          external_action_blocked: boolean
+          external_send_allowed: boolean
+          id: string
+          is_test_data: boolean
+          item_status: string
+          item_type: string
+          materialisation_status: string
+          materialised_to_id: string | null
+          materialised_to_table: string | null
+          metadata: Json
+          missing_context: Json
+          onboarding_run_id: string | null
+          requires_founder_review: boolean
+          risk_level: string
+          risk_warnings: Json
+          source_hash: string | null
+          source_section: string | null
+          starter_pack_id: string | null
+          structured_payload: Json
+          subject: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          body?: string | null
+          business_id: string
+          created_at?: string
+          destination_module: string
+          external_action_blocked?: boolean
+          external_send_allowed?: boolean
+          id?: string
+          is_test_data?: boolean
+          item_status?: string
+          item_type: string
+          materialisation_status?: string
+          materialised_to_id?: string | null
+          materialised_to_table?: string | null
+          metadata?: Json
+          missing_context?: Json
+          onboarding_run_id?: string | null
+          requires_founder_review?: boolean
+          risk_level?: string
+          risk_warnings?: Json
+          source_hash?: string | null
+          source_section?: string | null
+          starter_pack_id?: string | null
+          structured_payload?: Json
+          subject?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          body?: string | null
+          business_id?: string
+          created_at?: string
+          destination_module?: string
+          external_action_blocked?: boolean
+          external_send_allowed?: boolean
+          id?: string
+          is_test_data?: boolean
+          item_status?: string
+          item_type?: string
+          materialisation_status?: string
+          materialised_to_id?: string | null
+          materialised_to_table?: string | null
+          metadata?: Json
+          missing_context?: Json
+          onboarding_run_id?: string | null
+          requires_founder_review?: boolean
+          risk_level?: string
+          risk_warnings?: Json
+          source_hash?: string | null
+          source_section?: string | null
+          starter_pack_id?: string | null
+          structured_payload?: Json
+          subject?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       strategic_account_list_items: {
         Row: {
           created_at: string | null
