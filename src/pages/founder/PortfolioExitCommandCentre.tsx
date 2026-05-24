@@ -223,6 +223,11 @@ export default function PortfolioExitCommandCentre() {
                 <ArrowUpRight className="h-4 w-4 mr-1" /> Open Exit Valuation Engine
               </Link>
             </Button>
+            <Button asChild size="sm" variant="outline">
+              <Link to="/founder/portfolio-exit/build-selector">
+                <ArrowUpRight className="h-4 w-4 mr-1" /> Open Quarterly Build Selector
+              </Link>
+            </Button>
             <Badge variant="outline" className="gap-1">
               <Lock className="h-3 w-3" /> External outreach LOCKED_BY_DESIGN
             </Badge>
