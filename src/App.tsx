@@ -332,6 +332,7 @@ const App = () => (
             <Route path="/founder/ai-cost/pricing" element={<FounderRoute><AIProviderPricing /></FounderRoute>} />
             <Route path="/founder/ai-cost/quality" element={<FounderRoute><AIQualityScoring /></FounderRoute>} />
             <Route path="/founder/ai-cost/security" element={<FounderRoute><AISecurityCentre /></FounderRoute>} />
+            <Route path="/founder/ai-cost/queue" element={<FounderRoute><AIQueueControl /></FounderRoute>} />
             <Route path="/founder/brain" element={<FounderRoute><LiftorBrain /></FounderRoute>} />
             <Route path="/founder/brain/sessions" element={<FounderRoute><BrainSessions /></FounderRoute>} />
             <Route path="/founder/brain/drafts" element={<FounderRoute><BrainDrafts /></FounderRoute>} />
