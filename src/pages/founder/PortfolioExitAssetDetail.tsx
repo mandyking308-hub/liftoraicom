@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Briefcase, Lock, AlertCircle } from "lucide-react";
+import AssetAIAnalysisPanel from "@/components/founder/portfolio/AssetAIAnalysisPanel";
 
 const fmt = (n: number | null | undefined) =>
   n == null ? "—" : n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(2)}M`
@@ -194,6 +195,7 @@ export default function PortfolioExitAssetDetail() {
             <TabsTrigger value="execution">Execution Targets</TabsTrigger>
             <TabsTrigger value="dataroom">Data Room</TabsTrigger>
             <TabsTrigger value="risks">Risks &amp; Governance</TabsTrigger>
+            <TabsTrigger value="ai">AI Analysis</TabsTrigger>
           </TabsList>
 
           {/* Overview */}
