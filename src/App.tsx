@@ -119,6 +119,7 @@ import AIQueueControl from "./pages/founder/AIQueueControl";
 import AISandbox from "./pages/founder/AISandbox";
 import AIFinancePack from "./pages/founder/AIFinancePack";
 import AILiveOperations from "./pages/founder/AILiveOperations";
+import AICostGovernorHub from "./pages/founder/AICostGovernorHub";
 import DataIngestionCentre from "./pages/founder/DataIngestionCentre";
 import BrainSessions from "./pages/founder/BrainSessions";
 import BrainDrafts from "./pages/founder/BrainDrafts";
@@ -323,6 +324,7 @@ const App = () => (
             <Route path="/founder/portfolio-exit/ingestion" element={<FounderRoute><DataIngestionCentre /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/hardening" element={<FounderRoute><PortfolioExitHardening /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/release-gate" element={<FounderRoute><PortfolioExitReleaseGate /></FounderRoute>} />
+            <Route path="/founder/ai-cost" element={<FounderRoute><AICostGovernorHub /></FounderRoute>} />
             <Route path="/founder/ai-cost/ledger" element={<FounderRoute><AIUsageLedger /></FounderRoute>} />
             <Route path="/founder/ai-cost/routing" element={<FounderRoute><AIModelRouting /></FounderRoute>} />
             <Route path="/founder/ai-cost/budgets" element={<FounderRoute><AIBusinessBudgets /></FounderRoute>} />

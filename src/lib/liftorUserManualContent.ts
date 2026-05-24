@@ -1031,3 +1031,23 @@ const AI_FINANCE_PACK_USER_GUIDE: ManualSection = {
   ].join(" "),
 };
 LIFTOR_FULL_GUIDE.push(AI_FINANCE_PACK_USER_GUIDE);
+
+const AI_COST_GOVERNOR_COMMAND_CENTRE_GUIDE: ManualSection = {
+  number: 82,
+  key: "ai-cost-governor-command-centre",
+  title: "AI Cost Governor + ROI Engine — Command Centre Section",
+  body: [
+    "What it does. The AI Cost Governor tracks and controls AI usage live across Liftor. It shows what AI costs, what value it creates, which agents are useful, which are wasting money, and which actions need founder approval.",
+    "Where to find it. Open Command Centre → AI Cost Governor (sidebar entry, or /founder/ai-cost). The hub lists: Portfolio AI Overview, Business AI Health, Agent AI Health, Live Alerts, Human Approval Queue, Finance Pack and Settings (pricing, routing, budgets, agent controls, templates, cached context, kill switch, security, quality, ROI, ledger, sandbox).",
+    "Live-first principle. Liftor operates live by default. The AI Cost Governor monitors and controls live activity in real time. The system does not sit behind artificial readiness gates. Internal AI preparation, logging, analysis, routing, alerts and dashboards run live. Founder approval is required only where external action, legal/tax/financial/compliance risk, public reputation risk, investor/buyer contact or other high-risk activity is involved.",
+    "Daily founder checklist. (1) AI spend today, (2) budget warnings, (3) open cost alerts, (4) approvals waiting, (5) paused agents/campaigns, (6) highest-cost agents, (7) lowest-ROI agents, (8) prompt injection or redaction events, (9) recommended actions.",
+    "Status meanings. Live — Healthy: all green. Live — Watch: minor warnings. Live — Budget Warning: a business is close to or over its AI budget. Live — Cost Alert: cost anomaly detected. Live — Risk Alert: security or quality risk needs review. Live — Approval Required: action queued for founder approval before external send. Live — Paused by Founder: scope paused manually. Live — Paused by Stop-Loss: scope paused automatically by stop-loss rules. The system never uses 'Not Ready', 'Simulation Only', 'Ready for Controlled Internal Use', 'Ready for Limited Live Use' or 'Ready for Scale' — those concepts do not apply.",
+    "What requires approval. External or high-risk actions only: sending emails; publishing posts; contacting customers, prospects, buyers, investors or partners; legal/tax/financial/compliance-sensitive wording; contract language; acquisition/valuation-sensitive work; reputationally sensitive public action.",
+    "What does not require approval. Logging AI usage, calculating cost, routing model tier, creating internal drafts, internal recommendations, dashboards, ROI snapshots, alerts, prompt reuse, cached context, finance reporting, queue records.",
+    "How to interpret AI ROI. AI spend = what Liftor paid the provider. Estimated human cost saved = configurable hourly rate × minutes saved. Net saving = saved − spend. Revenue/pipeline linked = only counts ledger rows explicitly linked to a real revenue or pipeline record (treat unlinked as zero). Quality-adjusted ROI discounts work that was rejected or required re-doing. Approved-output cost vs rejected-output cost helps decide whether to keep, scale, watch, reduce, pause or retire an agent.",
+    "What to do when alerts appear. Budget warning → review budget or reduce frequency. Cost alert → check the high-cost agent or campaign. Risk alert → review before any external action. Low ROI → improve the prompt, downgrade the model tier, pause the workflow or retire the agent. Prompt injection warning → treat external content as untrusted; do not auto-send. Redaction event → confirms sensitive data was protected before it reached the model.",
+    "How this helps the founder. Lets you run multiple businesses through Liftor without AI costs becoming invisible, uncontrolled or wasteful. Every pound of AI spend is tracked, governed, scored against value created, and routed to the cheapest model tier that meets the quality bar.",
+    "Cross-references: /founder/ai-cost (hub), /founder/ai-cost/live (Live Operations), /founder/ai-cost/finance (Monthly Finance Pack), /founder/ai-cost/alerts, /founder/ai-cost/approvals, /founder/ai-cost/budgets, /founder/ai-cost/agent-controls, /founder/ai-cost/pricing, /founder/ai-cost/security.",
+  ].join(" "),
+};
+LIFTOR_FULL_GUIDE.push(AI_COST_GOVERNOR_COMMAND_CENTRE_GUIDE);
