@@ -37,6 +37,14 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "social_brain", name: "Social Brain", to: "/founder/social", category: "social" },
   { key: "support_knowledge", name: "Support Knowledge Agent", to: "/founder/support", category: "support" },
   { key: "customer_sales_engine", name: "Customer Sales Engine", to: "/founder/customer-sales", category: "sales" },
+  { key: "voice_sales_agent", name: "Voice Sales Agent", to: "/founder/customer-sales/voice-console", category: "sales" },
+  { key: "inbound_call_agent", name: "Inbound Call Agent", to: "/founder/customer-sales/voice-console", category: "sales" },
+  { key: "outbound_call_agent", name: "Outbound Call Agent", to: "/founder/customer-sales/voice-console", category: "sales" },
+  { key: "sales_conversation_agent", name: "Sales Conversation Agent", to: "/founder/customer-sales/conversations", category: "sales" },
+  { key: "objection_handling_agent", name: "Objection Handling Agent", to: "/founder/customer-sales/objections", category: "sales" },
+  { key: "close_preparation_agent", name: "Close Preparation Agent", to: "/founder/customer-sales/close-engine", category: "sales" },
+  { key: "follow_up_agent", name: "Follow-Up Agent", to: "/founder/customer-sales/follow-up", category: "sales" },
+  { key: "human_handoff_agent", name: "Human Handoff Agent", to: "/founder/customer-sales/follow-up", category: "sales" },
 ];
 
 export default function AgentOperatingStatus() {
