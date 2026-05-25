@@ -333,6 +333,30 @@ async function loadConfig(): Promise<{ sections: Section[]; overall: Sev }> {
           fix: { label: "Open Command Centre", to: "/founder/command-centre" } },
       ],
     },
+    {
+      id: "customer-sales",
+      title: "11. Customer Voice + Sales Close Engine",
+      icon: BookOpen,
+      blurb: "Internal sales preparation runs live. Outbound calls, payment links, contracts and customer messages stay approval-gated until a provider is connected and you approve the action.",
+      items: [
+        { title: "Products & sales knowledge", why: "Liftor needs at least one product/service to match customers and prepare quotes.",
+          detail: `${csProductCount} active product${csProductCount === 1 ? "" : "s"}.`,
+          status: csProductCount > 0 ? "ok" : "configure",
+          fix: { label: "Open Product Knowledge", to: "/founder/customer-sales/product-knowledge" } },
+        { title: "Playbooks ready", why: "Scripts, discovery, objections and closes are run from playbooks.",
+          detail: `${csPlaybookCount} active playbook${csPlaybookCount === 1 ? "" : "s"}.`,
+          status: csPlaybookCount > 0 ? "ok" : "configure",
+          fix: { label: "Open Playbooks", to: "/founder/customer-sales/playbooks" } },
+        { title: "Voice/chat provider connected", why: "No external calls/messages are sent until a provider (Retell/Vapi/Twilio/ElevenLabs/custom) is live.",
+          detail: csProviderList.length === 0 ? "no provider connected" : csProviderLive ? "provider live" : "configured, not live",
+          status: csProviderLive ? "ok" : csProviderList.length === 0 ? "configure" : "watch",
+          fix: { label: "Open Settings", to: "/founder/customer-sales/settings" } },
+        { title: "Close actions awaiting approval", why: "Payment links, invoices and contracts must be founder-approved before send.",
+          detail: `${csClosesPendingCount} close action${csClosesPendingCount === 1 ? "" : "s"} waiting.`,
+          status: csClosesPendingCount > 0 ? "watch" : "ok",
+          fix: { label: "Open Close Engine", to: "/founder/customer-sales/close-engine" } },
+      ],
+    },
   ];
 
   const all = sections.flatMap((s) => s.items);
