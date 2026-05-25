@@ -13,6 +13,59 @@ const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 
 const MODEL = "google/gemini-2.5-pro";
 
+// Log parser/orchestrator errors into ma_error_queue (best-effort; never blocks).
+async function logError(
+  admin: any,
+  module: string,
+  message: string,
+  severity: "low" | "medium" | "high" = "medium",
+  relatedRecordType: string | null = null,
+  relatedRecordId: string | null = null,
+  rawSample?: string,
+) {
+  try {
+    await admin.from("ma_error_queue").insert({
+      error_type: "ma_intelligence_orchestrator",
+      module,
+      message: message.slice(0, 2000),
+      severity,
+      related_record_type: relatedRecordType,
+      related_record_id: relatedRecordId,
+      retry_available: true,
+      notes: rawSample ? `raw_sample (truncated 500 chars): ${rawSample.slice(0, 500)}` : null,
+    });
+  } catch (_) {
+    // never let logging crash the live call
+  }
+}
+
+/** Defensive JSON parser:
+ *  - accepts tool_call.arguments OR fenced/embedded JSON in plain content
+ *  - strips markdown fences
+ *  - extracts first balanced JSON object if surrounded by prose
+ *  - throws a typed error with raw sample preserved for ma_error_queue
+ */
+function safeJsonParse(raw: unknown): { ok: true; data: any } | { ok: false; error: string; sample: string } {
+  if (raw == null) return { ok: false, error: "empty payload", sample: "" };
+  let text = typeof raw === "string" ? raw : JSON.stringify(raw);
+  const sample = text.slice(0, 500);
+  // try direct
+  try { return { ok: true, data: JSON.parse(text) }; } catch (_) { /* continue */ }
+  // strip ```json fences
+  text = text.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim();
+  try { return { ok: true, data: JSON.parse(text) }; } catch (_) { /* continue */ }
+  // extract first balanced { ... } block
+  const first = text.indexOf("{");
+  const last = text.lastIndexOf("}");
+  if (first !== -1 && last > first) {
+    const candidate = text.slice(first, last + 1);
+    try { return { ok: true, data: JSON.parse(candidate) }; } catch (e: any) {
+      return { ok: false, error: `balanced-extract failed: ${e?.message ?? "parse"}`, sample };
+    }
+  }
+  return { ok: false, error: "no JSON object found", sample };
+}
+
 const SYSTEM_PRINCIPLES = `You are the Liftor Portfolio & Exit Intelligence Orchestrator.
 You reason across portfolio assets, buyer/investor signals, competitors, valuation benchmarks, execution targets, data-room readiness and jurisdiction notes.
 
@@ -39,7 +92,7 @@ async function callAI(
   prompt: string,
   schema: Record<string, unknown>,
   toolName: string,
-) {
+): Promise<{ parsed: any; raw: string }> {
   const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -77,8 +130,15 @@ async function callAI(
 
   const data = await res.json();
   const call = data.choices?.[0]?.message?.tool_calls?.[0];
-  if (!call) throw new Error("No tool_call returned");
-  return JSON.parse(call.function.arguments);
+  const content = data.choices?.[0]?.message?.content ?? "";
+  const rawArgs = call?.function?.arguments ?? content ?? "";
+  const result = safeJsonParse(rawArgs);
+  if (!result.ok) {
+    const err = new Error(`ai_parse_failed: ${result.error}`);
+    (err as any).rawSample = result.sample;
+    throw err;
+  }
+  return { parsed: result.data, raw: typeof rawArgs === "string" ? rawArgs : JSON.stringify(rawArgs) };
 }
 
 // ============ SCHEMAS ============
@@ -235,7 +295,8 @@ Deno.serve(async (req) => {
 
     if (mode === "portfolio_briefing") {
       const prompt = `Generate a portfolio-wide intelligence briefing. Data:\n${JSON.stringify(ctx).slice(0, 60000)}`;
-      result = await callAI(prompt, portfolioSchema, "portfolio_briefing");
+      const out = await callAIWithLogging(admin, "portfolio_briefing", prompt, portfolioSchema);
+      result = out.parsed;
       const { data: row } = await admin.from("ma_ai_briefings").insert({
         kind: "portfolio",
         title: "Portfolio Intelligence Briefing",
@@ -262,7 +323,8 @@ Deno.serve(async (req) => {
         valuation_benchmarks: ctx.valuation_benchmarks,
       };
       const prompt = `Analyse this portfolio asset deeply. Data:\n${JSON.stringify(scoped).slice(0, 60000)}`;
-      result = await callAI(prompt, assetSchema, "asset_analysis");
+      const out = await callAIWithLogging(admin, "asset_analysis", prompt, assetSchema, "ma_portfolio_assets", asset_id);
+      result = out.parsed;
       const { data: row } = await admin.from("ma_ai_briefings").insert({
         kind: "asset",
         portfolio_asset_id: asset_id,
@@ -280,7 +342,8 @@ Deno.serve(async (req) => {
       const cand = ctx.build_candidates.find((c: any) => c.id === build_candidate_id);
       if (!cand) throw new Error("candidate not found");
       const prompt = `Write a quarterly build recommendation memo for this candidate. Context:\n${JSON.stringify({ candidate: cand, all_candidates: ctx.build_candidates, weekly_signals: ctx.weekly_signals, competitors: ctx.competitor_profiles, buyers: ctx.buyer_matches, valuation_benchmarks: ctx.valuation_benchmarks }).slice(0, 60000)}`;
-      result = await callAI(prompt, buildMemoSchema, "build_memo");
+      const out = await callAIWithLogging(admin, "build_memo", prompt, buildMemoSchema, "ma_build_candidates", build_candidate_id);
+      result = out.parsed;
       const { data: row } = await admin.from("ma_ai_briefings").insert({
         kind: "build_memo",
         build_candidate_id,
@@ -295,7 +358,8 @@ Deno.serve(async (req) => {
       inserted = row;
     } else if (mode === "generate_recommendations") {
       const prompt = `Generate 3-8 high-value recommendations across the portfolio. Each must cite supporting record ids. Data:\n${JSON.stringify(ctx).slice(0, 60000)}`;
-      result = await callAI(prompt, recommendationsSchema, "recommendations");
+      const out = await callAIWithLogging(admin, "generate_recommendations", prompt, recommendationsSchema);
+      result = out.parsed;
       const today = new Date();
       const rows = (result.recommendations ?? []).map((r: any) => ({
         portfolio_asset_id: r.portfolio_asset_id || null,
@@ -324,7 +388,41 @@ Deno.serve(async (req) => {
   } catch (e) {
     if (e instanceof Response) return e;
     console.error("orchestrator error", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : String(e) }),
+    const msg = e instanceof Error ? e.message : String(e);
+    const rawSample = (e as any)?.rawSample as string | undefined;
+    const userMessage = msg.startsWith("ai_parse_failed")
+      ? "The AI returned an unparseable response. The run was logged and is safe to retry."
+      : msg;
+    return new Response(JSON.stringify({ error: userMessage, debug_code: msg, raw_sample: rawSample ? "[preserved server-side]" : undefined }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 });
+
+// Wrapper that runs callAI, logs parser/provider failures into ma_error_queue,
+// and rethrows so the outer try/catch still returns a clean 500.
+async function callAIWithLogging(
+  admin: any,
+  mode: string,
+  prompt: string,
+  schema: Record<string, unknown>,
+  relatedType: string | null = null,
+  relatedId: string | null = null,
+): Promise<{ parsed: any; raw: string }> {
+  try {
+    return await callAI(prompt, schema, mode);
+  } catch (e: any) {
+    const message = e?.message ?? String(e);
+    const sample = e?.rawSample as string | undefined;
+    const severity = message.startsWith("ai_parse_failed") ? "medium" : "high";
+    await logError(admin, `ma-intelligence-orchestrator:${mode}`, message, severity, relatedType, relatedId, sample);
+    try {
+      await admin.from("ma_intelligence_runs").insert({
+        run_type: `orchestrator_${mode}`,
+        status: "failed",
+        summary: message.slice(0, 500),
+        errors: [{ message, sample: sample ?? null }],
+      });
+    } catch (_) { /* best effort */ }
+    throw e;
+  }
+}
