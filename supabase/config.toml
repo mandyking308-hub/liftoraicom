@@ -19,3 +19,12 @@ verify_jwt = false
 verify_jwt = false
 [functions.smartlead-webhook]
 verify_jwt = false
+
+[functions.customer-voice-inbound-webhook]
+verify_jwt = false
+
+[functions.customer-voice-call-status-webhook]
+verify_jwt = false
+
+[functions.customer-voice-transcript-ingest]
+verify_jwt = false

@@ -3,6 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { CSLayout, CSSection, CSEmptyState } from "./_shared";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
+import { SUPPORTED_VOICE_PROVIDERS } from "@/lib/providers/voiceProviderAdapter";
+import { Lock } from "lucide-react";
 
 export default function VoiceConsole() {
   const { data } = useQuery({
@@ -18,32 +20,34 @@ export default function VoiceConsole() {
   });
 
   const live = (data?.providers ?? []).some(p => p.provider_status === "live");
+  const byType: Record<string, any> = {};
+  (data?.providers ?? []).forEach((p: any) => { byType[p.provider_type] = p; });
 
   return (
     <CSLayout
       title="Voice Console"
       subtitle="Internal voice/web-call console. Drafting, transcripts and recommendations run live. Live outbound dialing is locked unless a provider is connected and the founder approves the call."
     >
-      <CSSection title="Provider state">
-        {(data?.providers ?? []).length === 0 ? (
-          <CSEmptyState title="No voice/web-call provider connected"
-            hint="Add a Retell/Vapi/Twilio/ElevenLabs/custom provider in Settings. Internal preparation continues without it."
-            action={<Link to="/founder/customer-sales/settings" className="text-xs text-primary underline">Open Settings</Link>} />
-        ) : (
-          <div className="grid sm:grid-cols-2 gap-2">
-            {(data?.providers ?? []).map((p: any) => (
-              <div key={p.id} className="rounded-md border border-border/60 bg-background/40 p-3 text-xs space-y-1">
+      <CSSection title="Provider state" description="One row per supported provider. Adapter layer is in place; no external calls are made from this page.">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
+          {SUPPORTED_VOICE_PROVIDERS.map((cat) => {
+            const p = byType[cat.type];
+            const status = p?.provider_status ?? "not_connected";
+            return (
+              <div key={cat.type} className="rounded-md border border-border/60 bg-background/40 p-3 text-xs space-y-1">
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold capitalize">{p.provider_type}</span>
-                  <Badge variant="outline" className="text-[10px]">{p.provider_status}</Badge>
+                  <span className="font-semibold">{cat.label}</span>
+                  <Badge variant="outline" className="text-[10px]">{status.replace(/_/g, " ")}</Badge>
                 </div>
-                <p className="text-muted-foreground">Inbound: {p.inbound_enabled ? "on" : "off"} · Outbound: {p.outbound_enabled ? "on" : "off"} · Web call: {p.web_call_enabled ? "on" : "off"}</p>
-                <p className="text-muted-foreground">Phone: {p.phone_number ?? "—"}</p>
-                <p className="text-yellow-300/90">Outbound approval required: {p.require_founder_approval_for_outbound ? "yes" : "no"}</p>
+                <p className="text-muted-foreground">Inbound: {p?.inbound_enabled ? "on" : "off"} · Outbound: {p?.outbound_enabled ? "on" : "off"} · Web call: {p?.web_call_enabled ? "on" : "off"}</p>
+                <p className="text-muted-foreground">Batch: {p?.batch_calls_enabled ? "on" : "off"} · Recording: {p?.recording_enabled ? "on" : "off"} · Transcription: {p?.transcription_enabled ? "on" : "off"}</p>
+                <p className="text-muted-foreground">Phone: {p?.phone_number ?? "—"}</p>
+                <p className="text-yellow-300/90 flex items-center gap-1"><Lock size={10} /> Outbound approval required: {p?.require_founder_approval_for_outbound !== false ? "yes" : "no"}</p>
+                {!p && <Link to="/founder/customer-sales/settings" className="text-primary underline text-[11px]">Configure in Settings →</Link>}
               </div>
-            ))}
-          </div>
-        )}
+            );
+          })}
+        </div>
       </CSSection>
 
       <CSSection title="Recent calls">
