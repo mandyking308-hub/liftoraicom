@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   AlertTriangle, ClipboardCheck, Activity, Bot, DollarSign, Send, MessageSquare,
-  Users, FlaskConical, ShieldAlert, Briefcase, Banknote, Sparkles, ArrowRight, Phone,
+  Users, FlaskConical, ShieldAlert, Briefcase, Banknote, Sparkles, ArrowRight, Phone, Flame, ShieldCheck,
 } from "lucide-react";
 
 type Tone = "danger" | "warn" | "good" | "default";
@@ -46,6 +46,7 @@ export default function WhatNeedsAttentionToday() {
         pricingMissing, budgetGaps, blockedQueue, smartleadSetup,
         crmWarnings, socialApprovals, supportEscalations, financePending,
         portfolioApprovals, injectionEvents, testRecords, salesCloseApprovals, salesFollowUp,
+        salesHotSignals, salesSafetyWarnings, salesReadyToBuy, salesEscalations, salesConsentIssues, salesHandoffs,
       ] = await Promise.all([
         sb.from("founder_approval_items").select("id", head).eq("status", "pending"),
         sb.from("system_events").select("id", head).eq("resolved", false).in("severity", ["critical", "high"]),
@@ -64,6 +65,12 @@ export default function WhatNeedsAttentionToday() {
         sb.from("founder_approval_items").select("id", head).eq("status", "pending").ilike("metadata->>source", "%LIVE_INTERNAL_TEST%"),
         sb.from("customer_sales_close_actions").select("id", head).eq("action_status", "approval_required"),
         sb.from("customer_sales_conversations").select("id", head).eq("conversation_status", "follow_up_needed"),
+        sb.from("customer_sales_conversations").select("id", head).gte("close_probability", 0.7),
+        sb.from("customer_sales_safety_events").select("id", head).gte("created_at", since24h).in("severity", ["high", "critical"]),
+        sb.from("customer_sales_conversations").select("id", head).eq("call_outcome", "ready_to_buy"),
+        sb.from("customer_sales_conversations").select("id", head).eq("conversation_status", "escalated"),
+        sb.from("customer_sales_call_logs").select("id", head).eq("consent_recorded", false).not("transcript_text", "is", null),
+        sb.from("customer_sales_human_handoff_tasks").select("id", head).eq("task_status", "open"),
       ].map((p) => p.catch(() => ({ count: 0 }))));
       return {
         approvalsPending: approvalsPending?.count ?? 0,
@@ -83,6 +90,12 @@ export default function WhatNeedsAttentionToday() {
         testRecords: testRecords?.count ?? 0,
         salesCloseApprovals: salesCloseApprovals?.count ?? 0,
         salesFollowUp: salesFollowUp?.count ?? 0,
+        salesHotSignals: salesHotSignals?.count ?? 0,
+        salesSafetyWarnings: salesSafetyWarnings?.count ?? 0,
+        salesReadyToBuy: salesReadyToBuy?.count ?? 0,
+        salesEscalations: salesEscalations?.count ?? 0,
+        salesConsentIssues: salesConsentIssues?.count ?? 0,
+        salesHandoffs: salesHandoffs?.count ?? 0,
       };
     },
   });
@@ -92,6 +105,7 @@ export default function WhatNeedsAttentionToday() {
     pricingMissing: 0, budgetGaps: 0, blockedQueue: 0, smartleadSetup: 0,
     crmWarnings: 0, socialApprovals: 0, supportEscalations: 0, financePending: 0,
     portfolioApprovals: 0, injectionEvents: 0, testRecords: 0, salesCloseApprovals: 0, salesFollowUp: 0,
+    salesHotSignals: 0, salesSafetyWarnings: 0, salesReadyToBuy: 0, salesEscalations: 0, salesConsentIssues: 0, salesHandoffs: 0,
   };
 
   const tone = (n: number, warn = 1, danger = 5): Tone =>
@@ -131,6 +145,12 @@ export default function WhatNeedsAttentionToday() {
             <Tile label="Test records to clear" value={d.testRecords} to="/founder/ai-cost/approvals" icon={FlaskConical} tone={tone(d.testRecords)} hint="LIVE_INTERNAL_TEST drill items" />
             <Tile label="Sales close actions awaiting approval" value={d.salesCloseApprovals} to="/founder/customer-sales/close-engine" icon={Phone} tone={tone(d.salesCloseApprovals)} hint="external send locked" />
             <Tile label="Sales follow-ups" value={d.salesFollowUp} to="/founder/customer-sales/follow-up" icon={Phone} tone={tone(d.salesFollowUp)} />
+            <Tile label="Hot buying signals" value={d.salesHotSignals} to="/founder/customer-sales/conversations" icon={Flame} tone={d.salesHotSignals > 0 ? "warn" : "good"} hint=">=70% close probability" />
+            <Tile label="Ready to buy" value={d.salesReadyToBuy} to="/founder/customer-sales/conversations" icon={Phone} tone={d.salesReadyToBuy > 0 ? "warn" : "good"} />
+            <Tile label="Sales safety warnings" value={d.salesSafetyWarnings} to="/founder/customer-sales/safety" icon={ShieldCheck} tone={tone(d.salesSafetyWarnings)} hint="consent / prohibited claim / window" />
+            <Tile label="Sales escalations" value={d.salesEscalations} to="/founder/customer-sales/conversations" icon={AlertTriangle} tone={tone(d.salesEscalations)} />
+            <Tile label="Consent gaps on calls" value={d.salesConsentIssues} to="/founder/customer-sales/call-logs" icon={ShieldAlert} tone={tone(d.salesConsentIssues)} />
+            <Tile label="Human handoffs open" value={d.salesHandoffs} to="/founder/customer-sales/follow-up" icon={Users} tone={tone(d.salesHandoffs)} />
           </div>
         </CardContent>
       </Card>
