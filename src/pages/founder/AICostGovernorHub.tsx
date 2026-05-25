@@ -25,6 +25,12 @@ const SECTIONS: Array<{
     icon: Sparkles,
   },
   {
+    title: "First-Use Configuration (whole Liftor)",
+    description: "Whole-system live configuration pack: Gateway, Cost, External Safety, Business setup, CRM, Outreach/Smartlead, Social, Finance, Portfolio/Exit, Manuals. Warnings + links, never a gate.",
+    to: "/founder/first-use-configuration",
+    icon: Sparkles,
+  },
+  {
     title: "Founder Action Board",
     description: "Daily live cockpit. What needs attention, what is working, what to decide — with one-click actions.",
     to: "/founder/ai-cost/action-board",
