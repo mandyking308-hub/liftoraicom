@@ -341,6 +341,29 @@ export default function AIProviderPricing() {
                   <Label>Effective to (optional)</Label>
                   <Input type="date" value={editing.effective_to ?? ""} onChange={(e) => setEditing({ ...editing, effective_to: e.target.value || null })} />
                 </div>
+                <div>
+                  <Label>Confidence</Label>
+                  <Select
+                    value={editing.confidence ?? "estimated"}
+                    onValueChange={(v) => setEditing({ ...editing, confidence: v as any })}
+                  >
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="verified">verified pricing (from provider page)</SelectItem>
+                      <SelectItem value="estimated">estimated pricing</SelectItem>
+                      <SelectItem value="unknown">unknown</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Pricing source URL</Label>
+                  <Input
+                    type="url"
+                    placeholder="https://provider.example/pricing"
+                    value={editing.pricing_source_url ?? ""}
+                    onChange={(e) => setEditing({ ...editing, pricing_source_url: e.target.value })}
+                  />
+                </div>
                 <div className="col-span-2 flex items-center gap-3">
                   <Switch checked={editing.active ?? true} onCheckedChange={(v) => setEditing({ ...editing, active: v })} />
                   <Label>Active</Label>
