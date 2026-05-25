@@ -13441,77 +13441,119 @@ export type Database = {
         Row: {
           action_status: string
           amount: number | null
+          approval_status: string
+          assigned_human_user_id: string | null
           audit_metadata: Json | null
           booking_url: string | null
           business_id: string | null
           close_action_type: string
           completed_at: string | null
+          confidence: number | null
+          confirmed_revenue_value: number | null
           contact_id: string | null
           contract_id: string | null
           conversation_id: string | null
           created_at: string
           currency: string | null
+          estimated_pipeline_value: number | null
+          founder_approval_item_id: string | null
           founder_approval_required: boolean
           founder_approved_at: string | null
           id: string
           invoice_id: string | null
+          last_decision_reason: string | null
+          missing_info: Json
           offer_id: string | null
           payment_link_url: string | null
           payment_provider: string | null
           product_id: string | null
           proposal_id: string | null
+          recommended_reason: string | null
+          requested_changes: string | null
+          risk_flags: Json
           sent_at: string | null
+          test_label: string | null
           updated_at: string
+          verified_event_at: string | null
+          verified_event_type: string | null
         }
         Insert: {
           action_status?: string
           amount?: number | null
+          approval_status?: string
+          assigned_human_user_id?: string | null
           audit_metadata?: Json | null
           booking_url?: string | null
           business_id?: string | null
           close_action_type?: string
           completed_at?: string | null
+          confidence?: number | null
+          confirmed_revenue_value?: number | null
           contact_id?: string | null
           contract_id?: string | null
           conversation_id?: string | null
           created_at?: string
           currency?: string | null
+          estimated_pipeline_value?: number | null
+          founder_approval_item_id?: string | null
           founder_approval_required?: boolean
           founder_approved_at?: string | null
           id?: string
           invoice_id?: string | null
+          last_decision_reason?: string | null
+          missing_info?: Json
           offer_id?: string | null
           payment_link_url?: string | null
           payment_provider?: string | null
           product_id?: string | null
           proposal_id?: string | null
+          recommended_reason?: string | null
+          requested_changes?: string | null
+          risk_flags?: Json
           sent_at?: string | null
+          test_label?: string | null
           updated_at?: string
+          verified_event_at?: string | null
+          verified_event_type?: string | null
         }
         Update: {
           action_status?: string
           amount?: number | null
+          approval_status?: string
+          assigned_human_user_id?: string | null
           audit_metadata?: Json | null
           booking_url?: string | null
           business_id?: string | null
           close_action_type?: string
           completed_at?: string | null
+          confidence?: number | null
+          confirmed_revenue_value?: number | null
           contact_id?: string | null
           contract_id?: string | null
           conversation_id?: string | null
           created_at?: string
           currency?: string | null
+          estimated_pipeline_value?: number | null
+          founder_approval_item_id?: string | null
           founder_approval_required?: boolean
           founder_approved_at?: string | null
           id?: string
           invoice_id?: string | null
+          last_decision_reason?: string | null
+          missing_info?: Json
           offer_id?: string | null
           payment_link_url?: string | null
           payment_provider?: string | null
           product_id?: string | null
           proposal_id?: string | null
+          recommended_reason?: string | null
+          requested_changes?: string | null
+          risk_flags?: Json
           sent_at?: string | null
+          test_label?: string | null
           updated_at?: string
+          verified_event_at?: string | null
+          verified_event_type?: string | null
         }
         Relationships: [
           {
@@ -13536,6 +13578,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      customer_sales_close_provider_settings: {
+        Row: {
+          active: boolean
+          configured: boolean
+          created_at: string
+          id: string
+          last_checked_at: string | null
+          next_setup_action: string | null
+          pre_approved_rule_allowed: boolean
+          provider_category: string
+          provider_key: string
+          provider_label: string
+          status_note: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          configured?: boolean
+          created_at?: string
+          id?: string
+          last_checked_at?: string | null
+          next_setup_action?: string | null
+          pre_approved_rule_allowed?: boolean
+          provider_category: string
+          provider_key: string
+          provider_label: string
+          status_note?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          configured?: boolean
+          created_at?: string
+          id?: string
+          last_checked_at?: string | null
+          next_setup_action?: string | null
+          pre_approved_rule_allowed?: boolean
+          provider_category?: string
+          provider_key?: string
+          provider_label?: string
+          status_note?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       customer_sales_conversation_states: {
         Row: {
