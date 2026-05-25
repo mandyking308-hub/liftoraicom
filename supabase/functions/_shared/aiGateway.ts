@@ -419,6 +419,7 @@ export async function callAIGateway(input: AIGatewayCallInput): Promise<AIGatewa
     await writeLedger(trace_id, input, { status: "failed", output_summary: `network: ${err}` });
     await updateRuntimeRequest(sb, request_id, { status: "failed", completed_at: new Date().toISOString(), error_message: err });
     await recordRuntimeEvent(sb, { request_id, event_type: "network_error", severity: "error", message: err });
+    await releaseLease(sb, request_id, false);
     return { trace_id, request_id, status: "failed", http_status: 0, error: err, used_fallback: usedFallback };
   }
 
@@ -426,12 +427,14 @@ export async function callAIGateway(input: AIGatewayCallInput): Promise<AIGatewa
     await writeLedger(trace_id, input, { status: "failed", output_summary: "rate_limited" });
     await updateRuntimeRequest(sb, request_id, { status: "failed", completed_at: new Date().toISOString(), error_message: "rate_limited" });
     await recordRuntimeEvent(sb, { request_id, event_type: "rate_limited", severity: "warning" });
+    await releaseLease(sb, request_id, false);
     return { trace_id, request_id, status: "rate_limited", http_status: 429, error: "Rate limit exceeded", used_fallback: usedFallback };
   }
   if (resp.status === 402) {
     await writeLedger(trace_id, input, { status: "failed", output_summary: "payment_required" });
     await updateRuntimeRequest(sb, request_id, { status: "failed", completed_at: new Date().toISOString(), error_message: "payment_required" });
     await recordRuntimeEvent(sb, { request_id, event_type: "payment_required", severity: "error" });
+    await releaseLease(sb, request_id, false);
     return { trace_id, request_id, status: "payment_required", http_status: 402, error: "Lovable AI credits required", used_fallback: usedFallback };
   }
   if (!resp.ok) {
@@ -439,6 +442,7 @@ export async function callAIGateway(input: AIGatewayCallInput): Promise<AIGatewa
     await writeLedger(trace_id, input, { status: "failed", output_summary: `http ${resp.status}` });
     await updateRuntimeRequest(sb, request_id, { status: "failed", completed_at: new Date().toISOString(), error_message: `http ${resp.status}` });
     await recordRuntimeEvent(sb, { request_id, event_type: "http_error", severity: "error", message: `http ${resp.status}` });
+    await releaseLease(sb, request_id, false);
     return { trace_id, request_id, status: "failed", http_status: resp.status, error: txt.slice(0, 500), used_fallback: usedFallback };
   }
 
@@ -458,6 +462,7 @@ export async function callAIGateway(input: AIGatewayCallInput): Promise<AIGatewa
     token_usage: usage,
   });
   await recordRuntimeEvent(sb, { request_id, event_type: "completed", severity: "info", metadata: { used_fallback: usedFallback } });
+  await releaseLease(sb, request_id, true);
   return {
     trace_id, request_id, status: "completed", http_status: 200, data,
     prompt_tokens: usage.prompt_tokens, completion_tokens: usage.completion_tokens,
