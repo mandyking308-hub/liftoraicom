@@ -157,6 +157,7 @@ import LiftorMasterReconciliationPanel from "@/components/founder/testing/Liftor
 import FullManualFunctionControlPanel from "@/components/founder/command/FullManualFunctionControlPanel";
 import CRMContact360Panel from "@/components/founder/crm/CRMContact360Panel";
 import CommandCentreMasterControlPlane from "@/components/founder/command/CommandCentreMasterControlPlane";
+import CustomerSalesEngineCard from "@/components/founder/command/CustomerSalesEngineCard";
 import CustomerJourneyControlBoard from "@/components/founder/command/CustomerJourneyControlBoard";
 import AgentCollaborationBoard from "@/components/founder/agents/AgentCollaborationBoard";
 import CustomerJourneyFlowMap from "@/components/founder/command/CustomerJourneyFlowMap";
@@ -799,6 +800,7 @@ const CommandCentre = () => {
       <div className="max-w-7xl mx-auto px-4 pt-4"><AIAlertsMiniWidget /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><FounderAlertEscalationPanel /></div>
       <WhatNeedsAttentionToday />
+      <div className="max-w-7xl mx-auto px-4 pt-4"><CustomerSalesEngineCard /></div>
       <BusinessOperatingStatus />
       <AgentOperatingStatus />
       <div className="max-w-7xl mx-auto px-4 pt-4">
