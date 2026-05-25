@@ -3793,5 +3793,5 @@ liftor-brain-provider-check / -diagnostic / -constitution-acceptance / -full-acc
 \`KNOWN_DIRECT_AI_CALLERS\` in \`src/services/aiGateway.ts\` and \`META\` in \`src/pages/founder/AIGatewayBypassRegister.tsx\`.
 
 *End of AI Gateway Bypass Audit (v5.8).*
-\`;
+`;
 };
