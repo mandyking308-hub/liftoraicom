@@ -84,6 +84,9 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "founder_reporting_agent", name: "Founder Reporting Agent", to: "/founder/reports", category: "operations" },
   { key: "weekly_priorities_agent", name: "Weekly Priorities Agent", to: "/founder/reports/weekly", category: "operations" },
   { key: "portfolio_recommendation_agent", name: "Portfolio Recommendation Agent", to: "/founder/reports/portfolio", category: "operations" },
+  { key: "product_qa_agent", name: "Product QA Agent", to: "/founder/product", category: "operations" },
+  { key: "release_notes_agent", name: "Release Notes Agent", to: "/founder/product/releases", category: "operations" },
+  { key: "rollback_advisor_agent", name: "Rollback Advisor Agent", to: "/founder/product/rollback", category: "operations" },
 ];
 
 export default function AgentOperatingStatus() {
