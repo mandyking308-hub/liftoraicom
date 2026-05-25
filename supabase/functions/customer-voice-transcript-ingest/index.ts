@@ -18,7 +18,7 @@ Deno.serve(async (req) => {
 
   if (call_log_id && transcript) {
     await a.admin.from("customer_sales_call_logs").update({
-      transcript, transcript_ready_at: new Date().toISOString(),
+      transcript_text: transcript,
     }).eq("id", call_log_id);
   }
 

@@ -31,8 +31,8 @@ Deno.serve(async (req) => {
       call_direction: "inbound",
       from_number: body?.from_number ?? body?.from ?? null,
       to_number: body?.to_number ?? body?.to ?? null,
-      provider_type: provider,
-      external_call_id: body?.call_id ?? body?.id ?? null,
+      provider_name: provider,
+      provider_call_id: body?.call_id ?? body?.id ?? null,
       started_at: new Date().toISOString(),
       outcome: can_answer ? "in_progress" : "escalated_no_provider",
     }).select("id").maybeSingle();

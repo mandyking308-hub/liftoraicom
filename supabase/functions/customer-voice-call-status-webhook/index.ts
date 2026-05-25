@@ -17,7 +17,7 @@ Deno.serve(async (req) => {
   let call_log_id: string | null = null;
   if (external_call_id) {
     const { data: existing } = await a.admin
-      .from("customer_sales_call_logs").select("id").eq("external_call_id", external_call_id).maybeSingle();
+      .from("customer_sales_call_logs").select("id").eq("provider_call_id", external_call_id).maybeSingle();
     if (existing?.id) {
       call_log_id = existing.id;
       await a.admin.from("customer_sales_call_logs").update({
