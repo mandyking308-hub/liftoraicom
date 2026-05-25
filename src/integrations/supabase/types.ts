@@ -27830,6 +27830,212 @@ export type Database = {
           },
         ]
       }
+      marketplace_listings: {
+        Row: {
+          audit_metadata: Json
+          business_id: string
+          category: string | null
+          created_at: string
+          founder_approval_required: boolean
+          id: string
+          listing_description: string | null
+          listing_status: string
+          listing_title: string
+          location: string | null
+          marketplace_id: string | null
+          price_amount: number | null
+          price_currency: string | null
+          price_type: string | null
+          published_at: string | null
+          quality_score: number | null
+          risk_flags: string[] | null
+          seller_id: string | null
+          seller_prospect_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id: string
+          category?: string | null
+          created_at?: string
+          founder_approval_required?: boolean
+          id?: string
+          listing_description?: string | null
+          listing_status?: string
+          listing_title: string
+          location?: string | null
+          marketplace_id?: string | null
+          price_amount?: number | null
+          price_currency?: string | null
+          price_type?: string | null
+          published_at?: string | null
+          quality_score?: number | null
+          risk_flags?: string[] | null
+          seller_id?: string | null
+          seller_prospect_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string
+          category?: string | null
+          created_at?: string
+          founder_approval_required?: boolean
+          id?: string
+          listing_description?: string | null
+          listing_status?: string
+          listing_title?: string
+          location?: string | null
+          marketplace_id?: string | null
+          price_amount?: number | null
+          price_currency?: string | null
+          price_type?: string | null
+          published_at?: string | null
+          quality_score?: number | null
+          risk_flags?: string[] | null
+          seller_id?: string | null
+          seller_prospect_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_listings_marketplace_id_fkey"
+            columns: ["marketplace_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketplace_listings_seller_prospect_id_fkey"
+            columns: ["seller_prospect_id"]
+            isOneToOne: false
+            referencedRelation: "seller_prospects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketplace_profiles: {
+        Row: {
+          active: boolean
+          audit_metadata: Json
+          business_id: string
+          buyer_value_proposition: string | null
+          commission_model: string | null
+          core_categories: string[] | null
+          core_locations: string[] | null
+          created_at: string
+          demand_side_name: string | null
+          id: string
+          marketplace_name: string
+          marketplace_type: string
+          payout_model: string | null
+          platform_fee_model: string | null
+          seller_terms_summary: string | null
+          seller_value_proposition: string | null
+          supply_side_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          audit_metadata?: Json
+          business_id: string
+          buyer_value_proposition?: string | null
+          commission_model?: string | null
+          core_categories?: string[] | null
+          core_locations?: string[] | null
+          created_at?: string
+          demand_side_name?: string | null
+          id?: string
+          marketplace_name: string
+          marketplace_type?: string
+          payout_model?: string | null
+          platform_fee_model?: string | null
+          seller_terms_summary?: string | null
+          seller_value_proposition?: string | null
+          supply_side_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          audit_metadata?: Json
+          business_id?: string
+          buyer_value_proposition?: string | null
+          commission_model?: string | null
+          core_categories?: string[] | null
+          core_locations?: string[] | null
+          created_at?: string
+          demand_side_name?: string | null
+          id?: string
+          marketplace_name?: string
+          marketplace_type?: string
+          payout_model?: string | null
+          platform_fee_model?: string | null
+          seller_terms_summary?: string | null
+          seller_value_proposition?: string | null
+          supply_side_name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      marketplace_supply_demand_snapshots: {
+        Row: {
+          active_seller_count: number | null
+          audit_metadata: Json
+          business_id: string
+          buyer_request_count: number | null
+          category: string | null
+          created_at: string
+          demand_count: number | null
+          demand_gap_score: number | null
+          id: string
+          location: string | null
+          marketplace_id: string | null
+          recommended_action: string | null
+          supply_count: number | null
+          supply_gap_score: number | null
+        }
+        Insert: {
+          active_seller_count?: number | null
+          audit_metadata?: Json
+          business_id: string
+          buyer_request_count?: number | null
+          category?: string | null
+          created_at?: string
+          demand_count?: number | null
+          demand_gap_score?: number | null
+          id?: string
+          location?: string | null
+          marketplace_id?: string | null
+          recommended_action?: string | null
+          supply_count?: number | null
+          supply_gap_score?: number | null
+        }
+        Update: {
+          active_seller_count?: number | null
+          audit_metadata?: Json
+          business_id?: string
+          buyer_request_count?: number | null
+          category?: string | null
+          created_at?: string
+          demand_count?: number | null
+          demand_gap_score?: number | null
+          id?: string
+          location?: string | null
+          marketplace_id?: string | null
+          recommended_action?: string | null
+          supply_count?: number | null
+          supply_gap_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_supply_demand_snapshots_marketplace_id_fkey"
+            columns: ["marketplace_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       meeting_action_items: {
         Row: {
           action_owner: string | null
@@ -34720,6 +34926,286 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      seller_onboarding_records: {
+        Row: {
+          audit_metadata: Json
+          business_id: string
+          created_at: string
+          id: string
+          listing_setup_status: string
+          marketplace_id: string | null
+          missing_information: string[] | null
+          onboarding_status: string
+          payout_setup_status: string
+          required_documents: string[] | null
+          seller_account_id: string | null
+          seller_prospect_id: string | null
+          terms_accepted: boolean
+          updated_at: string
+          verification_status: string | null
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id: string
+          created_at?: string
+          id?: string
+          listing_setup_status?: string
+          marketplace_id?: string | null
+          missing_information?: string[] | null
+          onboarding_status?: string
+          payout_setup_status?: string
+          required_documents?: string[] | null
+          seller_account_id?: string | null
+          seller_prospect_id?: string | null
+          terms_accepted?: boolean
+          updated_at?: string
+          verification_status?: string | null
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string
+          created_at?: string
+          id?: string
+          listing_setup_status?: string
+          marketplace_id?: string | null
+          missing_information?: string[] | null
+          onboarding_status?: string
+          payout_setup_status?: string
+          required_documents?: string[] | null
+          seller_account_id?: string | null
+          seller_prospect_id?: string | null
+          terms_accepted?: boolean
+          updated_at?: string
+          verification_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seller_onboarding_records_marketplace_id_fkey"
+            columns: ["marketplace_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seller_onboarding_records_seller_prospect_id_fkey"
+            columns: ["seller_prospect_id"]
+            isOneToOne: false
+            referencedRelation: "seller_prospects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seller_prospects: {
+        Row: {
+          audit_metadata: Json
+          business_id: string
+          capacity_score: number | null
+          category: string | null
+          company_name: string | null
+          created_at: string
+          email: string | null
+          expected_value: number | null
+          external_action_locked: boolean
+          fit_score: number | null
+          founder_approval_required: boolean
+          id: string
+          location: string | null
+          marketplace_id: string | null
+          phone: string | null
+          prospect_name: string
+          prospect_type: string
+          qualification_status: string
+          recommended_pitch: string | null
+          reputation_score: number | null
+          risk_flags: string[] | null
+          source: string | null
+          supply_quality_score: number | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id: string
+          capacity_score?: number | null
+          category?: string | null
+          company_name?: string | null
+          created_at?: string
+          email?: string | null
+          expected_value?: number | null
+          external_action_locked?: boolean
+          fit_score?: number | null
+          founder_approval_required?: boolean
+          id?: string
+          location?: string | null
+          marketplace_id?: string | null
+          phone?: string | null
+          prospect_name: string
+          prospect_type?: string
+          qualification_status?: string
+          recommended_pitch?: string | null
+          reputation_score?: number | null
+          risk_flags?: string[] | null
+          source?: string | null
+          supply_quality_score?: number | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string
+          capacity_score?: number | null
+          category?: string | null
+          company_name?: string | null
+          created_at?: string
+          email?: string | null
+          expected_value?: number | null
+          external_action_locked?: boolean
+          fit_score?: number | null
+          founder_approval_required?: boolean
+          id?: string
+          location?: string | null
+          marketplace_id?: string | null
+          phone?: string | null
+          prospect_name?: string
+          prospect_type?: string
+          qualification_status?: string
+          recommended_pitch?: string | null
+          reputation_score?: number | null
+          risk_flags?: string[] | null
+          source?: string | null
+          supply_quality_score?: number | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seller_prospects_marketplace_id_fkey"
+            columns: ["marketplace_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seller_recruitment_campaigns: {
+        Row: {
+          approval_required: boolean
+          audit_metadata: Json
+          business_id: string
+          campaign_name: string
+          campaign_status: string
+          created_at: string
+          id: string
+          marketplace_id: string | null
+          outreach_sequence_summary: string | null
+          target_category: string | null
+          target_location: string | null
+          target_seller_profile: string | null
+          updated_at: string
+          value_proposition: string | null
+        }
+        Insert: {
+          approval_required?: boolean
+          audit_metadata?: Json
+          business_id: string
+          campaign_name: string
+          campaign_status?: string
+          created_at?: string
+          id?: string
+          marketplace_id?: string | null
+          outreach_sequence_summary?: string | null
+          target_category?: string | null
+          target_location?: string | null
+          target_seller_profile?: string | null
+          updated_at?: string
+          value_proposition?: string | null
+        }
+        Update: {
+          approval_required?: boolean
+          audit_metadata?: Json
+          business_id?: string
+          campaign_name?: string
+          campaign_status?: string
+          created_at?: string
+          id?: string
+          marketplace_id?: string | null
+          outreach_sequence_summary?: string | null
+          target_category?: string | null
+          target_location?: string | null
+          target_seller_profile?: string | null
+          updated_at?: string
+          value_proposition?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seller_recruitment_campaigns_marketplace_id_fkey"
+            columns: ["marketplace_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seller_verification_checks: {
+        Row: {
+          business_id: string
+          check_status: string
+          check_summary: string | null
+          check_type: string
+          created_at: string
+          evidence_url: string | null
+          id: string
+          marketplace_id: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          seller_prospect_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          check_status?: string
+          check_summary?: string | null
+          check_type: string
+          created_at?: string
+          evidence_url?: string | null
+          id?: string
+          marketplace_id?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          seller_prospect_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          check_status?: string
+          check_summary?: string | null
+          check_type?: string
+          created_at?: string
+          evidence_url?: string | null
+          id?: string
+          marketplace_id?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          seller_prospect_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seller_verification_checks_marketplace_id_fkey"
+            columns: ["marketplace_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seller_verification_checks_seller_prospect_id_fkey"
+            columns: ["seller_prospect_id"]
+            isOneToOne: false
+            referencedRelation: "seller_prospects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       send_windows: {
         Row: {
