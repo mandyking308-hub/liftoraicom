@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import FounderLayout from "@/components/founder/FounderLayout";
+import AICostBreadcrumb from "@/components/founder/ai/AICostBreadcrumb";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -221,6 +222,7 @@ export default function AIRuntimeHealth() {
   return (
     <FounderLayout>
       <div className="space-y-4 max-w-[1400px]">
+        <AICostBreadcrumb page="AI Runtime Health" description="Live health, bottlenecks, costs, failures and approvals for every AI call." />
         <div className="flex items-start justify-between flex-wrap gap-2">
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2"><Activity className="h-7 w-7 text-primary" /> AI Runtime Health Cockpit</h1>
