@@ -196,6 +196,13 @@ import ContractsObligations from "./pages/founder/contracts/Obligations";
 import ContractsRenewals from "./pages/founder/contracts/Renewals";
 import ContractsRisk from "./pages/founder/contracts/Risk";
 import ContractsSettings from "./pages/founder/contracts/Settings";
+import VendorsOverview from "./pages/founder/vendors/Overview";
+import VendorsSaas from "./pages/founder/vendors/Saas";
+import VendorsContracts from "./pages/founder/vendors/Contracts";
+import VendorsCosts from "./pages/founder/vendors/Costs";
+import VendorsRenewals from "./pages/founder/vendors/Renewals";
+import VendorsAccess from "./pages/founder/vendors/Access";
+import VendorsRisk from "./pages/founder/vendors/Risk";
 import CustomerUpgradesHub from "./pages/founder/customer-upgrades/Hub";
 import CustomerUpgradesOpportunities from "./pages/founder/customer-upgrades/Opportunities";
 import CustomerUpgradesProductLadders from "./pages/founder/customer-upgrades/ProductLadders";
@@ -487,6 +494,13 @@ const App = () => (
             <Route path="/founder/contracts/renewals" element={<FounderRoute><ContractsRenewals /></FounderRoute>} />
             <Route path="/founder/contracts/risk" element={<FounderRoute><ContractsRisk /></FounderRoute>} />
             <Route path="/founder/contracts/settings" element={<FounderRoute><ContractsSettings /></FounderRoute>} />
+            <Route path="/founder/vendors" element={<FounderRoute><VendorsOverview /></FounderRoute>} />
+            <Route path="/founder/vendors/saas" element={<FounderRoute><VendorsSaas /></FounderRoute>} />
+            <Route path="/founder/vendors/contracts" element={<FounderRoute><VendorsContracts /></FounderRoute>} />
+            <Route path="/founder/vendors/costs" element={<FounderRoute><VendorsCosts /></FounderRoute>} />
+            <Route path="/founder/vendors/renewals" element={<FounderRoute><VendorsRenewals /></FounderRoute>} />
+            <Route path="/founder/vendors/access" element={<FounderRoute><VendorsAccess /></FounderRoute>} />
+            <Route path="/founder/vendors/risk" element={<FounderRoute><VendorsRisk /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />

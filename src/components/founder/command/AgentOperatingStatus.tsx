@@ -63,6 +63,9 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "contract_agent", name: "Contract Agent", to: "/founder/contracts", category: "legal" },
   { key: "contract_renewal_agent", name: "Contract Renewal Agent", to: "/founder/contracts/renewals", category: "legal" },
   { key: "contract_risk_agent", name: "Contract Risk Agent", to: "/founder/contracts/risk", category: "legal" },
+  { key: "vendor_agent", name: "Vendor Agent", to: "/founder/vendors", category: "operations" },
+  { key: "vendor_cost_agent", name: "Vendor Cost Agent", to: "/founder/vendors/costs", category: "operations" },
+  { key: "vendor_risk_agent", name: "Vendor Risk Agent", to: "/founder/vendors/risk", category: "operations" },
 ];
 
 export default function AgentOperatingStatus() {
