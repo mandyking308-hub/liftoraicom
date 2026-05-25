@@ -24,6 +24,7 @@ import ReputationCrisisCommsPanel from "@/components/founder/brand/ReputationCri
 import KPIOKRPerformancePanel from "@/components/founder/analytics/KPIOKRPerformancePanel";
 import FounderAlertEscalationPanel from "@/components/founder/command/FounderAlertEscalationPanel";
 import CommandCentreUsabilityReportPanel from "@/components/founder/command/CommandCentreUsabilityReportPanel";
+import FounderCockpit from "@/components/founder/command/FounderCockpit";
 import BusinessActivationWizardPanel from "@/components/founder/activation/BusinessActivationWizardPanel";
 import BusinessOnboardingBrainPanel from "@/components/founder/activation/BusinessOnboardingBrainPanel";
 import StarterPackMaterialiserPanel from "@/components/founder/activation/StarterPackMaterialiserPanel";
