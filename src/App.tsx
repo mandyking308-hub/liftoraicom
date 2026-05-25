@@ -203,6 +203,13 @@ import VendorsCosts from "./pages/founder/vendors/Costs";
 import VendorsRenewals from "./pages/founder/vendors/Renewals";
 import VendorsAccess from "./pages/founder/vendors/Access";
 import VendorsRisk from "./pages/founder/vendors/Risk";
+import PeopleOverview from "./pages/founder/people/Overview";
+import PeopleOperators from "./pages/founder/people/Operators";
+import PeopleTasks from "./pages/founder/people/Tasks";
+import PeopleAccess from "./pages/founder/people/Access";
+import PeopleTraining from "./pages/founder/people/Training";
+import PeopleQuality from "./pages/founder/people/Quality";
+import PeopleHandover from "./pages/founder/people/Handover";
 import CustomerUpgradesHub from "./pages/founder/customer-upgrades/Hub";
 import CustomerUpgradesOpportunities from "./pages/founder/customer-upgrades/Opportunities";
 import CustomerUpgradesProductLadders from "./pages/founder/customer-upgrades/ProductLadders";
@@ -501,6 +508,13 @@ const App = () => (
             <Route path="/founder/vendors/renewals" element={<FounderRoute><VendorsRenewals /></FounderRoute>} />
             <Route path="/founder/vendors/access" element={<FounderRoute><VendorsAccess /></FounderRoute>} />
             <Route path="/founder/vendors/risk" element={<FounderRoute><VendorsRisk /></FounderRoute>} />
+            <Route path="/founder/people" element={<FounderRoute><PeopleOverview /></FounderRoute>} />
+            <Route path="/founder/people/operators" element={<FounderRoute><PeopleOperators /></FounderRoute>} />
+            <Route path="/founder/people/tasks" element={<FounderRoute><PeopleTasks /></FounderRoute>} />
+            <Route path="/founder/people/access" element={<FounderRoute><PeopleAccess /></FounderRoute>} />
+            <Route path="/founder/people/training" element={<FounderRoute><PeopleTraining /></FounderRoute>} />
+            <Route path="/founder/people/quality" element={<FounderRoute><PeopleQuality /></FounderRoute>} />
+            <Route path="/founder/people/handover" element={<FounderRoute><PeopleHandover /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
