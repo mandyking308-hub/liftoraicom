@@ -18,6 +18,10 @@ export const MP_NAV: { to: string; label: string }[] = [
   { to: "/founder/marketplace/risk", label: "Risk / Suspension" },
   { to: "/founder/marketplace/listings", label: "Listings" },
   { to: "/founder/marketplace/supply-demand", label: "Supply / Demand" },
+  { to: "/founder/marketplace/liquidity", label: "Liquidity" },
+  { to: "/founder/marketplace/category-balance", label: "Category balance" },
+  { to: "/founder/marketplace/location-balance", label: "Location balance" },
+  { to: "/founder/marketplace/growth-actions", label: "Growth actions" },
   { to: "/founder/marketplace/seller-performance", label: "Performance" },
   { to: "/founder/marketplace/settings", label: "Settings" },
 ];
