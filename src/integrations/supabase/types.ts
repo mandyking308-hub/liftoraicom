@@ -5989,6 +5989,50 @@ export type Database = {
         }
         Relationships: []
       }
+      business_integration_requirements: {
+        Row: {
+          business_id: string
+          created_at: string
+          id: string
+          integration_id: string
+          priority: string
+          reason: string | null
+          required_before_external_live: boolean
+          requirement_status: string
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          id?: string
+          integration_id: string
+          priority?: string
+          reason?: string | null
+          required_before_external_live?: boolean
+          requirement_status?: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          id?: string
+          integration_id?: string
+          priority?: string
+          reason?: string | null
+          required_before_external_live?: boolean
+          requirement_status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_integration_requirements_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "integration_catalog"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_internal_activation_records: {
         Row: {
           activation_mode: string
@@ -21340,6 +21384,95 @@ export type Database = {
             columns: ["integration_id"]
             isOneToOne: false
             referencedRelation: "integrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integration_catalog: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string | null
+          external_action_risk_level: string
+          id: string
+          paid_api_risk: boolean
+          provider_name: string
+          provider_type: string
+          supported_archetypes: string[]
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          external_action_risk_level?: string
+          id?: string
+          paid_api_risk?: boolean
+          provider_name: string
+          provider_type: string
+          supported_archetypes?: string[]
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          external_action_risk_level?: string
+          id?: string
+          paid_api_risk?: boolean
+          provider_name?: string
+          provider_type?: string
+          supported_archetypes?: string[]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      integration_connection_status: {
+        Row: {
+          business_id: string
+          created_at: string
+          id: string
+          integration_id: string
+          last_error: string | null
+          last_test_at: string | null
+          last_test_status: string | null
+          provider_status: string
+          secret_configured: boolean
+          updated_at: string
+          webhook_configured: boolean
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          id?: string
+          integration_id: string
+          last_error?: string | null
+          last_test_at?: string | null
+          last_test_status?: string | null
+          provider_status?: string
+          secret_configured?: boolean
+          updated_at?: string
+          webhook_configured?: boolean
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          id?: string
+          integration_id?: string
+          last_error?: string | null
+          last_test_at?: string | null
+          last_test_status?: string | null
+          provider_status?: string
+          secret_configured?: boolean
+          updated_at?: string
+          webhook_configured?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_connection_status_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "integration_catalog"
             referencedColumns: ["id"]
           },
         ]
