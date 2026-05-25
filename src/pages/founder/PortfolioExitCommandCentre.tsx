@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import FounderLayout from "@/components/founder/FounderLayout";
 import { supabase } from "@/integrations/supabase/client";
 import IntelligenceOrchestratorPanel from "@/components/founder/portfolio/IntelligenceOrchestratorPanel";
+import PortfolioCommanderEnginePanel from "@/components/founder/portfolio/PortfolioCommanderEnginePanel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -333,6 +334,9 @@ export default function PortfolioExitCommandCentre() {
 
         {/* AI Intelligence Orchestrator */}
         <IntelligenceOrchestratorPanel />
+
+        {/* Portfolio Commander Step Engine */}
+        <PortfolioCommanderEnginePanel compact />
 
         {/* Filters */}
         <Card className="tech-card">
