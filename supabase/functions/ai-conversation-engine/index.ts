@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { beginGatewayLog, endGatewayLog } from "../_shared/aiGateway.ts";
+import { callAIGateway } from "../_shared/aiGateway.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -183,75 +183,56 @@ Use the classify_and_reply tool. Classifications:
 
     const userPrompt = `Conversation so far (oldest → newest):\n${history}\n\nThe LAST message from the prospect is what you must respond to.`;
 
-    // Call Lovable AI (gateway-logged)
-    const __gwInput = {
+    // Call Lovable AI via the shared gateway helper (ledger + lease + retry).
+    const gw = await callAIGateway({
       action_type: "ai_conversation_reply",
       task_category: "inbound_reply",
       conversation_id: conv.id,
       model: "google/gemini-2.5-flash",
       fallback_model: "google/gemini-3-flash-preview",
-      risk_level: "high" as const,
+      risk_level: "high",
       request_type: "inbound_reply_classify",
-      messages: [],
       metadata: { contact_id: contact.id },
-    };
-    const __log = await beginGatewayLog(__gwInput);
-    const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${Deno.env.get("LOVABLE_API_KEY")}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        tools: [{
-          type: "function",
-          function: {
-            name: "classify_and_reply",
-            description: "Classify the prospect's intent and produce a reply.",
-            parameters: {
-              type: "object",
-              properties: {
-                classification: {
-                  type: "string",
-                  enum: ["interested","not_interested","neutral","unsubscribe","question","escalate"],
-                },
-                reply: { type: "string", description: `Reply text, max ${MAX_REPLY_WORDS} words` },
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+      tools: [{
+        type: "function",
+        function: {
+          name: "classify_and_reply",
+          description: "Classify the prospect's intent and produce a reply.",
+          parameters: {
+            type: "object",
+            properties: {
+              classification: {
+                type: "string",
+                enum: ["interested","not_interested","neutral","unsubscribe","question","escalate"],
               },
-              required: ["classification","reply"],
-              additionalProperties: false,
+              reply: { type: "string", description: `Reply text, max ${MAX_REPLY_WORDS} words` },
             },
+            required: ["classification","reply"],
+            additionalProperties: false,
           },
-        }],
-        tool_choice: { type: "function", function: { name: "classify_and_reply" } },
-      }),
+        },
+      }],
+      tool_choice: { type: "function", function: { name: "classify_and_reply" } },
     });
 
-    if (!aiRes.ok) {
-      const errText = await aiRes.text();
-      await endGatewayLog({ ...__log, input: __gwInput }, { ok: false, error: `gateway_${aiRes.status}` });
+    if (gw.status !== "completed" || !gw.data) {
       await supabase.from("ai_actions").insert({
         conversation_id: conv.id,
         contact_id: contact.id,
         action_type: "reply",
         status: "failed",
-        error_message: `gateway_${aiRes.status}: ${errText.slice(0, 400)}`,
+        error_message: `gateway_${gw.http_status}: ${(gw.error ?? "").slice(0, 400)}`,
       });
-      if (aiRes.status === 429) return json({ error: "Rate limit. Try again shortly." }, 429);
-      if (aiRes.status === 402) return json({ error: "AI credits exhausted." }, 402);
-      return json({ error: "AI gateway error", status: aiRes.status }, 500);
+      if (gw.status === "rate_limited") return json({ error: "Rate limit. Try again shortly." }, 429);
+      if (gw.status === "payment_required") return json({ error: "AI credits exhausted." }, 402);
+      return json({ error: "AI gateway error", status: gw.http_status }, 500);
     }
 
-    const aiJson = await aiRes.json();
-    await endGatewayLog({ ...__log, input: __gwInput }, {
-      ok: true,
-      prompt_tokens: aiJson?.usage?.prompt_tokens ?? 0,
-      completion_tokens: aiJson?.usage?.completion_tokens ?? 0,
-    });
+    const aiJson = gw.data;
     const tc = aiJson?.choices?.[0]?.message?.tool_calls?.[0];
     const args = tc ? JSON.parse(tc.function.arguments) : null;
     const classification: string = args?.classification ?? "neutral";
