@@ -41494,6 +41494,155 @@ export type Database = {
           },
         ]
       }
+      support_sla_policies: {
+        Row: {
+          active: boolean
+          business_id: string | null
+          created_at: string
+          escalation_after_minutes: number | null
+          id: string
+          policy_name: string
+          resolution_time_minutes: number | null
+          response_time_minutes: number | null
+          severity: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          business_id?: string | null
+          created_at?: string
+          escalation_after_minutes?: number | null
+          id?: string
+          policy_name: string
+          resolution_time_minutes?: number | null
+          response_time_minutes?: number | null
+          severity?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          business_id?: string | null
+          created_at?: string
+          escalation_after_minutes?: number | null
+          id?: string
+          policy_name?: string
+          resolution_time_minutes?: number | null
+          response_time_minutes?: number | null
+          severity?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      support_ticket_events: {
+        Row: {
+          audit_metadata: Json | null
+          business_id: string | null
+          created_at: string
+          created_by: string | null
+          event_summary: string | null
+          event_type: string
+          id: string
+          ticket_id: string | null
+        }
+        Insert: {
+          audit_metadata?: Json | null
+          business_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          event_summary?: string | null
+          event_type: string
+          id?: string
+          ticket_id?: string | null
+        }
+        Update: {
+          audit_metadata?: Json | null
+          business_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          event_summary?: string | null
+          event_type?: string
+          id?: string
+          ticket_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_ticket_events_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_tickets: {
+        Row: {
+          assigned_to: string | null
+          assigned_to_type: string | null
+          audit_metadata: Json | null
+          business_id: string | null
+          contact_id: string | null
+          created_at: string
+          customer_id: string | null
+          customer_visible: boolean
+          id: string
+          issue_type: string | null
+          resolution_summary: string | null
+          resolved_at: string | null
+          sentiment: string
+          severity: string
+          sla_due_at: string | null
+          source_channel: string
+          ticket_description: string | null
+          ticket_status: string
+          ticket_title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          assigned_to_type?: string | null
+          audit_metadata?: Json | null
+          business_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          customer_visible?: boolean
+          id?: string
+          issue_type?: string | null
+          resolution_summary?: string | null
+          resolved_at?: string | null
+          sentiment?: string
+          severity?: string
+          sla_due_at?: string | null
+          source_channel?: string
+          ticket_description?: string | null
+          ticket_status?: string
+          ticket_title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          assigned_to_type?: string | null
+          audit_metadata?: Json | null
+          business_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          customer_visible?: boolean
+          id?: string
+          issue_type?: string | null
+          resolution_summary?: string | null
+          resolved_at?: string | null
+          sentiment?: string
+          severity?: string
+          sla_due_at?: string | null
+          source_channel?: string
+          ticket_description?: string | null
+          ticket_status?: string
+          ticket_title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       support_triage_reviews: {
         Row: {
           business_id: string
