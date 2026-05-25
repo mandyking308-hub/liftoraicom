@@ -1,9 +1,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
-import { createOpenAICompatible } from "npm:@ai-sdk/openai-compatible";
-import { generateText, Output } from "npm:ai";
 import { z } from "npm:zod";
-import { beginGatewayLog, endGatewayLog } from "../_shared/aiGateway.ts";
+import { callAIGateway } from "../_shared/aiGateway.ts";
 
 interface Input {
   interaction_id?: string | null;
@@ -12,14 +10,6 @@ interface Input {
   contact_id?: string | null;
   raw_text?: string | null;
   founder_language?: string | null;
-}
-
-function gateway(key: string) {
-  return createOpenAICompatible({
-    name: "lovable",
-    baseURL: "https://ai.gateway.lovable.dev/v1",
-    headers: { "Lovable-API-Key": key, "X-Lovable-AIG-SDK": "vercel-ai-sdk" },
-  });
 }
 
 Deno.serve(async (req) => {
@@ -59,14 +49,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    const apiKey = Deno.env.get("LOVABLE_API_KEY");
-    if (!apiKey) {
-      return new Response(JSON.stringify({ error: "LOVABLE_API_KEY missing" }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const model = gateway(apiKey)("google/gemini-3-flash-preview");
     const founderLang = (input.founder_language ?? "en").toLowerCase();
 
     const schema = z.object({
@@ -86,7 +68,17 @@ Deno.serve(async (req) => {
       action_type: "multilingual_intake_preview",
       task_category: "intake_translation",
       model: "google/gemini-3-flash-preview",
-      messages: [],
+      messages: [
+        {
+          role: "user" as const,
+          content:
+            `You are a multilingual intake analyst for a B2B AI engineering firm. Founder reviews everything in ${founderLang}.\n\n` +
+            `Customer message:\n"""${text}"""\n\n` +
+            `Detect language, summarise in English for the founder, classify intent (e.g. enquiry, complaint, scheduling, pricing, support, spam), note cultural/tone considerations for the customer's language, recommend response language, draft a polite response in the customer's language preserving formal B2B tone, and provide an English back-translation of that draft. Flag risks: legal_risk, compliance_risk, sanctions_risk, ambiguous_meaning, sensitive_content, low_confidence, machine_translation_warning. Always include "machine_translation_warning" if confidence < 0.85.\n\n` +
+            `Respond ONLY with a strict JSON object matching this schema: {source_language:string(ISO 639-1), detection_confidence:number(0..1), english_summary:string, translated_text_english:string, intent_detected:string, cultural_tone_notes:string, recommended_response_language:string, draft_response_original_language:string, draft_response_english_back_translation:string, risk_flags:string[]}.`,
+        },
+      ],
+      response_format: { type: "json_object" } as any,
       user_id: userId,
       business_id: input.business_id ?? null,
       conversation_id: input.conversation_id ?? null,
@@ -100,34 +92,30 @@ Deno.serve(async (req) => {
         text_length: text.length,
       },
     };
-    const ctx = await beginGatewayLog(gatewayInput);
-    try {
-      const result = await generateText({
-        model,
-        output: Output.object({ schema }),
-        prompt:
-          `You are a multilingual intake analyst for a B2B AI engineering firm. Founder reviews everything in ${founderLang}.\n\n` +
-          `Customer message:\n"""${text}"""\n\n` +
-          `Detect language, summarise in English for the founder, classify intent (e.g. enquiry, complaint, scheduling, pricing, support, spam), note cultural/tone considerations for the customer's language, recommend response language, draft a polite response in the customer's language preserving formal B2B tone, and provide an English back-translation of that draft. Flag risks: legal_risk, compliance_risk, sanctions_risk, ambiguous_meaning, sensitive_content, low_confidence, machine_translation_warning. Always include "machine_translation_warning" if confidence < 0.85.`,
+    const gw = await callAIGateway(gatewayInput);
+    if (gw.status !== "completed" || !gw.data) {
+      const status = gw.status === "rate_limited" ? 429 : gw.status === "payment_required" ? 402 : 500;
+      return new Response(JSON.stringify({ error: gw.error ?? `gateway_${gw.http_status}` }), {
+        status, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
-      const usage: any = (result as any).usage ?? {};
-      await endGatewayLog({ ...ctx, input: gatewayInput }, {
-        ok: true,
-        prompt_tokens: usage.promptTokens ?? usage.prompt_tokens,
-        completion_tokens: usage.completionTokens ?? usage.completion_tokens,
-      });
-      return new Response(JSON.stringify({
-        ...result.output,
-        send_allowed: false,
-        founder_review_required: true,
-        note: "Preview only. Not saved. No send.",
-        trace_id: ctx.trace_id,
-        request_id: ctx.request_id,
-      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    } catch (err: any) {
-      await endGatewayLog({ ...ctx, input: gatewayInput }, { ok: false, error: String(err?.message ?? err) });
-      throw err;
     }
+    const raw = gw.data?.choices?.[0]?.message?.content ?? "{}";
+    let parsed: z.infer<typeof schema>;
+    try {
+      parsed = schema.parse(JSON.parse(raw));
+    } catch (e: any) {
+      return new Response(JSON.stringify({ error: `schema_parse_failed: ${String(e?.message ?? e)}` }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    return new Response(JSON.stringify({
+      ...parsed,
+      send_allowed: false,
+      founder_review_required: true,
+      note: "Preview only. Not saved. No send.",
+      trace_id: gw.trace_id,
+      request_id: gw.request_id,
+    }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e: any) {
     const status = typeof e?.statusCode === "number" ? e.statusCode : 500;
     return new Response(JSON.stringify({ error: String(e?.message ?? e) }), {
