@@ -1260,6 +1260,8 @@ const CUSTOMER_VOICE_SALES_INTEGRATION: ManualSection = {
 LIFTOR_FULL_GUIDE.push(CUSTOMER_VOICE_SALES_INTEGRATION);
 
 const SALES_COACHING_LEARNING_LOOP = {
+  number: 94,
+  key: "sales-coaching-learning-loop",
   title: "94. Sales Coaching + Conversion Learning Loop",
   body: [
     "Purpose. Liftor learns what works. Every conversation, proposal, call, follow-up, close attempt and upgrade feeds a learning loop that improves scripts, offers, objection responses, and conversion rates over time. Internal analysis runs live; all external customer actions remain approval-gated.",
