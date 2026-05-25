@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   AlertTriangle, ClipboardCheck, Activity, Bot, DollarSign, Send, MessageSquare,
   Users, FlaskConical, ShieldAlert, Briefcase, Banknote, Sparkles, ArrowRight, Phone, Flame, ShieldCheck,
-  Target,
+  Target, TrendingUp,
 } from "lucide-react";
 
 type Tone = "danger" | "warn" | "good" | "default";
