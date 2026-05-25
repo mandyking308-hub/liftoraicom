@@ -1115,3 +1115,17 @@ const AI_GATEWAY_RUNTIME_GUIDE: ManualSection = {
   ].join(" "),
 };
 LIFTOR_FULL_GUIDE.push(AI_GATEWAY_RUNTIME_GUIDE);
+
+const AI_COST_ACCURACY_GUIDE = {
+  id: 86,
+  title: "AI Cost Accuracy — actual vs estimated",
+  body: [
+    "Cost cards show two figures: Actual cost (computed from real provider token counts) and Estimated-only cost (computed from approximate or streaming token counts).",
+    "Every AI call is tagged with a cost_basis: actual_tokens, provider_reported, streaming_estimate, estimated_tokens, manual_estimate, or pricing_missing. The basis tells you how to read the row — actual_tokens and provider_reported are exact; the rest are best-effort.",
+    "If you see a 'Models missing pricing' warning, the model returned tokens but has no row in the pricing registry yet. The call still ran; cost just wasn't computed. Add a row in the Provider Pricing page to back-fill.",
+    "Most pricing rows ship as 'estimated' until a founder confirms them against the official provider price page and flips them to 'verified'. Estimated rows are flagged in the cockpit and the manual.",
+    "Founder Copilot uses streaming. Its rows are tagged streaming_estimate because token totals are not always returned mid-stream. This is expected and does not indicate an error.",
+    "Cross-references: /founder/ai-cost/health (Cost Accuracy tab), /founder/ai-cost/pricing (Provider Pricing registry), /founder/ai-cost/ledger.",
+  ].join(" "),
+};
+LIFTOR_FULL_GUIDE.push(AI_COST_ACCURACY_GUIDE);
