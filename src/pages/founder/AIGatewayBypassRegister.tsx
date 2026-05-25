@@ -67,6 +67,8 @@ const META: Record<string, AuditEntry> = {
     sensitive: "customer + CRM data",
     complexity: "moderate",
     action: "Batch B — migrate with redaction + approval gating preserved.",
+    migration_status: "migrated",
+    migration_notes: "v5.9.5: Lovable AI Gateway fetch wrapped with beginGatewayLog/endGatewayLog. Logs to ai_gateway_requests + ai_usage_ledger. Drafts only; auto-send unchanged.",
   },
   "ai-engagement-agent-run": {
     risk: "high", batch: "B", treatment: "migrate_carefully", active: "active",
@@ -79,6 +81,8 @@ const META: Record<string, AuditEntry> = {
     sensitive: "CRM + outreach data",
     complexity: "moderate",
     action: "Batch B — capture spend in ledger; keep human approval for outreach.",
+    migration_status: "migrated",
+    migration_notes: "v5.9.5: wrapped with beginGatewayLog/endGatewayLog. Founder approval for outreach unchanged.",
   },
   "apollo-qualify": {
     risk: "medium", batch: "B", treatment: "migrate_carefully", active: "active",
@@ -90,6 +94,8 @@ const META: Record<string, AuditEntry> = {
     sensitive: "buyer/contact data",
     complexity: "simple",
     action: "Batch B — migrate alongside lead-fit-classify.",
+    migration_status: "migrated",
+    migration_notes: "v5.9.5: wrapped with beginGatewayLog/endGatewayLog.",
   },
   "business-daily-operating-loop-acceptance": {
     risk: "low", batch: "D", treatment: "deprecated_candidate", active: "likely_unused",
@@ -101,6 +107,8 @@ const META: Record<string, AuditEntry> = {
     sensitive: "test data",
     complexity: "simple",
     action: "Batch D — confirm unused, then retire or fold into one harness.",
+    migration_status: "migrated_no_op",
+    migration_notes: "v5.9.5: re-audit confirmed no direct AI call (provider_status flag only). Still referenced by liftor-final-linking-acceptance + liftor-build-phase-closeout — not deprecated yet; safe.",
   },
   "business-daily-operating-run": {
     risk: "medium", batch: "B", treatment: "migrate_carefully", active: "active",
@@ -112,6 +120,8 @@ const META: Record<string, AuditEntry> = {
     sensitive: "internal business data",
     complexity: "moderate",
     action: "Batch B — route through gateway to capture daily spend.",
+    migration_status: "migrated_no_op",
+    migration_notes: "v5.9.5: re-audit confirmed no direct AI fetch in this function — provider_status flag only. Any AI usage routes via liftor-brain-chat (now gateway-controlled).",
   },
   "business-external-activation-readiness-run": {
     risk: "low", batch: "A", treatment: "migrate_now", active: "active",
@@ -135,6 +145,8 @@ const META: Record<string, AuditEntry> = {
     drafts_external: false, sends_external: false, sensitive: "test data",
     complexity: "simple",
     action: "Batch D — retire or fold.",
+    migration_status: "migrated_no_op",
+    migration_notes: "v5.9.5: re-audit confirmed no direct AI call. Still referenced by liftor-final-linking-acceptance; safe to keep.",
   },
   "business-weekly-review-run": {
     risk: "medium", batch: "B", treatment: "migrate_carefully", active: "active",
@@ -146,6 +158,8 @@ const META: Record<string, AuditEntry> = {
     sensitive: "internal business data",
     complexity: "moderate",
     action: "Batch B — wrap and ledger-tag.",
+    migration_status: "migrated_no_op",
+    migration_notes: "v5.9.5: re-audit confirmed no direct AI fetch — provider_status flag only.",
   },
   "founder-copilot": {
     risk: "high", batch: "B", treatment: "migrate_carefully", active: "active",
@@ -158,6 +172,8 @@ const META: Record<string, AuditEntry> = {
     sensitive: "founder + business data",
     complexity: "moderate",
     action: "Batch B — high volume; migrate to capture spend and apply redaction.",
+    migration_status: "migrated",
+    migration_notes: "v5.9.5: streaming call wrapped with beginGatewayLog (fire-and-forget endGatewayLog on stream start). Streamed token counts remain estimate-only.",
   },
   "generate-proposal": {
     risk: "high", batch: "C", treatment: "migrate_carefully", active: "active",
@@ -170,6 +186,8 @@ const META: Record<string, AuditEntry> = {
     sensitive: "client + commercial data",
     complexity: "complex",
     action: "Batch C — migrate with approval gate; legal/commercial sensitive.",
+    migration_status: "migrated",
+    migration_notes: "v5.9.5: wrapped with beginGatewayLog/endGatewayLog. Drafts only — public flow still requires founder review before any external action.",
   },
   "internal-proposal-generate": {
     risk: "medium", batch: "B", treatment: "migrate_carefully", active: "active",
@@ -182,6 +200,8 @@ const META: Record<string, AuditEntry> = {
     sensitive: "commercial data",
     complexity: "moderate",
     action: "Batch B — wrap with ledger.",
+    migration_status: "migrated",
+    migration_notes: "v5.9.5: wrapped with beginGatewayLog/endGatewayLog.",
   },
   "lead-fit-classify": {
     risk: "medium", batch: "B", treatment: "migrate_carefully", active: "active",
@@ -193,18 +213,22 @@ const META: Record<string, AuditEntry> = {
     sensitive: "buyer/contact data",
     complexity: "simple",
     action: "Batch B — migrate before any outreach reactivation.",
+    migration_status: "migrated",
+    migration_notes: "v5.9.5: per-row classify wrapped with beginGatewayLog/endGatewayLog.",
   },
   "liftor-brain-chat": {
     risk: "critical", batch: "C", treatment: "blocked_needs_review", active: "active",
-    provider: "openai (direct)", model: "gpt-5.5 (configurable)",
+    provider: "lovable-ai-gateway", model: "openai/gpt-5.5 (configurable; fallback google/gemini-3-flash-preview)",
     purpose: "Liftor Brain founder chat — only function that bypasses Lovable AI entirely.",
     caller: "LiftorBrain page + brain chat surfaces.",
     reads: "brain sessions, drafts, founder context.",
     writes: "brain_sessions, brain_drafts, audit.",
     drafts_external: false, sends_external: false,
-    sensitive: "founder + business data; uses OPENAI_API_KEY direct",
+    sensitive: "founder + business data",
     complexity: "complex",
     action: "Batch C — migrate to Lovable AI Gateway; remove OpenAI direct dependency. Coordinate with provider-check + draft-inbound-reply.",
+    migration_status: "migrated",
+    migration_notes: "v5.9.5 CRITICAL MIGRATION: replaced api.openai.com/v1/chat/completions with ai.gateway.lovable.dev/v1/chat/completions using LOVABLE_API_KEY. Model namespaced (openai/gpt-5.5). Wrapped with beginGatewayLog/endGatewayLog → appears in ai_gateway_requests, ai_usage_ledger, ai_runtime_events. response_format json_object preserved; response shape unchanged. External actions remain locked; provider-check legacy path still references OPENAI_API_KEY for status flag only.",
   },
   "ma-intelligence-orchestrator": {
     risk: "medium", batch: "B", treatment: "migrate_carefully", active: "active",
@@ -216,6 +240,8 @@ const META: Record<string, AuditEntry> = {
     sensitive: "buyer/investor/deal data — already gated by approvals.",
     complexity: "moderate",
     action: "Batch B — wrap with callAIGateway; keep existing approval queue behaviour.",
+    migration_status: "migrated",
+    migration_notes: "v5.9.5: wrapped shared callAI helper with beginGatewayLog/endGatewayLog.",
   },
   "multilingual-intake-preview": {
     risk: "low", batch: "A", treatment: "migrate_now", active: "active",
