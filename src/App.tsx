@@ -326,6 +326,13 @@ import BCRules from "./pages/founder/business-compliance/Rules";
 import BCClaims from "./pages/founder/business-compliance/Claims";
 import BCChannels from "./pages/founder/business-compliance/Channels";
 import BCApprovalTriggers from "./pages/founder/business-compliance/ApprovalTriggers";
+
+// Multi-Business Context Guard
+import CGOverview from "./pages/founder/context-guard/Overview";
+import CGEvents from "./pages/founder/context-guard/Events";
+import CGMissing from "./pages/founder/context-guard/MissingBusiness";
+import CGCross from "./pages/founder/context-guard/CrossContamination";
+import CGSettings from "./pages/founder/context-guard/Settings";
 import KnowledgeOverview from "./pages/founder/knowledge-governance/Overview";
 import KnowledgeSources from "./pages/founder/knowledge-governance/Sources";
 import KnowledgeConflicts from "./pages/founder/knowledge-governance/Conflicts";
@@ -754,6 +761,11 @@ const App = () => (
             <Route path="/founder/business-compliance/claims" element={<FounderRoute><BCClaims /></FounderRoute>} />
             <Route path="/founder/business-compliance/channels" element={<FounderRoute><BCChannels /></FounderRoute>} />
             <Route path="/founder/business-compliance/approval-triggers" element={<FounderRoute><BCApprovalTriggers /></FounderRoute>} />
+            <Route path="/founder/context-guard" element={<FounderRoute><CGOverview /></FounderRoute>} />
+            <Route path="/founder/context-guard/events" element={<FounderRoute><CGEvents /></FounderRoute>} />
+            <Route path="/founder/context-guard/missing-business" element={<FounderRoute><CGMissing /></FounderRoute>} />
+            <Route path="/founder/context-guard/cross-contamination" element={<FounderRoute><CGCross /></FounderRoute>} />
+            <Route path="/founder/context-guard/settings" element={<FounderRoute><CGSettings /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
