@@ -217,6 +217,13 @@ import AccessGovernanceUsers from "./pages/founder/access-governance/Users";
 import AccessGovernanceRevocation from "./pages/founder/access-governance/Revocation";
 import AccessGovernanceRotation from "./pages/founder/access-governance/Rotation";
 import AccessGovernanceAudit from "./pages/founder/access-governance/Audit";
+import PrivacyOverview from "./pages/founder/privacy/Overview";
+import PrivacyDSAR from "./pages/founder/privacy/DSAR";
+import PrivacyRetention from "./pages/founder/privacy/Retention";
+import PrivacyConsent from "./pages/founder/privacy/Consent";
+import PrivacyProcessors from "./pages/founder/privacy/Processors";
+import PrivacyBreaches from "./pages/founder/privacy/Breaches";
+import PrivacySettings from "./pages/founder/privacy/Settings";
 import CustomerUpgradesHub from "./pages/founder/customer-upgrades/Hub";
 import CustomerUpgradesOpportunities from "./pages/founder/customer-upgrades/Opportunities";
 import CustomerUpgradesProductLadders from "./pages/founder/customer-upgrades/ProductLadders";
@@ -529,6 +536,13 @@ const App = () => (
             <Route path="/founder/access-governance/revocation" element={<FounderRoute><AccessGovernanceRevocation /></FounderRoute>} />
             <Route path="/founder/access-governance/rotation" element={<FounderRoute><AccessGovernanceRotation /></FounderRoute>} />
             <Route path="/founder/access-governance/audit" element={<FounderRoute><AccessGovernanceAudit /></FounderRoute>} />
+            <Route path="/founder/privacy" element={<FounderRoute><PrivacyOverview /></FounderRoute>} />
+            <Route path="/founder/privacy/dsar" element={<FounderRoute><PrivacyDSAR /></FounderRoute>} />
+            <Route path="/founder/privacy/retention" element={<FounderRoute><PrivacyRetention /></FounderRoute>} />
+            <Route path="/founder/privacy/consent" element={<FounderRoute><PrivacyConsent /></FounderRoute>} />
+            <Route path="/founder/privacy/processors" element={<FounderRoute><PrivacyProcessors /></FounderRoute>} />
+            <Route path="/founder/privacy/breaches" element={<FounderRoute><PrivacyBreaches /></FounderRoute>} />
+            <Route path="/founder/privacy/settings" element={<FounderRoute><PrivacySettings /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
