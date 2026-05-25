@@ -55,6 +55,8 @@ export type AIGatewayCallResult = {
   used_fallback?: boolean;
   approval_required?: boolean;
   duplicate_prevented?: boolean;
+  lease_blocked?: boolean;
+  lease_reason?: string;
 };
 
 function newTraceId() {
@@ -99,28 +101,78 @@ async function recordRuntimeEvent(
   } catch (_) { /* best-effort */ }
 }
 
-/** Per-agent concurrency / status / budget check. Logical control, not a global lock. */
-async function preflightAgent(
+/** Resolve agent status/models and capacities without taking a lock. */
+async function loadAgentMeta(
   sb: any,
   agent_id: string | null | undefined,
-): Promise<{ ok: boolean; reason?: string; primary_model?: string; fallback_model?: string }> {
-  if (!sb || !agent_id) return { ok: true };
+): Promise<{ ok: boolean; reason?: string; primary_model?: string; fallback_model?: string; capacity?: number }> {
+  if (!sb || !agent_id) return { ok: true, capacity: 0 };
   try {
-    const { data: agent } = await sb.from("ai_agent_registry").select("*").eq("id", agent_id).maybeSingle();
-    if (!agent) return { ok: true };
+    const { data: agent } = await sb.from("ai_agent_registry").select("status,primary_model,fallback_model,max_concurrency").eq("id", agent_id).maybeSingle();
+    if (!agent) return { ok: true, capacity: 0 };
     if (agent.status !== "active") return { ok: false, reason: `agent_${agent.status}` };
-    const { count } = await sb
-      .from("ai_gateway_requests")
-      .select("id", { head: true, count: "exact" })
-      .eq("agent_id", agent_id)
-      .in("status", ["queued", "running"]);
-    if ((count ?? 0) >= (agent.max_concurrency ?? 4)) {
-      return { ok: false, reason: "agent_concurrency_limit" };
-    }
-    return { ok: true, primary_model: agent.primary_model, fallback_model: agent.fallback_model };
+    return {
+      ok: true,
+      primary_model: agent.primary_model,
+      fallback_model: agent.fallback_model,
+      capacity: Number(agent.max_concurrency ?? 4),
+    };
   } catch {
-    return { ok: true };
+    return { ok: true, capacity: 0 };
   }
+}
+
+async function loadBusinessCapacity(sb: any, business_id: string | null | undefined): Promise<number> {
+  if (!sb || !business_id) return 0;
+  try {
+    const { data } = await sb
+      .from("ai_business_budgets")
+      .select("max_concurrent_requests")
+      .eq("business_id", business_id)
+      .maybeSingle();
+    return Number(data?.max_concurrent_requests ?? 25);
+  } catch {
+    return 25;
+  }
+}
+
+/** Acquire a strict concurrency lease via the atomic Postgres function. */
+export async function acquireLease(
+  sb: any,
+  args: {
+    request_id: string;
+    agent_id?: string | null;
+    business_id?: string | null;
+    agent_capacity: number;
+    business_capacity: number;
+    provider?: string;
+    model?: string;
+    ttl_seconds?: number;
+  },
+): Promise<{ ok: boolean; reason?: string; expires_at?: string }> {
+  if (!sb) return { ok: true };
+  try {
+    const { data, error } = await sb.rpc("acquire_ai_lease", {
+      _request_id: args.request_id,
+      _agent_id: args.agent_id ?? null,
+      _business_id: args.business_id ?? null,
+      _agent_capacity: args.agent_capacity ?? 0,
+      _business_capacity: args.business_capacity ?? 0,
+      _provider: args.provider ?? "lovable-ai-gateway",
+      _model: args.model ?? null,
+      _ttl_seconds: args.ttl_seconds ?? 180,
+    });
+    if (error) return { ok: true, reason: `lease_rpc_error:${error.message}` };
+    return data as any;
+  } catch (e: any) {
+    // Fail-open: never crash the UI because of lease infrastructure
+    return { ok: true, reason: `lease_exception:${String(e?.message ?? e)}` };
+  }
+}
+
+export async function releaseLease(sb: any, request_id: string, ok: boolean) {
+  if (!sb) return;
+  try { await sb.rpc("release_ai_lease", { _request_id: request_id, _ok: ok }); } catch { /* best-effort */ }
 }
 
 function getServiceClient() {
