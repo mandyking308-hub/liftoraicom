@@ -22,13 +22,13 @@ export async function computeAdviserPackSnapshot(): Promise<AdviserPackSnapshot>
   const sb: any = supabase as any;
   const since = new Date(Date.now() - 30 * 86400000).toISOString();
 
-  const [packsRes, itemsRes, qRes, entRes, aiRes, qtcRes] = await Promise.all([
+  const [packsRes, itemsRes, qRes, entRes, aiRes, payRes] = await Promise.all([
     sb.from("adviser_handoff_packs").select("id,pack_status,period_start,period_end").order("period_end", { ascending: false }),
     sb.from("adviser_pack_items").select("id,needs_adviser_review"),
     sb.from("adviser_questions").select("id,status"),
     sb.from("entity_structure_records").select("id,active"),
-    sb.from("ai_usage_ledger").select("cost_usd,created_at").gte("created_at", since).limit(5000),
-    sb.from("quote_to_cash_records").select("amount,status,created_at").gte("created_at", since).limit(2000),
+    sb.from("ai_usage_ledger").select("estimated_cost,actual_cost_gbp,created_at").gte("created_at", since).limit(5000),
+    sb.from("qtc_payments").select("amount,confirmed_revenue,payment_status,created_at").gte("created_at", since).limit(2000),
   ]);
 
   const packs = packsRes.data ?? [];
@@ -36,7 +36,7 @@ export async function computeAdviserPackSnapshot(): Promise<AdviserPackSnapshot>
   const questions = qRes.data ?? [];
   const entities = entRes.data ?? [];
   const ai = aiRes.data ?? [];
-  const qtc = qtcRes.data ?? [];
+  const pays = payRes.data ?? [];
 
   const packs_draft = packs.filter((p: any) => p.pack_status === "draft").length;
   const packs_review_required = packs.filter((p: any) => p.pack_status === "review_required").length;
@@ -53,12 +53,12 @@ export async function computeAdviserPackSnapshot(): Promise<AdviserPackSnapshot>
   const questions_approved = questions.filter((q: any) => q.status === "approved_to_send").length;
   const entities_active = entities.filter((e: any) => e.active).length;
 
-  const ai_spend_30d = ai.reduce((s: number, r: any) => s + Number(r.cost_usd || 0), 0);
-  const confirmed_revenue_30d = qtc
-    .filter((r: any) => ["paid", "confirmed", "revenue_confirmed"].includes(String(r.status ?? "").toLowerCase()))
+  const ai_spend_30d = ai.reduce((s: number, r: any) => s + Number(r.estimated_cost || r.actual_cost_gbp || 0), 0);
+  const confirmed_revenue_30d = pays
+    .filter((r: any) => r.confirmed_revenue === true || String(r.payment_status ?? "").toLowerCase() === "completed")
     .reduce((s: number, r: any) => s + Number(r.amount || 0), 0);
-  const estimated_revenue_30d = qtc
-    .filter((r: any) => !["paid", "confirmed", "revenue_confirmed"].includes(String(r.status ?? "").toLowerCase()))
+  const estimated_revenue_30d = pays
+    .filter((r: any) => !(r.confirmed_revenue === true || String(r.payment_status ?? "").toLowerCase() === "completed"))
     .reduce((s: number, r: any) => s + Number(r.amount || 0), 0);
 
   let recommended_action = "Adviser posture clean. No outstanding pack work.";
