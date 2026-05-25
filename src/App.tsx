@@ -237,6 +237,12 @@ import AdviserPackRevenue from "./pages/founder/adviser-pack/Revenue";
 import AdviserPackExpenses from "./pages/founder/adviser-pack/Expenses";
 import AdviserPackDocuments from "./pages/founder/adviser-pack/Documents";
 import AdviserPackQuestions from "./pages/founder/adviser-pack/Questions";
+import ReportsOverview from "./pages/founder/reports/Overview";
+import ReportsWeekly from "./pages/founder/reports/Weekly";
+import ReportsMonthly from "./pages/founder/reports/Monthly";
+import ReportsPortfolio from "./pages/founder/reports/Portfolio";
+import ReportsDecisions from "./pages/founder/reports/Decisions";
+import ReportsArchive from "./pages/founder/reports/Archive";
 import CustomerUpgradesHub from "./pages/founder/customer-upgrades/Hub";
 import CustomerUpgradesOpportunities from "./pages/founder/customer-upgrades/Opportunities";
 import CustomerUpgradesProductLadders from "./pages/founder/customer-upgrades/ProductLadders";
@@ -569,6 +575,12 @@ const App = () => (
             <Route path="/founder/adviser-pack/expenses" element={<FounderRoute><AdviserPackExpenses /></FounderRoute>} />
             <Route path="/founder/adviser-pack/documents" element={<FounderRoute><AdviserPackDocuments /></FounderRoute>} />
             <Route path="/founder/adviser-pack/questions" element={<FounderRoute><AdviserPackQuestions /></FounderRoute>} />
+            <Route path="/founder/reports" element={<FounderRoute><ReportsOverview /></FounderRoute>} />
+            <Route path="/founder/reports/weekly" element={<FounderRoute><ReportsWeekly /></FounderRoute>} />
+            <Route path="/founder/reports/monthly" element={<FounderRoute><ReportsMonthly /></FounderRoute>} />
+            <Route path="/founder/reports/portfolio" element={<FounderRoute><ReportsPortfolio /></FounderRoute>} />
+            <Route path="/founder/reports/decisions" element={<FounderRoute><ReportsDecisions /></FounderRoute>} />
+            <Route path="/founder/reports/archive" element={<FounderRoute><ReportsArchive /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
