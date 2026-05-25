@@ -72,6 +72,9 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "access_governance_agent", name: "Access Governance Agent", to: "/founder/access-governance", category: "security" },
   { key: "secret_rotation_agent", name: "Secret Rotation Agent", to: "/founder/access-governance/rotation", category: "security" },
   { key: "leak_prevention_agent", name: "Leak Prevention Agent", to: "/founder/access-governance/audit", category: "security" },
+  { key: "privacy_agent", name: "Privacy Agent", to: "/founder/privacy", category: "security" },
+  { key: "dsar_agent", name: "DSAR Agent", to: "/founder/privacy/dsar", category: "security" },
+  { key: "breach_response_agent", name: "Breach Response Agent", to: "/founder/privacy/breaches", category: "security" },
 ];
 
 export default function AgentOperatingStatus() {
