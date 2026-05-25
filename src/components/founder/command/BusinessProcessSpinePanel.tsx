@@ -24,6 +24,7 @@ import MarketplaceGrowthCard from "./MarketplaceGrowthCard";
 import MarketplaceHealthCard from "./MarketplaceHealthCard";
 import BusinessArchetypeCard from "./BusinessArchetypeCard";
 import BusinessTemplateCard from "./BusinessTemplateCard";
+import EntityMapCard from "./EntityMapCard";
 
 /**
  * Business Process Spine — single integrated panel that surfaces every
@@ -58,6 +59,8 @@ export default function BusinessProcessSpinePanel() {
       <BusinessArchetypeCard />
 
       <BusinessTemplateCard />
+
+      <EntityMapCard />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <DeliveryEngineCard />

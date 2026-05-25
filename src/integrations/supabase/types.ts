@@ -5507,6 +5507,53 @@ export type Database = {
         }
         Relationships: []
       }
+      business_entity_assignments: {
+        Row: {
+          assignment_type: string
+          business_id: string
+          created_at: string
+          effective_from: string | null
+          effective_to: string | null
+          founder_confirmed: boolean
+          id: string
+          legal_entity_id: string
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          assignment_type: string
+          business_id: string
+          created_at?: string
+          effective_from?: string | null
+          effective_to?: string | null
+          founder_confirmed?: boolean
+          id?: string
+          legal_entity_id: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assignment_type?: string
+          business_id?: string
+          created_at?: string
+          effective_from?: string | null
+          effective_to?: string | null
+          founder_confirmed?: boolean
+          id?: string
+          legal_entity_id?: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_entity_assignments_legal_entity_id_fkey"
+            columns: ["legal_entity_id"]
+            isOneToOne: false
+            referencedRelation: "legal_entities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_execution_starter_packs: {
         Row: {
           approved_at: string | null
@@ -18740,6 +18787,47 @@ export type Database = {
         }
         Relationships: []
       }
+      entity_policy_assignments: {
+        Row: {
+          business_id: string
+          created_at: string
+          id: string
+          legal_entity_id: string | null
+          policy_status: string
+          policy_type: string
+          policy_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          id?: string
+          legal_entity_id?: string | null
+          policy_status?: string
+          policy_type: string
+          policy_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          id?: string
+          legal_entity_id?: string | null
+          policy_status?: string
+          policy_type?: string
+          policy_url?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entity_policy_assignments_legal_entity_id_fkey"
+            columns: ["legal_entity_id"]
+            isOneToOne: false
+            referencedRelation: "legal_entities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       entity_structure_records: {
         Row: {
           accountant_contact: string | null
@@ -22591,6 +22679,57 @@ export type Database = {
           id?: string
           published_at?: string
           version?: string
+        }
+        Relationships: []
+      }
+      legal_entities: {
+        Row: {
+          accountant_contact: string | null
+          active: boolean
+          audit_metadata: Json
+          created_at: string
+          entity_name: string
+          entity_type: string | null
+          financial_year_end: string | null
+          id: string
+          jurisdiction: string | null
+          legal_contact: string | null
+          owner_summary: string | null
+          registration_number_summary: string | null
+          tax_residency_summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          accountant_contact?: string | null
+          active?: boolean
+          audit_metadata?: Json
+          created_at?: string
+          entity_name: string
+          entity_type?: string | null
+          financial_year_end?: string | null
+          id?: string
+          jurisdiction?: string | null
+          legal_contact?: string | null
+          owner_summary?: string | null
+          registration_number_summary?: string | null
+          tax_residency_summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          accountant_contact?: string | null
+          active?: boolean
+          audit_metadata?: Json
+          created_at?: string
+          entity_name?: string
+          entity_type?: string | null
+          financial_year_end?: string | null
+          id?: string
+          jurisdiction?: string | null
+          legal_contact?: string | null
+          owner_summary?: string | null
+          registration_number_summary?: string | null
+          tax_residency_summary?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -34558,6 +34697,56 @@ export type Database = {
         }
         Relationships: []
       }
+      revenue_routing_rules: {
+        Row: {
+          active: boolean
+          adviser_review_required: boolean
+          business_id: string
+          created_at: string
+          id: string
+          legal_entity_id: string | null
+          revenue_type: string
+          route_to_bank_summary: string | null
+          route_to_entity: string | null
+          tax_notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          adviser_review_required?: boolean
+          business_id: string
+          created_at?: string
+          id?: string
+          legal_entity_id?: string | null
+          revenue_type: string
+          route_to_bank_summary?: string | null
+          route_to_entity?: string | null
+          tax_notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          adviser_review_required?: boolean
+          business_id?: string
+          created_at?: string
+          id?: string
+          legal_entity_id?: string | null
+          revenue_type?: string
+          route_to_bank_summary?: string | null
+          route_to_entity?: string | null
+          tax_notes?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "revenue_routing_rules_legal_entity_id_fkey"
+            columns: ["legal_entity_id"]
+            isOneToOne: false
+            referencedRelation: "legal_entities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       revenue_target_activity_plans: {
         Row: {
           assumed_conversion_rate: number | null
@@ -45819,6 +46008,50 @@ export type Database = {
           workflow_name?: string
         }
         Relationships: []
+      }
+      tax_sensitive_questions: {
+        Row: {
+          business_id: string | null
+          category: string
+          created_at: string
+          id: string
+          legal_entity_id: string | null
+          priority: string
+          question: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          category: string
+          created_at?: string
+          id?: string
+          legal_entity_id?: string | null
+          priority?: string
+          question: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          category?: string
+          created_at?: string
+          id?: string
+          legal_entity_id?: string | null
+          priority?: string
+          question?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tax_sensitive_questions_legal_entity_id_fkey"
+            columns: ["legal_entity_id"]
+            isOneToOne: false
+            referencedRelation: "legal_entities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       template_components: {
         Row: {
