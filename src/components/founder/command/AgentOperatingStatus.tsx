@@ -112,6 +112,7 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "marketplace_growth_agent", name: "Marketplace Growth Agent", to: "/founder/marketplace/liquidity", category: "operations" },
   { key: "liquidity_balance_agent", name: "Liquidity Balance Agent", to: "/founder/marketplace/liquidity", category: "operations" },
   { key: "growth_action_agent", name: "Growth Action Agent", to: "/founder/marketplace/growth-actions", category: "operations" },
+  { key: "business_archetype_agent", name: "Business Archetype Agent", to: "/founder/business-archetypes/classifier", category: "operations" },
 ];
 
 export default function AgentOperatingStatus() {

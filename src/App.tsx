@@ -284,6 +284,11 @@ import MarketplaceLiquidity from "./pages/founder/marketplace/Liquidity";
 import MarketplaceCategoryBalance from "./pages/founder/marketplace/CategoryBalance";
 import MarketplaceLocationBalance from "./pages/founder/marketplace/LocationBalance";
 import MarketplaceGrowthActions from "./pages/founder/marketplace/GrowthActions";
+import ArchetypeOverview from "./pages/founder/archetypes/Overview";
+import ArchetypeClassifier from "./pages/founder/archetypes/Classifier";
+import ArchetypeBusinessMap from "./pages/founder/archetypes/BusinessMap";
+import ArchetypeRecommendations from "./pages/founder/archetypes/Recommendations";
+import ArchetypeSettings from "./pages/founder/archetypes/Settings";
 import KnowledgeOverview from "./pages/founder/knowledge-governance/Overview";
 import KnowledgeSources from "./pages/founder/knowledge-governance/Sources";
 import KnowledgeConflicts from "./pages/founder/knowledge-governance/Conflicts";
@@ -676,6 +681,11 @@ const App = () => (
             <Route path="/founder/marketplace/category-balance" element={<FounderRoute><MarketplaceCategoryBalance /></FounderRoute>} />
             <Route path="/founder/marketplace/location-balance" element={<FounderRoute><MarketplaceLocationBalance /></FounderRoute>} />
             <Route path="/founder/marketplace/growth-actions" element={<FounderRoute><MarketplaceGrowthActions /></FounderRoute>} />
+            <Route path="/founder/business-archetypes" element={<FounderRoute><ArchetypeOverview /></FounderRoute>} />
+            <Route path="/founder/business-archetypes/classifier" element={<FounderRoute><ArchetypeClassifier /></FounderRoute>} />
+            <Route path="/founder/business-archetypes/business-map" element={<FounderRoute><ArchetypeBusinessMap /></FounderRoute>} />
+            <Route path="/founder/business-archetypes/recommendations" element={<FounderRoute><ArchetypeRecommendations /></FounderRoute>} />
+            <Route path="/founder/business-archetypes/settings" element={<FounderRoute><ArchetypeSettings /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
