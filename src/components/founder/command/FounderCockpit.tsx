@@ -200,7 +200,7 @@ export default function FounderCockpit() {
               to="/founder/ai-cost/runtime" />
             <Stat icon={ShieldAlert} label="Active bypasses" value={d?.bypassCount ?? 0}
               tone={(d?.bypassCount ?? 0) > 0 ? "danger" : "good"}
-              to="/founder/gateway-bypass" />
+              to="/founder/portfolio-exit/ai-bypass-register" />
             <Stat icon={ShieldCheck} label="Approvals waiting" value={d?.approvalsWaiting ?? 0}
               tone={(d?.approvalsWaiting ?? 0) > 0 ? "warn" : "good"}
               to="/founder/ai-cost/approvals" />
