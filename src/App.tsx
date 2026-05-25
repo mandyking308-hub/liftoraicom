@@ -257,6 +257,13 @@ import DataQualityOrphans from "./pages/founder/data-quality/Orphans";
 import DataQualityStale from "./pages/founder/data-quality/Stale";
 import DataQualityRevenueIntegrity from "./pages/founder/data-quality/RevenueIntegrity";
 import DataQualityRepairQueue from "./pages/founder/data-quality/RepairQueue";
+import CapacityOverview from "./pages/founder/capacity/Overview";
+import CapacityBusiness from "./pages/founder/capacity/Business";
+import CapacityAgents from "./pages/founder/capacity/Agents";
+import CapacityHumans from "./pages/founder/capacity/Humans";
+import CapacityDelivery from "./pages/founder/capacity/Delivery";
+import CapacityBottlenecks from "./pages/founder/capacity/Bottlenecks";
+import CapacityForecast from "./pages/founder/capacity/Forecast";
 import KnowledgeOverview from "./pages/founder/knowledge-governance/Overview";
 import KnowledgeSources from "./pages/founder/knowledge-governance/Sources";
 import KnowledgeConflicts from "./pages/founder/knowledge-governance/Conflicts";
@@ -621,6 +628,13 @@ const App = () => (
             <Route path="/founder/knowledge-governance/stale" element={<FounderRoute><KnowledgeStale /></FounderRoute>} />
             <Route path="/founder/knowledge-governance/approved-claims" element={<FounderRoute><KnowledgeApprovedClaims /></FounderRoute>} />
             <Route path="/founder/knowledge-governance/manual-sync" element={<FounderRoute><KnowledgeManualSync /></FounderRoute>} />
+            <Route path="/founder/capacity" element={<FounderRoute><CapacityOverview /></FounderRoute>} />
+            <Route path="/founder/capacity/business" element={<FounderRoute><CapacityBusiness /></FounderRoute>} />
+            <Route path="/founder/capacity/agents" element={<FounderRoute><CapacityAgents /></FounderRoute>} />
+            <Route path="/founder/capacity/humans" element={<FounderRoute><CapacityHumans /></FounderRoute>} />
+            <Route path="/founder/capacity/delivery" element={<FounderRoute><CapacityDelivery /></FounderRoute>} />
+            <Route path="/founder/capacity/bottlenecks" element={<FounderRoute><CapacityBottlenecks /></FounderRoute>} />
+            <Route path="/founder/capacity/forecast" element={<FounderRoute><CapacityForecast /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
