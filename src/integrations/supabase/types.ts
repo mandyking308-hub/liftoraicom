@@ -30293,6 +30293,321 @@ export type Database = {
         }
         Relationships: []
       }
+      qtc_invoices: {
+        Row: {
+          audit_metadata: Json | null
+          business_id: string
+          contact_id: string | null
+          created_at: string
+          currency: string | null
+          deal_id: string | null
+          due_date: string | null
+          founder_approval_required: boolean | null
+          founder_approved_at: string | null
+          id: string
+          invoice_amount: number | null
+          invoice_number: string | null
+          invoice_status: string
+          paid_at: string | null
+          payment_link_url: string | null
+          payment_provider: string | null
+          provider_invoice_id: string | null
+          quote_id: string | null
+          sent_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json | null
+          business_id: string
+          contact_id?: string | null
+          created_at?: string
+          currency?: string | null
+          deal_id?: string | null
+          due_date?: string | null
+          founder_approval_required?: boolean | null
+          founder_approved_at?: string | null
+          id?: string
+          invoice_amount?: number | null
+          invoice_number?: string | null
+          invoice_status?: string
+          paid_at?: string | null
+          payment_link_url?: string | null
+          payment_provider?: string | null
+          provider_invoice_id?: string | null
+          quote_id?: string | null
+          sent_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json | null
+          business_id?: string
+          contact_id?: string | null
+          created_at?: string
+          currency?: string | null
+          deal_id?: string | null
+          due_date?: string | null
+          founder_approval_required?: boolean | null
+          founder_approved_at?: string | null
+          id?: string
+          invoice_amount?: number | null
+          invoice_number?: string | null
+          invoice_status?: string
+          paid_at?: string | null
+          payment_link_url?: string | null
+          payment_provider?: string | null
+          provider_invoice_id?: string | null
+          quote_id?: string | null
+          sent_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      qtc_payments: {
+        Row: {
+          amount: number | null
+          audit_metadata: Json | null
+          business_id: string
+          confirmed_revenue: boolean | null
+          contact_id: string | null
+          created_at: string
+          currency: string | null
+          deal_id: string | null
+          id: string
+          invoice_id: string | null
+          payment_method: string | null
+          payment_status: string
+          provider_name: string | null
+          provider_payment_id: string | null
+          received_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount?: number | null
+          audit_metadata?: Json | null
+          business_id: string
+          confirmed_revenue?: boolean | null
+          contact_id?: string | null
+          created_at?: string
+          currency?: string | null
+          deal_id?: string | null
+          id?: string
+          invoice_id?: string | null
+          payment_method?: string | null
+          payment_status?: string
+          provider_name?: string | null
+          provider_payment_id?: string | null
+          received_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number | null
+          audit_metadata?: Json | null
+          business_id?: string
+          confirmed_revenue?: boolean | null
+          contact_id?: string | null
+          created_at?: string
+          currency?: string | null
+          deal_id?: string | null
+          id?: string
+          invoice_id?: string | null
+          payment_method?: string | null
+          payment_status?: string
+          provider_name?: string | null
+          provider_payment_id?: string | null
+          received_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      qtc_proposals: {
+        Row: {
+          accepted_at: string | null
+          audit_metadata: Json | null
+          business_id: string
+          contact_id: string | null
+          created_at: string
+          deal_id: string | null
+          founder_approval_required: boolean | null
+          founder_approved_at: string | null
+          id: string
+          pricing_summary: Json | null
+          proposal_body: string | null
+          proposal_status: string
+          proposal_summary: string | null
+          proposal_title: string
+          quote_id: string | null
+          risk_flags: Json | null
+          sent_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          audit_metadata?: Json | null
+          business_id: string
+          contact_id?: string | null
+          created_at?: string
+          deal_id?: string | null
+          founder_approval_required?: boolean | null
+          founder_approved_at?: string | null
+          id?: string
+          pricing_summary?: Json | null
+          proposal_body?: string | null
+          proposal_status?: string
+          proposal_summary?: string | null
+          proposal_title: string
+          quote_id?: string | null
+          risk_flags?: Json | null
+          sent_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          audit_metadata?: Json | null
+          business_id?: string
+          contact_id?: string | null
+          created_at?: string
+          deal_id?: string | null
+          founder_approval_required?: boolean | null
+          founder_approved_at?: string | null
+          id?: string
+          pricing_summary?: Json | null
+          proposal_body?: string | null
+          proposal_status?: string
+          proposal_summary?: string | null
+          proposal_title?: string
+          quote_id?: string | null
+          risk_flags?: Json | null
+          sent_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      qtc_quotes: {
+        Row: {
+          accepted_at: string | null
+          audit_metadata: Json | null
+          business_id: string
+          contact_id: string | null
+          created_at: string
+          currency: string | null
+          deal_id: string | null
+          discount_amount: number | null
+          founder_approval_required: boolean | null
+          founder_approved_at: string | null
+          id: string
+          offer_id: string | null
+          product_id: string | null
+          quote_amount: number | null
+          quote_number: string | null
+          quote_status: string
+          sent_at: string | null
+          tax_amount: number | null
+          terms_summary: string | null
+          total_amount: number | null
+          updated_at: string
+          validity_until: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          audit_metadata?: Json | null
+          business_id: string
+          contact_id?: string | null
+          created_at?: string
+          currency?: string | null
+          deal_id?: string | null
+          discount_amount?: number | null
+          founder_approval_required?: boolean | null
+          founder_approved_at?: string | null
+          id?: string
+          offer_id?: string | null
+          product_id?: string | null
+          quote_amount?: number | null
+          quote_number?: string | null
+          quote_status?: string
+          sent_at?: string | null
+          tax_amount?: number | null
+          terms_summary?: string | null
+          total_amount?: number | null
+          updated_at?: string
+          validity_until?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          audit_metadata?: Json | null
+          business_id?: string
+          contact_id?: string | null
+          created_at?: string
+          currency?: string | null
+          deal_id?: string | null
+          discount_amount?: number | null
+          founder_approval_required?: boolean | null
+          founder_approved_at?: string | null
+          id?: string
+          offer_id?: string | null
+          product_id?: string | null
+          quote_amount?: number | null
+          quote_number?: string | null
+          quote_status?: string
+          sent_at?: string | null
+          tax_amount?: number | null
+          terms_summary?: string | null
+          total_amount?: number | null
+          updated_at?: string
+          validity_until?: string | null
+        }
+        Relationships: []
+      }
+      qtc_revenue_confirmations: {
+        Row: {
+          audit_metadata: Json | null
+          business_id: string
+          confirmation_source: string
+          confirmed_at: string
+          confirmed_by: string | null
+          contact_id: string | null
+          created_at: string
+          currency: string | null
+          deal_id: string | null
+          id: string
+          invoice_id: string | null
+          payment_id: string | null
+          revenue_amount: number | null
+          revenue_type: string
+        }
+        Insert: {
+          audit_metadata?: Json | null
+          business_id: string
+          confirmation_source: string
+          confirmed_at?: string
+          confirmed_by?: string | null
+          contact_id?: string | null
+          created_at?: string
+          currency?: string | null
+          deal_id?: string | null
+          id?: string
+          invoice_id?: string | null
+          payment_id?: string | null
+          revenue_amount?: number | null
+          revenue_type: string
+        }
+        Update: {
+          audit_metadata?: Json | null
+          business_id?: string
+          confirmation_source?: string
+          confirmed_at?: string
+          confirmed_by?: string | null
+          contact_id?: string | null
+          created_at?: string
+          currency?: string | null
+          deal_id?: string | null
+          id?: string
+          invoice_id?: string | null
+          payment_id?: string | null
+          revenue_amount?: number | null
+          revenue_type?: string
+        }
+        Relationships: []
+      }
       referral_links: {
         Row: {
           business_id: string | null

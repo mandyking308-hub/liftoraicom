@@ -1288,3 +1288,19 @@ const REVENUE_AUTOPILOT_LOOP = {
   ].join(" "),
 };
 LIFTOR_FULL_GUIDE.push(REVENUE_AUTOPILOT_LOOP);
+
+const QUOTE_TO_CASH_ENGINE = {
+  number: 96,
+  key: "quote-to-cash-engine",
+  title: "96. Quote-to-Cash Engine",
+  body: [
+    "Purpose. Single commercial flow: lead/opportunity → quote → proposal → approval → invoice/payment link → payment received → revenue confirmed → delivery triggered. Drafts run live. Sending quotes/proposals/invoices, issuing payment links, and provider mutations remain founder-approval-gated.",
+    "Routes. /founder/quote-to-cash (Overview + flow diagram), /quotes, /proposals, /invoices, /payments, /revenue-confirmation, /settings (provider wiring + approval rules).",
+    "Tables. qtc_quotes (status draft/approval_required/approved/sent/accepted/rejected/expired/cancelled, amount, tax, discount, total, validity, terms). qtc_proposals (title, summary, body, pricing_summary, risk_flags, status). qtc_invoices (status draft/approval_required/approved/sent/paid/overdue/void/cancelled, due_date, provider, provider_invoice_id, payment_link_url). qtc_payments (status pending/succeeded/failed/refunded/disputed/cancelled, provider, provider_payment_id, confirmed_revenue flag). qtc_revenue_confirmations (revenue_type one_time/recurring/subscription/deposit/balance/refund, confirmation_source payment_provider/manual/invoice_paid/contract_signed).",
+    "Triggers. qtc_on_quote_accepted: when a quote moves to accepted, an invoice draft is auto-created with founder_approval_required = true. qtc_on_payment_succeeded: when a payment transitions to succeeded (and is not a LIVE_INTERNAL_TEST row), it writes a qtc_revenue_confirmations row, sets confirmed_revenue = true on the payment, and marks the linked invoice paid.",
+    "Agents. Quote-to-Cash Agent (drafts quotes/proposals/invoices from accepted deals). Invoice & Payment Agent (chases overdue, prepares retries, never sends without approval). Revenue Confirmation Agent (matches payments to invoices, writes confirmed revenue).",
+    "Integration. Customer Sales Close Engine seeds quotes/proposals on close attempts. CRM links contact/deal. Revenue Autopilot consumes approval-blocked counts and confirmed revenue. Finance Pack reads qtc_revenue_confirmations for verified revenue only. Approval Queue receives quote/proposal/invoice approval items. Command Centre exposes the Quote-to-Cash Card (quotes awaiting approval, invoices drafted/awaiting approval, overdue, payments received, confirmed revenue today/month, revenue blocked by approval).",
+    "Rules. Confirmed revenue only after verified payment, invoice paid event, signed contract, or manual founder confirmation. Estimated pipeline (from sales conversations/close actions) stays separate from confirmed revenue. Test rows tagged LIVE_INTERNAL_TEST never count as confirmed revenue. No external provider mutation is performed by this engine yet — Stripe/invoice/contract integrations are wired later from Settings.",
+  ].join(" "),
+};
+LIFTOR_FULL_GUIDE.push(QUOTE_TO_CASH_ENGINE);

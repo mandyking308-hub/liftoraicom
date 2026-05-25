@@ -160,6 +160,7 @@ import CommandCentreMasterControlPlane from "@/components/founder/command/Comman
 import CustomerSalesEngineCard from "@/components/founder/command/CustomerSalesEngineCard";
 import VoiceProviderStatusCard from "@/components/founder/command/VoiceProviderStatusCard";
 import RevenueAutopilotCard from "@/components/founder/command/RevenueAutopilotCard";
+import QuoteToCashCard from "@/components/founder/command/QuoteToCashCard";
 import CustomerJourneyControlBoard from "@/components/founder/command/CustomerJourneyControlBoard";
 import AgentCollaborationBoard from "@/components/founder/agents/AgentCollaborationBoard";
 import CustomerJourneyFlowMap from "@/components/founder/command/CustomerJourneyFlowMap";
@@ -805,6 +806,7 @@ const CommandCentre = () => {
       <div className="max-w-7xl mx-auto px-4 pt-4"><CustomerSalesEngineCard /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><VoiceProviderStatusCard /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><RevenueAutopilotCard /></div>
+      <div className="max-w-7xl mx-auto px-4 pt-4"><QuoteToCashCard /></div>
       <BusinessOperatingStatus />
       <AgentOperatingStatus />
       <div className="max-w-7xl mx-auto px-4 pt-4">

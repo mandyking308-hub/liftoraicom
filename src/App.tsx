@@ -157,6 +157,13 @@ import RevenueAutopilotTargets from "./pages/founder/revenue-autopilot/Targets";
 import RevenueAutopilotTasks from "./pages/founder/revenue-autopilot/Tasks";
 import RevenueAutopilotGaps from "./pages/founder/revenue-autopilot/Gaps";
 import RevenueAutopilotApprovals from "./pages/founder/revenue-autopilot/Approvals";
+import QTCOverview from "./pages/founder/quote-to-cash/Overview";
+import QTCQuotes from "./pages/founder/quote-to-cash/Quotes";
+import QTCProposals from "./pages/founder/quote-to-cash/Proposals";
+import QTCInvoices from "./pages/founder/quote-to-cash/Invoices";
+import QTCPayments from "./pages/founder/quote-to-cash/Payments";
+import QTCRevenueConfirmation from "./pages/founder/quote-to-cash/RevenueConfirmation";
+import QTCSettings from "./pages/founder/quote-to-cash/Settings";
 import CustomerUpgradesHub from "./pages/founder/customer-upgrades/Hub";
 import CustomerUpgradesOpportunities from "./pages/founder/customer-upgrades/Opportunities";
 import CustomerUpgradesProductLadders from "./pages/founder/customer-upgrades/ProductLadders";
@@ -409,6 +416,13 @@ const App = () => (
             <Route path="/founder/revenue-autopilot/tasks" element={<FounderRoute><RevenueAutopilotTasks /></FounderRoute>} />
             <Route path="/founder/revenue-autopilot/gaps" element={<FounderRoute><RevenueAutopilotGaps /></FounderRoute>} />
             <Route path="/founder/revenue-autopilot/approvals" element={<FounderRoute><RevenueAutopilotApprovals /></FounderRoute>} />
+            <Route path="/founder/quote-to-cash" element={<FounderRoute><QTCOverview /></FounderRoute>} />
+            <Route path="/founder/quote-to-cash/quotes" element={<FounderRoute><QTCQuotes /></FounderRoute>} />
+            <Route path="/founder/quote-to-cash/proposals" element={<FounderRoute><QTCProposals /></FounderRoute>} />
+            <Route path="/founder/quote-to-cash/invoices" element={<FounderRoute><QTCInvoices /></FounderRoute>} />
+            <Route path="/founder/quote-to-cash/payments" element={<FounderRoute><QTCPayments /></FounderRoute>} />
+            <Route path="/founder/quote-to-cash/revenue-confirmation" element={<FounderRoute><QTCRevenueConfirmation /></FounderRoute>} />
+            <Route path="/founder/quote-to-cash/settings" element={<FounderRoute><QTCSettings /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />

@@ -9,6 +9,7 @@ import {
   Target, TrendingUp,
   GraduationCap,
   Gauge,
+  Receipt,
 } from "lucide-react";
 
 type Tone = "danger" | "warn" | "good" | "default";
@@ -54,6 +55,7 @@ export default function WhatNeedsAttentionToday() {
         upgradeOpps, upgradeHot, upgradeApprovals, renewalsSoon,
         coachingOpen, coachingCritical, scriptsRetire,
         autopilotTasks, autopilotCritical,
+        qtcQuotesApproval, qtcInvoicesApproval, qtcOverdue,
       ] = await Promise.all([
         sb.from("founder_approval_items").select("id", head).eq("status", "pending"),
         sb.from("system_events").select("id", head).eq("resolved", false).in("severity", ["critical", "high"]),
@@ -90,6 +92,9 @@ export default function WhatNeedsAttentionToday() {
         sb.from("sales_script_performance").select("id", head).in("recommended_status", ["retire", "improve"]),
         sb.from("revenue_autopilot_tasks").select("id", head).eq("status", "open"),
         sb.from("revenue_autopilot_tasks").select("id", head).eq("status", "open").eq("priority", "critical"),
+        sb.from("qtc_quotes").select("id", head).eq("quote_status", "approval_required"),
+        sb.from("qtc_invoices").select("id", head).eq("invoice_status", "approval_required"),
+        sb.from("qtc_invoices").select("id", head).eq("invoice_status", "overdue"),
       ].map((p) => p.catch(() => ({ count: 0 }))));
       return {
         approvalsPending: approvalsPending?.count ?? 0,
@@ -127,6 +132,9 @@ export default function WhatNeedsAttentionToday() {
         scriptsRetire: scriptsRetire?.count ?? 0,
         autopilotTasks: autopilotTasks?.count ?? 0,
         autopilotCritical: autopilotCritical?.count ?? 0,
+        qtcQuotesApproval: qtcQuotesApproval?.count ?? 0,
+        qtcInvoicesApproval: qtcInvoicesApproval?.count ?? 0,
+        qtcOverdue: qtcOverdue?.count ?? 0,
       };
     },
   });
@@ -141,6 +149,7 @@ export default function WhatNeedsAttentionToday() {
     upgradeOpps: 0, upgradeHot: 0, upgradeApprovals: 0, renewalsSoon: 0,
     coachingOpen: 0, coachingCritical: 0, scriptsRetire: 0,
     autopilotTasks: 0, autopilotCritical: 0,
+    qtcQuotesApproval: 0, qtcInvoicesApproval: 0, qtcOverdue: 0,
   };
 
   const tone = (n: number, warn = 1, danger = 5): Tone =>
@@ -198,6 +207,9 @@ export default function WhatNeedsAttentionToday() {
             <Tile label="Scripts to fix or retire" value={d.scriptsRetire} to="/founder/sales-coaching/scripts" icon={GraduationCap} tone={d.scriptsRetire > 0 ? "warn" : "good"} />
             <Tile label="Revenue autopilot tasks" value={d.autopilotTasks} to="/founder/revenue-autopilot/tasks" icon={Gauge} tone={d.autopilotTasks > 0 ? "warn" : "good"} hint="open revenue work" />
             <Tile label="Critical autopilot tasks" value={d.autopilotCritical} to="/founder/revenue-autopilot/tasks" icon={AlertTriangle} tone={d.autopilotCritical > 0 ? "danger" : "good"} />
+            <Tile label="Quotes awaiting approval" value={d.qtcQuotesApproval} to="/founder/quote-to-cash/quotes" icon={Receipt} tone={d.qtcQuotesApproval > 0 ? "warn" : "good"} hint="external send locked" />
+            <Tile label="Invoices awaiting approval" value={d.qtcInvoicesApproval} to="/founder/quote-to-cash/invoices" icon={Receipt} tone={d.qtcInvoicesApproval > 0 ? "warn" : "good"} hint="external send locked" />
+            <Tile label="Overdue invoices" value={d.qtcOverdue} to="/founder/quote-to-cash/invoices" icon={AlertTriangle} tone={d.qtcOverdue > 0 ? "danger" : "good"} />
           </div>
         </CardContent>
       </Card>
