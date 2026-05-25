@@ -9,6 +9,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Progress } from "@/components/ui/progress";
 import { Activity, Cpu, Workflow, ShieldCheck, AlertTriangle, MessagesSquare, ListChecks } from "lucide-react";
+import PortfolioCommanderEnginePanel from "@/components/founder/portfolio/PortfolioCommanderEnginePanel";
 
 const sb: any = supabase;
 
@@ -360,6 +361,8 @@ export default function AIOrchestrationLive() {
             )}
           </CardContent>
         </Card>
+
+        <PortfolioCommanderEnginePanel />
       </div>
     </FounderLayout>
   );
