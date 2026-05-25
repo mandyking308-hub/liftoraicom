@@ -14,6 +14,9 @@ export type ProviderPricing = {
   notes: string | null;
   created_at: string;
   updated_at: string;
+  confidence?: "verified" | "estimated" | "unknown";
+  pricing_source?: string | null;
+  pricing_source_url?: string | null;
 };
 
 export type EstimateInput = {
@@ -199,6 +202,9 @@ export async function upsertPricing(row: Partial<ProviderPricing> & { id?: strin
         effective_to: row.effective_to ?? null,
         active: row.active ?? true,
         notes: row.notes ?? null,
+        confidence: row.confidence ?? "estimated",
+        pricing_source: row.pricing_source ?? null,
+        pricing_source_url: row.pricing_source_url ?? null,
       } as any)
       .eq("id", row.id);
     if (error) throw error;
@@ -215,6 +221,9 @@ export async function upsertPricing(row: Partial<ProviderPricing> & { id?: strin
     effective_to: row.effective_to ?? null,
     active: row.active ?? true,
     notes: row.notes ?? null,
+    confidence: row.confidence ?? "estimated",
+    pricing_source: row.pricing_source ?? null,
+    pricing_source_url: row.pricing_source_url ?? null,
   } as any);
   if (error) throw error;
 }
