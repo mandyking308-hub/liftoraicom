@@ -7420,6 +7420,66 @@ export type Database = {
           },
         ]
       }
+      business_operating_templates: {
+        Row: {
+          active: boolean
+          archetype_code: string
+          created_at: string
+          default_approval_rules: Json
+          default_risk_flags: Json
+          default_workflows: Json
+          description: string | null
+          id: string
+          recommended_agents: Json
+          recommended_integrations: Json
+          recommended_modules: Json
+          required_agents: Json
+          required_documents: Json
+          required_kpis: Json
+          required_modules: Json
+          template_name: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          archetype_code: string
+          created_at?: string
+          default_approval_rules?: Json
+          default_risk_flags?: Json
+          default_workflows?: Json
+          description?: string | null
+          id?: string
+          recommended_agents?: Json
+          recommended_integrations?: Json
+          recommended_modules?: Json
+          required_agents?: Json
+          required_documents?: Json
+          required_kpis?: Json
+          required_modules?: Json
+          template_name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          archetype_code?: string
+          created_at?: string
+          default_approval_rules?: Json
+          default_risk_flags?: Json
+          default_workflows?: Json
+          description?: string | null
+          id?: string
+          recommended_agents?: Json
+          recommended_integrations?: Json
+          recommended_modules?: Json
+          required_agents?: Json
+          required_documents?: Json
+          required_kpis?: Json
+          required_modules?: Json
+          template_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       business_pre_live_baselines: {
         Row: {
           agents_checked: boolean
@@ -7797,6 +7857,62 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      business_setup_tasks: {
+        Row: {
+          assigned_agent: string | null
+          business_id: string
+          created_at: string
+          due_at: string | null
+          founder_action_required: boolean
+          id: string
+          module_link: string | null
+          priority: string
+          task_category: string | null
+          task_name: string
+          task_status: string
+          template_application_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          assigned_agent?: string | null
+          business_id: string
+          created_at?: string
+          due_at?: string | null
+          founder_action_required?: boolean
+          id?: string
+          module_link?: string | null
+          priority?: string
+          task_category?: string | null
+          task_name: string
+          task_status?: string
+          template_application_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assigned_agent?: string | null
+          business_id?: string
+          created_at?: string
+          due_at?: string | null
+          founder_action_required?: boolean
+          id?: string
+          module_link?: string | null
+          priority?: string
+          task_category?: string | null
+          task_name?: string
+          task_status?: string
+          template_application_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_setup_tasks_template_application_id_fkey"
+            columns: ["template_application_id"]
+            isOneToOne: false
+            referencedRelation: "business_template_applications"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       business_social_brain_extractions: {
         Row: {
@@ -8464,6 +8580,62 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_template_applications: {
+        Row: {
+          agents_enabled: Json
+          application_status: string
+          applied_at: string | null
+          audit_metadata: Json
+          business_id: string
+          created_at: string
+          founder_confirmed: boolean
+          id: string
+          missing_requirements: Json
+          modules_enabled: Json
+          setup_tasks_created: number
+          template_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          agents_enabled?: Json
+          application_status?: string
+          applied_at?: string | null
+          audit_metadata?: Json
+          business_id: string
+          created_at?: string
+          founder_confirmed?: boolean
+          id?: string
+          missing_requirements?: Json
+          modules_enabled?: Json
+          setup_tasks_created?: number
+          template_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          agents_enabled?: Json
+          application_status?: string
+          applied_at?: string | null
+          audit_metadata?: Json
+          business_id?: string
+          created_at?: string
+          founder_confirmed?: boolean
+          id?: string
+          missing_requirements?: Json
+          modules_enabled?: Json
+          setup_tasks_created?: number
+          template_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_template_applications_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "business_operating_templates"
             referencedColumns: ["id"]
           },
         ]
