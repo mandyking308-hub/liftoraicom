@@ -602,6 +602,13 @@ const App = () => (
             <Route path="/founder/product/releases" element={<FounderRoute><ProductReleases /></FounderRoute>} />
             <Route path="/founder/product/rollback" element={<FounderRoute><ProductRollback /></FounderRoute>} />
             <Route path="/founder/product/known-issues" element={<FounderRoute><ProductKnownIssues /></FounderRoute>} />
+            <Route path="/founder/data-quality" element={<FounderRoute><DataQualityOverview /></FounderRoute>} />
+            <Route path="/founder/data-quality/duplicates" element={<FounderRoute><DataQualityDuplicates /></FounderRoute>} />
+            <Route path="/founder/data-quality/test-data" element={<FounderRoute><DataQualityTestData /></FounderRoute>} />
+            <Route path="/founder/data-quality/orphans" element={<FounderRoute><DataQualityOrphans /></FounderRoute>} />
+            <Route path="/founder/data-quality/stale" element={<FounderRoute><DataQualityStale /></FounderRoute>} />
+            <Route path="/founder/data-quality/revenue-integrity" element={<FounderRoute><DataQualityRevenueIntegrity /></FounderRoute>} />
+            <Route path="/founder/data-quality/repair-queue" element={<FounderRoute><DataQualityRepairQueue /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
