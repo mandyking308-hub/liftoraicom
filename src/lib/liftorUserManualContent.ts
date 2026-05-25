@@ -1144,3 +1144,19 @@ const PORTFOLIO_COMMANDER_ENGINE_GUIDE: ManualSection = {
   ].join(" "),
 };
 LIFTOR_FULL_GUIDE.push(PORTFOLIO_COMMANDER_ENGINE_GUIDE);
+
+const FINAL_ACCEPTANCE_GUIDE: ManualSection = {
+  number: 88,
+  key: "final-acceptance-ai-runtime",
+  title: "Final Acceptance — what Liftor can and cannot do automatically",
+  body: [
+    "Status: Live — Gateway Controlled and Orchestrated. Every AI call in Liftor now flows through the AI Gateway. There are zero direct AI bypasses on the runtime path.",
+    "What runs automatically (no approval needed). Internal analysis, drafting, summarising, classification, scoring, valuation modelling, buyer/investor/competitor research, portfolio briefings, data-room checks, workflow step execution that does not contact the outside world, and dashboard updates. These run live across multiple businesses, agents and conversations in parallel.",
+    "What always waits for founder approval. Sending any external message (email, DM, post, social), contacting buyers/investors/advisers, sharing buyer or data-room packs, committing spend, activating a paid API, starting a sale process, killing an asset, any legal/tax/entity action, and any irreversible step. Portfolio Commander parks these steps as 'waiting_approval' — the AI provider is not even called until you approve.",
+    "Simultaneous conversations. Liftor can run many AI conversations at once. Different businesses never see each other's context. A conversation waiting for approval does not block any other conversation.",
+    "Cost visibility. Every AI call is logged with a clear cost_basis label. Completed non-streaming calls carry actual token cost where pricing is published; streaming calls and unpriced models carry estimated cost. Open AI Runtime Health → Cost Accuracy to see the split and which models still lack verified pricing.",
+    "Top tests you can run yourself. (1) Open AI Runtime Health — confirm 'Live — Gateway Controlled' and 0 bypasses. (2) Run a Founder Copilot chat — confirm runtime events appear. (3) Trigger a portfolio weekly review workflow — confirm internal steps run and a high-risk step parks for approval. (4) Approve the step — confirm it advances. (5) Open AI Bypass Register — confirm it stays at 0.",
+    "What Liftor will never do automatically. Send anything externally, contact a buyer/investor/adviser, publish anything, share a buyer pack, commit spend, change legal/tax/entity status, start a sale process, take an irreversible action without your approval recorded, or expose any secret.",
+  ].join(" "),
+};
+LIFTOR_FULL_GUIDE.push(FINAL_ACCEPTANCE_GUIDE);

@@ -4128,3 +4128,43 @@ export const AI_RUNTIME_CLEANUP_NOTE = `
 
 *End of AI Runtime Cleanup (v5.9.9).*
 `;
+
+export const FINAL_CARRIER_GRADE_QA_NOTE = `
+## Final Carrier-Grade QA — Liftor AI Runtime + Portfolio Exit Engine (v5.9.10 — 2026-05-25)
+
+### Final status
+**Live — Gateway Controlled and Orchestrated (with scale caveats).**
+
+### What this QA verified
+- **Direct AI bypasses: 0.** All sixteen original AI-calling edge functions either route through \`callAIGateway\` (\`supabase/functions/_shared/aiGateway.ts\`) or have been deprecated/blocked. Verified surfaces: liftor-brain-chat, founder-copilot, ma-intelligence-orchestrator, generate-proposal, internal-proposal-generate, ai-conversation-engine, ai-engagement-agent-run, apollo-qualify, lead-fit-classify.
+- **Gateway-controlled status surfaces.** AIGatewayHealthPanel, AIRuntimeHealthMiniCard, AIRuntimeHealth, AIGatewayBypassRegister and LiftorBrainPanel all read live from \`ai_gateway_requests\` / \`ai_runtime_events\` / \`ai_usage_ledger\` and show "Live — Gateway Controlled".
+- **Simultaneous orchestration.** Each request carries its own (conversation_id, business_id, portfolio_asset_id, agent_id); no global queue. Strict concurrency lease (\`ai_concurrency_leases\` + \`acquire_ai_lease\`/\`release_ai_lease\`) is active per (tenant, agent). Idempotency keys (\`ai_idempotency_keys\`) prevent duplicate side-effects. Burst over-allocation risk is reduced but not eliminated under simultaneous lease acquisition from many edge runtimes — documented limitation.
+- **Portfolio Commander step engine.** \`portfolio-commander-step-engine\` drives 8 internal workflow templates. High/critical risk steps auto-park as \`waiting_approval\`; only founder approval advances them. Engine panels are mounted in AIOrchestrationLive and PortfolioExitCommandCentre.
+- **Portfolio & Exit Command Centre.** Portfolio Briefing, Asset Analysis, Buyer Warm-Up, Investor/Competitor Intelligence, Valuation Engine, Quarterly Build Selector, Execution Handoff and Data Room Readiness all reachable. Operating panels visible. Manuals linked from working screens.
+- **Cost & runtime visibility.** \`ai_gateway_requests\`, \`ai_usage_ledger\` (with \`actual_cost_gbp\` + \`cost_basis\`) and \`ai_runtime_events\` are wired and populated as traffic flows. Pricing registry \`ai_provider_pricing\` carries 13 active rows (all confidence=\`estimated\`); \`computeAndTagCost\` writes \`pricing_missing\` events when a model is not covered. AIRuntimeHealth → Cost Accuracy tab surfaces actual vs estimated month totals and missing-pricing models.
+- **Safety posture.** No external sending enabled automatically. No paid API auto-activation. No secrets exposed (LOVABLE_API_KEY only; OPENAI_API_KEY no longer on runtime path). Sale/kill/legal/tax/entity actions all require founder/adviser approval. No simulation-only mode and no artificial readiness gates blocking internal use; missing data renders as live empty states.
+
+### Acceptance test script (run in order)
+1. Open AIRuntimeHealth — confirm status tile = "Live — Gateway Controlled" and bypass count = 0.
+2. Open AIGatewayBypassRegister — confirm zero active bypass rows.
+3. Trigger Founder Copilot stream — confirm \`ai_runtime_events\` rows: stream_request_started → stream_opened → stream_first_token → stream_completed, and a \`ai_gateway_requests\` row with cost_basis=streaming_estimate.
+4. Trigger Liftor Brain chat from two different businesses in parallel — confirm two concurrent rows with distinct business_id / conversation_id and no lease starvation.
+5. Create a portfolio_weekly_review workflow via Portfolio Commander Engine panel — tick to first high-risk step — confirm it parks as waiting_approval and does NOT call the provider.
+6. Approve the parked step — confirm it advances and a gateway request is logged with the matching idempotency key.
+7. Re-send the same idempotency key — confirm the second call is short-circuited (no duplicate ledger row).
+8. Run \`ma-intelligence-orchestrator\` — confirm gateway row + ledger row + cost computation (actual_tokens if usage returned, else streaming_estimate).
+9. Open AIRuntimeHealth → Cost Accuracy tab — confirm actual vs estimated split, pricing registry list, and any models-missing-pricing chips.
+10. Pull \`ai_gateway_bypass_register\` view (or AIGatewayBypassRegister page) — confirm no new direct-AI paths regressed.
+
+### Remaining limitations / risks (documented, not blockers)
+- Pricing rows are all \`estimated\` until vendor-published rates are pasted in with confidence=\`verified\`. Cost cards are partly exact (non-streaming) and partly estimated (streaming + estimated-confidence rows).
+- Streaming completion_tokens remain \`~4 chars/token\` heuristic until providers return usage on the final SSE frame.
+- Strict concurrency lease reduces but does not fully eliminate burst over-allocation across many simultaneous edge invocations (no distributed token bucket).
+- Portfolio Commander templates live in code; a future Workflow Template Library can lift them into the database.
+- Founder approval unblocks a high-risk step; the actual external action remains a separate founder-initiated step by design.
+- Some legacy acceptance/diagnostic functions cosmetically still mention OPENAI_API_KEY for historical audit reports; they are not on the runtime path.
+
+### Ready for live internal operation: **YES**.
+
+*End of Final Carrier-Grade QA (v5.9.10).*
+`;
