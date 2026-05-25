@@ -13766,7 +13766,10 @@ export type Database = {
           created_at: string
           customer_pain_points: string[] | null
           description: string | null
+          do_not_say: string[] | null
           eligibility_rules: string | null
+          escalation_rules: string | null
+          faqs: Json
           features: string[] | null
           guarantee_terms: string | null
           id: string
@@ -13792,7 +13795,10 @@ export type Database = {
           created_at?: string
           customer_pain_points?: string[] | null
           description?: string | null
+          do_not_say?: string[] | null
           eligibility_rules?: string | null
+          escalation_rules?: string | null
+          faqs?: Json
           features?: string[] | null
           guarantee_terms?: string | null
           id?: string
@@ -13818,7 +13824,10 @@ export type Database = {
           created_at?: string
           customer_pain_points?: string[] | null
           description?: string | null
+          do_not_say?: string[] | null
           eligibility_rules?: string | null
+          escalation_rules?: string | null
+          faqs?: Json
           features?: string[] | null
           guarantee_terms?: string | null
           id?: string
