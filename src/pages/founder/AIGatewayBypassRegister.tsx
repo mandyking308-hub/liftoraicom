@@ -228,7 +228,7 @@ const META: Record<string, AuditEntry> = {
     complexity: "complex",
     action: "Batch C — migrate to Lovable AI Gateway; remove OpenAI direct dependency. Coordinate with provider-check + draft-inbound-reply.",
     migration_status: "migrated",
-    migration_notes: "v5.9.5 CRITICAL MIGRATION: replaced api.openai.com/v1/chat/completions with ai.gateway.lovable.dev/v1/chat/completions using LOVABLE_API_KEY. Model namespaced (openai/gpt-5.5). Wrapped with beginGatewayLog/endGatewayLog → appears in ai_gateway_requests, ai_usage_ledger, ai_runtime_events. response_format json_object preserved; response shape unchanged. External actions remain locked; provider-check legacy path still references OPENAI_API_KEY for status flag only.",
+    migration_notes: "v5.9.5 CRITICAL MIGRATION: replaced api.openai.com/v1/chat/completions with ai.gateway.lovable.dev/v1/chat/completions using LOVABLE_API_KEY. Model namespaced (openai/gpt-5.5). Wrapped with beginGatewayLog/endGatewayLog → appears in ai_gateway_requests, ai_usage_ledger, ai_runtime_events. response_format json_object preserved; response shape unchanged. External actions remain locked. v5.9.9: provider-check now reads LOVABLE_API_KEY (gateway) — OPENAI_API_KEY is no longer referenced by brain runtime.",
   },
   "ma-intelligence-orchestrator": {
     risk: "medium", batch: "B", treatment: "migrate_carefully", active: "active",
