@@ -3941,5 +3941,51 @@ Provider events (network_error, http_error, rate_limited, payment_required, sdk_
 actual_cost_gbp depends on the pricing registry tagging rows; estimated_cost_gbp is the fallback. Average latency is per request, not weighted by tokens. Pause-on-cap is enforced at request time via budget checks, not via a separate worker; if a future worker pool is added it must respect the same caps. 13 functions still bypass the gateway and will not appear in these metrics until migrated.
 
 *End of AI Runtime Health Cockpit (v5.9.3).*
+
+## Final AI Gateway QA & Recommendation (v5.9.4)
+
+### Bypass verification
+Source of truth: KNOWN_DIRECT_AI_CALLERS in src/services/aiGateway.ts (16 entries). Bypass Register (/founder/ai-cost/bypass-register) carries per-function risk + migration_status.
+
+- **Migrated (real ledger calls):** multilingual-intake-preview (Batch A) — wrapped with beginGatewayLog/endGatewayLog so each call writes ai_gateway_requests + ai_usage_ledger + ai_runtime_events; trace_id/request_id returned in response.
+- **Migrated (no-op re-audit):** agent-permission-audit, business-external-activation-readiness-run — no real AI call exists; LOVABLE_API_KEY is only read for presence/secret-presence checks. No further migration required.
+- **Pending (Batch B — 9, medium risk, internal-only AI):** ai-conversation-engine, ai-engagement-agent-run, apollo-qualify, business-daily-operating-run, business-weekly-review-run, founder-copilot, internal-proposal-generate, lead-fit-classify, ma-intelligence-orchestrator. Still run; not yet ledgered/concurrency-controlled.
+- **Pending (Batch C — 2, high risk):** generate-proposal, liftor-brain-chat. liftor-brain-chat additionally uses OPENAI_API_KEY directly; must be migrated with founder-review wiring before promotion.
+- **Deprecated candidates (Batch D — 2):** business-daily-operating-loop-acceptance, business-weekly-review-acceptance — kept for now; not deleted.
+
+Active bypass count: **13** (of 16 registered). Status recommendation: **Live — Partial Migration**. Promotion to **Live — Gateway Controlled** requires Batches B + C migrated and Batch D resolved.
+
+### Simultaneous-conversation verification
+- Conversations: ai_conversations row per conversation_id with business_id/portfolio_asset_id/agent_id — confirmed isolated.
+- Workflows: ai_workflow_runs + ai_workflow_steps with separate workflow_id and step rows — confirmed.
+- Agents: 11 entries in ai_agent_registry with max_concurrency / monthly_budget_gbp / primary+fallback model — confirmed.
+- Idempotency: ai_gateway_requests.idempotency_key returns the existing row on duplicate insert — confirmed.
+- Concurrency: preflightAgent() runs per agent inside callAIGateway; no global serial lock.
+- Approval holds: only requests with risk_level in (high, critical) AND approval_required=true sit in waiting_approval. Internal AI is never blocked by an approval queue.
+
+### Live-first verification
+No simulation-only mode. No artificial gates on dashboards. Internal AI runs live. Missing data renders empty-state / intelligence-gap cards instead of mock data. Approvals only on external/high-risk actions.
+
+### Safety verification
+No external sending wired to autopilot. No paid APIs activated without explicit approval. No secrets surfaced to client or manuals (TRACKED_SECRETS only records presence). No automatic export pipelines. Founder approval enforced for buyer/investor/adviser contact, spend commitments, legal/tax/entity changes, sale/kill decisions.
+
+### Top 5 tests to run
+1. Trigger multilingual-intake-preview and confirm a new ai_gateway_requests row + ai_usage_ledger row land with the returned trace_id.
+2. From AI Runtime Health, retry a failed low-risk row and confirm status flips to queued and a retry_requested event is written.
+3. From AI Orchestration Live, open two parallel conversations on different business_ids and confirm neither blocks the other and per-agent concurrency bars move independently.
+4. Force a 429 from a provider and confirm an ai_runtime_events row with event_type=rate_limited appears and the bottleneck banner raises a warning.
+5. Queue a high-risk external action and confirm it sits in waiting_approval, the provider is not called, and no message is sent.
+
+### Top 5 remaining risks
+1. 13 legacy functions still bypass the gateway — their cost, concurrency and approval state are invisible to the cockpit until migrated.
+2. liftor-brain-chat uses OPENAI_API_KEY directly — no ledger, no budget, no concurrency control, no fallback.
+3. preflightAgent is best-effort (no row-level lock) — small over-allocation possible during bursts.
+4. Portfolio Commander Agent's automatic step-assignment is not yet wired — workflow rows can be written but are not auto-stepped by code.
+5. actual_cost_gbp depends on the pricing registry tagging rows; until then estimated_cost_gbp is used and budgets are approximate.
+
+### Live-internal-operation readiness
+Ready for live internal operation (analysis, scoring, valuation, reporting, intelligence, internal drafts, dashboards). Not yet ready for fully unattended external operation — high-risk external actions must continue to flow through the founder approval queue until Batches B + C are migrated and the Portfolio Commander step engine is wired.
+
+*End of Final AI Gateway QA & Recommendation (v5.9.4).*
 `;
 };

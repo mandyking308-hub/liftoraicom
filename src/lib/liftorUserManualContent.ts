@@ -1096,3 +1096,22 @@ const FOUNDER_ACTION_BOARD_GUIDE: ManualSection = {
   ].join(" "),
 };
 LIFTOR_FULL_GUIDE.push(FOUNDER_ACTION_BOARD_GUIDE);
+
+const AI_GATEWAY_RUNTIME_GUIDE: ManualSection = {
+  number: 85,
+  key: "ai-gateway-runtime",
+  title: "AI Gateway, Orchestration Live and Runtime Health",
+  body: [
+    "What the AI Gateway is. One governance/control layer through which every approved AI call flows. It is not one queue and not one conversation pipe — many AI conversations, agents and workflows run at the same time. The gateway only exists to log cost, enforce budgets, isolate tenants, hold high-risk actions for approval, and give the founder a single place to see what is happening.",
+    "Where to find it. Command Centre → AI Cost Governor. Three main screens: AI Bypass Register (/founder/ai-cost/bypass-register), AI Orchestration Live (/founder/ai-cost/orchestration-live), AI Runtime Health (/founder/ai-cost/health).",
+    "Simultaneous conversations. Every conversation has its own conversation_id, business_id, portfolio_asset_id and agent_id. Conversations from different businesses never touch the same context. Many can run in parallel. A conversation waiting on approval does not block any other conversation.",
+    "Status meanings. running = the AI provider call is in flight. queued = preflight passed and the request is waiting on an agent slot. waiting_approval = a high-risk external action is held for founder approval; the provider has not been called and no message has been sent. failed = the provider returned an error or the network failed. completed = the call returned successfully and was logged.",
+    "Approval rules. Internal AI runs live with no approval: analysis, scoring, valuation, reporting, classification, internal drafts, dashboards, intelligence gap detection. Founder approval is always required for: external outreach or sending, buyer/investor/adviser contact, paid API activation, data export, spend commitments, legal/tax/entity changes, sale process start, kill decisions, sharing buyer packs externally.",
+    "How to read bottleneck warnings. The Runtime Health cockpit raises warnings when queue depth, failed jobs, approval backlog, rate-limited events or budget usage cross thresholds. Warning means the system can still run but needs attention. Critical means a business is over cap or AI credits are exhausted — non-critical AI for that business is paused until the founder acts.",
+    "What to do if AI fails. Open AI Runtime Health → Failed Jobs. Low/medium-risk rows can be retried from the cockpit (one click; a retry event is written to the audit trail). High/critical rows cannot be retried from the cockpit — they must be re-issued by the originating workflow so external-action safety is preserved. Any failed row can be marked resolved which writes manually_resolved to the audit trail.",
+    "What the AI Gateway will never do automatically. Send external messages, contact a buyer/investor/adviser, publish anything externally, share a buyer pack, commit spend, change legal/tax/entity status, start a sale process, take an irreversible action without founder approval recorded, or expose any secret.",
+    "Bypass Register. The register lists every function still calling AI outside the gateway. Each row shows risk level, migration status (migrated, migrated_no_op, pending) and notes. Migrated functions write to ai_gateway_requests + ai_usage_ledger + ai_runtime_events. Pending functions still run and are still safe, but their cost and concurrency are not yet under gateway control.",
+    "Cross-references: /founder/ai-cost (hub), /founder/ai-cost/bypass-register, /founder/ai-cost/orchestration-live, /founder/ai-cost/health, /founder/ai-cost/action-board, /founder/ai-cost/approvals, /founder/ai-cost/budgets, /founder/ai-cost/ledger.",
+  ].join(" "),
+};
+LIFTOR_FULL_GUIDE.push(AI_GATEWAY_RUNTIME_GUIDE);
