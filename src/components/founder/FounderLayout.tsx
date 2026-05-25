@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { LayoutDashboard, FileInput, GitBranch, FolderKanban, Activity, FileText, LogOut, Menu, X, Monitor, Bot, Workflow, Plug, Play, Command, Network, Layers, Rocket, BarChart3, Zap, BookOpen, Globe, Building2, Shield, ShieldAlert, ShieldCheck, LayoutTemplate, Sparkles, BookOpenCheck, ClipboardList, PoundSterling, Brain, Scale, Compass, MessageSquare, FlaskConical, Users, Banknote, Send, MessagesSquare, FileSignature, MonitorPlay, Briefcase, ClipboardCheck, Gavel, TrendingUp, Radar, Siren, Target, Calculator, Trophy, Handshake, Route, Coins, PauseCircle } from "lucide-react";
+import { LayoutDashboard, FileInput, GitBranch, FolderKanban, Activity, FileText, LogOut, Menu, X, Monitor, Bot, Workflow, Plug, Play, Command, Network, Layers, Rocket, BarChart3, Zap, BookOpen, Globe, Building2, Shield, ShieldAlert, ShieldCheck, LayoutTemplate, Sparkles, BookOpenCheck, ClipboardList, PoundSterling, Brain, Scale, Compass, MessageSquare, FlaskConical, Users, Banknote, Send, MessagesSquare, FileSignature, MonitorPlay, Briefcase, ClipboardCheck, Gavel, TrendingUp, Radar, Siren, Target, Calculator, Trophy, Handshake, Route, Coins, PauseCircle, Flame, Swords } from "lucide-react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +12,11 @@ const navItems = [
   { label: "Exit Valuation", to: "/founder/portfolio-exit/valuation", icon: Calculator },
   { label: "Build Selector", to: "/founder/portfolio-exit/build-selector", icon: Trophy },
   { label: "Execution Handoff", to: "/founder/portfolio-exit/execution-handoff", icon: Handshake },
+  { label: "Buyer Warm-Up", to: "/founder/portfolio-exit/buyer-warmup", icon: Flame },
+  { label: "Investor Intel", to: "/founder/portfolio-exit/investors", icon: Banknote },
+  { label: "Competitor Intel", to: "/founder/portfolio-exit/competitors", icon: Swords },
+  { label: "Operating Panels", to: "/founder/portfolio-exit/operating-panels", icon: Coins },
+  { label: "AI Bypass Register", to: "/founder/portfolio-exit/ai-bypass-register", icon: ShieldAlert },
   { label: "Data Ingestion", to: "/founder/portfolio-exit/ingestion", icon: FileInput },
   { label: "Portfolio Manual", to: "/founder/portfolio-exit/manual", icon: BookOpenCheck },
   { label: "Approval Queue", to: "/founder/ai-cost/approvals", icon: ClipboardCheck },

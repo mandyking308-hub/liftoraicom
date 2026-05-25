@@ -34,6 +34,15 @@ export default function PortfolioExitManual() {
         <Card id="user-manual" className="tech-card scroll-mt-24">
           <CardHeader><CardTitle>User Manual</CardTitle></CardHeader>
           <CardContent className="space-y-4 text-sm">
+            <Section title="New pages added in the May 2026 patch">
+              <ul className="list-disc pl-5 space-y-1 text-xs">
+                <li><strong>Buyer Warm-Up</strong> (<code>/founder/portfolio-exit/buyer-warmup</code>) — drafts, warmth status and next actions per buyer match. No external sending. Founder approval required for any contact.</li>
+                <li><strong>Investor Intelligence</strong> (<code>/investors</code>) — search and filter VCs, PE, angels, family offices and strategics. Open the side drawer for cheque size, portfolio, exit history, likely end-buyer notes, linked deals and source evidence.</li>
+                <li><strong>Competitor Intelligence</strong> (<code>/competitors</code>) — search and filter competitors and comparables. Detail drawer shows problem solved, target customer, pricing, growth signals, weaknesses, what we can learn, what we must not copy, legally distinct differentiation, and evidence.</li>
+                <li><strong>Operating Panels</strong> (<code>/operating-panels</code>) — five previously hidden tables: capital allocation, capacity, strategic assumptions, paid connector registry, integration allowlist. Read-only. No paid connectors are activated and no keys are stored here.</li>
+                <li><strong>AI Gateway Bypass Register</strong> (<code>/ai-bypass-register</code>) — visible list of legacy edge functions still calling AI directly, each with risk grade and next migration step.</li>
+              </ul>
+            </Section>
             <Section title="Carrier-grade Controls Centre (new)">
               The Controls Centre is the single place to manage operational discipline across all portfolio assets. It contains 14 panels — each is described below. Open it from the Command Centre header or the sidebar.
             </Section>
@@ -147,6 +156,40 @@ export default function PortfolioExitManual() {
         <Card id="technical-manual" className="tech-card scroll-mt-24">
           <CardHeader><CardTitle>Technical Manual</CardTitle></CardHeader>
           <CardContent className="space-y-4 text-sm">
+            <Section title="Patch additions (May 2026)">
+              <ul className="list-disc pl-5 space-y-1 text-xs">
+                <li><strong>New routes:</strong> <code>/founder/portfolio-exit/buyer-warmup</code>, <code>/investors</code>, <code>/competitors</code>, <code>/operating-panels</code>, <code>/ai-bypass-register</code>.</li>
+                <li><strong>New components:</strong> <code>PortfolioBuyerWarmUp</code>, <code>PortfolioInvestorIntelligence</code>, <code>PortfolioCompetitorIntelligence</code>, <code>PortfolioOperatingPanels</code>, <code>AIGatewayBypassRegister</code>.</li>
+                <li><strong>Buyer Warm-Up</strong> reads <code>ma_buyer_matches</code> joined to <code>ma_portfolio_assets</code> and <code>ma_companies</code>. Approval status comes from <code>ma_approval_queue</code> rows where <code>module='buyer_warmup'</code> and <code>related_record_id</code> matches the buyer-match id. No outreach is sent from this page.</li>
+                <li><strong>Investor Intelligence</strong> reads <code>ma_investors</code> with source join to <code>ma_intelligence_sources</code>, linked <code>ma_deals</code> and read-side hints from <code>ma_buyer_matches</code>. Detail drawer uses shadcn <code>Sheet</code>.</li>
+                <li><strong>Competitor Intelligence</strong> reads <code>ma_competitor_profiles</code> with company and asset joins, evidence rows from <code>ma_evidence_links</code> filtered to <code>related_record_type='ma_competitor_profiles'</code>. Always shows the principle "Adopt the market signal, do not copy protected assets."</li>
+                <li><strong>Operating Panels</strong> surfaces five previously hidden tables: <code>ma_capital_allocation</code>, <code>ma_capacity_snapshots</code>, <code>ma_strategic_assumptions</code>, <code>ma_paid_connectors</code>, <code>ma_integration_allowlist</code>. View-only. Paid connectors and allowlist show <em>status only</em> — no keys, no activation.</li>
+                <li><strong>AI Gateway Bypass Register</strong> reads <code>KNOWN_DIRECT_AI_CALLERS</code> from <code>src/services/aiGateway.ts</code> and renders risk grade + recommended action per function. Migration target: every entry should call <code>callAIGateway</code> from <code>supabase/functions/_shared/aiGateway.ts</code>.</li>
+              </ul>
+            </Section>
+            <Section title="Orchestrator parser hardening">
+              <p className="text-xs">
+                <code>ma-intelligence-orchestrator</code> now wraps every AI response in <code>safeJsonParse</code>: tries the raw <code>tool_calls.arguments</code>, then strips <code>```json</code> fences, then extracts the first balanced <code>{`{ ... }`}</code> block. Failures throw <code>ai_parse_failed</code>, are logged into <code>ma_error_queue</code> (with a truncated 500-char raw sample in <code>notes</code>), and a failed run row is recorded in <code>ma_intelligence_runs</code>. The panel surfaces a friendly message ("AI returned an unparseable response — safe to retry") and never crashes.
+              </p>
+              <p className="text-xs mt-2"><strong>Manual acceptance steps:</strong> (1) Run portfolio briefing — expect success and a <code>ma_ai_briefings</code> row. (2) Temporarily change the model to one without tool-call support to force unparseable output, run again, expect HTTP 500 with friendly message and a new row in <code>ma_error_queue</code> + <code>ma_intelligence_runs</code> with <code>status='failed'</code>. (3) Revert model.</p>
+            </Section>
+            <Section title="TypeScript / Supabase typing status">
+              <p className="text-xs">
+                The auto-generated <code>src/integrations/supabase/types.ts</code> currently lags the <code>ma_*</code> schema. New Portfolio &amp; Exit components still cast via <code>(supabase as any)</code> or a single <code>const sb: any = supabase</code> alias.
+              </p>
+              <ul className="list-disc pl-5 text-xs space-y-1 mt-2">
+                <li><strong>Where casts remain:</strong> <code>PortfolioBuyerWarmUp</code>, <code>PortfolioInvestorIntelligence</code>, <code>PortfolioCompetitorIntelligence</code>, <code>PortfolioOperatingPanels</code>, <code>AIGatewayBypassRegister</code>, plus pre-existing casts in <code>PortfolioExitCommandCentre</code>, <code>PortfolioExitHardening</code>, <code>PortfolioExitControls</code>, <code>MAIntelligenceWorkspace</code>.</li>
+                <li><strong>Why:</strong> auto-regeneration of <code>types.ts</code> is not available from inside this patch; manually editing the file is forbidden.</li>
+                <li><strong>Next step:</strong> trigger a Supabase types regeneration from the Cloud connector, then sweep the files above and replace <code>(supabase as any)</code> with typed table references and inferred row types.</li>
+              </ul>
+            </Section>
+            <Section title="Limitations after patch">
+              <ul className="list-disc pl-5 text-xs space-y-1">
+                <li>9+ legacy edge functions still bypass the AI Gateway — visible in <code>/founder/portfolio-exit/ai-bypass-register</code>. Operational status remains <strong>Live — Bypass Detected</strong> until migrated.</li>
+                <li>Paid connector activation, billing and secret entry happen in Connectors and the Approval Queue, never inside the Operating Panels view.</li>
+                <li>Investor ↔ portfolio-asset linkage is currently inferred from notes; a hard FK can be added later if needed.</li>
+              </ul>
+            </Section>
             <Section title="Database tables (all prefixed ma_)">
               <code className="text-xs">ma_portfolio_assets, ma_companies, ma_investors, ma_buyer_matches, ma_deals, ma_competitor_profiles, ma_adviser_channels, ma_intelligence_sources, ma_weekly_signals, ma_build_candidates, ma_exit_targets, ma_execution_targets, ma_valuation_benchmarks, ma_data_room_items, ma_ai_recommendations, ma_ai_briefings, ma_audit_logs,
               <br/>ma_lifecycle_gates, ma_lifecycle_transitions, ma_kpi_dictionary, ma_prompt_versions, ma_cost_entries, ma_budgets, ma_data_classifications, ma_backup_events, ma_alerts, ma_workload_capacity, ma_mock_diligence_runs, ma_agent_contracts, ma_capital_allocation, ma_do_not_build_patterns</code>
