@@ -19,11 +19,11 @@ export default function AdviserPackExpenses() {
       const since = new Date(Date.now() - 30 * 86400000).toISOString();
       const [iRes, aiRes, vRes] = await Promise.all([
         sb.from("adviser_pack_items").select("*").in("item_type", EXP_TYPES).order("created_at", { ascending: false }).limit(200),
-        sb.from("ai_usage_ledger").select("cost_usd").gte("created_at", since).limit(5000),
-        sb.from("vendor_records").select("monthly_cost,currency,active").eq("active", true).limit(500),
+        sb.from("ai_usage_ledger").select("estimated_cost,actual_cost_gbp").gte("created_at", since).limit(5000),
+        sb.from("vendor_subscriptions").select("monthly_cost,currency,subscription_status").eq("subscription_status", "active").limit(500),
       ]);
       setItems(iRes.data ?? []);
-      setAiSpend((aiRes.data ?? []).reduce((s: number, r: any) => s + Number(r.cost_usd || 0), 0));
+      setAiSpend((aiRes.data ?? []).reduce((s: number, r: any) => s + Number(r.estimated_cost || r.actual_cost_gbp || 0), 0));
       setVendorCost((vRes.data ?? []).reduce((s: number, r: any) => s + Number(r.monthly_cost || 0), 0));
     })();
   }, []);
