@@ -257,6 +257,11 @@ export default function AIGatewayBypassRegister() {
     medium: KNOWN_DIRECT_AI_CALLERS.filter((c) => META[c.name]?.risk === "medium").length,
     low: KNOWN_DIRECT_AI_CALLERS.filter((c) => META[c.name]?.risk === "low").length,
   };
+  const migrated = KNOWN_DIRECT_AI_CALLERS.filter((c) => {
+    const s = META[c.name]?.migration_status;
+    return s === "migrated" || s === "migrated_no_op";
+  }).length;
+  const activeBypass = totals.total - migrated;
 
   const batches: Record<Batch, string[]> = { A: [], B: [], C: [], D: [] };
   for (const c of KNOWN_DIRECT_AI_CALLERS) {
@@ -301,6 +306,12 @@ export default function AIGatewayBypassRegister() {
           <StatCard label="Low risk" v={totals.low} />
         </div>
 
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+          <StatCard label="Migrated (real + no-op)" v={migrated} />
+          <StatCard label="Active bypasses remaining" v={activeBypass} accent={activeBypass === 0 ? undefined : "amber"} />
+          <StatCard label="System status" v={activeBypass === 0 ? 1 : 0} accent={activeBypass === 0 ? undefined : "amber"} />
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
           {(Object.keys(batches) as Batch[]).map((b) => (
             <Card key={b} className="tech-card">
@@ -329,6 +340,7 @@ export default function AIGatewayBypassRegister() {
                 <TableHead>Risk</TableHead>
                 <TableHead>Batch</TableHead>
                 <TableHead>Treatment</TableHead>
+                <TableHead>Migration</TableHead>
                 <TableHead>External</TableHead>
                 <TableHead>Recommended next action</TableHead>
               </TableRow></TableHeader>
@@ -355,6 +367,17 @@ export default function AIGatewayBypassRegister() {
                       </TableCell>
                       <TableCell className="align-top"><Badge className="text-[10px]">{m.batch}</Badge></TableCell>
                       <TableCell className="align-top"><Badge variant="outline" className="text-[10px]">{m.treatment}</Badge></TableCell>
+                      <TableCell className="align-top">
+                        <Badge
+                          variant={m.migration_status === "migrated" || m.migration_status === "migrated_no_op" ? "default" : "outline"}
+                          className="text-[10px]"
+                        >
+                          {m.migration_status ?? "pending"}
+                        </Badge>
+                        {m.migration_notes && (
+                          <div className="text-[10px] text-muted-foreground font-sans mt-0.5 max-w-[260px]">{m.migration_notes}</div>
+                        )}
+                      </TableCell>
                       <TableCell className="align-top">
                         <Badge variant={ext === "sends" ? "destructive" : "outline"} className="text-[10px]">{ext}</Badge>
                       </TableCell>
