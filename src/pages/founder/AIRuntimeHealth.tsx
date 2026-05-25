@@ -82,6 +82,12 @@ export default function AIRuntimeHealth() {
       ).data ?? [],
   });
 
+  const { data: pricingRows = [] } = useQuery<any[]>({
+    queryKey: ["health_pricing"],
+    queryFn: async () =>
+      (await sb.from("ai_provider_pricing").select("model_name,confidence,input_cost_per_1m_tokens,output_cost_per_1m_tokens,currency,active,pricing_source").eq("active", true)).data ?? [],
+  });
+
   async function cleanupStaleLeases() {
     const { data, error } = await sb.rpc("cleanup_stale_ai_leases");
     if (error) { toast({ title: "Cleanup failed", description: error.message, variant: "destructive" }); return; }
@@ -130,6 +136,22 @@ export default function AIRuntimeHealth() {
   const leaseDeniedEvents = events.filter((e) => e.event_type === "lease_denied").length;
   const idempotencyDuplicates = events.filter((e) => e.event_type === "idempotency_duplicate_blocked" || e.event_type === "idempotency_replay").length;
   const staleCleanupEvents = events.filter((e) => e.event_type === "stale_lease_cleanup").length;
+
+  // Cost accuracy
+  const pricedModels = new Set(pricingRows.map((p) => p.model_name));
+  const estimatedModels = new Set(pricingRows.filter((p) => p.confidence === "estimated").map((p) => p.model_name));
+  const requestModels = new Set(requests.map((r) => r.model).filter(Boolean));
+  const modelsMissingPricing = [...requestModels].filter((m) => !pricedModels.has(m));
+  const requestsByBasis = (() => {
+    const map: Record<string, number> = {};
+    for (const r of monthRows) {
+      const b = (r as any).cost_basis ?? "unknown";
+      map[b] = (map[b] ?? 0) + 1;
+    }
+    return map;
+  })();
+  const actualCostMonth = monthRows.reduce((s, r) => s + Number((r as any).actual_cost_gbp ?? 0), 0);
+  const estimatedOnlyMonth = monthRows.filter((r) => (r as any).actual_cost_gbp == null).reduce((s, r) => s + Number(r.estimated_cost_gbp ?? 0), 0);
   const errorsByModel = (() => {
     const map = new Map<string, number>();
     for (const r of failed24h) map.set(r.model ?? "unknown", (map.get(r.model ?? "unknown") ?? 0) + 1);
@@ -234,6 +256,9 @@ export default function AIRuntimeHealth() {
           <StatCard icon={AlertTriangle} label="Lease denials 24h" v={leaseDeniedEvents} accent={leaseDeniedEvents ? "amber" : undefined} />
           <StatCard icon={ShieldAlert} label="Idempotency dupes 24h" v={idempotencyDuplicates} accent={idempotencyDuplicates ? "amber" : undefined} />
           <StatCard icon={RotateCw} label="Stale lease sweeps" v={staleCleanupEvents} />
+          <StatCard icon={PoundSterling} label="Actual cost month" v={`£${actualCostMonth.toFixed(2)}`} />
+          <StatCard icon={PoundSterling} label="Estimated-only month" v={`£${estimatedOnlyMonth.toFixed(2)}`} accent={estimatedOnlyMonth ? "amber" : undefined} />
+          <StatCard icon={AlertTriangle} label="Models missing pricing" v={modelsMissingPricing.length} accent={modelsMissingPricing.length ? "amber" : undefined} />
         </div>
 
         {bottlenecks.length > 0 && (
@@ -264,6 +289,7 @@ export default function AIRuntimeHealth() {
             <TabsTrigger value="approval">Approval Holds</TabsTrigger>
             <TabsTrigger value="cost">Cost & Budget</TabsTrigger>
             <TabsTrigger value="leases">Concurrency Leases</TabsTrigger>
+            <TabsTrigger value="cost-accuracy">Cost Accuracy</TabsTrigger>
             <TabsTrigger value="bypass">Bypass Register</TabsTrigger>
           </TabsList>
 
@@ -534,6 +560,57 @@ export default function AIRuntimeHealth() {
                   ))}
                 </TableBody>
               </Table>
+            </CardContent></Card>
+          </TabsContent>
+
+          <TabsContent value="cost-accuracy">
+            <Card className="tech-card"><CardContent className="p-3 space-y-3">
+              <div className="text-[11px] text-muted-foreground max-w-3xl">
+                Every gateway call is tagged with a <code>cost_basis</code>: <code>actual_tokens</code> (exact provider usage), <code>provider_reported</code>, <code>streaming_estimate</code> (token count not returned by stream), <code>estimated_tokens</code>, <code>pricing_missing</code>, or <code>manual_estimate</code>. Estimated rows are flagged so dashboards never silently overstate accuracy.
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                {Object.entries(requestsByBasis).map(([k, v]) => (<StatCard key={k} icon={Activity} label={`Basis: ${k}`} v={v} />))}
+              </div>
+              <div>
+                <CardTitle className="text-sm mb-2">Models missing pricing</CardTitle>
+                {modelsMissingPricing.length === 0 ? (
+                  <p className="text-[11px] text-muted-foreground">All observed models have an active pricing row.</p>
+                ) : (
+                  <div className="flex flex-wrap gap-1.5">
+                    {modelsMissingPricing.map((m) => (
+                      <code key={m} className="text-[10px] px-2 py-0.5 rounded border border-amber-500/30 text-amber-300 bg-amber-500/5">{m}</code>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div>
+                <CardTitle className="text-sm mb-2">Active pricing registry ({pricingRows.length} rows)</CardTitle>
+                <Table>
+                  <TableHeader><TableRow>
+                    <TableHead>Model</TableHead><TableHead>In / 1M</TableHead><TableHead>Out / 1M</TableHead>
+                    <TableHead>Currency</TableHead><TableHead>Confidence</TableHead><TableHead>Source</TableHead>
+                  </TableRow></TableHeader>
+                  <TableBody>
+                    {pricingRows.slice(0, 50).map((p, i) => (
+                      <TableRow key={i}>
+                        <TableCell className="font-mono text-[11px]">{p.model_name}</TableCell>
+                        <TableCell className="text-xs">{Number(p.input_cost_per_1m_tokens).toFixed(3)}</TableCell>
+                        <TableCell className="text-xs">{Number(p.output_cost_per_1m_tokens).toFixed(3)}</TableCell>
+                        <TableCell className="text-[10px]">{p.currency}</TableCell>
+                        <TableCell>
+                          <Badge variant={p.confidence === "verified" ? "outline" : "secondary"} className={`text-[10px] ${p.confidence === "estimated" ? "border-amber-500/30 text-amber-300" : ""}`}>
+                            {p.confidence}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-[10px] text-muted-foreground">{p.pricing_source ?? "—"}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+                <p className="text-[11px] text-muted-foreground mt-2">
+                  {estimatedModels.size} model(s) currently use <span className="text-amber-300">estimated</span> rates. Verified rates can be entered in the Provider Pricing page.
+                </p>
+              </div>
             </CardContent></Card>
           </TabsContent>
         </Tabs>
