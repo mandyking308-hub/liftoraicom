@@ -198,8 +198,8 @@ export default function StartHereOperatingPanel() {
     },
     {
       n: 15,
-      label: "Run final readiness / dry-run test",
-      description: "Master dry-run validates the full operating spine end-to-end",
+      label: "Run live operating dry-run",
+      description: "Master dry-run validates the full live operating spine end-to-end. Live-first — not a release gate.",
       to: "/founder/system",
       icon: ShieldCheck,
     },
