@@ -50,6 +50,8 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "upgrade_agent", name: "Upgrade Agent", to: "/founder/customer-upgrades", category: "sales" },
   { key: "renewal_agent", name: "Renewal Agent", to: "/founder/customer-upgrades/renewals", category: "sales" },
   { key: "cross_sell_agent", name: "Cross-Sell Agent", to: "/founder/customer-upgrades/opportunities", category: "sales" },
+  { key: "coaching_agent", name: "Sales Coaching Agent", to: "/founder/sales-coaching", category: "sales" },
+  { key: "conversion_learning_agent", name: "Conversion Learning Agent", to: "/founder/sales-coaching/conversions", category: "sales" },
 ];
 
 export default function AgentOperatingStatus() {
