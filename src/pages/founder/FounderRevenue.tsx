@@ -9,6 +9,7 @@ import TreasuryCashflowControlPanel from "@/components/founder/finance/TreasuryC
 import CRMTotalMemoryRecoveryPanel from "@/components/founder/customer/CRMTotalMemoryRecoveryPanel";
 import PortfolioCommandCentrePanel from "@/components/founder/command/PortfolioCommandCentrePanel";
 import { ProductisationReadinessPanel } from "@/components/founder/revenue/ProductisationReadinessPanel";
+import CustomerSalesEngineCard from "@/components/founder/command/CustomerSalesEngineCard";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -242,6 +243,7 @@ const FounderRevenue = () => {
 
           {/* REVENUE TAB */}
           <TabsContent value="dashboard" className="space-y-4 mt-4">
+            <CustomerSalesEngineCard />
             {/* Revenue breakdown */}
             <div className="grid sm:grid-cols-4 gap-4">
               {[
