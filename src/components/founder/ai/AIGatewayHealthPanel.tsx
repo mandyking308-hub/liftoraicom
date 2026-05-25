@@ -71,7 +71,7 @@ export default function AIGatewayHealthPanel() {
     if (!stats) return "live_healthy";
     if (stats.securityEvents > 0) return "live_risk_alert";
     if (stats.alerts > 5 || stats.failedCalls > 10) return "live_cost_alert";
-    if (KNOWN_DIRECT_AI_CALLERS.length > 0) return "live_bypass_detected";
+    if (KNOWN_DIRECT_AI_CALLERS.some((c) => c.status === "pending_migration" || c.status === "blocked")) return "live_bypass_detected";
     if (stats.missing > 0 || stats.approvalCalls > 5) return "live_watch";
     return "live_healthy";
   }, [stats]);
@@ -79,7 +79,7 @@ export default function AIGatewayHealthPanel() {
   const tiles: Array<[string, string | number, string?]> = stats ? [
     ["Gateway calls today", stats.totalCalls],
     ["Enforced via aiGateway", stats.enforcedCalls],
-    ["Bypass / direct (pending migration)", KNOWN_DIRECT_AI_CALLERS.length, "amber"],
+    ["Bypass / direct (pending migration)", KNOWN_DIRECT_AI_CALLERS.filter((c) => c.status === "pending_migration" || c.status === "blocked").length, "amber"],
     ["Blocked calls", stats.blockedCalls, stats.blockedCalls ? "amber" : ""],
     ["Approval required", stats.approvalCalls, stats.approvalCalls ? "amber" : ""],
     ["Failed calls", stats.failedCalls, stats.failedCalls ? "red" : ""],
@@ -112,7 +112,7 @@ export default function AIGatewayHealthPanel() {
           ))}
         </div>
 
-        {KNOWN_DIRECT_AI_CALLERS.length > 0 && (
+        {KNOWN_DIRECT_AI_CALLERS.some((c) => c.status === "pending_migration" || c.status === "blocked") && (
           <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3">
             <div className="flex items-center gap-2 text-sm font-medium text-amber-300">
               <AlertTriangle className="h-4 w-4" /> Direct AI calls detected — pending migration to aiGateway
@@ -121,7 +121,7 @@ export default function AIGatewayHealthPanel() {
               These edge functions currently call the model provider directly. They continue to run live, but are not yet routed through the central enforcement layer. Each one should be migrated to <code>supabase/functions/_shared/aiGateway.ts</code>.
             </p>
             <div className="flex flex-wrap gap-1.5 mt-2">
-              {KNOWN_DIRECT_AI_CALLERS.map((f) => (
+              {KNOWN_DIRECT_AI_CALLERS.filter((c) => c.status === "pending_migration" || c.status === "blocked").map((f) => (
                 <code key={f.name} className="text-[10px] px-2 py-0.5 rounded border border-amber-500/30 text-amber-300 bg-amber-500/5">
                   {f.name}
                 </code>

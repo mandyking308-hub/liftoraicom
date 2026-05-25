@@ -30,7 +30,7 @@ export default function AIRuntimeHealthMiniCard() {
     },
   });
 
-  const bypassCount = KNOWN_DIRECT_AI_CALLERS.length - 3; // 3 migrated/no-op
+  const bypassCount = KNOWN_DIRECT_AI_CALLERS.filter((c) => c.status === "pending_migration" || c.status === "blocked").length;
   const failed = data?.failed ?? 0;
   const waiting = data?.waiting ?? 0;
 

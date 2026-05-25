@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { beginGatewayLog, endGatewayLog } from "../_shared/aiGateway.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -130,6 +131,17 @@ The estimated_productivity_gain should be a percentage range string like "20% â€
 - Project Scale: ${projectScale}
 - Timeline Preference: ${timeline}`;
 
+    const __gwInput = {
+      action_type: "generate_proposal_public",
+      task_category: "proposal_generation",
+      model: "google/gemini-3-flash-preview",
+      fallback_model: "google/gemini-2.5-flash",
+      risk_level: "high" as const,
+      request_type: "public_proposal_draft",
+      messages: [],
+      metadata: { industry, project_scale: projectScale },
+    };
+    const __log = await beginGatewayLog(__gwInput);
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -226,21 +238,29 @@ The estimated_productivity_gain should be a percentage range string like "20% â€
 
     if (!response.ok) {
       if (response.status === 429) {
+        await endGatewayLog({ ...__log, input: __gwInput }, { ok: false, error: "rate_limited" });
         return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again shortly." }), {
           status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       if (response.status === 402) {
+        await endGatewayLog({ ...__log, input: __gwInput }, { ok: false, error: "payment_required" });
         return new Response(JSON.stringify({ error: "AI service credits exhausted." }), {
           status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       const t = await response.text();
       console.error("AI gateway error:", response.status, t);
+      await endGatewayLog({ ...__log, input: __gwInput }, { ok: false, error: `gateway_${response.status}` });
       throw new Error("AI gateway error");
     }
 
     const data = await response.json();
+    await endGatewayLog({ ...__log, input: __gwInput }, {
+      ok: true,
+      prompt_tokens: data?.usage?.prompt_tokens ?? 0,
+      completion_tokens: data?.usage?.completion_tokens ?? 0,
+    });
     const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
     if (!toolCall) throw new Error("No tool call in AI response");
 

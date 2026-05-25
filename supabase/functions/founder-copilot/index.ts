@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { beginGatewayLog, endGatewayLog } from "../_shared/aiGateway.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -70,6 +71,17 @@ GUIDELINES:
 - Always be strategic and actionable in your recommendations
 - You are speaking to the founder/CEO — be direct and business-focused`;
 
+    const __gwInput = {
+      action_type: "founder_copilot_stream",
+      task_category: "founder_copilot",
+      model: "google/gemini-3-flash-preview",
+      fallback_model: "google/gemini-2.5-flash",
+      risk_level: "medium" as const,
+      request_type: "copilot_chat",
+      messages: [],
+      metadata: { streaming: true },
+    };
+    const __log = await beginGatewayLog(__gwInput);
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -88,12 +100,14 @@ GUIDELINES:
 
     if (!response.ok) {
       if (response.status === 429) {
+        await endGatewayLog({ ...__log, input: __gwInput }, { ok: false, error: "rate_limited" });
         return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again shortly." }), {
           status: 429,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       if (response.status === 402) {
+        await endGatewayLog({ ...__log, input: __gwInput }, { ok: false, error: "payment_required" });
         return new Response(JSON.stringify({ error: "AI credits exhausted. Please top up your workspace." }), {
           status: 402,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -101,12 +115,15 @@ GUIDELINES:
       }
       const t = await response.text();
       console.error("AI gateway error:", response.status, t);
+      await endGatewayLog({ ...__log, input: __gwInput }, { ok: false, error: `gateway_${response.status}` });
       return new Response(JSON.stringify({ error: "AI gateway error" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
+    // Fire-and-forget completion log (stream tokens not counted server-side).
+    endGatewayLog({ ...__log, input: __gwInput }, { ok: true }).catch(() => {});
     return new Response(response.body, {
       headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
     });

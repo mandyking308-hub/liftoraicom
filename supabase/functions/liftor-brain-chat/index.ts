@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { beginGatewayLog, endGatewayLog } from "../_shared/aiGateway.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -292,7 +293,7 @@ Deno.serve(async (req) => {
     content: m.message_text,
   }));
 
-  const openaiKey = Deno.env.get("OPENAI_API_KEY");
+  const lovableKey = Deno.env.get("LOVABLE_API_KEY");
   let assistantText = "";
   let parsed: any = null;
   let usage: any = null;
@@ -311,27 +312,58 @@ Deno.serve(async (req) => {
     assistantText = parsed.answer;
   } else {
     try {
-      const model = (default_model || "gpt-5.5").trim();
-      const r = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${openaiKey}` },
-        body: JSON.stringify({
-          model,
-          messages: [
-            { role: "system", content: systemPrompt },
-            ...threadMsgs,
-            { role: "user", content: user_message },
-          ],
-          response_format: { type: "json_object" },
-        }),
-      });
+      // Migrated: route via approved Lovable AI Gateway (no direct OpenAI call).
+      const rawModel = (default_model || "gpt-5.5").trim();
+      const model = rawModel.includes("/") ? rawModel : `openai/${rawModel}`;
+      const fallback_model = "google/gemini-3-flash-preview";
+      const gwInput = {
+        action_type: "liftor_brain_chat",
+        task_category: "brain_chat",
+        business_id,
+        user_id: u.user.id,
+        model,
+        fallback_model,
+        risk_level: "medium" as const,
+        request_type: "brain_chat",
+        conversation_id: session.id,
+        messages: [],
+        metadata: { requested_mode, context_type },
+      };
+      const __log = await beginGatewayLog(gwInput);
+      let r: Response;
+      try {
+        r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableKey}` },
+          body: JSON.stringify({
+            model,
+            messages: [
+              { role: "system", content: systemPrompt },
+              ...threadMsgs,
+              { role: "user", content: user_message },
+            ],
+            response_format: { type: "json_object" },
+          }),
+        });
+      } catch (e) {
+        await endGatewayLog({ ...__log, input: gwInput }, { ok: false, error: (e as Error).message });
+        throw e;
+      }
       const data = await r.json();
       if (!r.ok) {
-        aiError = data?.error?.message ?? `openai_http_${r.status}`;
+        aiError = data?.error?.message ?? `gateway_http_${r.status}`;
+        await endGatewayLog({ ...__log, input: gwInput }, { ok: false, error: aiError });
+        if (r.status === 429) aiError = "Rate limit. Try again shortly.";
+        if (r.status === 402) aiError = "AI credits exhausted.";
       } else {
         assistantText = data?.choices?.[0]?.message?.content ?? "";
         usage = data?.usage ?? null;
         parsed = safeJsonParse(assistantText);
+        await endGatewayLog({ ...__log, input: gwInput }, {
+          ok: true,
+          prompt_tokens: usage?.prompt_tokens ?? 0,
+          completion_tokens: usage?.completion_tokens ?? 0,
+        });
       }
     } catch (e) {
       aiError = (e as Error).message;

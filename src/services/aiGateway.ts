@@ -448,23 +448,24 @@ function blockedResult(
 
 /** Manifest of edge functions that still call Lovable AI directly. Used by the
  *  Command Centre AI Gateway Health panel to show bypass status until migrated. */
-export const KNOWN_DIRECT_AI_CALLERS: Array<{ name: string; status: "pending_migration" }> = [
-  { name: "agent-permission-audit", status: "pending_migration" },
-  { name: "ai-conversation-engine", status: "pending_migration" },
-  { name: "ai-engagement-agent-run", status: "pending_migration" },
-  { name: "apollo-qualify", status: "pending_migration" },
-  { name: "business-daily-operating-loop-acceptance", status: "pending_migration" },
-  { name: "business-daily-operating-run", status: "pending_migration" },
-  { name: "business-external-activation-readiness-run", status: "pending_migration" },
-  { name: "business-weekly-review-acceptance", status: "pending_migration" },
-  { name: "business-weekly-review-run", status: "pending_migration" },
-  { name: "founder-copilot", status: "pending_migration" },
-  { name: "generate-proposal", status: "pending_migration" },
-  { name: "internal-proposal-generate", status: "pending_migration" },
-  { name: "lead-fit-classify", status: "pending_migration" },
-  { name: "liftor-brain-chat", status: "pending_migration" },
-  { name: "ma-intelligence-orchestrator", status: "pending_migration" },
-  { name: "multilingual-intake-preview", status: "pending_migration" },
+export type DirectAICallerStatus = "migrated" | "migrated_no_op" | "pending_migration" | "blocked";
+export const KNOWN_DIRECT_AI_CALLERS: Array<{ name: string; status: DirectAICallerStatus }> = [
+  { name: "agent-permission-audit", status: "migrated_no_op" },
+  { name: "ai-conversation-engine", status: "migrated" },
+  { name: "ai-engagement-agent-run", status: "migrated" },
+  { name: "apollo-qualify", status: "migrated" },
+  { name: "business-daily-operating-loop-acceptance", status: "migrated_no_op" },
+  { name: "business-daily-operating-run", status: "migrated_no_op" },
+  { name: "business-external-activation-readiness-run", status: "migrated_no_op" },
+  { name: "business-weekly-review-acceptance", status: "migrated_no_op" },
+  { name: "business-weekly-review-run", status: "migrated_no_op" },
+  { name: "founder-copilot", status: "migrated" },
+  { name: "generate-proposal", status: "migrated" },
+  { name: "internal-proposal-generate", status: "migrated" },
+  { name: "lead-fit-classify", status: "migrated" },
+  { name: "liftor-brain-chat", status: "migrated" },
+  { name: "ma-intelligence-orchestrator", status: "migrated" },
+  { name: "multilingual-intake-preview", status: "migrated" },
 ];
 
 export const aiGateway = { execute, KNOWN_DIRECT_AI_CALLERS };

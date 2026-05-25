@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { beginGatewayLog, endGatewayLog } from "../_shared/aiGateway.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -182,7 +183,19 @@ Use the classify_and_reply tool. Classifications:
 
     const userPrompt = `Conversation so far (oldest → newest):\n${history}\n\nThe LAST message from the prospect is what you must respond to.`;
 
-    // Call Lovable AI
+    // Call Lovable AI (gateway-logged)
+    const __gwInput = {
+      action_type: "ai_conversation_reply",
+      task_category: "inbound_reply",
+      conversation_id: conv.id,
+      model: "google/gemini-2.5-flash",
+      fallback_model: "google/gemini-3-flash-preview",
+      risk_level: "high" as const,
+      request_type: "inbound_reply_classify",
+      messages: [],
+      metadata: { contact_id: contact.id },
+    };
+    const __log = await beginGatewayLog(__gwInput);
     const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -220,6 +233,7 @@ Use the classify_and_reply tool. Classifications:
 
     if (!aiRes.ok) {
       const errText = await aiRes.text();
+      await endGatewayLog({ ...__log, input: __gwInput }, { ok: false, error: `gateway_${aiRes.status}` });
       await supabase.from("ai_actions").insert({
         conversation_id: conv.id,
         contact_id: contact.id,
@@ -233,6 +247,11 @@ Use the classify_and_reply tool. Classifications:
     }
 
     const aiJson = await aiRes.json();
+    await endGatewayLog({ ...__log, input: __gwInput }, {
+      ok: true,
+      prompt_tokens: aiJson?.usage?.prompt_tokens ?? 0,
+      completion_tokens: aiJson?.usage?.completion_tokens ?? 0,
+    });
     const tc = aiJson?.choices?.[0]?.message?.tool_calls?.[0];
     const args = tc ? JSON.parse(tc.function.arguments) : null;
     const classification: string = args?.classification ?? "neutral";
