@@ -4063,3 +4063,42 @@ Sharpens cost reporting by tagging every gateway call with a cost basis and seed
 *End of AI Cost Accuracy Hardening (v5.9.7).*
 `;
 };
+
+export const PORTFOLIO_COMMANDER_ENGINE_TECH_NOTE = `
+## Portfolio Commander Step Engine (v5.9.8)
+
+### Design
+- Edge function: \`portfolio-commander-step-engine\`.
+- Drives \`ai_workflow_runs\` + \`ai_workflow_steps\` by executing the next eligible step through \`callAIGateway\` (no direct provider calls).
+- Actions: \`create\`, \`tick\`, \`tick_all\`, \`retry\`, \`cancel\`, \`approve_step\`. Admin-only via user_roles.
+- Idempotency key per step: \`wf:{workflow_id}:step:{step_index}\` — duplicate calls are blocked by the gateway.
+- Each step writes to \`ai_runtime_events\` (workflow_id stored in metadata) and \`agent_action_audit_log\` (action_type = create/cancel/retry/approve_step).
+
+### Workflow types (initial set)
+- portfolio_weekly_review, asset_exit_review, quarterly_build_selection, buyer_warmup_plan, data_room_cleanup, valuation_refresh, execution_target_generation, competitor_investor_scan.
+- Each template defines step name, owner agent (ai_agent_registry.agent_name), risk level, approval flag, prompt, completion criteria. Templates ship in code (TEMPLATES const).
+
+### Step execution
+- On tick, the engine loads the step at \`current_step\`, marks it running, then calls \`callAIGateway\` with agent_id, business_id, portfolio_asset_id, workflow_id, risk_level, approval_required, idempotency_key, action_type=\`workflow.{type}.{step_name}\`, task_category=portfolio_commander_workflow.
+- On success the step is marked completed with output_summary (first 4000 chars of the model reply), request_id is stored, and the run's current_step is advanced. When current_step == total_steps, the run is marked completed.
+
+### Approval pause logic
+- Steps with approval_required + risk in {high, critical} are NOT sent to the provider. The engine parks the step as waiting_approval and the run as waiting_approval. The gateway's own short-circuit provides defence-in-depth: if a step ever reaches \`callAIGateway\` with those flags, it is still parked.
+- Approve via \`action=approve_step\`. Approving advances the run; the engine never auto-fires the external action — that remains a founder workflow.
+
+### Retry / cancel
+- \`retry\` is only valid on failed/cancelled steps. High-risk approval-gated steps are reset to waiting_approval instead of queued. Low/medium-risk steps are requeued; idempotency keys prevent duplicate provider calls or duplicate external actions.
+- \`cancel\` marks the run cancelled and bulk-cancels its in-flight queued/running/waiting_approval steps.
+
+### Surfaces
+- /founder/ai-cost/orchestration-live: full PortfolioCommanderEnginePanel with create + run-next + per-step retry/approve/cancel.
+- /founder/portfolio-exit: compact PortfolioCommanderEnginePanel showing active workflows + current/next step.
+
+### Limitations
+- No internal scheduler yet — workflows tick on user-initiated requests or scheduled tick_all calls (cron not wired here).
+- Approval workflow is binary (approve → mark completed); a richer reject/comment flow is out of scope for v5.9.8.
+- Templates live in code rather than the database; a future Workflow Template Library can lift them out.
+- Founder approval for high-risk steps does NOT auto-fire the external action; it only unblocks the run. The actual external action remains a separate founder-initiated step.
+
+*End of Portfolio Commander Step Engine (v5.9.8).*
+`;
