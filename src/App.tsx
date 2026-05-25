@@ -177,6 +177,12 @@ import CustomerOnboardingChecklists from "./pages/founder/customer-onboarding/Ch
 import CustomerOnboardingMissingInfo from "./pages/founder/customer-onboarding/MissingInfo";
 import CustomerOnboardingWelcomePacks from "./pages/founder/customer-onboarding/WelcomePacks";
 import CustomerOnboardingSettings from "./pages/founder/customer-onboarding/Settings";
+import SupportTicketsOverview from "./pages/founder/support-tickets/Overview";
+import SupportTicketsQueue from "./pages/founder/support-tickets/Queue";
+import SupportTicketsSLA from "./pages/founder/support-tickets/SLA";
+import SupportTicketsEscalations from "./pages/founder/support-tickets/Escalations";
+import SupportTicketsKnowledge from "./pages/founder/support-tickets/Knowledge";
+import SupportTicketsSettings from "./pages/founder/support-tickets/Settings";
 import CustomerUpgradesHub from "./pages/founder/customer-upgrades/Hub";
 import CustomerUpgradesOpportunities from "./pages/founder/customer-upgrades/Opportunities";
 import CustomerUpgradesProductLadders from "./pages/founder/customer-upgrades/ProductLadders";
@@ -449,6 +455,12 @@ const App = () => (
             <Route path="/founder/customer-onboarding/missing-info" element={<FounderRoute><CustomerOnboardingMissingInfo /></FounderRoute>} />
             <Route path="/founder/customer-onboarding/welcome-packs" element={<FounderRoute><CustomerOnboardingWelcomePacks /></FounderRoute>} />
             <Route path="/founder/customer-onboarding/settings" element={<FounderRoute><CustomerOnboardingSettings /></FounderRoute>} />
+            <Route path="/founder/support-tickets" element={<FounderRoute><SupportTicketsOverview /></FounderRoute>} />
+            <Route path="/founder/support-tickets/queue" element={<FounderRoute><SupportTicketsQueue /></FounderRoute>} />
+            <Route path="/founder/support-tickets/sla" element={<FounderRoute><SupportTicketsSLA /></FounderRoute>} />
+            <Route path="/founder/support-tickets/escalations" element={<FounderRoute><SupportTicketsEscalations /></FounderRoute>} />
+            <Route path="/founder/support-tickets/knowledge" element={<FounderRoute><SupportTicketsKnowledge /></FounderRoute>} />
+            <Route path="/founder/support-tickets/settings" element={<FounderRoute><SupportTicketsSettings /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
