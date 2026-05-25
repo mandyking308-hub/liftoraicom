@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { beginGatewayLog, endGatewayLog } from "../_shared/aiGateway.ts";
+import { callAIGateway } from "../_shared/aiGateway.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -10,7 +10,6 @@ const corsHeaders = {
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 
 const MODEL = "google/gemini-2.5-pro";
 
@@ -94,61 +93,39 @@ async function callAI(
   schema: Record<string, unknown>,
   toolName: string,
 ): Promise<{ parsed: any; raw: string }> {
-  const __gwInput = {
+  const gw = await callAIGateway({
     action_type: "ma_intelligence",
     task_category: "ma_analysis",
     model: MODEL,
     fallback_model: "google/gemini-3-flash-preview",
-    risk_level: "medium" as const,
+    risk_level: "medium",
     request_type: toolName,
-    messages: [],
     metadata: { tool: toolName },
-  };
-  const __log = await beginGatewayLog(__gwInput);
-  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${LOVABLE_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      messages: [
-        { role: "system", content: SYSTEM_PRINCIPLES },
-        { role: "user", content: prompt },
-      ],
-      tools: [{
-        type: "function",
-        function: { name: toolName, description: "Return structured analysis", parameters: schema },
-      }],
-      tool_choice: { type: "function", function: { name: toolName } },
-    }),
+    messages: [
+      { role: "system", content: SYSTEM_PRINCIPLES },
+      { role: "user", content: prompt },
+    ],
+    tools: [{
+      type: "function",
+      function: { name: toolName, description: "Return structured analysis", parameters: schema },
+    }],
+    tool_choice: { type: "function", function: { name: toolName } },
   });
 
-  if (res.status === 429) {
-    await endGatewayLog({ ...__log, input: __gwInput }, { ok: false, error: "rate_limited" });
+  if (gw.status === "rate_limited") {
     throw new Response(JSON.stringify({ error: "AI rate limit exceeded. Please try again later." }),
       { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
-  if (res.status === 402) {
-    await endGatewayLog({ ...__log, input: __gwInput }, { ok: false, error: "payment_required" });
+  if (gw.status === "payment_required") {
     throw new Response(JSON.stringify({ error: "AI credits exhausted. Add credits at Settings → Workspace → Usage." }),
       { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
-  if (!res.ok) {
-    const text = await res.text();
-    console.error("AI gateway error", res.status, text);
-    await endGatewayLog({ ...__log, input: __gwInput }, { ok: false, error: `gateway_${res.status}` });
+  if (gw.status !== "completed" || !gw.data) {
+    console.error("AI gateway error", gw.http_status, gw.error);
     throw new Response(JSON.stringify({ error: "AI gateway failure" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
-
-  const data = await res.json();
-  await endGatewayLog({ ...__log, input: __gwInput }, {
-    ok: true,
-    prompt_tokens: data?.usage?.prompt_tokens ?? 0,
-    completion_tokens: data?.usage?.completion_tokens ?? 0,
-  });
+  const data = gw.data;
   const call = data.choices?.[0]?.message?.tool_calls?.[0];
   const content = data.choices?.[0]?.message?.content ?? "";
   const rawArgs = call?.function?.arguments ?? content ?? "";

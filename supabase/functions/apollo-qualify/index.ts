@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { beginGatewayLog, endGatewayLog } from "../_shared/aiGateway.ts";
+import { callAIGateway } from "../_shared/aiGateway.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -7,7 +7,6 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const LOVABLE_AI = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const AI_TIMEOUT_MS = 20_000;
 const DB_TIMEOUT_MS = 8_000;
 const TOTAL_BUDGET_MS = 110_000;
@@ -79,73 +78,53 @@ function ruleScore(p: { title?: string | null; company?: string | null; country?
 async function aiClassify(items: { id: string; title: string | null; company: string | null }[]) {
   const apiKey = Deno.env.get("LOVABLE_API_KEY");
   if (!apiKey || items.length === 0) return null;
-  const __gwInput = {
-    action_type: "apollo_qualify_classify",
-    task_category: "lead_qualification",
-    model: "google/gemini-2.5-flash-lite",
-    fallback_model: "google/gemini-3-flash-preview",
-    risk_level: "medium" as const,
-    request_type: "lead_classify_batch",
-    messages: [],
-    metadata: { batch_size: items.length },
-  };
-  const __log = await beginGatewayLog(__gwInput);
   try {
-    const resp = await fetch(LOVABLE_AI, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      signal: AbortSignal.timeout(AI_TIMEOUT_MS),
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash-lite",
-        messages: [
-          { role: "system", content: "You classify B2B contacts for a multi-business portfolio. Respond by calling the classify function with one entry per input id." },
-          { role: "user", content: `Tag taxonomy: ${TAG_TAXONOMY.join(", ")}. Classify each:\n${JSON.stringify(items)}` },
-        ],
-        tools: [{
-          type: "function",
-          function: {
-            name: "classify",
-            description: "Return tags and qualification for each contact.",
-            parameters: {
-              type: "object",
-              properties: {
-                results: {
-                  type: "array",
-                  items: {
-                    type: "object",
-                    properties: {
-                      id: { type: "string" },
-                      qualification: { type: "string", enum: ["qualified","maybe","not_qualified","needs_review"] },
-                      reason: { type: "string" },
-                      tags: { type: "array", items: { type: "string", enum: TAG_TAXONOMY } },
-                    },
-                    required: ["id","qualification","reason","tags"],
+    const gw = await withTimeout(callAIGateway({
+      action_type: "apollo_qualify_classify",
+      task_category: "lead_qualification",
+      model: "google/gemini-2.5-flash-lite",
+      fallback_model: "google/gemini-3-flash-preview",
+      risk_level: "medium",
+      request_type: "lead_classify_batch",
+      metadata: { batch_size: items.length },
+      messages: [
+        { role: "system", content: "You classify B2B contacts for a multi-business portfolio. Respond by calling the classify function with one entry per input id." },
+        { role: "user", content: `Tag taxonomy: ${TAG_TAXONOMY.join(", ")}. Classify each:\n${JSON.stringify(items)}` },
+      ],
+      tools: [{
+        type: "function",
+        function: {
+          name: "classify",
+          description: "Return tags and qualification for each contact.",
+          parameters: {
+            type: "object",
+            properties: {
+              results: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    id: { type: "string" },
+                    qualification: { type: "string", enum: ["qualified","maybe","not_qualified","needs_review"] },
+                    reason: { type: "string" },
+                    tags: { type: "array", items: { type: "string", enum: TAG_TAXONOMY } },
                   },
+                  required: ["id","qualification","reason","tags"],
                 },
               },
-              required: ["results"],
             },
+            required: ["results"],
           },
-        }],
-        tool_choice: { type: "function", function: { name: "classify" } },
-      }),
-    });
-    if (!resp.ok) {
-      await endGatewayLog({ ...__log, input: __gwInput }, { ok: false, error: `gateway_${resp.status}` });
-      return null;
-    }
-    const data = await resp.json();
-    await endGatewayLog({ ...__log, input: __gwInput }, {
-      ok: true,
-      prompt_tokens: data?.usage?.prompt_tokens ?? 0,
-      completion_tokens: data?.usage?.completion_tokens ?? 0,
-    });
-    const args = data?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
+        },
+      }],
+      tool_choice: { type: "function", function: { name: "classify" } },
+    }), AI_TIMEOUT_MS, "ai_classify");
+    if (gw.status !== "completed" || !gw.data) return null;
+    const args = gw.data?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
     if (!args) return null;
     const parsed = JSON.parse(args);
     return parsed.results as { id: string; qualification: string; reason: string; tags: string[] }[];
-  } catch (e) {
-    await endGatewayLog({ ...__log, input: __gwInput }, { ok: false, error: (e as Error).message });
+  } catch {
     return null;
   }
 }

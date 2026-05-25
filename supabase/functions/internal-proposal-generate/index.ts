@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { beginGatewayLog, endGatewayLog } from "../_shared/aiGateway.ts";
+import { callAIGateway } from "../_shared/aiGateway.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -62,30 +62,19 @@ Processes to Automate: ${processes.join(", ")}
 Scale: ${scale}
 Timeline: ${timeline}`;
 
-    const __gwInput = {
+    const gw = await callAIGateway({
       action_type: "internal_proposal_generate",
       task_category: "proposal_generation",
       model: "google/gemini-2.5-flash",
       fallback_model: "google/gemini-3-flash-preview",
-      risk_level: "high" as const,
+      risk_level: "high",
       request_type: "internal_proposal_draft",
-      messages: [],
       metadata: { contact_id: contact.id, industry },
-    };
-    const __log = await beginGatewayLog(__gwInput);
-    const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${Deno.env.get("LOVABLE_API_KEY")}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        tools: [{
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+      tools: [{
           type: "function",
           function: {
             name: "suggest_proposal",
@@ -130,23 +119,15 @@ Timeline: ${timeline}`;
             },
           },
         }],
-        tool_choice: { type: "function", function: { name: "suggest_proposal" } },
-      }),
+      tool_choice: { type: "function", function: { name: "suggest_proposal" } },
     });
 
-    if (!aiRes.ok) {
-      const t = await aiRes.text();
-      await endGatewayLog({ ...__log, input: __gwInput }, { ok: false, error: `gateway_${aiRes.status}` });
-      if (aiRes.status === 429) return j({ error: "AI rate-limited. Try again shortly." }, 429);
-      if (aiRes.status === 402) return j({ error: "AI credits exhausted." }, 402);
-      return j({ error: "AI gateway error", detail: t.slice(0,300) }, 500);
+    if (gw.status !== "completed" || !gw.data) {
+      if (gw.status === "rate_limited") return j({ error: "AI rate-limited. Try again shortly." }, 429);
+      if (gw.status === "payment_required") return j({ error: "AI credits exhausted." }, 402);
+      return j({ error: "AI gateway error", detail: (gw.error ?? "").slice(0,300) }, 500);
     }
-    const aiJson = await aiRes.json();
-    await endGatewayLog({ ...__log, input: __gwInput }, {
-      ok: true,
-      prompt_tokens: aiJson?.usage?.prompt_tokens ?? 0,
-      completion_tokens: aiJson?.usage?.completion_tokens ?? 0,
-    });
+    const aiJson = gw.data;
     const tc = aiJson?.choices?.[0]?.message?.tool_calls?.[0];
     if (!tc) return j({ error: "No proposal tool call" }, 500);
     const p = JSON.parse(tc.function.arguments);

@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { beginGatewayLog, endGatewayLog } from "../_shared/aiGateway.ts";
+import { callAIGateway } from "../_shared/aiGateway.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -123,34 +123,21 @@ Company: ${r.company ?? ""}
 Categories: dj, playlist_curator, music_blog, radio, event_promoter, creator_influencer, poor_fit.
 Return ONLY JSON: {"fit":"<category>","confidence":0..1,"reason":"<short>"}`;
       try {
-        const __gwInput = {
+        const gw = await callAIGateway({
           action_type: "lead_fit_classify",
           task_category: "lead_qualification",
           model: "google/gemini-2.5-flash-lite",
           fallback_model: "google/gemini-3-flash-preview",
-          risk_level: "medium" as const,
+          risk_level: "medium",
           request_type: "lead_fit",
-          messages: [],
           metadata: { apollo_lead_id: r.apollo_lead_id },
-        };
-        const __log = await beginGatewayLog(__gwInput);
-        const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-          body: JSON.stringify({
-            model: "google/gemini-2.5-flash-lite",
-            messages: [{ role: "user", content: prompt }],
-            response_format: { type: "json_object" },
-          }),
+          response_format: { type: "json_object" },
+          messages: [{ role: "user", content: prompt }],
         });
-        const j = await resp.json();
-        await endGatewayLog({ ...__log, input: __gwInput }, {
-          ok: resp.ok,
-          prompt_tokens: j?.usage?.prompt_tokens ?? 0,
-          completion_tokens: j?.usage?.completion_tokens ?? 0,
-          error: resp.ok ? undefined : `gateway_${resp.status}`,
-        });
-        const txt = j?.choices?.[0]?.message?.content ?? "{}";
+        if (gw.status !== "completed" || !gw.data) {
+          throw new Error(gw.error ?? `gateway_${gw.http_status}`);
+        }
+        const txt = gw.data?.choices?.[0]?.message?.content ?? "{}";
         const parsed = JSON.parse(txt);
         const fit = String(parsed.fit ?? "poor_fit");
         const conf = Math.max(0, Math.min(1, Number(parsed.confidence ?? 0.5)));
