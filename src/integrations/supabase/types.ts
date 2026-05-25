@@ -3550,6 +3550,59 @@ export type Database = {
         }
         Relationships: []
       }
+      approved_claims: {
+        Row: {
+          approval_status: string
+          approved_at: string | null
+          approved_by: string | null
+          audit_metadata: Json
+          business_id: string | null
+          claim_text: string
+          claim_type: string
+          created_at: string
+          evidence_source_id: string | null
+          id: string
+          product_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          audit_metadata?: Json
+          business_id?: string | null
+          claim_text: string
+          claim_type?: string
+          created_at?: string
+          evidence_source_id?: string | null
+          id?: string
+          product_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          audit_metadata?: Json
+          business_id?: string | null
+          claim_text?: string
+          claim_type?: string
+          created_at?: string
+          evidence_source_id?: string | null
+          id?: string
+          product_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "approved_claims_evidence_source_id_fkey"
+            columns: ["evidence_source_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       approved_template_library: {
         Row: {
           approval_status: string
@@ -21481,6 +21534,72 @@ export type Database = {
           },
         ]
       }
+      knowledge_conflicts: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          conflict_summary: string
+          conflict_type: string
+          created_at: string
+          id: string
+          resolution_status: string
+          resolved_at: string | null
+          resolved_by: string | null
+          resolved_value: string | null
+          severity: string
+          source_a_id: string | null
+          source_b_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          conflict_summary: string
+          conflict_type?: string
+          created_at?: string
+          id?: string
+          resolution_status?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          resolved_value?: string | null
+          severity?: string
+          source_a_id?: string | null
+          source_b_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          conflict_summary?: string
+          conflict_type?: string
+          created_at?: string
+          id?: string
+          resolution_status?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          resolved_value?: string | null
+          severity?: string
+          source_a_id?: string | null
+          source_b_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_conflicts_source_a_id_fkey"
+            columns: ["source_a_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_sources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "knowledge_conflicts_source_b_id_fkey"
+            columns: ["source_b_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       knowledge_documents: {
         Row: {
           created_at: string
@@ -21641,6 +21760,60 @@ export type Database = {
           source_type?: string
           source_url?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      knowledge_sources: {
+        Row: {
+          active: boolean
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          expires_at: string | null
+          file_reference: string | null
+          id: string
+          last_verified_at: string | null
+          source_type: string
+          source_url: string | null
+          summary: string | null
+          title: string
+          trust_level: string
+          updated_at: string
+          verified_by: string | null
+        }
+        Insert: {
+          active?: boolean
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          expires_at?: string | null
+          file_reference?: string | null
+          id?: string
+          last_verified_at?: string | null
+          source_type?: string
+          source_url?: string | null
+          summary?: string | null
+          title: string
+          trust_level?: string
+          updated_at?: string
+          verified_by?: string | null
+        }
+        Update: {
+          active?: boolean
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          expires_at?: string | null
+          file_reference?: string | null
+          id?: string
+          last_verified_at?: string | null
+          source_type?: string
+          source_url?: string | null
+          summary?: string | null
+          title?: string
+          trust_level?: string
+          updated_at?: string
+          verified_by?: string | null
         }
         Relationships: []
       }
