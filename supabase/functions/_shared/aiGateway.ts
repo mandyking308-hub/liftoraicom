@@ -655,15 +655,18 @@ export async function beginGatewayLog(input: AIGatewayCallInput): Promise<{ trac
 
 export async function endGatewayLog(
   ctx: { trace_id: string; request_id: string; input: AIGatewayCallInput },
-  result: { ok: boolean; prompt_tokens?: number; completion_tokens?: number; error?: string },
+  result: { ok: boolean; prompt_tokens?: number; completion_tokens?: number; error?: string; cost_basis?: CostBasis },
 ) {
   const sb = getServiceClient();
   const completedAt = new Date().toISOString();
+  const basis: CostBasis = result.cost_basis
+    ?? (result.prompt_tokens != null && result.completion_tokens != null ? "actual_tokens" : "streaming_estimate");
   await writeLedger(ctx.trace_id, ctx.input, {
     status: result.ok ? "completed" : "failed",
     prompt_tokens: result.prompt_tokens ?? 0,
     completion_tokens: result.completion_tokens ?? 0,
     output_summary: result.ok ? ctx.input.action_type : (result.error ?? "error"),
+    cost_basis: basis,
   });
   await updateRuntimeRequest(sb, ctx.request_id, {
     status: result.ok ? "completed" : "failed",
@@ -672,6 +675,15 @@ export async function endGatewayLog(
     completion_tokens: result.completion_tokens ?? null,
     error_message: result.ok ? null : (result.error ?? null),
   });
+  if (result.ok) {
+    await computeAndTagCost(sb, {
+      request_id: ctx.request_id,
+      model: ctx.input.model ?? "google/gemini-3-flash-preview",
+      prompt_tokens: result.prompt_tokens, completion_tokens: result.completion_tokens,
+      basis,
+      agent_id: ctx.input.agent_id ?? null, business_id: ctx.input.business_id ?? null,
+    });
+  }
   await recordRuntimeEvent(sb, {
     request_id: ctx.request_id,
     conversation_id: ctx.input.conversation_id ?? null,
