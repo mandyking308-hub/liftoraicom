@@ -3824,5 +3824,36 @@ Per-agent daily_run_limit + monthly_budget_gbp on ai_agent_registry. Provider 42
 Concurrency check is best-effort (no row-level lock); under burst load minor over-allocation is possible. Estimated_cost_gbp is filled later by the pricing registry. Existing 16 bypass functions still report via ledger only until migrated per the AI Gateway Bypass Audit (v5.8).
 
 *End of AI Gateway Runtime (v5.9).*
+
+## AI Gateway Migration — Batch A (v5.9.1 — 2026-05-25)
+
+First migration pass against the Bypass Audit. Live-first: no functionality disabled, no behaviour change beyond observability.
+
+### Functions migrated
+- multilingual-intake-preview — wrapped Vercel AI SDK call with beginGatewayLog / endGatewayLog (added to supabase/functions/_shared/aiGateway.ts). Calls now appear in ai_gateway_requests + ai_usage_ledger + ai_runtime_events with trace_id and request_id. Structured output and founder-review behaviour preserved.
+- agent-permission-audit — re-audit shows no AI call present (LOVABLE_API_KEY only listed in TRACKED_SECRETS for presence reporting). Marked migrated_no_op.
+- business-external-activation-readiness-run — re-audit shows no AI call present (env presence flag only). Marked migrated_no_op.
+
+### New helpers (supabase/functions/_shared/aiGateway.ts)
+beginGatewayLog(input) and endGatewayLog(ctx, result) — for any edge function that already calls the Lovable AI Gateway through an SDK (Vercel AI SDK, OpenAI-compatible client) and cannot easily route through callAIGateway. They produce the same ledger + runtime rows as a first-class gateway call.
+
+### Standard for all future AI calls
+1. Prefer callAIGateway / streamAIGateway from _shared/aiGateway.ts.
+2. If an SDK call is required for structured output, wrap it with beginGatewayLog / endGatewayLog.
+3. High-risk (external-facing drafts, contact, spend, legal/tax) must set risk_level high|critical and approval_required true — provider is not called until approval lands.
+4. No direct fetch to ai.gateway.lovable.dev or api.openai.com outside _shared/aiGateway.ts.
+
+### Remaining bypasses (next batches)
+- Batch B (medium-risk active): ai-conversation-engine, ai-engagement-agent-run, apollo-qualify, business-daily-operating-run, business-weekly-review-run, founder-copilot, internal-proposal-generate, lead-fit-classify, ma-intelligence-orchestrator.
+- Batch C (high-risk / approval-sensitive): generate-proposal, liftor-brain-chat (OpenAI direct).
+- Batch D (deprecated candidates): business-daily-operating-loop-acceptance, business-weekly-review-acceptance — confirm unused before removal.
+
+### Risk / approval changes
+No risk model change in v5.9.1. multilingual-intake-preview remains preview-only (send_allowed=false, founder_review_required=true).
+
+### Known limitations
+SDK-wrapped logging (Batch A) records lifecycle and token usage but does not yet enforce per-agent concurrency preflight or fallback-model behaviour; only callAIGateway does. Cost is filled in by the pricing registry once tagged.
+
+*End of AI Gateway Migration — Batch A (v5.9.1).*
 `;
 };
