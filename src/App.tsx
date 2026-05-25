@@ -224,6 +224,12 @@ import PrivacyConsent from "./pages/founder/privacy/Consent";
 import PrivacyProcessors from "./pages/founder/privacy/Processors";
 import PrivacyBreaches from "./pages/founder/privacy/Breaches";
 import PrivacySettings from "./pages/founder/privacy/Settings";
+import IncidentsOverview from "./pages/founder/incidents/Overview";
+import IncidentsLive from "./pages/founder/incidents/Live";
+import IncidentsPostmortems from "./pages/founder/incidents/Postmortems";
+import IncidentsContinuity from "./pages/founder/incidents/Continuity";
+import IncidentsNotifications from "./pages/founder/incidents/Notifications";
+import IncidentsSettings from "./pages/founder/incidents/Settings";
 import CustomerUpgradesHub from "./pages/founder/customer-upgrades/Hub";
 import CustomerUpgradesOpportunities from "./pages/founder/customer-upgrades/Opportunities";
 import CustomerUpgradesProductLadders from "./pages/founder/customer-upgrades/ProductLadders";
@@ -543,6 +549,12 @@ const App = () => (
             <Route path="/founder/privacy/processors" element={<FounderRoute><PrivacyProcessors /></FounderRoute>} />
             <Route path="/founder/privacy/breaches" element={<FounderRoute><PrivacyBreaches /></FounderRoute>} />
             <Route path="/founder/privacy/settings" element={<FounderRoute><PrivacySettings /></FounderRoute>} />
+            <Route path="/founder/incidents" element={<FounderRoute><IncidentsOverview /></FounderRoute>} />
+            <Route path="/founder/incidents/live" element={<FounderRoute><IncidentsLive /></FounderRoute>} />
+            <Route path="/founder/incidents/postmortems" element={<FounderRoute><IncidentsPostmortems /></FounderRoute>} />
+            <Route path="/founder/incidents/continuity" element={<FounderRoute><IncidentsContinuity /></FounderRoute>} />
+            <Route path="/founder/incidents/notifications" element={<FounderRoute><IncidentsNotifications /></FounderRoute>} />
+            <Route path="/founder/incidents/settings" element={<FounderRoute><IncidentsSettings /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
