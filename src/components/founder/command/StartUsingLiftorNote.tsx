@@ -6,13 +6,14 @@ import { Sparkles, ArrowRight } from "lucide-react";
 const STEPS: Array<{ n: number; label: string; to?: string; note?: string }> = [
   { n: 1, label: "Start here — Command Centre", to: "/founder/command-centre" },
   { n: 2, label: "Review Today's Founder Cockpit (top of this page)" },
-  { n: 3, label: "Open Founder Action Board", to: "/founder/ai-cost/action-board" },
-  { n: 4, label: "Clear the Human Approval Queue", to: "/founder/ai-cost/approvals" },
-  { n: 5, label: "Check Live Alerts", to: "/founder/ai-cost/alerts" },
-  { n: 6, label: "Check AI Gateway / Runtime Health", to: "/founder/ai-cost/runtime" },
-  { n: 7, label: "Review AI spend (today + month)", to: "/founder/ai-cost/ledger" },
-  { n: 8, label: "Ask Liftor Brain / Founder Copilot one internal question", to: "/founder/brain" },
-  { n: 9, label: "Never approve an external action unless ready — sends/posts/contacts/spend are gated" },
+  { n: 3, label: "Open First-Use Configuration (whole-Liftor checklist)", to: "/founder/first-use-configuration" },
+  { n: 4, label: "Open Founder Action Board", to: "/founder/ai-cost/action-board" },
+  { n: 5, label: "Clear the Human Approval Queue", to: "/founder/ai-cost/approvals" },
+  { n: 6, label: "Check Live Alerts", to: "/founder/ai-cost/alerts" },
+  { n: 7, label: "Check AI Gateway / Runtime Health", to: "/founder/ai-cost/runtime" },
+  { n: 8, label: "Review AI spend (today + month)", to: "/founder/ai-cost/ledger" },
+  { n: 9, label: "Ask Liftor Brain / Founder Copilot one internal question", to: "/founder/brain" },
+  { n: 10, label: "Never approve an external action unless ready — sends/posts/contacts/spend are gated" },
 ];
 
 export default function StartUsingLiftorNote() {
