@@ -2603,6 +2603,129 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_workflow_runs: {
+        Row: {
+          business_id: string | null
+          completed_at: string | null
+          created_at: string
+          current_step: number
+          error_message: string | null
+          id: string
+          initiated_by: string | null
+          metadata: Json
+          portfolio_asset_id: string | null
+          priority: number
+          started_at: string | null
+          status: string
+          total_steps: number
+          updated_at: string
+          workflow_id: string
+          workflow_type: string
+        }
+        Insert: {
+          business_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          current_step?: number
+          error_message?: string | null
+          id?: string
+          initiated_by?: string | null
+          metadata?: Json
+          portfolio_asset_id?: string | null
+          priority?: number
+          started_at?: string | null
+          status?: string
+          total_steps?: number
+          updated_at?: string
+          workflow_id: string
+          workflow_type: string
+        }
+        Update: {
+          business_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          current_step?: number
+          error_message?: string | null
+          id?: string
+          initiated_by?: string | null
+          metadata?: Json
+          portfolio_asset_id?: string | null
+          priority?: number
+          started_at?: string | null
+          status?: string
+          total_steps?: number
+          updated_at?: string
+          workflow_id?: string
+          workflow_type?: string
+        }
+        Relationships: []
+      }
+      ai_workflow_steps: {
+        Row: {
+          agent_id: string | null
+          approval_required: boolean
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          input_summary: string | null
+          metadata: Json
+          output_summary: string | null
+          request_id: string | null
+          status: string
+          step_index: number
+          step_name: string
+          workflow_run_id: string
+        }
+        Insert: {
+          agent_id?: string | null
+          approval_required?: boolean
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          input_summary?: string | null
+          metadata?: Json
+          output_summary?: string | null
+          request_id?: string | null
+          status?: string
+          step_index?: number
+          step_name: string
+          workflow_run_id: string
+        }
+        Update: {
+          agent_id?: string | null
+          approval_required?: boolean
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          input_summary?: string | null
+          metadata?: Json
+          output_summary?: string | null
+          request_id?: string | null
+          status?: string
+          step_index?: number
+          step_name?: string
+          workflow_run_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_workflow_steps_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agent_registry"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_workflow_steps_workflow_run_id_fkey"
+            columns: ["workflow_run_id"]
+            isOneToOne: false
+            referencedRelation: "ai_workflow_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       apollo_automation_runs: {
         Row: {
           business_name: string
