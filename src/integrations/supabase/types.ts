@@ -15893,6 +15893,123 @@ export type Database = {
           },
         ]
       }
+      customer_upgrade_opportunities: {
+        Row: {
+          approval_required: boolean
+          business_id: string | null
+          contact_id: string | null
+          created_at: string
+          currency: string
+          current_product_id: string | null
+          customer_id: string | null
+          customer_signal: string | null
+          detail: Json
+          detected_at: string
+          due_at: string | null
+          estimated_value: number
+          id: string
+          next_best_action: string | null
+          opportunity_type: string
+          probability_score: number
+          recommended_pitch: string | null
+          recommended_upgrade_product_id: string | null
+          status: string
+          trigger_reason: string | null
+          updated_at: string
+          urgency_score: number
+        }
+        Insert: {
+          approval_required?: boolean
+          business_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          currency?: string
+          current_product_id?: string | null
+          customer_id?: string | null
+          customer_signal?: string | null
+          detail?: Json
+          detected_at?: string
+          due_at?: string | null
+          estimated_value?: number
+          id?: string
+          next_best_action?: string | null
+          opportunity_type?: string
+          probability_score?: number
+          recommended_pitch?: string | null
+          recommended_upgrade_product_id?: string | null
+          status?: string
+          trigger_reason?: string | null
+          updated_at?: string
+          urgency_score?: number
+        }
+        Update: {
+          approval_required?: boolean
+          business_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          currency?: string
+          current_product_id?: string | null
+          customer_id?: string | null
+          customer_signal?: string | null
+          detail?: Json
+          detected_at?: string
+          due_at?: string | null
+          estimated_value?: number
+          id?: string
+          next_best_action?: string | null
+          opportunity_type?: string
+          probability_score?: number
+          recommended_pitch?: string | null
+          recommended_upgrade_product_id?: string | null
+          status?: string
+          trigger_reason?: string | null
+          updated_at?: string
+          urgency_score?: number
+        }
+        Relationships: []
+      }
+      customer_upgrade_rules: {
+        Row: {
+          active: boolean
+          business_id: string | null
+          condition_json: Json
+          created_at: string
+          id: string
+          priority: number
+          recommended_action: string | null
+          requires_founder_approval: boolean
+          rule_name: string
+          trigger_type: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          business_id?: string | null
+          condition_json?: Json
+          created_at?: string
+          id?: string
+          priority?: number
+          recommended_action?: string | null
+          requires_founder_approval?: boolean
+          rule_name: string
+          trigger_type?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          business_id?: string | null
+          condition_json?: Json
+          created_at?: string
+          id?: string
+          priority?: number
+          recommended_action?: string | null
+          requires_founder_approval?: boolean
+          rule_name?: string
+          trigger_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       customer_upsell_opportunities: {
         Row: {
           approval_status: string | null
@@ -29360,6 +29477,69 @@ export type Database = {
           target_release_date?: string | null
           title?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      product_upgrade_ladders: {
+        Row: {
+          active: boolean
+          approved_pitch: string | null
+          base_product_id: string | null
+          business_id: string | null
+          created_at: string
+          currency: string
+          id: string
+          ladder_tier: string | null
+          metadata: Json
+          price_difference: number
+          prohibited_claims: string[]
+          recommended_timing: string | null
+          requires_founder_approval: boolean
+          updated_at: string
+          upgrade_name: string
+          upgrade_product_id: string | null
+          upgrade_reason: string | null
+          upgrade_trigger: string | null
+        }
+        Insert: {
+          active?: boolean
+          approved_pitch?: string | null
+          base_product_id?: string | null
+          business_id?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          ladder_tier?: string | null
+          metadata?: Json
+          price_difference?: number
+          prohibited_claims?: string[]
+          recommended_timing?: string | null
+          requires_founder_approval?: boolean
+          updated_at?: string
+          upgrade_name: string
+          upgrade_product_id?: string | null
+          upgrade_reason?: string | null
+          upgrade_trigger?: string | null
+        }
+        Update: {
+          active?: boolean
+          approved_pitch?: string | null
+          base_product_id?: string | null
+          business_id?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          ladder_tier?: string | null
+          metadata?: Json
+          price_difference?: number
+          prohibited_claims?: string[]
+          recommended_timing?: string | null
+          requires_founder_approval?: boolean
+          updated_at?: string
+          upgrade_name?: string
+          upgrade_product_id?: string | null
+          upgrade_reason?: string | null
+          upgrade_trigger?: string | null
         }
         Relationships: []
       }
