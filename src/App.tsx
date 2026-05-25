@@ -126,6 +126,7 @@ import AIFinancePack from "./pages/founder/AIFinancePack";
 import AILiveOperations from "./pages/founder/AILiveOperations";
 import AICostGovernorHub from "./pages/founder/AICostGovernorHub";
 import AIFirstUseSetup from "./pages/founder/AIFirstUseSetup";
+import FirstUseConfiguration from "./pages/founder/FirstUseConfiguration";
 import AIFounderActionBoard from "./pages/founder/AIFounderActionBoard";
 import AIRuntimeOrchestration from "./pages/founder/AIRuntimeOrchestration";
 import AIOrchestrationLive from "./pages/founder/AIOrchestrationLive";
@@ -341,6 +342,7 @@ const App = () => (
             <Route path="/founder/portfolio-exit/ai-bypass-register" element={<FounderRoute><AIGatewayBypassRegister /></FounderRoute>} />
             <Route path="/founder/ai-cost" element={<FounderRoute><AICostGovernorHub /></FounderRoute>} />
             <Route path="/founder/ai-cost/first-use" element={<FounderRoute><AIFirstUseSetup /></FounderRoute>} />
+            <Route path="/founder/first-use-configuration" element={<FounderRoute><FirstUseConfiguration /></FounderRoute>} />
             <Route path="/founder/ai-cost/action-board" element={<FounderRoute><AIFounderActionBoard /></FounderRoute>} />
             <Route path="/founder/ai-cost/runtime" element={<FounderRoute><AIRuntimeOrchestration /></FounderRoute>} />
             <Route path="/founder/ai-cost/orchestration-live" element={<FounderRoute><AIOrchestrationLive /></FounderRoute>} />
