@@ -10381,6 +10381,130 @@ export type Database = {
           },
         ]
       }
+      contract_events: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          contract_id: string
+          created_at: string
+          event_summary: string | null
+          event_type: string
+          id: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          contract_id: string
+          created_at?: string
+          event_summary?: string | null
+          event_type: string
+          id?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          contract_id?: string
+          created_at?: string
+          event_summary?: string | null
+          event_type?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_events_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contract_obligations: {
+        Row: {
+          business_id: string | null
+          contract_id: string
+          created_at: string
+          due_date: string | null
+          id: string
+          obligation_owner: string | null
+          obligation_status: string
+          obligation_summary: string
+          risk_level: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          contract_id: string
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          obligation_owner?: string | null
+          obligation_status?: string
+          obligation_summary: string
+          risk_level?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          contract_id?: string
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          obligation_owner?: string | null
+          obligation_status?: string
+          obligation_summary?: string
+          risk_level?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_obligations_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contract_provider_settings: {
+        Row: {
+          active: boolean
+          api_secret_configured: boolean
+          business_id: string | null
+          created_at: string
+          default_template_id: string | null
+          id: string
+          provider_status: string
+          provider_type: string
+          updated_at: string
+          webhook_url: string | null
+        }
+        Insert: {
+          active?: boolean
+          api_secret_configured?: boolean
+          business_id?: string | null
+          created_at?: string
+          default_template_id?: string | null
+          id?: string
+          provider_status?: string
+          provider_type?: string
+          updated_at?: string
+          webhook_url?: string | null
+        }
+        Update: {
+          active?: boolean
+          api_secret_configured?: boolean
+          business_id?: string | null
+          created_at?: string
+          default_template_id?: string | null
+          id?: string
+          provider_status?: string
+          provider_type?: string
+          updated_at?: string
+          webhook_url?: string | null
+        }
+        Relationships: []
+      }
       contract_register: {
         Row: {
           business_id: string | null
@@ -10506,6 +10630,72 @@ export type Database = {
           template_text?: string
           updated_at?: string
           version?: number
+        }
+        Relationships: []
+      }
+      contracts: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          contact_id: string | null
+          contract_status: string
+          contract_title: string
+          contract_type: string
+          created_at: string
+          currency: string | null
+          customer_id: string | null
+          end_date: string | null
+          founder_approval_required: boolean
+          id: string
+          legal_review_required: boolean
+          renewal_date: string | null
+          signed_at: string | null
+          start_date: string | null
+          updated_at: string
+          value_amount: number | null
+          vendor_id: string | null
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          contact_id?: string | null
+          contract_status?: string
+          contract_title: string
+          contract_type?: string
+          created_at?: string
+          currency?: string | null
+          customer_id?: string | null
+          end_date?: string | null
+          founder_approval_required?: boolean
+          id?: string
+          legal_review_required?: boolean
+          renewal_date?: string | null
+          signed_at?: string | null
+          start_date?: string | null
+          updated_at?: string
+          value_amount?: number | null
+          vendor_id?: string | null
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          contact_id?: string | null
+          contract_status?: string
+          contract_title?: string
+          contract_type?: string
+          created_at?: string
+          currency?: string | null
+          customer_id?: string | null
+          end_date?: string | null
+          founder_approval_required?: boolean
+          id?: string
+          legal_review_required?: boolean
+          renewal_date?: string | null
+          signed_at?: string | null
+          start_date?: string | null
+          updated_at?: string
+          value_amount?: number | null
+          vendor_id?: string | null
         }
         Relationships: []
       }
