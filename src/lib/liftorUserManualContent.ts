@@ -1,6 +1,6 @@
 // Liftor User Manual — plain-English operating guide (separate from Founder/Technical Manual)
 
-export const LIFTOR_USER_MANUAL_VERSION = "1.4 — Business Onboarding Factory Edition (24 May 2026)";
+export const LIFTOR_USER_MANUAL_VERSION = "1.5 — Live-First Founder-Use Edition (25 May 2026)";
 
 export interface ManualSection {
   number: number;
@@ -1160,3 +1160,71 @@ const FINAL_ACCEPTANCE_GUIDE: ManualSection = {
   ].join(" "),
 };
 LIFTOR_FULL_GUIDE.push(FINAL_ACCEPTANCE_GUIDE);
+
+const START_USING_LIFTOR_TODAY: ManualSection = {
+  number: 89,
+  key: "start-using-liftor-today",
+  title: "Start Using Liftor Today — 60-second founder routine",
+  body: [
+    "Liftor is live. There is no readiness gate, no simulation-only mode, no pre-live blocker. Internal AI work runs live; only external/high-risk action waits for your approval.",
+    "Step 1: Open /founder/command-centre.",
+    "Step 2: Read Today's Founder Cockpit at the top — it answers, in one card: what needs attention today, today's AI spend, month-to-date AI spend, AI Gateway health, bypasses (should be 0), pending approvals.",
+    "Step 3: Open the Founder Action Board card and clear approvals (the 9 LIVE_INTERNAL_TEST drill items can be bulk-rejected).",
+    "Step 4: Check AI Gateway Health (/founder/ai-cost/health) — confirm Live — Gateway Controlled and 0 bypasses.",
+    "Step 5: Check Alerts (/founder/ai-cost/alerts) and AI Spend (/founder/ai-cost/finance) — act on any red row.",
+    "Step 6: Run one safe internal Liftor Brain query (/founder/brain) — confirm the row appears in the ledger and runtime events.",
+    "Step 7: Do not approve any external action (email send, social publish, Apollo/Smartlead push, invoice send, buyer contact) until that business is configured and you have explicitly reviewed the draft.",
+    "Cross-references: /founder/command-centre, /founder/ai-cost, /founder/ai-cost/action-board, /founder/ai-cost/health, /founder/ai-cost/alerts, /founder/ai-cost/finance, /founder/brain, /founder/ai-first-use-setup.",
+  ].join(" "),
+};
+LIFTOR_FULL_GUIDE.push(START_USING_LIFTOR_TODAY);
+
+const WHOLE_SYSTEM_LIVE_CAPABILITY_MAP: ManualSection = {
+  number: 90,
+  key: "whole-system-live-capability-map",
+  title: "Whole-System Capability Map — what Liftor does live vs what needs approval",
+  body: [
+    "Live without approval (internal): analysis, drafting, scoring, classification, CRM/customer memory, content preparation, campaign planning, portfolio analysis, valuation modelling, finance reporting, dashboard updates, ledger logging, runtime events, internal recommendations, intelligence-gap detection.",
+    "Always requires founder approval (external/high-risk): sending email (native or SMTP), Smartlead campaign start, Smartlead lead push, follow-up sequence activation; Metricool publish/schedule, ManyChat automation mutation, public post creation; customer email, customer report share, portal invite, customer success message; invoice send, payment or spend commitment, paid API activation, credit spend; buyer/investor/adviser contact, data-room share, sale process start, kill/park/sell asset action; legal/tax/entity action, contract/compliance-sensitive action; API-key change, provider activation, webhook activation, cron/send-job activation.",
+    "Whole-system modules (every module reachable from Command Centre).",
+    "Command Centre (/founder/command-centre) — daily operating cockpit. Hosts Founder Cockpit, What-Needs-Attention-Today, Business Operating Status, Agent Operating Status, Founder Action Board, navigation to every module.",
+    "Liftor Brain (/founder/brain) — central AI co-pilot for internal questions, drafting and analysis. Reads Command Centre, manuals, CRM, approvals, revenue. Never sends, publishes or charges.",
+    "AI Cost Governor (/founder/ai-cost) — pricing, budgets, agent controls, kill switch, alerts, ROI, ledger, finance pack, security, quality, sandbox.",
+    "Gateway/Runtime Health (/founder/ai-cost/health, /founder/ai-cost/orchestration-live, /founder/ai-cost/bypass-register) — single gateway with 0 direct bypasses; cost-accuracy split between actual_tokens and estimated.",
+    "CRM (business contact + memory tables, gated for external send) — total memory of every interaction; drafts only.",
+    "Outreach (outreach_campaigns, Apollo) — internal prep live; external send/push behind approval gates.",
+    "Smartlead — all four mutating actions (campaign_start, lead_push, webhook_create, follow-up activation) locked at the gate.",
+    "Social (Metricool + ManyChat) — drafting live; publish/schedule/DM behind locked gates.",
+    "Customer Success — onboarding share, report share, complaint/dispute response, winback message all gated; drafts live.",
+    "Finance/Revenue — analysis live; invoice_send and apollo_credit_spend gated; payment/spend never automatic.",
+    "Portfolio/Exit (/founder/portfolio-exit) — valuation, build selector, M&A intelligence, execution handoff, data-room readiness all live; buyer/investor contact, data-room share, sale process start always require approval.",
+    "Approvals (/founder/ai-cost/approvals, Founder Approval Console) — every gated action lands here with the original draft and the required confirmation phrase.",
+    "Alerts (/founder/ai-cost/alerts) — budget warnings, cost anomalies, risk alerts, injection events.",
+    "Manuals — this User Manual (Simple + Full) plus the Technical Manual at /founder/manual/full.",
+    "Cross-references: /founder/command-centre, /founder/brain, /founder/ai-cost, /founder/portfolio-exit, /founder/manual, /founder/manual/full, /founder/approvals.",
+  ].join(" "),
+};
+LIFTOR_FULL_GUIDE.push(WHOLE_SYSTEM_LIVE_CAPABILITY_MAP);
+
+const TECHNICAL_MANUAL_LIVE_STATE: ManualSection = {
+  number: 91,
+  key: "technical-manual-live-state",
+  title: "Technical Manual — current architecture (v5.3 live state)",
+  body: [
+    "Live-first principle. Liftor runs live by default. There are no artificial readiness gates, no simulation-only default, no pre-live blockers. Approval locks apply only to external/high-risk action.",
+    "Architecture. React 18 + Vite + TS + Tailwind + shadcn/ui frontend; Supabase Postgres + Edge Functions + Storage backend; multi-tenant by business_id with RLS on every public table.",
+    "AI Gateway runtime path. Every approved AI call flows through supabase/functions/_shared/aiGateway.ts (callAIGateway / streamAIGateway). The gateway writes ai_gateway_requests, ai_runtime_events, ai_usage_ledger and enforces concurrency leases, budget caps, kill switch, redaction and idempotency.",
+    "Edge function list. 14+ runtime functions import the shared gateway helper (Liftor Brain, Founder Copilot, business onboarding factory, daily/weekly loops, portfolio commander, proposal generator, etc.). external-action-executor is the single chokepoint for external mutations and reads external_action_gates before doing anything.",
+    "Direct AI bypass status. 0 direct provider calls on the runtime path. The Bypass Register (/founder/ai-cost/bypass-register) reads 0. LOVABLE_API_KEY is the only AI credential; no OPENAI_API_KEY in runtime code.",
+    "Database tables (audited live). 200+ public tables, every one with rowsecurity=true. Hot paths: ai_usage_ledger, ai_gateway_requests, ai_runtime_events, ai_provider_pricing, ai_business_budgets, ai_agent_cost_controls, ai_kill_switch_state, founder_approval_items, external_action_gates, execution_result_log, business_*, brain_*, apollo_*, agent_*.",
+    "RLS/security. Founder/admin read+write on platform tables via has_role(); tenant-scoped CRM/customer/finance/portfolio tables; service-role inserts on ledger/runtime/gateway; no public SELECT on sensitive tables; UNIQUE(action_type) on external_action_gates prevents bypass ambiguity.",
+    "External action gates. 19 gates (native_email_send, smartlead_campaign_start, smartlead_lead_push, smartlead_webhook_create, social_schedule_post, social_dm_send, customer_report_share, customer_onboarding_share, complaint_response_send, dispute_response_send, external_message_send, invoice_send, apollo_credit_spend, apollo_candidate_pull, apollo_reveal, prospecting_external_search, proposal_send, compliance_action, compliance_suppression). All enabled=false, requires_founder_confirmation=true.",
+    "Ledger/runtime/cost logging. ai_usage_ledger carries cost_basis ∈ {actual_tokens, provider_reported, streaming_estimate, estimated_tokens, manual_estimate, pricing_missing}; ai_provider_pricing holds 12 active rules currently flagged confidence='estimated' pending founder verification.",
+    "Idempotency/concurrency. ai_concurrency_leases enforces per-agent/per-business slot limits; idempotency keys on external_action_executor prevent duplicate sends; portfolio commander steps marked waiting_approval do not call the provider until approval is recorded.",
+    "Command Centre data flow. CommandCentre.tsx mounts FounderCockpit + WhatNeedsAttentionToday + BusinessOperatingStatus + AgentOperatingStatus + FounderActionBoard at the top; each queries Supabase live via useQuery. Setup/activation/runbook panels collapsed into a single optional section beneath operations.",
+    "Known limitations. (a) 12 pricing rules still 'estimated'. (b) Streaming completion tokens recorded as streaming_estimate. (c) Vite bundle size warning (6 MB / 1.47 MB gz) — cosmetic. (d) Portfolio/exit has no executor wired — by design, advisory-only.",
+    "Build status. tsc --noEmit: 0 errors. vite build: passing. vitest: 54/54 tests passing including CommandCentreMasterIndex orphan audit.",
+    "Cross-references: /founder/manual/full (this technical manual), /founder/ai-cost/health, /founder/ai-cost/bypass-register, /founder/ai-cost/pricing, /founder/ai-cost/approvals, /founder/ai-first-use-setup.",
+  ].join(" "),
+};
+LIFTOR_FULL_GUIDE.push(TECHNICAL_MANUAL_LIVE_STATE);
