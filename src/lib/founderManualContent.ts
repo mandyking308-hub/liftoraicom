@@ -3987,5 +3987,45 @@ No external sending wired to autopilot. No paid APIs activated without explicit 
 Ready for live internal operation (analysis, scoring, valuation, reporting, intelligence, internal drafts, dashboards). Not yet ready for fully unattended external operation — high-risk external actions must continue to flow through the founder approval queue until Batches B + C are migrated and the Portfolio Commander step engine is wired.
 
 *End of Final AI Gateway QA & Recommendation (v5.9.4).*
+
+## Strict Concurrency Lease + Idempotency Hardening (v5.9.6)
+
+Promotes the AI runtime from "best-effort preflight" to a database-enforced lease system so simultaneous AI conversations across many businesses cannot burst over-allocate.
+
+### Lease mechanism
+- Table: ai_concurrency_leases (lease_key, request_id, agent_id, business_id, provider, model, status, acquired_at, expires_at, released_at).
+- Acquire: acquire_ai_lease(...) Postgres function. Uses pg_advisory_xact_lock keyed by ai_lease_agent:<id> and ai_lease_business:<id> so contention is scoped — no global serial bottleneck. Counts unexpired active leases inside the lock, refuses if cap reached, otherwise inserts the lease atomically.
+- Release: release_ai_lease(request_id, ok) called on success, network error, http error, 429, 402 and SDK end-of-stream.
+- Cleanup: cleanup_stale_ai_leases() sweeps any lease past TTL (default 180s) and writes a stale_lease_cleanup runtime event.
+- Per-business cap: ai_business_budgets.max_concurrent_requests (default 25).
+- Per-agent cap: ai_agent_registry.max_concurrency (existing).
+
+### Idempotency
+- callAIGateway looks up the most recent ai_gateway_requests row for the supplied idempotency_key:
+  - completed → returns the existing result with duplicate_prevented=true, writes an idempotency_replay event.
+  - running | queued | waiting_approval → blocks the duplicate, writes idempotency_duplicate_blocked, returns 202 with duplicate_prevented=true.
+  - failed | cancelled → safe retry allowed; audit trail preserved.
+- Prevents double-charge, double-generate, double-draft, double-recommendation and duplicate workflow steps.
+
+### Failure handling
+- Lease denied → response is rate_limited 429 with lease_blocked=true and a friendly "try again shortly" message. No crash, no UI break.
+- Network / 5xx → fallback model attempted once, lease released either way.
+- 429 / 402 / 4xx → ledger + runtime event + lease released; surfaced plainly to caller.
+- High-risk + approval_required → still held as waiting_approval with no provider call and no lease consumed.
+
+### Race-condition handling
+- Acquire and capacity check happen inside the same advisory-locked transaction → no TOCTOU between count() and insert().
+- Stale-lease sweep is idempotent and bounded by an UPDATE…WHERE expires_at < now().
+- Idempotency lookup orders by created_at DESC and limits to 1, so concurrent inserts with the same key cannot both pass.
+
+### Runtime Health surface
+New "Concurrency Leases" tab and new top-line stats: Leases active, Lease denials 24h, Idempotency dupes 24h, Stale lease sweeps. Founder can trigger cleanup_stale_ai_leases from the cockpit.
+
+### Remaining limitations
+- Lease infrastructure is fail-open: if the RPC errors, the call proceeds without a lease and an event is logged. This protects the live UI but means a database-side outage temporarily restores best-effort behaviour.
+- Provider-side rate-limit headers are not yet ingested; per-provider/model rate control is currently inferred from observed 429 events.
+- Worker-pool drainage of queued rows is still synchronous per edge-function invocation; very high global throughput would benefit from a dedicated worker.
+
+*End of Strict Concurrency Lease + Idempotency Hardening (v5.9.6).*
 `;
 };
