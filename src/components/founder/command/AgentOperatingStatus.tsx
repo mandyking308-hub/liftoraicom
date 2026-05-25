@@ -36,6 +36,7 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "business_weekly_review", name: "Weekly Review", to: "/founder/business/weekly-review", category: "operations" },
   { key: "social_brain", name: "Social Brain", to: "/founder/social", category: "social" },
   { key: "support_knowledge", name: "Support Knowledge Agent", to: "/founder/support", category: "support" },
+  { key: "customer_sales_engine", name: "Customer Sales Engine", to: "/founder/customer-sales", category: "sales" },
 ];
 
 export default function AgentOperatingStatus() {
