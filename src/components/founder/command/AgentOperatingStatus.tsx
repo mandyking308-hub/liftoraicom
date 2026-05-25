@@ -78,6 +78,9 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "incident_agent", name: "Incident Agent", to: "/founder/incidents", category: "operations" },
   { key: "continuity_agent", name: "Continuity Agent", to: "/founder/incidents/continuity", category: "operations" },
   { key: "postmortem_agent", name: "Postmortem Agent", to: "/founder/incidents/postmortems", category: "operations" },
+  { key: "adviser_pack_agent", name: "Adviser Pack Agent", to: "/founder/adviser-pack", category: "finance" },
+  { key: "adviser_question_agent", name: "Adviser Question Agent", to: "/founder/adviser-pack/questions", category: "finance" },
+  { key: "tax_sensitivity_agent", name: "Tax Sensitivity Agent", to: "/founder/adviser-pack/expenses", category: "finance" },
 ];
 
 export default function AgentOperatingStatus() {

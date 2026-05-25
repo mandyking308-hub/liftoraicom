@@ -230,6 +230,13 @@ import IncidentsPostmortems from "./pages/founder/incidents/Postmortems";
 import IncidentsContinuity from "./pages/founder/incidents/Continuity";
 import IncidentsNotifications from "./pages/founder/incidents/Notifications";
 import IncidentsSettings from "./pages/founder/incidents/Settings";
+import AdviserPackOverview from "./pages/founder/adviser-pack/Overview";
+import AdviserPackMonthly from "./pages/founder/adviser-pack/Monthly";
+import AdviserPackEntities from "./pages/founder/adviser-pack/Entities";
+import AdviserPackRevenue from "./pages/founder/adviser-pack/Revenue";
+import AdviserPackExpenses from "./pages/founder/adviser-pack/Expenses";
+import AdviserPackDocuments from "./pages/founder/adviser-pack/Documents";
+import AdviserPackQuestions from "./pages/founder/adviser-pack/Questions";
 import CustomerUpgradesHub from "./pages/founder/customer-upgrades/Hub";
 import CustomerUpgradesOpportunities from "./pages/founder/customer-upgrades/Opportunities";
 import CustomerUpgradesProductLadders from "./pages/founder/customer-upgrades/ProductLadders";
@@ -555,6 +562,13 @@ const App = () => (
             <Route path="/founder/incidents/continuity" element={<FounderRoute><IncidentsContinuity /></FounderRoute>} />
             <Route path="/founder/incidents/notifications" element={<FounderRoute><IncidentsNotifications /></FounderRoute>} />
             <Route path="/founder/incidents/settings" element={<FounderRoute><IncidentsSettings /></FounderRoute>} />
+            <Route path="/founder/adviser-pack" element={<FounderRoute><AdviserPackOverview /></FounderRoute>} />
+            <Route path="/founder/adviser-pack/monthly" element={<FounderRoute><AdviserPackMonthly /></FounderRoute>} />
+            <Route path="/founder/adviser-pack/entities" element={<FounderRoute><AdviserPackEntities /></FounderRoute>} />
+            <Route path="/founder/adviser-pack/revenue" element={<FounderRoute><AdviserPackRevenue /></FounderRoute>} />
+            <Route path="/founder/adviser-pack/expenses" element={<FounderRoute><AdviserPackExpenses /></FounderRoute>} />
+            <Route path="/founder/adviser-pack/documents" element={<FounderRoute><AdviserPackDocuments /></FounderRoute>} />
+            <Route path="/founder/adviser-pack/questions" element={<FounderRoute><AdviserPackQuestions /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
