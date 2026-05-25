@@ -658,7 +658,8 @@ const App = () => (
             <Route path="/founder/marketplace/seller-verification" element={<FounderRoute><MarketplaceVerification /></FounderRoute>} />
             <Route path="/founder/marketplace/listings" element={<FounderRoute><MarketplaceListings /></FounderRoute>} />
             <Route path="/founder/marketplace/supply-demand" element={<FounderRoute><MarketplaceSupplyDemand /></FounderRoute>} />
-            <Route path="/founder/marketplace/seller-performance" element={<FounderRoute><MarketplacePerformance /></FounderRoute>} />
+            <Route path="/founder/marketplace/seller-performance" element={<FounderRoute><SellerPerformanceBoard /></FounderRoute>} />
+            <Route path="/founder/marketplace/active-sellers" element={<FounderRoute><MarketplacePerformance /></FounderRoute>} />
             <Route path="/founder/marketplace/settings" element={<FounderRoute><MarketplaceSettings /></FounderRoute>} />
             <Route path="/founder/marketplace/seller-accounts" element={<FounderRoute><SellerAccounts /></FounderRoute>} />
             <Route path="/founder/marketplace/seller-checklist" element={<FounderRoute><SellerChecklist /></FounderRoute>} />
