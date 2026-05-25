@@ -192,6 +192,11 @@ export default function FounderCockpit() {
                   <ShieldCheck className="h-3.5 w-3.5 mr-1" /> Approval Queue
                 </Button>
               </Link>
+              <Link to="/founder/customer-sales">
+                <Button size="sm" variant="outline" className="h-8 text-xs">
+                  <Activity className="h-3.5 w-3.5 mr-1" /> Customer Sales Engine
+                </Button>
+              </Link>
             </div>
           </div>
         </CardHeader>
