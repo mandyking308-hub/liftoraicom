@@ -137,6 +137,7 @@ import CustomerSalesCloseEngine from "./pages/founder/customer-sales/CloseEngine
 import CustomerSalesOffers from "./pages/founder/customer-sales/Offers";
 import CustomerSalesObjections from "./pages/founder/customer-sales/Objections";
 import CustomerSalesFollowUp from "./pages/founder/customer-sales/FollowUp";
+import CustomerSalesSafetyCentre from "./pages/founder/customer-sales/SafetyCentre";
 import CustomerSalesSettings from "./pages/founder/customer-sales/Settings";
 import AIFounderActionBoard from "./pages/founder/AIFounderActionBoard";
 import AIRuntimeOrchestration from "./pages/founder/AIRuntimeOrchestration";
@@ -364,6 +365,7 @@ const App = () => (
             <Route path="/founder/customer-sales/offers" element={<FounderRoute><CustomerSalesOffers /></FounderRoute>} />
             <Route path="/founder/customer-sales/objections" element={<FounderRoute><CustomerSalesObjections /></FounderRoute>} />
             <Route path="/founder/customer-sales/follow-up" element={<FounderRoute><CustomerSalesFollowUp /></FounderRoute>} />
+            <Route path="/founder/customer-sales/safety" element={<FounderRoute><CustomerSalesSafetyCentre /></FounderRoute>} />
             <Route path="/founder/customer-sales/settings" element={<FounderRoute><CustomerSalesSettings /></FounderRoute>} />
             <Route path="/founder/ai-cost/action-board" element={<FounderRoute><AIFounderActionBoard /></FounderRoute>} />
             <Route path="/founder/ai-cost/runtime" element={<FounderRoute><AIRuntimeOrchestration /></FounderRoute>} />

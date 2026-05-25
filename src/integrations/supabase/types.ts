@@ -13624,6 +13624,69 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_sales_contact_safety: {
+        Row: {
+          allowed_window_end: string | null
+          allowed_window_start: string | null
+          contact_id: string | null
+          cooldown_hours: number
+          created_at: string
+          do_not_call: boolean
+          frequency_cap_per_week: number
+          id: string
+          last_contacted_at: string | null
+          lawful_basis: string | null
+          notes: string | null
+          on_suppression_list: boolean
+          opt_out: boolean
+          permission_status: string
+          suppression_reason: string | null
+          time_zone: string | null
+          updated_at: string
+          vulnerable_flag: boolean
+        }
+        Insert: {
+          allowed_window_end?: string | null
+          allowed_window_start?: string | null
+          contact_id?: string | null
+          cooldown_hours?: number
+          created_at?: string
+          do_not_call?: boolean
+          frequency_cap_per_week?: number
+          id?: string
+          last_contacted_at?: string | null
+          lawful_basis?: string | null
+          notes?: string | null
+          on_suppression_list?: boolean
+          opt_out?: boolean
+          permission_status?: string
+          suppression_reason?: string | null
+          time_zone?: string | null
+          updated_at?: string
+          vulnerable_flag?: boolean
+        }
+        Update: {
+          allowed_window_end?: string | null
+          allowed_window_start?: string | null
+          contact_id?: string | null
+          cooldown_hours?: number
+          created_at?: string
+          do_not_call?: boolean
+          frequency_cap_per_week?: number
+          id?: string
+          last_contacted_at?: string | null
+          lawful_basis?: string | null
+          notes?: string | null
+          on_suppression_list?: boolean
+          opt_out?: boolean
+          permission_status?: string
+          suppression_reason?: string | null
+          time_zone?: string | null
+          updated_at?: string
+          vulnerable_flag?: boolean
+        }
+        Relationships: []
+      }
       customer_sales_conversation_states: {
         Row: {
           brain_output: Json
@@ -13687,18 +13750,23 @@ export type Database = {
           call_outcome: string | null
           channel: string
           close_probability: number | null
+          consent_text_used: string | null
+          consent_timestamp: string | null
           contact_id: string | null
           conversation_status: string
           created_at: string
+          customer_consented: boolean
           customer_email: string | null
           customer_memory_summary: string | null
           customer_name: string | null
           customer_need: string | null
           customer_phone: string | null
           direction: string
+          escalation_triggered: Json
           external_action_locked: boolean
           founder_approval_required: boolean
           id: string
+          jurisdiction: string | null
           last_analysed_at: string | null
           last_call_log_id: string | null
           linked_contact_email: string | null
@@ -13706,10 +13774,15 @@ export type Database = {
           offer_id: string | null
           playbook_id: string | null
           product_id: string | null
+          prohibited_claim_warnings: Json
+          provider_recording_status: string | null
           qualification_score: number | null
           recommended_next_action: string | null
+          recording_notice_given: boolean
+          recording_notice_required: boolean
           sentiment_score: number | null
           test_label: string | null
+          transcript_notice_given: boolean
           transcript_summary: string | null
           updated_at: string
         }
@@ -13719,18 +13792,23 @@ export type Database = {
           call_outcome?: string | null
           channel?: string
           close_probability?: number | null
+          consent_text_used?: string | null
+          consent_timestamp?: string | null
           contact_id?: string | null
           conversation_status?: string
           created_at?: string
+          customer_consented?: boolean
           customer_email?: string | null
           customer_memory_summary?: string | null
           customer_name?: string | null
           customer_need?: string | null
           customer_phone?: string | null
           direction?: string
+          escalation_triggered?: Json
           external_action_locked?: boolean
           founder_approval_required?: boolean
           id?: string
+          jurisdiction?: string | null
           last_analysed_at?: string | null
           last_call_log_id?: string | null
           linked_contact_email?: string | null
@@ -13738,10 +13816,15 @@ export type Database = {
           offer_id?: string | null
           playbook_id?: string | null
           product_id?: string | null
+          prohibited_claim_warnings?: Json
+          provider_recording_status?: string | null
           qualification_score?: number | null
           recommended_next_action?: string | null
+          recording_notice_given?: boolean
+          recording_notice_required?: boolean
           sentiment_score?: number | null
           test_label?: string | null
+          transcript_notice_given?: boolean
           transcript_summary?: string | null
           updated_at?: string
         }
@@ -13751,18 +13834,23 @@ export type Database = {
           call_outcome?: string | null
           channel?: string
           close_probability?: number | null
+          consent_text_used?: string | null
+          consent_timestamp?: string | null
           contact_id?: string | null
           conversation_status?: string
           created_at?: string
+          customer_consented?: boolean
           customer_email?: string | null
           customer_memory_summary?: string | null
           customer_name?: string | null
           customer_need?: string | null
           customer_phone?: string | null
           direction?: string
+          escalation_triggered?: Json
           external_action_locked?: boolean
           founder_approval_required?: boolean
           id?: string
+          jurisdiction?: string | null
           last_analysed_at?: string | null
           last_call_log_id?: string | null
           linked_contact_email?: string | null
@@ -13770,10 +13858,15 @@ export type Database = {
           offer_id?: string | null
           playbook_id?: string | null
           product_id?: string | null
+          prohibited_claim_warnings?: Json
+          provider_recording_status?: string | null
           qualification_score?: number | null
           recommended_next_action?: string | null
+          recording_notice_given?: boolean
+          recording_notice_required?: boolean
           sentiment_score?: number | null
           test_label?: string | null
+          transcript_notice_given?: boolean
           transcript_summary?: string | null
           updated_at?: string
         }
@@ -13800,6 +13893,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      customer_sales_escalation_triggers: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string | null
+          id: string
+          severity: string
+          trigger_key: string
+          trigger_label: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          severity?: string
+          trigger_key: string
+          trigger_label: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          severity?: string
+          trigger_key?: string
+          trigger_label?: string
+        }
+        Relationships: []
       }
       customer_sales_knowledge_sources: {
         Row: {
@@ -14159,6 +14282,39 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_sales_prohibited_claims: {
+        Row: {
+          active: boolean
+          category: string
+          claim_key: string
+          claim_label: string
+          created_at: string
+          description: string | null
+          id: string
+          severity: string
+        }
+        Insert: {
+          active?: boolean
+          category: string
+          claim_key: string
+          claim_label: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          severity?: string
+        }
+        Update: {
+          active?: boolean
+          category?: string
+          claim_key?: string
+          claim_label?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          severity?: string
+        }
+        Relationships: []
+      }
       customer_sales_provider_settings: {
         Row: {
           active: boolean
@@ -14255,6 +14411,63 @@ export type Database = {
           updated_at?: string
           web_call_enabled?: boolean | null
           webhook_url?: string | null
+        }
+        Relationships: []
+      }
+      customer_sales_safety_events: {
+        Row: {
+          approval_required: boolean
+          business_id: string | null
+          call_log_id: string | null
+          close_action_id: string | null
+          contact_id: string | null
+          conversation_id: string | null
+          created_at: string
+          data_used: Json
+          decision: string
+          event_category: string
+          external_side_effect: boolean
+          id: string
+          reason: string | null
+          resolved_at: string | null
+          rule_key: string
+          severity: string
+        }
+        Insert: {
+          approval_required?: boolean
+          business_id?: string | null
+          call_log_id?: string | null
+          close_action_id?: string | null
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          data_used?: Json
+          decision?: string
+          event_category: string
+          external_side_effect?: boolean
+          id?: string
+          reason?: string | null
+          resolved_at?: string | null
+          rule_key: string
+          severity?: string
+        }
+        Update: {
+          approval_required?: boolean
+          business_id?: string | null
+          call_log_id?: string | null
+          close_action_id?: string | null
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          data_used?: Json
+          decision?: string
+          event_category?: string
+          external_side_effect?: boolean
+          id?: string
+          reason?: string | null
+          resolved_at?: string | null
+          rule_key?: string
+          severity?: string
         }
         Relationships: []
       }

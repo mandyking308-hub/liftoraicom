@@ -15,6 +15,7 @@ export const CS_NAV: { to: string; label: string }[] = [
   { to: "/founder/customer-sales/offers", label: "Offers" },
   { to: "/founder/customer-sales/objections", label: "Objections" },
   { to: "/founder/customer-sales/follow-up", label: "Follow-up" },
+  { to: "/founder/customer-sales/safety", label: "Safety Centre" },
   { to: "/founder/customer-sales/settings", label: "Settings" },
 ];
 
