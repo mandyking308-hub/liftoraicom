@@ -5206,6 +5206,45 @@ export type Database = {
         }
         Relationships: []
       }
+      business_channel_accounts: {
+        Row: {
+          account_name: string
+          account_url: string | null
+          active: boolean
+          business_id: string
+          channel_type: string
+          connected: boolean
+          created_at: string
+          id: string
+          login_method_summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_name: string
+          account_url?: string | null
+          active?: boolean
+          business_id: string
+          channel_type: string
+          connected?: boolean
+          created_at?: string
+          id?: string
+          login_method_summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_name?: string
+          account_url?: string | null
+          active?: boolean
+          business_id?: string
+          channel_type?: string
+          connected?: boolean
+          created_at?: string
+          id?: string
+          login_method_summary?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       business_contact_relationships: {
         Row: {
           business_id: string | null
@@ -6384,6 +6423,42 @@ export type Database = {
           },
         ]
       }
+      business_launch_checklist_items: {
+        Row: {
+          business_id: string
+          created_at: string
+          id: string
+          item_category: string
+          item_name: string
+          item_status: string
+          link_to_fix: string | null
+          required: boolean
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          id?: string
+          item_category: string
+          item_name: string
+          item_status?: string
+          link_to_fix?: string | null
+          required?: boolean
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          id?: string
+          item_category?: string
+          item_name?: string
+          item_status?: string
+          link_to_fix?: string | null
+          required?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       business_launch_plans: {
         Row: {
           approved_at: string | null
@@ -6458,6 +6533,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      business_launch_profiles: {
+        Row: {
+          audit_metadata: Json
+          brand_name: string | null
+          business_id: string
+          created_at: string
+          domain_name: string | null
+          id: string
+          launch_status: string
+          legal_footer_entity_id: string | null
+          public_brand_name: string | null
+          sales_email: string | null
+          support_email: string | null
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          audit_metadata?: Json
+          brand_name?: string | null
+          business_id: string
+          created_at?: string
+          domain_name?: string | null
+          id?: string
+          launch_status?: string
+          legal_footer_entity_id?: string | null
+          public_brand_name?: string | null
+          sales_email?: string | null
+          support_email?: string | null
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          audit_metadata?: Json
+          brand_name?: string | null
+          business_id?: string
+          created_at?: string
+          domain_name?: string | null
+          id?: string
+          launch_status?: string
+          legal_footer_entity_id?: string | null
+          public_brand_name?: string | null
+          sales_email?: string | null
+          support_email?: string | null
+          updated_at?: string
+          website_url?: string | null
+        }
+        Relationships: []
       }
       business_launch_templates: {
         Row: {
