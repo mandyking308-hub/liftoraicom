@@ -250,6 +250,13 @@ import ProductQA from "./pages/founder/product/QA";
 import ProductReleases from "./pages/founder/product/Releases";
 import ProductRollback from "./pages/founder/product/Rollback";
 import ProductKnownIssues from "./pages/founder/product/KnownIssues";
+import DataQualityOverview from "./pages/founder/data-quality/Overview";
+import DataQualityDuplicates from "./pages/founder/data-quality/Duplicates";
+import DataQualityTestData from "./pages/founder/data-quality/TestData";
+import DataQualityOrphans from "./pages/founder/data-quality/Orphans";
+import DataQualityStale from "./pages/founder/data-quality/Stale";
+import DataQualityRevenueIntegrity from "./pages/founder/data-quality/RevenueIntegrity";
+import DataQualityRepairQueue from "./pages/founder/data-quality/RepairQueue";
 import CustomerUpgradesHub from "./pages/founder/customer-upgrades/Hub";
 import CustomerUpgradesOpportunities from "./pages/founder/customer-upgrades/Opportunities";
 import CustomerUpgradesProductLadders from "./pages/founder/customer-upgrades/ProductLadders";
@@ -595,6 +602,13 @@ const App = () => (
             <Route path="/founder/product/releases" element={<FounderRoute><ProductReleases /></FounderRoute>} />
             <Route path="/founder/product/rollback" element={<FounderRoute><ProductRollback /></FounderRoute>} />
             <Route path="/founder/product/known-issues" element={<FounderRoute><ProductKnownIssues /></FounderRoute>} />
+            <Route path="/founder/data-quality" element={<FounderRoute><DataQualityOverview /></FounderRoute>} />
+            <Route path="/founder/data-quality/duplicates" element={<FounderRoute><DataQualityDuplicates /></FounderRoute>} />
+            <Route path="/founder/data-quality/test-data" element={<FounderRoute><DataQualityTestData /></FounderRoute>} />
+            <Route path="/founder/data-quality/orphans" element={<FounderRoute><DataQualityOrphans /></FounderRoute>} />
+            <Route path="/founder/data-quality/stale" element={<FounderRoute><DataQualityStale /></FounderRoute>} />
+            <Route path="/founder/data-quality/revenue-integrity" element={<FounderRoute><DataQualityRevenueIntegrity /></FounderRoute>} />
+            <Route path="/founder/data-quality/repair-queue" element={<FounderRoute><DataQualityRepairQueue /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
