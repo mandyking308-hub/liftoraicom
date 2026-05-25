@@ -127,6 +127,17 @@ import AILiveOperations from "./pages/founder/AILiveOperations";
 import AICostGovernorHub from "./pages/founder/AICostGovernorHub";
 import AIFirstUseSetup from "./pages/founder/AIFirstUseSetup";
 import FirstUseConfiguration from "./pages/founder/FirstUseConfiguration";
+import CustomerSalesHub from "./pages/founder/customer-sales/CustomerSalesHub";
+import CustomerSalesVoiceConsole from "./pages/founder/customer-sales/VoiceConsole";
+import CustomerSalesProductKnowledge from "./pages/founder/customer-sales/ProductKnowledge";
+import CustomerSalesPlaybooks from "./pages/founder/customer-sales/Playbooks";
+import CustomerSalesConversations from "./pages/founder/customer-sales/Conversations";
+import CustomerSalesCallLogs from "./pages/founder/customer-sales/CallLogs";
+import CustomerSalesCloseEngine from "./pages/founder/customer-sales/CloseEngine";
+import CustomerSalesOffers from "./pages/founder/customer-sales/Offers";
+import CustomerSalesObjections from "./pages/founder/customer-sales/Objections";
+import CustomerSalesFollowUp from "./pages/founder/customer-sales/FollowUp";
+import CustomerSalesSettings from "./pages/founder/customer-sales/Settings";
 import AIFounderActionBoard from "./pages/founder/AIFounderActionBoard";
 import AIRuntimeOrchestration from "./pages/founder/AIRuntimeOrchestration";
 import AIOrchestrationLive from "./pages/founder/AIOrchestrationLive";
@@ -343,6 +354,17 @@ const App = () => (
             <Route path="/founder/ai-cost" element={<FounderRoute><AICostGovernorHub /></FounderRoute>} />
             <Route path="/founder/ai-cost/first-use" element={<FounderRoute><AIFirstUseSetup /></FounderRoute>} />
             <Route path="/founder/first-use-configuration" element={<FounderRoute><FirstUseConfiguration /></FounderRoute>} />
+            <Route path="/founder/customer-sales" element={<FounderRoute><CustomerSalesHub /></FounderRoute>} />
+            <Route path="/founder/customer-sales/voice-console" element={<FounderRoute><CustomerSalesVoiceConsole /></FounderRoute>} />
+            <Route path="/founder/customer-sales/product-knowledge" element={<FounderRoute><CustomerSalesProductKnowledge /></FounderRoute>} />
+            <Route path="/founder/customer-sales/playbooks" element={<FounderRoute><CustomerSalesPlaybooks /></FounderRoute>} />
+            <Route path="/founder/customer-sales/conversations" element={<FounderRoute><CustomerSalesConversations /></FounderRoute>} />
+            <Route path="/founder/customer-sales/call-logs" element={<FounderRoute><CustomerSalesCallLogs /></FounderRoute>} />
+            <Route path="/founder/customer-sales/close-engine" element={<FounderRoute><CustomerSalesCloseEngine /></FounderRoute>} />
+            <Route path="/founder/customer-sales/offers" element={<FounderRoute><CustomerSalesOffers /></FounderRoute>} />
+            <Route path="/founder/customer-sales/objections" element={<FounderRoute><CustomerSalesObjections /></FounderRoute>} />
+            <Route path="/founder/customer-sales/follow-up" element={<FounderRoute><CustomerSalesFollowUp /></FounderRoute>} />
+            <Route path="/founder/customer-sales/settings" element={<FounderRoute><CustomerSalesSettings /></FounderRoute>} />
             <Route path="/founder/ai-cost/action-board" element={<FounderRoute><AIFounderActionBoard /></FounderRoute>} />
             <Route path="/founder/ai-cost/runtime" element={<FounderRoute><AIRuntimeOrchestration /></FounderRoute>} />
             <Route path="/founder/ai-cost/orchestration-live" element={<FounderRoute><AIOrchestrationLive /></FounderRoute>} />
