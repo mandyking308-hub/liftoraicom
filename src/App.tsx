@@ -264,6 +264,15 @@ import CapacityHumans from "./pages/founder/capacity/Humans";
 import CapacityDelivery from "./pages/founder/capacity/Delivery";
 import CapacityBottlenecks from "./pages/founder/capacity/Bottlenecks";
 import CapacityForecast from "./pages/founder/capacity/Forecast";
+import MarketplaceOverview from "./pages/founder/marketplace/Overview";
+import MarketplaceRecruitment from "./pages/founder/marketplace/Recruitment";
+import MarketplaceProspects from "./pages/founder/marketplace/Prospects";
+import MarketplaceOnboarding from "./pages/founder/marketplace/Onboarding";
+import MarketplaceVerification from "./pages/founder/marketplace/Verification";
+import MarketplaceListings from "./pages/founder/marketplace/Listings";
+import MarketplaceSupplyDemand from "./pages/founder/marketplace/SupplyDemand";
+import MarketplacePerformance from "./pages/founder/marketplace/Performance";
+import MarketplaceSettings from "./pages/founder/marketplace/Settings";
 import KnowledgeOverview from "./pages/founder/knowledge-governance/Overview";
 import KnowledgeSources from "./pages/founder/knowledge-governance/Sources";
 import KnowledgeConflicts from "./pages/founder/knowledge-governance/Conflicts";
@@ -635,6 +644,15 @@ const App = () => (
             <Route path="/founder/capacity/delivery" element={<FounderRoute><CapacityDelivery /></FounderRoute>} />
             <Route path="/founder/capacity/bottlenecks" element={<FounderRoute><CapacityBottlenecks /></FounderRoute>} />
             <Route path="/founder/capacity/forecast" element={<FounderRoute><CapacityForecast /></FounderRoute>} />
+            <Route path="/founder/marketplace" element={<FounderRoute><MarketplaceOverview /></FounderRoute>} />
+            <Route path="/founder/marketplace/seller-recruitment" element={<FounderRoute><MarketplaceRecruitment /></FounderRoute>} />
+            <Route path="/founder/marketplace/seller-prospects" element={<FounderRoute><MarketplaceProspects /></FounderRoute>} />
+            <Route path="/founder/marketplace/seller-onboarding" element={<FounderRoute><MarketplaceOnboarding /></FounderRoute>} />
+            <Route path="/founder/marketplace/seller-verification" element={<FounderRoute><MarketplaceVerification /></FounderRoute>} />
+            <Route path="/founder/marketplace/listings" element={<FounderRoute><MarketplaceListings /></FounderRoute>} />
+            <Route path="/founder/marketplace/supply-demand" element={<FounderRoute><MarketplaceSupplyDemand /></FounderRoute>} />
+            <Route path="/founder/marketplace/seller-performance" element={<FounderRoute><MarketplacePerformance /></FounderRoute>} />
+            <Route path="/founder/marketplace/settings" element={<FounderRoute><MarketplaceSettings /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />

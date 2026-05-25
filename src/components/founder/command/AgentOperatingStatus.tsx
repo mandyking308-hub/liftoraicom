@@ -99,6 +99,12 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "capacity_agent", name: "Capacity Agent", to: "/founder/capacity", category: "operations" },
   { key: "bottleneck_detection_agent", name: "Bottleneck Detection Agent", to: "/founder/capacity/bottlenecks", category: "operations" },
   { key: "workload_balancer_agent", name: "Workload Balancer Agent", to: "/founder/capacity/forecast", category: "operations" },
+  { key: "marketplace_recruitment_agent", name: "Marketplace Recruitment Agent", to: "/founder/marketplace", category: "operations" },
+  { key: "seller_qualification_agent", name: "Seller Qualification Agent", to: "/founder/marketplace/seller-prospects", category: "operations" },
+  { key: "seller_onboarding_agent", name: "Seller Onboarding Agent", to: "/founder/marketplace/seller-onboarding", category: "operations" },
+  { key: "seller_verification_agent", name: "Seller Verification Agent", to: "/founder/marketplace/seller-verification", category: "operations" },
+  { key: "listing_review_agent", name: "Listing Review Agent", to: "/founder/marketplace/listings", category: "operations" },
+  { key: "supply_demand_agent", name: "Supply / Demand Agent", to: "/founder/marketplace/supply-demand", category: "operations" },
 ];
 
 export default function AgentOperatingStatus() {
