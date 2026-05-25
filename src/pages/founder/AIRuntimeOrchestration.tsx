@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import FounderLayout from "@/components/founder/FounderLayout";
+import AICostBreadcrumb from "@/components/founder/ai/AICostBreadcrumb";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -98,6 +99,7 @@ export default function AIRuntimeOrchestration() {
   return (
     <FounderLayout>
       <div className="space-y-4 max-w-[1400px]">
+        <AICostBreadcrumb page="AI Runtime & Orchestration" description="Live runtime, queue depth, agent concurrency and bottlenecks for every AI call." />
         <div className="flex items-start justify-between flex-wrap gap-2">
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
