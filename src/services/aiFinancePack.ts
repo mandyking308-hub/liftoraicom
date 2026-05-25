@@ -33,6 +33,8 @@ type LedgerRow = {
   revenue_linked_amount: number;
   pipeline_linked_amount: number;
   human_approved: boolean;
+  cost_basis?: string | null;
+  actual_cost_gbp?: number | null;
 };
 
 type QualityRow = {
@@ -70,6 +72,14 @@ export type FinancePack = {
   range: MonthRange;
   totals: {
     ai_spend: number;
+    actual_known_cost: number;
+    estimated_cost: number;
+    pricing_missing_rows: number;
+    revenue_confirmed: number;
+    revenue_estimated: number;
+    pipeline_confirmed: number;
+    pipeline_estimated: number;
+    human_equivalent_saving_estimated: number;
     human_cost_saved: number;
     net_saving: number;
     revenue_linked: number;
@@ -214,7 +224,7 @@ export async function buildFinancePack(yyyyMm: string): Promise<FinancePack> {
 
   const { data: ledger, error } = await supabase
     .from("ai_usage_ledger")
-    .select("id,business_id,agent_id,campaign_id,task_category,status,estimated_cost,human_equivalent_cost,time_saved_minutes,revenue_linked_amount,pipeline_linked_amount,human_approved")
+    .select("id,business_id,agent_id,campaign_id,task_category,status,estimated_cost,human_equivalent_cost,time_saved_minutes,revenue_linked_amount,pipeline_linked_amount,human_approved,cost_basis,actual_cost_gbp")
     .eq("is_simulation", false)
     .gte("created_at", range.start)
     .lt("created_at", range.end)
@@ -239,13 +249,31 @@ export async function buildFinancePack(yyyyMm: string): Promise<FinancePack> {
 
   // Totals & outcome-cost ratios
   let ai_spend = 0, human_cost_saved = 0, rev = 0, pipe = 0;
+  let actual_known_cost = 0, estimated_only_cost = 0, pricing_missing_rows = 0;
+  let revenue_confirmed = 0, revenue_estimated = 0;
+  let pipeline_confirmed = 0, pipeline_estimated = 0;
   let actions = 0, approved = 0, rejected = 0, edited = 0;
   const outcomeCount: Record<string, number> = { lead: 0, opportunity: 0, sale: 0, content: 0, interaction: 0 };
   for (const r of rows) {
-    ai_spend += Number(r.estimated_cost ?? 0);
+    const est = Number(r.estimated_cost ?? 0);
+    const act = Number(r.actual_cost_gbp ?? 0);
+    const basis = String(r.cost_basis ?? "").toLowerCase();
+    ai_spend += act > 0 ? act : est;
+    if (basis === "pricing_missing") pricing_missing_rows += 1;
+    else if (act > 0) actual_known_cost += act;
+    else estimated_only_cost += est;
     human_cost_saved += Number(r.human_equivalent_cost ?? 0);
-    rev += Number(r.revenue_linked_amount ?? 0);
-    pipe += Number(r.pipeline_linked_amount ?? 0);
+    const revAmt = Number(r.revenue_linked_amount ?? 0);
+    const pipeAmt = Number(r.pipeline_linked_amount ?? 0);
+    rev += revAmt;
+    pipe += pipeAmt;
+    if (r.human_approved) {
+      revenue_confirmed += revAmt;
+      pipeline_confirmed += pipeAmt;
+    } else {
+      revenue_estimated += revAmt;
+      pipeline_estimated += pipeAmt;
+    }
     actions += 1;
     const q = qMap.get(r.id);
     if (q?.approved_without_edit || r.human_approved) approved += 1;
@@ -263,6 +291,14 @@ export async function buildFinancePack(yyyyMm: string): Promise<FinancePack> {
 
   const totals = {
     ai_spend: round(ai_spend),
+    actual_known_cost: round(actual_known_cost),
+    estimated_cost: round(estimated_only_cost),
+    pricing_missing_rows,
+    revenue_confirmed: round(revenue_confirmed),
+    revenue_estimated: round(revenue_estimated),
+    pipeline_confirmed: round(pipeline_confirmed),
+    pipeline_estimated: round(pipeline_estimated),
+    human_equivalent_saving_estimated: round(human_cost_saved),
     human_cost_saved: round(human_cost_saved),
     net_saving: round(human_cost_saved - ai_spend),
     revenue_linked: round(rev),
@@ -353,7 +389,8 @@ export async function buildFinancePack(yyyyMm: string): Promise<FinancePack> {
     by_business, by_agent, by_campaign, by_category,
     business_unit_economics,
     founder_summary: summary,
-    estimates_disclaimer: "Revenue and pipeline figures shown are based on linked records in the AI usage ledger; where no direct link exists, the value is treated as 0. Human-cost-saved figures are estimates based on configured hourly rates and time saved.",
+    estimates_disclaimer:
+      "AI spend separates actual cost (token usage × current pricing), estimated cost (pricing-table rates with no token receipt), and pricing-missing rows. Pricing rows are marked verified or estimated in /founder/ai-cost/pricing. Revenue/pipeline split between confirmed (human-approved entries) and estimated (unapproved). Human-cost-saved figures are always estimates based on configured hourly rates and time saved.",
   };
 }
 

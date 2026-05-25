@@ -15,6 +15,7 @@ import {
   type Bucket, type BusinessUE, type Decision,
 } from "@/services/aiFinancePack";
 import { formatGBP } from "@/services/aiUsageLogger";
+import CostConfidenceBadge from "@/components/founder/ai/CostConfidenceBadge";
 
 const DECISION_VARIANT: Record<Decision, "default" | "secondary" | "destructive" | "outline"> = {
   scale: "default",
@@ -91,10 +92,15 @@ export default function AIFinancePack() {
             {/* Top totals */}
             <div className="grid gap-3 grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
               <StatCard label="AI spend" value={formatGBP(pack.totals.ai_spend)} />
+              <StatCard label="Actual known cost" value={formatGBP(pack.totals.actual_known_cost)} tone="good" />
+              <StatCard label="Estimated cost" value={formatGBP(pack.totals.estimated_cost)} />
+              <StatCard label="Pricing missing rows" value={String(pack.totals.pricing_missing_rows)} tone={pack.totals.pricing_missing_rows > 0 ? "destructive" : undefined} />
               <StatCard label="Est. human cost saved" value={formatGBP(pack.totals.human_cost_saved)} />
               <StatCard label="Net saving" value={formatGBP(pack.totals.net_saving)} tone={pack.totals.net_saving >= 0 ? "good" : "destructive"} />
-              <StatCard label="Revenue linked" value={formatGBP(pack.totals.revenue_linked)} />
-              <StatCard label="Pipeline linked" value={formatGBP(pack.totals.pipeline_linked)} />
+              <StatCard label="Revenue confirmed" value={formatGBP(pack.totals.revenue_confirmed)} tone="good" />
+              <StatCard label="Revenue estimated" value={formatGBP(pack.totals.revenue_estimated)} />
+              <StatCard label="Pipeline confirmed" value={formatGBP(pack.totals.pipeline_confirmed)} tone="good" />
+              <StatCard label="Pipeline estimated" value={formatGBP(pack.totals.pipeline_estimated)} />
               <StatCard label="Quality-adj. ROI" value={`${pack.totals.quality_adjusted_roi.toFixed(2)}×`} />
               <StatCard label="Approval rate" value={`${(pack.totals.approval_rate * 100).toFixed(0)}%`} />
               <StatCard label="Rejection rate" value={`${(pack.totals.rejection_rate * 100).toFixed(0)}%`} tone={pack.totals.rejection_rate > 0.2 ? "destructive" : undefined} />
@@ -106,6 +112,20 @@ export default function AIFinancePack() {
               <StatCard label="Cost / interaction" value={fmtOpt(pack.totals.cost_per_customer_interaction)} />
               <StatCard label="Actions" value={String(pack.totals.actions)} />
             </div>
+
+            <Card>
+              <CardContent className="p-4 flex flex-wrap items-center gap-3 text-xs">
+                <span className="font-medium">Cost confidence legend:</span>
+                <CostConfidenceBadge cost_basis="actual_tokens" actual_cost_gbp={1} pricing_confidence="verified" />
+                <CostConfidenceBadge cost_basis="actual_tokens" actual_cost_gbp={1} pricing_confidence="estimated" />
+                <CostConfidenceBadge cost_basis="streaming_estimate" estimated_cost={1} />
+                <CostConfidenceBadge cost_basis="manual_estimate" estimated_cost={1} />
+                <CostConfidenceBadge pricing_missing />
+                <span className="text-muted-foreground">
+                  Currency: GBP. USD/EUR rows are converted at a conservative fixed rate and shown as approximate.
+                </span>
+              </CardContent>
+            </Card>
 
             {/* Breakdown tabs */}
             <Tabs defaultValue="business">
