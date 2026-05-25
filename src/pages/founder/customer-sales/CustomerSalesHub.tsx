@@ -65,6 +65,7 @@ export default function CustomerSalesHub() {
           <Tile to="/founder/customer-sales/playbooks" icon={ListChecks} label="Playbooks" value={data?.playbooks} />
           <Tile to="/founder/customer-sales/objections" icon={Shield} label="Objection library" value={data?.objections} />
           <Tile to="/founder/customer-sales/settings" icon={Cog} label="Providers" value={(data?.providers ?? []).length} hint={providerLive ? "live" : "not connected"} />
+          <Tile to="/founder/sales-targets" icon={Target} label="Sales Target Cockpit" value="→" hint="reverse-engineered activity plan" />
         </div>
       </CSSection>
 

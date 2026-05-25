@@ -139,6 +139,12 @@ import CustomerSalesObjections from "./pages/founder/customer-sales/Objections";
 import CustomerSalesFollowUp from "./pages/founder/customer-sales/FollowUp";
 import CustomerSalesSafetyCentre from "./pages/founder/customer-sales/SafetyCentre";
 import CustomerSalesSettings from "./pages/founder/customer-sales/Settings";
+import SalesTargetsCockpit from "./pages/founder/sales-targets/Cockpit";
+import SalesTargetsBusiness from "./pages/founder/sales-targets/BusinessTargets";
+import SalesTargetsActivityPlan from "./pages/founder/sales-targets/ActivityPlan";
+import SalesTargetsConversion from "./pages/founder/sales-targets/Conversion";
+import SalesTargetsGaps from "./pages/founder/sales-targets/Gaps";
+import SalesTargetsForecast from "./pages/founder/sales-targets/Forecast";
 import AIFounderActionBoard from "./pages/founder/AIFounderActionBoard";
 import AIRuntimeOrchestration from "./pages/founder/AIRuntimeOrchestration";
 import AIOrchestrationLive from "./pages/founder/AIOrchestrationLive";
@@ -367,6 +373,12 @@ const App = () => (
             <Route path="/founder/customer-sales/follow-up" element={<FounderRoute><CustomerSalesFollowUp /></FounderRoute>} />
             <Route path="/founder/customer-sales/safety" element={<FounderRoute><CustomerSalesSafetyCentre /></FounderRoute>} />
             <Route path="/founder/customer-sales/settings" element={<FounderRoute><CustomerSalesSettings /></FounderRoute>} />
+            <Route path="/founder/sales-targets" element={<FounderRoute><SalesTargetsCockpit /></FounderRoute>} />
+            <Route path="/founder/sales-targets/business" element={<FounderRoute><SalesTargetsBusiness /></FounderRoute>} />
+            <Route path="/founder/sales-targets/activity-plan" element={<FounderRoute><SalesTargetsActivityPlan /></FounderRoute>} />
+            <Route path="/founder/sales-targets/conversion" element={<FounderRoute><SalesTargetsConversion /></FounderRoute>} />
+            <Route path="/founder/sales-targets/gaps" element={<FounderRoute><SalesTargetsGaps /></FounderRoute>} />
+            <Route path="/founder/sales-targets/forecast" element={<FounderRoute><SalesTargetsForecast /></FounderRoute>} />
             <Route path="/founder/ai-cost/action-board" element={<FounderRoute><AIFounderActionBoard /></FounderRoute>} />
             <Route path="/founder/ai-cost/runtime" element={<FounderRoute><AIRuntimeOrchestration /></FounderRoute>} />
             <Route path="/founder/ai-cost/orchestration-live" element={<FounderRoute><AIOrchestrationLive /></FounderRoute>} />

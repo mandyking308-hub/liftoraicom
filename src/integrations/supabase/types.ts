@@ -31047,6 +31047,202 @@ export type Database = {
           },
         ]
       }
+      sales_activity_targets: {
+        Row: {
+          assumed_average_order_value: number
+          assumed_call_to_proposal_rate: number
+          assumed_lead_to_call_rate: number
+          assumed_proposal_to_close_rate: number
+          business_id: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          required_calls: number
+          required_closes: number
+          required_conversations: number
+          required_followups: number
+          required_leads: number
+          required_proposals: number
+          required_upgrades: number
+          revenue_target_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          assumed_average_order_value?: number
+          assumed_call_to_proposal_rate?: number
+          assumed_lead_to_call_rate?: number
+          assumed_proposal_to_close_rate?: number
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          required_calls?: number
+          required_closes?: number
+          required_conversations?: number
+          required_followups?: number
+          required_leads?: number
+          required_proposals?: number
+          required_upgrades?: number
+          revenue_target_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assumed_average_order_value?: number
+          assumed_call_to_proposal_rate?: number
+          assumed_lead_to_call_rate?: number
+          assumed_proposal_to_close_rate?: number
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          required_calls?: number
+          required_closes?: number
+          required_conversations?: number
+          required_followups?: number
+          required_leads?: number
+          required_proposals?: number
+          required_upgrades?: number
+          revenue_target_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_activity_targets_revenue_target_id_fkey"
+            columns: ["revenue_target_id"]
+            isOneToOne: false
+            referencedRelation: "sales_revenue_targets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales_revenue_targets: {
+        Row: {
+          active: boolean
+          business_id: string | null
+          created_at: string
+          id: string
+          metadata: Json
+          notes: string | null
+          target_currency: string
+          target_end_date: string
+          target_name: string
+          target_period: string
+          target_revenue_amount: number
+          target_start_date: string
+          target_type: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          target_currency?: string
+          target_end_date: string
+          target_name: string
+          target_period?: string
+          target_revenue_amount?: number
+          target_start_date: string
+          target_type?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          target_currency?: string
+          target_end_date?: string
+          target_name?: string
+          target_period?: string
+          target_revenue_amount?: number
+          target_start_date?: string
+          target_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sales_target_progress: {
+        Row: {
+          actual_calls: number
+          actual_closed_won: number
+          actual_conversations: number
+          actual_followups: number
+          actual_leads: number
+          actual_pipeline: number
+          actual_proposals: number
+          actual_revenue: number
+          business_id: string | null
+          created_at: string
+          detail: Json
+          id: string
+          period_end: string
+          period_start: string
+          recommended_action: string | null
+          revenue_target_id: string | null
+          status: string
+          target_gap_amount: number
+          target_gap_percent: number
+          updated_at: string
+        }
+        Insert: {
+          actual_calls?: number
+          actual_closed_won?: number
+          actual_conversations?: number
+          actual_followups?: number
+          actual_leads?: number
+          actual_pipeline?: number
+          actual_proposals?: number
+          actual_revenue?: number
+          business_id?: string | null
+          created_at?: string
+          detail?: Json
+          id?: string
+          period_end: string
+          period_start: string
+          recommended_action?: string | null
+          revenue_target_id?: string | null
+          status?: string
+          target_gap_amount?: number
+          target_gap_percent?: number
+          updated_at?: string
+        }
+        Update: {
+          actual_calls?: number
+          actual_closed_won?: number
+          actual_conversations?: number
+          actual_followups?: number
+          actual_leads?: number
+          actual_pipeline?: number
+          actual_proposals?: number
+          actual_revenue?: number
+          business_id?: string | null
+          created_at?: string
+          detail?: Json
+          id?: string
+          period_end?: string
+          period_start?: string
+          recommended_action?: string | null
+          revenue_target_id?: string | null
+          status?: string
+          target_gap_amount?: number
+          target_gap_percent?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_target_progress_revenue_target_id_fkey"
+            columns: ["revenue_target_id"]
+            isOneToOne: false
+            referencedRelation: "sales_revenue_targets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       security_alerts: {
         Row: {
           alert_type: string
