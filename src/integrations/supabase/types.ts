@@ -344,6 +344,145 @@ export type Database = {
         }
         Relationships: []
       }
+      adviser_handoff_packs: {
+        Row: {
+          approved_at: string | null
+          audit_metadata: Json
+          created_at: string
+          id: string
+          pack_name: string
+          pack_status: string
+          period_end: string
+          period_start: string
+          prepared_by: string | null
+          reviewed_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          audit_metadata?: Json
+          created_at?: string
+          id?: string
+          pack_name: string
+          pack_status?: string
+          period_end: string
+          period_start: string
+          prepared_by?: string | null
+          reviewed_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          audit_metadata?: Json
+          created_at?: string
+          id?: string
+          pack_name?: string
+          pack_status?: string
+          period_end?: string
+          period_start?: string
+          prepared_by?: string | null
+          reviewed_by?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      adviser_pack_items: {
+        Row: {
+          amount: number | null
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          currency: string | null
+          id: string
+          item_summary: string
+          item_type: string
+          needs_adviser_review: boolean
+          pack_id: string
+          source_record_id: string | null
+          source_table: string | null
+        }
+        Insert: {
+          amount?: number | null
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          item_summary: string
+          item_type?: string
+          needs_adviser_review?: boolean
+          pack_id: string
+          source_record_id?: string | null
+          source_table?: string | null
+        }
+        Update: {
+          amount?: number | null
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          item_summary?: string
+          item_type?: string
+          needs_adviser_review?: boolean
+          pack_id?: string
+          source_record_id?: string | null
+          source_table?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "adviser_pack_items_pack_id_fkey"
+            columns: ["pack_id"]
+            isOneToOne: false
+            referencedRelation: "adviser_handoff_packs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      adviser_questions: {
+        Row: {
+          answer_summary: string | null
+          category: string
+          created_at: string
+          id: string
+          pack_id: string | null
+          priority: string
+          question: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          answer_summary?: string | null
+          category?: string
+          created_at?: string
+          id?: string
+          pack_id?: string | null
+          priority?: string
+          question: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          answer_summary?: string | null
+          category?: string
+          created_at?: string
+          id?: string
+          pack_id?: string | null
+          priority?: string
+          question?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "adviser_questions_pack_id_fkey"
+            columns: ["pack_id"]
+            isOneToOne: false
+            referencedRelation: "adviser_handoff_packs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       affiliate_payouts: {
         Row: {
           amount: number
@@ -18033,6 +18172,54 @@ export type Database = {
           queue_id?: string | null
           source?: string | null
           user_agent_hash?: string | null
+        }
+        Relationships: []
+      }
+      entity_structure_records: {
+        Row: {
+          accountant_contact: string | null
+          active: boolean
+          created_at: string
+          entity_name: string
+          entity_type: string | null
+          financial_year_end: string | null
+          id: string
+          jurisdiction: string | null
+          legal_contact: string | null
+          ownership_summary: string | null
+          registration_number_summary: string | null
+          tax_notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          accountant_contact?: string | null
+          active?: boolean
+          created_at?: string
+          entity_name: string
+          entity_type?: string | null
+          financial_year_end?: string | null
+          id?: string
+          jurisdiction?: string | null
+          legal_contact?: string | null
+          ownership_summary?: string | null
+          registration_number_summary?: string | null
+          tax_notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          accountant_contact?: string | null
+          active?: boolean
+          created_at?: string
+          entity_name?: string
+          entity_type?: string | null
+          financial_year_end?: string | null
+          id?: string
+          jurisdiction?: string | null
+          legal_contact?: string | null
+          ownership_summary?: string | null
+          registration_number_summary?: string | null
+          tax_notes?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
