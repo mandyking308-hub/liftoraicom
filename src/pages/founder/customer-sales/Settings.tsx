@@ -133,7 +133,7 @@ function ProviderCard({ catalogue, row, onProvision }: { catalogue: { type: Voic
         <Flag label="Batch calls" on={!!row?.batch_calls_enabled} />
         <Flag label="Recording" on={!!row?.recording_enabled} />
         <Flag label="Transcription" on={!!row?.transcription_enabled} />
-        <Flag label="Consent notice required" on={!!row?.consent_notice_required ?? true} />
+        <Flag label="Consent notice required" on={row?.consent_notice_required !== false} />
       </div>
 
       <div className="text-[11px] text-muted-foreground space-y-0.5">
