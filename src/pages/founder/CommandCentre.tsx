@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import FounderLayout from "@/components/founder/FounderLayout";
 import AIUsageMiniWidget from "@/components/founder/ai/AIUsageMiniWidget";
+import AIRuntimeHealthMiniCard from "@/components/founder/ai/AIRuntimeHealthMiniCard";
 import AIPromptReuseWidget from "@/components/founder/ai/AIPromptReuseWidget";
 import AICostGovernorPortfolio from "@/components/founder/ai/AICostGovernorPortfolio";
 import AIAlertsMiniWidget from "@/components/founder/ai/AIAlertsMiniWidget";
@@ -787,6 +788,7 @@ const CommandCentre = () => {
         <AIUsageMiniWidget />
         <AIPromptReuseWidget />
       </div>
+      <div className="max-w-7xl mx-auto px-4 pt-4"><AIRuntimeHealthMiniCard /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><AIAlertsMiniWidget /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><FounderAlertEscalationPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><CommandCentreTruthSyncPanel /></div>
