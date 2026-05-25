@@ -1258,3 +1258,16 @@ const CUSTOMER_VOICE_SALES_INTEGRATION: ManualSection = {
   ].join(" "),
 };
 LIFTOR_FULL_GUIDE.push(CUSTOMER_VOICE_SALES_INTEGRATION);
+
+const SALES_COACHING_LEARNING_LOOP = {
+  title: "94. Sales Coaching + Conversion Learning Loop",
+  body: [
+    "Purpose. Liftor learns what works. Every conversation, proposal, call, follow-up, close attempt and upgrade feeds a learning loop that improves scripts, offers, objection responses, and conversion rates over time. Internal analysis runs live; all external customer actions remain approval-gated.",
+    "Routes. /founder/sales-coaching (Dashboard — funnel, drop-off, objections, scripts, lost-deal reasons, close rate by agent/product), /founder/sales-coaching/conversions (close rate by agent, product, channel), /founder/sales-coaching/objections (objection register with loss impact and suggested responses), /founder/sales-coaching/scripts (per-section usage, conversion, objection, approval, close rate, sentiment, and recommended status keep/improve/retire/test_new), /founder/sales-coaching/wins-losses (per-deal review with winning factors, losing factors, price/trust/timing/fit/competitor flags, recommended change), /founder/sales-coaching/recommendations (Coaching Agent suggestions — review, apply, dismiss).",
+    "Tables. sales_conversion_events (funnel events: lead_created, call_booked, call_completed, proposal_sent, follow_up_sent, close_attempted, closed_won, closed_lost, upgraded, churned with value, currency, source_agent, channel). sales_win_loss_reviews (outcome, objections, winning_factors, losing_factors, issue flags, recommended_change). sales_script_performance (usage_count, conversion_rate, objection_rate, approval_rate, close_rate, average_sentiment, recommended_status). sales_coaching_recommendations (category, priority, status open/in_review/applied/dismissed, evidence). RLS restricts to founders/admins.",
+    "Agents. Sales Coaching Agent (weekly performance review: what is working, what is not, what to change). Conversion Learning Agent (continuously updates sales_script_performance from new events and reviews).",
+    "Integration. Customer Sales Engine emits sales_conversion_events for every funnel transition. Sales Target Achievement Engine consumes conversion rates to recalculate required activity. Upgrade + Upsell Engine emits upgraded/churned events. Approval Queue receives any recommendation that proposes a script/offer change requiring founder sign-off. Command Centre exposes coaching tiles (open recommendations, critical items, scripts to fix or retire) and the Sales Coaching Hub link inside the Customer Sales Hub.",
+    "Safety. No external action. Recommendations only mutate internal scripts/offers after the founder presses Apply. The engine never sends a message, schedules a call, or modifies a contract.",
+  ].join(" "),
+};
+LIFTOR_FULL_GUIDE.push(SALES_COACHING_LEARNING_LOOP);
