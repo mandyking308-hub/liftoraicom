@@ -34927,6 +34927,81 @@ export type Database = {
         }
         Relationships: []
       }
+      seller_accounts: {
+        Row: {
+          audit_metadata: Json
+          business_id: string
+          created_at: string
+          dispute_rate: number | null
+          fulfilment_score: number | null
+          id: string
+          marketplace_id: string | null
+          payout_status: string | null
+          response_time_score: number | null
+          seller_category: string | null
+          seller_location: string | null
+          seller_name: string
+          seller_prospect_id: string | null
+          seller_rating: number | null
+          seller_status: string
+          terms_status: string | null
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id: string
+          created_at?: string
+          dispute_rate?: number | null
+          fulfilment_score?: number | null
+          id?: string
+          marketplace_id?: string | null
+          payout_status?: string | null
+          response_time_score?: number | null
+          seller_category?: string | null
+          seller_location?: string | null
+          seller_name: string
+          seller_prospect_id?: string | null
+          seller_rating?: number | null
+          seller_status?: string
+          terms_status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string
+          created_at?: string
+          dispute_rate?: number | null
+          fulfilment_score?: number | null
+          id?: string
+          marketplace_id?: string | null
+          payout_status?: string | null
+          response_time_score?: number | null
+          seller_category?: string | null
+          seller_location?: string | null
+          seller_name?: string
+          seller_prospect_id?: string | null
+          seller_rating?: number | null
+          seller_status?: string
+          terms_status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seller_accounts_marketplace_id_fkey"
+            columns: ["marketplace_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seller_accounts_seller_prospect_id_fkey"
+            columns: ["seller_prospect_id"]
+            isOneToOne: false
+            referencedRelation: "seller_prospects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       seller_onboarding_records: {
         Row: {
           audit_metadata: Json
@@ -34992,6 +35067,153 @@ export type Database = {
             columns: ["seller_prospect_id"]
             isOneToOne: false
             referencedRelation: "seller_prospects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seller_payout_profiles: {
+        Row: {
+          audit_metadata: Json
+          business_id: string
+          commission_rate: number | null
+          created_at: string
+          currency: string | null
+          id: string
+          marketplace_id: string | null
+          payout_provider: string
+          payout_risk_flags: string[] | null
+          payout_schedule: string | null
+          payout_status: string
+          platform_fee: number | null
+          seller_id: string | null
+          tax_form_status: string | null
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id: string
+          commission_rate?: number | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          marketplace_id?: string | null
+          payout_provider?: string
+          payout_risk_flags?: string[] | null
+          payout_schedule?: string | null
+          payout_status?: string
+          platform_fee?: number | null
+          seller_id?: string | null
+          tax_form_status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string
+          commission_rate?: number | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          marketplace_id?: string | null
+          payout_provider?: string
+          payout_risk_flags?: string[] | null
+          payout_schedule?: string | null
+          payout_status?: string
+          platform_fee?: number | null
+          seller_id?: string | null
+          tax_form_status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seller_payout_profiles_marketplace_id_fkey"
+            columns: ["marketplace_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seller_payout_profiles_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "seller_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seller_performance_metrics: {
+        Row: {
+          audit_metadata: Json
+          average_response_time_minutes: number | null
+          business_id: string
+          commission_generated: number | null
+          created_at: string
+          customer_rating: number | null
+          dispute_count: number | null
+          id: string
+          marketplace_id: string | null
+          orders_cancelled: number | null
+          orders_completed: number | null
+          performance_status: string | null
+          period_end: string | null
+          period_start: string | null
+          recommended_action: string | null
+          refund_count: number | null
+          revenue_generated: number | null
+          seller_id: string | null
+        }
+        Insert: {
+          audit_metadata?: Json
+          average_response_time_minutes?: number | null
+          business_id: string
+          commission_generated?: number | null
+          created_at?: string
+          customer_rating?: number | null
+          dispute_count?: number | null
+          id?: string
+          marketplace_id?: string | null
+          orders_cancelled?: number | null
+          orders_completed?: number | null
+          performance_status?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          recommended_action?: string | null
+          refund_count?: number | null
+          revenue_generated?: number | null
+          seller_id?: string | null
+        }
+        Update: {
+          audit_metadata?: Json
+          average_response_time_minutes?: number | null
+          business_id?: string
+          commission_generated?: number | null
+          created_at?: string
+          customer_rating?: number | null
+          dispute_count?: number | null
+          id?: string
+          marketplace_id?: string | null
+          orders_cancelled?: number | null
+          orders_completed?: number | null
+          performance_status?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          recommended_action?: string | null
+          refund_count?: number | null
+          revenue_generated?: number | null
+          seller_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seller_performance_metrics_marketplace_id_fkey"
+            columns: ["marketplace_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seller_performance_metrics_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "seller_accounts"
             referencedColumns: ["id"]
           },
         ]
@@ -35143,6 +35365,63 @@ export type Database = {
             columns: ["marketplace_id"]
             isOneToOne: false
             referencedRelation: "marketplace_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seller_terms_acceptance: {
+        Row: {
+          acceptance_source: string | null
+          accepted: boolean
+          accepted_at: string | null
+          audit_metadata: Json
+          business_id: string
+          created_at: string
+          id: string
+          ip_address_summary: string | null
+          marketplace_id: string | null
+          seller_id: string | null
+          terms_version: string
+        }
+        Insert: {
+          acceptance_source?: string | null
+          accepted?: boolean
+          accepted_at?: string | null
+          audit_metadata?: Json
+          business_id: string
+          created_at?: string
+          id?: string
+          ip_address_summary?: string | null
+          marketplace_id?: string | null
+          seller_id?: string | null
+          terms_version: string
+        }
+        Update: {
+          acceptance_source?: string | null
+          accepted?: boolean
+          accepted_at?: string | null
+          audit_metadata?: Json
+          business_id?: string
+          created_at?: string
+          id?: string
+          ip_address_summary?: string | null
+          marketplace_id?: string | null
+          seller_id?: string | null
+          terms_version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seller_terms_acceptance_marketplace_id_fkey"
+            columns: ["marketplace_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seller_terms_acceptance_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "seller_accounts"
             referencedColumns: ["id"]
           },
         ]
