@@ -9661,6 +9661,72 @@ export type Database = {
           },
         ]
       }
+      complaint_cases: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          complaint_status: string
+          complaint_summary: string | null
+          complaint_type: string
+          contact_id: string | null
+          created_at: string
+          customer_id: string | null
+          customer_sentiment: string | null
+          founder_approval_required: boolean
+          id: string
+          proposed_resolution: string | null
+          related_invoice_id: string | null
+          related_order_id: string | null
+          related_ticket_id: string | null
+          requested_resolution: string | null
+          resolved_at: string | null
+          severity: string
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          complaint_status?: string
+          complaint_summary?: string | null
+          complaint_type?: string
+          contact_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          customer_sentiment?: string | null
+          founder_approval_required?: boolean
+          id?: string
+          proposed_resolution?: string | null
+          related_invoice_id?: string | null
+          related_order_id?: string | null
+          related_ticket_id?: string | null
+          requested_resolution?: string | null
+          resolved_at?: string | null
+          severity?: string
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          complaint_status?: string
+          complaint_summary?: string | null
+          complaint_type?: string
+          contact_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          customer_sentiment?: string | null
+          founder_approval_required?: boolean
+          id?: string
+          proposed_resolution?: string | null
+          related_invoice_id?: string | null
+          related_order_id?: string | null
+          related_ticket_id?: string | null
+          requested_resolution?: string | null
+          resolved_at?: string | null
+          severity?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       complaint_resolution_plans: {
         Row: {
           approved_at: string | null
@@ -17175,6 +17241,50 @@ export type Database = {
             columns: ["architecture_id"]
             isOneToOne: false
             referencedRelation: "architectures"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dispute_evidence: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          complaint_case_id: string | null
+          created_at: string
+          evidence_summary: string | null
+          evidence_type: string
+          evidence_url: string | null
+          id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          complaint_case_id?: string | null
+          created_at?: string
+          evidence_summary?: string | null
+          evidence_type?: string
+          evidence_url?: string | null
+          id?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          complaint_case_id?: string | null
+          created_at?: string
+          evidence_summary?: string | null
+          evidence_type?: string
+          evidence_url?: string | null
+          id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dispute_evidence_complaint_case_id_fkey"
+            columns: ["complaint_case_id"]
+            isOneToOne: false
+            referencedRelation: "complaint_cases"
             referencedColumns: ["id"]
           },
         ]
@@ -31065,6 +31175,74 @@ export type Database = {
             columns: ["partnership_id"]
             isOneToOne: false
             referencedRelation: "partnership_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      refund_requests: {
+        Row: {
+          amount_approved: number | null
+          amount_requested: number | null
+          audit_metadata: Json
+          business_id: string | null
+          complaint_case_id: string | null
+          created_at: string
+          currency: string | null
+          customer_id: string | null
+          founder_approved_at: string | null
+          id: string
+          invoice_id: string | null
+          payment_id: string | null
+          policy_match: string | null
+          processed_at: string | null
+          refund_reason: string | null
+          refund_status: string
+          updated_at: string
+        }
+        Insert: {
+          amount_approved?: number | null
+          amount_requested?: number | null
+          audit_metadata?: Json
+          business_id?: string | null
+          complaint_case_id?: string | null
+          created_at?: string
+          currency?: string | null
+          customer_id?: string | null
+          founder_approved_at?: string | null
+          id?: string
+          invoice_id?: string | null
+          payment_id?: string | null
+          policy_match?: string | null
+          processed_at?: string | null
+          refund_reason?: string | null
+          refund_status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount_approved?: number | null
+          amount_requested?: number | null
+          audit_metadata?: Json
+          business_id?: string | null
+          complaint_case_id?: string | null
+          created_at?: string
+          currency?: string | null
+          customer_id?: string | null
+          founder_approved_at?: string | null
+          id?: string
+          invoice_id?: string | null
+          payment_id?: string | null
+          policy_match?: string | null
+          processed_at?: string | null
+          refund_reason?: string | null
+          refund_status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "refund_requests_complaint_case_id_fkey"
+            columns: ["complaint_case_id"]
+            isOneToOne: false
+            referencedRelation: "complaint_cases"
             referencedColumns: ["id"]
           },
         ]

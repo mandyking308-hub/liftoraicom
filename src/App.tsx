@@ -183,6 +183,12 @@ import SupportTicketsSLA from "./pages/founder/support-tickets/SLA";
 import SupportTicketsEscalations from "./pages/founder/support-tickets/Escalations";
 import SupportTicketsKnowledge from "./pages/founder/support-tickets/Knowledge";
 import SupportTicketsSettings from "./pages/founder/support-tickets/Settings";
+import ComplaintsOverview from "./pages/founder/complaints/Overview";
+import ComplaintsRefunds from "./pages/founder/complaints/Refunds";
+import ComplaintsDisputes from "./pages/founder/complaints/Disputes";
+import ComplaintsEscalations from "./pages/founder/complaints/Escalations";
+import ComplaintsEvidence from "./pages/founder/complaints/Evidence";
+import ComplaintsSettings from "./pages/founder/complaints/Settings";
 import CustomerUpgradesHub from "./pages/founder/customer-upgrades/Hub";
 import CustomerUpgradesOpportunities from "./pages/founder/customer-upgrades/Opportunities";
 import CustomerUpgradesProductLadders from "./pages/founder/customer-upgrades/ProductLadders";
@@ -461,6 +467,12 @@ const App = () => (
             <Route path="/founder/support-tickets/escalations" element={<FounderRoute><SupportTicketsEscalations /></FounderRoute>} />
             <Route path="/founder/support-tickets/knowledge" element={<FounderRoute><SupportTicketsKnowledge /></FounderRoute>} />
             <Route path="/founder/support-tickets/settings" element={<FounderRoute><SupportTicketsSettings /></FounderRoute>} />
+            <Route path="/founder/complaints" element={<FounderRoute><ComplaintsOverview /></FounderRoute>} />
+            <Route path="/founder/complaints/refunds" element={<FounderRoute><ComplaintsRefunds /></FounderRoute>} />
+            <Route path="/founder/complaints/disputes" element={<FounderRoute><ComplaintsDisputes /></FounderRoute>} />
+            <Route path="/founder/complaints/escalations" element={<FounderRoute><ComplaintsEscalations /></FounderRoute>} />
+            <Route path="/founder/complaints/evidence" element={<FounderRoute><ComplaintsEvidence /></FounderRoute>} />
+            <Route path="/founder/complaints/settings" element={<FounderRoute><ComplaintsSettings /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
