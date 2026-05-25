@@ -221,26 +221,46 @@ export async function callAIGateway(input: AIGatewayCallInput): Promise<AIGatewa
     try {
       const { data: existing } = await sb
         .from("ai_gateway_requests")
-        .select("request_id,status,prompt_tokens,completion_tokens,trace_id,error_message")
+        .select("request_id,status,prompt_tokens,completion_tokens,trace_id,error_message,started_at,created_at")
         .eq("idempotency_key", input.idempotency_key)
+        .order("created_at", { ascending: false })
+        .limit(1)
         .maybeSingle();
       if (existing) {
-        return {
-          trace_id: existing.trace_id ?? trace_id,
-          request_id: existing.request_id,
-          status: existing.status === "completed" ? "completed" : "failed",
-          http_status: existing.status === "completed" ? 200 : 409,
-          duplicate_prevented: true,
-          prompt_tokens: existing.prompt_tokens ?? undefined,
-          completion_tokens: existing.completion_tokens ?? undefined,
-          error: existing.error_message ?? undefined,
-        };
+        // Completed → return existing result (safe). Running → block duplicate. Failed → allow safe retry (fall through).
+        if (existing.status === "completed") {
+          await recordRuntimeEvent(sb, {
+            request_id: existing.request_id, event_type: "idempotency_replay",
+            severity: "info", message: "Returned existing completed result for idempotency_key",
+            metadata: { idempotency_key: input.idempotency_key },
+          });
+          return {
+            trace_id: existing.trace_id ?? trace_id,
+            request_id: existing.request_id,
+            status: "completed", http_status: 200, duplicate_prevented: true,
+            prompt_tokens: existing.prompt_tokens ?? undefined,
+            completion_tokens: existing.completion_tokens ?? undefined,
+          };
+        }
+        if (["running", "queued", "waiting_approval"].includes(existing.status)) {
+          await recordRuntimeEvent(sb, {
+            request_id: existing.request_id, event_type: "idempotency_duplicate_blocked",
+            severity: "warning", message: "Duplicate request blocked while original is in-flight",
+            metadata: { idempotency_key: input.idempotency_key, original_status: existing.status },
+          });
+          return {
+            trace_id: existing.trace_id ?? trace_id,
+            request_id: existing.request_id,
+            status: "completed", http_status: 202, duplicate_prevented: true,
+          };
+        }
+        // failed / cancelled → allow retry below
       }
     } catch { /* fall through */ }
   }
 
-  // Per-agent preflight (status + concurrency).
-  const pre = await preflightAgent(sb, input.agent_id ?? null);
+  // Resolve agent meta + business capacity, then acquire strict lease.
+  const pre = await loadAgentMeta(sb, input.agent_id ?? null);
   if (!pre.ok) {
     await recordRuntimeRequest(sb, {
       request_id, conversation_id: input.conversation_id ?? null,
@@ -300,6 +320,49 @@ export async function callAIGateway(input: AIGatewayCallInput): Promise<AIGatewa
     return { trace_id, request_id, status: "failed", http_status: 500, error: "LOVABLE_API_KEY not configured" };
   }
 
+  // ---- Strict concurrency lease (atomic in Postgres) ----
+  const businessCapacity = await loadBusinessCapacity(sb, input.business_id ?? null);
+  const primaryModel = input.model ?? pre.primary_model ?? "google/gemini-3-flash-preview";
+  const fallbackModel = input.fallback_model ?? pre.fallback_model ?? null;
+  const lease = await acquireLease(sb, {
+    request_id,
+    agent_id: input.agent_id ?? null,
+    business_id: input.business_id ?? null,
+    agent_capacity: pre.capacity ?? 0,
+    business_capacity: businessCapacity,
+    provider: "lovable-ai-gateway",
+    model: primaryModel,
+    ttl_seconds: 180,
+  });
+  if (!lease.ok) {
+    await recordRuntimeRequest(sb, {
+      request_id, conversation_id: input.conversation_id ?? null,
+      workflow_id: input.workflow_id ?? null, agent_id: input.agent_id ?? null,
+      portfolio_asset_id: input.portfolio_asset_id ?? null, business_id: input.business_id ?? null,
+      user_id: input.user_id ?? null,
+      request_type: input.request_type ?? input.action_type,
+      provider: "lovable-ai-gateway", model: primaryModel,
+      prompt_version: input.prompt_version ?? null,
+      risk_level: input.risk_level ?? "low",
+      approval_required: !!input.approval_required,
+      status: "queued", priority: input.priority ?? 5,
+      idempotency_key: input.idempotency_key ?? null,
+      trace_id, error_message: lease.reason,
+      metadata: { ...(input.metadata ?? {}), lease_blocked: true, lease_reason: lease.reason },
+    });
+    await recordRuntimeEvent(sb, {
+      request_id, conversation_id: input.conversation_id ?? null,
+      agent_id: input.agent_id ?? null, business_id: input.business_id ?? null,
+      event_type: "lease_denied", severity: "warning",
+      message: lease.reason, metadata: { reason: lease.reason },
+    });
+    return {
+      trace_id, request_id, status: "rate_limited", http_status: 429,
+      error: `Concurrency limit reached (${lease.reason}). Try again shortly.`,
+      lease_blocked: true, lease_reason: lease.reason,
+    };
+  }
+
   await writeLedger(trace_id, input, { status: "pending", input_summary: input.action_type });
   const startedAt = new Date().toISOString();
   await recordRuntimeRequest(sb, {
@@ -309,17 +372,15 @@ export async function callAIGateway(input: AIGatewayCallInput): Promise<AIGatewa
     user_id: input.user_id ?? null,
     request_type: input.request_type ?? input.action_type,
     provider: "lovable-ai-gateway",
-    model: input.model ?? pre.primary_model ?? "google/gemini-3-flash-preview",
+    model: primaryModel,
     prompt_version: input.prompt_version ?? null,
     risk_level: input.risk_level ?? "low",
     approval_required: !!input.approval_required,
     status: "running", priority: input.priority ?? 5,
     idempotency_key: input.idempotency_key ?? null,
-    started_at: startedAt, trace_id, metadata: input.metadata ?? {},
+    started_at: startedAt, trace_id,
+    metadata: { ...(input.metadata ?? {}), lease_expires_at: lease.expires_at ?? null },
   });
-
-  const primaryModel = input.model ?? pre.primary_model ?? "google/gemini-3-flash-preview";
-  const fallbackModel = input.fallback_model ?? pre.fallback_model ?? null;
 
   const doCall = async (modelToUse: string): Promise<Response | { error: string }> => {
     try {
