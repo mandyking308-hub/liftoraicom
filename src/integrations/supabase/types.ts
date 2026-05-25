@@ -32372,6 +32372,108 @@ export type Database = {
         }
         Relationships: []
       }
+      portfolio_priority_decisions: {
+        Row: {
+          business_id: string
+          created_at: string
+          decision_status: string
+          decision_type: string
+          expected_impact: string | null
+          founder_approved_at: string | null
+          id: string
+          reason: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          decision_status?: string
+          decision_type: string
+          expected_impact?: string | null
+          founder_approved_at?: string | null
+          id?: string
+          reason?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          decision_status?: string
+          decision_type?: string
+          expected_impact?: string | null
+          founder_approved_at?: string | null
+          id?: string
+          reason?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      portfolio_priority_scores: {
+        Row: {
+          ai_operability_score: number
+          audit_metadata: Json
+          buildability_score: number
+          business_id: string
+          cash_required_score: number
+          compliance_risk_score: number
+          created_at: string
+          exit_potential_score: number
+          founder_attention_required_score: number
+          id: string
+          margin_score: number
+          market_signal_score: number
+          reason_summary: string | null
+          recommended_decision: string
+          revenue_potential_score: number
+          score_period_end: string
+          score_period_start: string
+          speed_to_revenue_score: number
+          total_priority_score: number
+        }
+        Insert: {
+          ai_operability_score?: number
+          audit_metadata?: Json
+          buildability_score?: number
+          business_id: string
+          cash_required_score?: number
+          compliance_risk_score?: number
+          created_at?: string
+          exit_potential_score?: number
+          founder_attention_required_score?: number
+          id?: string
+          margin_score?: number
+          market_signal_score?: number
+          reason_summary?: string | null
+          recommended_decision?: string
+          revenue_potential_score?: number
+          score_period_end?: string
+          score_period_start?: string
+          speed_to_revenue_score?: number
+          total_priority_score?: number
+        }
+        Update: {
+          ai_operability_score?: number
+          audit_metadata?: Json
+          buildability_score?: number
+          business_id?: string
+          cash_required_score?: number
+          compliance_risk_score?: number
+          created_at?: string
+          exit_potential_score?: number
+          founder_attention_required_score?: number
+          id?: string
+          margin_score?: number
+          market_signal_score?: number
+          reason_summary?: string | null
+          recommended_decision?: string
+          revenue_potential_score?: number
+          score_period_end?: string
+          score_period_start?: string
+          speed_to_revenue_score?: number
+          total_priority_score?: number
+        }
+        Relationships: []
+      }
       portfolio_strategy_recommendations: {
         Row: {
           business_id: string | null
