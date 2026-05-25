@@ -17184,6 +17184,104 @@ export type Database = {
         }
         Relationships: []
       }
+      data_quality_findings: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          finding_summary: string
+          finding_type: string
+          fix_status: string
+          id: string
+          recommended_fix: string | null
+          severity: string
+          source_record_id: string | null
+          source_table: string | null
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          finding_summary: string
+          finding_type?: string
+          fix_status?: string
+          id?: string
+          recommended_fix?: string | null
+          severity?: string
+          source_record_id?: string | null
+          source_table?: string | null
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          finding_summary?: string
+          finding_type?: string
+          fix_status?: string
+          id?: string
+          recommended_fix?: string | null
+          severity?: string
+          source_record_id?: string | null
+          source_table?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      data_repair_actions: {
+        Row: {
+          action_status: string
+          action_type: string
+          approved_at: string | null
+          approved_by: string | null
+          audit_metadata: Json
+          completed_at: string | null
+          created_at: string
+          finding_id: string | null
+          founder_approval_required: boolean
+          id: string
+          irreversible: boolean
+          updated_at: string
+        }
+        Insert: {
+          action_status?: string
+          action_type?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          audit_metadata?: Json
+          completed_at?: string | null
+          created_at?: string
+          finding_id?: string | null
+          founder_approval_required?: boolean
+          id?: string
+          irreversible?: boolean
+          updated_at?: string
+        }
+        Update: {
+          action_status?: string
+          action_type?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          audit_metadata?: Json
+          completed_at?: string | null
+          created_at?: string
+          finding_id?: string | null
+          founder_approval_required?: boolean
+          id?: string
+          irreversible?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_repair_actions_finding_id_fkey"
+            columns: ["finding_id"]
+            isOneToOne: false
+            referencedRelation: "data_quality_findings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       data_retention_rules: {
         Row: {
           active: boolean
