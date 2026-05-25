@@ -300,6 +300,16 @@ import EMBusinesses from "./pages/founder/entity-map/Businesses";
 import EMRevenueRouting from "./pages/founder/entity-map/RevenueRouting";
 import EMAdviserQuestions from "./pages/founder/entity-map/AdviserQuestions";
 import EMSettings from "./pages/founder/entity-map/Settings";
+
+// Launch Factory
+import LFOverview from "./pages/founder/launch-factory/Overview";
+import LFBrand from "./pages/founder/launch-factory/Brand";
+import LFDomains from "./pages/founder/launch-factory/Domains";
+import LFEmail from "./pages/founder/launch-factory/Email";
+import LFSocials from "./pages/founder/launch-factory/Socials";
+import LFLegalPages from "./pages/founder/launch-factory/LegalPages";
+import LFTracking from "./pages/founder/launch-factory/Tracking";
+import LFChecklist from "./pages/founder/launch-factory/Checklist";
 import KnowledgeOverview from "./pages/founder/knowledge-governance/Overview";
 import KnowledgeSources from "./pages/founder/knowledge-governance/Sources";
 import KnowledgeConflicts from "./pages/founder/knowledge-governance/Conflicts";
@@ -708,6 +718,14 @@ const App = () => (
             <Route path="/founder/entity-map/revenue-routing" element={<FounderRoute><EMRevenueRouting /></FounderRoute>} />
             <Route path="/founder/entity-map/adviser-questions" element={<FounderRoute><EMAdviserQuestions /></FounderRoute>} />
             <Route path="/founder/entity-map/settings" element={<FounderRoute><EMSettings /></FounderRoute>} />
+            <Route path="/founder/launch-factory" element={<FounderRoute><LFOverview /></FounderRoute>} />
+            <Route path="/founder/launch-factory/brand" element={<FounderRoute><LFBrand /></FounderRoute>} />
+            <Route path="/founder/launch-factory/domains" element={<FounderRoute><LFDomains /></FounderRoute>} />
+            <Route path="/founder/launch-factory/email" element={<FounderRoute><LFEmail /></FounderRoute>} />
+            <Route path="/founder/launch-factory/socials" element={<FounderRoute><LFSocials /></FounderRoute>} />
+            <Route path="/founder/launch-factory/legal-pages" element={<FounderRoute><LFLegalPages /></FounderRoute>} />
+            <Route path="/founder/launch-factory/tracking" element={<FounderRoute><LFTracking /></FounderRoute>} />
+            <Route path="/founder/launch-factory/checklist" element={<FounderRoute><LFChecklist /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
