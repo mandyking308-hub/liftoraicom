@@ -14,7 +14,7 @@ export default function BCBusinesses() {
   const [businessId, setBusinessId] = useState("");
   const [archetype, setArchetype] = useState("saas");
   const [busy, setBusy] = useState(false);
-  const load = () => fetchProfiles().then(setProfiles).catch(() => {});
+  const load = () => { fetchProfiles().then(setProfiles).catch(() => {}); };
   useEffect(load, []);
 
   async function onSuggest() {
