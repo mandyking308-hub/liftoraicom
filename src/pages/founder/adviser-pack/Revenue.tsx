@@ -16,14 +16,15 @@ export default function AdviserPackRevenue() {
   useEffect(() => {
     (async () => {
       const sb: any = supabase as any;
-      const [iRes, qtcRes] = await Promise.all([
+      const [iRes, payRes] = await Promise.all([
         sb.from("adviser_pack_items").select("*").in("item_type", REV_TYPES).order("created_at", { ascending: false }).limit(200),
-        sb.from("quote_to_cash_records").select("amount,status").gte("created_at", new Date(Date.now() - 30 * 86400000).toISOString()).limit(2000),
+        sb.from("qtc_payments").select("amount,confirmed_revenue,payment_status").gte("created_at", new Date(Date.now() - 30 * 86400000).toISOString()).limit(2000),
       ]);
       setItems(iRes.data ?? []);
-      const qtc = qtcRes.data ?? [];
-      setConfirmed(qtc.filter((r: any) => ["paid", "confirmed", "revenue_confirmed"].includes(String(r.status ?? "").toLowerCase())).reduce((s: number, r: any) => s + Number(r.amount || 0), 0));
-      setEstimated(qtc.filter((r: any) => !["paid", "confirmed", "revenue_confirmed"].includes(String(r.status ?? "").toLowerCase())).reduce((s: number, r: any) => s + Number(r.amount || 0), 0));
+      const pays = payRes.data ?? [];
+      const isConfirmed = (r: any) => r.confirmed_revenue === true || String(r.payment_status ?? "").toLowerCase() === "completed";
+      setConfirmed(pays.filter(isConfirmed).reduce((s: number, r: any) => s + Number(r.amount || 0), 0));
+      setEstimated(pays.filter((r: any) => !isConfirmed(r)).reduce((s: number, r: any) => s + Number(r.amount || 0), 0));
     })();
   }, []);
 
