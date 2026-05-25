@@ -27830,6 +27830,117 @@ export type Database = {
           },
         ]
       }
+      marketplace_growth_actions: {
+        Row: {
+          action_status: string
+          action_type: string
+          approval_required: boolean
+          assigned_agent: string | null
+          audit_metadata: Json
+          business_id: string | null
+          category: string | null
+          created_at: string
+          expected_impact: string | null
+          id: string
+          location: string | null
+          marketplace_id: string | null
+          priority: string
+          reason: string | null
+          updated_at: string
+        }
+        Insert: {
+          action_status?: string
+          action_type: string
+          approval_required?: boolean
+          assigned_agent?: string | null
+          audit_metadata?: Json
+          business_id?: string | null
+          category?: string | null
+          created_at?: string
+          expected_impact?: string | null
+          id?: string
+          location?: string | null
+          marketplace_id?: string | null
+          priority?: string
+          reason?: string | null
+          updated_at?: string
+        }
+        Update: {
+          action_status?: string
+          action_type?: string
+          approval_required?: boolean
+          assigned_agent?: string | null
+          audit_metadata?: Json
+          business_id?: string | null
+          category?: string | null
+          created_at?: string
+          expected_impact?: string | null
+          id?: string
+          location?: string | null
+          marketplace_id?: string | null
+          priority?: string
+          reason?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      marketplace_liquidity_scores: {
+        Row: {
+          active_demand: number
+          active_supply: number
+          audit_metadata: Json
+          average_time_to_match: number | null
+          business_id: string | null
+          category: string | null
+          created_at: string
+          demand_gap_score: number
+          failed_matches: number
+          id: string
+          liquidity_status: string
+          location: string | null
+          marketplace_id: string | null
+          matched_transactions: number
+          recommended_action: string | null
+          supply_gap_score: number
+        }
+        Insert: {
+          active_demand?: number
+          active_supply?: number
+          audit_metadata?: Json
+          average_time_to_match?: number | null
+          business_id?: string | null
+          category?: string | null
+          created_at?: string
+          demand_gap_score?: number
+          failed_matches?: number
+          id?: string
+          liquidity_status?: string
+          location?: string | null
+          marketplace_id?: string | null
+          matched_transactions?: number
+          recommended_action?: string | null
+          supply_gap_score?: number
+        }
+        Update: {
+          active_demand?: number
+          active_supply?: number
+          audit_metadata?: Json
+          average_time_to_match?: number | null
+          business_id?: string | null
+          category?: string | null
+          created_at?: string
+          demand_gap_score?: number
+          failed_matches?: number
+          id?: string
+          liquidity_status?: string
+          location?: string | null
+          marketplace_id?: string | null
+          matched_transactions?: number
+          recommended_action?: string | null
+          supply_gap_score?: number
+        }
+        Relationships: []
+      }
       marketplace_listings: {
         Row: {
           audit_metadata: Json
@@ -27913,6 +28024,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      marketplace_match_attempts: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          buyer_contact_id: string | null
+          category: string | null
+          created_at: string
+          failure_reason: string | null
+          id: string
+          location: string | null
+          marketplace_id: string | null
+          match_status: string
+          seller_id: string | null
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          buyer_contact_id?: string | null
+          category?: string | null
+          created_at?: string
+          failure_reason?: string | null
+          id?: string
+          location?: string | null
+          marketplace_id?: string | null
+          match_status?: string
+          seller_id?: string | null
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          buyer_contact_id?: string | null
+          category?: string | null
+          created_at?: string
+          failure_reason?: string | null
+          id?: string
+          location?: string | null
+          marketplace_id?: string | null
+          match_status?: string
+          seller_id?: string | null
+        }
+        Relationships: []
       }
       marketplace_profiles: {
         Row: {

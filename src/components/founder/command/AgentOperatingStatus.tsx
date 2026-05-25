@@ -109,6 +109,9 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "supply_quality_agent", name: "Supply Quality Agent", to: "/founder/marketplace/risk", category: "operations" },
   { key: "seller_payout_agent", name: "Seller Payout Agent", to: "/founder/marketplace/payouts", category: "finance" },
   { key: "seller_performance_agent", name: "Seller Performance Agent", to: "/founder/marketplace/seller-performance", category: "operations" },
+  { key: "marketplace_growth_agent", name: "Marketplace Growth Agent", to: "/founder/marketplace/liquidity", category: "operations" },
+  { key: "liquidity_balance_agent", name: "Liquidity Balance Agent", to: "/founder/marketplace/liquidity", category: "operations" },
+  { key: "growth_action_agent", name: "Growth Action Agent", to: "/founder/marketplace/growth-actions", category: "operations" },
 ];
 
 export default function AgentOperatingStatus() {

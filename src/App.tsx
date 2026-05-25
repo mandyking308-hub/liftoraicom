@@ -280,6 +280,10 @@ import SellerPayouts from "./pages/founder/marketplace/Payouts";
 import SellerTerms from "./pages/founder/marketplace/Terms";
 import SellerPerformanceBoard from "./pages/founder/marketplace/Performance2";
 import SellerRisk from "./pages/founder/marketplace/Risk";
+import MarketplaceLiquidity from "./pages/founder/marketplace/Liquidity";
+import MarketplaceCategoryBalance from "./pages/founder/marketplace/CategoryBalance";
+import MarketplaceLocationBalance from "./pages/founder/marketplace/LocationBalance";
+import MarketplaceGrowthActions from "./pages/founder/marketplace/GrowthActions";
 import KnowledgeOverview from "./pages/founder/knowledge-governance/Overview";
 import KnowledgeSources from "./pages/founder/knowledge-governance/Sources";
 import KnowledgeConflicts from "./pages/founder/knowledge-governance/Conflicts";
@@ -668,6 +672,10 @@ const App = () => (
             <Route path="/founder/marketplace/terms" element={<FounderRoute><SellerTerms /></FounderRoute>} />
             <Route path="/founder/marketplace/performance-board" element={<FounderRoute><SellerPerformanceBoard /></FounderRoute>} />
             <Route path="/founder/marketplace/risk" element={<FounderRoute><SellerRisk /></FounderRoute>} />
+            <Route path="/founder/marketplace/liquidity" element={<FounderRoute><MarketplaceLiquidity /></FounderRoute>} />
+            <Route path="/founder/marketplace/category-balance" element={<FounderRoute><MarketplaceCategoryBalance /></FounderRoute>} />
+            <Route path="/founder/marketplace/location-balance" element={<FounderRoute><MarketplaceLocationBalance /></FounderRoute>} />
+            <Route path="/founder/marketplace/growth-actions" element={<FounderRoute><MarketplaceGrowthActions /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
