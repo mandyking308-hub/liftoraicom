@@ -1,6 +1,6 @@
 // Liftor User Manual — plain-English operating guide (separate from Founder/Technical Manual)
 
-export const LIFTOR_USER_MANUAL_VERSION = "1.4 — Business Onboarding Factory Edition (24 May 2026)";
+export const LIFTOR_USER_MANUAL_VERSION = "1.5 — Live-First Founder-Use Edition (25 May 2026)";
 
 export interface ManualSection {
   number: number;
