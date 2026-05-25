@@ -81,6 +81,9 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "adviser_pack_agent", name: "Adviser Pack Agent", to: "/founder/adviser-pack", category: "finance" },
   { key: "adviser_question_agent", name: "Adviser Question Agent", to: "/founder/adviser-pack/questions", category: "finance" },
   { key: "tax_sensitivity_agent", name: "Tax Sensitivity Agent", to: "/founder/adviser-pack/expenses", category: "finance" },
+  { key: "founder_reporting_agent", name: "Founder Reporting Agent", to: "/founder/reports", category: "operations" },
+  { key: "weekly_priorities_agent", name: "Weekly Priorities Agent", to: "/founder/reports/weekly", category: "operations" },
+  { key: "portfolio_recommendation_agent", name: "Portfolio Recommendation Agent", to: "/founder/reports/portfolio", category: "operations" },
 ];
 
 export default function AgentOperatingStatus() {
