@@ -7,6 +7,7 @@ import {
   AlertTriangle, ClipboardCheck, Activity, Bot, DollarSign, Send, MessageSquare,
   Users, FlaskConical, ShieldAlert, Briefcase, Banknote, Sparkles, ArrowRight, Phone, Flame, ShieldCheck,
   Target, TrendingUp,
+  GraduationCap,
 } from "lucide-react";
 
 type Tone = "danger" | "warn" | "good" | "default";
@@ -50,6 +51,7 @@ export default function WhatNeedsAttentionToday() {
         salesHotSignals, salesSafetyWarnings, salesReadyToBuy, salesEscalations, salesConsentIssues, salesHandoffs,
         activeTargets, targetsBehind, targetsCritical,
         upgradeOpps, upgradeHot, upgradeApprovals, renewalsSoon,
+        coachingOpen, coachingCritical, scriptsRetire,
       ] = await Promise.all([
         sb.from("founder_approval_items").select("id", head).eq("status", "pending"),
         sb.from("system_events").select("id", head).eq("resolved", false).in("severity", ["critical", "high"]),
@@ -81,6 +83,9 @@ export default function WhatNeedsAttentionToday() {
         sb.from("customer_upgrade_opportunities").select("id", head).gte("urgency_score", 0.7).in("status", ["new", "watch", "approval_required"]),
         sb.from("customer_upgrade_opportunities").select("id", head).eq("status", "approval_required"),
         sb.from("customer_upgrade_opportunities").select("id", head).in("opportunity_type", ["renewal", "subscription_upgrade"]).lte("due_at", new Date(Date.now() + 30 * 86400000).toISOString()).not("due_at", "is", null),
+        sb.from("sales_coaching_recommendations").select("id", head).eq("status", "open"),
+        sb.from("sales_coaching_recommendations").select("id", head).eq("status", "open").eq("priority", "critical"),
+        sb.from("sales_script_performance").select("id", head).in("recommended_status", ["retire", "improve"]),
       ].map((p) => p.catch(() => ({ count: 0 }))));
       return {
         approvalsPending: approvalsPending?.count ?? 0,
@@ -113,6 +118,9 @@ export default function WhatNeedsAttentionToday() {
         upgradeHot: upgradeHot?.count ?? 0,
         upgradeApprovals: upgradeApprovals?.count ?? 0,
         renewalsSoon: renewalsSoon?.count ?? 0,
+        coachingOpen: coachingOpen?.count ?? 0,
+        coachingCritical: coachingCritical?.count ?? 0,
+        scriptsRetire: scriptsRetire?.count ?? 0,
       };
     },
   });
@@ -125,6 +133,7 @@ export default function WhatNeedsAttentionToday() {
     salesHotSignals: 0, salesSafetyWarnings: 0, salesReadyToBuy: 0, salesEscalations: 0, salesConsentIssues: 0, salesHandoffs: 0,
     activeTargets: 0, targetsBehind: 0, targetsCritical: 0,
     upgradeOpps: 0, upgradeHot: 0, upgradeApprovals: 0, renewalsSoon: 0,
+    coachingOpen: 0, coachingCritical: 0, scriptsRetire: 0,
   };
 
   const tone = (n: number, warn = 1, danger = 5): Tone =>
@@ -177,6 +186,9 @@ export default function WhatNeedsAttentionToday() {
             <Tile label="Hot upgrade signals" value={d.upgradeHot} to="/founder/customer-upgrades/opportunities" icon={Flame} tone={d.upgradeHot > 0 ? "warn" : "good"} hint="urgency >= 0.7" />
             <Tile label="Upgrade approvals waiting" value={d.upgradeApprovals} to="/founder/customer-upgrades/follow-up" icon={ClipboardCheck} tone={tone(d.upgradeApprovals)} hint="external send locked" />
             <Tile label="Renewals due (30d)" value={d.renewalsSoon} to="/founder/customer-upgrades/renewals" icon={Target} tone={d.renewalsSoon > 0 ? "warn" : "good"} />
+            <Tile label="Coaching recommendations" value={d.coachingOpen} to="/founder/sales-coaching/recommendations" icon={GraduationCap} tone={d.coachingOpen > 0 ? "warn" : "good"} hint="open suggestions" />
+            <Tile label="Critical coaching items" value={d.coachingCritical} to="/founder/sales-coaching/recommendations" icon={AlertTriangle} tone={d.coachingCritical > 0 ? "danger" : "good"} />
+            <Tile label="Scripts to fix or retire" value={d.scriptsRetire} to="/founder/sales-coaching/scripts" icon={GraduationCap} tone={d.scriptsRetire > 0 ? "warn" : "good"} />
           </div>
         </CardContent>
       </Card>
