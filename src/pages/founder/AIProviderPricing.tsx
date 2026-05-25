@@ -219,6 +219,7 @@ export default function AIProviderPricing() {
                   <TableHead>Input / 1M</TableHead>
                   <TableHead>Output / 1M</TableHead>
                   <TableHead>Currency</TableHead>
+                  <TableHead>Confidence</TableHead>
                   <TableHead>Effective</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead></TableHead>
@@ -233,6 +234,15 @@ export default function AIProviderPricing() {
                     <TableCell>{Number(p.input_cost_per_1m_tokens).toFixed(4)}</TableCell>
                     <TableCell>{Number(p.output_cost_per_1m_tokens).toFixed(4)}</TableCell>
                     <TableCell>{p.currency}</TableCell>
+                    <TableCell>
+                      {p.confidence === "verified" ? (
+                        <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30" variant="outline">verified pricing</Badge>
+                      ) : p.confidence === "unknown" ? (
+                        <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/30">unknown</Badge>
+                      ) : (
+                        <Badge variant="outline" className="bg-amber-500/10 text-amber-400 border-amber-500/30">estimated pricing</Badge>
+                      )}
+                    </TableCell>
                     <TableCell className="text-xs">
                       {p.effective_from}{p.effective_to ? ` → ${p.effective_to}` : ""}
                     </TableCell>
