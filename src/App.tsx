@@ -145,6 +145,12 @@ import SalesTargetsActivityPlan from "./pages/founder/sales-targets/ActivityPlan
 import SalesTargetsConversion from "./pages/founder/sales-targets/Conversion";
 import SalesTargetsGaps from "./pages/founder/sales-targets/Gaps";
 import SalesTargetsForecast from "./pages/founder/sales-targets/Forecast";
+import CustomerUpgradesHub from "./pages/founder/customer-upgrades/Hub";
+import CustomerUpgradesOpportunities from "./pages/founder/customer-upgrades/Opportunities";
+import CustomerUpgradesProductLadders from "./pages/founder/customer-upgrades/ProductLadders";
+import CustomerUpgradesRenewals from "./pages/founder/customer-upgrades/Renewals";
+import CustomerUpgradesRules from "./pages/founder/customer-upgrades/UpgradeRules";
+import CustomerUpgradesFollowUp from "./pages/founder/customer-upgrades/FollowUp";
 import AIFounderActionBoard from "./pages/founder/AIFounderActionBoard";
 import AIRuntimeOrchestration from "./pages/founder/AIRuntimeOrchestration";
 import AIOrchestrationLive from "./pages/founder/AIOrchestrationLive";
@@ -379,6 +385,12 @@ const App = () => (
             <Route path="/founder/sales-targets/conversion" element={<FounderRoute><SalesTargetsConversion /></FounderRoute>} />
             <Route path="/founder/sales-targets/gaps" element={<FounderRoute><SalesTargetsGaps /></FounderRoute>} />
             <Route path="/founder/sales-targets/forecast" element={<FounderRoute><SalesTargetsForecast /></FounderRoute>} />
+            <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
+            <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
+            <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
+            <Route path="/founder/customer-upgrades/renewals" element={<FounderRoute><CustomerUpgradesRenewals /></FounderRoute>} />
+            <Route path="/founder/customer-upgrades/upgrade-rules" element={<FounderRoute><CustomerUpgradesRules /></FounderRoute>} />
+            <Route path="/founder/customer-upgrades/follow-up" element={<FounderRoute><CustomerUpgradesFollowUp /></FounderRoute>} />
             <Route path="/founder/ai-cost/action-board" element={<FounderRoute><AIFounderActionBoard /></FounderRoute>} />
             <Route path="/founder/ai-cost/runtime" element={<FounderRoute><AIRuntimeOrchestration /></FounderRoute>} />
             <Route path="/founder/ai-cost/orchestration-live" element={<FounderRoute><AIOrchestrationLive /></FounderRoute>} />

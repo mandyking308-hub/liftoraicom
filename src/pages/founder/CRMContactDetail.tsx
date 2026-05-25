@@ -5,6 +5,7 @@ import FounderLayout from "@/components/founder/FounderLayout";
 import CRMContact360Panel from "@/components/founder/crm/CRMContact360Panel";
 import CustomerContinuityTimeline from "@/components/founder/customer/CustomerContinuityTimeline";
 import CRMContactSalesPanel from "@/components/founder/customer-sales/CRMContactSalesPanel";
+import CRMContactUpgradePanel from "@/components/founder/customer-upgrades/CRMContactUpgradePanel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -245,6 +246,7 @@ const CRMContactDetail = () => {
 
         <CRMContact360Panel contactId={contact.id} />
         <CRMContactSalesPanel contactId={contact.id} />
+        <CRMContactUpgradePanel contactId={contact.id} />
         <CustomerContinuityTimeline contactId={contact.id} />
       </div>
     </FounderLayout>

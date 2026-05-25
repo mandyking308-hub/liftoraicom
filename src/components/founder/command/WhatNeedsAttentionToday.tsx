@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   AlertTriangle, ClipboardCheck, Activity, Bot, DollarSign, Send, MessageSquare,
   Users, FlaskConical, ShieldAlert, Briefcase, Banknote, Sparkles, ArrowRight, Phone, Flame, ShieldCheck,
-  Target,
+  Target, TrendingUp,
 } from "lucide-react";
 
 type Tone = "danger" | "warn" | "good" | "default";
@@ -49,6 +49,7 @@ export default function WhatNeedsAttentionToday() {
         portfolioApprovals, injectionEvents, testRecords, salesCloseApprovals, salesFollowUp,
         salesHotSignals, salesSafetyWarnings, salesReadyToBuy, salesEscalations, salesConsentIssues, salesHandoffs,
         activeTargets, targetsBehind, targetsCritical,
+        upgradeOpps, upgradeHot, upgradeApprovals, renewalsSoon,
       ] = await Promise.all([
         sb.from("founder_approval_items").select("id", head).eq("status", "pending"),
         sb.from("system_events").select("id", head).eq("resolved", false).in("severity", ["critical", "high"]),
@@ -76,6 +77,10 @@ export default function WhatNeedsAttentionToday() {
         sb.from("sales_revenue_targets").select("id", head).eq("active", true),
         sb.from("sales_target_progress").select("id", head).eq("status", "behind"),
         sb.from("sales_target_progress").select("id", head).eq("status", "critical"),
+        sb.from("customer_upgrade_opportunities").select("id", head).in("status", ["new", "watch"]),
+        sb.from("customer_upgrade_opportunities").select("id", head).gte("urgency_score", 0.7).in("status", ["new", "watch", "approval_required"]),
+        sb.from("customer_upgrade_opportunities").select("id", head).eq("status", "approval_required"),
+        sb.from("customer_upgrade_opportunities").select("id", head).in("opportunity_type", ["renewal", "subscription_upgrade"]).lte("due_at", new Date(Date.now() + 30 * 86400000).toISOString()).not("due_at", "is", null),
       ].map((p) => p.catch(() => ({ count: 0 }))));
       return {
         approvalsPending: approvalsPending?.count ?? 0,
@@ -104,6 +109,10 @@ export default function WhatNeedsAttentionToday() {
         activeTargets: activeTargets?.count ?? 0,
         targetsBehind: targetsBehind?.count ?? 0,
         targetsCritical: targetsCritical?.count ?? 0,
+        upgradeOpps: upgradeOpps?.count ?? 0,
+        upgradeHot: upgradeHot?.count ?? 0,
+        upgradeApprovals: upgradeApprovals?.count ?? 0,
+        renewalsSoon: renewalsSoon?.count ?? 0,
       };
     },
   });
@@ -115,6 +124,7 @@ export default function WhatNeedsAttentionToday() {
     portfolioApprovals: 0, injectionEvents: 0, testRecords: 0, salesCloseApprovals: 0, salesFollowUp: 0,
     salesHotSignals: 0, salesSafetyWarnings: 0, salesReadyToBuy: 0, salesEscalations: 0, salesConsentIssues: 0, salesHandoffs: 0,
     activeTargets: 0, targetsBehind: 0, targetsCritical: 0,
+    upgradeOpps: 0, upgradeHot: 0, upgradeApprovals: 0, renewalsSoon: 0,
   };
 
   const tone = (n: number, warn = 1, danger = 5): Tone =>
@@ -163,6 +173,10 @@ export default function WhatNeedsAttentionToday() {
             <Tile label="Active sales targets" value={d.activeTargets} to="/founder/sales-targets" icon={Target} tone={d.activeTargets > 0 ? "good" : "warn"} hint="reverse-engineered activity plan" />
             <Tile label="Targets behind pace" value={d.targetsBehind} to="/founder/sales-targets/gaps" icon={Target} tone={d.targetsBehind > 0 ? "warn" : "good"} />
             <Tile label="Targets critical" value={d.targetsCritical} to="/founder/sales-targets/gaps" icon={AlertTriangle} tone={d.targetsCritical > 0 ? "danger" : "good"} />
+            <Tile label="Upgrade opportunities" value={d.upgradeOpps} to="/founder/customer-upgrades/opportunities" icon={TrendingUp} tone={d.upgradeOpps > 0 ? "warn" : "good"} />
+            <Tile label="Hot upgrade signals" value={d.upgradeHot} to="/founder/customer-upgrades/opportunities" icon={Flame} tone={d.upgradeHot > 0 ? "warn" : "good"} hint="urgency >= 0.7" />
+            <Tile label="Upgrade approvals waiting" value={d.upgradeApprovals} to="/founder/customer-upgrades/follow-up" icon={ClipboardCheck} tone={tone(d.upgradeApprovals)} hint="external send locked" />
+            <Tile label="Renewals due (30d)" value={d.renewalsSoon} to="/founder/customer-upgrades/renewals" icon={Target} tone={d.renewalsSoon > 0 ? "warn" : "good"} />
           </div>
         </CardContent>
       </Card>

@@ -47,6 +47,9 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "human_handoff_agent", name: "Human Handoff Agent", to: "/founder/customer-sales/follow-up", category: "sales" },
   { key: "sales_manager_agent", name: "Sales Manager Agent", to: "/founder/sales-targets", category: "sales" },
   { key: "sales_target_planner", name: "Sales Target Planner", to: "/founder/sales-targets/activity-plan", category: "sales" },
+  { key: "upgrade_agent", name: "Upgrade Agent", to: "/founder/customer-upgrades", category: "sales" },
+  { key: "renewal_agent", name: "Renewal Agent", to: "/founder/customer-upgrades/renewals", category: "sales" },
+  { key: "cross_sell_agent", name: "Cross-Sell Agent", to: "/founder/customer-upgrades/opportunities", category: "sales" },
 ];
 
 export default function AgentOperatingStatus() {
