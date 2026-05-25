@@ -96,7 +96,7 @@ export default function AIRuntimeHealth() {
   const cost = (rows: any[]) => rows.reduce((s, r) => s + Number(r.actual_cost_gbp ?? r.estimated_cost_gbp ?? 0), 0);
   const costToday = cost(todayRows);
   const costMonth = cost(monthRows);
-  const bypassCount = KNOWN_DIRECT_AI_CALLERS.length - 3; // 3 migrated/no-op in v5.9.1
+  const bypassCount = KNOWN_DIRECT_AI_CALLERS.filter((c) => c.status === "pending_migration" || c.status === "blocked").length;
 
   const activeConversations = conversations.filter((c) => c.status === "active");
   const activeWorkflows = workflows.filter((w) => ["queued", "running", "paused", "waiting_approval"].includes(w.status));
