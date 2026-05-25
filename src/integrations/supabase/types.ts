@@ -34703,6 +34703,137 @@ export type Database = {
           },
         ]
       }
+      resource_allocation_items: {
+        Row: {
+          allocated_amount: number
+          business_id: string
+          created_at: string
+          expected_return: string | null
+          id: string
+          plan_id: string
+          priority: string
+          reason: string | null
+          risk_notes: string | null
+          status: string
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          allocated_amount?: number
+          business_id: string
+          created_at?: string
+          expected_return?: string | null
+          id?: string
+          plan_id: string
+          priority?: string
+          reason?: string | null
+          risk_notes?: string | null
+          status?: string
+          unit?: string
+          updated_at?: string
+        }
+        Update: {
+          allocated_amount?: number
+          business_id?: string
+          created_at?: string
+          expected_return?: string | null
+          id?: string
+          plan_id?: string
+          priority?: string
+          reason?: string | null
+          risk_notes?: string | null
+          status?: string
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resource_allocation_items_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "resource_allocation_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      resource_allocation_plans: {
+        Row: {
+          allocation_period_end: string
+          allocation_period_start: string
+          allocation_type: string
+          created_at: string
+          id: string
+          plan_status: string
+          total_available: number
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          allocation_period_end?: string
+          allocation_period_start?: string
+          allocation_type: string
+          created_at?: string
+          id?: string
+          plan_status?: string
+          total_available?: number
+          unit?: string
+          updated_at?: string
+        }
+        Update: {
+          allocation_period_end?: string
+          allocation_period_start?: string
+          allocation_type?: string
+          created_at?: string
+          id?: string
+          plan_status?: string
+          total_available?: number
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      resource_usage_actuals: {
+        Row: {
+          actual_used: number
+          allocation_type: string
+          audit_metadata: Json
+          business_id: string
+          created_at: string
+          id: string
+          output_summary: string | null
+          period_end: string
+          period_start: string
+          roi_summary: string | null
+          unit: string
+        }
+        Insert: {
+          actual_used?: number
+          allocation_type: string
+          audit_metadata?: Json
+          business_id: string
+          created_at?: string
+          id?: string
+          output_summary?: string | null
+          period_end?: string
+          period_start?: string
+          roi_summary?: string | null
+          unit?: string
+        }
+        Update: {
+          actual_used?: number
+          allocation_type?: string
+          audit_metadata?: Json
+          business_id?: string
+          created_at?: string
+          id?: string
+          output_summary?: string | null
+          period_end?: string
+          period_start?: string
+          roi_summary?: string | null
+          unit?: string
+        }
+        Relationships: []
+      }
       response_context_checks: {
         Row: {
           action_type: string
