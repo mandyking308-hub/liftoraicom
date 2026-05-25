@@ -1273,3 +1273,18 @@ const SALES_COACHING_LEARNING_LOOP = {
   ].join(" "),
 };
 LIFTOR_FULL_GUIDE.push(SALES_COACHING_LEARNING_LOOP);
+
+const REVENUE_AUTOPILOT_LOOP = {
+  number: 95,
+  key: "revenue-autopilot-operating-loop",
+  title: "95. Revenue Autopilot Operating Loop",
+  body: [
+    "Purpose. One daily loop that connects sales, targets, upgrades, CRM, outreach, customer success and finance into a single revenue heartbeat. Internal recommendations and task creation run live; external actions (contact, send, call, charge, book, invoice, sign) remain approval-gated.",
+    "Routes. /founder/revenue-autopilot (Overview — target/actual/pipeline/gap, top 5 actions, Revenue Manager Agent recommendation), /founder/revenue-autopilot/today (recommended sequence for today), /founder/revenue-autopilot/targets (active monthly targets feeding the loop), /founder/revenue-autopilot/tasks (Revenue Task Queue — qualify_lead, draft_reply, prepare_call/follow_up/proposal/close/upgrade, review_approval, update_crm, review_lost_deal, improve_script, set_missing_revenue_target, verify_pricing), /founder/revenue-autopilot/gaps (bottleneck explanation, pipeline coverage, blockers), /founder/revenue-autopilot/approvals (close actions awaiting founder sign-off).",
+    "Tables. revenue_autopilot_tasks (task_type, priority, estimated_value, due_at, assigned_agent, approval_required, status, linked contact/conversation/product/offer). revenue_autopilot_snapshots (daily target/actual/pipeline/gap/required activity/hot leads/upgrade opportunities/proposals/calls/approvals/top actions). revenue_autopilot_recommendations (Revenue Manager Agent suggestions with category, priority, is_blocking, target_agent, status). RLS restricts to founders/admins.",
+    "Agents. Revenue Manager Agent coordinates Sales Manager Agent, Voice Sales Agent, Upgrade Agent, Proposal Generator, Follow-Up Agent, Customer Success Agent and Finance Agent. It outputs the top 5 revenue actions today, what is blocking revenue, what must be approved, what must be configured, what target is at risk, and which agent should act next. The Revenue Autopilot Orchestrator emits and updates daily snapshots and tasks.",
+    "Rules. Confirmed revenue updates only after verified payment, contract, subscription or booking completion (confirmed_revenue_value on customer_sales_close_actions). Estimated pipeline is probability-weighted and clearly labelled. No external side effects from this loop; it can prepare, route and queue but never transmit.",
+    "Command Centre. The Revenue Autopilot Card surfaces target gap, required actions today, hot leads, upgrade opportunities, close approvals waiting, overdue follow-ups, proposals needed, calls to prepare, and the agent recommended action. What Needs Attention Today exposes open and critical autopilot tasks.",
+  ].join(" "),
+};
+LIFTOR_FULL_GUIDE.push(REVENUE_AUTOPILOT_LOOP);
