@@ -30,9 +30,9 @@ export async function computeRevenueLoop(): Promise<RevenueLoopSnapshot> {
     targets, completedClose, pipelineClose, overdueFU, hotSignals, upgradeOpps,
     closeApprovals, openTasks, criticalTasks, lostReviews,
   ] = await Promise.all([
-    safe(sb.from("sales_revenue_targets").select("monthly_revenue_target,actual_revenue,active").eq("active", true)),
-    safe(sb.from("customer_sales_close_actions").select("expected_value", { head: false }).eq("action_status", "completed").gte("created_at", since30)),
-    safe(sb.from("customer_sales_conversations").select("close_probability,expected_value", { head: false }).gte("close_probability", 0.3)),
+    safe(sb.from("sales_revenue_targets").select("target_revenue_amount,active").eq("active", true)),
+    safe(sb.from("customer_sales_close_actions").select("confirmed_revenue_value,amount").eq("action_status", "completed").gte("created_at", since30)),
+    safe(sb.from("customer_sales_close_actions").select("estimated_pipeline_value,amount,confidence").eq("action_status", "approval_required")),
     safe(sb.from("customer_sales_conversations").select("id", head).eq("conversation_status", "follow_up_needed").lt("next_action_at", now)),
     safe(sb.from("customer_sales_conversations").select("id", head).gte("close_probability", 0.7)),
     safe(sb.from("customer_upgrade_opportunities").select("id", head).in("status", ["new", "watch"])),
@@ -42,12 +42,12 @@ export async function computeRevenueLoop(): Promise<RevenueLoopSnapshot> {
     safe(sb.from("sales_win_loss_reviews").select("id", head).eq("outcome", "lost").gte("created_at", since30)),
   ]);
 
-  const revenue_target = (targets.data || []).reduce((s: number, t: any) => s + Number(t.monthly_revenue_target || 0), 0);
-  const target_actual = (targets.data || []).reduce((s: number, t: any) => s + Number(t.actual_revenue || 0), 0);
-  const close_actual = (completedClose.data || []).reduce((s: number, r: any) => s + Number(r.expected_value || 0), 0);
-  const actual_revenue = target_actual || close_actual;
+  const revenue_target = (targets.data || []).reduce((s: number, t: any) => s + Number(t.target_revenue_amount || 0), 0);
+  const actual_revenue = (completedClose.data || []).reduce(
+    (s: number, r: any) => s + Number(r.confirmed_revenue_value ?? r.amount ?? 0), 0
+  );
   const pipeline_estimated = (pipelineClose.data || []).reduce(
-    (s: number, r: any) => s + Number(r.expected_value || 0) * Number(r.close_probability || 0), 0
+    (s: number, r: any) => s + Number(r.estimated_pipeline_value ?? r.amount ?? 0) * Number(r.confidence ?? 0.5), 0
   );
   const gap = Math.max(0, revenue_target - actual_revenue);
 
