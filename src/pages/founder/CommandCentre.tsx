@@ -793,10 +793,19 @@ const CommandCentre = () => {
       <div className="max-w-7xl mx-auto px-4 pt-4"><AIRuntimeHealthMiniCard /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><AIAlertsMiniWidget /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><FounderAlertEscalationPanel /></div>
-      <div className="max-w-7xl mx-auto px-4 pt-4"><CommandCentreTruthSyncPanel /></div>
-      <div className="max-w-7xl mx-auto px-4 pt-4"><FinalHardeningStatusPanel /></div>
-      <div className="max-w-7xl mx-auto px-4 pt-4"><FinalGoToUseReadinessPanel /></div>
-      <div className="max-w-7xl mx-auto px-4 pt-4"><CommandCentreUsabilityReportPanel /></div>
+      <div className="max-w-7xl mx-auto px-4 pt-4">
+        <Collapsible>
+          <CollapsibleTrigger className="w-full text-left text-xs px-3 py-2 rounded-md border border-border/60 bg-background/40 hover:border-primary/60">
+            Diagnostics &amp; archive panels (optional — Truth Sync, hardening status, usability report, readiness reference)
+          </CollapsibleTrigger>
+          <CollapsibleContent className="space-y-3 pt-3">
+            <CommandCentreTruthSyncPanel />
+            <FinalHardeningStatusPanel />
+            <FinalGoToUseReadinessPanel />
+            <CommandCentreUsabilityReportPanel />
+          </CollapsibleContent>
+        </Collapsible>
+      </div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><BusinessActivationWizardPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><BusinessOnboardingBrainPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><StarterPackMaterialiserPanel /></div>
