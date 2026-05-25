@@ -75,6 +75,9 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "privacy_agent", name: "Privacy Agent", to: "/founder/privacy", category: "security" },
   { key: "dsar_agent", name: "DSAR Agent", to: "/founder/privacy/dsar", category: "security" },
   { key: "breach_response_agent", name: "Breach Response Agent", to: "/founder/privacy/breaches", category: "security" },
+  { key: "incident_agent", name: "Incident Agent", to: "/founder/incidents", category: "operations" },
+  { key: "continuity_agent", name: "Continuity Agent", to: "/founder/incidents/continuity", category: "operations" },
+  { key: "postmortem_agent", name: "Postmortem Agent", to: "/founder/incidents/postmortems", category: "operations" },
 ];
 
 export default function AgentOperatingStatus() {

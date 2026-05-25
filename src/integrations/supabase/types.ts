@@ -10550,6 +10550,48 @@ export type Database = {
           },
         ]
       }
+      continuity_plans: {
+        Row: {
+          active: boolean
+          business_id: string | null
+          created_at: string
+          critical_contacts: Json
+          critical_systems: string[]
+          fallback_steps: Json
+          id: string
+          last_tested_at: string | null
+          plan_name: string
+          scenario: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          business_id?: string | null
+          created_at?: string
+          critical_contacts?: Json
+          critical_systems?: string[]
+          fallback_steps?: Json
+          id?: string
+          last_tested_at?: string | null
+          plan_name: string
+          scenario?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          business_id?: string | null
+          created_at?: string
+          critical_contacts?: Json
+          critical_systems?: string[]
+          fallback_steps?: Json
+          id?: string
+          last_tested_at?: string | null
+          plan_name?: string
+          scenario?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       contract_events: {
         Row: {
           audit_metadata: Json
@@ -19832,6 +19874,116 @@ export type Database = {
           },
         ]
       }
+      incident_postmortems: {
+        Row: {
+          completed_at: string | null
+          corrective_actions: Json
+          created_at: string
+          id: string
+          impact_summary: string | null
+          incident_id: string
+          owner: string | null
+          root_cause_summary: string | null
+          what_failed: string | null
+          what_worked: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          corrective_actions?: Json
+          created_at?: string
+          id?: string
+          impact_summary?: string | null
+          incident_id: string
+          owner?: string | null
+          root_cause_summary?: string | null
+          what_failed?: string | null
+          what_worked?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          corrective_actions?: Json
+          created_at?: string
+          id?: string
+          impact_summary?: string | null
+          incident_id?: string
+          owner?: string | null
+          root_cause_summary?: string | null
+          what_failed?: string | null
+          what_worked?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incident_postmortems_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "incident_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      incident_records: {
+        Row: {
+          affected_customers_count: number
+          affected_systems: string[]
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          customer_notification_required: boolean
+          discovered_at: string
+          id: string
+          incident_status: string
+          incident_title: string
+          incident_type: string
+          owner: string | null
+          regulator_notification_required: boolean
+          resolved_at: string | null
+          root_cause: string | null
+          severity: string
+          updated_at: string
+          workaround: string | null
+        }
+        Insert: {
+          affected_customers_count?: number
+          affected_systems?: string[]
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          customer_notification_required?: boolean
+          discovered_at?: string
+          id?: string
+          incident_status?: string
+          incident_title: string
+          incident_type?: string
+          owner?: string | null
+          regulator_notification_required?: boolean
+          resolved_at?: string | null
+          root_cause?: string | null
+          severity?: string
+          updated_at?: string
+          workaround?: string | null
+        }
+        Update: {
+          affected_customers_count?: number
+          affected_systems?: string[]
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          customer_notification_required?: boolean
+          discovered_at?: string
+          id?: string
+          incident_status?: string
+          incident_title?: string
+          incident_type?: string
+          owner?: string | null
+          regulator_notification_required?: boolean
+          resolved_at?: string | null
+          root_cause?: string | null
+          severity?: string
+          updated_at?: string
+          workaround?: string | null
+        }
+        Relationships: []
+      }
       incident_register: {
         Row: {
           business_id: string | null
@@ -19903,6 +20055,44 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      incident_timeline_events: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          event_summary: string
+          event_time: string
+          event_type: string
+          id: string
+          incident_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          event_summary: string
+          event_time?: string
+          event_type?: string
+          id?: string
+          incident_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          event_summary?: string
+          event_time?: string
+          event_type?: string
+          id?: string
+          incident_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incident_timeline_events_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "incident_records"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       insurance_policy_register: {
         Row: {
