@@ -87,6 +87,9 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "product_qa_agent", name: "Product QA Agent", to: "/founder/product", category: "operations" },
   { key: "release_notes_agent", name: "Release Notes Agent", to: "/founder/product/releases", category: "operations" },
   { key: "rollback_advisor_agent", name: "Rollback Advisor Agent", to: "/founder/product/rollback", category: "operations" },
+  { key: "data_quality_agent", name: "Data Quality Agent", to: "/founder/data-quality", category: "operations" },
+  { key: "duplicate_detection_agent", name: "Duplicate Detection Agent", to: "/founder/data-quality/duplicates", category: "operations" },
+  { key: "revenue_integrity_agent", name: "Revenue Integrity Agent", to: "/founder/data-quality/revenue-integrity", category: "finance" },
 ];
 
 export default function AgentOperatingStatus() {
