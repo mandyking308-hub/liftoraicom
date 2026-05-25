@@ -30845,6 +30845,177 @@ export type Database = {
         }
         Relationships: []
       }
+      revenue_autopilot_recommendations: {
+        Row: {
+          business_id: string
+          category: string
+          created_at: string
+          detail: string | null
+          evidence: Json | null
+          id: string
+          is_blocking: boolean | null
+          priority: string | null
+          status: string | null
+          target_agent: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          category: string
+          created_at?: string
+          detail?: string | null
+          evidence?: Json | null
+          id?: string
+          is_blocking?: boolean | null
+          priority?: string | null
+          status?: string | null
+          target_agent?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          category?: string
+          created_at?: string
+          detail?: string | null
+          evidence?: Json | null
+          id?: string
+          is_blocking?: boolean | null
+          priority?: string | null
+          status?: string | null
+          target_agent?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      revenue_autopilot_snapshots: {
+        Row: {
+          actual_revenue: number | null
+          agent_recommended_action: string | null
+          approvals_blocking: number | null
+          business_id: string
+          calls_to_prepare: number | null
+          created_at: string
+          gap: number | null
+          hot_leads: number | null
+          id: string
+          overdue_follow_ups: number | null
+          pipeline_estimated: number | null
+          proposals_needed: number | null
+          required_activity: Json | null
+          revenue_target: number | null
+          snapshot_date: string
+          top_actions: Json | null
+          upgrade_opportunities: number | null
+        }
+        Insert: {
+          actual_revenue?: number | null
+          agent_recommended_action?: string | null
+          approvals_blocking?: number | null
+          business_id: string
+          calls_to_prepare?: number | null
+          created_at?: string
+          gap?: number | null
+          hot_leads?: number | null
+          id?: string
+          overdue_follow_ups?: number | null
+          pipeline_estimated?: number | null
+          proposals_needed?: number | null
+          required_activity?: Json | null
+          revenue_target?: number | null
+          snapshot_date?: string
+          top_actions?: Json | null
+          upgrade_opportunities?: number | null
+        }
+        Update: {
+          actual_revenue?: number | null
+          agent_recommended_action?: string | null
+          approvals_blocking?: number | null
+          business_id?: string
+          calls_to_prepare?: number | null
+          created_at?: string
+          gap?: number | null
+          hot_leads?: number | null
+          id?: string
+          overdue_follow_ups?: number | null
+          pipeline_estimated?: number | null
+          proposals_needed?: number | null
+          required_activity?: Json | null
+          revenue_target?: number | null
+          snapshot_date?: string
+          top_actions?: Json | null
+          upgrade_opportunities?: number | null
+        }
+        Relationships: []
+      }
+      revenue_autopilot_tasks: {
+        Row: {
+          approval_required: boolean | null
+          assigned_agent: string | null
+          business_id: string
+          created_at: string
+          currency: string | null
+          detail: string | null
+          due_at: string | null
+          estimated_value: number | null
+          id: string
+          linked_contact_id: string | null
+          linked_conversation_id: string | null
+          linked_offer_id: string | null
+          linked_product_id: string | null
+          metadata: Json | null
+          priority: string | null
+          status: string | null
+          task_type: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          approval_required?: boolean | null
+          assigned_agent?: string | null
+          business_id: string
+          created_at?: string
+          currency?: string | null
+          detail?: string | null
+          due_at?: string | null
+          estimated_value?: number | null
+          id?: string
+          linked_contact_id?: string | null
+          linked_conversation_id?: string | null
+          linked_offer_id?: string | null
+          linked_product_id?: string | null
+          metadata?: Json | null
+          priority?: string | null
+          status?: string | null
+          task_type: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          approval_required?: boolean | null
+          assigned_agent?: string | null
+          business_id?: string
+          created_at?: string
+          currency?: string | null
+          detail?: string | null
+          due_at?: string | null
+          estimated_value?: number | null
+          id?: string
+          linked_contact_id?: string | null
+          linked_conversation_id?: string | null
+          linked_offer_id?: string | null
+          linked_product_id?: string | null
+          metadata?: Json | null
+          priority?: string | null
+          status?: string | null
+          task_type?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       revenue_goal_progress_snapshots: {
         Row: {
           actual_amount: number
