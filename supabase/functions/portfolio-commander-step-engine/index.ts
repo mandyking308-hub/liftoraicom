@@ -171,8 +171,16 @@ async function logEvent(admin: any, e: {
 
 async function logAudit(admin: any, user_id: string | null, action: string, details: Record<string, unknown>) {
   try {
-    await admin.from("audit_logs").insert({
-      user_id, action, resource: "portfolio_commander_workflow", details,
+    await admin.from("agent_action_audit_log").insert({
+      agent_key: "portfolio_commander_agent",
+      action_type: action,
+      source_function: "portfolio-commander-step-engine",
+      founder_user_id: user_id,
+      dry_run: false,
+      action_status: "ok",
+      external_provider_called: false,
+      email_sent: false,
+      metadata: details,
     });
   } catch {/* best-effort */}
 }
