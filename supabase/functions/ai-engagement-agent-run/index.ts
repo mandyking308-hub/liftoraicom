@@ -1,6 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
-import { beginGatewayLog, endGatewayLog } from "../_shared/aiGateway.ts";
+import { callAIGateway } from "../_shared/aiGateway.ts";
 
 const CONFIRMATION_PHRASE = "RUN AI ENGAGEMENT AGENT";
 const SOURCE_FUNCTION = "ai-engagement-agent-run";
@@ -46,61 +46,45 @@ async function aiClassifyIntent(input: { subject?: string | null; body?: string 
     return { ...h, draft_subject: input.subject ? `Re: ${input.subject}` : "Quick reply", draft_body: "" } as any;
   }
   try {
-    const __gwInput = {
+    const gw = await callAIGateway({
       action_type: "ai_engagement_intent_classify",
       task_category: "engagement_classifier",
       model: "google/gemini-3-flash-preview",
       fallback_model: "google/gemini-2.5-flash",
-      risk_level: "high" as const,
+      risk_level: "high",
       request_type: "engagement_draft",
-      messages: [],
       metadata: { contact_name: input.contact_name ?? null },
-    };
-    const __log = await beginGatewayLog(__gwInput);
-    const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "system", content: "You are Liftor's engagement intent classifier and draft author. Tone: warm, confident, concise, non-needy, brand-appropriate. No over-explaining AI. Never grant full video access unless contact explicitly qualifies. Return only the tool call." },
-          { role: "user", content: `Classify and draft a brief reply.\n\nFROM: ${input.contact_name ?? "unknown"}\nSUBJECT: ${input.subject ?? ""}\nBODY:\n${(input.body ?? "").slice(0, 4000)}` },
-        ],
-        tools: [{
-          type: "function",
-          function: {
-            name: "classify_and_draft",
-            description: "Classify intent and draft a brief reply.",
-            parameters: {
-              type: "object",
-              properties: {
-                intent: { type: "string", enum: INTENT_LABELS },
-                confidence: { type: "number" },
-                rationale: { type: "string" },
-                draft_subject: { type: "string" },
-                draft_body: { type: "string" },
-                risk_flags: { type: "array", items: { type: "string" } },
-              },
-              required: ["intent", "confidence", "rationale", "draft_subject", "draft_body"],
-              additionalProperties: false,
+      messages: [
+        { role: "system", content: "You are Liftor's engagement intent classifier and draft author. Tone: warm, confident, concise, non-needy, brand-appropriate. No over-explaining AI. Never grant full video access unless contact explicitly qualifies. Return only the tool call." },
+        { role: "user", content: `Classify and draft a brief reply.\n\nFROM: ${input.contact_name ?? "unknown"}\nSUBJECT: ${input.subject ?? ""}\nBODY:\n${(input.body ?? "").slice(0, 4000)}` },
+      ],
+      tools: [{
+        type: "function",
+        function: {
+          name: "classify_and_draft",
+          description: "Classify intent and draft a brief reply.",
+          parameters: {
+            type: "object",
+            properties: {
+              intent: { type: "string", enum: INTENT_LABELS },
+              confidence: { type: "number" },
+              rationale: { type: "string" },
+              draft_subject: { type: "string" },
+              draft_body: { type: "string" },
+              risk_flags: { type: "array", items: { type: "string" } },
             },
+            required: ["intent", "confidence", "rationale", "draft_subject", "draft_body"],
+            additionalProperties: false,
           },
-        }],
-        tool_choice: { type: "function", function: { name: "classify_and_draft" } },
-      }),
+        },
+      }],
+      tool_choice: { type: "function", function: { name: "classify_and_draft" } },
     });
-    if (!resp.ok) {
-      await endGatewayLog({ ...__log, input: __gwInput }, { ok: false, error: `gateway_${resp.status}` });
+    if (gw.status !== "completed" || !gw.data) {
       const h = heuristicIntent(fallbackText);
       return { ...h, draft_subject: input.subject ? `Re: ${input.subject}` : "", draft_body: "" } as any;
     }
-    const data = await resp.json();
-    await endGatewayLog({ ...__log, input: __gwInput }, {
-      ok: true,
-      prompt_tokens: data?.usage?.prompt_tokens ?? 0,
-      completion_tokens: data?.usage?.completion_tokens ?? 0,
-    });
-    const args = data?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
+    const args = gw.data?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
     const parsed = args ? JSON.parse(args) : null;
     if (parsed?.intent && INTENT_LABELS.includes(parsed.intent)) return parsed;
     const h = heuristicIntent(fallbackText);
