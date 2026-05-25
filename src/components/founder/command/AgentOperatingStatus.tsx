@@ -66,6 +66,9 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "vendor_agent", name: "Vendor Agent", to: "/founder/vendors", category: "operations" },
   { key: "vendor_cost_agent", name: "Vendor Cost Agent", to: "/founder/vendors/costs", category: "operations" },
   { key: "vendor_risk_agent", name: "Vendor Risk Agent", to: "/founder/vendors/risk", category: "operations" },
+  { key: "human_oversight_agent", name: "Human Oversight Agent", to: "/founder/people", category: "operations" },
+  { key: "operator_quality_agent", name: "Operator Quality Agent", to: "/founder/people/quality", category: "operations" },
+  { key: "operator_access_agent", name: "Operator Access Agent", to: "/founder/people/access", category: "operations" },
 ];
 
 export default function AgentOperatingStatus() {
