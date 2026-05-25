@@ -372,3 +372,72 @@ export async function streamAIGateway(input: AIGatewayCallInput): Promise<{ trac
   // Caller is responsible for piping `response.body`. Final ledger update happens on close.
   return { trace_id, response };
 }
+
+/**
+ * Lightweight ledger wrappers for edge functions that already call the Lovable AI
+ * Gateway via the Vercel AI SDK / OpenAI-compatible client and cannot easily
+ * route through `callAIGateway`. Use `beginGatewayLog` before the SDK call and
+ * `endGatewayLog` after — the function's traffic then appears in
+ * `ai_gateway_requests`, `ai_usage_ledger` and `ai_runtime_events` like a
+ * first-class gateway call.
+ */
+export async function beginGatewayLog(input: AIGatewayCallInput): Promise<{ trace_id: string; request_id: string }> {
+  const trace_id = newTraceId();
+  const request_id = newRequestId();
+  const sb = getServiceClient();
+  const startedAt = new Date().toISOString();
+  await writeLedger(trace_id, input, { status: "pending", input_summary: input.action_type });
+  await recordRuntimeRequest(sb, {
+    request_id,
+    conversation_id: input.conversation_id ?? null,
+    workflow_id: input.workflow_id ?? null,
+    agent_id: input.agent_id ?? null,
+    portfolio_asset_id: input.portfolio_asset_id ?? null,
+    business_id: input.business_id ?? null,
+    user_id: input.user_id ?? null,
+    request_type: input.request_type ?? input.action_type,
+    provider: "lovable-ai-gateway",
+    model: input.model ?? "google/gemini-3-flash-preview",
+    prompt_version: input.prompt_version ?? null,
+    risk_level: input.risk_level ?? "low",
+    approval_required: !!input.approval_required,
+    status: "running",
+    priority: input.priority ?? 5,
+    idempotency_key: input.idempotency_key ?? null,
+    started_at: startedAt,
+    trace_id,
+    metadata: { ...(input.metadata ?? {}), sdk_wrapped: true },
+  });
+  return { trace_id, request_id };
+}
+
+export async function endGatewayLog(
+  ctx: { trace_id: string; request_id: string; input: AIGatewayCallInput },
+  result: { ok: boolean; prompt_tokens?: number; completion_tokens?: number; error?: string },
+) {
+  const sb = getServiceClient();
+  const completedAt = new Date().toISOString();
+  await writeLedger(ctx.trace_id, ctx.input, {
+    status: result.ok ? "completed" : "failed",
+    prompt_tokens: result.prompt_tokens ?? 0,
+    completion_tokens: result.completion_tokens ?? 0,
+    output_summary: result.ok ? ctx.input.action_type : (result.error ?? "error"),
+  });
+  await updateRuntimeRequest(sb, ctx.request_id, {
+    status: result.ok ? "completed" : "failed",
+    completed_at: completedAt,
+    prompt_tokens: result.prompt_tokens ?? null,
+    completion_tokens: result.completion_tokens ?? null,
+    error_message: result.ok ? null : (result.error ?? null),
+  });
+  await recordRuntimeEvent(sb, {
+    request_id: ctx.request_id,
+    conversation_id: ctx.input.conversation_id ?? null,
+    agent_id: ctx.input.agent_id ?? null,
+    business_id: ctx.input.business_id ?? null,
+    event_type: result.ok ? "completed" : "sdk_error",
+    severity: result.ok ? "info" : "error",
+    message: result.error,
+    metadata: { sdk_wrapped: true },
+  });
+}
