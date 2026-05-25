@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { CSLayout, CSSection, CSEmptyState } from "./_shared";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ShieldAlert, MicOff, PhoneOff, Ban, AlertTriangle, UserCog, Lock, FileWarning } from "lucide-react";
+import { ShieldAlert, MicOff, PhoneOff, Ban, UserCog, Lock, FileWarning } from "lucide-react";
 
 const SEVERITY_TONE: Record<string, string> = {
   info:     "bg-muted text-muted-foreground",
@@ -173,5 +173,3 @@ function Stat({ icon: Icon, label, value, tone }: { icon: any; label: string; va
     </Card>
   );
 }
-
-function AlertNote() { return <AlertTriangle size={12} className="text-yellow-400" />; }
