@@ -7,6 +7,25 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Approx tokens for streaming telemetry. Real token counts are not returned
+// mid-stream by the gateway; we use ~4 chars/token as a conservative estimate.
+const approxTokens = (s: string) => Math.max(1, Math.ceil(s.length / 4));
+
+async function logRuntimeEvent(
+  sb: any,
+  request_id: string | null,
+  event_type: string,
+  severity: "info" | "warning" | "error" = "info",
+  metadata: Record<string, unknown> = {},
+  message?: string,
+) {
+  try {
+    await sb.from("ai_runtime_events").insert({
+      request_id, event_type, severity, message: message ?? null, metadata,
+    });
+  } catch {/* best-effort */}
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -82,6 +101,12 @@ GUIDELINES:
       metadata: { streaming: true },
     };
     const __log = await beginGatewayLog(__gwInput);
+    const fullPrompt = JSON.stringify({ system: systemPrompt, messages });
+    const promptTokens = approxTokens(fullPrompt);
+    const t0 = Date.now();
+    await logRuntimeEvent(supabase, __log.request_id, "stream_request_started", "info", {
+      function: "founder-copilot", model: __gwInput.model, prompt_tokens_estimate: promptTokens,
+    });
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -97,10 +122,15 @@ GUIDELINES:
         stream: true,
       }),
     });
+    await logRuntimeEvent(supabase, __log.request_id, "stream_opened", "info", {
+      function: "founder-copilot", http_status: response.status,
+      ttfh_ms: Date.now() - t0,
+    });
 
     if (!response.ok) {
       if (response.status === 429) {
         await endGatewayLog({ ...__log, input: __gwInput }, { ok: false, error: "rate_limited" });
+        await logRuntimeEvent(supabase, __log.request_id, "stream_rate_limited", "warning", { function: "founder-copilot" });
         return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again shortly." }), {
           status: 429,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -108,6 +138,7 @@ GUIDELINES:
       }
       if (response.status === 402) {
         await endGatewayLog({ ...__log, input: __gwInput }, { ok: false, error: "payment_required" });
+        await logRuntimeEvent(supabase, __log.request_id, "stream_payment_required", "error", { function: "founder-copilot" });
         return new Response(JSON.stringify({ error: "AI credits exhausted. Please top up your workspace." }), {
           status: 402,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -116,15 +147,55 @@ GUIDELINES:
       const t = await response.text();
       console.error("AI gateway error:", response.status, t);
       await endGatewayLog({ ...__log, input: __gwInput }, { ok: false, error: `gateway_${response.status}` });
+      await logRuntimeEvent(supabase, __log.request_id, "stream_gateway_error", "error", {
+        function: "founder-copilot", http_status: response.status,
+      });
       return new Response(JSON.stringify({ error: "AI gateway error" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Fire-and-forget completion log (stream tokens not counted server-side).
-    endGatewayLog({ ...__log, input: __gwInput }, { ok: true, cost_basis: "streaming_estimate" }).catch(() => {});
-    return new Response(response.body, {
+    // Tee the stream so we can pass it to the client AND tally output bytes
+    // for an estimated completion-token count + completion event. Real token
+    // counts are not returned mid-stream; we tag cost_basis=streaming_estimate.
+    const decoder = new TextDecoder();
+    let completionChars = 0;
+    let firstTokenLogged = false;
+    const transform = new TransformStream<Uint8Array, Uint8Array>({
+      transform(chunk, controller) {
+        controller.enqueue(chunk);
+        try {
+          const text = decoder.decode(chunk, { stream: true });
+          // Sum SSE "delta.content" lengths approximately by counting JSON content fields.
+          // Cheaper proxy: count raw chunk chars, minus SSE framing overhead (~15%).
+          completionChars += Math.ceil(text.length * 0.85);
+          if (!firstTokenLogged && text.includes("data:")) {
+            firstTokenLogged = true;
+            logRuntimeEvent(supabase, __log.request_id, "stream_first_token", "info", {
+              function: "founder-copilot", time_to_first_token_ms: Date.now() - t0,
+            });
+          }
+        } catch {/* ignore */}
+      },
+      async flush() {
+        const completionTokens = approxTokens("x".repeat(completionChars));
+        await endGatewayLog({ ...__log, input: __gwInput }, {
+          ok: true,
+          prompt_tokens: promptTokens,
+          completion_tokens: completionTokens,
+          cost_basis: "streaming_estimate",
+        });
+        await logRuntimeEvent(supabase, __log.request_id, "stream_completed", "info", {
+          function: "founder-copilot",
+          duration_ms: Date.now() - t0,
+          prompt_tokens_estimate: promptTokens,
+          completion_tokens_estimate: completionTokens,
+          cost_basis: "streaming_estimate",
+        });
+      },
+    });
+    return new Response(response.body!.pipeThrough(transform), {
       headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
     });
   } catch (e) {
