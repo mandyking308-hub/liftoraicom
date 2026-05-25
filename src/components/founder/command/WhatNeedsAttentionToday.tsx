@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   AlertTriangle, ClipboardCheck, Activity, Bot, DollarSign, Send, MessageSquare,
-  Users, FlaskConical, ShieldAlert, Briefcase, Banknote, Sparkles, ArrowRight,
+  Users, FlaskConical, ShieldAlert, Briefcase, Banknote, Sparkles, ArrowRight, Phone,
 } from "lucide-react";
 
 type Tone = "danger" | "warn" | "good" | "default";
@@ -45,7 +45,7 @@ export default function WhatNeedsAttentionToday() {
         approvalsPending, alertsOpen, gatewayFails24h, runtimeErrors24h,
         pricingMissing, budgetGaps, blockedQueue, smartleadSetup,
         crmWarnings, socialApprovals, supportEscalations, financePending,
-        portfolioApprovals, injectionEvents, testRecords,
+        portfolioApprovals, injectionEvents, testRecords, salesCloseApprovals, salesFollowUp,
       ] = await Promise.all([
         sb.from("founder_approval_items").select("id", head).eq("status", "pending"),
         sb.from("system_events").select("id", head).eq("resolved", false).in("severity", ["critical", "high"]),
@@ -62,6 +62,8 @@ export default function WhatNeedsAttentionToday() {
         sb.from("portfolio_exit_approvals").select("id", head).eq("status", "pending"),
         sb.from("ai_runtime_events").select("id", head).gte("created_at", since24h).in("event_type", ["prompt_injection_detected", "redaction_triggered"]),
         sb.from("founder_approval_items").select("id", head).eq("status", "pending").ilike("metadata->>source", "%LIVE_INTERNAL_TEST%"),
+        sb.from("customer_sales_close_actions").select("id", head).eq("action_status", "approval_required"),
+        sb.from("customer_sales_conversations").select("id", head).eq("conversation_status", "follow_up_needed"),
       ].map((p) => p.catch(() => ({ count: 0 }))));
       return {
         approvalsPending: approvalsPending?.count ?? 0,
@@ -79,6 +81,8 @@ export default function WhatNeedsAttentionToday() {
         portfolioApprovals: portfolioApprovals?.count ?? 0,
         injectionEvents: injectionEvents?.count ?? 0,
         testRecords: testRecords?.count ?? 0,
+        salesCloseApprovals: salesCloseApprovals?.count ?? 0,
+        salesFollowUp: salesFollowUp?.count ?? 0,
       };
     },
   });
@@ -87,7 +91,7 @@ export default function WhatNeedsAttentionToday() {
     approvalsPending: 0, alertsOpen: 0, gatewayFails: 0, runtimeErrors: 0,
     pricingMissing: 0, budgetGaps: 0, blockedQueue: 0, smartleadSetup: 0,
     crmWarnings: 0, socialApprovals: 0, supportEscalations: 0, financePending: 0,
-    portfolioApprovals: 0, injectionEvents: 0, testRecords: 0,
+    portfolioApprovals: 0, injectionEvents: 0, testRecords: 0, salesCloseApprovals: 0, salesFollowUp: 0,
   };
 
   const tone = (n: number, warn = 1, danger = 5): Tone =>
@@ -125,6 +129,8 @@ export default function WhatNeedsAttentionToday() {
             <Tile label="Portfolio/exit approvals" value={d.portfolioApprovals} to="/founder/portfolio" icon={Briefcase} tone={tone(d.portfolioApprovals)} />
             <Tile label="Security / injection events" value={d.injectionEvents} to="/founder/ai-cost/security" icon={ShieldAlert} tone={d.injectionEvents > 0 ? "danger" : "good"} />
             <Tile label="Test records to clear" value={d.testRecords} to="/founder/ai-cost/approvals" icon={FlaskConical} tone={tone(d.testRecords)} hint="LIVE_INTERNAL_TEST drill items" />
+            <Tile label="Sales close actions awaiting approval" value={d.salesCloseApprovals} to="/founder/customer-sales/close-engine" icon={Phone} tone={tone(d.salesCloseApprovals)} hint="external send locked" />
+            <Tile label="Sales follow-ups" value={d.salesFollowUp} to="/founder/customer-sales/follow-up" icon={Phone} tone={tone(d.salesFollowUp)} />
           </div>
         </CardContent>
       </Card>
