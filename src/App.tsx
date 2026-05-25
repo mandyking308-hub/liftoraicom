@@ -164,6 +164,13 @@ import QTCInvoices from "./pages/founder/quote-to-cash/Invoices";
 import QTCPayments from "./pages/founder/quote-to-cash/Payments";
 import QTCRevenueConfirmation from "./pages/founder/quote-to-cash/RevenueConfirmation";
 import QTCSettings from "./pages/founder/quote-to-cash/Settings";
+import DeliveryOverview from "./pages/founder/delivery/Overview";
+import DeliveryOrders from "./pages/founder/delivery/Orders";
+import DeliveryTasks from "./pages/founder/delivery/Tasks";
+import DeliveryCapacity from "./pages/founder/delivery/Capacity";
+import DeliveryBlockers from "./pages/founder/delivery/Blockers";
+import DeliveryCompletionProof from "./pages/founder/delivery/CompletionProof";
+import DeliverySettings from "./pages/founder/delivery/Settings";
 import CustomerUpgradesHub from "./pages/founder/customer-upgrades/Hub";
 import CustomerUpgradesOpportunities from "./pages/founder/customer-upgrades/Opportunities";
 import CustomerUpgradesProductLadders from "./pages/founder/customer-upgrades/ProductLadders";
@@ -423,6 +430,13 @@ const App = () => (
             <Route path="/founder/quote-to-cash/payments" element={<FounderRoute><QTCPayments /></FounderRoute>} />
             <Route path="/founder/quote-to-cash/revenue-confirmation" element={<FounderRoute><QTCRevenueConfirmation /></FounderRoute>} />
             <Route path="/founder/quote-to-cash/settings" element={<FounderRoute><QTCSettings /></FounderRoute>} />
+            <Route path="/founder/delivery" element={<FounderRoute><DeliveryOverview /></FounderRoute>} />
+            <Route path="/founder/delivery/orders" element={<FounderRoute><DeliveryOrders /></FounderRoute>} />
+            <Route path="/founder/delivery/tasks" element={<FounderRoute><DeliveryTasks /></FounderRoute>} />
+            <Route path="/founder/delivery/capacity" element={<FounderRoute><DeliveryCapacity /></FounderRoute>} />
+            <Route path="/founder/delivery/blockers" element={<FounderRoute><DeliveryBlockers /></FounderRoute>} />
+            <Route path="/founder/delivery/completion-proof" element={<FounderRoute><DeliveryCompletionProof /></FounderRoute>} />
+            <Route path="/founder/delivery/settings" element={<FounderRoute><DeliverySettings /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
