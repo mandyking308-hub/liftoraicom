@@ -151,6 +151,12 @@ import SalesCoachingObjections from "./pages/founder/sales-coaching/Objections";
 import SalesCoachingScripts from "./pages/founder/sales-coaching/Scripts";
 import SalesCoachingWinsLosses from "./pages/founder/sales-coaching/WinsLosses";
 import SalesCoachingRecommendations from "./pages/founder/sales-coaching/Recommendations";
+import RevenueAutopilotOverview from "./pages/founder/revenue-autopilot/Overview";
+import RevenueAutopilotToday from "./pages/founder/revenue-autopilot/Today";
+import RevenueAutopilotTargets from "./pages/founder/revenue-autopilot/Targets";
+import RevenueAutopilotTasks from "./pages/founder/revenue-autopilot/Tasks";
+import RevenueAutopilotGaps from "./pages/founder/revenue-autopilot/Gaps";
+import RevenueAutopilotApprovals from "./pages/founder/revenue-autopilot/Approvals";
 import CustomerUpgradesHub from "./pages/founder/customer-upgrades/Hub";
 import CustomerUpgradesOpportunities from "./pages/founder/customer-upgrades/Opportunities";
 import CustomerUpgradesProductLadders from "./pages/founder/customer-upgrades/ProductLadders";
@@ -397,6 +403,12 @@ const App = () => (
             <Route path="/founder/sales-coaching/scripts" element={<FounderRoute><SalesCoachingScripts /></FounderRoute>} />
             <Route path="/founder/sales-coaching/wins-losses" element={<FounderRoute><SalesCoachingWinsLosses /></FounderRoute>} />
             <Route path="/founder/sales-coaching/recommendations" element={<FounderRoute><SalesCoachingRecommendations /></FounderRoute>} />
+            <Route path="/founder/revenue-autopilot" element={<FounderRoute><RevenueAutopilotOverview /></FounderRoute>} />
+            <Route path="/founder/revenue-autopilot/today" element={<FounderRoute><RevenueAutopilotToday /></FounderRoute>} />
+            <Route path="/founder/revenue-autopilot/targets" element={<FounderRoute><RevenueAutopilotTargets /></FounderRoute>} />
+            <Route path="/founder/revenue-autopilot/tasks" element={<FounderRoute><RevenueAutopilotTasks /></FounderRoute>} />
+            <Route path="/founder/revenue-autopilot/gaps" element={<FounderRoute><RevenueAutopilotGaps /></FounderRoute>} />
+            <Route path="/founder/revenue-autopilot/approvals" element={<FounderRoute><RevenueAutopilotApprovals /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
