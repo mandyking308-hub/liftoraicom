@@ -45,6 +45,8 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "close_preparation_agent", name: "Close Preparation Agent", to: "/founder/customer-sales/close-engine", category: "sales" },
   { key: "follow_up_agent", name: "Follow-Up Agent", to: "/founder/customer-sales/follow-up", category: "sales" },
   { key: "human_handoff_agent", name: "Human Handoff Agent", to: "/founder/customer-sales/follow-up", category: "sales" },
+  { key: "sales_manager_agent", name: "Sales Manager Agent", to: "/founder/sales-targets", category: "sales" },
+  { key: "sales_target_planner", name: "Sales Target Planner", to: "/founder/sales-targets/activity-plan", category: "sales" },
 ];
 
 export default function AgentOperatingStatus() {
