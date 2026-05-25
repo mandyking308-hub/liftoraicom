@@ -19,6 +19,12 @@ const SECTIONS: Array<{
   items?: Array<{ label: string; to: string; icon: any }>;
 }> = [
   {
+    title: "First-Use Setup",
+    description: "Live checklist for configuring the AI Cost Governor. Missing settings create warnings, not gates — Liftor operates live while you complete setup.",
+    to: "/founder/ai-cost/first-use",
+    icon: Sparkles,
+  },
+  {
     title: "Founder Action Board",
     description: "Daily live cockpit. What needs attention, what is working, what to decide — with one-click actions.",
     to: "/founder/ai-cost/action-board",
