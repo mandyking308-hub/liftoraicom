@@ -628,6 +628,13 @@ const App = () => (
             <Route path="/founder/knowledge-governance/stale" element={<FounderRoute><KnowledgeStale /></FounderRoute>} />
             <Route path="/founder/knowledge-governance/approved-claims" element={<FounderRoute><KnowledgeApprovedClaims /></FounderRoute>} />
             <Route path="/founder/knowledge-governance/manual-sync" element={<FounderRoute><KnowledgeManualSync /></FounderRoute>} />
+            <Route path="/founder/capacity" element={<FounderRoute><CapacityOverview /></FounderRoute>} />
+            <Route path="/founder/capacity/business" element={<FounderRoute><CapacityBusiness /></FounderRoute>} />
+            <Route path="/founder/capacity/agents" element={<FounderRoute><CapacityAgents /></FounderRoute>} />
+            <Route path="/founder/capacity/humans" element={<FounderRoute><CapacityHumans /></FounderRoute>} />
+            <Route path="/founder/capacity/delivery" element={<FounderRoute><CapacityDelivery /></FounderRoute>} />
+            <Route path="/founder/capacity/bottlenecks" element={<FounderRoute><CapacityBottlenecks /></FounderRoute>} />
+            <Route path="/founder/capacity/forecast" element={<FounderRoute><CapacityForecast /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
