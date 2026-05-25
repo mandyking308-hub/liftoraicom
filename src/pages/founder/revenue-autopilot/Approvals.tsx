@@ -4,12 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { RALayout, RASection, RAEmpty } from "./_shared";
 
-type Approval = { id: string; action_type: string; action_status: string; expected_value: number | null; currency: string | null; created_at: string };
+type Approval = { id: string; close_action_type: string; action_status: string; amount: number | null; currency: string | null; created_at: string };
 
 export default function RevenueAutopilotApprovals() {
   const [rows, setRows] = useState<Approval[]>([]);
   useEffect(() => {
-    supabase.from("customer_sales_close_actions").select("id,action_type,action_status,expected_value,currency,created_at").eq("action_status", "approval_required").order("created_at", { ascending: false }).limit(200)
+    supabase.from("customer_sales_close_actions").select("id,close_action_type,action_status,amount,currency,created_at").eq("action_status", "approval_required").order("created_at", { ascending: false }).limit(200)
       .then(r => setRows((r.data as Approval[]) || []));
   }, []);
 
@@ -20,7 +20,7 @@ export default function RevenueAutopilotApprovals() {
           <ul className="text-xs space-y-2">
             {rows.map(r => (
               <li key={r.id} className="flex justify-between border-b border-border/40 pb-2">
-                <span>{r.action_type}{(r.expected_value || 0) > 0 ? ` — ${r.currency || "USD"} ${Math.round(r.expected_value || 0).toLocaleString()}` : ""}</span>
+                <span>{r.close_action_type}{(r.amount || 0) > 0 ? ` — ${r.currency || "USD"} ${Math.round(r.amount || 0).toLocaleString()}` : ""}</span>
                 <Badge variant="outline" className="text-[10px] bg-yellow-500/15 text-yellow-300 border-yellow-500/30">approval required</Badge>
               </li>
             ))}
