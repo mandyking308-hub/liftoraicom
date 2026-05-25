@@ -16707,6 +16707,238 @@ export type Database = {
         }
         Relationships: []
       }
+      delivery_capacity: {
+        Row: {
+          business_id: string | null
+          capacity_period_end: string
+          capacity_period_start: string
+          capacity_status: string
+          created_at: string
+          current_hours: number | null
+          current_orders: number | null
+          id: string
+          max_hours: number | null
+          max_orders: number | null
+          recommended_action: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          capacity_period_end: string
+          capacity_period_start: string
+          capacity_status?: string
+          created_at?: string
+          current_hours?: number | null
+          current_orders?: number | null
+          id?: string
+          max_hours?: number | null
+          max_orders?: number | null
+          recommended_action?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          capacity_period_end?: string
+          capacity_period_start?: string
+          capacity_status?: string
+          created_at?: string
+          current_hours?: number | null
+          current_orders?: number | null
+          id?: string
+          max_hours?: number | null
+          max_orders?: number | null
+          recommended_action?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      delivery_completion_proof: {
+        Row: {
+          audit_metadata: Json | null
+          business_id: string | null
+          created_at: string
+          customer_confirmed: boolean
+          delivery_order_id: string | null
+          id: string
+          proof_summary: string | null
+          proof_type: string
+          proof_url: string | null
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          audit_metadata?: Json | null
+          business_id?: string | null
+          created_at?: string
+          customer_confirmed?: boolean
+          delivery_order_id?: string | null
+          id?: string
+          proof_summary?: string | null
+          proof_type?: string
+          proof_url?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          audit_metadata?: Json | null
+          business_id?: string | null
+          created_at?: string
+          customer_confirmed?: boolean
+          delivery_order_id?: string | null
+          id?: string
+          proof_summary?: string | null
+          proof_type?: string
+          proof_url?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_completion_proof_delivery_order_id_fkey"
+            columns: ["delivery_order_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      delivery_orders: {
+        Row: {
+          audit_metadata: Json | null
+          business_id: string | null
+          completed_at: string | null
+          contact_id: string | null
+          created_at: string
+          customer_id: string | null
+          customer_requirements: string | null
+          deal_id: string | null
+          delivery_summary: string | null
+          delivery_type: string
+          due_date: string | null
+          id: string
+          invoice_id: string | null
+          offer_id: string | null
+          order_status: string
+          product_id: string | null
+          quote_id: string | null
+          risk_flags: Json | null
+          start_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json | null
+          business_id?: string | null
+          completed_at?: string | null
+          contact_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          customer_requirements?: string | null
+          deal_id?: string | null
+          delivery_summary?: string | null
+          delivery_type?: string
+          due_date?: string | null
+          id?: string
+          invoice_id?: string | null
+          offer_id?: string | null
+          order_status?: string
+          product_id?: string | null
+          quote_id?: string | null
+          risk_flags?: Json | null
+          start_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json | null
+          business_id?: string | null
+          completed_at?: string | null
+          contact_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          customer_requirements?: string | null
+          deal_id?: string | null
+          delivery_summary?: string | null
+          delivery_type?: string
+          due_date?: string | null
+          id?: string
+          invoice_id?: string | null
+          offer_id?: string | null
+          order_status?: string
+          product_id?: string | null
+          quote_id?: string | null
+          risk_flags?: Json | null
+          start_date?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      delivery_tasks: {
+        Row: {
+          assigned_to: string | null
+          assigned_to_type: string | null
+          audit_metadata: Json | null
+          blocker_reason: string | null
+          business_id: string | null
+          completed_at: string | null
+          created_at: string
+          customer_visible: boolean
+          delivery_order_id: string | null
+          due_at: string | null
+          founder_approval_required: boolean
+          id: string
+          priority: string | null
+          task_name: string
+          task_status: string
+          task_type: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          assigned_to_type?: string | null
+          audit_metadata?: Json | null
+          blocker_reason?: string | null
+          business_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          customer_visible?: boolean
+          delivery_order_id?: string | null
+          due_at?: string | null
+          founder_approval_required?: boolean
+          id?: string
+          priority?: string | null
+          task_name: string
+          task_status?: string
+          task_type?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          assigned_to_type?: string | null
+          audit_metadata?: Json | null
+          blocker_reason?: string | null
+          business_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          customer_visible?: boolean
+          delivery_order_id?: string | null
+          due_at?: string | null
+          founder_approval_required?: boolean
+          id?: string
+          priority?: string | null
+          task_name?: string
+          task_status?: string
+          task_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_tasks_delivery_order_id_fkey"
+            columns: ["delivery_order_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       demo_access: {
         Row: {
           access_count: number
