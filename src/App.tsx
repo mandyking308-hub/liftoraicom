@@ -318,6 +318,14 @@ import IMProviders from "./pages/founder/integration-map/Providers";
 import IMMissing from "./pages/founder/integration-map/Missing";
 import IMRisks from "./pages/founder/integration-map/Risks";
 import IMSettings from "./pages/founder/integration-map/Settings";
+
+// Business Compliance Rules
+import BCOverview from "./pages/founder/business-compliance/Overview";
+import BCBusinesses from "./pages/founder/business-compliance/Businesses";
+import BCRules from "./pages/founder/business-compliance/Rules";
+import BCClaims from "./pages/founder/business-compliance/Claims";
+import BCChannels from "./pages/founder/business-compliance/Channels";
+import BCApprovalTriggers from "./pages/founder/business-compliance/ApprovalTriggers";
 import KnowledgeOverview from "./pages/founder/knowledge-governance/Overview";
 import KnowledgeSources from "./pages/founder/knowledge-governance/Sources";
 import KnowledgeConflicts from "./pages/founder/knowledge-governance/Conflicts";
@@ -740,6 +748,12 @@ const App = () => (
             <Route path="/founder/integration-map/missing" element={<FounderRoute><IMMissing /></FounderRoute>} />
             <Route path="/founder/integration-map/risks" element={<FounderRoute><IMRisks /></FounderRoute>} />
             <Route path="/founder/integration-map/settings" element={<FounderRoute><IMSettings /></FounderRoute>} />
+            <Route path="/founder/business-compliance" element={<FounderRoute><BCOverview /></FounderRoute>} />
+            <Route path="/founder/business-compliance/businesses" element={<FounderRoute><BCBusinesses /></FounderRoute>} />
+            <Route path="/founder/business-compliance/rules" element={<FounderRoute><BCRules /></FounderRoute>} />
+            <Route path="/founder/business-compliance/claims" element={<FounderRoute><BCClaims /></FounderRoute>} />
+            <Route path="/founder/business-compliance/channels" element={<FounderRoute><BCChannels /></FounderRoute>} />
+            <Route path="/founder/business-compliance/approval-triggers" element={<FounderRoute><BCApprovalTriggers /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
