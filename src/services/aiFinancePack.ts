@@ -389,7 +389,8 @@ export async function buildFinancePack(yyyyMm: string): Promise<FinancePack> {
     by_business, by_agent, by_campaign, by_category,
     business_unit_economics,
     founder_summary: summary,
-    estimates_disclaimer: "Revenue and pipeline figures shown are based on linked records in the AI usage ledger; where no direct link exists, the value is treated as 0. Human-cost-saved figures are estimates based on configured hourly rates and time saved.",
+    estimates_disclaimer:
+      "AI spend separates actual cost (token usage × current pricing), estimated cost (pricing-table rates with no token receipt), and pricing-missing rows. Pricing rows are marked verified or estimated in /founder/ai-cost/pricing. Revenue/pipeline split between confirmed (human-approved entries) and estimated (unapproved). Human-cost-saved figures are always estimates based on configured hourly rates and time saved.",
   };
 }
 
