@@ -5245,6 +5245,102 @@ export type Database = {
         }
         Relationships: []
       }
+      business_compliance_profiles: {
+        Row: {
+          business_id: string
+          compliance_risk_level: string
+          created_at: string
+          founder_confirmed: boolean
+          handles_children_data: boolean
+          handles_financial_data: boolean
+          handles_health_data: boolean
+          handles_legal_sensitive_data: boolean
+          id: string
+          marketplace_liability: boolean
+          notes: string | null
+          regulated_activity_possible: boolean
+          requires_disclaimers: boolean
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          compliance_risk_level?: string
+          created_at?: string
+          founder_confirmed?: boolean
+          handles_children_data?: boolean
+          handles_financial_data?: boolean
+          handles_health_data?: boolean
+          handles_legal_sensitive_data?: boolean
+          id?: string
+          marketplace_liability?: boolean
+          notes?: string | null
+          regulated_activity_possible?: boolean
+          requires_disclaimers?: boolean
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          compliance_risk_level?: string
+          created_at?: string
+          founder_confirmed?: boolean
+          handles_children_data?: boolean
+          handles_financial_data?: boolean
+          handles_health_data?: boolean
+          handles_legal_sensitive_data?: boolean
+          id?: string
+          marketplace_liability?: boolean
+          notes?: string | null
+          regulated_activity_possible?: boolean
+          requires_disclaimers?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      business_compliance_rules: {
+        Row: {
+          active: boolean
+          adviser_review_required: boolean
+          allowed_behavior: string | null
+          approval_required: boolean
+          business_id: string
+          created_at: string
+          id: string
+          prohibited_behavior: string | null
+          rule_name: string
+          rule_summary: string | null
+          rule_type: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          adviser_review_required?: boolean
+          allowed_behavior?: string | null
+          approval_required?: boolean
+          business_id: string
+          created_at?: string
+          id?: string
+          prohibited_behavior?: string | null
+          rule_name: string
+          rule_summary?: string | null
+          rule_type: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          adviser_review_required?: boolean
+          allowed_behavior?: string | null
+          approval_required?: boolean
+          business_id?: string
+          created_at?: string
+          id?: string
+          prohibited_behavior?: string | null
+          rule_name?: string
+          rule_summary?: string | null
+          rule_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       business_contact_relationships: {
         Row: {
           business_id: string | null
@@ -10758,6 +10854,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      compliance_approval_triggers: {
+        Row: {
+          action_required: string
+          active: boolean
+          business_id: string
+          created_at: string
+          id: string
+          trigger_condition: string
+          trigger_name: string
+          updated_at: string
+        }
+        Insert: {
+          action_required: string
+          active?: boolean
+          business_id: string
+          created_at?: string
+          id?: string
+          trigger_condition: string
+          trigger_name: string
+          updated_at?: string
+        }
+        Update: {
+          action_required?: string
+          active?: boolean
+          business_id?: string
+          created_at?: string
+          id?: string
+          trigger_condition?: string
+          trigger_name?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       compliance_documents: {
         Row: {
