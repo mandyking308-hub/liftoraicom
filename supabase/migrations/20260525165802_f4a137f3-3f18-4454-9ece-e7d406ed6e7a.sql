@@ -1,0 +1,3 @@
+UPDATE external_action_gates SET action_type='apollo_credit_spend' WHERE gate_key='apollo_credit_spend_gate' AND action_type='external_provider_call';
+UPDATE external_action_gates SET action_type='prospecting_external_search' WHERE gate_key='prospecting_external_search_gate' AND action_type='external_provider_call';
+CREATE UNIQUE INDEX IF NOT EXISTS external_action_gates_action_type_uniq ON external_action_gates(action_type);
