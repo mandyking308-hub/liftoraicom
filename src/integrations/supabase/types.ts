@@ -13253,6 +13253,68 @@ export type Database = {
           },
         ]
       }
+      customer_sales_brain_runs: {
+        Row: {
+          business_id: string | null
+          conversation_id: string | null
+          cost_usd: number | null
+          created_at: string
+          error: string | null
+          id: string
+          input_context: Json
+          input_transcript: string | null
+          model: string | null
+          output: Json
+          playbook_id: string | null
+          product_id: string | null
+          status: string
+          tokens_in: number | null
+          tokens_out: number | null
+        }
+        Insert: {
+          business_id?: string | null
+          conversation_id?: string | null
+          cost_usd?: number | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          input_context?: Json
+          input_transcript?: string | null
+          model?: string | null
+          output?: Json
+          playbook_id?: string | null
+          product_id?: string | null
+          status?: string
+          tokens_in?: number | null
+          tokens_out?: number | null
+        }
+        Update: {
+          business_id?: string | null
+          conversation_id?: string | null
+          cost_usd?: number | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          input_context?: Json
+          input_transcript?: string | null
+          model?: string | null
+          output?: Json
+          playbook_id?: string | null
+          product_id?: string | null
+          status?: string
+          tokens_in?: number | null
+          tokens_out?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_sales_brain_runs_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_sales_call_logs: {
         Row: {
           business_id: string | null
@@ -13426,6 +13488,62 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "customer_sales_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_sales_conversation_states: {
+        Row: {
+          brain_output: Json
+          conversation_id: string
+          created_at: string
+          escalation_reason: string | null
+          id: string
+          next_best_question: string | null
+          objections_detected: string[]
+          previous_stage: string | null
+          required_info_collected: Json
+          signals_detected: string[]
+          stage: string
+          stage_history: Json
+          updated_at: string
+        }
+        Insert: {
+          brain_output?: Json
+          conversation_id: string
+          created_at?: string
+          escalation_reason?: string | null
+          id?: string
+          next_best_question?: string | null
+          objections_detected?: string[]
+          previous_stage?: string | null
+          required_info_collected?: Json
+          signals_detected?: string[]
+          stage?: string
+          stage_history?: Json
+          updated_at?: string
+        }
+        Update: {
+          brain_output?: Json
+          conversation_id?: string
+          created_at?: string
+          escalation_reason?: string | null
+          id?: string
+          next_best_question?: string | null
+          objections_detected?: string[]
+          previous_stage?: string | null
+          required_info_collected?: Json
+          signals_detected?: string[]
+          stage?: string
+          stage_history?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_sales_conversation_states_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_conversations"
             referencedColumns: ["id"]
           },
         ]
@@ -13702,17 +13820,27 @@ export type Database = {
       customer_sales_playbooks: {
         Row: {
           active: boolean
+          approved_claims: string[] | null
           business_id: string | null
+          buying_signal_triggers: string[] | null
+          close_action_allowed: string
+          closing_questions: string[] | null
           closing_script: string | null
           compliance_notes: string | null
+          consent_notice: string | null
           created_at: string
           discovery_questions: string[] | null
           do_not_say_rules: string[] | null
           escalation_rules: string | null
+          escalation_triggers: string[] | null
           id: string
           objection_responses: Json | null
+          offer_id: string | null
           opening_script: string | null
           playbook_name: string
+          product_id: string | null
+          product_matching_logic: string | null
+          prohibited_claims: string[] | null
           qualification_rules: string | null
           tone_of_voice: string | null
           updated_at: string
@@ -13720,17 +13848,27 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          approved_claims?: string[] | null
           business_id?: string | null
+          buying_signal_triggers?: string[] | null
+          close_action_allowed?: string
+          closing_questions?: string[] | null
           closing_script?: string | null
           compliance_notes?: string | null
+          consent_notice?: string | null
           created_at?: string
           discovery_questions?: string[] | null
           do_not_say_rules?: string[] | null
           escalation_rules?: string | null
+          escalation_triggers?: string[] | null
           id?: string
           objection_responses?: Json | null
+          offer_id?: string | null
           opening_script?: string | null
           playbook_name: string
+          product_id?: string | null
+          product_matching_logic?: string | null
+          prohibited_claims?: string[] | null
           qualification_rules?: string | null
           tone_of_voice?: string | null
           updated_at?: string
@@ -13738,23 +13876,48 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          approved_claims?: string[] | null
           business_id?: string | null
+          buying_signal_triggers?: string[] | null
+          close_action_allowed?: string
+          closing_questions?: string[] | null
           closing_script?: string | null
           compliance_notes?: string | null
+          consent_notice?: string | null
           created_at?: string
           discovery_questions?: string[] | null
           do_not_say_rules?: string[] | null
           escalation_rules?: string | null
+          escalation_triggers?: string[] | null
           id?: string
           objection_responses?: Json | null
+          offer_id?: string | null
           opening_script?: string | null
           playbook_name?: string
+          product_id?: string | null
+          product_matching_logic?: string | null
+          prohibited_claims?: string[] | null
           qualification_rules?: string | null
           tone_of_voice?: string | null
           updated_at?: string
           use_case?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "customer_sales_playbooks_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_offers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_sales_playbooks_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       customer_sales_products: {
         Row: {
@@ -13909,6 +14072,45 @@ export type Database = {
           updated_at?: string
           web_call_enabled?: boolean | null
           webhook_url?: string | null
+        }
+        Relationships: []
+      }
+      customer_sales_signal_library: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string | null
+          id: string
+          keywords: string[]
+          label: string
+          signal_key: string
+          signal_kind: string
+          updated_at: string
+          weight: number
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          keywords?: string[]
+          label: string
+          signal_key: string
+          signal_kind?: string
+          updated_at?: string
+          weight?: number
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          keywords?: string[]
+          label?: string
+          signal_key?: string
+          signal_kind?: string
+          updated_at?: string
+          weight?: number
         }
         Relationships: []
       }
