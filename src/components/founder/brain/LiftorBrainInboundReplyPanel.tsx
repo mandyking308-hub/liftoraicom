@@ -132,7 +132,7 @@ export default function LiftorBrainInboundReplyPanel({
         {providerStatus === "not_configured" && (
           <div className="rounded-md border border-yellow-500/30 bg-yellow-500/10 text-yellow-200 text-xs p-3 flex items-start gap-2">
             <AlertTriangle size={14} className="mt-0.5" />
-            <div>OpenAI provider not configured. Drafting will return fail-closed until <code className="px-1 rounded bg-background/50">OPENAI_API_KEY</code> is added as a Supabase Edge Function secret.</div>
+            <div>Lovable AI Gateway not reachable. Drafting is fail-closed until <code className="px-1 rounded bg-background/50">LOVABLE_API_KEY</code> is available (auto-provisioned by Lovable).</div>
           </div>
         )}
 
