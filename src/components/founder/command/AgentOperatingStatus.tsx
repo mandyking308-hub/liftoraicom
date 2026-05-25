@@ -54,6 +54,9 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "conversion_learning_agent", name: "Conversion Learning Agent", to: "/founder/sales-coaching/conversions", category: "sales" },
   { key: "revenue_manager_agent", name: "Revenue Manager Agent", to: "/founder/revenue-autopilot", category: "sales" },
   { key: "revenue_autopilot_orchestrator", name: "Revenue Autopilot Orchestrator", to: "/founder/revenue-autopilot/today", category: "sales" },
+  { key: "quote_to_cash_agent", name: "Quote-to-Cash Agent", to: "/founder/quote-to-cash", category: "sales" },
+  { key: "invoice_payment_agent", name: "Invoice & Payment Agent", to: "/founder/quote-to-cash/invoices", category: "sales" },
+  { key: "revenue_confirmation_agent", name: "Revenue Confirmation Agent", to: "/founder/quote-to-cash/revenue-confirmation", category: "sales" },
 ];
 
 export default function AgentOperatingStatus() {
