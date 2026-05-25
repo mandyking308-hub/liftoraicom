@@ -13924,6 +13924,228 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_sales_follow_up_tasks: {
+        Row: {
+          approval_required: boolean
+          approval_status: string
+          assigned_to: string | null
+          business_id: string | null
+          call_log_id: string | null
+          channel: string
+          close_action_id: string | null
+          completed_at: string | null
+          contact_id: string | null
+          conversation_id: string | null
+          created_at: string
+          draft_message: string | null
+          draft_subject: string | null
+          follow_up_due_at: string | null
+          follow_up_priority: string
+          id: string
+          next_best_action: string
+          outcome: string | null
+          reason: string | null
+          risk_flags: Json
+          sent_at: string | null
+          task_status: string
+          template_key: string | null
+          test_label: string | null
+          updated_at: string
+        }
+        Insert: {
+          approval_required?: boolean
+          approval_status?: string
+          assigned_to?: string | null
+          business_id?: string | null
+          call_log_id?: string | null
+          channel?: string
+          close_action_id?: string | null
+          completed_at?: string | null
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          draft_message?: string | null
+          draft_subject?: string | null
+          follow_up_due_at?: string | null
+          follow_up_priority?: string
+          id?: string
+          next_best_action?: string
+          outcome?: string | null
+          reason?: string | null
+          risk_flags?: Json
+          sent_at?: string | null
+          task_status?: string
+          template_key?: string | null
+          test_label?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approval_required?: boolean
+          approval_status?: string
+          assigned_to?: string | null
+          business_id?: string | null
+          call_log_id?: string | null
+          channel?: string
+          close_action_id?: string | null
+          completed_at?: string | null
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          draft_message?: string | null
+          draft_subject?: string | null
+          follow_up_due_at?: string | null
+          follow_up_priority?: string
+          id?: string
+          next_best_action?: string
+          outcome?: string | null
+          reason?: string | null
+          risk_flags?: Json
+          sent_at?: string | null
+          task_status?: string
+          template_key?: string | null
+          test_label?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_sales_follow_up_tasks_close_action_id_fkey"
+            columns: ["close_action_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_close_actions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_sales_follow_up_tasks_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_sales_follow_up_templates: {
+        Row: {
+          active: boolean
+          body_template: string
+          channel: string
+          created_at: string
+          default_priority: string
+          default_subject: string | null
+          id: string
+          requires_approval: boolean
+          template_key: string
+          template_label: string
+        }
+        Insert: {
+          active?: boolean
+          body_template: string
+          channel?: string
+          created_at?: string
+          default_priority?: string
+          default_subject?: string | null
+          id?: string
+          requires_approval?: boolean
+          template_key: string
+          template_label: string
+        }
+        Update: {
+          active?: boolean
+          body_template?: string
+          channel?: string
+          created_at?: string
+          default_priority?: string
+          default_subject?: string | null
+          id?: string
+          requires_approval?: boolean
+          template_key?: string
+          template_label?: string
+        }
+        Relationships: []
+      }
+      customer_sales_human_handoff_tasks: {
+        Row: {
+          assigned_to: string | null
+          business_id: string | null
+          close_action_id: string | null
+          contact_id: string | null
+          conversation_id: string | null
+          created_at: string
+          customer_need: string | null
+          id: string
+          objections: Json
+          offer_id: string | null
+          outcome: string | null
+          priority: string
+          product_id: string | null
+          reason_key: string
+          recommended_response: string | null
+          risk_flags: Json
+          suggested_next_step: string | null
+          task_status: string
+          transcript_summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          business_id?: string | null
+          close_action_id?: string | null
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          customer_need?: string | null
+          id?: string
+          objections?: Json
+          offer_id?: string | null
+          outcome?: string | null
+          priority?: string
+          product_id?: string | null
+          reason_key: string
+          recommended_response?: string | null
+          risk_flags?: Json
+          suggested_next_step?: string | null
+          task_status?: string
+          transcript_summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          business_id?: string | null
+          close_action_id?: string | null
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          customer_need?: string | null
+          id?: string
+          objections?: Json
+          offer_id?: string | null
+          outcome?: string | null
+          priority?: string
+          product_id?: string | null
+          reason_key?: string
+          recommended_response?: string | null
+          risk_flags?: Json
+          suggested_next_step?: string | null
+          task_status?: string
+          transcript_summary?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_sales_human_handoff_tasks_close_action_id_fkey"
+            columns: ["close_action_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_close_actions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_sales_human_handoff_tasks_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_sales_knowledge_sources: {
         Row: {
           active: boolean
