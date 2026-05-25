@@ -159,13 +159,12 @@ async function logEvent(admin: any, e: {
 }) {
   try {
     await admin.from("ai_runtime_events").insert({
-      workflow_id: e.workflow_id ?? null,
       agent_id: e.agent_id ?? null,
       business_id: e.business_id ?? null,
       event_type: e.event_type,
       severity: e.severity ?? "info",
       message: e.message ?? null,
-      metadata: e.metadata ?? {},
+      metadata: { ...(e.metadata ?? {}), workflow_id: e.workflow_id ?? null },
     });
   } catch {/* best-effort */}
 }
