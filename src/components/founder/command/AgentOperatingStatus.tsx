@@ -93,6 +93,9 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "knowledge_governance_agent", name: "Knowledge Governance Agent", to: "/founder/knowledge-governance", category: "operations" },
   { key: "conflict_resolution_agent", name: "Conflict Resolution Agent", to: "/founder/knowledge-governance/conflicts", category: "operations" },
   { key: "approved_claims_agent", name: "Approved Claims Agent", to: "/founder/knowledge-governance/approved-claims", category: "operations" },
+  { key: "capacity_agent", name: "Capacity Agent", to: "/founder/capacity", category: "operations" },
+  { key: "bottleneck_detection_agent", name: "Bottleneck Detection Agent", to: "/founder/capacity/bottlenecks", category: "operations" },
+  { key: "workload_balancer_agent", name: "Workload Balancer Agent", to: "/founder/capacity/forecast", category: "operations" },
 ];
 
 export default function AgentOperatingStatus() {
