@@ -5420,6 +5420,54 @@ export type Database = {
           },
         ]
       }
+      business_context_profiles: {
+        Row: {
+          approved_context_source_id: string | null
+          brand_voice_summary: string | null
+          business_id: string
+          compliance_profile_id: string | null
+          created_at: string
+          default_currency: string | null
+          default_market: string | null
+          id: string
+          legal_entity_id: string | null
+          primary_domain: string | null
+          sales_email: string | null
+          support_email: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved_context_source_id?: string | null
+          brand_voice_summary?: string | null
+          business_id: string
+          compliance_profile_id?: string | null
+          created_at?: string
+          default_currency?: string | null
+          default_market?: string | null
+          id?: string
+          legal_entity_id?: string | null
+          primary_domain?: string | null
+          sales_email?: string | null
+          support_email?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved_context_source_id?: string | null
+          brand_voice_summary?: string | null
+          business_id?: string
+          compliance_profile_id?: string | null
+          created_at?: string
+          default_currency?: string | null
+          default_market?: string | null
+          id?: string
+          legal_entity_id?: string | null
+          primary_domain?: string | null
+          sales_email?: string | null
+          support_email?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       business_continuity_plans: {
         Row: {
           backup_processes: Json | null
@@ -11498,6 +11546,45 @@ export type Database = {
             referencedColumns: ["inbox_id"]
           },
         ]
+      }
+      context_guard_events: {
+        Row: {
+          action_taken: string
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          event_summary: string
+          event_type: string
+          id: string
+          severity: string
+          source_module: string
+          source_record_id: string | null
+        }
+        Insert: {
+          action_taken?: string
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          event_summary: string
+          event_type: string
+          id?: string
+          severity?: string
+          source_module: string
+          source_record_id?: string | null
+        }
+        Update: {
+          action_taken?: string
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          event_summary?: string
+          event_type?: string
+          id?: string
+          severity?: string
+          source_module?: string
+          source_record_id?: string | null
+        }
+        Relationships: []
       }
       continuity_plans: {
         Row: {
