@@ -18829,6 +18829,101 @@ export type Database = {
           },
         ]
       }
+      founder_report_items: {
+        Row: {
+          action_required: boolean
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          id: string
+          item_summary: string
+          item_type: string
+          metric_value: number | null
+          priority: string
+          report_id: string
+        }
+        Insert: {
+          action_required?: boolean
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          item_summary: string
+          item_type?: string
+          metric_value?: number | null
+          priority?: string
+          report_id: string
+        }
+        Update: {
+          action_required?: boolean
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          item_summary?: string
+          item_type?: string
+          metric_value?: number | null
+          priority?: string
+          report_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "founder_report_items_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "founder_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      founder_reports: {
+        Row: {
+          audit_metadata: Json
+          created_at: string
+          decisions_needed: Json
+          executive_summary: string | null
+          id: string
+          key_metrics: Json
+          key_risks: Json
+          period_end: string
+          period_start: string
+          recommended_actions: Json
+          report_status: string
+          report_type: string
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          created_at?: string
+          decisions_needed?: Json
+          executive_summary?: string | null
+          id?: string
+          key_metrics?: Json
+          key_risks?: Json
+          period_end: string
+          period_start: string
+          recommended_actions?: Json
+          report_status?: string
+          report_type?: string
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          created_at?: string
+          decisions_needed?: Json
+          executive_summary?: string | null
+          id?: string
+          key_metrics?: Json
+          key_risks?: Json
+          period_end?: string
+          period_start?: string
+          recommended_actions?: Json
+          report_status?: string
+          report_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       funding_exit_readiness: {
         Row: {
           blockers: Json
