@@ -1116,8 +1116,9 @@ const AI_GATEWAY_RUNTIME_GUIDE: ManualSection = {
 };
 LIFTOR_FULL_GUIDE.push(AI_GATEWAY_RUNTIME_GUIDE);
 
-const AI_COST_ACCURACY_GUIDE = {
-  id: 86,
+const AI_COST_ACCURACY_GUIDE: ManualSection = {
+  number: 86,
+  key: "ai-cost-accuracy",
   title: "AI Cost Accuracy — actual vs estimated",
   body: [
     "Cost cards show two figures: Actual cost (computed from real provider token counts) and Estimated-only cost (computed from approximate or streaming token counts).",
