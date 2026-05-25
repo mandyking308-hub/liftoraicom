@@ -1,0 +1,70 @@
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Workflow } from "lucide-react";
+import BusinessProcessHealthCard from "./BusinessProcessHealthCard";
+import DeliveryEngineCard from "./DeliveryEngineCard";
+import CustomerOnboardingCard from "./CustomerOnboardingCard";
+import SupportSLACard from "./SupportSLACard";
+import ComplaintsRefundsCard from "./ComplaintsRefundsCard";
+import ContractLifecycleCard from "./ContractLifecycleCard";
+import VendorManagementCard from "./VendorManagementCard";
+import PeopleOperationsCard from "./PeopleOperationsCard";
+import AccessGovernanceCard from "./AccessGovernanceCard";
+import PrivacyOperationsCard from "./PrivacyOperationsCard";
+import IncidentContinuityCard from "./IncidentContinuityCard";
+import AdviserHandoffPackCard from "./AdviserHandoffPackCard";
+import FounderReportingPackCard from "./FounderReportingPackCard";
+import ProductReleaseCard from "./ProductReleaseCard";
+import DataQualityCard from "./DataQualityCard";
+import KnowledgeGovernanceCard from "./KnowledgeGovernanceCard";
+import CapacityPlanningCard from "./CapacityPlanningCard";
+
+/**
+ * Business Process Spine — single integrated panel that surfaces every
+ * live business-process engine on the Command Centre. Live-first; no
+ * artificial gates. Approval-gated actions remain inside each module.
+ */
+export default function BusinessProcessSpinePanel() {
+  return (
+    <div className="max-w-7xl mx-auto px-4 pt-6 space-y-4">
+      <Card className="tech-card border-primary/30">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Workflow size={18} className="text-primary" />
+            Whole Business Process Spine
+            <Badge variant="outline" className="bg-emerald-500/15 text-emerald-400 border-emerald-500/30 text-[10px] ml-auto">
+              Live-first
+            </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="text-xs text-muted-foreground">
+          Every Liftor business-process engine — sales, revenue, delivery, support, finance,
+          compliance, governance and capacity — surfaced in one place. Daily operations stay
+          on the surface; only customer-impacting or irreversible actions are approval-gated
+          inside each module.
+        </CardContent>
+      </Card>
+
+      <BusinessProcessHealthCard />
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <DeliveryEngineCard />
+        <CustomerOnboardingCard />
+        <SupportSLACard />
+        <ComplaintsRefundsCard />
+        <ContractLifecycleCard />
+        <VendorManagementCard />
+        <PeopleOperationsCard />
+        <AccessGovernanceCard />
+        <PrivacyOperationsCard />
+        <IncidentContinuityCard />
+        <CapacityPlanningCard />
+        <DataQualityCard />
+        <KnowledgeGovernanceCard />
+        <ProductReleaseCard />
+        <AdviserHandoffPackCard />
+        <FounderReportingPackCard />
+      </div>
+    </div>
+  );
+}
