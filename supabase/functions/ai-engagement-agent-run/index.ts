@@ -1,5 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { beginGatewayLog, endGatewayLog } from "../_shared/aiGateway.ts";
 
 const CONFIRMATION_PHRASE = "RUN AI ENGAGEMENT AGENT";
 const SOURCE_FUNCTION = "ai-engagement-agent-run";
@@ -45,6 +46,17 @@ async function aiClassifyIntent(input: { subject?: string | null; body?: string 
     return { ...h, draft_subject: input.subject ? `Re: ${input.subject}` : "Quick reply", draft_body: "" } as any;
   }
   try {
+    const __gwInput = {
+      action_type: "ai_engagement_intent_classify",
+      task_category: "engagement_classifier",
+      model: "google/gemini-3-flash-preview",
+      fallback_model: "google/gemini-2.5-flash",
+      risk_level: "high" as const,
+      request_type: "engagement_draft",
+      messages: [],
+      metadata: { contact_name: input.contact_name ?? null },
+    };
+    const __log = await beginGatewayLog(__gwInput);
     const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
@@ -78,10 +90,16 @@ async function aiClassifyIntent(input: { subject?: string | null; body?: string 
       }),
     });
     if (!resp.ok) {
+      await endGatewayLog({ ...__log, input: __gwInput }, { ok: false, error: `gateway_${resp.status}` });
       const h = heuristicIntent(fallbackText);
       return { ...h, draft_subject: input.subject ? `Re: ${input.subject}` : "", draft_body: "" } as any;
     }
     const data = await resp.json();
+    await endGatewayLog({ ...__log, input: __gwInput }, {
+      ok: true,
+      prompt_tokens: data?.usage?.prompt_tokens ?? 0,
+      completion_tokens: data?.usage?.completion_tokens ?? 0,
+    });
     const args = data?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
     const parsed = args ? JSON.parse(args) : null;
     if (parsed?.intent && INTENT_LABELS.includes(parsed.intent)) return parsed;
