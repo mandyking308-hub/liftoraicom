@@ -145,6 +145,12 @@ import SalesTargetsActivityPlan from "./pages/founder/sales-targets/ActivityPlan
 import SalesTargetsConversion from "./pages/founder/sales-targets/Conversion";
 import SalesTargetsGaps from "./pages/founder/sales-targets/Gaps";
 import SalesTargetsForecast from "./pages/founder/sales-targets/Forecast";
+import SalesCoachingDashboard from "./pages/founder/sales-coaching/Dashboard";
+import SalesCoachingConversions from "./pages/founder/sales-coaching/Conversions";
+import SalesCoachingObjections from "./pages/founder/sales-coaching/Objections";
+import SalesCoachingScripts from "./pages/founder/sales-coaching/Scripts";
+import SalesCoachingWinsLosses from "./pages/founder/sales-coaching/WinsLosses";
+import SalesCoachingRecommendations from "./pages/founder/sales-coaching/Recommendations";
 import CustomerUpgradesHub from "./pages/founder/customer-upgrades/Hub";
 import CustomerUpgradesOpportunities from "./pages/founder/customer-upgrades/Opportunities";
 import CustomerUpgradesProductLadders from "./pages/founder/customer-upgrades/ProductLadders";
@@ -385,6 +391,12 @@ const App = () => (
             <Route path="/founder/sales-targets/conversion" element={<FounderRoute><SalesTargetsConversion /></FounderRoute>} />
             <Route path="/founder/sales-targets/gaps" element={<FounderRoute><SalesTargetsGaps /></FounderRoute>} />
             <Route path="/founder/sales-targets/forecast" element={<FounderRoute><SalesTargetsForecast /></FounderRoute>} />
+            <Route path="/founder/sales-coaching" element={<FounderRoute><SalesCoachingDashboard /></FounderRoute>} />
+            <Route path="/founder/sales-coaching/conversions" element={<FounderRoute><SalesCoachingConversions /></FounderRoute>} />
+            <Route path="/founder/sales-coaching/objections" element={<FounderRoute><SalesCoachingObjections /></FounderRoute>} />
+            <Route path="/founder/sales-coaching/scripts" element={<FounderRoute><SalesCoachingScripts /></FounderRoute>} />
+            <Route path="/founder/sales-coaching/wins-losses" element={<FounderRoute><SalesCoachingWinsLosses /></FounderRoute>} />
+            <Route path="/founder/sales-coaching/recommendations" element={<FounderRoute><SalesCoachingRecommendations /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
