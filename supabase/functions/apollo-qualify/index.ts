@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { beginGatewayLog, endGatewayLog } from "../_shared/aiGateway.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -78,6 +79,17 @@ function ruleScore(p: { title?: string | null; company?: string | null; country?
 async function aiClassify(items: { id: string; title: string | null; company: string | null }[]) {
   const apiKey = Deno.env.get("LOVABLE_API_KEY");
   if (!apiKey || items.length === 0) return null;
+  const __gwInput = {
+    action_type: "apollo_qualify_classify",
+    task_category: "lead_qualification",
+    model: "google/gemini-2.5-flash-lite",
+    fallback_model: "google/gemini-3-flash-preview",
+    risk_level: "medium" as const,
+    request_type: "lead_classify_batch",
+    messages: [],
+    metadata: { batch_size: items.length },
+  };
+  const __log = await beginGatewayLog(__gwInput);
   try {
     const resp = await fetch(LOVABLE_AI, {
       method: "POST",
@@ -118,13 +130,22 @@ async function aiClassify(items: { id: string; title: string | null; company: st
         tool_choice: { type: "function", function: { name: "classify" } },
       }),
     });
-    if (!resp.ok) return null;
+    if (!resp.ok) {
+      await endGatewayLog({ ...__log, input: __gwInput }, { ok: false, error: `gateway_${resp.status}` });
+      return null;
+    }
     const data = await resp.json();
+    await endGatewayLog({ ...__log, input: __gwInput }, {
+      ok: true,
+      prompt_tokens: data?.usage?.prompt_tokens ?? 0,
+      completion_tokens: data?.usage?.completion_tokens ?? 0,
+    });
     const args = data?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
     if (!args) return null;
     const parsed = JSON.parse(args);
     return parsed.results as { id: string; qualification: string; reason: string; tags: string[] }[];
-  } catch {
+  } catch (e) {
+    await endGatewayLog({ ...__log, input: __gwInput }, { ok: false, error: (e as Error).message });
     return null;
   }
 }
