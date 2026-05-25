@@ -68,6 +68,28 @@ export default function AIRuntimeHealth() {
       ).data ?? [],
   });
 
+  const { data: leases = [] } = useQuery<any[]>({
+    queryKey: ["health_leases"],
+    refetchInterval: 8000,
+    queryFn: async () =>
+      (
+        await sb
+          .from("ai_concurrency_leases")
+          .select("id,lease_key,request_id,agent_id,business_id,provider,model,status,acquired_at,expires_at,released_at")
+          .gte("acquired_at", since24h)
+          .order("acquired_at", { ascending: false })
+          .limit(500)
+      ).data ?? [],
+  });
+
+  async function cleanupStaleLeases() {
+    const { data, error } = await sb.rpc("cleanup_stale_ai_leases");
+    if (error) { toast({ title: "Cleanup failed", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "Stale leases cleaned", description: `${data ?? 0} expired` });
+    qc.invalidateQueries({ queryKey: ["health_leases"] });
+    qc.invalidateQueries({ queryKey: ["health_events"] });
+  }
+
   const { data: budgets = [] } = useQuery<any[]>({
     queryKey: ["health_business_budgets"],
     queryFn: async () => (await sb.from("ai_business_budgets").select("*")).data ?? [],
@@ -103,6 +125,11 @@ export default function AIRuntimeHealth() {
   const staleWorkflows = activeWorkflows.filter((w) => w.started_at && Date.now() - new Date(w.started_at).getTime() > 6 * 3600_000);
 
   const providerErrorEvents = events.filter((e) => ["network_error", "http_error", "rate_limited", "payment_required", "sdk_error"].includes(e.event_type));
+  const activeLeases = leases.filter((l) => l.status === "active");
+  const expiredLeases = leases.filter((l) => l.status === "expired");
+  const leaseDeniedEvents = events.filter((e) => e.event_type === "lease_denied").length;
+  const idempotencyDuplicates = events.filter((e) => e.event_type === "idempotency_duplicate_blocked" || e.event_type === "idempotency_replay").length;
+  const staleCleanupEvents = events.filter((e) => e.event_type === "stale_lease_cleanup").length;
   const errorsByModel = (() => {
     const map = new Map<string, number>();
     for (const r of failed24h) map.set(r.model ?? "unknown", (map.get(r.model ?? "unknown") ?? 0) + 1);
@@ -203,6 +230,10 @@ export default function AIRuntimeHealth() {
           <StatCard icon={AlertTriangle} label="Provider errors 24h" v={providerErrorEvents.length} accent={providerErrorEvents.length ? "destructive" : undefined} />
           <StatCard icon={Activity} label="Queue depth" v={queued.length + running.length} />
           <StatCard icon={AlertTriangle} label="Bottlenecks" v={bottlenecks.length} accent={bottlenecks.length ? "amber" : undefined} />
+          <StatCard icon={ShieldCheck} label="Leases active" v={activeLeases.length} />
+          <StatCard icon={AlertTriangle} label="Lease denials 24h" v={leaseDeniedEvents} accent={leaseDeniedEvents ? "amber" : undefined} />
+          <StatCard icon={ShieldAlert} label="Idempotency dupes 24h" v={idempotencyDuplicates} accent={idempotencyDuplicates ? "amber" : undefined} />
+          <StatCard icon={RotateCw} label="Stale lease sweeps" v={staleCleanupEvents} />
         </div>
 
         {bottlenecks.length > 0 && (
@@ -232,6 +263,7 @@ export default function AIRuntimeHealth() {
             <TabsTrigger value="failed">Failed Jobs</TabsTrigger>
             <TabsTrigger value="approval">Approval Holds</TabsTrigger>
             <TabsTrigger value="cost">Cost & Budget</TabsTrigger>
+            <TabsTrigger value="leases">Concurrency Leases</TabsTrigger>
             <TabsTrigger value="bypass">Bypass Register</TabsTrigger>
           </TabsList>
 
@@ -463,6 +495,45 @@ export default function AIRuntimeHealth() {
             <Card className="tech-card"><CardContent className="p-3">
               <p className="text-[11px] text-muted-foreground mb-2">{bypassCount} edge functions still call the gateway directly (Batch B + C of the AI Gateway Bypass Audit).</p>
               <Button asChild size="sm" variant="outline"><Link to="/founder/portfolio-exit/ai-bypass-register">Open full Bypass Register</Link></Button>
+            </CardContent></Card>
+          </TabsContent>
+
+          <TabsContent value="leases">
+            <Card className="tech-card"><CardContent className="p-3 space-y-3">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div className="text-[11px] text-muted-foreground max-w-3xl">
+                  Strict concurrency is enforced atomically in Postgres. Each AI call acquires a lease per agent and per business (TTL 180s) and releases it on completion, failure or timeout. Stale leases are swept automatically.
+                </div>
+                <Button size="sm" variant="outline" className="h-7 text-[10px]" onClick={cleanupStaleLeases}>
+                  <RotateCw className="h-3 w-3 mr-1" /> Sweep stale leases
+                </Button>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                <StatCard icon={ShieldCheck} label="Active" v={activeLeases.length} />
+                <StatCard icon={AlertTriangle} label="Expired 24h" v={expiredLeases.length} accent={expiredLeases.length ? "amber" : undefined} />
+                <StatCard icon={Cpu} label="Distinct agents" v={new Set(activeLeases.map((l) => l.agent_id).filter(Boolean)).size} />
+                <StatCard icon={Cpu} label="Distinct businesses" v={new Set(activeLeases.map((l) => l.business_id).filter(Boolean)).size} />
+              </div>
+              <Table>
+                <TableHeader><TableRow>
+                  <TableHead>Scope</TableHead><TableHead>Request</TableHead><TableHead>Agent</TableHead><TableHead>Business</TableHead>
+                  <TableHead>Model</TableHead><TableHead>Status</TableHead><TableHead>Acquired</TableHead><TableHead>Expires</TableHead>
+                </TableRow></TableHeader>
+                <TableBody>
+                  {leases.slice(0, 80).map((l) => (
+                    <TableRow key={l.id}>
+                      <TableCell className="text-[10px] font-mono">{l.lease_key}</TableCell>
+                      <TableCell className="text-[10px] font-mono">{l.request_id}</TableCell>
+                      <TableCell className="text-xs">{agentName(l.agent_id)}</TableCell>
+                      <TableCell className="text-[10px] font-mono text-muted-foreground">{l.business_id ?? "—"}</TableCell>
+                      <TableCell className="text-[10px] font-mono">{l.model ?? "—"}</TableCell>
+                      <TableCell><Badge variant={l.status === "expired" ? "destructive" : l.status === "active" ? "outline" : "secondary"} className="text-[10px]">{l.status}</Badge></TableCell>
+                      <TableCell className="text-[10px] text-muted-foreground">{new Date(l.acquired_at).toLocaleTimeString()}</TableCell>
+                      <TableCell className="text-[10px] text-muted-foreground">{new Date(l.expires_at).toLocaleTimeString()}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </CardContent></Card>
           </TabsContent>
         </Tabs>
