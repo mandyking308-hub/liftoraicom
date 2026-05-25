@@ -235,6 +235,31 @@ export default function PortfolioExitCommandCentre() {
               </Link>
             </Button>
             <Button asChild size="sm" variant="outline">
+              <Link to="/founder/portfolio-exit/buyer-warmup">
+                <ArrowUpRight className="h-4 w-4 mr-1" /> Buyer Warm-Up
+              </Link>
+            </Button>
+            <Button asChild size="sm" variant="outline">
+              <Link to="/founder/portfolio-exit/investors">
+                <ArrowUpRight className="h-4 w-4 mr-1" /> Investor Intelligence
+              </Link>
+            </Button>
+            <Button asChild size="sm" variant="outline">
+              <Link to="/founder/portfolio-exit/competitors">
+                <ArrowUpRight className="h-4 w-4 mr-1" /> Competitor Intelligence
+              </Link>
+            </Button>
+            <Button asChild size="sm" variant="outline">
+              <Link to="/founder/portfolio-exit/operating-panels">
+                <ArrowUpRight className="h-4 w-4 mr-1" /> Operating Panels
+              </Link>
+            </Button>
+            <Button asChild size="sm" variant="outline">
+              <Link to="/founder/portfolio-exit/ai-bypass-register">
+                <ArrowUpRight className="h-4 w-4 mr-1" /> AI Gateway Bypass Register
+              </Link>
+            </Button>
+            <Button asChild size="sm" variant="outline">
               <Link to="/founder/portfolio-exit/manual#user-manual">
                 <ArrowUpRight className="h-4 w-4 mr-1" /> Open User Manual
               </Link>
