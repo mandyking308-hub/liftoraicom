@@ -29,6 +29,7 @@ import LaunchFactoryCard from "./LaunchFactoryCard";
 import IntegrationMapCard from "./IntegrationMapCard";
 import BusinessComplianceCard from "./BusinessComplianceCard";
 import ContextGuardCard from "./ContextGuardCard";
+import PortfolioPrioritisationCard from "./PortfolioPrioritisationCard";
 
 /**
  * Business Process Spine — single integrated panel that surfaces every
@@ -73,6 +74,8 @@ export default function BusinessProcessSpinePanel() {
       <BusinessComplianceCard />
 
       <ContextGuardCard />
+
+      <PortfolioPrioritisationCard />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <DeliveryEngineCard />

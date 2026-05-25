@@ -119,6 +119,7 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "integration_planner_agent", name: "Integration Planner Agent", to: "/founder/integration-map", category: "operations" },
   { key: "compliance_rules_agent", name: "Compliance Rules Agent", to: "/founder/business-compliance", category: "security" },
   { key: "context_guard_agent", name: "Context Guard Agent", to: "/founder/context-guard", category: "security" },
+  { key: "portfolio_prioritisation_agent", name: "Portfolio Prioritisation Agent", to: "/founder/portfolio-prioritisation", category: "strategy" },
 ];
 
 export default function AgentOperatingStatus() {
