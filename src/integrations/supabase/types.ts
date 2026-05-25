@@ -14013,20 +14013,31 @@ export type Database = {
         Row: {
           active: boolean
           api_secret_configured: boolean | null
+          batch_calls_enabled: boolean | null
           business_id: string | null
+          consent_notice_required: boolean | null
+          consent_notice_text: string | null
           created_at: string
           default_agent_id: string | null
+          default_agent_name: string | null
           default_voice_id: string | null
+          default_voice_name: string | null
           id: string
           inbound_enabled: boolean | null
+          last_error: string | null
+          last_test_at: string | null
+          last_test_result: string | null
+          next_setup_action: string | null
           outbound_enabled: boolean | null
           phone_number: string | null
           provider_status: string
           provider_type: string
           rate_limit_per_hour: number | null
+          recording_enabled: boolean | null
           require_founder_approval_for_contract: boolean
           require_founder_approval_for_outbound: boolean
           require_founder_approval_for_payment: boolean
+          transcription_enabled: boolean | null
           updated_at: string
           web_call_enabled: boolean | null
           webhook_url: string | null
@@ -14034,20 +14045,31 @@ export type Database = {
         Insert: {
           active?: boolean
           api_secret_configured?: boolean | null
+          batch_calls_enabled?: boolean | null
           business_id?: string | null
+          consent_notice_required?: boolean | null
+          consent_notice_text?: string | null
           created_at?: string
           default_agent_id?: string | null
+          default_agent_name?: string | null
           default_voice_id?: string | null
+          default_voice_name?: string | null
           id?: string
           inbound_enabled?: boolean | null
+          last_error?: string | null
+          last_test_at?: string | null
+          last_test_result?: string | null
+          next_setup_action?: string | null
           outbound_enabled?: boolean | null
           phone_number?: string | null
           provider_status?: string
           provider_type?: string
           rate_limit_per_hour?: number | null
+          recording_enabled?: boolean | null
           require_founder_approval_for_contract?: boolean
           require_founder_approval_for_outbound?: boolean
           require_founder_approval_for_payment?: boolean
+          transcription_enabled?: boolean | null
           updated_at?: string
           web_call_enabled?: boolean | null
           webhook_url?: string | null
@@ -14055,20 +14077,31 @@ export type Database = {
         Update: {
           active?: boolean
           api_secret_configured?: boolean | null
+          batch_calls_enabled?: boolean | null
           business_id?: string | null
+          consent_notice_required?: boolean | null
+          consent_notice_text?: string | null
           created_at?: string
           default_agent_id?: string | null
+          default_agent_name?: string | null
           default_voice_id?: string | null
+          default_voice_name?: string | null
           id?: string
           inbound_enabled?: boolean | null
+          last_error?: string | null
+          last_test_at?: string | null
+          last_test_result?: string | null
+          next_setup_action?: string | null
           outbound_enabled?: boolean | null
           phone_number?: string | null
           provider_status?: string
           provider_type?: string
           rate_limit_per_hour?: number | null
+          recording_enabled?: boolean | null
           require_founder_approval_for_contract?: boolean
           require_founder_approval_for_outbound?: boolean
           require_founder_approval_for_payment?: boolean
+          transcription_enabled?: boolean | null
           updated_at?: string
           web_call_enabled?: boolean | null
           webhook_url?: string | null
@@ -14111,6 +14144,57 @@ export type Database = {
           signal_kind?: string
           updated_at?: string
           weight?: number
+        }
+        Relationships: []
+      }
+      customer_sales_voice_runtime_events: {
+        Row: {
+          business_id: string | null
+          call_log_id: string | null
+          conversation_id: string | null
+          created_at: string
+          error: string | null
+          event_status: string
+          event_type: string
+          external_action_attempted: boolean
+          id: string
+          internal_test: boolean
+          payload: Json | null
+          provider_type: string
+          result: Json | null
+          test_label: string | null
+        }
+        Insert: {
+          business_id?: string | null
+          call_log_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          error?: string | null
+          event_status?: string
+          event_type: string
+          external_action_attempted?: boolean
+          id?: string
+          internal_test?: boolean
+          payload?: Json | null
+          provider_type: string
+          result?: Json | null
+          test_label?: string | null
+        }
+        Update: {
+          business_id?: string | null
+          call_log_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          error?: string | null
+          event_status?: string
+          event_type?: string
+          external_action_attempted?: boolean
+          id?: string
+          internal_test?: boolean
+          payload?: Json | null
+          provider_type?: string
+          result?: Json | null
+          test_label?: string | null
         }
         Relationships: []
       }
