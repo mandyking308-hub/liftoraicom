@@ -67,6 +67,7 @@ export default function CustomerSalesHub() {
           <Tile to="/founder/customer-sales/settings" icon={Cog} label="Providers" value={(data?.providers ?? []).length} hint={providerLive ? "live" : "not connected"} />
           <Tile to="/founder/sales-targets" icon={Target} label="Sales Target Cockpit" value="→" hint="reverse-engineered activity plan" />
           <Tile to="/founder/customer-upgrades" icon={Activity} label="Upgrade + Upsell Engine" value="→" hint="upgrades, cross-sells, renewals" />
+          <Tile to="/founder/sales-coaching" icon={BookOpen} label="Sales Coaching + Learning" value="→" hint="conversion funnel, scripts, win/loss" />
         </div>
       </CSSection>
 

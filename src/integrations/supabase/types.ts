@@ -31295,6 +31295,96 @@ export type Database = {
           },
         ]
       }
+      sales_coaching_recommendations: {
+        Row: {
+          business_id: string
+          category: string
+          created_at: string
+          detail: string | null
+          evidence: Json | null
+          id: string
+          priority: string | null
+          status: string | null
+          target_ref: Json | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          category: string
+          created_at?: string
+          detail?: string | null
+          evidence?: Json | null
+          id?: string
+          priority?: string | null
+          status?: string | null
+          target_ref?: Json | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          category?: string
+          created_at?: string
+          detail?: string | null
+          evidence?: Json | null
+          id?: string
+          priority?: string | null
+          status?: string | null
+          target_ref?: Json | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sales_conversion_events: {
+        Row: {
+          business_id: string
+          channel: string | null
+          contact_id: string | null
+          conversation_id: string | null
+          created_at: string
+          currency: string | null
+          event_type: string
+          event_value: number | null
+          id: string
+          metadata: Json | null
+          offer_id: string | null
+          product_id: string | null
+          source_agent: string | null
+        }
+        Insert: {
+          business_id: string
+          channel?: string | null
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          currency?: string | null
+          event_type: string
+          event_value?: number | null
+          id?: string
+          metadata?: Json | null
+          offer_id?: string | null
+          product_id?: string | null
+          source_agent?: string | null
+        }
+        Update: {
+          business_id?: string
+          channel?: string | null
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          currency?: string | null
+          event_type?: string
+          event_value?: number | null
+          id?: string
+          metadata?: Json | null
+          offer_id?: string | null
+          product_id?: string | null
+          source_agent?: string | null
+        }
+        Relationships: []
+      }
       sales_revenue_targets: {
         Row: {
           active: boolean
@@ -31343,6 +31433,54 @@ export type Database = {
           target_start_date?: string
           target_type?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      sales_script_performance: {
+        Row: {
+          approval_rate: number | null
+          average_sentiment: number | null
+          business_id: string
+          close_rate: number | null
+          conversion_rate: number | null
+          created_at: string
+          id: string
+          objection_rate: number | null
+          playbook_id: string | null
+          recommended_status: string | null
+          script_section: string
+          updated_at: string
+          usage_count: number | null
+        }
+        Insert: {
+          approval_rate?: number | null
+          average_sentiment?: number | null
+          business_id: string
+          close_rate?: number | null
+          conversion_rate?: number | null
+          created_at?: string
+          id?: string
+          objection_rate?: number | null
+          playbook_id?: string | null
+          recommended_status?: string | null
+          script_section: string
+          updated_at?: string
+          usage_count?: number | null
+        }
+        Update: {
+          approval_rate?: number | null
+          average_sentiment?: number | null
+          business_id?: string
+          close_rate?: number | null
+          conversion_rate?: number | null
+          created_at?: string
+          id?: string
+          objection_rate?: number | null
+          playbook_id?: string | null
+          recommended_status?: string | null
+          script_section?: string
+          updated_at?: string
+          usage_count?: number | null
         }
         Relationships: []
       }
@@ -31422,6 +31560,69 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      sales_win_loss_reviews: {
+        Row: {
+          business_id: string
+          competitor_issue: boolean | null
+          contact_id: string | null
+          conversation_id: string | null
+          created_at: string
+          id: string
+          losing_factors: Json | null
+          objections: Json | null
+          offer_id: string | null
+          outcome: string
+          price_issue: boolean | null
+          product_fit_issue: boolean | null
+          product_id: string | null
+          reason: string | null
+          recommended_change: string | null
+          timing_issue: boolean | null
+          trust_issue: boolean | null
+          winning_factors: Json | null
+        }
+        Insert: {
+          business_id: string
+          competitor_issue?: boolean | null
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          losing_factors?: Json | null
+          objections?: Json | null
+          offer_id?: string | null
+          outcome: string
+          price_issue?: boolean | null
+          product_fit_issue?: boolean | null
+          product_id?: string | null
+          reason?: string | null
+          recommended_change?: string | null
+          timing_issue?: boolean | null
+          trust_issue?: boolean | null
+          winning_factors?: Json | null
+        }
+        Update: {
+          business_id?: string
+          competitor_issue?: boolean | null
+          contact_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          losing_factors?: Json | null
+          objections?: Json | null
+          offer_id?: string | null
+          outcome?: string
+          price_issue?: boolean | null
+          product_fit_issue?: boolean | null
+          product_id?: string | null
+          reason?: string | null
+          recommended_change?: string | null
+          timing_issue?: boolean | null
+          trust_issue?: boolean | null
+          winning_factors?: Json | null
+        }
+        Relationships: []
       }
       security_alerts: {
         Row: {
