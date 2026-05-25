@@ -34,6 +34,15 @@ export default function PortfolioExitManual() {
         <Card id="user-manual" className="tech-card scroll-mt-24">
           <CardHeader><CardTitle>User Manual</CardTitle></CardHeader>
           <CardContent className="space-y-4 text-sm">
+            <Section title="New pages added in the May 2026 patch">
+              <ul className="list-disc pl-5 space-y-1 text-xs">
+                <li><strong>Buyer Warm-Up</strong> (<code>/founder/portfolio-exit/buyer-warmup</code>) — drafts, warmth status and next actions per buyer match. No external sending. Founder approval required for any contact.</li>
+                <li><strong>Investor Intelligence</strong> (<code>/investors</code>) — search and filter VCs, PE, angels, family offices and strategics. Open the side drawer for cheque size, portfolio, exit history, likely end-buyer notes, linked deals and source evidence.</li>
+                <li><strong>Competitor Intelligence</strong> (<code>/competitors</code>) — search and filter competitors and comparables. Detail drawer shows problem solved, target customer, pricing, growth signals, weaknesses, what we can learn, what we must not copy, legally distinct differentiation, and evidence.</li>
+                <li><strong>Operating Panels</strong> (<code>/operating-panels</code>) — five previously hidden tables: capital allocation, capacity, strategic assumptions, paid connector registry, integration allowlist. Read-only. No paid connectors are activated and no keys are stored here.</li>
+                <li><strong>AI Gateway Bypass Register</strong> (<code>/ai-bypass-register</code>) — visible list of legacy edge functions still calling AI directly, each with risk grade and next migration step.</li>
+              </ul>
+            </Section>
             <Section title="Carrier-grade Controls Centre (new)">
               The Controls Centre is the single place to manage operational discipline across all portfolio assets. It contains 14 panels — each is described below. Open it from the Command Centre header or the sidebar.
             </Section>
