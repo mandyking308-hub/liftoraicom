@@ -13317,67 +13317,112 @@ export type Database = {
       }
       customer_sales_call_logs: {
         Row: {
+          analysed_at: string | null
+          analysis_output: Json
           business_id: string | null
+          buying_signals: string[]
           call_direction: string | null
+          close_action_suggestion: string | null
+          close_probability: number | null
           consent_recorded: boolean | null
+          contact_id: string | null
           conversation_id: string | null
           created_at: string
+          customer_need: string | null
+          customer_pain: string | null
           duration_seconds: number | null
           ended_at: string | null
+          escalation_reason: string | null
+          follow_up_draft: string | null
           from_number: string | null
           id: string
           metadata: Json | null
           next_step: string | null
+          objections: string[]
           outcome: string | null
           provider_call_id: string | null
           provider_name: string | null
+          qualification_score: number | null
+          recommended_next_step: string | null
           recording_notice_given: boolean | null
           recording_url: string | null
+          sentiment_score: number | null
           started_at: string | null
+          test_label: string | null
           to_number: string | null
           transcript_summary: string | null
           transcript_text: string | null
         }
         Insert: {
+          analysed_at?: string | null
+          analysis_output?: Json
           business_id?: string | null
+          buying_signals?: string[]
           call_direction?: string | null
+          close_action_suggestion?: string | null
+          close_probability?: number | null
           consent_recorded?: boolean | null
+          contact_id?: string | null
           conversation_id?: string | null
           created_at?: string
+          customer_need?: string | null
+          customer_pain?: string | null
           duration_seconds?: number | null
           ended_at?: string | null
+          escalation_reason?: string | null
+          follow_up_draft?: string | null
           from_number?: string | null
           id?: string
           metadata?: Json | null
           next_step?: string | null
+          objections?: string[]
           outcome?: string | null
           provider_call_id?: string | null
           provider_name?: string | null
+          qualification_score?: number | null
+          recommended_next_step?: string | null
           recording_notice_given?: boolean | null
           recording_url?: string | null
+          sentiment_score?: number | null
           started_at?: string | null
+          test_label?: string | null
           to_number?: string | null
           transcript_summary?: string | null
           transcript_text?: string | null
         }
         Update: {
+          analysed_at?: string | null
+          analysis_output?: Json
           business_id?: string | null
+          buying_signals?: string[]
           call_direction?: string | null
+          close_action_suggestion?: string | null
+          close_probability?: number | null
           consent_recorded?: boolean | null
+          contact_id?: string | null
           conversation_id?: string | null
           created_at?: string
+          customer_need?: string | null
+          customer_pain?: string | null
           duration_seconds?: number | null
           ended_at?: string | null
+          escalation_reason?: string | null
+          follow_up_draft?: string | null
           from_number?: string | null
           id?: string
           metadata?: Json | null
           next_step?: string | null
+          objections?: string[]
           outcome?: string | null
           provider_call_id?: string | null
           provider_name?: string | null
+          qualification_score?: number | null
+          recommended_next_step?: string | null
           recording_notice_given?: boolean | null
           recording_url?: string | null
+          sentiment_score?: number | null
           started_at?: string | null
+          test_label?: string | null
           to_number?: string | null
           transcript_summary?: string | null
           transcript_text?: string | null
@@ -13552,12 +13597,14 @@ export type Database = {
         Row: {
           business_id: string | null
           buying_signals: string[] | null
+          call_outcome: string | null
           channel: string
           close_probability: number | null
           contact_id: string | null
           conversation_status: string
           created_at: string
           customer_email: string | null
+          customer_memory_summary: string | null
           customer_name: string | null
           customer_need: string | null
           customer_phone: string | null
@@ -13565,6 +13612,9 @@ export type Database = {
           external_action_locked: boolean
           founder_approval_required: boolean
           id: string
+          last_analysed_at: string | null
+          last_call_log_id: string | null
+          linked_contact_email: string | null
           objections_raised: string[] | null
           offer_id: string | null
           playbook_id: string | null
@@ -13572,18 +13622,21 @@ export type Database = {
           qualification_score: number | null
           recommended_next_action: string | null
           sentiment_score: number | null
+          test_label: string | null
           transcript_summary: string | null
           updated_at: string
         }
         Insert: {
           business_id?: string | null
           buying_signals?: string[] | null
+          call_outcome?: string | null
           channel?: string
           close_probability?: number | null
           contact_id?: string | null
           conversation_status?: string
           created_at?: string
           customer_email?: string | null
+          customer_memory_summary?: string | null
           customer_name?: string | null
           customer_need?: string | null
           customer_phone?: string | null
@@ -13591,6 +13644,9 @@ export type Database = {
           external_action_locked?: boolean
           founder_approval_required?: boolean
           id?: string
+          last_analysed_at?: string | null
+          last_call_log_id?: string | null
+          linked_contact_email?: string | null
           objections_raised?: string[] | null
           offer_id?: string | null
           playbook_id?: string | null
@@ -13598,18 +13654,21 @@ export type Database = {
           qualification_score?: number | null
           recommended_next_action?: string | null
           sentiment_score?: number | null
+          test_label?: string | null
           transcript_summary?: string | null
           updated_at?: string
         }
         Update: {
           business_id?: string | null
           buying_signals?: string[] | null
+          call_outcome?: string | null
           channel?: string
           close_probability?: number | null
           contact_id?: string | null
           conversation_status?: string
           created_at?: string
           customer_email?: string | null
+          customer_memory_summary?: string | null
           customer_name?: string | null
           customer_need?: string | null
           customer_phone?: string | null
@@ -13617,6 +13676,9 @@ export type Database = {
           external_action_locked?: boolean
           founder_approval_required?: boolean
           id?: string
+          last_analysed_at?: string | null
+          last_call_log_id?: string | null
+          linked_contact_email?: string | null
           objections_raised?: string[] | null
           offer_id?: string | null
           playbook_id?: string | null
@@ -13624,6 +13686,7 @@ export type Database = {
           qualification_score?: number | null
           recommended_next_action?: string | null
           sentiment_score?: number | null
+          test_label?: string | null
           transcript_summary?: string | null
           updated_at?: string
         }
@@ -42213,6 +42276,10 @@ export type Database = {
           p_provider_message_id?: string
         }
         Returns: Json
+      }
+      customer_sales_link_contact_by_email: {
+        Args: { p_email: string }
+        Returns: string
       }
       detect_anomalies: { Args: never; Returns: Json }
       detect_orphan_content: { Args: never; Returns: Json }
