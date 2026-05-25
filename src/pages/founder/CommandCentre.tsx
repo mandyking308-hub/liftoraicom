@@ -24,6 +24,7 @@ import ReputationCrisisCommsPanel from "@/components/founder/brand/ReputationCri
 import KPIOKRPerformancePanel from "@/components/founder/analytics/KPIOKRPerformancePanel";
 import FounderAlertEscalationPanel from "@/components/founder/command/FounderAlertEscalationPanel";
 import CommandCentreUsabilityReportPanel from "@/components/founder/command/CommandCentreUsabilityReportPanel";
+import FounderCockpit from "@/components/founder/command/FounderCockpit";
 import BusinessActivationWizardPanel from "@/components/founder/activation/BusinessActivationWizardPanel";
 import BusinessOnboardingBrainPanel from "@/components/founder/activation/BusinessOnboardingBrainPanel";
 import StarterPackMaterialiserPanel from "@/components/founder/activation/StarterPackMaterialiserPanel";
@@ -783,6 +784,7 @@ const CommandCentre = () => {
   return (
     <FounderLayout>
       <CommandCentreViewModeBar />
+      <FounderCockpit />
       <AICostGovernorPortfolio />
       <div className="max-w-7xl mx-auto px-4 pt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
         <AIUsageMiniWidget />
@@ -791,10 +793,19 @@ const CommandCentre = () => {
       <div className="max-w-7xl mx-auto px-4 pt-4"><AIRuntimeHealthMiniCard /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><AIAlertsMiniWidget /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><FounderAlertEscalationPanel /></div>
-      <div className="max-w-7xl mx-auto px-4 pt-4"><CommandCentreTruthSyncPanel /></div>
-      <div className="max-w-7xl mx-auto px-4 pt-4"><FinalHardeningStatusPanel /></div>
-      <div className="max-w-7xl mx-auto px-4 pt-4"><FinalGoToUseReadinessPanel /></div>
-      <div className="max-w-7xl mx-auto px-4 pt-4"><CommandCentreUsabilityReportPanel /></div>
+      <div className="max-w-7xl mx-auto px-4 pt-4">
+        <Collapsible>
+          <CollapsibleTrigger className="w-full text-left text-xs px-3 py-2 rounded-md border border-border/60 bg-background/40 hover:border-primary/60">
+            Diagnostics &amp; archive panels (optional — Truth Sync, hardening status, usability report, readiness reference)
+          </CollapsibleTrigger>
+          <CollapsibleContent className="space-y-3 pt-3">
+            <CommandCentreTruthSyncPanel />
+            <FinalHardeningStatusPanel />
+            <FinalGoToUseReadinessPanel />
+            <CommandCentreUsabilityReportPanel />
+          </CollapsibleContent>
+        </Collapsible>
+      </div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><BusinessActivationWizardPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><BusinessOnboardingBrainPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><StarterPackMaterialiserPanel /></div>
@@ -807,8 +818,17 @@ const CommandCentre = () => {
       <div className="max-w-7xl mx-auto px-4 pt-4"><LiftorBuildPhaseCloseoutPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><Phase23LaunchPathPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><ManualsHierarchyPanel /></div>
-      <div className="max-w-7xl mx-auto px-4 pt-4"><BusinessRehearsalSimulationPanel /></div>
-      <div className="max-w-7xl mx-auto px-4 pt-4"><PreLiveBaselineControlPanel /></div>
+      <div className="max-w-7xl mx-auto px-4 pt-4">
+        <Collapsible>
+          <CollapsibleTrigger className="w-full text-left text-xs px-3 py-2 rounded-md border border-border/60 bg-background/40 hover:border-primary/60">
+            Optional rehearsal &amp; baseline tools (simulation — not the default operating mode)
+          </CollapsibleTrigger>
+          <CollapsibleContent className="space-y-3 pt-3">
+            <BusinessRehearsalSimulationPanel />
+            <PreLiveBaselineControlPanel />
+          </CollapsibleContent>
+        </Collapsible>
+      </div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><RevenueTargetOperatingPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><BusinessValuationIntelligencePanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><BusinessKnowledgeUploadTrainingPanel /></div>

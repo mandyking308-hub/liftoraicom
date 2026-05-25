@@ -225,7 +225,7 @@ export default function CRMCustomerMemoryDashboard() {
 
       {agentReady.blockers.length > 0 && (
         <div className="rounded-md border border-destructive/40 p-2 text-[11px]">
-          <div className="text-[10px] uppercase text-muted-foreground mb-1">Agent readiness blockers</div>
+          <div className="text-[10px] uppercase text-muted-foreground mb-1">Agent live-watch items</div>
           <div className="flex flex-wrap gap-1">
             {agentReady.blockers.map((b) => <Badge key={b} variant="destructive" className="text-[10px]">{b}</Badge>)}
           </div>
