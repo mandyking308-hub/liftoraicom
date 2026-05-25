@@ -13,13 +13,17 @@ export default function CustomerSalesEngineCard() {
       const sb: any = supabase;
       const head = { count: "exact" as const, head: true };
       const today = new Date(); today.setHours(0, 0, 0, 0);
-      const [providers, callsToday, followUp, closesPending, hot, productsActive] = await Promise.all([
+      const [providers, callsToday, followUp, closesPending, hot, productsActive, escalated, consentIssues, missingTranscript, readyToBuy] = await Promise.all([
         sb.from("customer_sales_provider_settings").select("provider_type,provider_status").eq("active", true),
-        sb.from("customer_sales_call_logs").select("id", head).gte("started_at", today.toISOString()),
+        sb.from("customer_sales_call_logs").select("id", head).gte("started_at", today.toISOString()).is("test_label", null),
         sb.from("customer_sales_conversations").select("id", head).eq("conversation_status", "follow_up_needed"),
         sb.from("customer_sales_close_actions").select("id", head).eq("action_status", "approval_required"),
         sb.from("customer_sales_conversations").select("id", head).gte("close_probability", 0.7),
         sb.from("customer_sales_products").select("id", head).eq("active", true),
+        sb.from("customer_sales_conversations").select("id", head).eq("conversation_status", "escalated"),
+        sb.from("customer_sales_call_logs").select("id", head).eq("consent_recorded", false).not("transcript_text", "is", null),
+        sb.from("customer_sales_call_logs").select("id", head).is("transcript_text", null),
+        sb.from("customer_sales_conversations").select("id", head).eq("call_outcome", "ready_to_buy"),
       ].map(p => p.catch(() => ({ count: 0, data: [] }))));
       return {
         providers: (providers.data ?? []) as any[],
@@ -28,6 +32,10 @@ export default function CustomerSalesEngineCard() {
         closesPending: closesPending.count ?? 0,
         hot: hot.count ?? 0,
         productsActive: productsActive.count ?? 0,
+        escalated: escalated.count ?? 0,
+        consentIssues: consentIssues.count ?? 0,
+        missingTranscript: missingTranscript.count ?? 0,
+        readyToBuy: readyToBuy.count ?? 0,
       };
     },
   });
@@ -37,7 +45,10 @@ export default function CustomerSalesEngineCard() {
   const nextAction =
     (data?.providers ?? []).length === 0 ? "Connect a voice/chat provider in Settings"
     : (data?.productsActive ?? 0) === 0 ? "Add your first product so Liftor can match offers"
+    : (data?.escalated ?? 0) > 0 ? `Resolve ${data?.escalated} escalated conversation(s)`
+    : (data?.consentIssues ?? 0) > 0 ? `Fix ${data?.consentIssues} call(s) with missing consent`
     : (data?.closesPending ?? 0) > 0 ? `Review ${data?.closesPending} close action(s) waiting approval`
+    : (data?.readyToBuy ?? 0) > 0 ? `Convert ${data?.readyToBuy} ready-to-buy customer(s)`
     : (data?.followUp ?? 0) > 0 ? `Work the ${data?.followUp} follow-up item(s)`
     : (data?.hot ?? 0) > 0 ? `Engage ${data?.hot} hot buying signal(s)`
     : "Add a playbook and an objection or two";
@@ -63,7 +74,11 @@ export default function CustomerSalesEngineCard() {
           <Stat label="Follow-ups" value={data?.followUp} to="/founder/customer-sales/follow-up" />
           <Stat label="Close actions awaiting approval" value={data?.closesPending} to="/founder/customer-sales/close-engine" />
           <Stat label="Hot buying signals" value={data?.hot} to="/founder/customer-sales/conversations" />
-          <Stat label="Products missing sales knowledge" value={data?.productsActive === 0 ? 1 : 0} to="/founder/customer-sales/product-knowledge" />
+          <Stat label="Ready to buy" value={data?.readyToBuy} to="/founder/customer-sales/conversations" />
+          <Stat label="Escalation needed" value={data?.escalated} to="/founder/customer-sales/conversations" />
+          <Stat label="Consent issues" value={data?.consentIssues} to="/founder/customer-sales/call-logs" />
+          <Stat label="Missing transcript" value={data?.missingTranscript} to="/founder/customer-sales/call-logs" />
+          <Stat label="Products missing knowledge" value={data?.productsActive === 0 ? 1 : 0} to="/founder/customer-sales/product-knowledge" />
         </div>
         <div className="rounded-md border border-primary/40 bg-primary/5 p-2.5 text-xs">
           <span className="font-semibold text-primary">Next action: </span>{nextAction}
