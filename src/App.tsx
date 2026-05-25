@@ -341,6 +341,14 @@ import PPBuildNow from "./pages/founder/portfolio-prioritisation/BuildNow";
 import PPScale from "./pages/founder/portfolio-prioritisation/Scale";
 import PPPark from "./pages/founder/portfolio-prioritisation/Park";
 import PPDecisions from "./pages/founder/portfolio-prioritisation/Decisions";
+
+// Resource Allocation Engine
+import RAOverview from "./pages/founder/resource-allocation/Overview";
+import RAAIBudget from "./pages/founder/resource-allocation/AIBudget";
+import RAHumanTime from "./pages/founder/resource-allocation/HumanTime";
+import RAFounderAttention from "./pages/founder/resource-allocation/FounderAttention";
+import RACash from "./pages/founder/resource-allocation/Cash";
+import RARecommendations from "./pages/founder/resource-allocation/Recommendations";
 import KnowledgeOverview from "./pages/founder/knowledge-governance/Overview";
 import KnowledgeSources from "./pages/founder/knowledge-governance/Sources";
 import KnowledgeConflicts from "./pages/founder/knowledge-governance/Conflicts";
@@ -780,6 +788,12 @@ const App = () => (
             <Route path="/founder/portfolio-prioritisation/scale" element={<FounderRoute><PPScale /></FounderRoute>} />
             <Route path="/founder/portfolio-prioritisation/park" element={<FounderRoute><PPPark /></FounderRoute>} />
             <Route path="/founder/portfolio-prioritisation/decisions" element={<FounderRoute><PPDecisions /></FounderRoute>} />
+            <Route path="/founder/resource-allocation" element={<FounderRoute><RAOverview /></FounderRoute>} />
+            <Route path="/founder/resource-allocation/ai-budget" element={<FounderRoute><RAAIBudget /></FounderRoute>} />
+            <Route path="/founder/resource-allocation/human-time" element={<FounderRoute><RAHumanTime /></FounderRoute>} />
+            <Route path="/founder/resource-allocation/founder-attention" element={<FounderRoute><RAFounderAttention /></FounderRoute>} />
+            <Route path="/founder/resource-allocation/cash" element={<FounderRoute><RACash /></FounderRoute>} />
+            <Route path="/founder/resource-allocation/recommendations" element={<FounderRoute><RARecommendations /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
