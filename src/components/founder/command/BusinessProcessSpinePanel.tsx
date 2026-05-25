@@ -20,6 +20,7 @@ import KnowledgeGovernanceCard from "./KnowledgeGovernanceCard";
 import CapacityPlanningCard from "./CapacityPlanningCard";
 import MarketplaceCard from "./MarketplaceCard";
 import SellerOpsCard from "./SellerOpsCard";
+import MarketplaceGrowthCard from "./MarketplaceGrowthCard";
 
 /**
  * Business Process Spine — single integrated panel that surfaces every
@@ -68,6 +69,7 @@ export default function BusinessProcessSpinePanel() {
         <FounderReportingPackCard />
         <MarketplaceCard />
         <SellerOpsCard />
+        <MarketplaceGrowthCard />
       </div>
     </div>
   );
