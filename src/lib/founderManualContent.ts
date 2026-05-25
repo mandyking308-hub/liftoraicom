@@ -4027,5 +4027,39 @@ New "Concurrency Leases" tab and new top-line stats: Leases active, Lease denial
 - Worker-pool drainage of queued rows is still synchronous per edge-function invocation; very high global throughput would benefit from a dedicated worker.
 
 *End of Strict Concurrency Lease + Idempotency Hardening (v5.9.6).*
+
+## AI Cost Accuracy Hardening (v5.9.7)
+
+Sharpens cost reporting by tagging every gateway call with a cost basis and seeding a pricing registry for every active model.
+
+### Pricing registry
+- Table: ai_provider_pricing (provider_name, model_name, model_tier, input_cost_per_1m_tokens, output_cost_per_1m_tokens, currency, active, effective_from, effective_to, pricing_source, pricing_source_url, confidence, notes).
+- Seeded rows for every model present in ai_agent_registry plus the Brain default (openai/gpt-5.5) and the runtime default (google/gemini-3-flash-preview). Seeded confidence='estimated'; founder can promote to 'verified' once official rates are confirmed.
+- Lookup function selects the most recent active row by effective_from desc, limit 1.
+
+### Cost calculation
+- Native rate × token counts → native total → USD-to-GBP fallback at 0.79 (overridden by row currency).
+- actual_cost_gbp is populated only when basis is actual_tokens or provider_reported.
+- estimated_cost_gbp is populated for streaming_estimate, estimated_tokens, manual_estimate; actual_cost_gbp is left NULL in those cases so dashboards can distinguish.
+- pricing_missing → both fields are 0 and a pricing_missing runtime event is raised.
+
+### Streaming costs
+- founder-copilot streams responses; the token totals are not always returned mid-stream. endGatewayLog is now called with cost_basis='streaming_estimate'. The cockpit labels these rows accordingly and includes them in the "Estimated-only" total rather than "Actual".
+
+### Runtime Health surface
+- New top-line stats: Actual cost month, Estimated-only month, Models missing pricing.
+- New "Cost Accuracy" tab: per-basis call counts, models-missing-pricing list, full active pricing registry with confidence badges.
+
+### Pricing update process
+1. Open Provider Pricing page (admin only).
+2. Enter verified rate; mark confidence='verified' with pricing_source + pricing_source_url.
+3. Set effective_to on the old row (or active=false). New calls pick up the latest active row automatically.
+
+### Remaining limitations
+- Seed rates are estimates. Until a founder promotes them to 'verified', monthly totals carry that uncertainty.
+- USD→GBP uses a static 0.79 fallback. Live FX is out of scope here.
+- Streaming calls record token counts only when the gateway returns them; otherwise the row stays on streaming_estimate.
+
+*End of AI Cost Accuracy Hardening (v5.9.7).*
 `;
 };
