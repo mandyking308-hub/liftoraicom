@@ -191,12 +191,12 @@ Deno.serve(async (req) => {
   // --- Provider missing path: fail-closed ---
   if (!can_call_ai) {
     const failText =
-      "Liftor Brain provider is not configured. Add OPENAI_API_KEY as a Supabase Edge Function secret to enable the AI brain. No model call was made.";
+      "Liftor Brain is fail-closed: the Lovable AI Gateway is not currently reachable from this environment (LOVABLE_API_KEY is auto-provisioned by Lovable). No model call was made.";
     const { data: aMsg } = await admin.from("liftor_brain_messages").insert({
       session_id: session.id, business_id, role: "assistant",
       message_text: failText, message_status: "blocked",
       context_pack_id, external_action_blocked: true,
-      metadata: { provider_status, reason: "openai_secret_missing" },
+      metadata: { provider_status, reason: "lovable_api_key_missing", provider: "lovable_ai_gateway" },
     }).select("id").maybeSingle();
     await admin.from("liftor_brain_sessions").update({
       last_user_message_at: new Date().toISOString(),
@@ -218,16 +218,16 @@ Deno.serve(async (req) => {
       context_pack_id,
       answer: failText,
       suggested_actions: [{
-        title: "Configure OpenAI provider for Liftor Brain",
-        reason: "OPENAI_API_KEY missing — Brain is fail-closed.",
+        title: "Restore Lovable AI Gateway access for Liftor Brain",
+        reason: "LOVABLE_API_KEY not present in the runtime — Brain is fail-closed. Lovable auto-provisions this key.",
         priority: "high", safe_internal: true, external_action_required: false,
         recommended_route: "/founder/command-centre",
       }],
       missing_context, risk_warnings,
       tool_results: [], created_draft_ids: [],
-      provider_status, usage: null,
+      provider_status, provider: "lovable_ai_gateway", usage: null,
       external_actions_blocked: true,
-      no_forbidden_action_audit: { ...NO_FORBIDDEN_AUDIT, openai_calls: 0 },
+      no_forbidden_action_audit: { ...NO_FORBIDDEN_AUDIT, direct_openai_calls: 0 },
     });
   }
 
