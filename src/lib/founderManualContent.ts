@@ -3768,5 +3768,30 @@ Every card and tile renders a useful message when no data exists yet (e.g. "Will
 Live — Healthy / Watch / Budget Warning / Cost Alert / Risk Alert / Founder Pause Active. No "Not Ready", "Simulation Only", "Ready for…" or release-gate language.
 
 *End of Founder Action Board technical addendum (v5.7).*
-`;
+
+## AI Gateway Bypass Audit (v5.8 — 2026-05-25, doc-only)
+
+### Status
+Live — Bypass Detected (controlled). 16 legacy edge functions still call AI directly. No code migrated in this pass; audit and batching only.
+
+### Critical finding
+\`liftor-brain-chat\` is the only function calling \`api.openai.com\` directly (uses \`OPENAI_API_KEY\`). The other 15 already point at \`ai.gateway.lovable.dev\` but bypass the in-app \`aiGateway.execute()\` enforcement helper (no ledger, no redaction, no budget/stop-loss/approval gating).
+
+### Migration batches
+- Batch A — simple low-risk (3): agent-permission-audit, business-external-activation-readiness-run, multilingual-intake-preview.
+- Batch B — active medium-risk (9): ai-conversation-engine, ai-engagement-agent-run, apollo-qualify, business-daily-operating-run, business-weekly-review-run, founder-copilot, internal-proposal-generate, lead-fit-classify, ma-intelligence-orchestrator.
+- Batch C — high-risk / approval-sensitive (2): generate-proposal, liftor-brain-chat.
+- Batch D — deprecated / unused candidates (2): business-daily-operating-loop-acceptance, business-weekly-review-acceptance.
+
+### Recommended order
+1. Batch A (proves helper pattern). 2. Batch D triage. 3. Batch B in order: lead-fit-classify → apollo-qualify → ai-engagement-agent-run → ai-conversation-engine → internal-proposal-generate → ma-intelligence-orchestrator → business-daily-operating-run → business-weekly-review-run → founder-copilot. 4. Batch C: generate-proposal, then liftor-brain-chat.
+
+### Do not touch yet
+liftor-brain-provider-check / -diagnostic / -constitution-acceptance / -full-acceptance — migrate together with liftor-brain-chat to preserve the provider contract.
+
+### Source of truth
+\`KNOWN_DIRECT_AI_CALLERS\` in \`src/services/aiGateway.ts\` and \`META\` in \`src/pages/founder/AIGatewayBypassRegister.tsx\`.
+
+*End of AI Gateway Bypass Audit (v5.8).*
+\`;
 };
