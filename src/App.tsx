@@ -210,6 +210,13 @@ import PeopleAccess from "./pages/founder/people/Access";
 import PeopleTraining from "./pages/founder/people/Training";
 import PeopleQuality from "./pages/founder/people/Quality";
 import PeopleHandover from "./pages/founder/people/Handover";
+import AccessGovernanceOverview from "./pages/founder/access-governance/Overview";
+import AccessGovernanceSystems from "./pages/founder/access-governance/Systems";
+import AccessGovernanceSecrets from "./pages/founder/access-governance/Secrets";
+import AccessGovernanceUsers from "./pages/founder/access-governance/Users";
+import AccessGovernanceRevocation from "./pages/founder/access-governance/Revocation";
+import AccessGovernanceRotation from "./pages/founder/access-governance/Rotation";
+import AccessGovernanceAudit from "./pages/founder/access-governance/Audit";
 import CustomerUpgradesHub from "./pages/founder/customer-upgrades/Hub";
 import CustomerUpgradesOpportunities from "./pages/founder/customer-upgrades/Opportunities";
 import CustomerUpgradesProductLadders from "./pages/founder/customer-upgrades/ProductLadders";
@@ -515,6 +522,13 @@ const App = () => (
             <Route path="/founder/people/training" element={<FounderRoute><PeopleTraining /></FounderRoute>} />
             <Route path="/founder/people/quality" element={<FounderRoute><PeopleQuality /></FounderRoute>} />
             <Route path="/founder/people/handover" element={<FounderRoute><PeopleHandover /></FounderRoute>} />
+            <Route path="/founder/access-governance" element={<FounderRoute><AccessGovernanceOverview /></FounderRoute>} />
+            <Route path="/founder/access-governance/systems" element={<FounderRoute><AccessGovernanceSystems /></FounderRoute>} />
+            <Route path="/founder/access-governance/secrets" element={<FounderRoute><AccessGovernanceSecrets /></FounderRoute>} />
+            <Route path="/founder/access-governance/users" element={<FounderRoute><AccessGovernanceUsers /></FounderRoute>} />
+            <Route path="/founder/access-governance/revocation" element={<FounderRoute><AccessGovernanceRevocation /></FounderRoute>} />
+            <Route path="/founder/access-governance/rotation" element={<FounderRoute><AccessGovernanceRotation /></FounderRoute>} />
+            <Route path="/founder/access-governance/audit" element={<FounderRoute><AccessGovernanceAudit /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
