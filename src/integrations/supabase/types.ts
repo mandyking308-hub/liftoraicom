@@ -47,6 +47,94 @@ export type Database = {
         }
         Relationships: []
       }
+      access_assignments: {
+        Row: {
+          access_level: string | null
+          access_status: string
+          created_at: string
+          expires_at: string | null
+          granted_at: string | null
+          id: string
+          reviewed_at: string | null
+          revoked_at: string | null
+          system_id: string
+          updated_at: string
+          user_or_operator: string
+        }
+        Insert: {
+          access_level?: string | null
+          access_status?: string
+          created_at?: string
+          expires_at?: string | null
+          granted_at?: string | null
+          id?: string
+          reviewed_at?: string | null
+          revoked_at?: string | null
+          system_id: string
+          updated_at?: string
+          user_or_operator: string
+        }
+        Update: {
+          access_level?: string | null
+          access_status?: string
+          created_at?: string
+          expires_at?: string | null
+          granted_at?: string | null
+          id?: string
+          reviewed_at?: string | null
+          revoked_at?: string | null
+          system_id?: string
+          updated_at?: string
+          user_or_operator?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "access_assignments_system_id_fkey"
+            columns: ["system_id"]
+            isOneToOne: false
+            referencedRelation: "access_systems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      access_audit_events: {
+        Row: {
+          audit_metadata: Json
+          created_at: string
+          event_summary: string | null
+          event_type: string
+          id: string
+          severity: string
+          system_id: string | null
+        }
+        Insert: {
+          audit_metadata?: Json
+          created_at?: string
+          event_summary?: string | null
+          event_type: string
+          id?: string
+          severity?: string
+          system_id?: string | null
+        }
+        Update: {
+          audit_metadata?: Json
+          created_at?: string
+          event_summary?: string | null
+          event_type?: string
+          id?: string
+          severity?: string
+          system_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "access_audit_events_system_id_fkey"
+            columns: ["system_id"]
+            isOneToOne: false
+            referencedRelation: "access_systems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       access_audit_log: {
         Row: {
           action: string
@@ -132,6 +220,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      access_systems: {
+        Row: {
+          active: boolean
+          business_id: string | null
+          created_at: string
+          id: string
+          login_method_summary: string | null
+          owner: string | null
+          risk_level: string
+          system_name: string
+          system_type: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          login_method_summary?: string | null
+          owner?: string | null
+          risk_level?: string
+          system_name: string
+          system_type?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          login_method_summary?: string | null
+          owner?: string | null
+          risk_level?: string
+          system_name?: string
+          system_type?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       accounting_close_tasks: {
         Row: {
@@ -33085,6 +33212,62 @@ export type Database = {
           winning_factors?: Json | null
         }
         Relationships: []
+      }
+      secret_inventory: {
+        Row: {
+          active: boolean
+          configured: boolean
+          created_at: string
+          id: string
+          last_rotated_at: string | null
+          owner: string | null
+          risk_level: string
+          rotation_due_at: string | null
+          secret_name: string
+          secret_type: string
+          storage_location_summary: string | null
+          system_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          configured?: boolean
+          created_at?: string
+          id?: string
+          last_rotated_at?: string | null
+          owner?: string | null
+          risk_level?: string
+          rotation_due_at?: string | null
+          secret_name: string
+          secret_type?: string
+          storage_location_summary?: string | null
+          system_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          configured?: boolean
+          created_at?: string
+          id?: string
+          last_rotated_at?: string | null
+          owner?: string | null
+          risk_level?: string
+          rotation_due_at?: string | null
+          secret_name?: string
+          secret_type?: string
+          storage_location_summary?: string | null
+          system_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "secret_inventory_system_id_fkey"
+            columns: ["system_id"]
+            isOneToOne: false
+            referencedRelation: "access_systems"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       security_alerts: {
         Row: {
