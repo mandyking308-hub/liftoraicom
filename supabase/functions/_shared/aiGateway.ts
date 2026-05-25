@@ -582,11 +582,40 @@ export async function callAIGateway(input: AIGatewayCallInput): Promise<AIGatewa
   };
 }
 
-/** Streaming variant. Returns the raw Response so the edge function can pipe it. */
-export async function streamAIGateway(input: AIGatewayCallInput): Promise<{ trace_id: string; response: Response }> {
+/** Streaming variant. Returns the raw Response so the edge function can pipe it.
+ *  Registers an ai_gateway_requests row so the call shows up in dashboards;
+ *  the caller must call `endGatewayLog({ trace_id, request_id, input }, ...)`
+ *  when the stream finishes to record final tokens / cost. */
+export async function streamAIGateway(
+  input: AIGatewayCallInput,
+): Promise<{ trace_id: string; request_id: string; response: Response }> {
   const trace_id = newTraceId();
+  const request_id = newRequestId();
+  const sb = getServiceClient();
   const apiKey = Deno.env.get("LOVABLE_API_KEY");
+  const startedAt = new Date().toISOString();
   await writeLedger(trace_id, input, { status: "pending", input_summary: input.action_type });
+  await recordRuntimeRequest(sb, {
+    request_id,
+    conversation_id: input.conversation_id ?? null,
+    workflow_id: input.workflow_id ?? null,
+    agent_id: input.agent_id ?? null,
+    portfolio_asset_id: input.portfolio_asset_id ?? null,
+    business_id: input.business_id ?? null,
+    user_id: input.user_id ?? null,
+    request_type: input.request_type ?? input.action_type,
+    provider: "lovable-ai-gateway",
+    model: input.model ?? "google/gemini-3-flash-preview",
+    prompt_version: input.prompt_version ?? null,
+    risk_level: input.risk_level ?? "low",
+    approval_required: !!input.approval_required,
+    status: "running",
+    priority: input.priority ?? 5,
+    idempotency_key: input.idempotency_key ?? null,
+    started_at: startedAt,
+    trace_id,
+    metadata: { ...(input.metadata ?? {}), streaming: true },
+  });
   const response = await fetch(GATEWAY_URL, {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
@@ -597,10 +626,10 @@ export async function streamAIGateway(input: AIGatewayCallInput): Promise<{ trac
       tool_choice: input.tool_choice,
       reasoning: input.reasoning,
       stream: true,
+      ...(input.response_format ? { response_format: input.response_format } : {}),
     }),
   });
-  // Caller is responsible for piping `response.body`. Final ledger update happens on close.
-  return { trace_id, response };
+  return { trace_id, request_id, response };
 }
 
 /**
