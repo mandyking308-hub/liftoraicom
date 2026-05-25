@@ -129,7 +129,7 @@ export default function AIRuntimeHealth() {
   }
   for (const b of budgets) {
     const spend = cost(monthRows.filter((r) => r.business_id === b.business_id));
-    const cap = Number(b.monthly_budget_gbp ?? 0);
+    const cap = Number(b.monthly_ai_budget ?? 0);
     if (cap > 0 && spend >= cap) bottlenecks.push({ label: `Business ${b.business_id} exceeded monthly budget (£${spend.toFixed(2)} / £${cap})`, severity: "critical" });
   }
   if (staleWorkflows.length > 0) bottlenecks.push({ label: `${staleWorkflows.length} workflows stale (>6h)`, severity: "warning" });
@@ -440,7 +440,7 @@ export default function AIRuntimeHealth() {
                     <TableBody>
                       {budgets.map((b) => {
                         const spend = cost(monthRows.filter((r) => r.business_id === b.business_id));
-                        const cap = Number(b.monthly_budget_gbp ?? 0);
+                        const cap = Number(b.monthly_ai_budget ?? 0);
                         const pct = cap > 0 ? Math.min(100, Math.round((spend / cap) * 100)) : 0;
                         return (
                           <TableRow key={b.id ?? b.business_id}>
