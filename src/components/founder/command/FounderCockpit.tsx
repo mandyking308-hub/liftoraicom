@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import {
   Activity, AlertTriangle, ShieldCheck, ShieldAlert, PoundSterling,
   ListChecks, Siren, PauseCircle, TrendingUp, TrendingDown, Coins,
-  Building2, ArrowUpRight, FileText, Gauge,
+  Building2, ArrowUpRight, FileText, Gauge, Sparkles,
 } from "lucide-react";
 import { formatGBP } from "@/services/aiUsageLogger";
 
