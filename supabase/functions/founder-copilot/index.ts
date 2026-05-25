@@ -123,7 +123,7 @@ GUIDELINES:
     }
 
     // Fire-and-forget completion log (stream tokens not counted server-side).
-    endGatewayLog({ ...__log, input: __gwInput }, { ok: true }).catch(() => {});
+    endGatewayLog({ ...__log, input: __gwInput }, { ok: true, cost_basis: "streaming_estimate" }).catch(() => {});
     return new Response(response.body, {
       headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
     });

@@ -175,6 +175,108 @@ export async function releaseLease(sb: any, request_id: string, ok: boolean) {
   try { await sb.rpc("release_ai_lease", { _request_id: request_id, _ok: ok }); } catch { /* best-effort */ }
 }
 
+// ============================================================================
+// Cost computation + tagging
+// ============================================================================
+//
+// USD → GBP fallback. The pricing registry stores per-model rates in their
+// native currency (USD for every seeded row). We convert to GBP for dashboards.
+// 0.79 is a safe ~rate; verified pricing rows can override the currency.
+const USD_TO_GBP = 0.79;
+
+export type CostBasis =
+  | "actual_tokens"
+  | "estimated_tokens"
+  | "provider_reported"
+  | "manual_estimate"
+  | "streaming_estimate"
+  | "pricing_missing";
+
+async function lookupPricing(sb: any, model: string | null | undefined) {
+  if (!sb || !model) return null;
+  try {
+    const { data } = await sb
+      .from("ai_provider_pricing")
+      .select("input_cost_per_1m_tokens,output_cost_per_1m_tokens,currency,confidence,pricing_source")
+      .eq("model_name", model)
+      .eq("active", true)
+      .order("effective_from", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    return data;
+  } catch { return null; }
+}
+
+function toGbp(amount: number, currency: string) {
+  if (!amount) return 0;
+  if (currency === "GBP") return amount;
+  if (currency === "USD") return amount * USD_TO_GBP;
+  return amount * USD_TO_GBP; // default-assume USD-equivalent
+}
+
+/**
+ * Compute cost for a completed (or estimated) call and write both actual + estimated
+ * fields on ai_gateway_requests and a matching ai_usage_ledger row patch.
+ * - basis === "actual_tokens" or "provider_reported"  → fills actual_cost_gbp
+ * - basis === anything else (streaming/missing/estimated) → fills estimated_cost_gbp
+ * Pricing-missing rows raise a runtime event so the cockpit can warn.
+ */
+export async function computeAndTagCost(
+  sb: any,
+  args: {
+    request_id: string;
+    model: string;
+    prompt_tokens?: number | null;
+    completion_tokens?: number | null;
+    basis: CostBasis;
+    agent_id?: string | null;
+    business_id?: string | null;
+  },
+): Promise<{ actual_cost_gbp: number; estimated_cost_gbp: number; pricing_missing: boolean; confidence: string }> {
+  const inTok = Math.max(0, Number(args.prompt_tokens ?? 0));
+  const outTok = Math.max(0, Number(args.completion_tokens ?? 0));
+  const pricing = await lookupPricing(sb, args.model);
+
+  if (!pricing) {
+    await recordRuntimeEvent(sb, {
+      request_id: args.request_id, agent_id: args.agent_id ?? null, business_id: args.business_id ?? null,
+      event_type: "pricing_missing", severity: "warning",
+      message: `No active pricing registry row for ${args.model}`,
+      metadata: { model: args.model, basis: args.basis },
+    });
+    await updateRuntimeRequest(sb, args.request_id, {
+      cost_basis: "pricing_missing",
+      estimated_cost_gbp: 0,
+      actual_cost_gbp: null,
+    });
+    return { actual_cost_gbp: 0, estimated_cost_gbp: 0, pricing_missing: true, confidence: "unknown" };
+  }
+
+  const inCostNative = (inTok / 1_000_000) * Number(pricing.input_cost_per_1m_tokens || 0);
+  const outCostNative = (outTok / 1_000_000) * Number(pricing.output_cost_per_1m_tokens || 0);
+  const totalGbp = toGbp(inCostNative + outCostNative, pricing.currency ?? "USD");
+
+  const isActual = args.basis === "actual_tokens" || args.basis === "provider_reported";
+  const patch: Record<string, unknown> = {
+    cost_basis: args.basis,
+  };
+  if (isActual) {
+    patch.actual_cost_gbp = totalGbp;
+    patch.estimated_cost_gbp = totalGbp; // mirror so legacy dashboards still work
+  } else {
+    patch.estimated_cost_gbp = totalGbp;
+    patch.actual_cost_gbp = null;
+  }
+  await updateRuntimeRequest(sb, args.request_id, patch);
+
+  return {
+    actual_cost_gbp: isActual ? totalGbp : 0,
+    estimated_cost_gbp: totalGbp,
+    pricing_missing: false,
+    confidence: pricing.confidence ?? "estimated",
+  };
+}
+
 function getServiceClient() {
   const url = Deno.env.get("SUPABASE_URL") ?? Deno.env.get("VITE_SUPABASE_URL");
   const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
@@ -453,6 +555,7 @@ export async function callAIGateway(input: AIGatewayCallInput): Promise<AIGatewa
     prompt_tokens: usage.prompt_tokens ?? 0,
     completion_tokens: usage.completion_tokens ?? 0,
     output_summary: input.action_type,
+    cost_basis: "actual_tokens",
   });
   await updateRuntimeRequest(sb, request_id, {
     status: "completed",
@@ -460,6 +563,12 @@ export async function callAIGateway(input: AIGatewayCallInput): Promise<AIGatewa
     prompt_tokens: usage.prompt_tokens ?? null,
     completion_tokens: usage.completion_tokens ?? null,
     token_usage: usage,
+  });
+  await computeAndTagCost(sb, {
+    request_id, model: primaryModel,
+    prompt_tokens: usage.prompt_tokens, completion_tokens: usage.completion_tokens,
+    basis: "actual_tokens",
+    agent_id: input.agent_id ?? null, business_id: input.business_id ?? null,
   });
   await recordRuntimeEvent(sb, { request_id, event_type: "completed", severity: "info", metadata: { used_fallback: usedFallback } });
   await releaseLease(sb, request_id, true);
@@ -546,15 +655,18 @@ export async function beginGatewayLog(input: AIGatewayCallInput): Promise<{ trac
 
 export async function endGatewayLog(
   ctx: { trace_id: string; request_id: string; input: AIGatewayCallInput },
-  result: { ok: boolean; prompt_tokens?: number; completion_tokens?: number; error?: string },
+  result: { ok: boolean; prompt_tokens?: number; completion_tokens?: number; error?: string; cost_basis?: CostBasis },
 ) {
   const sb = getServiceClient();
   const completedAt = new Date().toISOString();
+  const basis: CostBasis = result.cost_basis
+    ?? (result.prompt_tokens != null && result.completion_tokens != null ? "actual_tokens" : "streaming_estimate");
   await writeLedger(ctx.trace_id, ctx.input, {
     status: result.ok ? "completed" : "failed",
     prompt_tokens: result.prompt_tokens ?? 0,
     completion_tokens: result.completion_tokens ?? 0,
     output_summary: result.ok ? ctx.input.action_type : (result.error ?? "error"),
+    cost_basis: basis,
   });
   await updateRuntimeRequest(sb, ctx.request_id, {
     status: result.ok ? "completed" : "failed",
@@ -563,6 +675,15 @@ export async function endGatewayLog(
     completion_tokens: result.completion_tokens ?? null,
     error_message: result.ok ? null : (result.error ?? null),
   });
+  if (result.ok) {
+    await computeAndTagCost(sb, {
+      request_id: ctx.request_id,
+      model: ctx.input.model ?? "google/gemini-3-flash-preview",
+      prompt_tokens: result.prompt_tokens, completion_tokens: result.completion_tokens,
+      basis,
+      agent_id: ctx.input.agent_id ?? null, business_id: ctx.input.business_id ?? null,
+    });
+  }
   await recordRuntimeEvent(sb, {
     request_id: ctx.request_id,
     conversation_id: ctx.input.conversation_id ?? null,

@@ -1845,6 +1845,7 @@ export type Database = {
           completed_at: string | null
           completion_tokens: number | null
           conversation_id: string | null
+          cost_basis: string | null
           created_at: string
           error_message: string | null
           estimated_cost_gbp: number | null
@@ -1876,6 +1877,7 @@ export type Database = {
           completed_at?: string | null
           completion_tokens?: number | null
           conversation_id?: string | null
+          cost_basis?: string | null
           created_at?: string
           error_message?: string | null
           estimated_cost_gbp?: number | null
@@ -1907,6 +1909,7 @@ export type Database = {
           completed_at?: string | null
           completion_tokens?: number | null
           conversation_id?: string | null
+          cost_basis?: string | null
           created_at?: string
           error_message?: string | null
           estimated_cost_gbp?: number | null
@@ -2180,6 +2183,7 @@ export type Database = {
       ai_provider_pricing: {
         Row: {
           active: boolean
+          confidence: string
           created_at: string
           currency: string
           effective_from: string
@@ -2190,11 +2194,14 @@ export type Database = {
           model_tier: string | null
           notes: string | null
           output_cost_per_1m_tokens: number
+          pricing_source: string | null
+          pricing_source_url: string | null
           provider_name: string
           updated_at: string
         }
         Insert: {
           active?: boolean
+          confidence?: string
           created_at?: string
           currency?: string
           effective_from?: string
@@ -2205,11 +2212,14 @@ export type Database = {
           model_tier?: string | null
           notes?: string | null
           output_cost_per_1m_tokens?: number
+          pricing_source?: string | null
+          pricing_source_url?: string | null
           provider_name: string
           updated_at?: string
         }
         Update: {
           active?: boolean
+          confidence?: string
           created_at?: string
           currency?: string
           effective_from?: string
@@ -2220,6 +2230,8 @@ export type Database = {
           model_tier?: string | null
           notes?: string | null
           output_cost_per_1m_tokens?: number
+          pricing_source?: string | null
+          pricing_source_url?: string | null
           provider_name?: string
           updated_at?: string
         }
@@ -2546,6 +2558,7 @@ export type Database = {
       ai_usage_ledger: {
         Row: {
           action_type: string | null
+          actual_cost_gbp: number | null
           agent_id: string | null
           audit_metadata: Json
           business_id: string | null
@@ -2553,6 +2566,7 @@ export type Database = {
           completed_at: string | null
           completion_tokens: number | null
           confidence_score: number | null
+          cost_basis: string | null
           created_at: string
           currency: string | null
           error_message: string | null
@@ -2581,6 +2595,7 @@ export type Database = {
         }
         Insert: {
           action_type?: string | null
+          actual_cost_gbp?: number | null
           agent_id?: string | null
           audit_metadata?: Json
           business_id?: string | null
@@ -2588,6 +2603,7 @@ export type Database = {
           completed_at?: string | null
           completion_tokens?: number | null
           confidence_score?: number | null
+          cost_basis?: string | null
           created_at?: string
           currency?: string | null
           error_message?: string | null
@@ -2616,6 +2632,7 @@ export type Database = {
         }
         Update: {
           action_type?: string | null
+          actual_cost_gbp?: number | null
           agent_id?: string | null
           audit_metadata?: Json
           business_id?: string | null
@@ -2623,6 +2640,7 @@ export type Database = {
           completed_at?: string | null
           completion_tokens?: number | null
           confidence_score?: number | null
+          cost_basis?: string | null
           created_at?: string
           currency?: string | null
           error_message?: string | null
