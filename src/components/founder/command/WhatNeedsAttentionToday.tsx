@@ -8,6 +8,7 @@ import {
   Users, FlaskConical, ShieldAlert, Briefcase, Banknote, Sparkles, ArrowRight, Phone, Flame, ShieldCheck,
   Target, TrendingUp,
   GraduationCap,
+  Gauge,
 } from "lucide-react";
 
 type Tone = "danger" | "warn" | "good" | "default";
@@ -52,6 +53,7 @@ export default function WhatNeedsAttentionToday() {
         activeTargets, targetsBehind, targetsCritical,
         upgradeOpps, upgradeHot, upgradeApprovals, renewalsSoon,
         coachingOpen, coachingCritical, scriptsRetire,
+        autopilotTasks, autopilotCritical,
       ] = await Promise.all([
         sb.from("founder_approval_items").select("id", head).eq("status", "pending"),
         sb.from("system_events").select("id", head).eq("resolved", false).in("severity", ["critical", "high"]),
@@ -86,6 +88,8 @@ export default function WhatNeedsAttentionToday() {
         sb.from("sales_coaching_recommendations").select("id", head).eq("status", "open"),
         sb.from("sales_coaching_recommendations").select("id", head).eq("status", "open").eq("priority", "critical"),
         sb.from("sales_script_performance").select("id", head).in("recommended_status", ["retire", "improve"]),
+        sb.from("revenue_autopilot_tasks").select("id", head).eq("status", "open"),
+        sb.from("revenue_autopilot_tasks").select("id", head).eq("status", "open").eq("priority", "critical"),
       ].map((p) => p.catch(() => ({ count: 0 }))));
       return {
         approvalsPending: approvalsPending?.count ?? 0,
@@ -121,6 +125,8 @@ export default function WhatNeedsAttentionToday() {
         coachingOpen: coachingOpen?.count ?? 0,
         coachingCritical: coachingCritical?.count ?? 0,
         scriptsRetire: scriptsRetire?.count ?? 0,
+        autopilotTasks: autopilotTasks?.count ?? 0,
+        autopilotCritical: autopilotCritical?.count ?? 0,
       };
     },
   });
@@ -134,6 +140,7 @@ export default function WhatNeedsAttentionToday() {
     activeTargets: 0, targetsBehind: 0, targetsCritical: 0,
     upgradeOpps: 0, upgradeHot: 0, upgradeApprovals: 0, renewalsSoon: 0,
     coachingOpen: 0, coachingCritical: 0, scriptsRetire: 0,
+    autopilotTasks: 0, autopilotCritical: 0,
   };
 
   const tone = (n: number, warn = 1, danger = 5): Tone =>
@@ -189,6 +196,8 @@ export default function WhatNeedsAttentionToday() {
             <Tile label="Coaching recommendations" value={d.coachingOpen} to="/founder/sales-coaching/recommendations" icon={GraduationCap} tone={d.coachingOpen > 0 ? "warn" : "good"} hint="open suggestions" />
             <Tile label="Critical coaching items" value={d.coachingCritical} to="/founder/sales-coaching/recommendations" icon={AlertTriangle} tone={d.coachingCritical > 0 ? "danger" : "good"} />
             <Tile label="Scripts to fix or retire" value={d.scriptsRetire} to="/founder/sales-coaching/scripts" icon={GraduationCap} tone={d.scriptsRetire > 0 ? "warn" : "good"} />
+            <Tile label="Revenue autopilot tasks" value={d.autopilotTasks} to="/founder/revenue-autopilot/tasks" icon={Gauge} tone={d.autopilotTasks > 0 ? "warn" : "good"} hint="open revenue work" />
+            <Tile label="Critical autopilot tasks" value={d.autopilotCritical} to="/founder/revenue-autopilot/tasks" icon={AlertTriangle} tone={d.autopilotCritical > 0 ? "danger" : "good"} />
           </div>
         </CardContent>
       </Card>
