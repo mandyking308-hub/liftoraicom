@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { beginGatewayLog, endGatewayLog } from "../_shared/aiGateway.ts";
+import { streamAIGateway, endGatewayLog } from "../_shared/aiGateway.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -97,30 +97,22 @@ GUIDELINES:
       fallback_model: "google/gemini-2.5-flash",
       risk_level: "medium" as const,
       request_type: "copilot_chat",
-      messages: [],
+      messages: [
+        { role: "system" as const, content: systemPrompt },
+        ...messages,
+      ],
       metadata: { streaming: true },
     };
-    const __log = await beginGatewayLog(__gwInput);
     const fullPrompt = JSON.stringify({ system: systemPrompt, messages });
     const promptTokens = approxTokens(fullPrompt);
     const t0 = Date.now();
+    const __log = { trace_id: "", request_id: "" } as { trace_id: string; request_id: string };
+    const stream = await streamAIGateway(__gwInput);
+    __log.trace_id = stream.trace_id;
+    __log.request_id = stream.request_id;
+    const response = stream.response;
     await logRuntimeEvent(supabase, __log.request_id, "stream_request_started", "info", {
       function: "founder-copilot", model: __gwInput.model, prompt_tokens_estimate: promptTokens,
-    });
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "system", content: systemPrompt },
-          ...messages,
-        ],
-        stream: true,
-      }),
     });
     await logRuntimeEvent(supabase, __log.request_id, "stream_opened", "info", {
       function: "founder-copilot", http_status: response.status,
