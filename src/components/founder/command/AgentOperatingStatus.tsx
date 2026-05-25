@@ -1,0 +1,134 @@
+import { useQuery } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Bot, ArrowRight } from "lucide-react";
+
+type Row = {
+  key: string;
+  name: string;
+  status: "active" | "idle" | "paused" | "failed" | "needs_setup";
+  lastAction: string;
+  costToday: number;
+  failures: number;
+  approvalsGenerated: number;
+  nextAction: string;
+  to: string;
+};
+
+const statusCls: Record<Row["status"], string> = {
+  active: "bg-emerald-500/20 text-emerald-400 border-emerald-500/40",
+  idle: "bg-muted text-muted-foreground border-border/60",
+  paused: "bg-yellow-500/20 text-yellow-300 border-yellow-500/40",
+  failed: "bg-destructive/15 text-destructive border-destructive/30",
+  needs_setup: "bg-background/40 text-foreground border-border/60",
+};
+
+const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: string }> = [
+  { key: "liftor_brain", name: "Liftor Brain", to: "/founder/brain", category: "founder_copilot" },
+  { key: "founder_copilot", name: "Founder Copilot", to: "/founder/brain", category: "founder_copilot" },
+  { key: "ai_engagement_agent", name: "AI Engagement Agent", to: "/founder/conversations", category: "engagement" },
+  { key: "lead_fit_classify", name: "Lead Fit Classifier", to: "/founder/priority", category: "qualification" },
+  { key: "apollo_qualify", name: "Apollo Qualifier", to: "/founder/outreach/imports", category: "prospecting" },
+  { key: "proposal_generator", name: "Proposal Generator", to: "/founder/proposals", category: "proposals" },
+  { key: "business_daily_operating", name: "Daily Operating Loop", to: "/founder/business/daily-operating-loop", category: "operations" },
+  { key: "business_weekly_review", name: "Weekly Review", to: "/founder/business/weekly-review", category: "operations" },
+  { key: "social_brain", name: "Social Brain", to: "/founder/social", category: "social" },
+  { key: "support_knowledge", name: "Support Knowledge Agent", to: "/founder/support", category: "support" },
+];
+
+export default function AgentOperatingStatus() {
+  const { data: rows = [] } = useQuery<Row[]>({
+    queryKey: ["cc-agent-operating-status-v1"],
+    refetchInterval: 60000,
+    queryFn: async () => {
+      const sb: any = supabase as any;
+      const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+      const [ledger, runtime, approvals] = await Promise.all([
+        sb.from("ai_usage_ledger").select("task_category,action_type,cost_usd,created_at").gte("created_at", since),
+        sb.from("ai_runtime_events").select("event_type,severity,metadata,created_at").gte("created_at", since),
+        sb.from("founder_approval_items").select("approval_type,status,created_at").gte("created_at", since),
+      ].map((p) => p.catch(() => ({ data: [] }))));
+
+      return CORE_AGENTS.map((a) => {
+        const used = (ledger.data ?? []).filter((l: any) =>
+          l.task_category === a.category || (l.action_type ?? "").includes(a.key),
+        );
+        const cost = used.reduce((s: number, l: any) => s + Number(l.cost_usd ?? 0), 0);
+        const failures = (runtime.data ?? []).filter((r: any) =>
+          r.severity === "error" && ((r.metadata?.function ?? "").includes(a.key) || (r.event_type ?? "").includes(a.key)),
+        ).length;
+        const generated = (approvals.data ?? []).filter((ap: any) =>
+          (ap.approval_type ?? "").includes(a.category) || (ap.approval_type ?? "").includes(a.key),
+        ).length;
+        const lastUse = used[0]?.created_at as string | undefined;
+
+        let status: Row["status"] = used.length > 0 ? "active" : "idle";
+        if (failures >= 3) status = "failed";
+
+        let nextAction = "—";
+        if (status === "failed") nextAction = "Investigate failures in Runtime Health";
+        else if (status === "idle") nextAction = "No activity in 24h — run an internal task to warm it up";
+        else if (generated > 0) nextAction = `Review ${generated} approval${generated === 1 ? "" : "s"} this agent created`;
+        else nextAction = "Healthy — no action required";
+
+        return {
+          key: a.key,
+          name: a.name,
+          status,
+          lastAction: lastUse ? new Date(lastUse).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "no activity (24h)",
+          costToday: Math.round(cost * 100000) / 100000,
+          failures,
+          approvalsGenerated: generated,
+          nextAction,
+          to: a.to,
+        };
+      });
+    },
+  });
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 pt-4">
+      <Card className="tech-card">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Bot size={14} className="text-primary" /> Agent operating status
+            <Badge variant="outline" className="ml-2 bg-emerald-500/15 text-emerald-400 border-emerald-500/30">Live</Badge>
+            <span className="ml-auto text-[11px] text-muted-foreground font-normal">All agents route through the AI Gateway. External actions remain locked.</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto -mx-1">
+            <table className="w-full text-xs">
+              <thead className="text-[10px] uppercase text-muted-foreground">
+                <tr className="border-b border-border/40">
+                  <th className="text-left p-2">Agent</th>
+                  <th className="text-left p-2">Status</th>
+                  <th className="text-left p-2">Last action</th>
+                  <th className="text-right p-2">Cost today</th>
+                  <th className="text-right p-2">Failures (24h)</th>
+                  <th className="text-right p-2">Approvals generated</th>
+                  <th className="text-left p-2">Recommended action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r) => (
+                  <tr key={r.key} className="border-b border-border/20 hover:bg-secondary/30">
+                    <td className="p-2"><Link to={r.to} className="font-medium hover:text-primary inline-flex items-center gap-1">{r.name} <ArrowRight size={10} /></Link></td>
+                    <td className="p-2"><Badge variant="outline" className={`text-[10px] ${statusCls[r.status]}`}>{r.status.replace("_", " ")}</Badge></td>
+                    <td className="p-2 text-muted-foreground">{r.lastAction}</td>
+                    <td className="p-2 text-right font-mono">${r.costToday.toFixed(5)}</td>
+                    <td className={`p-2 text-right ${r.failures > 0 ? "text-destructive" : ""}`}>{r.failures}</td>
+                    <td className="p-2 text-right">{r.approvalsGenerated}</td>
+                    <td className="p-2 text-primary/90">{r.nextAction}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
