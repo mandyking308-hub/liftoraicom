@@ -103,6 +103,11 @@ import PortfolioExitManual from "./pages/founder/PortfolioExitManual";
 import PortfolioExitControls from "./pages/founder/PortfolioExitControls";
 import PortfolioExitHardening from "./pages/founder/PortfolioExitHardening";
 import PortfolioExitReleaseGate from "./pages/founder/PortfolioExitReleaseGate";
+import PortfolioBuyerWarmUp from "./pages/founder/PortfolioBuyerWarmUp";
+import PortfolioInvestorIntelligence from "./pages/founder/PortfolioInvestorIntelligence";
+import PortfolioCompetitorIntelligence from "./pages/founder/PortfolioCompetitorIntelligence";
+import PortfolioOperatingPanels from "./pages/founder/PortfolioOperatingPanels";
+import AIGatewayBypassRegister from "./pages/founder/AIGatewayBypassRegister";
 import AIUsageLedger from "./pages/founder/AIUsageLedger";
 import AIModelRouting from "./pages/founder/AIModelRouting";
 import AIBusinessBudgets from "./pages/founder/AIBusinessBudgets";
@@ -325,6 +330,11 @@ const App = () => (
             <Route path="/founder/portfolio-exit/ingestion" element={<FounderRoute><DataIngestionCentre /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/hardening" element={<FounderRoute><PortfolioExitHardening /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/release-gate" element={<FounderRoute><PortfolioExitReleaseGate /></FounderRoute>} />
+            <Route path="/founder/portfolio-exit/buyer-warmup" element={<FounderRoute><PortfolioBuyerWarmUp /></FounderRoute>} />
+            <Route path="/founder/portfolio-exit/investors" element={<FounderRoute><PortfolioInvestorIntelligence /></FounderRoute>} />
+            <Route path="/founder/portfolio-exit/competitors" element={<FounderRoute><PortfolioCompetitorIntelligence /></FounderRoute>} />
+            <Route path="/founder/portfolio-exit/operating-panels" element={<FounderRoute><PortfolioOperatingPanels /></FounderRoute>} />
+            <Route path="/founder/portfolio-exit/ai-bypass-register" element={<FounderRoute><AIGatewayBypassRegister /></FounderRoute>} />
             <Route path="/founder/ai-cost" element={<FounderRoute><AICostGovernorHub /></FounderRoute>} />
             <Route path="/founder/ai-cost/action-board" element={<FounderRoute><AIFounderActionBoard /></FounderRoute>} />
             <Route path="/founder/ai-cost/ledger" element={<FounderRoute><AIUsageLedger /></FounderRoute>} />
