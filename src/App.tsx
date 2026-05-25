@@ -289,6 +289,11 @@ import ArchetypeClassifier from "./pages/founder/archetypes/Classifier";
 import ArchetypeBusinessMap from "./pages/founder/archetypes/BusinessMap";
 import ArchetypeRecommendations from "./pages/founder/archetypes/Recommendations";
 import ArchetypeSettings from "./pages/founder/archetypes/Settings";
+import BTOverview from "./pages/founder/business-templates/Overview";
+import BTLibrary from "./pages/founder/business-templates/Library";
+import BTApply from "./pages/founder/business-templates/Apply";
+import BTBusinessSetup from "./pages/founder/business-templates/BusinessSetup";
+import BTSettings from "./pages/founder/business-templates/Settings";
 import KnowledgeOverview from "./pages/founder/knowledge-governance/Overview";
 import KnowledgeSources from "./pages/founder/knowledge-governance/Sources";
 import KnowledgeConflicts from "./pages/founder/knowledge-governance/Conflicts";
@@ -686,6 +691,11 @@ const App = () => (
             <Route path="/founder/business-archetypes/business-map" element={<FounderRoute><ArchetypeBusinessMap /></FounderRoute>} />
             <Route path="/founder/business-archetypes/recommendations" element={<FounderRoute><ArchetypeRecommendations /></FounderRoute>} />
             <Route path="/founder/business-archetypes/settings" element={<FounderRoute><ArchetypeSettings /></FounderRoute>} />
+            <Route path="/founder/business-templates" element={<FounderRoute><BTOverview /></FounderRoute>} />
+            <Route path="/founder/business-templates/library" element={<FounderRoute><BTLibrary /></FounderRoute>} />
+            <Route path="/founder/business-templates/apply" element={<FounderRoute><BTApply /></FounderRoute>} />
+            <Route path="/founder/business-templates/business-setup" element={<FounderRoute><BTBusinessSetup /></FounderRoute>} />
+            <Route path="/founder/business-templates/settings" element={<FounderRoute><BTSettings /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
