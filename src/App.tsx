@@ -257,6 +257,12 @@ import DataQualityOrphans from "./pages/founder/data-quality/Orphans";
 import DataQualityStale from "./pages/founder/data-quality/Stale";
 import DataQualityRevenueIntegrity from "./pages/founder/data-quality/RevenueIntegrity";
 import DataQualityRepairQueue from "./pages/founder/data-quality/RepairQueue";
+import KnowledgeOverview from "./pages/founder/knowledge-governance/Overview";
+import KnowledgeSources from "./pages/founder/knowledge-governance/Sources";
+import KnowledgeConflicts from "./pages/founder/knowledge-governance/Conflicts";
+import KnowledgeStale from "./pages/founder/knowledge-governance/Stale";
+import KnowledgeApprovedClaims from "./pages/founder/knowledge-governance/ApprovedClaims";
+import KnowledgeManualSync from "./pages/founder/knowledge-governance/ManualSync";
 import CustomerUpgradesHub from "./pages/founder/customer-upgrades/Hub";
 import CustomerUpgradesOpportunities from "./pages/founder/customer-upgrades/Opportunities";
 import CustomerUpgradesProductLadders from "./pages/founder/customer-upgrades/ProductLadders";
@@ -609,6 +615,12 @@ const App = () => (
             <Route path="/founder/data-quality/stale" element={<FounderRoute><DataQualityStale /></FounderRoute>} />
             <Route path="/founder/data-quality/revenue-integrity" element={<FounderRoute><DataQualityRevenueIntegrity /></FounderRoute>} />
             <Route path="/founder/data-quality/repair-queue" element={<FounderRoute><DataQualityRepairQueue /></FounderRoute>} />
+            <Route path="/founder/knowledge-governance" element={<FounderRoute><KnowledgeOverview /></FounderRoute>} />
+            <Route path="/founder/knowledge-governance/sources" element={<FounderRoute><KnowledgeSources /></FounderRoute>} />
+            <Route path="/founder/knowledge-governance/conflicts" element={<FounderRoute><KnowledgeConflicts /></FounderRoute>} />
+            <Route path="/founder/knowledge-governance/stale" element={<FounderRoute><KnowledgeStale /></FounderRoute>} />
+            <Route path="/founder/knowledge-governance/approved-claims" element={<FounderRoute><KnowledgeApprovedClaims /></FounderRoute>} />
+            <Route path="/founder/knowledge-governance/manual-sync" element={<FounderRoute><KnowledgeManualSync /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
