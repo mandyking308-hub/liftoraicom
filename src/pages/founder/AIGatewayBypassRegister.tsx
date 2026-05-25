@@ -12,25 +12,217 @@ import { KNOWN_DIRECT_AI_CALLERS } from "@/services/aiGateway";
 
 const sb: any = supabase;
 
-// Curated risk scoring + next action for each known bypassing function.
-// Updated when functions migrate to the AI Gateway helper.
-const META: Record<string, { risk: "low" | "medium" | "high"; action: string; note?: string }> = {
-  "agent-permission-audit": { risk: "low", action: "Migrate next sprint — read-only diagnostics, low spend." },
-  "ai-conversation-engine": { risk: "high", action: "Migrate first — high call volume, direct to client conversations." },
-  "ai-engagement-agent-run": { risk: "high", action: "Migrate first — repeated runs, no ledger coverage." },
-  "apollo-qualify": { risk: "medium", action: "Migrate after lead-fit-classify; tied to outreach." },
-  "business-daily-operating-loop-acceptance": { risk: "low", action: "Acceptance test path — schedule simple migration." },
-  "business-daily-operating-run": { risk: "medium", action: "Daily cron — migrate to capture daily spend." },
-  "business-external-activation-readiness-run": { risk: "low", action: "Pre-activation check — low frequency." },
-  "business-weekly-review-acceptance": { risk: "low", action: "Acceptance test — schedule simple migration." },
-  "business-weekly-review-run": { risk: "medium", action: "Weekly cron — migrate to capture weekly spend." },
-  "founder-copilot": { risk: "high", action: "Migrate — founder chat traffic is significant." },
-  "generate-proposal": { risk: "medium", action: "Migrate — external-facing proposal text needs audit." },
-  "internal-proposal-generate": { risk: "medium", action: "Migrate — internal proposal drafting needs ledger." },
-  "lead-fit-classify": { risk: "medium", action: "Migrate before reactivating outreach." },
-  "liftor-brain-chat": { risk: "high", action: "Migrate — high volume founder/AI conversation surface." },
-  "ma-intelligence-orchestrator": { risk: "medium", action: "Migrate — single-call but multi-mode and uses gemini-2.5-pro." },
-  "multilingual-intake-preview": { risk: "low", action: "Low volume — schedule with general migration." },
+// Full audit per function (2026-05-25). Source: codebase scan of supabase/functions/* for
+// direct fetch to ai.gateway.lovable.dev or api.openai.com. Doc-only — no code migrated yet.
+type Treatment =
+  | "migrate_now"
+  | "migrate_carefully"
+  | "deprecated_candidate"
+  | "keep_temporarily_with_exception"
+  | "blocked_needs_review";
+
+type Batch = "A" | "B" | "C" | "D";
+
+type AuditEntry = {
+  risk: "low" | "medium" | "high" | "critical";
+  batch: Batch;
+  treatment: Treatment;
+  active: "active" | "likely_unused" | "scheduled";
+  provider: string;
+  model: string;
+  purpose: string;
+  caller: string;
+  reads: string;
+  writes: string;
+  drafts_external: boolean;
+  sends_external: boolean;
+  sensitive: string;
+  complexity: "simple" | "moderate" | "complex";
+  action: string;
+};
+
+const META: Record<string, AuditEntry> = {
+  "agent-permission-audit": {
+    risk: "low", batch: "A", treatment: "migrate_now", active: "scheduled",
+    provider: "lovable-ai-gateway", model: "google/gemini-3-flash-preview",
+    purpose: "Read-only agent permission diagnostic.",
+    caller: "Founder agent controls page.",
+    reads: "agent config, permissions.", writes: "audit row only.",
+    drafts_external: false, sends_external: false, sensitive: "internal config",
+    complexity: "simple",
+    action: "Batch A — wrap call in callAIGateway helper; no behavioural change.",
+  },
+  "ai-conversation-engine": {
+    risk: "high", batch: "B", treatment: "migrate_carefully", active: "active",
+    provider: "lovable-ai-gateway", model: "google/gemini-2.5-flash",
+    purpose: "Drafts and routes inbound conversation replies.",
+    caller: "CRM / Conversations / Inbox surfaces.",
+    reads: "conversation history, contact, business context.",
+    writes: "conversation_messages, ai_drafts (no auto-send).",
+    drafts_external: true, sends_external: false,
+    sensitive: "customer + CRM data",
+    complexity: "moderate",
+    action: "Batch B — migrate with redaction + approval gating preserved.",
+  },
+  "ai-engagement-agent-run": {
+    risk: "high", batch: "B", treatment: "migrate_carefully", active: "active",
+    provider: "lovable-ai-gateway", model: "google/gemini-3-flash-preview",
+    purpose: "Recurring engagement scoring + next-action suggestions.",
+    caller: "Engagement tracking + outreach dashboards.",
+    reads: "engagement events, contacts, campaigns.",
+    writes: "engagement_runs, suggested_actions.",
+    drafts_external: false, sends_external: false,
+    sensitive: "CRM + outreach data",
+    complexity: "moderate",
+    action: "Batch B — capture spend in ledger; keep human approval for outreach.",
+  },
+  "apollo-qualify": {
+    risk: "medium", batch: "B", treatment: "migrate_carefully", active: "active",
+    provider: "lovable-ai-gateway", model: "google/gemini-2.5-flash-lite",
+    purpose: "Qualifies Apollo-imported leads against ICP.",
+    caller: "Lead pipeline / imports.",
+    reads: "imported contacts, ICP rules.", writes: "lead_fit_scores.",
+    drafts_external: false, sends_external: false,
+    sensitive: "buyer/contact data",
+    complexity: "simple",
+    action: "Batch B — migrate alongside lead-fit-classify.",
+  },
+  "business-daily-operating-loop-acceptance": {
+    risk: "low", batch: "D", treatment: "deprecated_candidate", active: "likely_unused",
+    provider: "n/a (acceptance harness)", model: "n/a",
+    purpose: "Acceptance test wrapper for daily loop.",
+    caller: "CI / acceptance scripts only.",
+    reads: "test fixtures.", writes: "acceptance_runs.",
+    drafts_external: false, sends_external: false,
+    sensitive: "test data",
+    complexity: "simple",
+    action: "Batch D — confirm unused, then retire or fold into one harness.",
+  },
+  "business-daily-operating-run": {
+    risk: "medium", batch: "B", treatment: "migrate_carefully", active: "active",
+    provider: "lovable-ai-gateway (indirect via brain)", model: "varies",
+    purpose: "Daily operating loop generator.",
+    caller: "Business daily operating loop page + cron.",
+    reads: "business state, KPIs, recent events.", writes: "daily_run rows.",
+    drafts_external: false, sends_external: false,
+    sensitive: "internal business data",
+    complexity: "moderate",
+    action: "Batch B — route through gateway to capture daily spend.",
+  },
+  "business-external-activation-readiness-run": {
+    risk: "low", batch: "A", treatment: "migrate_now", active: "active",
+    provider: "lovable-ai-gateway (indirect)", model: "varies",
+    purpose: "Pre-activation readiness check.",
+    caller: "ExternalActivationReadiness page.",
+    reads: "activation checklist + configs.", writes: "readiness_runs.",
+    drafts_external: false, sends_external: false,
+    sensitive: "internal config",
+    complexity: "simple",
+    action: "Batch A — straightforward wrap.",
+  },
+  "business-weekly-review-acceptance": {
+    risk: "low", batch: "D", treatment: "deprecated_candidate", active: "likely_unused",
+    provider: "n/a (acceptance harness)", model: "n/a",
+    purpose: "Acceptance harness for weekly review.",
+    caller: "CI / acceptance only.",
+    reads: "fixtures.", writes: "acceptance_runs.",
+    drafts_external: false, sends_external: false, sensitive: "test data",
+    complexity: "simple",
+    action: "Batch D — retire or fold.",
+  },
+  "business-weekly-review-run": {
+    risk: "medium", batch: "B", treatment: "migrate_carefully", active: "active",
+    provider: "lovable-ai-gateway (indirect)", model: "varies",
+    purpose: "Weekly business review generator.",
+    caller: "BusinessWeeklyReview page + cron.",
+    reads: "weekly KPIs.", writes: "weekly_review rows.",
+    drafts_external: false, sends_external: false,
+    sensitive: "internal business data",
+    complexity: "moderate",
+    action: "Batch B — wrap and ledger-tag.",
+  },
+  "founder-copilot": {
+    risk: "high", batch: "B", treatment: "migrate_carefully", active: "active",
+    provider: "lovable-ai-gateway", model: "google/gemini-3-flash-preview",
+    purpose: "Founder chat copilot across the Command Centre.",
+    caller: "Founder copilot dock / hub.",
+    reads: "founder context, recent activity.",
+    writes: "copilot_sessions, copilot_messages.",
+    drafts_external: false, sends_external: false,
+    sensitive: "founder + business data",
+    complexity: "moderate",
+    action: "Batch B — high volume; migrate to capture spend and apply redaction.",
+  },
+  "generate-proposal": {
+    risk: "high", batch: "C", treatment: "migrate_carefully", active: "active",
+    provider: "lovable-ai-gateway", model: "google/gemini-3-flash-preview",
+    purpose: "Generates external-facing proposal drafts.",
+    caller: "Proposal builder + public proposal flow.",
+    reads: "client brief, pricing, templates.",
+    writes: "proposal_drafts (no auto-send).",
+    drafts_external: true, sends_external: false,
+    sensitive: "client + commercial data",
+    complexity: "complex",
+    action: "Batch C — migrate with approval gate; legal/commercial sensitive.",
+  },
+  "internal-proposal-generate": {
+    risk: "medium", batch: "B", treatment: "migrate_carefully", active: "active",
+    provider: "lovable-ai-gateway", model: "google/gemini-2.5-flash",
+    purpose: "Generates internal proposal drafts for founder review.",
+    caller: "Internal proposals page.",
+    reads: "opportunity + pricing.",
+    writes: "internal_proposals.",
+    drafts_external: false, sends_external: false,
+    sensitive: "commercial data",
+    complexity: "moderate",
+    action: "Batch B — wrap with ledger.",
+  },
+  "lead-fit-classify": {
+    risk: "medium", batch: "B", treatment: "migrate_carefully", active: "active",
+    provider: "lovable-ai-gateway", model: "google/gemini-2.5-flash-lite",
+    purpose: "Classifies lead fit vs ICP.",
+    caller: "Lead pipeline.",
+    reads: "contacts, ICP rules.", writes: "lead_fit_scores.",
+    drafts_external: false, sends_external: false,
+    sensitive: "buyer/contact data",
+    complexity: "simple",
+    action: "Batch B — migrate before any outreach reactivation.",
+  },
+  "liftor-brain-chat": {
+    risk: "critical", batch: "C", treatment: "blocked_needs_review", active: "active",
+    provider: "openai (direct)", model: "gpt-5.5 (configurable)",
+    purpose: "Liftor Brain founder chat — only function that bypasses Lovable AI entirely.",
+    caller: "LiftorBrain page + brain chat surfaces.",
+    reads: "brain sessions, drafts, founder context.",
+    writes: "brain_sessions, brain_drafts, audit.",
+    drafts_external: false, sends_external: false,
+    sensitive: "founder + business data; uses OPENAI_API_KEY direct",
+    complexity: "complex",
+    action: "Batch C — migrate to Lovable AI Gateway; remove OpenAI direct dependency. Coordinate with provider-check + draft-inbound-reply.",
+  },
+  "ma-intelligence-orchestrator": {
+    risk: "medium", batch: "B", treatment: "migrate_carefully", active: "active",
+    provider: "lovable-ai-gateway", model: "google/gemini-2.5-pro",
+    purpose: "Portfolio & Exit intelligence orchestrator (briefings, asset analysis, memos, recs).",
+    caller: "PortfolioExitCommandCentre + asset detail.",
+    reads: "ma_* tables.", writes: "ma_intelligence_runs, ma_ai_recommendations, ma_audit_logs.",
+    drafts_external: false, sends_external: false,
+    sensitive: "buyer/investor/deal data — already gated by approvals.",
+    complexity: "moderate",
+    action: "Batch B — wrap with callAIGateway; keep existing approval queue behaviour.",
+  },
+  "multilingual-intake-preview": {
+    risk: "low", batch: "A", treatment: "migrate_now", active: "active",
+    provider: "lovable-ai-gateway (via @ai-sdk/openai-compatible)",
+    model: "google/gemini-3-flash-preview",
+    purpose: "Multilingual intake preview translator.",
+    caller: "Public intake preview.",
+    reads: "intake draft.", writes: "preview only (no persistence).",
+    drafts_external: false, sends_external: false,
+    sensitive: "intake text",
+    complexity: "simple",
+    action: "Batch A — wrap with helper; preserve streaming.",
+  },
 };
 
 export default function AIGatewayBypassRegister() {
@@ -52,9 +244,22 @@ export default function AIGatewayBypassRegister() {
 
   const totals = {
     total: KNOWN_DIRECT_AI_CALLERS.length,
+    critical: KNOWN_DIRECT_AI_CALLERS.filter((c) => META[c.name]?.risk === "critical").length,
     high: KNOWN_DIRECT_AI_CALLERS.filter((c) => META[c.name]?.risk === "high").length,
     medium: KNOWN_DIRECT_AI_CALLERS.filter((c) => META[c.name]?.risk === "medium").length,
     low: KNOWN_DIRECT_AI_CALLERS.filter((c) => META[c.name]?.risk === "low").length,
+  };
+
+  const batches: Record<Batch, string[]> = { A: [], B: [], C: [], D: [] };
+  for (const c of KNOWN_DIRECT_AI_CALLERS) {
+    const b = META[c.name]?.batch ?? "B";
+    batches[b].push(c.name);
+  }
+  const batchLabel: Record<Batch, string> = {
+    A: "Batch A — simple low-risk",
+    B: "Batch B — active medium-risk",
+    C: "Batch C — high-risk / approval-sensitive",
+    D: "Batch D — deprecated / unused candidates",
   };
 
   return (
@@ -80,11 +285,26 @@ export default function AIGatewayBypassRegister() {
           </AlertDescription>
         </Alert>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
           <StatCard label="Functions bypassing" v={totals.total} />
+          <StatCard label="Critical" v={totals.critical} accent="destructive" />
           <StatCard label="High risk" v={totals.high} accent="destructive" />
           <StatCard label="Medium risk" v={totals.medium} accent="amber" />
           <StatCard label="Low risk" v={totals.low} />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+          {(Object.keys(batches) as Batch[]).map((b) => (
+            <Card key={b} className="tech-card">
+              <CardContent className="p-3">
+                <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{batchLabel[b]}</div>
+                <div className="text-2xl font-semibold">{batches[b].length}</div>
+                <ul className="text-[11px] text-muted-foreground mt-1 space-y-0.5 font-mono">
+                  {batches[b].map((n) => <li key={n}>· {n}</li>)}
+                </ul>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
         <Card className="tech-card">
@@ -96,23 +316,41 @@ export default function AIGatewayBypassRegister() {
             <Table>
               <TableHeader><TableRow>
                 <TableHead>Function</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>Provider / model</TableHead>
+                <TableHead>Active</TableHead>
                 <TableHead>Risk</TableHead>
-                <TableHead>Migration needed</TableHead>
+                <TableHead>Batch</TableHead>
+                <TableHead>Treatment</TableHead>
+                <TableHead>External</TableHead>
                 <TableHead>Recommended next action</TableHead>
               </TableRow></TableHeader>
               <TableBody>
                 {KNOWN_DIRECT_AI_CALLERS.map((c) => {
-                  const m = META[c.name] ?? { risk: "medium" as const, action: "Migrate to AI Gateway helper." };
+                  const m = META[c.name];
+                  if (!m) return null;
+                  const ext = m.sends_external ? "sends" : m.drafts_external ? "drafts only" : "none";
                   return (
                     <TableRow key={c.name}>
-                      <TableCell className="font-mono text-xs">{c.name}</TableCell>
-                      <TableCell><Badge variant="outline" className="text-[10px]">{c.status}</Badge></TableCell>
-                      <TableCell>
-                        <Badge variant={m.risk === "high" ? "destructive" : "outline"} className="text-[10px]">{m.risk}</Badge>
+                      <TableCell className="font-mono text-xs align-top">
+                        <div>{c.name}</div>
+                        <div className="text-[10px] text-muted-foreground font-sans mt-0.5 max-w-[260px]">{m.purpose}</div>
                       </TableCell>
-                      <TableCell><Badge className="text-[10px]">Yes</Badge></TableCell>
-                      <TableCell className="text-xs max-w-[420px]">{m.action}</TableCell>
+                      <TableCell className="text-[11px] align-top">
+                        <div>{m.provider}</div>
+                        <div className="text-muted-foreground">{m.model}</div>
+                      </TableCell>
+                      <TableCell className="align-top">
+                        <Badge variant="outline" className="text-[10px]">{m.active}</Badge>
+                      </TableCell>
+                      <TableCell className="align-top">
+                        <Badge variant={m.risk === "high" || m.risk === "critical" ? "destructive" : "outline"} className="text-[10px]">{m.risk}</Badge>
+                      </TableCell>
+                      <TableCell className="align-top"><Badge className="text-[10px]">{m.batch}</Badge></TableCell>
+                      <TableCell className="align-top"><Badge variant="outline" className="text-[10px]">{m.treatment}</Badge></TableCell>
+                      <TableCell className="align-top">
+                        <Badge variant={ext === "sends" ? "destructive" : "outline"} className="text-[10px]">{ext}</Badge>
+                      </TableCell>
+                      <TableCell className="text-xs max-w-[360px] align-top">{m.action}</TableCell>
                     </TableRow>
                   );
                 })}
