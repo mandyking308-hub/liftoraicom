@@ -530,6 +530,9 @@ const FounderManual = () => {
           ))}
         </div>
 
+        {/* Whole Business Process Spine */}
+        <BusinessProcessSpineManualPanel />
+
         {/* TOC */}
         <Card className="bg-card border-border/50">
           <CardHeader className="pb-2">
