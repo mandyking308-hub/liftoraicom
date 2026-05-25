@@ -335,6 +335,9 @@ export default function PortfolioExitCommandCentre() {
         {/* AI Intelligence Orchestrator */}
         <IntelligenceOrchestratorPanel />
 
+        {/* Portfolio Commander Step Engine */}
+        <PortfolioCommanderEnginePanel compact />
+
         {/* Filters */}
         <Card className="tech-card">
           <CardContent className="p-4 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3">
