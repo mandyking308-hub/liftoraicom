@@ -504,6 +504,21 @@ export async function beginGatewayLog(input: AIGatewayCallInput): Promise<{ trac
   const request_id = newRequestId();
   const sb = getServiceClient();
   const startedAt = new Date().toISOString();
+  // Best-effort lease — fail-open if RPC unavailable so we never break live callers.
+  try {
+    const agentMeta = await loadAgentMeta(sb, input.agent_id ?? null);
+    const businessCapacity = await loadBusinessCapacity(sb, input.business_id ?? null);
+    await acquireLease(sb, {
+      request_id,
+      agent_id: input.agent_id ?? null,
+      business_id: input.business_id ?? null,
+      agent_capacity: agentMeta.capacity ?? 0,
+      business_capacity: businessCapacity,
+      provider: "lovable-ai-gateway",
+      model: input.model ?? agentMeta.primary_model ?? "google/gemini-3-flash-preview",
+      ttl_seconds: 180,
+    });
+  } catch { /* fail-open */ }
   await writeLedger(trace_id, input, { status: "pending", input_summary: input.action_type });
   await recordRuntimeRequest(sb, {
     request_id,
@@ -558,4 +573,5 @@ export async function endGatewayLog(
     message: result.error,
     metadata: { sdk_wrapped: true },
   });
+  await releaseLease(sb, ctx.request_id, result.ok);
 }
