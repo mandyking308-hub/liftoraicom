@@ -333,6 +333,14 @@ import CGEvents from "./pages/founder/context-guard/Events";
 import CGMissing from "./pages/founder/context-guard/MissingBusiness";
 import CGCross from "./pages/founder/context-guard/CrossContamination";
 import CGSettings from "./pages/founder/context-guard/Settings";
+
+// Portfolio Prioritisation Engine
+import PPOverview from "./pages/founder/portfolio-prioritisation/Overview";
+import PPScores from "./pages/founder/portfolio-prioritisation/Scores";
+import PPBuildNow from "./pages/founder/portfolio-prioritisation/BuildNow";
+import PPScale from "./pages/founder/portfolio-prioritisation/Scale";
+import PPPark from "./pages/founder/portfolio-prioritisation/Park";
+import PPDecisions from "./pages/founder/portfolio-prioritisation/Decisions";
 import KnowledgeOverview from "./pages/founder/knowledge-governance/Overview";
 import KnowledgeSources from "./pages/founder/knowledge-governance/Sources";
 import KnowledgeConflicts from "./pages/founder/knowledge-governance/Conflicts";
@@ -766,6 +774,12 @@ const App = () => (
             <Route path="/founder/context-guard/missing-business" element={<FounderRoute><CGMissing /></FounderRoute>} />
             <Route path="/founder/context-guard/cross-contamination" element={<FounderRoute><CGCross /></FounderRoute>} />
             <Route path="/founder/context-guard/settings" element={<FounderRoute><CGSettings /></FounderRoute>} />
+            <Route path="/founder/portfolio-prioritisation" element={<FounderRoute><PPOverview /></FounderRoute>} />
+            <Route path="/founder/portfolio-prioritisation/scores" element={<FounderRoute><PPScores /></FounderRoute>} />
+            <Route path="/founder/portfolio-prioritisation/build-now" element={<FounderRoute><PPBuildNow /></FounderRoute>} />
+            <Route path="/founder/portfolio-prioritisation/scale" element={<FounderRoute><PPScale /></FounderRoute>} />
+            <Route path="/founder/portfolio-prioritisation/park" element={<FounderRoute><PPPark /></FounderRoute>} />
+            <Route path="/founder/portfolio-prioritisation/decisions" element={<FounderRoute><PPDecisions /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
