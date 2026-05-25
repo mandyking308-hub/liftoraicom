@@ -273,6 +273,13 @@ import MarketplaceListings from "./pages/founder/marketplace/Listings";
 import MarketplaceSupplyDemand from "./pages/founder/marketplace/SupplyDemand";
 import MarketplacePerformance from "./pages/founder/marketplace/Performance";
 import MarketplaceSettings from "./pages/founder/marketplace/Settings";
+import SellerAccounts from "./pages/founder/marketplace/SellerAccounts";
+import SellerChecklist from "./pages/founder/marketplace/SellerChecklist";
+import ListingQueue from "./pages/founder/marketplace/ListingQueue";
+import SellerPayouts from "./pages/founder/marketplace/Payouts";
+import SellerTerms from "./pages/founder/marketplace/Terms";
+import SellerPerformanceBoard from "./pages/founder/marketplace/Performance2";
+import SellerRisk from "./pages/founder/marketplace/Risk";
 import KnowledgeOverview from "./pages/founder/knowledge-governance/Overview";
 import KnowledgeSources from "./pages/founder/knowledge-governance/Sources";
 import KnowledgeConflicts from "./pages/founder/knowledge-governance/Conflicts";
@@ -651,8 +658,16 @@ const App = () => (
             <Route path="/founder/marketplace/seller-verification" element={<FounderRoute><MarketplaceVerification /></FounderRoute>} />
             <Route path="/founder/marketplace/listings" element={<FounderRoute><MarketplaceListings /></FounderRoute>} />
             <Route path="/founder/marketplace/supply-demand" element={<FounderRoute><MarketplaceSupplyDemand /></FounderRoute>} />
-            <Route path="/founder/marketplace/seller-performance" element={<FounderRoute><MarketplacePerformance /></FounderRoute>} />
+            <Route path="/founder/marketplace/seller-performance" element={<FounderRoute><SellerPerformanceBoard /></FounderRoute>} />
+            <Route path="/founder/marketplace/active-sellers" element={<FounderRoute><MarketplacePerformance /></FounderRoute>} />
             <Route path="/founder/marketplace/settings" element={<FounderRoute><MarketplaceSettings /></FounderRoute>} />
+            <Route path="/founder/marketplace/seller-accounts" element={<FounderRoute><SellerAccounts /></FounderRoute>} />
+            <Route path="/founder/marketplace/seller-checklist" element={<FounderRoute><SellerChecklist /></FounderRoute>} />
+            <Route path="/founder/marketplace/listing-queue" element={<FounderRoute><ListingQueue /></FounderRoute>} />
+            <Route path="/founder/marketplace/payouts" element={<FounderRoute><SellerPayouts /></FounderRoute>} />
+            <Route path="/founder/marketplace/terms" element={<FounderRoute><SellerTerms /></FounderRoute>} />
+            <Route path="/founder/marketplace/performance-board" element={<FounderRoute><SellerPerformanceBoard /></FounderRoute>} />
+            <Route path="/founder/marketplace/risk" element={<FounderRoute><SellerRisk /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
