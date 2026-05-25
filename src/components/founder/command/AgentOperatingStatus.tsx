@@ -60,6 +60,9 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "complaints_agent", name: "Complaints Agent", to: "/founder/complaints", category: "support" },
   { key: "refund_review_agent", name: "Refund Review Agent", to: "/founder/complaints/refunds", category: "support" },
   { key: "dispute_evidence_agent", name: "Dispute Evidence Agent", to: "/founder/complaints/evidence", category: "support" },
+  { key: "contract_agent", name: "Contract Agent", to: "/founder/contracts", category: "legal" },
+  { key: "contract_renewal_agent", name: "Contract Renewal Agent", to: "/founder/contracts/renewals", category: "legal" },
+  { key: "contract_risk_agent", name: "Contract Risk Agent", to: "/founder/contracts/risk", category: "legal" },
 ];
 
 export default function AgentOperatingStatus() {
