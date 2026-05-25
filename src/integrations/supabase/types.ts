@@ -31146,6 +31146,102 @@ export type Database = {
         }
         Relationships: []
       }
+      product_bugs: {
+        Row: {
+          affected_area: string | null
+          audit_metadata: Json
+          bug_description: string | null
+          bug_status: string
+          bug_title: string
+          business_id: string | null
+          created_at: string
+          id: string
+          linked_incident_id: string | null
+          severity: string
+          source_ref: string | null
+          updated_at: string
+          user_impact: string | null
+          workaround: string | null
+        }
+        Insert: {
+          affected_area?: string | null
+          audit_metadata?: Json
+          bug_description?: string | null
+          bug_status?: string
+          bug_title: string
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          linked_incident_id?: string | null
+          severity?: string
+          source_ref?: string | null
+          updated_at?: string
+          user_impact?: string | null
+          workaround?: string | null
+        }
+        Update: {
+          affected_area?: string | null
+          audit_metadata?: Json
+          bug_description?: string | null
+          bug_status?: string
+          bug_title?: string
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          linked_incident_id?: string | null
+          severity?: string
+          source_ref?: string | null
+          updated_at?: string
+          user_impact?: string | null
+          workaround?: string | null
+        }
+        Relationships: []
+      }
+      product_features: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          feature_name: string
+          feature_status: string
+          feature_summary: string | null
+          id: string
+          owner: string | null
+          priority: string
+          source_ref: string | null
+          target_release_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          feature_name: string
+          feature_status?: string
+          feature_summary?: string | null
+          id?: string
+          owner?: string | null
+          priority?: string
+          source_ref?: string | null
+          target_release_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          feature_name?: string
+          feature_status?: string
+          feature_summary?: string | null
+          id?: string
+          owner?: string | null
+          priority?: string
+          source_ref?: string | null
+          target_release_date?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       product_roadmap_items: {
         Row: {
           business_id: string | null
@@ -31971,6 +32067,56 @@ export type Database = {
         }
         Relationships: []
       }
+      qa_checklists: {
+        Row: {
+          business_id: string | null
+          checklist_items: Json
+          checklist_name: string
+          created_at: string
+          id: string
+          notes: string | null
+          qa_status: string
+          release_id: string | null
+          tested_at: string | null
+          tested_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          checklist_items?: Json
+          checklist_name: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          qa_status?: string
+          release_id?: string | null
+          tested_at?: string | null
+          tested_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          checklist_items?: Json
+          checklist_name?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          qa_status?: string
+          release_id?: string | null
+          tested_at?: string | null
+          tested_by?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "qa_checklists_release_id_fkey"
+            columns: ["release_id"]
+            isOneToOne: false
+            referencedRelation: "release_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       qa_test_cases: {
         Row: {
           business_id: string | null
@@ -32594,6 +32740,63 @@ export type Database = {
           release_status?: string | null
           rollback_plan?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      release_records: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          audit_metadata: Json
+          bugs_fixed: Json
+          business_id: string | null
+          created_at: string
+          features_included: Json
+          founder_approval_required: boolean
+          id: string
+          release_name: string
+          release_notes: string | null
+          release_status: string
+          released_at: string | null
+          risk_summary: string | null
+          rollback_plan: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          audit_metadata?: Json
+          bugs_fixed?: Json
+          business_id?: string | null
+          created_at?: string
+          features_included?: Json
+          founder_approval_required?: boolean
+          id?: string
+          release_name: string
+          release_notes?: string | null
+          release_status?: string
+          released_at?: string | null
+          risk_summary?: string | null
+          rollback_plan?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          audit_metadata?: Json
+          bugs_fixed?: Json
+          business_id?: string | null
+          created_at?: string
+          features_included?: Json
+          founder_approval_required?: boolean
+          id?: string
+          release_name?: string
+          release_notes?: string | null
+          release_status?: string
+          released_at?: string | null
+          risk_summary?: string | null
+          rollback_plan?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
