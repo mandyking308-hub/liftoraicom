@@ -167,6 +167,11 @@ export default function FounderCockpit() {
               <Badge variant="outline" className={`ml-2 text-[10px] ${statusTone}`}>{statusLabel}</Badge>
             </CardTitle>
             <div className="flex flex-wrap gap-1.5">
+              <Link to="/founder/first-use-configuration">
+                <Button size="sm" variant="outline" className="h-8 text-xs">
+                  <Sparkles className="h-3.5 w-3.5 mr-1" /> First-Use Configuration
+                </Button>
+              </Link>
               <Link to="/founder/ai-cost/action-board">
                 <Button size="sm" className="h-8 text-xs">
                   <ListChecks className="h-3.5 w-3.5 mr-1" /> Open Founder Action Board
