@@ -615,6 +615,12 @@ const App = () => (
             <Route path="/founder/data-quality/stale" element={<FounderRoute><DataQualityStale /></FounderRoute>} />
             <Route path="/founder/data-quality/revenue-integrity" element={<FounderRoute><DataQualityRevenueIntegrity /></FounderRoute>} />
             <Route path="/founder/data-quality/repair-queue" element={<FounderRoute><DataQualityRepairQueue /></FounderRoute>} />
+            <Route path="/founder/knowledge-governance" element={<FounderRoute><KnowledgeOverview /></FounderRoute>} />
+            <Route path="/founder/knowledge-governance/sources" element={<FounderRoute><KnowledgeSources /></FounderRoute>} />
+            <Route path="/founder/knowledge-governance/conflicts" element={<FounderRoute><KnowledgeConflicts /></FounderRoute>} />
+            <Route path="/founder/knowledge-governance/stale" element={<FounderRoute><KnowledgeStale /></FounderRoute>} />
+            <Route path="/founder/knowledge-governance/approved-claims" element={<FounderRoute><KnowledgeApprovedClaims /></FounderRoute>} />
+            <Route path="/founder/knowledge-governance/manual-sync" element={<FounderRoute><KnowledgeManualSync /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
