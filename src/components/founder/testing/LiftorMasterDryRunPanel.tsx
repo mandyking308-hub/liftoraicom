@@ -140,7 +140,7 @@ export default function LiftorMasterDryRunPanel() {
             </div>
 
             <div className="space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Live readiness gates</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Live operating checks</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                 {data.live_readiness_gates.map((g) => (
                   <div key={g.gate_key} className="rounded-md border border-border/50 p-2 bg-card/30">

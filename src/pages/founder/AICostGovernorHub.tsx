@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Activity, Building2, Bot, Siren, ShieldCheck, FileText, Settings as SettingsIcon,
   TrendingUp, Coins, Route as RouteIcon, PoundSterling, Sparkles, BookOpen,
-  PauseCircle, FlaskConical, ListChecks,
+  PauseCircle, FlaskConical, ListChecks, Cpu,
 } from "lucide-react";
 
 const SECTIONS: Array<{
@@ -29,6 +29,17 @@ const SECTIONS: Array<{
     description: "Daily live cockpit. What needs attention, what is working, what to decide — with one-click actions.",
     to: "/founder/ai-cost/action-board",
     icon: ListChecks,
+  },
+  {
+    title: "Runtime & Orchestration",
+    description: "Live runtime, step engine, per-agent concurrency, queue depth, bottlenecks and health cockpit.",
+    to: "/founder/ai-cost/runtime",
+    icon: Cpu,
+    items: [
+      { label: "AI Runtime", to: "/founder/ai-cost/runtime", icon: Cpu },
+      { label: "Orchestration Live", to: "/founder/ai-cost/orchestration-live", icon: Activity },
+      { label: "Runtime Health Cockpit", to: "/founder/ai-cost/health", icon: Activity },
+    ],
   },
   {
     title: "Portfolio AI Overview",
