@@ -534,7 +534,12 @@ export default function AIFounderActionBoard() {
             </h1>
             <p className="text-sm text-muted-foreground">What needs attention, what is working, what to decide — today.</p>
           </div>
-          <Badge variant="outline" className="bg-emerald-500/15 text-emerald-400 border-emerald-500/30">Live Operating Mode</Badge>
+          <div className="flex items-center gap-2">
+            <Link to="/founder/first-use-configuration">
+              <Button size="sm" variant="outline" className="h-8 text-xs">First-Use Configuration</Button>
+            </Link>
+            <Badge variant="outline" className="bg-emerald-500/15 text-emerald-400 border-emerald-500/30">Live Operating Mode</Badge>
+          </div>
         </div>
 
         {isLoading || !derived ? (
