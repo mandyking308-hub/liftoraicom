@@ -1245,3 +1245,16 @@ const CUSTOMER_VOICE_SALES_CLOSE_ENGINE: ManualSection = {
   ].join(" "),
 };
 LIFTOR_FULL_GUIDE.push(CUSTOMER_VOICE_SALES_CLOSE_ENGINE);
+
+const CUSTOMER_VOICE_SALES_INTEGRATION: ManualSection = {
+  number: 93,
+  key: "customer-voice-sales-integration",
+  title: "93. Customer Voice + Sales Close — full Command Centre integration",
+  body: [
+    "Surfaces. The Customer Voice + Sales Close Engine is not a detached page. It is wired into Today's Founder Cockpit (sales button + recommended action), What Needs Attention Today (close approvals, follow-ups, hot buying signals, ready-to-buy, safety warnings, escalations, consent gaps, human handoffs), Business Operating Status (calls today + close awaiting approval per business), Agent Operating Status (Voice Sales Agent, Inbound Call Agent, Outbound Call Agent, Sales Conversation Agent, Objection Handling Agent, Close Preparation Agent, Follow-Up Agent, Human Handoff Agent), First-Use Configuration (products, playbooks, provider, close approvals), the Approval Queue (close actions and outbound calls require founder approval), Live Alerts (sales safety events feed founder_alert_run when severity >= high), the CRM contact detail page (CRMContactSalesPanel shows conversations, calls, closes awaiting approval, follow-ups, handoffs, and hot signals), and the Finance / Revenue dashboard (pipeline and close-action state).",
+    "Agents. Each sales agent surfaces status (active/idle/paused/failed), provider dependency (Retell/Vapi/Twilio/ElevenLabs/custom), last action timestamp, cost today (rolled up from ai_usage_ledger by sales category), failures (last 24h ai_runtime_events), approvals generated (founder_approval_items), and a recommended next action. External call/message actions remain locked until the provider is live and founder approval rule allows.",
+    "Manual coverage. User Manual: how to add products/services (Product Knowledge), how to create offers (Offers), how to review calls (Call Logs + Conversations), how to approve close actions (Close Engine), what the voice agent can/cannot do (Settings → safety + provider status), external action safety (Safety Centre), API setup checklist (Settings → providers + Secrets). Technical Manual: tables customer_sales_*, provider adapter src/lib/providers/voiceProviderAdapter.ts, voice provider secrets (Retell/Vapi/Twilio/ElevenLabs API keys — empty until founder adds), webhook routes (customer-voice-inbound-webhook, customer-voice-call-status-webhook, customer-voice-transcript-ingest, customer-voice-post-call-analysis), playbook engine (sales-conversation-brain), close engine (customer_sales_close_actions with approval_status gate), safety/consent layer (customer_sales_safety_events + customer_sales_contact_safety + customer_sales_prohibited_claims + customer_sales_escalation_triggers), CRM/finance integration (CRMContactSalesPanel + FounderRevenue CustomerSalesEngineCard).",
+    "Known limitations. No provider is wired by default; founder must add secrets and switch provider_status to live to enable real calls. Confirmed revenue is updated only on verified payment/contract/booking events. Estimated pipeline derives from close_probability and is advisory. Inbound calls without configured consent language stay in approval-required state.",
+  ].join(" "),
+};
+LIFTOR_FULL_GUIDE.push(CUSTOMER_VOICE_SALES_INTEGRATION);
