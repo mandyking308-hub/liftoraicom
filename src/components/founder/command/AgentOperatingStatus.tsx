@@ -69,6 +69,9 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "human_oversight_agent", name: "Human Oversight Agent", to: "/founder/people", category: "operations" },
   { key: "operator_quality_agent", name: "Operator Quality Agent", to: "/founder/people/quality", category: "operations" },
   { key: "operator_access_agent", name: "Operator Access Agent", to: "/founder/people/access", category: "operations" },
+  { key: "access_governance_agent", name: "Access Governance Agent", to: "/founder/access-governance", category: "security" },
+  { key: "secret_rotation_agent", name: "Secret Rotation Agent", to: "/founder/access-governance/rotation", category: "security" },
+  { key: "leak_prevention_agent", name: "Leak Prevention Agent", to: "/founder/access-governance/audit", category: "security" },
 ];
 
 export default function AgentOperatingStatus() {
