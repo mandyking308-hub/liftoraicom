@@ -25,6 +25,7 @@ import KPIOKRPerformancePanel from "@/components/founder/analytics/KPIOKRPerform
 import FounderAlertEscalationPanel from "@/components/founder/command/FounderAlertEscalationPanel";
 import CommandCentreUsabilityReportPanel from "@/components/founder/command/CommandCentreUsabilityReportPanel";
 import FounderCockpit from "@/components/founder/command/FounderCockpit";
+import StartUsingLiftorNote from "@/components/founder/command/StartUsingLiftorNote";
 import BusinessActivationWizardPanel from "@/components/founder/activation/BusinessActivationWizardPanel";
 import BusinessOnboardingBrainPanel from "@/components/founder/activation/BusinessOnboardingBrainPanel";
 import StarterPackMaterialiserPanel from "@/components/founder/activation/StarterPackMaterialiserPanel";
@@ -784,6 +785,7 @@ const CommandCentre = () => {
   return (
     <FounderLayout>
       <CommandCentreViewModeBar />
+      <StartUsingLiftorNote />
       <FounderCockpit />
       <AICostGovernorPortfolio />
       <div className="max-w-7xl mx-auto px-4 pt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
