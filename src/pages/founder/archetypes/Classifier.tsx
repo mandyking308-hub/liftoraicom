@@ -46,7 +46,7 @@ export default function ArchetypeClassifier() {
           <div className="space-y-1"><Label>Products / services</Label><Input value={input.products ?? ""} onChange={e => set("products", e.target.value)} /></div>
           {(Object.entries(SELECTS) as [keyof ClassifierInput, string[]][]).map(([k, opts]) => (
             <div key={String(k)} className="space-y-1">
-              <Label className="capitalize">{String(k).replaceAll("_", " ")}</Label>
+              <Label className="capitalize">{String(k).replace(/_/g, " ")}</Label>
               <select className="w-full bg-background border border-border rounded px-2 py-2 text-sm"
                 value={(input as any)[k] ?? ""} onChange={e => set(k as any, (e.target.value || undefined) as any)}>
                 <option value="">—</option>
