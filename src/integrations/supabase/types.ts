@@ -43215,6 +43215,228 @@ export type Database = {
         }
         Relationships: []
       }
+      vendor_access_records: {
+        Row: {
+          access_level: string | null
+          access_status: string
+          business_id: string | null
+          created_at: string
+          expires_at: string | null
+          granted_at: string | null
+          id: string
+          notes: string | null
+          revoked_at: string | null
+          updated_at: string
+          user_or_agent: string
+          vendor_id: string
+        }
+        Insert: {
+          access_level?: string | null
+          access_status?: string
+          business_id?: string | null
+          created_at?: string
+          expires_at?: string | null
+          granted_at?: string | null
+          id?: string
+          notes?: string | null
+          revoked_at?: string | null
+          updated_at?: string
+          user_or_agent: string
+          vendor_id: string
+        }
+        Update: {
+          access_level?: string | null
+          access_status?: string
+          business_id?: string | null
+          created_at?: string
+          expires_at?: string | null
+          granted_at?: string | null
+          id?: string
+          notes?: string | null
+          revoked_at?: string | null
+          updated_at?: string
+          user_or_agent?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_access_records_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_risk_reviews: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          data_accessed: string | null
+          dpa_status: string | null
+          id: string
+          review_status: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          risk_summary: string | null
+          security_notes: string | null
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          data_accessed?: string | null
+          dpa_status?: string | null
+          id?: string
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          risk_summary?: string | null
+          security_notes?: string | null
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          data_accessed?: string | null
+          dpa_status?: string | null
+          id?: string
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          risk_summary?: string | null
+          security_notes?: string | null
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_risk_reviews_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_subscriptions: {
+        Row: {
+          annual_cost: number | null
+          audit_metadata: Json
+          business_id: string | null
+          cancellation_deadline: string | null
+          contract_id: string | null
+          created_at: string
+          currency: string | null
+          id: string
+          login_method_summary: string | null
+          monthly_cost: number | null
+          owner: string | null
+          payment_method_summary: string | null
+          renewal_date: string | null
+          subscription_name: string
+          subscription_status: string
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          annual_cost?: number | null
+          audit_metadata?: Json
+          business_id?: string | null
+          cancellation_deadline?: string | null
+          contract_id?: string | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          login_method_summary?: string | null
+          monthly_cost?: number | null
+          owner?: string | null
+          payment_method_summary?: string | null
+          renewal_date?: string | null
+          subscription_name: string
+          subscription_status?: string
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          annual_cost?: number | null
+          audit_metadata?: Json
+          business_id?: string | null
+          cancellation_deadline?: string | null
+          contract_id?: string | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          login_method_summary?: string | null
+          monthly_cost?: number | null
+          owner?: string | null
+          payment_method_summary?: string | null
+          renewal_date?: string | null
+          subscription_name?: string
+          subscription_status?: string
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_subscriptions_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendors: {
+        Row: {
+          active: boolean
+          contact_email: string | null
+          contact_name: string | null
+          contract_required: boolean
+          created_at: string
+          data_processor: boolean
+          dpa_required: boolean
+          id: string
+          risk_level: string | null
+          updated_at: string
+          vendor_name: string
+          vendor_type: string
+          website: string | null
+        }
+        Insert: {
+          active?: boolean
+          contact_email?: string | null
+          contact_name?: string | null
+          contract_required?: boolean
+          created_at?: string
+          data_processor?: boolean
+          dpa_required?: boolean
+          id?: string
+          risk_level?: string | null
+          updated_at?: string
+          vendor_name: string
+          vendor_type?: string
+          website?: string | null
+        }
+        Update: {
+          active?: boolean
+          contact_email?: string | null
+          contact_name?: string | null
+          contract_required?: boolean
+          created_at?: string
+          data_processor?: boolean
+          dpa_required?: boolean
+          id?: string
+          risk_level?: string | null
+          updated_at?: string
+          vendor_name?: string
+          vendor_type?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       website_funnel_audit: {
         Row: {
           action: string
