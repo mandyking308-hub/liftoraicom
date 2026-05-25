@@ -242,18 +242,41 @@ function BrainPanel({ conversation, playbooks, onClose }: { conversation: any; p
   const brain: any = state?.brain_output || {};
   const currentStage: string = state?.stage || "greeting";
 
+  const { data: callLogs = [] } = useQuery({
+    queryKey: ["cs-calllogs-conv", conversation.id],
+    queryFn: async () => (await sb.from("customer_sales_call_logs").select("*").eq("conversation_id", conversation.id).order("started_at", { ascending: false }).limit(20)).data ?? [],
+    refetchInterval: 6000,
+  });
+
   return (
     <Card className="tech-card border-primary/50 mt-4">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm flex items-center justify-between">
           <span className="flex items-center gap-2"><Brain size={14} />Sales Conversation Brain — {conversation.customer_name || conversation.customer_email || "conversation"}</span>
           <div className="flex gap-2 items-center">
+            {conversation.contact_id && <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-300 border-emerald-500/30"><User size={9} className="mr-0.5" />CRM linked</Badge>}
+            {conversation.test_label === "LIVE_INTERNAL_TEST" && <Badge variant="outline" className="text-[10px] bg-blue-500/10 text-blue-300 border-blue-500/30">LIVE_INTERNAL_TEST</Badge>}
             <Badge variant="outline" className="bg-yellow-500/15 text-yellow-300 border-yellow-500/30 text-[10px]"><Lock size={9} className="mr-1" />Internal only</Badge>
             <Button variant="outline" size="sm" onClick={onClose}>Close</Button>
           </div>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {(conversation.transcript_summary || conversation.customer_memory_summary || conversation.call_outcome) && (
+          <Card className="tech-card">
+            <CardHeader className="pb-2"><CardTitle className="text-xs flex items-center gap-2"><FileText size={12} />Customer memory & call outcome</CardTitle></CardHeader>
+            <CardContent className="grid md:grid-cols-3 gap-3 text-xs">
+              <div><div className="text-[10px] uppercase text-muted-foreground mb-1">Transcript summary</div><p>{conversation.transcript_summary ?? "—"}</p></div>
+              <div><div className="text-[10px] uppercase text-muted-foreground mb-1">Customer memory</div><p>{conversation.customer_memory_summary ?? "—"}</p></div>
+              <div>
+                <div className="text-[10px] uppercase text-muted-foreground mb-1">Call outcome</div>
+                <p><Badge variant="outline" className="text-[10px]">{conversation.call_outcome ?? "—"}</Badge></p>
+                {conversation.linked_contact_email && <p className="mt-1 text-[10px] text-muted-foreground">CRM: {conversation.linked_contact_email}</p>}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <div className="grid md:grid-cols-3 gap-3">
           <StageMachine current={currentStage} />
           <Card className="tech-card md:col-span-2">
@@ -337,6 +360,19 @@ function BrainPanel({ conversation, playbooks, onClose }: { conversation: any; p
                   <span>{new Date(r.created_at).toLocaleTimeString()} · {r.model || "—"}</span>
                   <span className="text-muted-foreground">{r.status} · in {r.tokens_in ?? "—"} / out {r.tokens_out ?? "—"}</span>
                 </div>
+              ))}
+            </div>
+          )}
+        </CSSection>
+
+        <CSSection title={`Call logs (${callLogs.length})`} description="Voice/web-call records linked to this conversation">
+          {callLogs.length === 0 ? <p className="text-xs text-muted-foreground">No calls logged for this conversation yet.</p> : (
+            <div className="space-y-1 text-[11px]">
+              {callLogs.map((c: any) => (
+                <RLink key={c.id} to="/founder/customer-sales/call-logs" className="flex justify-between border-b border-border/30 py-1 hover:bg-background/40">
+                  <span>{c.started_at ? new Date(c.started_at).toLocaleString() : "—"} · {c.provider_name ?? "—"} · {c.call_direction ?? "—"}</span>
+                  <span className="text-muted-foreground">{c.outcome ?? "no outcome"} · {c.duration_seconds ?? 0}s</span>
+                </RLink>
               ))}
             </div>
           )}
