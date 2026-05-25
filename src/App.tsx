@@ -171,6 +171,12 @@ import DeliveryCapacity from "./pages/founder/delivery/Capacity";
 import DeliveryBlockers from "./pages/founder/delivery/Blockers";
 import DeliveryCompletionProof from "./pages/founder/delivery/CompletionProof";
 import DeliverySettings from "./pages/founder/delivery/Settings";
+import CustomerOnboardingOverview from "./pages/founder/customer-onboarding/Overview";
+import CustomerOnboardingCustomers from "./pages/founder/customer-onboarding/Customers";
+import CustomerOnboardingChecklists from "./pages/founder/customer-onboarding/Checklists";
+import CustomerOnboardingMissingInfo from "./pages/founder/customer-onboarding/MissingInfo";
+import CustomerOnboardingWelcomePacks from "./pages/founder/customer-onboarding/WelcomePacks";
+import CustomerOnboardingSettings from "./pages/founder/customer-onboarding/Settings";
 import CustomerUpgradesHub from "./pages/founder/customer-upgrades/Hub";
 import CustomerUpgradesOpportunities from "./pages/founder/customer-upgrades/Opportunities";
 import CustomerUpgradesProductLadders from "./pages/founder/customer-upgrades/ProductLadders";
@@ -437,6 +443,12 @@ const App = () => (
             <Route path="/founder/delivery/blockers" element={<FounderRoute><DeliveryBlockers /></FounderRoute>} />
             <Route path="/founder/delivery/completion-proof" element={<FounderRoute><DeliveryCompletionProof /></FounderRoute>} />
             <Route path="/founder/delivery/settings" element={<FounderRoute><DeliverySettings /></FounderRoute>} />
+            <Route path="/founder/customer-onboarding" element={<FounderRoute><CustomerOnboardingOverview /></FounderRoute>} />
+            <Route path="/founder/customer-onboarding/customers" element={<FounderRoute><CustomerOnboardingCustomers /></FounderRoute>} />
+            <Route path="/founder/customer-onboarding/checklists" element={<FounderRoute><CustomerOnboardingChecklists /></FounderRoute>} />
+            <Route path="/founder/customer-onboarding/missing-info" element={<FounderRoute><CustomerOnboardingMissingInfo /></FounderRoute>} />
+            <Route path="/founder/customer-onboarding/welcome-packs" element={<FounderRoute><CustomerOnboardingWelcomePacks /></FounderRoute>} />
+            <Route path="/founder/customer-onboarding/settings" element={<FounderRoute><CustomerOnboardingSettings /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />

@@ -26779,6 +26779,59 @@ export type Database = {
           },
         ]
       }
+      onboarding_checklist_items: {
+        Row: {
+          blocker_reason: string | null
+          business_id: string | null
+          completed_at: string | null
+          created_at: string
+          due_at: string | null
+          id: string
+          item_name: string
+          item_status: string
+          item_type: string
+          onboarding_record_id: string | null
+          required_from: string
+          updated_at: string
+        }
+        Insert: {
+          blocker_reason?: string | null
+          business_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          due_at?: string | null
+          id?: string
+          item_name: string
+          item_status?: string
+          item_type?: string
+          onboarding_record_id?: string | null
+          required_from?: string
+          updated_at?: string
+        }
+        Update: {
+          blocker_reason?: string | null
+          business_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          due_at?: string | null
+          id?: string
+          item_name?: string
+          item_status?: string
+          item_type?: string
+          onboarding_record_id?: string | null
+          required_from?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_checklist_items_onboarding_record_id_fkey"
+            columns: ["onboarding_record_id"]
+            isOneToOne: false
+            referencedRelation: "onboarding_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       onboarding_email_drafts: {
         Row: {
           approval_status: string
@@ -26861,6 +26914,122 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      onboarding_records: {
+        Row: {
+          audit_metadata: Json | null
+          business_id: string | null
+          completed_at: string | null
+          contact_id: string | null
+          created_at: string
+          customer_id: string | null
+          delivery_order_id: string | null
+          first_success_milestone: string | null
+          id: string
+          missing_information: Json | null
+          onboarding_stage: string | null
+          onboarding_status: string
+          portal_invite_prepared: boolean
+          portal_invite_sent: boolean
+          product_id: string | null
+          updated_at: string
+          welcome_pack_prepared: boolean
+          welcome_pack_sent: boolean
+        }
+        Insert: {
+          audit_metadata?: Json | null
+          business_id?: string | null
+          completed_at?: string | null
+          contact_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          delivery_order_id?: string | null
+          first_success_milestone?: string | null
+          id?: string
+          missing_information?: Json | null
+          onboarding_stage?: string | null
+          onboarding_status?: string
+          portal_invite_prepared?: boolean
+          portal_invite_sent?: boolean
+          product_id?: string | null
+          updated_at?: string
+          welcome_pack_prepared?: boolean
+          welcome_pack_sent?: boolean
+        }
+        Update: {
+          audit_metadata?: Json | null
+          business_id?: string | null
+          completed_at?: string | null
+          contact_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          delivery_order_id?: string | null
+          first_success_milestone?: string | null
+          id?: string
+          missing_information?: Json | null
+          onboarding_stage?: string | null
+          onboarding_status?: string
+          portal_invite_prepared?: boolean
+          portal_invite_sent?: boolean
+          product_id?: string | null
+          updated_at?: string
+          welcome_pack_prepared?: boolean
+          welcome_pack_sent?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_records_delivery_order_id_fkey"
+            columns: ["delivery_order_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      onboarding_templates: {
+        Row: {
+          active: boolean
+          business_id: string | null
+          checklist_json: Json | null
+          created_at: string
+          first_success_milestone: string | null
+          id: string
+          product_id: string | null
+          required_customer_info: Json | null
+          required_documents: Json | null
+          template_name: string
+          updated_at: string
+          welcome_message_template: string | null
+        }
+        Insert: {
+          active?: boolean
+          business_id?: string | null
+          checklist_json?: Json | null
+          created_at?: string
+          first_success_milestone?: string | null
+          id?: string
+          product_id?: string | null
+          required_customer_info?: Json | null
+          required_documents?: Json | null
+          template_name: string
+          updated_at?: string
+          welcome_message_template?: string | null
+        }
+        Update: {
+          active?: boolean
+          business_id?: string | null
+          checklist_json?: Json | null
+          created_at?: string
+          first_success_milestone?: string | null
+          id?: string
+          product_id?: string | null
+          required_customer_info?: Json | null
+          required_documents?: Json | null
+          template_name?: string
+          updated_at?: string
+          welcome_message_template?: string | null
+        }
+        Relationships: []
       }
       operating_cost_register: {
         Row: {
