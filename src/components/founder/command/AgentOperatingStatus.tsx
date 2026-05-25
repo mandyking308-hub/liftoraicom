@@ -90,6 +90,9 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "data_quality_agent", name: "Data Quality Agent", to: "/founder/data-quality", category: "operations" },
   { key: "duplicate_detection_agent", name: "Duplicate Detection Agent", to: "/founder/data-quality/duplicates", category: "operations" },
   { key: "revenue_integrity_agent", name: "Revenue Integrity Agent", to: "/founder/data-quality/revenue-integrity", category: "finance" },
+  { key: "knowledge_governance_agent", name: "Knowledge Governance Agent", to: "/founder/knowledge-governance", category: "operations" },
+  { key: "conflict_resolution_agent", name: "Conflict Resolution Agent", to: "/founder/knowledge-governance/conflicts", category: "operations" },
+  { key: "approved_claims_agent", name: "Approved Claims Agent", to: "/founder/knowledge-governance/approved-claims", category: "operations" },
 ];
 
 export default function AgentOperatingStatus() {
