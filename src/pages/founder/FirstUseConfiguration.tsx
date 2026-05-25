@@ -38,6 +38,7 @@ async function loadConfig(): Promise<{ sections: Section[]; overall: Sev }> {
     gw, gwBypass, ledger, runtime,
     approvals, gates, killState,
     apolloLeads, outreach, drafts,
+    csProducts, csPlaybooks, csProviders, csClosesPending,
   ] = await Promise.all([
     supabase.from("ai_provider_pricing").select("id,is_active").limit(500),
     supabase.from("ai_business_budgets").select("business_id").limit(500),
@@ -54,6 +55,10 @@ async function loadConfig(): Promise<{ sections: Section[]; overall: Sev }> {
     supabase.from("apollo_leads").select("id").limit(20),
     supabase.from("outreach_campaigns").select("id,status").limit(50),
     supabase.from("ai_drafts").select("id,item_status").limit(50),
+    (supabase as any).from("customer_sales_products").select("id").eq("active", true).limit(50),
+    (supabase as any).from("customer_sales_playbooks").select("id").eq("active", true).limit(50),
+    (supabase as any).from("customer_sales_provider_settings").select("provider_status,active").limit(50),
+    (supabase as any).from("customer_sales_close_actions").select("id").eq("action_status", "approval_required").limit(200),
   ]);
 
   const pricingActive = ((pricing.data ?? []) as any[]).filter((p) => p.is_active !== false).length;
@@ -81,6 +86,11 @@ async function loadConfig(): Promise<{ sections: Section[]; overall: Sev }> {
   const killGlobal = !!((killState.data ?? []) as any[])[0]?.global_pause;
   const outreachActive = ((outreach.data ?? []) as any[]).filter((o) => ["active", "live"].includes(o.status)).length;
   const draftsReady = ((drafts.data ?? []) as any[]).length;
+  const csProductCount = ((csProducts as any)?.data ?? []).length;
+  const csPlaybookCount = ((csPlaybooks as any)?.data ?? []).length;
+  const csProviderList = ((csProviders as any)?.data ?? []) as any[];
+  const csProviderLive = csProviderList.some((p) => p.provider_status === "live");
+  const csClosesPendingCount = ((csClosesPending as any)?.data ?? []).length;
 
   const sections: Section[] = [
     {
