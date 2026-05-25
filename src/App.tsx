@@ -338,6 +338,7 @@ const App = () => (
             <Route path="/founder/portfolio-exit/ai-bypass-register" element={<FounderRoute><AIGatewayBypassRegister /></FounderRoute>} />
             <Route path="/founder/ai-cost" element={<FounderRoute><AICostGovernorHub /></FounderRoute>} />
             <Route path="/founder/ai-cost/action-board" element={<FounderRoute><AIFounderActionBoard /></FounderRoute>} />
+            <Route path="/founder/ai-cost/runtime" element={<FounderRoute><AIRuntimeOrchestration /></FounderRoute>} />
             <Route path="/founder/ai-cost/ledger" element={<FounderRoute><AIUsageLedger /></FounderRoute>} />
             <Route path="/founder/ai-cost/routing" element={<FounderRoute><AIModelRouting /></FounderRoute>} />
             <Route path="/founder/ai-cost/budgets" element={<FounderRoute><AIBusinessBudgets /></FounderRoute>} />
