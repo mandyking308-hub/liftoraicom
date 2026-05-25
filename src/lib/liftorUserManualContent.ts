@@ -1130,3 +1130,17 @@ const AI_COST_ACCURACY_GUIDE: ManualSection = {
   ].join(" "),
 };
 LIFTOR_FULL_GUIDE.push(AI_COST_ACCURACY_GUIDE);
+
+const PORTFOLIO_COMMANDER_ENGINE_GUIDE: ManualSection = {
+  number: 87,
+  key: "portfolio-commander-engine",
+  title: "Portfolio Commander — what it does and what needs approval",
+  body: [
+    "Portfolio Commander is the engine that drives internal multi-agent workflows across your portfolio: weekly portfolio review, asset exit review, quarterly build selection, buyer warm-up plan, data room cleanup, valuation refresh, execution target generation, and competitor/investor scans.",
+    "Each workflow is broken into ordered steps. Each step is owned by one agent (Portfolio Commander, M&A Intelligence, Valuation, Buyer Warm-Up, Data Room, Execution Target, Compliance/IP, or Founder Approval). The engine executes the next eligible step through the AI Gateway, then advances.",
+    "Live-first behaviour. Internal analysis, scoring, drafts and reporting run automatically with no approval. Only high-risk external or irreversible steps wait for founder approval: buyer/investor/adviser contact, external sending, data exports, paid API activation, legal/tax/entity recommendations, spend commitments, sale process start, kill decisions, sharing buyer packs.",
+    "Reading workflow progress. Each run shows status (queued, running, waiting_approval, paused, completed, failed, cancelled), current step / total steps, owner agent per step, and whether approval is required. Awaiting-approval steps show an Approve action; failed steps show a Retry action. Retrying a high-risk step routes it back to waiting_approval — duplicate external sends are blocked by idempotency.",
+    "Where to see it. AI Orchestration Live (/founder/ai-cost/orchestration-live) shows the full step engine table. Portfolio & Exit Command Centre (/founder/portfolio-exit) shows a compact view with the next 7-day workflow actions and blocked items.",
+  ].join(" "),
+};
+LIFTOR_FULL_GUIDE.push(PORTFOLIO_COMMANDER_ENGINE_GUIDE);
