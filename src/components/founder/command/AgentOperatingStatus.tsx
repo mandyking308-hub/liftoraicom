@@ -116,6 +116,7 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "business_template_agent", name: "Business Template Agent", to: "/founder/business-templates/apply", category: "operations" },
   { key: "entity_mapping_agent", name: "Entity Mapping Agent", to: "/founder/entity-map", category: "operations" },
   { key: "launch_factory_agent", name: "Launch Factory Agent", to: "/founder/launch-factory", category: "operations" },
+  { key: "integration_planner_agent", name: "Integration Planner Agent", to: "/founder/integration-map", category: "operations" },
 ];
 
 export default function AgentOperatingStatus() {

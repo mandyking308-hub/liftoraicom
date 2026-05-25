@@ -310,6 +310,14 @@ import LFSocials from "./pages/founder/launch-factory/Socials";
 import LFLegalPages from "./pages/founder/launch-factory/LegalPages";
 import LFTracking from "./pages/founder/launch-factory/Tracking";
 import LFChecklist from "./pages/founder/launch-factory/Checklist";
+
+// Integration Needs Map
+import IMOverview from "./pages/founder/integration-map/Overview";
+import IMBusinesses from "./pages/founder/integration-map/Businesses";
+import IMProviders from "./pages/founder/integration-map/Providers";
+import IMMissing from "./pages/founder/integration-map/Missing";
+import IMRisks from "./pages/founder/integration-map/Risks";
+import IMSettings from "./pages/founder/integration-map/Settings";
 import KnowledgeOverview from "./pages/founder/knowledge-governance/Overview";
 import KnowledgeSources from "./pages/founder/knowledge-governance/Sources";
 import KnowledgeConflicts from "./pages/founder/knowledge-governance/Conflicts";
@@ -726,6 +734,12 @@ const App = () => (
             <Route path="/founder/launch-factory/legal-pages" element={<FounderRoute><LFLegalPages /></FounderRoute>} />
             <Route path="/founder/launch-factory/tracking" element={<FounderRoute><LFTracking /></FounderRoute>} />
             <Route path="/founder/launch-factory/checklist" element={<FounderRoute><LFChecklist /></FounderRoute>} />
+            <Route path="/founder/integration-map" element={<FounderRoute><IMOverview /></FounderRoute>} />
+            <Route path="/founder/integration-map/businesses" element={<FounderRoute><IMBusinesses /></FounderRoute>} />
+            <Route path="/founder/integration-map/providers" element={<FounderRoute><IMProviders /></FounderRoute>} />
+            <Route path="/founder/integration-map/missing" element={<FounderRoute><IMMissing /></FounderRoute>} />
+            <Route path="/founder/integration-map/risks" element={<FounderRoute><IMRisks /></FounderRoute>} />
+            <Route path="/founder/integration-map/settings" element={<FounderRoute><IMSettings /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
