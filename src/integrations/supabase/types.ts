@@ -18963,6 +18963,213 @@ export type Database = {
         }
         Relationships: []
       }
+      human_operator_access: {
+        Row: {
+          access_level: string | null
+          access_status: string
+          created_at: string
+          expires_at: string | null
+          granted_at: string | null
+          id: string
+          notes: string | null
+          operator_id: string
+          revoked_at: string | null
+          system_name: string
+          updated_at: string
+        }
+        Insert: {
+          access_level?: string | null
+          access_status?: string
+          created_at?: string
+          expires_at?: string | null
+          granted_at?: string | null
+          id?: string
+          notes?: string | null
+          operator_id: string
+          revoked_at?: string | null
+          system_name: string
+          updated_at?: string
+        }
+        Update: {
+          access_level?: string | null
+          access_status?: string
+          created_at?: string
+          expires_at?: string | null
+          granted_at?: string | null
+          id?: string
+          notes?: string | null
+          operator_id?: string
+          revoked_at?: string | null
+          system_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "human_operator_access_operator_id_fkey"
+            columns: ["operator_id"]
+            isOneToOne: false
+            referencedRelation: "human_operators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      human_operator_quality_reviews: {
+        Row: {
+          accuracy_score: number | null
+          business_id: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          operator_id: string
+          quality_score: number | null
+          recommended_action: string | null
+          review_period_end: string | null
+          review_period_start: string | null
+          timeliness_score: number | null
+        }
+        Insert: {
+          accuracy_score?: number | null
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          operator_id: string
+          quality_score?: number | null
+          recommended_action?: string | null
+          review_period_end?: string | null
+          review_period_start?: string | null
+          timeliness_score?: number | null
+        }
+        Update: {
+          accuracy_score?: number | null
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          operator_id?: string
+          quality_score?: number | null
+          recommended_action?: string | null
+          review_period_end?: string | null
+          review_period_start?: string | null
+          timeliness_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "human_operator_quality_reviews_operator_id_fkey"
+            columns: ["operator_id"]
+            isOneToOne: false
+            referencedRelation: "human_operators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      human_operator_tasks: {
+        Row: {
+          approval_required: boolean
+          business_id: string | null
+          completed_at: string | null
+          created_at: string
+          due_at: string | null
+          id: string
+          operator_id: string | null
+          priority: string
+          source_agent: string | null
+          task_description: string | null
+          task_status: string
+          task_title: string
+          updated_at: string
+        }
+        Insert: {
+          approval_required?: boolean
+          business_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          due_at?: string | null
+          id?: string
+          operator_id?: string | null
+          priority?: string
+          source_agent?: string | null
+          task_description?: string | null
+          task_status?: string
+          task_title: string
+          updated_at?: string
+        }
+        Update: {
+          approval_required?: boolean
+          business_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          due_at?: string | null
+          id?: string
+          operator_id?: string | null
+          priority?: string
+          source_agent?: string | null
+          task_description?: string | null
+          task_status?: string
+          task_title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "human_operator_tasks_operator_id_fkey"
+            columns: ["operator_id"]
+            isOneToOne: false
+            referencedRelation: "human_operators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      human_operators: {
+        Row: {
+          contract_status: string
+          created_at: string
+          email: string | null
+          escalation_rules: string | null
+          id: string
+          name: string
+          nda_status: string
+          organisation: string | null
+          primary_responsibilities: string | null
+          role_type: string
+          status: string
+          timezone: string | null
+          updated_at: string
+          working_hours: string | null
+        }
+        Insert: {
+          contract_status?: string
+          created_at?: string
+          email?: string | null
+          escalation_rules?: string | null
+          id?: string
+          name: string
+          nda_status?: string
+          organisation?: string | null
+          primary_responsibilities?: string | null
+          role_type?: string
+          status?: string
+          timezone?: string | null
+          updated_at?: string
+          working_hours?: string | null
+        }
+        Update: {
+          contract_status?: string
+          created_at?: string
+          email?: string | null
+          escalation_rules?: string | null
+          id?: string
+          name?: string
+          nda_status?: string
+          organisation?: string | null
+          primary_responsibilities?: string | null
+          role_type?: string
+          status?: string
+          timezone?: string | null
+          updated_at?: string
+          working_hours?: string | null
+        }
+        Relationships: []
+      }
       import_batches: {
         Row: {
           business_name: string
