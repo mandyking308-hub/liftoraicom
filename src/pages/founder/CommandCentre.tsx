@@ -26,6 +26,9 @@ import FounderAlertEscalationPanel from "@/components/founder/command/FounderAle
 import CommandCentreUsabilityReportPanel from "@/components/founder/command/CommandCentreUsabilityReportPanel";
 import FounderCockpit from "@/components/founder/command/FounderCockpit";
 import StartUsingLiftorNote from "@/components/founder/command/StartUsingLiftorNote";
+import WhatNeedsAttentionToday from "@/components/founder/command/WhatNeedsAttentionToday";
+import BusinessOperatingStatus from "@/components/founder/command/BusinessOperatingStatus";
+import AgentOperatingStatus from "@/components/founder/command/AgentOperatingStatus";
 import BusinessActivationWizardPanel from "@/components/founder/activation/BusinessActivationWizardPanel";
 import BusinessOnboardingBrainPanel from "@/components/founder/activation/BusinessOnboardingBrainPanel";
 import StarterPackMaterialiserPanel from "@/components/founder/activation/StarterPackMaterialiserPanel";
@@ -795,6 +798,9 @@ const CommandCentre = () => {
       <div className="max-w-7xl mx-auto px-4 pt-4"><AIRuntimeHealthMiniCard /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><AIAlertsMiniWidget /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><FounderAlertEscalationPanel /></div>
+      <WhatNeedsAttentionToday />
+      <BusinessOperatingStatus />
+      <AgentOperatingStatus />
       <div className="max-w-7xl mx-auto px-4 pt-4">
         <Collapsible>
           <CollapsibleTrigger className="w-full text-left text-xs px-3 py-2 rounded-md border border-border/60 bg-background/40 hover:border-primary/60">
@@ -808,22 +814,31 @@ const CommandCentre = () => {
           </CollapsibleContent>
         </Collapsible>
       </div>
-      <div className="max-w-7xl mx-auto px-4 pt-4"><BusinessActivationWizardPanel /></div>
-      <div className="max-w-7xl mx-auto px-4 pt-4"><BusinessOnboardingBrainPanel /></div>
-      <div className="max-w-7xl mx-auto px-4 pt-4"><StarterPackMaterialiserPanel /></div>
-      <div className="max-w-7xl mx-auto px-4 pt-4"><BusinessOnboardingFactoryPanel /></div>
-      <div className="max-w-7xl mx-auto px-4 pt-4"><BusinessInternalActivationPanel /></div>
-      <div className="max-w-7xl mx-auto px-4 pt-4"><BusinessDailyOperatingLoopPanel /></div>
-      <div className="max-w-7xl mx-auto px-4 pt-4"><BusinessWeeklyReviewPanel /></div>
-      <div className="max-w-7xl mx-auto px-4 pt-4"><ControlledExternalActivationReadinessPanel /></div>
-      <div className="max-w-7xl mx-auto px-4 pt-4"><ControlledMicroBatchPreparationPanel /></div>
-      <div className="max-w-7xl mx-auto px-4 pt-4"><LiftorBuildPhaseCloseoutPanel /></div>
-      <div className="max-w-7xl mx-auto px-4 pt-4"><Phase23LaunchPathPanel /></div>
-      <div className="max-w-7xl mx-auto px-4 pt-4"><ManualsHierarchyPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4">
         <Collapsible>
           <CollapsibleTrigger className="w-full text-left text-xs px-3 py-2 rounded-md border border-border/60 bg-background/40 hover:border-primary/60">
-            Optional rehearsal &amp; baseline tools (simulation — not the default operating mode)
+            Setup, activation &amp; runbooks (optional — onboarding factory, internal activation, weekly review, launch path, manuals)
+          </CollapsibleTrigger>
+          <CollapsibleContent className="space-y-3 pt-3">
+            <BusinessActivationWizardPanel />
+            <BusinessOnboardingBrainPanel />
+            <StarterPackMaterialiserPanel />
+            <BusinessOnboardingFactoryPanel />
+            <BusinessInternalActivationPanel />
+            <BusinessDailyOperatingLoopPanel />
+            <BusinessWeeklyReviewPanel />
+            <ControlledExternalActivationReadinessPanel />
+            <ControlledMicroBatchPreparationPanel />
+            <LiftorBuildPhaseCloseoutPanel />
+            <Phase23LaunchPathPanel />
+            <ManualsHierarchyPanel />
+          </CollapsibleContent>
+        </Collapsible>
+      </div>
+      <div className="max-w-7xl mx-auto px-4 pt-4">
+        <Collapsible>
+          <CollapsibleTrigger className="w-full text-left text-xs px-3 py-2 rounded-md border border-border/60 bg-background/40 hover:border-primary/60">
+            Optional diagnostic rehearsal &amp; baseline tools (live operating mode is the default)
           </CollapsibleTrigger>
           <CollapsibleContent className="space-y-3 pt-3">
             <BusinessRehearsalSimulationPanel />
