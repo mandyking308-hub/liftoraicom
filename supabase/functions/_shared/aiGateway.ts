@@ -555,6 +555,7 @@ export async function callAIGateway(input: AIGatewayCallInput): Promise<AIGatewa
     prompt_tokens: usage.prompt_tokens ?? 0,
     completion_tokens: usage.completion_tokens ?? 0,
     output_summary: input.action_type,
+    cost_basis: "actual_tokens",
   });
   await updateRuntimeRequest(sb, request_id, {
     status: "completed",
@@ -562,6 +563,12 @@ export async function callAIGateway(input: AIGatewayCallInput): Promise<AIGatewa
     prompt_tokens: usage.prompt_tokens ?? null,
     completion_tokens: usage.completion_tokens ?? null,
     token_usage: usage,
+  });
+  await computeAndTagCost(sb, {
+    request_id, model: primaryModel,
+    prompt_tokens: usage.prompt_tokens, completion_tokens: usage.completion_tokens,
+    basis: "actual_tokens",
+    agent_id: input.agent_id ?? null, business_id: input.business_id ?? null,
   });
   await recordRuntimeEvent(sb, { request_id, event_type: "completed", severity: "info", metadata: { used_fallback: usedFallback } });
   await releaseLease(sb, request_id, true);
