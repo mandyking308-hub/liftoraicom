@@ -57,6 +57,9 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "quote_to_cash_agent", name: "Quote-to-Cash Agent", to: "/founder/quote-to-cash", category: "sales" },
   { key: "invoice_payment_agent", name: "Invoice & Payment Agent", to: "/founder/quote-to-cash/invoices", category: "sales" },
   { key: "revenue_confirmation_agent", name: "Revenue Confirmation Agent", to: "/founder/quote-to-cash/revenue-confirmation", category: "sales" },
+  { key: "complaints_agent", name: "Complaints Agent", to: "/founder/complaints", category: "support" },
+  { key: "refund_review_agent", name: "Refund Review Agent", to: "/founder/complaints/refunds", category: "support" },
+  { key: "dispute_evidence_agent", name: "Dispute Evidence Agent", to: "/founder/complaints/evidence", category: "support" },
 ];
 
 export default function AgentOperatingStatus() {
