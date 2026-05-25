@@ -125,6 +125,7 @@ import AISandbox from "./pages/founder/AISandbox";
 import AIFinancePack from "./pages/founder/AIFinancePack";
 import AILiveOperations from "./pages/founder/AILiveOperations";
 import AICostGovernorHub from "./pages/founder/AICostGovernorHub";
+import AIFirstUseSetup from "./pages/founder/AIFirstUseSetup";
 import AIFounderActionBoard from "./pages/founder/AIFounderActionBoard";
 import AIRuntimeOrchestration from "./pages/founder/AIRuntimeOrchestration";
 import AIOrchestrationLive from "./pages/founder/AIOrchestrationLive";
