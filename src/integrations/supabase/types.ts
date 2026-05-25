@@ -965,6 +965,63 @@ export type Database = {
           },
         ]
       }
+      ai_agent_registry: {
+        Row: {
+          agent_name: string
+          agent_type: string
+          allowed_actions: string[]
+          approval_required_actions: string[]
+          created_at: string
+          daily_run_limit: number
+          description: string | null
+          fallback_model: string | null
+          id: string
+          max_concurrency: number
+          metadata: Json
+          monthly_budget_gbp: number
+          primary_model: string
+          prohibited_actions: string[]
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          agent_name: string
+          agent_type?: string
+          allowed_actions?: string[]
+          approval_required_actions?: string[]
+          created_at?: string
+          daily_run_limit?: number
+          description?: string | null
+          fallback_model?: string | null
+          id?: string
+          max_concurrency?: number
+          metadata?: Json
+          monthly_budget_gbp?: number
+          primary_model?: string
+          prohibited_actions?: string[]
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          agent_name?: string
+          agent_type?: string
+          allowed_actions?: string[]
+          approval_required_actions?: string[]
+          created_at?: string
+          daily_run_limit?: number
+          description?: string | null
+          fallback_model?: string | null
+          id?: string
+          max_concurrency?: number
+          metadata?: Json
+          monthly_budget_gbp?: number
+          primary_model?: string
+          prohibited_actions?: string[]
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ai_agent_roles: {
         Row: {
           agent_category: string
@@ -1435,6 +1492,65 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_conversations: {
+        Row: {
+          agent_id: string | null
+          business_id: string | null
+          channel: string
+          context_scope: string | null
+          conversation_id: string
+          created_at: string
+          data_classification: string
+          id: string
+          metadata: Json
+          portfolio_asset_id: string | null
+          status: string
+          title: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          agent_id?: string | null
+          business_id?: string | null
+          channel?: string
+          context_scope?: string | null
+          conversation_id: string
+          created_at?: string
+          data_classification?: string
+          id?: string
+          metadata?: Json
+          portfolio_asset_id?: string | null
+          status?: string
+          title?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          agent_id?: string | null
+          business_id?: string | null
+          channel?: string
+          context_scope?: string | null
+          conversation_id?: string
+          created_at?: string
+          data_classification?: string
+          id?: string
+          metadata?: Json
+          portfolio_asset_id?: string | null
+          status?: string
+          title?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_conversations_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agent_registry"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_cost_alerts: {
         Row: {
           acknowledged_at: string | null
@@ -1668,6 +1784,110 @@ export type Database = {
             columns: ["triggered_by_inbound_id"]
             isOneToOne: false
             referencedRelation: "inbound_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_gateway_requests: {
+        Row: {
+          actual_cost_gbp: number | null
+          agent_id: string | null
+          approval_required: boolean
+          business_id: string | null
+          completed_at: string | null
+          completion_tokens: number | null
+          conversation_id: string | null
+          created_at: string
+          error_message: string | null
+          estimated_cost_gbp: number | null
+          id: string
+          idempotency_key: string | null
+          input_hash: string | null
+          metadata: Json
+          model: string
+          portfolio_asset_id: string | null
+          priority: number
+          prompt_tokens: number | null
+          prompt_version: string | null
+          provider: string
+          request_id: string
+          request_type: string
+          risk_level: string
+          started_at: string | null
+          status: string
+          token_usage: Json | null
+          trace_id: string | null
+          user_id: string | null
+          workflow_id: string | null
+        }
+        Insert: {
+          actual_cost_gbp?: number | null
+          agent_id?: string | null
+          approval_required?: boolean
+          business_id?: string | null
+          completed_at?: string | null
+          completion_tokens?: number | null
+          conversation_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          estimated_cost_gbp?: number | null
+          id?: string
+          idempotency_key?: string | null
+          input_hash?: string | null
+          metadata?: Json
+          model?: string
+          portfolio_asset_id?: string | null
+          priority?: number
+          prompt_tokens?: number | null
+          prompt_version?: string | null
+          provider?: string
+          request_id: string
+          request_type: string
+          risk_level?: string
+          started_at?: string | null
+          status?: string
+          token_usage?: Json | null
+          trace_id?: string | null
+          user_id?: string | null
+          workflow_id?: string | null
+        }
+        Update: {
+          actual_cost_gbp?: number | null
+          agent_id?: string | null
+          approval_required?: boolean
+          business_id?: string | null
+          completed_at?: string | null
+          completion_tokens?: number | null
+          conversation_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          estimated_cost_gbp?: number | null
+          id?: string
+          idempotency_key?: string | null
+          input_hash?: string | null
+          metadata?: Json
+          model?: string
+          portfolio_asset_id?: string | null
+          priority?: number
+          prompt_tokens?: number | null
+          prompt_version?: string | null
+          provider?: string
+          request_id?: string
+          request_type?: string
+          risk_level?: string
+          started_at?: string | null
+          status?: string
+          token_usage?: Json | null
+          trace_id?: string | null
+          user_id?: string | null
+          workflow_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_gateway_requests_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agent_registry"
             referencedColumns: ["id"]
           },
         ]
@@ -2203,6 +2423,45 @@ export type Database = {
           roi_status?: string | null
           time_saved_minutes?: number | null
           total_ai_spend?: number | null
+        }
+        Relationships: []
+      }
+      ai_runtime_events: {
+        Row: {
+          agent_id: string | null
+          business_id: string | null
+          conversation_id: string | null
+          created_at: string
+          event_type: string
+          id: string
+          message: string | null
+          metadata: Json
+          request_id: string | null
+          severity: string
+        }
+        Insert: {
+          agent_id?: string | null
+          business_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          message?: string | null
+          metadata?: Json
+          request_id?: string | null
+          severity?: string
+        }
+        Update: {
+          agent_id?: string | null
+          business_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          message?: string | null
+          metadata?: Json
+          request_id?: string | null
+          severity?: string
         }
         Relationships: []
       }

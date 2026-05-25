@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { LayoutDashboard, FileInput, GitBranch, FolderKanban, Activity, FileText, LogOut, Menu, X, Monitor, Bot, Workflow, Plug, Play, Command, Network, Layers, Rocket, BarChart3, Zap, BookOpen, Globe, Building2, Shield, ShieldAlert, ShieldCheck, LayoutTemplate, Sparkles, BookOpenCheck, ClipboardList, PoundSterling, Brain, Scale, Compass, MessageSquare, FlaskConical, Users, Banknote, Send, MessagesSquare, FileSignature, MonitorPlay, Briefcase, ClipboardCheck, Gavel, TrendingUp, Radar, Siren, Target, Calculator, Trophy, Handshake, Route, Coins, PauseCircle, Flame, Swords } from "lucide-react";
+import { LayoutDashboard, FileInput, GitBranch, FolderKanban, Activity, FileText, LogOut, Menu, X, Monitor, Bot, Workflow, Plug, Play, Command, Network, Layers, Rocket, BarChart3, Zap, BookOpen, Globe, Building2, Shield, ShieldAlert, ShieldCheck, LayoutTemplate, Sparkles, BookOpenCheck, ClipboardList, PoundSterling, Brain, Scale, Compass, MessageSquare, FlaskConical, Users, Banknote, Send, MessagesSquare, FileSignature, MonitorPlay, Briefcase, ClipboardCheck, Gavel, TrendingUp, Radar, Siren, Target, Calculator, Trophy, Handshake, Route, Coins, PauseCircle, Flame, Swords, Cpu } from "lucide-react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,6 +24,7 @@ const navItems = [
   { label: "Hardening Centre", to: "/founder/portfolio-exit/hardening", icon: ShieldAlert },
   { label: "Operating Status", to: "/founder/portfolio-exit/release-gate", icon: Activity },
   { label: "AI Cost Governor", to: "/founder/ai-cost", icon: Activity },
+  { label: "AI Runtime", to: "/founder/ai-cost/runtime", icon: Cpu },
   { label: "AI Co-Pilot", to: "/founder/copilot", icon: MessageSquare },
   { label: "AI Brain", to: "/founder/brain", icon: Brain },
   { label: "Decisions", to: "/founder/decisions", icon: Scale },

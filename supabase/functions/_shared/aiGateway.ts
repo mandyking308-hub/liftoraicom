@@ -31,21 +31,96 @@ export type AIGatewayCallInput = {
   reasoning?: { effort: "minimal" | "low" | "medium" | "high" | "xhigh" | "none" };
   stream?: boolean;
   metadata?: Record<string, unknown>;
+  /** New runtime fields — drive ai_gateway_requests + concurrency control. */
+  request_type?: string;
+  conversation_id?: string | null;
+  portfolio_asset_id?: string | null;
+  prompt_version?: string | null;
+  risk_level?: "low" | "medium" | "high" | "critical";
+  approval_required?: boolean;
+  idempotency_key?: string | null;
+  priority?: number;
+  fallback_model?: string;
 };
 
 export type AIGatewayCallResult = {
   trace_id: string;
+  request_id: string;
   status: "completed" | "failed" | "rate_limited" | "payment_required";
   http_status: number;
   data?: any;
   error?: string;
   prompt_tokens?: number;
   completion_tokens?: number;
+  used_fallback?: boolean;
+  approval_required?: boolean;
+  duplicate_prevented?: boolean;
 };
 
 function newTraceId() {
   const r = (crypto as any).randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2);
   return `trc_${r}`;
+}
+
+function newRequestId() {
+  const r = (crypto as any).randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2);
+  return `req_${r}`;
+}
+
+async function recordRuntimeRequest(sb: any, row: Record<string, unknown>) {
+  if (!sb) return;
+  try { await sb.from("ai_gateway_requests").insert(row); } catch (_) { /* best-effort */ }
+}
+
+async function updateRuntimeRequest(sb: any, request_id: string, patch: Record<string, unknown>) {
+  if (!sb) return;
+  try { await sb.from("ai_gateway_requests").update(patch).eq("request_id", request_id); } catch (_) { /* best-effort */ }
+}
+
+async function recordRuntimeEvent(
+  sb: any,
+  e: { request_id?: string | null; conversation_id?: string | null; agent_id?: string | null;
+       business_id?: string | null; event_type: string; message?: string;
+       severity?: "debug" | "info" | "warning" | "error" | "critical";
+       metadata?: Record<string, unknown> },
+) {
+  if (!sb) return;
+  try {
+    await sb.from("ai_runtime_events").insert({
+      request_id: e.request_id ?? null,
+      conversation_id: e.conversation_id ?? null,
+      agent_id: e.agent_id ?? null,
+      business_id: e.business_id ?? null,
+      event_type: e.event_type,
+      message: e.message ?? null,
+      severity: e.severity ?? "info",
+      metadata: e.metadata ?? {},
+    });
+  } catch (_) { /* best-effort */ }
+}
+
+/** Per-agent concurrency / status / budget check. Logical control, not a global lock. */
+async function preflightAgent(
+  sb: any,
+  agent_id: string | null | undefined,
+): Promise<{ ok: boolean; reason?: string; primary_model?: string; fallback_model?: string }> {
+  if (!sb || !agent_id) return { ok: true };
+  try {
+    const { data: agent } = await sb.from("ai_agent_registry").select("*").eq("id", agent_id).maybeSingle();
+    if (!agent) return { ok: true };
+    if (agent.status !== "active") return { ok: false, reason: `agent_${agent.status}` };
+    const { count } = await sb
+      .from("ai_gateway_requests")
+      .select("id", { head: true, count: "exact" })
+      .eq("agent_id", agent_id)
+      .in("status", ["queued", "running"]);
+    if ((count ?? 0) >= (agent.max_concurrency ?? 4)) {
+      return { ok: false, reason: "agent_concurrency_limit" };
+    }
+    return { ok: true, primary_model: agent.primary_model, fallback_model: agent.fallback_model };
+  } catch {
+    return { ok: true };
+  }
 }
 
 function getServiceClient() {
@@ -86,45 +161,172 @@ async function writeLedger(
 /** Non-streaming AI call routed through the Lovable AI Gateway with full audit. */
 export async function callAIGateway(input: AIGatewayCallInput): Promise<AIGatewayCallResult> {
   const trace_id = newTraceId();
+  const request_id = newRequestId();
+  const sb = getServiceClient();
+
+  // Idempotency check — if the same idempotency_key already exists, return that row.
+  if (input.idempotency_key && sb) {
+    try {
+      const { data: existing } = await sb
+        .from("ai_gateway_requests")
+        .select("request_id,status,prompt_tokens,completion_tokens,trace_id,error_message")
+        .eq("idempotency_key", input.idempotency_key)
+        .maybeSingle();
+      if (existing) {
+        return {
+          trace_id: existing.trace_id ?? trace_id,
+          request_id: existing.request_id,
+          status: existing.status === "completed" ? "completed" : "failed",
+          http_status: existing.status === "completed" ? 200 : 409,
+          duplicate_prevented: true,
+          prompt_tokens: existing.prompt_tokens ?? undefined,
+          completion_tokens: existing.completion_tokens ?? undefined,
+          error: existing.error_message ?? undefined,
+        };
+      }
+    } catch { /* fall through */ }
+  }
+
+  // Per-agent preflight (status + concurrency).
+  const pre = await preflightAgent(sb, input.agent_id ?? null);
+  if (!pre.ok) {
+    await recordRuntimeRequest(sb, {
+      request_id, conversation_id: input.conversation_id ?? null,
+      workflow_id: input.workflow_id ?? null, agent_id: input.agent_id ?? null,
+      portfolio_asset_id: input.portfolio_asset_id ?? null, business_id: input.business_id ?? null,
+      user_id: input.user_id ?? null,
+      request_type: input.request_type ?? input.action_type,
+      provider: "lovable-ai-gateway",
+      model: input.model ?? pre.primary_model ?? "google/gemini-3-flash-preview",
+      prompt_version: input.prompt_version ?? null,
+      risk_level: input.risk_level ?? "low",
+      approval_required: !!input.approval_required,
+      status: "cancelled",
+      priority: input.priority ?? 5,
+      idempotency_key: input.idempotency_key ?? null,
+      trace_id, error_message: pre.reason,
+      metadata: { reason: pre.reason },
+    });
+    await recordRuntimeEvent(sb, {
+      request_id, conversation_id: input.conversation_id ?? null,
+      agent_id: input.agent_id ?? null, business_id: input.business_id ?? null,
+      event_type: "preflight_blocked", severity: "warning",
+      message: pre.reason, metadata: { reason: pre.reason },
+    });
+    return { trace_id, request_id, status: "failed", http_status: 409, error: pre.reason };
+  }
+
+  // High-risk + approval_required: do not call provider; mark waiting_approval.
+  if (input.approval_required && (input.risk_level === "high" || input.risk_level === "critical")) {
+    await recordRuntimeRequest(sb, {
+      request_id, conversation_id: input.conversation_id ?? null,
+      workflow_id: input.workflow_id ?? null, agent_id: input.agent_id ?? null,
+      portfolio_asset_id: input.portfolio_asset_id ?? null, business_id: input.business_id ?? null,
+      user_id: input.user_id ?? null,
+      request_type: input.request_type ?? input.action_type,
+      provider: "lovable-ai-gateway",
+      model: input.model ?? pre.primary_model ?? "google/gemini-3-flash-preview",
+      prompt_version: input.prompt_version ?? null,
+      risk_level: input.risk_level ?? "high",
+      approval_required: true,
+      status: "waiting_approval",
+      priority: input.priority ?? 5,
+      idempotency_key: input.idempotency_key ?? null,
+      trace_id, metadata: input.metadata ?? {},
+    });
+    await recordRuntimeEvent(sb, {
+      request_id, conversation_id: input.conversation_id ?? null,
+      agent_id: input.agent_id ?? null, business_id: input.business_id ?? null,
+      event_type: "waiting_approval", severity: "info",
+    });
+    return { trace_id, request_id, status: "completed", http_status: 202, approval_required: true };
+  }
+
   const apiKey = Deno.env.get("LOVABLE_API_KEY");
   if (!apiKey) {
     await writeLedger(trace_id, input, { status: "failed", input_summary: "LOVABLE_API_KEY missing" });
-    return { trace_id, status: "failed", http_status: 500, error: "LOVABLE_API_KEY not configured" };
+    return { trace_id, request_id, status: "failed", http_status: 500, error: "LOVABLE_API_KEY not configured" };
   }
 
   await writeLedger(trace_id, input, { status: "pending", input_summary: input.action_type });
+  const startedAt = new Date().toISOString();
+  await recordRuntimeRequest(sb, {
+    request_id, conversation_id: input.conversation_id ?? null,
+    workflow_id: input.workflow_id ?? null, agent_id: input.agent_id ?? null,
+    portfolio_asset_id: input.portfolio_asset_id ?? null, business_id: input.business_id ?? null,
+    user_id: input.user_id ?? null,
+    request_type: input.request_type ?? input.action_type,
+    provider: "lovable-ai-gateway",
+    model: input.model ?? pre.primary_model ?? "google/gemini-3-flash-preview",
+    prompt_version: input.prompt_version ?? null,
+    risk_level: input.risk_level ?? "low",
+    approval_required: !!input.approval_required,
+    status: "running", priority: input.priority ?? 5,
+    idempotency_key: input.idempotency_key ?? null,
+    started_at: startedAt, trace_id, metadata: input.metadata ?? {},
+  });
 
-  let resp: Response;
-  try {
-    resp = await fetch(GATEWAY_URL, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: input.model ?? "google/gemini-3-flash-preview",
-        messages: input.messages,
-        tools: input.tools,
-        tool_choice: input.tool_choice,
-        reasoning: input.reasoning,
-        stream: !!input.stream,
-      }),
-    });
-  } catch (e: any) {
-    await writeLedger(trace_id, input, { status: "failed", output_summary: `network: ${String(e?.message ?? e)}` });
-    return { trace_id, status: "failed", http_status: 0, error: String(e?.message ?? e) };
+  const primaryModel = input.model ?? pre.primary_model ?? "google/gemini-3-flash-preview";
+  const fallbackModel = input.fallback_model ?? pre.fallback_model ?? null;
+
+  const doCall = async (modelToUse: string): Promise<Response | { error: string }> => {
+    try {
+      return await fetch(GATEWAY_URL, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: modelToUse,
+          messages: input.messages,
+          tools: input.tools,
+          tool_choice: input.tool_choice,
+          reasoning: input.reasoning,
+          stream: !!input.stream,
+        }),
+      });
+    } catch (e: any) {
+      return { error: String(e?.message ?? e) };
+    }
+  };
+
+  let usedFallback = false;
+  let resp: Response | { error: string } = await doCall(primaryModel);
+  if ("error" in resp || (resp instanceof Response && resp.status >= 500)) {
+    if (fallbackModel) {
+      await recordRuntimeEvent(sb, {
+        request_id, event_type: "provider_fallback", severity: "warning",
+        message: "primary failed, retrying with fallback",
+        metadata: { primary: primaryModel, fallback: fallbackModel },
+      });
+      usedFallback = true;
+      resp = await doCall(fallbackModel);
+    }
+  }
+  if ("error" in resp) {
+    const err = resp.error;
+    await writeLedger(trace_id, input, { status: "failed", output_summary: `network: ${err}` });
+    await updateRuntimeRequest(sb, request_id, { status: "failed", completed_at: new Date().toISOString(), error_message: err });
+    await recordRuntimeEvent(sb, { request_id, event_type: "network_error", severity: "error", message: err });
+    return { trace_id, request_id, status: "failed", http_status: 0, error: err, used_fallback: usedFallback };
   }
 
   if (resp.status === 429) {
     await writeLedger(trace_id, input, { status: "failed", output_summary: "rate_limited" });
-    return { trace_id, status: "rate_limited", http_status: 429, error: "Rate limit exceeded" };
+    await updateRuntimeRequest(sb, request_id, { status: "failed", completed_at: new Date().toISOString(), error_message: "rate_limited" });
+    await recordRuntimeEvent(sb, { request_id, event_type: "rate_limited", severity: "warning" });
+    return { trace_id, request_id, status: "rate_limited", http_status: 429, error: "Rate limit exceeded", used_fallback: usedFallback };
   }
   if (resp.status === 402) {
     await writeLedger(trace_id, input, { status: "failed", output_summary: "payment_required" });
-    return { trace_id, status: "payment_required", http_status: 402, error: "Lovable AI credits required" };
+    await updateRuntimeRequest(sb, request_id, { status: "failed", completed_at: new Date().toISOString(), error_message: "payment_required" });
+    await recordRuntimeEvent(sb, { request_id, event_type: "payment_required", severity: "error" });
+    return { trace_id, request_id, status: "payment_required", http_status: 402, error: "Lovable AI credits required", used_fallback: usedFallback };
   }
   if (!resp.ok) {
     const txt = await resp.text().catch(() => "");
     await writeLedger(trace_id, input, { status: "failed", output_summary: `http ${resp.status}` });
-    return { trace_id, status: "failed", http_status: resp.status, error: txt.slice(0, 500) };
+    await updateRuntimeRequest(sb, request_id, { status: "failed", completed_at: new Date().toISOString(), error_message: `http ${resp.status}` });
+    await recordRuntimeEvent(sb, { request_id, event_type: "http_error", severity: "error", message: `http ${resp.status}` });
+    return { trace_id, request_id, status: "failed", http_status: resp.status, error: txt.slice(0, 500), used_fallback: usedFallback };
   }
 
   const data = await resp.json();
@@ -135,9 +337,18 @@ export async function callAIGateway(input: AIGatewayCallInput): Promise<AIGatewa
     completion_tokens: usage.completion_tokens ?? 0,
     output_summary: input.action_type,
   });
+  await updateRuntimeRequest(sb, request_id, {
+    status: "completed",
+    completed_at: new Date().toISOString(),
+    prompt_tokens: usage.prompt_tokens ?? null,
+    completion_tokens: usage.completion_tokens ?? null,
+    token_usage: usage,
+  });
+  await recordRuntimeEvent(sb, { request_id, event_type: "completed", severity: "info", metadata: { used_fallback: usedFallback } });
   return {
-    trace_id, status: "completed", http_status: 200, data,
+    trace_id, request_id, status: "completed", http_status: 200, data,
     prompt_tokens: usage.prompt_tokens, completion_tokens: usage.completion_tokens,
+    used_fallback: usedFallback,
   };
 }
 
