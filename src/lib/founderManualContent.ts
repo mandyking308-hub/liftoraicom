@@ -4102,3 +4102,29 @@ export const PORTFOLIO_COMMANDER_ENGINE_TECH_NOTE = `
 
 *End of Portfolio Commander Step Engine (v5.9.8).*
 `;
+
+export const AI_RUNTIME_CLEANUP_NOTE = `
+## AI Runtime Cleanup (v5.9.9)
+
+### Brain provider check
+- \`liftor-brain-provider-check\` no longer references \`OPENAI_API_KEY\`. It reads \`LOVABLE_API_KEY\` only and reports route = Lovable AI Gateway, default model openai/gpt-5.5, fallback google/gemini-3-flash-preview.
+- \`liftor-brain-chat\` fail-closed message + suggested action updated to reference the gateway (no OpenAI key required).
+- Old \`liftor_brain_provider_config\` rows are normalised on next check (secret_name → LOVABLE_API_KEY, provider_name → Lovable AI Gateway).
+- UI: LiftorBrainPanel and LiftorBrainInboundReplyPanel labels updated. Brain status now reads "Gateway Controlled · Direct AI bypasses: 0".
+- Acceptance and diagnostic functions (\`liftor-brain-*-acceptance\`, \`liftor-brain-provider-diagnostic\`) still mention OPENAI_API_KEY cosmetically for backward-compatible historical reports. They are not on the runtime path and are not removed blindly.
+
+### Founder Copilot streaming telemetry
+- \`founder-copilot\` now emits the following events into \`ai_runtime_events\` keyed by request_id:
+  - stream_request_started (prompt_tokens_estimate)
+  - stream_opened (ttfh_ms, http_status)
+  - stream_first_token (time_to_first_token_ms)
+  - stream_completed (duration_ms, prompt/completion_tokens_estimate, cost_basis=streaming_estimate)
+  - stream_rate_limited / stream_payment_required / stream_gateway_error on the failure paths
+- The response body is teed through a TransformStream so the client receives bytes unchanged while server tallies an output-char count. Final endGatewayLog is called with the approximated token counts (cost_basis still streaming_estimate).
+
+### Limitations
+- Mid-stream token counts are still estimates (~4 chars/token, 15% framing overhead subtracted). Cost rows tagged streaming_estimate, not actual.
+- The cosmetic OPENAI_API_KEY references that remain in acceptance/diagnostic functions and historical audit rows are documentation-only and do not affect runtime.
+
+*End of AI Runtime Cleanup (v5.9.9).*
+`;
