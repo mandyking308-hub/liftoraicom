@@ -3893,5 +3893,53 @@ Concurrency preflight is best-effort (no row-level lock) so a small over-allocat
 Row-level concurrency lease (e.g. advisory lock) to make preflight strict, a worker pool that drains the queued ai_gateway_requests rows in parallel rather than relying on synchronous edge-function invocation, regional sharding of the gateway URL, persistent ai_runtime_events partitioned by day, and migration of all 13 remaining bypass functions so every AI call passes through ledger + concurrency control.
 
 *End of Simultaneous Conversation Orchestration (v5.9.2).*
+
+## AI Runtime Health Cockpit (v5.9.3)
+
+Operational view of the AI runtime. Lives at /founder/ai-cost/health. A compact summary card is injected into the main Command Centre below the AI usage widgets.
+
+### Health summary
+Total requests today, running, queued, failed 24h, average latency (completed_at − started_at over completed 24h calls), cost today, cost month, active conversations, active workflows, approvals pending, bypass count, provider errors 24h, queue depth, bottleneck count.
+
+### Breakdown tabs
+By Agent, By Business/Asset, By Conversation, By Workflow, By Provider/Model, Failed Jobs, Approval Holds, Cost & Budget, Bypass Register link.
+
+### Bottleneck rules
+- Queue depth > 50 → warning; > 200 → critical.
+- Failed 24h > 20 → warning.
+- Waiting approval > 25 → warning.
+- Rate-limited events > 10 in 24h → warning.
+- payment_required event present → critical (Lovable AI credits exhausted).
+- Any agent at concurrency limit → warning.
+- Any agent at ≥90% of monthly budget → warning.
+- Any business over monthly cap → critical, non-critical AI paused for that business.
+- Workflows running > 6h with no completion → stale warning.
+- Any function still bypassing the gateway → warning.
+
+### Error recovery rules
+Failed jobs with risk_level in (low, medium) can be retried from the cockpit — the row is moved back to status=queued and an ai_runtime_events row is written (event_type=retry_requested). High/critical rows cannot be retried from here; they must be re-issued by the originating workflow so external-action safety is preserved. Any failed row can be marked resolved (status=cancelled) which writes manually_resolved to ai_runtime_events. The audit trail is preserved (request_id, trace_id, original error_message, retry/resolve event).
+
+### Cost controls
+Per-agent monthly_budget_gbp (ai_agent_registry) and per-business monthly_budget_gbp (ai_business_budgets) are surfaced as bars on the Cost & Budget tab. Spend is computed from actual_cost_gbp where present, falling back to estimated_cost_gbp. Threshold warnings appear in the bottleneck banner. Non-critical jobs are paused when caps are exceeded; compliance and safety jobs continue.
+
+### Provider / model control
+Provider events (network_error, http_error, rate_limited, payment_required, sdk_error) come from ai_runtime_events. Errors-by-model is derived from ai_gateway_requests.status='failed' grouped by model. Fallback model is shown next to primary on every agent row. Secrets are never exposed — only event type, severity, message, model name.
+
+### Command Centre integration
+- Mini card on /founder/command-centre below AI usage widgets.
+- Nav: AI Runtime Health, AI Orchestration Live, AI Bypass Register.
+- Existing AI Cost Governor, Runtime, Approvals routes remain.
+
+### User-facing reading guide
+- running = provider call in flight.
+- queued = preflighted, waiting on agent slot.
+- waiting_approval = high-risk external action held for founder; provider has not been called.
+- failed = provider returned an error or network failed. Retry safe for low/medium risk; high/critical must be re-issued.
+- bottleneck warning = system can still run, but a queue, budget, error rate or approval backlog needs attention.
+
+### Known limitations
+actual_cost_gbp depends on the pricing registry tagging rows; estimated_cost_gbp is the fallback. Average latency is per request, not weighted by tokens. Pause-on-cap is enforced at request time via budget checks, not via a separate worker; if a future worker pool is added it must respect the same caps. 13 functions still bypass the gateway and will not appear in these metrics until migrated.
+
+*End of AI Runtime Health Cockpit (v5.9.3).*
 `;
 };

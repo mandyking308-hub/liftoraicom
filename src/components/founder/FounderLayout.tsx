@@ -26,6 +26,7 @@ const navItems = [
   { label: "AI Cost Governor", to: "/founder/ai-cost", icon: Activity },
   { label: "AI Runtime", to: "/founder/ai-cost/runtime", icon: Cpu },
   { label: "AI Orchestration Live", to: "/founder/ai-cost/orchestration-live", icon: Activity },
+  { label: "AI Runtime Health", to: "/founder/ai-cost/health", icon: Activity },
   { label: "AI Co-Pilot", to: "/founder/copilot", icon: MessageSquare },
   { label: "AI Brain", to: "/founder/brain", icon: Brain },
   { label: "Decisions", to: "/founder/decisions", icon: Scale },
