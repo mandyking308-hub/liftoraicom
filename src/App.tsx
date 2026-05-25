@@ -127,6 +127,7 @@ import AILiveOperations from "./pages/founder/AILiveOperations";
 import AICostGovernorHub from "./pages/founder/AICostGovernorHub";
 import AIFounderActionBoard from "./pages/founder/AIFounderActionBoard";
 import AIRuntimeOrchestration from "./pages/founder/AIRuntimeOrchestration";
+import AIOrchestrationLive from "./pages/founder/AIOrchestrationLive";
 import DataIngestionCentre from "./pages/founder/DataIngestionCentre";
 import BrainSessions from "./pages/founder/BrainSessions";
 import BrainDrafts from "./pages/founder/BrainDrafts";
