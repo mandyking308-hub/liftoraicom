@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   AlertTriangle, ClipboardCheck, Activity, Bot, DollarSign, Send, MessageSquare,
   Users, FlaskConical, ShieldAlert, Briefcase, Banknote, Sparkles, ArrowRight, Phone, Flame, ShieldCheck,
+  Target,
 } from "lucide-react";
 
 type Tone = "danger" | "warn" | "good" | "default";
@@ -47,6 +48,7 @@ export default function WhatNeedsAttentionToday() {
         crmWarnings, socialApprovals, supportEscalations, financePending,
         portfolioApprovals, injectionEvents, testRecords, salesCloseApprovals, salesFollowUp,
         salesHotSignals, salesSafetyWarnings, salesReadyToBuy, salesEscalations, salesConsentIssues, salesHandoffs,
+        activeTargets, targetsBehind, targetsCritical,
       ] = await Promise.all([
         sb.from("founder_approval_items").select("id", head).eq("status", "pending"),
         sb.from("system_events").select("id", head).eq("resolved", false).in("severity", ["critical", "high"]),
@@ -71,6 +73,9 @@ export default function WhatNeedsAttentionToday() {
         sb.from("customer_sales_conversations").select("id", head).eq("conversation_status", "escalated"),
         sb.from("customer_sales_call_logs").select("id", head).eq("consent_recorded", false).not("transcript_text", "is", null),
         sb.from("customer_sales_human_handoff_tasks").select("id", head).eq("task_status", "open"),
+        sb.from("sales_revenue_targets").select("id", head).eq("active", true),
+        sb.from("sales_target_progress").select("id", head).eq("status", "behind"),
+        sb.from("sales_target_progress").select("id", head).eq("status", "critical"),
       ].map((p) => p.catch(() => ({ count: 0 }))));
       return {
         approvalsPending: approvalsPending?.count ?? 0,
@@ -96,6 +101,9 @@ export default function WhatNeedsAttentionToday() {
         salesEscalations: salesEscalations?.count ?? 0,
         salesConsentIssues: salesConsentIssues?.count ?? 0,
         salesHandoffs: salesHandoffs?.count ?? 0,
+        activeTargets: activeTargets?.count ?? 0,
+        targetsBehind: targetsBehind?.count ?? 0,
+        targetsCritical: targetsCritical?.count ?? 0,
       };
     },
   });
@@ -106,6 +114,7 @@ export default function WhatNeedsAttentionToday() {
     crmWarnings: 0, socialApprovals: 0, supportEscalations: 0, financePending: 0,
     portfolioApprovals: 0, injectionEvents: 0, testRecords: 0, salesCloseApprovals: 0, salesFollowUp: 0,
     salesHotSignals: 0, salesSafetyWarnings: 0, salesReadyToBuy: 0, salesEscalations: 0, salesConsentIssues: 0, salesHandoffs: 0,
+    activeTargets: 0, targetsBehind: 0, targetsCritical: 0,
   };
 
   const tone = (n: number, warn = 1, danger = 5): Tone =>
@@ -151,6 +160,9 @@ export default function WhatNeedsAttentionToday() {
             <Tile label="Sales escalations" value={d.salesEscalations} to="/founder/customer-sales/conversations" icon={AlertTriangle} tone={tone(d.salesEscalations)} />
             <Tile label="Consent gaps on calls" value={d.salesConsentIssues} to="/founder/customer-sales/call-logs" icon={ShieldAlert} tone={tone(d.salesConsentIssues)} />
             <Tile label="Human handoffs open" value={d.salesHandoffs} to="/founder/customer-sales/follow-up" icon={Users} tone={tone(d.salesHandoffs)} />
+            <Tile label="Active sales targets" value={d.activeTargets} to="/founder/sales-targets" icon={Target} tone={d.activeTargets > 0 ? "good" : "warn"} hint="reverse-engineered activity plan" />
+            <Tile label="Targets behind pace" value={d.targetsBehind} to="/founder/sales-targets/gaps" icon={Target} tone={d.targetsBehind > 0 ? "warn" : "good"} />
+            <Tile label="Targets critical" value={d.targetsCritical} to="/founder/sales-targets/gaps" icon={AlertTriangle} tone={d.targetsCritical > 0 ? "danger" : "good"} />
           </div>
         </CardContent>
       </Card>
