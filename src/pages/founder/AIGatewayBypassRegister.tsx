@@ -39,6 +39,8 @@ type AuditEntry = {
   sensitive: string;
   complexity: "simple" | "moderate" | "complex";
   action: string;
+  migration_status?: "pending" | "migrated" | "migrated_no_op" | "in_progress";
+  migration_notes?: string;
 };
 
 const META: Record<string, AuditEntry> = {
@@ -51,6 +53,8 @@ const META: Record<string, AuditEntry> = {
     drafts_external: false, sends_external: false, sensitive: "internal config",
     complexity: "simple",
     action: "Batch A — wrap call in callAIGateway helper; no behavioural change.",
+    migration_status: "migrated_no_op",
+    migration_notes: "Re-audit (v5.9): no AI call present. LOVABLE_API_KEY appears only in TRACKED_SECRETS for presence reporting. Removed from active bypass count.",
   },
   "ai-conversation-engine": {
     risk: "high", batch: "B", treatment: "migrate_carefully", active: "active",
@@ -119,6 +123,8 @@ const META: Record<string, AuditEntry> = {
     sensitive: "internal config",
     complexity: "simple",
     action: "Batch A — straightforward wrap.",
+    migration_status: "migrated_no_op",
+    migration_notes: "Re-audit (v5.9): no AI call present. References LOVABLE_API_KEY only for provider_status flag. Removed from active bypass count.",
   },
   "business-weekly-review-acceptance": {
     risk: "low", batch: "D", treatment: "deprecated_candidate", active: "likely_unused",
@@ -222,6 +228,8 @@ const META: Record<string, AuditEntry> = {
     sensitive: "intake text",
     complexity: "simple",
     action: "Batch A — wrap with helper; preserve streaming.",
+    migration_status: "migrated",
+    migration_notes: "v5.9: wrapped Vercel AI SDK call with beginGatewayLog/endGatewayLog. Calls now appear in ai_gateway_requests + ai_usage_ledger with trace_id/request_id. Behaviour unchanged; structured output preserved.",
   },
 };
 
