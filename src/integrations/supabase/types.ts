@@ -4404,6 +4404,45 @@ export type Database = {
           },
         ]
       }
+      bottleneck_alerts: {
+        Row: {
+          bottleneck_summary: string
+          bottleneck_type: string
+          business_id: string | null
+          created_at: string
+          id: string
+          metadata: Json
+          recommended_action: string | null
+          resolved_at: string | null
+          severity: string
+          status: string
+        }
+        Insert: {
+          bottleneck_summary: string
+          bottleneck_type: string
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          recommended_action?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+        }
+        Update: {
+          bottleneck_summary?: string
+          bottleneck_type?: string
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          recommended_action?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+        }
+        Relationships: []
+      }
       brain_insights: {
         Row: {
           created_at: string
@@ -8801,6 +8840,78 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      capacity_plans: {
+        Row: {
+          business_id: string | null
+          capacity_period_end: string
+          capacity_period_start: string
+          capacity_status: string
+          created_at: string
+          current_ai_actions: number
+          current_customers: number
+          current_human_hours: number
+          current_orders: number
+          current_projects: number
+          current_support_tickets: number
+          id: string
+          max_ai_actions: number
+          max_customers: number
+          max_human_hours: number
+          max_orders: number
+          max_projects: number
+          max_support_tickets: number
+          metadata: Json
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          capacity_period_end?: string
+          capacity_period_start?: string
+          capacity_status?: string
+          created_at?: string
+          current_ai_actions?: number
+          current_customers?: number
+          current_human_hours?: number
+          current_orders?: number
+          current_projects?: number
+          current_support_tickets?: number
+          id?: string
+          max_ai_actions?: number
+          max_customers?: number
+          max_human_hours?: number
+          max_orders?: number
+          max_projects?: number
+          max_support_tickets?: number
+          metadata?: Json
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          capacity_period_end?: string
+          capacity_period_start?: string
+          capacity_status?: string
+          created_at?: string
+          current_ai_actions?: number
+          current_customers?: number
+          current_human_hours?: number
+          current_orders?: number
+          current_projects?: number
+          current_support_tickets?: number
+          id?: string
+          max_ai_actions?: number
+          max_customers?: number
+          max_human_hours?: number
+          max_orders?: number
+          max_projects?: number
+          max_support_tickets?: number
+          metadata?: Json
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       cashflow_forecast_items: {
         Row: {
@@ -45638,6 +45749,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      workload_items: {
+        Row: {
+          assigned_to: string | null
+          assigned_to_type: string
+          business_id: string | null
+          created_at: string
+          due_at: string | null
+          estimated_hours: number
+          id: string
+          metadata: Json
+          priority: string
+          source_record_id: string | null
+          source_type: string
+          updated_at: string
+          workload_name: string
+          workload_status: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          assigned_to_type?: string
+          business_id?: string | null
+          created_at?: string
+          due_at?: string | null
+          estimated_hours?: number
+          id?: string
+          metadata?: Json
+          priority?: string
+          source_record_id?: string | null
+          source_type: string
+          updated_at?: string
+          workload_name: string
+          workload_status?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          assigned_to_type?: string
+          business_id?: string | null
+          created_at?: string
+          due_at?: string | null
+          estimated_hours?: number
+          id?: string
+          metadata?: Json
+          priority?: string
+          source_record_id?: string | null
+          source_type?: string
+          updated_at?: string
+          workload_name?: string
+          workload_status?: string
+        }
+        Relationships: []
       }
     }
     Views: {
