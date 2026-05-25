@@ -4937,6 +4937,137 @@ export type Database = {
           },
         ]
       }
+      business_archetype_assignments: {
+        Row: {
+          audit_metadata: Json
+          business_id: string
+          confidence_score: number
+          created_at: string
+          founder_confirmed: boolean
+          founder_confirmed_at: string | null
+          id: string
+          primary_archetype_id: string | null
+          reason_summary: string | null
+          secondary_archetype_ids: string[]
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id: string
+          confidence_score?: number
+          created_at?: string
+          founder_confirmed?: boolean
+          founder_confirmed_at?: string | null
+          id?: string
+          primary_archetype_id?: string | null
+          reason_summary?: string | null
+          secondary_archetype_ids?: string[]
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string
+          confidence_score?: number
+          created_at?: string
+          founder_confirmed?: boolean
+          founder_confirmed_at?: string | null
+          id?: string
+          primary_archetype_id?: string | null
+          reason_summary?: string | null
+          secondary_archetype_ids?: string[]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_archetype_assignments_primary_archetype_id_fkey"
+            columns: ["primary_archetype_id"]
+            isOneToOne: false
+            referencedRelation: "business_archetypes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_archetype_questions: {
+        Row: {
+          answer: string | null
+          answer_source: string
+          business_id: string
+          confidence_score: number
+          created_at: string
+          id: string
+          question: string
+          updated_at: string
+        }
+        Insert: {
+          answer?: string | null
+          answer_source?: string
+          business_id: string
+          confidence_score?: number
+          created_at?: string
+          id?: string
+          question: string
+          updated_at?: string
+        }
+        Update: {
+          answer?: string | null
+          answer_source?: string
+          business_id?: string
+          confidence_score?: number
+          created_at?: string
+          id?: string
+          question?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      business_archetypes: {
+        Row: {
+          active: boolean
+          archetype_code: string
+          archetype_name: string
+          created_at: string
+          default_agents: Json
+          default_compliance_flags: Json
+          default_exit_metrics: Json
+          default_integrations: Json
+          default_kpis: Json
+          default_operating_model: Json
+          description: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          archetype_code: string
+          archetype_name: string
+          created_at?: string
+          default_agents?: Json
+          default_compliance_flags?: Json
+          default_exit_metrics?: Json
+          default_integrations?: Json
+          default_kpis?: Json
+          default_operating_model?: Json
+          description?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          archetype_code?: string
+          archetype_name?: string
+          created_at?: string
+          default_agents?: Json
+          default_compliance_flags?: Json
+          default_exit_metrics?: Json
+          default_integrations?: Json
+          default_kpis?: Json
+          default_operating_model?: Json
+          description?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       business_autopilot_settings: {
         Row: {
           ai_classification_allowed: boolean
