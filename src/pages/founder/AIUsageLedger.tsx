@@ -153,7 +153,16 @@ export default function AIUsageLedger() {
     const total = rows.reduce((s, r) => s + Number(r.estimated_cost ?? 0), 0);
     const failed = rows.filter((r) => r.status === "failed").length;
     const review = rows.filter((r) => r.status === "human_review_required").length;
-    return { count: rows.length, total, failed, review };
+    const actualKnown = rows
+      .filter((r) => r.actual_cost_gbp != null && Number(r.actual_cost_gbp) > 0)
+      .reduce((s, r) => s + Number(r.actual_cost_gbp ?? 0), 0);
+    const estimatedOnly = rows
+      .filter((r) => r.actual_cost_gbp == null || Number(r.actual_cost_gbp) === 0)
+      .reduce((s, r) => s + Number(r.estimated_cost ?? 0), 0);
+    const pricingMissing = rows.filter(
+      (r) => String(r.cost_basis ?? "").toLowerCase() === "pricing_missing",
+    ).length;
+    return { count: rows.length, total, failed, review, actualKnown, estimatedOnly, pricingMissing };
   }, [rows]);
 
   return (
@@ -174,9 +183,12 @@ export default function AIUsageLedger() {
         </div>
 
         {/* Totals */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
           <Stat label="Rows" value={totals.count.toLocaleString()} />
           <Stat label="Total cost (window)" value={formatGBP(totals.total)} />
+          <Stat label="Actual cost (known)" value={formatGBP(totals.actualKnown)} />
+          <Stat label="Estimated only" value={formatGBP(totals.estimatedOnly)} tone={totals.estimatedOnly > 0 ? "warn" : undefined} />
+          <Stat label="Pricing missing" value={totals.pricingMissing.toString()} tone={totals.pricingMissing > 0 ? "danger" : undefined} />
           <Stat label="Failed" value={totals.failed.toString()} tone={totals.failed > 0 ? "danger" : undefined} />
           <Stat label="Human review required" value={totals.review.toString()} tone={totals.review > 0 ? "warn" : undefined} />
         </div>
