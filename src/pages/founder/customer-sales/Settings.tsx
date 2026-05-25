@@ -15,11 +15,16 @@ export default function CustomerSalesSettings() {
     queryKey: ["cs-settings"],
     queryFn: async () => {
       const sb: any = supabase;
-      const [providers, knowledge] = await Promise.all([
+      const [providers, knowledge, closeProviders] = await Promise.all([
         sb.from("customer_sales_provider_settings").select("*"),
         sb.from("customer_sales_knowledge_sources").select("*").order("created_at", { ascending: false }).limit(20),
+        sb.from("customer_sales_close_provider_settings").select("*").order("provider_label"),
       ].map(p => p.catch(() => ({ data: [] }))));
-      return { providers: (providers.data ?? []) as any[], knowledge: (knowledge.data ?? []) as any[] };
+      return {
+        providers: (providers.data ?? []) as any[],
+        knowledge: (knowledge.data ?? []) as any[],
+        closeProviders: (closeProviders.data ?? []) as any[],
+      };
     },
   });
 
@@ -72,6 +77,27 @@ export default function CustomerSalesSettings() {
               <li key={k.id} className="rounded border border-border/40 bg-background/40 p-2 flex items-center justify-between gap-2">
                 <span>{k.title} <span className="text-muted-foreground">— {k.source_type}</span></span>
                 <Badge variant="outline" className="text-[10px]">{k.verified_by_founder ? "verified" : "unverified"}</Badge>
+              </li>
+            ))}
+          </ul>
+        )}
+      </CSSection>
+
+      <CSSection title="Close-engine providers" description="Placeholders for Stripe, invoicing, DocuSign / Dropbox Sign, calendar booking and email follow-up. No secrets stored here yet. External sends remain approval-gated until activation.">
+        {(data?.closeProviders ?? []).length === 0 ? (
+          <CSEmptyState title="No close providers seeded" />
+        ) : (
+          <ul className="grid sm:grid-cols-2 gap-2">
+            {(data?.closeProviders ?? []).map((p: any) => (
+              <li key={p.id} className="rounded border border-border/40 bg-background/40 p-2 text-[11px] space-y-0.5">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-sm font-medium">{p.provider_label}</span>
+                  <Badge variant="outline" className={`text-[10px] ${p.configured ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30" : "bg-muted text-muted-foreground"}`}>
+                    {p.configured ? "configured" : "not configured"}
+                  </Badge>
+                </div>
+                <div className="text-muted-foreground">{p.provider_category} · pre-approved rule: {p.pre_approved_rule_allowed ? "allowed" : "no"}</div>
+                {p.next_setup_action && <div className="text-primary/80"><span className="font-semibold">Next:</span> {p.next_setup_action}</div>}
               </li>
             ))}
           </ul>
