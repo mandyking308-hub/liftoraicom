@@ -140,7 +140,9 @@ export default function LiftorBrainPanel({ businessId = null, businessName }: Pr
               <Badge className="bg-blue-500/15 text-blue-300 border-blue-500/30 gap-1">
                 <Lock size={12} /> External actions locked
               </Badge>
+              <Badge variant="outline" className="text-xs">Route: Lovable AI Gateway</Badge>
               <Badge variant="outline" className="text-xs">model: {defaultModel}</Badge>
+              <Badge variant="outline" className="text-xs">fallback: google/gemini-3-flash-preview</Badge>
               {businessName ? <Badge variant="outline" className="text-xs">Business: {businessName}</Badge> : <Badge variant="outline" className="text-xs">Portfolio-wide</Badge>}
             </div>
           </div>
@@ -149,12 +151,17 @@ export default function LiftorBrainPanel({ businessId = null, businessName }: Pr
           </p>
         </CardHeader>
         <CardContent className="space-y-3">
-          {providerStatus === "not_configured" && (
+          {providerStatus === "not_configured" ? (
             <div className="rounded-md border border-yellow-500/30 bg-yellow-500/10 text-yellow-200 text-xs p-3 flex items-start gap-2">
               <AlertTriangle size={14} className="mt-0.5" />
               <div>
-                OpenAI provider not configured. Add <code className="px-1 rounded bg-background/50">OPENAI_API_KEY</code> as a Supabase Edge Function secret to enable the Brain. Until then, asking will return a fail-closed message — no model call is made.
+                Lovable AI Gateway is not reachable from this environment. Brain is fail-closed — no model call is made.
+                <code className="px-1 mx-1 rounded bg-background/50">LOVABLE_API_KEY</code> is auto-provisioned by Lovable; contact support if missing.
               </div>
+            </div>
+          ) : (
+            <div className="rounded-md border border-emerald-500/30 bg-emerald-500/10 text-emerald-200 text-xs p-3">
+              Brain status: <strong>Gateway Controlled</strong> · Direct AI bypasses: <strong>0</strong>
             </div>
           )}
 
