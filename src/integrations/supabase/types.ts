@@ -10148,6 +10148,48 @@ export type Database = {
         }
         Relationships: []
       }
+      consent_records: {
+        Row: {
+          business_id: string | null
+          consent_source: string | null
+          consent_status: string
+          consent_text: string | null
+          consent_type: string
+          consented_at: string | null
+          contact_id: string | null
+          created_at: string
+          id: string
+          updated_at: string
+          withdrawn_at: string | null
+        }
+        Insert: {
+          business_id?: string | null
+          consent_source?: string | null
+          consent_status?: string
+          consent_text?: string | null
+          consent_type?: string
+          consented_at?: string | null
+          contact_id?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          withdrawn_at?: string | null
+        }
+        Update: {
+          business_id?: string | null
+          consent_source?: string | null
+          consent_status?: string
+          consent_text?: string | null
+          consent_type?: string
+          consented_at?: string | null
+          contact_id?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          withdrawn_at?: string | null
+        }
+        Relationships: []
+      }
       contact_compliance_events: {
         Row: {
           actor: string
@@ -16957,6 +16999,42 @@ export type Database = {
           request_status?: string
           request_summary?: string | null
           request_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      data_retention_rules: {
+        Row: {
+          active: boolean
+          business_id: string | null
+          created_at: string
+          data_category: string
+          deletion_action: string
+          id: string
+          legal_basis: string | null
+          retention_period_days: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          business_id?: string | null
+          created_at?: string
+          data_category: string
+          deletion_action?: string
+          id?: string
+          legal_basis?: string | null
+          retention_period_days?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          business_id?: string | null
+          created_at?: string
+          data_category?: string
+          deletion_action?: string
+          id?: string
+          legal_basis?: string | null
+          retention_period_days?: number
           updated_at?: string
         }
         Relationships: []
@@ -30257,6 +30335,105 @@ export type Database = {
         }
         Relationships: []
       }
+      privacy_breach_events: {
+        Row: {
+          audit_metadata: Json
+          breach_status: string
+          business_id: string | null
+          contained_at: string | null
+          created_at: string
+          data_affected: string | null
+          discovered_at: string
+          event_summary: string
+          founder_approval_required: boolean
+          id: string
+          people_affected_count: number | null
+          reported_at: string | null
+          severity: string
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          breach_status?: string
+          business_id?: string | null
+          contained_at?: string | null
+          created_at?: string
+          data_affected?: string | null
+          discovered_at?: string
+          event_summary: string
+          founder_approval_required?: boolean
+          id?: string
+          people_affected_count?: number | null
+          reported_at?: string | null
+          severity?: string
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          breach_status?: string
+          business_id?: string | null
+          contained_at?: string | null
+          created_at?: string
+          data_affected?: string | null
+          discovered_at?: string
+          event_summary?: string
+          founder_approval_required?: boolean
+          id?: string
+          people_affected_count?: number | null
+          reported_at?: string | null
+          severity?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      privacy_requests: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          completed_at: string | null
+          created_at: string
+          due_date: string | null
+          founder_approval_required: boolean
+          id: string
+          identity_verified: boolean
+          request_status: string
+          request_type: string
+          requester_contact_id: string | null
+          response_summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          due_date?: string | null
+          founder_approval_required?: boolean
+          id?: string
+          identity_verified?: boolean
+          request_status?: string
+          request_type?: string
+          requester_contact_id?: string | null
+          response_summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          due_date?: string | null
+          founder_approval_required?: boolean
+          id?: string
+          identity_verified?: boolean
+          request_status?: string
+          request_type?: string
+          requester_contact_id?: string | null
+          response_summary?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       process_documents: {
         Row: {
           category: string
@@ -30392,6 +30569,45 @@ export type Database = {
           id?: string
           name?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      processor_register: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          data_processed: string | null
+          dpa_status: string
+          id: string
+          processor_name: string
+          review_status: string
+          risk_level: string
+          updated_at: string
+          vendor_id: string | null
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          data_processed?: string | null
+          dpa_status?: string
+          id?: string
+          processor_name: string
+          review_status?: string
+          risk_level?: string
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          data_processed?: string | null
+          dpa_status?: string
+          id?: string
+          processor_name?: string
+          review_status?: string
+          risk_level?: string
+          updated_at?: string
+          vendor_id?: string | null
         }
         Relationships: []
       }
