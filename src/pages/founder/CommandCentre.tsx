@@ -818,8 +818,17 @@ const CommandCentre = () => {
       <div className="max-w-7xl mx-auto px-4 pt-4"><LiftorBuildPhaseCloseoutPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><Phase23LaunchPathPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><ManualsHierarchyPanel /></div>
-      <div className="max-w-7xl mx-auto px-4 pt-4"><BusinessRehearsalSimulationPanel /></div>
-      <div className="max-w-7xl mx-auto px-4 pt-4"><PreLiveBaselineControlPanel /></div>
+      <div className="max-w-7xl mx-auto px-4 pt-4">
+        <Collapsible>
+          <CollapsibleTrigger className="w-full text-left text-xs px-3 py-2 rounded-md border border-border/60 bg-background/40 hover:border-primary/60">
+            Optional rehearsal &amp; baseline tools (simulation — not the default operating mode)
+          </CollapsibleTrigger>
+          <CollapsibleContent className="space-y-3 pt-3">
+            <BusinessRehearsalSimulationPanel />
+            <PreLiveBaselineControlPanel />
+          </CollapsibleContent>
+        </Collapsible>
+      </div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><RevenueTargetOperatingPanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><BusinessValuationIntelligencePanel /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><BusinessKnowledgeUploadTrainingPanel /></div>
