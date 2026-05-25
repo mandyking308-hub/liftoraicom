@@ -41,6 +41,8 @@ export type AIGatewayCallInput = {
   idempotency_key?: string | null;
   priority?: number;
   fallback_model?: string;
+  /** OpenAI-compatible response_format passthrough (e.g. {type:"json_object"}). */
+  response_format?: any;
 };
 
 export type AIGatewayCallResult = {
@@ -496,6 +498,7 @@ export async function callAIGateway(input: AIGatewayCallInput): Promise<AIGatewa
           tool_choice: input.tool_choice,
           reasoning: input.reasoning,
           stream: !!input.stream,
+          ...(input.response_format ? { response_format: input.response_format } : {}),
         }),
       });
     } catch (e: any) {
