@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { beginGatewayLog, endGatewayLog } from "../_shared/aiGateway.ts";
+import { callAIGateway } from "../_shared/aiGateway.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -293,7 +293,6 @@ Deno.serve(async (req) => {
     content: m.message_text,
   }));
 
-  const lovableKey = Deno.env.get("LOVABLE_API_KEY");
   let assistantText = "";
   let parsed: any = null;
   let usage: any = null;
@@ -312,58 +311,40 @@ Deno.serve(async (req) => {
     assistantText = parsed.answer;
   } else {
     try {
-      // Migrated: route via approved Lovable AI Gateway (no direct OpenAI call).
       const rawModel = (default_model || "gpt-5.5").trim();
       const model = rawModel.includes("/") ? rawModel : `openai/${rawModel}`;
       const fallback_model = "google/gemini-3-flash-preview";
-      const gwInput = {
+      const gw = await callAIGateway({
         action_type: "liftor_brain_chat",
         task_category: "brain_chat",
         business_id,
         user_id: u.user.id,
         model,
         fallback_model,
-        risk_level: "medium" as const,
+        risk_level: "medium",
         request_type: "brain_chat",
         conversation_id: session.id,
-        messages: [],
+        response_format: { type: "json_object" },
+        messages: [
+          { role: "system", content: systemPrompt },
+          ...threadMsgs,
+          { role: "user", content: user_message },
+        ],
         metadata: { requested_mode, context_type },
-      };
-      const __log = await beginGatewayLog(gwInput);
-      let r: Response;
-      try {
-        r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableKey}` },
-          body: JSON.stringify({
-            model,
-            messages: [
-              { role: "system", content: systemPrompt },
-              ...threadMsgs,
-              { role: "user", content: user_message },
-            ],
-            response_format: { type: "json_object" },
-          }),
-        });
-      } catch (e) {
-        await endGatewayLog({ ...__log, input: gwInput }, { ok: false, error: (e as Error).message });
-        throw e;
-      }
-      const data = await r.json();
-      if (!r.ok) {
-        aiError = data?.error?.message ?? `gateway_http_${r.status}`;
-        await endGatewayLog({ ...__log, input: gwInput }, { ok: false, error: aiError });
-        if (r.status === 429) aiError = "Rate limit. Try again shortly.";
-        if (r.status === 402) aiError = "AI credits exhausted.";
-      } else {
-        assistantText = data?.choices?.[0]?.message?.content ?? "";
-        usage = data?.usage ?? null;
+      });
+      if (gw.status === "completed" && gw.data) {
+        assistantText = gw.data?.choices?.[0]?.message?.content ?? "";
+        usage = gw.data?.usage ?? {
+          prompt_tokens: gw.prompt_tokens ?? 0,
+          completion_tokens: gw.completion_tokens ?? 0,
+        };
         parsed = safeJsonParse(assistantText);
-        await endGatewayLog({ ...__log, input: gwInput }, {
-          ok: true,
-          prompt_tokens: usage?.prompt_tokens ?? 0,
-          completion_tokens: usage?.completion_tokens ?? 0,
-        });
+      } else if (gw.status === "rate_limited") {
+        aiError = "Rate limit. Try again shortly.";
+      } else if (gw.status === "payment_required") {
+        aiError = "AI credits exhausted.";
+      } else {
+        aiError = gw.error ?? `gateway_http_${gw.http_status}`;
       }
     } catch (e) {
       aiError = (e as Error).message;
