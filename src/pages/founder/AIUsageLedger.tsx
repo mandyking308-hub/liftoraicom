@@ -351,7 +351,16 @@ export default function AIUsageLedger() {
                         {r.model_tier ? <Badge variant="outline" className={tierVariant[r.model_tier]}>{r.model_tier}</Badge> : "—"}
                       </TableCell>
                       <TableCell className="text-xs">{r.model_used ?? "—"}</TableCell>
-                      <TableCell className="text-right text-xs">{formatGBP(r.estimated_cost ?? 0)}</TableCell>
+                      <TableCell className="text-right text-xs">
+                        <div className="flex flex-col items-end gap-1">
+                          <span>{formatGBP(Number(r.actual_cost_gbp ?? r.estimated_cost ?? 0))}</span>
+                          <CostConfidenceBadge
+                            cost_basis={r.cost_basis}
+                            actual_cost_gbp={r.actual_cost_gbp}
+                            estimated_cost={r.estimated_cost}
+                          />
+                        </div>
+                      </TableCell>
                       <TableCell>
                         {r.status ? <Badge variant="outline" className={statusVariant[r.status]}>{r.status}</Badge> : "—"}
                       </TableCell>
