@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link as RLink } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Brain, Plus, Lock, AlertTriangle, ArrowRight } from "lucide-react";
+import { Brain, Plus, Lock, AlertTriangle, ArrowRight, FileText, User } from "lucide-react";
 import { CSLayout, CSEmptyState, CSSection } from "./_shared";
 
 const STAGES = [
@@ -61,21 +62,36 @@ export default function Conversations() {
               <thead>
                 <tr className="text-left text-muted-foreground border-b border-border/50">
                   <th className="py-2 px-2">Customer</th>
+                  <th className="py-2 px-2">Channel</th>
+                  <th className="py-2 px-2">Dir</th>
                   <th className="py-2 px-2">Status</th>
                   <th className="py-2 px-2">Qual</th>
                   <th className="py-2 px-2">Close</th>
                   <th className="py-2 px-2">Next action</th>
+                  <th className="py-2 px-2">Flags</th>
                   <th />
                 </tr>
               </thead>
               <tbody>
                 {conversations.map((r: any) => (
                   <tr key={r.id} className="border-b border-border/30 hover:bg-background/40">
-                    <td className="py-2 px-2">{r.customer_name ?? r.customer_email ?? r.customer_phone ?? "—"}</td>
+                    <td className="py-2 px-2">
+                      {r.customer_name ?? r.customer_email ?? r.customer_phone ?? "—"}
+                      {r.test_label === "LIVE_INTERNAL_TEST" && <Badge variant="outline" className="ml-1 text-[9px] bg-blue-500/10 text-blue-300 border-blue-500/30">TEST</Badge>}
+                    </td>
+                    <td className="py-2 px-2 text-muted-foreground">{r.channel}</td>
+                    <td className="py-2 px-2 text-muted-foreground">{r.direction}</td>
                     <td className="py-2 px-2"><Badge variant="outline" className="text-[10px]">{r.conversation_status}</Badge></td>
                     <td className="py-2 px-2">{r.qualification_score == null ? "—" : Number(r.qualification_score).toFixed(0)}</td>
                     <td className="py-2 px-2">{r.close_probability == null ? "—" : `${Math.round(Number(r.close_probability) * 100)}%`}</td>
                     <td className="py-2 px-2 truncate max-w-[260px]">{r.recommended_next_action ?? "—"}</td>
+                    <td className="py-2 px-2">
+                      <div className="flex gap-1">
+                        {r.founder_approval_required && <Badge variant="outline" className="text-[9px] bg-yellow-500/10 text-yellow-300 border-yellow-500/30">approval</Badge>}
+                        {r.external_action_locked && <Badge variant="outline" className="text-[9px]"><Lock size={8} className="mr-0.5" />locked</Badge>}
+                        {(r.buying_signals?.length ?? 0) > 0 && <Badge variant="outline" className="text-[9px] bg-emerald-500/10 text-emerald-300 border-emerald-500/30">{r.buying_signals.length} signals</Badge>}
+                      </div>
+                    </td>
                     <td className="py-2 px-2 text-right">
                       <Button size="sm" variant="outline" onClick={() => setSelected(r)}><Brain size={12} className="mr-1" />Brain</Button>
                     </td>
