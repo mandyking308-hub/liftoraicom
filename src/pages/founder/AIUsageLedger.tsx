@@ -23,6 +23,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import { Activity, CalendarIcon, ShieldCheck, AlertTriangle, RefreshCw } from "lucide-react";
 import { formatGBP } from "@/services/aiUsageLogger";
+import CostConfidenceBadge from "@/components/founder/ai/CostConfidenceBadge";
 
 type LedgerRow = {
   id: string;
@@ -57,6 +58,8 @@ type LedgerRow = {
   confidence_score: number | null;
   error_message: string | null;
   audit_metadata: Record<string, unknown> | null;
+  cost_basis?: string | null;
+  actual_cost_gbp?: number | null;
 };
 
 const TIERS = ["no_ai", "cheap", "standard", "premium", "human_required"];
