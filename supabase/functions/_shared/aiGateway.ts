@@ -55,6 +55,8 @@ export type AIGatewayCallResult = {
   used_fallback?: boolean;
   approval_required?: boolean;
   duplicate_prevented?: boolean;
+  lease_blocked?: boolean;
+  lease_reason?: string;
 };
 
 function newTraceId() {
@@ -99,28 +101,78 @@ async function recordRuntimeEvent(
   } catch (_) { /* best-effort */ }
 }
 
-/** Per-agent concurrency / status / budget check. Logical control, not a global lock. */
-async function preflightAgent(
+/** Resolve agent status/models and capacities without taking a lock. */
+async function loadAgentMeta(
   sb: any,
   agent_id: string | null | undefined,
-): Promise<{ ok: boolean; reason?: string; primary_model?: string; fallback_model?: string }> {
-  if (!sb || !agent_id) return { ok: true };
+): Promise<{ ok: boolean; reason?: string; primary_model?: string; fallback_model?: string; capacity?: number }> {
+  if (!sb || !agent_id) return { ok: true, capacity: 0 };
   try {
-    const { data: agent } = await sb.from("ai_agent_registry").select("*").eq("id", agent_id).maybeSingle();
-    if (!agent) return { ok: true };
+    const { data: agent } = await sb.from("ai_agent_registry").select("status,primary_model,fallback_model,max_concurrency").eq("id", agent_id).maybeSingle();
+    if (!agent) return { ok: true, capacity: 0 };
     if (agent.status !== "active") return { ok: false, reason: `agent_${agent.status}` };
-    const { count } = await sb
-      .from("ai_gateway_requests")
-      .select("id", { head: true, count: "exact" })
-      .eq("agent_id", agent_id)
-      .in("status", ["queued", "running"]);
-    if ((count ?? 0) >= (agent.max_concurrency ?? 4)) {
-      return { ok: false, reason: "agent_concurrency_limit" };
-    }
-    return { ok: true, primary_model: agent.primary_model, fallback_model: agent.fallback_model };
+    return {
+      ok: true,
+      primary_model: agent.primary_model,
+      fallback_model: agent.fallback_model,
+      capacity: Number(agent.max_concurrency ?? 4),
+    };
   } catch {
-    return { ok: true };
+    return { ok: true, capacity: 0 };
   }
+}
+
+async function loadBusinessCapacity(sb: any, business_id: string | null | undefined): Promise<number> {
+  if (!sb || !business_id) return 0;
+  try {
+    const { data } = await sb
+      .from("ai_business_budgets")
+      .select("max_concurrent_requests")
+      .eq("business_id", business_id)
+      .maybeSingle();
+    return Number(data?.max_concurrent_requests ?? 25);
+  } catch {
+    return 25;
+  }
+}
+
+/** Acquire a strict concurrency lease via the atomic Postgres function. */
+export async function acquireLease(
+  sb: any,
+  args: {
+    request_id: string;
+    agent_id?: string | null;
+    business_id?: string | null;
+    agent_capacity: number;
+    business_capacity: number;
+    provider?: string;
+    model?: string;
+    ttl_seconds?: number;
+  },
+): Promise<{ ok: boolean; reason?: string; expires_at?: string }> {
+  if (!sb) return { ok: true };
+  try {
+    const { data, error } = await sb.rpc("acquire_ai_lease", {
+      _request_id: args.request_id,
+      _agent_id: args.agent_id ?? null,
+      _business_id: args.business_id ?? null,
+      _agent_capacity: args.agent_capacity ?? 0,
+      _business_capacity: args.business_capacity ?? 0,
+      _provider: args.provider ?? "lovable-ai-gateway",
+      _model: args.model ?? null,
+      _ttl_seconds: args.ttl_seconds ?? 180,
+    });
+    if (error) return { ok: true, reason: `lease_rpc_error:${error.message}` };
+    return data as any;
+  } catch (e: any) {
+    // Fail-open: never crash the UI because of lease infrastructure
+    return { ok: true, reason: `lease_exception:${String(e?.message ?? e)}` };
+  }
+}
+
+export async function releaseLease(sb: any, request_id: string, ok: boolean) {
+  if (!sb) return;
+  try { await sb.rpc("release_ai_lease", { _request_id: request_id, _ok: ok }); } catch { /* best-effort */ }
 }
 
 function getServiceClient() {
@@ -169,26 +221,46 @@ export async function callAIGateway(input: AIGatewayCallInput): Promise<AIGatewa
     try {
       const { data: existing } = await sb
         .from("ai_gateway_requests")
-        .select("request_id,status,prompt_tokens,completion_tokens,trace_id,error_message")
+        .select("request_id,status,prompt_tokens,completion_tokens,trace_id,error_message,started_at,created_at")
         .eq("idempotency_key", input.idempotency_key)
+        .order("created_at", { ascending: false })
+        .limit(1)
         .maybeSingle();
       if (existing) {
-        return {
-          trace_id: existing.trace_id ?? trace_id,
-          request_id: existing.request_id,
-          status: existing.status === "completed" ? "completed" : "failed",
-          http_status: existing.status === "completed" ? 200 : 409,
-          duplicate_prevented: true,
-          prompt_tokens: existing.prompt_tokens ?? undefined,
-          completion_tokens: existing.completion_tokens ?? undefined,
-          error: existing.error_message ?? undefined,
-        };
+        // Completed → return existing result (safe). Running → block duplicate. Failed → allow safe retry (fall through).
+        if (existing.status === "completed") {
+          await recordRuntimeEvent(sb, {
+            request_id: existing.request_id, event_type: "idempotency_replay",
+            severity: "info", message: "Returned existing completed result for idempotency_key",
+            metadata: { idempotency_key: input.idempotency_key },
+          });
+          return {
+            trace_id: existing.trace_id ?? trace_id,
+            request_id: existing.request_id,
+            status: "completed", http_status: 200, duplicate_prevented: true,
+            prompt_tokens: existing.prompt_tokens ?? undefined,
+            completion_tokens: existing.completion_tokens ?? undefined,
+          };
+        }
+        if (["running", "queued", "waiting_approval"].includes(existing.status)) {
+          await recordRuntimeEvent(sb, {
+            request_id: existing.request_id, event_type: "idempotency_duplicate_blocked",
+            severity: "warning", message: "Duplicate request blocked while original is in-flight",
+            metadata: { idempotency_key: input.idempotency_key, original_status: existing.status },
+          });
+          return {
+            trace_id: existing.trace_id ?? trace_id,
+            request_id: existing.request_id,
+            status: "completed", http_status: 202, duplicate_prevented: true,
+          };
+        }
+        // failed / cancelled → allow retry below
       }
     } catch { /* fall through */ }
   }
 
-  // Per-agent preflight (status + concurrency).
-  const pre = await preflightAgent(sb, input.agent_id ?? null);
+  // Resolve agent meta + business capacity, then acquire strict lease.
+  const pre = await loadAgentMeta(sb, input.agent_id ?? null);
   if (!pre.ok) {
     await recordRuntimeRequest(sb, {
       request_id, conversation_id: input.conversation_id ?? null,
@@ -248,6 +320,49 @@ export async function callAIGateway(input: AIGatewayCallInput): Promise<AIGatewa
     return { trace_id, request_id, status: "failed", http_status: 500, error: "LOVABLE_API_KEY not configured" };
   }
 
+  // ---- Strict concurrency lease (atomic in Postgres) ----
+  const businessCapacity = await loadBusinessCapacity(sb, input.business_id ?? null);
+  const primaryModel = input.model ?? pre.primary_model ?? "google/gemini-3-flash-preview";
+  const fallbackModel = input.fallback_model ?? pre.fallback_model ?? null;
+  const lease = await acquireLease(sb, {
+    request_id,
+    agent_id: input.agent_id ?? null,
+    business_id: input.business_id ?? null,
+    agent_capacity: pre.capacity ?? 0,
+    business_capacity: businessCapacity,
+    provider: "lovable-ai-gateway",
+    model: primaryModel,
+    ttl_seconds: 180,
+  });
+  if (!lease.ok) {
+    await recordRuntimeRequest(sb, {
+      request_id, conversation_id: input.conversation_id ?? null,
+      workflow_id: input.workflow_id ?? null, agent_id: input.agent_id ?? null,
+      portfolio_asset_id: input.portfolio_asset_id ?? null, business_id: input.business_id ?? null,
+      user_id: input.user_id ?? null,
+      request_type: input.request_type ?? input.action_type,
+      provider: "lovable-ai-gateway", model: primaryModel,
+      prompt_version: input.prompt_version ?? null,
+      risk_level: input.risk_level ?? "low",
+      approval_required: !!input.approval_required,
+      status: "queued", priority: input.priority ?? 5,
+      idempotency_key: input.idempotency_key ?? null,
+      trace_id, error_message: lease.reason,
+      metadata: { ...(input.metadata ?? {}), lease_blocked: true, lease_reason: lease.reason },
+    });
+    await recordRuntimeEvent(sb, {
+      request_id, conversation_id: input.conversation_id ?? null,
+      agent_id: input.agent_id ?? null, business_id: input.business_id ?? null,
+      event_type: "lease_denied", severity: "warning",
+      message: lease.reason, metadata: { reason: lease.reason },
+    });
+    return {
+      trace_id, request_id, status: "rate_limited", http_status: 429,
+      error: `Concurrency limit reached (${lease.reason}). Try again shortly.`,
+      lease_blocked: true, lease_reason: lease.reason,
+    };
+  }
+
   await writeLedger(trace_id, input, { status: "pending", input_summary: input.action_type });
   const startedAt = new Date().toISOString();
   await recordRuntimeRequest(sb, {
@@ -257,17 +372,15 @@ export async function callAIGateway(input: AIGatewayCallInput): Promise<AIGatewa
     user_id: input.user_id ?? null,
     request_type: input.request_type ?? input.action_type,
     provider: "lovable-ai-gateway",
-    model: input.model ?? pre.primary_model ?? "google/gemini-3-flash-preview",
+    model: primaryModel,
     prompt_version: input.prompt_version ?? null,
     risk_level: input.risk_level ?? "low",
     approval_required: !!input.approval_required,
     status: "running", priority: input.priority ?? 5,
     idempotency_key: input.idempotency_key ?? null,
-    started_at: startedAt, trace_id, metadata: input.metadata ?? {},
+    started_at: startedAt, trace_id,
+    metadata: { ...(input.metadata ?? {}), lease_expires_at: lease.expires_at ?? null },
   });
-
-  const primaryModel = input.model ?? pre.primary_model ?? "google/gemini-3-flash-preview";
-  const fallbackModel = input.fallback_model ?? pre.fallback_model ?? null;
 
   const doCall = async (modelToUse: string): Promise<Response | { error: string }> => {
     try {
@@ -306,6 +419,7 @@ export async function callAIGateway(input: AIGatewayCallInput): Promise<AIGatewa
     await writeLedger(trace_id, input, { status: "failed", output_summary: `network: ${err}` });
     await updateRuntimeRequest(sb, request_id, { status: "failed", completed_at: new Date().toISOString(), error_message: err });
     await recordRuntimeEvent(sb, { request_id, event_type: "network_error", severity: "error", message: err });
+    await releaseLease(sb, request_id, false);
     return { trace_id, request_id, status: "failed", http_status: 0, error: err, used_fallback: usedFallback };
   }
 
@@ -313,12 +427,14 @@ export async function callAIGateway(input: AIGatewayCallInput): Promise<AIGatewa
     await writeLedger(trace_id, input, { status: "failed", output_summary: "rate_limited" });
     await updateRuntimeRequest(sb, request_id, { status: "failed", completed_at: new Date().toISOString(), error_message: "rate_limited" });
     await recordRuntimeEvent(sb, { request_id, event_type: "rate_limited", severity: "warning" });
+    await releaseLease(sb, request_id, false);
     return { trace_id, request_id, status: "rate_limited", http_status: 429, error: "Rate limit exceeded", used_fallback: usedFallback };
   }
   if (resp.status === 402) {
     await writeLedger(trace_id, input, { status: "failed", output_summary: "payment_required" });
     await updateRuntimeRequest(sb, request_id, { status: "failed", completed_at: new Date().toISOString(), error_message: "payment_required" });
     await recordRuntimeEvent(sb, { request_id, event_type: "payment_required", severity: "error" });
+    await releaseLease(sb, request_id, false);
     return { trace_id, request_id, status: "payment_required", http_status: 402, error: "Lovable AI credits required", used_fallback: usedFallback };
   }
   if (!resp.ok) {
@@ -326,6 +442,7 @@ export async function callAIGateway(input: AIGatewayCallInput): Promise<AIGatewa
     await writeLedger(trace_id, input, { status: "failed", output_summary: `http ${resp.status}` });
     await updateRuntimeRequest(sb, request_id, { status: "failed", completed_at: new Date().toISOString(), error_message: `http ${resp.status}` });
     await recordRuntimeEvent(sb, { request_id, event_type: "http_error", severity: "error", message: `http ${resp.status}` });
+    await releaseLease(sb, request_id, false);
     return { trace_id, request_id, status: "failed", http_status: resp.status, error: txt.slice(0, 500), used_fallback: usedFallback };
   }
 
@@ -345,6 +462,7 @@ export async function callAIGateway(input: AIGatewayCallInput): Promise<AIGatewa
     token_usage: usage,
   });
   await recordRuntimeEvent(sb, { request_id, event_type: "completed", severity: "info", metadata: { used_fallback: usedFallback } });
+  await releaseLease(sb, request_id, true);
   return {
     trace_id, request_id, status: "completed", http_status: 200, data,
     prompt_tokens: usage.prompt_tokens, completion_tokens: usage.completion_tokens,
@@ -386,6 +504,21 @@ export async function beginGatewayLog(input: AIGatewayCallInput): Promise<{ trac
   const request_id = newRequestId();
   const sb = getServiceClient();
   const startedAt = new Date().toISOString();
+  // Best-effort lease — fail-open if RPC unavailable so we never break live callers.
+  try {
+    const agentMeta = await loadAgentMeta(sb, input.agent_id ?? null);
+    const businessCapacity = await loadBusinessCapacity(sb, input.business_id ?? null);
+    await acquireLease(sb, {
+      request_id,
+      agent_id: input.agent_id ?? null,
+      business_id: input.business_id ?? null,
+      agent_capacity: agentMeta.capacity ?? 0,
+      business_capacity: businessCapacity,
+      provider: "lovable-ai-gateway",
+      model: input.model ?? agentMeta.primary_model ?? "google/gemini-3-flash-preview",
+      ttl_seconds: 180,
+    });
+  } catch { /* fail-open */ }
   await writeLedger(trace_id, input, { status: "pending", input_summary: input.action_type });
   await recordRuntimeRequest(sb, {
     request_id,
@@ -440,4 +573,5 @@ export async function endGatewayLog(
     message: result.error,
     metadata: { sdk_wrapped: true },
   });
+  await releaseLease(sb, ctx.request_id, result.ok);
 }

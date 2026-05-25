@@ -1312,6 +1312,7 @@ export type Database = {
           currency: string | null
           daily_ai_budget: number | null
           id: string
+          max_concurrent_requests: number
           max_cost_per_agent_per_day: number | null
           max_cost_per_content_asset: number | null
           max_cost_per_customer: number | null
@@ -1331,6 +1332,7 @@ export type Database = {
           currency?: string | null
           daily_ai_budget?: number | null
           id?: string
+          max_concurrent_requests?: number
           max_cost_per_agent_per_day?: number | null
           max_cost_per_content_asset?: number | null
           max_cost_per_customer?: number | null
@@ -1350,6 +1352,7 @@ export type Database = {
           currency?: string | null
           daily_ai_budget?: number | null
           id?: string
+          max_concurrent_requests?: number
           max_cost_per_agent_per_day?: number | null
           max_cost_per_content_asset?: number | null
           max_cost_per_customer?: number | null
@@ -1402,6 +1405,51 @@ export type Database = {
           summary?: string
           title?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      ai_concurrency_leases: {
+        Row: {
+          acquired_at: string
+          agent_id: string | null
+          business_id: string | null
+          expires_at: string
+          id: string
+          lease_key: string
+          metadata: Json
+          model: string | null
+          provider: string | null
+          released_at: string | null
+          request_id: string
+          status: string
+        }
+        Insert: {
+          acquired_at?: string
+          agent_id?: string | null
+          business_id?: string | null
+          expires_at: string
+          id?: string
+          lease_key: string
+          metadata?: Json
+          model?: string | null
+          provider?: string | null
+          released_at?: string | null
+          request_id: string
+          status?: string
+        }
+        Update: {
+          acquired_at?: string
+          agent_id?: string | null
+          business_id?: string | null
+          expires_at?: string
+          id?: string
+          lease_key?: string
+          metadata?: Json
+          model?: string | null
+          provider?: string | null
+          released_at?: string | null
+          request_id?: string
+          status?: string
         }
         Relationships: []
       }
@@ -41090,6 +41138,19 @@ export type Database = {
     Functions: {
       _is_founder_or_admin: { Args: never; Returns: boolean }
       accept_proposal_by_token: { Args: { _token: string }; Returns: Json }
+      acquire_ai_lease: {
+        Args: {
+          _agent_capacity: number
+          _agent_id: string
+          _business_capacity: number
+          _business_id: string
+          _model: string
+          _provider: string
+          _request_id: string
+          _ttl_seconds?: number
+        }
+        Returns: Json
+      }
       activate_outreach_campaign: {
         Args: { _campaign_id: string }
         Returns: Json
@@ -41135,6 +41196,7 @@ export type Database = {
         Args: { _contact_id: string; _inbox_id: string }
         Returns: Json
       }
+      cleanup_stale_ai_leases: { Args: never; Returns: number }
       compare_system_versions: {
         Args: { _version_a: number; _version_b: number }
         Returns: Json
@@ -41636,6 +41698,10 @@ export type Database = {
       }
       refresh_all_assignment_sla: { Args: never; Returns: number }
       refresh_all_business_risk_scores: { Args: never; Returns: number }
+      release_ai_lease: {
+        Args: { _ok?: boolean; _request_id: string }
+        Returns: number
+      }
       reset_inbox_hourly_counts: { Args: never; Returns: number }
       reset_inbox_send_counts: { Args: never; Returns: number }
       resolve_contact_by_email: { Args: { _email: string }; Returns: string }
