@@ -32,8 +32,8 @@ export interface ReportingSnapshot {
   recommended_action: string;
 }
 
-async function safe<T>(p: Promise<{ data: T[] | null }>): Promise<T[]> {
-  try { const r = await p; return r.data ?? []; } catch { return []; }
+async function safe(p: Promise<{ data: any[] | null }>): Promise<any[]> {
+  try { const r = await p; return (r?.data ?? []) as any[]; } catch { return []; }
 }
 
 export async function computeReportingSnapshot(): Promise<ReportingSnapshot> {
