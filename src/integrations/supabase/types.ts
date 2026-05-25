@@ -13253,6 +13253,656 @@ export type Database = {
           },
         ]
       }
+      customer_sales_call_logs: {
+        Row: {
+          business_id: string | null
+          call_direction: string | null
+          consent_recorded: boolean | null
+          conversation_id: string | null
+          created_at: string
+          duration_seconds: number | null
+          ended_at: string | null
+          from_number: string | null
+          id: string
+          metadata: Json | null
+          next_step: string | null
+          outcome: string | null
+          provider_call_id: string | null
+          provider_name: string | null
+          recording_notice_given: boolean | null
+          recording_url: string | null
+          started_at: string | null
+          to_number: string | null
+          transcript_summary: string | null
+          transcript_text: string | null
+        }
+        Insert: {
+          business_id?: string | null
+          call_direction?: string | null
+          consent_recorded?: boolean | null
+          conversation_id?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          ended_at?: string | null
+          from_number?: string | null
+          id?: string
+          metadata?: Json | null
+          next_step?: string | null
+          outcome?: string | null
+          provider_call_id?: string | null
+          provider_name?: string | null
+          recording_notice_given?: boolean | null
+          recording_url?: string | null
+          started_at?: string | null
+          to_number?: string | null
+          transcript_summary?: string | null
+          transcript_text?: string | null
+        }
+        Update: {
+          business_id?: string | null
+          call_direction?: string | null
+          consent_recorded?: boolean | null
+          conversation_id?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          ended_at?: string | null
+          from_number?: string | null
+          id?: string
+          metadata?: Json | null
+          next_step?: string | null
+          outcome?: string | null
+          provider_call_id?: string | null
+          provider_name?: string | null
+          recording_notice_given?: boolean | null
+          recording_url?: string | null
+          started_at?: string | null
+          to_number?: string | null
+          transcript_summary?: string | null
+          transcript_text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_sales_call_logs_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_sales_close_actions: {
+        Row: {
+          action_status: string
+          amount: number | null
+          audit_metadata: Json | null
+          booking_url: string | null
+          business_id: string | null
+          close_action_type: string
+          completed_at: string | null
+          contact_id: string | null
+          contract_id: string | null
+          conversation_id: string | null
+          created_at: string
+          currency: string | null
+          founder_approval_required: boolean
+          founder_approved_at: string | null
+          id: string
+          invoice_id: string | null
+          offer_id: string | null
+          payment_link_url: string | null
+          payment_provider: string | null
+          product_id: string | null
+          proposal_id: string | null
+          sent_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          action_status?: string
+          amount?: number | null
+          audit_metadata?: Json | null
+          booking_url?: string | null
+          business_id?: string | null
+          close_action_type?: string
+          completed_at?: string | null
+          contact_id?: string | null
+          contract_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          currency?: string | null
+          founder_approval_required?: boolean
+          founder_approved_at?: string | null
+          id?: string
+          invoice_id?: string | null
+          offer_id?: string | null
+          payment_link_url?: string | null
+          payment_provider?: string | null
+          product_id?: string | null
+          proposal_id?: string | null
+          sent_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          action_status?: string
+          amount?: number | null
+          audit_metadata?: Json | null
+          booking_url?: string | null
+          business_id?: string | null
+          close_action_type?: string
+          completed_at?: string | null
+          contact_id?: string | null
+          contract_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          currency?: string | null
+          founder_approval_required?: boolean
+          founder_approved_at?: string | null
+          id?: string
+          invoice_id?: string | null
+          offer_id?: string | null
+          payment_link_url?: string | null
+          payment_provider?: string | null
+          product_id?: string | null
+          proposal_id?: string | null
+          sent_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_sales_close_actions_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_sales_close_actions_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_offers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_sales_close_actions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_sales_conversations: {
+        Row: {
+          business_id: string | null
+          buying_signals: string[] | null
+          channel: string
+          close_probability: number | null
+          contact_id: string | null
+          conversation_status: string
+          created_at: string
+          customer_email: string | null
+          customer_name: string | null
+          customer_need: string | null
+          customer_phone: string | null
+          direction: string
+          external_action_locked: boolean
+          founder_approval_required: boolean
+          id: string
+          objections_raised: string[] | null
+          offer_id: string | null
+          playbook_id: string | null
+          product_id: string | null
+          qualification_score: number | null
+          recommended_next_action: string | null
+          sentiment_score: number | null
+          transcript_summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          buying_signals?: string[] | null
+          channel?: string
+          close_probability?: number | null
+          contact_id?: string | null
+          conversation_status?: string
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_need?: string | null
+          customer_phone?: string | null
+          direction?: string
+          external_action_locked?: boolean
+          founder_approval_required?: boolean
+          id?: string
+          objections_raised?: string[] | null
+          offer_id?: string | null
+          playbook_id?: string | null
+          product_id?: string | null
+          qualification_score?: number | null
+          recommended_next_action?: string | null
+          sentiment_score?: number | null
+          transcript_summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          buying_signals?: string[] | null
+          channel?: string
+          close_probability?: number | null
+          contact_id?: string | null
+          conversation_status?: string
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_need?: string | null
+          customer_phone?: string | null
+          direction?: string
+          external_action_locked?: boolean
+          founder_approval_required?: boolean
+          id?: string
+          objections_raised?: string[] | null
+          offer_id?: string | null
+          playbook_id?: string | null
+          product_id?: string | null
+          qualification_score?: number | null
+          recommended_next_action?: string | null
+          sentiment_score?: number | null
+          transcript_summary?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_sales_conversations_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_offers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_sales_conversations_playbook_id_fkey"
+            columns: ["playbook_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_playbooks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_sales_conversations_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_sales_knowledge_sources: {
+        Row: {
+          active: boolean
+          business_id: string | null
+          created_at: string
+          id: string
+          last_verified_at: string | null
+          source_file_id: string | null
+          source_type: string
+          source_url: string | null
+          summary: string | null
+          title: string
+          updated_at: string
+          verified_by_founder: boolean | null
+        }
+        Insert: {
+          active?: boolean
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          last_verified_at?: string | null
+          source_file_id?: string | null
+          source_type?: string
+          source_url?: string | null
+          summary?: string | null
+          title: string
+          updated_at?: string
+          verified_by_founder?: boolean | null
+        }
+        Update: {
+          active?: boolean
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          last_verified_at?: string | null
+          source_file_id?: string | null
+          source_type?: string
+          source_url?: string | null
+          summary?: string | null
+          title?: string
+          updated_at?: string
+          verified_by_founder?: boolean | null
+        }
+        Relationships: []
+      }
+      customer_sales_objection_library: {
+        Row: {
+          active: boolean
+          approved_response: string | null
+          business_id: string | null
+          created_at: string
+          do_not_say: string[] | null
+          escalation_required: boolean | null
+          evidence_or_proof: string | null
+          id: string
+          objection: string
+          product_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          approved_response?: string | null
+          business_id?: string | null
+          created_at?: string
+          do_not_say?: string[] | null
+          escalation_required?: boolean | null
+          evidence_or_proof?: string | null
+          id?: string
+          objection: string
+          product_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          approved_response?: string | null
+          business_id?: string | null
+          created_at?: string
+          do_not_say?: string[] | null
+          escalation_required?: boolean | null
+          evidence_or_proof?: string | null
+          id?: string
+          objection?: string
+          product_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_sales_objection_library_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_sales_offers: {
+        Row: {
+          active: boolean
+          approved_claims: string[] | null
+          business_id: string | null
+          close_type: string | null
+          created_at: string
+          discount_allowed: boolean | null
+          discount_rules: string | null
+          id: string
+          offer_name: string
+          offer_stage: string
+          offer_summary: string | null
+          price_amount: number | null
+          price_currency: string | null
+          product_id: string | null
+          prohibited_claims: string[] | null
+          requires_founder_approval: boolean
+          updated_at: string
+          urgency_or_bonus: string | null
+        }
+        Insert: {
+          active?: boolean
+          approved_claims?: string[] | null
+          business_id?: string | null
+          close_type?: string | null
+          created_at?: string
+          discount_allowed?: boolean | null
+          discount_rules?: string | null
+          id?: string
+          offer_name: string
+          offer_stage?: string
+          offer_summary?: string | null
+          price_amount?: number | null
+          price_currency?: string | null
+          product_id?: string | null
+          prohibited_claims?: string[] | null
+          requires_founder_approval?: boolean
+          updated_at?: string
+          urgency_or_bonus?: string | null
+        }
+        Update: {
+          active?: boolean
+          approved_claims?: string[] | null
+          business_id?: string | null
+          close_type?: string | null
+          created_at?: string
+          discount_allowed?: boolean | null
+          discount_rules?: string | null
+          id?: string
+          offer_name?: string
+          offer_stage?: string
+          offer_summary?: string | null
+          price_amount?: number | null
+          price_currency?: string | null
+          product_id?: string | null
+          prohibited_claims?: string[] | null
+          requires_founder_approval?: boolean
+          updated_at?: string
+          urgency_or_bonus?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_sales_offers_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_sales_playbooks: {
+        Row: {
+          active: boolean
+          business_id: string | null
+          closing_script: string | null
+          compliance_notes: string | null
+          created_at: string
+          discovery_questions: string[] | null
+          do_not_say_rules: string[] | null
+          escalation_rules: string | null
+          id: string
+          objection_responses: Json | null
+          opening_script: string | null
+          playbook_name: string
+          qualification_rules: string | null
+          tone_of_voice: string | null
+          updated_at: string
+          use_case: string
+        }
+        Insert: {
+          active?: boolean
+          business_id?: string | null
+          closing_script?: string | null
+          compliance_notes?: string | null
+          created_at?: string
+          discovery_questions?: string[] | null
+          do_not_say_rules?: string[] | null
+          escalation_rules?: string | null
+          id?: string
+          objection_responses?: Json | null
+          opening_script?: string | null
+          playbook_name: string
+          qualification_rules?: string | null
+          tone_of_voice?: string | null
+          updated_at?: string
+          use_case?: string
+        }
+        Update: {
+          active?: boolean
+          business_id?: string | null
+          closing_script?: string | null
+          compliance_notes?: string | null
+          created_at?: string
+          discovery_questions?: string[] | null
+          do_not_say_rules?: string[] | null
+          escalation_rules?: string | null
+          id?: string
+          objection_responses?: Json | null
+          opening_script?: string | null
+          playbook_name?: string
+          qualification_rules?: string | null
+          tone_of_voice?: string | null
+          updated_at?: string
+          use_case?: string
+        }
+        Relationships: []
+      }
+      customer_sales_products: {
+        Row: {
+          active: boolean
+          benefits: string[] | null
+          billing_frequency: string | null
+          business_id: string | null
+          compliance_notes: string | null
+          created_at: string
+          customer_pain_points: string[] | null
+          description: string | null
+          eligibility_rules: string | null
+          features: string[] | null
+          guarantee_terms: string | null
+          id: string
+          outcomes_promised: string[] | null
+          price_amount: number | null
+          price_currency: string | null
+          price_range_max: number | null
+          price_range_min: number | null
+          pricing_type: string | null
+          product_name: string
+          product_type: string
+          proof_points: string[] | null
+          refund_policy: string | null
+          target_customer: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          benefits?: string[] | null
+          billing_frequency?: string | null
+          business_id?: string | null
+          compliance_notes?: string | null
+          created_at?: string
+          customer_pain_points?: string[] | null
+          description?: string | null
+          eligibility_rules?: string | null
+          features?: string[] | null
+          guarantee_terms?: string | null
+          id?: string
+          outcomes_promised?: string[] | null
+          price_amount?: number | null
+          price_currency?: string | null
+          price_range_max?: number | null
+          price_range_min?: number | null
+          pricing_type?: string | null
+          product_name: string
+          product_type?: string
+          proof_points?: string[] | null
+          refund_policy?: string | null
+          target_customer?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          benefits?: string[] | null
+          billing_frequency?: string | null
+          business_id?: string | null
+          compliance_notes?: string | null
+          created_at?: string
+          customer_pain_points?: string[] | null
+          description?: string | null
+          eligibility_rules?: string | null
+          features?: string[] | null
+          guarantee_terms?: string | null
+          id?: string
+          outcomes_promised?: string[] | null
+          price_amount?: number | null
+          price_currency?: string | null
+          price_range_max?: number | null
+          price_range_min?: number | null
+          pricing_type?: string | null
+          product_name?: string
+          product_type?: string
+          proof_points?: string[] | null
+          refund_policy?: string | null
+          target_customer?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      customer_sales_provider_settings: {
+        Row: {
+          active: boolean
+          api_secret_configured: boolean | null
+          business_id: string | null
+          created_at: string
+          default_agent_id: string | null
+          default_voice_id: string | null
+          id: string
+          inbound_enabled: boolean | null
+          outbound_enabled: boolean | null
+          phone_number: string | null
+          provider_status: string
+          provider_type: string
+          rate_limit_per_hour: number | null
+          require_founder_approval_for_contract: boolean
+          require_founder_approval_for_outbound: boolean
+          require_founder_approval_for_payment: boolean
+          updated_at: string
+          web_call_enabled: boolean | null
+          webhook_url: string | null
+        }
+        Insert: {
+          active?: boolean
+          api_secret_configured?: boolean | null
+          business_id?: string | null
+          created_at?: string
+          default_agent_id?: string | null
+          default_voice_id?: string | null
+          id?: string
+          inbound_enabled?: boolean | null
+          outbound_enabled?: boolean | null
+          phone_number?: string | null
+          provider_status?: string
+          provider_type?: string
+          rate_limit_per_hour?: number | null
+          require_founder_approval_for_contract?: boolean
+          require_founder_approval_for_outbound?: boolean
+          require_founder_approval_for_payment?: boolean
+          updated_at?: string
+          web_call_enabled?: boolean | null
+          webhook_url?: string | null
+        }
+        Update: {
+          active?: boolean
+          api_secret_configured?: boolean | null
+          business_id?: string | null
+          created_at?: string
+          default_agent_id?: string | null
+          default_voice_id?: string | null
+          id?: string
+          inbound_enabled?: boolean | null
+          outbound_enabled?: boolean | null
+          phone_number?: string | null
+          provider_status?: string
+          provider_type?: string
+          rate_limit_per_hour?: number | null
+          require_founder_approval_for_contract?: boolean
+          require_founder_approval_for_outbound?: boolean
+          require_founder_approval_for_payment?: boolean
+          updated_at?: string
+          web_call_enabled?: boolean | null
+          webhook_url?: string | null
+        }
+        Relationships: []
+      }
       customer_satisfaction_surveys: {
         Row: {
           approval_status: string | null

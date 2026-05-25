@@ -1228,3 +1228,20 @@ const TECHNICAL_MANUAL_LIVE_STATE: ManualSection = {
   ].join(" "),
 };
 LIFTOR_FULL_GUIDE.push(TECHNICAL_MANUAL_LIVE_STATE);
+
+const CUSTOMER_VOICE_SALES_CLOSE_ENGINE: ManualSection = {
+  number: 92,
+  key: "customer-voice-sales-close-engine",
+  title: "92. Customer Voice + Sales Close Engine",
+  body: [
+    "Purpose. Liftor holds customer/prospect conversations, understands each product or service, recommends the right offer, qualifies the buyer, handles objections, prepares a close and hands off to payment / contract / booking. Internal preparation (drafting, analysis, CRM updates, product matching, script generation, quote preparation, objection responses) runs live. Outbound calls, payment links, contract sends, invoice sends and any customer/prospect message remain approval-gated until the relevant provider is connected and founder rules permit.",
+    "Routes. /founder/customer-sales (hub), /voice-console, /product-knowledge, /playbooks, /conversations, /call-logs, /close-engine, /offers, /objections, /follow-up, /settings.",
+    "Tables. customer_sales_products, customer_sales_offers, customer_sales_playbooks, customer_sales_conversations, customer_sales_call_logs, customer_sales_close_actions, customer_sales_provider_settings, customer_sales_objection_library, customer_sales_knowledge_sources — all RLS-protected to founder/admin only.",
+    "Providers. Retell / Vapi / Twilio / ElevenLabs / custom. Each starts at provider_status='not_connected' with api_secret_configured=false. No external dialing, messaging, payment or contract action is performed until provider_status='live' and the matching founder approval flag is satisfied (require_founder_approval_for_outbound / payment / contract).",
+    "Command Centre integration. CustomerSalesEngineCard shows provider status, calls today, conversations needing follow-up, close actions awaiting approval, hot buying signals (>=70% close probability), products missing sales knowledge, and the next recommended action. WhatNeedsAttentionToday surfaces sales close approvals and follow-ups. AgentOperatingStatus lists 'Customer Sales Engine' as a core agent.",
+    "First-Use Configuration. Section 11 covers products, playbooks, provider connection and close approvals — surfaced as 'configure' or 'watch' status, never as a blocker.",
+    "Empty states. No provider connected, no products added, no playbooks added, no calls yet, no close actions yet — every screen has a safe empty state with a hint and a fix link. Liftor continues preparing scripts, qualification and offers internally regardless of empty state.",
+    "Caveats. No external provider is wired by this foundation pass: no outbound dialing, no payment links sent, no contracts sent. That switch is enabled per-business once you connect a provider and approve the action explicitly.",
+  ].join(" "),
+};
+LIFTOR_FULL_GUIDE.push(CUSTOMER_VOICE_SALES_CLOSE_ENGINE);
