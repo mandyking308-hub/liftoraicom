@@ -3855,5 +3855,43 @@ No risk model change in v5.9.1. multilingual-intake-preview remains preview-only
 SDK-wrapped logging (Batch A) records lifecycle and token usage but does not yet enforce per-agent concurrency preflight or fallback-model behaviour; only callAIGateway does. Cost is filled in by the pricing registry once tagged.
 
 *End of AI Gateway Migration — Batch A (v5.9.1).*
+
+## Simultaneous Conversation Orchestration (v5.9.2 — multi-agent, multi-business)
+
+Liftor now supports many concurrent AI conversations and workflows across multiple businesses, with strict context isolation and no single serial queue.
+
+### Conversation isolation (ai_conversations)
+Every conversation row carries: conversation_id (unique), business_id, portfolio_asset_id, agent_id, user_id, channel (internal | email | chat | crm | buyer_warmup | support | other), context_scope, data_classification, status, title, metadata. RLS is admin-only. A conversation cannot reach another business's rows because every downstream query (gateway requests, ledger, workflow steps) filters by business_id / portfolio_asset_id from the conversation, and RLS enforces admin scope on every read.
+
+### Workflow schema
+- **ai_workflow_runs** — id, workflow_id (unique), workflow_type, portfolio_asset_id, business_id, status (queued | running | completed | failed | paused | waiting_approval | cancelled), started_at, completed_at, initiated_by, current_step, total_steps, priority, error_message, metadata.
+- **ai_workflow_steps** — id, workflow_run_id (FK cascade), step_index, step_name, agent_id (FK ai_agent_registry), status (queued | running | completed | failed | skipped | waiting_approval | cancelled), input_summary, output_summary, request_id, approval_required, error_message, metadata.
+
+### Agent registry (seeded)
+11 operating agents: outreach_agent, inbox_agent, crm_agent, content_agent, reporting_agent, compliance_agent, buyer_warmup_agent, data_room_agent, founder_approval_agent, ma_intelligence_agent, portfolio_commander_agent. Each carries: allowed_actions, prohibited_actions, approval_required_actions, max_concurrency, daily_run_limit, monthly_budget_gbp, primary_model, fallback_model, escalation target, output destination, logging table.
+
+### Concurrency controls (no bottleneck)
+- Per-agent: ai_agent_registry.max_concurrency (default 2–8 per agent), enforced by preflightAgent() inside callAIGateway before any provider call.
+- Per-business: ai_business_budgets caps cost + volume per business.
+- Provider rate limits surfaced as 429 → ai_runtime_events.event_type='rate_limited'.
+- Priority: ai_gateway_requests.priority (default 5).
+- Idempotency: ai_gateway_requests.idempotency_key returns the existing row on duplicate insert; safe retries.
+
+### Approval handling
+Internal-only AI (analysis, scoring, valuation, reporting, classification, internal drafts) runs live with no approval. Only requests with risk_level in (high, critical) AND approval_required=true are held as waiting_approval; the provider is not called until founder approval lands. This is what stops "one gateway" from becoming "one queue".
+
+### Command Centre surface
+/founder/ai-cost/orchestration-live — running/queued/waiting/failed cards, active conversations, active workflows, per-agent concurrency bars, per-business 24h activity, bottleneck warnings, scale-readiness checklist, recent workflow steps.
+
+### Scale Readiness Checklist (live values on page)
+Conversation isolation, request IDs, idempotency keys, safe retries, approvals separated from internal AI, cost/rate limits, queue depth visibility, failure logs, no direct AI bypasses, manual escalation path documented. The only failing check today is "no direct AI bypasses active" — 13 functions remain in Batch B + Batch C of the AI Gateway Bypass Audit.
+
+### Limitations
+Concurrency preflight is best-effort (no row-level lock) so a small over-allocation is possible during burst. Workflow orchestration tables are in place but the Portfolio Commander Agent's automatic step assignment is not yet wired — workflows can be written but are not yet auto-stepped by code. Per-business budget caps depend on ai_business_budgets rows being populated. Costs depend on the pricing registry tagging actual_cost_gbp on each ai_gateway_requests row.
+
+### What would be needed for very high-volume / global scale
+Row-level concurrency lease (e.g. advisory lock) to make preflight strict, a worker pool that drains the queued ai_gateway_requests rows in parallel rather than relying on synchronous edge-function invocation, regional sharding of the gateway URL, persistent ai_runtime_events partitioned by day, and migration of all 13 remaining bypass functions so every AI call passes through ledger + concurrency control.
+
+*End of Simultaneous Conversation Orchestration (v5.9.2).*
 `;
 };
