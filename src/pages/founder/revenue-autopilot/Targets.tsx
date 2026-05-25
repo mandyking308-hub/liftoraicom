@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { RALayout, RASection, RAEmpty } from "./_shared";
 
-type Target = { id: string; business_id: string; monthly_revenue_target: number; actual_revenue: number; active: boolean; period_start?: string; period_end?: string };
+type Target = { id: string; business_id: string; target_revenue_amount: number; target_period: string; target_currency: string; active: boolean; target_start_date?: string; target_end_date?: string };
 
 export default function RevenueAutopilotTargets() {
   const [rows, setRows] = useState<Target[]>([]);
@@ -21,21 +21,18 @@ export default function RevenueAutopilotTargets() {
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead className="text-[10px] uppercase text-muted-foreground">
-                <tr><th className="text-left p-2">Business</th><th className="p-2">Target</th><th className="p-2">Actual</th><th className="p-2">Gap</th><th className="p-2">Status</th></tr>
+                <tr><th className="text-left p-2">Business</th><th className="p-2">Period</th><th className="p-2">Target</th><th className="p-2">Currency</th><th className="p-2">Status</th></tr>
               </thead>
               <tbody>
-                {rows.map(t => {
-                  const gap = Math.max(0, (t.monthly_revenue_target || 0) - (t.actual_revenue || 0));
-                  return (
-                    <tr key={t.id} className="border-t border-border/40">
-                      <td className="p-2 font-mono text-[10px]">{t.business_id.slice(0, 8)}</td>
-                      <td className="p-2 text-center tabular-nums">${Math.round(t.monthly_revenue_target || 0).toLocaleString()}</td>
-                      <td className="p-2 text-center tabular-nums">${Math.round(t.actual_revenue || 0).toLocaleString()}</td>
-                      <td className="p-2 text-center tabular-nums">${Math.round(gap).toLocaleString()}</td>
-                      <td className="p-2 text-center">{t.active ? <span className="text-emerald-400">active</span> : <span className="text-muted-foreground">paused</span>}</td>
-                    </tr>
-                  );
-                })}
+                {rows.map(t => (
+                  <tr key={t.id} className="border-t border-border/40">
+                    <td className="p-2 font-mono text-[10px]">{t.business_id.slice(0, 8)}</td>
+                    <td className="p-2 text-center">{t.target_period}</td>
+                    <td className="p-2 text-center tabular-nums">{Math.round(t.target_revenue_amount || 0).toLocaleString()}</td>
+                    <td className="p-2 text-center">{t.target_currency}</td>
+                    <td className="p-2 text-center">{t.active ? <span className="text-emerald-400">active</span> : <span className="text-muted-foreground">paused</span>}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
