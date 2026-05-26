@@ -422,6 +422,13 @@ import WorkQueueBlocked from "./pages/founder/work-queue/Blocked";
 import WorkQueueHighValue from "./pages/founder/work-queue/HighValue";
 import WorkQueueOverdue from "./pages/founder/work-queue/Overdue";
 import WorkQueueSettings from "./pages/founder/work-queue/Settings";
+import NotificationsOverview from "./pages/founder/notifications/Overview";
+import NotificationsInbox from "./pages/founder/notifications/Inbox";
+import NotificationsUrgent from "./pages/founder/notifications/Urgent";
+import NotificationsEscalations from "./pages/founder/notifications/Escalations";
+import NotificationsRules from "./pages/founder/notifications/Rules";
+import NotificationsArchive from "./pages/founder/notifications/Archive";
+import NotificationsSettings from "./pages/founder/notifications/Settings";
 import KnowledgeOverview from "./pages/founder/knowledge-governance/Overview";
 import KnowledgeSources from "./pages/founder/knowledge-governance/Sources";
 import KnowledgeConflicts from "./pages/founder/knowledge-governance/Conflicts";
@@ -934,6 +941,13 @@ const App = () => (
             <Route path="/founder/work-queue/high-value" element={<FounderRoute><WorkQueueHighValue /></FounderRoute>} />
             <Route path="/founder/work-queue/overdue" element={<FounderRoute><WorkQueueOverdue /></FounderRoute>} />
             <Route path="/founder/work-queue/settings" element={<FounderRoute><WorkQueueSettings /></FounderRoute>} />
+            <Route path="/founder/notifications" element={<FounderRoute><NotificationsOverview /></FounderRoute>} />
+            <Route path="/founder/notifications/inbox" element={<FounderRoute><NotificationsInbox /></FounderRoute>} />
+            <Route path="/founder/notifications/urgent" element={<FounderRoute><NotificationsUrgent /></FounderRoute>} />
+            <Route path="/founder/notifications/escalations" element={<FounderRoute><NotificationsEscalations /></FounderRoute>} />
+            <Route path="/founder/notifications/rules" element={<FounderRoute><NotificationsRules /></FounderRoute>} />
+            <Route path="/founder/notifications/archive" element={<FounderRoute><NotificationsArchive /></FounderRoute>} />
+            <Route path="/founder/notifications/settings" element={<FounderRoute><NotificationsSettings /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
