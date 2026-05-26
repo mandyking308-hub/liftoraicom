@@ -14019,6 +14019,42 @@ export type Database = {
         }
         Relationships: []
       }
+      currency_settings: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          default_currency: string
+          display_currency: string
+          fx_rate_confidence: Database["public"]["Enums"]["fx_confidence"]
+          fx_rate_source: string | null
+          id: string
+          supported_currencies: string[]
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          default_currency?: string
+          display_currency?: string
+          fx_rate_confidence?: Database["public"]["Enums"]["fx_confidence"]
+          fx_rate_source?: string | null
+          id?: string
+          supported_currencies?: string[]
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          default_currency?: string
+          display_currency?: string
+          fx_rate_confidence?: Database["public"]["Enums"]["fx_confidence"]
+          fx_rate_source?: string | null
+          id?: string
+          supported_currencies?: string[]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       customer_account_reviews: {
         Row: {
           account_health: string | null
@@ -23314,6 +23350,45 @@ export type Database = {
           },
         ]
       }
+      jurisdiction_adviser_review_items: {
+        Row: {
+          answer_summary: string | null
+          business_id: string | null
+          created_at: string
+          id: string
+          legal_entity_id: string | null
+          priority: string
+          question: string
+          review_type: Database["public"]["Enums"]["adviser_review_type"]
+          status: Database["public"]["Enums"]["adviser_review_status"]
+          updated_at: string
+        }
+        Insert: {
+          answer_summary?: string | null
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          legal_entity_id?: string | null
+          priority?: string
+          question: string
+          review_type: Database["public"]["Enums"]["adviser_review_type"]
+          status?: Database["public"]["Enums"]["adviser_review_status"]
+          updated_at?: string
+        }
+        Update: {
+          answer_summary?: string | null
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          legal_entity_id?: string | null
+          priority?: string
+          question?: string
+          review_type?: Database["public"]["Enums"]["adviser_review_type"]
+          status?: Database["public"]["Enums"]["adviser_review_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       jurisdiction_policy_profiles: {
         Row: {
           action_type: string
@@ -23424,6 +23499,51 @@ export type Database = {
           id?: string
           notes?: string
           region?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      jurisdiction_records: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          country: string | null
+          created_at: string
+          id: string
+          jurisdiction_confidence: Database["public"]["Enums"]["jurisdiction_confidence"]
+          party_type: Database["public"]["Enums"]["party_type"]
+          region: string | null
+          related_record_id: string | null
+          related_table: string | null
+          tax_identifier_summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          country?: string | null
+          created_at?: string
+          id?: string
+          jurisdiction_confidence?: Database["public"]["Enums"]["jurisdiction_confidence"]
+          party_type: Database["public"]["Enums"]["party_type"]
+          region?: string | null
+          related_record_id?: string | null
+          related_table?: string | null
+          tax_identifier_summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          country?: string | null
+          created_at?: string
+          id?: string
+          jurisdiction_confidence?: Database["public"]["Enums"]["jurisdiction_confidence"]
+          party_type?: Database["public"]["Enums"]["party_type"]
+          region?: string | null
+          related_record_id?: string | null
+          related_table?: string | null
+          tax_identifier_summary?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -49242,6 +49362,66 @@ export type Database = {
           },
         ]
       }
+      tax_treatment_flags: {
+        Row: {
+          adviser_review_required: boolean
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          currency: string | null
+          customer_country: string | null
+          id: string
+          legal_entity_id: string | null
+          marketplace_tax_flag: Database["public"]["Enums"]["tax_flag"]
+          notes: string | null
+          related_record_id: string | null
+          related_table: string | null
+          revenue_type: string | null
+          seller_country: string | null
+          updated_at: string
+          vat_sales_tax_flag: Database["public"]["Enums"]["tax_flag"]
+          withholding_flag: Database["public"]["Enums"]["tax_flag"]
+        }
+        Insert: {
+          adviser_review_required?: boolean
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          currency?: string | null
+          customer_country?: string | null
+          id?: string
+          legal_entity_id?: string | null
+          marketplace_tax_flag?: Database["public"]["Enums"]["tax_flag"]
+          notes?: string | null
+          related_record_id?: string | null
+          related_table?: string | null
+          revenue_type?: string | null
+          seller_country?: string | null
+          updated_at?: string
+          vat_sales_tax_flag?: Database["public"]["Enums"]["tax_flag"]
+          withholding_flag?: Database["public"]["Enums"]["tax_flag"]
+        }
+        Update: {
+          adviser_review_required?: boolean
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          currency?: string | null
+          customer_country?: string | null
+          id?: string
+          legal_entity_id?: string | null
+          marketplace_tax_flag?: Database["public"]["Enums"]["tax_flag"]
+          notes?: string | null
+          related_record_id?: string | null
+          related_table?: string | null
+          revenue_type?: string | null
+          seller_country?: string | null
+          updated_at?: string
+          vat_sales_tax_flag?: Database["public"]["Enums"]["tax_flag"]
+          withholding_flag?: Database["public"]["Enums"]["tax_flag"]
+        }
+        Relationships: []
+      }
       template_components: {
         Row: {
           agent_id: string | null
@@ -52182,6 +52362,22 @@ export type Database = {
       validate_system_integrity: { Args: never; Returns: Json }
     }
     Enums: {
+      adviser_review_status:
+        | "draft"
+        | "review_required"
+        | "approved_to_ask"
+        | "answered"
+        | "closed"
+      adviser_review_type:
+        | "vat"
+        | "sales_tax"
+        | "marketplace_tax"
+        | "withholding"
+        | "fx"
+        | "entity_routing"
+        | "seller_payout"
+        | "customer_country"
+        | "other"
       ai_action_status: "success" | "failed"
       ai_action_type: "classify" | "reply" | "escalate"
       ai_draft_status:
@@ -52305,6 +52501,7 @@ export type Database = {
         | "delayed"
         | "throttled"
         | "cancelled"
+      fx_confidence: "estimated" | "provider" | "manual" | "verified"
       inbound_provider_type: "none" | "ionos_imap"
       inbound_status_type:
         | "not_configured"
@@ -52332,6 +52529,7 @@ export type Database = {
         | "rejected"
         | "expired"
       invoice_status: "DRAFT" | "SENT" | "PAID" | "OVERDUE" | "PARTIALLY_PAID"
+      jurisdiction_confidence: "unknown" | "inferred" | "provided" | "verified"
       lead_campaign_fit:
         | "dj"
         | "playlist_curator"
@@ -52552,6 +52750,14 @@ export type Database = {
         | "strategic_premium"
         | "mixed"
       outreach_campaign_status: "active" | "paused"
+      party_type:
+        | "customer"
+        | "seller"
+        | "vendor"
+        | "partner"
+        | "entity"
+        | "payment_provider"
+        | "other"
       payment_event_type:
         | "reminder_sent"
         | "escalation_sent"
@@ -52636,6 +52842,12 @@ export type Database = {
       system_event_severity: "low" | "medium" | "high" | "critical"
       system_task_status: "pending" | "in_progress" | "completed" | "dismissed"
       system_task_type: "follow_up" | "review" | "escalate"
+      tax_flag:
+        | "unknown"
+        | "not_applicable"
+        | "possible"
+        | "required_review"
+        | "confirmed"
       timezone_confidence_level: "high" | "medium" | "low"
       warmup_stage: "new" | "warming" | "stable"
     }
@@ -52765,6 +52977,24 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      adviser_review_status: [
+        "draft",
+        "review_required",
+        "approved_to_ask",
+        "answered",
+        "closed",
+      ],
+      adviser_review_type: [
+        "vat",
+        "sales_tax",
+        "marketplace_tax",
+        "withholding",
+        "fx",
+        "entity_routing",
+        "seller_payout",
+        "customer_country",
+        "other",
+      ],
       ai_action_status: ["success", "failed"],
       ai_action_type: ["classify", "reply", "escalate"],
       ai_draft_status: [
@@ -52902,6 +53132,7 @@ export const Constants = {
         "throttled",
         "cancelled",
       ],
+      fx_confidence: ["estimated", "provider", "manual", "verified"],
       inbound_provider_type: ["none", "ionos_imap"],
       inbound_status_type: [
         "not_configured",
@@ -52932,6 +53163,7 @@ export const Constants = {
         "expired",
       ],
       invoice_status: ["DRAFT", "SENT", "PAID", "OVERDUE", "PARTIALLY_PAID"],
+      jurisdiction_confidence: ["unknown", "inferred", "provided", "verified"],
       lead_campaign_fit: [
         "dj",
         "playlist_curator",
@@ -53176,6 +53408,15 @@ export const Constants = {
         "mixed",
       ],
       outreach_campaign_status: ["active", "paused"],
+      party_type: [
+        "customer",
+        "seller",
+        "vendor",
+        "partner",
+        "entity",
+        "payment_provider",
+        "other",
+      ],
       payment_event_type: [
         "reminder_sent",
         "escalation_sent",
@@ -53270,6 +53511,13 @@ export const Constants = {
       system_event_severity: ["low", "medium", "high", "critical"],
       system_task_status: ["pending", "in_progress", "completed", "dismissed"],
       system_task_type: ["follow_up", "review", "escalate"],
+      tax_flag: [
+        "unknown",
+        "not_applicable",
+        "possible",
+        "required_review",
+        "confirmed",
+      ],
       timezone_confidence_level: ["high", "medium", "low"],
       warmup_stage: ["new", "warming", "stable"],
     },
