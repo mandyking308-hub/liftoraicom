@@ -543,6 +543,14 @@ import AuditByUser from "./pages/founder/audit-ledger/ByUser";
 import AuditByModule from "./pages/founder/audit-ledger/ByModule";
 import AuditSensitive from "./pages/founder/audit-ledger/Sensitive";
 import AuditSettings from "./pages/founder/audit-ledger/Settings";
+import SearchOverview from "./pages/founder/search/Overview";
+import SearchAll from "./pages/founder/search/All";
+import SearchCustomers from "./pages/founder/search/Customers";
+import SearchBusinesses from "./pages/founder/search/Businesses";
+import SearchDocuments from "./pages/founder/search/Documents";
+import SearchCommunications from "./pages/founder/search/Communications";
+import SearchAudit from "./pages/founder/search/Audit";
+import SearchSettings from "./pages/founder/search/Settings";
 import PortalsOverview from "./pages/founder/portals/Overview";
 import PortalsCustomerAdmin from "./pages/founder/portals/Customer";
 import PortalsSellerAdmin from "./pages/founder/portals/Seller";
@@ -1196,6 +1204,14 @@ const App = () => (
             <Route path="/founder/audit-ledger/by-module" element={<FounderRoute><AuditByModule /></FounderRoute>} />
             <Route path="/founder/audit-ledger/sensitive" element={<FounderRoute><AuditSensitive /></FounderRoute>} />
             <Route path="/founder/audit-ledger/settings" element={<FounderRoute><AuditSettings /></FounderRoute>} />
+            <Route path="/founder/search" element={<FounderRoute><SearchOverview /></FounderRoute>} />
+            <Route path="/founder/search/all" element={<FounderRoute><SearchAll /></FounderRoute>} />
+            <Route path="/founder/search/customers" element={<FounderRoute><SearchCustomers /></FounderRoute>} />
+            <Route path="/founder/search/businesses" element={<FounderRoute><SearchBusinesses /></FounderRoute>} />
+            <Route path="/founder/search/documents" element={<FounderRoute><SearchDocuments /></FounderRoute>} />
+            <Route path="/founder/search/communications" element={<FounderRoute><SearchCommunications /></FounderRoute>} />
+            <Route path="/founder/search/audit" element={<FounderRoute><SearchAudit /></FounderRoute>} />
+            <Route path="/founder/search/settings" element={<FounderRoute><SearchSettings /></FounderRoute>} />
             <Route path="/founder/portals" element={<FounderRoute><PortalsOverview /></FounderRoute>} />
             <Route path="/founder/portals/customer" element={<FounderRoute><PortalsCustomerAdmin /></FounderRoute>} />
             <Route path="/founder/portals/seller" element={<FounderRoute><PortalsSellerAdmin /></FounderRoute>} />
