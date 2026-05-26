@@ -150,6 +150,7 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "configuration_agent", name: "Configuration Agent", to: "/founder/system-config", category: "operations" },
   { key: "connector_agent", name: "Connector Agent", to: "/founder/connectors", category: "operations" },
   { key: "webhook_agent", name: "Webhook Agent", to: "/founder/webhooks", category: "operations" },
+  { key: "audit_agent", name: "Audit Agent", to: "/founder/audit-ledger", category: "security" },
 ];
 
 export default function AgentOperatingStatus() {
