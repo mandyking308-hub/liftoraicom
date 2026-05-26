@@ -65,6 +65,7 @@ import WebhookHealthCard from "./WebhookHealthCard";
 import AuditLedgerHealthCard from "./AuditLedgerHealthCard";
 import GlobalSearchCard from "./GlobalSearchCard";
 import ImportCentreCard from "./ImportCentreCard";
+import IdentityResolutionCard from "./IdentityResolutionCard";
 
 /**
  * Business Process Spine — single integrated panel that surfaces every
@@ -122,6 +123,7 @@ export default function BusinessProcessSpinePanel() {
       <AuditLedgerHealthCard />
       <GlobalSearchCard />
       <ImportCentreCard />
+      <IdentityResolutionCard />
 
       <PortalsCard />
 
