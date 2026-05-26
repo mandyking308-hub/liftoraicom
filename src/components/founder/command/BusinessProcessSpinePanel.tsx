@@ -40,6 +40,7 @@ import AttributionEngineCard from "./AttributionEngineCard";
 import PartnerEngineCard from "./PartnerEngineCard";
 import IPAssetsCard from "./IPAssetsCard";
 import InsuranceLiabilityCard from "./InsuranceLiabilityCard";
+import ExitMetricsCard from "./ExitMetricsCard";
 
 /**
  * Business Process Spine — single integrated panel that surfaces every
@@ -106,6 +107,8 @@ export default function BusinessProcessSpinePanel() {
       <IPAssetsCard />
 
       <InsuranceLiabilityCard />
+
+      <ExitMetricsCard />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <DeliveryEngineCard />
