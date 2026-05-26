@@ -3821,6 +3821,53 @@ export type Database = {
         }
         Relationships: []
       }
+      asset_rights_records: {
+        Row: {
+          asset_id: string | null
+          created_at: string
+          end_date: string | null
+          evidence_source: string | null
+          id: string
+          restrictions: string | null
+          rights_summary: string | null
+          rights_type: string
+          start_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          asset_id?: string | null
+          created_at?: string
+          end_date?: string | null
+          evidence_source?: string | null
+          id?: string
+          restrictions?: string | null
+          rights_summary?: string | null
+          rights_type?: string
+          start_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          asset_id?: string | null
+          created_at?: string
+          end_date?: string | null
+          evidence_source?: string | null
+          id?: string
+          restrictions?: string | null
+          rights_summary?: string | null
+          rights_type?: string
+          start_date?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_rights_records_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "digital_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assignments: {
         Row: {
           acknowledged_at: string | null
@@ -19214,6 +19261,54 @@ export type Database = {
           },
         ]
       }
+      digital_assets: {
+        Row: {
+          active: boolean
+          asset_name: string
+          asset_type: string
+          asset_url: string | null
+          business_id: string | null
+          commercial_use_allowed: boolean | null
+          created_at: string
+          creator_summary: string | null
+          id: string
+          owner_entity_id: string | null
+          rights_status: string
+          storage_location_summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          asset_name: string
+          asset_type?: string
+          asset_url?: string | null
+          business_id?: string | null
+          commercial_use_allowed?: boolean | null
+          created_at?: string
+          creator_summary?: string | null
+          id?: string
+          owner_entity_id?: string | null
+          rights_status?: string
+          storage_location_summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          asset_name?: string
+          asset_type?: string
+          asset_url?: string | null
+          business_id?: string | null
+          commercial_use_allowed?: boolean | null
+          created_at?: string
+          creator_summary?: string | null
+          id?: string
+          owner_entity_id?: string | null
+          rights_status?: string
+          storage_location_summary?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       discount_rules: {
         Row: {
           active: boolean
@@ -23745,6 +23840,53 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      licensing_opportunities: {
+        Row: {
+          asset_id: string | null
+          business_id: string | null
+          created_at: string
+          currency: string | null
+          expected_value: number | null
+          id: string
+          opportunity_status: string
+          opportunity_type: string
+          risk_flags: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          asset_id?: string | null
+          business_id?: string | null
+          created_at?: string
+          currency?: string | null
+          expected_value?: number | null
+          id?: string
+          opportunity_status?: string
+          opportunity_type?: string
+          risk_flags?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          asset_id?: string | null
+          business_id?: string | null
+          created_at?: string
+          currency?: string | null
+          expected_value?: number | null
+          id?: string
+          opportunity_status?: string
+          opportunity_type?: string
+          risk_flags?: string[] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "licensing_opportunities_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "digital_assets"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       liftor_brain_access_map_snapshots: {
         Row: {
