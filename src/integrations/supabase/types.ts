@@ -20679,6 +20679,60 @@ export type Database = {
           },
         ]
       }
+      duplicate_identity_candidates: {
+        Row: {
+          audit_metadata: Json
+          confidence_score: number
+          created_at: string
+          id: string
+          identity_profile_a_id: string
+          identity_profile_b_id: string
+          match_reason: string | null
+          merge_recommendation: string | null
+          merge_status: string
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          confidence_score?: number
+          created_at?: string
+          id?: string
+          identity_profile_a_id: string
+          identity_profile_b_id: string
+          match_reason?: string | null
+          merge_recommendation?: string | null
+          merge_status?: string
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          confidence_score?: number
+          created_at?: string
+          id?: string
+          identity_profile_a_id?: string
+          identity_profile_b_id?: string
+          match_reason?: string | null
+          merge_recommendation?: string | null
+          merge_status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "duplicate_identity_candidates_identity_profile_a_id_fkey"
+            columns: ["identity_profile_a_id"]
+            isOneToOne: false
+            referencedRelation: "identity_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "duplicate_identity_candidates_identity_profile_b_id_fkey"
+            columns: ["identity_profile_b_id"]
+            isOneToOne: false
+            referencedRelation: "identity_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ecommerce_order_items: {
         Row: {
           business_id: string | null
@@ -23348,6 +23402,133 @@ export type Database = {
           timezone?: string | null
           updated_at?: string
           working_hours?: string | null
+        }
+        Relationships: []
+      }
+      identity_links: {
+        Row: {
+          business_id: string | null
+          confidence_score: number
+          created_at: string
+          id: string
+          identity_profile_id: string
+          link_status: string
+          linked_record_id: string | null
+          linked_role: string
+          linked_table: string
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          confidence_score?: number
+          created_at?: string
+          id?: string
+          identity_profile_id: string
+          link_status?: string
+          linked_record_id?: string | null
+          linked_role?: string
+          linked_table: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          confidence_score?: number
+          created_at?: string
+          id?: string
+          identity_profile_id?: string
+          link_status?: string
+          linked_record_id?: string | null
+          linked_role?: string
+          linked_table?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "identity_links_identity_profile_id_fkey"
+            columns: ["identity_profile_id"]
+            isOneToOne: false
+            referencedRelation: "identity_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      identity_merge_actions: {
+        Row: {
+          action_status: string
+          created_at: string
+          duplicate_candidate_id: string
+          founder_approval_required: boolean
+          id: string
+          irreversible: boolean
+          merge_summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          action_status?: string
+          created_at?: string
+          duplicate_candidate_id: string
+          founder_approval_required?: boolean
+          id?: string
+          irreversible?: boolean
+          merge_summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          action_status?: string
+          created_at?: string
+          duplicate_candidate_id?: string
+          founder_approval_required?: boolean
+          id?: string
+          irreversible?: boolean
+          merge_summary?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "identity_merge_actions_duplicate_candidate_id_fkey"
+            columns: ["duplicate_candidate_id"]
+            isOneToOne: false
+            referencedRelation: "duplicate_identity_candidates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      identity_profiles: {
+        Row: {
+          audit_metadata: Json
+          canonical_contact_id: string | null
+          created_at: string
+          display_name: string | null
+          do_not_contact_global: boolean
+          id: string
+          identity_status: string
+          primary_email: string | null
+          primary_phone_summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          canonical_contact_id?: string | null
+          created_at?: string
+          display_name?: string | null
+          do_not_contact_global?: boolean
+          id?: string
+          identity_status?: string
+          primary_email?: string | null
+          primary_phone_summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          canonical_contact_id?: string | null
+          created_at?: string
+          display_name?: string | null
+          do_not_contact_global?: boolean
+          id?: string
+          identity_status?: string
+          primary_email?: string | null
+          primary_phone_summary?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
