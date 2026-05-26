@@ -143,6 +143,7 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "ai_evaluation_agent", name: "AI Evaluation Agent", to: "/founder/ai-evals", category: "operations" },
   { key: "sop_governance_agent", name: "SOP Governance Agent", to: "/founder/sops", category: "operations" },
   { key: "backup_recovery_agent", name: "Backup Recovery Agent", to: "/founder/backup-recovery", category: "security" },
+  { key: "decision_register_agent", name: "Decision Register Agent", to: "/founder/decisions", category: "operations" },
 ];
 
 export default function AgentOperatingStatus() {

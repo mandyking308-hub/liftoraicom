@@ -55,6 +55,7 @@ import DocumentVaultCard from "./DocumentVaultCard";
 import AiEvalCard from "./AiEvalCard";
 import SopVersionControlCard from "./SopVersionControlCard";
 import BackupRecoveryCard from "./BackupRecoveryCard";
+import DecisionRegisterCard from "./DecisionRegisterCard";
 
 /**
  * Business Process Spine — single integrated panel that surfaces every
@@ -101,6 +102,7 @@ export default function BusinessProcessSpinePanel() {
       <AiEvalCard />
       <SopVersionControlCard />
       <BackupRecoveryCard />
+      <DecisionRegisterCard />
 
       <PortalsCard />
 

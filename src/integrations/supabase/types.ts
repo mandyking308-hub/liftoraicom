@@ -19492,6 +19492,44 @@ export type Database = {
         }
         Relationships: []
       }
+      decision_review_reminders: {
+        Row: {
+          created_at: string
+          decision_id: string
+          id: string
+          review_due_at: string
+          review_reason: string | null
+          review_status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          decision_id: string
+          id?: string
+          review_due_at: string
+          review_reason?: string | null
+          review_status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          decision_id?: string
+          id?: string
+          review_due_at?: string
+          review_reason?: string | null
+          review_status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "decision_review_reminders_decision_id_fkey"
+            columns: ["decision_id"]
+            isOneToOne: false
+            referencedRelation: "founder_decisions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       delivery_capacity: {
         Row: {
           business_id: string | null
@@ -21483,57 +21521,137 @@ export type Database = {
         }
         Relationships: []
       }
+      founder_decision_events: {
+        Row: {
+          audit_metadata: Json
+          created_at: string
+          created_by: string | null
+          decision_id: string
+          event_summary: string | null
+          event_type: string
+          id: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          created_at?: string
+          created_by?: string | null
+          decision_id: string
+          event_summary?: string | null
+          event_type: string
+          id?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          created_at?: string
+          created_by?: string | null
+          decision_id?: string
+          event_summary?: string | null
+          event_type?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "founder_decision_events_decision_id_fkey"
+            columns: ["decision_id"]
+            isOneToOne: false
+            referencedRelation: "founder_decisions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       founder_decisions: {
         Row: {
+          audit_metadata: Json
           business_id: string | null
           cost_credit_impact: string | null
           created_at: string
           created_by_run: string | null
+          deadline: string | null
           decided_at: string | null
           decided_by: string | null
+          decision_status: string
+          decision_summary: string | null
+          decision_title: string | null
           decision_type: string
+          financial_impact_summary: string | null
           finding: string | null
+          founder_decided_at: string | null
+          founder_decision: string | null
           id: string
+          options_json: Json
           recommendation: string | null
+          recommended_option: string | null
           related_ids: Json
           resolution_note: string | null
           risk: string | null
+          risk_summary: string | null
+          source_module: string | null
+          source_record_id: string | null
+          source_table: string | null
           status: string
           title: string
           updated_at: string
         }
         Insert: {
+          audit_metadata?: Json
           business_id?: string | null
           cost_credit_impact?: string | null
           created_at?: string
           created_by_run?: string | null
+          deadline?: string | null
           decided_at?: string | null
           decided_by?: string | null
+          decision_status?: string
+          decision_summary?: string | null
+          decision_title?: string | null
           decision_type: string
+          financial_impact_summary?: string | null
           finding?: string | null
+          founder_decided_at?: string | null
+          founder_decision?: string | null
           id?: string
+          options_json?: Json
           recommendation?: string | null
+          recommended_option?: string | null
           related_ids?: Json
           resolution_note?: string | null
           risk?: string | null
+          risk_summary?: string | null
+          source_module?: string | null
+          source_record_id?: string | null
+          source_table?: string | null
           status?: string
           title: string
           updated_at?: string
         }
         Update: {
+          audit_metadata?: Json
           business_id?: string | null
           cost_credit_impact?: string | null
           created_at?: string
           created_by_run?: string | null
+          deadline?: string | null
           decided_at?: string | null
           decided_by?: string | null
+          decision_status?: string
+          decision_summary?: string | null
+          decision_title?: string | null
           decision_type?: string
+          financial_impact_summary?: string | null
           finding?: string | null
+          founder_decided_at?: string | null
+          founder_decision?: string | null
           id?: string
+          options_json?: Json
           recommendation?: string | null
+          recommended_option?: string | null
           related_ids?: Json
           resolution_note?: string | null
           risk?: string | null
+          risk_summary?: string | null
+          source_module?: string | null
+          source_record_id?: string | null
+          source_table?: string | null
           status?: string
           title?: string
           updated_at?: string
