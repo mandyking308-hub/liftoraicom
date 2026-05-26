@@ -32,6 +32,7 @@ import ContextGuardCard from "./ContextGuardCard";
 import PortfolioPrioritisationCard from "./PortfolioPrioritisationCard";
 import ResourceAllocationCard from "./ResourceAllocationCard";
 import PortfolioRiskCard from "./PortfolioRiskCard";
+import BusinessLifecycleCard from "./BusinessLifecycleCard";
 
 /**
  * Business Process Spine — single integrated panel that surfaces every
@@ -82,6 +83,8 @@ export default function BusinessProcessSpinePanel() {
       <ResourceAllocationCard />
 
       <PortfolioRiskCard />
+
+      <BusinessLifecycleCard />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <DeliveryEngineCard />

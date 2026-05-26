@@ -122,6 +122,7 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "portfolio_prioritisation_agent", name: "Portfolio Prioritisation Agent", to: "/founder/portfolio-prioritisation", category: "strategy" },
   { key: "resource_allocation_agent", name: "Resource Allocation Agent", to: "/founder/resource-allocation", category: "strategy" },
   { key: "portfolio_risk_agent", name: "Portfolio Risk Agent", to: "/founder/portfolio-risk", category: "security" },
+  { key: "lifecycle_agent", name: "Lifecycle Agent", to: "/founder/business-lifecycle", category: "operations" },
 ];
 
 export default function AgentOperatingStatus() {

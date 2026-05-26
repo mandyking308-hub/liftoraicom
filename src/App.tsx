@@ -356,6 +356,13 @@ import PRMatrix from "./pages/founder/portfolio-risk/Matrix";
 import PRBusinesses from "./pages/founder/portfolio-risk/Businesses";
 import PRCritical from "./pages/founder/portfolio-risk/Critical";
 import PRActions from "./pages/founder/portfolio-risk/Actions";
+
+// Business Lifecycle Stage Control
+import BLOverview from "./pages/founder/business-lifecycle/Overview";
+import BLStages from "./pages/founder/business-lifecycle/Stages";
+import BLBusinesses from "./pages/founder/business-lifecycle/Businesses";
+import BLTransitions from "./pages/founder/business-lifecycle/Transitions";
+import BLSettings from "./pages/founder/business-lifecycle/Settings";
 import KnowledgeOverview from "./pages/founder/knowledge-governance/Overview";
 import KnowledgeSources from "./pages/founder/knowledge-governance/Sources";
 import KnowledgeConflicts from "./pages/founder/knowledge-governance/Conflicts";
@@ -806,6 +813,11 @@ const App = () => (
             <Route path="/founder/portfolio-risk/businesses" element={<FounderRoute><PRBusinesses /></FounderRoute>} />
             <Route path="/founder/portfolio-risk/critical" element={<FounderRoute><PRCritical /></FounderRoute>} />
             <Route path="/founder/portfolio-risk/actions" element={<FounderRoute><PRActions /></FounderRoute>} />
+            <Route path="/founder/business-lifecycle" element={<FounderRoute><BLOverview /></FounderRoute>} />
+            <Route path="/founder/business-lifecycle/stages" element={<FounderRoute><BLStages /></FounderRoute>} />
+            <Route path="/founder/business-lifecycle/businesses" element={<FounderRoute><BLBusinesses /></FounderRoute>} />
+            <Route path="/founder/business-lifecycle/transitions" element={<FounderRoute><BLTransitions /></FounderRoute>} />
+            <Route path="/founder/business-lifecycle/settings" element={<FounderRoute><BLSettings /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
