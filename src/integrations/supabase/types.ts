@@ -7857,6 +7857,60 @@ export type Database = {
           },
         ]
       }
+      business_memory_summaries: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          current_status: string | null
+          generated_by: string | null
+          id: string
+          key_metrics: Json
+          last_generated_at: string | null
+          open_decisions: Json
+          open_risks: Json
+          open_work_items: Json
+          summary_body: string | null
+          summary_title: string
+          summary_type: string
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          current_status?: string | null
+          generated_by?: string | null
+          id?: string
+          key_metrics?: Json
+          last_generated_at?: string | null
+          open_decisions?: Json
+          open_risks?: Json
+          open_work_items?: Json
+          summary_body?: string | null
+          summary_title: string
+          summary_type?: string
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          current_status?: string | null
+          generated_by?: string | null
+          id?: string
+          key_metrics?: Json
+          last_generated_at?: string | null
+          open_decisions?: Json
+          open_risks?: Json
+          open_work_items?: Json
+          summary_body?: string | null
+          summary_title?: string
+          summary_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       business_micro_batch_approval_packets: {
         Row: {
           blocked_candidate_count: number
@@ -22534,6 +22588,95 @@ export type Database = {
         }
         Relationships: []
       }
+      handover_pack_items: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          id: string
+          item_summary: string | null
+          item_type: string
+          pack_id: string
+          source_record_id: string | null
+          source_table: string | null
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          item_summary?: string | null
+          item_type: string
+          pack_id: string
+          source_record_id?: string | null
+          source_table?: string | null
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          item_summary?: string | null
+          item_type?: string
+          pack_id?: string
+          source_record_id?: string | null
+          source_table?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "handover_pack_items_pack_id_fkey"
+            columns: ["pack_id"]
+            isOneToOne: false
+            referencedRelation: "handover_packs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      handover_packs: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          founder_approval_required: boolean
+          id: string
+          included_sections: Json
+          pack_status: string
+          pack_summary: string | null
+          pack_title: string
+          pack_type: string
+          sensitivity_level: string
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          founder_approval_required?: boolean
+          id?: string
+          included_sections?: Json
+          pack_status?: string
+          pack_summary?: string | null
+          pack_title: string
+          pack_type?: string
+          sensitivity_level?: string
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          founder_approval_required?: boolean
+          id?: string
+          included_sections?: Json
+          pack_status?: string
+          pack_summary?: string | null
+          pack_title?: string
+          pack_type?: string
+          sensitivity_level?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       human_operator_access: {
         Row: {
           access_level: string | null
@@ -35471,6 +35614,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      portfolio_history_events: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          event_date: string
+          event_summary: string | null
+          event_type: string
+          id: string
+          source_module: string | null
+          source_record_id: string | null
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          event_date?: string
+          event_summary?: string | null
+          event_type: string
+          id?: string
+          source_module?: string | null
+          source_record_id?: string | null
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          event_date?: string
+          event_summary?: string | null
+          event_type?: string
+          id?: string
+          source_module?: string | null
+          source_record_id?: string | null
+        }
+        Relationships: []
       }
       portfolio_intelligence_scores: {
         Row: {
