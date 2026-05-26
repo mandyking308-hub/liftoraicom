@@ -349,6 +349,13 @@ import RAHumanTime from "./pages/founder/resource-allocation/HumanTime";
 import RAFounderAttention from "./pages/founder/resource-allocation/FounderAttention";
 import RACash from "./pages/founder/resource-allocation/Cash";
 import RARecommendations from "./pages/founder/resource-allocation/Recommendations";
+
+// Portfolio Risk Matrix
+import PROverview from "./pages/founder/portfolio-risk/Overview";
+import PRMatrix from "./pages/founder/portfolio-risk/Matrix";
+import PRBusinesses from "./pages/founder/portfolio-risk/Businesses";
+import PRCritical from "./pages/founder/portfolio-risk/Critical";
+import PRActions from "./pages/founder/portfolio-risk/Actions";
 import KnowledgeOverview from "./pages/founder/knowledge-governance/Overview";
 import KnowledgeSources from "./pages/founder/knowledge-governance/Sources";
 import KnowledgeConflicts from "./pages/founder/knowledge-governance/Conflicts";
@@ -794,6 +801,11 @@ const App = () => (
             <Route path="/founder/resource-allocation/founder-attention" element={<FounderRoute><RAFounderAttention /></FounderRoute>} />
             <Route path="/founder/resource-allocation/cash" element={<FounderRoute><RACash /></FounderRoute>} />
             <Route path="/founder/resource-allocation/recommendations" element={<FounderRoute><RARecommendations /></FounderRoute>} />
+            <Route path="/founder/portfolio-risk" element={<FounderRoute><PROverview /></FounderRoute>} />
+            <Route path="/founder/portfolio-risk/matrix" element={<FounderRoute><PRMatrix /></FounderRoute>} />
+            <Route path="/founder/portfolio-risk/businesses" element={<FounderRoute><PRBusinesses /></FounderRoute>} />
+            <Route path="/founder/portfolio-risk/critical" element={<FounderRoute><PRCritical /></FounderRoute>} />
+            <Route path="/founder/portfolio-risk/actions" element={<FounderRoute><PRActions /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
