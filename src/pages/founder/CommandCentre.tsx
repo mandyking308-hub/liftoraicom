@@ -162,6 +162,7 @@ import VoiceProviderStatusCard from "@/components/founder/command/VoiceProviderS
 import RevenueAutopilotCard from "@/components/founder/command/RevenueAutopilotCard";
 import QuoteToCashCard from "@/components/founder/command/QuoteToCashCard";
 import BusinessProcessSpinePanel from "@/components/founder/command/BusinessProcessSpinePanel";
+import ControlFabricCard from "@/components/founder/command/ControlFabricCard";
 import CustomerJourneyControlBoard from "@/components/founder/command/CustomerJourneyControlBoard";
 import AgentCollaborationBoard from "@/components/founder/agents/AgentCollaborationBoard";
 import CustomerJourneyFlowMap from "@/components/founder/command/CustomerJourneyFlowMap";
@@ -795,6 +796,7 @@ const CommandCentre = () => {
       <CommandCentreViewModeBar />
       <StartUsingLiftorNote />
       <FounderCockpit />
+      <div className="max-w-7xl mx-auto px-4 pt-4"><ControlFabricCard /></div>
       <AICostGovernorPortfolio />
       <div className="max-w-7xl mx-auto px-4 pt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
         <AIUsageMiniWidget />
