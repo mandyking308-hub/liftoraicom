@@ -530,6 +530,12 @@ import ConnectorsWebhooks from "./pages/founder/connectors/Webhooks";
 import ConnectorsSecrets from "./pages/founder/connectors/Secrets";
 import ConnectorsBusinessMap from "./pages/founder/connectors/BusinessMap";
 import ConnectorsSettings from "./pages/founder/connectors/Settings";
+import WebhooksOverview from "./pages/founder/webhooks/Overview";
+import WebhooksInbox from "./pages/founder/webhooks/Inbox";
+import WebhooksProviders from "./pages/founder/webhooks/Providers";
+import WebhooksNormalised from "./pages/founder/webhooks/NormalisedEvents";
+import WebhooksFailures from "./pages/founder/webhooks/Failures";
+import WebhooksSettings from "./pages/founder/webhooks/Settings";
 import PortalsOverview from "./pages/founder/portals/Overview";
 import PortalsCustomerAdmin from "./pages/founder/portals/Customer";
 import PortalsSellerAdmin from "./pages/founder/portals/Seller";
@@ -1170,6 +1176,12 @@ const App = () => (
             <Route path="/founder/connectors/secrets" element={<FounderRoute><ConnectorsSecrets /></FounderRoute>} />
             <Route path="/founder/connectors/business-map" element={<FounderRoute><ConnectorsBusinessMap /></FounderRoute>} />
             <Route path="/founder/connectors/settings" element={<FounderRoute><ConnectorsSettings /></FounderRoute>} />
+            <Route path="/founder/webhooks" element={<FounderRoute><WebhooksOverview /></FounderRoute>} />
+            <Route path="/founder/webhooks/inbox" element={<FounderRoute><WebhooksInbox /></FounderRoute>} />
+            <Route path="/founder/webhooks/providers" element={<FounderRoute><WebhooksProviders /></FounderRoute>} />
+            <Route path="/founder/webhooks/normalised-events" element={<FounderRoute><WebhooksNormalised /></FounderRoute>} />
+            <Route path="/founder/webhooks/failures" element={<FounderRoute><WebhooksFailures /></FounderRoute>} />
+            <Route path="/founder/webhooks/settings" element={<FounderRoute><WebhooksSettings /></FounderRoute>} />
             <Route path="/founder/portals" element={<FounderRoute><PortalsOverview /></FounderRoute>} />
             <Route path="/founder/portals/customer" element={<FounderRoute><PortalsCustomerAdmin /></FounderRoute>} />
             <Route path="/founder/portals/seller" element={<FounderRoute><PortalsSellerAdmin /></FounderRoute>} />
