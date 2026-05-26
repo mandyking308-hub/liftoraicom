@@ -23351,41 +23351,259 @@ export type Database = {
         }
         Relationships: []
       }
+      import_applied_records: {
+        Row: {
+          action_taken: string
+          audit_metadata: Json
+          created_at: string
+          id: string
+          import_batch_id: string
+          rollback_possible: boolean
+          target_record_id: string | null
+          target_table: string
+        }
+        Insert: {
+          action_taken?: string
+          audit_metadata?: Json
+          created_at?: string
+          id?: string
+          import_batch_id: string
+          rollback_possible?: boolean
+          target_record_id?: string | null
+          target_table: string
+        }
+        Update: {
+          action_taken?: string
+          audit_metadata?: Json
+          created_at?: string
+          id?: string
+          import_batch_id?: string
+          rollback_possible?: boolean
+          target_record_id?: string | null
+          target_table?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_applied_records_import_batch_id_fkey"
+            columns: ["import_batch_id"]
+            isOneToOne: false
+            referencedRelation: "import_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       import_batches: {
         Row: {
+          audit_metadata: Json
+          business_id: string | null
           business_name: string
           created_at: string
+          created_by: string | null
           duplicate_rows: number
           file_name: string
+          founder_approval_required: boolean
           id: string
+          import_name: string | null
+          import_status: string
+          import_type: string
           invalid_rows: number
+          is_test_import: boolean
+          rows_error: number
+          rows_total: number
+          rows_valid: number
+          rows_warning: number
+          source_filename: string | null
+          source_format: string
           source_name: string
           total_rows: number
+          updated_at: string
           valid_rows: number
         }
         Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
           business_name?: string
           created_at?: string
+          created_by?: string | null
           duplicate_rows?: number
           file_name?: string
+          founder_approval_required?: boolean
           id?: string
+          import_name?: string | null
+          import_status?: string
+          import_type?: string
           invalid_rows?: number
+          is_test_import?: boolean
+          rows_error?: number
+          rows_total?: number
+          rows_valid?: number
+          rows_warning?: number
+          source_filename?: string | null
+          source_format?: string
           source_name?: string
           total_rows?: number
+          updated_at?: string
           valid_rows?: number
         }
         Update: {
+          audit_metadata?: Json
+          business_id?: string | null
           business_name?: string
           created_at?: string
+          created_by?: string | null
           duplicate_rows?: number
           file_name?: string
+          founder_approval_required?: boolean
           id?: string
+          import_name?: string | null
+          import_status?: string
+          import_type?: string
           invalid_rows?: number
+          is_test_import?: boolean
+          rows_error?: number
+          rows_total?: number
+          rows_valid?: number
+          rows_warning?: number
+          source_filename?: string | null
+          source_format?: string
           source_name?: string
           total_rows?: number
+          updated_at?: string
           valid_rows?: number
         }
         Relationships: []
+      }
+      import_mappings: {
+        Row: {
+          created_at: string
+          id: string
+          import_batch_id: string
+          mapping_status: string
+          required: boolean
+          source_field: string
+          target_field: string | null
+          target_table: string | null
+          transformation_rule: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          import_batch_id: string
+          mapping_status?: string
+          required?: boolean
+          source_field: string
+          target_field?: string | null
+          target_table?: string | null
+          transformation_rule?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          import_batch_id?: string
+          mapping_status?: string
+          required?: boolean
+          source_field?: string
+          target_field?: string | null
+          target_table?: string | null
+          transformation_rule?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_mappings_import_batch_id_fkey"
+            columns: ["import_batch_id"]
+            isOneToOne: false
+            referencedRelation: "import_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      import_preview_rows: {
+        Row: {
+          created_at: string
+          duplicate_match_summary: string | null
+          id: string
+          import_batch_id: string
+          mapped_row: Json
+          raw_row: Json
+          row_number: number
+          validation_messages: Json
+          validation_status: string
+        }
+        Insert: {
+          created_at?: string
+          duplicate_match_summary?: string | null
+          id?: string
+          import_batch_id: string
+          mapped_row?: Json
+          raw_row?: Json
+          row_number: number
+          validation_messages?: Json
+          validation_status?: string
+        }
+        Update: {
+          created_at?: string
+          duplicate_match_summary?: string | null
+          id?: string
+          import_batch_id?: string
+          mapped_row?: Json
+          raw_row?: Json
+          row_number?: number
+          validation_messages?: Json
+          validation_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_preview_rows_import_batch_id_fkey"
+            columns: ["import_batch_id"]
+            isOneToOne: false
+            referencedRelation: "import_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      import_rollback_events: {
+        Row: {
+          audit_metadata: Json
+          completed_at: string | null
+          created_at: string
+          founder_approval_required: boolean
+          id: string
+          import_batch_id: string
+          rollback_status: string
+          rollback_summary: string | null
+        }
+        Insert: {
+          audit_metadata?: Json
+          completed_at?: string | null
+          created_at?: string
+          founder_approval_required?: boolean
+          id?: string
+          import_batch_id: string
+          rollback_status?: string
+          rollback_summary?: string | null
+        }
+        Update: {
+          audit_metadata?: Json
+          completed_at?: string | null
+          created_at?: string
+          founder_approval_required?: boolean
+          id?: string
+          import_batch_id?: string
+          rollback_status?: string
+          rollback_summary?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_rollback_events_import_batch_id_fkey"
+            columns: ["import_batch_id"]
+            isOneToOne: false
+            referencedRelation: "import_batches"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       imported_leads: {
         Row: {
