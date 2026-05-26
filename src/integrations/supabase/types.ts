@@ -6887,6 +6887,98 @@ export type Database = {
         }
         Relationships: []
       }
+      business_lifecycle_assignments: {
+        Row: {
+          business_id: string
+          created_at: string
+          entered_at: string
+          founder_approved_at: string | null
+          id: string
+          reason: string | null
+          stage_id: string
+          stage_status: string
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          entered_at?: string
+          founder_approved_at?: string | null
+          id?: string
+          reason?: string | null
+          stage_id: string
+          stage_status?: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          entered_at?: string
+          founder_approved_at?: string | null
+          id?: string
+          reason?: string | null
+          stage_id?: string
+          stage_status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_lifecycle_assignments_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "business_lifecycle_stages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_lifecycle_stages: {
+        Row: {
+          active: boolean
+          allowed_external_actions: string[]
+          allowed_modules: string[]
+          approval_required_for_entry: boolean
+          created_at: string
+          description: string | null
+          id: string
+          required_checks: string[]
+          required_modules: string[]
+          sort_order: number
+          stage_code: string
+          stage_name: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          allowed_external_actions?: string[]
+          allowed_modules?: string[]
+          approval_required_for_entry?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          required_checks?: string[]
+          required_modules?: string[]
+          sort_order?: number
+          stage_code: string
+          stage_name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          allowed_external_actions?: string[]
+          allowed_modules?: string[]
+          approval_required_for_entry?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          required_checks?: string[]
+          required_modules?: string[]
+          sort_order?: number
+          stage_code?: string
+          stage_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       business_margin_snapshots: {
         Row: {
           business_id: string | null
@@ -8941,6 +9033,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      business_stage_transition_events: {
+        Row: {
+          approval_required: boolean
+          approved_at: string | null
+          approved_by: string | null
+          audit_metadata: Json
+          business_id: string
+          created_at: string
+          from_stage: string | null
+          id: string
+          to_stage: string
+          transition_reason: string | null
+        }
+        Insert: {
+          approval_required?: boolean
+          approved_at?: string | null
+          approved_by?: string | null
+          audit_metadata?: Json
+          business_id: string
+          created_at?: string
+          from_stage?: string | null
+          id?: string
+          to_stage: string
+          transition_reason?: string | null
+        }
+        Update: {
+          approval_required?: boolean
+          approved_at?: string | null
+          approved_by?: string | null
+          audit_metadata?: Json
+          business_id?: string
+          created_at?: string
+          from_stage?: string | null
+          id?: string
+          to_stage?: string
+          transition_reason?: string | null
+        }
+        Relationships: []
       }
       business_template_applications: {
         Row: {
