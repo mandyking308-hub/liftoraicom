@@ -134,6 +134,7 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "notification_agent", name: "Notification Agent", to: "/founder/notifications", category: "operations" },
   { key: "delegation_agent", name: "Delegation Agent", to: "/founder/roles/delegation", category: "operations" },
   { key: "reporting_truth_agent", name: "Reporting Truth Agent", to: "/founder/reporting-truth", category: "operations" },
+  { key: "portal_access_agent", name: "Portal Access Agent", to: "/founder/portals", category: "security" },
 ];
 
 export default function AgentOperatingStatus() {

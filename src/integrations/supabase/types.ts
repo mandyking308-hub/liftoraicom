@@ -33944,6 +33944,232 @@ export type Database = {
         }
         Relationships: []
       }
+      portal_access_events: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          event_summary: string
+          event_type: string
+          id: string
+          portal_profile_id: string | null
+          portal_user_id: string | null
+          severity: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          event_summary: string
+          event_type: string
+          id?: string
+          portal_profile_id?: string | null
+          portal_user_id?: string | null
+          severity?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          event_summary?: string
+          event_type?: string
+          id?: string
+          portal_profile_id?: string | null
+          portal_user_id?: string | null
+          severity?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portal_access_events_portal_profile_id_fkey"
+            columns: ["portal_profile_id"]
+            isOneToOne: false
+            referencedRelation: "portal_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "portal_access_events_portal_user_id_fkey"
+            columns: ["portal_user_id"]
+            isOneToOne: false
+            referencedRelation: "portal_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      portal_invites: {
+        Row: {
+          accepted_at: string | null
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          expires_at: string | null
+          founder_approval_required: boolean
+          founder_approved_at: string | null
+          id: string
+          invite_status: string
+          invite_token_hash: string | null
+          invite_type: string
+          invitee_email: string
+          portal_profile_id: string
+          sent_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          expires_at?: string | null
+          founder_approval_required?: boolean
+          founder_approved_at?: string | null
+          id?: string
+          invite_status?: string
+          invite_token_hash?: string | null
+          invite_type: string
+          invitee_email: string
+          portal_profile_id: string
+          sent_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          expires_at?: string | null
+          founder_approval_required?: boolean
+          founder_approved_at?: string | null
+          id?: string
+          invite_status?: string
+          invite_token_hash?: string | null
+          invite_type?: string
+          invitee_email?: string
+          portal_profile_id?: string
+          sent_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portal_invites_portal_profile_id_fkey"
+            columns: ["portal_profile_id"]
+            isOneToOne: false
+            referencedRelation: "portal_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      portal_profiles: {
+        Row: {
+          access_mode: string
+          active: boolean
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          id: string
+          portal_name: string
+          portal_status: string
+          portal_type: string
+          public_url: string | null
+          requires_founder_approval_for_invites: boolean
+          updated_at: string
+        }
+        Insert: {
+          access_mode?: string
+          active?: boolean
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          portal_name: string
+          portal_status?: string
+          portal_type: string
+          public_url?: string | null
+          requires_founder_approval_for_invites?: boolean
+          updated_at?: string
+        }
+        Update: {
+          access_mode?: string
+          active?: boolean
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          portal_name?: string
+          portal_status?: string
+          portal_type?: string
+          public_url?: string | null
+          requires_founder_approval_for_invites?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      portal_users: {
+        Row: {
+          access_status: string
+          adviser_id: string | null
+          audit_metadata: Json
+          business_id: string | null
+          contact_id: string | null
+          created_at: string
+          display_name: string | null
+          email: string
+          id: string
+          invited_at: string | null
+          last_login_at: string | null
+          partner_id: string | null
+          portal_profile_id: string
+          portal_role: string
+          revoked_at: string | null
+          seller_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_status?: string
+          adviser_id?: string | null
+          audit_metadata?: Json
+          business_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          display_name?: string | null
+          email: string
+          id?: string
+          invited_at?: string | null
+          last_login_at?: string | null
+          partner_id?: string | null
+          portal_profile_id: string
+          portal_role: string
+          revoked_at?: string | null
+          seller_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_status?: string
+          adviser_id?: string | null
+          audit_metadata?: Json
+          business_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string
+          id?: string
+          invited_at?: string | null
+          last_login_at?: string | null
+          partner_id?: string | null
+          portal_profile_id?: string
+          portal_role?: string
+          revoked_at?: string | null
+          seller_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portal_users_portal_profile_id_fkey"
+            columns: ["portal_profile_id"]
+            isOneToOne: false
+            referencedRelation: "portal_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       portfolio_intelligence_scores: {
         Row: {
           attention_score: number

@@ -442,6 +442,19 @@ import ReportingTruthDefinitions from "./pages/founder/reporting-truth/Definitio
 import ReportingTruthReconciliation from "./pages/founder/reporting-truth/Reconciliation";
 import ReportingTruthConflicts from "./pages/founder/reporting-truth/Conflicts";
 import ReportingTruthSettings from "./pages/founder/reporting-truth/Settings";
+import PortalsOverview from "./pages/founder/portals/Overview";
+import PortalsCustomerAdmin from "./pages/founder/portals/Customer";
+import PortalsSellerAdmin from "./pages/founder/portals/Seller";
+import PortalsPartnerAdmin from "./pages/founder/portals/Partner";
+import PortalsAdviserAdmin from "./pages/founder/portals/Adviser";
+import PortalsDocumentUploadAdmin from "./pages/founder/portals/DocumentUpload";
+import PortalsAccessPage from "./pages/founder/portals/Access";
+import PortalsSettings from "./pages/founder/portals/Settings";
+import PublicCustomerPortal from "./pages/portal/Customer";
+import PublicSellerPortal from "./pages/portal/Seller";
+import PublicPartnerPortal from "./pages/portal/Partner";
+import PublicAdviserPortal from "./pages/portal/Adviser";
+import PublicUploadPortal from "./pages/portal/Upload";
 import KnowledgeOverview from "./pages/founder/knowledge-governance/Overview";
 import KnowledgeSources from "./pages/founder/knowledge-governance/Sources";
 import KnowledgeConflicts from "./pages/founder/knowledge-governance/Conflicts";
@@ -603,6 +616,13 @@ const App = () => (
             <Route path="/portal/signup" element={<PortalSignup />} />
             <Route path="/portal/forgot-password" element={<ForgotPassword />} />
             <Route path="/portal/reset-password" element={<ResetPassword />} />
+
+            {/* External Portals Architecture — public placeholders (not activated by default) */}
+            <Route path="/portal/customer" element={<PublicCustomerPortal />} />
+            <Route path="/portal/seller" element={<PublicSellerPortal />} />
+            <Route path="/portal/partner" element={<PublicPartnerPortal />} />
+            <Route path="/portal/adviser" element={<PublicAdviserPortal />} />
+            <Route path="/portal/upload" element={<PublicUploadPortal />} />
 
             {/* Protected Client Portal */}
             <Route path="/portal/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
@@ -974,6 +994,14 @@ const App = () => (
             <Route path="/founder/reporting-truth/reconciliation" element={<FounderRoute><ReportingTruthReconciliation /></FounderRoute>} />
             <Route path="/founder/reporting-truth/conflicts" element={<FounderRoute><ReportingTruthConflicts /></FounderRoute>} />
             <Route path="/founder/reporting-truth/settings" element={<FounderRoute><ReportingTruthSettings /></FounderRoute>} />
+            <Route path="/founder/portals" element={<FounderRoute><PortalsOverview /></FounderRoute>} />
+            <Route path="/founder/portals/customer" element={<FounderRoute><PortalsCustomerAdmin /></FounderRoute>} />
+            <Route path="/founder/portals/seller" element={<FounderRoute><PortalsSellerAdmin /></FounderRoute>} />
+            <Route path="/founder/portals/partner" element={<FounderRoute><PortalsPartnerAdmin /></FounderRoute>} />
+            <Route path="/founder/portals/adviser" element={<FounderRoute><PortalsAdviserAdmin /></FounderRoute>} />
+            <Route path="/founder/portals/document-upload" element={<FounderRoute><PortalsDocumentUploadAdmin /></FounderRoute>} />
+            <Route path="/founder/portals/access" element={<FounderRoute><PortalsAccessPage /></FounderRoute>} />
+            <Route path="/founder/portals/settings" element={<FounderRoute><PortalsSettings /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
