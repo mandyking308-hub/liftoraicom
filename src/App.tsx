@@ -485,6 +485,12 @@ import SopsReviews from "./pages/founder/sops/Reviews";
 import SopsAgentUsage from "./pages/founder/sops/AgentUsage";
 import SopsConflicts from "./pages/founder/sops/Conflicts";
 import SopsSettings from "./pages/founder/sops/Settings";
+import BROverview from "./pages/founder/backup-recovery/Overview";
+import BRStatus from "./pages/founder/backup-recovery/Status";
+import BRExports from "./pages/founder/backup-recovery/Exports";
+import BRRestore from "./pages/founder/backup-recovery/Restore";
+import BREmergencyPack from "./pages/founder/backup-recovery/EmergencyPack";
+import BRSettings from "./pages/founder/backup-recovery/Settings";
 import EvalsOverview from "./pages/founder/ai-evals/Overview";
 import EvalsTestSuites from "./pages/founder/ai-evals/TestSuites";
 import EvalsResults from "./pages/founder/ai-evals/Results";
@@ -1087,6 +1093,12 @@ const App = () => (
             <Route path="/founder/sops/agent-usage" element={<FounderRoute><SopsAgentUsage /></FounderRoute>} />
             <Route path="/founder/sops/conflicts" element={<FounderRoute><SopsConflicts /></FounderRoute>} />
             <Route path="/founder/sops/settings" element={<FounderRoute><SopsSettings /></FounderRoute>} />
+            <Route path="/founder/backup-recovery" element={<FounderRoute><BROverview /></FounderRoute>} />
+            <Route path="/founder/backup-recovery/status" element={<FounderRoute><BRStatus /></FounderRoute>} />
+            <Route path="/founder/backup-recovery/exports" element={<FounderRoute><BRExports /></FounderRoute>} />
+            <Route path="/founder/backup-recovery/restore" element={<FounderRoute><BRRestore /></FounderRoute>} />
+            <Route path="/founder/backup-recovery/emergency-pack" element={<FounderRoute><BREmergencyPack /></FounderRoute>} />
+            <Route path="/founder/backup-recovery/settings" element={<FounderRoute><BRSettings /></FounderRoute>} />
             <Route path="/founder/ai-evals" element={<FounderRoute><EvalsOverview /></FounderRoute>} />
             <Route path="/founder/ai-evals/test-suites" element={<FounderRoute><EvalsTestSuites /></FounderRoute>} />
             <Route path="/founder/ai-evals/results" element={<FounderRoute><EvalsResults /></FounderRoute>} />
