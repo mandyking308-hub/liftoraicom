@@ -1211,6 +1211,13 @@ const App = () => (
             <Route path="/founder/audit-ledger/by-module" element={<FounderRoute><AuditByModule /></FounderRoute>} />
             <Route path="/founder/audit-ledger/sensitive" element={<FounderRoute><AuditSensitive /></FounderRoute>} />
             <Route path="/founder/audit-ledger/settings" element={<FounderRoute><AuditSettings /></FounderRoute>} />
+            <Route path="/founder/imports" element={<FounderRoute><ImportOverview /></FounderRoute>} />
+            <Route path="/founder/imports/upload" element={<FounderRoute><ImportUpload /></FounderRoute>} />
+            <Route path="/founder/imports/mapping" element={<FounderRoute><ImportMapping /></FounderRoute>} />
+            <Route path="/founder/imports/preview" element={<FounderRoute><ImportPreview /></FounderRoute>} />
+            <Route path="/founder/imports/history" element={<FounderRoute><ImportHistory /></FounderRoute>} />
+            <Route path="/founder/imports/rollback" element={<FounderRoute><ImportRollback /></FounderRoute>} />
+            <Route path="/founder/imports/settings" element={<FounderRoute><ImportSettings /></FounderRoute>} />
             <Route path="/founder/search" element={<FounderRoute><SearchOverview /></FounderRoute>} />
             <Route path="/founder/search/all" element={<FounderRoute><SearchAll /></FounderRoute>} />
             <Route path="/founder/search/customers" element={<FounderRoute><SearchCustomers /></FounderRoute>} />
