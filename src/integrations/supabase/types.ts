@@ -6069,6 +6069,110 @@ export type Database = {
           },
         ]
       }
+      business_exit_metric_values: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          evidence_source: string | null
+          id: string
+          metric_status: string
+          metric_template_id: string | null
+          metric_value: number | null
+          period_end: string | null
+          period_start: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          evidence_source?: string | null
+          id?: string
+          metric_status?: string
+          metric_template_id?: string | null
+          metric_value?: number | null
+          period_end?: string | null
+          period_start?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          evidence_source?: string | null
+          id?: string
+          metric_status?: string
+          metric_template_id?: string | null
+          metric_value?: number | null
+          period_end?: string | null
+          period_start?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_exit_metric_values_metric_template_id_fkey"
+            columns: ["metric_template_id"]
+            isOneToOne: false
+            referencedRelation: "exit_metric_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_exit_readiness_scores: {
+        Row: {
+          audit_metadata: Json | null
+          business_id: string | null
+          buyer_fit_score: number | null
+          compliance_score: number | null
+          created_at: string
+          data_room_score: number | null
+          defensibility_score: number | null
+          growth_score: number | null
+          id: string
+          margin_score: number | null
+          operations_score: number | null
+          recommended_action: string | null
+          revenue_quality_score: number | null
+          score_period_end: string | null
+          score_period_start: string | null
+          total_exit_readiness_score: number | null
+        }
+        Insert: {
+          audit_metadata?: Json | null
+          business_id?: string | null
+          buyer_fit_score?: number | null
+          compliance_score?: number | null
+          created_at?: string
+          data_room_score?: number | null
+          defensibility_score?: number | null
+          growth_score?: number | null
+          id?: string
+          margin_score?: number | null
+          operations_score?: number | null
+          recommended_action?: string | null
+          revenue_quality_score?: number | null
+          score_period_end?: string | null
+          score_period_start?: string | null
+          total_exit_readiness_score?: number | null
+        }
+        Update: {
+          audit_metadata?: Json | null
+          business_id?: string | null
+          buyer_fit_score?: number | null
+          compliance_score?: number | null
+          created_at?: string
+          data_room_score?: number | null
+          defensibility_score?: number | null
+          growth_score?: number | null
+          id?: string
+          margin_score?: number | null
+          operations_score?: number | null
+          recommended_action?: string | null
+          revenue_quality_score?: number | null
+          score_period_end?: string | null
+          score_period_start?: string | null
+          total_exit_readiness_score?: number | null
+        }
+        Relationships: []
+      }
       business_external_activation_channel_checks: {
         Row: {
           batch_limit: number
@@ -19955,6 +20059,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      exit_metric_templates: {
+        Row: {
+          active: boolean
+          archetype_code: string
+          buyer_importance_score: number
+          created_at: string
+          description: string | null
+          id: string
+          metric_category: string
+          metric_name: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          archetype_code: string
+          buyer_importance_score?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          metric_category: string
+          metric_name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          archetype_code?: string
+          buyer_importance_score?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          metric_category?: string
+          metric_name?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       external_action_gates: {
         Row: {
