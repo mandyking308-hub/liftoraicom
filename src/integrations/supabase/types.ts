@@ -4843,6 +4843,51 @@ export type Database = {
         }
         Relationships: []
       }
+      backup_status_records: {
+        Row: {
+          audit_metadata: Json
+          backup_status: string
+          backup_type: string
+          business_id: string | null
+          created_at: string
+          id: string
+          last_backup_at: string | null
+          last_verified_at: string | null
+          risk_level: string
+          storage_location_summary: string | null
+          system_name: string
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          backup_status?: string
+          backup_type?: string
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          last_backup_at?: string | null
+          last_verified_at?: string | null
+          risk_level?: string
+          storage_location_summary?: string | null
+          system_name: string
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          backup_status?: string
+          backup_type?: string
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          last_backup_at?: string | null
+          last_verified_at?: string | null
+          risk_level?: string
+          storage_location_summary?: string | null
+          system_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       baseline_change_log: {
         Row: {
           after_snapshot: Json
@@ -20647,6 +20692,45 @@ export type Database = {
         }
         Relationships: []
       }
+      emergency_operating_packs: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          generated_file_reference: string | null
+          id: string
+          included_sections: Json
+          pack_name: string
+          pack_status: string
+          pack_summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          generated_file_reference?: string | null
+          id?: string
+          included_sections?: Json
+          pack_name: string
+          pack_status?: string
+          pack_summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          generated_file_reference?: string | null
+          id?: string
+          included_sections?: Json
+          pack_name?: string
+          pack_status?: string
+          pack_summary?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       entity_policy_assignments: {
         Row: {
           business_id: string
@@ -21039,6 +21123,45 @@ export type Database = {
           id?: string
           metric_category?: string
           metric_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      export_requests: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          export_status: string
+          export_type: string
+          founder_approval_required: boolean
+          generated_file_reference: string | null
+          id: string
+          requested_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          export_status?: string
+          export_type?: string
+          founder_approval_required?: boolean
+          generated_file_reference?: string | null
+          id?: string
+          requested_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          export_status?: string
+          export_type?: string
+          founder_approval_required?: boolean
+          generated_file_reference?: string | null
+          id?: string
+          requested_by?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -37472,6 +37595,45 @@ export type Database = {
           source_record_id?: string | null
           source_type?: Database["public"]["Enums"]["recon_source_type"]
           transaction_date?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      recovery_checklists: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          checklist_items: Json
+          checklist_name: string
+          created_at: string
+          id: string
+          last_tested_at: string | null
+          recovery_scenario: string
+          recovery_status: string
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          checklist_items?: Json
+          checklist_name: string
+          created_at?: string
+          id?: string
+          last_tested_at?: string | null
+          recovery_scenario?: string
+          recovery_status?: string
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          checklist_items?: Json
+          checklist_name?: string
+          created_at?: string
+          id?: string
+          last_tested_at?: string | null
+          recovery_scenario?: string
+          recovery_status?: string
           updated_at?: string
         }
         Relationships: []
