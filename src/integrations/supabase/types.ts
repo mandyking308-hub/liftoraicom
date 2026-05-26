@@ -47516,6 +47516,240 @@ export type Database = {
           },
         ]
       }
+      sop_agent_usage: {
+        Row: {
+          active: boolean
+          agent_key: string
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          id: string
+          sop_id: string
+          updated_at: string
+          usage_type: string
+        }
+        Insert: {
+          active?: boolean
+          agent_key: string
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          sop_id: string
+          updated_at?: string
+          usage_type?: string
+        }
+        Update: {
+          active?: boolean
+          agent_key?: string
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          sop_id?: string
+          updated_at?: string
+          usage_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sop_agent_usage_sop_id_fkey"
+            columns: ["sop_id"]
+            isOneToOne: false
+            referencedRelation: "sop_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sop_conflicts: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          conflict_summary: string | null
+          created_at: string
+          id: string
+          resolution_status: string
+          severity: string
+          sop_a_id: string
+          sop_b_id: string
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          conflict_summary?: string | null
+          created_at?: string
+          id?: string
+          resolution_status?: string
+          severity?: string
+          sop_a_id: string
+          sop_b_id: string
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          conflict_summary?: string | null
+          created_at?: string
+          id?: string
+          resolution_status?: string
+          severity?: string
+          sop_a_id?: string
+          sop_b_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sop_conflicts_sop_a_id_fkey"
+            columns: ["sop_a_id"]
+            isOneToOne: false
+            referencedRelation: "sop_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sop_conflicts_sop_b_id_fkey"
+            columns: ["sop_b_id"]
+            isOneToOne: false
+            referencedRelation: "sop_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sop_documents: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          current_version_id: string | null
+          id: string
+          owner: string | null
+          sop_name: string
+          sop_status: string
+          sop_type: string
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          current_version_id?: string | null
+          id?: string
+          owner?: string | null
+          sop_name: string
+          sop_status?: string
+          sop_type?: string
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          current_version_id?: string | null
+          id?: string
+          owner?: string | null
+          sop_name?: string
+          sop_status?: string
+          sop_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sop_review_tasks: {
+        Row: {
+          assigned_to: string | null
+          audit_metadata: Json
+          created_at: string
+          due_at: string | null
+          id: string
+          review_reason: string
+          review_status: string
+          sop_id: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          audit_metadata?: Json
+          created_at?: string
+          due_at?: string | null
+          id?: string
+          review_reason?: string
+          review_status?: string
+          sop_id: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          audit_metadata?: Json
+          created_at?: string
+          due_at?: string | null
+          id?: string
+          review_reason?: string
+          review_status?: string
+          sop_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sop_review_tasks_sop_id_fkey"
+            columns: ["sop_id"]
+            isOneToOne: false
+            referencedRelation: "sop_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sop_versions: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          audit_metadata: Json
+          content_body: string | null
+          content_summary: string | null
+          created_at: string
+          effective_from: string | null
+          id: string
+          sop_id: string
+          updated_at: string
+          version_number: number
+          version_status: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          audit_metadata?: Json
+          content_body?: string | null
+          content_summary?: string | null
+          created_at?: string
+          effective_from?: string | null
+          id?: string
+          sop_id: string
+          updated_at?: string
+          version_number?: number
+          version_status?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          audit_metadata?: Json
+          content_body?: string | null
+          content_summary?: string | null
+          created_at?: string
+          effective_from?: string | null
+          id?: string
+          sop_id?: string
+          updated_at?: string
+          version_number?: number
+          version_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sop_versions_sop_id_fkey"
+            columns: ["sop_id"]
+            isOneToOne: false
+            referencedRelation: "sop_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       starter_pack_materialisation_runs: {
         Row: {
           blocked_items: number
