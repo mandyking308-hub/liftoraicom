@@ -10,7 +10,7 @@ export default function PAReferrals() {
   const [rows, setRows] = useState<ReferralRecord[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
   const reload = () => fetchReferrals().then(setRows).catch(() => {});
-  useEffect(reload, []);
+  useEffect(() => { reload(); }, []);
 
   const move = async (id: string, status: ReferralStatus) => {
     setBusy(id);

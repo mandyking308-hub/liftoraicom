@@ -13,7 +13,7 @@ export default function PAProspects() {
   const [rows, setRows] = useState<PartnerProspect[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
   const reload = () => fetchProspects().then(setRows).catch(() => {});
-  useEffect(reload, []);
+  useEffect(() => { reload(); }, []);
 
   const move = async (id: string, status: OutreachStatus) => {
     setBusy(id);
