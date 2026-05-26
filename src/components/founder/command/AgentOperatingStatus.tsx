@@ -138,6 +138,7 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "reconciliation_agent", name: "Reconciliation Agent", to: "/founder/reconciliation", category: "operations" },
   { key: "jurisdiction_tracker_agent", name: "Jurisdiction Tracker Agent", to: "/founder/jurisdiction-tax", category: "operations" },
   { key: "ecommerce_ops_agent", name: "E-commerce Ops Agent", to: "/founder/ecommerce", category: "operations" },
+  { key: "scheduling_agent", name: "Scheduling Agent", to: "/founder/scheduling", category: "operations" },
 ];
 
 export default function AgentOperatingStatus() {
