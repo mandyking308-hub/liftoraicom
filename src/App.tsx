@@ -915,6 +915,7 @@ const App = () => (
             <Route path="/founder/exit-metrics/readiness" element={<FounderRoute><ExitReadiness /></FounderRoute>} />
             <Route path="/founder/exit-metrics/buyer-fit" element={<FounderRoute><ExitBuyerFit /></FounderRoute>} />
             <Route path="/founder/exit-metrics/data-room" element={<FounderRoute><ExitDataRoom /></FounderRoute>} />
+            <Route path="/founder/portfolio-diversity" element={<FounderRoute><PortfolioDiversityOverview /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
