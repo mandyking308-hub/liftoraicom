@@ -498,6 +498,12 @@ import EvalsAgents from "./pages/founder/ai-evals/Agents";
 import EvalsRegression from "./pages/founder/ai-evals/Regression";
 import EvalsSafety from "./pages/founder/ai-evals/Safety";
 import EvalsSettings from "./pages/founder/ai-evals/Settings";
+import DecisionsOverview from "./pages/founder/decisions/Overview";
+import DecisionsOpen from "./pages/founder/decisions/Open";
+import DecisionsMade from "./pages/founder/decisions/Made";
+import DecisionsImplemented from "./pages/founder/decisions/Implemented";
+import DecisionsReview from "./pages/founder/decisions/Review";
+import DecisionsSettings from "./pages/founder/decisions/Settings";
 import PortalsOverview from "./pages/founder/portals/Overview";
 import PortalsCustomerAdmin from "./pages/founder/portals/Customer";
 import PortalsSellerAdmin from "./pages/founder/portals/Seller";
@@ -1106,6 +1112,12 @@ const App = () => (
             <Route path="/founder/ai-evals/regression" element={<FounderRoute><EvalsRegression /></FounderRoute>} />
             <Route path="/founder/ai-evals/safety" element={<FounderRoute><EvalsSafety /></FounderRoute>} />
             <Route path="/founder/ai-evals/settings" element={<FounderRoute><EvalsSettings /></FounderRoute>} />
+            <Route path="/founder/decisions" element={<FounderRoute><DecisionsOverview /></FounderRoute>} />
+            <Route path="/founder/decisions/open" element={<FounderRoute><DecisionsOpen /></FounderRoute>} />
+            <Route path="/founder/decisions/made" element={<FounderRoute><DecisionsMade /></FounderRoute>} />
+            <Route path="/founder/decisions/implemented" element={<FounderRoute><DecisionsImplemented /></FounderRoute>} />
+            <Route path="/founder/decisions/review" element={<FounderRoute><DecisionsReview /></FounderRoute>} />
+            <Route path="/founder/decisions/settings" element={<FounderRoute><DecisionsSettings /></FounderRoute>} />
             <Route path="/founder/portals" element={<FounderRoute><PortalsOverview /></FounderRoute>} />
             <Route path="/founder/portals/customer" element={<FounderRoute><PortalsCustomerAdmin /></FounderRoute>} />
             <Route path="/founder/portals/seller" element={<FounderRoute><PortalsSellerAdmin /></FounderRoute>} />
