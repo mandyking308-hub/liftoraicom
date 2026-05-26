@@ -543,6 +543,13 @@ import AuditByUser from "./pages/founder/audit-ledger/ByUser";
 import AuditByModule from "./pages/founder/audit-ledger/ByModule";
 import AuditSensitive from "./pages/founder/audit-ledger/Sensitive";
 import AuditSettings from "./pages/founder/audit-ledger/Settings";
+import ImportOverview from "./pages/founder/imports/Overview";
+import ImportUpload from "./pages/founder/imports/Upload";
+import ImportMapping from "./pages/founder/imports/Mapping";
+import ImportPreview from "./pages/founder/imports/Preview";
+import ImportHistory from "./pages/founder/imports/History";
+import ImportRollback from "./pages/founder/imports/Rollback";
+import ImportSettings from "./pages/founder/imports/Settings";
 import SearchOverview from "./pages/founder/search/Overview";
 import SearchAll from "./pages/founder/search/All";
 import SearchCustomers from "./pages/founder/search/Customers";
@@ -1204,6 +1211,13 @@ const App = () => (
             <Route path="/founder/audit-ledger/by-module" element={<FounderRoute><AuditByModule /></FounderRoute>} />
             <Route path="/founder/audit-ledger/sensitive" element={<FounderRoute><AuditSensitive /></FounderRoute>} />
             <Route path="/founder/audit-ledger/settings" element={<FounderRoute><AuditSettings /></FounderRoute>} />
+            <Route path="/founder/imports" element={<FounderRoute><ImportOverview /></FounderRoute>} />
+            <Route path="/founder/imports/upload" element={<FounderRoute><ImportUpload /></FounderRoute>} />
+            <Route path="/founder/imports/mapping" element={<FounderRoute><ImportMapping /></FounderRoute>} />
+            <Route path="/founder/imports/preview" element={<FounderRoute><ImportPreview /></FounderRoute>} />
+            <Route path="/founder/imports/history" element={<FounderRoute><ImportHistory /></FounderRoute>} />
+            <Route path="/founder/imports/rollback" element={<FounderRoute><ImportRollback /></FounderRoute>} />
+            <Route path="/founder/imports/settings" element={<FounderRoute><ImportSettings /></FounderRoute>} />
             <Route path="/founder/search" element={<FounderRoute><SearchOverview /></FounderRoute>} />
             <Route path="/founder/search/all" element={<FounderRoute><SearchAll /></FounderRoute>} />
             <Route path="/founder/search/customers" element={<FounderRoute><SearchCustomers /></FounderRoute>} />
