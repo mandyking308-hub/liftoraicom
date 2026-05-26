@@ -57,6 +57,7 @@ import SopVersionControlCard from "./SopVersionControlCard";
 import BackupRecoveryCard from "./BackupRecoveryCard";
 import DecisionRegisterCard from "./DecisionRegisterCard";
 import PortfolioMemoryCard from "./PortfolioMemoryCard";
+import ControlFabricCard from "./ControlFabricCard";
 
 /**
  * Business Process Spine — single integrated panel that surfaces every
@@ -85,6 +86,8 @@ export default function BusinessProcessSpinePanel() {
       </Card>
 
       <BusinessProcessHealthCard />
+
+      <ControlFabricCard />
 
       <UnifiedNotificationsCard />
 

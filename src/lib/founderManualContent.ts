@@ -4168,3 +4168,38 @@ export const FINAL_CARRIER_GRADE_QA_NOTE = `
 
 *End of Final Carrier-Grade QA (v5.9.10).*
 `;
+
+export const CONTROL_FABRIC_TECH_NOTE = `
+## Control Fabric — Final Integration
+
+The Control Fabric integrates 15 cross-cutting modules into a single Command Centre lane:
+
+- Master Work Queue / Portfolio PMO ('master_work_items')
+- Unified Notifications & Escalations ('unified_notifications', 'escalation_records')
+- Role-Based Access & Delegation ('access_requests', 'role_definitions', 'role_permissions')
+- Reporting Truth Layer ('reporting_conflicts', 'reporting_snapshots', 'kpi_definitions')
+- External Portals ('portal_profiles', 'portal_invites', 'portal_users', 'portal_access_events')
+- Bank / Payment / Payout Reconciliation ('reconciliation_records', 'reconciliation_exceptions')
+- Jurisdiction / Tax Tracker ('jurisdiction_profiles', 'jurisdiction_records', 'jurisdiction_review_queue', 'tax_treatment_flags')
+- E-commerce / Inventory / Returns ('ecommerce_products', 'ecommerce_orders', 'inventory_records')
+- Booking / Scheduling ('booking_records', 'booking_events')
+- Document Vault / Evidence / Data Room ('document_vault_items', 'data_room_profiles', 'data_room_items')
+- AI Evaluation / Regression Testing ('ai_eval_test_suites', 'ai_eval_test_cases', 'ai_eval_runs', 'ai_eval_results')
+- SOP / Playbook Version Control ('sop_documents', 'sop_versions', 'sop_review_tasks', 'sop_conflicts')
+- Backup / Export / Recovery ('backup_status_records', 'export_requests', 'recovery_checklists', 'emergency_operating_packs')
+- Founder Decision Register ('founder_decisions', 'founder_decision_events')
+- Portfolio Memory / Handover ('business_memory_summaries', 'handover_packs', 'handover_pack_items', 'portfolio_history_events')
+
+Surface: 'ControlFabricCard' on Command Centre (above 'BusinessProcessSpinePanel').
+Agents registered in 'AgentOperatingStatus.AGENTS': master_pmo_agent, notification_agent,
+delegation_agent, reporting_truth_agent, portal_access_agent, reconciliation_agent,
+jurisdiction_tracker_agent, ecommerce_ops_agent, scheduling_agent, document_vault_agent,
+ai_evaluation_agent, sop_governance_agent, backup_recovery_agent, decision_register_agent,
+portfolio_memory_agent.
+
+External-action policy: the Control Fabric card surfaces *counts only*. Every send,
+publish, charge, invite, export, restore, payout, share, delete or irreversible decision
+stays approval-gated inside the owning module. LIVE_INTERNAL_TEST rows are tagged via
+'audit_metadata->>tag = LIVE_INTERNAL_TEST' (and 'is_test_data = true' where the column
+exists) so they are excluded from real revenue / KPI surfaces.
+`;

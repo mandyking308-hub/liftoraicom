@@ -101,6 +101,28 @@ export const LIFTOR_FULL_GUIDE: ManualSection[] = [
   })),
 ];
 
+/**
+ * Control Fabric — cross-cutting operating layer across all 15 control modules.
+ * Plain-English summary used by the User Manual and surfaced on the Command Centre.
+ */
+export const LIFTOR_CONTROL_FABRIC_GUIDE: ManualSection = {
+  number: 999,
+  key: "control-fabric",
+  title: "Control Fabric — one place to see every cross-cutting control",
+  body:
+    "The Control Fabric integrates the 15 cross-cutting control modules across Liftor: " +
+    "Master Work Queue / Portfolio PMO, Unified Notifications & Escalations, " +
+    "Role-Based Access & Delegation, Reporting Truth Layer, External Portals, " +
+    "Bank/Payment/Payout Reconciliation, Multi-Currency / Jurisdiction / Tax Tracker, " +
+    "E-commerce / Inventory / Returns, Booking / Scheduling, Document Vault / Evidence / Data Room, " +
+    "AI Evaluation & Regression Testing, SOP & Playbook Version Control, " +
+    "Backup / Export / Recovery, Founder Decision Register and Portfolio Memory / Handover. " +
+    "Open Command Centre → 'Control Fabric' to see one line per module with the live open " +
+    "count and a direct link. Counts are read-only — every external action (invites, exports, " +
+    "data room shares, payouts, restores, irreversible decisions) stays approval-gated inside " +
+    "the module that owns it. Nothing on this card sends, publishes, charges, files or shares.",
+};
+
 export const NEW_BUSINESS_OPERATING_FLOW: string[] = [
   "Create or select the business in the Activation Wizard.",
   "Upload the business technical manual if available.",
