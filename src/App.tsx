@@ -383,6 +383,12 @@ import CSBusinesses from "./pages/founder/channel-strategy/Businesses";
 import CSChannels from "./pages/founder/channel-strategy/Channels";
 import CSCampaigns from "./pages/founder/channel-strategy/Campaigns";
 import CSRecommendations from "./pages/founder/channel-strategy/Recommendations";
+import AAOverview from "./pages/founder/analytics-attribution/Overview";
+import AASources from "./pages/founder/analytics-attribution/Sources";
+import AACampaigns from "./pages/founder/analytics-attribution/Campaigns";
+import AARevenue from "./pages/founder/analytics-attribution/Revenue";
+import AAFunnel from "./pages/founder/analytics-attribution/Funnel";
+import AASettings from "./pages/founder/analytics-attribution/Settings";
 import KnowledgeOverview from "./pages/founder/knowledge-governance/Overview";
 import KnowledgeSources from "./pages/founder/knowledge-governance/Sources";
 import KnowledgeConflicts from "./pages/founder/knowledge-governance/Conflicts";
@@ -856,6 +862,12 @@ const App = () => (
             <Route path="/founder/channel-strategy/channels" element={<FounderRoute><CSChannels /></FounderRoute>} />
             <Route path="/founder/channel-strategy/campaigns" element={<FounderRoute><CSCampaigns /></FounderRoute>} />
             <Route path="/founder/channel-strategy/recommendations" element={<FounderRoute><CSRecommendations /></FounderRoute>} />
+            <Route path="/founder/analytics-attribution" element={<FounderRoute><AAOverview /></FounderRoute>} />
+            <Route path="/founder/analytics-attribution/sources" element={<FounderRoute><AASources /></FounderRoute>} />
+            <Route path="/founder/analytics-attribution/campaigns" element={<FounderRoute><AACampaigns /></FounderRoute>} />
+            <Route path="/founder/analytics-attribution/revenue" element={<FounderRoute><AARevenue /></FounderRoute>} />
+            <Route path="/founder/analytics-attribution/funnel" element={<FounderRoute><AAFunnel /></FounderRoute>} />
+            <Route path="/founder/analytics-attribution/settings" element={<FounderRoute><AASettings /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />

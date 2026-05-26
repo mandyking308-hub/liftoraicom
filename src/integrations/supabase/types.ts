@@ -3928,6 +3928,117 @@ export type Database = {
           },
         ]
       }
+      attribution_events: {
+        Row: {
+          audit_metadata: Json | null
+          business_id: string
+          campaign_id: string | null
+          contact_id: string | null
+          created_at: string
+          currency: string | null
+          deal_id: string | null
+          event_type: string
+          id: string
+          revenue_record_id: string | null
+          source_id: string | null
+          touchpoint_order: number | null
+          value_amount: number | null
+        }
+        Insert: {
+          audit_metadata?: Json | null
+          business_id: string
+          campaign_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          currency?: string | null
+          deal_id?: string | null
+          event_type: string
+          id?: string
+          revenue_record_id?: string | null
+          source_id?: string | null
+          touchpoint_order?: number | null
+          value_amount?: number | null
+        }
+        Update: {
+          audit_metadata?: Json | null
+          business_id?: string
+          campaign_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          currency?: string | null
+          deal_id?: string | null
+          event_type?: string
+          id?: string
+          revenue_record_id?: string | null
+          source_id?: string | null
+          touchpoint_order?: number | null
+          value_amount?: number | null
+        }
+        Relationships: []
+      }
+      attribution_models: {
+        Row: {
+          active: boolean
+          business_id: string
+          created_at: string
+          id: string
+          model_name: string
+          model_type: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          business_id: string
+          created_at?: string
+          id?: string
+          model_name: string
+          model_type: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          business_id?: string
+          created_at?: string
+          id?: string
+          model_name?: string
+          model_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      attribution_sources: {
+        Row: {
+          active: boolean
+          business_id: string
+          channel_id: string | null
+          created_at: string
+          id: string
+          source_name: string
+          source_type: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          business_id: string
+          channel_id?: string | null
+          created_at?: string
+          id?: string
+          source_name: string
+          source_type: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          business_id?: string
+          channel_id?: string | null
+          created_at?: string
+          id?: string
+          source_name?: string
+          source_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       automation_workflows: {
         Row: {
           automation_type: string
