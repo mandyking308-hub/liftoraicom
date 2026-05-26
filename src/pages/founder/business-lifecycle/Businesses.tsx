@@ -15,7 +15,7 @@ export default function BLBusinesses() {
     fetchStages().then(setStages).catch(() => {});
     fetchAssignments().then(setAsgs).catch(() => {});
   };
-  useEffect(load, []);
+  useEffect(() => { load(); }, []);
   const stageById = useMemo(() => new Map(stages.map(s => [s.id, s])), [stages]);
   const current = useMemo(() => Array.from(currentByBusiness(asgs).values()), [asgs]);
 

@@ -12,7 +12,7 @@ export default function BLTransitions() {
   const [trs, setTrs] = useState<TransitionEvent[]>([]);
   const [filter, setFilter] = useState<"pending" | "approved" | "all">("pending");
   const load = () => fetchTransitions().then(setTrs).catch(() => {});
-  useEffect(load, []);
+  useEffect(() => { load(); }, []);
   const filtered = trs.filter(t =>
     filter === "all" ? true :
     filter === "pending" ? (t.approval_required && !t.approved_at) :
