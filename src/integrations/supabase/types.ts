@@ -25113,6 +25113,69 @@ export type Database = {
         }
         Relationships: []
       }
+      internal_handoff_records: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          completed_at: string | null
+          created_at: string
+          due_at: string | null
+          from_actor_id: string | null
+          from_actor_type: string | null
+          handoff_status: string
+          handoff_summary: string | null
+          handoff_type: string
+          id: string
+          priority: string
+          source_module: string
+          source_record_id: string | null
+          source_table: string | null
+          to_actor_id: string | null
+          to_actor_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          due_at?: string | null
+          from_actor_id?: string | null
+          from_actor_type?: string | null
+          handoff_status?: string
+          handoff_summary?: string | null
+          handoff_type: string
+          id?: string
+          priority?: string
+          source_module: string
+          source_record_id?: string | null
+          source_table?: string | null
+          to_actor_id?: string | null
+          to_actor_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          due_at?: string | null
+          from_actor_id?: string | null
+          from_actor_type?: string | null
+          handoff_status?: string
+          handoff_summary?: string | null
+          handoff_type?: string
+          id?: string
+          priority?: string
+          source_module?: string
+          source_record_id?: string | null
+          source_table?: string | null
+          to_actor_id?: string | null
+          to_actor_type?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       internal_operating_schedules: {
         Row: {
           business_id: string | null
@@ -25336,6 +25399,92 @@ export type Database = {
           version?: number
           view_token?: string
           viewed_at?: string | null
+        }
+        Relationships: []
+      }
+      internal_sla_breaches: {
+        Row: {
+          breach_summary: string | null
+          breach_type: string
+          created_at: string
+          escalation_created: boolean
+          handoff_record_id: string
+          id: string
+          severity: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          breach_summary?: string | null
+          breach_type: string
+          created_at?: string
+          escalation_created?: boolean
+          handoff_record_id: string
+          id?: string
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          breach_summary?: string | null
+          breach_type?: string
+          created_at?: string
+          escalation_created?: boolean
+          handoff_record_id?: string
+          id?: string
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "internal_sla_breaches_handoff_record_id_fkey"
+            columns: ["handoff_record_id"]
+            isOneToOne: false
+            referencedRelation: "internal_handoff_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      internal_sla_policies: {
+        Row: {
+          active: boolean
+          completion_time_minutes: number | null
+          created_at: string
+          escalation_after_minutes: number | null
+          handoff_type: string | null
+          id: string
+          policy_name: string
+          priority: string | null
+          response_time_minutes: number | null
+          source_module: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          completion_time_minutes?: number | null
+          created_at?: string
+          escalation_after_minutes?: number | null
+          handoff_type?: string | null
+          id?: string
+          policy_name: string
+          priority?: string | null
+          response_time_minutes?: number | null
+          source_module?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          completion_time_minutes?: number | null
+          created_at?: string
+          escalation_after_minutes?: number | null
+          handoff_type?: string | null
+          id?: string
+          policy_name?: string
+          priority?: string | null
+          response_time_minutes?: number | null
+          source_module?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
