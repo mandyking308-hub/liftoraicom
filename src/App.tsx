@@ -583,6 +583,14 @@ import SlaOverdue from "./pages/founder/internal-sla/Overdue";
 import SlaByAgent from "./pages/founder/internal-sla/ByAgent";
 import SlaByHuman from "./pages/founder/internal-sla/ByHuman";
 import SlaSettings from "./pages/founder/internal-sla/Settings";
+import DepOverview from "./pages/founder/deployment/Overview";
+import DepEnvironments from "./pages/founder/deployment/Environments";
+import DepReleases from "./pages/founder/deployment/Releases";
+import DepMigrations from "./pages/founder/deployment/Migrations";
+import DepEdgeFunctions from "./pages/founder/deployment/EdgeFunctions";
+import DepEnvVars from "./pages/founder/deployment/EnvVars";
+import DepRollback from "./pages/founder/deployment/Rollback";
+import DepSettings from "./pages/founder/deployment/Settings";
 import SearchOverview from "./pages/founder/search/Overview";
 import SearchAll from "./pages/founder/search/All";
 import SearchCustomers from "./pages/founder/search/Customers";
@@ -1284,6 +1292,14 @@ const App = () => (
             <Route path="/founder/internal-sla/by-agent" element={<FounderRoute><SlaByAgent /></FounderRoute>} />
             <Route path="/founder/internal-sla/by-human" element={<FounderRoute><SlaByHuman /></FounderRoute>} />
             <Route path="/founder/internal-sla/settings" element={<FounderRoute><SlaSettings /></FounderRoute>} />
+            <Route path="/founder/deployment" element={<FounderRoute><DepOverview /></FounderRoute>} />
+            <Route path="/founder/deployment/environments" element={<FounderRoute><DepEnvironments /></FounderRoute>} />
+            <Route path="/founder/deployment/releases" element={<FounderRoute><DepReleases /></FounderRoute>} />
+            <Route path="/founder/deployment/migrations" element={<FounderRoute><DepMigrations /></FounderRoute>} />
+            <Route path="/founder/deployment/edge-functions" element={<FounderRoute><DepEdgeFunctions /></FounderRoute>} />
+            <Route path="/founder/deployment/env-vars" element={<FounderRoute><DepEnvVars /></FounderRoute>} />
+            <Route path="/founder/deployment/rollback" element={<FounderRoute><DepRollback /></FounderRoute>} />
+            <Route path="/founder/deployment/settings" element={<FounderRoute><DepSettings /></FounderRoute>} />
             <Route path="/founder/search" element={<FounderRoute><SearchOverview /></FounderRoute>} />
             <Route path="/founder/search/all" element={<FounderRoute><SearchAll /></FounderRoute>} />
             <Route path="/founder/search/customers" element={<FounderRoute><SearchCustomers /></FounderRoute>} />
