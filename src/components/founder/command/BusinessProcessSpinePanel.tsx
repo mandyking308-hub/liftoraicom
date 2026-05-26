@@ -58,6 +58,7 @@ import BackupRecoveryCard from "./BackupRecoveryCard";
 import DecisionRegisterCard from "./DecisionRegisterCard";
 import PortfolioMemoryCard from "./PortfolioMemoryCard";
 import ControlFabricCard from "./ControlFabricCard";
+import ScheduledJobsCard from "./ScheduledJobsCard";
 
 /**
  * Business Process Spine — single integrated panel that surfaces every
@@ -108,6 +109,7 @@ export default function BusinessProcessSpinePanel() {
       <BackupRecoveryCard />
       <DecisionRegisterCard />
       <PortfolioMemoryCard />
+      <ScheduledJobsCard />
 
       <PortalsCard />
 

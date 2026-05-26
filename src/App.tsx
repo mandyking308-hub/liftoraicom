@@ -511,6 +511,12 @@ import PortMemOperator from "./pages/founder/portfolio-memory/OperatorBriefs";
 import PortMemAdviser from "./pages/founder/portfolio-memory/AdviserBriefs";
 import PortMemBuyer from "./pages/founder/portfolio-memory/BuyerBriefs";
 import PortMemHistory from "./pages/founder/portfolio-memory/History";
+import SJOverview from "./pages/founder/scheduled-jobs/Overview";
+import SJJobs from "./pages/founder/scheduled-jobs/Jobs";
+import SJRuns from "./pages/founder/scheduled-jobs/Runs";
+import SJFailures from "./pages/founder/scheduled-jobs/Failures";
+import SJCalendar from "./pages/founder/scheduled-jobs/Calendar";
+import SJSettings from "./pages/founder/scheduled-jobs/Settings";
 import PortalsOverview from "./pages/founder/portals/Overview";
 import PortalsCustomerAdmin from "./pages/founder/portals/Customer";
 import PortalsSellerAdmin from "./pages/founder/portals/Seller";
@@ -1132,6 +1138,12 @@ const App = () => (
             <Route path="/founder/portfolio-memory/adviser-briefs" element={<FounderRoute><PortMemAdviser /></FounderRoute>} />
             <Route path="/founder/portfolio-memory/buyer-briefs" element={<FounderRoute><PortMemBuyer /></FounderRoute>} />
             <Route path="/founder/portfolio-memory/history" element={<FounderRoute><PortMemHistory /></FounderRoute>} />
+            <Route path="/founder/scheduled-jobs" element={<FounderRoute><SJOverview /></FounderRoute>} />
+            <Route path="/founder/scheduled-jobs/jobs" element={<FounderRoute><SJJobs /></FounderRoute>} />
+            <Route path="/founder/scheduled-jobs/runs" element={<FounderRoute><SJRuns /></FounderRoute>} />
+            <Route path="/founder/scheduled-jobs/failures" element={<FounderRoute><SJFailures /></FounderRoute>} />
+            <Route path="/founder/scheduled-jobs/calendar" element={<FounderRoute><SJCalendar /></FounderRoute>} />
+            <Route path="/founder/scheduled-jobs/settings" element={<FounderRoute><SJSettings /></FounderRoute>} />
             <Route path="/founder/portals" element={<FounderRoute><PortalsOverview /></FounderRoute>} />
             <Route path="/founder/portals/customer" element={<FounderRoute><PortalsCustomerAdmin /></FounderRoute>} />
             <Route path="/founder/portals/seller" element={<FounderRoute><PortalsSellerAdmin /></FounderRoute>} />
