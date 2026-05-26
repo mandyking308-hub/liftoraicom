@@ -478,6 +478,13 @@ import DocumentsDataRoom from "./pages/founder/documents/DataRoom";
 import DocumentsPolicies from "./pages/founder/documents/Policies";
 import DocumentsRequests from "./pages/founder/documents/Requests";
 import DocumentsAccess from "./pages/founder/documents/Access";
+import SopsOverview from "./pages/founder/sops/Overview";
+import SopsLibrary from "./pages/founder/sops/Library";
+import SopsVersions from "./pages/founder/sops/Versions";
+import SopsReviews from "./pages/founder/sops/Reviews";
+import SopsAgentUsage from "./pages/founder/sops/AgentUsage";
+import SopsConflicts from "./pages/founder/sops/Conflicts";
+import SopsSettings from "./pages/founder/sops/Settings";
 import EvalsOverview from "./pages/founder/ai-evals/Overview";
 import EvalsTestSuites from "./pages/founder/ai-evals/TestSuites";
 import EvalsResults from "./pages/founder/ai-evals/Results";
@@ -1073,6 +1080,13 @@ const App = () => (
             <Route path="/founder/documents/policies" element={<FounderRoute><DocumentsPolicies /></FounderRoute>} />
             <Route path="/founder/documents/requests" element={<FounderRoute><DocumentsRequests /></FounderRoute>} />
             <Route path="/founder/documents/access" element={<FounderRoute><DocumentsAccess /></FounderRoute>} />
+            <Route path="/founder/sops" element={<FounderRoute><SopsOverview /></FounderRoute>} />
+            <Route path="/founder/sops/library" element={<FounderRoute><SopsLibrary /></FounderRoute>} />
+            <Route path="/founder/sops/versions" element={<FounderRoute><SopsVersions /></FounderRoute>} />
+            <Route path="/founder/sops/reviews" element={<FounderRoute><SopsReviews /></FounderRoute>} />
+            <Route path="/founder/sops/agent-usage" element={<FounderRoute><SopsAgentUsage /></FounderRoute>} />
+            <Route path="/founder/sops/conflicts" element={<FounderRoute><SopsConflicts /></FounderRoute>} />
+            <Route path="/founder/sops/settings" element={<FounderRoute><SopsSettings /></FounderRoute>} />
             <Route path="/founder/ai-evals" element={<FounderRoute><EvalsOverview /></FounderRoute>} />
             <Route path="/founder/ai-evals/test-suites" element={<FounderRoute><EvalsTestSuites /></FounderRoute>} />
             <Route path="/founder/ai-evals/results" element={<FounderRoute><EvalsResults /></FounderRoute>} />
