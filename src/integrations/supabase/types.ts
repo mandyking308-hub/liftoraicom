@@ -32474,6 +32474,114 @@ export type Database = {
         }
         Relationships: []
       }
+      portfolio_risk_items: {
+        Row: {
+          business_id: string
+          created_at: string
+          id: string
+          owner: string | null
+          recommended_action: string | null
+          risk_category: string
+          risk_summary: string
+          severity: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          id?: string
+          owner?: string | null
+          recommended_action?: string | null
+          risk_category: string
+          risk_summary: string
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          id?: string
+          owner?: string | null
+          recommended_action?: string | null
+          risk_category?: string
+          risk_summary?: string
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      portfolio_risk_scores: {
+        Row: {
+          ai_cost_risk: number
+          audit_metadata: Json
+          business_id: string
+          cashflow_risk: number
+          compliance_risk: number
+          created_at: string
+          customer_risk: number
+          data_privacy_risk: number
+          delivery_risk: number
+          dependency_risk: number
+          founder_overload_risk: number
+          id: string
+          integration_risk: number
+          legal_risk: number
+          period_end: string
+          period_start: string
+          reputation_risk: number
+          risk_status: string
+          tax_risk: number
+          total_risk_score: number
+        }
+        Insert: {
+          ai_cost_risk?: number
+          audit_metadata?: Json
+          business_id: string
+          cashflow_risk?: number
+          compliance_risk?: number
+          created_at?: string
+          customer_risk?: number
+          data_privacy_risk?: number
+          delivery_risk?: number
+          dependency_risk?: number
+          founder_overload_risk?: number
+          id?: string
+          integration_risk?: number
+          legal_risk?: number
+          period_end?: string
+          period_start?: string
+          reputation_risk?: number
+          risk_status?: string
+          tax_risk?: number
+          total_risk_score?: number
+        }
+        Update: {
+          ai_cost_risk?: number
+          audit_metadata?: Json
+          business_id?: string
+          cashflow_risk?: number
+          compliance_risk?: number
+          created_at?: string
+          customer_risk?: number
+          data_privacy_risk?: number
+          delivery_risk?: number
+          dependency_risk?: number
+          founder_overload_risk?: number
+          id?: string
+          integration_risk?: number
+          legal_risk?: number
+          period_end?: string
+          period_start?: string
+          reputation_risk?: number
+          risk_status?: string
+          tax_risk?: number
+          total_risk_score?: number
+        }
+        Relationships: []
+      }
       portfolio_strategy_recommendations: {
         Row: {
           business_id: string | null
