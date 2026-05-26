@@ -2211,6 +2211,202 @@ export type Database = {
           },
         ]
       }
+      ai_eval_results: {
+        Row: {
+          audit_metadata: Json
+          cost_estimate: number | null
+          created_at: string
+          failure_reason: string | null
+          id: string
+          output_summary: string | null
+          quality_score: number | null
+          result_status: string
+          run_id: string
+          safety_score: number | null
+          test_case_id: string
+          trace_id: string | null
+        }
+        Insert: {
+          audit_metadata?: Json
+          cost_estimate?: number | null
+          created_at?: string
+          failure_reason?: string | null
+          id?: string
+          output_summary?: string | null
+          quality_score?: number | null
+          result_status?: string
+          run_id: string
+          safety_score?: number | null
+          test_case_id: string
+          trace_id?: string | null
+        }
+        Update: {
+          audit_metadata?: Json
+          cost_estimate?: number | null
+          created_at?: string
+          failure_reason?: string | null
+          id?: string
+          output_summary?: string | null
+          quality_score?: number | null
+          result_status?: string
+          run_id?: string
+          safety_score?: number | null
+          test_case_id?: string
+          trace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_eval_results_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "ai_eval_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_eval_results_test_case_id_fkey"
+            columns: ["test_case_id"]
+            isOneToOne: false
+            referencedRelation: "ai_eval_test_cases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_eval_runs: {
+        Row: {
+          audit_metadata: Json
+          completed_at: string | null
+          created_at: string
+          failed_tests: number
+          id: string
+          passed_tests: number
+          run_status: string
+          started_at: string | null
+          suite_id: string
+          total_tests: number
+          warning_tests: number
+        }
+        Insert: {
+          audit_metadata?: Json
+          completed_at?: string | null
+          created_at?: string
+          failed_tests?: number
+          id?: string
+          passed_tests?: number
+          run_status?: string
+          started_at?: string | null
+          suite_id: string
+          total_tests?: number
+          warning_tests?: number
+        }
+        Update: {
+          audit_metadata?: Json
+          completed_at?: string | null
+          created_at?: string
+          failed_tests?: number
+          id?: string
+          passed_tests?: number
+          run_status?: string
+          started_at?: string | null
+          suite_id?: string
+          total_tests?: number
+          warning_tests?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_eval_runs_suite_id_fkey"
+            columns: ["suite_id"]
+            isOneToOne: false
+            referencedRelation: "ai_eval_test_suites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_eval_test_cases: {
+        Row: {
+          active: boolean
+          agent_key: string | null
+          business_id: string | null
+          created_at: string
+          expected_behaviour: string | null
+          id: string
+          prohibited_behaviour: string | null
+          risk_level: string
+          suite_id: string
+          test_name: string
+          test_prompt: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          agent_key?: string | null
+          business_id?: string | null
+          created_at?: string
+          expected_behaviour?: string | null
+          id?: string
+          prohibited_behaviour?: string | null
+          risk_level?: string
+          suite_id: string
+          test_name: string
+          test_prompt: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          agent_key?: string | null
+          business_id?: string | null
+          created_at?: string
+          expected_behaviour?: string | null
+          id?: string
+          prohibited_behaviour?: string | null
+          risk_level?: string
+          suite_id?: string
+          test_name?: string
+          test_prompt?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_eval_test_cases_suite_id_fkey"
+            columns: ["suite_id"]
+            isOneToOne: false
+            referencedRelation: "ai_eval_test_suites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_eval_test_suites: {
+        Row: {
+          active: boolean
+          agent_key: string | null
+          business_id: string | null
+          created_at: string
+          id: string
+          suite_name: string
+          suite_type: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          agent_key?: string | null
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          suite_name: string
+          suite_type?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          agent_key?: string | null
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          suite_name?: string
+          suite_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ai_gateway_requests: {
         Row: {
           actual_cost_gbp: number | null
