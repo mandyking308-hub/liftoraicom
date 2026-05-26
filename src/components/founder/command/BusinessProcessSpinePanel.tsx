@@ -69,6 +69,7 @@ import IdentityResolutionCard from "./IdentityResolutionCard";
 import CommunicationsLedgerCard from "./CommunicationsLedgerCard";
 import RelationshipHealthCard from "./RelationshipHealthCard";
 import TrustSafetyCard from "./TrustSafetyCard";
+import InternalSlaCard from "./InternalSlaCard";
 
 /**
  * Business Process Spine — single integrated panel that surfaces every
@@ -130,6 +131,7 @@ export default function BusinessProcessSpinePanel() {
       <CommunicationsLedgerCard />
       <RelationshipHealthCard />
       <TrustSafetyCard />
+      <InternalSlaCard />
 
       <PortalsCard />
 
