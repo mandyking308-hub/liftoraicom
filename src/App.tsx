@@ -429,6 +429,13 @@ import NotificationsEscalations from "./pages/founder/notifications/Escalations"
 import NotificationsRules from "./pages/founder/notifications/Rules";
 import NotificationsArchive from "./pages/founder/notifications/Archive";
 import NotificationsSettings from "./pages/founder/notifications/Settings";
+import RolesOverview from "./pages/founder/roles/Overview";
+import RolesUsers from "./pages/founder/roles/Users";
+import RolesPermissions from "./pages/founder/roles/Permissions";
+import RolesDelegation from "./pages/founder/roles/Delegation";
+import RolesAccessRequests from "./pages/founder/roles/AccessRequests";
+import RolesAudit from "./pages/founder/roles/Audit";
+import RolesSettings from "./pages/founder/roles/Settings";
 import KnowledgeOverview from "./pages/founder/knowledge-governance/Overview";
 import KnowledgeSources from "./pages/founder/knowledge-governance/Sources";
 import KnowledgeConflicts from "./pages/founder/knowledge-governance/Conflicts";
@@ -948,6 +955,13 @@ const App = () => (
             <Route path="/founder/notifications/rules" element={<FounderRoute><NotificationsRules /></FounderRoute>} />
             <Route path="/founder/notifications/archive" element={<FounderRoute><NotificationsArchive /></FounderRoute>} />
             <Route path="/founder/notifications/settings" element={<FounderRoute><NotificationsSettings /></FounderRoute>} />
+            <Route path="/founder/roles" element={<FounderRoute><RolesOverview /></FounderRoute>} />
+            <Route path="/founder/roles/users" element={<FounderRoute><RolesUsers /></FounderRoute>} />
+            <Route path="/founder/roles/permissions" element={<FounderRoute><RolesPermissions /></FounderRoute>} />
+            <Route path="/founder/roles/delegation" element={<FounderRoute><RolesDelegation /></FounderRoute>} />
+            <Route path="/founder/roles/access-requests" element={<FounderRoute><RolesAccessRequests /></FounderRoute>} />
+            <Route path="/founder/roles/audit" element={<FounderRoute><RolesAudit /></FounderRoute>} />
+            <Route path="/founder/roles/settings" element={<FounderRoute><RolesSettings /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />

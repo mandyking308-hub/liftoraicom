@@ -165,6 +165,115 @@ export type Database = {
         }
         Relationships: []
       }
+      access_requests: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          founder_approval_required: boolean
+          id: string
+          is_test_data: boolean
+          reason: string | null
+          request_status: string
+          requested_role_id: string | null
+          requested_scope: string | null
+          requester_email: string | null
+          requester_name: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          founder_approval_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          reason?: string | null
+          request_status?: string
+          requested_role_id?: string | null
+          requested_scope?: string | null
+          requester_email?: string | null
+          requester_name?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          founder_approval_required?: boolean
+          id?: string
+          is_test_data?: boolean
+          reason?: string | null
+          request_status?: string
+          requested_role_id?: string | null
+          requested_scope?: string | null
+          requester_email?: string | null
+          requester_name?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "access_requests_requested_role_id_fkey"
+            columns: ["requested_role_id"]
+            isOneToOne: false
+            referencedRelation: "role_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      access_review_events: {
+        Row: {
+          audit_metadata: Json
+          created_at: string
+          id: string
+          is_test_data: boolean
+          notes: string | null
+          review_status: string
+          review_type: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          user_role_assignment_id: string | null
+        }
+        Insert: {
+          audit_metadata?: Json
+          created_at?: string
+          id?: string
+          is_test_data?: boolean
+          notes?: string | null
+          review_status?: string
+          review_type?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          user_role_assignment_id?: string | null
+        }
+        Update: {
+          audit_metadata?: Json
+          created_at?: string
+          id?: string
+          is_test_data?: boolean
+          notes?: string | null
+          review_status?: string
+          review_type?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          user_role_assignment_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "access_review_events_user_role_assignment_id_fkey"
+            columns: ["user_role_assignment_id"]
+            isOneToOne: false
+            referencedRelation: "user_role_assignments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       access_review_items: {
         Row: {
           access_status: string | null
@@ -30506,6 +30615,68 @@ export type Database = {
           },
         ]
       }
+      module_permission_matrix: {
+        Row: {
+          business_id: string | null
+          can_approve: boolean
+          can_create: boolean
+          can_delete: boolean
+          can_edit: boolean
+          can_export: boolean
+          can_manage_settings: boolean
+          can_trigger_external_action: boolean
+          can_view: boolean
+          created_at: string
+          id: string
+          module_name: string
+          role_id: string
+          sensitivity_notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          can_approve?: boolean
+          can_create?: boolean
+          can_delete?: boolean
+          can_edit?: boolean
+          can_export?: boolean
+          can_manage_settings?: boolean
+          can_trigger_external_action?: boolean
+          can_view?: boolean
+          created_at?: string
+          id?: string
+          module_name: string
+          role_id: string
+          sensitivity_notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          can_approve?: boolean
+          can_create?: boolean
+          can_delete?: boolean
+          can_edit?: boolean
+          can_export?: boolean
+          can_manage_settings?: boolean
+          can_trigger_external_action?: boolean
+          can_view?: boolean
+          created_at?: string
+          id?: string
+          module_name?: string
+          role_id?: string
+          sensitivity_notes?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_permission_matrix_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "role_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       monitored_systems: {
         Row: {
           client_id: string
@@ -37291,6 +37462,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      role_definitions: {
+        Row: {
+          active: boolean
+          created_at: string
+          default_permissions: Json
+          id: string
+          role_code: string
+          role_description: string | null
+          role_name: string
+          sensitivity_level: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          default_permissions?: Json
+          id?: string
+          role_code: string
+          role_description?: string | null
+          role_name: string
+          sensitivity_level?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          default_permissions?: Json
+          id?: string
+          role_code?: string
+          role_description?: string | null
+          role_name?: string
+          sensitivity_level?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       role_permissions: {
         Row: {
@@ -48769,6 +48976,71 @@ export type Database = {
             columns: ["role_id"]
             isOneToOne: false
             referencedRelation: "platform_roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_role_assignments: {
+        Row: {
+          access_status: string
+          assignment_scope: string
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          display_name: string | null
+          email: string | null
+          expires_at: string | null
+          granted_at: string | null
+          granted_by: string | null
+          id: string
+          is_test_data: boolean
+          revoked_at: string | null
+          role_id: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          access_status?: string
+          assignment_scope?: string
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          expires_at?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          is_test_data?: boolean
+          revoked_at?: string | null
+          role_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          access_status?: string
+          assignment_scope?: string
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          expires_at?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          is_test_data?: boolean
+          revoked_at?: string | null
+          role_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_role_assignments_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "role_definitions"
             referencedColumns: ["id"]
           },
         ]
