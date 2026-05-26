@@ -142,6 +142,7 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "document_vault_agent", name: "Document Vault Agent", to: "/founder/documents", category: "operations" },
   { key: "ai_evaluation_agent", name: "AI Evaluation Agent", to: "/founder/ai-evals", category: "operations" },
   { key: "sop_governance_agent", name: "SOP Governance Agent", to: "/founder/sops", category: "operations" },
+  { key: "backup_recovery_agent", name: "Backup Recovery Agent", to: "/founder/backup-recovery", category: "security" },
 ];
 
 export default function AgentOperatingStatus() {
