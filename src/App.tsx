@@ -363,6 +363,15 @@ import BLStages from "./pages/founder/business-lifecycle/Stages";
 import BLBusinesses from "./pages/founder/business-lifecycle/Businesses";
 import BLTransitions from "./pages/founder/business-lifecycle/Transitions";
 import BLSettings from "./pages/founder/business-lifecycle/Settings";
+
+// Global Product / Offer Catalogue
+import PCOverview from "./pages/founder/product-catalogue/Overview";
+import PCProducts from "./pages/founder/product-catalogue/Products";
+import PCPackages from "./pages/founder/product-catalogue/Packages";
+import PCAddOns from "./pages/founder/product-catalogue/AddOns";
+import PCOffers from "./pages/founder/product-catalogue/Offers";
+import PCPricing from "./pages/founder/product-catalogue/Pricing";
+import PCClaims from "./pages/founder/product-catalogue/Claims";
 import KnowledgeOverview from "./pages/founder/knowledge-governance/Overview";
 import KnowledgeSources from "./pages/founder/knowledge-governance/Sources";
 import KnowledgeConflicts from "./pages/founder/knowledge-governance/Conflicts";
@@ -818,6 +827,13 @@ const App = () => (
             <Route path="/founder/business-lifecycle/businesses" element={<FounderRoute><BLBusinesses /></FounderRoute>} />
             <Route path="/founder/business-lifecycle/transitions" element={<FounderRoute><BLTransitions /></FounderRoute>} />
             <Route path="/founder/business-lifecycle/settings" element={<FounderRoute><BLSettings /></FounderRoute>} />
+            <Route path="/founder/product-catalogue" element={<FounderRoute><PCOverview /></FounderRoute>} />
+            <Route path="/founder/product-catalogue/products" element={<FounderRoute><PCProducts /></FounderRoute>} />
+            <Route path="/founder/product-catalogue/packages" element={<FounderRoute><PCPackages /></FounderRoute>} />
+            <Route path="/founder/product-catalogue/add-ons" element={<FounderRoute><PCAddOns /></FounderRoute>} />
+            <Route path="/founder/product-catalogue/offers" element={<FounderRoute><PCOffers /></FounderRoute>} />
+            <Route path="/founder/product-catalogue/pricing" element={<FounderRoute><PCPricing /></FounderRoute>} />
+            <Route path="/founder/product-catalogue/claims" element={<FounderRoute><PCClaims /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
