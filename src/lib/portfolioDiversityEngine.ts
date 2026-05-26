@@ -88,7 +88,7 @@ export async function loadDiversity(): Promise<DiversityCounts> {
     count("business_risk_scores", q => q.eq("high_risk", true)),
     count("business_lifecycle_assignments"),
     count("global_offers"),
-    count("product_margin_profiles", q => q.in("margin_status", ["low", "loss"])),
+    count("product_margin_profiles", q => q.in("margin_status", ["poor", "loss_making"])),
     count("business_channel_strategies"),
     count("attribution_sources"),
     count("attribution_sources", q => q.eq("source_type", "unknown")),
