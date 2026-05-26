@@ -39350,6 +39350,155 @@ export type Database = {
         }
         Relationships: []
       }
+      relationship_health_events: {
+        Row: {
+          audit_metadata: Json
+          created_at: string
+          event_summary: string | null
+          event_type: string
+          health_score_id: string
+          id: string
+          score_impact: number
+        }
+        Insert: {
+          audit_metadata?: Json
+          created_at?: string
+          event_summary?: string | null
+          event_type: string
+          health_score_id: string
+          id?: string
+          score_impact?: number
+        }
+        Update: {
+          audit_metadata?: Json
+          created_at?: string
+          event_summary?: string | null
+          event_type?: string
+          health_score_id?: string
+          id?: string
+          score_impact?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "relationship_health_events_health_score_id_fkey"
+            columns: ["health_score_id"]
+            isOneToOne: false
+            referencedRelation: "relationship_health_scores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      relationship_health_scores: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          contact_id: string | null
+          created_at: string
+          customer_id: string | null
+          engagement_score: number
+          health_score: number
+          id: string
+          identity_profile_id: string | null
+          partner_id: string | null
+          recommended_action: string | null
+          relationship_status: string
+          relationship_type: string
+          risk_score: number
+          seller_id: string | null
+          sentiment_score: number
+          trust_score: number
+          updated_at: string
+          value_score: number
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          engagement_score?: number
+          health_score?: number
+          id?: string
+          identity_profile_id?: string | null
+          partner_id?: string | null
+          recommended_action?: string | null
+          relationship_status?: string
+          relationship_type: string
+          risk_score?: number
+          seller_id?: string | null
+          sentiment_score?: number
+          trust_score?: number
+          updated_at?: string
+          value_score?: number
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          engagement_score?: number
+          health_score?: number
+          id?: string
+          identity_profile_id?: string | null
+          partner_id?: string | null
+          recommended_action?: string | null
+          relationship_status?: string
+          relationship_type?: string
+          risk_score?: number
+          seller_id?: string | null
+          sentiment_score?: number
+          trust_score?: number
+          updated_at?: string
+          value_score?: number
+        }
+        Relationships: []
+      }
+      relationship_opportunities: {
+        Row: {
+          approval_required: boolean
+          business_id: string | null
+          created_at: string
+          currency: string | null
+          estimated_value: number | null
+          id: string
+          identity_profile_id: string | null
+          opportunity_summary: string | null
+          opportunity_type: string
+          probability_score: number | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          approval_required?: boolean
+          business_id?: string | null
+          created_at?: string
+          currency?: string | null
+          estimated_value?: number | null
+          id?: string
+          identity_profile_id?: string | null
+          opportunity_summary?: string | null
+          opportunity_type: string
+          probability_score?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          approval_required?: boolean
+          business_id?: string | null
+          created_at?: string
+          currency?: string | null
+          estimated_value?: number | null
+          id?: string
+          identity_profile_id?: string | null
+          opportunity_summary?: string | null
+          opportunity_type?: string
+          probability_score?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       release_plans: {
         Row: {
           approved_at: string | null
