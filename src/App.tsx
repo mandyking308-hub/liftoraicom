@@ -536,6 +536,13 @@ import WebhooksProviders from "./pages/founder/webhooks/Providers";
 import WebhooksNormalised from "./pages/founder/webhooks/NormalisedEvents";
 import WebhooksFailures from "./pages/founder/webhooks/Failures";
 import WebhooksSettings from "./pages/founder/webhooks/Settings";
+import AuditOverview from "./pages/founder/audit-ledger/Overview";
+import AuditEvents from "./pages/founder/audit-ledger/Events";
+import AuditByBusiness from "./pages/founder/audit-ledger/ByBusiness";
+import AuditByUser from "./pages/founder/audit-ledger/ByUser";
+import AuditByModule from "./pages/founder/audit-ledger/ByModule";
+import AuditSensitive from "./pages/founder/audit-ledger/Sensitive";
+import AuditSettings from "./pages/founder/audit-ledger/Settings";
 import PortalsOverview from "./pages/founder/portals/Overview";
 import PortalsCustomerAdmin from "./pages/founder/portals/Customer";
 import PortalsSellerAdmin from "./pages/founder/portals/Seller";
@@ -1182,6 +1189,13 @@ const App = () => (
             <Route path="/founder/webhooks/normalised-events" element={<FounderRoute><WebhooksNormalised /></FounderRoute>} />
             <Route path="/founder/webhooks/failures" element={<FounderRoute><WebhooksFailures /></FounderRoute>} />
             <Route path="/founder/webhooks/settings" element={<FounderRoute><WebhooksSettings /></FounderRoute>} />
+            <Route path="/founder/audit-ledger" element={<FounderRoute><AuditOverview /></FounderRoute>} />
+            <Route path="/founder/audit-ledger/events" element={<FounderRoute><AuditEvents /></FounderRoute>} />
+            <Route path="/founder/audit-ledger/by-business" element={<FounderRoute><AuditByBusiness /></FounderRoute>} />
+            <Route path="/founder/audit-ledger/by-user" element={<FounderRoute><AuditByUser /></FounderRoute>} />
+            <Route path="/founder/audit-ledger/by-module" element={<FounderRoute><AuditByModule /></FounderRoute>} />
+            <Route path="/founder/audit-ledger/sensitive" element={<FounderRoute><AuditSensitive /></FounderRoute>} />
+            <Route path="/founder/audit-ledger/settings" element={<FounderRoute><AuditSettings /></FounderRoute>} />
             <Route path="/founder/portals" element={<FounderRoute><PortalsOverview /></FounderRoute>} />
             <Route path="/founder/portals/customer" element={<FounderRoute><PortalsCustomerAdmin /></FounderRoute>} />
             <Route path="/founder/portals/seller" element={<FounderRoute><PortalsSellerAdmin /></FounderRoute>} />
