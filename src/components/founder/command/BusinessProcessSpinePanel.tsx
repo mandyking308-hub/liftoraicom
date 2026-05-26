@@ -48,6 +48,7 @@ import RoleAccessCard from "./RoleAccessCard";
 import ReportingTruthCard from "./ReportingTruthCard";
 import PortalsCard from "./PortalsCard";
 import ReconciliationCard from "./ReconciliationCard";
+import JurisdictionTaxCard from "./JurisdictionTaxCard";
 
 /**
  * Business Process Spine — single integrated panel that surfaces every
@@ -86,6 +87,8 @@ export default function BusinessProcessSpinePanel() {
       <ReportingTruthCard />
 
       <ReconciliationCard />
+
+      <JurisdictionTaxCard />
 
       <PortalsCard />
 

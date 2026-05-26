@@ -450,6 +450,13 @@ import ReconciliationPayouts from "./pages/founder/reconciliation/Payouts";
 import ReconciliationRefunds from "./pages/founder/reconciliation/Refunds";
 import ReconciliationUnmatched from "./pages/founder/reconciliation/Unmatched";
 import ReconciliationSettings from "./pages/founder/reconciliation/Settings";
+import JTOverview from "./pages/founder/jurisdiction-tax/Overview";
+import JTCurrencies from "./pages/founder/jurisdiction-tax/Currencies";
+import JTRevenue from "./pages/founder/jurisdiction-tax/Revenue";
+import JTCustomers from "./pages/founder/jurisdiction-tax/Customers";
+import JTSellers from "./pages/founder/jurisdiction-tax/Sellers";
+import JTAdviserReview from "./pages/founder/jurisdiction-tax/AdviserReview";
+import JTSettings from "./pages/founder/jurisdiction-tax/Settings";
 import PortalsOverview from "./pages/founder/portals/Overview";
 import PortalsCustomerAdmin from "./pages/founder/portals/Customer";
 import PortalsSellerAdmin from "./pages/founder/portals/Seller";
@@ -1010,6 +1017,13 @@ const App = () => (
             <Route path="/founder/reconciliation/refunds" element={<FounderRoute><ReconciliationRefunds /></FounderRoute>} />
             <Route path="/founder/reconciliation/unmatched" element={<FounderRoute><ReconciliationUnmatched /></FounderRoute>} />
             <Route path="/founder/reconciliation/settings" element={<FounderRoute><ReconciliationSettings /></FounderRoute>} />
+            <Route path="/founder/jurisdiction-tax" element={<FounderRoute><JTOverview /></FounderRoute>} />
+            <Route path="/founder/jurisdiction-tax/currencies" element={<FounderRoute><JTCurrencies /></FounderRoute>} />
+            <Route path="/founder/jurisdiction-tax/revenue" element={<FounderRoute><JTRevenue /></FounderRoute>} />
+            <Route path="/founder/jurisdiction-tax/customers" element={<FounderRoute><JTCustomers /></FounderRoute>} />
+            <Route path="/founder/jurisdiction-tax/sellers" element={<FounderRoute><JTSellers /></FounderRoute>} />
+            <Route path="/founder/jurisdiction-tax/adviser-review" element={<FounderRoute><JTAdviserReview /></FounderRoute>} />
+            <Route path="/founder/jurisdiction-tax/settings" element={<FounderRoute><JTSettings /></FounderRoute>} />
             <Route path="/founder/portals" element={<FounderRoute><PortalsOverview /></FounderRoute>} />
             <Route path="/founder/portals/customer" element={<FounderRoute><PortalsCustomerAdmin /></FounderRoute>} />
             <Route path="/founder/portals/seller" element={<FounderRoute><PortalsSellerAdmin /></FounderRoute>} />

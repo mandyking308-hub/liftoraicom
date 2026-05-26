@@ -136,6 +136,7 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "reporting_truth_agent", name: "Reporting Truth Agent", to: "/founder/reporting-truth", category: "operations" },
   { key: "portal_access_agent", name: "Portal Access Agent", to: "/founder/portals", category: "security" },
   { key: "reconciliation_agent", name: "Reconciliation Agent", to: "/founder/reconciliation", category: "operations" },
+  { key: "jurisdiction_tracker_agent", name: "Jurisdiction Tracker Agent", to: "/founder/jurisdiction-tax", category: "operations" },
 ];
 
 export default function AgentOperatingStatus() {
