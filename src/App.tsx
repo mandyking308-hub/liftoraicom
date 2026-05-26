@@ -874,6 +874,12 @@ const App = () => (
             <Route path="/founder/analytics-attribution/revenue" element={<FounderRoute><AARevenue /></FounderRoute>} />
             <Route path="/founder/analytics-attribution/funnel" element={<FounderRoute><AAFunnel /></FounderRoute>} />
             <Route path="/founder/analytics-attribution/settings" element={<FounderRoute><AASettings /></FounderRoute>} />
+            <Route path="/founder/partners" element={<FounderRoute><PAOverview /></FounderRoute>} />
+            <Route path="/founder/partners/prospects" element={<FounderRoute><PAProspects /></FounderRoute>} />
+            <Route path="/founder/partners/referrals" element={<FounderRoute><PAReferrals /></FounderRoute>} />
+            <Route path="/founder/partners/affiliates" element={<FounderRoute><PAAffiliates /></FounderRoute>} />
+            <Route path="/founder/partners/commissions" element={<FounderRoute><PACommissions /></FounderRoute>} />
+            <Route path="/founder/partners/performance" element={<FounderRoute><PAPerformance /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
