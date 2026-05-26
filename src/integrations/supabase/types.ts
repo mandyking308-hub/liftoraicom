@@ -4608,6 +4608,45 @@ export type Database = {
         }
         Relationships: []
       }
+      availability_windows: {
+        Row: {
+          active: boolean
+          business_id: string | null
+          created_at: string
+          day_of_week: number
+          end_time: string
+          id: string
+          resource_id: string
+          start_time: string
+          timezone: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          business_id?: string | null
+          created_at?: string
+          day_of_week: number
+          end_time: string
+          id?: string
+          resource_id: string
+          start_time: string
+          timezone?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          business_id?: string | null
+          created_at?: string
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          resource_id?: string
+          start_time?: string
+          timezone?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       baseline_change_log: {
         Row: {
           after_snapshot: Json
@@ -4670,6 +4709,99 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      booking_events: {
+        Row: {
+          audit_metadata: Json
+          booking_id: string
+          business_id: string | null
+          created_at: string
+          event_summary: string | null
+          event_type: string
+          id: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          booking_id: string
+          business_id?: string | null
+          created_at?: string
+          event_summary?: string | null
+          event_type: string
+          id?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          booking_id?: string
+          business_id?: string | null
+          created_at?: string
+          event_summary?: string | null
+          event_type?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      booking_records: {
+        Row: {
+          audit_metadata: Json
+          booking_status: string
+          booking_type: string
+          business_id: string | null
+          calendar_provider: string | null
+          contact_id: string | null
+          created_at: string
+          customer_id: string | null
+          founder_approval_required: boolean
+          id: string
+          meeting_url: string | null
+          provider_event_id: string | null
+          related_conversation_id: string | null
+          resource_id: string | null
+          scheduled_end: string | null
+          scheduled_start: string | null
+          timezone: string
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          booking_status?: string
+          booking_type?: string
+          business_id?: string | null
+          calendar_provider?: string | null
+          contact_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          founder_approval_required?: boolean
+          id?: string
+          meeting_url?: string | null
+          provider_event_id?: string | null
+          related_conversation_id?: string | null
+          resource_id?: string | null
+          scheduled_end?: string | null
+          scheduled_start?: string | null
+          timezone?: string
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          booking_status?: string
+          booking_type?: string
+          business_id?: string | null
+          calendar_provider?: string | null
+          contact_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          founder_approval_required?: boolean
+          id?: string
+          meeting_url?: string | null
+          provider_event_id?: string | null
+          related_conversation_id?: string | null
+          resource_id?: string | null
+          scheduled_end?: string | null
+          scheduled_start?: string | null
+          timezone?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       bottleneck_alerts: {
         Row: {
@@ -38946,6 +39078,45 @@ export type Database = {
           timing_issue?: boolean | null
           trust_issue?: boolean | null
           winning_factors?: Json | null
+        }
+        Relationships: []
+      }
+      scheduling_resources: {
+        Row: {
+          active: boolean
+          audit_metadata: Json
+          availability_summary: string | null
+          business_id: string | null
+          created_at: string
+          id: string
+          resource_name: string
+          resource_type: string
+          timezone: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          audit_metadata?: Json
+          availability_summary?: string | null
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          resource_name: string
+          resource_type?: string
+          timezone?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          audit_metadata?: Json
+          availability_summary?: string | null
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          resource_name?: string
+          resource_type?: string
+          timezone?: string
+          updated_at?: string
         }
         Relationships: []
       }
