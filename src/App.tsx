@@ -465,6 +465,12 @@ import EcommerceFulfilment from "./pages/founder/ecommerce/Fulfilment";
 import EcommerceReturns from "./pages/founder/ecommerce/Returns";
 import EcommerceSuppliers from "./pages/founder/ecommerce/Suppliers";
 import EcommerceSettings from "./pages/founder/ecommerce/Settings";
+import SchedulingOverview from "./pages/founder/scheduling/Overview";
+import SchedulingAvailability from "./pages/founder/scheduling/Availability";
+import SchedulingBookings from "./pages/founder/scheduling/Bookings";
+import SchedulingResources from "./pages/founder/scheduling/Resources";
+import SchedulingNoShows from "./pages/founder/scheduling/NoShows";
+import SchedulingSettings from "./pages/founder/scheduling/Settings";
 import PortalsOverview from "./pages/founder/portals/Overview";
 import PortalsCustomerAdmin from "./pages/founder/portals/Customer";
 import PortalsSellerAdmin from "./pages/founder/portals/Seller";
@@ -1040,6 +1046,12 @@ const App = () => (
             <Route path="/founder/ecommerce/returns" element={<FounderRoute><EcommerceReturns /></FounderRoute>} />
             <Route path="/founder/ecommerce/suppliers" element={<FounderRoute><EcommerceSuppliers /></FounderRoute>} />
             <Route path="/founder/ecommerce/settings" element={<FounderRoute><EcommerceSettings /></FounderRoute>} />
+            <Route path="/founder/scheduling" element={<FounderRoute><SchedulingOverview /></FounderRoute>} />
+            <Route path="/founder/scheduling/availability" element={<FounderRoute><SchedulingAvailability /></FounderRoute>} />
+            <Route path="/founder/scheduling/bookings" element={<FounderRoute><SchedulingBookings /></FounderRoute>} />
+            <Route path="/founder/scheduling/resources" element={<FounderRoute><SchedulingResources /></FounderRoute>} />
+            <Route path="/founder/scheduling/no-shows" element={<FounderRoute><SchedulingNoShows /></FounderRoute>} />
+            <Route path="/founder/scheduling/settings" element={<FounderRoute><SchedulingSettings /></FounderRoute>} />
             <Route path="/founder/portals" element={<FounderRoute><PortalsOverview /></FounderRoute>} />
             <Route path="/founder/portals/customer" element={<FounderRoute><PortalsCustomerAdmin /></FounderRoute>} />
             <Route path="/founder/portals/seller" element={<FounderRoute><PortalsSellerAdmin /></FounderRoute>} />
