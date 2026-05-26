@@ -36815,6 +36815,51 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_cost_records: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          confirmed_cost: number | null
+          cost_basis: string
+          cost_period_end: string
+          cost_period_start: string
+          cost_source: string
+          created_at: string
+          currency: string
+          estimated_cost: number | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          confirmed_cost?: number | null
+          cost_basis?: string
+          cost_period_end: string
+          cost_period_start: string
+          cost_source: string
+          created_at?: string
+          currency?: string
+          estimated_cost?: number | null
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          confirmed_cost?: number | null
+          cost_basis?: string
+          cost_period_end?: string
+          cost_period_start?: string
+          cost_source?: string
+          created_at?: string
+          currency?: string
+          estimated_cost?: number | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       platform_diagnostic_runs: {
         Row: {
           created_at: string
@@ -36848,6 +36893,54 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_performance_events: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          event_summary: string | null
+          event_type: string
+          id: string
+          metric_value: number | null
+          recommended_action: string | null
+          severity: string
+          source_module: string
+          status: string
+          threshold_value: number | null
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          event_summary?: string | null
+          event_type: string
+          id?: string
+          metric_value?: number | null
+          recommended_action?: string | null
+          severity?: string
+          source_module: string
+          status?: string
+          threshold_value?: number | null
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          event_summary?: string | null
+          event_type?: string
+          id?: string
+          metric_value?: number | null
+          recommended_action?: string | null
+          severity?: string
+          source_module?: string
+          status?: string
+          threshold_value?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       platform_roles: {
         Row: {
           access_level: string
@@ -36871,6 +36964,42 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      platform_scalability_recommendations: {
+        Row: {
+          action_status: string
+          created_at: string
+          expected_impact: string | null
+          id: string
+          priority: string
+          recommendation_summary: string | null
+          recommendation_type: string
+          source_module: string
+          updated_at: string
+        }
+        Insert: {
+          action_status?: string
+          created_at?: string
+          expected_impact?: string | null
+          id?: string
+          priority?: string
+          recommendation_summary?: string | null
+          recommendation_type: string
+          source_module: string
+          updated_at?: string
+        }
+        Update: {
+          action_status?: string
+          created_at?: string
+          expected_impact?: string | null
+          id?: string
+          priority?: string
+          recommendation_summary?: string | null
+          recommendation_type?: string
+          source_module?: string
           updated_at?: string
         }
         Relationships: []
