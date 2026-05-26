@@ -436,6 +436,12 @@ import RolesDelegation from "./pages/founder/roles/Delegation";
 import RolesAccessRequests from "./pages/founder/roles/AccessRequests";
 import RolesAudit from "./pages/founder/roles/Audit";
 import RolesSettings from "./pages/founder/roles/Settings";
+import ReportingTruthOverview from "./pages/founder/reporting-truth/Overview";
+import ReportingTruthKpiDictionary from "./pages/founder/reporting-truth/KpiDictionary";
+import ReportingTruthDefinitions from "./pages/founder/reporting-truth/Definitions";
+import ReportingTruthReconciliation from "./pages/founder/reporting-truth/Reconciliation";
+import ReportingTruthConflicts from "./pages/founder/reporting-truth/Conflicts";
+import ReportingTruthSettings from "./pages/founder/reporting-truth/Settings";
 import KnowledgeOverview from "./pages/founder/knowledge-governance/Overview";
 import KnowledgeSources from "./pages/founder/knowledge-governance/Sources";
 import KnowledgeConflicts from "./pages/founder/knowledge-governance/Conflicts";
@@ -962,6 +968,12 @@ const App = () => (
             <Route path="/founder/roles/access-requests" element={<FounderRoute><RolesAccessRequests /></FounderRoute>} />
             <Route path="/founder/roles/audit" element={<FounderRoute><RolesAudit /></FounderRoute>} />
             <Route path="/founder/roles/settings" element={<FounderRoute><RolesSettings /></FounderRoute>} />
+            <Route path="/founder/reporting-truth" element={<FounderRoute><ReportingTruthOverview /></FounderRoute>} />
+            <Route path="/founder/reporting-truth/kpi-dictionary" element={<FounderRoute><ReportingTruthKpiDictionary /></FounderRoute>} />
+            <Route path="/founder/reporting-truth/definitions" element={<FounderRoute><ReportingTruthDefinitions /></FounderRoute>} />
+            <Route path="/founder/reporting-truth/reconciliation" element={<FounderRoute><ReportingTruthReconciliation /></FounderRoute>} />
+            <Route path="/founder/reporting-truth/conflicts" element={<FounderRoute><ReportingTruthConflicts /></FounderRoute>} />
+            <Route path="/founder/reporting-truth/settings" element={<FounderRoute><ReportingTruthSettings /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
