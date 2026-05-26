@@ -1163,6 +1163,13 @@ const App = () => (
             <Route path="/founder/system-config/external-actions" element={<FounderRoute><SCExternalActions /></FounderRoute>} />
             <Route path="/founder/system-config/business-overrides" element={<FounderRoute><SCBusinessOverrides /></FounderRoute>} />
             <Route path="/founder/system-config/audit" element={<FounderRoute><SCAudit /></FounderRoute>} />
+            <Route path="/founder/connectors" element={<FounderRoute><ConnectorsOverview /></FounderRoute>} />
+            <Route path="/founder/connectors/registry" element={<FounderRoute><ConnectorsRegistry /></FounderRoute>} />
+            <Route path="/founder/connectors/health" element={<FounderRoute><ConnectorsHealth /></FounderRoute>} />
+            <Route path="/founder/connectors/webhooks" element={<FounderRoute><ConnectorsWebhooks /></FounderRoute>} />
+            <Route path="/founder/connectors/secrets" element={<FounderRoute><ConnectorsSecrets /></FounderRoute>} />
+            <Route path="/founder/connectors/business-map" element={<FounderRoute><ConnectorsBusinessMap /></FounderRoute>} />
+            <Route path="/founder/connectors/settings" element={<FounderRoute><ConnectorsSettings /></FounderRoute>} />
             <Route path="/founder/portals" element={<FounderRoute><PortalsOverview /></FounderRoute>} />
             <Route path="/founder/portals/customer" element={<FounderRoute><PortalsCustomerAdmin /></FounderRoute>} />
             <Route path="/founder/portals/seller" element={<FounderRoute><PortalsSellerAdmin /></FounderRoute>} />
