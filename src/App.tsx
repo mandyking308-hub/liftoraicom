@@ -389,6 +389,12 @@ import AACampaigns from "./pages/founder/analytics-attribution/Campaigns";
 import AARevenue from "./pages/founder/analytics-attribution/Revenue";
 import AAFunnel from "./pages/founder/analytics-attribution/Funnel";
 import AASettings from "./pages/founder/analytics-attribution/Settings";
+import PAOverview from "./pages/founder/partners/Overview";
+import PAProspects from "./pages/founder/partners/Prospects";
+import PAReferrals from "./pages/founder/partners/Referrals";
+import PAAffiliates from "./pages/founder/partners/Affiliates";
+import PACommissions from "./pages/founder/partners/Commissions";
+import PAPerformance from "./pages/founder/partners/Performance";
 import KnowledgeOverview from "./pages/founder/knowledge-governance/Overview";
 import KnowledgeSources from "./pages/founder/knowledge-governance/Sources";
 import KnowledgeConflicts from "./pages/founder/knowledge-governance/Conflicts";
@@ -868,6 +874,12 @@ const App = () => (
             <Route path="/founder/analytics-attribution/revenue" element={<FounderRoute><AARevenue /></FounderRoute>} />
             <Route path="/founder/analytics-attribution/funnel" element={<FounderRoute><AAFunnel /></FounderRoute>} />
             <Route path="/founder/analytics-attribution/settings" element={<FounderRoute><AASettings /></FounderRoute>} />
+            <Route path="/founder/partners" element={<FounderRoute><PAOverview /></FounderRoute>} />
+            <Route path="/founder/partners/prospects" element={<FounderRoute><PAProspects /></FounderRoute>} />
+            <Route path="/founder/partners/referrals" element={<FounderRoute><PAReferrals /></FounderRoute>} />
+            <Route path="/founder/partners/affiliates" element={<FounderRoute><PAAffiliates /></FounderRoute>} />
+            <Route path="/founder/partners/commissions" element={<FounderRoute><PACommissions /></FounderRoute>} />
+            <Route path="/founder/partners/performance" element={<FounderRoute><PAPerformance /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />

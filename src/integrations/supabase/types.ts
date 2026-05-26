@@ -32235,6 +32235,45 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_commission_rules: {
+        Row: {
+          active: boolean
+          approval_required: boolean
+          business_id: string | null
+          commission_type: string
+          commission_value: number | null
+          created_at: string
+          currency: string | null
+          id: string
+          partner_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          approval_required?: boolean
+          business_id?: string | null
+          commission_type?: string
+          commission_value?: number | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          partner_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          approval_required?: boolean
+          business_id?: string | null
+          commission_type?: string
+          commission_value?: number | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          partner_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       partner_deals: {
         Row: {
           client_organisation: string
@@ -32414,6 +32453,96 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      partner_performance_snapshots: {
+        Row: {
+          business_id: string | null
+          commission_due: number | null
+          created_at: string
+          id: string
+          leads_generated: number | null
+          partner_id: string | null
+          period_end: string | null
+          period_start: string | null
+          quality_score: number | null
+          recommended_action: string | null
+          revenue_generated: number | null
+        }
+        Insert: {
+          business_id?: string | null
+          commission_due?: number | null
+          created_at?: string
+          id?: string
+          leads_generated?: number | null
+          partner_id?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          quality_score?: number | null
+          recommended_action?: string | null
+          revenue_generated?: number | null
+        }
+        Update: {
+          business_id?: string | null
+          commission_due?: number | null
+          created_at?: string
+          id?: string
+          leads_generated?: number | null
+          partner_id?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          quality_score?: number | null
+          recommended_action?: string | null
+          revenue_generated?: number | null
+        }
+        Relationships: []
+      }
+      partner_prospects: {
+        Row: {
+          business_id: string | null
+          category: string | null
+          created_at: string
+          email: string | null
+          expected_value: number | null
+          fit_score: number | null
+          id: string
+          outreach_status: string
+          partner_name: string
+          partner_type: string
+          risk_flags: string[] | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          business_id?: string | null
+          category?: string | null
+          created_at?: string
+          email?: string | null
+          expected_value?: number | null
+          fit_score?: number | null
+          id?: string
+          outreach_status?: string
+          partner_name: string
+          partner_type?: string
+          risk_flags?: string[] | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          business_id?: string | null
+          category?: string | null
+          created_at?: string
+          email?: string | null
+          expected_value?: number | null
+          fit_score?: number | null
+          id?: string
+          outreach_status?: string
+          partner_name?: string
+          partner_type?: string
+          risk_flags?: string[] | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
       }
       partner_referral_records: {
         Row: {
@@ -35113,6 +35242,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      referral_records: {
+        Row: {
+          business_id: string | null
+          commission_due: number | null
+          created_at: string
+          currency: string | null
+          id: string
+          referral_status: string
+          referred_contact_id: string | null
+          referrer_contact_id: string | null
+          updated_at: string
+          value_amount: number | null
+        }
+        Insert: {
+          business_id?: string | null
+          commission_due?: number | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          referral_status?: string
+          referred_contact_id?: string | null
+          referrer_contact_id?: string | null
+          updated_at?: string
+          value_amount?: number | null
+        }
+        Update: {
+          business_id?: string | null
+          commission_due?: number | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          referral_status?: string
+          referred_contact_id?: string | null
+          referrer_contact_id?: string | null
+          updated_at?: string
+          value_amount?: number | null
+        }
+        Relationships: []
       }
       refund_requests: {
         Row: {

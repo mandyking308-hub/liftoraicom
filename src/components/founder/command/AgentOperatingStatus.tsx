@@ -127,6 +127,7 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "pricing_agent", name: "Pricing Agent", to: "/founder/pricing-margin", category: "finance" },
   { key: "channel_strategy_agent", name: "Channel Strategy Agent", to: "/founder/channel-strategy", category: "growth" },
   { key: "attribution_agent", name: "Attribution Agent", to: "/founder/analytics-attribution", category: "analytics" },
+  { key: "partner_agent", name: "Partner Agent", to: "/founder/partners", category: "growth" },
 ];
 
 export default function AgentOperatingStatus() {
