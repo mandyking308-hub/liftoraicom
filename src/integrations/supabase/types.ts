@@ -22615,6 +22615,66 @@ export type Database = {
         }
         Relationships: []
       }
+      global_search_index: {
+        Row: {
+          active: boolean
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          id: string
+          is_test_data: boolean
+          last_indexed_at: string
+          record_type: string
+          searchable_text: string
+          sensitivity_level: string
+          source_module: string
+          source_record_id: string
+          source_table: string
+          summary: string | null
+          tags: string[]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          is_test_data?: boolean
+          last_indexed_at?: string
+          record_type?: string
+          searchable_text: string
+          sensitivity_level?: string
+          source_module: string
+          source_record_id: string
+          source_table: string
+          summary?: string | null
+          tags?: string[]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          is_test_data?: boolean
+          last_indexed_at?: string
+          record_type?: string
+          searchable_text?: string
+          sensitivity_level?: string
+          source_module?: string
+          source_record_id?: string
+          source_table?: string
+          summary?: string | null
+          tags?: string[]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       group_bank_accounts: {
         Row: {
           account_label: string
@@ -40494,6 +40554,36 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_searches: {
+        Row: {
+          created_at: string
+          filters: Json
+          id: string
+          query_text: string
+          search_name: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          filters?: Json
+          id?: string
+          query_text?: string
+          search_name: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          filters?: Json
+          id?: string
+          query_text?: string
+          search_name?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       scheduled_job_definitions: {
         Row: {
           active: boolean
@@ -40700,6 +40790,45 @@ export type Database = {
           resource_type?: string
           timezone?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      search_index_jobs: {
+        Row: {
+          audit_metadata: Json
+          completed_at: string | null
+          created_at: string
+          failure_reason: string | null
+          id: string
+          job_name: string
+          job_status: string
+          records_indexed: number
+          source_module: string
+          started_at: string | null
+        }
+        Insert: {
+          audit_metadata?: Json
+          completed_at?: string | null
+          created_at?: string
+          failure_reason?: string | null
+          id?: string
+          job_name: string
+          job_status?: string
+          records_indexed?: number
+          source_module: string
+          started_at?: string | null
+        }
+        Update: {
+          audit_metadata?: Json
+          completed_at?: string | null
+          created_at?: string
+          failure_reason?: string | null
+          id?: string
+          job_name?: string
+          job_status?: string
+          records_indexed?: number
+          source_module?: string
+          started_at?: string | null
         }
         Relationships: []
       }
@@ -54860,6 +54989,8 @@ export type Database = {
         Args: { _s: Database["public"]["Enums"]["compliance_severity"] }
         Returns: number
       }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
       suggest_replacement_supplier: {
         Args: { _assignment_id: string }
         Returns: {
