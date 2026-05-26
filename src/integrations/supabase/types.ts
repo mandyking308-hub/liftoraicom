@@ -30046,6 +30046,185 @@ export type Database = {
           },
         ]
       }
+      master_work_item_events: {
+        Row: {
+          audit_metadata: Json
+          created_at: string
+          created_by: string | null
+          event_summary: string | null
+          event_type: string
+          id: string
+          work_item_id: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          created_at?: string
+          created_by?: string | null
+          event_summary?: string | null
+          event_type: string
+          id?: string
+          work_item_id: string
+        }
+        Update: {
+          audit_metadata?: Json
+          created_at?: string
+          created_by?: string | null
+          event_summary?: string | null
+          event_type?: string
+          id?: string
+          work_item_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "master_work_item_events_work_item_id_fkey"
+            columns: ["work_item_id"]
+            isOneToOne: false
+            referencedRelation: "master_work_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      master_work_items: {
+        Row: {
+          action_url: string | null
+          approval_item_id: string | null
+          approval_required: boolean
+          assigned_agent: string | null
+          audit_metadata: Json
+          blocker_reason: string | null
+          business_id: string | null
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          due_at: string | null
+          estimated_value_amount: number | null
+          estimated_value_currency: string | null
+          id: string
+          is_test_data: boolean
+          owner_id: string | null
+          owner_type: string
+          priority: string
+          recommended_action: string | null
+          risk_score: number | null
+          source_module: string
+          source_record_id: string | null
+          source_table: string | null
+          status: string
+          title: string
+          updated_at: string
+          value_score: number | null
+          work_type: string
+        }
+        Insert: {
+          action_url?: string | null
+          approval_item_id?: string | null
+          approval_required?: boolean
+          assigned_agent?: string | null
+          audit_metadata?: Json
+          blocker_reason?: string | null
+          business_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_at?: string | null
+          estimated_value_amount?: number | null
+          estimated_value_currency?: string | null
+          id?: string
+          is_test_data?: boolean
+          owner_id?: string | null
+          owner_type?: string
+          priority?: string
+          recommended_action?: string | null
+          risk_score?: number | null
+          source_module: string
+          source_record_id?: string | null
+          source_table?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          value_score?: number | null
+          work_type: string
+        }
+        Update: {
+          action_url?: string | null
+          approval_item_id?: string | null
+          approval_required?: boolean
+          assigned_agent?: string | null
+          audit_metadata?: Json
+          blocker_reason?: string | null
+          business_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_at?: string | null
+          estimated_value_amount?: number | null
+          estimated_value_currency?: string | null
+          id?: string
+          is_test_data?: boolean
+          owner_id?: string | null
+          owner_type?: string
+          priority?: string
+          recommended_action?: string | null
+          risk_score?: number | null
+          source_module?: string
+          source_record_id?: string | null
+          source_table?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          value_score?: number | null
+          work_type?: string
+        }
+        Relationships: []
+      }
+      master_work_queue_rules: {
+        Row: {
+          active: boolean
+          condition_json: Json
+          created_at: string
+          default_agent: string | null
+          default_owner_type: string | null
+          due_in_hours: number | null
+          id: string
+          priority_boost: number
+          risk_weight: number
+          rule_name: string
+          source_module: string
+          updated_at: string
+          value_weight: number
+        }
+        Insert: {
+          active?: boolean
+          condition_json?: Json
+          created_at?: string
+          default_agent?: string | null
+          default_owner_type?: string | null
+          due_in_hours?: number | null
+          id?: string
+          priority_boost?: number
+          risk_weight?: number
+          rule_name: string
+          source_module: string
+          updated_at?: string
+          value_weight?: number
+        }
+        Update: {
+          active?: boolean
+          condition_json?: Json
+          created_at?: string
+          default_agent?: string | null
+          default_owner_type?: string | null
+          due_in_hours?: number | null
+          id?: string
+          priority_boost?: number
+          risk_weight?: number
+          rule_name?: string
+          source_module?: string
+          updated_at?: string
+          value_weight?: number
+        }
+        Relationships: []
+      }
       meeting_action_items: {
         Row: {
           action_owner: string | null

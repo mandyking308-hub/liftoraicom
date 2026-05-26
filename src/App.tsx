@@ -413,6 +413,15 @@ import ExitReadiness from "./pages/founder/exit-metrics/Readiness";
 import ExitBuyerFit from "./pages/founder/exit-metrics/BuyerFit";
 import ExitDataRoom from "./pages/founder/exit-metrics/DataRoom";
 import PortfolioDiversityOverview from "./pages/founder/portfolio-diversity/Overview";
+import WorkQueueOverview from "./pages/founder/work-queue/Overview";
+import WorkQueueToday from "./pages/founder/work-queue/Today";
+import WorkQueueByBusiness from "./pages/founder/work-queue/ByBusiness";
+import WorkQueueByAgent from "./pages/founder/work-queue/ByAgent";
+import WorkQueueApprovals from "./pages/founder/work-queue/Approvals";
+import WorkQueueBlocked from "./pages/founder/work-queue/Blocked";
+import WorkQueueHighValue from "./pages/founder/work-queue/HighValue";
+import WorkQueueOverdue from "./pages/founder/work-queue/Overdue";
+import WorkQueueSettings from "./pages/founder/work-queue/Settings";
 import KnowledgeOverview from "./pages/founder/knowledge-governance/Overview";
 import KnowledgeSources from "./pages/founder/knowledge-governance/Sources";
 import KnowledgeConflicts from "./pages/founder/knowledge-governance/Conflicts";
@@ -916,6 +925,15 @@ const App = () => (
             <Route path="/founder/exit-metrics/buyer-fit" element={<FounderRoute><ExitBuyerFit /></FounderRoute>} />
             <Route path="/founder/exit-metrics/data-room" element={<FounderRoute><ExitDataRoom /></FounderRoute>} />
             <Route path="/founder/portfolio-diversity" element={<FounderRoute><PortfolioDiversityOverview /></FounderRoute>} />
+            <Route path="/founder/work-queue" element={<FounderRoute><WorkQueueOverview /></FounderRoute>} />
+            <Route path="/founder/work-queue/today" element={<FounderRoute><WorkQueueToday /></FounderRoute>} />
+            <Route path="/founder/work-queue/by-business" element={<FounderRoute><WorkQueueByBusiness /></FounderRoute>} />
+            <Route path="/founder/work-queue/by-agent" element={<FounderRoute><WorkQueueByAgent /></FounderRoute>} />
+            <Route path="/founder/work-queue/approvals" element={<FounderRoute><WorkQueueApprovals /></FounderRoute>} />
+            <Route path="/founder/work-queue/blocked" element={<FounderRoute><WorkQueueBlocked /></FounderRoute>} />
+            <Route path="/founder/work-queue/high-value" element={<FounderRoute><WorkQueueHighValue /></FounderRoute>} />
+            <Route path="/founder/work-queue/overdue" element={<FounderRoute><WorkQueueOverdue /></FounderRoute>} />
+            <Route path="/founder/work-queue/settings" element={<FounderRoute><WorkQueueSettings /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
