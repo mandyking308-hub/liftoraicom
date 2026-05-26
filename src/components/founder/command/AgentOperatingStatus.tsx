@@ -153,6 +153,7 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "audit_agent", name: "Audit Agent", to: "/founder/audit-ledger", category: "security" },
   { key: "search_index_agent", name: "Search Index Agent", to: "/founder/search", category: "operations" },
   { key: "import_agent", name: "Import Agent", to: "/founder/imports", category: "operations" },
+  { key: "identity_agent", name: "Identity Agent", to: "/founder/identity-resolution", category: "operations" },
 ];
 
 export default function AgentOperatingStatus() {
