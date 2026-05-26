@@ -20478,6 +20478,59 @@ export type Database = {
           },
         ]
       }
+      deployment_records: {
+        Row: {
+          audit_metadata: Json
+          build_status: string | null
+          commit_hash: string | null
+          created_at: string
+          deployed_at: string | null
+          deployed_by: string | null
+          deployment_status: string
+          environment_id: string | null
+          id: string
+          notes: string | null
+          release_name: string | null
+          test_status: string | null
+        }
+        Insert: {
+          audit_metadata?: Json
+          build_status?: string | null
+          commit_hash?: string | null
+          created_at?: string
+          deployed_at?: string | null
+          deployed_by?: string | null
+          deployment_status?: string
+          environment_id?: string | null
+          id?: string
+          notes?: string | null
+          release_name?: string | null
+          test_status?: string | null
+        }
+        Update: {
+          audit_metadata?: Json
+          build_status?: string | null
+          commit_hash?: string | null
+          created_at?: string
+          deployed_at?: string | null
+          deployed_by?: string | null
+          deployment_status?: string
+          environment_id?: string | null
+          id?: string
+          notes?: string | null
+          release_name?: string | null
+          test_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deployment_records_environment_id_fkey"
+            columns: ["environment_id"]
+            isOneToOne: false
+            referencedRelation: "environment_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deployment_stages: {
         Row: {
           completed_at: string | null
@@ -21127,6 +21180,50 @@ export type Database = {
         }
         Relationships: []
       }
+      edge_function_records: {
+        Row: {
+          created_at: string
+          deployed_status: string
+          environment_id: string | null
+          external_action_possible: boolean
+          function_name: string
+          id: string
+          last_deployed_at: string | null
+          last_error: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deployed_status?: string
+          environment_id?: string | null
+          external_action_possible?: boolean
+          function_name: string
+          id?: string
+          last_deployed_at?: string | null
+          last_error?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deployed_status?: string
+          environment_id?: string | null
+          external_action_possible?: boolean
+          function_name?: string
+          id?: string
+          last_deployed_at?: string | null
+          last_error?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "edge_function_records_environment_id_fkey"
+            columns: ["environment_id"]
+            isOneToOne: false
+            referencedRelation: "environment_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_events: {
         Row: {
           contact_id: string
@@ -21469,6 +21566,86 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      environment_records: {
+        Row: {
+          active: boolean
+          app_url: string | null
+          branch_summary: string | null
+          created_at: string
+          environment_name: string
+          environment_status: string
+          id: string
+          supabase_project_summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          app_url?: string | null
+          branch_summary?: string | null
+          created_at?: string
+          environment_name: string
+          environment_status?: string
+          id?: string
+          supabase_project_summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          app_url?: string | null
+          branch_summary?: string | null
+          created_at?: string
+          environment_name?: string
+          environment_status?: string
+          id?: string
+          supabase_project_summary?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      environment_variable_records: {
+        Row: {
+          configured: boolean
+          created_at: string
+          environment_id: string | null
+          id: string
+          last_verified_at: string | null
+          notes: string | null
+          sensitivity_level: string
+          updated_at: string
+          variable_name: string
+        }
+        Insert: {
+          configured?: boolean
+          created_at?: string
+          environment_id?: string | null
+          id?: string
+          last_verified_at?: string | null
+          notes?: string | null
+          sensitivity_level?: string
+          updated_at?: string
+          variable_name: string
+        }
+        Update: {
+          configured?: boolean
+          created_at?: string
+          environment_id?: string | null
+          id?: string
+          last_verified_at?: string | null
+          notes?: string | null
+          sensitivity_level?: string
+          updated_at?: string
+          variable_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "environment_variable_records_environment_id_fkey"
+            columns: ["environment_id"]
+            isOneToOne: false
+            referencedRelation: "environment_records"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       escalation_records: {
         Row: {
@@ -33339,6 +33516,47 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      migration_records: {
+        Row: {
+          applied_at: string | null
+          created_at: string
+          environment_id: string | null
+          id: string
+          migration_name: string
+          migration_status: string
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          applied_at?: string | null
+          created_at?: string
+          environment_id?: string | null
+          id?: string
+          migration_name: string
+          migration_status?: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          applied_at?: string | null
+          created_at?: string
+          environment_id?: string | null
+          id?: string
+          migration_name?: string
+          migration_status?: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "migration_records_environment_id_fkey"
+            columns: ["environment_id"]
+            isOneToOne: false
+            referencedRelation: "environment_records"
             referencedColumns: ["id"]
           },
         ]
