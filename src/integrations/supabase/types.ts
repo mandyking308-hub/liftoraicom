@@ -20279,6 +20279,107 @@ export type Database = {
         }
         Relationships: []
       }
+      global_offers: {
+        Row: {
+          approval_required: boolean
+          billing_frequency: string | null
+          business_id: string
+          created_at: string
+          currency: string
+          discount_allowed: boolean
+          id: string
+          margin_estimate: number | null
+          offer_name: string
+          offer_status: string
+          offer_type: string
+          price_amount: number | null
+          product_id: string
+          updated_at: string
+        }
+        Insert: {
+          approval_required?: boolean
+          billing_frequency?: string | null
+          business_id: string
+          created_at?: string
+          currency?: string
+          discount_allowed?: boolean
+          id?: string
+          margin_estimate?: number | null
+          offer_name: string
+          offer_status?: string
+          offer_type?: string
+          price_amount?: number | null
+          product_id: string
+          updated_at?: string
+        }
+        Update: {
+          approval_required?: boolean
+          billing_frequency?: string | null
+          business_id?: string
+          created_at?: string
+          currency?: string
+          discount_allowed?: boolean
+          id?: string
+          margin_estimate?: number | null
+          offer_name?: string
+          offer_status?: string
+          offer_type?: string
+          price_amount?: number | null
+          product_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "global_offers_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "global_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      global_products: {
+        Row: {
+          active: boolean
+          business_id: string
+          cost_to_deliver_estimate: number | null
+          created_at: string
+          delivery_type: string | null
+          description: string | null
+          id: string
+          product_name: string
+          product_type: string
+          target_customer: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          business_id: string
+          cost_to_deliver_estimate?: number | null
+          created_at?: string
+          delivery_type?: string | null
+          description?: string | null
+          id?: string
+          product_name: string
+          product_type?: string
+          target_customer?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          business_id?: string
+          cost_to_deliver_estimate?: number | null
+          created_at?: string
+          delivery_type?: string | null
+          description?: string | null
+          id?: string
+          product_name?: string
+          product_type?: string
+          target_customer?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       group_bank_accounts: {
         Row: {
           account_label: string
@@ -29745,6 +29846,114 @@ export type Database = {
             columns: ["strategy_id"]
             isOneToOne: false
             referencedRelation: "longform_content_strategies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      offer_claims: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          business_id: string
+          claim_status: string
+          claim_text: string
+          created_at: string
+          evidence_source: string | null
+          id: string
+          offer_id: string | null
+          product_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          business_id: string
+          claim_status?: string
+          claim_text: string
+          created_at?: string
+          evidence_source?: string | null
+          id?: string
+          offer_id?: string | null
+          product_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          business_id?: string
+          claim_status?: string
+          claim_text?: string
+          created_at?: string
+          evidence_source?: string | null
+          id?: string
+          offer_id?: string | null
+          product_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offer_claims_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "global_offers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offer_claims_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "global_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      offer_delivery_requirements: {
+        Row: {
+          business_id: string
+          created_at: string
+          id: string
+          offer_id: string | null
+          product_id: string | null
+          required: boolean
+          requirement_name: string
+          requirement_type: string
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          id?: string
+          offer_id?: string | null
+          product_id?: string | null
+          required?: boolean
+          requirement_name: string
+          requirement_type?: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          id?: string
+          offer_id?: string | null
+          product_id?: string | null
+          required?: boolean
+          requirement_name?: string
+          requirement_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offer_delivery_requirements_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "global_offers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offer_delivery_requirements_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "global_products"
             referencedColumns: ["id"]
           },
         ]
