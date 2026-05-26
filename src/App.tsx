@@ -504,6 +504,13 @@ import DecisionsMade from "./pages/founder/decisions/Made";
 import DecisionsImplemented from "./pages/founder/decisions/Implemented";
 import DecisionsReview from "./pages/founder/decisions/Review";
 import DecisionsSettings from "./pages/founder/decisions/Settings";
+import PMOverview from "./pages/founder/portfolio-memory/Overview";
+import PMBusinesses from "./pages/founder/portfolio-memory/Businesses";
+import PMPacks from "./pages/founder/portfolio-memory/HandoverPacks";
+import PMOperator from "./pages/founder/portfolio-memory/OperatorBriefs";
+import PMAdviser from "./pages/founder/portfolio-memory/AdviserBriefs";
+import PMBuyer from "./pages/founder/portfolio-memory/BuyerBriefs";
+import PMHistory from "./pages/founder/portfolio-memory/History";
 import PortalsOverview from "./pages/founder/portals/Overview";
 import PortalsCustomerAdmin from "./pages/founder/portals/Customer";
 import PortalsSellerAdmin from "./pages/founder/portals/Seller";
@@ -1118,6 +1125,13 @@ const App = () => (
             <Route path="/founder/decisions/implemented" element={<FounderRoute><DecisionsImplemented /></FounderRoute>} />
             <Route path="/founder/decisions/review" element={<FounderRoute><DecisionsReview /></FounderRoute>} />
             <Route path="/founder/decisions/settings" element={<FounderRoute><DecisionsSettings /></FounderRoute>} />
+            <Route path="/founder/portfolio-memory" element={<FounderRoute><PMOverview /></FounderRoute>} />
+            <Route path="/founder/portfolio-memory/businesses" element={<FounderRoute><PMBusinesses /></FounderRoute>} />
+            <Route path="/founder/portfolio-memory/handover-packs" element={<FounderRoute><PMPacks /></FounderRoute>} />
+            <Route path="/founder/portfolio-memory/operator-briefs" element={<FounderRoute><PMOperator /></FounderRoute>} />
+            <Route path="/founder/portfolio-memory/adviser-briefs" element={<FounderRoute><PMAdviser /></FounderRoute>} />
+            <Route path="/founder/portfolio-memory/buyer-briefs" element={<FounderRoute><PMBuyer /></FounderRoute>} />
+            <Route path="/founder/portfolio-memory/history" element={<FounderRoute><PMHistory /></FounderRoute>} />
             <Route path="/founder/portals" element={<FounderRoute><PortalsOverview /></FounderRoute>} />
             <Route path="/founder/portals/customer" element={<FounderRoute><PortalsCustomerAdmin /></FounderRoute>} />
             <Route path="/founder/portals/seller" element={<FounderRoute><PortalsSellerAdmin /></FounderRoute>} />
