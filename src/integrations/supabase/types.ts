@@ -23822,6 +23822,54 @@ export type Database = {
         }
         Relationships: []
       }
+      kpi_definitions: {
+        Row: {
+          active: boolean
+          calculation_logic_summary: string | null
+          confirmed_vs_estimated_rules: string | null
+          created_at: string
+          definition: string
+          id: string
+          kpi_category: string
+          kpi_code: string
+          kpi_name: string
+          source_of_truth_field: string | null
+          source_of_truth_table: string | null
+          test_data_exclusion_rules: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          calculation_logic_summary?: string | null
+          confirmed_vs_estimated_rules?: string | null
+          created_at?: string
+          definition: string
+          id?: string
+          kpi_category: string
+          kpi_code: string
+          kpi_name: string
+          source_of_truth_field?: string | null
+          source_of_truth_table?: string | null
+          test_data_exclusion_rules?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          calculation_logic_summary?: string | null
+          confirmed_vs_estimated_rules?: string | null
+          created_at?: string
+          definition?: string
+          id?: string
+          kpi_category?: string
+          kpi_code?: string
+          kpi_name?: string
+          source_of_truth_field?: string | null
+          source_of_truth_table?: string | null
+          test_data_exclusion_rules?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       launch_checklist: {
         Row: {
           completed: boolean
@@ -36462,6 +36510,123 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      reporting_conflicts: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          conflict_status: string
+          conflict_summary: string
+          conflict_type: string
+          created_at: string
+          id: string
+          recommended_fix: string | null
+          severity: string
+          source_a: string | null
+          source_b: string | null
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          conflict_status?: string
+          conflict_summary: string
+          conflict_type: string
+          created_at?: string
+          id?: string
+          recommended_fix?: string | null
+          severity?: string
+          source_a?: string | null
+          source_b?: string | null
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          conflict_status?: string
+          conflict_summary?: string
+          conflict_type?: string
+          created_at?: string
+          id?: string
+          recommended_fix?: string | null
+          severity?: string
+          source_a?: string | null
+          source_b?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      reporting_snapshots: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          generated_from_rules_version: string | null
+          id: string
+          metrics: Json
+          period_end: string
+          period_start: string
+          snapshot_type: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          generated_from_rules_version?: string | null
+          id?: string
+          metrics?: Json
+          period_end: string
+          period_start: string
+          snapshot_type: string
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          generated_from_rules_version?: string | null
+          id?: string
+          metrics?: Json
+          period_end?: string
+          period_start?: string
+          snapshot_type?: string
+        }
+        Relationships: []
+      }
+      reporting_truth_rules: {
+        Row: {
+          active: boolean
+          created_at: string
+          exclusion_conditions: Json
+          id: string
+          rule_name: string
+          rule_summary: string
+          rule_type: string
+          source_priority_order: Json
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          exclusion_conditions?: Json
+          id?: string
+          rule_name: string
+          rule_summary: string
+          rule_type: string
+          source_priority_order?: Json
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          exclusion_conditions?: Json
+          id?: string
+          rule_name?: string
+          rule_summary?: string
+          rule_type?: string
+          source_priority_order?: Json
+          updated_at?: string
+        }
+        Relationships: []
       }
       reputation_events: {
         Row: {
