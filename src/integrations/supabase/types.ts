@@ -40025,6 +40025,176 @@ export type Database = {
         }
         Relationships: []
       }
+      scheduled_job_definitions: {
+        Row: {
+          active: boolean
+          audit_metadata: Json
+          created_at: string
+          description: string | null
+          external_action_allowed: boolean
+          external_action_possible: boolean
+          founder_approval_required_for_external: boolean
+          id: string
+          job_category: string
+          job_code: string
+          job_name: string
+          owner_module: string | null
+          schedule_cron: string
+          timezone: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          audit_metadata?: Json
+          created_at?: string
+          description?: string | null
+          external_action_allowed?: boolean
+          external_action_possible?: boolean
+          founder_approval_required_for_external?: boolean
+          id?: string
+          job_category?: string
+          job_code: string
+          job_name: string
+          owner_module?: string | null
+          schedule_cron?: string
+          timezone?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          audit_metadata?: Json
+          created_at?: string
+          description?: string | null
+          external_action_allowed?: boolean
+          external_action_possible?: boolean
+          founder_approval_required_for_external?: boolean
+          id?: string
+          job_category?: string
+          job_code?: string
+          job_name?: string
+          owner_module?: string | null
+          schedule_cron?: string
+          timezone?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      scheduled_job_failures: {
+        Row: {
+          created_at: string
+          failure_summary: string | null
+          failure_type: string
+          id: string
+          job_definition_id: string
+          job_run_id: string | null
+          recommended_action: string | null
+          severity: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          failure_summary?: string | null
+          failure_type?: string
+          id?: string
+          job_definition_id: string
+          job_run_id?: string | null
+          recommended_action?: string | null
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          failure_summary?: string | null
+          failure_type?: string
+          id?: string
+          job_definition_id?: string
+          job_run_id?: string | null
+          recommended_action?: string | null
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_job_failures_job_definition_id_fkey"
+            columns: ["job_definition_id"]
+            isOneToOne: false
+            referencedRelation: "scheduled_job_definitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_job_failures_job_run_id_fkey"
+            columns: ["job_run_id"]
+            isOneToOne: false
+            referencedRelation: "scheduled_job_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scheduled_job_runs: {
+        Row: {
+          audit_metadata: Json
+          completed_at: string | null
+          created_at: string
+          created_notifications_count: number
+          created_work_items_count: number
+          duration_ms: number | null
+          external_actions_attempted_count: number
+          external_actions_blocked_count: number
+          failure_reason: string | null
+          id: string
+          job_definition_id: string
+          output_summary: string | null
+          run_status: string
+          started_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          completed_at?: string | null
+          created_at?: string
+          created_notifications_count?: number
+          created_work_items_count?: number
+          duration_ms?: number | null
+          external_actions_attempted_count?: number
+          external_actions_blocked_count?: number
+          failure_reason?: string | null
+          id?: string
+          job_definition_id: string
+          output_summary?: string | null
+          run_status?: string
+          started_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          completed_at?: string | null
+          created_at?: string
+          created_notifications_count?: number
+          created_work_items_count?: number
+          duration_ms?: number | null
+          external_actions_attempted_count?: number
+          external_actions_blocked_count?: number
+          failure_reason?: string | null
+          id?: string
+          job_definition_id?: string
+          output_summary?: string | null
+          run_status?: string
+          started_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_job_runs_job_definition_id_fkey"
+            columns: ["job_definition_id"]
+            isOneToOne: false
+            referencedRelation: "scheduled_job_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       scheduling_resources: {
         Row: {
           active: boolean
