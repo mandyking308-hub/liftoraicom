@@ -1176,6 +1176,12 @@ const App = () => (
             <Route path="/founder/connectors/secrets" element={<FounderRoute><ConnectorsSecrets /></FounderRoute>} />
             <Route path="/founder/connectors/business-map" element={<FounderRoute><ConnectorsBusinessMap /></FounderRoute>} />
             <Route path="/founder/connectors/settings" element={<FounderRoute><ConnectorsSettings /></FounderRoute>} />
+            <Route path="/founder/webhooks" element={<FounderRoute><WebhooksOverview /></FounderRoute>} />
+            <Route path="/founder/webhooks/inbox" element={<FounderRoute><WebhooksInbox /></FounderRoute>} />
+            <Route path="/founder/webhooks/providers" element={<FounderRoute><WebhooksProviders /></FounderRoute>} />
+            <Route path="/founder/webhooks/normalised-events" element={<FounderRoute><WebhooksNormalised /></FounderRoute>} />
+            <Route path="/founder/webhooks/failures" element={<FounderRoute><WebhooksFailures /></FounderRoute>} />
+            <Route path="/founder/webhooks/settings" element={<FounderRoute><WebhooksSettings /></FounderRoute>} />
             <Route path="/founder/portals" element={<FounderRoute><PortalsOverview /></FounderRoute>} />
             <Route path="/founder/portals/customer" element={<FounderRoute><PortalsCustomerAdmin /></FounderRoute>} />
             <Route path="/founder/portals/seller" element={<FounderRoute><PortalsSellerAdmin /></FounderRoute>} />
