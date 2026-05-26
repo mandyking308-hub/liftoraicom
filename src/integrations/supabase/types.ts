@@ -32798,6 +32798,68 @@ export type Database = {
           },
         ]
       }
+      normalised_external_events: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          confidence_score: number | null
+          created_at: string
+          event_category: string
+          event_type: string
+          id: string
+          liftor_event_id: string | null
+          normalised_payload: Json
+          related_contact_id: string | null
+          related_customer_id: string | null
+          related_record_id: string | null
+          related_record_table: string | null
+          related_seller_id: string | null
+          webhook_inbox_event_id: string | null
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          event_category: string
+          event_type: string
+          id?: string
+          liftor_event_id?: string | null
+          normalised_payload?: Json
+          related_contact_id?: string | null
+          related_customer_id?: string | null
+          related_record_id?: string | null
+          related_record_table?: string | null
+          related_seller_id?: string | null
+          webhook_inbox_event_id?: string | null
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          event_category?: string
+          event_type?: string
+          id?: string
+          liftor_event_id?: string | null
+          normalised_payload?: Json
+          related_contact_id?: string | null
+          related_customer_id?: string | null
+          related_record_id?: string | null
+          related_record_table?: string | null
+          related_seller_id?: string | null
+          webhook_inbox_event_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "normalised_external_events_webhook_inbox_event_id_fkey"
+            columns: ["webhook_inbox_event_id"]
+            isOneToOne: false
+            referencedRelation: "webhook_inbox_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_rules: {
         Row: {
           active: boolean
@@ -52253,6 +52315,113 @@ export type Database = {
           vendor_name?: string
           vendor_type?: string
           website?: string | null
+        }
+        Relationships: []
+      }
+      webhook_inbox_events: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          connector_id: string | null
+          error_message: string | null
+          id: string
+          payload_hash: string | null
+          processed_at: string | null
+          processing_status: string
+          provider_event_id: string | null
+          provider_name: string
+          raw_payload_summary: Json
+          received_at: string
+          signature_verified: boolean
+          verification_status: string
+          webhook_event_type: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          connector_id?: string | null
+          error_message?: string | null
+          id?: string
+          payload_hash?: string | null
+          processed_at?: string | null
+          processing_status?: string
+          provider_event_id?: string | null
+          provider_name: string
+          raw_payload_summary?: Json
+          received_at?: string
+          signature_verified?: boolean
+          verification_status?: string
+          webhook_event_type: string
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          connector_id?: string | null
+          error_message?: string | null
+          id?: string
+          payload_hash?: string | null
+          processed_at?: string | null
+          processing_status?: string
+          provider_event_id?: string | null
+          provider_name?: string
+          raw_payload_summary?: Json
+          received_at?: string
+          signature_verified?: boolean
+          verification_status?: string
+          webhook_event_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhook_inbox_events_connector_id_fkey"
+            columns: ["connector_id"]
+            isOneToOne: false
+            referencedRelation: "connector_registry"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      webhook_processing_rules: {
+        Row: {
+          active: boolean
+          audit_metadata: Json
+          business_mapping_strategy: string | null
+          created_at: string
+          event_category: string
+          id: string
+          idempotency_field: string | null
+          normalised_event_type: string
+          provider_name: string
+          required_signature: boolean
+          updated_at: string
+          webhook_event_type: string
+        }
+        Insert: {
+          active?: boolean
+          audit_metadata?: Json
+          business_mapping_strategy?: string | null
+          created_at?: string
+          event_category?: string
+          id?: string
+          idempotency_field?: string | null
+          normalised_event_type: string
+          provider_name: string
+          required_signature?: boolean
+          updated_at?: string
+          webhook_event_type: string
+        }
+        Update: {
+          active?: boolean
+          audit_metadata?: Json
+          business_mapping_strategy?: string | null
+          created_at?: string
+          event_category?: string
+          id?: string
+          idempotency_field?: string | null
+          normalised_event_type?: string
+          provider_name?: string
+          required_signature?: boolean
+          updated_at?: string
+          webhook_event_type?: string
         }
         Relationships: []
       }
