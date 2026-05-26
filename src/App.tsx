@@ -557,6 +557,13 @@ import IdentityRoles from "./pages/founder/identity-resolution/Roles";
 import IdentityMergeQueue from "./pages/founder/identity-resolution/MergeQueue";
 import IdentityDoNotContact from "./pages/founder/identity-resolution/DoNotContact";
 import IdentitySettings from "./pages/founder/identity-resolution/Settings";
+import CommsOverview from "./pages/founder/communications/Overview";
+import CommsLedger from "./pages/founder/communications/Ledger";
+import CommsByContact from "./pages/founder/communications/ByContact";
+import CommsByBusiness from "./pages/founder/communications/ByBusiness";
+import CommsDrafts from "./pages/founder/communications/Drafts";
+import CommsReceived from "./pages/founder/communications/Received";
+import CommsSettings from "./pages/founder/communications/Settings";
 import SearchOverview from "./pages/founder/search/Overview";
 import SearchAll from "./pages/founder/search/All";
 import SearchCustomers from "./pages/founder/search/Customers";
@@ -1232,6 +1239,13 @@ const App = () => (
             <Route path="/founder/identity-resolution/merge-queue" element={<FounderRoute><IdentityMergeQueue /></FounderRoute>} />
             <Route path="/founder/identity-resolution/do-not-contact" element={<FounderRoute><IdentityDoNotContact /></FounderRoute>} />
             <Route path="/founder/identity-resolution/settings" element={<FounderRoute><IdentitySettings /></FounderRoute>} />
+            <Route path="/founder/communications" element={<FounderRoute><CommsOverview /></FounderRoute>} />
+            <Route path="/founder/communications/ledger" element={<FounderRoute><CommsLedger /></FounderRoute>} />
+            <Route path="/founder/communications/by-contact" element={<FounderRoute><CommsByContact /></FounderRoute>} />
+            <Route path="/founder/communications/by-business" element={<FounderRoute><CommsByBusiness /></FounderRoute>} />
+            <Route path="/founder/communications/drafts" element={<FounderRoute><CommsDrafts /></FounderRoute>} />
+            <Route path="/founder/communications/received" element={<FounderRoute><CommsReceived /></FounderRoute>} />
+            <Route path="/founder/communications/settings" element={<FounderRoute><CommsSettings /></FounderRoute>} />
             <Route path="/founder/search" element={<FounderRoute><SearchOverview /></FounderRoute>} />
             <Route path="/founder/search/all" element={<FounderRoute><SearchAll /></FounderRoute>} />
             <Route path="/founder/search/customers" element={<FounderRoute><SearchCustomers /></FounderRoute>} />
