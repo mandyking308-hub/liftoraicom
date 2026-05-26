@@ -62,6 +62,7 @@ import ScheduledJobsCard from "./ScheduledJobsCard";
 import SystemConfigCard from "./SystemConfigCard";
 import ConnectorHealthCard from "./ConnectorHealthCard";
 import WebhookHealthCard from "./WebhookHealthCard";
+import AuditLedgerHealthCard from "./AuditLedgerHealthCard";
 
 /**
  * Business Process Spine — single integrated panel that surfaces every
@@ -116,6 +117,7 @@ export default function BusinessProcessSpinePanel() {
       <SystemConfigCard />
       <ConnectorHealthCard />
       <WebhookHealthCard />
+      <AuditLedgerHealthCard />
 
       <PortalsCard />
 
