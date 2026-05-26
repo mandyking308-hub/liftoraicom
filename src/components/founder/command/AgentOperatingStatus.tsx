@@ -155,6 +155,7 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "import_agent", name: "Import Agent", to: "/founder/imports", category: "operations" },
   { key: "identity_agent", name: "Identity Agent", to: "/founder/identity-resolution", category: "operations" },
   { key: "communications_agent", name: "Communications Agent", to: "/founder/communications", category: "operations" },
+  { key: "relationship_health_agent", name: "Relationship Health Agent", to: "/founder/relationship-health", category: "operations" },
 ];
 
 export default function AgentOperatingStatus() {

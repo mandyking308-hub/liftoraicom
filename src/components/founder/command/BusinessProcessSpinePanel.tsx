@@ -67,6 +67,7 @@ import GlobalSearchCard from "./GlobalSearchCard";
 import ImportCentreCard from "./ImportCentreCard";
 import IdentityResolutionCard from "./IdentityResolutionCard";
 import CommunicationsLedgerCard from "./CommunicationsLedgerCard";
+import RelationshipHealthCard from "./RelationshipHealthCard";
 
 /**
  * Business Process Spine — single integrated panel that surfaces every
@@ -126,6 +127,7 @@ export default function BusinessProcessSpinePanel() {
       <ImportCentreCard />
       <IdentityResolutionCard />
       <CommunicationsLedgerCard />
+      <RelationshipHealthCard />
 
       <PortalsCard />
 
