@@ -591,13 +591,13 @@ import DepEdgeFunctions from "./pages/founder/deployment/EdgeFunctions";
 import DepEnvVars from "./pages/founder/deployment/EnvVars";
 import DepRollback from "./pages/founder/deployment/Rollback";
 import DepSettings from "./pages/founder/deployment/Settings";
-import PMOverview from "./pages/founder/platform-monitor/Overview";
-import PMPerformance from "./pages/founder/platform-monitor/Performance";
-import PMErrors from "./pages/founder/platform-monitor/Errors";
-import PMRateLimits from "./pages/founder/platform-monitor/RateLimits";
-import PMCosts from "./pages/founder/platform-monitor/Costs";
-import PMScalability from "./pages/founder/platform-monitor/Scalability";
-import PMRecommendations from "./pages/founder/platform-monitor/Recommendations";
+import PlatMonOverview from "./pages/founder/platform-monitor/Overview";
+import PlatMonPerformance from "./pages/founder/platform-monitor/Performance";
+import PlatMonErrors from "./pages/founder/platform-monitor/Errors";
+import PlatMonRateLimits from "./pages/founder/platform-monitor/RateLimits";
+import PlatMonCosts from "./pages/founder/platform-monitor/Costs";
+import PlatMonScalability from "./pages/founder/platform-monitor/Scalability";
+import PlatMonRecommendations from "./pages/founder/platform-monitor/Recommendations";
 import SearchOverview from "./pages/founder/search/Overview";
 import SearchAll from "./pages/founder/search/All";
 import SearchCustomers from "./pages/founder/search/Customers";
@@ -1307,13 +1307,13 @@ const App = () => (
             <Route path="/founder/deployment/env-vars" element={<FounderRoute><DepEnvVars /></FounderRoute>} />
             <Route path="/founder/deployment/rollback" element={<FounderRoute><DepRollback /></FounderRoute>} />
             <Route path="/founder/deployment/settings" element={<FounderRoute><DepSettings /></FounderRoute>} />
-            <Route path="/founder/platform-monitor" element={<FounderRoute><PMOverview /></FounderRoute>} />
-            <Route path="/founder/platform-monitor/performance" element={<FounderRoute><PMPerformance /></FounderRoute>} />
-            <Route path="/founder/platform-monitor/errors" element={<FounderRoute><PMErrors /></FounderRoute>} />
-            <Route path="/founder/platform-monitor/rate-limits" element={<FounderRoute><PMRateLimits /></FounderRoute>} />
-            <Route path="/founder/platform-monitor/costs" element={<FounderRoute><PMCosts /></FounderRoute>} />
-            <Route path="/founder/platform-monitor/scalability" element={<FounderRoute><PMScalability /></FounderRoute>} />
-            <Route path="/founder/platform-monitor/recommendations" element={<FounderRoute><PMRecommendations /></FounderRoute>} />
+            <Route path="/founder/platform-monitor" element={<FounderRoute><PlatMonOverview /></FounderRoute>} />
+            <Route path="/founder/platform-monitor/performance" element={<FounderRoute><PlatMonPerformance /></FounderRoute>} />
+            <Route path="/founder/platform-monitor/errors" element={<FounderRoute><PlatMonErrors /></FounderRoute>} />
+            <Route path="/founder/platform-monitor/rate-limits" element={<FounderRoute><PlatMonRateLimits /></FounderRoute>} />
+            <Route path="/founder/platform-monitor/costs" element={<FounderRoute><PlatMonCosts /></FounderRoute>} />
+            <Route path="/founder/platform-monitor/scalability" element={<FounderRoute><PlatMonScalability /></FounderRoute>} />
+            <Route path="/founder/platform-monitor/recommendations" element={<FounderRoute><PlatMonRecommendations /></FounderRoute>} />
             <Route path="/founder/search" element={<FounderRoute><SearchOverview /></FounderRoute>} />
             <Route path="/founder/search/all" element={<FounderRoute><SearchAll /></FounderRoute>} />
             <Route path="/founder/search/customers" element={<FounderRoute><SearchCustomers /></FounderRoute>} />
