@@ -19041,6 +19041,87 @@ export type Database = {
         }
         Relationships: []
       }
+      data_room_items: {
+        Row: {
+          created_at: string
+          data_room_id: string
+          document_id: string
+          id: string
+          item_status: string
+          share_allowed: boolean
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          data_room_id: string
+          document_id: string
+          id?: string
+          item_status?: string
+          share_allowed?: boolean
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          data_room_id?: string
+          document_id?: string
+          id?: string
+          item_status?: string
+          share_allowed?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_room_items_data_room_id_fkey"
+            columns: ["data_room_id"]
+            isOneToOne: false
+            referencedRelation: "data_room_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_room_items_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "document_vault_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      data_room_profiles: {
+        Row: {
+          access_expires_at: string | null
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          data_room_name: string
+          data_room_status: string
+          data_room_type: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          access_expires_at?: string | null
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          data_room_name: string
+          data_room_status?: string
+          data_room_type?: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          access_expires_at?: string | null
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          data_room_name?: string
+          data_room_status?: string
+          data_room_type?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       deals: {
         Row: {
           business_name: string
@@ -19776,6 +19857,116 @@ export type Database = {
           },
         ]
       }
+      document_access_rules: {
+        Row: {
+          access_scope: string
+          active: boolean
+          allowed_role_id: string | null
+          created_at: string
+          document_id: string
+          expires_at: string | null
+          external_access_allowed: boolean
+          founder_approval_required: boolean
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          access_scope?: string
+          active?: boolean
+          allowed_role_id?: string | null
+          created_at?: string
+          document_id: string
+          expires_at?: string | null
+          external_access_allowed?: boolean
+          founder_approval_required?: boolean
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          access_scope?: string
+          active?: boolean
+          allowed_role_id?: string | null
+          created_at?: string
+          document_id?: string
+          expires_at?: string | null
+          external_access_allowed?: boolean
+          founder_approval_required?: boolean
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_access_rules_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "document_vault_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_vault_items: {
+        Row: {
+          active: boolean
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          document_title: string
+          document_type: string
+          file_reference: string | null
+          id: string
+          legal_entity_id: string | null
+          owner: string | null
+          sensitivity_level: string
+          source_module: string | null
+          source_record_id: string | null
+          storage_location_summary: string | null
+          updated_at: string
+          verified: boolean
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          active?: boolean
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          document_title: string
+          document_type?: string
+          file_reference?: string | null
+          id?: string
+          legal_entity_id?: string | null
+          owner?: string | null
+          sensitivity_level?: string
+          source_module?: string | null
+          source_record_id?: string | null
+          storage_location_summary?: string | null
+          updated_at?: string
+          verified?: boolean
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          active?: boolean
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          document_title?: string
+          document_type?: string
+          file_reference?: string | null
+          id?: string
+          legal_entity_id?: string | null
+          owner?: string | null
+          sensitivity_level?: string
+          source_module?: string | null
+          source_record_id?: string | null
+          storage_location_summary?: string | null
+          updated_at?: string
+          verified?: boolean
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: []
+      }
       domain_protection_alerts: {
         Row: {
           alert_type: string
@@ -20407,6 +20598,53 @@ export type Database = {
             columns: ["notification_id"]
             isOneToOne: false
             referencedRelation: "unified_notifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      evidence_records: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          document_id: string | null
+          evidence_status: string
+          evidence_summary: string | null
+          evidence_type: string
+          id: string
+          source_module: string | null
+          source_record_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          document_id?: string | null
+          evidence_status?: string
+          evidence_summary?: string | null
+          evidence_type?: string
+          id?: string
+          source_module?: string | null
+          source_record_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          document_id?: string | null
+          evidence_status?: string
+          evidence_summary?: string | null
+          evidence_type?: string
+          id?: string
+          source_module?: string | null
+          source_record_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evidence_records_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "document_vault_items"
             referencedColumns: ["id"]
           },
         ]
