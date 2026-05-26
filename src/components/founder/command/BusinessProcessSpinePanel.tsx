@@ -43,6 +43,7 @@ import InsuranceLiabilityCard from "./InsuranceLiabilityCard";
 import ExitMetricsCard from "./ExitMetricsCard";
 import PortfolioDiversityHealthCard from "./PortfolioDiversityHealthCard";
 import MasterWorkQueueCard from "./MasterWorkQueueCard";
+import UnifiedNotificationsCard from "./UnifiedNotificationsCard";
 
 /**
  * Business Process Spine — single integrated panel that surfaces every
@@ -71,6 +72,8 @@ export default function BusinessProcessSpinePanel() {
       </Card>
 
       <BusinessProcessHealthCard />
+
+      <UnifiedNotificationsCard />
 
       <MasterWorkQueueCard />
 
