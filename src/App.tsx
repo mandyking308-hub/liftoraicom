@@ -517,6 +517,12 @@ import SJRuns from "./pages/founder/scheduled-jobs/Runs";
 import SJFailures from "./pages/founder/scheduled-jobs/Failures";
 import SJCalendar from "./pages/founder/scheduled-jobs/Calendar";
 import SJSettings from "./pages/founder/scheduled-jobs/Settings";
+import SCOverview from "./pages/founder/system-config/Overview";
+import SCFeatureFlags from "./pages/founder/system-config/FeatureFlags";
+import SCModules from "./pages/founder/system-config/Modules";
+import SCExternalActions from "./pages/founder/system-config/ExternalActions";
+import SCBusinessOverrides from "./pages/founder/system-config/BusinessOverrides";
+import SCAudit from "./pages/founder/system-config/Audit";
 import PortalsOverview from "./pages/founder/portals/Overview";
 import PortalsCustomerAdmin from "./pages/founder/portals/Customer";
 import PortalsSellerAdmin from "./pages/founder/portals/Seller";
@@ -1144,6 +1150,12 @@ const App = () => (
             <Route path="/founder/scheduled-jobs/failures" element={<FounderRoute><SJFailures /></FounderRoute>} />
             <Route path="/founder/scheduled-jobs/calendar" element={<FounderRoute><SJCalendar /></FounderRoute>} />
             <Route path="/founder/scheduled-jobs/settings" element={<FounderRoute><SJSettings /></FounderRoute>} />
+            <Route path="/founder/system-config" element={<FounderRoute><SCOverview /></FounderRoute>} />
+            <Route path="/founder/system-config/feature-flags" element={<FounderRoute><SCFeatureFlags /></FounderRoute>} />
+            <Route path="/founder/system-config/modules" element={<FounderRoute><SCModules /></FounderRoute>} />
+            <Route path="/founder/system-config/external-actions" element={<FounderRoute><SCExternalActions /></FounderRoute>} />
+            <Route path="/founder/system-config/business-overrides" element={<FounderRoute><SCBusinessOverrides /></FounderRoute>} />
+            <Route path="/founder/system-config/audit" element={<FounderRoute><SCAudit /></FounderRoute>} />
             <Route path="/founder/portals" element={<FounderRoute><PortalsOverview /></FounderRoute>} />
             <Route path="/founder/portals/customer" element={<FounderRoute><PortalsCustomerAdmin /></FounderRoute>} />
             <Route path="/founder/portals/seller" element={<FounderRoute><PortalsSellerAdmin /></FounderRoute>} />
