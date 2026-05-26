@@ -129,6 +129,7 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "attribution_agent", name: "Attribution Agent", to: "/founder/analytics-attribution", category: "analytics" },
   { key: "partner_agent", name: "Partner Agent", to: "/founder/partners", category: "growth" },
   { key: "ip_licensing_agent", name: "IP / Licensing Agent", to: "/founder/ip-assets", category: "operations" },
+  { key: "insurance_liability_agent", name: "Insurance / Liability Agent", to: "/founder/insurance-liability", category: "security" },
 ];
 
 export default function AgentOperatingStatus() {

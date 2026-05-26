@@ -22048,6 +22048,90 @@ export type Database = {
           },
         ]
       }
+      insurance_gap_assessments: {
+        Row: {
+          adviser_review_required: boolean
+          business_id: string | null
+          created_at: string
+          gap_summary: string | null
+          id: string
+          recommended_cover: string | null
+          risk_type: string
+          severity: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          adviser_review_required?: boolean
+          business_id?: string | null
+          created_at?: string
+          gap_summary?: string | null
+          id?: string
+          recommended_cover?: string | null
+          risk_type: string
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          adviser_review_required?: boolean
+          business_id?: string | null
+          created_at?: string
+          gap_summary?: string | null
+          id?: string
+          recommended_cover?: string | null
+          risk_type?: string
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      insurance_policy_records: {
+        Row: {
+          business_id: string | null
+          cover_amount: number | null
+          created_at: string
+          currency: string | null
+          entity_id: string | null
+          id: string
+          insurer_name: string | null
+          policy_status: string
+          policy_summary: string | null
+          policy_type: string
+          renewal_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          cover_amount?: number | null
+          created_at?: string
+          currency?: string | null
+          entity_id?: string | null
+          id?: string
+          insurer_name?: string | null
+          policy_status?: string
+          policy_summary?: string | null
+          policy_type: string
+          renewal_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          cover_amount?: number | null
+          created_at?: string
+          currency?: string | null
+          entity_id?: string | null
+          id?: string
+          insurer_name?: string | null
+          policy_status?: string
+          policy_summary?: string | null
+          policy_type?: string
+          renewal_date?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       insurance_policy_register: {
         Row: {
           broker_name: string | null
@@ -23837,6 +23921,42 @@ export type Database = {
           owner_summary?: string | null
           registration_number_summary?: string | null
           tax_residency_summary?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      liability_events: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          event_summary: string | null
+          event_type: string
+          id: string
+          insurance_relevant: boolean
+          severity: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          event_summary?: string | null
+          event_type: string
+          id?: string
+          insurance_relevant?: boolean
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          event_summary?: string | null
+          event_type?: string
+          id?: string
+          insurance_relevant?: boolean
+          severity?: string
+          status?: string
           updated_at?: string
         }
         Relationships: []
