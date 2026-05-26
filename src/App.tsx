@@ -457,6 +457,14 @@ import JTCustomers from "./pages/founder/jurisdiction-tax/Customers";
 import JTSellers from "./pages/founder/jurisdiction-tax/Sellers";
 import JTAdviserReview from "./pages/founder/jurisdiction-tax/AdviserReview";
 import JTSettings from "./pages/founder/jurisdiction-tax/Settings";
+import EcommerceOverview from "./pages/founder/ecommerce/Overview";
+import EcommerceProducts from "./pages/founder/ecommerce/Products";
+import EcommerceInventory from "./pages/founder/ecommerce/Inventory";
+import EcommerceOrders from "./pages/founder/ecommerce/Orders";
+import EcommerceFulfilment from "./pages/founder/ecommerce/Fulfilment";
+import EcommerceReturns from "./pages/founder/ecommerce/Returns";
+import EcommerceSuppliers from "./pages/founder/ecommerce/Suppliers";
+import EcommerceSettings from "./pages/founder/ecommerce/Settings";
 import PortalsOverview from "./pages/founder/portals/Overview";
 import PortalsCustomerAdmin from "./pages/founder/portals/Customer";
 import PortalsSellerAdmin from "./pages/founder/portals/Seller";
@@ -1024,6 +1032,14 @@ const App = () => (
             <Route path="/founder/jurisdiction-tax/sellers" element={<FounderRoute><JTSellers /></FounderRoute>} />
             <Route path="/founder/jurisdiction-tax/adviser-review" element={<FounderRoute><JTAdviserReview /></FounderRoute>} />
             <Route path="/founder/jurisdiction-tax/settings" element={<FounderRoute><JTSettings /></FounderRoute>} />
+            <Route path="/founder/ecommerce" element={<FounderRoute><EcommerceOverview /></FounderRoute>} />
+            <Route path="/founder/ecommerce/products" element={<FounderRoute><EcommerceProducts /></FounderRoute>} />
+            <Route path="/founder/ecommerce/inventory" element={<FounderRoute><EcommerceInventory /></FounderRoute>} />
+            <Route path="/founder/ecommerce/orders" element={<FounderRoute><EcommerceOrders /></FounderRoute>} />
+            <Route path="/founder/ecommerce/fulfilment" element={<FounderRoute><EcommerceFulfilment /></FounderRoute>} />
+            <Route path="/founder/ecommerce/returns" element={<FounderRoute><EcommerceReturns /></FounderRoute>} />
+            <Route path="/founder/ecommerce/suppliers" element={<FounderRoute><EcommerceSuppliers /></FounderRoute>} />
+            <Route path="/founder/ecommerce/settings" element={<FounderRoute><EcommerceSettings /></FounderRoute>} />
             <Route path="/founder/portals" element={<FounderRoute><PortalsOverview /></FounderRoute>} />
             <Route path="/founder/portals/customer" element={<FounderRoute><PortalsCustomerAdmin /></FounderRoute>} />
             <Route path="/founder/portals/seller" element={<FounderRoute><PortalsSellerAdmin /></FounderRoute>} />

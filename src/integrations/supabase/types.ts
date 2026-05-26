@@ -19739,6 +19739,180 @@ export type Database = {
           },
         ]
       }
+      ecommerce_order_items: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          currency: string
+          ecommerce_product_id: string
+          fulfilment_status: string
+          id: string
+          order_id: string
+          quantity: number
+          unit_price: number
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          currency?: string
+          ecommerce_product_id: string
+          fulfilment_status?: string
+          id?: string
+          order_id: string
+          quantity?: number
+          unit_price?: number
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          currency?: string
+          ecommerce_product_id?: string
+          fulfilment_status?: string
+          id?: string
+          order_id?: string
+          quantity?: number
+          unit_price?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ecommerce_orders: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          contact_id: string | null
+          created_at: string
+          currency: string
+          customer_id: string | null
+          id: string
+          order_number: string
+          order_status: string
+          qtc_payment_id: string | null
+          shipping_required: boolean
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          currency?: string
+          customer_id?: string | null
+          id?: string
+          order_number: string
+          order_status?: string
+          qtc_payment_id?: string | null
+          shipping_required?: boolean
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          currency?: string
+          customer_id?: string | null
+          id?: string
+          order_number?: string
+          order_status?: string
+          qtc_payment_id?: string | null
+          shipping_required?: boolean
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ecommerce_products: {
+        Row: {
+          active: boolean
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          id: string
+          product_id: string | null
+          product_name: string
+          product_type: string
+          sku: string
+          stock_tracking_enabled: boolean
+          supplier_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          product_id?: string | null
+          product_name: string
+          product_type?: string
+          sku: string
+          stock_tracking_enabled?: boolean
+          supplier_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          product_id?: string | null
+          product_name?: string
+          product_type?: string
+          sku?: string
+          stock_tracking_enabled?: boolean
+          supplier_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ecommerce_suppliers: {
+        Row: {
+          active: boolean
+          audit_metadata: Json
+          business_id: string | null
+          contact_email: string | null
+          created_at: string
+          id: string
+          lead_time_days: number
+          risk_level: string
+          supplier_name: string
+          supplier_type: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          audit_metadata?: Json
+          business_id?: string | null
+          contact_email?: string | null
+          created_at?: string
+          id?: string
+          lead_time_days?: number
+          risk_level?: string
+          supplier_name: string
+          supplier_type?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          audit_metadata?: Json
+          business_id?: string | null
+          contact_email?: string | null
+          created_at?: string
+          id?: string
+          lead_time_days?: number
+          risk_level?: string
+          supplier_name?: string
+          supplier_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       email_events: {
         Row: {
           contact_id: string
@@ -20838,6 +21012,48 @@ export type Database = {
           recommended_actions?: Json
           report_status?: string
           report_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      fulfilment_shipments: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          carrier: string | null
+          created_at: string
+          delivered_at: string | null
+          id: string
+          order_id: string
+          shipment_status: string
+          shipped_at: string | null
+          tracking_number: string | null
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          carrier?: string | null
+          created_at?: string
+          delivered_at?: string | null
+          id?: string
+          order_id: string
+          shipment_status?: string
+          shipped_at?: string | null
+          tracking_number?: string | null
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          carrier?: string | null
+          created_at?: string
+          delivered_at?: string | null
+          id?: string
+          order_id?: string
+          shipment_status?: string
+          shipped_at?: string | null
+          tracking_number?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -23084,6 +23300,54 @@ export type Database = {
           version?: number
           view_token?: string
           viewed_at?: string | null
+        }
+        Relationships: []
+      }
+      inventory_records: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          ecommerce_product_id: string
+          id: string
+          inventory_status: string
+          location_name: string
+          reorder_point: number
+          reorder_quantity: number
+          stock_available: number
+          stock_on_hand: number
+          stock_reserved: number
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          ecommerce_product_id: string
+          id?: string
+          inventory_status?: string
+          location_name?: string
+          reorder_point?: number
+          reorder_quantity?: number
+          stock_available?: number
+          stock_on_hand?: number
+          stock_reserved?: number
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          ecommerce_product_id?: string
+          id?: string
+          inventory_status?: string
+          location_name?: string
+          reorder_point?: number
+          reorder_quantity?: number
+          stock_available?: number
+          stock_on_hand?: number
+          stock_reserved?: number
+          updated_at?: string
         }
         Relationships: []
       }
@@ -37606,6 +37870,45 @@ export type Database = {
           retry_count?: number
           retry_reason?: string
           status?: Database["public"]["Enums"]["retry_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      return_requests: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          customer_id: string | null
+          id: string
+          order_id: string
+          refund_required: boolean
+          return_reason: string | null
+          return_status: string
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          order_id: string
+          refund_required?: boolean
+          return_reason?: string | null
+          return_status?: string
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          order_id?: string
+          refund_required?: boolean
+          return_reason?: string | null
+          return_status?: string
           updated_at?: string
         }
         Relationships: []
