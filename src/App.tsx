@@ -564,6 +564,12 @@ import CommsByBusiness from "./pages/founder/communications/ByBusiness";
 import CommsDrafts from "./pages/founder/communications/Drafts";
 import CommsReceived from "./pages/founder/communications/Received";
 import CommsSettings from "./pages/founder/communications/Settings";
+import RhOverview from "./pages/founder/relationship-health/Overview";
+import RhCustomers from "./pages/founder/relationship-health/Customers";
+import RhSellers from "./pages/founder/relationship-health/Sellers";
+import RhPartners from "./pages/founder/relationship-health/Partners";
+import RhRisks from "./pages/founder/relationship-health/Risks";
+import RhOpportunities from "./pages/founder/relationship-health/Opportunities";
 import SearchOverview from "./pages/founder/search/Overview";
 import SearchAll from "./pages/founder/search/All";
 import SearchCustomers from "./pages/founder/search/Customers";
@@ -1246,6 +1252,12 @@ const App = () => (
             <Route path="/founder/communications/drafts" element={<FounderRoute><CommsDrafts /></FounderRoute>} />
             <Route path="/founder/communications/received" element={<FounderRoute><CommsReceived /></FounderRoute>} />
             <Route path="/founder/communications/settings" element={<FounderRoute><CommsSettings /></FounderRoute>} />
+            <Route path="/founder/relationship-health" element={<FounderRoute><RhOverview /></FounderRoute>} />
+            <Route path="/founder/relationship-health/customers" element={<FounderRoute><RhCustomers /></FounderRoute>} />
+            <Route path="/founder/relationship-health/sellers" element={<FounderRoute><RhSellers /></FounderRoute>} />
+            <Route path="/founder/relationship-health/partners" element={<FounderRoute><RhPartners /></FounderRoute>} />
+            <Route path="/founder/relationship-health/risks" element={<FounderRoute><RhRisks /></FounderRoute>} />
+            <Route path="/founder/relationship-health/opportunities" element={<FounderRoute><RhOpportunities /></FounderRoute>} />
             <Route path="/founder/search" element={<FounderRoute><SearchOverview /></FounderRoute>} />
             <Route path="/founder/search/all" element={<FounderRoute><SearchAll /></FounderRoute>} />
             <Route path="/founder/search/customers" element={<FounderRoute><SearchCustomers /></FounderRoute>} />
