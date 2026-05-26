@@ -159,6 +159,7 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "trust_safety_agent", name: "Trust & Safety Agent", to: "/founder/trust-safety", category: "security" },
   { key: "handoff_agent", name: "Handoff / SLA Agent", to: "/founder/internal-sla", category: "operations" },
   { key: "deployment_control_agent", name: "Deployment Control Agent", to: "/founder/deployment", category: "security" },
+  { key: "platform_monitor_agent", name: "Platform Monitor Agent", to: "/founder/platform-monitor", category: "operations" },
 ];
 
 export default function AgentOperatingStatus() {
