@@ -577,6 +577,12 @@ import TsPayments from "./pages/founder/trust-safety/Payments";
 import TsMessages from "./pages/founder/trust-safety/Messages";
 import TsActions from "./pages/founder/trust-safety/Actions";
 import TsSettings from "./pages/founder/trust-safety/Settings";
+import SlaOverview from "./pages/founder/internal-sla/Overview";
+import SlaHandoffs from "./pages/founder/internal-sla/Handoffs";
+import SlaOverdue from "./pages/founder/internal-sla/Overdue";
+import SlaByAgent from "./pages/founder/internal-sla/ByAgent";
+import SlaByHuman from "./pages/founder/internal-sla/ByHuman";
+import SlaSettings from "./pages/founder/internal-sla/Settings";
 import SearchOverview from "./pages/founder/search/Overview";
 import SearchAll from "./pages/founder/search/All";
 import SearchCustomers from "./pages/founder/search/Customers";
@@ -1272,6 +1278,12 @@ const App = () => (
             <Route path="/founder/trust-safety/messages" element={<FounderRoute><TsMessages /></FounderRoute>} />
             <Route path="/founder/trust-safety/actions" element={<FounderRoute><TsActions /></FounderRoute>} />
             <Route path="/founder/trust-safety/settings" element={<FounderRoute><TsSettings /></FounderRoute>} />
+            <Route path="/founder/internal-sla" element={<FounderRoute><SlaOverview /></FounderRoute>} />
+            <Route path="/founder/internal-sla/handoffs" element={<FounderRoute><SlaHandoffs /></FounderRoute>} />
+            <Route path="/founder/internal-sla/overdue" element={<FounderRoute><SlaOverdue /></FounderRoute>} />
+            <Route path="/founder/internal-sla/by-agent" element={<FounderRoute><SlaByAgent /></FounderRoute>} />
+            <Route path="/founder/internal-sla/by-human" element={<FounderRoute><SlaByHuman /></FounderRoute>} />
+            <Route path="/founder/internal-sla/settings" element={<FounderRoute><SlaSettings /></FounderRoute>} />
             <Route path="/founder/search" element={<FounderRoute><SearchOverview /></FounderRoute>} />
             <Route path="/founder/search/all" element={<FounderRoute><SearchAll /></FounderRoute>} />
             <Route path="/founder/search/customers" element={<FounderRoute><SearchCustomers /></FounderRoute>} />
