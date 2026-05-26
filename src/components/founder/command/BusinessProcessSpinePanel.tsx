@@ -41,6 +41,7 @@ import PartnerEngineCard from "./PartnerEngineCard";
 import IPAssetsCard from "./IPAssetsCard";
 import InsuranceLiabilityCard from "./InsuranceLiabilityCard";
 import ExitMetricsCard from "./ExitMetricsCard";
+import PortfolioDiversityHealthCard from "./PortfolioDiversityHealthCard";
 
 /**
  * Business Process Spine — single integrated panel that surfaces every
@@ -69,6 +70,8 @@ export default function BusinessProcessSpinePanel() {
       </Card>
 
       <BusinessProcessHealthCard />
+
+      <PortfolioDiversityHealthCard />
 
       <MarketplaceHealthCard />
 
