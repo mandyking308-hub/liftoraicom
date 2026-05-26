@@ -11709,6 +11709,188 @@ export type Database = {
         }
         Relationships: []
       }
+      communication_records: {
+        Row: {
+          approval_item_id: string | null
+          audit_metadata: Json
+          business_id: string | null
+          channel: string
+          communication_status: string
+          contact_id: string | null
+          content_reference: string | null
+          created_at: string
+          customer_id: string | null
+          direction: string
+          external_provider: string | null
+          id: string
+          identity_profile_id: string | null
+          partner_id: string | null
+          provider_message_id: string | null
+          received_at: string | null
+          seller_id: string | null
+          sent_at: string | null
+          subject: string | null
+          summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          approval_item_id?: string | null
+          audit_metadata?: Json
+          business_id?: string | null
+          channel: string
+          communication_status?: string
+          contact_id?: string | null
+          content_reference?: string | null
+          created_at?: string
+          customer_id?: string | null
+          direction: string
+          external_provider?: string | null
+          id?: string
+          identity_profile_id?: string | null
+          partner_id?: string | null
+          provider_message_id?: string | null
+          received_at?: string | null
+          seller_id?: string | null
+          sent_at?: string | null
+          subject?: string | null
+          summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approval_item_id?: string | null
+          audit_metadata?: Json
+          business_id?: string | null
+          channel?: string
+          communication_status?: string
+          contact_id?: string | null
+          content_reference?: string | null
+          created_at?: string
+          customer_id?: string | null
+          direction?: string
+          external_provider?: string | null
+          id?: string
+          identity_profile_id?: string | null
+          partner_id?: string | null
+          provider_message_id?: string | null
+          received_at?: string | null
+          seller_id?: string | null
+          sent_at?: string | null
+          subject?: string | null
+          summary?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      communication_safety_flags: {
+        Row: {
+          audit_metadata: Json
+          communication_record_id: string
+          created_at: string
+          flag_summary: string | null
+          flag_type: string
+          id: string
+          severity: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          communication_record_id: string
+          created_at?: string
+          flag_summary?: string | null
+          flag_type: string
+          id?: string
+          severity?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          communication_record_id?: string
+          created_at?: string
+          flag_summary?: string | null
+          flag_type?: string
+          id?: string
+          severity?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "communication_safety_flags_communication_record_id_fkey"
+            columns: ["communication_record_id"]
+            isOneToOne: false
+            referencedRelation: "communication_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      communication_thread_messages: {
+        Row: {
+          communication_record_id: string
+          created_at: string
+          id: string
+          message_order: number
+          thread_id: string
+        }
+        Insert: {
+          communication_record_id: string
+          created_at?: string
+          id?: string
+          message_order?: number
+          thread_id: string
+        }
+        Update: {
+          communication_record_id?: string
+          created_at?: string
+          id?: string
+          message_order?: number
+          thread_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "communication_thread_messages_communication_record_id_fkey"
+            columns: ["communication_record_id"]
+            isOneToOne: false
+            referencedRelation: "communication_records"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "communication_thread_messages_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "communication_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      communication_threads: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          id: string
+          last_message_at: string | null
+          primary_identity_profile_id: string | null
+          thread_status: string
+          thread_title: string
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          primary_identity_profile_id?: string | null
+          thread_status?: string
+          thread_title: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          primary_identity_profile_id?: string | null
+          thread_status?: string
+          thread_title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       communications: {
         Row: {
           ai_generated: boolean
