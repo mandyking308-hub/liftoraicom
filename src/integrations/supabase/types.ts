@@ -22322,6 +22322,81 @@ export type Database = {
           },
         ]
       }
+      global_audit_events: {
+        Row: {
+          action_summary: string
+          actor_id: string | null
+          actor_label: string | null
+          actor_type: string
+          after_summary: Json
+          approval_item_id: string | null
+          audit_metadata: Json
+          before_summary: Json
+          business_id: string | null
+          created_at: string
+          event_category: string
+          event_type: string
+          external_side_effect: boolean
+          id: string
+          ip_address_summary: string | null
+          is_test_data: boolean
+          sensitivity_level: string
+          source_module: string
+          source_record_id: string | null
+          source_table: string | null
+          trace_id: string | null
+          user_agent_summary: string | null
+        }
+        Insert: {
+          action_summary: string
+          actor_id?: string | null
+          actor_label?: string | null
+          actor_type?: string
+          after_summary?: Json
+          approval_item_id?: string | null
+          audit_metadata?: Json
+          before_summary?: Json
+          business_id?: string | null
+          created_at?: string
+          event_category?: string
+          event_type: string
+          external_side_effect?: boolean
+          id?: string
+          ip_address_summary?: string | null
+          is_test_data?: boolean
+          sensitivity_level?: string
+          source_module: string
+          source_record_id?: string | null
+          source_table?: string | null
+          trace_id?: string | null
+          user_agent_summary?: string | null
+        }
+        Update: {
+          action_summary?: string
+          actor_id?: string | null
+          actor_label?: string | null
+          actor_type?: string
+          after_summary?: Json
+          approval_item_id?: string | null
+          audit_metadata?: Json
+          before_summary?: Json
+          business_id?: string | null
+          created_at?: string
+          event_category?: string
+          event_type?: string
+          external_side_effect?: boolean
+          id?: string
+          ip_address_summary?: string | null
+          is_test_data?: boolean
+          sensitivity_level?: string
+          source_module?: string
+          source_record_id?: string | null
+          source_table?: string | null
+          trace_id?: string | null
+          user_agent_summary?: string | null
+        }
+        Relationships: []
+      }
       global_brain_status_snapshots: {
         Row: {
           agent_tasks_pending: number
