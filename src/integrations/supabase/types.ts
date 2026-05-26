@@ -19898,6 +19898,68 @@ export type Database = {
         }
         Relationships: []
       }
+      escalation_records: {
+        Row: {
+          assigned_to: string | null
+          assigned_to_type: string
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          due_at: string | null
+          escalation_reason: string | null
+          escalation_status: string
+          escalation_type: string
+          id: string
+          notification_id: string | null
+          resolved_at: string | null
+          severity: string
+          source_module: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          assigned_to_type?: string
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          due_at?: string | null
+          escalation_reason?: string | null
+          escalation_status?: string
+          escalation_type: string
+          id?: string
+          notification_id?: string | null
+          resolved_at?: string | null
+          severity?: string
+          source_module: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          assigned_to_type?: string
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          due_at?: string | null
+          escalation_reason?: string | null
+          escalation_status?: string
+          escalation_type?: string
+          id?: string
+          notification_id?: string | null
+          resolved_at?: string | null
+          severity?: string
+          source_module?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "escalation_records_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "unified_notifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       execution_logs: {
         Row: {
           created_at: string
@@ -30739,6 +30801,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      notification_rules: {
+        Row: {
+          active: boolean
+          condition_json: Json
+          create_escalation: boolean
+          create_work_item: boolean
+          created_at: string
+          escalation_type: string | null
+          id: string
+          priority: string
+          rule_name: string
+          severity: string
+          source_module: string
+          suppress_duplicates_window_minutes: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          condition_json?: Json
+          create_escalation?: boolean
+          create_work_item?: boolean
+          created_at?: string
+          escalation_type?: string | null
+          id?: string
+          priority?: string
+          rule_name: string
+          severity?: string
+          source_module: string
+          suppress_duplicates_window_minutes?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          condition_json?: Json
+          create_escalation?: boolean
+          create_work_item?: boolean
+          created_at?: string
+          escalation_type?: string | null
+          id?: string
+          priority?: string
+          rule_name?: string
+          severity?: string
+          source_module?: string
+          suppress_duplicates_window_minutes?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       offer_claims: {
         Row: {
@@ -48430,6 +48540,81 @@ export type Database = {
           training_completed_at?: string | null
           training_required?: boolean | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      unified_notifications: {
+        Row: {
+          action_required: boolean
+          action_url: string | null
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          due_at: string | null
+          id: string
+          is_test_data: boolean
+          message: string | null
+          notification_status: string
+          notification_type: string
+          priority: string
+          related_approval_item_id: string | null
+          related_work_item_id: string | null
+          resolved_at: string | null
+          severity: string
+          snoozed_until: string | null
+          source_module: string
+          source_record_id: string | null
+          source_table: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          action_required?: boolean
+          action_url?: string | null
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          due_at?: string | null
+          id?: string
+          is_test_data?: boolean
+          message?: string | null
+          notification_status?: string
+          notification_type: string
+          priority?: string
+          related_approval_item_id?: string | null
+          related_work_item_id?: string | null
+          resolved_at?: string | null
+          severity?: string
+          snoozed_until?: string | null
+          source_module: string
+          source_record_id?: string | null
+          source_table?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          action_required?: boolean
+          action_url?: string | null
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          due_at?: string | null
+          id?: string
+          is_test_data?: boolean
+          message?: string | null
+          notification_status?: string
+          notification_type?: string
+          priority?: string
+          related_approval_item_id?: string | null
+          related_work_item_id?: string | null
+          resolved_at?: string | null
+          severity?: string
+          snoozed_until?: string | null
+          source_module?: string
+          source_record_id?: string | null
+          source_table?: string | null
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
