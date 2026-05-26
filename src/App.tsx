@@ -471,6 +471,13 @@ import SchedulingBookings from "./pages/founder/scheduling/Bookings";
 import SchedulingResources from "./pages/founder/scheduling/Resources";
 import SchedulingNoShows from "./pages/founder/scheduling/NoShows";
 import SchedulingSettings from "./pages/founder/scheduling/Settings";
+import DocumentsOverview from "./pages/founder/documents/Overview";
+import DocumentsVault from "./pages/founder/documents/Vault";
+import DocumentsEvidence from "./pages/founder/documents/Evidence";
+import DocumentsDataRoom from "./pages/founder/documents/DataRoom";
+import DocumentsPolicies from "./pages/founder/documents/Policies";
+import DocumentsRequests from "./pages/founder/documents/Requests";
+import DocumentsAccess from "./pages/founder/documents/Access";
 import PortalsOverview from "./pages/founder/portals/Overview";
 import PortalsCustomerAdmin from "./pages/founder/portals/Customer";
 import PortalsSellerAdmin from "./pages/founder/portals/Seller";
@@ -1052,6 +1059,13 @@ const App = () => (
             <Route path="/founder/scheduling/resources" element={<FounderRoute><SchedulingResources /></FounderRoute>} />
             <Route path="/founder/scheduling/no-shows" element={<FounderRoute><SchedulingNoShows /></FounderRoute>} />
             <Route path="/founder/scheduling/settings" element={<FounderRoute><SchedulingSettings /></FounderRoute>} />
+            <Route path="/founder/documents" element={<FounderRoute><DocumentsOverview /></FounderRoute>} />
+            <Route path="/founder/documents/vault" element={<FounderRoute><DocumentsVault /></FounderRoute>} />
+            <Route path="/founder/documents/evidence" element={<FounderRoute><DocumentsEvidence /></FounderRoute>} />
+            <Route path="/founder/documents/data-room" element={<FounderRoute><DocumentsDataRoom /></FounderRoute>} />
+            <Route path="/founder/documents/policies" element={<FounderRoute><DocumentsPolicies /></FounderRoute>} />
+            <Route path="/founder/documents/requests" element={<FounderRoute><DocumentsRequests /></FounderRoute>} />
+            <Route path="/founder/documents/access" element={<FounderRoute><DocumentsAccess /></FounderRoute>} />
             <Route path="/founder/portals" element={<FounderRoute><PortalsOverview /></FounderRoute>} />
             <Route path="/founder/portals/customer" element={<FounderRoute><PortalsCustomerAdmin /></FounderRoute>} />
             <Route path="/founder/portals/seller" element={<FounderRoute><PortalsSellerAdmin /></FounderRoute>} />
