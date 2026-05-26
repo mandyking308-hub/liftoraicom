@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Gavel, ArrowLeft, Lock } from "lucide-react";
+import { DECISION_STATUS_META, DECISION_TYPE_LABEL, isIrreversible, type FounderDecision } from "@/lib/decisionRegister";
 
 export const DEC_NAV = [
   { to: "/founder/decisions",             label: "Overview" },
@@ -62,20 +63,17 @@ export function DecStat({ label, value, hint, tone }: { label: string; value: nu
   );
 }
 
-import { Badge as B } from "@/components/ui/badge";
-import { DECISION_STATUS_META, DECISION_TYPE_LABEL, isIrreversible, type FounderDecision } from "@/lib/decisionRegister";
-
 export function DecisionRow({ d }: { d: FounderDecision }) {
   const status = DECISION_STATUS_META[d.decision_status] ?? DECISION_STATUS_META.needed;
   const irrev = isIrreversible(d);
   return (
     <div className="border border-border/50 rounded p-3 space-y-2">
       <div className="flex flex-wrap items-center gap-2">
-        <B variant="outline" className={`text-[10px] ${status.cls}`}>{status.label}</B>
-        <B variant="outline" className="text-[10px]">{DECISION_TYPE_LABEL[d.decision_type] ?? d.decision_type}</B>
-        {irrev && <B variant="outline" className="text-[10px] bg-red-500/15 text-red-300 border-red-500/30">Irreversible · gated</B>}
+        <Badge variant="outline" className={`text-[10px] ${status.cls}`}>{status.label}</Badge>
+        <Badge variant="outline" className="text-[10px]">{DECISION_TYPE_LABEL[d.decision_type] ?? d.decision_type}</Badge>
+        {irrev && <Badge variant="outline" className="text-[10px] bg-red-500/15 text-red-300 border-red-500/30">Irreversible · gated</Badge>}
         {d.audit_metadata?.live_internal_test && (
-          <B variant="outline" className="text-[10px] bg-blue-500/15 text-blue-300 border-blue-500/30">Live internal test</B>
+          <Badge variant="outline" className="text-[10px] bg-blue-500/15 text-blue-300 border-blue-500/30">Live internal test</Badge>
         )}
         <span className="ml-auto text-[10px] text-muted-foreground">{d.source_module ?? "—"}</span>
       </div>
