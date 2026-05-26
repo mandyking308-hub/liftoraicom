@@ -523,6 +523,13 @@ import SCModules from "./pages/founder/system-config/Modules";
 import SCExternalActions from "./pages/founder/system-config/ExternalActions";
 import SCBusinessOverrides from "./pages/founder/system-config/BusinessOverrides";
 import SCAudit from "./pages/founder/system-config/Audit";
+import ConnectorsOverview from "./pages/founder/connectors/Overview";
+import ConnectorsRegistry from "./pages/founder/connectors/Registry";
+import ConnectorsHealth from "./pages/founder/connectors/Health";
+import ConnectorsWebhooks from "./pages/founder/connectors/Webhooks";
+import ConnectorsSecrets from "./pages/founder/connectors/Secrets";
+import ConnectorsBusinessMap from "./pages/founder/connectors/BusinessMap";
+import ConnectorsSettings from "./pages/founder/connectors/Settings";
 import PortalsOverview from "./pages/founder/portals/Overview";
 import PortalsCustomerAdmin from "./pages/founder/portals/Customer";
 import PortalsSellerAdmin from "./pages/founder/portals/Seller";
@@ -1156,6 +1163,13 @@ const App = () => (
             <Route path="/founder/system-config/external-actions" element={<FounderRoute><SCExternalActions /></FounderRoute>} />
             <Route path="/founder/system-config/business-overrides" element={<FounderRoute><SCBusinessOverrides /></FounderRoute>} />
             <Route path="/founder/system-config/audit" element={<FounderRoute><SCAudit /></FounderRoute>} />
+            <Route path="/founder/connectors" element={<FounderRoute><ConnectorsOverview /></FounderRoute>} />
+            <Route path="/founder/connectors/registry" element={<FounderRoute><ConnectorsRegistry /></FounderRoute>} />
+            <Route path="/founder/connectors/health" element={<FounderRoute><ConnectorsHealth /></FounderRoute>} />
+            <Route path="/founder/connectors/webhooks" element={<FounderRoute><ConnectorsWebhooks /></FounderRoute>} />
+            <Route path="/founder/connectors/secrets" element={<FounderRoute><ConnectorsSecrets /></FounderRoute>} />
+            <Route path="/founder/connectors/business-map" element={<FounderRoute><ConnectorsBusinessMap /></FounderRoute>} />
+            <Route path="/founder/connectors/settings" element={<FounderRoute><ConnectorsSettings /></FounderRoute>} />
             <Route path="/founder/portals" element={<FounderRoute><PortalsOverview /></FounderRoute>} />
             <Route path="/founder/portals/customer" element={<FounderRoute><PortalsCustomerAdmin /></FounderRoute>} />
             <Route path="/founder/portals/seller" element={<FounderRoute><PortalsSellerAdmin /></FounderRoute>} />
