@@ -6958,6 +6958,50 @@ export type Database = {
         }
         Relationships: []
       }
+      business_feature_overrides: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          flag_id: string
+          founder_approved_at: string | null
+          id: string
+          override_reason: string | null
+          override_value: boolean
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          flag_id: string
+          founder_approved_at?: string | null
+          id?: string
+          override_reason?: string | null
+          override_value: boolean
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          flag_id?: string
+          founder_approved_at?: string | null
+          id?: string
+          override_reason?: string | null
+          override_value?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_feature_overrides_flag_id_fkey"
+            columns: ["flag_id"]
+            isOneToOne: false
+            referencedRelation: "feature_flags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_integration_requirements: {
         Row: {
           business_id: string
@@ -12227,6 +12271,45 @@ export type Database = {
           risk_trend?: string
           score?: number
           updated_at?: string
+        }
+        Relationships: []
+      }
+      configuration_audit_events: {
+        Row: {
+          approval_item_id: string | null
+          audit_metadata: Json
+          change_reason: string | null
+          changed_by: string | null
+          config_key: string
+          config_type: string
+          created_at: string
+          id: string
+          new_value: Json | null
+          old_value: Json | null
+        }
+        Insert: {
+          approval_item_id?: string | null
+          audit_metadata?: Json
+          change_reason?: string | null
+          changed_by?: string | null
+          config_key: string
+          config_type: string
+          created_at?: string
+          id?: string
+          new_value?: Json | null
+          old_value?: Json | null
+        }
+        Update: {
+          approval_item_id?: string | null
+          audit_metadata?: Json
+          change_reason?: string | null
+          changed_by?: string | null
+          config_key?: string
+          config_type?: string
+          created_at?: string
+          id?: string
+          new_value?: Json | null
+          old_value?: Json | null
         }
         Relationships: []
       }
@@ -21305,6 +21388,54 @@ export type Database = {
           provider_type?: string | null
           requires_founder_confirmation?: boolean
           risk_level?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      feature_flags: {
+        Row: {
+          active: boolean
+          audit_metadata: Json
+          created_at: string
+          current_value: boolean
+          default_value: boolean
+          description: string | null
+          external_action_risk: boolean
+          flag_category: string
+          flag_key: string
+          flag_name: string
+          id: string
+          requires_founder_approval: boolean
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          audit_metadata?: Json
+          created_at?: string
+          current_value?: boolean
+          default_value?: boolean
+          description?: string | null
+          external_action_risk?: boolean
+          flag_category?: string
+          flag_key: string
+          flag_name: string
+          id?: string
+          requires_founder_approval?: boolean
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          audit_metadata?: Json
+          created_at?: string
+          current_value?: boolean
+          default_value?: boolean
+          description?: string | null
+          external_action_risk?: boolean
+          flag_category?: string
+          flag_key?: string
+          flag_name?: string
+          id?: string
+          requires_founder_approval?: boolean
           updated_at?: string
         }
         Relationships: []
@@ -50473,6 +50604,45 @@ export type Database = {
           id?: string
           manual_version?: number | null
           summary?: string | null
+        }
+        Relationships: []
+      }
+      system_configuration_values: {
+        Row: {
+          active: boolean
+          config_category: string
+          config_key: string
+          config_name: string
+          config_value: Json
+          created_at: string
+          founder_approval_required: boolean
+          id: string
+          sensitivity_level: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          config_category?: string
+          config_key: string
+          config_name: string
+          config_value?: Json
+          created_at?: string
+          founder_approval_required?: boolean
+          id?: string
+          sensitivity_level?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          config_category?: string
+          config_key?: string
+          config_name?: string
+          config_value?: Json
+          created_at?: string
+          founder_approval_required?: boolean
+          id?: string
+          sensitivity_level?: string
+          updated_at?: string
         }
         Relationships: []
       }

@@ -147,6 +147,7 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "portfolio_memory_agent", name: "Portfolio Memory Agent", to: "/founder/portfolio-memory", category: "operations" },
   { key: "master_pmo_agent", name: "Master PMO Agent", to: "/founder/work-queue", category: "operations" },
   { key: "scheduling_control_agent", name: "Scheduling Control Agent", to: "/founder/scheduled-jobs", category: "operations" },
+  { key: "configuration_agent", name: "Configuration Agent", to: "/founder/system-config", category: "operations" },
 ];
 
 export default function AgentOperatingStatus() {
