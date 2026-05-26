@@ -140,6 +140,7 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "ecommerce_ops_agent", name: "E-commerce Ops Agent", to: "/founder/ecommerce", category: "operations" },
   { key: "scheduling_agent", name: "Scheduling Agent", to: "/founder/scheduling", category: "operations" },
   { key: "document_vault_agent", name: "Document Vault Agent", to: "/founder/documents", category: "operations" },
+  { key: "ai_evaluation_agent", name: "AI Evaluation Agent", to: "/founder/ai-evals", category: "operations" },
 ];
 
 export default function AgentOperatingStatus() {

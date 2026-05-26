@@ -52,6 +52,7 @@ import JurisdictionTaxCard from "./JurisdictionTaxCard";
 import EcommerceEngineCard from "./EcommerceEngineCard";
 import SchedulingEngineCard from "./SchedulingEngineCard";
 import DocumentVaultCard from "./DocumentVaultCard";
+import AiEvalCard from "./AiEvalCard";
 
 /**
  * Business Process Spine — single integrated panel that surfaces every
@@ -95,6 +96,7 @@ export default function BusinessProcessSpinePanel() {
       <EcommerceEngineCard />
       <SchedulingEngineCard />
       <DocumentVaultCard />
+      <AiEvalCard />
 
       <PortalsCard />
 

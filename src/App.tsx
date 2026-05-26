@@ -478,6 +478,13 @@ import DocumentsDataRoom from "./pages/founder/documents/DataRoom";
 import DocumentsPolicies from "./pages/founder/documents/Policies";
 import DocumentsRequests from "./pages/founder/documents/Requests";
 import DocumentsAccess from "./pages/founder/documents/Access";
+import EvalsOverview from "./pages/founder/ai-evals/Overview";
+import EvalsTestSuites from "./pages/founder/ai-evals/TestSuites";
+import EvalsResults from "./pages/founder/ai-evals/Results";
+import EvalsAgents from "./pages/founder/ai-evals/Agents";
+import EvalsRegression from "./pages/founder/ai-evals/Regression";
+import EvalsSafety from "./pages/founder/ai-evals/Safety";
+import EvalsSettings from "./pages/founder/ai-evals/Settings";
 import PortalsOverview from "./pages/founder/portals/Overview";
 import PortalsCustomerAdmin from "./pages/founder/portals/Customer";
 import PortalsSellerAdmin from "./pages/founder/portals/Seller";
@@ -1066,6 +1073,13 @@ const App = () => (
             <Route path="/founder/documents/policies" element={<FounderRoute><DocumentsPolicies /></FounderRoute>} />
             <Route path="/founder/documents/requests" element={<FounderRoute><DocumentsRequests /></FounderRoute>} />
             <Route path="/founder/documents/access" element={<FounderRoute><DocumentsAccess /></FounderRoute>} />
+            <Route path="/founder/ai-evals" element={<FounderRoute><EvalsOverview /></FounderRoute>} />
+            <Route path="/founder/ai-evals/test-suites" element={<FounderRoute><EvalsTestSuites /></FounderRoute>} />
+            <Route path="/founder/ai-evals/results" element={<FounderRoute><EvalsResults /></FounderRoute>} />
+            <Route path="/founder/ai-evals/agents" element={<FounderRoute><EvalsAgents /></FounderRoute>} />
+            <Route path="/founder/ai-evals/regression" element={<FounderRoute><EvalsRegression /></FounderRoute>} />
+            <Route path="/founder/ai-evals/safety" element={<FounderRoute><EvalsSafety /></FounderRoute>} />
+            <Route path="/founder/ai-evals/settings" element={<FounderRoute><EvalsSettings /></FounderRoute>} />
             <Route path="/founder/portals" element={<FounderRoute><PortalsOverview /></FounderRoute>} />
             <Route path="/founder/portals/customer" element={<FounderRoute><PortalsCustomerAdmin /></FounderRoute>} />
             <Route path="/founder/portals/seller" element={<FounderRoute><PortalsSellerAdmin /></FounderRoute>} />
