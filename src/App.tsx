@@ -550,6 +550,13 @@ import ImportPreview from "./pages/founder/imports/Preview";
 import ImportHistory from "./pages/founder/imports/History";
 import ImportRollback from "./pages/founder/imports/Rollback";
 import ImportSettings from "./pages/founder/imports/Settings";
+import IdentityOverview from "./pages/founder/identity-resolution/Overview";
+import IdentityPeople from "./pages/founder/identity-resolution/People";
+import IdentityDuplicates from "./pages/founder/identity-resolution/Duplicates";
+import IdentityRoles from "./pages/founder/identity-resolution/Roles";
+import IdentityMergeQueue from "./pages/founder/identity-resolution/MergeQueue";
+import IdentityDoNotContact from "./pages/founder/identity-resolution/DoNotContact";
+import IdentitySettings from "./pages/founder/identity-resolution/Settings";
 import SearchOverview from "./pages/founder/search/Overview";
 import SearchAll from "./pages/founder/search/All";
 import SearchCustomers from "./pages/founder/search/Customers";
@@ -1218,6 +1225,13 @@ const App = () => (
             <Route path="/founder/imports/history" element={<FounderRoute><ImportHistory /></FounderRoute>} />
             <Route path="/founder/imports/rollback" element={<FounderRoute><ImportRollback /></FounderRoute>} />
             <Route path="/founder/imports/settings" element={<FounderRoute><ImportSettings /></FounderRoute>} />
+            <Route path="/founder/identity-resolution" element={<FounderRoute><IdentityOverview /></FounderRoute>} />
+            <Route path="/founder/identity-resolution/people" element={<FounderRoute><IdentityPeople /></FounderRoute>} />
+            <Route path="/founder/identity-resolution/duplicates" element={<FounderRoute><IdentityDuplicates /></FounderRoute>} />
+            <Route path="/founder/identity-resolution/roles" element={<FounderRoute><IdentityRoles /></FounderRoute>} />
+            <Route path="/founder/identity-resolution/merge-queue" element={<FounderRoute><IdentityMergeQueue /></FounderRoute>} />
+            <Route path="/founder/identity-resolution/do-not-contact" element={<FounderRoute><IdentityDoNotContact /></FounderRoute>} />
+            <Route path="/founder/identity-resolution/settings" element={<FounderRoute><IdentitySettings /></FounderRoute>} />
             <Route path="/founder/search" element={<FounderRoute><SearchOverview /></FounderRoute>} />
             <Route path="/founder/search/all" element={<FounderRoute><SearchAll /></FounderRoute>} />
             <Route path="/founder/search/customers" element={<FounderRoute><SearchCustomers /></FounderRoute>} />
