@@ -35,6 +35,7 @@ import PortfolioRiskCard from "./PortfolioRiskCard";
 import BusinessLifecycleCard from "./BusinessLifecycleCard";
 import ProductCatalogueCard from "./ProductCatalogueCard";
 import PricingMarginCard from "./PricingMarginCard";
+import ChannelStrategyCard from "./ChannelStrategyCard";
 
 /**
  * Business Process Spine — single integrated panel that surfaces every
@@ -91,6 +92,8 @@ export default function BusinessProcessSpinePanel() {
       <ProductCatalogueCard />
 
       <PricingMarginCard />
+
+      <ChannelStrategyCard />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <DeliveryEngineCard />

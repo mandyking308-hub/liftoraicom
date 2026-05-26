@@ -378,6 +378,11 @@ import PMBusinesses from "./pages/founder/pricing-margin/Businesses";
 import PMDiscounts from "./pages/founder/pricing-margin/Discounts";
 import PMBreakeven from "./pages/founder/pricing-margin/Breakeven";
 import PMRecommendations from "./pages/founder/pricing-margin/Recommendations";
+import CSOverview from "./pages/founder/channel-strategy/Overview";
+import CSBusinesses from "./pages/founder/channel-strategy/Businesses";
+import CSChannels from "./pages/founder/channel-strategy/Channels";
+import CSCampaigns from "./pages/founder/channel-strategy/Campaigns";
+import CSRecommendations from "./pages/founder/channel-strategy/Recommendations";
 import KnowledgeOverview from "./pages/founder/knowledge-governance/Overview";
 import KnowledgeSources from "./pages/founder/knowledge-governance/Sources";
 import KnowledgeConflicts from "./pages/founder/knowledge-governance/Conflicts";
@@ -846,6 +851,11 @@ const App = () => (
             <Route path="/founder/pricing-margin/discounts" element={<FounderRoute><PMDiscounts /></FounderRoute>} />
             <Route path="/founder/pricing-margin/breakeven" element={<FounderRoute><PMBreakeven /></FounderRoute>} />
             <Route path="/founder/pricing-margin/recommendations" element={<FounderRoute><PMRecommendations /></FounderRoute>} />
+            <Route path="/founder/channel-strategy" element={<FounderRoute><CSOverview /></FounderRoute>} />
+            <Route path="/founder/channel-strategy/businesses" element={<FounderRoute><CSBusinesses /></FounderRoute>} />
+            <Route path="/founder/channel-strategy/channels" element={<FounderRoute><CSChannels /></FounderRoute>} />
+            <Route path="/founder/channel-strategy/campaigns" element={<FounderRoute><CSCampaigns /></FounderRoute>} />
+            <Route path="/founder/channel-strategy/recommendations" element={<FounderRoute><CSRecommendations /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
