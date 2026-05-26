@@ -5284,6 +5284,48 @@ export type Database = {
         }
         Relationships: []
       }
+      business_channel_strategies: {
+        Row: {
+          approval_required_for_external: boolean
+          business_id: string
+          channel_id: string
+          channel_status: string
+          created_at: string
+          expected_cost: number | null
+          expected_return: number | null
+          id: string
+          reason: string | null
+          target_audience: string | null
+          updated_at: string
+        }
+        Insert: {
+          approval_required_for_external?: boolean
+          business_id: string
+          channel_id: string
+          channel_status?: string
+          created_at?: string
+          expected_cost?: number | null
+          expected_return?: number | null
+          id?: string
+          reason?: string | null
+          target_audience?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approval_required_for_external?: boolean
+          business_id?: string
+          channel_id?: string
+          channel_status?: string
+          created_at?: string
+          expected_cost?: number | null
+          expected_return?: number | null
+          id?: string
+          reason?: string | null
+          target_audience?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       business_compliance_profiles: {
         Row: {
           business_id: string
@@ -9869,6 +9911,81 @@ export type Database = {
           runway_months?: number | null
           tax_reserve?: number | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      channel_campaign_plans: {
+        Row: {
+          budget_estimate: number | null
+          business_id: string
+          campaign_goal: string | null
+          campaign_name: string
+          campaign_status: string
+          channel_id: string
+          created_at: string
+          expected_outcome: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          budget_estimate?: number | null
+          business_id: string
+          campaign_goal?: string | null
+          campaign_name: string
+          campaign_status?: string
+          channel_id: string
+          created_at?: string
+          expected_outcome?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          budget_estimate?: number | null
+          business_id?: string
+          campaign_goal?: string | null
+          campaign_name?: string
+          campaign_status?: string
+          channel_id?: string
+          created_at?: string
+          expected_outcome?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      channel_catalog: {
+        Row: {
+          active: boolean
+          channel_name: string
+          channel_type: string
+          created_at: string
+          id: string
+          risk_level: string
+          setup_requirements: string | null
+          suitable_archetypes: string[]
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          channel_name: string
+          channel_type: string
+          created_at?: string
+          id?: string
+          risk_level?: string
+          setup_requirements?: string | null
+          suitable_archetypes?: string[]
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          channel_name?: string
+          channel_type?: string
+          created_at?: string
+          id?: string
+          risk_level?: string
+          setup_requirements?: string | null
+          suitable_archetypes?: string[]
+          updated_at?: string
         }
         Relationships: []
       }
