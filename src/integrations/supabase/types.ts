@@ -6062,6 +6062,62 @@ export type Database = {
         }
         Relationships: []
       }
+      business_connector_assignments: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          connector_id: string
+          connector_status: string
+          created_at: string
+          external_action_enabled: boolean
+          id: string
+          last_error: string | null
+          last_health_checked_at: string | null
+          last_health_status: string | null
+          secret_configured: boolean
+          updated_at: string
+          webhook_configured: boolean
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          connector_id: string
+          connector_status?: string
+          created_at?: string
+          external_action_enabled?: boolean
+          id?: string
+          last_error?: string | null
+          last_health_checked_at?: string | null
+          last_health_status?: string | null
+          secret_configured?: boolean
+          updated_at?: string
+          webhook_configured?: boolean
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          connector_id?: string
+          connector_status?: string
+          created_at?: string
+          external_action_enabled?: boolean
+          id?: string
+          last_error?: string | null
+          last_health_checked_at?: string | null
+          last_health_status?: string | null
+          secret_configured?: boolean
+          updated_at?: string
+          webhook_configured?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_connector_assignments_connector_id_fkey"
+            columns: ["connector_id"]
+            isOneToOne: false
+            referencedRelation: "connector_registry"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_contact_relationships: {
         Row: {
           business_id: string | null
@@ -12312,6 +12368,151 @@ export type Database = {
           old_value?: Json | null
         }
         Relationships: []
+      }
+      connector_health_checks: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          check_summary: string | null
+          check_type: string
+          checked_at: string
+          connector_id: string
+          error_message: string | null
+          health_status: string
+          id: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          check_summary?: string | null
+          check_type: string
+          checked_at?: string
+          connector_id: string
+          error_message?: string | null
+          health_status?: string
+          id?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          check_summary?: string | null
+          check_type?: string
+          checked_at?: string
+          connector_id?: string
+          error_message?: string | null
+          health_status?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "connector_health_checks_connector_id_fkey"
+            columns: ["connector_id"]
+            isOneToOne: false
+            referencedRelation: "connector_registry"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      connector_registry: {
+        Row: {
+          active: boolean
+          audit_metadata: Json
+          connector_key: string
+          connector_name: string
+          created_at: string
+          description: string | null
+          external_action_risk_level: string
+          id: string
+          paid_api_possible: boolean
+          provider_type: string
+          supports_sandbox: boolean
+          supports_webhooks: boolean
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          audit_metadata?: Json
+          connector_key: string
+          connector_name: string
+          created_at?: string
+          description?: string | null
+          external_action_risk_level?: string
+          id?: string
+          paid_api_possible?: boolean
+          provider_type: string
+          supports_sandbox?: boolean
+          supports_webhooks?: boolean
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          audit_metadata?: Json
+          connector_key?: string
+          connector_name?: string
+          created_at?: string
+          description?: string | null
+          external_action_risk_level?: string
+          id?: string
+          paid_api_possible?: boolean
+          provider_type?: string
+          supports_sandbox?: boolean
+          supports_webhooks?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      connector_webhook_endpoints: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          connector_id: string
+          created_at: string
+          endpoint_name: string
+          endpoint_url: string
+          id: string
+          last_error: string | null
+          last_event_at: string | null
+          signature_verification_required: boolean
+          updated_at: string
+          webhook_status: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          connector_id: string
+          created_at?: string
+          endpoint_name: string
+          endpoint_url: string
+          id?: string
+          last_error?: string | null
+          last_event_at?: string | null
+          signature_verification_required?: boolean
+          updated_at?: string
+          webhook_status?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          connector_id?: string
+          created_at?: string
+          endpoint_name?: string
+          endpoint_url?: string
+          id?: string
+          last_error?: string | null
+          last_event_at?: string | null
+          signature_verification_required?: boolean
+          updated_at?: string
+          webhook_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "connector_webhook_endpoints_connector_id_fkey"
+            columns: ["connector_id"]
+            isOneToOne: false
+            referencedRelation: "connector_registry"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       consent_records: {
         Row: {
