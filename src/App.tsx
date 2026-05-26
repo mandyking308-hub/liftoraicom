@@ -412,6 +412,7 @@ import ExitArchetypes from "./pages/founder/exit-metrics/Archetypes";
 import ExitReadiness from "./pages/founder/exit-metrics/Readiness";
 import ExitBuyerFit from "./pages/founder/exit-metrics/BuyerFit";
 import ExitDataRoom from "./pages/founder/exit-metrics/DataRoom";
+import PortfolioDiversityOverview from "./pages/founder/portfolio-diversity/Overview";
 import KnowledgeOverview from "./pages/founder/knowledge-governance/Overview";
 import KnowledgeSources from "./pages/founder/knowledge-governance/Sources";
 import KnowledgeConflicts from "./pages/founder/knowledge-governance/Conflicts";
