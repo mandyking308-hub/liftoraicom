@@ -26616,6 +26616,57 @@ export type Database = {
         }
         Relationships: []
       }
+      liftor_events: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          event_category: string
+          event_payload: Json
+          event_status: string
+          event_type: string
+          id: string
+          idempotency_key: string | null
+          is_test_data: boolean
+          processed_at: string | null
+          source_module: string
+          source_record_id: string | null
+          source_table: string | null
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          event_category?: string
+          event_payload?: Json
+          event_status?: string
+          event_type: string
+          id?: string
+          idempotency_key?: string | null
+          is_test_data?: boolean
+          processed_at?: string | null
+          source_module: string
+          source_record_id?: string | null
+          source_table?: string | null
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          event_category?: string
+          event_payload?: Json
+          event_status?: string
+          event_type?: string
+          id?: string
+          idempotency_key?: string | null
+          is_test_data?: boolean
+          processed_at?: string | null
+          source_module?: string
+          source_record_id?: string | null
+          source_table?: string | null
+        }
+        Relationships: []
+      }
       liftor_live_readiness_gates: {
         Row: {
           blocker_reason: string | null
@@ -52206,6 +52257,51 @@ export type Database = {
           },
         ]
       }
+      workflow_definitions: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string | null
+          external_action_possible: boolean
+          id: string
+          requires_founder_approval_for_external: boolean
+          steps: Json
+          trigger_event_type: string
+          updated_at: string
+          workflow_category: string
+          workflow_code: string
+          workflow_name: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          external_action_possible?: boolean
+          id?: string
+          requires_founder_approval_for_external?: boolean
+          steps?: Json
+          trigger_event_type: string
+          updated_at?: string
+          workflow_category?: string
+          workflow_code: string
+          workflow_name: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          external_action_possible?: boolean
+          id?: string
+          requires_founder_approval_for_external?: boolean
+          steps?: Json
+          trigger_event_type?: string
+          updated_at?: string
+          workflow_category?: string
+          workflow_code?: string
+          workflow_name?: string
+        }
+        Relationships: []
+      }
       workflow_executions: {
         Row: {
           completed_at: string | null
@@ -52259,6 +52355,176 @@ export type Database = {
             columns: ["workflow_id"]
             isOneToOne: false
             referencedRelation: "automation_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_failure_events: {
+        Row: {
+          audit_metadata: Json
+          created_at: string
+          failure_summary: string
+          failure_type: string
+          id: string
+          recommended_action: string | null
+          severity: string
+          status: string
+          updated_at: string
+          workflow_run_id: string
+          workflow_step_run_id: string | null
+        }
+        Insert: {
+          audit_metadata?: Json
+          created_at?: string
+          failure_summary: string
+          failure_type?: string
+          id?: string
+          recommended_action?: string | null
+          severity?: string
+          status?: string
+          updated_at?: string
+          workflow_run_id: string
+          workflow_step_run_id?: string | null
+        }
+        Update: {
+          audit_metadata?: Json
+          created_at?: string
+          failure_summary?: string
+          failure_type?: string
+          id?: string
+          recommended_action?: string | null
+          severity?: string
+          status?: string
+          updated_at?: string
+          workflow_run_id?: string
+          workflow_step_run_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_failure_events_workflow_run_id_fkey"
+            columns: ["workflow_run_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_failure_events_workflow_step_run_id_fkey"
+            columns: ["workflow_step_run_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_step_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_runs: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          completed_at: string | null
+          created_at: string
+          failure_reason: string | null
+          id: string
+          retry_count: number
+          run_status: string
+          started_at: string | null
+          triggering_event_id: string | null
+          updated_at: string
+          workflow_definition_id: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          failure_reason?: string | null
+          id?: string
+          retry_count?: number
+          run_status?: string
+          started_at?: string | null
+          triggering_event_id?: string | null
+          updated_at?: string
+          workflow_definition_id: string
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          failure_reason?: string | null
+          id?: string
+          retry_count?: number
+          run_status?: string
+          started_at?: string | null
+          triggering_event_id?: string | null
+          updated_at?: string
+          workflow_definition_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_runs_triggering_event_id_fkey"
+            columns: ["triggering_event_id"]
+            isOneToOne: false
+            referencedRelation: "liftor_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_runs_workflow_definition_id_fkey"
+            columns: ["workflow_definition_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_step_runs: {
+        Row: {
+          audit_metadata: Json
+          created_at: string
+          failure_reason: string | null
+          id: string
+          output_summary: string | null
+          source_module: string | null
+          step_name: string
+          step_order: number
+          step_status: string
+          target_module: string | null
+          updated_at: string
+          workflow_run_id: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          created_at?: string
+          failure_reason?: string | null
+          id?: string
+          output_summary?: string | null
+          source_module?: string | null
+          step_name: string
+          step_order?: number
+          step_status?: string
+          target_module?: string | null
+          updated_at?: string
+          workflow_run_id: string
+        }
+        Update: {
+          audit_metadata?: Json
+          created_at?: string
+          failure_reason?: string | null
+          id?: string
+          output_summary?: string | null
+          source_module?: string | null
+          step_name?: string
+          step_order?: number
+          step_status?: string
+          target_module?: string | null
+          updated_at?: string
+          workflow_run_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_step_runs_workflow_run_id_fkey"
+            columns: ["workflow_run_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_runs"
             referencedColumns: ["id"]
           },
         ]
