@@ -132,6 +132,7 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "insurance_liability_agent", name: "Insurance / Liability Agent", to: "/founder/insurance-liability", category: "security" },
   { key: "exit_metrics_agent", name: "Exit Metrics Agent", to: "/founder/exit-metrics", category: "strategy" },
   { key: "notification_agent", name: "Notification Agent", to: "/founder/notifications", category: "operations" },
+  { key: "delegation_agent", name: "Delegation Agent", to: "/founder/roles/delegation", category: "operations" },
 ];
 
 export default function AgentOperatingStatus() {
