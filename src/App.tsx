@@ -406,6 +406,12 @@ import InsuranceBusinesses from "./pages/founder/insurance-liability/Businesses"
 import InsurancePolicies from "./pages/founder/insurance-liability/Policies";
 import InsuranceGaps from "./pages/founder/insurance-liability/Gaps";
 import InsuranceClaims from "./pages/founder/insurance-liability/Claims";
+import ExitOverview from "./pages/founder/exit-metrics/Overview";
+import ExitBusinesses from "./pages/founder/exit-metrics/Businesses";
+import ExitArchetypes from "./pages/founder/exit-metrics/Archetypes";
+import ExitReadiness from "./pages/founder/exit-metrics/Readiness";
+import ExitBuyerFit from "./pages/founder/exit-metrics/BuyerFit";
+import ExitDataRoom from "./pages/founder/exit-metrics/DataRoom";
 import KnowledgeOverview from "./pages/founder/knowledge-governance/Overview";
 import KnowledgeSources from "./pages/founder/knowledge-governance/Sources";
 import KnowledgeConflicts from "./pages/founder/knowledge-governance/Conflicts";
@@ -902,6 +908,12 @@ const App = () => (
             <Route path="/founder/insurance-liability/policies" element={<FounderRoute><InsurancePolicies /></FounderRoute>} />
             <Route path="/founder/insurance-liability/gaps" element={<FounderRoute><InsuranceGaps /></FounderRoute>} />
             <Route path="/founder/insurance-liability/claims" element={<FounderRoute><InsuranceClaims /></FounderRoute>} />
+            <Route path="/founder/exit-metrics" element={<FounderRoute><ExitOverview /></FounderRoute>} />
+            <Route path="/founder/exit-metrics/businesses" element={<FounderRoute><ExitBusinesses /></FounderRoute>} />
+            <Route path="/founder/exit-metrics/archetypes" element={<FounderRoute><ExitArchetypes /></FounderRoute>} />
+            <Route path="/founder/exit-metrics/readiness" element={<FounderRoute><ExitReadiness /></FounderRoute>} />
+            <Route path="/founder/exit-metrics/buyer-fit" element={<FounderRoute><ExitBuyerFit /></FounderRoute>} />
+            <Route path="/founder/exit-metrics/data-room" element={<FounderRoute><ExitDataRoom /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
