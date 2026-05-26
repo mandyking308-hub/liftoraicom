@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      abuse_message_flags: {
+        Row: {
+          audit_metadata: Json
+          communication_record_id: string
+          created_at: string
+          flag_summary: string | null
+          flag_type: string
+          id: string
+          severity: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          communication_record_id: string
+          created_at?: string
+          flag_summary?: string | null
+          flag_type: string
+          id?: string
+          severity?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          communication_record_id?: string
+          created_at?: string
+          flag_summary?: string | null
+          flag_type?: string
+          id?: string
+          severity?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "abuse_message_flags_communication_record_id_fkey"
+            columns: ["communication_record_id"]
+            isOneToOne: false
+            referencedRelation: "communication_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       access_anomalies: {
         Row: {
           anomaly_type: string
@@ -52714,6 +52752,104 @@ export type Database = {
           training_completed_at?: string | null
           training_required?: boolean | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      trust_action_recommendations: {
+        Row: {
+          action_status: string
+          action_type: string
+          audit_metadata: Json
+          created_at: string
+          founder_approval_required: boolean
+          id: string
+          trust_risk_event_id: string
+          updated_at: string
+        }
+        Insert: {
+          action_status?: string
+          action_type: string
+          audit_metadata?: Json
+          created_at?: string
+          founder_approval_required?: boolean
+          id?: string
+          trust_risk_event_id: string
+          updated_at?: string
+        }
+        Update: {
+          action_status?: string
+          action_type?: string
+          audit_metadata?: Json
+          created_at?: string
+          founder_approval_required?: boolean
+          id?: string
+          trust_risk_event_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trust_action_recommendations_trust_risk_event_id_fkey"
+            columns: ["trust_risk_event_id"]
+            isOneToOne: false
+            referencedRelation: "trust_risk_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trust_risk_events: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          customer_id: string | null
+          evidence_summary: string | null
+          id: string
+          identity_profile_id: string | null
+          recommended_action: string | null
+          related_record_id: string | null
+          related_table: string | null
+          risk_summary: string | null
+          risk_type: string
+          seller_id: string | null
+          severity: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          evidence_summary?: string | null
+          id?: string
+          identity_profile_id?: string | null
+          recommended_action?: string | null
+          related_record_id?: string | null
+          related_table?: string | null
+          risk_summary?: string | null
+          risk_type: string
+          seller_id?: string | null
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          evidence_summary?: string | null
+          id?: string
+          identity_profile_id?: string | null
+          recommended_action?: string | null
+          related_record_id?: string | null
+          related_table?: string | null
+          risk_summary?: string | null
+          risk_type?: string
+          seller_id?: string | null
+          severity?: string
+          status?: string
+          updated_at?: string
         }
         Relationships: []
       }

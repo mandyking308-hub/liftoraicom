@@ -570,6 +570,13 @@ import RhSellers from "./pages/founder/relationship-health/Sellers";
 import RhPartners from "./pages/founder/relationship-health/Partners";
 import RhRisks from "./pages/founder/relationship-health/Risks";
 import RhOpportunities from "./pages/founder/relationship-health/Opportunities";
+import TsOverview from "./pages/founder/trust-safety/Overview";
+import TsRiskEvents from "./pages/founder/trust-safety/RiskEvents";
+import TsAccounts from "./pages/founder/trust-safety/Accounts";
+import TsPayments from "./pages/founder/trust-safety/Payments";
+import TsMessages from "./pages/founder/trust-safety/Messages";
+import TsActions from "./pages/founder/trust-safety/Actions";
+import TsSettings from "./pages/founder/trust-safety/Settings";
 import SearchOverview from "./pages/founder/search/Overview";
 import SearchAll from "./pages/founder/search/All";
 import SearchCustomers from "./pages/founder/search/Customers";
@@ -1258,6 +1265,13 @@ const App = () => (
             <Route path="/founder/relationship-health/partners" element={<FounderRoute><RhPartners /></FounderRoute>} />
             <Route path="/founder/relationship-health/risks" element={<FounderRoute><RhRisks /></FounderRoute>} />
             <Route path="/founder/relationship-health/opportunities" element={<FounderRoute><RhOpportunities /></FounderRoute>} />
+            <Route path="/founder/trust-safety" element={<FounderRoute><TsOverview /></FounderRoute>} />
+            <Route path="/founder/trust-safety/risk-events" element={<FounderRoute><TsRiskEvents /></FounderRoute>} />
+            <Route path="/founder/trust-safety/accounts" element={<FounderRoute><TsAccounts /></FounderRoute>} />
+            <Route path="/founder/trust-safety/payments" element={<FounderRoute><TsPayments /></FounderRoute>} />
+            <Route path="/founder/trust-safety/messages" element={<FounderRoute><TsMessages /></FounderRoute>} />
+            <Route path="/founder/trust-safety/actions" element={<FounderRoute><TsActions /></FounderRoute>} />
+            <Route path="/founder/trust-safety/settings" element={<FounderRoute><TsSettings /></FounderRoute>} />
             <Route path="/founder/search" element={<FounderRoute><SearchOverview /></FounderRoute>} />
             <Route path="/founder/search/all" element={<FounderRoute><SearchAll /></FounderRoute>} />
             <Route path="/founder/search/customers" element={<FounderRoute><SearchCustomers /></FounderRoute>} />
