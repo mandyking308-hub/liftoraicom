@@ -4607,6 +4607,45 @@ export type Database = {
           },
         ]
       }
+      breakeven_models: {
+        Row: {
+          breakeven_revenue: number | null
+          breakeven_units: number | null
+          business_id: string
+          created_at: string
+          fixed_costs: number
+          id: string
+          price_per_sale: number
+          product_id: string | null
+          updated_at: string
+          variable_cost_per_sale: number
+        }
+        Insert: {
+          breakeven_revenue?: number | null
+          breakeven_units?: number | null
+          business_id: string
+          created_at?: string
+          fixed_costs?: number
+          id?: string
+          price_per_sale?: number
+          product_id?: string | null
+          updated_at?: string
+          variable_cost_per_sale?: number
+        }
+        Update: {
+          breakeven_revenue?: number | null
+          breakeven_units?: number | null
+          business_id?: string
+          created_at?: string
+          fixed_costs?: number
+          id?: string
+          price_per_sale?: number
+          product_id?: string | null
+          updated_at?: string
+          variable_cost_per_sale?: number
+        }
+        Relationships: []
+      }
       brief_audit_log: {
         Row: {
           brief_id: string
@@ -18946,6 +18985,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      discount_rules: {
+        Row: {
+          active: boolean
+          allowed_conditions: string | null
+          business_id: string
+          created_at: string
+          discount_name: string
+          discount_requires_approval: boolean
+          id: string
+          max_discount_percent: number
+          offer_id: string | null
+          product_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          allowed_conditions?: string | null
+          business_id: string
+          created_at?: string
+          discount_name: string
+          discount_requires_approval?: boolean
+          id?: string
+          max_discount_percent?: number
+          offer_id?: string | null
+          product_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          allowed_conditions?: string | null
+          business_id?: string
+          created_at?: string
+          discount_name?: string
+          discount_requires_approval?: boolean
+          id?: string
+          max_discount_percent?: number
+          offer_id?: string | null
+          product_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       dispute_evidence: {
         Row: {
@@ -33443,6 +33524,69 @@ export type Database = {
           priority?: string
           source_ref?: string | null
           target_release_date?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      product_margin_profiles: {
+        Row: {
+          ai_cost_estimate: number | null
+          business_id: string
+          created_at: string
+          currency: string
+          delivery_cost_estimate: number | null
+          direct_cost_estimate: number | null
+          gross_margin_amount: number | null
+          gross_margin_percent: number | null
+          human_cost_estimate: number | null
+          id: string
+          margin_status: string
+          offer_id: string | null
+          payment_fee_estimate: number | null
+          price_amount: number | null
+          product_id: string | null
+          refund_risk_estimate: number | null
+          support_cost_estimate: number | null
+          updated_at: string
+        }
+        Insert: {
+          ai_cost_estimate?: number | null
+          business_id: string
+          created_at?: string
+          currency?: string
+          delivery_cost_estimate?: number | null
+          direct_cost_estimate?: number | null
+          gross_margin_amount?: number | null
+          gross_margin_percent?: number | null
+          human_cost_estimate?: number | null
+          id?: string
+          margin_status?: string
+          offer_id?: string | null
+          payment_fee_estimate?: number | null
+          price_amount?: number | null
+          product_id?: string | null
+          refund_risk_estimate?: number | null
+          support_cost_estimate?: number | null
+          updated_at?: string
+        }
+        Update: {
+          ai_cost_estimate?: number | null
+          business_id?: string
+          created_at?: string
+          currency?: string
+          delivery_cost_estimate?: number | null
+          direct_cost_estimate?: number | null
+          gross_margin_amount?: number | null
+          gross_margin_percent?: number | null
+          human_cost_estimate?: number | null
+          id?: string
+          margin_status?: string
+          offer_id?: string | null
+          payment_fee_estimate?: number | null
+          price_amount?: number | null
+          product_id?: string | null
+          refund_risk_estimate?: number | null
+          support_cost_estimate?: number | null
           updated_at?: string
         }
         Relationships: []
