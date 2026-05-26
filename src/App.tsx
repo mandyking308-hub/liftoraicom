@@ -442,6 +442,14 @@ import ReportingTruthDefinitions from "./pages/founder/reporting-truth/Definitio
 import ReportingTruthReconciliation from "./pages/founder/reporting-truth/Reconciliation";
 import ReportingTruthConflicts from "./pages/founder/reporting-truth/Conflicts";
 import ReportingTruthSettings from "./pages/founder/reporting-truth/Settings";
+import ReconciliationOverview from "./pages/founder/reconciliation/Overview";
+import ReconciliationPayments from "./pages/founder/reconciliation/Payments";
+import ReconciliationInvoices from "./pages/founder/reconciliation/Invoices";
+import ReconciliationBank from "./pages/founder/reconciliation/Bank";
+import ReconciliationPayouts from "./pages/founder/reconciliation/Payouts";
+import ReconciliationRefunds from "./pages/founder/reconciliation/Refunds";
+import ReconciliationUnmatched from "./pages/founder/reconciliation/Unmatched";
+import ReconciliationSettings from "./pages/founder/reconciliation/Settings";
 import PortalsOverview from "./pages/founder/portals/Overview";
 import PortalsCustomerAdmin from "./pages/founder/portals/Customer";
 import PortalsSellerAdmin from "./pages/founder/portals/Seller";
@@ -994,6 +1002,14 @@ const App = () => (
             <Route path="/founder/reporting-truth/reconciliation" element={<FounderRoute><ReportingTruthReconciliation /></FounderRoute>} />
             <Route path="/founder/reporting-truth/conflicts" element={<FounderRoute><ReportingTruthConflicts /></FounderRoute>} />
             <Route path="/founder/reporting-truth/settings" element={<FounderRoute><ReportingTruthSettings /></FounderRoute>} />
+            <Route path="/founder/reconciliation" element={<FounderRoute><ReconciliationOverview /></FounderRoute>} />
+            <Route path="/founder/reconciliation/payments" element={<FounderRoute><ReconciliationPayments /></FounderRoute>} />
+            <Route path="/founder/reconciliation/invoices" element={<FounderRoute><ReconciliationInvoices /></FounderRoute>} />
+            <Route path="/founder/reconciliation/bank" element={<FounderRoute><ReconciliationBank /></FounderRoute>} />
+            <Route path="/founder/reconciliation/payouts" element={<FounderRoute><ReconciliationPayouts /></FounderRoute>} />
+            <Route path="/founder/reconciliation/refunds" element={<FounderRoute><ReconciliationRefunds /></FounderRoute>} />
+            <Route path="/founder/reconciliation/unmatched" element={<FounderRoute><ReconciliationUnmatched /></FounderRoute>} />
+            <Route path="/founder/reconciliation/settings" element={<FounderRoute><ReconciliationSettings /></FounderRoute>} />
             <Route path="/founder/portals" element={<FounderRoute><PortalsOverview /></FounderRoute>} />
             <Route path="/founder/portals/customer" element={<FounderRoute><PortalsCustomerAdmin /></FounderRoute>} />
             <Route path="/founder/portals/seller" element={<FounderRoute><PortalsSellerAdmin /></FounderRoute>} />

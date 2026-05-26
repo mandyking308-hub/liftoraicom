@@ -30143,6 +30143,66 @@ export type Database = {
         }
         Relationships: []
       }
+      marketplace_payout_records: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          commission_amount: number
+          created_at: string
+          currency: string
+          gross_amount: number
+          id: string
+          marketplace_id: string | null
+          payout_amount: number
+          payout_period_end: string | null
+          payout_period_start: string | null
+          payout_provider: string | null
+          payout_status: Database["public"]["Enums"]["recon_payout_status"]
+          platform_fee: number
+          provider_payout_id: string | null
+          seller_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          commission_amount?: number
+          created_at?: string
+          currency?: string
+          gross_amount?: number
+          id?: string
+          marketplace_id?: string | null
+          payout_amount?: number
+          payout_period_end?: string | null
+          payout_period_start?: string | null
+          payout_provider?: string | null
+          payout_status?: Database["public"]["Enums"]["recon_payout_status"]
+          platform_fee?: number
+          provider_payout_id?: string | null
+          seller_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          commission_amount?: number
+          created_at?: string
+          currency?: string
+          gross_amount?: number
+          id?: string
+          marketplace_id?: string | null
+          payout_amount?: number
+          payout_period_end?: string | null
+          payout_period_start?: string | null
+          payout_provider?: string | null
+          payout_status?: Database["public"]["Enums"]["recon_payout_status"]
+          platform_fee?: number
+          provider_payout_id?: string | null
+          seller_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       marketplace_profiles: {
         Row: {
           active: boolean
@@ -33646,6 +33706,57 @@ export type Database = {
           },
         ]
       }
+      payment_reconciliation_matches: {
+        Row: {
+          approved_at: string | null
+          audit_metadata: Json
+          bank_record_id: string | null
+          business_id: string | null
+          created_at: string
+          founder_approval_required: boolean
+          id: string
+          invoice_id: string | null
+          match_confidence: number | null
+          match_reason: string | null
+          match_status: Database["public"]["Enums"]["recon_match_status"]
+          payment_id: string | null
+          payout_record_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          audit_metadata?: Json
+          bank_record_id?: string | null
+          business_id?: string | null
+          created_at?: string
+          founder_approval_required?: boolean
+          id?: string
+          invoice_id?: string | null
+          match_confidence?: number | null
+          match_reason?: string | null
+          match_status?: Database["public"]["Enums"]["recon_match_status"]
+          payment_id?: string | null
+          payout_record_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          audit_metadata?: Json
+          bank_record_id?: string | null
+          business_id?: string | null
+          created_at?: string
+          founder_approval_required?: boolean
+          id?: string
+          invoice_id?: string | null
+          match_confidence?: number | null
+          match_reason?: string | null
+          match_status?: Database["public"]["Enums"]["recon_match_status"]
+          payment_id?: string | null
+          payout_record_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       payments: {
         Row: {
           amount_received: number
@@ -36316,6 +36427,102 @@ export type Database = {
           payment_id?: string | null
           revenue_amount?: number | null
           revenue_type?: string
+        }
+        Relationships: []
+      }
+      reconciliation_exceptions: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          exception_summary: string
+          exception_type: Database["public"]["Enums"]["recon_exception_type"]
+          id: string
+          recommended_action: string | null
+          severity: Database["public"]["Enums"]["recon_severity"]
+          status: Database["public"]["Enums"]["recon_exception_status"]
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          exception_summary: string
+          exception_type: Database["public"]["Enums"]["recon_exception_type"]
+          id?: string
+          recommended_action?: string | null
+          severity?: Database["public"]["Enums"]["recon_severity"]
+          status?: Database["public"]["Enums"]["recon_exception_status"]
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          exception_summary?: string
+          exception_type?: Database["public"]["Enums"]["recon_exception_type"]
+          id?: string
+          recommended_action?: string | null
+          severity?: Database["public"]["Enums"]["recon_severity"]
+          status?: Database["public"]["Enums"]["recon_exception_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      reconciliation_records: {
+        Row: {
+          amount: number
+          audit_metadata: Json
+          business_id: string | null
+          confidence_score: number | null
+          created_at: string
+          currency: string
+          description: string | null
+          id: string
+          legal_entity_id: string | null
+          matched_record_id: string | null
+          matched_table: string | null
+          reconciliation_status: Database["public"]["Enums"]["recon_status"]
+          source_record_id: string | null
+          source_type: Database["public"]["Enums"]["recon_source_type"]
+          transaction_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          audit_metadata?: Json
+          business_id?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          legal_entity_id?: string | null
+          matched_record_id?: string | null
+          matched_table?: string | null
+          reconciliation_status?: Database["public"]["Enums"]["recon_status"]
+          source_record_id?: string | null
+          source_type: Database["public"]["Enums"]["recon_source_type"]
+          transaction_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          audit_metadata?: Json
+          business_id?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          legal_entity_id?: string | null
+          matched_record_id?: string | null
+          matched_table?: string | null
+          reconciliation_status?: Database["public"]["Enums"]["recon_status"]
+          source_record_id?: string | null
+          source_type?: Database["public"]["Enums"]["recon_source_type"]
+          transaction_date?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -52358,6 +52565,49 @@ export type Database = {
         | "assignment"
         | "invoice"
       priority_level: "low" | "medium" | "high" | "critical"
+      recon_exception_status:
+        | "open"
+        | "review_required"
+        | "resolved"
+        | "ignored"
+      recon_exception_type:
+        | "unmatched_payment"
+        | "duplicate_payment"
+        | "refund_mismatch"
+        | "chargeback"
+        | "payout_mismatch"
+        | "currency_mismatch"
+        | "amount_mismatch"
+        | "missing_invoice"
+        | "other"
+      recon_match_status: "suggested" | "approved" | "rejected" | "confirmed"
+      recon_payout_status:
+        | "draft"
+        | "approval_required"
+        | "approved"
+        | "scheduled"
+        | "paid"
+        | "failed"
+        | "disputed"
+        | "cancelled"
+      recon_severity: "low" | "medium" | "high" | "critical"
+      recon_source_type:
+        | "bank"
+        | "stripe"
+        | "paypal"
+        | "invoice"
+        | "manual"
+        | "marketplace_payout"
+        | "refund"
+        | "chargeback"
+        | "other"
+      recon_status:
+        | "unmatched"
+        | "suggested_match"
+        | "matched"
+        | "disputed"
+        | "ignored"
+        | "needs_review"
       reputation_event_type:
         | "bounce"
         | "spam"
@@ -52941,6 +53191,54 @@ export const Constants = {
         "invoice",
       ],
       priority_level: ["low", "medium", "high", "critical"],
+      recon_exception_status: [
+        "open",
+        "review_required",
+        "resolved",
+        "ignored",
+      ],
+      recon_exception_type: [
+        "unmatched_payment",
+        "duplicate_payment",
+        "refund_mismatch",
+        "chargeback",
+        "payout_mismatch",
+        "currency_mismatch",
+        "amount_mismatch",
+        "missing_invoice",
+        "other",
+      ],
+      recon_match_status: ["suggested", "approved", "rejected", "confirmed"],
+      recon_payout_status: [
+        "draft",
+        "approval_required",
+        "approved",
+        "scheduled",
+        "paid",
+        "failed",
+        "disputed",
+        "cancelled",
+      ],
+      recon_severity: ["low", "medium", "high", "critical"],
+      recon_source_type: [
+        "bank",
+        "stripe",
+        "paypal",
+        "invoice",
+        "manual",
+        "marketplace_payout",
+        "refund",
+        "chargeback",
+        "other",
+      ],
+      recon_status: [
+        "unmatched",
+        "suggested_match",
+        "matched",
+        "disputed",
+        "ignored",
+        "needs_review",
+      ],
       reputation_event_type: [
         "bounce",
         "spam",

@@ -47,6 +47,7 @@ import UnifiedNotificationsCard from "./UnifiedNotificationsCard";
 import RoleAccessCard from "./RoleAccessCard";
 import ReportingTruthCard from "./ReportingTruthCard";
 import PortalsCard from "./PortalsCard";
+import ReconciliationCard from "./ReconciliationCard";
 
 /**
  * Business Process Spine — single integrated panel that surfaces every
@@ -83,6 +84,8 @@ export default function BusinessProcessSpinePanel() {
       <MasterWorkQueueCard />
 
       <ReportingTruthCard />
+
+      <ReconciliationCard />
 
       <PortalsCard />
 
