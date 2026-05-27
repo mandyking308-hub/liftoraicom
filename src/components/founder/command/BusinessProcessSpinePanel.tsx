@@ -78,6 +78,7 @@ import ExperimentEngineCard from "./ExperimentEngineCard";
 import WindDownCard from "./WindDownCard";
 import PolicyCoverageCard from "./PolicyCoverageCard";
 import AgentCapabilityCard from "./AgentCapabilityCard";
+import AttentionGuardCard from "./AttentionGuardCard";
 
 /**
  * Business Process Spine — single integrated panel that surfaces every
@@ -148,6 +149,7 @@ export default function BusinessProcessSpinePanel() {
       <WindDownCard />
       <PolicyCoverageCard />
       <AgentCapabilityCard />
+      <AttentionGuardCard />
 
       <PortalsCard />
 
