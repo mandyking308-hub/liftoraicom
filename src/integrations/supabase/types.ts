@@ -6235,6 +6235,78 @@ export type Database = {
           },
         ]
       }
+      business_context_envelopes: {
+        Row: {
+          archetype_code: string | null
+          audit_metadata: Json
+          brand_name: string
+          business_id: string
+          compliance_profile_id: string | null
+          context_status: string
+          created_at: string
+          default_currency: string | null
+          default_market: string | null
+          entity_mapping_status: string
+          founder_confirmed: boolean
+          id: string
+          integration_status: string
+          legal_entity_id: string | null
+          lifecycle_stage: string | null
+          primary_domain: string | null
+          product_catalogue_status: string
+          public_brand_name: string | null
+          sales_email: string | null
+          support_email: string | null
+          updated_at: string
+        }
+        Insert: {
+          archetype_code?: string | null
+          audit_metadata?: Json
+          brand_name: string
+          business_id: string
+          compliance_profile_id?: string | null
+          context_status?: string
+          created_at?: string
+          default_currency?: string | null
+          default_market?: string | null
+          entity_mapping_status?: string
+          founder_confirmed?: boolean
+          id?: string
+          integration_status?: string
+          legal_entity_id?: string | null
+          lifecycle_stage?: string | null
+          primary_domain?: string | null
+          product_catalogue_status?: string
+          public_brand_name?: string | null
+          sales_email?: string | null
+          support_email?: string | null
+          updated_at?: string
+        }
+        Update: {
+          archetype_code?: string | null
+          audit_metadata?: Json
+          brand_name?: string
+          business_id?: string
+          compliance_profile_id?: string | null
+          context_status?: string
+          created_at?: string
+          default_currency?: string | null
+          default_market?: string | null
+          entity_mapping_status?: string
+          founder_confirmed?: boolean
+          id?: string
+          integration_status?: string
+          legal_entity_id?: string | null
+          lifecycle_stage?: string | null
+          primary_domain?: string | null
+          product_catalogue_status?: string
+          public_brand_name?: string | null
+          sales_email?: string | null
+          support_email?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       business_context_profiles: {
         Row: {
           approved_context_source_id: string | null
@@ -6280,6 +6352,54 @@ export type Database = {
           sales_email?: string | null
           support_email?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      business_context_validation_events: {
+        Row: {
+          action_taken: string
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          id: string
+          recommended_fix: string | null
+          resolved_at: string | null
+          severity: string
+          source_module: string
+          source_record_id: string | null
+          source_table: string | null
+          validation_summary: string
+          validation_type: string
+        }
+        Insert: {
+          action_taken?: string
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          recommended_fix?: string | null
+          resolved_at?: string | null
+          severity?: string
+          source_module: string
+          source_record_id?: string | null
+          source_table?: string | null
+          validation_summary: string
+          validation_type: string
+        }
+        Update: {
+          action_taken?: string
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          recommended_fix?: string | null
+          resolved_at?: string | null
+          severity?: string
+          source_module?: string
+          source_record_id?: string | null
+          source_table?: string | null
+          validation_summary?: string
+          validation_type?: string
         }
         Relationships: []
       }
@@ -13175,6 +13295,53 @@ export type Database = {
         }
         Relationships: []
       }
+      context_repair_actions: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          founder_approval_required: boolean
+          id: string
+          irreversible: boolean
+          repair_status: string
+          repair_type: string
+          updated_at: string
+          validation_event_id: string | null
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          founder_approval_required?: boolean
+          id?: string
+          irreversible?: boolean
+          repair_status?: string
+          repair_type: string
+          updated_at?: string
+          validation_event_id?: string | null
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          founder_approval_required?: boolean
+          id?: string
+          irreversible?: boolean
+          repair_status?: string
+          repair_type?: string
+          updated_at?: string
+          validation_event_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "context_repair_actions_validation_event_id_fkey"
+            columns: ["validation_event_id"]
+            isOneToOne: false
+            referencedRelation: "business_context_validation_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       continuity_plans: {
         Row: {
           active: boolean
@@ -14946,6 +15113,54 @@ export type Database = {
           rule_key?: string
           source_stage?: string | null
           suppression_trigger_allowed?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      cross_module_record_links: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          id: string
+          link_status: string
+          link_type: string
+          source_module: string
+          source_record_id: string
+          source_table: string
+          target_module: string
+          target_record_id: string
+          target_table: string
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          link_status?: string
+          link_type: string
+          source_module: string
+          source_record_id: string
+          source_table: string
+          target_module: string
+          target_record_id: string
+          target_table: string
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          link_status?: string
+          link_type?: string
+          source_module?: string
+          source_record_id?: string
+          source_table?: string
+          target_module?: string
+          target_record_id?: string
+          target_table?: string
           updated_at?: string
         }
         Relationships: []
@@ -33560,6 +33775,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      module_integration_contracts: {
+        Row: {
+          active: boolean
+          allowed_event_types: string[]
+          allowed_work_item_types: string[]
+          approval_required_for_external: boolean
+          contract_name: string
+          created_at: string
+          external_action_possible: boolean
+          id: string
+          optional_context_fields: string[]
+          required_context_fields: string[]
+          required_source_fields: string[]
+          source_module: string
+          target_module: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          allowed_event_types?: string[]
+          allowed_work_item_types?: string[]
+          approval_required_for_external?: boolean
+          contract_name: string
+          created_at?: string
+          external_action_possible?: boolean
+          id?: string
+          optional_context_fields?: string[]
+          required_context_fields?: string[]
+          required_source_fields?: string[]
+          source_module: string
+          target_module: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          allowed_event_types?: string[]
+          allowed_work_item_types?: string[]
+          approval_required_for_external?: boolean
+          contract_name?: string
+          created_at?: string
+          external_action_possible?: boolean
+          id?: string
+          optional_context_fields?: string[]
+          required_context_fields?: string[]
+          required_source_fields?: string[]
+          source_module?: string
+          target_module?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       module_permission_matrix: {
         Row: {
