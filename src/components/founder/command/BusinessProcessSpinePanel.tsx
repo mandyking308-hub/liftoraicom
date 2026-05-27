@@ -74,6 +74,7 @@ import DeploymentControlCard from "./DeploymentControlCard";
 import PlatformMonitorCard from "./PlatformMonitorCard";
 import CollectionsCard from "./CollectionsCard";
 import VoiceOfCustomerCard from "./VoiceOfCustomerCard";
+import ExperimentEngineCard from "./ExperimentEngineCard";
 
 /**
  * Business Process Spine — single integrated panel that surfaces every
