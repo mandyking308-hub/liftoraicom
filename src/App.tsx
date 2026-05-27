@@ -591,6 +591,13 @@ import DepEdgeFunctions from "./pages/founder/deployment/EdgeFunctions";
 import DepEnvVars from "./pages/founder/deployment/EnvVars";
 import DepRollback from "./pages/founder/deployment/Rollback";
 import DepSettings from "./pages/founder/deployment/Settings";
+import CollectionsOverview from "./pages/founder/collections/Overview";
+import CollectionsOverdue from "./pages/founder/collections/Overdue";
+import CollectionsFailedPayments from "./pages/founder/collections/FailedPayments";
+import CollectionsReminders from "./pages/founder/collections/Reminders";
+import CollectionsPaymentPlans from "./pages/founder/collections/PaymentPlans";
+import CollectionsServiceHolds from "./pages/founder/collections/ServiceHolds";
+import CollectionsSettings from "./pages/founder/collections/Settings";
 import PlatMonOverview from "./pages/founder/platform-monitor/Overview";
 import PlatMonPerformance from "./pages/founder/platform-monitor/Performance";
 import PlatMonErrors from "./pages/founder/platform-monitor/Errors";
@@ -1307,6 +1314,13 @@ const App = () => (
             <Route path="/founder/deployment/env-vars" element={<FounderRoute><DepEnvVars /></FounderRoute>} />
             <Route path="/founder/deployment/rollback" element={<FounderRoute><DepRollback /></FounderRoute>} />
             <Route path="/founder/deployment/settings" element={<FounderRoute><DepSettings /></FounderRoute>} />
+            <Route path="/founder/collections" element={<FounderRoute><CollectionsOverview /></FounderRoute>} />
+            <Route path="/founder/collections/overdue" element={<FounderRoute><CollectionsOverdue /></FounderRoute>} />
+            <Route path="/founder/collections/failed-payments" element={<FounderRoute><CollectionsFailedPayments /></FounderRoute>} />
+            <Route path="/founder/collections/reminders" element={<FounderRoute><CollectionsReminders /></FounderRoute>} />
+            <Route path="/founder/collections/payment-plans" element={<FounderRoute><CollectionsPaymentPlans /></FounderRoute>} />
+            <Route path="/founder/collections/service-holds" element={<FounderRoute><CollectionsServiceHolds /></FounderRoute>} />
+            <Route path="/founder/collections/settings" element={<FounderRoute><CollectionsSettings /></FounderRoute>} />
             <Route path="/founder/platform-monitor" element={<FounderRoute><PlatMonOverview /></FounderRoute>} />
             <Route path="/founder/platform-monitor/performance" element={<FounderRoute><PlatMonPerformance /></FounderRoute>} />
             <Route path="/founder/platform-monitor/errors" element={<FounderRoute><PlatMonErrors /></FounderRoute>} />

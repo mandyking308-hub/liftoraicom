@@ -72,6 +72,7 @@ import TrustSafetyCard from "./TrustSafetyCard";
 import InternalSlaCard from "./InternalSlaCard";
 import DeploymentControlCard from "./DeploymentControlCard";
 import PlatformMonitorCard from "./PlatformMonitorCard";
+import CollectionsCard from "./CollectionsCard";
 
 /**
  * Business Process Spine — single integrated panel that surfaces every
@@ -136,6 +137,7 @@ export default function BusinessProcessSpinePanel() {
       <InternalSlaCard />
       <DeploymentControlCard />
       <PlatformMonitorCard />
+      <CollectionsCard />
 
       <PortalsCard />
 

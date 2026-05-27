@@ -6235,6 +6235,78 @@ export type Database = {
           },
         ]
       }
+      business_context_envelopes: {
+        Row: {
+          archetype_code: string | null
+          audit_metadata: Json
+          brand_name: string
+          business_id: string
+          compliance_profile_id: string | null
+          context_status: string
+          created_at: string
+          default_currency: string | null
+          default_market: string | null
+          entity_mapping_status: string
+          founder_confirmed: boolean
+          id: string
+          integration_status: string
+          legal_entity_id: string | null
+          lifecycle_stage: string | null
+          primary_domain: string | null
+          product_catalogue_status: string
+          public_brand_name: string | null
+          sales_email: string | null
+          support_email: string | null
+          updated_at: string
+        }
+        Insert: {
+          archetype_code?: string | null
+          audit_metadata?: Json
+          brand_name: string
+          business_id: string
+          compliance_profile_id?: string | null
+          context_status?: string
+          created_at?: string
+          default_currency?: string | null
+          default_market?: string | null
+          entity_mapping_status?: string
+          founder_confirmed?: boolean
+          id?: string
+          integration_status?: string
+          legal_entity_id?: string | null
+          lifecycle_stage?: string | null
+          primary_domain?: string | null
+          product_catalogue_status?: string
+          public_brand_name?: string | null
+          sales_email?: string | null
+          support_email?: string | null
+          updated_at?: string
+        }
+        Update: {
+          archetype_code?: string | null
+          audit_metadata?: Json
+          brand_name?: string
+          business_id?: string
+          compliance_profile_id?: string | null
+          context_status?: string
+          created_at?: string
+          default_currency?: string | null
+          default_market?: string | null
+          entity_mapping_status?: string
+          founder_confirmed?: boolean
+          id?: string
+          integration_status?: string
+          legal_entity_id?: string | null
+          lifecycle_stage?: string | null
+          primary_domain?: string | null
+          product_catalogue_status?: string
+          public_brand_name?: string | null
+          sales_email?: string | null
+          support_email?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       business_context_profiles: {
         Row: {
           approved_context_source_id: string | null
@@ -6280,6 +6352,54 @@ export type Database = {
           sales_email?: string | null
           support_email?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      business_context_validation_events: {
+        Row: {
+          action_taken: string
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          id: string
+          recommended_fix: string | null
+          resolved_at: string | null
+          severity: string
+          source_module: string
+          source_record_id: string | null
+          source_table: string | null
+          validation_summary: string
+          validation_type: string
+        }
+        Insert: {
+          action_taken?: string
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          recommended_fix?: string | null
+          resolved_at?: string | null
+          severity?: string
+          source_module: string
+          source_record_id?: string | null
+          source_table?: string | null
+          validation_summary: string
+          validation_type: string
+        }
+        Update: {
+          action_taken?: string
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          recommended_fix?: string | null
+          resolved_at?: string | null
+          severity?: string
+          source_module?: string
+          source_record_id?: string | null
+          source_table?: string | null
+          validation_summary?: string
+          validation_type?: string
         }
         Relationships: []
       }
@@ -11207,6 +11327,468 @@ export type Database = {
         }
         Relationships: []
       }
+      collections_failed_payments: {
+        Row: {
+          amount: number
+          approved_to_retry: boolean
+          attempt_count: number
+          business_name: string | null
+          contact_id: string | null
+          created_at: string
+          currency: string
+          failure_code: string | null
+          failure_reason: string | null
+          id: string
+          invoice_reference: string | null
+          is_test_data: boolean
+          last_attempt_at: string | null
+          provider: string | null
+          recovery_status: string
+          requires_external_action: boolean
+          retry_recommendation: string
+          trace_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          approved_to_retry?: boolean
+          attempt_count?: number
+          business_name?: string | null
+          contact_id?: string | null
+          created_at?: string
+          currency?: string
+          failure_code?: string | null
+          failure_reason?: string | null
+          id?: string
+          invoice_reference?: string | null
+          is_test_data?: boolean
+          last_attempt_at?: string | null
+          provider?: string | null
+          recovery_status?: string
+          requires_external_action?: boolean
+          retry_recommendation?: string
+          trace_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          approved_to_retry?: boolean
+          attempt_count?: number
+          business_name?: string | null
+          contact_id?: string | null
+          created_at?: string
+          currency?: string
+          failure_code?: string | null
+          failure_reason?: string | null
+          id?: string
+          invoice_reference?: string | null
+          is_test_data?: boolean
+          last_attempt_at?: string | null
+          provider?: string | null
+          recovery_status?: string
+          requires_external_action?: boolean
+          retry_recommendation?: string
+          trace_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      collections_overdue_invoices: {
+        Row: {
+          amount_outstanding: number
+          business_name: string | null
+          collection_status: string
+          contact_id: string | null
+          created_at: string
+          currency: string
+          customer_label: string | null
+          days_overdue: number
+          due_date: string | null
+          founder_review_required: boolean
+          id: string
+          invoice_reference: string
+          is_test_data: boolean
+          notes: string | null
+          risk_tier: string
+          trace_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount_outstanding?: number
+          business_name?: string | null
+          collection_status?: string
+          contact_id?: string | null
+          created_at?: string
+          currency?: string
+          customer_label?: string | null
+          days_overdue?: number
+          due_date?: string | null
+          founder_review_required?: boolean
+          id?: string
+          invoice_reference: string
+          is_test_data?: boolean
+          notes?: string | null
+          risk_tier?: string
+          trace_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount_outstanding?: number
+          business_name?: string | null
+          collection_status?: string
+          contact_id?: string | null
+          created_at?: string
+          currency?: string
+          customer_label?: string | null
+          days_overdue?: number
+          due_date?: string | null
+          founder_review_required?: boolean
+          id?: string
+          invoice_reference?: string
+          is_test_data?: boolean
+          notes?: string | null
+          risk_tier?: string
+          trace_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      collections_payment_plans: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          business_name: string | null
+          cadence: string
+          contact_id: string | null
+          created_at: string
+          currency: string
+          first_instalment_date: string | null
+          id: string
+          instalment_count: number
+          invoice_reference: string | null
+          is_test_data: boolean
+          notes: string | null
+          overdue_invoice_id: string | null
+          plan_status: string
+          requires_approval: boolean
+          total_amount: number
+          trace_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          business_name?: string | null
+          cadence?: string
+          contact_id?: string | null
+          created_at?: string
+          currency?: string
+          first_instalment_date?: string | null
+          id?: string
+          instalment_count?: number
+          invoice_reference?: string | null
+          is_test_data?: boolean
+          notes?: string | null
+          overdue_invoice_id?: string | null
+          plan_status?: string
+          requires_approval?: boolean
+          total_amount?: number
+          trace_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          business_name?: string | null
+          cadence?: string
+          contact_id?: string | null
+          created_at?: string
+          currency?: string
+          first_instalment_date?: string | null
+          id?: string
+          instalment_count?: number
+          invoice_reference?: string | null
+          is_test_data?: boolean
+          notes?: string | null
+          overdue_invoice_id?: string | null
+          plan_status?: string
+          requires_approval?: boolean
+          total_amount?: number
+          trace_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collections_payment_plans_overdue_invoice_id_fkey"
+            columns: ["overdue_invoice_id"]
+            isOneToOne: false
+            referencedRelation: "collections_overdue_invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collections_recovery_actions: {
+        Row: {
+          action_status: string
+          action_type: string
+          approved_at: string | null
+          approved_by: string | null
+          business_name: string | null
+          created_at: string
+          executed_at: string | null
+          failed_payment_id: string | null
+          id: string
+          invoice_reference: string | null
+          is_test_data: boolean
+          overdue_invoice_id: string | null
+          rationale: string | null
+          requires_approval: boolean
+          requires_external_action: boolean
+          trace_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          action_status?: string
+          action_type: string
+          approved_at?: string | null
+          approved_by?: string | null
+          business_name?: string | null
+          created_at?: string
+          executed_at?: string | null
+          failed_payment_id?: string | null
+          id?: string
+          invoice_reference?: string | null
+          is_test_data?: boolean
+          overdue_invoice_id?: string | null
+          rationale?: string | null
+          requires_approval?: boolean
+          requires_external_action?: boolean
+          trace_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          action_status?: string
+          action_type?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          business_name?: string | null
+          created_at?: string
+          executed_at?: string | null
+          failed_payment_id?: string | null
+          id?: string
+          invoice_reference?: string | null
+          is_test_data?: boolean
+          overdue_invoice_id?: string | null
+          rationale?: string | null
+          requires_approval?: boolean
+          requires_external_action?: boolean
+          trace_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collections_recovery_actions_failed_payment_id_fkey"
+            columns: ["failed_payment_id"]
+            isOneToOne: false
+            referencedRelation: "collections_failed_payments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collections_recovery_actions_overdue_invoice_id_fkey"
+            columns: ["overdue_invoice_id"]
+            isOneToOne: false
+            referencedRelation: "collections_overdue_invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collections_reminder_drafts: {
+        Row: {
+          approval_status: string
+          approved_at: string | null
+          approved_by: string | null
+          business_name: string | null
+          channel: string
+          contact_id: string | null
+          created_at: string
+          draft_body: string
+          draft_subject: string | null
+          id: string
+          invoice_reference: string | null
+          is_test_data: boolean
+          overdue_invoice_id: string | null
+          requires_external_send: boolean
+          sent_at: string | null
+          tone: string
+          trace_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          business_name?: string | null
+          channel?: string
+          contact_id?: string | null
+          created_at?: string
+          draft_body: string
+          draft_subject?: string | null
+          id?: string
+          invoice_reference?: string | null
+          is_test_data?: boolean
+          overdue_invoice_id?: string | null
+          requires_external_send?: boolean
+          sent_at?: string | null
+          tone?: string
+          trace_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          business_name?: string | null
+          channel?: string
+          contact_id?: string | null
+          created_at?: string
+          draft_body?: string
+          draft_subject?: string | null
+          id?: string
+          invoice_reference?: string | null
+          is_test_data?: boolean
+          overdue_invoice_id?: string | null
+          requires_external_send?: boolean
+          sent_at?: string | null
+          tone?: string
+          trace_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collections_reminder_drafts_overdue_invoice_id_fkey"
+            columns: ["overdue_invoice_id"]
+            isOneToOne: false
+            referencedRelation: "collections_overdue_invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collections_service_hold_recommendations: {
+        Row: {
+          business_name: string | null
+          contact_id: string | null
+          created_at: string
+          customer_label: string | null
+          executed: boolean
+          founder_decision: string | null
+          founder_decision_at: string | null
+          hold_scope: string
+          hold_status: string
+          id: string
+          is_test_data: boolean
+          justification: string
+          risk_score: number
+          trace_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_name?: string | null
+          contact_id?: string | null
+          created_at?: string
+          customer_label?: string | null
+          executed?: boolean
+          founder_decision?: string | null
+          founder_decision_at?: string | null
+          hold_scope?: string
+          hold_status?: string
+          id?: string
+          is_test_data?: boolean
+          justification: string
+          risk_score?: number
+          trace_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_name?: string | null
+          contact_id?: string | null
+          created_at?: string
+          customer_label?: string | null
+          executed?: boolean
+          founder_decision?: string | null
+          founder_decision_at?: string | null
+          hold_scope?: string
+          hold_status?: string
+          id?: string
+          is_test_data?: boolean
+          justification?: string
+          risk_score?: number
+          trace_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      collections_writeoff_decisions: {
+        Row: {
+          amount: number
+          applied: boolean
+          business_name: string | null
+          created_at: string
+          currency: string
+          founder_decision: string | null
+          founder_decision_at: string | null
+          id: string
+          invoice_reference: string | null
+          is_test_data: boolean
+          overdue_invoice_id: string | null
+          reason: string | null
+          recommendation: string
+          trace_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          applied?: boolean
+          business_name?: string | null
+          created_at?: string
+          currency?: string
+          founder_decision?: string | null
+          founder_decision_at?: string | null
+          id?: string
+          invoice_reference?: string | null
+          is_test_data?: boolean
+          overdue_invoice_id?: string | null
+          reason?: string | null
+          recommendation?: string
+          trace_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          applied?: boolean
+          business_name?: string | null
+          created_at?: string
+          currency?: string
+          founder_decision?: string | null
+          founder_decision_at?: string | null
+          id?: string
+          invoice_reference?: string | null
+          is_test_data?: boolean
+          overdue_invoice_id?: string | null
+          reason?: string | null
+          recommendation?: string
+          trace_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collections_writeoff_decisions_overdue_invoice_id_fkey"
+            columns: ["overdue_invoice_id"]
+            isOneToOne: false
+            referencedRelation: "collections_overdue_invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       command_centre_customer_journey_steps: {
         Row: {
           business_scoped: boolean | null
@@ -13175,6 +13757,53 @@ export type Database = {
         }
         Relationships: []
       }
+      context_repair_actions: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          founder_approval_required: boolean
+          id: string
+          irreversible: boolean
+          repair_status: string
+          repair_type: string
+          updated_at: string
+          validation_event_id: string | null
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          founder_approval_required?: boolean
+          id?: string
+          irreversible?: boolean
+          repair_status?: string
+          repair_type: string
+          updated_at?: string
+          validation_event_id?: string | null
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          founder_approval_required?: boolean
+          id?: string
+          irreversible?: boolean
+          repair_status?: string
+          repair_type?: string
+          updated_at?: string
+          validation_event_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "context_repair_actions_validation_event_id_fkey"
+            columns: ["validation_event_id"]
+            isOneToOne: false
+            referencedRelation: "business_context_validation_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       continuity_plans: {
         Row: {
           active: boolean
@@ -14946,6 +15575,54 @@ export type Database = {
           rule_key?: string
           source_stage?: string | null
           suppression_trigger_allowed?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      cross_module_record_links: {
+        Row: {
+          audit_metadata: Json
+          business_id: string | null
+          created_at: string
+          id: string
+          link_status: string
+          link_type: string
+          source_module: string
+          source_record_id: string
+          source_table: string
+          target_module: string
+          target_record_id: string
+          target_table: string
+          updated_at: string
+        }
+        Insert: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          link_status?: string
+          link_type: string
+          source_module: string
+          source_record_id: string
+          source_table: string
+          target_module: string
+          target_record_id: string
+          target_table: string
+          updated_at?: string
+        }
+        Update: {
+          audit_metadata?: Json
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          link_status?: string
+          link_type?: string
+          source_module?: string
+          source_record_id?: string
+          source_table?: string
+          target_module?: string
+          target_record_id?: string
+          target_table?: string
           updated_at?: string
         }
         Relationships: []
@@ -33560,6 +34237,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      module_integration_contracts: {
+        Row: {
+          active: boolean
+          allowed_event_types: string[]
+          allowed_work_item_types: string[]
+          approval_required_for_external: boolean
+          contract_name: string
+          created_at: string
+          external_action_possible: boolean
+          id: string
+          optional_context_fields: string[]
+          required_context_fields: string[]
+          required_source_fields: string[]
+          source_module: string
+          target_module: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          allowed_event_types?: string[]
+          allowed_work_item_types?: string[]
+          approval_required_for_external?: boolean
+          contract_name: string
+          created_at?: string
+          external_action_possible?: boolean
+          id?: string
+          optional_context_fields?: string[]
+          required_context_fields?: string[]
+          required_source_fields?: string[]
+          source_module: string
+          target_module: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          allowed_event_types?: string[]
+          allowed_work_item_types?: string[]
+          approval_required_for_external?: boolean
+          contract_name?: string
+          created_at?: string
+          external_action_possible?: boolean
+          id?: string
+          optional_context_fields?: string[]
+          required_context_fields?: string[]
+          required_source_fields?: string[]
+          source_module?: string
+          target_module?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       module_permission_matrix: {
         Row: {
