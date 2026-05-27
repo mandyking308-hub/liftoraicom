@@ -42,7 +42,7 @@ export default function EvalsOverview() {
       <Card className="tech-card">
         <CardHeader className="pb-2"><CardTitle className="text-sm">Integrated with</CardTitle></CardHeader>
         <CardContent className="text-xs text-muted-foreground">
-          AI Gateway · AI Cost Governor · Prompt Templates · Context Guard · Business Compliance · Master Work Queue · Command Centre · Manuals.
+          AI Gateway · AI Cost Governor · Prompt Templates · Context Fabric · Business Compliance · Master Work Queue · Command Centre · Manuals.
         </CardContent>
       </Card>
     </EvalLayout>

@@ -124,7 +124,7 @@ export const DIVERSITY_MODULES: Array<{ key: keyof DiversityCounts; label: strin
   { key: "launch_items_missing",      label: "Launch basics missing",       to: "/founder/launch-factory" },
   { key: "integrations_missing",      label: "Integrations missing",        to: "/founder/integration-map" },
   { key: "compliance_high_risk",      label: "Compliance risks",            to: "/founder/business-compliance" },
-  { key: "context_warnings",          label: "Context guard warnings",      to: "/founder/context-guard" },
+  { key: "context_warnings",          label: "Context fabric warnings",     to: "/founder/context-fabric" },
   { key: "priority_recommendations",  label: "Priority recommendations",    to: "/founder/portfolio-prioritisation" },
   { key: "resource_allocations",      label: "Resource allocation items",   to: "/founder/resource-allocation" },
   { key: "portfolio_risk_high",       label: "Portfolio risk (high)",       to: "/founder/portfolio-risk" },

@@ -118,7 +118,7 @@ const CORE_AGENTS: Array<{ key: string; name: string; to: string; category: stri
   { key: "launch_factory_agent", name: "Launch Factory Agent", to: "/founder/launch-factory", category: "operations" },
   { key: "integration_planner_agent", name: "Integration Planner Agent", to: "/founder/integration-map", category: "operations" },
   { key: "compliance_rules_agent", name: "Compliance Rules Agent", to: "/founder/business-compliance", category: "security" },
-  { key: "context_guard_agent", name: "Context Guard Agent", to: "/founder/context-guard", category: "security" },
+  { key: "context_guard_agent", name: "Context Fabric Agent", to: "/founder/context-fabric", category: "security" },
   { key: "portfolio_prioritisation_agent", name: "Portfolio Prioritisation Agent", to: "/founder/portfolio-prioritisation", category: "strategy" },
   { key: "resource_allocation_agent", name: "Resource Allocation Agent", to: "/founder/resource-allocation", category: "strategy" },
   { key: "portfolio_risk_agent", name: "Portfolio Risk Agent", to: "/founder/portfolio-risk", category: "security" },

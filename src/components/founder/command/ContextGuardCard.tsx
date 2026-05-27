@@ -18,7 +18,7 @@ export default function ContextGuardCard() {
       <CardHeader className="pb-2">
         <CardTitle className="text-sm flex items-center gap-2">
           <ShieldCheck size={14} className="text-primary" />
-          Multi-Business Context Guard
+          Multi-Business Context Fabric
           <Badge variant="outline" className="ml-auto text-[10px] bg-emerald-500/10 text-emerald-400 border-emerald-500/30">Live</Badge>
         </CardTitle>
       </CardHeader>
@@ -32,10 +32,10 @@ export default function ContextGuardCard() {
         {sum.blocked_24h > 0 && <p className="text-destructive">{sum.blocked_24h} external action{sum.blocked_24h === 1 ? "" : "s"} blocked.</p>}
         {sum.approvals_24h > 0 && <p className="text-yellow-300">{sum.approvals_24h} item{sum.approvals_24h === 1 ? "" : "s"} routed to approval.</p>}
         <div className="flex gap-2 pt-1 flex-wrap">
-          <Link to="/founder/context-guard" className="text-primary hover:underline">Overview</Link>
-          <Link to="/founder/context-guard/events" className="text-primary hover:underline">Events</Link>
-          <Link to="/founder/context-guard/missing-business" className="text-primary hover:underline">Missing</Link>
-          <Link to="/founder/context-guard/cross-contamination" className="text-primary hover:underline">Cross-contamination</Link>
+          <Link to="/founder/context-fabric" className="text-primary hover:underline">Overview</Link>
+          <Link to="/founder/context-fabric/events" className="text-primary hover:underline">Events</Link>
+          <Link to="/founder/context-fabric/missing-business" className="text-primary hover:underline">Missing</Link>
+          <Link to="/founder/context-fabric/cross-contamination" className="text-primary hover:underline">Cross-contamination</Link>
         </div>
       </CardContent>
     </Card>

@@ -5,11 +5,11 @@ import { Badge } from "@/components/ui/badge";
 import { ShieldCheck, ArrowLeft, Lock } from "lucide-react";
 
 export const CG_NAV = [
-  { to: "/founder/context-guard", label: "Overview" },
-  { to: "/founder/context-guard/events", label: "Events" },
-  { to: "/founder/context-guard/missing-business", label: "Missing business" },
-  { to: "/founder/context-guard/cross-contamination", label: "Cross-contamination" },
-  { to: "/founder/context-guard/settings", label: "Settings" },
+  { to: "/founder/context-fabric", label: "Overview" },
+  { to: "/founder/context-fabric/events", label: "Events" },
+  { to: "/founder/context-fabric/missing-business", label: "Missing business" },
+  { to: "/founder/context-fabric/cross-contamination", label: "Cross-contamination" },
+  { to: "/founder/context-fabric/settings", label: "Settings" },
 ];
 
 export function CGLayout({ title, subtitle, children, actions }: { title: string; subtitle?: string; children: ReactNode; actions?: ReactNode }) {
@@ -22,7 +22,7 @@ export function CGLayout({ title, subtitle, children, actions }: { title: string
             <ArrowLeft size={12} /> Command Centre
           </Link>
           <span>/</span>
-          <span>Context Guard</span>
+          <span>Context Fabric</span>
         </div>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>

@@ -1098,11 +1098,18 @@ const App = () => (
             <Route path="/founder/business-compliance/claims" element={<FounderRoute><BCClaims /></FounderRoute>} />
             <Route path="/founder/business-compliance/channels" element={<FounderRoute><BCChannels /></FounderRoute>} />
             <Route path="/founder/business-compliance/approval-triggers" element={<FounderRoute><BCApprovalTriggers /></FounderRoute>} />
-            <Route path="/founder/context-guard" element={<FounderRoute><CGOverview /></FounderRoute>} />
-            <Route path="/founder/context-guard/events" element={<FounderRoute><CGEvents /></FounderRoute>} />
-            <Route path="/founder/context-guard/missing-business" element={<FounderRoute><CGMissing /></FounderRoute>} />
-            <Route path="/founder/context-guard/cross-contamination" element={<FounderRoute><CGCross /></FounderRoute>} />
-            <Route path="/founder/context-guard/settings" element={<FounderRoute><CGSettings /></FounderRoute>} />
+            {/* Canonical: Multi-Business Context Fabric */}
+            <Route path="/founder/context-fabric" element={<FounderRoute><CGOverview /></FounderRoute>} />
+            <Route path="/founder/context-fabric/events" element={<FounderRoute><CGEvents /></FounderRoute>} />
+            <Route path="/founder/context-fabric/missing-business" element={<FounderRoute><CGMissing /></FounderRoute>} />
+            <Route path="/founder/context-fabric/cross-contamination" element={<FounderRoute><CGCross /></FounderRoute>} />
+            <Route path="/founder/context-fabric/settings" element={<FounderRoute><CGSettings /></FounderRoute>} />
+            {/* Backward-compat aliases — old Context Guard URLs redirect to canonical Context Fabric */}
+            <Route path="/founder/context-guard" element={<Navigate to="/founder/context-fabric" replace />} />
+            <Route path="/founder/context-guard/events" element={<Navigate to="/founder/context-fabric/events" replace />} />
+            <Route path="/founder/context-guard/missing-business" element={<Navigate to="/founder/context-fabric/missing-business" replace />} />
+            <Route path="/founder/context-guard/cross-contamination" element={<Navigate to="/founder/context-fabric/cross-contamination" replace />} />
+            <Route path="/founder/context-guard/settings" element={<Navigate to="/founder/context-fabric/settings" replace />} />
             <Route path="/founder/portfolio-prioritisation" element={<FounderRoute><PPOverview /></FounderRoute>} />
             <Route path="/founder/portfolio-prioritisation/scores" element={<FounderRoute><PPScores /></FounderRoute>} />
             <Route path="/founder/portfolio-prioritisation/build-now" element={<FounderRoute><PPBuildNow /></FounderRoute>} />
