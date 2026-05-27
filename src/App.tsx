@@ -605,6 +605,11 @@ import VocTestimonials from "./pages/founder/customer-feedback/Testimonials";
 import VocReviews from "./pages/founder/customer-feedback/Reviews";
 import VocChurnReasons from "./pages/founder/customer-feedback/ChurnReasons";
 import VocInsights from "./pages/founder/customer-feedback/Insights";
+import ExperimentsOverview from "./pages/founder/experiments/Overview";
+import ExperimentPlans from "./pages/founder/experiments/Plans";
+import ExperimentResults from "./pages/founder/experiments/Results";
+import ExperimentWinners from "./pages/founder/experiments/Winners";
+import ExperimentLearningLibrary from "./pages/founder/experiments/LearningLibrary";
 import PlatMonOverview from "./pages/founder/platform-monitor/Overview";
 import PlatMonPerformance from "./pages/founder/platform-monitor/Performance";
 import PlatMonErrors from "./pages/founder/platform-monitor/Errors";
@@ -1335,6 +1340,11 @@ const App = () => (
             <Route path="/founder/customer-feedback/reviews" element={<FounderRoute><VocReviews /></FounderRoute>} />
             <Route path="/founder/customer-feedback/churn-reasons" element={<FounderRoute><VocChurnReasons /></FounderRoute>} />
             <Route path="/founder/customer-feedback/insights" element={<FounderRoute><VocInsights /></FounderRoute>} />
+            <Route path="/founder/experiments" element={<FounderRoute><ExperimentsOverview /></FounderRoute>} />
+            <Route path="/founder/experiments/plans" element={<FounderRoute><ExperimentPlans /></FounderRoute>} />
+            <Route path="/founder/experiments/results" element={<FounderRoute><ExperimentResults /></FounderRoute>} />
+            <Route path="/founder/experiments/winners" element={<FounderRoute><ExperimentWinners /></FounderRoute>} />
+            <Route path="/founder/experiments/learning-library" element={<FounderRoute><ExperimentLearningLibrary /></FounderRoute>} />
             <Route path="/founder/platform-monitor" element={<FounderRoute><PlatMonOverview /></FounderRoute>} />
             <Route path="/founder/platform-monitor/performance" element={<FounderRoute><PlatMonPerformance /></FounderRoute>} />
             <Route path="/founder/platform-monitor/errors" element={<FounderRoute><PlatMonErrors /></FounderRoute>} />
