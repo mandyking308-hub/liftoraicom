@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { formatGBP } from "@/services/aiUsageLogger";
 import SystemModeSwitcherCard from "@/components/founder/command/SystemModeSwitcherCard";
+import FounderHealthCockpitCard from "@/components/founder/command/FounderHealthCockpitCard";
 
 type CockpitData = {
   spendToday: number;
@@ -260,6 +261,9 @@ export default function FounderCockpit() {
       </Card>
       <div className="mt-4">
         <SystemModeSwitcherCard />
+      </div>
+      <div className="mt-4">
+        <FounderHealthCockpitCard />
       </div>
     </div>
   );
