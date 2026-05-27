@@ -623,6 +623,12 @@ import PoliciesCoverage from "./pages/founder/policies/Coverage";
 import PoliciesDrafts from "./pages/founder/policies/Drafts";
 import PoliciesReview from "./pages/founder/policies/Review";
 import PoliciesPublicPages from "./pages/founder/policies/PublicPages";
+import AgentCapabilitiesOverview from "./pages/founder/agent-capabilities/Overview";
+import AgentCapabilitiesRegistry from "./pages/founder/agent-capabilities/Registry";
+import AgentCapabilitiesBoundaries from "./pages/founder/agent-capabilities/Boundaries";
+import AgentCapabilitiesApprovalRules from "./pages/founder/agent-capabilities/ApprovalRules";
+import AgentCapabilitiesEscalations from "./pages/founder/agent-capabilities/Escalations";
+import AgentCapabilitiesAudit from "./pages/founder/agent-capabilities/Audit";
 import PlatMonOverview from "./pages/founder/platform-monitor/Overview";
 import PlatMonPerformance from "./pages/founder/platform-monitor/Performance";
 import PlatMonErrors from "./pages/founder/platform-monitor/Errors";
@@ -1371,6 +1377,12 @@ const App = () => (
             <Route path="/founder/policies/drafts" element={<FounderRoute><PoliciesDrafts /></FounderRoute>} />
             <Route path="/founder/policies/review" element={<FounderRoute><PoliciesReview /></FounderRoute>} />
             <Route path="/founder/policies/public-pages" element={<FounderRoute><PoliciesPublicPages /></FounderRoute>} />
+            <Route path="/founder/agent-capabilities" element={<FounderRoute><AgentCapabilitiesOverview /></FounderRoute>} />
+            <Route path="/founder/agent-capabilities/registry" element={<FounderRoute><AgentCapabilitiesRegistry /></FounderRoute>} />
+            <Route path="/founder/agent-capabilities/boundaries" element={<FounderRoute><AgentCapabilitiesBoundaries /></FounderRoute>} />
+            <Route path="/founder/agent-capabilities/approval-rules" element={<FounderRoute><AgentCapabilitiesApprovalRules /></FounderRoute>} />
+            <Route path="/founder/agent-capabilities/escalations" element={<FounderRoute><AgentCapabilitiesEscalations /></FounderRoute>} />
+            <Route path="/founder/agent-capabilities/audit" element={<FounderRoute><AgentCapabilitiesAudit /></FounderRoute>} />
             <Route path="/founder/platform-monitor" element={<FounderRoute><PlatMonOverview /></FounderRoute>} />
             <Route path="/founder/platform-monitor/performance" element={<FounderRoute><PlatMonPerformance /></FounderRoute>} />
             <Route path="/founder/platform-monitor/errors" element={<FounderRoute><PlatMonErrors /></FounderRoute>} />
