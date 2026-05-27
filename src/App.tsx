@@ -598,6 +598,13 @@ import CollectionsReminders from "./pages/founder/collections/Reminders";
 import CollectionsPaymentPlans from "./pages/founder/collections/PaymentPlans";
 import CollectionsServiceHolds from "./pages/founder/collections/ServiceHolds";
 import CollectionsSettings from "./pages/founder/collections/Settings";
+import VocOverview from "./pages/founder/customer-feedback/Overview";
+import VocSignals from "./pages/founder/customer-feedback/Signals";
+import VocFeatureRequests from "./pages/founder/customer-feedback/FeatureRequests";
+import VocTestimonials from "./pages/founder/customer-feedback/Testimonials";
+import VocReviews from "./pages/founder/customer-feedback/Reviews";
+import VocChurnReasons from "./pages/founder/customer-feedback/ChurnReasons";
+import VocInsights from "./pages/founder/customer-feedback/Insights";
 import PlatMonOverview from "./pages/founder/platform-monitor/Overview";
 import PlatMonPerformance from "./pages/founder/platform-monitor/Performance";
 import PlatMonErrors from "./pages/founder/platform-monitor/Errors";
@@ -1321,6 +1328,13 @@ const App = () => (
             <Route path="/founder/collections/payment-plans" element={<FounderRoute><CollectionsPaymentPlans /></FounderRoute>} />
             <Route path="/founder/collections/service-holds" element={<FounderRoute><CollectionsServiceHolds /></FounderRoute>} />
             <Route path="/founder/collections/settings" element={<FounderRoute><CollectionsSettings /></FounderRoute>} />
+            <Route path="/founder/customer-feedback" element={<FounderRoute><VocOverview /></FounderRoute>} />
+            <Route path="/founder/customer-feedback/signals" element={<FounderRoute><VocSignals /></FounderRoute>} />
+            <Route path="/founder/customer-feedback/feature-requests" element={<FounderRoute><VocFeatureRequests /></FounderRoute>} />
+            <Route path="/founder/customer-feedback/testimonials" element={<FounderRoute><VocTestimonials /></FounderRoute>} />
+            <Route path="/founder/customer-feedback/reviews" element={<FounderRoute><VocReviews /></FounderRoute>} />
+            <Route path="/founder/customer-feedback/churn-reasons" element={<FounderRoute><VocChurnReasons /></FounderRoute>} />
+            <Route path="/founder/customer-feedback/insights" element={<FounderRoute><VocInsights /></FounderRoute>} />
             <Route path="/founder/platform-monitor" element={<FounderRoute><PlatMonOverview /></FounderRoute>} />
             <Route path="/founder/platform-monitor/performance" element={<FounderRoute><PlatMonPerformance /></FounderRoute>} />
             <Route path="/founder/platform-monitor/errors" element={<FounderRoute><PlatMonErrors /></FounderRoute>} />
