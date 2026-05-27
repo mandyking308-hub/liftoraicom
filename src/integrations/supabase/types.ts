@@ -838,6 +838,103 @@ export type Database = {
           },
         ]
       }
+      agent_approval_requirements: {
+        Row: {
+          action: string
+          agent_id: string | null
+          created_at: string
+          id: string
+          is_pre_approved: boolean
+          is_test_data: boolean
+          required_approver: string
+          rule_summary: string | null
+          trace_id: string | null
+        }
+        Insert: {
+          action: string
+          agent_id?: string | null
+          created_at?: string
+          id?: string
+          is_pre_approved?: boolean
+          is_test_data?: boolean
+          required_approver?: string
+          rule_summary?: string | null
+          trace_id?: string | null
+        }
+        Update: {
+          action?: string
+          agent_id?: string | null
+          created_at?: string
+          id?: string
+          is_pre_approved?: boolean
+          is_test_data?: boolean
+          required_approver?: string
+          rule_summary?: string | null
+          trace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_approval_requirements_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agent_registry"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_boundary_violations: {
+        Row: {
+          agent_id: string | null
+          agent_name: string
+          attempted_action: string
+          created_at: string
+          detail: string | null
+          id: string
+          is_test_data: boolean
+          resolution: string | null
+          severity: string
+          status: string
+          trace_id: string | null
+          violation_type: string
+        }
+        Insert: {
+          agent_id?: string | null
+          agent_name: string
+          attempted_action: string
+          created_at?: string
+          detail?: string | null
+          id?: string
+          is_test_data?: boolean
+          resolution?: string | null
+          severity?: string
+          status?: string
+          trace_id?: string | null
+          violation_type: string
+        }
+        Update: {
+          agent_id?: string | null
+          agent_name?: string
+          attempted_action?: string
+          created_at?: string
+          detail?: string | null
+          id?: string
+          is_test_data?: boolean
+          resolution?: string | null
+          severity?: string
+          status?: string
+          trace_id?: string | null
+          violation_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_boundary_violations_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agent_registry"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agent_business_live_settings: {
         Row: {
           business_id: string | null
@@ -876,6 +973,91 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      agent_capabilities: {
+        Row: {
+          agent_id: string | null
+          capability: string
+          created_at: string
+          id: string
+          is_test_data: boolean
+          mode: string
+          notes: string | null
+          trace_id: string | null
+        }
+        Insert: {
+          agent_id?: string | null
+          capability: string
+          created_at?: string
+          id?: string
+          is_test_data?: boolean
+          mode?: string
+          notes?: string | null
+          trace_id?: string | null
+        }
+        Update: {
+          agent_id?: string | null
+          capability?: string
+          created_at?: string
+          id?: string
+          is_test_data?: boolean
+          mode?: string
+          notes?: string | null
+          trace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_capabilities_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agent_registry"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_escalation_triggers: {
+        Row: {
+          agent_id: string | null
+          created_at: string
+          escalate_to: string
+          id: string
+          is_test_data: boolean
+          notes: string | null
+          threshold: string | null
+          trace_id: string | null
+          trigger_type: string
+        }
+        Insert: {
+          agent_id?: string | null
+          created_at?: string
+          escalate_to?: string
+          id?: string
+          is_test_data?: boolean
+          notes?: string | null
+          threshold?: string | null
+          trace_id?: string | null
+          trigger_type: string
+        }
+        Update: {
+          agent_id?: string | null
+          created_at?: string
+          escalate_to?: string
+          id?: string
+          is_test_data?: boolean
+          notes?: string | null
+          threshold?: string | null
+          trace_id?: string | null
+          trigger_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_escalation_triggers_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agent_registry"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       agent_handover_log: {
         Row: {
@@ -994,6 +1176,142 @@ export type Database = {
           to_customer_stage?: string | null
           trigger_event?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      agent_module_permissions: {
+        Row: {
+          agent_id: string | null
+          created_at: string
+          id: string
+          is_test_data: boolean
+          module: string
+          notes: string | null
+          permission: string
+          trace_id: string | null
+        }
+        Insert: {
+          agent_id?: string | null
+          created_at?: string
+          id?: string
+          is_test_data?: boolean
+          module: string
+          notes?: string | null
+          permission?: string
+          trace_id?: string | null
+        }
+        Update: {
+          agent_id?: string | null
+          created_at?: string
+          id?: string
+          is_test_data?: boolean
+          module?: string
+          notes?: string | null
+          permission?: string
+          trace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_module_permissions_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agent_registry"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_prohibited_actions: {
+        Row: {
+          action: string
+          agent_id: string | null
+          created_at: string
+          id: string
+          is_test_data: boolean
+          reason: string | null
+          severity: string
+          trace_id: string | null
+        }
+        Insert: {
+          action: string
+          agent_id?: string | null
+          created_at?: string
+          id?: string
+          is_test_data?: boolean
+          reason?: string | null
+          severity?: string
+          trace_id?: string | null
+        }
+        Update: {
+          action?: string
+          agent_id?: string | null
+          created_at?: string
+          id?: string
+          is_test_data?: boolean
+          reason?: string | null
+          severity?: string
+          trace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_prohibited_actions_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agent_registry"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_registry: {
+        Row: {
+          agent_name: string
+          allowed_model_tier: string
+          business_scope: string
+          created_at: string
+          description: string | null
+          failure_behaviour: string
+          human_handoff_rule: string | null
+          id: string
+          is_test_data: boolean
+          max_ai_cost_usd: number
+          module_scope: string[]
+          owner_role: string
+          required_context_fields: string[]
+          status: string
+          trace_id: string | null
+        }
+        Insert: {
+          agent_name: string
+          allowed_model_tier?: string
+          business_scope?: string
+          created_at?: string
+          description?: string | null
+          failure_behaviour?: string
+          human_handoff_rule?: string | null
+          id?: string
+          is_test_data?: boolean
+          max_ai_cost_usd?: number
+          module_scope?: string[]
+          owner_role?: string
+          required_context_fields?: string[]
+          status?: string
+          trace_id?: string | null
+        }
+        Update: {
+          agent_name?: string
+          allowed_model_tier?: string
+          business_scope?: string
+          created_at?: string
+          description?: string | null
+          failure_behaviour?: string
+          human_handoff_rule?: string | null
+          id?: string
+          is_test_data?: boolean
+          max_ai_cost_usd?: number
+          module_scope?: string[]
+          owner_role?: string
+          required_context_fields?: string[]
+          status?: string
+          trace_id?: string | null
         }
         Relationships: []
       }
