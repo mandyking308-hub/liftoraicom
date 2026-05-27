@@ -55895,6 +55895,393 @@ export type Database = {
           },
         ]
       }
+      winddown_checklist_items: {
+        Row: {
+          category: string
+          created_at: string
+          detail: string | null
+          id: string
+          is_test_data: boolean
+          owner: string | null
+          plan_id: string | null
+          requires_approval: boolean
+          risk_level: string
+          status: string
+          task: string
+          trace_id: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          detail?: string | null
+          id?: string
+          is_test_data?: boolean
+          owner?: string | null
+          plan_id?: string | null
+          requires_approval?: boolean
+          risk_level?: string
+          status?: string
+          task: string
+          trace_id?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          detail?: string | null
+          id?: string
+          is_test_data?: boolean
+          owner?: string | null
+          plan_id?: string | null
+          requires_approval?: boolean
+          risk_level?: string
+          status?: string
+          task?: string
+          trace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "winddown_checklist_items_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "winddown_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      winddown_contract_terminations: {
+        Row: {
+          contract_type: string
+          counterparty: string
+          created_at: string
+          currency: string
+          founder_decision: string | null
+          id: string
+          is_test_data: boolean
+          legal_reviewed: boolean
+          notice_period_days: number
+          penalty_amount: number
+          plan_id: string | null
+          termination_clause_summary: string | null
+          termination_status: string
+          trace_id: string | null
+        }
+        Insert: {
+          contract_type: string
+          counterparty: string
+          created_at?: string
+          currency?: string
+          founder_decision?: string | null
+          id?: string
+          is_test_data?: boolean
+          legal_reviewed?: boolean
+          notice_period_days?: number
+          penalty_amount?: number
+          plan_id?: string | null
+          termination_clause_summary?: string | null
+          termination_status?: string
+          trace_id?: string | null
+        }
+        Update: {
+          contract_type?: string
+          counterparty?: string
+          created_at?: string
+          currency?: string
+          founder_decision?: string | null
+          id?: string
+          is_test_data?: boolean
+          legal_reviewed?: boolean
+          notice_period_days?: number
+          penalty_amount?: number
+          plan_id?: string | null
+          termination_clause_summary?: string | null
+          termination_status?: string
+          trace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "winddown_contract_terminations_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "winddown_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      winddown_customer_offboarding: {
+        Row: {
+          created_at: string
+          currency: string
+          customer_label: string
+          data_export_required: boolean
+          data_export_status: string
+          founder_decision: string | null
+          id: string
+          is_test_data: boolean
+          notice_required: boolean
+          notice_status: string
+          obligation_type: string
+          plan_id: string | null
+          refund_due: number
+          trace_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          customer_label: string
+          data_export_required?: boolean
+          data_export_status?: string
+          founder_decision?: string | null
+          id?: string
+          is_test_data?: boolean
+          notice_required?: boolean
+          notice_status?: string
+          obligation_type: string
+          plan_id?: string | null
+          refund_due?: number
+          trace_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          customer_label?: string
+          data_export_required?: boolean
+          data_export_status?: string
+          founder_decision?: string | null
+          id?: string
+          is_test_data?: boolean
+          notice_required?: boolean
+          notice_status?: string
+          obligation_type?: string
+          plan_id?: string | null
+          refund_due?: number
+          trace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "winddown_customer_offboarding_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "winddown_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      winddown_data_retention: {
+        Row: {
+          action: string
+          archive_location: string | null
+          audit_trail_preserved: boolean
+          created_at: string
+          dataset: string
+          founder_decision: string | null
+          id: string
+          is_test_data: boolean
+          plan_id: string | null
+          policy: string
+          retain_until: string | null
+          status: string
+          trace_id: string | null
+        }
+        Insert: {
+          action?: string
+          archive_location?: string | null
+          audit_trail_preserved?: boolean
+          created_at?: string
+          dataset: string
+          founder_decision?: string | null
+          id?: string
+          is_test_data?: boolean
+          plan_id?: string | null
+          policy: string
+          retain_until?: string | null
+          status?: string
+          trace_id?: string | null
+        }
+        Update: {
+          action?: string
+          archive_location?: string | null
+          audit_trail_preserved?: boolean
+          created_at?: string
+          dataset?: string
+          founder_decision?: string | null
+          id?: string
+          is_test_data?: boolean
+          plan_id?: string | null
+          policy?: string
+          retain_until?: string | null
+          status?: string
+          trace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "winddown_data_retention_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "winddown_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      winddown_legal_reviews: {
+        Row: {
+          adviser: string | null
+          created_at: string
+          feeds_decision_register: boolean
+          id: string
+          is_test_data: boolean
+          plan_id: string | null
+          question: string | null
+          recommendation: string | null
+          review_type: string
+          status: string
+          topic: string
+          trace_id: string | null
+        }
+        Insert: {
+          adviser?: string | null
+          created_at?: string
+          feeds_decision_register?: boolean
+          id?: string
+          is_test_data?: boolean
+          plan_id?: string | null
+          question?: string | null
+          recommendation?: string | null
+          review_type: string
+          status?: string
+          topic: string
+          trace_id?: string | null
+        }
+        Update: {
+          adviser?: string | null
+          created_at?: string
+          feeds_decision_register?: boolean
+          id?: string
+          is_test_data?: boolean
+          plan_id?: string | null
+          question?: string | null
+          recommendation?: string | null
+          review_type?: string
+          status?: string
+          topic?: string
+          trace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "winddown_legal_reviews_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "winddown_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      winddown_plans: {
+        Row: {
+          approval_status: string
+          business_name: string
+          created_at: string
+          founder_decision: string | null
+          id: string
+          is_test_data: boolean
+          mode: string
+          reason: string | null
+          requires_external_actions: boolean
+          risk_notes: string | null
+          status: string
+          target_date: string | null
+          trace_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          approval_status?: string
+          business_name: string
+          created_at?: string
+          founder_decision?: string | null
+          id?: string
+          is_test_data?: boolean
+          mode?: string
+          reason?: string | null
+          requires_external_actions?: boolean
+          risk_notes?: string | null
+          status?: string
+          target_date?: string | null
+          trace_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approval_status?: string
+          business_name?: string
+          created_at?: string
+          founder_decision?: string | null
+          id?: string
+          is_test_data?: boolean
+          mode?: string
+          reason?: string | null
+          requires_external_actions?: boolean
+          risk_notes?: string | null
+          status?: string
+          target_date?: string | null
+          trace_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      winddown_vendor_cancellations: {
+        Row: {
+          cancellation_status: string
+          created_at: string
+          currency: string
+          earliest_cancel_date: string | null
+          founder_decision: string | null
+          id: string
+          is_test_data: boolean
+          monthly_cost: number
+          notice_period_days: number
+          plan_id: string | null
+          service: string | null
+          trace_id: string | null
+          vendor_name: string
+        }
+        Insert: {
+          cancellation_status?: string
+          created_at?: string
+          currency?: string
+          earliest_cancel_date?: string | null
+          founder_decision?: string | null
+          id?: string
+          is_test_data?: boolean
+          monthly_cost?: number
+          notice_period_days?: number
+          plan_id?: string | null
+          service?: string | null
+          trace_id?: string | null
+          vendor_name: string
+        }
+        Update: {
+          cancellation_status?: string
+          created_at?: string
+          currency?: string
+          earliest_cancel_date?: string | null
+          founder_decision?: string | null
+          id?: string
+          is_test_data?: boolean
+          monthly_cost?: number
+          notice_period_days?: number
+          plan_id?: string | null
+          service?: string | null
+          trace_id?: string | null
+          vendor_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "winddown_vendor_cancellations_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "winddown_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workflow_activity_logs: {
         Row: {
           action: string
