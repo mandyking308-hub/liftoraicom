@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { CGLayout, CGSection, CGStat, SevBadge, ActionBadge } from "./_shared";
 import { fetchEvents, fetchProfiles, summarize, type ContextEvent, type ContextProfile } from "@/lib/contextGuardEngine";
+import { FabricActivationCard } from "@/components/founder/command/FabricActivationCard";
 
 export default function CGOverview() {
   const [events, setEvents] = useState<ContextEvent[]>([]);
@@ -14,6 +15,7 @@ export default function CGOverview() {
   return (
     <CGLayout title="Multi-Business Context Fabric"
       subtitle="Before any AI action, workflow, draft or external send, Liftor verifies which business it belongs to and refuses to mix brand voice, pricing, customers, legal entity, products, policies or compliance rules across businesses.">
+      <FabricActivationCard />
       <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
         <CGStat label="Context profiles" value={sum.profiles} hint="One per business" />
         <CGStat label="Events 24h" value={sum.events_24h} />
