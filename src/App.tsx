@@ -16,6 +16,7 @@ import SystemHealthOverview from "@/pages/founder/system-health/Overview";
 import CrossContaminationOverview from "@/pages/founder/cross-contamination/Overview";
 import RecoveryOverview from "@/pages/founder/recovery/Overview";
 import BusinessActivationOverview from "@/pages/founder/business-activation/Overview";
+import MondayReadinessOverview from "@/pages/founder/monday-readiness/Overview";
 import PartnerRoute from "@/components/partner/PartnerRoute";
 import ScrollToTop from "@/components/ScrollToTop";
 
@@ -1118,6 +1119,7 @@ const App = () => (
             <Route path="/founder/cross-contamination" element={<FounderRoute><CrossContaminationOverview /></FounderRoute>} />
             <Route path="/founder/recovery" element={<FounderRoute><RecoveryOverview /></FounderRoute>} />
             <Route path="/founder/business-activation" element={<FounderRoute><BusinessActivationOverview /></FounderRoute>} />
+            <Route path="/founder/monday-readiness" element={<FounderRoute><MondayReadinessOverview /></FounderRoute>} />
             {/* Backward-compat aliases — old Context Guard URLs redirect to canonical Context Fabric */}
             <Route path="/founder/context-guard" element={<Navigate to="/founder/context-fabric" replace />} />
             <Route path="/founder/context-guard/events" element={<Navigate to="/founder/context-fabric/events" replace />} />
