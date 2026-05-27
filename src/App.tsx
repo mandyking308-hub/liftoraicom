@@ -617,6 +617,12 @@ import WindDownCustomerOffboarding from "./pages/founder/wind-down/CustomerOffbo
 import WindDownVendorCancellation from "./pages/founder/wind-down/VendorCancellation";
 import WindDownDataRetention from "./pages/founder/wind-down/DataRetention";
 import WindDownArchive from "./pages/founder/wind-down/Archive";
+import PoliciesOverview from "./pages/founder/policies/Overview";
+import PoliciesBusinesses from "./pages/founder/policies/Businesses";
+import PoliciesCoverage from "./pages/founder/policies/Coverage";
+import PoliciesDrafts from "./pages/founder/policies/Drafts";
+import PoliciesReview from "./pages/founder/policies/Review";
+import PoliciesPublicPages from "./pages/founder/policies/PublicPages";
 import PlatMonOverview from "./pages/founder/platform-monitor/Overview";
 import PlatMonPerformance from "./pages/founder/platform-monitor/Performance";
 import PlatMonErrors from "./pages/founder/platform-monitor/Errors";
@@ -1359,6 +1365,12 @@ const App = () => (
             <Route path="/founder/business-wind-down/vendor-cancellation" element={<FounderRoute><WindDownVendorCancellation /></FounderRoute>} />
             <Route path="/founder/business-wind-down/data-retention" element={<FounderRoute><WindDownDataRetention /></FounderRoute>} />
             <Route path="/founder/business-wind-down/archive" element={<FounderRoute><WindDownArchive /></FounderRoute>} />
+            <Route path="/founder/policies" element={<FounderRoute><PoliciesOverview /></FounderRoute>} />
+            <Route path="/founder/policies/businesses" element={<FounderRoute><PoliciesBusinesses /></FounderRoute>} />
+            <Route path="/founder/policies/coverage" element={<FounderRoute><PoliciesCoverage /></FounderRoute>} />
+            <Route path="/founder/policies/drafts" element={<FounderRoute><PoliciesDrafts /></FounderRoute>} />
+            <Route path="/founder/policies/review" element={<FounderRoute><PoliciesReview /></FounderRoute>} />
+            <Route path="/founder/policies/public-pages" element={<FounderRoute><PoliciesPublicPages /></FounderRoute>} />
             <Route path="/founder/platform-monitor" element={<FounderRoute><PlatMonOverview /></FounderRoute>} />
             <Route path="/founder/platform-monitor/performance" element={<FounderRoute><PlatMonPerformance /></FounderRoute>} />
             <Route path="/founder/platform-monitor/errors" element={<FounderRoute><PlatMonErrors /></FounderRoute>} />

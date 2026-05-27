@@ -76,6 +76,7 @@ import CollectionsCard from "./CollectionsCard";
 import VoiceOfCustomerCard from "./VoiceOfCustomerCard";
 import ExperimentEngineCard from "./ExperimentEngineCard";
 import WindDownCard from "./WindDownCard";
+import PolicyCoverageCard from "./PolicyCoverageCard";
 
 /**
  * Business Process Spine — single integrated panel that surfaces every
@@ -144,6 +145,7 @@ export default function BusinessProcessSpinePanel() {
       <VoiceOfCustomerCard />
       <ExperimentEngineCard />
       <WindDownCard />
+      <PolicyCoverageCard />
 
       <PortalsCard />
 
