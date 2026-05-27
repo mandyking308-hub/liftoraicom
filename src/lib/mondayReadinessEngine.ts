@@ -108,9 +108,9 @@ export function checkFromRatio(
 
 /* ------------------------------ Loader -------------------------------- */
 
-async function safeCount(table: string, filters: (q: any) => any = (q) => q): Promise<number | null> {
+async function safeCount(table: any, filters: (q: any) => any = (q) => q): Promise<number | null> {
   try {
-    const q = filters(supabase.from(table).select("*", { count: "exact", head: true }));
+    const q = filters((supabase as any).from(table).select("*", { count: "exact", head: true }));
     const { count, error } = await q;
     if (error) return null;
     return count ?? 0;
@@ -119,9 +119,9 @@ async function safeCount(table: string, filters: (q: any) => any = (q) => q): Pr
   }
 }
 
-async function tableExists(table: string): Promise<boolean> {
+async function tableExists(table: any): Promise<boolean> {
   try {
-    const { error } = await supabase.from(table).select("*", { head: true, count: "exact" }).limit(1);
+    const { error } = await (supabase as any).from(table).select("*", { head: true, count: "exact" }).limit(1);
     return !error;
   } catch {
     return false;
@@ -181,13 +181,13 @@ export async function loadMondayReadiness(): Promise<ReadinessReport> {
   // System Health
   try {
     const health = await loadSystemHealth();
-    const ok = health.status === "healthy" || health.status === "degraded";
+    const ok = health.status === "GREEN" || health.status === "AMBER";
     checks.push({
       id: "system_health", label: "System Health Engine", category: "system_health",
       weight: 3, severity: ok ? "warning" : "blocker",
-      status: health.status === "healthy" ? "pass" : health.status === "degraded" ? "warn" : "fail",
-      score: Math.round(health.overallScore ?? 0),
-      message: `Health ${health.status} · score ${Math.round(health.overallScore ?? 0)}`,
+      status: health.status === "GREEN" ? "pass" : health.status === "AMBER" ? "warn" : "fail",
+      score: Math.round(health.score ?? 0),
+      message: `Health ${health.status} · score ${Math.round(health.score ?? 0)}`,
       fix: ok ? undefined : "Open /founder/system-health and triage red components.",
     });
   } catch {
