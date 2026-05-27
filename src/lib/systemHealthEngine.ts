@@ -271,7 +271,7 @@ export async function loadHealthTrend(hours = 12): Promise<Array<{ t: string; sc
   const since = new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
   const { data } = await supabase
     .from("ai_gateway_requests")
-    .select("status,created_at,latency_ms")
+    .select("status,created_at,started_at,completed_at")
     .gte("created_at", since)
     .limit(5000);
   const rows = (data ?? []) as any[];
@@ -283,7 +283,10 @@ export async function loadHealthTrend(hours = 12): Promise<Array<{ t: string; sc
     const b = buckets.get(key) ?? { fail: 0, total: 0, lat: [] };
     b.total += 1;
     if (r.status === "failed" || r.status === "rate_limited") b.fail += 1;
-    if (r.latency_ms) b.lat.push(Number(r.latency_ms));
+    if (r.started_at && r.completed_at) {
+      const lat = new Date(r.completed_at).getTime() - new Date(r.started_at).getTime();
+      if (lat > 0) b.lat.push(lat);
+    }
     buckets.set(key, b);
   }
   const series: Array<{ t: string; score: number; failRate: number }> = [];
