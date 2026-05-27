@@ -141,6 +141,7 @@ export default function BusinessProcessSpinePanel() {
       <PlatformMonitorCard />
       <CollectionsCard />
       <VoiceOfCustomerCard />
+      <ExperimentEngineCard />
 
       <PortalsCard />
 
