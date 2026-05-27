@@ -22,7 +22,7 @@ export default function DelegationPage() {
                 </div>
                 <div className="text-[10px] text-muted-foreground flex gap-3">
                   <span>{d.source_module}{d.source_ref ? ` - ${d.source_ref}` : ""}</span>
-                  {d.recommended_owner && <span>-> {d.recommended_owner}</span>}
+                  {d.recommended_owner && <span>{"-> "}{d.recommended_owner}</span>}
                   {d.defer_until && <span>until {d.defer_until}</span>}
                 </div>
               </div>
