@@ -610,6 +610,13 @@ import ExperimentPlans from "./pages/founder/experiments/Plans";
 import ExperimentResults from "./pages/founder/experiments/Results";
 import ExperimentWinners from "./pages/founder/experiments/Winners";
 import ExperimentLearningLibrary from "./pages/founder/experiments/LearningLibrary";
+import WindDownOverview from "./pages/founder/wind-down/Overview";
+import WindDownPause from "./pages/founder/wind-down/Pause";
+import WindDownClosureChecklist from "./pages/founder/wind-down/ClosureChecklist";
+import WindDownCustomerOffboarding from "./pages/founder/wind-down/CustomerOffboarding";
+import WindDownVendorCancellation from "./pages/founder/wind-down/VendorCancellation";
+import WindDownDataRetention from "./pages/founder/wind-down/DataRetention";
+import WindDownArchive from "./pages/founder/wind-down/Archive";
 import PlatMonOverview from "./pages/founder/platform-monitor/Overview";
 import PlatMonPerformance from "./pages/founder/platform-monitor/Performance";
 import PlatMonErrors from "./pages/founder/platform-monitor/Errors";
@@ -1345,6 +1352,13 @@ const App = () => (
             <Route path="/founder/experiments/results" element={<FounderRoute><ExperimentResults /></FounderRoute>} />
             <Route path="/founder/experiments/winners" element={<FounderRoute><ExperimentWinners /></FounderRoute>} />
             <Route path="/founder/experiments/learning-library" element={<FounderRoute><ExperimentLearningLibrary /></FounderRoute>} />
+            <Route path="/founder/business-wind-down" element={<FounderRoute><WindDownOverview /></FounderRoute>} />
+            <Route path="/founder/business-wind-down/pause" element={<FounderRoute><WindDownPause /></FounderRoute>} />
+            <Route path="/founder/business-wind-down/closure-checklist" element={<FounderRoute><WindDownClosureChecklist /></FounderRoute>} />
+            <Route path="/founder/business-wind-down/customer-offboarding" element={<FounderRoute><WindDownCustomerOffboarding /></FounderRoute>} />
+            <Route path="/founder/business-wind-down/vendor-cancellation" element={<FounderRoute><WindDownVendorCancellation /></FounderRoute>} />
+            <Route path="/founder/business-wind-down/data-retention" element={<FounderRoute><WindDownDataRetention /></FounderRoute>} />
+            <Route path="/founder/business-wind-down/archive" element={<FounderRoute><WindDownArchive /></FounderRoute>} />
             <Route path="/founder/platform-monitor" element={<FounderRoute><PlatMonOverview /></FounderRoute>} />
             <Route path="/founder/platform-monitor/performance" element={<FounderRoute><PlatMonPerformance /></FounderRoute>} />
             <Route path="/founder/platform-monitor/errors" element={<FounderRoute><PlatMonErrors /></FounderRoute>} />
