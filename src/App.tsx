@@ -1115,6 +1115,7 @@ const App = () => (
             <Route path="/founder/approvals-ops" element={<FounderRoute><ApprovalsOpsOverview /></FounderRoute>} />
             <Route path="/founder/system-health" element={<FounderRoute><SystemHealthOverview /></FounderRoute>} />
             <Route path="/founder/cross-contamination" element={<FounderRoute><CrossContaminationOverview /></FounderRoute>} />
+            <Route path="/founder/recovery" element={<FounderRoute><RecoveryOverview /></FounderRoute>} />
             {/* Backward-compat aliases — old Context Guard URLs redirect to canonical Context Fabric */}
             <Route path="/founder/context-guard" element={<Navigate to="/founder/context-fabric" replace />} />
             <Route path="/founder/context-guard/events" element={<Navigate to="/founder/context-fabric/events" replace />} />
