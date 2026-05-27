@@ -1107,6 +1107,7 @@ const App = () => (
             <Route path="/founder/context-fabric/missing-business" element={<FounderRoute><CGMissing /></FounderRoute>} />
             <Route path="/founder/context-fabric/cross-contamination" element={<FounderRoute><CGCross /></FounderRoute>} />
             <Route path="/founder/context-fabric/settings" element={<FounderRoute><CGSettings /></FounderRoute>} />
+            <Route path="/founder/runtime-mode" element={<FounderRoute><RuntimeModeOverview /></FounderRoute>} />
             {/* Backward-compat aliases — old Context Guard URLs redirect to canonical Context Fabric */}
             <Route path="/founder/context-guard" element={<Navigate to="/founder/context-fabric" replace />} />
             <Route path="/founder/context-guard/events" element={<Navigate to="/founder/context-fabric/events" replace />} />
