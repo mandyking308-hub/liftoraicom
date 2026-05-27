@@ -1111,6 +1111,7 @@ const App = () => (
             <Route path="/founder/context-fabric/settings" element={<FounderRoute><CGSettings /></FounderRoute>} />
             <Route path="/founder/runtime-mode" element={<FounderRoute><RuntimeModeOverview /></FounderRoute>} />
             <Route path="/founder/approvals-ops" element={<FounderRoute><ApprovalsOpsOverview /></FounderRoute>} />
+            <Route path="/founder/system-health" element={<FounderRoute><SystemHealthOverview /></FounderRoute>} />
             {/* Backward-compat aliases — old Context Guard URLs redirect to canonical Context Fabric */}
             <Route path="/founder/context-guard" element={<Navigate to="/founder/context-fabric" replace />} />
             <Route path="/founder/context-guard/events" element={<Navigate to="/founder/context-fabric/events" replace />} />
