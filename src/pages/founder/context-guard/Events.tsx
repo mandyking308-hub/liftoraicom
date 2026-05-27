@@ -6,7 +6,7 @@ export default function CGEvents() {
   const [events, setEvents] = useState<ContextEvent[]>([]);
   useEffect(() => { fetchEvents(500).then(setEvents).catch(() => {}); }, []);
   return (
-    <CGLayout title="Events" subtitle="Full audit log of every Context Guard decision.">
+    <CGLayout title="Events" subtitle="Full audit log of every Context Fabric decision.">
       <CGSection title={`${events.length} events`}>
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
