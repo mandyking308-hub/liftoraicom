@@ -4636,6 +4636,255 @@ export type Database = {
           },
         ]
       }
+      attention_delegation_items: {
+        Row: {
+          created_at: string
+          defer_until: string | null
+          founder_decision: string | null
+          id: string
+          is_test_data: boolean
+          recommended_action: string
+          recommended_owner: string | null
+          source_module: string
+          source_ref: string | null
+          status: string
+          title: string
+          trace_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          defer_until?: string | null
+          founder_decision?: string | null
+          id?: string
+          is_test_data?: boolean
+          recommended_action?: string
+          recommended_owner?: string | null
+          source_module: string
+          source_ref?: string | null
+          status?: string
+          title: string
+          trace_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          defer_until?: string | null
+          founder_decision?: string | null
+          id?: string
+          is_test_data?: boolean
+          recommended_action?: string
+          recommended_owner?: string | null
+          source_module?: string
+          source_ref?: string | null
+          status?: string
+          title?: string
+          trace_id?: string | null
+        }
+        Relationships: []
+      }
+      attention_fatigue_warnings: {
+        Row: {
+          created_at: string
+          detail: string | null
+          id: string
+          is_test_data: boolean
+          recommended_action: string | null
+          severity: string
+          status: string
+          trace_id: string | null
+          warning_type: string
+        }
+        Insert: {
+          created_at?: string
+          detail?: string | null
+          id?: string
+          is_test_data?: boolean
+          recommended_action?: string | null
+          severity?: string
+          status?: string
+          trace_id?: string | null
+          warning_type: string
+        }
+        Update: {
+          created_at?: string
+          detail?: string | null
+          id?: string
+          is_test_data?: boolean
+          recommended_action?: string | null
+          severity?: string
+          status?: string
+          trace_id?: string | null
+          warning_type?: string
+        }
+        Relationships: []
+      }
+      attention_focus_priorities: {
+        Row: {
+          business_name: string | null
+          category: string
+          created_at: string
+          founder_only: boolean
+          id: string
+          is_test_data: boolean
+          rationale: string | null
+          risk: number
+          source_module: string
+          source_ref: string | null
+          status: string
+          title: string
+          trace_id: string | null
+          urgency: number
+          value: number
+        }
+        Insert: {
+          business_name?: string | null
+          category?: string
+          created_at?: string
+          founder_only?: boolean
+          id?: string
+          is_test_data?: boolean
+          rationale?: string | null
+          risk?: number
+          source_module: string
+          source_ref?: string | null
+          status?: string
+          title: string
+          trace_id?: string | null
+          urgency?: number
+          value?: number
+        }
+        Update: {
+          business_name?: string | null
+          category?: string
+          created_at?: string
+          founder_only?: boolean
+          id?: string
+          is_test_data?: boolean
+          rationale?: string | null
+          risk?: number
+          source_module?: string
+          source_ref?: string | null
+          status?: string
+          title?: string
+          trace_id?: string | null
+          urgency?: number
+          value?: number
+        }
+        Relationships: []
+      }
+      attention_load_snapshots: {
+        Row: {
+          created_at: string
+          critical_items: number
+          deferred_items: number
+          delegated_items: number
+          founder_only_items: number
+          id: string
+          is_test_data: boolean
+          noise_items: number
+          notes: string | null
+          overload_level: string
+          snapshot_at: string
+          total_open_items: number
+          trace_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          critical_items?: number
+          deferred_items?: number
+          delegated_items?: number
+          founder_only_items?: number
+          id?: string
+          is_test_data?: boolean
+          noise_items?: number
+          notes?: string | null
+          overload_level?: string
+          snapshot_at?: string
+          total_open_items?: number
+          trace_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          critical_items?: number
+          deferred_items?: number
+          delegated_items?: number
+          founder_only_items?: number
+          id?: string
+          is_test_data?: boolean
+          noise_items?: number
+          notes?: string | null
+          overload_level?: string
+          snapshot_at?: string
+          total_open_items?: number
+          trace_id?: string | null
+        }
+        Relationships: []
+      }
+      attention_never_hide_items: {
+        Row: {
+          active: boolean
+          category: string
+          created_at: string
+          id: string
+          is_test_data: boolean
+          reason: string
+          trace_id: string | null
+        }
+        Insert: {
+          active?: boolean
+          category: string
+          created_at?: string
+          id?: string
+          is_test_data?: boolean
+          reason: string
+          trace_id?: string | null
+        }
+        Update: {
+          active?: boolean
+          category?: string
+          created_at?: string
+          id?: string
+          is_test_data?: boolean
+          reason?: string
+          trace_id?: string | null
+        }
+        Relationships: []
+      }
+      attention_noise_rules: {
+        Row: {
+          action: string
+          active: boolean
+          created_at: string
+          id: string
+          is_test_data: boolean
+          match_pattern: string
+          reason: string | null
+          rule_name: string
+          trace_id: string | null
+        }
+        Insert: {
+          action?: string
+          active?: boolean
+          created_at?: string
+          id?: string
+          is_test_data?: boolean
+          match_pattern: string
+          reason?: string | null
+          rule_name: string
+          trace_id?: string | null
+        }
+        Update: {
+          action?: string
+          active?: boolean
+          created_at?: string
+          id?: string
+          is_test_data?: boolean
+          match_pattern?: string
+          reason?: string | null
+          rule_name?: string
+          trace_id?: string | null
+        }
+        Relationships: []
+      }
       attribution_events: {
         Row: {
           audit_metadata: Json | null

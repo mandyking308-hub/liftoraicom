@@ -629,6 +629,12 @@ import AgentCapabilitiesBoundaries from "./pages/founder/agent-capabilities/Boun
 import AgentCapabilitiesApprovalRules from "./pages/founder/agent-capabilities/ApprovalRules";
 import AgentCapabilitiesEscalations from "./pages/founder/agent-capabilities/Escalations";
 import AgentCapabilitiesAudit from "./pages/founder/agent-capabilities/Audit";
+import AttentionOverview from "./pages/founder/attention-guard/Overview";
+import AttentionToday from "./pages/founder/attention-guard/Today";
+import AttentionNoise from "./pages/founder/attention-guard/Noise";
+import AttentionDecisions from "./pages/founder/attention-guard/Decisions";
+import AttentionDelegation from "./pages/founder/attention-guard/Delegation";
+import AttentionSettings from "./pages/founder/attention-guard/Settings";
 import PlatMonOverview from "./pages/founder/platform-monitor/Overview";
 import PlatMonPerformance from "./pages/founder/platform-monitor/Performance";
 import PlatMonErrors from "./pages/founder/platform-monitor/Errors";
@@ -1383,6 +1389,12 @@ const App = () => (
             <Route path="/founder/agent-capabilities/approval-rules" element={<FounderRoute><AgentCapabilitiesApprovalRules /></FounderRoute>} />
             <Route path="/founder/agent-capabilities/escalations" element={<FounderRoute><AgentCapabilitiesEscalations /></FounderRoute>} />
             <Route path="/founder/agent-capabilities/audit" element={<FounderRoute><AgentCapabilitiesAudit /></FounderRoute>} />
+            <Route path="/founder/attention-guard" element={<FounderRoute><AttentionOverview /></FounderRoute>} />
+            <Route path="/founder/attention-guard/today" element={<FounderRoute><AttentionToday /></FounderRoute>} />
+            <Route path="/founder/attention-guard/noise" element={<FounderRoute><AttentionNoise /></FounderRoute>} />
+            <Route path="/founder/attention-guard/decisions" element={<FounderRoute><AttentionDecisions /></FounderRoute>} />
+            <Route path="/founder/attention-guard/delegation" element={<FounderRoute><AttentionDelegation /></FounderRoute>} />
+            <Route path="/founder/attention-guard/settings" element={<FounderRoute><AttentionSettings /></FounderRoute>} />
             <Route path="/founder/platform-monitor" element={<FounderRoute><PlatMonOverview /></FounderRoute>} />
             <Route path="/founder/platform-monitor/performance" element={<FounderRoute><PlatMonPerformance /></FounderRoute>} />
             <Route path="/founder/platform-monitor/errors" element={<FounderRoute><PlatMonErrors /></FounderRoute>} />
