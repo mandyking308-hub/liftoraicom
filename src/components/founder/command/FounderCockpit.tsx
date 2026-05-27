@@ -10,6 +10,7 @@ import {
   Building2, ArrowUpRight, FileText, Gauge, Sparkles,
 } from "lucide-react";
 import { formatGBP } from "@/services/aiUsageLogger";
+import SystemModeSwitcherCard from "@/components/founder/command/SystemModeSwitcherCard";
 
 type CockpitData = {
   spendToday: number;
@@ -257,6 +258,9 @@ export default function FounderCockpit() {
           </div>
         </CardContent>
       </Card>
+      <div className="mt-4">
+        <SystemModeSwitcherCard />
+      </div>
     </div>
   );
 }

@@ -54616,6 +54616,36 @@ export type Database = {
         }
         Relationships: []
       }
+      system_mode_ledger: {
+        Row: {
+          audit_metadata: Json
+          changed_by: string | null
+          created_at: string
+          id: string
+          new_mode: string
+          previous_mode: string | null
+          reason: string | null
+        }
+        Insert: {
+          audit_metadata?: Json
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_mode: string
+          previous_mode?: string | null
+          reason?: string | null
+        }
+        Update: {
+          audit_metadata?: Json
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_mode?: string
+          previous_mode?: string | null
+          reason?: string | null
+        }
+        Relationships: []
+      }
       system_pages_index: {
         Row: {
           actions: string | null
@@ -54705,6 +54735,33 @@ export type Database = {
           severity?: string
           source_function?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      system_runtime_state: {
+        Row: {
+          audit_metadata: Json
+          changed_at: string
+          changed_by: string | null
+          id: string
+          mode: string
+          reason: string | null
+        }
+        Insert: {
+          audit_metadata?: Json
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          mode?: string
+          reason?: string | null
+        }
+        Update: {
+          audit_metadata?: Json
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          mode?: string
+          reason?: string | null
         }
         Relationships: []
       }
