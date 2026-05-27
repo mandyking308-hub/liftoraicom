@@ -12,6 +12,7 @@ import FounderRoute from "@/components/founder/FounderRoute";
 import SystemModeBanner from "@/components/system/SystemModeBanner";
 import RuntimeModeOverview from "@/pages/founder/runtime-mode/Overview";
 import ApprovalsOpsOverview from "@/pages/founder/approvals-ops/Overview";
+import SystemHealthOverview from "@/pages/founder/system-health/Overview";
 import PartnerRoute from "@/components/partner/PartnerRoute";
 import ScrollToTop from "@/components/ScrollToTop";
 
