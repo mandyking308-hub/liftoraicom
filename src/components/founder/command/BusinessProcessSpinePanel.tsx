@@ -29,6 +29,7 @@ import LaunchFactoryCard from "./LaunchFactoryCard";
 import IntegrationMapCard from "./IntegrationMapCard";
 import BusinessComplianceCard from "./BusinessComplianceCard";
 import ContextGuardCard from "./ContextGuardCard";
+import { FabricActivationCard } from "./FabricActivationCard";
 import PortfolioPrioritisationCard from "./PortfolioPrioritisationCard";
 import ResourceAllocationCard from "./ResourceAllocationCard";
 import PortfolioRiskCard from "./PortfolioRiskCard";
@@ -170,6 +171,8 @@ export default function BusinessProcessSpinePanel() {
       <BusinessComplianceCard />
 
       <ContextGuardCard />
+
+      <FabricActivationCard />
 
       <PortfolioPrioritisationCard />
 
