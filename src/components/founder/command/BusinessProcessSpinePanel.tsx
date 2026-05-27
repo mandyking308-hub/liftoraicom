@@ -73,6 +73,7 @@ import InternalSlaCard from "./InternalSlaCard";
 import DeploymentControlCard from "./DeploymentControlCard";
 import PlatformMonitorCard from "./PlatformMonitorCard";
 import CollectionsCard from "./CollectionsCard";
+import VoiceOfCustomerCard from "./VoiceOfCustomerCard";
 
 /**
  * Business Process Spine — single integrated panel that surfaces every
@@ -138,6 +139,7 @@ export default function BusinessProcessSpinePanel() {
       <DeploymentControlCard />
       <PlatformMonitorCard />
       <CollectionsCard />
+      <VoiceOfCustomerCard />
 
       <PortalsCard />
 
