@@ -10012,6 +10012,106 @@ export type Database = {
         }
         Relationships: []
       }
+      business_runtime_activation: {
+        Row: {
+          activated: boolean
+          activated_at: string | null
+          activated_by: string | null
+          ai_orchestration_allowed: boolean
+          business_id: string
+          created_at: string
+          deactivated_at: string | null
+          id: string
+          notes: string | null
+          outbound_allowed: boolean
+          queue_allowed: boolean
+          risk_level: string
+          runtime_state: string
+          updated_at: string
+        }
+        Insert: {
+          activated?: boolean
+          activated_at?: string | null
+          activated_by?: string | null
+          ai_orchestration_allowed?: boolean
+          business_id: string
+          created_at?: string
+          deactivated_at?: string | null
+          id?: string
+          notes?: string | null
+          outbound_allowed?: boolean
+          queue_allowed?: boolean
+          risk_level?: string
+          runtime_state?: string
+          updated_at?: string
+        }
+        Update: {
+          activated?: boolean
+          activated_at?: string | null
+          activated_by?: string | null
+          ai_orchestration_allowed?: boolean
+          business_id?: string
+          created_at?: string
+          deactivated_at?: string | null
+          id?: string
+          notes?: string | null
+          outbound_allowed?: boolean
+          queue_allowed?: boolean
+          risk_level?: string
+          runtime_state?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_runtime_activation_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: true
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_runtime_activation_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          business_id: string
+          created_at: string
+          id: string
+          new_state: Json | null
+          prev_state: Json | null
+          reason: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          business_id: string
+          created_at?: string
+          id?: string
+          new_state?: Json | null
+          prev_state?: Json | null
+          reason?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          business_id?: string
+          created_at?: string
+          id?: string
+          new_state?: Json | null
+          prev_state?: Json | null
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_runtime_activation_log_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_setup_tasks: {
         Row: {
           assigned_agent: string | null
