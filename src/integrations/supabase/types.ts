@@ -29802,6 +29802,98 @@ export type Database = {
         }
         Relationships: []
       }
+      liftor_recovery_actions: {
+        Row: {
+          action: string
+          audit_metadata: Json
+          confirmed: boolean
+          created_at: string
+          dry_run: boolean
+          id: string
+          notes: string | null
+          performed_by: string | null
+          snapshot_id: string | null
+          success: boolean
+          target_scope: string | null
+        }
+        Insert: {
+          action: string
+          audit_metadata?: Json
+          confirmed?: boolean
+          created_at?: string
+          dry_run?: boolean
+          id?: string
+          notes?: string | null
+          performed_by?: string | null
+          snapshot_id?: string | null
+          success?: boolean
+          target_scope?: string | null
+        }
+        Update: {
+          action?: string
+          audit_metadata?: Json
+          confirmed?: boolean
+          created_at?: string
+          dry_run?: boolean
+          id?: string
+          notes?: string | null
+          performed_by?: string | null
+          snapshot_id?: string | null
+          success?: boolean
+          target_scope?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "liftor_recovery_actions_snapshot_id_fkey"
+            columns: ["snapshot_id"]
+            isOneToOne: false
+            referencedRelation: "liftor_snapshots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      liftor_snapshots: {
+        Row: {
+          audit_metadata: Json
+          byte_size: number
+          created_at: string
+          error_message: string | null
+          id: string
+          integrity_hash: string
+          label: string
+          payload: Json
+          scope: string
+          status: string
+          taken_by: string | null
+        }
+        Insert: {
+          audit_metadata?: Json
+          byte_size?: number
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          integrity_hash: string
+          label: string
+          payload?: Json
+          scope: string
+          status?: string
+          taken_by?: string | null
+        }
+        Update: {
+          audit_metadata?: Json
+          byte_size?: number
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          integrity_hash?: string
+          label?: string
+          payload?: Json
+          scope?: string
+          status?: string
+          taken_by?: string | null
+        }
+        Relationships: []
+      }
       longform_content_audit: {
         Row: {
           action: string
