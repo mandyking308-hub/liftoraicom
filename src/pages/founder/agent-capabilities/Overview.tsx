@@ -13,7 +13,7 @@ export default function AgentRegistryOverview() {
           <Stat label="Agents" value={s?.agents ?? 0} />
           <Stat label="Active" value={s?.activeAgents ?? 0} tone="ok" />
           <Stat label="Capabilities" value={s?.capabilities ?? 0} />
-          <Stat label="Prohibited actions" value={s?.prohibitedActions ?? 0} tone="info" as any />
+          <Stat label="Prohibited actions" value={s?.prohibitedActions ?? 0} />
           <Stat label="Approval required" value={s?.approvalRequired ?? 0} tone={s?.approvalRequired ? "warn" : "ok"} />
           <Stat label="Pre-approved rules" value={s?.preApprovedRules ?? 0} tone="ok" />
           <Stat label="Escalation triggers" value={s?.escalationTriggers ?? 0} />
