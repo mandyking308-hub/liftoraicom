@@ -128,7 +128,7 @@ export async function loadSystemHealth(): Promise<OverallHealth> {
   ] = await Promise.all([
     supabase
       .from("ai_gateway_requests")
-      .select("status,created_at,latency_ms")
+      .select("status,created_at,started_at,completed_at")
       .gte("created_at", hourAgo)
       .limit(2000),
     supabase
@@ -158,7 +158,13 @@ export async function loadSystemHealth(): Promise<OverallHealth> {
   const gwFails = gwRows.filter((r) => r.status === "failed" || r.status === "rate_limited").length;
   const gwRate = gwRows.length ? gwFails / gwRows.length : 0;
   const gwScored = scoreFailureRate(gwRate, gwRows.length);
-  const gwLatencies = gwRows.map((r) => Number(r.latency_ms ?? 0)).filter((n) => n > 0).sort((a, b) => a - b);
+  const gwLatencies = gwRows
+    .map((r) => {
+      if (!r.started_at || !r.completed_at) return 0;
+      return new Date(r.completed_at).getTime() - new Date(r.started_at).getTime();
+    })
+    .filter((n) => n > 0)
+    .sort((a, b) => a - b);
   const gwP95 = gwLatencies.length ? gwLatencies[Math.floor(gwLatencies.length * 0.95)] : 0;
   const apiScored = scoreLatency(gwP95);
   const gwHeartbeat = gwRows[0]?.created_at ?? null;
