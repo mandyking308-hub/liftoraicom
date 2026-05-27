@@ -124,7 +124,6 @@ export async function loadSystemHealth(): Promise<OverallHealth> {
     ledgerRes,
     approvalsRes,
     contextRes,
-    queueRes,
     alertsRes,
   ] = await Promise.all([
     supabase
@@ -145,11 +144,6 @@ export async function loadSystemHealth(): Promise<OverallHealth> {
     supabase
       .from("business_context_validation_events")
       .select("severity,created_at")
-      .gte("created_at", dayAgo)
-      .limit(2000),
-    supabase
-      .from("queue_jobs")
-      .select("status,created_at,updated_at")
       .gte("created_at", dayAgo)
       .limit(2000),
     supabase
@@ -197,8 +191,15 @@ export async function loadSystemHealth(): Promise<OverallHealth> {
   const ctxScored = scoreFailureRate(ctxRate, ctx.length);
 
   // Queue Workers / Failed Jobs / Cron Jobs (best-effort if queue_jobs table exists)
-  const qRows = (queueRes.data ?? []) as any[];
-  const qFailRate = qRows.length ? qRows.filter((r) => r.status === "failed").length / qRows.length : 0;
+  const queueComposite = await supabase
+    .from("ai_action_queue")
+    .select("status,created_at,updated_at")
+    .gte("created_at", dayAgo)
+    .limit(2000);
+  const qRows = (queueComposite.data ?? []) as any[];
+  const qFailRate = qRows.length
+    ? qRows.filter((r) => r.status === "failed" || r.status === "error").length / qRows.length
+    : 0;
   const qScored = scoreFailureRate(qFailRate, qRows.length);
   const lastQueueHeartbeat = qRows[0]?.updated_at ?? qRows[0]?.created_at ?? null;
 
