@@ -54612,6 +54612,354 @@ export type Database = {
         }
         Relationships: []
       }
+      voc_churn_reasons: {
+        Row: {
+          business_name: string | null
+          created_at: string
+          currency: string
+          customer_label: string | null
+          detail: string | null
+          id: string
+          is_test_data: boolean
+          primary_cause: string
+          reason_category: string
+          recoverable: boolean
+          revenue_impact: number
+          status: string
+          trace_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_name?: string | null
+          created_at?: string
+          currency?: string
+          customer_label?: string | null
+          detail?: string | null
+          id?: string
+          is_test_data?: boolean
+          primary_cause: string
+          reason_category: string
+          recoverable?: boolean
+          revenue_impact?: number
+          status?: string
+          trace_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_name?: string | null
+          created_at?: string
+          currency?: string
+          customer_label?: string | null
+          detail?: string | null
+          id?: string
+          is_test_data?: boolean
+          primary_cause?: string
+          reason_category?: string
+          recoverable?: boolean
+          revenue_impact?: number
+          status?: string
+          trace_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      voc_feature_requests: {
+        Row: {
+          business_name: string | null
+          created_at: string
+          customer_impact: string
+          description: string | null
+          id: string
+          is_test_data: boolean
+          mention_count: number
+          recommended_next_step: string | null
+          requires_product_review: boolean
+          status: string
+          title: string
+          trace_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_name?: string | null
+          created_at?: string
+          customer_impact?: string
+          description?: string | null
+          id?: string
+          is_test_data?: boolean
+          mention_count?: number
+          recommended_next_step?: string | null
+          requires_product_review?: boolean
+          status?: string
+          title: string
+          trace_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_name?: string | null
+          created_at?: string
+          customer_impact?: string
+          description?: string | null
+          id?: string
+          is_test_data?: boolean
+          mention_count?: number
+          recommended_next_step?: string | null
+          requires_product_review?: boolean
+          status?: string
+          title?: string
+          trace_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      voc_feedback_records: {
+        Row: {
+          business_name: string | null
+          channel: string | null
+          contact_id: string | null
+          created_at: string
+          customer_label: string | null
+          id: string
+          is_test_data: boolean
+          raw_excerpt: string | null
+          related_deal_id: string | null
+          related_ticket_id: string | null
+          sentiment: string
+          source: string
+          summary: string
+          theme: string | null
+          trace_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_name?: string | null
+          channel?: string | null
+          contact_id?: string | null
+          created_at?: string
+          customer_label?: string | null
+          id?: string
+          is_test_data?: boolean
+          raw_excerpt?: string | null
+          related_deal_id?: string | null
+          related_ticket_id?: string | null
+          sentiment?: string
+          source: string
+          summary: string
+          theme?: string | null
+          trace_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_name?: string | null
+          channel?: string | null
+          contact_id?: string | null
+          created_at?: string
+          customer_label?: string | null
+          id?: string
+          is_test_data?: boolean
+          raw_excerpt?: string | null
+          related_deal_id?: string | null
+          related_ticket_id?: string | null
+          sentiment?: string
+          source?: string
+          summary?: string
+          theme?: string | null
+          trace_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      voc_insights: {
+        Row: {
+          applied: boolean
+          business_name: string | null
+          confidence: number
+          created_at: string
+          founder_decision: string | null
+          id: string
+          insight: string
+          is_test_data: boolean
+          recommendation: string | null
+          source_count: number
+          topic: string
+          trace_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          applied?: boolean
+          business_name?: string | null
+          confidence?: number
+          created_at?: string
+          founder_decision?: string | null
+          id?: string
+          insight: string
+          is_test_data?: boolean
+          recommendation?: string | null
+          source_count?: number
+          topic: string
+          trace_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          applied?: boolean
+          business_name?: string | null
+          confidence?: number
+          created_at?: string
+          founder_decision?: string | null
+          id?: string
+          insight?: string
+          is_test_data?: boolean
+          recommendation?: string | null
+          source_count?: number
+          topic?: string
+          trace_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      voc_pmf_signals: {
+        Row: {
+          business_name: string | null
+          created_at: string
+          id: string
+          is_test_data: boolean
+          notes: string | null
+          nps_score: number | null
+          sample_size: number
+          segment: string | null
+          signal_type: string
+          trace_id: string | null
+          updated_at: string
+          very_disappointed_pct: number | null
+          watch: boolean
+        }
+        Insert: {
+          business_name?: string | null
+          created_at?: string
+          id?: string
+          is_test_data?: boolean
+          notes?: string | null
+          nps_score?: number | null
+          sample_size?: number
+          segment?: string | null
+          signal_type: string
+          trace_id?: string | null
+          updated_at?: string
+          very_disappointed_pct?: number | null
+          watch?: boolean
+        }
+        Update: {
+          business_name?: string | null
+          created_at?: string
+          id?: string
+          is_test_data?: boolean
+          notes?: string | null
+          nps_score?: number | null
+          sample_size?: number
+          segment?: string | null
+          signal_type?: string
+          trace_id?: string | null
+          updated_at?: string
+          very_disappointed_pct?: number | null
+          watch?: boolean
+        }
+        Relationships: []
+      }
+      voc_review_requests: {
+        Row: {
+          approval_status: string
+          business_name: string | null
+          channel: string
+          created_at: string
+          customer_label: string | null
+          draft_body: string
+          draft_subject: string | null
+          id: string
+          is_test_data: boolean
+          platform: string | null
+          requires_external_send: boolean
+          trace_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          approval_status?: string
+          business_name?: string | null
+          channel?: string
+          created_at?: string
+          customer_label?: string | null
+          draft_body: string
+          draft_subject?: string | null
+          id?: string
+          is_test_data?: boolean
+          platform?: string | null
+          requires_external_send?: boolean
+          trace_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approval_status?: string
+          business_name?: string | null
+          channel?: string
+          created_at?: string
+          customer_label?: string | null
+          draft_body?: string
+          draft_subject?: string | null
+          id?: string
+          is_test_data?: boolean
+          platform?: string | null
+          requires_external_send?: boolean
+          trace_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      voc_testimonial_candidates: {
+        Row: {
+          ask_status: string
+          business_name: string | null
+          context: string | null
+          created_at: string
+          customer_label: string | null
+          founder_decision: string | null
+          id: string
+          is_test_data: boolean
+          quote: string
+          requires_external_ask: boolean
+          strength_score: number
+          trace_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          ask_status?: string
+          business_name?: string | null
+          context?: string | null
+          created_at?: string
+          customer_label?: string | null
+          founder_decision?: string | null
+          id?: string
+          is_test_data?: boolean
+          quote: string
+          requires_external_ask?: boolean
+          strength_score?: number
+          trace_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ask_status?: string
+          business_name?: string | null
+          context?: string | null
+          created_at?: string
+          customer_label?: string | null
+          founder_decision?: string | null
+          id?: string
+          is_test_data?: boolean
+          quote?: string
+          requires_external_ask?: boolean
+          strength_score?: number
+          trace_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       webhook_inbox_events: {
         Row: {
           audit_metadata: Json
