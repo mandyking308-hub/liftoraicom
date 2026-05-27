@@ -175,9 +175,13 @@ async function writeLog(
   reason?: string,
 ) {
   const actor_id = await getActorId();
-  await supabase.from("business_runtime_activation_log").insert({
-    business_id, action, prev_state, new_state, actor_id, reason: reason ?? null,
-  });
+  await supabase.from("business_runtime_activation_log").insert([{
+    business_id, action,
+    prev_state: prev_state as any,
+    new_state: new_state as any,
+    actor_id: actor_id ?? undefined,
+    reason: reason ?? undefined,
+  }]);
 }
 
 export async function activateBusiness(
