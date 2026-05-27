@@ -9,6 +9,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/portal/ProtectedRoute";
 import FounderRoute from "@/components/founder/FounderRoute";
+import SystemModeBanner from "@/components/system/SystemModeBanner";
+import RuntimeModeOverview from "@/pages/founder/runtime-mode/Overview";
 import PartnerRoute from "@/components/partner/PartnerRoute";
 import ScrollToTop from "@/components/ScrollToTop";
 
@@ -786,6 +788,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <ScrollToTop />
+          <SystemModeBanner />
           <Routes>
             {/* Public */}
             <Route path="/" element={<Index />} />
