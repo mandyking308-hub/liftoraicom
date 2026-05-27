@@ -22631,6 +22631,362 @@ export type Database = {
         }
         Relationships: []
       }
+      experiment_failures: {
+        Row: {
+          created_at: string
+          detail: string | null
+          failure_reason: string
+          id: string
+          is_test_data: boolean
+          plan_id: string | null
+          recommendation: string
+          trace_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          detail?: string | null
+          failure_reason: string
+          id?: string
+          is_test_data?: boolean
+          plan_id?: string | null
+          recommendation?: string
+          trace_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          detail?: string | null
+          failure_reason?: string
+          id?: string
+          is_test_data?: boolean
+          plan_id?: string | null
+          recommendation?: string
+          trace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiment_failures_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "experiment_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      experiment_learnings: {
+        Row: {
+          applied: boolean
+          applies_to: string | null
+          confidence: number
+          created_at: string
+          feeds_into: string | null
+          id: string
+          is_test_data: boolean
+          learning: string
+          plan_id: string | null
+          topic: string
+          trace_id: string | null
+        }
+        Insert: {
+          applied?: boolean
+          applies_to?: string | null
+          confidence?: number
+          created_at?: string
+          feeds_into?: string | null
+          id?: string
+          is_test_data?: boolean
+          learning: string
+          plan_id?: string | null
+          topic: string
+          trace_id?: string | null
+        }
+        Update: {
+          applied?: boolean
+          applies_to?: string | null
+          confidence?: number
+          created_at?: string
+          feeds_into?: string | null
+          id?: string
+          is_test_data?: boolean
+          learning?: string
+          plan_id?: string | null
+          topic?: string
+          trace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiment_learnings_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "experiment_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      experiment_metrics: {
+        Row: {
+          created_at: string
+          id: string
+          is_test_data: boolean
+          metric_name: string
+          metric_type: string
+          plan_id: string | null
+          target_value: number | null
+          trace_id: string | null
+          unit: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_test_data?: boolean
+          metric_name: string
+          metric_type?: string
+          plan_id?: string | null
+          target_value?: number | null
+          trace_id?: string | null
+          unit?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_test_data?: boolean
+          metric_name?: string
+          metric_type?: string
+          plan_id?: string | null
+          target_value?: number | null
+          trace_id?: string | null
+          unit?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiment_metrics_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "experiment_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      experiment_plans: {
+        Row: {
+          approval_status: string
+          audience: string | null
+          business_name: string | null
+          channel: string | null
+          created_at: string
+          founder_decision: string | null
+          hypothesis: string
+          id: string
+          is_test_data: boolean
+          product_or_offer: string | null
+          requires_external_launch: boolean
+          risk_level: string
+          status: string
+          success_metric: string
+          trace_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          approval_status?: string
+          audience?: string | null
+          business_name?: string | null
+          channel?: string | null
+          created_at?: string
+          founder_decision?: string | null
+          hypothesis: string
+          id?: string
+          is_test_data?: boolean
+          product_or_offer?: string | null
+          requires_external_launch?: boolean
+          risk_level?: string
+          status?: string
+          success_metric: string
+          trace_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approval_status?: string
+          audience?: string | null
+          business_name?: string | null
+          channel?: string | null
+          created_at?: string
+          founder_decision?: string | null
+          hypothesis?: string
+          id?: string
+          is_test_data?: boolean
+          product_or_offer?: string | null
+          requires_external_launch?: boolean
+          risk_level?: string
+          status?: string
+          success_metric?: string
+          trace_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      experiment_results: {
+        Row: {
+          created_at: string
+          id: string
+          is_test_data: boolean
+          lift_pct: number | null
+          metric_name: string
+          notes: string | null
+          observed_value: number
+          plan_id: string | null
+          sample_size: number
+          significance: number | null
+          source: string | null
+          trace_id: string | null
+          variant_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_test_data?: boolean
+          lift_pct?: number | null
+          metric_name: string
+          notes?: string | null
+          observed_value: number
+          plan_id?: string | null
+          sample_size?: number
+          significance?: number | null
+          source?: string | null
+          trace_id?: string | null
+          variant_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_test_data?: boolean
+          lift_pct?: number | null
+          metric_name?: string
+          notes?: string | null
+          observed_value?: number
+          plan_id?: string | null
+          sample_size?: number
+          significance?: number | null
+          source?: string | null
+          trace_id?: string | null
+          variant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiment_results_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "experiment_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiment_results_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "experiment_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      experiment_variants: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_control: boolean
+          is_test_data: boolean
+          label: string
+          plan_id: string | null
+          trace_id: string | null
+          traffic_split: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_control?: boolean
+          is_test_data?: boolean
+          label: string
+          plan_id?: string | null
+          trace_id?: string | null
+          traffic_split?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_control?: boolean
+          is_test_data?: boolean
+          label?: string
+          plan_id?: string | null
+          trace_id?: string | null
+          traffic_split?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiment_variants_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "experiment_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      experiment_winners: {
+        Row: {
+          confidence: number
+          created_at: string
+          founder_decision: string | null
+          id: string
+          is_test_data: boolean
+          plan_id: string | null
+          recommendation: string
+          requires_external_rollout: boolean
+          trace_id: string | null
+          variant_id: string | null
+          winning_hypothesis: string
+        }
+        Insert: {
+          confidence?: number
+          created_at?: string
+          founder_decision?: string | null
+          id?: string
+          is_test_data?: boolean
+          plan_id?: string | null
+          recommendation?: string
+          requires_external_rollout?: boolean
+          trace_id?: string | null
+          variant_id?: string | null
+          winning_hypothesis: string
+        }
+        Update: {
+          confidence?: number
+          created_at?: string
+          founder_decision?: string | null
+          id?: string
+          is_test_data?: boolean
+          plan_id?: string | null
+          recommendation?: string
+          requires_external_rollout?: boolean
+          trace_id?: string | null
+          variant_id?: string | null
+          winning_hypothesis?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiment_winners_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "experiment_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiment_winners_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "experiment_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       export_requests: {
         Row: {
           audit_metadata: Json
