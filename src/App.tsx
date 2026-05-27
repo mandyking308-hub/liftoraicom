@@ -11,6 +11,7 @@ import ProtectedRoute from "@/components/portal/ProtectedRoute";
 import FounderRoute from "@/components/founder/FounderRoute";
 import SystemModeBanner from "@/components/system/SystemModeBanner";
 import RuntimeModeOverview from "@/pages/founder/runtime-mode/Overview";
+import ApprovalsOpsOverview from "@/pages/founder/approvals-ops/Overview";
 import PartnerRoute from "@/components/partner/PartnerRoute";
 import ScrollToTop from "@/components/ScrollToTop";
 
@@ -1108,6 +1109,7 @@ const App = () => (
             <Route path="/founder/context-fabric/cross-contamination" element={<FounderRoute><CGCross /></FounderRoute>} />
             <Route path="/founder/context-fabric/settings" element={<FounderRoute><CGSettings /></FounderRoute>} />
             <Route path="/founder/runtime-mode" element={<FounderRoute><RuntimeModeOverview /></FounderRoute>} />
+            <Route path="/founder/approvals-ops" element={<FounderRoute><ApprovalsOpsOverview /></FounderRoute>} />
             {/* Backward-compat aliases — old Context Guard URLs redirect to canonical Context Fabric */}
             <Route path="/founder/context-guard" element={<Navigate to="/founder/context-fabric" replace />} />
             <Route path="/founder/context-guard/events" element={<Navigate to="/founder/context-fabric/events" replace />} />
