@@ -38168,6 +38168,319 @@ export type Database = {
         }
         Relationships: []
       }
+      policy_approvals: {
+        Row: {
+          approver_role: string
+          created_at: string
+          decided_at: string | null
+          decision: string
+          draft_id: string | null
+          id: string
+          is_test_data: boolean
+          notes: string | null
+          trace_id: string | null
+        }
+        Insert: {
+          approver_role: string
+          created_at?: string
+          decided_at?: string | null
+          decision?: string
+          draft_id?: string | null
+          id?: string
+          is_test_data?: boolean
+          notes?: string | null
+          trace_id?: string | null
+        }
+        Update: {
+          approver_role?: string
+          created_at?: string
+          decided_at?: string | null
+          decision?: string
+          draft_id?: string | null
+          id?: string
+          is_test_data?: boolean
+          notes?: string | null
+          trace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "policy_approvals_draft_id_fkey"
+            columns: ["draft_id"]
+            isOneToOne: false
+            referencedRelation: "policy_drafts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      policy_drafts: {
+        Row: {
+          business_name: string
+          created_at: string
+          draft_body: string | null
+          draft_summary: string
+          founder_decision: string | null
+          id: string
+          is_test_data: boolean
+          legal_reviewed: boolean
+          policy_type: string
+          publish_status: string
+          requirement_id: string | null
+          requires_legal_review: boolean
+          sensitivity: string
+          trace_id: string | null
+          version: string
+        }
+        Insert: {
+          business_name: string
+          created_at?: string
+          draft_body?: string | null
+          draft_summary: string
+          founder_decision?: string | null
+          id?: string
+          is_test_data?: boolean
+          legal_reviewed?: boolean
+          policy_type: string
+          publish_status?: string
+          requirement_id?: string | null
+          requires_legal_review?: boolean
+          sensitivity?: string
+          trace_id?: string | null
+          version?: string
+        }
+        Update: {
+          business_name?: string
+          created_at?: string
+          draft_body?: string | null
+          draft_summary?: string
+          founder_decision?: string | null
+          id?: string
+          is_test_data?: boolean
+          legal_reviewed?: boolean
+          policy_type?: string
+          publish_status?: string
+          requirement_id?: string | null
+          requires_legal_review?: boolean
+          sensitivity?: string
+          trace_id?: string | null
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "policy_drafts_requirement_id_fkey"
+            columns: ["requirement_id"]
+            isOneToOne: false
+            referencedRelation: "policy_requirements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      policy_public_pages: {
+        Row: {
+          business_name: string
+          created_at: string
+          founder_decision: string | null
+          id: string
+          is_published: boolean
+          is_test_data: boolean
+          last_published_at: string | null
+          last_published_version: string | null
+          policy_type: string
+          public_url: string | null
+          publish_status: string
+          requires_external_publish: boolean
+          trace_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_name: string
+          created_at?: string
+          founder_decision?: string | null
+          id?: string
+          is_published?: boolean
+          is_test_data?: boolean
+          last_published_at?: string | null
+          last_published_version?: string | null
+          policy_type: string
+          public_url?: string | null
+          publish_status?: string
+          requires_external_publish?: boolean
+          trace_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_name?: string
+          created_at?: string
+          founder_decision?: string | null
+          id?: string
+          is_published?: boolean
+          is_test_data?: boolean
+          last_published_at?: string | null
+          last_published_version?: string | null
+          policy_type?: string
+          public_url?: string | null
+          publish_status?: string
+          requires_external_publish?: boolean
+          trace_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      policy_requirements: {
+        Row: {
+          archetype: string
+          business_name: string
+          created_at: string
+          id: string
+          is_stale: boolean
+          is_test_data: boolean
+          jurisdiction: string
+          last_reviewed_at: string | null
+          legal_entity: string | null
+          next_review_due: string | null
+          notes: string | null
+          policy_type: string
+          required: boolean
+          status: string
+          trace_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          archetype: string
+          business_name: string
+          created_at?: string
+          id?: string
+          is_stale?: boolean
+          is_test_data?: boolean
+          jurisdiction?: string
+          last_reviewed_at?: string | null
+          legal_entity?: string | null
+          next_review_due?: string | null
+          notes?: string | null
+          policy_type: string
+          required?: boolean
+          status?: string
+          trace_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          archetype?: string
+          business_name?: string
+          created_at?: string
+          id?: string
+          is_stale?: boolean
+          is_test_data?: boolean
+          jurisdiction?: string
+          last_reviewed_at?: string | null
+          legal_entity?: string | null
+          next_review_due?: string | null
+          notes?: string | null
+          policy_type?: string
+          required?: boolean
+          status?: string
+          trace_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      policy_review_events: {
+        Row: {
+          created_at: string
+          detail: string | null
+          draft_id: string | null
+          event_type: string
+          id: string
+          is_test_data: boolean
+          requirement_id: string | null
+          routed_to: string | null
+          status: string
+          trace_id: string | null
+          triggered_by: string
+        }
+        Insert: {
+          created_at?: string
+          detail?: string | null
+          draft_id?: string | null
+          event_type: string
+          id?: string
+          is_test_data?: boolean
+          requirement_id?: string | null
+          routed_to?: string | null
+          status?: string
+          trace_id?: string | null
+          triggered_by?: string
+        }
+        Update: {
+          created_at?: string
+          detail?: string | null
+          draft_id?: string | null
+          event_type?: string
+          id?: string
+          is_test_data?: boolean
+          requirement_id?: string | null
+          routed_to?: string | null
+          status?: string
+          trace_id?: string | null
+          triggered_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "policy_review_events_draft_id_fkey"
+            columns: ["draft_id"]
+            isOneToOne: false
+            referencedRelation: "policy_drafts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "policy_review_events_requirement_id_fkey"
+            columns: ["requirement_id"]
+            isOneToOne: false
+            referencedRelation: "policy_requirements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      policy_templates: {
+        Row: {
+          archetype: string
+          created_at: string
+          default_review_frequency_days: number
+          id: string
+          is_test_data: boolean
+          jurisdiction: string
+          policy_type: string
+          required: boolean
+          sensitivity: string
+          template_summary: string | null
+          trace_id: string | null
+        }
+        Insert: {
+          archetype: string
+          created_at?: string
+          default_review_frequency_days?: number
+          id?: string
+          is_test_data?: boolean
+          jurisdiction?: string
+          policy_type: string
+          required?: boolean
+          sensitivity?: string
+          template_summary?: string | null
+          trace_id?: string | null
+        }
+        Update: {
+          archetype?: string
+          created_at?: string
+          default_review_frequency_days?: number
+          id?: string
+          is_test_data?: boolean
+          jurisdiction?: string
+          policy_type?: string
+          required?: boolean
+          sensitivity?: string
+          template_summary?: string | null
+          trace_id?: string | null
+        }
+        Relationships: []
+      }
       portal_access_events: {
         Row: {
           audit_metadata: Json
