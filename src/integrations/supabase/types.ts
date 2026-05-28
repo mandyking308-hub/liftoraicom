@@ -6490,6 +6490,105 @@ export type Database = {
         }
         Relationships: []
       }
+      business_autopsies: {
+        Row: {
+          approval_status: string
+          better_build_pack: Json | null
+          business_model: Json
+          company_name: string
+          competitor_notes: string | null
+          country: string | null
+          created_at: string
+          created_by: string
+          customer_pain: Json
+          founder_notes: string | null
+          funding_source: string | null
+          id: string
+          legal_warnings: string[]
+          liftor_advantage: Json
+          lovable_prompt_pack: Json | null
+          market_position: Json
+          operational_heaviness: Json
+          reason_for_analysis: string | null
+          recommendation: string
+          recommendation_reason: string | null
+          related_build_candidate_id: string | null
+          related_cluster_id: string | null
+          related_shortlist_id: string | null
+          related_watchlist_id: string | null
+          sector: string | null
+          source_kind: string
+          updated_at: string
+          uploaded_research: string | null
+          weakness_signals: Json
+          website: string | null
+        }
+        Insert: {
+          approval_status?: string
+          better_build_pack?: Json | null
+          business_model?: Json
+          company_name: string
+          competitor_notes?: string | null
+          country?: string | null
+          created_at?: string
+          created_by: string
+          customer_pain?: Json
+          founder_notes?: string | null
+          funding_source?: string | null
+          id?: string
+          legal_warnings?: string[]
+          liftor_advantage?: Json
+          lovable_prompt_pack?: Json | null
+          market_position?: Json
+          operational_heaviness?: Json
+          reason_for_analysis?: string | null
+          recommendation?: string
+          recommendation_reason?: string | null
+          related_build_candidate_id?: string | null
+          related_cluster_id?: string | null
+          related_shortlist_id?: string | null
+          related_watchlist_id?: string | null
+          sector?: string | null
+          source_kind?: string
+          updated_at?: string
+          uploaded_research?: string | null
+          weakness_signals?: Json
+          website?: string | null
+        }
+        Update: {
+          approval_status?: string
+          better_build_pack?: Json | null
+          business_model?: Json
+          company_name?: string
+          competitor_notes?: string | null
+          country?: string | null
+          created_at?: string
+          created_by?: string
+          customer_pain?: Json
+          founder_notes?: string | null
+          funding_source?: string | null
+          id?: string
+          legal_warnings?: string[]
+          liftor_advantage?: Json
+          lovable_prompt_pack?: Json | null
+          market_position?: Json
+          operational_heaviness?: Json
+          reason_for_analysis?: string | null
+          recommendation?: string
+          recommendation_reason?: string | null
+          related_build_candidate_id?: string | null
+          related_cluster_id?: string | null
+          related_shortlist_id?: string | null
+          related_watchlist_id?: string | null
+          sector?: string | null
+          source_kind?: string
+          updated_at?: string
+          uploaded_research?: string | null
+          weakness_signals?: Json
+          website?: string | null
+        }
+        Relationships: []
+      }
       business_channel_accounts: {
         Row: {
           account_name: string
