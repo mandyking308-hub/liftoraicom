@@ -119,6 +119,8 @@ import FRSettings from "./pages/founder/funding-radar/Settings";
 import FRWatchlist from "./pages/founder/funding-radar/Watchlist";
 import FRWatchlistDetail from "./pages/founder/funding-radar/WatchlistDetail";
 import FRWeaknessSignals from "./pages/founder/funding-radar/WeaknessSignals";
+import FRMarketMaps from "./pages/founder/funding-radar/MarketMaps";
+import FRWhiteSpace from "./pages/founder/funding-radar/WhiteSpace";
 import ExecutionHandoff from "./pages/founder/ExecutionHandoff";
 import PortfolioExitManual from "./pages/founder/PortfolioExitManual";
 import PortfolioExitControls from "./pages/founder/PortfolioExitControls";
@@ -918,6 +920,8 @@ const App = () => (
             <Route path="/founder/funding-radar/watchlist" element={<FounderRoute><FRWatchlist /></FounderRoute>} />
             <Route path="/founder/funding-radar/watchlist/:id" element={<FounderRoute><FRWatchlistDetail /></FounderRoute>} />
             <Route path="/founder/funding-radar/weakness-signals" element={<FounderRoute><FRWeaknessSignals /></FounderRoute>} />
+            <Route path="/founder/funding-radar/market-maps" element={<FounderRoute><FRMarketMaps /></FounderRoute>} />
+            <Route path="/founder/funding-radar/white-space" element={<FounderRoute><FRWhiteSpace /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/execution-handoff" element={<FounderRoute><ExecutionHandoff /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/manual" element={<FounderRoute><PortfolioExitManual /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/controls" element={<FounderRoute><PortfolioExitControls /></FounderRoute>} />

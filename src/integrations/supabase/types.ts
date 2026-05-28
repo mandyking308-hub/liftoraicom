@@ -24521,6 +24521,113 @@ export type Database = {
         }
         Relationships: []
       }
+      funding_market_maps: {
+        Row: {
+          ai_disruption_potential_score: number | null
+          avoid_reason: string | null
+          buyer_education_score: number | null
+          cluster_id: string | null
+          created_at: string
+          crowding_level: string | null
+          customer_segment: string | null
+          distribution_difficulty_score: number | null
+          dominant_players: Json | null
+          emerging_players: Json | null
+          founder_notes: string | null
+          fragmentation_score: number | null
+          geography: string | null
+          id: string
+          incumbent_players: Json | null
+          liftor_entry_score: number | null
+          market_description: string | null
+          market_name: string
+          market_stage: string | null
+          niche_players: Json | null
+          number_of_funded_companies: number | null
+          number_of_known_competitors: number | null
+          pricing_pressure_score: number | null
+          recommended_entry_strategy: string | null
+          saturation_risk: string | null
+          sector: string | null
+          switching_difficulty_score: number | null
+          total_visible_funding: number | null
+          updated_at: string
+          white_space_score: number | null
+        }
+        Insert: {
+          ai_disruption_potential_score?: number | null
+          avoid_reason?: string | null
+          buyer_education_score?: number | null
+          cluster_id?: string | null
+          created_at?: string
+          crowding_level?: string | null
+          customer_segment?: string | null
+          distribution_difficulty_score?: number | null
+          dominant_players?: Json | null
+          emerging_players?: Json | null
+          founder_notes?: string | null
+          fragmentation_score?: number | null
+          geography?: string | null
+          id?: string
+          incumbent_players?: Json | null
+          liftor_entry_score?: number | null
+          market_description?: string | null
+          market_name: string
+          market_stage?: string | null
+          niche_players?: Json | null
+          number_of_funded_companies?: number | null
+          number_of_known_competitors?: number | null
+          pricing_pressure_score?: number | null
+          recommended_entry_strategy?: string | null
+          saturation_risk?: string | null
+          sector?: string | null
+          switching_difficulty_score?: number | null
+          total_visible_funding?: number | null
+          updated_at?: string
+          white_space_score?: number | null
+        }
+        Update: {
+          ai_disruption_potential_score?: number | null
+          avoid_reason?: string | null
+          buyer_education_score?: number | null
+          cluster_id?: string | null
+          created_at?: string
+          crowding_level?: string | null
+          customer_segment?: string | null
+          distribution_difficulty_score?: number | null
+          dominant_players?: Json | null
+          emerging_players?: Json | null
+          founder_notes?: string | null
+          fragmentation_score?: number | null
+          geography?: string | null
+          id?: string
+          incumbent_players?: Json | null
+          liftor_entry_score?: number | null
+          market_description?: string | null
+          market_name?: string
+          market_stage?: string | null
+          niche_players?: Json | null
+          number_of_funded_companies?: number | null
+          number_of_known_competitors?: number | null
+          pricing_pressure_score?: number | null
+          recommended_entry_strategy?: string | null
+          saturation_risk?: string | null
+          sector?: string | null
+          switching_difficulty_score?: number | null
+          total_visible_funding?: number | null
+          updated_at?: string
+          white_space_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "funding_market_maps_cluster_id_fkey"
+            columns: ["cluster_id"]
+            isOneToOne: false
+            referencedRelation: "funding_problem_clusters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       funding_monthly_runs: {
         Row: {
           candidates_reviewed: number
@@ -25028,6 +25135,96 @@ export type Database = {
             columns: ["watchlist_id"]
             isOneToOne: false
             referencedRelation: "funding_watchlist"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      funding_white_space_opportunities: {
+        Row: {
+          ai_advantage: string | null
+          cluster_id: string | null
+          compliance_risk: string | null
+          created_at: string
+          customer_pain_gap: string | null
+          distribution_route: string | null
+          founder_notes: string | null
+          id: string
+          incumbent_weakness: string | null
+          legal_ip_risk: string | null
+          liftor_legally_distinct_angle: string | null
+          low_capex_entry_route: string | null
+          market_map_id: string | null
+          marketplace_consideration: string | null
+          opportunity_name: string
+          recommended_status: string | null
+          recurring_revenue_logic: string | null
+          underserved_customer_segment: string | null
+          underserved_geography: string | null
+          underserved_vertical: string | null
+          updated_at: string
+          why_existing_players_are_not_solving_it: string | null
+        }
+        Insert: {
+          ai_advantage?: string | null
+          cluster_id?: string | null
+          compliance_risk?: string | null
+          created_at?: string
+          customer_pain_gap?: string | null
+          distribution_route?: string | null
+          founder_notes?: string | null
+          id?: string
+          incumbent_weakness?: string | null
+          legal_ip_risk?: string | null
+          liftor_legally_distinct_angle?: string | null
+          low_capex_entry_route?: string | null
+          market_map_id?: string | null
+          marketplace_consideration?: string | null
+          opportunity_name: string
+          recommended_status?: string | null
+          recurring_revenue_logic?: string | null
+          underserved_customer_segment?: string | null
+          underserved_geography?: string | null
+          underserved_vertical?: string | null
+          updated_at?: string
+          why_existing_players_are_not_solving_it?: string | null
+        }
+        Update: {
+          ai_advantage?: string | null
+          cluster_id?: string | null
+          compliance_risk?: string | null
+          created_at?: string
+          customer_pain_gap?: string | null
+          distribution_route?: string | null
+          founder_notes?: string | null
+          id?: string
+          incumbent_weakness?: string | null
+          legal_ip_risk?: string | null
+          liftor_legally_distinct_angle?: string | null
+          low_capex_entry_route?: string | null
+          market_map_id?: string | null
+          marketplace_consideration?: string | null
+          opportunity_name?: string
+          recommended_status?: string | null
+          recurring_revenue_logic?: string | null
+          underserved_customer_segment?: string | null
+          underserved_geography?: string | null
+          underserved_vertical?: string | null
+          updated_at?: string
+          why_existing_players_are_not_solving_it?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "funding_white_space_opportunities_cluster_id_fkey"
+            columns: ["cluster_id"]
+            isOneToOne: false
+            referencedRelation: "funding_problem_clusters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funding_white_space_opportunities_market_map_id_fkey"
+            columns: ["market_map_id"]
+            isOneToOne: false
+            referencedRelation: "funding_market_maps"
             referencedColumns: ["id"]
           },
         ]

@@ -3,8 +3,9 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Radar, Trophy, Sparkles, Lock, CalendarClock, FileText, Upload, BookOpen, ListChecks, Eye } from "lucide-react";
+import { Radar, Trophy, Sparkles, Lock, CalendarClock, FileText, Upload, BookOpen, ListChecks, Eye, Map as MapIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { ENTRY_STRATEGY_LABEL, type EntryStrategy } from "@/lib/fundingRadarEngine";
 
 type Stats = {
   lastRunLabel: string | null;
@@ -33,6 +34,12 @@ type Stats = {
   topWeakness: { name: string; title: string } | null;
   topPositive: { name: string; title: string } | null;
   reviewDue: number;
+  marketsMapped: number;
+  topCrowded: { name: string; crowding: string } | null;
+  topWhiteSpace: { name: string; score: number } | null;
+  highestSaturation: { name: string; risk: string } | null;
+  bestNicheWedge: { name: string; strategy: string } | null;
+  topAvoid: { name: string; reason: string } | null;
 };
 
 const APPROVAL_GATED_ACTIONS = [
@@ -71,7 +78,7 @@ export default function FundingRadarCommandPanel() {
       const month = now.getMonth() + 1;
       const sb: any = supabase as any;
       const since30d = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString();
-      const [latestRun, currentRun, companies, beyond, needsVerify, clusters, shortlist, promotedCount, topScore, candidates, approvals, legalNotif, watchActive, newSignals, topNeg, topPos, reviewDue] = await Promise.all([
+      const [latestRun, currentRun, companies, beyond, needsVerify, clusters, shortlist, promotedCount, topScore, candidates, approvals, legalNotif, watchActive, newSignals, topNeg, topPos, reviewDue, marketMaps] = await Promise.all([
         sb.from("funding_monthly_runs").select("month,year,status,finalised_at,updated_at").order("year", { ascending: false }).order("month", { ascending: false }).limit(1),
         sb.from("funding_monthly_runs").select("month,year,status").eq("month", month).eq("year", year).maybeSingle(),
         sb.from("funding_radar_companies").select("id", { count: "exact", head: true }),
@@ -89,10 +96,18 @@ export default function FundingRadarCommandPanel() {
         sb.from("funding_weakness_signals").select("signal_title,severity_score,funding_radar_companies(company_name)").eq("signal_polarity","negative").order("severity_score",{ascending:false,nullsFirst:false}).limit(1),
         sb.from("funding_weakness_signals").select("signal_title,funding_radar_companies(company_name)").eq("signal_polarity","positive").order("created_at",{ascending:false}).limit(1),
         sb.from("funding_watchlist").select("id", { count: "exact", head: true }).lte("next_review_due_at", new Date().toISOString()),
+        sb.from("funding_market_maps").select("market_name,crowding_level,saturation_risk,white_space_score,recommended_entry_strategy,avoid_reason,liftor_entry_score").order("liftor_entry_score",{ascending:false,nullsFirst:false}).limit(50),
       ]);
       const candRows = (candidates.data ?? []) as any[];
       const selected = candRows.find((c) => c.recommendation_status === "selected");
       const topRows = (topScore.data ?? []) as any[];
+      const mmRows = (marketMaps.data ?? []) as any[];
+      const crowdOrder: Record<string, number> = { extreme: 4, high: 3, moderate: 2, low: 1 };
+      const topCrowdedRow = [...mmRows].sort((a, b) => (crowdOrder[b.crowding_level] ?? 0) - (crowdOrder[a.crowding_level] ?? 0))[0] ?? null;
+      const topWhiteSpaceRow = [...mmRows].sort((a, b) => Number(b.white_space_score ?? 0) - Number(a.white_space_score ?? 0))[0] ?? null;
+      const highestSatRow = [...mmRows].sort((a, b) => (crowdOrder[b.saturation_risk] ?? 0) - (crowdOrder[a.saturation_risk] ?? 0))[0] ?? null;
+      const niche = mmRows.find((m) => m.recommended_entry_strategy === "BUILD_NICHE_WEDGE") ?? mmRows.find((m) => String(m.recommended_entry_strategy ?? "").startsWith("BUILD")) ?? null;
+      const avoid = mmRows.find((m) => String(m.recommended_entry_strategy ?? "").startsWith("AVOID")) ?? null;
       const lr = latestRun.data?.[0];
       const cr = currentRun.data;
       const candidateCount = candRows.filter((c) => ["candidate","shortlisted","selected"].includes(c.recommendation_status)).length;
@@ -137,6 +152,12 @@ export default function FundingRadarCommandPanel() {
         topWeakness: (topNeg.data?.[0]) ? { name: topNeg.data[0].funding_radar_companies?.company_name ?? "—", title: topNeg.data[0].signal_title ?? "" } : null,
         topPositive: (topPos.data?.[0]) ? { name: topPos.data[0].funding_radar_companies?.company_name ?? "—", title: topPos.data[0].signal_title ?? "" } : null,
         reviewDue: reviewDue.count ?? 0,
+        marketsMapped: mmRows.length,
+        topCrowded: topCrowdedRow ? { name: topCrowdedRow.market_name, crowding: topCrowdedRow.crowding_level ?? "—" } : null,
+        topWhiteSpace: topWhiteSpaceRow ? { name: topWhiteSpaceRow.market_name, score: Number(topWhiteSpaceRow.white_space_score ?? 0) } : null,
+        highestSaturation: highestSatRow ? { name: highestSatRow.market_name, risk: highestSatRow.saturation_risk ?? "—" } : null,
+        bestNicheWedge: niche ? { name: niche.market_name, strategy: ENTRY_STRATEGY_LABEL[niche.recommended_entry_strategy as EntryStrategy] ?? niche.recommended_entry_strategy } : null,
+        topAvoid: avoid ? { name: avoid.market_name, reason: avoid.avoid_reason ?? (ENTRY_STRATEGY_LABEL[avoid.recommended_entry_strategy as EntryStrategy] ?? "") } : null,
       });
     })().catch(() => setS(null));
   }, []);
@@ -247,6 +268,25 @@ export default function FundingRadarCommandPanel() {
             <Button asChild size="sm" variant="outline" className="h-7 text-[11px]"><Link to="/founder/funding-radar/weakness-signals"><ListChecks className="h-3 w-3 mr-1" />Weakness signals</Link></Button>
           </div>
           <p className="col-span-2 md:col-span-6 text-[11px] text-muted-foreground">Internal intelligence only. No outbound contact, no scraping of restricted sources, no allegations or defamation. Public sources and manual/CSV input only.</p>
+        </CardContent>
+      </Card>
+
+      <Card className="tech-card lg:col-span-3">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2"><MapIcon className="h-4 w-4 text-primary" />Market Crowding & White Space</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 md:grid-cols-6 gap-3 text-xs">
+          <Row label="Markets mapped" value={s?.marketsMapped ?? 0} />
+          <Row label="Most crowded" value={s?.topCrowded ? `${s.topCrowded.name} · ${s.topCrowded.crowding}` : "—"} />
+          <Row label="Highest white space" value={s?.topWhiteSpace ? `${s.topWhiteSpace.name} · ${s.topWhiteSpace.score}/100` : "—"} />
+          <Row label="Highest saturation" value={s?.highestSaturation ? `${s.highestSaturation.name} · ${s.highestSaturation.risk}` : "—"} />
+          <Row label="Best niche wedge" value={s?.bestNicheWedge ? `${s.bestNicheWedge.name}` : "—"} />
+          <Row label="Top avoid" value={s?.topAvoid ? `${s.topAvoid.name}` : "—"} />
+          <div className="col-span-2 md:col-span-6 flex gap-2">
+            <Button asChild size="sm" variant="outline" className="h-7 text-[11px]"><Link to="/founder/funding-radar/market-maps"><MapIcon className="h-3 w-3 mr-1" />Market maps</Link></Button>
+            <Button asChild size="sm" variant="outline" className="h-7 text-[11px]"><Link to="/founder/funding-radar/white-space"><Sparkles className="h-3 w-3 mr-1" />White space</Link></Button>
+          </div>
+          <p className="col-span-2 md:col-span-6 text-[11px] text-muted-foreground">Crowded does not mean bad. Use Market Maps to distinguish saturated commodity markets from proven markets with white space, and to identify niche, vertical or geographic wedges before promoting into the Quarterly Build Selector.</p>
         </CardContent>
       </Card>
     </div>
