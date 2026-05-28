@@ -1012,7 +1012,8 @@ export function classifyProductionCandidate(g: ProductionGateInput): {
     return { classification: "PARK", score: 0, reasons: [], blockers };
   }
 
-  if (g.collision?.recommendation === "reject_due_to_duplication") {
+  const collisionRec: string | undefined = g.collision?.recommendation;
+  if (collisionRec === "reject_due_to_duplication") {
     blockers.push("Portfolio collision: duplicates an existing Liftor asset");
     return { classification: "KILL", score: 0, reasons: [], blockers };
   }
@@ -1039,8 +1040,8 @@ export function classifyProductionCandidate(g: ProductionGateInput): {
   if (m.recommended_entry_strategy && m.recommended_entry_strategy !== "AVOID_TOO_SATURATED") {
     reasons.push(`Entry strategy: ${ENTRY_STRATEGY_LABEL[m.recommended_entry_strategy as EntryStrategy] ?? m.recommended_entry_strategy}`);
   }
-  if (g.collision && g.collision.recommendation !== "build_new_business" && g.collision.recommendation !== "reject_due_to_duplication") {
-    reasons.push(`Portfolio synergy: ${g.collision.recommendation.replace(/_/g, " ")}`);
+  if (collisionRec && collisionRec !== "build_new_business" && collisionRec !== "reject_due_to_duplication") {
+    reasons.push(`Portfolio synergy: ${collisionRec.replace(/_/g, " ")}`);
   }
 
   let classification: ProductionClassification = "WATCH_NEXT_QUARTER";
