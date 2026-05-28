@@ -947,6 +947,246 @@ export function buildHandoffPack(args: {
   };
 }
 
+// ---- Quarterly Production Build Machine -----------------------------------
+
+export type ProductionClassification =
+  | "PRIMARY_BUILD"
+  | "BACKUP_BUILD"
+  | "WATCH_NEXT_QUARTER"
+  | "PARK"
+  | "KILL";
+
+export const PRODUCTION_CLASSIFICATION_LABEL: Record<ProductionClassification, string> = {
+  PRIMARY_BUILD: "Primary build",
+  BACKUP_BUILD: "Backup build",
+  WATCH_NEXT_QUARTER: "Watch next quarter",
+  PARK: "Park",
+  KILL: "Kill",
+};
+
+export type ProductionGateInput = {
+  candidate: { id: string; candidate_name: string; total_build_score?: number | null;
+    recommendation_status?: string | null; quarter?: number | null; year?: number | null;
+    funding_company_id?: string | null; funding_cluster_id?: string | null;
+    funding_shortlist_id?: string | null;
+    build_thesis?: string | null; description?: string | null; revenue_model?: string | null;
+    target_customer?: string | null; target_buyer_type?: string | null;
+    rejection_reason?: string | null;
+  };
+  shortlist?: {
+    build_thesis?: string | null; capital_efficiency_summary?: string | null;
+    recurring_revenue_score?: number | null; willingness_to_pay_evidence_score?: number | null;
+    capital_efficiency_advantage_score?: number | null; legal_ip_safety_score?: number | null;
+  } | null;
+  market?: {
+    market_name?: string | null; recommended_entry_strategy?: string | null;
+    crowding_level?: string | null; saturation_risk?: string | null;
+    white_space_score?: number | null; liftor_entry_score?: number | null;
+    avoid_reason?: string | null;
+  } | null;
+  whiteSpace?: { score?: number | null; underserved_segment?: string | null } | null;
+  killHits?: KillRuleHit[];
+  capacity?: ReturnType<typeof evaluateCapacityGate> | null;
+  collision?: ReturnType<typeof detectPortfolioCollision> | null;
+};
+
+export function classifyProductionCandidate(g: ProductionGateInput): {
+  classification: ProductionClassification;
+  score: number;
+  reasons: string[];
+  blockers: string[];
+} {
+  const reasons: string[] = [];
+  const blockers: string[] = [];
+  const kill = (g.killHits ?? []).filter((h) => h.severity === "block");
+  const sl = g.shortlist ?? {};
+  const m = g.market ?? {};
+
+  if (kill.length > 0) {
+    blockers.push(...kill.map((h) => h.reason));
+    return { classification: "KILL", score: 0, reasons: [], blockers };
+  }
+
+  if (m.recommended_entry_strategy === "AVOID_TOO_SATURATED") {
+    blockers.push("Market saturated — no viable wedge");
+    return { classification: "PARK", score: 0, reasons: [], blockers };
+  }
+
+  if (g.collision?.recommendation === "reject_due_to_duplication") {
+    blockers.push("Portfolio collision: duplicates an existing Liftor asset");
+    return { classification: "KILL", score: 0, reasons: [], blockers };
+  }
+
+  if (g.capacity && !g.capacity.ok) {
+    blockers.push(`Capacity gate: ${g.capacity.reason}`);
+    return { classification: "WATCH_NEXT_QUARTER", score: 0, reasons: [], blockers };
+  }
+
+  const components = [
+    Number(g.candidate.total_build_score ?? 0) * 0.30,
+    Number(sl.capital_efficiency_advantage_score ?? 0) * 0.15,
+    Number(sl.recurring_revenue_score ?? 0) * 0.15,
+    Number(sl.willingness_to_pay_evidence_score ?? 0) * 0.15,
+    Number(sl.legal_ip_safety_score ?? 70) * 0.10,
+    Number(m.liftor_entry_score ?? m.white_space_score ?? 0) * 0.15,
+  ];
+  const score = Math.round(components.reduce((a, b) => a + b, 0));
+
+  if ((sl.recurring_revenue_score ?? 0) >= 60) reasons.push("Recurring revenue evidence");
+  if ((sl.willingness_to_pay_evidence_score ?? 0) >= 60) reasons.push("Willingness-to-pay evidence");
+  if ((sl.capital_efficiency_advantage_score ?? 0) >= 60) reasons.push("Capital efficiency advantage");
+  if ((m.white_space_score ?? 0) >= 50) reasons.push("White space available");
+  if (m.recommended_entry_strategy && m.recommended_entry_strategy !== "AVOID_TOO_SATURATED") {
+    reasons.push(`Entry strategy: ${ENTRY_STRATEGY_LABEL[m.recommended_entry_strategy as EntryStrategy] ?? m.recommended_entry_strategy}`);
+  }
+  if (g.collision && g.collision.recommendation !== "build_new_business" && g.collision.recommendation !== "reject_due_to_duplication") {
+    reasons.push(`Portfolio synergy: ${g.collision.recommendation.replace(/_/g, " ")}`);
+  }
+
+  let classification: ProductionClassification = "WATCH_NEXT_QUARTER";
+  if (score >= 70) classification = "PRIMARY_BUILD";
+  else if (score >= 55) classification = "BACKUP_BUILD";
+  else if (score >= 35) classification = "WATCH_NEXT_QUARTER";
+  else classification = "PARK";
+
+  return { classification, score, reasons, blockers };
+}
+
+export function selectQuarterlyProduction(
+  inputs: ProductionGateInput[]
+): {
+  primary: (ProductionGateInput & { evaluation: ReturnType<typeof classifyProductionCandidate> }) | null;
+  backup: (ProductionGateInput & { evaluation: ReturnType<typeof classifyProductionCandidate> }) | null;
+  watch: Array<ProductionGateInput & { evaluation: ReturnType<typeof classifyProductionCandidate> }>;
+  park: Array<ProductionGateInput & { evaluation: ReturnType<typeof classifyProductionCandidate> }>;
+  kill: Array<ProductionGateInput & { evaluation: ReturnType<typeof classifyProductionCandidate> }>;
+} {
+  const evaluated = inputs.map((i) => ({ ...i, evaluation: classifyProductionCandidate(i) }));
+  evaluated.sort((a, b) => b.evaluation.score - a.evaluation.score);
+  const primaries = evaluated.filter((e) => e.evaluation.classification === "PRIMARY_BUILD");
+  const backups = evaluated.filter((e) => e.evaluation.classification === "BACKUP_BUILD");
+  const primary = primaries[0] ?? null;
+  // backup is best of remaining primaries (if multiple) or top backup
+  const backup = (primary ? primaries.slice(1)[0] : null) ?? backups[0] ?? null;
+  return {
+    primary,
+    backup,
+    watch: evaluated.filter((e) => e.evaluation.classification === "WATCH_NEXT_QUARTER"),
+    park: evaluated.filter((e) => e.evaluation.classification === "PARK"),
+    kill: evaluated.filter((e) => e.evaluation.classification === "KILL"),
+  };
+}
+
+export type ProductionBuildPack = BuildHandoffPack & {
+  classification: ProductionClassification;
+  score: number;
+  executive_summary: string;
+  why_selected: string[];
+  funding_proof: string | null;
+  customer_problem_thesis: string | null;
+  willingness_to_pay_evidence: string | null;
+  market_weakness: string | null;
+  watchlist_signal_summary: string | null;
+  crowding_white_space: string | null;
+  capital_efficiency_advantage: string | null;
+  acquirer_pain_thesis: string | null;
+  exit_logic: string | null;
+  database_schema_needs: string[];
+  human_oversight_requirements: string[];
+  ai_operator_requirements: string[];
+  command_centre_panel_requirements: string[];
+  lovable_build_prompt_pack: string[];
+  github_task_pack: string[];
+  founder_approval_required_before: string[];
+};
+
+export const PRODUCTION_FOUNDER_APPROVAL_GATES = [
+  "Starting production build",
+  "Creating public-facing brand or site",
+  "Buying domains",
+  "Enabling email sending",
+  "Launching outreach",
+  "Contacting any external party",
+  "Promoting to live business",
+  "Creating data room",
+  "Sharing financials",
+  "Starting sale or acquirer process",
+] as const;
+
+export function buildProductionPack(args: {
+  gate: ProductionGateInput;
+  evaluation: ReturnType<typeof classifyProductionCandidate>;
+  handoff: BuildHandoffPack;
+}): ProductionBuildPack {
+  const { gate, evaluation, handoff } = args;
+  const c = gate.candidate;
+  const m = gate.market ?? {};
+  const sl = gate.shortlist ?? {};
+  return {
+    ...handoff,
+    classification: evaluation.classification,
+    score: evaluation.score,
+    executive_summary: `${c.candidate_name} — ${PRODUCTION_CLASSIFICATION_LABEL[evaluation.classification]} (score ${evaluation.score}/100). ${(evaluation.reasons[0] ?? "Selected from validated funded category with capital-efficient Liftor execution route.")}`,
+    why_selected: evaluation.reasons,
+    funding_proof: c.build_thesis ?? sl.build_thesis ?? null,
+    customer_problem_thesis: handoff.thesis.problem_thesis,
+    willingness_to_pay_evidence: sl.willingness_to_pay_evidence_score != null
+      ? `WTP evidence score ${sl.willingness_to_pay_evidence_score}/100${sl.recurring_revenue_score != null ? `, recurring revenue ${sl.recurring_revenue_score}/100` : ""}`
+      : null,
+    market_weakness: m.avoid_reason ?? null,
+    watchlist_signal_summary: sl.capital_efficiency_summary ?? null,
+    crowding_white_space: m.market_name
+      ? `${m.market_name} — crowding ${m.crowding_level ?? "n/a"}, saturation ${m.saturation_risk ?? "n/a"}, white-space ${m.white_space_score ?? 0}/100, entry ${ENTRY_STRATEGY_LABEL[(m.recommended_entry_strategy ?? "BUILD_NICHE_WEDGE") as EntryStrategy] ?? m.recommended_entry_strategy}`
+      : null,
+    capital_efficiency_advantage: sl.capital_efficiency_advantage_score != null
+      ? `Capital efficiency advantage ${sl.capital_efficiency_advantage_score}/100`
+      : null,
+    acquirer_pain_thesis: c.target_buyer_type ? `Acquirer pain: ${c.target_buyer_type} pays today via people + tooling; Liftor compresses to AI-operated stack.` : null,
+    exit_logic: "Vertical AI-operator with recurring revenue and proprietary playbook → strategic acquirer or PE roll-up post-product-market-fit.",
+    database_schema_needs: [
+      "customers (auth + billing)",
+      "subscriptions (recurring revenue)",
+      "agent_runs + agent_audit (AI oversight)",
+      "approvals (founder gates)",
+      "build_kpis (30/90 day metrics)",
+    ],
+    human_oversight_requirements: [
+      "Founder review of every external action before send",
+      "Daily review of agent failures > confidence threshold",
+      "Weekly KPI + kill/continue review",
+    ],
+    ai_operator_requirements: [
+      "Agent registry with confidence + escalation rules",
+      "Tool/cost ceilings per run",
+      "Audit trail of every decision and action",
+      "Human approval queue for outbound + spend",
+    ],
+    command_centre_panel_requirements: [
+      "MRR + paying customers + retention",
+      "Founder hours/week",
+      "Approval queue depth",
+      "AI automation success rate",
+      "Kill/continue countdown",
+    ],
+    lovable_build_prompt_pack: [
+      `Scaffold ${c.candidate_name} as a Liftor sub-app: auth, billing, CRM pipeline, agent registry, approval queue, KPI dashboard. Use existing tech-card design system.`,
+      `Generate landing page sections: ${(handoff.build_plan.landing_page_structure).join(" / ")}.`,
+      `Wire CRM pipeline stages: ${(handoff.build_plan.crm_pipeline_stages).join(" → ")}.`,
+      "Add compliance pages: Terms, Privacy, DPA, AUP, Security disclosure.",
+      "All outbound actions must route through founder approval queue — no direct external calls.",
+    ],
+    github_task_pack: [
+      "epic: scaffold app shell + auth",
+      "epic: CRM pipeline + first-100 plan",
+      "epic: agent registry + approval queue",
+      "epic: KPI dashboard + kill/continue criteria",
+      "epic: legal/compliance pages",
+      "epic: Launch Factory + Business Template + Portfolio Commander wiring",
+    ],
+    founder_approval_required_before: [...PRODUCTION_FOUNDER_APPROVAL_GATES],
+  };
+}
+
 // CRUD helpers ---------------------------------------------------------------
 
 export async function fetchWatchlist() {
