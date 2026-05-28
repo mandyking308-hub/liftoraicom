@@ -18,6 +18,7 @@ const TABS = [
   { to: "/founder/funding-radar/weakness-signals", label: "Weakness signals" },
   { to: "/founder/funding-radar/market-maps", label: "Market maps" },
   { to: "/founder/funding-radar/white-space", label: "White space" },
+  { to: "/founder/funding-radar/business-autopsy", label: "Business autopsy" },
   { to: "/founder/funding-radar/monthly-run", label: "Monthly run" },
   { to: "/founder/funding-radar/shortlist", label: "Shortlist" },
   { to: "/founder/funding-radar/decision-pack", label: "Decision pack" },
