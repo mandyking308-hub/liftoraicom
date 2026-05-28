@@ -20,6 +20,7 @@ import RecurringRevenueRenewalsPanel from "@/components/founder/revenue/Recurrin
 import MeetingCallIntelligencePanel from "@/components/founder/customer/MeetingCallIntelligencePanel";
 import KnowledgeSourceTruthPanel from "@/components/founder/knowledge/KnowledgeSourceTruthPanel";
 import FundingExitReadinessPanel from "@/components/founder/strategy/FundingExitReadinessPanel";
+import FundingRadarCommandPanel from "@/components/founder/funding/FundingRadarCommandPanel";
 import ReputationCrisisCommsPanel from "@/components/founder/brand/ReputationCrisisCommsPanel";
 import KPIOKRPerformancePanel from "@/components/founder/analytics/KPIOKRPerformancePanel";
 import FounderAlertEscalationPanel from "@/components/founder/command/FounderAlertEscalationPanel";
@@ -1749,6 +1750,7 @@ const CommandCentre = () => {
     <div className="max-w-7xl mx-auto px-4 pb-6"><MeetingCallIntelligencePanel /></div>
     <div className="max-w-7xl mx-auto px-4 pb-6"><KnowledgeSourceTruthPanel /></div>
     <div className="max-w-7xl mx-auto px-4 pb-6"><FundingExitReadinessPanel /></div>
+    <div className="max-w-7xl mx-auto px-4 pb-6"><FundingRadarCommandPanel /></div>
     <div className="max-w-7xl mx-auto px-4 pb-6"><ReputationCrisisCommsPanel /></div>
     <div className="max-w-7xl mx-auto px-4 pb-6"><KPIOKRPerformancePanel /></div>
     </DiagnosticGate>
