@@ -2656,3 +2656,455 @@ export async function fetchAllSignals() {
   if (error) throw error;
   return data ?? [];
 }
+
+// ---- Vertical Launch Cannon + 30-Day Revenue Strike Plan ----------------
+
+export const LAUNCH_MODES = [
+  "PREPARING",
+  "READY_FOR_HARD_LAUNCH",
+  "HARD_LAUNCH_LIVE",
+  "ADJUSTING",
+  "PAUSED",
+  "PARKED",
+  "KILLED",
+  "SCALING",
+] as const;
+export type LaunchMode = typeof LAUNCH_MODES[number];
+export const LAUNCH_MODE_LABEL: Record<LaunchMode, string> = {
+  PREPARING: "Preparing",
+  READY_FOR_HARD_LAUNCH: "Ready for hard launch",
+  HARD_LAUNCH_LIVE: "Hard launch live",
+  ADJUSTING: "Adjusting",
+  PAUSED: "Paused",
+  PARKED: "Parked",
+  KILLED: "Killed",
+  SCALING: "Scaling",
+};
+
+export const VERTICAL_LAUNCH_FOUNDER_APPROVAL_GATES = [
+  "Public launch / move from preparing to hard launch live",
+  "Sending any outbound message",
+  "Activating sending domain or email",
+  "Activating any paid API",
+  "Spending money on paid ads",
+  "Contacting any external party",
+  "Publishing any claim or proof statement",
+  "Collecting payments",
+] as const;
+
+export const VERTICAL_LAUNCH_NEVER_AUTOMATIC = [
+  "Outbound sending",
+  "Domain or email activation",
+  "Paid API activation",
+  "Paid advertising spend",
+  "Contacting customers, investors, acquirers, employees or competitors",
+  "Publishing unsupported or regulated claims",
+  "Copying competitor wording, brand or assets",
+] as const;
+
+export const VERTICAL_LAUNCH_HARD_GATES = [
+  "Production QA passed",
+  "Legal pages present (Terms, Privacy, Cookies where relevant)",
+  "No copied competitor assets",
+  "Analytics live",
+  "CRM pipeline live",
+  "Support route live",
+  "Onboarding route live",
+  "Founder approval granted",
+  "Sending domain/email approved (only if outreach is used)",
+  "Suppression / do-not-contact rules active",
+  "No paid APIs active unless founder approved",
+  "No public regulated claims",
+] as const;
+
+export const VERTICAL_CRM_PIPELINE_STAGES = [
+  "Identified",
+  "Qualified",
+  "Ready for founder approval",
+  "Outreach drafted",
+  "Outreach approved",
+  "Sent",
+  "Opened/replied",
+  "Interested",
+  "Demo/call",
+  "Proposal/offer",
+  "Won",
+  "Not now",
+  "Closed lost",
+  "Suppressed",
+] as const;
+
+export type VerticalLaunchTarget = {
+  business_name: string;
+  vertical: string;
+  geography: string;
+  customer_type: string;
+  buyer_role: string;
+  prospect_profile_first_100_500: string;
+  why_vertical_selected: string;
+  why_vertical_has_budget: string;
+  why_problem_urgent: string;
+  why_liftor_advantage: string;
+};
+
+export type VerticalLaunchOffer = {
+  first_offer: string;
+  pricing_hypothesis: string;
+  pilot_option: string;
+  paid_starter_package: string;
+  guarantee_disclaimer_limits: string;
+  urgency_angle: string;
+  trust_angle: string;
+  proof_required: string;
+  founder_approval_required_before_public_use: true;
+};
+
+export type VerticalLaunchAssets = {
+  landing_cta_options: string[];
+  vertical_headlines: string[];
+  problem_copy: string[];
+  solution_copy: string[];
+  faq: Array<{ q: string; a: string }>;
+  pricing_placeholder: string;
+  trust_section: string[];
+  onboarding_form_copy: string;
+  outbound_email_sequence: Array<{ step: number; subject: string; body: string }>;
+  linkedin_message_drafts: string[];
+  follow_up_drafts: string[];
+  objection_handling: Array<{ objection: string; response: string }>;
+  support_replies: Array<{ scenario: string; reply: string }>;
+  demo_script: string[];
+  copy_rules: string[];
+};
+
+export type VerticalProspectingPlan = {
+  ideal_prospect_criteria: string[];
+  first_100_route: string[];
+  first_500_route: string[];
+  allowed_public_sources: string[];
+  disallowed_sources: string[];
+  enrichment_fields: string[];
+  crm_import_template_columns: string[];
+  suppression_rules: string[];
+  approval_gate_before_outreach: string;
+};
+
+export type VerticalCRMPipeline = {
+  stages: readonly string[];
+  ownership: string;
+  approval_gates: string[];
+};
+
+export type RevenueStrikeDay = {
+  day: number;
+  phase: string;
+  focus: string;
+  outputs: string[];
+  founder_approval_required: boolean;
+};
+
+export type LaunchVelocityMetrics = {
+  prospects_added: number;
+  approved_outreach: number;
+  sent_outreach: number;
+  reply_rate: number;
+  positive_reply_rate: number;
+  conversion_rate: number;
+  cost_per_lead: number | null;
+  founder_time_minutes: number;
+  human_oversight_burden: "low" | "moderate" | "high";
+  ai_automation_quality: "low" | "moderate" | "high";
+  support_burden: "low" | "moderate" | "high";
+  first_revenue_date: string | null;
+  thirty_day_revenue: number;
+  decision: "continue" | "adjust" | "park" | "kill" | null;
+};
+
+export type VerticalLaunchPack = {
+  launch_mode: LaunchMode;
+  launch_target: VerticalLaunchTarget;
+  launch_offer: VerticalLaunchOffer;
+  launch_assets: VerticalLaunchAssets;
+  prospecting_plan: VerticalProspectingPlan;
+  crm_pipeline: VerticalCRMPipeline;
+  revenue_strike_plan: RevenueStrikeDay[];
+  daily_command_centre_fields: string[];
+  velocity_metrics_template: LaunchVelocityMetrics;
+  hard_launch_gates: readonly string[];
+  founder_approval_gates: readonly string[];
+  never_automatic: readonly string[];
+  feedback_loop_targets: string[];
+  doctrine: string[];
+};
+
+export function emptyLaunchVelocityMetrics(): LaunchVelocityMetrics {
+  return {
+    prospects_added: 0,
+    approved_outreach: 0,
+    sent_outreach: 0,
+    reply_rate: 0,
+    positive_reply_rate: 0,
+    conversion_rate: 0,
+    cost_per_lead: null,
+    founder_time_minutes: 0,
+    human_oversight_burden: "moderate",
+    ai_automation_quality: "moderate",
+    support_burden: "low",
+    first_revenue_date: null,
+    thirty_day_revenue: 0,
+    decision: null,
+  };
+}
+
+export function buildRevenueStrikePlan(): RevenueStrikeDay[] {
+  const days: RevenueStrikeDay[] = [];
+  const phase = (d: number) => {
+    if (d <= 3) return { phase: "Day 1–3 · QA + setup", focus: "Final QA, legal, tracking, CRM setup", outputs: ["Production QA sign-off", "Legal pages confirmed", "Analytics live", "CRM pipeline live", "Support + onboarding routes live"] };
+    if (d <= 7) return { phase: "Day 4–7 · List + messaging", focus: "Vertical list build, messaging approval, landing finalisation", outputs: ["First 100 prospect list (public sources)", "Outreach drafts pending founder approval", "Landing page final copy"] };
+    if (d <= 14) return { phase: "Day 8–14 · First push", focus: "First outreach batch, content push, response tracking", outputs: ["Founder-approved outreach sent", "Replies logged", "Objections captured"] };
+    if (d <= 21) return { phase: "Day 15–21 · Refine + follow up", focus: "Follow-ups, objections, landing fixes, offer refinement", outputs: ["Follow-up drafts approved + sent", "Landing iteration shipped", "Offer adjustments captured"] };
+    return { phase: "Day 22–30 · Second push + decision", focus: "Second push, close early buyers, decide continue/adjust/park", outputs: ["Second outreach batch sent", "Early buyers closed", "30-day continue/adjust/park/kill decision"] };
+  };
+  for (let d = 1; d <= 30; d++) {
+    const p = phase(d);
+    days.push({
+      day: d,
+      phase: p.phase,
+      focus: p.focus,
+      outputs: p.outputs,
+      founder_approval_required: d === 1 || d === 7 || d === 8 || d === 15 || d === 22 || d === 30,
+    });
+  }
+  return days;
+}
+
+export function buildVerticalLaunchPack(args: {
+  pack: ProductionBuildPack;
+  vertical?: string | null;
+  geography?: string | null;
+  customer_type?: string | null;
+  buyer_role?: string | null;
+}): VerticalLaunchPack {
+  const p = args.pack;
+  const c = p.candidate;
+  const vertical = args.vertical ?? p.icp?.industry ?? p.icp?.persona ?? c.sector ?? "selected vertical (set by founder)";
+  const geography = args.geography ?? p.icp?.geography ?? "founder-selected geography";
+  const customer_type = args.customer_type ?? p.icp?.size ?? "operator-led teams";
+  const buyer_role = args.buyer_role ?? p.icp?.buyer ?? "operations / commercial lead";
+  const target: VerticalLaunchTarget = {
+    business_name: c.name,
+    vertical,
+    geography,
+    customer_type,
+    buyer_role,
+    prospect_profile_first_100_500: `${customer_type} in ${vertical} (${geography}) where ${buyer_role} owns the budget and the operational pain is recurring weekly.`,
+    why_vertical_selected: p.why_selected?.[0] ?? "Validated funded category with capital-efficient Liftor execution route.",
+    why_vertical_has_budget: p.willingness_to_pay_evidence ?? "Buyer already pays for people, tooling or services to absorb this work — Liftor compresses the cost.",
+    why_problem_urgent: p.customer_problem_thesis ?? "Pain is operational, recurring and currently solved with manual labour.",
+    why_liftor_advantage: p.capital_efficiency_advantage ?? "AI-operated stack with founder oversight, faster cycle time, lower run cost.",
+  };
+  const offer: VerticalLaunchOffer = {
+    first_offer: `${c.name} pilot for ${vertical}: clear scope, fixed timeframe, measurable outcome.`,
+    pricing_hypothesis: "Paid pilot or starter tier — never free indefinitely. Pricing must be tested, never asserted.",
+    pilot_option: "Founder-approved time-boxed pilot for first 3–10 customers with explicit success criteria.",
+    paid_starter_package: "Optional paid starter package once pilot outcomes are evidenced.",
+    guarantee_disclaimer_limits: "No regulated claims. Any guarantee must be reviewed by founder/adviser before public use.",
+    urgency_angle: "Operational cost compounds weekly — every week without this is paid out in headcount or rework.",
+    trust_angle: "Human-in-the-loop, founder-overseen, auditable AI operations. No silent automation.",
+    proof_required: "Internal evidence, pilot outcomes, or founder-approved case notes only — never fabricated proof.",
+    founder_approval_required_before_public_use: true,
+  };
+  const assets: VerticalLaunchAssets = {
+    landing_cta_options: [
+      `Book a ${vertical} pilot call`,
+      `Request the ${vertical} operating brief`,
+      `See how ${c.name} runs your ${vertical} workflow`,
+    ],
+    vertical_headlines: [
+      `${vertical}: the operating layer your team is doing by hand.`,
+      `Run ${vertical} on AI operators. Keep founder oversight.`,
+      `Compress your ${vertical} workload without losing control.`,
+    ],
+    problem_copy: [
+      `${vertical} teams are absorbing repeatable work that should not need a human every time.`,
+      `Tooling exists, but nothing operates the workflow end-to-end with audit trails.`,
+    ],
+    solution_copy: [
+      `${c.name} operates the ${vertical} workflow with human-in-the-loop approvals.`,
+      `Every action is logged, every external send is gated, every cost is capped.`,
+    ],
+    faq: [
+      { q: "Is this fully automated?", a: "No. Every external action is gated by founder approval. AI runs the workflow; humans run the gates." },
+      { q: "What data do you need?", a: "Only what the workflow requires. No scraping, no restricted sources." },
+      { q: "What does it cost?", a: "Pricing is tested per pilot. Expect a paid pilot before any rollout." },
+      { q: "What if it does not work?", a: "We define success criteria up-front. If criteria are not met, the pilot ends — no lock-in." },
+    ],
+    pricing_placeholder: "Pilot pricing — confirmed per engagement. Not displayed publicly until founder approval.",
+    trust_section: [
+      "Founder-overseen operations",
+      "Auditable agent runs",
+      "Approval queue for every external action",
+      "No paid APIs without founder approval",
+      "No regulated claims without adviser sign-off",
+    ],
+    onboarding_form_copy: `Tell us about your ${vertical} workflow: volume, current owners, current cost, what would 'done' look like in 30 days.`,
+    outbound_email_sequence: [
+      { step: 1, subject: `Quick ${vertical} question`, body: `Hi {first_name},\n\nWe are running a small founder-overseen pilot of ${c.name} for ${customer_type} in ${vertical}.\n\nIf the {workflow} is currently absorbed by your team, would it be useful to compare notes?\n\n— Founder, ${c.name}` },
+      { step: 2, subject: `Following up on ${vertical}`, body: `Hi {first_name},\n\nNo pressure — wanted to check whether the ${vertical} workflow we discussed is still painful or already solved.\n\nHappy to share the operating brief either way.\n\n— Founder, ${c.name}` },
+      { step: 3, subject: `Closing the loop`, body: `Hi {first_name},\n\nLast note from me on this — closing the loop. If the ${vertical} workflow becomes a priority again, the brief is here when you want it.\n\n— Founder, ${c.name}` },
+    ],
+    linkedin_message_drafts: [
+      `Hi {first_name} — running a small ${vertical} pilot with founder-overseen AI operators. Worth a 10-minute compare-notes?`,
+    ],
+    follow_up_drafts: [
+      `Hi {first_name}, checking in once on the ${vertical} brief — useful to share?`,
+    ],
+    objection_handling: [
+      { objection: "Too expensive", response: "Pilot pricing is fixed and outcome-bound. Compare against current weekly headcount cost." },
+      { objection: "We already have tooling", response: "Tooling does not operate the workflow — we run the workflow with audit trails and approval gates." },
+      { objection: "AI is risky", response: "Human-in-the-loop. Every external action is gated. Audit trail per run." },
+      { objection: "Not the right time", response: "Understood — we will leave you the brief and return on your timeline." },
+    ],
+    support_replies: [
+      { scenario: "Pilot question", reply: "Thanks — capturing this in the pilot log. Founder review within one business day." },
+      { scenario: "Pricing question", reply: "Pricing is pilot-bound; founder will confirm in writing before any commercial step." },
+      { scenario: "Data question", reply: "We only use approved sources. Restricted/private data is never scraped or stored." },
+    ],
+    demo_script: [
+      `Frame the ${vertical} workflow and current owners.`,
+      `Show the agent operating the workflow with the approval queue visible.`,
+      `Show the audit trail and kill/continue criteria.`,
+      `Confirm pilot scope, success criteria and founder approval gates.`,
+    ],
+    copy_rules: [
+      "All copy must be original.",
+      "No copied competitor wording.",
+      "No unsupported claims.",
+      "No regulated claims without adviser/founder approval.",
+      "No sending without founder approval.",
+    ],
+  };
+  const prospecting: VerticalProspectingPlan = {
+    ideal_prospect_criteria: [
+      `${customer_type} operating in ${vertical}`,
+      `Geography: ${geography}`,
+      `Buyer role present: ${buyer_role}`,
+      "Workflow currently absorbed by humans or rough tooling",
+      "Budget exists today (people, tools, services)",
+    ],
+    first_100_route: [
+      "Manual list build from public, founder-approved sources",
+      "Founder-curated network introductions (no automated contact)",
+      "Public directories and registered companies only",
+    ],
+    first_500_route: [
+      "Expand from first 100 patterns",
+      "Public sources only — no scraped private data",
+      "Founder approval per batch before any outreach",
+    ],
+    allowed_public_sources: [
+      "Public company registries",
+      "Public LinkedIn profiles (manual review)",
+      "Public directories and association lists",
+      "Founder-approved licensed datasets",
+    ],
+    disallowed_sources: [
+      "Scraped private/restricted data",
+      "Purchased lists of unverified provenance",
+      "Any paid API not founder-approved",
+      "Competitor customer lists",
+    ],
+    enrichment_fields: [
+      "company_name", "website", "country", "industry_vertical", "size_band", "buyer_role", "buyer_email", "evidence_link", "notes",
+    ],
+    crm_import_template_columns: [
+      "stage", "company_name", "website", "country", "industry_vertical", "size_band",
+      "buyer_first_name", "buyer_last_name", "buyer_role", "buyer_email", "evidence_link",
+      "source", "added_at", "owner", "notes", "approval_status",
+    ],
+    suppression_rules: [
+      "Do-not-contact list applied before any outreach",
+      "Opt-outs honoured immediately and permanently",
+      "Geographic legal compliance (e.g. consent requirements) enforced",
+      "No outreach until founder approval recorded",
+    ],
+    approval_gate_before_outreach: "Every outbound batch requires explicit founder approval recorded with timestamp.",
+  };
+  const crm: VerticalCRMPipeline = {
+    stages: VERTICAL_CRM_PIPELINE_STAGES,
+    ownership: "Founder-owned pipeline; AI assists drafting, never sends.",
+    approval_gates: [
+      "Move to Outreach approved requires founder sign-off",
+      "Move to Sent requires approved domain/email",
+      "Move to Won requires payment confirmation and signed pilot scope",
+    ],
+  };
+  return {
+    launch_mode: "PREPARING",
+    launch_target: target,
+    launch_offer: offer,
+    launch_assets: assets,
+    prospecting_plan: prospecting,
+    crm_pipeline: crm,
+    revenue_strike_plan: buildRevenueStrikePlan(),
+    daily_command_centre_fields: [
+      "selected vertical", "launch status", "launch day number",
+      "prospects identified", "outreach drafts awaiting approval", "outreach sent",
+      "replies", "interested leads", "demos/calls", "conversions", "revenue",
+      "objections", "support issues", "legal/compliance warnings", "next action",
+    ],
+    velocity_metrics_template: emptyLaunchVelocityMetrics(),
+    hard_launch_gates: VERTICAL_LAUNCH_HARD_GATES,
+    founder_approval_gates: VERTICAL_LAUNCH_FOUNDER_APPROVAL_GATES,
+    never_automatic: VERTICAL_LAUNCH_NEVER_AUTOMATIC,
+    feedback_loop_targets: [
+      "Funding Radar", "Business Autopsy", "Quarterly Build Selector",
+      "Production Pack", "Launch Factory", "Portfolio Commander", "Command Centre",
+    ],
+    doctrine: [
+      "Build fast", "QA hard", "Launch clean", "Hit one vertical",
+      "Measure daily", "Fix fast", "Push again",
+      "No vague soft launch", "No drifting", "No endless preparation",
+    ],
+  };
+}
+
+export type HardLaunchGateInput = {
+  production_qa_passed: boolean;
+  legal_pages_present: boolean;
+  no_copied_assets: boolean;
+  analytics_live: boolean;
+  crm_pipeline_live: boolean;
+  support_route_live: boolean;
+  onboarding_route_live: boolean;
+  founder_approval_granted: boolean;
+  sending_domain_approved_if_outreach: boolean;
+  outreach_used: boolean;
+  suppression_rules_active: boolean;
+  paid_apis_off_or_approved: boolean;
+  no_public_regulated_claims: boolean;
+};
+
+export function evaluateHardLaunchGates(input: HardLaunchGateInput): { ok: boolean; missing: string[] } {
+  const missing: string[] = [];
+  if (!input.production_qa_passed) missing.push("Production QA passed");
+  if (!input.legal_pages_present) missing.push("Legal pages present");
+  if (!input.no_copied_assets) missing.push("No copied competitor assets");
+  if (!input.analytics_live) missing.push("Analytics live");
+  if (!input.crm_pipeline_live) missing.push("CRM pipeline live");
+  if (!input.support_route_live) missing.push("Support route live");
+  if (!input.onboarding_route_live) missing.push("Onboarding route live");
+  if (!input.founder_approval_granted) missing.push("Founder approval granted");
+  if (input.outreach_used && !input.sending_domain_approved_if_outreach) missing.push("Sending domain/email approved");
+  if (!input.suppression_rules_active) missing.push("Suppression rules active");
+  if (!input.paid_apis_off_or_approved) missing.push("No paid APIs active unless founder approved");
+  if (!input.no_public_regulated_claims) missing.push("No public regulated claims");
+  return { ok: missing.length === 0, missing };
+}
+
+export function nextLaunchMode(current: LaunchMode, gates: HardLaunchGateInput): LaunchMode {
+  const ev = evaluateHardLaunchGates(gates);
+  if (current === "PREPARING") return ev.ok ? "READY_FOR_HARD_LAUNCH" : "PREPARING";
+  if (current === "READY_FOR_HARD_LAUNCH") return ev.ok && gates.founder_approval_granted ? "HARD_LAUNCH_LIVE" : current;
+  return current;
+}
