@@ -14,6 +14,8 @@ const TABS = [
   { to: "/founder/funding-radar/companies", label: "Companies" },
   { to: "/founder/funding-radar/clusters", label: "Clusters" },
   { to: "/founder/funding-radar/capital-efficiency", label: "Capital efficiency" },
+  { to: "/founder/funding-radar/watchlist", label: "Watchlist" },
+  { to: "/founder/funding-radar/weakness-signals", label: "Weakness signals" },
   { to: "/founder/funding-radar/monthly-run", label: "Monthly run" },
   { to: "/founder/funding-radar/shortlist", label: "Shortlist" },
   { to: "/founder/funding-radar/decision-pack", label: "Decision pack" },
