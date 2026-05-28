@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Radar, Trophy, Sparkles, Lock, CalendarClock, FileText, Upload, BookOpen, ListChecks, Eye, Map as MapIcon, Gavel, AlertTriangle, Factory } from "lucide-react";
+import { Radar, Trophy, Sparkles, Lock, CalendarClock, FileText, Upload, BookOpen, ListChecks, Eye, Map as MapIcon, Gavel, AlertTriangle, Factory, Stethoscope } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ENTRY_STRATEGY_LABEL, type EntryStrategy } from "@/lib/fundingRadarEngine";
 
@@ -364,6 +364,26 @@ export default function FundingRadarCommandPanel() {
             <Button asChild size="sm" variant="outline" className="h-7 text-[11px]"><Link to="/founder/launch-factory"><FileText className="h-3 w-3 mr-1" />Launch Factory</Link></Button>
           </div>
           <p className="col-span-2 md:col-span-6 text-[11px] text-muted-foreground">Reads the last three monthly Funding Radar runs, applies kill rules, capacity, market and portfolio gates, and recommends one Primary and one Backup build. Founder approval still gates production build, brand/site, domains, outreach and live launch.</p>
+        </CardContent>
+      </Card>
+
+      <Card className="tech-card lg:col-span-3">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2"><Stethoscope className="h-4 w-4 text-primary" />Business Autopsy & Better Build Generator</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 md:grid-cols-6 gap-3 text-xs">
+          <Row label="Latest autopsy" value={<span className="text-muted-foreground">open list</span>} />
+          <Row label="Better Build Pack" value={<span className="text-muted-foreground">generated per autopsy</span>} />
+          <Row label="Lovable prompt pack" value={<span className="text-muted-foreground">10-step pack</span>} />
+          <Row label="Approval required" value={<span className="text-amber-300">before build / brand / outreach</span>} />
+          <Row label="Linked quarterly build" value={<span className="text-muted-foreground">via Production Machine</span>} />
+          <Row label="Next action" value={<span className="text-primary">Open an autopsy → run analysis</span>} />
+          <div className="col-span-2 md:col-span-6 flex flex-wrap gap-2">
+            <Button asChild size="sm" variant="outline" className="h-7 text-[11px]"><Link to="/founder/funding-radar/business-autopsy"><Stethoscope className="h-3 w-3 mr-1" />Business autopsy</Link></Button>
+            <Button asChild size="sm" variant="outline" className="h-7 text-[11px]"><Link to="/founder/quarterly-production-machine/build-generator"><Sparkles className="h-3 w-3 mr-1" />Better Build Generator</Link></Button>
+            <Button asChild size="sm" variant="outline" className="h-7 text-[11px]"><Link to="/founder/quarterly-production-machine"><Factory className="h-3 w-3 mr-1" />Production Machine</Link></Button>
+          </div>
+          <p className="col-span-2 md:col-span-6 text-[11px] text-muted-foreground">Public, manual, uploaded, founder-approved or licensed sources only. Liftor extracts validated customer pain and weakness signals — never code, branding, copy, customer data or proprietary workflows. Generates a legally distinct Better Build Pack and a 10-prompt Lovable build pack. Founder approval still gates production build, brand/site, domains, outreach and live launch.</p>
         </CardContent>
       </Card>
     </div>
