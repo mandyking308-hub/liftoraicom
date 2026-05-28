@@ -184,7 +184,9 @@ export function validateCsvRow(row: Record<string, string>): string[] {
 }
 
 export function parseCsv(csv: string): { headers: string[]; rows: Record<string, string>[] } {
-  const lines = csv.split(/\r?\n/).filter((l) => l.trim().length > 0);
+  const lines = csv
+    .split(/\r?\n/)
+    .filter((l) => l.trim().length > 0 && !l.trim().startsWith("#"));
   if (lines.length === 0) return { headers: [], rows: [] };
   const splitLine = (line: string): string[] => {
     const out: string[] = [];
