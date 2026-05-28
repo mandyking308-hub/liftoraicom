@@ -567,6 +567,386 @@ export async function fetchWhiteSpaceOpportunities() {
   return data ?? [];
 }
 
+// ============================================================================
+// Decision discipline + Build handoff layer
+// ============================================================================
+
+// ---- Kill Rules ------------------------------------------------------------
+
+export const KILL_REASONS = [
+  "NO_RECURRING_REVENUE","NO_CUSTOMER_PAYMENT_EVIDENCE","NO_DISTRIBUTION_ROUTE",
+  "TOO_CAPITAL_HEAVY","TOO_REGULATED","NO_WHITE_SPACE","WINNER_TAKES_MOST",
+  "COMMODITY_TRAP","HIGH_LEGAL_IP_RISK","NO_LIFTOR_ADVANTAGE",
+  "TOO_MUCH_FOUNDER_ATTENTION","PORTFOLIO_COLLISION","PARK_FOR_LATER",
+] as const;
+export type KillReason = typeof KILL_REASONS[number];
+
+export const KILL_REASON_LABEL: Record<KillReason, string> = {
+  NO_RECURRING_REVENUE: "No recurring revenue",
+  NO_CUSTOMER_PAYMENT_EVIDENCE: "No customer payment evidence",
+  NO_DISTRIBUTION_ROUTE: "No distribution route",
+  TOO_CAPITAL_HEAVY: "Too capital heavy",
+  TOO_REGULATED: "Too regulated before MVP",
+  NO_WHITE_SPACE: "No white space",
+  WINNER_TAKES_MOST: "Winner-takes-most market",
+  COMMODITY_TRAP: "Commodity trap",
+  HIGH_LEGAL_IP_RISK: "High legal/IP risk",
+  NO_LIFTOR_ADVANTAGE: "No Liftor advantage",
+  TOO_MUCH_FOUNDER_ATTENTION: "Too much founder attention",
+  PORTFOLIO_COLLISION: "Portfolio collision",
+  PARK_FOR_LATER: "Park for later",
+};
+
+export type KillRuleInput = {
+  recurring_revenue_score?: number | null;
+  willingness_to_pay_evidence_count?: number | null;
+  distribution_route_present?: boolean | null;
+  capital_intensity_score?: number | null; // 0-100, higher = more capital heavy
+  regulatory_friction_score?: number | null; // 0-100, higher = more regulation
+  white_space_score?: number | null;
+  market_recommendation?: string | null; // entry strategy from market map
+  legal_ip_safety_score?: number | null; // higher = safer
+  capital_efficiency_advantage_score?: number | null;
+  ai_automation_advantage_score?: number | null;
+  founder_attention_score?: number | null; // higher = more attention required
+  portfolio_collision_detected?: boolean | null;
+  founder_park?: boolean | null;
+};
+
+export type KillRuleHit = { reason: KillReason; severity: "block" | "warn" };
+
+export function evaluateKillRules(input: KillRuleInput): KillRuleHit[] {
+  const hits: KillRuleHit[] = [];
+  if ((input.recurring_revenue_score ?? 0) < 30) hits.push({ reason: "NO_RECURRING_REVENUE", severity: "block" });
+  if ((input.willingness_to_pay_evidence_count ?? 0) < 1) hits.push({ reason: "NO_CUSTOMER_PAYMENT_EVIDENCE", severity: "block" });
+  if (input.distribution_route_present === false) hits.push({ reason: "NO_DISTRIBUTION_ROUTE", severity: "block" });
+  if ((input.capital_intensity_score ?? 0) >= 70) hits.push({ reason: "TOO_CAPITAL_HEAVY", severity: "block" });
+  if ((input.regulatory_friction_score ?? 0) >= 70) hits.push({ reason: "TOO_REGULATED", severity: "block" });
+  if ((input.white_space_score ?? 50) < 25) hits.push({ reason: "NO_WHITE_SPACE", severity: "warn" });
+  if (input.market_recommendation === "AVOID_WINNER_TAKES_MOST") hits.push({ reason: "WINNER_TAKES_MOST", severity: "block" });
+  if (input.market_recommendation === "AVOID_TOO_SATURATED") hits.push({ reason: "COMMODITY_TRAP", severity: "block" });
+  if ((input.legal_ip_safety_score ?? 80) < 50) hits.push({ reason: "HIGH_LEGAL_IP_RISK", severity: "block" });
+  const adv = Math.max(Number(input.capital_efficiency_advantage_score ?? 0), Number(input.ai_automation_advantage_score ?? 0));
+  if (adv < 50) hits.push({ reason: "NO_LIFTOR_ADVANTAGE", severity: "block" });
+  if ((input.founder_attention_score ?? 0) >= 80) hits.push({ reason: "TOO_MUCH_FOUNDER_ATTENTION", severity: "warn" });
+  if (input.portfolio_collision_detected === true) hits.push({ reason: "PORTFOLIO_COLLISION", severity: "warn" });
+  if (input.founder_park === true) hits.push({ reason: "PARK_FOR_LATER", severity: "warn" });
+  return hits;
+}
+
+export function isKillBlocked(input: KillRuleInput): boolean {
+  return evaluateKillRules(input).some((h) => h.severity === "block");
+}
+
+// ---- Source Quality + Confidence ------------------------------------------
+
+export const SOURCE_TYPES = [
+  "funding_announcement","investor_page","company_website","customer_review","case_study",
+  "testimonial","pricing_page","job_advert","press_article","regulatory_update",
+  "employee_review","founder_interview","partner_announcement","public_financial_filing",
+  "manual_founder_note","uploaded_csv","other",
+] as const;
+export type SourceType = typeof SOURCE_TYPES[number];
+
+export const SOURCE_RELIABILITY_DEFAULT: Record<SourceType, number> = {
+  funding_announcement: 85, investor_page: 80, company_website: 70, customer_review: 60,
+  case_study: 75, testimonial: 55, pricing_page: 90, job_advert: 70, press_article: 65,
+  regulatory_update: 95, employee_review: 50, founder_interview: 70, partner_announcement: 70,
+  public_financial_filing: 95, manual_founder_note: 75, uploaded_csv: 65, other: 40,
+};
+
+export type SourceModality = "public" | "licensed" | "manual" | "uploaded" | "inferred";
+
+export type SourceQualityInput = {
+  source_type?: SourceType | null;
+  source_modality?: SourceModality | null;
+  signal_date?: string | null;
+  reported_confidence?: number | null;
+  conflicts_with_other_signal?: boolean | null;
+  verified?: boolean | null;
+};
+
+export function ageInDaysFrom(iso?: string | null): number | null {
+  if (!iso) return null;
+  const t = new Date(iso).getTime();
+  if (Number.isNaN(t)) return null;
+  return Math.floor((Date.now() - t) / (24 * 3600 * 1000));
+}
+
+export const AGE_LABELS = ["Fresh","Current","Ageing","Stale","Contradicted","Needs verification"] as const;
+export type AgeLabel = typeof AGE_LABELS[number];
+
+export function deriveAgeLabel(input: SourceQualityInput): AgeLabel {
+  if (input.conflicts_with_other_signal) return "Contradicted";
+  if (input.verified === false) return "Needs verification";
+  const days = ageInDaysFrom(input.signal_date);
+  if (days === null) return "Needs verification";
+  if (days <= 30) return "Fresh";
+  if (days <= 90) return "Current";
+  if (days <= 180) return "Ageing";
+  return "Stale";
+}
+
+export function freshnessScore(input: SourceQualityInput): number {
+  const days = ageInDaysFrom(input.signal_date);
+  if (days === null) return 30;
+  if (days <= 30) return 100;
+  if (days <= 90) return 80;
+  if (days <= 180) return 55;
+  if (days <= 365) return 30;
+  return 10;
+}
+
+export function reliabilityScore(input: SourceQualityInput): number {
+  const base = input.source_type ? SOURCE_RELIABILITY_DEFAULT[input.source_type] : 40;
+  const modBonus = input.source_modality === "licensed" ? 10
+    : input.source_modality === "public" ? 0
+    : input.source_modality === "manual" ? -5
+    : input.source_modality === "uploaded" ? -10
+    : input.source_modality === "inferred" ? -20 : -10;
+  const verifiedBonus = input.verified ? 5 : -5;
+  return Math.max(0, Math.min(100, base + modBonus + verifiedBonus));
+}
+
+export function signalConfidenceScore(input: SourceQualityInput): number {
+  const rel = reliabilityScore(input);
+  const fresh = freshnessScore(input);
+  const reported = Number(input.reported_confidence ?? 60);
+  const conflictPenalty = input.conflicts_with_other_signal ? 25 : 0;
+  return Math.max(0, Math.min(100, Math.round(rel * 0.5 + fresh * 0.3 + reported * 0.2 - conflictPenalty)));
+}
+
+/** Decay weighting for old signals — multiply downstream scores by this. */
+export function ageingWeight(input: SourceQualityInput): number {
+  const label = deriveAgeLabel(input);
+  switch (label) {
+    case "Fresh": return 1.0;
+    case "Current": return 0.85;
+    case "Ageing": return 0.6;
+    case "Stale": return 0.3;
+    case "Contradicted": return 0.2;
+    case "Needs verification": return 0.5;
+  }
+}
+
+// ---- Willingness-to-Pay Gate ----------------------------------------------
+
+export const WTP_EVIDENCE_TYPES = [
+  "visible_pricing","case_study","paid_customer_logo","testimonial","procurement_language",
+  "enterprise_plan","renewal_retention_signal","marketplace_transaction","job_demand_signal",
+  "review_evidence_real_usage","manual_founder_approved",
+] as const;
+export type WtpEvidenceType = typeof WTP_EVIDENCE_TYPES[number];
+
+export function hasWillingnessToPayEvidence(types: WtpEvidenceType[] | null | undefined): boolean {
+  return Array.isArray(types) && types.length >= 1;
+}
+
+// ---- Distribution Route Gate ----------------------------------------------
+
+export type DistributionGateInput = {
+  first_customer_segment?: string | null;
+  first_100_customer_route?: string | null;
+  likely_acquisition_channel?: string | null;
+  outreach_plan?: string | null;
+  buyer_contact_type?: string | null;
+  expected_sales_cycle?: string | null;
+  founder_approval_required_before_outreach?: boolean | null;
+};
+
+export function evaluateDistributionGate(d: DistributionGateInput): { ok: boolean; missing: string[]; recommendation: "BUILD" | "WATCH" | "PARK" } {
+  const missing: string[] = [];
+  if (!d.first_customer_segment) missing.push("first_customer_segment");
+  if (!d.first_100_customer_route) missing.push("first_100_customer_route");
+  if (!d.likely_acquisition_channel) missing.push("likely_acquisition_channel");
+  if (!d.outreach_plan) missing.push("outreach_plan");
+  if (!d.buyer_contact_type) missing.push("buyer_contact_type");
+  const ok = missing.length === 0;
+  const recommendation: "BUILD" | "WATCH" | "PARK" = ok ? "BUILD" : missing.length >= 3 ? "PARK" : "WATCH";
+  return { ok, missing, recommendation };
+}
+
+// ---- Portfolio Collision Check --------------------------------------------
+
+export type PortfolioItemLite = { id: string; name?: string | null; sector?: string | null; description?: string | null; tags?: string[] | null };
+
+export type CollisionRecommendation =
+  | "build_new_business" | "add_feature_to_existing" | "create_vertical_version"
+  | "merge_into_existing_template" | "park_to_avoid_distraction" | "reject_due_to_duplication";
+
+export function detectPortfolioCollision(opp: { name: string; sector?: string | null; cluster?: string | null }, portfolio: PortfolioItemLite[]): {
+  collision: boolean; matches: PortfolioItemLite[]; recommendation: CollisionRecommendation;
+} {
+  const tokens = `${opp.name} ${opp.sector ?? ""} ${opp.cluster ?? ""}`.toLowerCase().split(/[^a-z0-9]+/).filter((t) => t.length >= 4);
+  const matches = portfolio.filter((p) => {
+    const hay = `${p.name ?? ""} ${p.sector ?? ""} ${p.description ?? ""} ${(p.tags ?? []).join(" ")}`.toLowerCase();
+    return tokens.some((t) => hay.includes(t));
+  });
+  if (matches.length === 0) return { collision: false, matches: [], recommendation: "build_new_business" };
+  if (matches.length >= 3) return { collision: true, matches, recommendation: "reject_due_to_duplication" };
+  if (matches.length === 2) return { collision: true, matches, recommendation: "merge_into_existing_template" };
+  return { collision: true, matches, recommendation: "add_feature_to_existing" };
+}
+
+// ---- Founder Capacity Gate ------------------------------------------------
+
+export type CapacityGateInput = {
+  build_complexity_score?: number | null;
+  operating_complexity_score?: number | null;
+  human_oversight_required_score?: number | null;
+  founder_attention_score?: number | null;
+  current_quarter_active_builds?: number | null;
+  active_businesses?: number | null;
+  current_launch_priorities?: number | null;
+};
+
+export function evaluateCapacityGate(c: CapacityGateInput): { ok: boolean; load: number; reason: string } {
+  const load = Math.round(
+    Number(c.build_complexity_score ?? 50) * 0.20 +
+    Number(c.operating_complexity_score ?? 50) * 0.20 +
+    Number(c.human_oversight_required_score ?? 50) * 0.20 +
+    Number(c.founder_attention_score ?? 50) * 0.20 +
+    Math.min(100, Number(c.current_quarter_active_builds ?? 0) * 50) * 0.20
+  );
+  const tooManyBuilds = Number(c.current_quarter_active_builds ?? 0) >= 2;
+  if (tooManyBuilds) return { ok: false, load, reason: "Already 2 active builds this quarter — capacity exhausted." };
+  if (load >= 80) return { ok: false, load, reason: "Combined complexity + oversight + attention load is too high for safe execution." };
+  return { ok: true, load, reason: "Within capacity envelope." };
+}
+
+// ---- Build Handoff Pack ---------------------------------------------------
+
+export type BuildHandoffPack = {
+  generated_at: string;
+  candidate: { id: string; name: string; quarter?: number; year?: number };
+  thesis: {
+    problem_thesis: string | null;
+    paying_customer_profile: string | null;
+    legally_distinct_product_concept: string | null;
+    first_offer: string | null;
+  };
+  build_plan: {
+    mvp_feature_list: string[];
+    landing_page_structure: string[];
+    crm_pipeline_stages: string[];
+    pricing_hypothesis: string | null;
+    onboarding_flow: string | null;
+    support_flow: string | null;
+    compliance_legal_pages_needed: string[];
+  };
+  go_to_market: {
+    first_100_customer_plan: string | null;
+    outreach_angle: string | null;
+    likely_acquisition_channel: string | null;
+    buyer_contact_type: string | null;
+    expected_sales_cycle: string | null;
+  };
+  governance: {
+    approval_gates: string[];
+    kill_continue_criteria: string[];
+    kpis: string[];
+  };
+  schedule: {
+    first_30_day_execution_plan: string[];
+    first_90_day_operating_plan: string[];
+  };
+  connections: {
+    launch_factory: string;
+    business_templates: string;
+    portfolio_commander: string;
+    command_centre: string;
+  };
+  guardrails: { no_external_actions: string[] };
+};
+
+export const HANDOFF_DEFAULT_APPROVAL_GATES = [
+  "Founder review of thesis & legally distinct concept",
+  "Founder approval before any outreach",
+  "Founder approval before paid API activation",
+  "Founder approval before public publishing of comparisons",
+  "Founder approval before opening a data room",
+] as const;
+
+export const HANDOFF_DEFAULT_KILL_CONTINUE = [
+  "Kill if no paying customer signal within 60 days post-launch",
+  "Kill if conversion < 1% across two outreach waves",
+  "Kill if founder attention exceeds 1 day/week beyond month 2",
+  "Continue if 3+ paying customers within 90 days",
+  "Continue if recurring revenue retention >= 80% at 90 days",
+] as const;
+
+export const HANDOFF_DEFAULT_KPIS = [
+  "Paying customers (count)","MRR","CAC","Activation rate","Retention @ 30/60/90",
+  "Founder hours/week","Human oversight hours","AI automation success rate",
+] as const;
+
+export function buildHandoffPack(args: {
+  candidate: { id: string; candidate_name: string; description?: string | null; quarter?: number | null; year?: number | null;
+    build_thesis?: string | null; revenue_model?: string | null; target_customer?: string | null; target_buyer_type?: string | null };
+  shortlist?: { build_thesis?: string | null; capital_efficiency_summary?: string | null } | null;
+  company?: { company_name?: string | null; revenue_model_pattern?: string | null; pricing_logic?: string | null; distinct_execution_route?: string | null } | null;
+  cluster?: { cluster_name?: string | null; problem_thesis?: string | null; customer_pain?: string | null; distinct_execution_route?: string | null } | null;
+  distribution?: DistributionGateInput | null;
+}): BuildHandoffPack {
+  const c = args.candidate;
+  const cl = args.cluster ?? {};
+  const co = args.company ?? {};
+  const sl = args.shortlist ?? {};
+  const d = args.distribution ?? {};
+  return {
+    generated_at: new Date().toISOString(),
+    candidate: { id: c.id, name: c.candidate_name, quarter: c.quarter ?? undefined, year: c.year ?? undefined },
+    thesis: {
+      problem_thesis: cl.problem_thesis ?? sl.build_thesis ?? c.build_thesis ?? c.description ?? null,
+      paying_customer_profile: c.target_customer ?? cl.customer_pain ?? null,
+      legally_distinct_product_concept: co.distinct_execution_route ?? cl.distinct_execution_route ?? null,
+      first_offer: sl.capital_efficiency_summary ?? c.revenue_model ?? null,
+    },
+    build_plan: {
+      mvp_feature_list: [],
+      landing_page_structure: ["Hero with problem statement","Proof of paying customer pattern","Distinct execution angle","Pricing","FAQ","Founder-led CTA"],
+      crm_pipeline_stages: ["New lead","Qualified","Demo/scoping","Proposal","Won","Onboarding","Live","Renewal"],
+      pricing_hypothesis: co.pricing_logic ?? null,
+      onboarding_flow: null,
+      support_flow: null,
+      compliance_legal_pages_needed: ["Terms","Privacy","DPA","AUP","Security disclosure"],
+    },
+    go_to_market: {
+      first_100_customer_plan: d.first_100_customer_route ?? null,
+      outreach_angle: d.outreach_plan ?? null,
+      likely_acquisition_channel: d.likely_acquisition_channel ?? null,
+      buyer_contact_type: d.buyer_contact_type ?? c.target_buyer_type ?? null,
+      expected_sales_cycle: d.expected_sales_cycle ?? null,
+    },
+    governance: {
+      approval_gates: [...HANDOFF_DEFAULT_APPROVAL_GATES],
+      kill_continue_criteria: [...HANDOFF_DEFAULT_KILL_CONTINUE],
+      kpis: [...HANDOFF_DEFAULT_KPIS],
+    },
+    schedule: {
+      first_30_day_execution_plan: [
+        "Confirm thesis with 5 manual founder conversations (existing network only)",
+        "Build MVP scope + landing page",
+        "Define legally distinct concept & legal/compliance pages",
+        "Wire CRM pipeline + first-100 plan into Launch Factory",
+      ],
+      first_90_day_operating_plan: [
+        "Reach 3+ paying customers",
+        "Confirm retention pattern at 30/60 days",
+        "Activate Portfolio Commander tracking",
+        "Decide kill/continue at day 90 against criteria",
+      ],
+    },
+    connections: {
+      launch_factory: "/founder/launch-factory",
+      business_templates: "/founder/business-templates",
+      portfolio_commander: "/founder/portfolio-exit",
+      command_centre: "/founder/command-centre",
+    },
+    guardrails: { no_external_actions: [...WATCHLIST_FORBIDDEN_ACTIONS] },
+  };
+}
+
 // CRUD helpers ---------------------------------------------------------------
 
 export async function fetchWatchlist() {

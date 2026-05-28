@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
+import { evaluateKillRules, KILL_REASON_LABEL } from "@/lib/fundingRadarEngine";
+import { FileText } from "lucide-react";
 
 export default function FRShortlist() {
   const [rows, setRows] = useState<any[]>([]);
@@ -23,6 +26,22 @@ export default function FRShortlist() {
       .from("funding_radar_scores").select("*").eq("funding_company_id", c.id ?? s.funding_company_id)
       .order("scored_at", { ascending: false }).limit(1);
     const score = (scores ?? [])[0];
+    // Kill rules — block hard violations before promotion.
+    const hits = evaluateKillRules({
+      recurring_revenue_score: score?.recurring_revenue_score,
+      willingness_to_pay_evidence_count: s.build_thesis ? 1 : 0,
+      distribution_route_present: !!s.build_thesis,
+      capital_intensity_score: 100 - Number(score?.capital_efficiency_advantage_score ?? 50),
+      regulatory_friction_score: 30,
+      legal_ip_safety_score: c.distinct_execution_route ? 80 : 40,
+      capital_efficiency_advantage_score: score?.capital_efficiency_advantage_score,
+      ai_automation_advantage_score: score?.ai_automation_advantage_score,
+    });
+    const blockers = hits.filter((h) => h.severity === "block");
+    if (blockers.length > 0) {
+      toast.error(`Blocked by kill rules: ${blockers.map((b) => KILL_REASON_LABEL[b.reason]).join(", ")}`);
+      return;
+    }
     const payload: any = {
       candidate_name: `[Radar] ${c.company_name}`,
       description: s.build_thesis ?? null,
@@ -80,6 +99,11 @@ export default function FRShortlist() {
                   <TableCell><Badge variant="outline" className="text-[10px]">{s.status}</Badge></TableCell>
                   <TableCell className="text-xs flex gap-1">
                     {s.status !== "promoted" && <Button size="sm" onClick={() => promoteToBuildCandidate(s)}>Promote</Button>}
+                    {s.status === "promoted" && s.promoted_build_candidate_id && (
+                      <Button asChild size="sm" variant="outline" className="h-7 text-[11px]">
+                        <Link to={`/founder/funding-radar/handoff/${s.promoted_build_candidate_id}`}><FileText className="h-3 w-3 mr-1" />Handoff</Link>
+                      </Button>
+                    )}
                     {s.status !== "rejected" && <Button size="sm" variant="ghost" onClick={() => setStatus(s.id, "rejected")}>Reject</Button>}
                     {s.status !== "parked" && <Button size="sm" variant="ghost" onClick={() => setStatus(s.id, "parked")}>Park</Button>}
                   </TableCell>

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Radar, Trophy, Sparkles, Lock, CalendarClock, FileText, Upload, BookOpen, ListChecks, Eye, Map as MapIcon } from "lucide-react";
+import { Radar, Trophy, Sparkles, Lock, CalendarClock, FileText, Upload, BookOpen, ListChecks, Eye, Map as MapIcon, Gavel, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ENTRY_STRATEGY_LABEL, type EntryStrategy } from "@/lib/fundingRadarEngine";
 
@@ -40,6 +40,9 @@ type Stats = {
   highestSaturation: { name: string; risk: string } | null;
   bestNicheWedge: { name: string; strategy: string } | null;
   topAvoid: { name: string; reason: string } | null;
+  decisionsNeeded: Array<{ id: string; name: string; status: string }>;
+  topRisks: Array<{ name: string; reason: string }>;
+  watchChanges: Array<{ name: string; title: string }>;
 };
 
 const APPROVAL_GATED_ACTIONS = [
@@ -98,10 +101,18 @@ export default function FundingRadarCommandPanel() {
         sb.from("funding_watchlist").select("id", { count: "exact", head: true }).lte("next_review_due_at", new Date().toISOString()),
         sb.from("funding_market_maps").select("market_name,crowding_level,saturation_risk,white_space_score,recommended_entry_strategy,avoid_reason,liftor_entry_score").order("liftor_entry_score",{ascending:false,nullsFirst:false}).limit(50),
       ]);
+      const decisionsNeeded = ((shortlist.data ?? []) as any[])
+        .filter((r) => ["shortlisted","reviewing"].includes(r.status))
+        .slice(0, 3)
+        .map((r: any) => ({ id: r.id, name: r.funding_radar_companies?.company_name ?? "—", status: r.status }));
       const candRows = (candidates.data ?? []) as any[];
       const selected = candRows.find((c) => c.recommendation_status === "selected");
       const topRows = (topScore.data ?? []) as any[];
       const mmRows = (marketMaps.data ?? []) as any[];
+      const topRisks = mmRows
+        .filter((m: any) => String(m.recommended_entry_strategy ?? "").startsWith("AVOID") || m.saturation_risk === "extreme" || m.saturation_risk === "high")
+        .slice(0, 3)
+        .map((m: any) => ({ name: m.market_name, reason: m.avoid_reason ?? m.saturation_risk ?? m.recommended_entry_strategy ?? "" }));
       const crowdOrder: Record<string, number> = { extreme: 4, high: 3, moderate: 2, low: 1 };
       const topCrowdedRow = [...mmRows].sort((a, b) => (crowdOrder[b.crowding_level] ?? 0) - (crowdOrder[a.crowding_level] ?? 0))[0] ?? null;
       const topWhiteSpaceRow = [...mmRows].sort((a, b) => Number(b.white_space_score ?? 0) - Number(a.white_space_score ?? 0))[0] ?? null;
@@ -158,6 +169,9 @@ export default function FundingRadarCommandPanel() {
         highestSaturation: highestSatRow ? { name: highestSatRow.market_name, risk: highestSatRow.saturation_risk ?? "—" } : null,
         bestNicheWedge: niche ? { name: niche.market_name, strategy: ENTRY_STRATEGY_LABEL[niche.recommended_entry_strategy as EntryStrategy] ?? niche.recommended_entry_strategy } : null,
         topAvoid: avoid ? { name: avoid.market_name, reason: avoid.avoid_reason ?? (ENTRY_STRATEGY_LABEL[avoid.recommended_entry_strategy as EntryStrategy] ?? "") } : null,
+        decisionsNeeded,
+        topRisks,
+        watchChanges: [],
       });
     })().catch(() => setS(null));
   }, []);
@@ -287,6 +301,49 @@ export default function FundingRadarCommandPanel() {
             <Button asChild size="sm" variant="outline" className="h-7 text-[11px]"><Link to="/founder/funding-radar/white-space"><Sparkles className="h-3 w-3 mr-1" />White space</Link></Button>
           </div>
           <p className="col-span-2 md:col-span-6 text-[11px] text-muted-foreground">Crowded does not mean bad. Use Market Maps to distinguish saturated commodity markets from proven markets with white space, and to identify niche, vertical or geographic wedges before promoting into the Quarterly Build Selector.</p>
+        </CardContent>
+      </Card>
+
+      <Card className="tech-card lg:col-span-3">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2"><Gavel className="h-4 w-4 text-primary" />Founder decisions</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+          <div className="border border-border/50 rounded p-2">
+            <p className="text-[10px] uppercase text-muted-foreground mb-1">Top 3 needing decision</p>
+            {(s?.decisionsNeeded ?? []).length === 0 ? (
+              <p className="text-muted-foreground italic">None — shortlist is clean.</p>
+            ) : (
+              <ul className="space-y-1">
+                {(s?.decisionsNeeded ?? []).map((d) => (
+                  <li key={d.id} className="flex items-center justify-between gap-2">
+                    <span className="truncate">{d.name}</span>
+                    <Badge variant="outline" className="text-[10px]">{d.status}</Badge>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <div className="border border-border/50 rounded p-2">
+            <p className="text-[10px] uppercase text-muted-foreground mb-1 flex items-center gap-1"><AlertTriangle className="h-3 w-3 text-amber-400" />Top 3 risks</p>
+            {(s?.topRisks ?? []).length === 0 ? (
+              <p className="text-muted-foreground italic">No risk markets logged.</p>
+            ) : (
+              <ul className="space-y-1">
+                {(s?.topRisks ?? []).map((r, i) => (
+                  <li key={i}><span className="font-medium">{r.name}</span><span className="text-muted-foreground"> — {r.reason}</span></li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <div className="border border-border/50 rounded p-2">
+            <p className="text-[10px] uppercase text-muted-foreground mb-1">Run & build</p>
+            <p>Next run: <span className="text-foreground">{s?.nextRunAt ?? "—"}</span></p>
+            <p>Selected build: <span className="text-foreground">{s?.selectedBuild ?? "none"}</span></p>
+            <p>Missing evidence: <span className="text-foreground">{s?.needsVerification ?? 0}</span></p>
+            <p>Blocked / rejected: <span className="text-foreground">{s?.blockedCount ?? 0}</span></p>
+            <p className="text-primary">Next action: {s?.nextAction ?? "—"}</p>
+          </div>
         </CardContent>
       </Card>
     </div>
