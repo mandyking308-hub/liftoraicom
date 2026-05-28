@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Radar, Trophy, Sparkles, Lock, CalendarClock, FileText, Upload, BookOpen, ListChecks, Eye, Map as MapIcon, Gavel, AlertTriangle, Factory, Stethoscope, ShieldCheck, ListOrdered, Rocket } from "lucide-react";
+import { Radar, Trophy, Sparkles, Lock, CalendarClock, FileText, Upload, BookOpen, ListChecks, Eye, Map as MapIcon, Gavel, AlertTriangle, Factory, Stethoscope, ShieldCheck, ListOrdered, Rocket, KeyRound, Database, GitBranch } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ENTRY_STRATEGY_LABEL, type EntryStrategy } from "@/lib/fundingRadarEngine";
 
@@ -423,6 +423,27 @@ export default function FundingRadarCommandPanel() {
             <Button asChild size="sm" variant="outline" className="h-7 text-[11px]"><Link to="/founder/launch-factory/vertical-launch-cannon"><Factory className="h-3 w-3 mr-1" />Open in Launch Factory</Link></Button>
           </div>
           <p className="col-span-2 md:col-span-6 text-[11px] text-muted-foreground">Controlled hard launch into one chosen vertical with a 30-day revenue strike plan. Founder approval gates remain in force for public launch, outreach sending, sending domain/email, paid APIs, paid ads, external contact, public claims and payments. No outbound, no paid APIs, no spend, no contact triggered automatically.</p>
+        </CardContent>
+      </Card>
+
+      <Card className="tech-card lg:col-span-3">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-primary" />Liftor Build Preservation · Security Vault</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 md:grid-cols-6 gap-3 text-xs">
+          <Row label="Last build snapshot" value={<span className="text-muted-foreground">recorded by founder</span>} />
+          <Row label="Last passing audit" value={<span className="text-muted-foreground">see Security Audit</span>} />
+          <Row label="Backup status" value={<span className="text-amber-300">manual · approval-gated</span>} />
+          <Row label="Secrets register" value={<span className="text-emerald-400">metadata only</span>} />
+          <Row label="Restore runbook" value={<span className="text-muted-foreground">9 steps · founder-readable</span>} />
+          <Row label="Security warnings" value={<span className="text-muted-foreground">review checklist</span>} />
+          <div className="col-span-2 md:col-span-6 flex flex-wrap gap-2">
+            <Button asChild size="sm" variant="outline" className="h-7 text-[11px]"><Link to="/founder/security-vault"><ShieldCheck className="h-3 w-3 mr-1" />Security Vault</Link></Button>
+            <Button asChild size="sm" variant="outline" className="h-7 text-[11px]"><Link to="/founder/security-vault/build-snapshots"><GitBranch className="h-3 w-3 mr-1" />Build Snapshots</Link></Button>
+            <Button asChild size="sm" variant="outline" className="h-7 text-[11px]"><Link to="/founder/security-vault/secrets-register"><KeyRound className="h-3 w-3 mr-1" />Secrets Register</Link></Button>
+            <Button asChild size="sm" variant="outline" className="h-7 text-[11px]"><Link to="/founder/security-vault/backup-restore"><Database className="h-3 w-3 mr-1" />Backup &amp; Restore</Link></Button>
+          </div>
+          <p className="col-span-2 md:col-span-6 text-[11px] text-muted-foreground">Preservation layer for the current Liftor build. Metadata only — no raw secrets, no automatic exports, no automatic restores. Founder approval required for exports, secret rotation, branch protection changes, live-mode changes, external sending and publishing.</p>
         </CardContent>
       </Card>
     </div>

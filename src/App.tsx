@@ -9,6 +9,11 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/portal/ProtectedRoute";
 import FounderRoute from "@/components/founder/FounderRoute";
+import SecurityVaultOverview from "@/pages/founder/security-vault/Overview";
+import SecurityVaultBuildSnapshots from "@/pages/founder/security-vault/BuildSnapshots";
+import SecurityVaultSecretsRegister from "@/pages/founder/security-vault/SecretsRegister";
+import SecurityVaultBackupRestore from "@/pages/founder/security-vault/BackupRestore";
+import SecurityVaultSecurityAudit from "@/pages/founder/security-vault/SecurityAudit";
 import SystemModeBanner from "@/components/system/SystemModeBanner";
 import RuntimeModeOverview from "@/pages/founder/runtime-mode/Overview";
 import ApprovalsOpsOverview from "@/pages/founder/approvals-ops/Overview";
@@ -941,6 +946,11 @@ const App = () => (
             <Route path="/founder/quarterly-production-machine/vertical-launch" element={<FounderRoute><QPMVerticalLaunch /></FounderRoute>} />
             <Route path="/founder/quarterly-production-machine/production-pack" element={<FounderRoute><QPMProductionPack /></FounderRoute>} />
             <Route path="/founder/quarterly-production-machine/lovable-pack" element={<FounderRoute><QPMLovablePack /></FounderRoute>} />
+            <Route path="/founder/security-vault" element={<FounderRoute><SecurityVaultOverview /></FounderRoute>} />
+            <Route path="/founder/security-vault/build-snapshots" element={<FounderRoute><SecurityVaultBuildSnapshots /></FounderRoute>} />
+            <Route path="/founder/security-vault/secrets-register" element={<FounderRoute><SecurityVaultSecretsRegister /></FounderRoute>} />
+            <Route path="/founder/security-vault/backup-restore" element={<FounderRoute><SecurityVaultBackupRestore /></FounderRoute>} />
+            <Route path="/founder/security-vault/security-audit" element={<FounderRoute><SecurityVaultSecurityAudit /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/execution-handoff" element={<FounderRoute><ExecutionHandoff /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/manual" element={<FounderRoute><PortfolioExitManual /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/controls" element={<FounderRoute><PortfolioExitControls /></FounderRoute>} />
