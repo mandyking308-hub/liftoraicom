@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { computeTotalScore, parseCsv, sanitizeExtraction, ALLOWED_EXTRACTION_FIELDS, FORBIDDEN_EXTRACTION_FIELDS, CAPITAL_EFFICIENCY_QUESTIONS } from "../fundingRadarEngine";
+import {
+  computeTotalScore, parseCsv, sanitizeExtraction,
+  ALLOWED_EXTRACTION_FIELDS, FORBIDDEN_EXTRACTION_FIELDS, CAPITAL_EFFICIENCY_QUESTIONS,
+  validateBuildPack, BUILD_PACK_REQUIRED_ITEMS,
+  buildProductionPromptQueue, computePromptQueueReadiness, isLiveModeUnlocked,
+} from "../fundingRadarEngine";
 
 describe("fundingRadarEngine", () => {
   it("computes weighted total score", () => {
@@ -49,5 +54,72 @@ describe("fundingRadarEngine", () => {
       "staff_heavy","sales_heavy","onboarding_heavy","support_heavy",
       "compliance_heavy","delivery_manual","ai_can_collapse_cost","liftor_can_operate",
     ]) expect(keys).toContain(k);
+  });
+
+  it("validateBuildPack flags every requirement missing when pack is null", () => {
+    const r = validateBuildPack(null);
+    expect(r.totalCount).toBe(BUILD_PACK_REQUIRED_ITEMS.length);
+    expect(r.presentCount).toBe(0);
+    expect(r.status).not.toBe("READY_FOR_PROMPT_QUEUE");
+    expect(r.missingKeys.length).toBe(BUILD_PACK_REQUIRED_ITEMS.length);
+  });
+
+  it("validateBuildPack reports READY only when all 23 items present", () => {
+    const fullPack: any = {
+      candidate: { name: "X", id: "x" },
+      thesis: {
+        problem_thesis: "thesis",
+        paying_customer_profile: "ICP",
+        legally_distinct_product_concept: "distinct",
+        first_offer: "offer",
+      },
+      build_plan: {
+        mvp_feature_list: ["a"],
+        landing_page_structure: ["hero"],
+        crm_pipeline_stages: ["lead"],
+        onboarding_steps: ["welcome"],
+        support_flow: ["intake"],
+      },
+      database_schema_needs: ["customers"],
+      governance: { kpis: ["MRR"], approval_gates: ["build"], kill_continue_criteria: ["criteria"], compliance_pages: ["Terms"] },
+      schedule: { first_30_day_execution_plan: ["d1"], first_90_day_operating_plan: ["d90"] },
+      human_oversight_requirements: ["founder review"],
+      ai_operator_requirements: ["agent registry"],
+      command_centre_panel_requirements: ["MRR tile"],
+      pricing_hypothesis: "$199/mo",
+      compliance_legal_checklist: ["Terms"],
+      customer_problem_thesis: "thesis",
+      willingness_to_pay_evidence: "WTP",
+      connections: { launch_factory: "/x", business_templates: "/y", portfolio_commander: "/z", command_centre: "/c" },
+    };
+    const r = validateBuildPack(fullPack);
+    expect(r.status).toBe("READY_FOR_PROMPT_QUEUE");
+    expect(r.presentCount).toBe(BUILD_PACK_REQUIRED_ITEMS.length);
+  });
+
+  it("prompt queue produces 14 ordered stages with the QA + live-mode gates", () => {
+    const q = buildProductionPromptQueue(null);
+    expect(q.length).toBe(14);
+    expect(q.map((x) => x.order)).toEqual(Array.from({ length: 14 }, (_, i) => i + 1));
+    expect(q.find((x) => x.is_qa_gate)?.key).toBe("qa_smoke_test");
+    expect(q.find((x) => x.is_live_mode_gate)?.key).toBe("founder_approval_live_mode");
+  });
+
+  it("queue blocks later stages when validation is not READY", () => {
+    const q = buildProductionPromptQueue(null);
+    const validation = validateBuildPack(null);
+    const r = computePromptQueueReadiness(q, validation, {});
+    // Every stage is blocked while validation fails
+    expect(r.every((row) => row.readiness === "BLOCKED_BY_DEPS")).toBe(true);
+    expect(isLiveModeUnlocked(q, {})).toBe(false);
+  });
+
+  it("queue advances to READY when validation passes and dependencies are completed", () => {
+    const q = buildProductionPromptQueue(null);
+    const validation = { ...validateBuildPack(null), status: "READY_FOR_PROMPT_QUEUE" as const, missingKeys: [], blockers: [] };
+    const state = { product_foundation: { completed_at: new Date().toISOString(), notes: "", founder_approved: false } } as any;
+    const r = computePromptQueueReadiness(q, validation, state);
+    expect(r[0].readiness).toBe("DONE");
+    expect(r[1].readiness).toBe("READY"); // database_schema depends only on product_foundation
   });
 });

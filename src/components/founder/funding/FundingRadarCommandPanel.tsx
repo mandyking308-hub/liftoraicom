@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Radar, Trophy, Sparkles, Lock, CalendarClock, FileText, Upload, BookOpen, ListChecks, Eye, Map as MapIcon, Gavel, AlertTriangle, Factory, Stethoscope } from "lucide-react";
+import { Radar, Trophy, Sparkles, Lock, CalendarClock, FileText, Upload, BookOpen, ListChecks, Eye, Map as MapIcon, Gavel, AlertTriangle, Factory, Stethoscope, ShieldCheck, ListOrdered } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ENTRY_STRATEGY_LABEL, type EntryStrategy } from "@/lib/fundingRadarEngine";
 
@@ -384,6 +384,26 @@ export default function FundingRadarCommandPanel() {
             <Button asChild size="sm" variant="outline" className="h-7 text-[11px]"><Link to="/founder/quarterly-production-machine"><Factory className="h-3 w-3 mr-1" />Production Machine</Link></Button>
           </div>
           <p className="col-span-2 md:col-span-6 text-[11px] text-muted-foreground">Public, manual, uploaded, founder-approved or licensed sources only. Liftor extracts validated customer pain and weakness signals — never code, branding, copy, customer data or proprietary workflows. Generates a legally distinct Better Build Pack and a 10-prompt Lovable build pack. Founder approval still gates production build, brand/site, domains, outreach and live launch.</p>
+        </CardContent>
+      </Card>
+
+      <Card className="tech-card lg:col-span-3">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2"><ListOrdered className="h-4 w-4 text-primary" />Production Queue · Build Pack Validator + Lovable Prompt Queue</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 md:grid-cols-6 gap-3 text-xs">
+          <Row label="Current quarterly build" value={s?.selectedBuild ?? <span className="text-muted-foreground">pending</span>} />
+          <Row label="Build pack validation" value={<span className="text-muted-foreground">opens validator</span>} />
+          <Row label="Current prompt stage" value={<span className="text-muted-foreground">opens queue</span>} />
+          <Row label="Next prompt ready" value={<span className="text-muted-foreground">based on deps</span>} />
+          <Row label="Blocked dependencies" value={<span className="text-muted-foreground">enforced in queue</span>} />
+          <Row label="QA + live mode" value={<span className="text-amber-300">locked until founder approves</span>} />
+          <div className="col-span-2 md:col-span-6 flex flex-wrap gap-2">
+            <Button asChild size="sm" variant="outline" className="h-7 text-[11px]"><Link to="/founder/quarterly-production-machine/build-pack-validator"><ShieldCheck className="h-3 w-3 mr-1" />Build Pack Validator</Link></Button>
+            <Button asChild size="sm" variant="outline" className="h-7 text-[11px]"><Link to="/founder/quarterly-production-machine/prompt-queue"><ListOrdered className="h-3 w-3 mr-1" />Prompt Queue</Link></Button>
+            <Button asChild size="sm" variant="outline" className="h-7 text-[11px]"><Link to="/founder/quarterly-production-machine"><Factory className="h-3 w-3 mr-1" />Production Machine</Link></Button>
+          </div>
+          <p className="col-span-2 md:col-span-6 text-[11px] text-muted-foreground">Validator confirms 23 required artefacts before any Lovable prompts run. The 14-stage queue enforces dependencies, acceptance criteria, QA gate and founder approval for live mode. No outbound, no paid APIs, no public claims, no copying of competitor branding, code, copy, customer lists or protected assets.</p>
         </CardContent>
       </Card>
     </div>

@@ -108,6 +108,8 @@ import MAIntelligenceWorkspace from "./pages/founder/MAIntelligenceWorkspace";
 import ExitValuationEngine from "./pages/founder/ExitValuationEngine";
 import QuarterlyBuildSelector from "./pages/founder/QuarterlyBuildSelector";
 import QuarterlyProductionMachine from "./pages/founder/QuarterlyProductionMachine";
+import QPMBuildPackValidator from "./pages/founder/quarterly-production-machine/BuildPackValidator";
+import QPMPromptQueue from "./pages/founder/quarterly-production-machine/PromptQueue";
 import FRRadarOverview from "./pages/founder/funding-radar/Overview";
 import FRCompanies from "./pages/founder/funding-radar/Companies";
 import FRCompanyDetail from "./pages/founder/funding-radar/CompanyDetail";
@@ -931,6 +933,8 @@ const App = () => (
             <Route path="/founder/funding-radar/business-autopsy" element={<FounderRoute><FRBusinessAutopsy /></FounderRoute>} />
             <Route path="/founder/funding-radar/business-autopsy/:id" element={<FounderRoute><FRBusinessAutopsyDetail /></FounderRoute>} />
             <Route path="/founder/quarterly-production-machine/build-generator" element={<FounderRoute><FRBusinessAutopsy /></FounderRoute>} />
+            <Route path="/founder/quarterly-production-machine/build-pack-validator" element={<FounderRoute><QPMBuildPackValidator /></FounderRoute>} />
+            <Route path="/founder/quarterly-production-machine/prompt-queue" element={<FounderRoute><QPMPromptQueue /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/execution-handoff" element={<FounderRoute><ExecutionHandoff /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/manual" element={<FounderRoute><PortfolioExitManual /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/controls" element={<FounderRoute><PortfolioExitControls /></FounderRoute>} />

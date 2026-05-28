@@ -220,6 +220,614 @@ export async function fetchCompanies() {
   return data ?? [];
 }
 
+// ---- Build Pack Validator + Lovable Prompt Queue Controller ---------------
+
+export type BuildPackValidationStatus =
+  | "INCOMPLETE"
+  | "NEEDS_FOUNDER_INPUT"
+  | "NEEDS_ADVISER_REVIEW"
+  | "READY_FOR_PROMPT_QUEUE";
+
+export const BUILD_PACK_VALIDATION_LABEL: Record<BuildPackValidationStatus, string> = {
+  INCOMPLETE: "Incomplete",
+  NEEDS_FOUNDER_INPUT: "Needs founder input",
+  NEEDS_ADVISER_REVIEW: "Needs adviser review",
+  READY_FOR_PROMPT_QUEUE: "Ready for prompt queue",
+};
+
+export type BuildPackRequirementKey =
+  | "problem_thesis"
+  | "paying_customer_profile"
+  | "legally_distinct_concept"
+  | "first_offer"
+  | "mvp_scope"
+  | "database_schema_needs"
+  | "landing_page_structure"
+  | "crm_pipeline"
+  | "onboarding_flow"
+  | "support_flow"
+  | "pricing_hypothesis"
+  | "compliance_legal_checklist"
+  | "analytics_kpi_plan"
+  | "approval_gates"
+  | "human_oversight"
+  | "ai_operator_requirement"
+  | "first_30_day_plan"
+  | "first_90_day_plan"
+  | "kill_continue_criteria"
+  | "command_centre_panel"
+  | "launch_factory_handoff"
+  | "business_template_handoff"
+  | "portfolio_commander_handoff";
+
+export type BuildPackRequirement = {
+  key: BuildPackRequirementKey;
+  label: string;
+  category: "thesis" | "build" | "operations" | "governance" | "handoff";
+  needsAdviser?: boolean;
+  needsFounder?: boolean;
+};
+
+export const BUILD_PACK_REQUIRED_ITEMS: BuildPackRequirement[] = [
+  { key: "problem_thesis", label: "Problem thesis", category: "thesis", needsFounder: true },
+  { key: "paying_customer_profile", label: "Paying customer profile", category: "thesis", needsFounder: true },
+  { key: "legally_distinct_concept", label: "Legally distinct product concept", category: "thesis", needsAdviser: true },
+  { key: "first_offer", label: "First offer", category: "thesis", needsFounder: true },
+  { key: "mvp_scope", label: "MVP scope", category: "build", needsFounder: true },
+  { key: "database_schema_needs", label: "Database / schema needs", category: "build" },
+  { key: "landing_page_structure", label: "Landing page structure", category: "build" },
+  { key: "crm_pipeline", label: "CRM pipeline", category: "operations" },
+  { key: "onboarding_flow", label: "Customer onboarding flow", category: "operations" },
+  { key: "support_flow", label: "Support flow", category: "operations" },
+  { key: "pricing_hypothesis", label: "Pricing hypothesis", category: "thesis", needsFounder: true },
+  { key: "compliance_legal_checklist", label: "Compliance / legal page checklist", category: "governance", needsAdviser: true },
+  { key: "analytics_kpi_plan", label: "Analytics / KPI plan", category: "governance" },
+  { key: "approval_gates", label: "Approval gates", category: "governance" },
+  { key: "human_oversight", label: "Human oversight requirement", category: "governance" },
+  { key: "ai_operator_requirement", label: "AI agent / operator requirement", category: "operations" },
+  { key: "first_30_day_plan", label: "First 30-day plan", category: "build" },
+  { key: "first_90_day_plan", label: "First 90-day plan", category: "build" },
+  { key: "kill_continue_criteria", label: "Kill / continue criteria", category: "governance" },
+  { key: "command_centre_panel", label: "Command Centre operating panel", category: "handoff" },
+  { key: "launch_factory_handoff", label: "Launch Factory handoff", category: "handoff" },
+  { key: "business_template_handoff", label: "Business Template handoff", category: "handoff" },
+  { key: "portfolio_commander_handoff", label: "Portfolio Commander handoff", category: "handoff" },
+];
+
+export type BuildPackValidationItem = {
+  key: BuildPackRequirementKey;
+  label: string;
+  present: boolean;
+  evidence: string | null;
+  needsAdviser: boolean;
+  needsFounder: boolean;
+};
+
+export type BuildPackValidationReport = {
+  status: BuildPackValidationStatus;
+  presentCount: number;
+  totalCount: number;
+  items: BuildPackValidationItem[];
+  missingKeys: BuildPackRequirementKey[];
+  needsFounderKeys: BuildPackRequirementKey[];
+  needsAdviserKeys: BuildPackRequirementKey[];
+  blockers: string[];
+};
+
+function nonEmptyStr(v: unknown): string | null {
+  if (typeof v !== "string") return null;
+  const s = v.trim();
+  return s.length > 0 ? s : null;
+}
+function nonEmptyList(v: unknown): string | null {
+  if (!Array.isArray(v)) return null;
+  const items = v.map((x) => (typeof x === "string" ? x.trim() : "")).filter(Boolean);
+  return items.length > 0 ? items.join(" · ") : null;
+}
+
+export function validateBuildPack(pack: ProductionBuildPack | null | undefined): BuildPackValidationReport {
+  const items: BuildPackValidationItem[] = BUILD_PACK_REQUIRED_ITEMS.map((req) => {
+    let evidence: string | null = null;
+    if (pack) {
+      switch (req.key) {
+        case "problem_thesis": evidence = nonEmptyStr(pack.customer_problem_thesis) ?? nonEmptyStr(pack.thesis?.problem_thesis); break;
+        case "paying_customer_profile": evidence = nonEmptyStr(pack.thesis?.paying_customer_profile); break;
+        case "legally_distinct_concept": evidence = nonEmptyStr(pack.thesis?.legally_distinct_product_concept); break;
+        case "first_offer": evidence = nonEmptyStr(pack.thesis?.first_offer) ?? nonEmptyList(pack.build_plan?.landing_page_structure as any); break;
+        case "mvp_scope": evidence = nonEmptyList(pack.build_plan?.mvp_feature_list); break;
+        case "database_schema_needs": evidence = nonEmptyList(pack.database_schema_needs); break;
+        case "landing_page_structure": evidence = nonEmptyList(pack.build_plan?.landing_page_structure); break;
+        case "crm_pipeline": evidence = nonEmptyList(pack.build_plan?.crm_pipeline_stages); break;
+        case "onboarding_flow": evidence = nonEmptyList((pack as any).build_plan?.onboarding_steps) ?? nonEmptyList(pack.schedule?.first_30_day_execution_plan); break;
+        case "support_flow": evidence = nonEmptyList((pack as any).build_plan?.support_flow) ?? nonEmptyStr((pack as any).support_flow_summary); break;
+        case "pricing_hypothesis": evidence = nonEmptyStr((pack as any).pricing_hypothesis) ?? nonEmptyStr(pack.willingness_to_pay_evidence); break;
+        case "compliance_legal_checklist": evidence = nonEmptyList((pack as any).compliance_legal_checklist) ?? nonEmptyList((pack as any).governance?.compliance_pages); break;
+        case "analytics_kpi_plan": evidence = nonEmptyList(pack.governance?.kpis); break;
+        case "approval_gates": evidence = nonEmptyList(pack.governance?.approval_gates); break;
+        case "human_oversight": evidence = nonEmptyList(pack.human_oversight_requirements); break;
+        case "ai_operator_requirement": evidence = nonEmptyList(pack.ai_operator_requirements); break;
+        case "first_30_day_plan": evidence = nonEmptyList(pack.schedule?.first_30_day_execution_plan); break;
+        case "first_90_day_plan": evidence = nonEmptyList(pack.schedule?.first_90_day_operating_plan); break;
+        case "kill_continue_criteria": evidence = nonEmptyList(pack.governance?.kill_continue_criteria); break;
+        case "command_centre_panel": evidence = nonEmptyList(pack.command_centre_panel_requirements); break;
+        case "launch_factory_handoff": evidence = nonEmptyStr(pack.connections?.launch_factory); break;
+        case "business_template_handoff": evidence = nonEmptyStr(pack.connections?.business_templates); break;
+        case "portfolio_commander_handoff": evidence = nonEmptyStr(pack.connections?.portfolio_commander); break;
+      }
+    }
+    return {
+      key: req.key,
+      label: req.label,
+      present: !!evidence,
+      evidence,
+      needsAdviser: !!req.needsAdviser,
+      needsFounder: !!req.needsFounder,
+    };
+  });
+
+  const missingKeys = items.filter((i) => !i.present).map((i) => i.key);
+  const needsFounderKeys = items.filter((i) => !i.present && i.needsFounder).map((i) => i.key);
+  const needsAdviserKeys = items.filter((i) => !i.present && i.needsAdviser).map((i) => i.key);
+
+  let status: BuildPackValidationStatus = "READY_FOR_PROMPT_QUEUE";
+  if (!pack || missingKeys.length > 0) {
+    if (needsAdviserKeys.length > 0) status = "NEEDS_ADVISER_REVIEW";
+    else if (needsFounderKeys.length > 0) status = "NEEDS_FOUNDER_INPUT";
+    else status = "INCOMPLETE";
+  }
+
+  const blockers: string[] = [];
+  if (!pack) blockers.push("No production build pack available — generate Primary build first.");
+  for (const k of missingKeys) {
+    const lbl = BUILD_PACK_REQUIRED_ITEMS.find((r) => r.key === k)?.label ?? k;
+    blockers.push(`Missing: ${lbl}`);
+  }
+
+  return {
+    status,
+    presentCount: items.filter((i) => i.present).length,
+    totalCount: items.length,
+    items,
+    missingKeys,
+    needsFounderKeys,
+    needsAdviserKeys,
+    blockers,
+  };
+}
+
+// --- Lovable Prompt Queue ---
+
+export type PromptQueueStageKey =
+  | "product_foundation"
+  | "database_schema"
+  | "core_mvp_screens"
+  | "founder_admin_dashboard"
+  | "customer_onboarding"
+  | "crm_pipeline"
+  | "support_workflow"
+  | "compliance_legal"
+  | "analytics_kpi"
+  | "command_centre_integration"
+  | "launch_factory_handoff"
+  | "business_template_handoff"
+  | "qa_smoke_test"
+  | "founder_approval_live_mode";
+
+export type PromptQueueItem = {
+  key: PromptQueueStageKey;
+  order: number;
+  title: string;
+  body: string;
+  dependencies: PromptQueueStageKey[];
+  acceptance_criteria: {
+    what_must_be_built: string;
+    where_it_appears: string;
+    table_or_data: string;
+    links_to_modules: string;
+    what_founder_sees: string;
+    empty_state: string;
+    test_proves_it_works: string;
+    must_remain_blocked: string;
+  };
+  test_instruction: string;
+  founder_approval_required: boolean;
+  is_qa_gate: boolean;
+  is_live_mode_gate: boolean;
+  created_at: string;
+  completed_at: string | null;
+  notes: string;
+};
+
+export const PROMPT_QUEUE_FORBIDDEN = [
+  "Outbound sending enabled by default",
+  "Paid APIs activated by default",
+  "Public claims without founder approval",
+  "Competitor copying",
+  "Copied branding, code, UI or website copy",
+  "Customer lists or protected assets",
+  "Private or restricted data",
+] as const;
+
+type StageBlueprint = Omit<PromptQueueItem, "created_at" | "completed_at" | "notes" | "order" | "title" | "body"> & {
+  buildTitle: (packName: string) => string;
+  buildBody: (pack: ProductionBuildPack) => string;
+};
+
+const STAGE_BLUEPRINTS: StageBlueprint[] = [
+  {
+    key: "product_foundation",
+    dependencies: [],
+    is_qa_gate: false,
+    is_live_mode_gate: false,
+    founder_approval_required: false,
+    test_instruction: "Open the new sub-app route — shell renders with auth gate and tech-card design system.",
+    acceptance_criteria: {
+      what_must_be_built: "App shell, auth gate, base layout, tech-card theme, founder/admin route guard.",
+      where_it_appears: "/founder/<build-slug> with founder-only access.",
+      table_or_data: "auth.users, profiles, user_roles (existing).",
+      links_to_modules: "Founder layout, has_role security definer.",
+      what_founder_sees: "Empty product shell with placeholders for upcoming stages.",
+      empty_state: "‘Build foundation ready — continue to database schema.’",
+      test_proves_it_works: "Non-admin users redirected; founder lands on shell.",
+      must_remain_blocked: "No outbound, no public route, no payments, no live mode.",
+    },
+    buildTitle: (n) => `Stage 1 · Product foundation · ${n}`,
+    buildBody: (p) => `Scaffold ${p.candidate.name} as a Liftor sub-app: auth, founder-only route guard, tech-card design system, base layout. Do not enable outbound, paid APIs or public routes. Reuse existing components — no copied branding, copy or competitor assets.`,
+  },
+  {
+    key: "database_schema",
+    dependencies: ["product_foundation"],
+    is_qa_gate: false,
+    is_live_mode_gate: false,
+    founder_approval_required: false,
+    test_instruction: "Run migration; confirm RLS + GRANTs present and Data API can read tables.",
+    acceptance_criteria: {
+      what_must_be_built: "Tables + RLS + GRANTs for the build pack’s schema needs.",
+      where_it_appears: "Supabase migrations + types regenerated.",
+      table_or_data: "build-specific tables + audit/approval tables.",
+      links_to_modules: "has_role, founder approval queue, agent audit.",
+      what_founder_sees: "Empty tables visible via founder admin pages.",
+      empty_state: "‘No records yet — schema ready.’",
+      test_proves_it_works: "Insert + select round-trip from founder seat with RLS pass.",
+      must_remain_blocked: "No public anon writes, no service_role exposure to client.",
+    },
+    buildTitle: (n) => `Stage 2 · Database / schema · ${n}`,
+    buildBody: (p) => `Create migrations for: ${p.database_schema_needs.join("; ") || "core schema"}. Include GRANTs and RLS scoped to founder/admin and tenant. No anon writes. No paid APIs.`,
+  },
+  {
+    key: "core_mvp_screens",
+    dependencies: ["database_schema"],
+    is_qa_gate: false,
+    is_live_mode_gate: false,
+    founder_approval_required: false,
+    test_instruction: "Walk through MVP feature list end-to-end with seeded data; each acceptance row passes.",
+    acceptance_criteria: {
+      what_must_be_built: "MVP feature list pages with empty states and validation.",
+      where_it_appears: "Sub-app routes mounted under the founder shell.",
+      table_or_data: "Stage 2 tables.",
+      links_to_modules: "Approval queue, agent registry stub, audit ledger.",
+      what_founder_sees: "Working CRUD for the MVP scope.",
+      empty_state: "Each screen shows guidance + ‘Add first record’.",
+      test_proves_it_works: "Smoke test on each MVP page returns no console errors.",
+      must_remain_blocked: "No outbound triggers from MVP screens — all queued.",
+    },
+    buildTitle: (n) => `Stage 3 · Core MVP screens · ${n}`,
+    buildBody: (p) => `Build MVP screens: ${p.build_plan.mvp_feature_list.join("; ") || "(define from thesis)"}. All actions route through founder approval queue. No outbound, no paid API calls.`,
+  },
+  {
+    key: "founder_admin_dashboard",
+    dependencies: ["core_mvp_screens"],
+    is_qa_gate: false,
+    is_live_mode_gate: false,
+    founder_approval_required: false,
+    test_instruction: "Open founder dashboard — KPIs render with zero-state values, no errors.",
+    acceptance_criteria: {
+      what_must_be_built: "Founder/admin dashboard with KPI tiles, approval queue, agent runs.",
+      where_it_appears: "/founder/<build-slug>/dashboard.",
+      table_or_data: "build_kpis, approvals, agent_runs.",
+      links_to_modules: "Command Centre, Approval Ops, Agent Capability.",
+      what_founder_sees: "All build KPIs in one place.",
+      empty_state: "‘No data yet — start collecting once live mode unlocked.’",
+      test_proves_it_works: "All KPI tiles + approval queue render with zero data.",
+      must_remain_blocked: "No public access; no exports without approval.",
+    },
+    buildTitle: (n) => `Stage 4 · Founder/admin dashboard · ${n}`,
+    buildBody: (p) => `Build founder dashboard with KPI tiles: ${p.governance.kpis.join("; ") || "MRR, paying customers, retention"} and an approval queue. No public access, no exports without approval.`,
+  },
+  {
+    key: "customer_onboarding",
+    dependencies: ["core_mvp_screens", "database_schema"],
+    is_qa_gate: false,
+    is_live_mode_gate: false,
+    founder_approval_required: false,
+    test_instruction: "Run onboarding with a dummy account in sandbox mode; complete without errors.",
+    acceptance_criteria: {
+      what_must_be_built: "Onboarding flow + welcome states + first-value moment.",
+      where_it_appears: "/onboarding inside sub-app, sandbox-only until live.",
+      table_or_data: "customers, subscriptions (stub).",
+      links_to_modules: "Customer Onboarding engine, Approval Ops.",
+      what_founder_sees: "Onboarding completion rate KPI.",
+      empty_state: "‘No customers onboarded yet.’",
+      test_proves_it_works: "Sandbox account reaches first-value step.",
+      must_remain_blocked: "No real payments, no public sign-up until live mode.",
+    },
+    buildTitle: (n) => `Stage 5 · Customer onboarding · ${n}`,
+    buildBody: () => "Build onboarding flow with welcome, first-value step, account confirmation. Sandbox-only. No real payments, no public sign-up.",
+  },
+  {
+    key: "crm_pipeline",
+    dependencies: ["database_schema"],
+    is_qa_gate: false,
+    is_live_mode_gate: false,
+    founder_approval_required: false,
+    test_instruction: "Move a test deal across all pipeline stages; events logged.",
+    acceptance_criteria: {
+      what_must_be_built: "CRM pipeline with the build pack’s stages and audit log.",
+      where_it_appears: "/founder/<build-slug>/crm.",
+      table_or_data: "crm_contacts, crm_deals, crm_events.",
+      links_to_modules: "CRM Dashboard, audit ledger.",
+      what_founder_sees: "Pipeline board with totals and stage timing.",
+      empty_state: "‘No deals yet — pipeline ready.’",
+      test_proves_it_works: "Test deal traverses every stage with events.",
+      must_remain_blocked: "No outbound email/SMS until Stage 14 unlocks live mode.",
+    },
+    buildTitle: (n) => `Stage 6 · CRM pipeline · ${n}`,
+    buildBody: (p) => `Wire CRM pipeline stages: ${p.build_plan.crm_pipeline_stages.join(" → ") || "Lead → Qualified → Won"}. Log every transition. Outbound disabled until live mode.`,
+  },
+  {
+    key: "support_workflow",
+    dependencies: ["core_mvp_screens"],
+    is_qa_gate: false,
+    is_live_mode_gate: false,
+    founder_approval_required: false,
+    test_instruction: "File a sandbox ticket, route to agent, escalate to founder; trace logged.",
+    acceptance_criteria: {
+      what_must_be_built: "Support inbox, ticket states, AI-assist + founder escalation.",
+      where_it_appears: "/founder/<build-slug>/support.",
+      table_or_data: "support_tickets, agent_runs, approvals.",
+      links_to_modules: "Support Hub, Approval Ops.",
+      what_founder_sees: "Open tickets, SLA, escalations.",
+      empty_state: "‘No tickets — support ready.’",
+      test_proves_it_works: "Sandbox ticket round-trip + audit entries.",
+      must_remain_blocked: "AI replies require founder approval before send.",
+    },
+    buildTitle: (n) => `Stage 7 · Support workflow · ${n}`,
+    buildBody: () => "Build support inbox with ticket states, AI-assist drafts, mandatory founder approval before any reply leaves the system.",
+  },
+  {
+    key: "compliance_legal",
+    dependencies: ["product_foundation"],
+    is_qa_gate: false,
+    is_live_mode_gate: false,
+    founder_approval_required: true,
+    test_instruction: "Visit each legal route; confirm rendered, versioned, and acceptance ledger writes work.",
+    acceptance_criteria: {
+      what_must_be_built: "Terms, Privacy, DPA, AUP, Security disclosure pages + acceptance ledger.",
+      where_it_appears: "/legal/* under sub-app domain.",
+      table_or_data: "legal_documents, legal_acceptances.",
+      links_to_modules: "Founder Legal Console.",
+      what_founder_sees: "Versioned policy table with acceptance counts.",
+      empty_state: "‘No acceptances yet.’",
+      test_proves_it_works: "Render + accept + ledger entry verified.",
+      must_remain_blocked: "No publishing without founder approval and adviser sign-off.",
+    },
+    buildTitle: (n) => `Stage 8 · Compliance / legal pages · ${n}`,
+    buildBody: () => "Add Terms, Privacy, DPA, AUP, Security disclosure with versioning + acceptance ledger. Founder approval required before publish.",
+  },
+  {
+    key: "analytics_kpi",
+    dependencies: ["founder_admin_dashboard"],
+    is_qa_gate: false,
+    is_live_mode_gate: false,
+    founder_approval_required: false,
+    test_instruction: "Trigger sample events; KPI tiles update; kill/continue tile reflects criteria.",
+    acceptance_criteria: {
+      what_must_be_built: "Event capture + KPI rollups + kill/continue tile.",
+      where_it_appears: "Founder dashboard.",
+      table_or_data: "build_kpis, events, kill_continue_log.",
+      links_to_modules: "Analytics-Attribution, Decision Register.",
+      what_founder_sees: "Live KPI deltas + kill/continue countdown.",
+      empty_state: "‘No events yet — analytics armed.’",
+      test_proves_it_works: "Sample events flow into rollups.",
+      must_remain_blocked: "No third-party analytics without approval.",
+    },
+    buildTitle: (n) => `Stage 9 · Analytics / KPI tracking · ${n}`,
+    buildBody: (p) => `Wire KPIs: ${p.governance.kpis.join("; ") || "MRR, paying customers, retention"} and kill/continue criteria: ${p.governance.kill_continue_criteria.join("; ") || "(define)"}. No third-party analytics without approval.`,
+  },
+  {
+    key: "command_centre_integration",
+    dependencies: ["analytics_kpi", "founder_admin_dashboard"],
+    is_qa_gate: false,
+    is_live_mode_gate: false,
+    founder_approval_required: false,
+    test_instruction: "Open Command Centre — new build appears with status, KPIs, approvals.",
+    acceptance_criteria: {
+      what_must_be_built: "Command Centre operating panel for the build.",
+      where_it_appears: "/founder/command-centre.",
+      table_or_data: "Existing build_kpis + approvals.",
+      links_to_modules: "FundingRadarCommandPanel + global Command Centre.",
+      what_founder_sees: "Single-glance build health card.",
+      empty_state: "Card shows ‘Awaiting first KPI’.",
+      test_proves_it_works: "Card renders with placeholder data without errors.",
+      must_remain_blocked: "No outbound action buttons on the card.",
+    },
+    buildTitle: (n) => `Stage 10 · Command Centre integration · ${n}`,
+    buildBody: (p) => `Add Command Centre operating panel showing: ${p.command_centre_panel_requirements.join("; ")}. Read-only — no outbound action buttons.`,
+  },
+  {
+    key: "launch_factory_handoff",
+    dependencies: ["command_centre_integration", "compliance_legal"],
+    is_qa_gate: false,
+    is_live_mode_gate: false,
+    founder_approval_required: true,
+    test_instruction: "Open Launch Factory record for the build — readiness checklist complete or flagged.",
+    acceptance_criteria: {
+      what_must_be_built: "Launch Factory record + readiness checklist link.",
+      where_it_appears: "Launch Factory + sub-app handoff page.",
+      table_or_data: "launch_factory_records.",
+      links_to_modules: "Launch Factory.",
+      what_founder_sees: "Readiness checklist with go/no-go.",
+      empty_state: "‘No checks yet — handoff drafted.’",
+      test_proves_it_works: "Record exists; checklist persists.",
+      must_remain_blocked: "No domains, no outbound, no public launch without approval.",
+    },
+    buildTitle: (n) => `Stage 11 · Launch Factory handoff · ${n}`,
+    buildBody: () => "Create Launch Factory record + readiness checklist. No domains purchased, no outbound enabled, no public launch without founder approval.",
+  },
+  {
+    key: "business_template_handoff",
+    dependencies: ["launch_factory_handoff"],
+    is_qa_gate: false,
+    is_live_mode_gate: false,
+    founder_approval_required: true,
+    test_instruction: "Open Business Template — captured for reuse with redactions.",
+    acceptance_criteria: {
+      what_must_be_built: "Business Template entry capturing reusable patterns only.",
+      where_it_appears: "Business Templates.",
+      table_or_data: "business_templates.",
+      links_to_modules: "Business Template Factory.",
+      what_founder_sees: "Template entry with non-PII fields only.",
+      empty_state: "‘No templates yet.’",
+      test_proves_it_works: "Template renders with redactions.",
+      must_remain_blocked: "No customer data, no copied competitor assets.",
+    },
+    buildTitle: (n) => `Stage 12 · Business Template handoff · ${n}`,
+    buildBody: () => "Capture this build as a Business Template — patterns only, no customer data, no copied competitor assets.",
+  },
+  {
+    key: "qa_smoke_test",
+    dependencies: [
+      "core_mvp_screens",
+      "founder_admin_dashboard",
+      "customer_onboarding",
+      "crm_pipeline",
+      "support_workflow",
+      "compliance_legal",
+      "analytics_kpi",
+      "command_centre_integration",
+      "launch_factory_handoff",
+      "business_template_handoff",
+    ],
+    is_qa_gate: true,
+    is_live_mode_gate: false,
+    founder_approval_required: true,
+    test_instruction: "Run npm test + npm run build + manual smoke checklist; all green.",
+    acceptance_criteria: {
+      what_must_be_built: "End-to-end QA pass with documented checklist.",
+      where_it_appears: "QA report attached to the build.",
+      table_or_data: "qa_runs, agent_audit.",
+      links_to_modules: "Platform Testing, Self-Diagnostics.",
+      what_founder_sees: "Pass/fail per area + outstanding issues.",
+      empty_state: "‘No QA run yet.’",
+      test_proves_it_works: "All MVP flows pass; build green.",
+      must_remain_blocked: "Live mode stays locked until founder approves.",
+    },
+    buildTitle: (n) => `Stage 13 · QA + smoke test · ${n}`,
+    buildBody: () => "Run full QA: every MVP flow, dashboards, CRM, support, compliance, analytics, Command Centre. Live mode stays locked.",
+  },
+  {
+    key: "founder_approval_live_mode",
+    dependencies: ["qa_smoke_test"],
+    is_qa_gate: false,
+    is_live_mode_gate: true,
+    founder_approval_required: true,
+    test_instruction: "Founder explicitly toggles live mode after reviewing QA + compliance + handoff records.",
+    acceptance_criteria: {
+      what_must_be_built: "Live-mode toggle gated by founder identity + QA pass.",
+      where_it_appears: "Build settings → Live mode.",
+      table_or_data: "approvals, audit_ledger.",
+      links_to_modules: "Approval Ops, Audit Ledger.",
+      what_founder_sees: "Locked toggle with prerequisites; unlocks only when met.",
+      empty_state: "‘Locked — QA + handoff incomplete.’",
+      test_proves_it_works: "Toggle refuses without QA pass; succeeds with founder identity + reason.",
+      must_remain_blocked: "Outbound, paid APIs, public launch remain off until live mode armed by founder.",
+    },
+    buildTitle: (n) => `Stage 14 · Founder approval for live mode · ${n}`,
+    buildBody: () => "Implement live-mode toggle. Locked until QA passes + founder records approval with reason. Outbound, paid APIs, public launch remain off until founder arms live mode.",
+  },
+];
+
+export function buildProductionPromptQueue(pack: ProductionBuildPack | null | undefined, now: Date = new Date()): PromptQueueItem[] {
+  const ts = now.toISOString();
+  const name = pack?.candidate?.name ?? "(build)";
+  return STAGE_BLUEPRINTS.map((b, idx) => ({
+    key: b.key,
+    order: idx + 1,
+    title: b.buildTitle(name),
+    body: pack ? b.buildBody(pack) : "Generate Primary build pack first to fill prompt body.",
+    dependencies: b.dependencies,
+    acceptance_criteria: b.acceptance_criteria,
+    test_instruction: b.test_instruction,
+    founder_approval_required: b.founder_approval_required,
+    is_qa_gate: b.is_qa_gate,
+    is_live_mode_gate: b.is_live_mode_gate,
+    created_at: ts,
+    completed_at: null,
+    notes: "",
+  }));
+}
+
+export type PromptQueueState = Record<PromptQueueStageKey, { completed_at: string | null; notes: string; founder_approved: boolean }>;
+
+export function applyPromptQueueState(queue: PromptQueueItem[], state: Partial<PromptQueueState>): PromptQueueItem[] {
+  return queue.map((q) => {
+    const s = state[q.key];
+    return s ? { ...q, completed_at: s.completed_at, notes: s.notes ?? q.notes } : q;
+  });
+}
+
+export type PromptStageReadiness = "READY" | "BLOCKED_BY_DEPS" | "DONE" | "AWAITING_FOUNDER_APPROVAL";
+
+export function computePromptQueueReadiness(
+  queue: PromptQueueItem[],
+  validation: BuildPackValidationReport,
+  state: Partial<PromptQueueState> = {},
+): Array<{ item: PromptQueueItem; readiness: PromptStageReadiness; missingDeps: PromptQueueStageKey[] }> {
+  const completedByKey = new Set(
+    queue.filter((q) => q.completed_at || state[q.key]?.completed_at).map((q) => q.key),
+  );
+  return queue.map((item) => {
+    const missingDeps = item.dependencies.filter((d) => !completedByKey.has(d));
+    if (item.completed_at || state[item.key]?.completed_at) return { item, readiness: "DONE" as const, missingDeps: [] };
+    if (validation.status !== "READY_FOR_PROMPT_QUEUE") return { item, readiness: "BLOCKED_BY_DEPS" as const, missingDeps };
+    if (missingDeps.length > 0) return { item, readiness: "BLOCKED_BY_DEPS" as const, missingDeps };
+    if (item.founder_approval_required && !(state[item.key]?.founder_approved)) return { item, readiness: "AWAITING_FOUNDER_APPROVAL" as const, missingDeps: [] };
+    return { item, readiness: "READY" as const, missingDeps: [] };
+  });
+}
+
+export function isLiveModeUnlocked(queue: PromptQueueItem[], state: Partial<PromptQueueState> = {}): boolean {
+  const qa = queue.find((q) => q.is_qa_gate);
+  const live = queue.find((q) => q.is_live_mode_gate);
+  const qaDone = !!(qa && (qa.completed_at || state[qa.key]?.completed_at));
+  const liveApproved = !!(live && state[live.key]?.founder_approved && (live.completed_at || state[live.key]?.completed_at));
+  return qaDone && liveApproved;
+}
+
+export function summarisePromptQueue(
+  queue: PromptQueueItem[],
+  validation: BuildPackValidationReport,
+  state: Partial<PromptQueueState> = {},
+) {
+  const readiness = computePromptQueueReadiness(queue, validation, state);
+  const done = readiness.filter((r) => r.readiness === "DONE");
+  const blocked = readiness.filter((r) => r.readiness === "BLOCKED_BY_DEPS");
+  const awaiting = readiness.filter((r) => r.readiness === "AWAITING_FOUNDER_APPROVAL");
+  const ready = readiness.filter((r) => r.readiness === "READY");
+  const current = readiness.find((r) => r.readiness !== "DONE");
+  const next = ready[0] ?? awaiting[0] ?? null;
+  return {
+    total: queue.length,
+    done: done.length,
+    blocked: blocked.length,
+    awaiting: awaiting.length,
+    ready: ready.length,
+    currentStage: current?.item.key ?? null,
+    nextReadyStage: next?.item.key ?? null,
+    liveModeUnlocked: isLiveModeUnlocked(queue, state),
+  };
+}
+
 export async function fetchClusters() {
   const { data, error } = await (supabase as any)
     .from("funding_problem_clusters")
