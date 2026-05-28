@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Radar, Trophy, Sparkles, Lock, CalendarClock, FileText, Upload, BookOpen, ListChecks, Eye, Map as MapIcon, Gavel, AlertTriangle, Factory, Stethoscope, ShieldCheck, ListOrdered } from "lucide-react";
+import { Radar, Trophy, Sparkles, Lock, CalendarClock, FileText, Upload, BookOpen, ListChecks, Eye, Map as MapIcon, Gavel, AlertTriangle, Factory, Stethoscope, ShieldCheck, ListOrdered, Rocket } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ENTRY_STRATEGY_LABEL, type EntryStrategy } from "@/lib/fundingRadarEngine";
 
@@ -404,6 +404,25 @@ export default function FundingRadarCommandPanel() {
             <Button asChild size="sm" variant="outline" className="h-7 text-[11px]"><Link to="/founder/quarterly-production-machine"><Factory className="h-3 w-3 mr-1" />Production Machine</Link></Button>
           </div>
           <p className="col-span-2 md:col-span-6 text-[11px] text-muted-foreground">Validator confirms 23 required artefacts before any Lovable prompts run. The 14-stage queue enforces dependencies, acceptance criteria, QA gate and founder approval for live mode. No outbound, no paid APIs, no public claims, no copying of competitor branding, code, copy, customer lists or protected assets.</p>
+        </CardContent>
+      </Card>
+
+      <Card className="tech-card lg:col-span-3">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2"><Rocket className="h-4 w-4 text-primary" />Vertical Launch Cannon · 30-Day Revenue Strike Plan</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 md:grid-cols-6 gap-3 text-xs">
+          <Row label="Doctrine" value={<span className="text-muted-foreground">Build · QA · Launch · One vertical · Measure · Fix · Push</span>} />
+          <Row label="Launch mode" value={<span className="text-amber-300">PREPARING until gates pass</span>} />
+          <Row label="Soft launch" value={<span className="text-rose-300">disabled by doctrine</span>} />
+          <Row label="Outreach" value={<span className="text-amber-300">drafted · approval-gated</span>} />
+          <Row label="CRM pipeline" value={<span className="text-muted-foreground">14 stages</span>} />
+          <Row label="Strike plan" value={<span className="text-muted-foreground">30 days · daily measure</span>} />
+          <div className="col-span-2 md:col-span-6 flex flex-wrap gap-2">
+            <Button asChild size="sm" variant="outline" className="h-7 text-[11px]"><Link to="/founder/quarterly-production-machine/vertical-launch"><Rocket className="h-3 w-3 mr-1" />Vertical Launch Cannon</Link></Button>
+            <Button asChild size="sm" variant="outline" className="h-7 text-[11px]"><Link to="/founder/launch-factory/vertical-launch-cannon"><Factory className="h-3 w-3 mr-1" />Open in Launch Factory</Link></Button>
+          </div>
+          <p className="col-span-2 md:col-span-6 text-[11px] text-muted-foreground">Controlled hard launch into one chosen vertical with a 30-day revenue strike plan. Founder approval gates remain in force for public launch, outreach sending, sending domain/email, paid APIs, paid ads, external contact, public claims and payments. No outbound, no paid APIs, no spend, no contact triggered automatically.</p>
         </CardContent>
       </Card>
     </div>
