@@ -561,6 +561,19 @@ function BuildMemoDialog({ open, onOpenChange, candidate, buyerMatches, competit
   const memoSections: { h: string; v: string }[] = [
     { h: "What we are building", v: candidate.description ?? "—" },
     { h: "Why now", v: candidate.source_signal ?? "—" },
+    ...(candidate.funding_company_id || candidate.build_thesis || candidate.acquirer_pain_thesis ? [
+      { h: "Funding Radar — funded company", v: candidate.funding_source_summary ?? `Linked funding_company_id ${candidate.funding_company_id ?? "—"}` },
+      { h: "Funding Radar — problem cluster", v: candidate.funding_cluster_id ?? "—" },
+      { h: "Capital Efficiency Advantage", v: [
+          candidate.capital_efficiency_advantage_score != null ? `CE advantage ${candidate.capital_efficiency_advantage_score}/100` : null,
+          candidate.investor_validation_score != null ? `Investor validation ${candidate.investor_validation_score}/100` : null,
+          candidate.ai_automation_advantage_score != null ? `AI automation ${candidate.ai_automation_advantage_score}/100` : null,
+          candidate.recurring_revenue_score != null ? `Recurring revenue ${candidate.recurring_revenue_score}/100` : null,
+          candidate.global_expansion_score != null ? `Global expansion ${candidate.global_expansion_score}/100` : null,
+        ].filter(Boolean).join(" · ") || "—" },
+      { h: "Build thesis (legally distinct execution route)", v: candidate.build_thesis ?? "—" },
+      { h: "Acquirer pain thesis", v: candidate.acquirer_pain_thesis ?? "—" },
+    ] : []),
     { h: "Buyer / investor signal", v: relatedBuyers.length ? relatedBuyers.map((b: any) => `${b.ma_companies?.company_name ?? "?"} (${b.buyer_warmth_status}, fit ${b.fit_score ?? "—"})`).join("; ") : `Target buyer type: ${candidate.target_buyer_type ?? "—"}` },
     { h: "Competitor proof", v: relatedComps.length ? relatedComps.map((c: any) => `${c.ma_companies?.company_name ?? "?"} — legal risk ${c.legal_copy_risk}`).join("; ") : "No competitor proof linked." },
     { h: "Target customer", v: candidate.target_customer ?? "—" },
