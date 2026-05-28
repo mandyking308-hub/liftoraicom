@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Radar, Trophy, Sparkles, Lock, CalendarClock, FileText, Upload, BookOpen, ListChecks } from "lucide-react";
+import { Radar, Trophy, Sparkles, Lock, CalendarClock, FileText, Upload, BookOpen, ListChecks, Eye } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 type Stats = {
@@ -28,6 +28,11 @@ type Stats = {
   candidateCount: number;
   blockedCount: number;
   topAdvantage: Array<{ name: string; score: number; id: string }>;
+  watchActive: number;
+  newSignals30d: number;
+  topWeakness: { name: string; title: string } | null;
+  topPositive: { name: string; title: string } | null;
+  reviewDue: number;
 };
 
 const APPROVAL_GATED_ACTIONS = [
@@ -65,7 +70,8 @@ export default function FundingRadarCommandPanel() {
       const year = now.getFullYear();
       const month = now.getMonth() + 1;
       const sb: any = supabase as any;
-      const [latestRun, currentRun, companies, beyond, needsVerify, clusters, shortlist, promotedCount, topScore, candidates, approvals, legalNotif] = await Promise.all([
+      const since30d = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString();
+      const [latestRun, currentRun, companies, beyond, needsVerify, clusters, shortlist, promotedCount, topScore, candidates, approvals, legalNotif, watchActive, newSignals, topNeg, topPos, reviewDue] = await Promise.all([
         sb.from("funding_monthly_runs").select("month,year,status,finalised_at,updated_at").order("year", { ascending: false }).order("month", { ascending: false }).limit(1),
         sb.from("funding_monthly_runs").select("month,year,status").eq("month", month).eq("year", year).maybeSingle(),
         sb.from("funding_radar_companies").select("id", { count: "exact", head: true }),
@@ -78,6 +84,11 @@ export default function FundingRadarCommandPanel() {
         sb.from("ma_build_candidates").select("id,candidate_name,recommendation_status,rejection_reason").eq("quarter", quarter).eq("year", year),
         sb.from("founder_notification_queue").select("id", { count: "exact", head: true }).eq("status", "unread").eq("founder_action_required", true),
         sb.from("funding_radar_companies").select("id", { count: "exact", head: true }).eq("needs_verification", true),
+        sb.from("funding_watchlist").select("id", { count: "exact", head: true }).eq("watch_status", "active"),
+        sb.from("funding_weakness_signals").select("id", { count: "exact", head: true }).gte("created_at", since30d),
+        sb.from("funding_weakness_signals").select("signal_title,severity_score,funding_radar_companies(company_name)").eq("signal_polarity","negative").order("severity_score",{ascending:false,nullsFirst:false}).limit(1),
+        sb.from("funding_weakness_signals").select("signal_title,funding_radar_companies(company_name)").eq("signal_polarity","positive").order("created_at",{ascending:false}).limit(1),
+        sb.from("funding_watchlist").select("id", { count: "exact", head: true }).lte("next_review_due_at", new Date().toISOString()),
       ]);
       const candRows = (candidates.data ?? []) as any[];
       const selected = candRows.find((c) => c.recommendation_status === "selected");
@@ -121,6 +132,11 @@ export default function FundingRadarCommandPanel() {
           name: r.funding_radar_companies?.company_name ?? "—",
           score: r.capital_efficiency_advantage_score ?? 0,
         })),
+        watchActive: watchActive.count ?? 0,
+        newSignals30d: newSignals.count ?? 0,
+        topWeakness: (topNeg.data?.[0]) ? { name: topNeg.data[0].funding_radar_companies?.company_name ?? "—", title: topNeg.data[0].signal_title ?? "" } : null,
+        topPositive: (topPos.data?.[0]) ? { name: topPos.data[0].funding_radar_companies?.company_name ?? "—", title: topPos.data[0].signal_title ?? "" } : null,
+        reviewDue: reviewDue.count ?? 0,
       });
     })().catch(() => setS(null));
   }, []);
@@ -212,6 +228,25 @@ export default function FundingRadarCommandPanel() {
             ))}
           </div>
           <p className="text-[11px] text-muted-foreground mt-2">Operating mode: <span className="text-foreground">Manual / CSV-first intelligence</span>. Future API-assisted mode (Crunchbase, Dealroom, PitchBook, Tracxn, CB Insights) requires explicit founder approval. All gated actions queue into the founder approval queue. Nothing in the Funding Radar or Quarterly Build Selector bypasses the existing approval workflow.</p>
+        </CardContent>
+      </Card>
+
+      <Card className="tech-card lg:col-span-3">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2"><Eye className="h-4 w-4 text-primary" />Watchlist & Weakness Signals</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 md:grid-cols-6 gap-3 text-xs">
+          <Row label="Active watched" value={s?.watchActive ?? 0} />
+          <Row label="New signals · 30d" value={s?.newSignals30d ?? 0} />
+          <Row label="Top weakness" value={s?.topWeakness ? `${s.topWeakness.name}` : "—"} />
+          <Row label="Top positive" value={s?.topPositive ? `${s.topPositive.name}` : "—"} />
+          <Row label="Highest Liftor advantage" value={s?.topCE ? s.topCE.name : "—"} />
+          <Row label="Review due" value={s?.reviewDue ?? 0} />
+          <div className="col-span-2 md:col-span-6 flex gap-2">
+            <Button asChild size="sm" variant="outline" className="h-7 text-[11px]"><Link to="/founder/funding-radar/watchlist"><Eye className="h-3 w-3 mr-1" />Watchlist</Link></Button>
+            <Button asChild size="sm" variant="outline" className="h-7 text-[11px]"><Link to="/founder/funding-radar/weakness-signals"><ListChecks className="h-3 w-3 mr-1" />Weakness signals</Link></Button>
+          </div>
+          <p className="col-span-2 md:col-span-6 text-[11px] text-muted-foreground">Internal intelligence only. No outbound contact, no scraping of restricted sources, no allegations or defamation. Public sources and manual/CSV input only.</p>
         </CardContent>
       </Card>
     </div>

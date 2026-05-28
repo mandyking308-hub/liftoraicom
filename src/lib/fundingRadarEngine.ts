@@ -266,3 +266,195 @@ export async function fetchScoresForCompany(id: string) {
   if (error) throw error;
   return data ?? [];
 }
+
+// ============================================================================
+// Watchlist + Weakness Signal Engine
+// ============================================================================
+
+export const WATCH_PRIORITIES = ["low", "medium", "high", "critical"] as const;
+export const WATCH_STATUSES = ["active", "paused", "archived"] as const;
+
+export const SIGNAL_TYPES_NEGATIVE = [
+  "customer_complaint","poor_review","support_issue","onboarding_issue","pricing_complaint",
+  "product_complexity","slow_implementation","failed_launch","delayed_expansion",
+  "leadership_exit","founder_exit","senior_hire_departure","layoffs","hiring_freeze",
+  "funding_pressure","down_round","regulatory_pressure","compliance_issue",
+  "integration_problem","churn_signal","competitor_pressure","market_confusion",
+  "trust_issue","geographic_expansion_problem","marketplace_supply_problem",
+  "marketplace_demand_problem",
+] as const;
+
+export const SIGNAL_TYPES_POSITIVE = [
+  "public_praise","strong_customer_love","strong_growth_signal",
+] as const;
+
+export const SIGNAL_TYPES_NEUTRAL = ["neutral_update"] as const;
+
+export const ALL_SIGNAL_TYPES = [
+  ...SIGNAL_TYPES_NEGATIVE,
+  ...SIGNAL_TYPES_POSITIVE,
+  ...SIGNAL_TYPES_NEUTRAL,
+] as const;
+
+export type SignalType = (typeof ALL_SIGNAL_TYPES)[number];
+export type SignalPolarity = "positive" | "negative" | "neutral";
+
+export function polarityForSignalType(t: string): SignalPolarity {
+  if ((SIGNAL_TYPES_POSITIVE as readonly string[]).includes(t)) return "positive";
+  if ((SIGNAL_TYPES_NEUTRAL as readonly string[]).includes(t)) return "neutral";
+  return "negative";
+}
+
+/**
+ * Watchlist + Weakness Signal scoring.
+ * Inputs are arrays of signals for a single company.
+ */
+export type SignalLite = {
+  signal_type: string;
+  signal_polarity?: string | null;
+  severity_score?: number | null;
+  confidence_score?: number | null;
+  relevance_to_liftor_score?: number | null;
+  customer_pain_relevance?: number | null;
+  capital_efficiency_relevance?: number | null;
+};
+
+function avg(nums: number[]): number {
+  if (nums.length === 0) return 0;
+  return Math.round(nums.reduce((a, b) => a + b, 0) / nums.length);
+}
+
+/** Severity-weighted average across negative signals only. */
+export function computeWeaknessSignalScore(signals: SignalLite[]): number {
+  const neg = signals.filter((s) => (s.signal_polarity ?? polarityForSignalType(s.signal_type)) === "negative");
+  if (neg.length === 0) return 0;
+  const weighted = neg.map((s) => {
+    const sev = Number(s.severity_score ?? 0);
+    const conf = Number(s.confidence_score ?? 70) / 100;
+    return sev * conf;
+  });
+  return Math.min(100, Math.round(avg(weighted) * Math.min(1, 0.6 + neg.length * 0.05)));
+}
+
+export function computeCustomerPainEvidenceScore(signals: SignalLite[]): number {
+  const r = signals
+    .filter((s) => ["customer_complaint","poor_review","support_issue","onboarding_issue","pricing_complaint","product_complexity","churn_signal","trust_issue"].includes(s.signal_type))
+    .map((s) => Number(s.customer_pain_relevance ?? s.severity_score ?? 0));
+  return Math.min(100, avg(r));
+}
+
+export function computeCapitalDragScore(signals: SignalLite[]): number {
+  const r = signals
+    .filter((s) => ["layoffs","hiring_freeze","funding_pressure","down_round","slow_implementation","support_issue","onboarding_issue","integration_problem","marketplace_supply_problem","marketplace_demand_problem"].includes(s.signal_type))
+    .map((s) => Number(s.capital_efficiency_relevance ?? s.severity_score ?? 0));
+  return Math.min(100, avg(r));
+}
+
+export function computeExecutionGapScore(signals: SignalLite[]): number {
+  const r = signals
+    .filter((s) => ["failed_launch","delayed_expansion","slow_implementation","leadership_exit","founder_exit","senior_hire_departure","integration_problem","market_confusion"].includes(s.signal_type))
+    .map((s) => Number(s.severity_score ?? 0));
+  return Math.min(100, avg(r));
+}
+
+export function computeOpportunityTimingScore(signals: SignalLite[]): number {
+  // Mix of weakness presence and recency proxy (more signals -> hotter timing).
+  const w = computeWeaknessSignalScore(signals);
+  const volume = Math.min(100, signals.length * 10);
+  return Math.round((w + volume) / 2);
+}
+
+export function computeLiftorAdvantageScore(signals: SignalLite[]): number {
+  if (signals.length === 0) return 0;
+  return Math.min(100, avg(signals.map((s) => Number(s.relevance_to_liftor_score ?? 0))));
+}
+
+/** Higher = lower legal risk. Defaults to 70 (cautious-clean) when no notes/signals. */
+export function computeLegalIpSafetyScore(legalIpRiskNotesCount: number): number {
+  if (legalIpRiskNotesCount === 0) return 80;
+  return Math.max(20, 80 - legalIpRiskNotesCount * 15);
+}
+
+export function computeWatchPriorityScore(input: {
+  weakness: number; capitalDrag: number; executionGap: number; liftorAdvantage: number; timing: number;
+}): number {
+  return Math.round(
+    input.weakness * 0.20 +
+    input.capitalDrag * 0.20 +
+    input.executionGap * 0.15 +
+    input.liftorAdvantage * 0.30 +
+    input.timing * 0.15
+  );
+}
+
+/** Aggregate every score in one pass. */
+export function computeWatchlistScores(signals: SignalLite[], legalIpRiskNotesCount = 0) {
+  const weakness = computeWeaknessSignalScore(signals);
+  const customerPain = computeCustomerPainEvidenceScore(signals);
+  const capitalDrag = computeCapitalDragScore(signals);
+  const executionGap = computeExecutionGapScore(signals);
+  const timing = computeOpportunityTimingScore(signals);
+  const liftorAdvantage = computeLiftorAdvantageScore(signals);
+  const legalIpSafety = computeLegalIpSafetyScore(legalIpRiskNotesCount);
+  const watchPriority = computeWatchPriorityScore({ weakness, capitalDrag, executionGap, liftorAdvantage, timing });
+  return { weakness, customerPain, capitalDrag, executionGap, timing, liftorAdvantage, legalIpSafety, watchPriority };
+}
+
+export const WEAKNESS_SIGNAL_CSV_COLUMNS = [
+  "company_name","website","signal_type","signal_title","signal_summary",
+  "source_name","source_url","source_type","signal_date",
+  "confidence_score","severity_score","relevance_to_liftor_score","founder_notes",
+] as const;
+
+/** Module-level rules: what may NEVER happen with the Watchlist + Weakness Signal Engine. */
+export const WATCHLIST_FORBIDDEN_ACTIONS = [
+  "Contacting employees","Contacting leavers","Contacting customers","Contacting investors",
+  "Contacting acquirers","Contacting competitors","Impersonating anyone",
+  "Collecting private information","Scraping restricted platforms","Bypassing terms of service",
+  "Publishing allegations","Making defamatory claims","Creating attack campaigns",
+  "Harassing competitors",
+] as const;
+
+// CRUD helpers ---------------------------------------------------------------
+
+export async function fetchWatchlist() {
+  const { data, error } = await (supabase as any)
+    .from("funding_watchlist")
+    .select("*, funding_radar_companies(company_name, website, sector, last_funding_round, last_funding_amount_usd, country, cluster_id), funding_problem_clusters(cluster_name)")
+    .order("priority", { ascending: false })
+    .order("updated_at", { ascending: false });
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function fetchWatchlistEntry(id: string) {
+  const { data, error } = await (supabase as any)
+    .from("funding_watchlist")
+    .select("*, funding_radar_companies(*), funding_problem_clusters(*)")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+export async function fetchSignalsForCompany(companyId: string) {
+  const { data, error } = await (supabase as any)
+    .from("funding_weakness_signals")
+    .select("*")
+    .eq("company_id", companyId)
+    .order("signal_date", { ascending: false, nullsFirst: false })
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function fetchAllSignals() {
+  const { data, error } = await (supabase as any)
+    .from("funding_weakness_signals")
+    .select("*, funding_radar_companies(company_name, sector, cluster_id)")
+    .order("signal_date", { ascending: false, nullsFirst: false })
+    .order("created_at", { ascending: false })
+    .limit(500);
+  if (error) throw error;
+  return data ?? [];
+}

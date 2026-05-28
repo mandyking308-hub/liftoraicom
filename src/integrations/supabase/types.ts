@@ -24885,6 +24885,153 @@ export type Database = {
           },
         ]
       }
+      funding_watchlist: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          founder_notes: string | null
+          id: string
+          last_reviewed_at: string | null
+          next_review_due_at: string | null
+          priority: string
+          problem_cluster_id: string | null
+          updated_at: string
+          watch_reason: string | null
+          watch_status: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          founder_notes?: string | null
+          id?: string
+          last_reviewed_at?: string | null
+          next_review_due_at?: string | null
+          priority?: string
+          problem_cluster_id?: string | null
+          updated_at?: string
+          watch_reason?: string | null
+          watch_status?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          founder_notes?: string | null
+          id?: string
+          last_reviewed_at?: string | null
+          next_review_due_at?: string | null
+          priority?: string
+          problem_cluster_id?: string | null
+          updated_at?: string
+          watch_reason?: string | null
+          watch_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "funding_watchlist_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "funding_radar_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funding_watchlist_problem_cluster_id_fkey"
+            columns: ["problem_cluster_id"]
+            isOneToOne: false
+            referencedRelation: "funding_problem_clusters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      funding_weakness_signals: {
+        Row: {
+          capital_efficiency_relevance: number | null
+          company_id: string
+          confidence_score: number | null
+          created_at: string
+          created_by: string | null
+          customer_pain_relevance: number | null
+          founder_notes: string | null
+          id: string
+          legal_ip_notes: string | null
+          relevance_to_liftor_score: number | null
+          severity_score: number | null
+          signal_date: string | null
+          signal_polarity: string
+          signal_summary: string | null
+          signal_title: string
+          signal_type: string
+          source_name: string | null
+          source_type: string | null
+          source_url: string | null
+          updated_at: string
+          watchlist_id: string | null
+        }
+        Insert: {
+          capital_efficiency_relevance?: number | null
+          company_id: string
+          confidence_score?: number | null
+          created_at?: string
+          created_by?: string | null
+          customer_pain_relevance?: number | null
+          founder_notes?: string | null
+          id?: string
+          legal_ip_notes?: string | null
+          relevance_to_liftor_score?: number | null
+          severity_score?: number | null
+          signal_date?: string | null
+          signal_polarity?: string
+          signal_summary?: string | null
+          signal_title: string
+          signal_type: string
+          source_name?: string | null
+          source_type?: string | null
+          source_url?: string | null
+          updated_at?: string
+          watchlist_id?: string | null
+        }
+        Update: {
+          capital_efficiency_relevance?: number | null
+          company_id?: string
+          confidence_score?: number | null
+          created_at?: string
+          created_by?: string | null
+          customer_pain_relevance?: number | null
+          founder_notes?: string | null
+          id?: string
+          legal_ip_notes?: string | null
+          relevance_to_liftor_score?: number | null
+          severity_score?: number | null
+          signal_date?: string | null
+          signal_polarity?: string
+          signal_summary?: string | null
+          signal_title?: string
+          signal_type?: string
+          source_name?: string | null
+          source_type?: string | null
+          source_url?: string | null
+          updated_at?: string
+          watchlist_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "funding_weakness_signals_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "funding_radar_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funding_weakness_signals_watchlist_id_fkey"
+            columns: ["watchlist_id"]
+            isOneToOne: false
+            referencedRelation: "funding_watchlist"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       global_audit_events: {
         Row: {
           action_summary: string
