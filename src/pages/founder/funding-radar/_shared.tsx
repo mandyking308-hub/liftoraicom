@@ -1,9 +1,11 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
 import FounderLayout from "@/components/founder/FounderLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Radar, ArrowLeft } from "lucide-react";
+import { Radar, ArrowLeft, FlaskConical, EyeOff, Eye } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export const NEEDS_VERIFICATION_LABEL = "Needs verification";
 
@@ -14,8 +16,65 @@ const TABS = [
   { to: "/founder/funding-radar/capital-efficiency", label: "Capital efficiency" },
   { to: "/founder/funding-radar/monthly-run", label: "Monthly run" },
   { to: "/founder/funding-radar/shortlist", label: "Shortlist" },
+  { to: "/founder/funding-radar/decision-pack", label: "Decision pack" },
   { to: "/founder/funding-radar/settings", label: "Settings" },
 ];
+
+// ---- Demo data isolation ----------------------------------------------------
+
+const HIDE_DEMO_KEY = "fundingRadar:hideDemo";
+
+export function isDemoRecord(rec: any): boolean {
+  if (!rec) return false;
+  const name: string =
+    rec.company_name ?? rec.cluster_name ?? rec.candidate_name ?? rec.funding_radar_companies?.company_name ?? "";
+  return /^\s*\[demo\]/i.test(String(name));
+}
+
+export function useHideDemo(): [boolean, (v: boolean) => void] {
+  const [v, setV] = useState<boolean>(() => {
+    try { return localStorage.getItem(HIDE_DEMO_KEY) === "1"; } catch { return false; }
+  });
+  useEffect(() => {
+    try { localStorage.setItem(HIDE_DEMO_KEY, v ? "1" : "0"); } catch {}
+  }, [v]);
+  return [v, setV];
+}
+
+export function applyDemoFilter<T>(rows: T[], hide: boolean): T[] {
+  if (!hide) return rows;
+  return rows.filter((r) => !isDemoRecord(r));
+}
+
+export function DemoBadge({ record, className = "" }: { record: any; className?: string }) {
+  if (!isDemoRecord(record)) return null;
+  return (
+    <Badge
+      variant="outline"
+      className={"gap-1 border-amber-500/40 text-amber-400 text-[10px] " + className}
+      title="Demo / test record — not live intelligence"
+    >
+      <FlaskConical className="h-3 w-3" /> DEMO
+    </Badge>
+  );
+}
+
+export function HideDemoToggle() {
+  const [hide, setHide] = useHideDemo();
+  return (
+    <Button
+      type="button"
+      size="sm"
+      variant="outline"
+      onClick={() => setHide(!hide)}
+      className="gap-1"
+      title="Hide records prefixed with [DEMO] from main views (does not delete them)"
+    >
+      {hide ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
+      {hide ? "Show demo records" : "Hide demo records"}
+    </Button>
+  );
+}
 
 export function FundingRadarLayout({ title, subtitle, children }: { title: string; subtitle?: string; children: ReactNode }) {
   const loc = useLocation();
