@@ -26,9 +26,15 @@ const HIDE_DEMO_KEY = "fundingRadar:hideDemo";
 
 export function isDemoRecord(rec: any): boolean {
   if (!rec) return false;
-  const name: string =
-    rec.company_name ?? rec.cluster_name ?? rec.candidate_name ?? rec.funding_radar_companies?.company_name ?? "";
-  return /^\s*\[demo\]/i.test(String(name));
+  const candidates: any[] = [
+    rec.company_name,
+    rec.cluster_name,
+    rec.candidate_name,
+    rec.funding_radar_companies?.company_name,
+    rec.funding_problem_clusters?.cluster_name,
+    rec.notes,
+  ];
+  return candidates.some((v) => typeof v === "string" && /^\s*\[demo\]/i.test(v));
 }
 
 export function useHideDemo(): [boolean, (v: boolean) => void] {
