@@ -24473,6 +24473,418 @@ export type Database = {
           },
         ]
       }
+      funding_imports: {
+        Row: {
+          accepted_count: number
+          created_at: string
+          created_by: string | null
+          error_log: Json | null
+          filename: string | null
+          id: string
+          ingestion_method: string
+          notes: string | null
+          rejected_count: number
+          row_count: number
+          source_label: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          accepted_count?: number
+          created_at?: string
+          created_by?: string | null
+          error_log?: Json | null
+          filename?: string | null
+          id?: string
+          ingestion_method?: string
+          notes?: string | null
+          rejected_count?: number
+          row_count?: number
+          source_label?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          accepted_count?: number
+          created_at?: string
+          created_by?: string | null
+          error_log?: Json | null
+          filename?: string | null
+          id?: string
+          ingestion_method?: string
+          notes?: string | null
+          rejected_count?: number
+          row_count?: number
+          source_label?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      funding_monthly_runs: {
+        Row: {
+          candidates_reviewed: number
+          created_at: string
+          created_by: string | null
+          finalised_at: string | null
+          id: string
+          month: number
+          notes: string | null
+          shortlist_size: number
+          status: string
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          candidates_reviewed?: number
+          created_at?: string
+          created_by?: string | null
+          finalised_at?: string | null
+          id?: string
+          month: number
+          notes?: string | null
+          shortlist_size?: number
+          status?: string
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          candidates_reviewed?: number
+          created_at?: string
+          created_by?: string | null
+          finalised_at?: string | null
+          id?: string
+          month?: number
+          notes?: string | null
+          shortlist_size?: number
+          status?: string
+          updated_at?: string
+          year?: number
+        }
+        Relationships: []
+      }
+      funding_problem_clusters: {
+        Row: {
+          buyer_type: string | null
+          capital_efficiency_rationale: string | null
+          cluster_name: string
+          created_at: string
+          created_by: string | null
+          customer_pain: string | null
+          distinct_execution_route: string | null
+          id: string
+          market_validation_summary: string | null
+          needs_verification: boolean
+          notes: string | null
+          problem_thesis: string | null
+          updated_at: string
+        }
+        Insert: {
+          buyer_type?: string | null
+          capital_efficiency_rationale?: string | null
+          cluster_name: string
+          created_at?: string
+          created_by?: string | null
+          customer_pain?: string | null
+          distinct_execution_route?: string | null
+          id?: string
+          market_validation_summary?: string | null
+          needs_verification?: boolean
+          notes?: string | null
+          problem_thesis?: string | null
+          updated_at?: string
+        }
+        Update: {
+          buyer_type?: string | null
+          capital_efficiency_rationale?: string | null
+          cluster_name?: string
+          created_at?: string
+          created_by?: string | null
+          customer_pain?: string | null
+          distinct_execution_route?: string | null
+          id?: string
+          market_validation_summary?: string | null
+          needs_verification?: boolean
+          notes?: string | null
+          problem_thesis?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      funding_radar_companies: {
+        Row: {
+          buyer_type: string | null
+          cluster_id: string | null
+          company_name: string
+          country: string | null
+          created_at: string
+          created_by: string | null
+          customer_pain: string | null
+          distinct_execution_route: string | null
+          headcount: number | null
+          hq_city: string | null
+          id: string
+          import_id: string | null
+          ingestion_method: string
+          last_funding_amount_usd: number | null
+          last_funding_date: string | null
+          last_funding_round: string | null
+          market_validation: string | null
+          needs_verification: boolean
+          notes: string | null
+          pricing_logic: string | null
+          problem_thesis: string | null
+          publicly_visible_weakness: string | null
+          region: string | null
+          revenue_model_pattern: string | null
+          sector: string | null
+          source_type: string | null
+          source_url: string | null
+          sub_sector: string | null
+          total_funding_usd: number | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          buyer_type?: string | null
+          cluster_id?: string | null
+          company_name: string
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_pain?: string | null
+          distinct_execution_route?: string | null
+          headcount?: number | null
+          hq_city?: string | null
+          id?: string
+          import_id?: string | null
+          ingestion_method?: string
+          last_funding_amount_usd?: number | null
+          last_funding_date?: string | null
+          last_funding_round?: string | null
+          market_validation?: string | null
+          needs_verification?: boolean
+          notes?: string | null
+          pricing_logic?: string | null
+          problem_thesis?: string | null
+          publicly_visible_weakness?: string | null
+          region?: string | null
+          revenue_model_pattern?: string | null
+          sector?: string | null
+          source_type?: string | null
+          source_url?: string | null
+          sub_sector?: string | null
+          total_funding_usd?: number | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          buyer_type?: string | null
+          cluster_id?: string | null
+          company_name?: string
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_pain?: string | null
+          distinct_execution_route?: string | null
+          headcount?: number | null
+          hq_city?: string | null
+          id?: string
+          import_id?: string | null
+          ingestion_method?: string
+          last_funding_amount_usd?: number | null
+          last_funding_date?: string | null
+          last_funding_round?: string | null
+          market_validation?: string | null
+          needs_verification?: boolean
+          notes?: string | null
+          pricing_logic?: string | null
+          problem_thesis?: string | null
+          publicly_visible_weakness?: string | null
+          region?: string | null
+          revenue_model_pattern?: string | null
+          sector?: string | null
+          source_type?: string | null
+          source_url?: string | null
+          sub_sector?: string | null
+          total_funding_usd?: number | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "funding_radar_companies_cluster_id_fkey"
+            columns: ["cluster_id"]
+            isOneToOne: false
+            referencedRelation: "funding_problem_clusters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funding_radar_companies_import_id_fkey"
+            columns: ["import_id"]
+            isOneToOne: false
+            referencedRelation: "funding_imports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      funding_radar_scores: {
+        Row: {
+          ai_automation_advantage_score: number | null
+          ai_can_collapse_cost: boolean | null
+          capital_efficiency_advantage_score: number | null
+          compliance_heavy: boolean | null
+          created_at: string
+          delivery_manual: boolean | null
+          funding_company_id: string
+          global_expansion_score: number | null
+          id: string
+          investor_validation_score: number | null
+          liftor_can_operate: boolean | null
+          onboarding_heavy: boolean | null
+          rationale: string | null
+          recurring_revenue_score: number | null
+          sales_heavy: boolean | null
+          scored_at: string
+          scored_by: string | null
+          staff_heavy: boolean | null
+          support_heavy: boolean | null
+          total_score: number | null
+          updated_at: string
+        }
+        Insert: {
+          ai_automation_advantage_score?: number | null
+          ai_can_collapse_cost?: boolean | null
+          capital_efficiency_advantage_score?: number | null
+          compliance_heavy?: boolean | null
+          created_at?: string
+          delivery_manual?: boolean | null
+          funding_company_id: string
+          global_expansion_score?: number | null
+          id?: string
+          investor_validation_score?: number | null
+          liftor_can_operate?: boolean | null
+          onboarding_heavy?: boolean | null
+          rationale?: string | null
+          recurring_revenue_score?: number | null
+          sales_heavy?: boolean | null
+          scored_at?: string
+          scored_by?: string | null
+          staff_heavy?: boolean | null
+          support_heavy?: boolean | null
+          total_score?: number | null
+          updated_at?: string
+        }
+        Update: {
+          ai_automation_advantage_score?: number | null
+          ai_can_collapse_cost?: boolean | null
+          capital_efficiency_advantage_score?: number | null
+          compliance_heavy?: boolean | null
+          created_at?: string
+          delivery_manual?: boolean | null
+          funding_company_id?: string
+          global_expansion_score?: number | null
+          id?: string
+          investor_validation_score?: number | null
+          liftor_can_operate?: boolean | null
+          onboarding_heavy?: boolean | null
+          rationale?: string | null
+          recurring_revenue_score?: number | null
+          sales_heavy?: boolean | null
+          scored_at?: string
+          scored_by?: string | null
+          staff_heavy?: boolean | null
+          support_heavy?: boolean | null
+          total_score?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "funding_radar_scores_funding_company_id_fkey"
+            columns: ["funding_company_id"]
+            isOneToOne: false
+            referencedRelation: "funding_radar_companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      funding_shortlist: {
+        Row: {
+          acquirer_pain_thesis: string | null
+          build_thesis: string | null
+          capital_efficiency_summary: string | null
+          cluster_id: string | null
+          created_at: string
+          created_by: string | null
+          founder_notes: string | null
+          funding_company_id: string
+          id: string
+          monthly_run_id: string | null
+          promoted_build_candidate_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          acquirer_pain_thesis?: string | null
+          build_thesis?: string | null
+          capital_efficiency_summary?: string | null
+          cluster_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          founder_notes?: string | null
+          funding_company_id: string
+          id?: string
+          monthly_run_id?: string | null
+          promoted_build_candidate_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          acquirer_pain_thesis?: string | null
+          build_thesis?: string | null
+          capital_efficiency_summary?: string | null
+          cluster_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          founder_notes?: string | null
+          funding_company_id?: string
+          id?: string
+          monthly_run_id?: string | null
+          promoted_build_candidate_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "funding_shortlist_cluster_id_fkey"
+            columns: ["cluster_id"]
+            isOneToOne: false
+            referencedRelation: "funding_problem_clusters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funding_shortlist_funding_company_id_fkey"
+            columns: ["funding_company_id"]
+            isOneToOne: false
+            referencedRelation: "funding_radar_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funding_shortlist_monthly_run_id_fkey"
+            columns: ["monthly_run_id"]
+            isOneToOne: false
+            referencedRelation: "funding_monthly_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funding_shortlist_promoted_build_candidate_id_fkey"
+            columns: ["promoted_build_candidate_id"]
+            isOneToOne: false
+            referencedRelation: "ma_build_candidates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       global_audit_events: {
         Row: {
           action_summary: string
@@ -31315,12 +31727,22 @@ export type Database = {
       }
       ma_build_candidates: {
         Row: {
+          acquirer_pain_thesis: string | null
+          ai_automation_advantage_score: number | null
+          build_thesis: string | null
           buyer_clarity_score: number | null
           candidate_name: string
+          capital_efficiency_advantage_score: number | null
           created_at: string
           description: string | null
           distribution_score: number | null
+          funding_cluster_id: string | null
+          funding_company_id: string | null
+          funding_shortlist_id: string | null
+          funding_source_summary: string | null
+          global_expansion_score: number | null
           id: string
+          investor_validation_score: number | null
           legal_ip_safety_score: number | null
           liftor_operability_score: number | null
           lovable_buildability_score: number | null
@@ -31328,6 +31750,7 @@ export type Database = {
           ninety_day_proof_score: number | null
           quarter: number | null
           recommendation_status: Database["public"]["Enums"]["ma_recommendation_status"]
+          recurring_revenue_score: number | null
           regulatory_friction_score: number | null
           rejection_reason: string | null
           revenue_model: string | null
@@ -31339,12 +31762,22 @@ export type Database = {
           year: number | null
         }
         Insert: {
+          acquirer_pain_thesis?: string | null
+          ai_automation_advantage_score?: number | null
+          build_thesis?: string | null
           buyer_clarity_score?: number | null
           candidate_name: string
+          capital_efficiency_advantage_score?: number | null
           created_at?: string
           description?: string | null
           distribution_score?: number | null
+          funding_cluster_id?: string | null
+          funding_company_id?: string | null
+          funding_shortlist_id?: string | null
+          funding_source_summary?: string | null
+          global_expansion_score?: number | null
           id?: string
+          investor_validation_score?: number | null
           legal_ip_safety_score?: number | null
           liftor_operability_score?: number | null
           lovable_buildability_score?: number | null
@@ -31352,6 +31785,7 @@ export type Database = {
           ninety_day_proof_score?: number | null
           quarter?: number | null
           recommendation_status?: Database["public"]["Enums"]["ma_recommendation_status"]
+          recurring_revenue_score?: number | null
           regulatory_friction_score?: number | null
           rejection_reason?: string | null
           revenue_model?: string | null
@@ -31365,12 +31799,22 @@ export type Database = {
           year?: number | null
         }
         Update: {
+          acquirer_pain_thesis?: string | null
+          ai_automation_advantage_score?: number | null
+          build_thesis?: string | null
           buyer_clarity_score?: number | null
           candidate_name?: string
+          capital_efficiency_advantage_score?: number | null
           created_at?: string
           description?: string | null
           distribution_score?: number | null
+          funding_cluster_id?: string | null
+          funding_company_id?: string | null
+          funding_shortlist_id?: string | null
+          funding_source_summary?: string | null
+          global_expansion_score?: number | null
           id?: string
+          investor_validation_score?: number | null
           legal_ip_safety_score?: number | null
           liftor_operability_score?: number | null
           lovable_buildability_score?: number | null
@@ -31378,6 +31822,7 @@ export type Database = {
           ninety_day_proof_score?: number | null
           quarter?: number | null
           recommendation_status?: Database["public"]["Enums"]["ma_recommendation_status"]
+          recurring_revenue_score?: number | null
           regulatory_friction_score?: number | null
           rejection_reason?: string | null
           revenue_model?: string | null
@@ -31390,7 +31835,29 @@ export type Database = {
           updated_at?: string
           year?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "ma_build_candidates_funding_cluster_id_fkey"
+            columns: ["funding_cluster_id"]
+            isOneToOne: false
+            referencedRelation: "funding_problem_clusters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ma_build_candidates_funding_company_id_fkey"
+            columns: ["funding_company_id"]
+            isOneToOne: false
+            referencedRelation: "funding_radar_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ma_build_candidates_funding_shortlist_id_fkey"
+            columns: ["funding_shortlist_id"]
+            isOneToOne: false
+            referencedRelation: "funding_shortlist"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ma_buyer_matches: {
         Row: {
