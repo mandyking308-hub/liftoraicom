@@ -1191,8 +1191,8 @@ export function buildFullProductionPack(args: {
   const now = args.now ?? new Date();
   const ts = now.toISOString();
   const name = pack.candidate?.name ?? "(build)";
-  const sector = pack.thesis?.sector ?? (pack as any).candidate?.sector ?? "B2B SaaS";
-  const geo = pack.thesis?.geography ?? "EU / UK first";
+  const sector = (pack.thesis as any)?.sector ?? (pack as any).candidate?.sector ?? "B2B SaaS";
+  const geo = (pack.thesis as any)?.geography ?? "EU / UK first";
 
   const business_summary: FullProductionPack["business_summary"] = {
     business_name_placeholder: `Working title: ${name} (rename before launch)`,
