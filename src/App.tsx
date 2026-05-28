@@ -110,6 +110,7 @@ import QuarterlyBuildSelector from "./pages/founder/QuarterlyBuildSelector";
 import QuarterlyProductionMachine from "./pages/founder/QuarterlyProductionMachine";
 import QPMBuildPackValidator from "./pages/founder/quarterly-production-machine/BuildPackValidator";
 import QPMPromptQueue from "./pages/founder/quarterly-production-machine/PromptQueue";
+import QPMVerticalLaunch from "./pages/founder/quarterly-production-machine/VerticalLaunch";
 import FRRadarOverview from "./pages/founder/funding-radar/Overview";
 import FRCompanies from "./pages/founder/funding-radar/Companies";
 import FRCompanyDetail from "./pages/founder/funding-radar/CompanyDetail";
@@ -935,6 +936,7 @@ const App = () => (
             <Route path="/founder/quarterly-production-machine/build-generator" element={<FounderRoute><FRBusinessAutopsy /></FounderRoute>} />
             <Route path="/founder/quarterly-production-machine/build-pack-validator" element={<FounderRoute><QPMBuildPackValidator /></FounderRoute>} />
             <Route path="/founder/quarterly-production-machine/prompt-queue" element={<FounderRoute><QPMPromptQueue /></FounderRoute>} />
+            <Route path="/founder/quarterly-production-machine/vertical-launch" element={<FounderRoute><QPMVerticalLaunch /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/execution-handoff" element={<FounderRoute><ExecutionHandoff /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/manual" element={<FounderRoute><PortfolioExitManual /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/controls" element={<FounderRoute><PortfolioExitControls /></FounderRoute>} />
@@ -1137,6 +1139,7 @@ const App = () => (
             <Route path="/founder/launch-factory/legal-pages" element={<FounderRoute><LFLegalPages /></FounderRoute>} />
             <Route path="/founder/launch-factory/tracking" element={<FounderRoute><LFTracking /></FounderRoute>} />
             <Route path="/founder/launch-factory/checklist" element={<FounderRoute><LFChecklist /></FounderRoute>} />
+            <Route path="/founder/launch-factory/vertical-launch-cannon" element={<FounderRoute><QPMVerticalLaunch /></FounderRoute>} />
             <Route path="/founder/integration-map" element={<FounderRoute><IMOverview /></FounderRoute>} />
             <Route path="/founder/integration-map/businesses" element={<FounderRoute><IMBusinesses /></FounderRoute>} />
             <Route path="/founder/integration-map/providers" element={<FounderRoute><IMProviders /></FounderRoute>} />
