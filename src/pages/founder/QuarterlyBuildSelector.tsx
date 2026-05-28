@@ -451,6 +451,28 @@ function DraftDialog({ draft, setDraft, redFlags, previewTotal, signals, compani
           <div className="text-2xl font-semibold">{previewTotal}</div>
         </div>
 
+        <div className="md:col-span-2 border-t border-border pt-3">
+          <div className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Funding Radar context (optional)</div>
+          <p className="text-[11px] text-muted-foreground mb-2">Populated automatically when promoted from <code>/founder/funding-radar/shortlist</code>. Manual entry is allowed but must reference a real funded company captured in Funding Radar — no scraped or restricted IP.</p>
+        </div>
+        <div><Label className="text-xs">Linked funded company id</Label><Input value={draft.funding_company_id ?? ""} onChange={(e) => set("funding_company_id", e.target.value || undefined)} placeholder="funding_radar_companies.id" /></div>
+        <div><Label className="text-xs">Linked problem cluster id</Label><Input value={draft.funding_cluster_id ?? ""} onChange={(e) => set("funding_cluster_id", e.target.value || undefined)} placeholder="funding_problem_clusters.id" /></div>
+        {[
+          ["capital_efficiency_advantage_score","Capital Efficiency Advantage (0–100)"],
+          ["investor_validation_score","Investor validation (0–100)"],
+          ["ai_automation_advantage_score","AI automation advantage (0–100)"],
+          ["recurring_revenue_score","Recurring revenue potential (0–100)"],
+          ["global_expansion_score","Global expansion potential (0–100)"],
+        ].map(([k, l]) => (
+          <div key={k}>
+            <Label className="text-xs">{l}</Label>
+            <Input type="number" min={0} max={100} value={(draft as any)[k] ?? ""} onChange={(e) => set(k as any, e.target.value === "" ? undefined : Math.max(0, Math.min(100, Number(e.target.value))))} />
+          </div>
+        ))}
+        <div className="md:col-span-2"><Label className="text-xs">Why the funded company needs capital / cost areas Liftor can collapse with AI</Label><Textarea rows={2} value={draft.funding_source_summary ?? ""} onChange={(e) => set("funding_source_summary", e.target.value || undefined)} placeholder="e.g. Series A $12m. Staff-heavy ops (sales + CS headcount). Liftor collapses outbound + onboarding + reporting." /></div>
+        <div className="md:col-span-2"><Label className="text-xs">Build thesis (legally distinct execution route)</Label><Textarea rows={2} value={draft.build_thesis ?? ""} onChange={(e) => set("build_thesis", e.target.value || undefined)} placeholder="Public-problem thesis only. No copied branding, copy, code, or customer data." /></div>
+        <div className="md:col-span-2"><Label className="text-xs">Acquirer pain thesis</Label><Textarea rows={2} value={draft.acquirer_pain_thesis ?? ""} onChange={(e) => set("acquirer_pain_thesis", e.target.value || undefined)} placeholder="Which strategic buyer/PE feels the pain this solves and why." /></div>
+
         {redFlags.length > 0 && (
           <div className="md:col-span-2 rounded border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
             <div className="flex items-center gap-2 font-medium mb-1"><AlertTriangle className="h-4 w-4" />Hard buildability red flags — will auto-reject unless explicitly parked</div>
