@@ -93,6 +93,18 @@ type DraftCandidate = {
   linked_signal_id?: string;
   linked_company_id?: string;
   linked_competitor_id?: string;
+  // Funding Radar context (optional — pre-filled when promoted from funding_shortlist)
+  funding_shortlist_id?: string;
+  funding_company_id?: string;
+  funding_cluster_id?: string;
+  capital_efficiency_advantage_score?: number;
+  investor_validation_score?: number;
+  ai_automation_advantage_score?: number;
+  recurring_revenue_score?: number;
+  global_expansion_score?: number;
+  funding_source_summary?: string;
+  build_thesis?: string;
+  acquirer_pain_thesis?: string;
 };
 
 const emptyDraft: DraftCandidate = {
@@ -215,6 +227,18 @@ export default function QuarterlyBuildSelector() {
       recommendation_status: finalStatus,
       quarter: q,
       year: y,
+      // Funding Radar linkage (nullable — preserved when provided)
+      funding_shortlist_id: draft.funding_shortlist_id ?? null,
+      funding_company_id: draft.funding_company_id ?? null,
+      funding_cluster_id: draft.funding_cluster_id ?? null,
+      capital_efficiency_advantage_score: draft.capital_efficiency_advantage_score ?? null,
+      investor_validation_score: draft.investor_validation_score ?? null,
+      ai_automation_advantage_score: draft.ai_automation_advantage_score ?? null,
+      recurring_revenue_score: draft.recurring_revenue_score ?? null,
+      global_expansion_score: draft.global_expansion_score ?? null,
+      funding_source_summary: draft.funding_source_summary || null,
+      build_thesis: draft.build_thesis || null,
+      acquirer_pain_thesis: draft.acquirer_pain_thesis || null,
     };
     const { error } = await (supabase as any).from("ma_build_candidates").insert(payload);
     if (error) { toast.error(error.message); return; }
@@ -427,6 +451,28 @@ function DraftDialog({ draft, setDraft, redFlags, previewTotal, signals, compani
           <div className="text-2xl font-semibold">{previewTotal}</div>
         </div>
 
+        <div className="md:col-span-2 border-t border-border pt-3">
+          <div className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Funding Radar context (optional)</div>
+          <p className="text-[11px] text-muted-foreground mb-2">Populated automatically when promoted from <code>/founder/funding-radar/shortlist</code>. Manual entry is allowed but must reference a real funded company captured in Funding Radar — no scraped or restricted IP.</p>
+        </div>
+        <div><Label className="text-xs">Linked funded company id</Label><Input value={draft.funding_company_id ?? ""} onChange={(e) => set("funding_company_id", e.target.value || undefined)} placeholder="funding_radar_companies.id" /></div>
+        <div><Label className="text-xs">Linked problem cluster id</Label><Input value={draft.funding_cluster_id ?? ""} onChange={(e) => set("funding_cluster_id", e.target.value || undefined)} placeholder="funding_problem_clusters.id" /></div>
+        {[
+          ["capital_efficiency_advantage_score","Capital Efficiency Advantage (0–100)"],
+          ["investor_validation_score","Investor validation (0–100)"],
+          ["ai_automation_advantage_score","AI automation advantage (0–100)"],
+          ["recurring_revenue_score","Recurring revenue potential (0–100)"],
+          ["global_expansion_score","Global expansion potential (0–100)"],
+        ].map(([k, l]) => (
+          <div key={k}>
+            <Label className="text-xs">{l}</Label>
+            <Input type="number" min={0} max={100} value={(draft as any)[k] ?? ""} onChange={(e) => set(k as any, e.target.value === "" ? undefined : Math.max(0, Math.min(100, Number(e.target.value))))} />
+          </div>
+        ))}
+        <div className="md:col-span-2"><Label className="text-xs">Why the funded company needs capital / cost areas Liftor can collapse with AI</Label><Textarea rows={2} value={draft.funding_source_summary ?? ""} onChange={(e) => set("funding_source_summary", e.target.value || undefined)} placeholder="e.g. Series A $12m. Staff-heavy ops (sales + CS headcount). Liftor collapses outbound + onboarding + reporting." /></div>
+        <div className="md:col-span-2"><Label className="text-xs">Build thesis (legally distinct execution route)</Label><Textarea rows={2} value={draft.build_thesis ?? ""} onChange={(e) => set("build_thesis", e.target.value || undefined)} placeholder="Public-problem thesis only. No copied branding, copy, code, or customer data." /></div>
+        <div className="md:col-span-2"><Label className="text-xs">Acquirer pain thesis</Label><Textarea rows={2} value={draft.acquirer_pain_thesis ?? ""} onChange={(e) => set("acquirer_pain_thesis", e.target.value || undefined)} placeholder="Which strategic buyer/PE feels the pain this solves and why." /></div>
+
         {redFlags.length > 0 && (
           <div className="md:col-span-2 rounded border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
             <div className="flex items-center gap-2 font-medium mb-1"><AlertTriangle className="h-4 w-4" />Hard buildability red flags — will auto-reject unless explicitly parked</div>
@@ -459,6 +505,12 @@ function Column({ title, tone, rows, onMemo, onChangeStatus, onPromote }: any) {
               <Badge variant="outline" className="text-[10px]">{c.total_build_score ?? 0}</Badge>
             </div>
             <div className="text-[11px] text-muted-foreground line-clamp-2 mt-1">{c.description ?? "—"}</div>
+            {c.funding_company_id && (
+              <div className="flex flex-wrap gap-1 mt-1">
+                <Badge variant="outline" className="text-[9px] border-blue-500/40 text-blue-300">Funding Radar</Badge>
+                {c.capital_efficiency_advantage_score != null && <Badge variant="outline" className="text-[9px]">CE {c.capital_efficiency_advantage_score}</Badge>}
+              </div>
+            )}
             {c.rejection_reason && <div className="text-[10px] text-amber-400 mt-1">{c.rejection_reason}</div>}
             <div className="flex flex-wrap gap-1 mt-2">
               <Button size="sm" variant="outline" className="h-6 text-[11px]" onClick={() => onMemo(c)}><FileText className="h-3 w-3 mr-1" />Memo</Button>
@@ -509,6 +561,19 @@ function BuildMemoDialog({ open, onOpenChange, candidate, buyerMatches, competit
   const memoSections: { h: string; v: string }[] = [
     { h: "What we are building", v: candidate.description ?? "—" },
     { h: "Why now", v: candidate.source_signal ?? "—" },
+    ...(candidate.funding_company_id || candidate.build_thesis || candidate.acquirer_pain_thesis ? [
+      { h: "Funding Radar — funded company", v: candidate.funding_source_summary ?? `Linked funding_company_id ${candidate.funding_company_id ?? "—"}` },
+      { h: "Funding Radar — problem cluster", v: candidate.funding_cluster_id ?? "—" },
+      { h: "Capital Efficiency Advantage", v: [
+          candidate.capital_efficiency_advantage_score != null ? `CE advantage ${candidate.capital_efficiency_advantage_score}/100` : null,
+          candidate.investor_validation_score != null ? `Investor validation ${candidate.investor_validation_score}/100` : null,
+          candidate.ai_automation_advantage_score != null ? `AI automation ${candidate.ai_automation_advantage_score}/100` : null,
+          candidate.recurring_revenue_score != null ? `Recurring revenue ${candidate.recurring_revenue_score}/100` : null,
+          candidate.global_expansion_score != null ? `Global expansion ${candidate.global_expansion_score}/100` : null,
+        ].filter(Boolean).join(" · ") || "—" },
+      { h: "Build thesis (legally distinct execution route)", v: candidate.build_thesis ?? "—" },
+      { h: "Acquirer pain thesis", v: candidate.acquirer_pain_thesis ?? "—" },
+    ] : []),
     { h: "Buyer / investor signal", v: relatedBuyers.length ? relatedBuyers.map((b: any) => `${b.ma_companies?.company_name ?? "?"} (${b.buyer_warmth_status}, fit ${b.fit_score ?? "—"})`).join("; ") : `Target buyer type: ${candidate.target_buyer_type ?? "—"}` },
     { h: "Competitor proof", v: relatedComps.length ? relatedComps.map((c: any) => `${c.ma_companies?.company_name ?? "?"} — legal risk ${c.legal_copy_risk}`).join("; ") : "No competitor proof linked." },
     { h: "Target customer", v: candidate.target_customer ?? "—" },
