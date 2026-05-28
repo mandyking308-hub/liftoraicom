@@ -2887,10 +2887,11 @@ export function buildVerticalLaunchPack(args: {
 }): VerticalLaunchPack {
   const p = args.pack;
   const c = p.candidate;
-  const vertical = args.vertical ?? p.icp?.industry ?? p.icp?.persona ?? c.sector ?? "selected vertical (set by founder)";
-  const geography = args.geography ?? p.icp?.geography ?? "founder-selected geography";
-  const customer_type = args.customer_type ?? p.icp?.size ?? "operator-led teams";
-  const buyer_role = args.buyer_role ?? p.icp?.buyer ?? "operations / commercial lead";
+  const profile = p.thesis?.paying_customer_profile ?? null;
+  const vertical = args.vertical ?? profile ?? "selected vertical (set by founder)";
+  const geography = args.geography ?? "founder-selected geography";
+  const customer_type = args.customer_type ?? profile ?? "operator-led teams";
+  const buyer_role = args.buyer_role ?? "operations / commercial lead";
   const target: VerticalLaunchTarget = {
     business_name: c.name,
     vertical,
