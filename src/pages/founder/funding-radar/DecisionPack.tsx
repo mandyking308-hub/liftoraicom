@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ShieldAlert, Sparkles, Download } from "lucide-react";
+import { ENTRY_STRATEGY_LABEL, type EntryStrategy } from "@/lib/fundingRadarEngine";
 
 const SEED_ROUNDS = ["pre-seed", "preseed", "pre_seed", "seed"];
 
@@ -31,6 +32,7 @@ export default function FRDecisionPack() {
   const [shortlist, setShortlist] = useState<any[]>([]);
   const [scores, setScores] = useState<any[]>([]);
   const [runs, setRuns] = useState<any[]>([]);
+  const [marketMaps, setMarketMaps] = useState<any[]>([]);
   const [generatedAt, setGeneratedAt] = useState<string | null>(null);
   const [hideDemo] = useHideDemo();
 
@@ -44,6 +46,11 @@ export default function FRDecisionPack() {
       .select("*, funding_radar_companies(id, company_name, sector, last_funding_amount_usd, last_funding_round, cluster_id)")
       .order("total_score", { ascending: false });
     setScores(data ?? []);
+    const { data: mm } = await (supabase as any)
+      .from("funding_market_maps")
+      .select("*, funding_problem_clusters(cluster_name)")
+      .order("liftor_entry_score", { ascending: false, nullsFirst: false });
+    setMarketMaps(mm ?? []);
     setGeneratedAt(new Date().toISOString());
   };
 
@@ -106,6 +113,12 @@ export default function FRDecisionPack() {
       promoted: promoted.length,
       rejected_or_parked: rejected.length,
       legal_ip_warnings: ipWarnings.length,
+      market_crowding: {
+        markets_reviewed: marketMaps.length,
+        avoid: marketMaps.filter((m) => String(m.recommended_entry_strategy ?? "").startsWith("AVOID")).map((m) => ({ name: m.market_name, reason: m.avoid_reason })),
+        watch: marketMaps.filter((m) => String(m.recommended_entry_strategy ?? "").startsWith("WATCH")).map((m) => m.market_name),
+        white_space: marketMaps.filter((m) => String(m.recommended_entry_strategy ?? "").startsWith("BUILD")).map((m) => ({ name: m.market_name, strategy: m.recommended_entry_strategy, white_space_score: m.white_space_score })),
+      },
       forbidden_extraction_fields: FORBIDDEN_EXTRACTION_FIELDS,
       approval_required_actions: APPROVAL_REQUIRED_ACTIONS,
     };
@@ -263,6 +276,42 @@ export default function FRDecisionPack() {
         <ul className="text-xs text-muted-foreground list-disc list-inside space-y-1">
           {APPROVAL_REQUIRED_ACTIONS.map((a) => <li key={a}>{a}</li>)}
         </ul>
+      </FRSection>
+
+      <FRSection
+        title="Market crowding & white space"
+        description="Crowded does not mean bad. This section separates saturated commodity markets from proven markets with white space."
+      >
+        {marketMaps.length === 0 ? (
+          <p className="text-xs text-muted-foreground">No market maps yet. Add one in <Link to="/founder/funding-radar/market-maps" className="text-primary hover:underline">Market Maps</Link>.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead className="text-muted-foreground">
+                <tr className="text-left border-b border-border/50">
+                  <th className="py-2 pr-2">Market</th>
+                  <th className="py-2 pr-2">Crowding</th>
+                  <th className="py-2 pr-2">Saturation</th>
+                  <th className="py-2 pr-2">White space</th>
+                  <th className="py-2 pr-2">Liftor entry</th>
+                  <th className="py-2 pr-2">Recommendation</th>
+                </tr>
+              </thead>
+              <tbody>
+                {marketMaps.slice(0, 20).map((m) => (
+                  <tr key={m.id} className="border-b border-border/30">
+                    <td className="py-2 pr-2">{m.market_name}</td>
+                    <td className="py-2 pr-2">{m.crowding_level ?? "—"}</td>
+                    <td className="py-2 pr-2">{m.saturation_risk ?? "—"}</td>
+                    <td className="py-2 pr-2">{m.white_space_score ?? "—"}</td>
+                    <td className="py-2 pr-2 text-primary">{m.liftor_entry_score ?? "—"}</td>
+                    <td className="py-2 pr-2"><Badge variant="outline" className="text-[10px]">{m.recommended_entry_strategy ? (ENTRY_STRATEGY_LABEL[m.recommended_entry_strategy as EntryStrategy] ?? m.recommended_entry_strategy) : "—"}</Badge></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </FRSection>
     </FundingRadarLayout>
   );

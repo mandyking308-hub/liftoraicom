@@ -415,6 +415,158 @@ export const WATCHLIST_FORBIDDEN_ACTIONS = [
   "Harassing competitors",
 ] as const;
 
+// ============================================================================
+// Market Crowding + White Space Engine
+// ============================================================================
+
+export const MARKET_STAGES = [
+  "emerging","growing","mature","saturated","declining","fragmented","consolidating",
+] as const;
+export type MarketStage = typeof MARKET_STAGES[number];
+
+export const CROWDING_LEVELS = ["low","moderate","high","extreme"] as const;
+export const SATURATION_LEVELS = ["low","moderate","high","extreme"] as const;
+
+export const ENTRY_STRATEGIES = [
+  "AVOID_TOO_SATURATED","AVOID_WINNER_TAKES_MOST","WATCH_TOO_EARLY","WATCH_CROWDED_BUT_INTERESTING",
+  "BUILD_NICHE_WEDGE","BUILD_VERTICAL_VERSION","BUILD_GEOGRAPHIC_VERSION","BUILD_MANAGED_SERVICE_FIRST",
+  "PARTNER_OR_ACQUIRE_LATER",
+] as const;
+export type EntryStrategy = typeof ENTRY_STRATEGIES[number];
+
+export const ENTRY_STRATEGY_LABEL: Record<EntryStrategy, string> = {
+  AVOID_TOO_SATURATED: "Avoid — too saturated",
+  AVOID_WINNER_TAKES_MOST: "Avoid — winner takes most",
+  WATCH_TOO_EARLY: "Watch — too early",
+  WATCH_CROWDED_BUT_INTERESTING: "Watch — crowded but interesting",
+  BUILD_NICHE_WEDGE: "Build niche wedge",
+  BUILD_VERTICAL_VERSION: "Build vertical version",
+  BUILD_GEOGRAPHIC_VERSION: "Build geographic version",
+  BUILD_MANAGED_SERVICE_FIRST: "Build managed-service first",
+  PARTNER_OR_ACQUIRE_LATER: "Partner / acquire later",
+};
+
+export const CROWDED_MARKET_SIGNALS = [
+  "Many funded companies solving same problem","Many similar websites/products",
+  "Heavy paid advertising competition","Similar positioning across players",
+  "Pricing pressure","Feature parity","Customer complaints about sameness",
+  "High switching difficulty","Low differentiation","Dominant incumbent control",
+  "Marketplace liquidity lock-in","Regulatory lock-in","Distribution channel capture",
+  "Long sales-cycle difficulty",
+] as const;
+
+export const WHITE_SPACE_SIGNALS = [
+  "Underserved niche customer","Underserved geography","Underserved smaller business segment",
+  "Expensive incumbent pricing","Poor onboarding feedback","Slow implementation complaints",
+  "Weak support complaints","Weak localisation","Bad UX","Compliance/admin burden unresolved",
+  "Customers using spreadsheets/workarounds","Strong demand but poor trust",
+  "Vertical-specific needs ignored by horizontal platforms","Market fragmented with no trusted operating layer",
+] as const;
+
+export type MarketMapInput = {
+  number_of_known_competitors?: number | null;
+  number_of_funded_companies?: number | null;
+  fragmentation_score?: number | null;
+  buyer_education_score?: number | null;
+  switching_difficulty_score?: number | null;
+  distribution_difficulty_score?: number | null;
+  pricing_pressure_score?: number | null;
+  ai_disruption_potential_score?: number | null;
+  white_space_score?: number | null;
+  market_stage?: MarketStage | null;
+  dominant_players?: any[] | null;
+};
+
+export function deriveCrowdingLevel(m: MarketMapInput): "low"|"moderate"|"high"|"extreme" {
+  const funded = Number(m.number_of_funded_companies ?? 0);
+  const comps = Number(m.number_of_known_competitors ?? 0);
+  const total = funded + comps;
+  if (total >= 40) return "extreme";
+  if (total >= 20) return "high";
+  if (total >= 8) return "moderate";
+  return "low";
+}
+
+export function deriveSaturationRisk(m: MarketMapInput): "low"|"moderate"|"high"|"extreme" {
+  const pricing = Number(m.pricing_pressure_score ?? 0);
+  const ws = Number(m.white_space_score ?? 50);
+  const dom = Array.isArray(m.dominant_players) ? m.dominant_players.length : 0;
+  let s = pricing * 0.5 + (100 - ws) * 0.4 + Math.min(50, dom * 10) * 0.1;
+  if (m.market_stage === "saturated" || m.market_stage === "declining") s += 20;
+  s = Math.min(100, s);
+  if (s >= 75) return "extreme";
+  if (s >= 55) return "high";
+  if (s >= 30) return "moderate";
+  return "low";
+}
+
+/**
+ * Liftor entry score: higher = better fit for Liftor's risk-averse, AI-led, capital-efficient wedge.
+ * Rewards AI disruption potential, fragmentation, white space; penalises distribution/switching difficulty
+ * and pricing pressure.
+ */
+export function computeLiftorEntryScore(m: MarketMapInput): number {
+  const ai = Number(m.ai_disruption_potential_score ?? 0);
+  const ws = Number(m.white_space_score ?? 0);
+  const frag = Number(m.fragmentation_score ?? 0);
+  const buyerEdu = Number(m.buyer_education_score ?? 50);
+  const dist = Number(m.distribution_difficulty_score ?? 50);
+  const sw = Number(m.switching_difficulty_score ?? 50);
+  const price = Number(m.pricing_pressure_score ?? 50);
+  const positive = ai * 0.30 + ws * 0.25 + frag * 0.15 + buyerEdu * 0.10;
+  const negative = dist * 0.10 + sw * 0.05 + price * 0.05;
+  return Math.max(0, Math.min(100, Math.round(positive - negative + 30)));
+}
+
+export function recommendEntryStrategy(m: MarketMapInput & {
+  liftor_entry_score?: number | null;
+}): { strategy: EntryStrategy; reason: string } {
+  const crowding = deriveCrowdingLevel(m);
+  const saturation = deriveSaturationRisk(m);
+  const ws = Number(m.white_space_score ?? 0);
+  const ai = Number(m.ai_disruption_potential_score ?? 0);
+  const frag = Number(m.fragmentation_score ?? 0);
+  const dom = Array.isArray(m.dominant_players) ? m.dominant_players.length : 0;
+  const entry = Number(m.liftor_entry_score ?? computeLiftorEntryScore(m));
+
+  if (saturation === "extreme" && ws < 25)
+    return { strategy: "AVOID_TOO_SATURATED", reason: "Saturation risk extreme and visible white space is minimal — commodity trap." };
+  if (dom >= 3 && Number(m.switching_difficulty_score ?? 0) >= 70 && ws < 35)
+    return { strategy: "AVOID_WINNER_TAKES_MOST", reason: "Few dominant players with high switching cost; winner-takes-most dynamics." };
+  if (m.market_stage === "emerging" && Number(m.buyer_education_score ?? 0) < 30)
+    return { strategy: "WATCH_TOO_EARLY", reason: "Market still in education phase; revisit when buyers self-pull." };
+  if (frag >= 60 && ai >= 60)
+    return { strategy: "BUILD_VERTICAL_VERSION", reason: "Fragmented market with high AI disruption potential — vertical AI-native version is the wedge." };
+  if (ws >= 60 && entry >= 60 && Number(m.distribution_difficulty_score ?? 0) <= 50)
+    return { strategy: "BUILD_NICHE_WEDGE", reason: "Strong white space, low distribution friction — niche wedge entry." };
+  if (Number(m.distribution_difficulty_score ?? 0) >= 70 && ai >= 50)
+    return { strategy: "BUILD_MANAGED_SERVICE_FIRST", reason: "Distribution is hard; lead with managed service to learn before product." };
+  if (ws >= 50 && (m.market_stage === "growing" || m.market_stage === "fragmented"))
+    return { strategy: "BUILD_GEOGRAPHIC_VERSION", reason: "Underserved geographies inside a growing market — localise first." };
+  if (crowding === "high" || crowding === "extreme")
+    return { strategy: "WATCH_CROWDED_BUT_INTERESTING", reason: "Market is crowded but proven — watch for fragmentation or weakness signals before entering." };
+  return { strategy: "PARTNER_OR_ACQUIRE_LATER", reason: "Insufficient direct edge — better positioned for partner/acquire path later." };
+}
+
+export async function fetchMarketMaps() {
+  const { data, error } = await (supabase as any)
+    .from("funding_market_maps")
+    .select("*, funding_problem_clusters(cluster_name)")
+    .order("liftor_entry_score", { ascending: false, nullsFirst: false })
+    .order("updated_at", { ascending: false });
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function fetchWhiteSpaceOpportunities() {
+  const { data, error } = await (supabase as any)
+    .from("funding_white_space_opportunities")
+    .select("*, funding_market_maps(market_name, sector, geography), funding_problem_clusters(cluster_name)")
+    .order("updated_at", { ascending: false });
+  if (error) throw error;
+  return data ?? [];
+}
+
 // CRUD helpers ---------------------------------------------------------------
 
 export async function fetchWatchlist() {
