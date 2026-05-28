@@ -105,15 +105,14 @@ export default function FundingRadarCommandPanel() {
         .filter((r) => ["shortlisted","reviewing"].includes(r.status))
         .slice(0, 3)
         .map((r: any) => ({ id: r.id, name: r.funding_radar_companies?.company_name ?? "—", status: r.status }));
-      const topRisks = (mmRows.length ? mmRows : [])
-        .filter((m: any) => String(m.recommended_entry_strategy ?? "").startsWith("AVOID") || m.saturation_risk === "extreme" || m.saturation_risk === "high")
-        .slice(0, 3)
-        .map((m: any) => ({ name: m.market_name, reason: m.avoid_reason ?? m.saturation_risk ?? m.recommended_entry_strategy ?? "" }));
-      const watchChanges = ((newSignals as any).data ?? []) as any[]; // placeholder; we already have new signals count
       const candRows = (candidates.data ?? []) as any[];
       const selected = candRows.find((c) => c.recommendation_status === "selected");
       const topRows = (topScore.data ?? []) as any[];
       const mmRows = (marketMaps.data ?? []) as any[];
+      const topRisks = mmRows
+        .filter((m: any) => String(m.recommended_entry_strategy ?? "").startsWith("AVOID") || m.saturation_risk === "extreme" || m.saturation_risk === "high")
+        .slice(0, 3)
+        .map((m: any) => ({ name: m.market_name, reason: m.avoid_reason ?? m.saturation_risk ?? m.recommended_entry_strategy ?? "" }));
       const crowdOrder: Record<string, number> = { extreme: 4, high: 3, moderate: 2, low: 1 };
       const topCrowdedRow = [...mmRows].sort((a, b) => (crowdOrder[b.crowding_level] ?? 0) - (crowdOrder[a.crowding_level] ?? 0))[0] ?? null;
       const topWhiteSpaceRow = [...mmRows].sort((a, b) => Number(b.white_space_score ?? 0) - Number(a.white_space_score ?? 0))[0] ?? null;
