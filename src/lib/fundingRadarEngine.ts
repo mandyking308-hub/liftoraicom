@@ -1188,6 +1188,231 @@ export function buildProductionPack(args: {
   };
 }
 
+// ---- Business Autopsy + Better Build Generator ----------------------------
+
+export type AutopsyInput = {
+  company_name: string;
+  website?: string | null;
+  funding_source?: string | null;
+  sector?: string | null;
+  country?: string | null;
+  competitor_notes?: string | null;
+  uploaded_research?: string | null;
+  reason_for_analysis?: string | null;
+  related_cluster?: { id?: string | null; cluster_name?: string | null; problem_thesis?: string | null; customer_pain?: string | null } | null;
+  related_market?: { recommended_entry_strategy?: string | null; crowding_level?: string | null; saturation_risk?: string | null; white_space_score?: number | null; avoid_reason?: string | null } | null;
+  related_signals?: SignalLite[];
+};
+
+export type AutopsyReport = {
+  business_model: { what_sold: string; customer: string; payer: string; why_pay: string; recurring_revenue: string; pricing_model: string; sales_motion: string; onboarding_model: string; support_model: string; marketplace_model: string; compliance_burden: string };
+  customer_pain: { problem: string; severity: string; repeatability: string; urgency: string; willingness_to_pay_evidence: string; complaints: string; praise: string; unmet_needs: string; workarounds: string };
+  operational_heaviness: { team_heavy: string; sales_heavy: string; onboarding_heavy: string; support_heavy: string; manual_delivery: string; compliance_admin: string; implementation_burden: string; human_bottlenecks: string; why_funding_needed: string };
+  weakness_signals: { negative: string[]; positive: string[]; summary: string };
+  market_position: { crowdedness: string; saturation_risk: string; white_space: string; niche_wedge: string; geographic_wedge: string; vertical_wedge: string; buyer_education: string; pricing_pressure: string; distribution_difficulty: string; switching_difficulty: string; winner_takes_most_risk: string };
+  liftor_advantage: { ai_automation: string[]; human_work_reduction: string[]; cheaper_faster: string[]; simpler: string[]; managed_service_first: string; verticalisation: string; low_capex_reasons: string[]; founder_approvals_required: string[] };
+  legal_warnings: string[];
+  recommendation: "build" | "watch" | "park" | "kill" | "review";
+  recommendation_reason: string;
+};
+
+export const AUTOPSY_FORBIDDEN_COPYING = [
+  "company name",
+  "brand identity",
+  "website copy",
+  "UI design",
+  "code",
+  "databases",
+  "customer lists",
+  "confidential documents",
+  "proprietary workflows",
+  "private pricing documents",
+  "protected assets",
+  "restricted scraped data",
+] as const;
+
+export const AUTOPSY_ALLOWED_EXTRACTION = [
+  "problem thesis",
+  "customer pain",
+  "market validation signal",
+  "buyer type",
+  "pricing logic",
+  "revenue model pattern",
+  "public weakness",
+  "legally distinct execution route",
+] as const;
+
+const TBD = "Founder to confirm — public sources only";
+
+export function generateAutopsyReport(input: AutopsyInput): AutopsyReport {
+  const cluster = input.related_cluster ?? {};
+  const market = input.related_market ?? {};
+  const signals = input.related_signals ?? [];
+  const negSignals = signals.filter((s) => s.signal_polarity === "negative");
+  const posSignals = signals.filter((s) => s.signal_polarity === "positive");
+  const wsScore = market.white_space_score ?? null;
+
+  const negTitles = negSignals.slice(0, 6).map((s) => s.signal_type ?? "weakness signal");
+  const posTitles = posSignals.slice(0, 6).map((s) => s.signal_type ?? "positive signal");
+
+  const recommendation: AutopsyReport["recommendation"] =
+    market.recommended_entry_strategy === "AVOID_TOO_SATURATED" ? "park" :
+    (wsScore ?? 0) >= 60 && negSignals.length >= 2 ? "build" :
+    (wsScore ?? 0) >= 40 ? "watch" :
+    "review";
+
+  return {
+    business_model: {
+      what_sold: cluster.problem_thesis ?? TBD,
+      customer: cluster.customer_pain ? `Buyer affected by: ${cluster.customer_pain}` : TBD,
+      payer: TBD, why_pay: TBD, recurring_revenue: TBD, pricing_model: TBD,
+      sales_motion: TBD, onboarding_model: TBD, support_model: TBD,
+      marketplace_model: TBD, compliance_burden: TBD,
+    },
+    customer_pain: {
+      problem: cluster.customer_pain ?? input.reason_for_analysis ?? TBD,
+      severity: TBD, repeatability: TBD, urgency: TBD,
+      willingness_to_pay_evidence: input.funding_source ? `Funding round logged at: ${input.funding_source}` : TBD,
+      complaints: negTitles.join(", ") || TBD,
+      praise: posTitles.join(", ") || TBD,
+      unmet_needs: TBD, workarounds: TBD,
+    },
+    operational_heaviness: {
+      team_heavy: TBD, sales_heavy: TBD, onboarding_heavy: TBD, support_heavy: TBD,
+      manual_delivery: TBD, compliance_admin: TBD, implementation_burden: TBD,
+      human_bottlenecks: TBD,
+      why_funding_needed: input.funding_source ? "Capital used for headcount + GTM expansion (public filings)." : TBD,
+    },
+    weakness_signals: {
+      negative: negTitles,
+      positive: posTitles,
+      summary: `${negSignals.length} negative, ${posSignals.length} positive signals from public/manual sources.`,
+    },
+    market_position: {
+      crowdedness: market.crowding_level ?? TBD,
+      saturation_risk: market.saturation_risk ?? TBD,
+      white_space: wsScore != null ? `${wsScore}/100` : TBD,
+      niche_wedge: market.recommended_entry_strategy === "BUILD_NICHE_WEDGE" ? "Yes" : TBD,
+      geographic_wedge: TBD, vertical_wedge: TBD, buyer_education: TBD,
+      pricing_pressure: TBD, distribution_difficulty: TBD, switching_difficulty: TBD,
+      winner_takes_most_risk: market.recommended_entry_strategy === "AVOID_TOO_SATURATED" ? "High" : TBD,
+    },
+    liftor_advantage: {
+      ai_automation: ["Sales qualification","Onboarding workflow","Tier-1 support","Reporting + analytics"],
+      human_work_reduction: ["Manual data entry","Scheduling","Status updates"],
+      cheaper_faster: ["Self-serve onboarding","Agent-led configuration"],
+      simpler: ["Single workflow per ICP","Opinionated defaults"],
+      managed_service_first: "Start managed-service-first; productise once 3 paying customers retain",
+      verticalisation: cluster.cluster_name ? `Vertical wedge into ${cluster.cluster_name}` : "Pick a single ICP wedge",
+      low_capex_reasons: ["No field sales team","No professional services org","No data centre","No physical inventory"],
+      founder_approvals_required: [...PRODUCTION_FOUNDER_APPROVAL_GATES],
+    },
+    legal_warnings: [
+      "Never copy: " + AUTOPSY_FORBIDDEN_COPYING.join(", "),
+      "Only extract: " + AUTOPSY_ALLOWED_EXTRACTION.join(", "),
+      "Public, manual, uploaded, founder-approved or licensed sources only.",
+    ],
+    recommendation,
+    recommendation_reason:
+      recommendation === "build" ? "Funded category, weakness signals present, white space available — proceed to Better Build Pack." :
+      recommendation === "park" ? "Saturated commodity market with no viable wedge — park." :
+      recommendation === "watch" ? "Some white space but evidence is thin — keep watching." :
+      "Insufficient evidence — gather more public/manual data before deciding.",
+  };
+}
+
+export type BetterBuildPack = {
+  legally_distinct_concept: string;
+  product_name_placeholder: string;
+  target_customer: string;
+  first_offer: string;
+  mvp_feature_list: string[];
+  database_schema_needs: string[];
+  landing_page_structure: string[];
+  crm_pipeline_stages: string[];
+  onboarding_flow: string[];
+  support_flow: string[];
+  pricing_hypothesis: string;
+  compliance_legal_pages_needed: string[];
+  approval_gates: string[];
+  human_oversight_requirements: string[];
+  ai_agent_requirements: string[];
+  first_30_day_build_plan: string[];
+  first_90_day_operating_plan: string[];
+  kpis: string[];
+  kill_continue_criteria: string[];
+  acquirer_pain_thesis: string;
+  exit_logic: string;
+};
+
+export function generateBetterBuildPack(input: AutopsyInput, report: AutopsyReport): BetterBuildPack {
+  const wedge = input.related_cluster?.cluster_name ?? input.sector ?? "vertical wedge";
+  return {
+    legally_distinct_concept: `An AI-operated, ${wedge}-specific solution that solves the same validated customer pain through a distinct workflow, distinct UX and distinct data model. No assets, code, copy, branding, customer data or proprietary workflows are reused from any analysed company.`,
+    product_name_placeholder: "Liftor-[Wedge] (working name — founder to finalise)",
+    target_customer: report.customer_pain.problem,
+    first_offer: "Done-for-you setup + first 30 days managed-service, then self-serve subscription.",
+    mvp_feature_list: [
+      "Auth + billing","Single-ICP onboarding wizard","Core workflow agent","Approval queue (founder gate)",
+      "KPI dashboard","Audit log","Compliance pages",
+    ],
+    database_schema_needs: ["customers","subscriptions","workflows","agent_runs","approvals","kpi_snapshots","audit_events"],
+    landing_page_structure: [
+      "Hero (problem statement, no competitor mention)","Validated pain summary","Distinct execution angle",
+      "Pricing","Founder-led CTA","FAQ","Compliance & security",
+    ],
+    crm_pipeline_stages: ["New lead","Qualified","Discovery","Proposal","Won","Onboarding","Live","Renewal"],
+    onboarding_flow: ["Self-serve signup","ICP qualification","Founder-approved managed-service kickoff","Agent configuration","First value milestone","Hand to self-serve"],
+    support_flow: ["Tier-0 agent","Tier-1 founder approval","Tier-2 escalation"],
+    pricing_hypothesis: "Tiered subscription with managed-service add-on; founder to validate WTP from public funding signals.",
+    compliance_legal_pages_needed: ["Terms","Privacy","DPA","AUP","Security disclosure","Cookie policy"],
+    approval_gates: [...PRODUCTION_FOUNDER_APPROVAL_GATES],
+    human_oversight_requirements: ["Founder reviews every external action","Daily review of agent failures","Weekly KPI + kill/continue review"],
+    ai_agent_requirements: ["Agent registry","Confidence + escalation rules","Tool/cost ceilings","Audit trail","Human approval queue"],
+    first_30_day_build_plan: [
+      "Confirm thesis with 5 founder-network conversations","Scaffold app + landing page in Lovable",
+      "Wire approval queue + agent registry","Stand up compliance pages","Founder approval to start managed-service kickoff",
+    ],
+    first_90_day_operating_plan: [
+      "Reach 3+ paying customers via founder network only","Validate retention at 30/60 days",
+      "Activate Portfolio Commander tracking","Day-90 kill/continue review",
+    ],
+    kpis: ["Paying customers","MRR","CAC","Activation rate","Retention 30/60/90","Founder hours/week","AI automation success rate"],
+    kill_continue_criteria: [
+      "Kill if no paying customer within 60 days post-launch",
+      "Kill if conversion < 1% across two outreach waves",
+      "Continue if 3+ paying customers within 90 days and retention >= 80%",
+    ],
+    acquirer_pain_thesis: "Acquirers in this space pay today through headcount + tooling. Liftor compresses that to an AI-operated stack with recurring revenue.",
+    exit_logic: "Vertical AI-operator with proprietary playbook → strategic acquirer or PE roll-up post-product-market-fit.",
+  };
+}
+
+export type LovablePromptPack = {
+  generated_at: string;
+  legal_notice: string;
+  prompts: Array<{ step: number; title: string; prompt: string }>;
+};
+
+export function generateLovablePromptPack(input: AutopsyInput, pack: BetterBuildPack): LovablePromptPack {
+  const safe = (s: string | null | undefined) => (s ?? "").replace(/[<>]/g, "").slice(0, 400);
+  const wedge = safe(input.related_cluster?.cluster_name) || safe(input.sector) || "single ICP wedge";
+  const legal = `Do not copy any company name, brand, website copy, UI design, code, databases, customer lists, proprietary workflows or pricing documents. Build a legally distinct product. All outbound actions must route through the founder approval queue.`;
+  const prompts = [
+    { step: 1, title: "Product foundation", prompt: `Scaffold a new Lovable app named ${pack.product_name_placeholder}. Use the existing Liftor design system (dark navy bg, electric blue #2EA3FF, .tech-card components, 120px desktop / 80px mobile spacing). Add auth, billing, and a founder-only admin shell. Wedge: ${wedge}. ${legal}` },
+    { step: 2, title: "Database schema", prompt: `Create Supabase tables: ${pack.database_schema_needs.join(", ")}. Add RLS so users only see their own data; admins see all. Add updated_at triggers. ${legal}` },
+    { step: 3, title: "Landing page", prompt: `Build a single landing page with sections: ${pack.landing_page_structure.join(" / ")}. Write fresh copy from scratch — do not reuse any external copy. Include compliance footer. ${legal}` },
+    { step: 4, title: "Customer onboarding", prompt: `Build an onboarding wizard following: ${pack.onboarding_flow.join(" → ")}. Each step writes to the workflows table. Founder approval required before any external action is taken. ${legal}` },
+    { step: 5, title: "CRM pipeline", prompt: `Build a CRM pipeline with stages: ${pack.crm_pipeline_stages.join(" → ")}. Add manual entry only — no scraping, no enrichment from paid APIs without explicit founder approval. ${legal}` },
+    { step: 6, title: "Support workflow", prompt: `Build a tiered support workflow: ${pack.support_flow.join(" → ")}. Tier-0 is an AI agent with confidence threshold; below threshold escalates to a founder approval queue. ${legal}` },
+    { step: 7, title: "Admin / founder dashboard", prompt: `Build an admin dashboard showing KPIs (${pack.kpis.join(", ")}), approval queue depth, agent run audit log and kill/continue countdown. ${legal}` },
+    { step: 8, title: "Compliance / legal pages", prompt: `Generate static pages for: ${pack.compliance_legal_pages_needed.join(", ")}. Use template language; do not copy any third-party document. ${legal}` },
+    { step: 9, title: "Analytics / KPIs", prompt: `Build a kpi_snapshots writer that captures daily ${pack.kpis.join(", ")}, plus a 30/60/90 retention chart. ${legal}` },
+    { step: 10, title: "Launch QA", prompt: `Run a launch QA checklist: auth, billing, RLS, approval queue, audit log, compliance pages, KPI dashboard, kill/continue criteria visible. Block launch until founder approval is recorded. ${legal}` },
+  ];
+  return { generated_at: new Date().toISOString(), legal_notice: legal, prompts };
+}
+
 // CRUD helpers ---------------------------------------------------------------
 
 export async function fetchWatchlist() {
