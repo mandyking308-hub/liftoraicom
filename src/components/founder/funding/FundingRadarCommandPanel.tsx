@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Radar, Trophy, Sparkles, Lock, CalendarClock, FileText, Upload, BookOpen, ListChecks, Eye, Map as MapIcon, Gavel, AlertTriangle } from "lucide-react";
+import { Radar, Trophy, Sparkles, Lock, CalendarClock, FileText, Upload, BookOpen, ListChecks, Eye, Map as MapIcon, Gavel, AlertTriangle, Factory } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ENTRY_STRATEGY_LABEL, type EntryStrategy } from "@/lib/fundingRadarEngine";
 
@@ -344,6 +344,26 @@ export default function FundingRadarCommandPanel() {
             <p>Blocked / rejected: <span className="text-foreground">{s?.blockedCount ?? 0}</span></p>
             <p className="text-primary">Next action: {s?.nextAction ?? "—"}</p>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card className="tech-card lg:col-span-3">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2"><Factory className="h-4 w-4 text-primary" />Quarterly Production Build Machine</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 md:grid-cols-6 gap-3 text-xs">
+          <Row label="Current quarter" value={s ? `Q${s.quarter} ${s.year}` : "—"} />
+          <Row label="Recommended primary" value={s?.selectedBuild ?? <span className="text-muted-foreground">pending evaluation</span>} />
+          <Row label="Backup build" value={(s?.candidateCount ?? 0) > 1 ? "available" : <span className="text-muted-foreground">none</span>} />
+          <Row label="Production pack" value={s?.selectedBuild ? "draft ready" : "—"} />
+          <Row label="Founder approval" value={<span className="text-amber-300">required to start build</span>} />
+          <Row label="Next action" value={<span className="text-primary">{s?.selectedBuild ? "Review production pack" : "Promote shortlist → selector"}</span>} />
+          <div className="col-span-2 md:col-span-6 flex flex-wrap gap-2">
+            <Button asChild size="sm" variant="outline" className="h-7 text-[11px]"><Link to="/founder/quarterly-production-machine"><Factory className="h-3 w-3 mr-1" />Production machine</Link></Button>
+            <Button asChild size="sm" variant="outline" className="h-7 text-[11px]"><Link to="/founder/portfolio-exit/build-selector"><Trophy className="h-3 w-3 mr-1" />Build Selector</Link></Button>
+            <Button asChild size="sm" variant="outline" className="h-7 text-[11px]"><Link to="/founder/launch-factory"><FileText className="h-3 w-3 mr-1" />Launch Factory</Link></Button>
+          </div>
+          <p className="col-span-2 md:col-span-6 text-[11px] text-muted-foreground">Reads the last three monthly Funding Radar runs, applies kill rules, capacity, market and portfolio gates, and recommends one Primary and one Backup build. Founder approval still gates production build, brand/site, domains, outreach and live launch.</p>
         </CardContent>
       </Card>
     </div>
