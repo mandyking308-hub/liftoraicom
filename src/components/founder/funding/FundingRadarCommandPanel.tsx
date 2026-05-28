@@ -108,7 +108,7 @@ export default function FundingRadarCommandPanel() {
           <Row label="Blocked / rejected" value={s?.blockedCount ?? 0} />
           <Row label="Next action" value={s?.selectedBuild ? "Promote to portfolio asset" : (s && s.candidateCount > 0 ? "Pick one selected build" : "Promote from Funding Radar shortlist")} />
           <Button asChild size="sm" variant="outline" className="w-full mt-2 h-7 text-[11px]">
-            <Link to="/founder/quarterly-build-selector">Open Selector <ArrowRight className="h-3 w-3 ml-1" /></Link>
+            <Link to="/founder/portfolio-exit/build-selector">Open Selector <ArrowRight className="h-3 w-3 ml-1" /></Link>
           </Button>
         </CardContent>
       </Card>
