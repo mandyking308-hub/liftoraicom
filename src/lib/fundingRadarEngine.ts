@@ -828,6 +828,598 @@ export function summarisePromptQueue(
   };
 }
 
+// ---- Full Business Production Pack ---------------------------------------
+
+export type FullProductionPack = {
+  generated_at: string;
+  business_summary: {
+    business_name_placeholder: string;
+    legally_distinct_concept: string;
+    problem_thesis: string;
+    paying_customer_profile: string;
+    first_niche_wedge: string;
+    sector: string;
+    geography: string;
+    why_selected: string[];
+    funded_proof: string;
+    what_not_to_copy: string[];
+    founder_approval_status: string;
+  };
+  brand_pack: {
+    brand_name_options: string[];
+    positioning_statement: string;
+    tagline_options: string[];
+    tone_of_voice: string[];
+    visual_direction: string;
+    colour_direction: string;
+    typography_direction: string;
+    logo_direction: string;
+    imagery_style: string;
+    trust_signals: string[];
+    differentiation_statement: string;
+    prohibited_copy_notes: string[];
+    pre_launch_checks: string[];
+  };
+  product_pack: {
+    description: string;
+    user_types: string[];
+    user_journeys: string[];
+    core_mvp_features: string[];
+    future_features: string[];
+    admin_founder_features: string[];
+    customer_facing_features: string[];
+    support_features: string[];
+    ai_agent_features: string[];
+    human_oversight_requirements: string[];
+    approval_gates: string[];
+  };
+  technical_pack: {
+    app_structure: string[];
+    route_map: string[];
+    database_schema: string[];
+    supabase_table_plan: string[];
+    authentication: string[];
+    role_permission_model: string[];
+    storage: string[];
+    edge_functions: string[];
+    scheduled_jobs: string[];
+    webhooks: string[];
+    audit_logging: string[];
+    data_retention: string[];
+    integration_placeholders: string[];
+    no_paid_api_default: boolean;
+    no_outbound_default: boolean;
+  };
+  ui_ux_pack: {
+    public_landing: string[];
+    customer_portal: string[];
+    founder_admin_dashboard: string[];
+    onboarding_flow: string[];
+    settings_page: string[];
+    empty_states: string[];
+    success_states: string[];
+    error_states: string[];
+    mobile_layout_notes: string[];
+    accessibility_notes: string[];
+    trust_compliance_display: string[];
+  };
+  copy_pack: {
+    homepage: string[];
+    hero: string[];
+    problem: string[];
+    solution: string[];
+    how_it_works: string[];
+    pricing_placeholder: string[];
+    faq: string[];
+    trust: string[];
+    cta: string[];
+    onboarding_email_drafts: string[];
+    support_snippet_drafts: string[];
+    rules: string[];
+  };
+  legal_pack: {
+    pages: Array<{ slug: string; title: string; required: boolean; risk: "low"|"medium"|"high"; needs_adviser_review: boolean; draft_outline: string[] }>;
+    rules: string[];
+    pre_publish_gates: string[];
+  };
+  crm_pack: {
+    lead_stages: string[];
+    customer_stages: string[];
+    pipeline_structure: string[];
+    first_100_customer_route: string[];
+    offer_structure: string[];
+    pricing_hypothesis: string;
+    sales_approval_gates: string[];
+    follow_up_stages: string[];
+    objection_categories: string[];
+    conversion_kpis: string[];
+    revenue_kpis: string[];
+    outreach_rule: string;
+  };
+  onboarding_pack: {
+    customer_onboarding_flow: string[];
+    intake_questions: string[];
+    welcome_pack: string[];
+    checklist: string[];
+    delivery_workflow: string[];
+    internal_sla: string[];
+    support_handoff: string[];
+    escalation_rules: string[];
+    human_oversight_points: string[];
+    ai_agent_responsibilities: string[];
+    founder_approval_gates: string[];
+  };
+  support_pack: {
+    categories: string[];
+    ticket_stages: string[];
+    knowledge_base_outline: string[];
+    escalation_rules: string[];
+    refund_cancellation: string[];
+    complaints_evidence_capture: string[];
+    risk_flags: string[];
+    founder_escalation_triggers: string[];
+  };
+  analytics_pack: {
+    launch_kpis: string[];
+    usage_kpis: string[];
+    conversion_kpis: string[];
+    support_kpis: string[];
+    revenue_kpis: string[];
+    founder_workload_kpi: string;
+    human_oversight_burden_kpi: string;
+    ai_automation_performance_kpi: string;
+    proof_targets_30_60_90: string[];
+    kill_continue_park_criteria: string[];
+  };
+  launch_qa_pack: string[];
+  lovable_prompt_pack: PromptQueueItem[];
+  github_audit_pack: {
+    audit_steps: string[];
+    must_pass: string[];
+    must_block: string[];
+    expected_outputs: string[];
+    prompt_body: string;
+  };
+  automation_boundaries: {
+    may_auto: string[];
+    must_not_auto: string[];
+    founder_approval_required_before: string[];
+  };
+  prohibited_copy: string[];
+};
+
+export const PRODUCTION_PACK_PROHIBITED_COPY = [
+  "Competitor company name",
+  "Brand identity / logo / colour scheme",
+  "Website copy / wording",
+  "UI design",
+  "Source code",
+  "Customer lists",
+  "Databases / proprietary data",
+  "Confidential documents",
+  "Proprietary workflows",
+  "Private pricing documents",
+  "Protected assets",
+  "Restricted scraped data",
+] as const;
+
+export const PRODUCTION_PACK_MAY_AUTO = [
+  "Generate the production pack",
+  "Generate Lovable prompts",
+  "Create internal build queue items",
+  "Create draft Launch Factory records",
+  "Create draft Business Template records",
+  "Create draft Command Centre panels",
+  "Create internal tasks",
+  "Create legal-page draft structures",
+  "Create GitHub audit prompts",
+  "Update manuals",
+] as const;
+
+export const PRODUCTION_PACK_MUST_NOT_AUTO = [
+  "Publish a public website",
+  "Buy domains",
+  "Send emails",
+  "Launch outreach",
+  "Contact external parties",
+  "Activate paid APIs",
+  "Spend money",
+  "Open a data room",
+  "Contact investors / acquirers",
+  "Make public claims",
+  "Enable live mode",
+] as const;
+
+export const PRODUCTION_PACK_FOUNDER_APPROVAL_BEFORE = [
+  "Production build starts",
+  "Public brand / site goes live",
+  "Domain is purchased",
+  "Email sending is enabled",
+  "Outreach begins",
+  "Paid APIs are activated",
+  "External parties are contacted",
+  "Legal pages are published",
+  "Live mode is unlocked",
+] as const;
+
+export type LovablePromptPackStageKey =
+  | "brand_product_foundation"
+  | "app_structure_route_map"
+  | "database_schema"
+  | "landing_page"
+  | "customer_onboarding"
+  | "customer_portal"
+  | "founder_admin_dashboard"
+  | "crm_pipeline"
+  | "support_workflow"
+  | "legal_compliance_pages"
+  | "analytics_kpi_tracking"
+  | "command_centre_integration"
+  | "launch_factory_handoff"
+  | "business_template_handoff"
+  | "qa_smoke_test"
+  | "github_audit_launch_readiness";
+
+function makePromptItem(
+  order: number,
+  key: LovablePromptPackStageKey,
+  title: string,
+  body: string,
+  dependencies: LovablePromptPackStageKey[],
+  ac: PromptQueueItem["acceptance_criteria"],
+  test_instruction: string,
+  founder_approval_required: boolean,
+  flags: { is_qa_gate?: boolean; is_live_mode_gate?: boolean } = {},
+  ts: string,
+): PromptQueueItem {
+  return {
+    key: key as unknown as PromptQueueStageKey,
+    order,
+    title,
+    body,
+    dependencies: dependencies as unknown as PromptQueueStageKey[],
+    acceptance_criteria: ac,
+    test_instruction,
+    founder_approval_required,
+    is_qa_gate: !!flags.is_qa_gate,
+    is_live_mode_gate: !!flags.is_live_mode_gate,
+    created_at: ts,
+    completed_at: null,
+    notes: "",
+  };
+}
+
+function buildLovablePromptPack(p: FullProductionPack, name: string, ts: string): PromptQueueItem[] {
+  const ac = (
+    what: string, where: string, table: string, links: string,
+    founder: string, empty: string, test: string, blocked: string,
+  ) => ({ what_must_be_built: what, where_it_appears: where, table_or_data: table, links_to_modules: links, what_founder_sees: founder, empty_state: empty, test_proves_it_works: test, must_remain_blocked: blocked });
+
+  return [
+    makePromptItem(1, "brand_product_foundation", `Stage 1 · Brand + product foundation · ${name}`,
+      `Scaffold ${name} as a Liftor sub-app. Apply legally distinct branding from Brand Pack: ${p.brand_pack.positioning_statement} Tone: ${p.brand_pack.tone_of_voice.join(", ")}. Do not copy any competitor name, logo, colour, copy or UI. Reuse existing tech-card design system.`,
+      [], ac("App shell, auth gate, base layout, brand tokens.", "/founder/<slug>", "auth.users, profiles, user_roles", "Founder layout, has_role.", "Empty product shell with placeholders.", "‘Foundation ready — continue to schema.’", "Non-admin redirected; founder lands on shell.", "No outbound, no public route, no payments, no live mode."),
+      "Open the new sub-app route — shell renders with auth gate.", false, {}, ts),
+    makePromptItem(2, "app_structure_route_map", `Stage 2 · App structure + route map · ${name}`,
+      `Implement route map: ${p.technical_pack.route_map.join(" / ")}. Mount under founder layout. No public routes yet.`,
+      ["brand_product_foundation"], ac("All routes from technical pack.", "Sub-app routes.", "Route registry only.", "FounderLayout, FounderRoute.", "Empty pages with breadcrumbs.", "‘Page ready.’", "Each route loads without errors.", "No public access until live mode."),
+      "Visit each route — renders with founder guard.", false, {}, ts),
+    makePromptItem(3, "database_schema", `Stage 3 · Database / schema · ${name}`,
+      `Create migrations for: ${p.technical_pack.database_schema.join("; ")}. Include GRANTs and RLS scoped to founder/admin and tenant. No anon writes. No paid APIs.`,
+      ["app_structure_route_map"], ac("Tables + RLS + GRANTs.", "Supabase migrations.", "Stage tables.", "has_role, audit ledger.", "Empty tables visible.", "‘No records yet — schema ready.’", "Insert + select round-trip with RLS pass.", "No public anon writes."),
+      "Run migration and confirm RLS + GRANTs.", false, {}, ts),
+    makePromptItem(4, "landing_page", `Stage 4 · Landing page · ${name}`,
+      `Generate landing page sections: ${p.ui_ux_pack.public_landing.join(" / ")}. Use original copy only. No competitor wording. No regulated claims.`,
+      ["brand_product_foundation"], ac("Landing page with hero, problem, solution, how-it-works, pricing, FAQ, trust, CTA.", "/<slug>/preview (internal until launch).", "Static content + CMS-style records.", "Brand pack, copy pack.", "Preview-only mode.", "‘Preview — not yet public.’", "Lighthouse + accessibility checks pass.", "No public publish without founder approval."),
+      "Open preview URL — sections render with original copy.", false, {}, ts),
+    makePromptItem(5, "customer_onboarding", `Stage 5 · Customer onboarding · ${name}`,
+      `Implement onboarding flow: ${p.onboarding_pack.customer_onboarding_flow.join(" → ")}. Sandbox-only until live mode. No real payments.`,
+      ["database_schema"], ac("Onboarding screens + intake.", "/onboarding inside sub-app.", "customers, onboarding_progress.", "Customer Onboarding engine, Approval Ops.", "Onboarding completion KPI.", "‘No customers onboarded yet.’", "Sandbox account reaches first-value step.", "No public sign-up until live mode."),
+      "Run onboarding with sandbox account.", false, {}, ts),
+    makePromptItem(6, "customer_portal", `Stage 6 · Customer portal · ${name}`,
+      "Build customer portal with account, settings, billing placeholder, support entry, AI-action approvals.",
+      ["customer_onboarding"], ac("Customer-facing portal.", "/portal under sub-app.", "customers, subscriptions stub, approvals.", "CRM, Approval Ops.", "Customer health KPIs.", "‘No customers yet.’", "Sandbox customer can navigate portal.", "No outbound from portal."),
+      "Sandbox customer logs into portal — pages render.", false, {}, ts),
+    makePromptItem(7, "founder_admin_dashboard", `Stage 7 · Founder / admin dashboard · ${name}`,
+      `Build founder dashboard with KPI tiles: ${p.analytics_pack.launch_kpis.join("; ")} and an approval queue. No public access.`,
+      ["customer_portal", "database_schema"], ac("Founder dashboard with KPI tiles + approval queue.", "/founder/<slug>/dashboard.", "build_kpis, approvals, agent_runs.", "Command Centre, Approval Ops.", "All KPIs in one place.", "‘No data yet.’", "All tiles render without errors.", "No public access; no exports without approval."),
+      "Open dashboard — KPI tiles render with zero-state.", false, {}, ts),
+    makePromptItem(8, "crm_pipeline", `Stage 8 · CRM / pipeline · ${name}`,
+      `Wire CRM stages: ${p.crm_pack.lead_stages.join(" → ")} ↦ ${p.crm_pack.customer_stages.join(" → ")}. Log every transition. Outbound disabled until live mode.`,
+      ["database_schema"], ac("CRM with stages and audit log.", "/founder/<slug>/crm.", "crm_contacts, crm_deals, crm_events.", "CRM Dashboard, audit ledger.", "Pipeline board with stage timing.", "‘No deals yet.’", "Test deal traverses every stage.", "No outbound email/SMS until live mode."),
+      "Move test deal across all stages.", false, {}, ts),
+    makePromptItem(9, "support_workflow", `Stage 9 · Support workflow · ${name}`,
+      "Build support inbox with ticket states and AI-assist drafts. Mandatory founder approval before any reply leaves the system.",
+      ["customer_portal"], ac("Support inbox + states + AI-assist + escalation.", "/founder/<slug>/support.", "support_tickets, agent_runs, approvals.", "Support Hub, Approval Ops.", "Open tickets, SLA, escalations.", "‘No tickets — support ready.’", "Sandbox ticket round-trip.", "AI replies require founder approval."),
+      "File a sandbox ticket; route + approve reply.", false, {}, ts),
+    makePromptItem(10, "legal_compliance_pages", `Stage 10 · Legal / compliance pages · ${name}`,
+      `Add legal pages with versioning + acceptance ledger: ${p.legal_pack.pages.map((x) => x.title).join(", ")}. Mark all as draft/template. Founder/adviser review required before publish.`,
+      ["brand_product_foundation"], ac("Versioned legal pages + acceptance ledger.", "/legal/* under sub-app.", "legal_documents, legal_acceptances.", "Founder Legal Console.", "Versioned policy table with acceptance counts.", "‘No acceptances yet.’", "Render + accept + ledger entry verified.", "No publishing without founder + adviser approval."),
+      "Visit each /legal/* route; verify acceptance ledger writes.", true, {}, ts),
+    makePromptItem(11, "analytics_kpi_tracking", `Stage 11 · Analytics / KPI tracking · ${name}`,
+      `Wire KPIs and kill/continue criteria: ${p.analytics_pack.kill_continue_park_criteria.join("; ")}. No third-party analytics without approval.`,
+      ["founder_admin_dashboard"], ac("Event capture + KPI rollups + kill/continue tile.", "Founder dashboard.", "build_kpis, events, kill_continue_log.", "Analytics-Attribution, Decision Register.", "Live KPI deltas + kill/continue countdown.", "‘No events yet — analytics armed.’", "Sample events flow into rollups.", "No third-party analytics without approval."),
+      "Trigger sample events; rollups update.", false, {}, ts),
+    makePromptItem(12, "command_centre_integration", `Stage 12 · Command Centre integration · ${name}`,
+      "Add Command Centre operating panel for the build (read-only — no outbound action buttons).",
+      ["analytics_kpi_tracking", "founder_admin_dashboard"], ac("Command Centre operating panel for the build.", "/founder/command-centre.", "build_kpis + approvals.", "FundingRadarCommandPanel + global Command Centre.", "Single-glance build health card.", "Card shows ‘Awaiting first KPI’.", "Card renders with placeholder data.", "No outbound action buttons on the card."),
+      "Open Command Centre — new build appears.", false, {}, ts),
+    makePromptItem(13, "launch_factory_handoff", `Stage 13 · Launch Factory handoff · ${name}`,
+      "Create Launch Factory record + readiness checklist. No domains, no outbound, no public launch without founder approval.",
+      ["command_centre_integration", "legal_compliance_pages"], ac("Launch Factory record + readiness checklist link.", "Launch Factory + sub-app handoff page.", "launch_factory_records.", "Launch Factory.", "Readiness checklist with go/no-go.", "‘No checks yet — handoff drafted.’", "Record exists; checklist persists.", "No domains/outbound/launch without approval."),
+      "Open Launch Factory record for the build.", true, {}, ts),
+    makePromptItem(14, "business_template_handoff", `Stage 14 · Business Template handoff · ${name}`,
+      "Capture this build as a Business Template — patterns only, no customer data, no copied competitor assets.",
+      ["launch_factory_handoff"], ac("Business Template entry capturing reusable patterns only.", "Business Templates.", "business_templates.", "Business Template Factory.", "Template entry with non-PII fields only.", "‘No templates yet.’", "Template renders with redactions.", "No customer data, no copied assets."),
+      "Open Business Template entry — verify redactions.", true, {}, ts),
+    makePromptItem(15, "qa_smoke_test", `Stage 15 · QA + smoke test · ${name}`,
+      "Run full QA: every MVP flow, dashboards, CRM, support, compliance, analytics, Command Centre. Live mode stays locked.",
+      ["customer_portal", "founder_admin_dashboard", "crm_pipeline", "support_workflow", "legal_compliance_pages", "analytics_kpi_tracking", "command_centre_integration", "launch_factory_handoff", "business_template_handoff"],
+      ac("End-to-end QA pass with documented checklist.", "QA report attached to the build.", "qa_runs, agent_audit.", "Platform Testing, Self-Diagnostics.", "Pass/fail per area + outstanding issues.", "‘No QA run yet.’", "All flows pass; build green.", "Live mode stays locked until founder approves."),
+      "Run npm test + npm run build + manual smoke checklist.", true, { is_qa_gate: true }, ts),
+    makePromptItem(16, "github_audit_launch_readiness", `Stage 16 · GitHub audit + launch-readiness report · ${name}`,
+      `Run the GitHub audit prompt and produce a launch-readiness report. ${p.github_audit_pack.prompt_body}`,
+      ["qa_smoke_test"], ac("GitHub audit + launch-readiness report.", "Audit report + Launch Factory checklist.", "audit_runs, approvals.", "Launch Factory, Approval Ops.", "Pass/fail summary with remaining issues.", "‘No audit run yet.’", "All audit checks pass before live mode.", "Outbound, paid APIs, public launch remain off until founder arms live mode."),
+      "Run audit prompt; review pass/fail; founder records approval before live mode.", true, { is_live_mode_gate: true }, ts),
+  ];
+}
+
+function legalPagesPlan(): FullProductionPack["legal_pack"]["pages"] {
+  return [
+    { slug: "/legal/terms", title: "Terms of Service", required: true, risk: "high", needs_adviser_review: true, draft_outline: ["Acceptance", "Eligibility", "Account & access", "Acceptable use", "Fees & billing (placeholder)", "Termination", "Disclaimers", "Limitation of liability", "Governing law"] },
+    { slug: "/legal/privacy", title: "Privacy Policy", required: true, risk: "high", needs_adviser_review: true, draft_outline: ["Data we collect", "Lawful basis", "How we use data", "Sharing", "Retention", "Your rights", "Cookies link", "Contact"] },
+    { slug: "/legal/cookies", title: "Cookie Policy", required: true, risk: "medium", needs_adviser_review: true, draft_outline: ["What cookies", "Categories", "Manage preferences", "Third parties", "Updates"] },
+    { slug: "/legal/aup", title: "Acceptable Use Policy", required: true, risk: "medium", needs_adviser_review: true, draft_outline: ["Prohibited uses", "Abuse handling", "Reporting", "Termination"] },
+    { slug: "/legal/ai-usage", title: "AI Usage Policy", required: true, risk: "high", needs_adviser_review: true, draft_outline: ["Models used", "Human-in-the-loop", "Hallucination disclaimer", "User responsibilities", "Data handling"] },
+    { slug: "/legal/automation-safety", title: "Automation Safety Policy", required: true, risk: "high", needs_adviser_review: true, draft_outline: ["Approval gates", "Outbound rules", "Paid-API rules", "Audit logging", "Incident response"] },
+    { slug: "/legal/security", title: "Security Policy", required: true, risk: "high", needs_adviser_review: true, draft_outline: ["Controls", "Encryption", "Access control", "Vulnerability disclosure", "Sub-processors"] },
+    { slug: "/legal/dpa", title: "Data Processing Agreement", required: false, risk: "high", needs_adviser_review: true, draft_outline: ["Roles", "Processing scope", "Sub-processors", "International transfers", "Audits"] },
+    { slug: "/legal/refunds", title: "Refund / Cancellation Policy", required: false, risk: "medium", needs_adviser_review: true, draft_outline: ["Eligibility", "Window", "Process", "Exceptions"] },
+    { slug: "/legal/marketplace", title: "Marketplace Terms", required: false, risk: "medium", needs_adviser_review: true, draft_outline: ["Roles", "Listing rules", "Disputes", "Fees"] },
+    { slug: "/legal/seller-terms", title: "Provider / Seller Terms", required: false, risk: "medium", needs_adviser_review: true, draft_outline: ["Onboarding", "Quality", "Payouts", "Suspension"] },
+    { slug: "/legal/disclaimer", title: "Disclaimer", required: false, risk: "high", needs_adviser_review: true, draft_outline: ["No professional advice", "Regulated-claim limits", "Jurisdictional notes"] },
+    { slug: "/legal/contact", title: "Contact / Complaints Route", required: true, risk: "low", needs_adviser_review: false, draft_outline: ["Email", "Response SLA", "Escalation path"] },
+  ];
+}
+
+export function buildFullProductionPack(args: {
+  pack: ProductionBuildPack;
+  founderApproved?: boolean;
+  now?: Date;
+}): FullProductionPack {
+  const { pack, founderApproved = false } = args;
+  const now = args.now ?? new Date();
+  const ts = now.toISOString();
+  const name = pack.candidate?.name ?? "(build)";
+  const sector = (pack.thesis as any)?.sector ?? (pack as any).candidate?.sector ?? "B2B SaaS";
+  const geo = (pack.thesis as any)?.geography ?? "EU / UK first";
+
+  const business_summary: FullProductionPack["business_summary"] = {
+    business_name_placeholder: `Working title: ${name} (rename before launch)`,
+    legally_distinct_concept: pack.thesis?.legally_distinct_product_concept ?? "Vertical AI operator with founder-approved actions; legally distinct from incumbents.",
+    problem_thesis: pack.customer_problem_thesis ?? pack.thesis?.problem_thesis ?? "Manual workflows in funded category that AI + human-in-the-loop compresses.",
+    paying_customer_profile: pack.thesis?.paying_customer_profile ?? "Established buyers with current SaaS spend evidencing willingness to pay.",
+    first_niche_wedge: pack.crowding_white_space ?? "Underserved niche segment within the broader funded category.",
+    sector,
+    geography: geo,
+    why_selected: pack.why_selected ?? [],
+    funded_proof: pack.funding_proof ?? "Funded competitors validate problem and willingness to pay.",
+    what_not_to_copy: [...PRODUCTION_PACK_PROHIBITED_COPY],
+    founder_approval_status: founderApproved ? "Approved by founder" : "Awaiting founder approval",
+  };
+
+  const brand_pack: FullProductionPack["brand_pack"] = {
+    brand_name_options: [`${name.split(/\s+/)[0]}Ops`, `${name.split(/\s+/)[0]}Edge`, `${name.split(/\s+/)[0]}Loop`, "(founder to confirm)"],
+    positioning_statement: `For ${business_summary.paying_customer_profile.toLowerCase()}, ${name} is the AI-operated alternative that compresses manual work with founder-approved guardrails.`,
+    tagline_options: [
+      "AI operators, human-approved.",
+      "Run the boring work. Approve the important moments.",
+      "Operations on autopilot — with you in the loop.",
+    ],
+    tone_of_voice: ["Calm", "technical", "engineering-grade", "no hype", "no agency-speak"],
+    visual_direction: "Dark navy background, electric blue accents, tech-card components, layered AI-OS feel.",
+    colour_direction: "Primary #2EA3FF over near-black; no light grey backgrounds.",
+    typography_direction: "Geometric sans for headings, neutral sans for body; no serif.",
+    logo_direction: "Geometric mark + wordmark; no copying of competitor marks; reserve trademark check.",
+    imagery_style: "Abstract layered diagrams, console screenshots; no stock people imagery.",
+    trust_signals: ["Human-in-the-loop badge", "Audit log link", "Security policy link", "Founder-approval indicator"],
+    differentiation_statement: "Liftor-built systems are auditable, founder-approved, and legally distinct from incumbents.",
+    prohibited_copy_notes: [...PRODUCTION_PACK_PROHIBITED_COPY],
+    pre_launch_checks: ["Trademark search", "Domain availability check (do not buy yet)", "Adviser review of name + tagline", "Founder approval before public launch"],
+  };
+
+  const product_pack: FullProductionPack["product_pack"] = {
+    description: `${name} is an AI-operated solution for ${business_summary.paying_customer_profile.toLowerCase()} that automates ${pack.thesis?.problem_thesis ?? "operational workflows"} with founder-approved actions.`,
+    user_types: ["Customer admin", "Customer end user", "Founder/operator", "Adviser (read-only)"],
+    user_journeys: [
+      "Sign up → onboarding → first value → recurring use",
+      "Lead → qualified → pilot → paying customer",
+      "Ticket → AI draft → founder approval → reply",
+    ],
+    core_mvp_features: pack.build_plan?.mvp_feature_list?.length ? pack.build_plan.mvp_feature_list : ["Intake", "AI triage", "Approval queue", "Audit log"],
+    future_features: ["Marketplace", "Public API", "Mobile app", "Advanced reporting"],
+    admin_founder_features: ["Approval queue", "KPI dashboard", "Audit log", "Kill/continue switch", "Live-mode toggle"],
+    customer_facing_features: ["Account", "Settings", "Billing placeholder", "Support entry"],
+    support_features: ["Ticket inbox", "AI-assist drafts", "Escalation rules"],
+    ai_agent_features: ["Triage agent", "Drafting agent", "Compliance check agent"],
+    human_oversight_requirements: pack.human_oversight_requirements ?? ["Founder reviews every external action"],
+    approval_gates: pack.governance?.approval_gates ?? [...PRODUCTION_PACK_FOUNDER_APPROVAL_BEFORE],
+  };
+
+  const technical_pack: FullProductionPack["technical_pack"] = {
+    app_structure: ["/founder/<slug>", "/founder/<slug>/dashboard", "/portal", "/legal/*", "/onboarding"],
+    route_map: ["/", "/preview", "/portal", "/onboarding", "/founder/<slug>", "/founder/<slug>/dashboard", "/founder/<slug>/crm", "/founder/<slug>/support", "/legal/terms", "/legal/privacy"],
+    database_schema: pack.database_schema_needs?.length ? pack.database_schema_needs : ["customers", "subscriptions", "approvals", "agent_runs", "build_kpis"],
+    supabase_table_plan: ["customers (auth/billing)", "subscriptions (recurring)", "approvals (founder gates)", "agent_runs + agent_audit", "build_kpis", "audit_ledger"],
+    authentication: ["Supabase Auth (email)", "Optional Google OAuth (founder approval to enable)", "RLS scoped to tenant + founder"],
+    role_permission_model: ["app_role enum: admin, operator, customer, viewer", "has_role security-definer", "RLS policies referencing has_role"],
+    storage: ["Bucket: <slug>-private (RLS, founder + tenant only)", "No public bucket without founder approval"],
+    edge_functions: ["agent-run (no outbound by default)", "approval-execute (only after founder approval)"],
+    scheduled_jobs: ["nightly-kpi-rollup", "weekly-kill-continue-review"],
+    webhooks: ["inbound-webhook (signed, rate-limited)", "no outbound webhooks until live mode"],
+    audit_logging: ["audit_ledger append-only", "agent_audit per run", "approvals trail"],
+    data_retention: ["Customer data: tenant-scoped, retain per DPA", "Audit logs: 24 months minimum"],
+    integration_placeholders: ["Email (disabled)", "SMS (disabled)", "Payments (placeholder)", "Analytics (internal only)"],
+    no_paid_api_default: true,
+    no_outbound_default: true,
+  };
+
+  const ui_ux_pack: FullProductionPack["ui_ux_pack"] = {
+    public_landing: pack.build_plan?.landing_page_structure?.length ? pack.build_plan.landing_page_structure : ["Hero", "Problem", "Solution", "How it works", "Pricing", "FAQ", "Trust", "CTA"],
+    customer_portal: ["Account", "Settings", "Billing placeholder", "Support entry", "Approvals"],
+    founder_admin_dashboard: ["KPI tiles", "Approval queue", "Agent runs", "Kill/continue tile", "Live-mode toggle"],
+    onboarding_flow: ["Welcome", "Connect", "First value", "Confirmation"],
+    settings_page: ["Profile", "Notifications", "Security", "Compliance"],
+    empty_states: ["‘No data yet — system armed’", "‘No tickets — support ready’", "‘No deals yet — pipeline ready’"],
+    success_states: ["‘Action completed’", "‘Approval recorded’", "‘QA passed’"],
+    error_states: ["‘Something went wrong — retry’", "‘Approval required’", "‘Blocked: dependency missing’"],
+    mobile_layout_notes: ["Single-column under 768px", "Touch-friendly tap targets", "Sticky approve buttons"],
+    accessibility_notes: ["WCAG AA contrast", "Keyboard navigable", "Screen-reader labels", "Focus rings always visible"],
+    trust_compliance_display: ["Human-in-the-loop badge", "Audit log link", "Security policy link", "Founder approval indicator"],
+  };
+
+  const copy_pack: FullProductionPack["copy_pack"] = {
+    homepage: ["Original copy only — no competitor wording"],
+    hero: ["Outcome-focused headline", "1-line proof", "Primary CTA: ‘Request access’ (no public sign-up by default)"],
+    problem: ["Describe the manual pain in customer language", "Cite category — never name competitors"],
+    solution: ["Describe Liftor’s legally distinct execution route", "Highlight human-in-the-loop"],
+    how_it_works: ["Step 1 onboarding", "Step 2 AI drafts", "Step 3 founder approval", "Step 4 outcome"],
+    pricing_placeholder: ["‘Pricing coming soon’ until founder confirms hypothesis"],
+    faq: ["Data handling", "AI oversight", "Approval gates", "Cancellation"],
+    trust: ["Security policy", "Audit logging", "Founder oversight"],
+    cta: ["‘Request access’", "‘Talk to the founder’ (founder-approved replies only)"],
+    onboarding_email_drafts: ["Welcome email — DRAFT (founder approval before sending)", "First-value email — DRAFT", "Approval reminder — DRAFT"],
+    support_snippet_drafts: ["Acknowledgement — DRAFT", "Escalation — DRAFT", "Refund handling — DRAFT (legal review)"],
+    rules: ["Original copy only", "No competitor wording", "No unsupported claims", "No regulated claims without adviser approval"],
+  };
+
+  const legal_pack: FullProductionPack["legal_pack"] = {
+    pages: legalPagesPlan(),
+    rules: [
+      "All legal text marked as draft / template only",
+      "Founder + adviser review required before publish for medium/high risk",
+      "No medical, legal, financial, insurance or regulated claims without review",
+      "Public launch blocked until required pages exist",
+    ],
+    pre_publish_gates: ["Adviser review", "Founder approval", "Versioning + acceptance ledger live"],
+  };
+
+  const crm_pack: FullProductionPack["crm_pack"] = {
+    lead_stages: ["Captured", "Qualified", "Pilot", "Closed-won/lost"],
+    customer_stages: ["Onboarding", "Active", "At-risk", "Churned"],
+    pipeline_structure: pack.build_plan?.crm_pipeline_stages ?? ["Lead", "Qualified", "Pilot", "Won"],
+    first_100_customer_route: ["Founder-approved warm intros", "Hand-picked design partners", "Public waitlist (after legal pages live)"],
+    offer_structure: ["Pilot offer", "Annual prepay incentive", "Reference customer credit"],
+    pricing_hypothesis: pack.willingness_to_pay_evidence ?? "Confirm pricing through 5 pilot conversations before publishing.",
+    sales_approval_gates: ["Founder approval before any outreach", "Founder approval before published comparisons"],
+    follow_up_stages: ["+24h", "+72h", "+7d", "+14d (then archive)"],
+    objection_categories: ["Trust", "Switching cost", "Compliance", "Price"],
+    conversion_kpis: ["Lead → qualified rate", "Pilot → paid rate", "Time-to-first-value"],
+    revenue_kpis: ["MRR", "ARR", "ARPA", "Churn"],
+    outreach_rule: "No outbound sending until founder enables live mode.",
+  };
+
+  const onboarding_pack: FullProductionPack["onboarding_pack"] = {
+    customer_onboarding_flow: ["Welcome", "Account setup", "Connect data (manual upload OK)", "AI draft preview", "Founder/customer approval", "First value"],
+    intake_questions: ["Company / role", "Use case", "Existing tools", "Compliance constraints", "Approval contacts"],
+    welcome_pack: ["Welcome video (founder-approved)", "Quick-start guide", "Approval-gate explainer"],
+    checklist: ["Account verified", "Tenant created", "Approval contacts captured", "First-value step done"],
+    delivery_workflow: ["Intake", "AI draft", "Founder/operator review", "Customer approval", "Outcome"],
+    internal_sla: ["First response < 1 business day", "First-value < 7 days", "Resolution < 14 days"],
+    support_handoff: ["Ticket created on intake failure", "Routed to founder if approval blocked"],
+    escalation_rules: ["AI confidence below threshold → founder review", "Compliance flag → adviser review"],
+    human_oversight_points: ["Every external action", "Pricing change", "Legal commitment"],
+    ai_agent_responsibilities: ["Triage", "Drafting", "Compliance pre-check"],
+    founder_approval_gates: [...PRODUCTION_PACK_FOUNDER_APPROVAL_BEFORE],
+  };
+
+  const support_pack: FullProductionPack["support_pack"] = {
+    categories: ["Account", "Onboarding", "Billing", "Compliance", "Bug", "Feature request"],
+    ticket_stages: ["New", "Triaged", "In progress", "Awaiting customer", "Awaiting founder", "Resolved", "Escalated"],
+    knowledge_base_outline: ["Getting started", "Approvals", "Compliance", "Privacy", "Troubleshooting"],
+    escalation_rules: ["Compliance flag → adviser", "Founder mention → founder", "Legal threat → legal advisor"],
+    refund_cancellation: ["Per Refund / Cancellation Policy (founder-approved)"],
+    complaints_evidence_capture: ["Ticket history", "Audit log entries", "AI-run trace", "Founder approvals"],
+    risk_flags: ["PII leak", "Regulated claim", "Outbound without approval", "Spending without approval"],
+    founder_escalation_triggers: ["Any compliance/legal risk", "Refund > threshold", "Press / public mention", "Investor inquiry"],
+  };
+
+  const analytics_pack: FullProductionPack["analytics_pack"] = {
+    launch_kpis: ["Signups (preview)", "Approval queue depth", "Time-to-first-value"],
+    usage_kpis: ["WAU", "Actions per user", "Approval cycle time"],
+    conversion_kpis: ["Preview → request access", "Request → pilot", "Pilot → paid"],
+    support_kpis: ["First response time", "Resolution time", "CSAT"],
+    revenue_kpis: ["MRR", "ARR", "ARPA", "Churn"],
+    founder_workload_kpi: "Founder hours per week on this build",
+    human_oversight_burden_kpi: "Approvals per active customer per week",
+    ai_automation_performance_kpi: "AI-success rate (approved without edit) %",
+    proof_targets_30_60_90: ["30d: 5 design partners", "60d: 10 paying customers", "90d: kill/continue review"],
+    kill_continue_park_criteria: pack.governance?.kill_continue_criteria ?? [
+      "<5 paying customers by 90d → kill",
+      "5-9 paying with strong WTP → park 30d",
+      "≥10 paying + retention > 90% → continue",
+    ],
+  };
+
+  const launch_qa_pack: FullProductionPack["launch_qa_pack"] = [
+    "Routing works on every page",
+    "Mobile layout renders without overlap",
+    "Auth works (where required) with proper redirects",
+    "Forms persist and validate correctly",
+    "CRM pipeline stage transitions logged",
+    "Onboarding completes for sandbox account",
+    "All required legal pages present and versioned",
+    "Analytics events flow into KPI rollups",
+    "Demo / seed data hidden in non-founder views",
+    "No outbound sending enabled by default",
+    "No paid APIs activated by default",
+    "No public unsupported claims in copy",
+    "Founder approval recorded before live mode",
+  ];
+
+  const github_audit_pack: FullProductionPack["github_audit_pack"] = {
+    audit_steps: [
+      "Inspect changed files for accidental copying",
+      "Check route registration for every page",
+      "Check Supabase tables, RLS, and GRANTs",
+      "Check legal pages exist and are versioned",
+      "Check Command Centre integration card present",
+      "Check Launch Factory handoff record exists",
+      "Check CRM, onboarding and support flows wired",
+      "Check no external actions enabled by default",
+      "Check no paid APIs activated",
+      "Check no copied competitor assets (names, code, copy, branding)",
+      "Run npm test",
+      "Run npm run build",
+    ],
+    must_pass: ["All routes load", "RLS + GRANTs in place", "Tests + build green", "Legal pages present"],
+    must_block: ["Outbound enabled", "Paid APIs activated", "Copied competitor content", "Public claims without approval"],
+    expected_outputs: ["pass/fail by check", "remaining issues", "Launch-readiness verdict"],
+    prompt_body: "Audit the new build's GitHub diff. For each step, return PASS/FAIL with file:line evidence. Confirm legal pages, RLS + GRANTs, Command Centre integration, Launch Factory handoff, no outbound, no paid APIs, no copied competitor assets. Run npm test + npm run build and report results. Do not modify code in this audit; report only.",
+  };
+
+  const lovable_prompt_pack = buildLovablePromptPack({
+    business_summary, brand_pack, product_pack, technical_pack, ui_ux_pack, copy_pack,
+    legal_pack, crm_pack, onboarding_pack, support_pack, analytics_pack, launch_qa_pack,
+    github_audit_pack,
+  } as unknown as FullProductionPack, name, ts);
+
+  return {
+    generated_at: ts,
+    business_summary, brand_pack, product_pack, technical_pack, ui_ux_pack, copy_pack,
+    legal_pack, crm_pack, onboarding_pack, support_pack, analytics_pack,
+    launch_qa_pack,
+    lovable_prompt_pack,
+    github_audit_pack,
+    automation_boundaries: {
+      may_auto: [...PRODUCTION_PACK_MAY_AUTO],
+      must_not_auto: [...PRODUCTION_PACK_MUST_NOT_AUTO],
+      founder_approval_required_before: [...PRODUCTION_PACK_FOUNDER_APPROVAL_BEFORE],
+    },
+    prohibited_copy: [...PRODUCTION_PACK_PROHIBITED_COPY],
+  };
+}
+
 export async function fetchClusters() {
   const { data, error } = await (supabase as any)
     .from("funding_problem_clusters")
