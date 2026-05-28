@@ -67,6 +67,8 @@ export default function FRRadarOverview() {
           <Link to="/founder/funding-radar/clusters" className="text-primary hover:underline">Clusters →</Link>
           <Link to="/founder/funding-radar/capital-efficiency" className="text-primary hover:underline">Capital efficiency →</Link>
           <Link to="/founder/funding-radar/shortlist" className="text-primary hover:underline">Shortlist →</Link>
+          <Link to="/founder/funding-radar/decision-pack" className="text-primary hover:underline">Decision pack →</Link>
+          <Link to="/founder/funding-radar/settings" className="text-primary hover:underline">Runbook (Settings) →</Link>
           <Link to="/founder/portfolio-exit/build-selector" className="text-primary hover:underline">Quarterly Build Selector →</Link>
         </div>
       </FRSection>
