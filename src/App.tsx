@@ -114,6 +114,7 @@ import FRClusters from "./pages/founder/funding-radar/Clusters";
 import FRCapitalEfficiency from "./pages/founder/funding-radar/CapitalEfficiency";
 import FRMonthlyRun from "./pages/founder/funding-radar/MonthlyRun";
 import FRShortlist from "./pages/founder/funding-radar/Shortlist";
+import FRDecisionPack from "./pages/founder/funding-radar/DecisionPack";
 import FRSettings from "./pages/founder/funding-radar/Settings";
 import ExecutionHandoff from "./pages/founder/ExecutionHandoff";
 import PortfolioExitManual from "./pages/founder/PortfolioExitManual";
@@ -909,6 +910,7 @@ const App = () => (
             <Route path="/founder/funding-radar/capital-efficiency" element={<FounderRoute><FRCapitalEfficiency /></FounderRoute>} />
             <Route path="/founder/funding-radar/monthly-run" element={<FounderRoute><FRMonthlyRun /></FounderRoute>} />
             <Route path="/founder/funding-radar/shortlist" element={<FounderRoute><FRShortlist /></FounderRoute>} />
+            <Route path="/founder/funding-radar/decision-pack" element={<FounderRoute><FRDecisionPack /></FounderRoute>} />
             <Route path="/founder/funding-radar/settings" element={<FounderRoute><FRSettings /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/execution-handoff" element={<FounderRoute><ExecutionHandoff /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/manual" element={<FounderRoute><PortfolioExitManual /></FounderRoute>} />
