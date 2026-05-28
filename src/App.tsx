@@ -123,6 +123,8 @@ import FRWeaknessSignals from "./pages/founder/funding-radar/WeaknessSignals";
 import FRMarketMaps from "./pages/founder/funding-radar/MarketMaps";
 import FRWhiteSpace from "./pages/founder/funding-radar/WhiteSpace";
 import FRBuildHandoffPack from "./pages/founder/funding-radar/BuildHandoffPack";
+import FRBusinessAutopsy from "./pages/founder/funding-radar/BusinessAutopsy";
+import FRBusinessAutopsyDetail from "./pages/founder/funding-radar/BusinessAutopsyDetail";
 import ExecutionHandoff from "./pages/founder/ExecutionHandoff";
 import PortfolioExitManual from "./pages/founder/PortfolioExitManual";
 import PortfolioExitControls from "./pages/founder/PortfolioExitControls";
@@ -926,6 +928,9 @@ const App = () => (
             <Route path="/founder/funding-radar/market-maps" element={<FounderRoute><FRMarketMaps /></FounderRoute>} />
             <Route path="/founder/funding-radar/white-space" element={<FounderRoute><FRWhiteSpace /></FounderRoute>} />
             <Route path="/founder/funding-radar/handoff/:id" element={<FounderRoute><FRBuildHandoffPack /></FounderRoute>} />
+            <Route path="/founder/funding-radar/business-autopsy" element={<FounderRoute><FRBusinessAutopsy /></FounderRoute>} />
+            <Route path="/founder/funding-radar/business-autopsy/:id" element={<FounderRoute><FRBusinessAutopsyDetail /></FounderRoute>} />
+            <Route path="/founder/quarterly-production-machine/build-generator" element={<FounderRoute><FRBusinessAutopsy /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/execution-handoff" element={<FounderRoute><ExecutionHandoff /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/manual" element={<FounderRoute><PortfolioExitManual /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/controls" element={<FounderRoute><PortfolioExitControls /></FounderRoute>} />
