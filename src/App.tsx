@@ -108,6 +108,8 @@ import MAIntelligenceWorkspace from "./pages/founder/MAIntelligenceWorkspace";
 import ExitValuationEngine from "./pages/founder/ExitValuationEngine";
 import QuarterlyBuildSelector from "./pages/founder/QuarterlyBuildSelector";
 import QuarterlyProductionMachine from "./pages/founder/QuarterlyProductionMachine";
+import QPMBuildPackValidator from "./pages/founder/quarterly-production-machine/BuildPackValidator";
+import QPMPromptQueue from "./pages/founder/quarterly-production-machine/PromptQueue";
 import FRRadarOverview from "./pages/founder/funding-radar/Overview";
 import FRCompanies from "./pages/founder/funding-radar/Companies";
 import FRCompanyDetail from "./pages/founder/funding-radar/CompanyDetail";
