@@ -505,6 +505,12 @@ function Column({ title, tone, rows, onMemo, onChangeStatus, onPromote }: any) {
               <Badge variant="outline" className="text-[10px]">{c.total_build_score ?? 0}</Badge>
             </div>
             <div className="text-[11px] text-muted-foreground line-clamp-2 mt-1">{c.description ?? "—"}</div>
+            {c.funding_company_id && (
+              <div className="flex flex-wrap gap-1 mt-1">
+                <Badge variant="outline" className="text-[9px] border-blue-500/40 text-blue-300">Funding Radar</Badge>
+                {c.capital_efficiency_advantage_score != null && <Badge variant="outline" className="text-[9px]">CE {c.capital_efficiency_advantage_score}</Badge>}
+              </div>
+            )}
             {c.rejection_reason && <div className="text-[10px] text-amber-400 mt-1">{c.rejection_reason}</div>}
             <div className="flex flex-wrap gap-1 mt-2">
               <Button size="sm" variant="outline" className="h-6 text-[11px]" onClick={() => onMemo(c)}><FileText className="h-3 w-3 mr-1" />Memo</Button>
