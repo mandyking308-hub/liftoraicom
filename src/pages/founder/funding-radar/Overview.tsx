@@ -4,7 +4,12 @@ import { FundingRadarLayout, FRSection, FRStat } from "./_shared";
 import { fetchCompanies, fetchClusters, fetchShortlist, fetchMonthlyRuns } from "@/lib/fundingRadarEngine";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShieldAlert } from "lucide-react";
+import { ShieldAlert, Lock } from "lucide-react";
+
+const CONNECTOR_PLACEHOLDERS = [
+  "Crunchbase","Dealroom","PitchBook","Tracxn","CB Insights",
+  "Investor newsletters","Funding press releases","Public company websites",
+];
 
 export default function FRRadarOverview() {
   const [companies, setCompanies] = useState<any[]>([]);
@@ -43,6 +48,25 @@ export default function FRRadarOverview() {
         <Badge variant="outline" className="gap-1 border-amber-500/40 text-amber-400">
           <ShieldAlert className="h-3 w-3" /> Distinct execution route required for promotion
         </Badge>
+      </FRSection>
+
+      <FRSection
+        title="Operating mode"
+        description="Current mode: Manual / CSV-first intelligence. Future mode: API-assisted intelligence — only after founder approves licensed/paid data connectors. All connector activation is gated."
+      >
+        <div className="flex flex-wrap gap-2">
+          {CONNECTOR_PLACEHOLDERS.map((c) => (
+            <Badge key={c} variant="outline" className="gap-1 border-amber-500/30 text-amber-300 text-[10px]">
+              <Lock className="h-3 w-3" /> {c} · founder approval required
+            </Badge>
+          ))}
+        </div>
+      </FRSection>
+
+      <FRSection title="Monthly cadence">
+        <p className="text-xs text-muted-foreground">
+          Scheduled job <span className="text-foreground font-medium">Monthly Funding Radar Operating Cycle</span> runs on the 1st of each month at 09:00 Europe/London. Adjust manually if the 1st is a weekend or bank holiday. The job prepares the monthly run, refreshes dashboard metrics and the Decision Pack, and creates a founder-facing internal task. It never contacts companies, investors, customers or acquirers, never activates paid APIs, never scrapes restricted sources, never exports data and never opens a data room.
+        </p>
       </FRSection>
 
       <FRSection
