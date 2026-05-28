@@ -93,6 +93,18 @@ type DraftCandidate = {
   linked_signal_id?: string;
   linked_company_id?: string;
   linked_competitor_id?: string;
+  // Funding Radar context (optional — pre-filled when promoted from funding_shortlist)
+  funding_shortlist_id?: string;
+  funding_company_id?: string;
+  funding_cluster_id?: string;
+  capital_efficiency_advantage_score?: number;
+  investor_validation_score?: number;
+  ai_automation_advantage_score?: number;
+  recurring_revenue_score?: number;
+  global_expansion_score?: number;
+  funding_source_summary?: string;
+  build_thesis?: string;
+  acquirer_pain_thesis?: string;
 };
 
 const emptyDraft: DraftCandidate = {
@@ -215,6 +227,18 @@ export default function QuarterlyBuildSelector() {
       recommendation_status: finalStatus,
       quarter: q,
       year: y,
+      // Funding Radar linkage (nullable — preserved when provided)
+      funding_shortlist_id: draft.funding_shortlist_id ?? null,
+      funding_company_id: draft.funding_company_id ?? null,
+      funding_cluster_id: draft.funding_cluster_id ?? null,
+      capital_efficiency_advantage_score: draft.capital_efficiency_advantage_score ?? null,
+      investor_validation_score: draft.investor_validation_score ?? null,
+      ai_automation_advantage_score: draft.ai_automation_advantage_score ?? null,
+      recurring_revenue_score: draft.recurring_revenue_score ?? null,
+      global_expansion_score: draft.global_expansion_score ?? null,
+      funding_source_summary: draft.funding_source_summary || null,
+      build_thesis: draft.build_thesis || null,
+      acquirer_pain_thesis: draft.acquirer_pain_thesis || null,
     };
     const { error } = await (supabase as any).from("ma_build_candidates").insert(payload);
     if (error) { toast.error(error.message); return; }
