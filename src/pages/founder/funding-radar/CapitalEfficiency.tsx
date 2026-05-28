@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { FundingRadarLayout, FRSection } from "./_shared";
+import { FundingRadarLayout, FRSection, DemoBadge, HideDemoToggle, useHideDemo, applyDemoFilter } from "./_shared";
 import { supabase } from "@/integrations/supabase/client";
 import { CAPITAL_EFFICIENCY_QUESTIONS } from "@/lib/fundingRadarEngine";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 
 export default function FRCapitalEfficiency() {
   const [rows, setRows] = useState<any[]>([]);
+  const [hideDemo] = useHideDemo();
   useEffect(() => {
     (async () => {
       const { data } = await (supabase as any)
@@ -31,8 +32,8 @@ export default function FRCapitalEfficiency() {
         </div>
       </FRSection>
 
-      <FRSection title={`Ranked companies (${rows.length})`}>
-        {rows.length === 0 ? (
+      <FRSection title={`Ranked companies (${rows.length})`} actions={<HideDemoToggle />}>
+        {applyDemoFilter(rows, hideDemo).length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-8">No scored companies yet. Open a company from the Companies tab and score it.</p>
         ) : (
           <Table>
@@ -42,7 +43,7 @@ export default function FRCapitalEfficiency() {
               <TableHead>Total</TableHead><TableHead>Levers</TableHead><TableHead></TableHead>
             </TableRow></TableHeader>
             <TableBody>
-              {rows.map((s) => {
+              {applyDemoFilter(rows, hideDemo).map((s) => {
                 const c = s.funding_radar_companies;
                 const levers = [
                   s.staff_heavy && "staff", s.sales_heavy && "sales", s.onboarding_heavy && "onboarding",
@@ -50,7 +51,12 @@ export default function FRCapitalEfficiency() {
                 ].filter(Boolean) as string[];
                 return (
                   <TableRow key={s.id}>
-                    <TableCell className="font-medium">{c?.company_name ?? "—"}</TableCell>
+                    <TableCell className="font-medium">
+                      <span className="inline-flex items-center gap-2">
+                        {c?.company_name ?? "—"}
+                        <DemoBadge record={c} />
+                      </span>
+                    </TableCell>
                     <TableCell className="text-xs">{c?.sector ?? "—"}</TableCell>
                     <TableCell className="text-xs">{c?.last_funding_amount_usd ? `$${Number(c.last_funding_amount_usd).toLocaleString()}` : "—"}</TableCell>
                     <TableCell className="text-xs">{s.capital_efficiency_advantage_score ?? "—"}</TableCell>

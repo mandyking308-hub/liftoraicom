@@ -1,16 +1,24 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { FundingRadarLayout, FRSection, NeedsVerification } from "./_shared";
+import { FundingRadarLayout, FRSection, NeedsVerification, DemoBadge, HideDemoToggle, useHideDemo, applyDemoFilter } from "./_shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Upload } from "lucide-react";
+import { Plus, Upload, Download } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { fetchCompanies, parseCsv, sanitizeExtraction, ALLOWED_EXTRACTION_FIELDS } from "@/lib/fundingRadarEngine";
+import {
+  fetchCompanies,
+  parseCsv,
+  sanitizeExtraction,
+  ALLOWED_EXTRACTION_FIELDS,
+  buildCsvTemplate,
+  validateCsvRow,
+  FUNDING_CSV_TEMPLATE_COLUMNS,
+} from "@/lib/fundingRadarEngine";
 
 const emptyDraft = {
   company_name: "",
@@ -40,6 +48,7 @@ export default function FRCompanies() {
   const [draft, setDraft] = useState(emptyDraft);
   const [csvText, setCsvText] = useState("");
   const [loading, setLoading] = useState(false);
+  const [hideDemo] = useHideDemo();
 
   const reload = () => fetchCompanies().then(setRows).catch(() => setRows([]));
   useEffect(() => { reload(); }, []);
@@ -76,22 +85,32 @@ export default function FRCompanies() {
       let accepted = 0, rejected = 0;
       const errors: any[] = [];
       for (const r of parsed) {
-        if (!r.company_name) { rejected++; errors.push({ row: r, reason: "missing company_name" }); continue; }
+        const warnings = validateCsvRow(r);
+        if (!r.company_name) {
+          rejected++;
+          errors.push({ row: r, reason: "missing company_name", warnings });
+          continue;
+        }
         const payload: any = sanitizeExtraction({
           company_name: r.company_name,
           website: r.website ?? null,
           sector: r.sector ?? null,
           country: r.country ?? null,
-          last_funding_amount_usd: r.last_funding_amount_usd ? Number(r.last_funding_amount_usd) : null,
-          last_funding_round: r.last_funding_round ?? null,
+          last_funding_amount_usd: r.latest_funding_amount
+            ? Number(r.latest_funding_amount)
+            : r.last_funding_amount_usd ? Number(r.last_funding_amount_usd) : null,
+          last_funding_round: r.latest_funding_round ?? r.last_funding_round ?? null,
           source_url: r.source_url ?? null,
-          problem_thesis: r.problem_thesis ?? null,
+          problem_thesis: r.problem_solved ?? r.problem_thesis ?? null,
+          customer_pain: r.customer_type ?? r.customer_pain ?? null,
+          notes: [r.notes, warnings.length ? `Warnings: ${warnings.join("; ")}` : null].filter(Boolean).join(" | ") || null,
           ingestion_method: "csv",
           import_id: imp.id,
           needs_verification: true,
         });
         const { error } = await (supabase as any).from("funding_radar_companies").insert(payload);
-        if (error) { rejected++; errors.push({ row: r, reason: error.message }); } else { accepted++; }
+        if (error) { rejected++; errors.push({ row: r, reason: error.message, warnings }); }
+        else { accepted++; if (warnings.length) errors.push({ row: r.company_name, reason: "warnings_only", warnings }); }
       }
       await (supabase as any).from("funding_imports").update({
         accepted_count: accepted,
@@ -110,7 +129,19 @@ export default function FRCompanies() {
     }
   };
 
-  const filtered = rows.filter((r) =>
+  const downloadTemplate = () => {
+    const blob = new Blob([buildCsvTemplate()], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "liftor_funding_radar_template.csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const filtered = applyDemoFilter(rows, hideDemo).filter((r) =>
     !search.trim() ||
     (r.company_name ?? "").toLowerCase().includes(search.toLowerCase()) ||
     (r.sector ?? "").toLowerCase().includes(search.toLowerCase()),
@@ -123,12 +154,19 @@ export default function FRCompanies() {
         actions={
           <div className="flex gap-2">
             <Input placeholder="Search…" value={search} onChange={(e) => setSearch(e.target.value)} className="h-8 w-48" />
+            <HideDemoToggle />
+            <Button size="sm" variant="outline" onClick={downloadTemplate}><Download className="h-4 w-4 mr-1" />Template</Button>
             <Dialog open={csvOpen} onOpenChange={setCsvOpen}>
               <DialogTrigger asChild><Button size="sm" variant="outline"><Upload className="h-4 w-4 mr-1" />CSV</Button></DialogTrigger>
               <DialogContent className="max-w-2xl">
                 <DialogHeader><DialogTitle>Paste CSV</DialogTitle></DialogHeader>
-                <p className="text-xs text-muted-foreground">Header row required. Recognised columns: company_name, website, sector, country, last_funding_amount_usd, last_funding_round, source_url, problem_thesis.</p>
-                <Textarea rows={10} value={csvText} onChange={(e) => setCsvText(e.target.value)} placeholder={`company_name,sector,last_funding_amount_usd\nAcme,fintech,5000000`} />
+                <p className="text-xs text-muted-foreground">
+                  Use the official template (Template button). Required: company_name, latest_funding_round, source_url,
+                  problem_solved, customer_type, legal_ip_risk. Rows with seed/pre-seed rounds are flagged for exclusion. Restricted
+                  fields (branding/code/customer lists) are stripped automatically.
+                </p>
+                <p className="text-[10px] text-muted-foreground break-all">Columns: {FUNDING_CSV_TEMPLATE_COLUMNS.join(", ")}</p>
+                <Textarea rows={10} value={csvText} onChange={(e) => setCsvText(e.target.value)} placeholder={`company_name,latest_funding_round,source_url,problem_solved,customer_type,legal_ip_risk\nAcme,series_b,https://...,Manual ops drag,B2B mid-market,low`} />
                 <DialogFooter><Button onClick={ingestCsv} disabled={loading}>{loading ? "Importing…" : "Import"}</Button></DialogFooter>
               </DialogContent>
             </Dialog>
@@ -172,7 +210,12 @@ export default function FRCompanies() {
             <TableBody>
               {filtered.map((r) => (
                 <TableRow key={r.id}>
-                  <TableCell className="font-medium">{r.company_name}</TableCell>
+                  <TableCell className="font-medium">
+                    <span className="inline-flex items-center gap-2">
+                      {r.company_name}
+                      <DemoBadge record={r} />
+                    </span>
+                  </TableCell>
                   <TableCell className="text-xs"><NeedsVerification value={r.sector} /></TableCell>
                   <TableCell className="text-xs"><NeedsVerification value={r.country} /></TableCell>
                   <TableCell className="text-xs">

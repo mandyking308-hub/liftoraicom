@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FundingRadarLayout, FRSection } from "./_shared";
+import { FundingRadarLayout, FRSection, DemoBadge, HideDemoToggle, useHideDemo, applyDemoFilter } from "./_shared";
 import { fetchShortlist } from "@/lib/fundingRadarEngine";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { toast } from "sonner";
 
 export default function FRShortlist() {
   const [rows, setRows] = useState<any[]>([]);
+  const [hideDemo] = useHideDemo();
   const reload = () => fetchShortlist().then(setRows).catch(() => setRows([]));
   useEffect(() => { reload(); }, []);
 
@@ -59,16 +60,21 @@ export default function FRShortlist() {
 
   return (
     <FundingRadarLayout title="Shortlist" subtitle="Promotion sends a candidate into ma_build_candidates (Quarterly Build Selector). One-selected-per-quarter, red-flag and buildability rules still apply there.">
-      <FRSection title={`Shortlist (${rows.length})`}>
-        {rows.length === 0 ? <p className="text-sm text-muted-foreground text-center py-8">Nothing shortlisted.</p> : (
+      <FRSection title={`Shortlist (${rows.length})`} actions={<HideDemoToggle />}>
+        {applyDemoFilter(rows, hideDemo).length === 0 ? <p className="text-sm text-muted-foreground text-center py-8">Nothing shortlisted.</p> : (
           <Table>
             <TableHeader><TableRow>
               <TableHead>Company</TableHead><TableHead>Cluster</TableHead><TableHead>Build thesis</TableHead><TableHead>Status</TableHead><TableHead></TableHead>
             </TableRow></TableHeader>
             <TableBody>
-              {rows.map((s) => (
+              {applyDemoFilter(rows, hideDemo).map((s) => (
                 <TableRow key={s.id}>
-                  <TableCell className="font-medium">{s.funding_radar_companies?.company_name ?? "—"}</TableCell>
+                  <TableCell className="font-medium">
+                    <span className="inline-flex items-center gap-2">
+                      {s.funding_radar_companies?.company_name ?? "—"}
+                      <DemoBadge record={s.funding_radar_companies} />
+                    </span>
+                  </TableCell>
                   <TableCell className="text-xs">{s.funding_problem_clusters?.cluster_name ?? "—"}</TableCell>
                   <TableCell className="text-xs max-w-[360px] truncate">{s.build_thesis ?? <span className="text-amber-400">Needs verification</span>}</TableCell>
                   <TableCell><Badge variant="outline" className="text-[10px]">{s.status}</Badge></TableCell>

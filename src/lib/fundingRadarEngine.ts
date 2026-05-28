@@ -76,8 +76,117 @@ export const CAPITAL_EFFICIENCY_QUESTIONS = [
 
 export const NEEDS_VERIFICATION = "Needs verification";
 
+/**
+ * Canonical CSV import template for the Funding Radar.
+ * Order matters — the downloaded template uses this exact column order.
+ */
+export const FUNDING_CSV_TEMPLATE_COLUMNS = [
+  "company_name",
+  "website",
+  "country",
+  "region",
+  "sector",
+  "subsector",
+  "year_founded",
+  "latest_funding_round",
+  "latest_funding_amount",
+  "currency",
+  "total_funding_amount",
+  "valuation_amount",
+  "lead_investor",
+  "investors",
+  "funding_announcement_date",
+  "source_name",
+  "source_url",
+  "problem_solved",
+  "customer_type",
+  "evidence_of_customer_traction",
+  "evidence_of_recurring_use",
+  "pricing_model_visible",
+  "problem_recurrence_type",
+  "team_heavy_signal",
+  "sales_heavy_signal",
+  "onboarding_heavy_signal",
+  "support_heavy_signal",
+  "compliance_heavy_signal",
+  "manual_delivery_signal",
+  "ai_automation_opportunity",
+  "liftor_legally_distinct_angle",
+  "legal_ip_risk",
+  "compliance_complexity",
+  "marketplace_complexity",
+  "notes",
+] as const;
+
+export const FUNDING_CSV_REQUIRED_FIELDS = [
+  "company_name",
+  "latest_funding_round",
+  "source_url",
+  "problem_solved",
+  "customer_type",
+  "legal_ip_risk",
+] as const;
+
+export function buildCsvTemplate(): string {
+  const headers = FUNDING_CSV_TEMPLATE_COLUMNS.join(",");
+  const example = [
+    "[DEMO] Example Co",
+    "https://example.com",
+    "USA",
+    "North America",
+    "fintech",
+    "lending",
+    "2021",
+    "series_b",
+    "30000000",
+    "USD",
+    "55000000",
+    "300000000",
+    "Acme Ventures",
+    "Acme Ventures; Beta Partners",
+    "2026-01-15",
+    "TechCrunch",
+    "https://techcrunch.com/...",
+    "Manual loan reconciliation drains ops teams",
+    "B2B mid-market lenders",
+    "30+ logos cited publicly",
+    "Daily reconciliation cycles",
+    "per-seat + per-loan fee",
+    "recurring",
+    "TRUE",
+    "TRUE",
+    "FALSE",
+    "TRUE",
+    "TRUE",
+    "TRUE",
+    "AI can collapse manual reconciliation",
+    "Distinct AI-first reconciliation route, no copying",
+    "low",
+    "medium",
+    "low",
+    "Demo seed row — replace before live use",
+  ].map((c) => (/[",\n]/.test(c) ? `"${c.replace(/"/g, '""')}"` : c)).join(",");
+  const note =
+    "# Liftor Funding Radar import template. Required: company_name, latest_funding_round, source_url, problem_solved, customer_type, legal_ip_risk. Never include branding, code, customer lists, or restricted scraped data.";
+  return [note, headers, example].join("\n");
+}
+
+export function validateCsvRow(row: Record<string, string>): string[] {
+  const warnings: string[] = [];
+  for (const f of FUNDING_CSV_REQUIRED_FIELDS) {
+    if (!row[f] || !String(row[f]).trim()) warnings.push(`Missing ${f}`);
+  }
+  const round = (row.latest_funding_round ?? row.last_funding_round ?? "").toLowerCase();
+  if (round && /^(pre[-_ ]?seed|seed)$/.test(round.replace(/\s+/g, ""))) {
+    warnings.push("Below seed-eligibility threshold (will be excluded from monthly run)");
+  }
+  return warnings;
+}
+
 export function parseCsv(csv: string): { headers: string[]; rows: Record<string, string>[] } {
-  const lines = csv.split(/\r?\n/).filter((l) => l.trim().length > 0);
+  const lines = csv
+    .split(/\r?\n/)
+    .filter((l) => l.trim().length > 0 && !l.trim().startsWith("#"));
   if (lines.length === 0) return { headers: [], rows: [] };
   const splitLine = (line: string): string[] => {
     const out: string[] = [];
