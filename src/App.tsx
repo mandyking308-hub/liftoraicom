@@ -111,6 +111,8 @@ import QuarterlyProductionMachine from "./pages/founder/QuarterlyProductionMachi
 import QPMBuildPackValidator from "./pages/founder/quarterly-production-machine/BuildPackValidator";
 import QPMPromptQueue from "./pages/founder/quarterly-production-machine/PromptQueue";
 import QPMVerticalLaunch from "./pages/founder/quarterly-production-machine/VerticalLaunch";
+import QPMProductionPack from "./pages/founder/quarterly-production-machine/ProductionPack";
+import QPMLovablePack from "./pages/founder/quarterly-production-machine/LovablePack";
 import FRRadarOverview from "./pages/founder/funding-radar/Overview";
 import FRCompanies from "./pages/founder/funding-radar/Companies";
 import FRCompanyDetail from "./pages/founder/funding-radar/CompanyDetail";
@@ -937,6 +939,8 @@ const App = () => (
             <Route path="/founder/quarterly-production-machine/build-pack-validator" element={<FounderRoute><QPMBuildPackValidator /></FounderRoute>} />
             <Route path="/founder/quarterly-production-machine/prompt-queue" element={<FounderRoute><QPMPromptQueue /></FounderRoute>} />
             <Route path="/founder/quarterly-production-machine/vertical-launch" element={<FounderRoute><QPMVerticalLaunch /></FounderRoute>} />
+            <Route path="/founder/quarterly-production-machine/production-pack" element={<FounderRoute><QPMProductionPack /></FounderRoute>} />
+            <Route path="/founder/quarterly-production-machine/lovable-pack" element={<FounderRoute><QPMLovablePack /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/execution-handoff" element={<FounderRoute><ExecutionHandoff /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/manual" element={<FounderRoute><PortfolioExitManual /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/controls" element={<FounderRoute><PortfolioExitControls /></FounderRoute>} />

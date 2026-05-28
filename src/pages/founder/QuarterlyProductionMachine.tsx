@@ -161,6 +161,14 @@ export default function QuarterlyProductionMachine() {
             <Badge variant="outline">Reviewed runs: {reviewedQuarters.join(", ") || "—"}</Badge>
             <Badge variant="outline">{allCount} candidates evaluated</Badge>
           </div>
+          <div className="flex flex-wrap gap-2 mt-3">
+            <Button asChild size="sm" variant="outline" className="h-7 text-[11px]"><Link to="/founder/quarterly-production-machine/build-generator">Better Build Generator</Link></Button>
+            <Button asChild size="sm" variant="outline" className="h-7 text-[11px]"><Link to="/founder/quarterly-production-machine/build-pack-validator">Build Pack Validator</Link></Button>
+            <Button asChild size="sm" variant="outline" className="h-7 text-[11px]"><Link to="/founder/quarterly-production-machine/production-pack">Production Pack</Link></Button>
+            <Button asChild size="sm" variant="outline" className="h-7 text-[11px]"><Link to="/founder/quarterly-production-machine/lovable-pack">Lovable Prompt Pack</Link></Button>
+            <Button asChild size="sm" variant="outline" className="h-7 text-[11px]"><Link to="/founder/quarterly-production-machine/prompt-queue">Prompt Queue</Link></Button>
+            <Button asChild size="sm" variant="outline" className="h-7 text-[11px]"><Link to="/founder/quarterly-production-machine/vertical-launch">Vertical Launch Cannon</Link></Button>
+          </div>
         </div>
 
         {loading ? (
