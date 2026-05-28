@@ -458,4 +458,3 @@ export async function fetchAllSignals() {
   if (error) throw error;
   return data ?? [];
 }
-}
