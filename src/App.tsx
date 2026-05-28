@@ -107,6 +107,7 @@ import PortfolioExitAssetDetail from "./pages/founder/PortfolioExitAssetDetail";
 import MAIntelligenceWorkspace from "./pages/founder/MAIntelligenceWorkspace";
 import ExitValuationEngine from "./pages/founder/ExitValuationEngine";
 import QuarterlyBuildSelector from "./pages/founder/QuarterlyBuildSelector";
+import QuarterlyProductionMachine from "./pages/founder/QuarterlyProductionMachine";
 import FRRadarOverview from "./pages/founder/funding-radar/Overview";
 import FRCompanies from "./pages/founder/funding-radar/Companies";
 import FRCompanyDetail from "./pages/founder/funding-radar/CompanyDetail";
@@ -909,6 +910,7 @@ const App = () => (
             <Route path="/founder/portfolio-exit/intelligence" element={<FounderRoute><MAIntelligenceWorkspace /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/valuation" element={<FounderRoute><ExitValuationEngine /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/build-selector" element={<FounderRoute><QuarterlyBuildSelector /></FounderRoute>} />
+            <Route path="/founder/quarterly-production-machine" element={<FounderRoute><QuarterlyProductionMachine /></FounderRoute>} />
             <Route path="/founder/funding-radar" element={<FounderRoute><FRRadarOverview /></FounderRoute>} />
             <Route path="/founder/funding-radar/companies" element={<FounderRoute><FRCompanies /></FounderRoute>} />
             <Route path="/founder/funding-radar/company/:id" element={<FounderRoute><FRCompanyDetail /></FounderRoute>} />
