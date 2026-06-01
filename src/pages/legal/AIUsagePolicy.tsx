@@ -1,12 +1,14 @@
 import { Link } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import SEOHead from "@/components/SEOHead";
 
 const AIUsagePolicy = () => {
   const today = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <SEOHead title="AI usage policy | Liftor AI" description="How AI models, agents, and decision systems may be used inside Liftor AI deployments." />
       <Navbar />
       <main className="flex-1 pt-[72px] pb-[88px]">
         <div className="mx-auto max-w-[900px] px-6" style={{ lineHeight: 1.6 }}>

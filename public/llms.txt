@@ -1,0 +1,34 @@
+# Liftor AI
+
+> Liftor AI designs, builds, and operates intelligent operational platforms, automation systems, and AI agents for modern organisations.
+
+Liftor AI is an AI systems engineering firm. We architect platforms, AI agents, automations, and operational intelligence systems for enterprises, financial services, family offices, and SaaS companies. All client work is confidential; this site describes our methodology, platform architecture, and the categories of systems we engineer.
+
+## Pages
+
+- [About](/about): Who we are and how we operate.
+- [What we build](/what-we-build): AI agents, automation systems, AI platforms, and operational intelligence.
+- [Systems](/systems): Catalogue of enterprise AI system types we engineer.
+- [Architecture](/architecture): How Liftor systems are architected end-to-end.
+- [Platform](/platform): The Liftor operating platform and intelligence layer.
+- [Industries](/industries): Sectors we serve.
+- [Method](/method): Our five-step engineering sequence and operations model.
+- [Case studies](/case-studies): Anonymised examples of deployed systems.
+- [Partners](/partners): Partner program for agencies, VCs, and consultants.
+- [Project discovery](/project-discovery): Start a confidential project conversation.
+
+## Legal
+
+- [Legal hub](/legal): Index of all legal policies.
+- [Terms of service](/legal/terms-of-service)
+- [Privacy policy](/legal/privacy-policy)
+- [Acceptable use](/legal/acceptable-use)
+- [AI usage policy](/legal/ai-usage-policy)
+- [Automation safety policy](/legal/automation-safety-policy)
+- [Security policy](/legal/security-policy)
+- [Security reporting](/legal/security-reporting)
+- [Cookie policy](/legal/cookie-policy)
+- [Data processing agreement](/legal/data-processing-agreement)
+- [AI output disclaimer](/legal/ai-output-disclaimer)
+- [Automation liability disclaimer](/legal/automation-liability-disclaimer)
+- [Enterprise services agreement](/legal/enterprise-services-agreement)

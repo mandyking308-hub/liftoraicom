@@ -1,6 +1,7 @@
 import { useLocation } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import SEOHead from "@/components/SEOHead";
 
 const titleMap: Record<string, string> = {
   "/legal/terms-of-service": "Terms of Service",
@@ -22,6 +23,7 @@ const LegalPagePlaceholder = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <SEOHead title={`${title} | Liftor AI`} description={`${title} for Liftor AI. Read the policy that applies to use of the Liftor AI platform and services.`} />
       <Navbar />
       <main className="flex-1 pt-16 pb-20">
         <div className="mx-auto max-w-[900px] px-6">

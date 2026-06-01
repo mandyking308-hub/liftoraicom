@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import SEOHead from "@/components/SEOHead";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { fadeUp } from "@/lib/animations";
@@ -38,6 +39,7 @@ const caseStudies = [
 
 const CaseStudies = () => (
   <div className="min-h-screen bg-background">
+    <SEOHead title="Case studies | Liftor AI" description="Anonymised examples of AI platforms, automation systems, and operational intelligence engineered by Liftor AI." />
     <Navbar />
 
     {/* Hero */}

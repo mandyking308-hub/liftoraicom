@@ -1,5 +1,6 @@
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import SEOHead from "@/components/SEOHead";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -48,6 +49,7 @@ const pillars = [
 
 const Industries = () => (
   <div className="min-h-screen bg-background">
+    <SEOHead title="Industries we serve | Liftor AI" description="AI systems engineering for enterprise organisations, financial services, family offices, SaaS companies, and operational businesses." />
     <Navbar />
 
     {/* Hero */}

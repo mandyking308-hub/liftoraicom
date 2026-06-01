@@ -1,5 +1,6 @@
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import SEOHead from "@/components/SEOHead";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -22,6 +23,7 @@ const steps = [
 
 const Method = () => (
   <div className="min-h-screen bg-background">
+    <SEOHead title="Method | Liftor AI engineering process" description="Liftor AI's five-step engineering sequence: concept, architecture, development, AI integration, and operations." />
     <Navbar />
 
     <section className="pt-32 pb-24">

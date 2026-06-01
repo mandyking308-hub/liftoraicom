@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import SEOHead from "@/components/SEOHead";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -36,6 +37,7 @@ const PartnerProgram = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="Partner program | Liftor AI" description="Liftor AI partner program for agencies, VCs, and consultants who want to deliver intelligent operational systems to their clients." />
       <Navbar />
 
       <section className="pt-32 pb-24">

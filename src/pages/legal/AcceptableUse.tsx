@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import SEOHead from "@/components/SEOHead";
 
 const AcceptableUse = () => {
   const today = new Date().toLocaleDateString("en-US", {
@@ -11,6 +12,7 @@ const AcceptableUse = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <SEOHead title="Acceptable use policy | Liftor AI" description="Permitted and prohibited uses of the Liftor AI platform and services." />
       <Navbar />
       <main className="flex-1 pt-[72px] pb-[88px]">
         <div className="mx-auto max-w-[900px] px-6" style={{ lineHeight: 1.6 }}>

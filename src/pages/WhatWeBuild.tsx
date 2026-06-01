@@ -1,5 +1,6 @@
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import SEOHead from "@/components/SEOHead";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -31,6 +32,7 @@ const capabilities = [
 
 const WhatWeBuild = () => (
   <div className="min-h-screen bg-background">
+    <SEOHead title="What we build | Liftor AI" description="AI agents, automation systems, AI platforms, and operational intelligence engineered by Liftor AI for modern organisations." />
     <Navbar />
 
     <section className="pt-32 pb-16">
