@@ -32,6 +32,7 @@ const capabilities = [
 
 const WhatWeBuild = () => (
   <div className="min-h-screen bg-background">
+    <SEOHead title="What we build | Liftor AI" description="AI agents, automation systems, AI platforms, and operational intelligence engineered by Liftor AI for modern organisations." />
     <Navbar />
 
     <section className="pt-32 pb-16">
