@@ -1,12 +1,14 @@
 import { Link } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import SEOHead from "@/components/SEOHead";
 
 const AIOutputDisclaimer = () => {
   const today = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <SEOHead title="AI output disclaimer | Liftor AI" description="Disclaimer covering AI-generated outputs produced by Liftor AI systems." />
       <Navbar />
       <main className="flex-1 pt-[72px] pb-[88px]">
         <div className="mx-auto max-w-[900px] px-6" style={{ lineHeight: 1.6 }}>
