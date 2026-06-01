@@ -25,6 +25,9 @@ const SupplierLogin = () => {
   useEffect(() => {
     const t = params.get("token");
     if (t) {
+      // Strip token from URL immediately so it doesn't persist in browser
+      // history, server logs, or Referer headers.
+      window.history.replaceState({}, "", "/supplier/login");
       setToken(t);
       void attempt(t);
     }
