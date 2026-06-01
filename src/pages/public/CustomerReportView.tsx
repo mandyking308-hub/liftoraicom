@@ -5,16 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-// CUSTOMER-FACING ONLY. NEVER select internal_summary, renewal_risk_flags,
-// upsell_opportunities, open_issues marked internal, or competitor mentions.
-const CUSTOMER_FIELDS = [
-  'id','report_quarter','report_year','reporting_period_start','reporting_period_end',
-  'customer_facing_summary','usage_summary','engagement_summary','value_summary',
-  'support_summary','feedback_summary','satisfaction_summary',
-  'completed_actions','recommendations','next_quarter_plan',
-  'customer_share_allowed','approved_at','shared_at',
-].join(',');
-
+// CUSTOMER-FACING ONLY. The token-validated RPC returns only the safe
+// customer-facing fields; sensitive fields (internal_summary, renewal_risk_flags,
+// upsell_opportunities, etc.) are never exposed.
 export default function CustomerReportView() {
   const { token } = useParams<{ token: string }>();
   const [report, setReport] = useState<any | null>(null);
@@ -23,13 +16,10 @@ export default function CustomerReportView() {
   useEffect(() => {
     (async () => {
       if (!token) { setState('unavailable'); return; }
-      const { data, error } = await supabase
-        .from('customer_quarterly_reports')
-        .select(CUSTOMER_FIELDS)
-        .eq('report_token', token)
-        .eq('customer_share_allowed', true)
-        .not('approved_at', 'is', null)
-        .maybeSingle();
+      const { data, error } = await (supabase as any).rpc(
+        'get_customer_quarterly_report_by_token',
+        { p_token: token }
+      );
       if (error || !data) { setState('unavailable'); return; }
       setReport(data); setState('ok');
     })();

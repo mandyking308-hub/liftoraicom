@@ -23,11 +23,10 @@ export default function SurveyResponse() {
   useEffect(() => {
     (async () => {
       if (!token) return setStatus('error');
-      const { data: req } = await supabase
-        .from('customer_survey_requests')
-        .select('id, business_id, template_id, expires_at, completed_at, request_status, survey_token')
-        .eq('survey_token', token)
-        .maybeSingle();
+      const { data: req } = await (supabase as any).rpc(
+        'get_customer_survey_request_by_token',
+        { p_token: token }
+      );
       if (!req) { setStatus('error'); return; }
       if (req.expires_at && new Date(req.expires_at) < new Date()) { setStatus('expired'); return; }
       if (req.completed_at) { setStatus('submitted'); return; }

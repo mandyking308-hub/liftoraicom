@@ -59806,6 +59806,14 @@ export type Database = {
         Args: { p_business_contact_relationship_id: string; p_limit?: number }
         Returns: Json
       }
+      get_customer_quarterly_report_by_token: {
+        Args: { p_token: string }
+        Returns: Json
+      }
+      get_customer_survey_request_by_token: {
+        Args: { p_token: string }
+        Returns: Json
+      }
       get_inbox_credentials_for_send: {
         Args: { _enc_key: string; _inbox_id: string }
         Returns: Json
