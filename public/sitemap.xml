@@ -11,6 +11,7 @@
   <url><loc>https://liftorai.com/case-studies</loc><priority>0.7</priority></url>
   <url><loc>https://liftorai.com/partners</loc><priority>0.6</priority></url>
   <url><loc>https://liftorai.com/project-discovery</loc><priority>0.9</priority></url>
+  <url><loc>https://liftorai.com/ai-proposal</loc><priority>0.7</priority></url>
   <url><loc>https://liftorai.com/legal</loc><priority>0.4</priority></url>
   <url><loc>https://liftorai.com/legal/terms-of-service</loc><priority>0.3</priority></url>
   <url><loc>https://liftorai.com/legal/privacy-policy</loc><priority>0.3</priority></url>
@@ -23,4 +24,5 @@
   <url><loc>https://liftorai.com/legal/ai-output-disclaimer</loc><priority>0.3</priority></url>
   <url><loc>https://liftorai.com/legal/automation-liability-disclaimer</loc><priority>0.3</priority></url>
   <url><loc>https://liftorai.com/legal/enterprise-services-agreement</loc><priority>0.3</priority></url>
+  <url><loc>https://liftorai.com/legal/security-reporting</loc><priority>0.3</priority></url>
 </urlset>
