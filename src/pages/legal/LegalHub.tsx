@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import SEOHead from "@/components/SEOHead";
 import { Card, CardContent } from "@/components/ui/card";
 import { FileText, Shield, AlertTriangle, Scale } from "lucide-react";
 
@@ -48,6 +49,7 @@ const disclaimers = [
 
 const LegalHub = () => (
   <div className="min-h-screen flex flex-col bg-background">
+    <SEOHead title="Legal hub | Liftor AI" description="Index of every Liftor AI legal policy: terms, privacy, acceptable use, AI usage, automation safety, security, and more." />
     <Navbar />
     <main className="flex-1 pt-16 pb-20">
       <div className="mx-auto max-w-[900px] px-6">

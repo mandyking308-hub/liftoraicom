@@ -39,6 +39,7 @@ const caseStudies = [
 
 const CaseStudies = () => (
   <div className="min-h-screen bg-background">
+    <SEOHead title="Case studies | Liftor AI" description="Anonymised examples of AI platforms, automation systems, and operational intelligence engineered by Liftor AI." />
     <Navbar />
 
     {/* Hero */}
