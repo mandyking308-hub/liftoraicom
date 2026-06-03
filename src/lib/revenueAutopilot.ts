@@ -24,7 +24,7 @@ export async function computeRevenueLoop(): Promise<RevenueLoopSnapshot> {
   const since30 = new Date(Date.now() - 30 * 86400000).toISOString();
   const now = new Date().toISOString();
 
-  const safe = (p: any) => p.catch(() => ({ count: 0, data: [] }));
+  const safe = (p: any) => Promise.resolve(p).then(r => r, () => ({ count: 0, data: [] }));
 
   const [
     targets, completedClose, pipelineClose, overdueFU, hotSignals, upgradeOpps,
