@@ -164,6 +164,7 @@ import VoiceProviderStatusCard from "@/components/founder/command/VoiceProviderS
 import RevenueAutopilotCard from "@/components/founder/command/RevenueAutopilotCard";
 import QuoteToCashCard from "@/components/founder/command/QuoteToCashCard";
 import PortfolioExitTargetsCard from "@/components/founder/command/PortfolioExitTargetsCard";
+import DistressedRadarCard from "@/components/founder/command/DistressedRadarCard";
 import BusinessProcessSpinePanel from "@/components/founder/command/BusinessProcessSpinePanel";
 import ControlFabricCard from "@/components/founder/command/ControlFabricCard";
 import CustomerJourneyControlBoard from "@/components/founder/command/CustomerJourneyControlBoard";
@@ -815,6 +816,7 @@ const CommandCentre = () => {
       <div className="max-w-7xl mx-auto px-4 pt-4"><RevenueAutopilotCard /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><QuoteToCashCard /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><PortfolioExitTargetsCard /></div>
+      <div className="max-w-7xl mx-auto px-4 pt-4"><DistressedRadarCard /></div>
       <BusinessProcessSpinePanel />
       <BusinessOperatingStatus />
       <AgentOperatingStatus />

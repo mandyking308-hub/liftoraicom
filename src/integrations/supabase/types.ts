@@ -22522,6 +22522,254 @@ export type Database = {
           },
         ]
       }
+      distressed_acquisition_opportunities: {
+        Row: {
+          annual_recurring_revenue: number | null
+          asking_price: number | null
+          brand_value_score: number | null
+          category: string
+          code_assets: string | null
+          country: string | null
+          created_at: string
+          customer_count: number | null
+          customer_data_status: string | null
+          distress_type: string
+          domain_strength: number | null
+          email_list_size: number | null
+          exit_route_score: number | null
+          financing_feasibility_score: number | null
+          financing_required: number | null
+          founder_approval_required: boolean
+          founder_approved: boolean
+          founder_dependency: number | null
+          id: string
+          ip_assets: string | null
+          legal_risk_score: number | null
+          liftor_advantage_notes: string | null
+          liftor_fit_score: number | null
+          monthly_recurring_revenue: number | null
+          next_action: string | null
+          notes: string | null
+          operational_complexity: number | null
+          opportunity_name: string
+          overall_priority_score: number | null
+          profit_ttm: number | null
+          recommended_action: string
+          recommended_structure: string
+          replacement_cost_score: number | null
+          revenue_ttm: number | null
+          scanned_at: string | null
+          social_following: number | null
+          source: string | null
+          source_url: string | null
+          trademark_status: string | null
+          turnaround_score: number | null
+          updated_at: string
+          user_count: number | null
+        }
+        Insert: {
+          annual_recurring_revenue?: number | null
+          asking_price?: number | null
+          brand_value_score?: number | null
+          category?: string
+          code_assets?: string | null
+          country?: string | null
+          created_at?: string
+          customer_count?: number | null
+          customer_data_status?: string | null
+          distress_type?: string
+          domain_strength?: number | null
+          email_list_size?: number | null
+          exit_route_score?: number | null
+          financing_feasibility_score?: number | null
+          financing_required?: number | null
+          founder_approval_required?: boolean
+          founder_approved?: boolean
+          founder_dependency?: number | null
+          id?: string
+          ip_assets?: string | null
+          legal_risk_score?: number | null
+          liftor_advantage_notes?: string | null
+          liftor_fit_score?: number | null
+          monthly_recurring_revenue?: number | null
+          next_action?: string | null
+          notes?: string | null
+          operational_complexity?: number | null
+          opportunity_name: string
+          overall_priority_score?: number | null
+          profit_ttm?: number | null
+          recommended_action?: string
+          recommended_structure?: string
+          replacement_cost_score?: number | null
+          revenue_ttm?: number | null
+          scanned_at?: string | null
+          social_following?: number | null
+          source?: string | null
+          source_url?: string | null
+          trademark_status?: string | null
+          turnaround_score?: number | null
+          updated_at?: string
+          user_count?: number | null
+        }
+        Update: {
+          annual_recurring_revenue?: number | null
+          asking_price?: number | null
+          brand_value_score?: number | null
+          category?: string
+          code_assets?: string | null
+          country?: string | null
+          created_at?: string
+          customer_count?: number | null
+          customer_data_status?: string | null
+          distress_type?: string
+          domain_strength?: number | null
+          email_list_size?: number | null
+          exit_route_score?: number | null
+          financing_feasibility_score?: number | null
+          financing_required?: number | null
+          founder_approval_required?: boolean
+          founder_approved?: boolean
+          founder_dependency?: number | null
+          id?: string
+          ip_assets?: string | null
+          legal_risk_score?: number | null
+          liftor_advantage_notes?: string | null
+          liftor_fit_score?: number | null
+          monthly_recurring_revenue?: number | null
+          next_action?: string | null
+          notes?: string | null
+          operational_complexity?: number | null
+          opportunity_name?: string
+          overall_priority_score?: number | null
+          profit_ttm?: number | null
+          recommended_action?: string
+          recommended_structure?: string
+          replacement_cost_score?: number | null
+          revenue_ttm?: number | null
+          scanned_at?: string | null
+          social_following?: number | null
+          source?: string | null
+          source_url?: string | null
+          trademark_status?: string | null
+          turnaround_score?: number | null
+          updated_at?: string
+          user_count?: number | null
+        }
+        Relationships: []
+      }
+      distressed_deal_financing_options: {
+        Row: {
+          created_at: string
+          estimated_capital: number | null
+          estimated_term_months: number | null
+          feasibility_score: number | null
+          founder_approved: boolean
+          id: string
+          notes: string | null
+          opportunity_id: string
+          recommended: boolean
+          structure: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          estimated_capital?: number | null
+          estimated_term_months?: number | null
+          feasibility_score?: number | null
+          founder_approved?: boolean
+          id?: string
+          notes?: string | null
+          opportunity_id: string
+          recommended?: boolean
+          structure: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          estimated_capital?: number | null
+          estimated_term_months?: number | null
+          feasibility_score?: number | null
+          founder_approved?: boolean
+          id?: string
+          notes?: string | null
+          opportunity_id?: string
+          recommended?: boolean
+          structure?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "distressed_deal_financing_options_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "distressed_acquisition_opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      distressed_disposal_assets: {
+        Row: {
+          asking_price_estimate: number | null
+          asset_name: string
+          build_status: string | null
+          category: string
+          code_ip_status: string | null
+          compliance_risk: string | null
+          created_at: string
+          customer_data_status: string | null
+          evidence_pack_status: string
+          founder_approved: boolean
+          handover_docs_status: string
+          id: string
+          notes: string | null
+          reason_for_disposal: string | null
+          recommended_action: string
+          revenue_status: string | null
+          sale_route: string
+          updated_at: string
+        }
+        Insert: {
+          asking_price_estimate?: number | null
+          asset_name: string
+          build_status?: string | null
+          category?: string
+          code_ip_status?: string | null
+          compliance_risk?: string | null
+          created_at?: string
+          customer_data_status?: string | null
+          evidence_pack_status?: string
+          founder_approved?: boolean
+          handover_docs_status?: string
+          id?: string
+          notes?: string | null
+          reason_for_disposal?: string | null
+          recommended_action?: string
+          revenue_status?: string | null
+          sale_route?: string
+          updated_at?: string
+        }
+        Update: {
+          asking_price_estimate?: number | null
+          asset_name?: string
+          build_status?: string | null
+          category?: string
+          code_ip_status?: string | null
+          compliance_risk?: string | null
+          created_at?: string
+          customer_data_status?: string | null
+          evidence_pack_status?: string
+          founder_approved?: boolean
+          handover_docs_status?: string
+          id?: string
+          notes?: string | null
+          reason_for_disposal?: string | null
+          recommended_action?: string
+          revenue_status?: string | null
+          sale_route?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       document_access_rules: {
         Row: {
           access_scope: string
