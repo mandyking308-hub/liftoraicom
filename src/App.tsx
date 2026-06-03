@@ -364,6 +364,15 @@ import BCClaims from "./pages/founder/business-compliance/Claims";
 import BCChannels from "./pages/founder/business-compliance/Channels";
 import BCApprovalTriggers from "./pages/founder/business-compliance/ApprovalTriggers";
 
+// AI Compliance Control Layer
+import AICOverview from "./pages/founder/ai-compliance/Overview";
+import AICSystems from "./pages/founder/ai-compliance/Systems";
+import AICDataFlows from "./pages/founder/ai-compliance/DataFlows";
+import AICOversight from "./pages/founder/ai-compliance/Oversight";
+import AICEvidence from "./pages/founder/ai-compliance/Evidence";
+import AICRisk from "./pages/founder/ai-compliance/Risk";
+import AICGaps from "./pages/founder/ai-compliance/Gaps";
+
 // Multi-Business Context Guard
 import CGOverview from "./pages/founder/context-guard/Overview";
 import CGEvents from "./pages/founder/context-guard/Events";
@@ -1166,6 +1175,15 @@ const App = () => (
             <Route path="/founder/business-compliance/claims" element={<FounderRoute><BCClaims /></FounderRoute>} />
             <Route path="/founder/business-compliance/channels" element={<FounderRoute><BCChannels /></FounderRoute>} />
             <Route path="/founder/business-compliance/approval-triggers" element={<FounderRoute><BCApprovalTriggers /></FounderRoute>} />
+
+            {/* AI Compliance Control Layer */}
+            <Route path="/founder/ai-compliance" element={<FounderRoute><AICOverview /></FounderRoute>} />
+            <Route path="/founder/ai-compliance/systems" element={<FounderRoute><AICSystems /></FounderRoute>} />
+            <Route path="/founder/ai-compliance/data-flows" element={<FounderRoute><AICDataFlows /></FounderRoute>} />
+            <Route path="/founder/ai-compliance/oversight" element={<FounderRoute><AICOversight /></FounderRoute>} />
+            <Route path="/founder/ai-compliance/evidence" element={<FounderRoute><AICEvidence /></FounderRoute>} />
+            <Route path="/founder/ai-compliance/risk" element={<FounderRoute><AICRisk /></FounderRoute>} />
+            <Route path="/founder/ai-compliance/gaps" element={<FounderRoute><AICGaps /></FounderRoute>} />
             {/* Canonical: Multi-Business Context Fabric */}
             <Route path="/founder/context-fabric" element={<FounderRoute><CGOverview /></FounderRoute>} />
             <Route path="/founder/context-fabric/events" element={<FounderRoute><CGEvents /></FounderRoute>} />
