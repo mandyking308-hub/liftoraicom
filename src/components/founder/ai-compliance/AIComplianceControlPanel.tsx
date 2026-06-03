@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Component, ReactNode, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -24,18 +24,65 @@ const SEV_CLS: Record<string, string> = {
   critical: "bg-destructive/15 text-destructive border-destructive/30",
 };
 
+class AICErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
+  state = { error: null as Error | null };
+  static getDerivedStateFromError(error: Error) { return { error }; }
+  componentDidCatch(error: Error) {
+    // eslint-disable-next-line no-console
+    console.error("[AIComplianceControlPanel]", error);
+  }
+  render() {
+    if (this.state.error) return <AICFallback message={this.state.error.message} />;
+    return this.props.children;
+  }
+}
+
+function AICFallback({ message }: { message?: string }) {
+  return (
+    <div className="max-w-7xl mx-auto px-4 pt-4">
+      <Card className="tech-card">
+        <CardContent className="p-4 text-xs space-y-2">
+          <p className="font-medium">
+            <ShieldCheck size={12} className="inline mr-1 text-primary" />
+            AI Compliance Control could not load yet — open AI Compliance Control directly or run module scan.
+          </p>
+          {message && <p className="text-[10px] text-muted-foreground">Detail: {message}</p>}
+          <Link to="/founder/ai-compliance" className="text-primary hover:underline inline-flex items-center gap-1">
+            Open AI Compliance Control <ArrowRight size={11} />
+          </Link>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 export default function AIComplianceControlPanel() {
+  return (
+    <AICErrorBoundary>
+      <AIComplianceControlPanelInner />
+    </AICErrorBoundary>
+  );
+}
+
+function AIComplianceControlPanelInner() {
   const [summary, setSummary] = useState<CommandCentreSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
+    const safe = <T,>(p: Promise<T>, fallback: T): Promise<T> =>
+      Promise.resolve(p).then(r => r ?? fallback, () => fallback);
     (async () => {
       try {
         const [systems, flows, oversight, evidence, gaps, profiles, triggers] = await Promise.all([
-          fetchSystems(), fetchFlows(), fetchOversight(), fetchEvidence(), fetchGapActions(),
-          fetchProfiles(), fetchTriggers(),
+          safe(fetchSystems(), []),
+          safe(fetchFlows(), []),
+          safe(fetchOversight(), []),
+          safe(fetchEvidence(), []),
+          safe(fetchGapActions(), []),
+          safe(fetchProfiles(), []),
+          safe(fetchTriggers(), []),
         ]);
         if (!active) return;
         setSummary(aggregateCommandCentre({ systems, flows, oversight, evidence, gaps, profiles, triggers }));
@@ -47,6 +94,8 @@ export default function AIComplianceControlPanel() {
     })();
     return () => { active = false; };
   }, []);
+
+  if (err && !summary) return <AICFallback message={err} />;
 
   return (
     <div className="max-w-7xl mx-auto px-4 pt-4">
@@ -74,7 +123,6 @@ export default function AIComplianceControlPanel() {
         </CardHeader>
         <CardContent className="space-y-4">
           {loading && <p className="text-xs text-muted-foreground">Loading AI compliance state…</p>}
-          {err && <p className="text-xs text-destructive">{err}</p>}
           {summary && (
             <>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
