@@ -126,3 +126,75 @@ The system surfaces signals and gaps. It does **not** decide:
 
 Those decisions require a qualified adviser. The "adviser review required"
 status exists explicitly for that handoff.
+---
+
+## Command Centre integration (v2)
+
+A compact `AIComplianceControlPanel` is rendered inside `/founder/command-centre`
+(directly after `FounderAlertEscalationPanel`, before `WhatNeedsAttentionToday`). It
+reads live from the 5 compliance tables and reports:
+
+- AI compliance status: `clear` / `needs_review` / `blocked`
+- inventoried systems, high/critical count, external-action count, sensitive-data count
+- open compliance gaps, founder decisions required, next review due
+- a "What needs Mandy today" list of real founder-decision items only
+
+Status logic (`aggregateCommandCentre`):
+
+- `blocked` — any open critical gap, or any external-action system without oversight,
+  or any sensitive-data system without a data-flow record
+- `needs_review` — open gaps, founder items pending, or zero systems inventoried
+- `clear` — none of the above
+
+Founder navigation: a sidebar entry `AI Compliance Control` → `/founder/ai-compliance`
+is registered in `FounderLayout`.
+
+## Module scan (idempotent backfill)
+
+`scanInternalModules()` writes/updates `ai_compliance_systems` from
+`MODULE_SCAN_REGISTRY`, which currently covers: AI Gateway, Liftor Brain, AI Usage
+Ledger, AI Approval Gates, AI Security Centre, AI Queue Control, AI Live
+Operations, Agent Capabilities, Business Compliance Rules, Privacy, Incidents,
+Audit Ledger, Policies, Connectors, Scheduled Jobs, Data Ingestion Centre,
+Smartlead Outreach, Apollo Lead Sourcing, Social Publishing (Metricool), Revenue
+Autopilot, Customer Sales, Quote to Cash, M&A Portfolio Exit Intelligence.
+
+Rules:
+- Lookup key: `system_name` with `business_id IS NULL` (global rows).
+- Insert when missing.
+- Update only missing/blank fields, never overwrite founder-confirmed rows.
+- Risk level is only raised, never lowered automatically.
+- All seeded rows start `founder_confirmed = false`, `current_status = 'under_review'`.
+- External-action seeds default to `high` or `critical` risk.
+
+## Gap synthesis (hardened)
+
+`synthesizeGapsExtended` builds on `synthesizeGaps` and adds rules for:
+no systems inventoried, high/critical not founder-confirmed, external-action
+without oversight evidence, sensitive-data without data flow, regulated-data
+without review evidence, missing/stale review dates, evidence pack missing for
+high/critical systems, missing policy evidence, missing incident escalation
+evidence. Dedup is keyed on
+`business_id | system_id | gap_title`.
+
+`materialiseGapsIdempotent` only inserts gaps that don't already exist as
+`open / in_progress / blocked` — `done` and `parked` gaps are not reopened.
+
+## Evidence roll-up
+
+`rollupEvidence` aggregates the evidence index across canonical categories
+(AI gateway, AI usage ledger, approval gates, audit ledger, business compliance,
+privacy, incidents, policies, security/access, connectors, scheduled jobs,
+external action gates, technical manual, user manual). Empty categories render as
+`Not available yet` — no fake data is ever inserted.
+
+## Safety constraints (unchanged)
+
+This layer never:
+- enables external sending or changes Smartlead campaign/Apollo/auto_send_enabled state
+- calls paid APIs, exports data, contacts advisers or buyers
+- changes public routes, RLS, secrets, or legal/tax/entity settings
+- writes fake prospects, customers, revenue or compliance evidence
+
+It only recommends, classifies and surfaces real records. External and irreversible
+actions remain founder approval-gated.

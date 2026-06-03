@@ -52,6 +52,7 @@ const navItems = [
   { label: "Suppliers", to: "/founder/suppliers", icon: Briefcase },
   { label: "Assignments", to: "/founder/assignments", icon: ClipboardCheck },
   { label: "Compliance", to: "/founder/compliance", icon: ShieldCheck },
+  { label: "AI Compliance Control", to: "/founder/ai-compliance", icon: ShieldCheck },
   { label: "Legal Console", to: "/founder/legal", icon: Gavel },
   { label: "Projects", to: "/founder/projects", icon: FolderKanban },
   { label: "Monitoring", to: "/founder/monitoring", icon: Monitor },

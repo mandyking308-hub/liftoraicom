@@ -388,3 +388,469 @@ export async function materialiseGaps(rows: SynthGap[]): Promise<number> {
   if (error) throw error;
   return count ?? rows.length;
 }
+
+/* ---------------- Module scan registry (idempotent backfill) ---------------- */
+
+export type ModuleSeed = {
+  /** stable canonical name used as the lookup key in ai_compliance_systems.system_name */
+  key: string;
+  system_type: SystemType;
+  autonomy_level: AutonomyLevel;
+  internal_or_external: "internal" | "external" | "mixed";
+  external_action_capable: boolean;
+  uses_personal_data: boolean;
+  uses_sensitive_data: boolean;
+  handles_children_data?: boolean;
+  handles_health_data?: boolean;
+  handles_financial_data?: boolean;
+  handles_legal_data?: boolean;
+  default_risk: RiskLevel;
+  purpose: string;
+  owner_role?: string;
+  current_status?: SystemStatus;
+};
+
+/**
+ * Conservative defaults. External-action-capable modules default to high/critical.
+ * Outreach / publishing / payments / contracts / pricing / data export must be high+ unless founder-confirmed otherwise.
+ * Records are inserted with founder_confirmed=false and current_status='under_review'.
+ */
+export const MODULE_SCAN_REGISTRY: ModuleSeed[] = [
+  { key: "AI Gateway", system_type: "gateway", autonomy_level: "approval_required", internal_or_external: "internal", external_action_capable: false, uses_personal_data: true, uses_sensitive_data: false, default_risk: "medium", purpose: "Routes AI model requests across providers." },
+  { key: "Liftor Brain", system_type: "agent", autonomy_level: "recommend_only", internal_or_external: "internal", external_action_capable: false, uses_personal_data: true, uses_sensitive_data: true, default_risk: "high", purpose: "Central reasoning, strategy and decision support for founder." },
+  { key: "AI Usage Ledger", system_type: "analytics", autonomy_level: "assistive", internal_or_external: "internal", external_action_capable: false, uses_personal_data: false, uses_sensitive_data: false, default_risk: "low", purpose: "Records AI request usage, cost and provider routing." },
+  { key: "AI Approval Gates", system_type: "workflow", autonomy_level: "approval_required", internal_or_external: "internal", external_action_capable: false, uses_personal_data: true, uses_sensitive_data: false, default_risk: "medium", purpose: "Enforces founder/human approval before sensitive or external actions." },
+  { key: "AI Security Centre", system_type: "analytics", autonomy_level: "assistive", internal_or_external: "internal", external_action_capable: false, uses_personal_data: true, uses_sensitive_data: true, default_risk: "high", purpose: "Detects misuse, leakage and security anomalies across AI surfaces." },
+  { key: "AI Queue Control", system_type: "workflow", autonomy_level: "approval_required", internal_or_external: "internal", external_action_capable: false, uses_personal_data: false, uses_sensitive_data: false, default_risk: "medium", purpose: "Holds and releases queued AI jobs with rate and safety controls." },
+  { key: "AI Live Operations", system_type: "automation", autonomy_level: "semi_autonomous", internal_or_external: "internal", external_action_capable: false, uses_personal_data: true, uses_sensitive_data: false, default_risk: "high", purpose: "Runs continuous AI operational loops across businesses." },
+  { key: "Agent Capabilities", system_type: "agent", autonomy_level: "recommend_only", internal_or_external: "internal", external_action_capable: false, uses_personal_data: false, uses_sensitive_data: false, default_risk: "medium", purpose: "Catalogue of agent skills and tool grants." },
+  { key: "Business Compliance Rules", system_type: "workflow", autonomy_level: "approval_required", internal_or_external: "internal", external_action_capable: false, uses_personal_data: true, uses_sensitive_data: true, default_risk: "high", purpose: "Per-business compliance profile, triggers and adviser flags." },
+  { key: "Privacy", system_type: "workflow", autonomy_level: "approval_required", internal_or_external: "internal", external_action_capable: false, uses_personal_data: true, uses_sensitive_data: true, default_risk: "high", purpose: "Privacy posture, DSAR, retention and processors register." },
+  { key: "Incidents", system_type: "workflow", autonomy_level: "approval_required", internal_or_external: "internal", external_action_capable: false, uses_personal_data: true, uses_sensitive_data: true, default_risk: "high", purpose: "Incident intake, severity classification and escalation." },
+  { key: "Audit Ledger", system_type: "analytics", autonomy_level: "assistive", internal_or_external: "internal", external_action_capable: false, uses_personal_data: true, uses_sensitive_data: false, default_risk: "medium", purpose: "Append-only audit ledger of system actions and approvals." },
+  { key: "Policies", system_type: "legal_tax", autonomy_level: "approval_required", internal_or_external: "internal", external_action_capable: false, uses_personal_data: false, uses_sensitive_data: false, default_risk: "medium", purpose: "Internal and public policy and legal page versions." },
+  { key: "Connectors", system_type: "connector", autonomy_level: "approval_required", internal_or_external: "external", external_action_capable: false, uses_personal_data: true, uses_sensitive_data: false, default_risk: "high", purpose: "Third-party integration registry and credentials." },
+  { key: "Scheduled Jobs", system_type: "automation", autonomy_level: "semi_autonomous", internal_or_external: "internal", external_action_capable: false, uses_personal_data: false, uses_sensitive_data: false, default_risk: "medium", purpose: "Cron/scheduled job control and observability." },
+  { key: "Data Ingestion Centre", system_type: "automation", autonomy_level: "approval_required", internal_or_external: "external", external_action_capable: false, uses_personal_data: true, uses_sensitive_data: true, default_risk: "high", purpose: "Ingests external data sources into Liftor systems." },
+  { key: "Smartlead Outreach", system_type: "outreach", autonomy_level: "external_action_capable", internal_or_external: "external", external_action_capable: true, uses_personal_data: true, uses_sensitive_data: false, default_risk: "critical", purpose: "Outbound email outreach campaign delivery (founder approval-gated)." },
+  { key: "Apollo Lead Sourcing", system_type: "connector", autonomy_level: "approval_required", internal_or_external: "external", external_action_capable: true, uses_personal_data: true, uses_sensitive_data: false, default_risk: "high", purpose: "Sources prospects via Apollo (founder approval-gated)." },
+  { key: "Social Publishing (Metricool)", system_type: "outreach", autonomy_level: "external_action_capable", internal_or_external: "external", external_action_capable: true, uses_personal_data: false, uses_sensitive_data: false, default_risk: "critical", purpose: "Public social media publishing (founder approval-gated)." },
+  { key: "Revenue Autopilot", system_type: "finance", autonomy_level: "approval_required", internal_or_external: "internal", external_action_capable: false, uses_personal_data: true, uses_sensitive_data: false, handles_financial_data: true, default_risk: "high", purpose: "Revenue automation and pricing intelligence." },
+  { key: "Customer Sales", system_type: "workflow", autonomy_level: "approval_required", internal_or_external: "internal", external_action_capable: false, uses_personal_data: true, uses_sensitive_data: false, handles_financial_data: true, default_risk: "high", purpose: "Customer sales pipeline and proposal generation." },
+  { key: "Quote to Cash", system_type: "finance", autonomy_level: "approval_required", internal_or_external: "internal", external_action_capable: false, uses_personal_data: true, uses_sensitive_data: false, handles_financial_data: true, handles_legal_data: true, default_risk: "high", purpose: "Quote, contract and invoice flow." },
+  { key: "M&A Portfolio Exit Intelligence", system_type: "analytics", autonomy_level: "recommend_only", internal_or_external: "internal", external_action_capable: false, uses_personal_data: true, uses_sensitive_data: true, handles_financial_data: true, handles_legal_data: true, default_risk: "critical", purpose: "M&A, valuation and exit intelligence — strictly confidential." },
+];
+
+export type ScanResult = {
+  inserted: number;
+  updated: number;
+  skipped: number;
+  details: { key: string; action: "inserted" | "updated" | "skipped"; reason?: string }[];
+};
+
+/**
+ * Idempotent inventory backfill. Founder-only.
+ * - Looks up by system_name === key (global rows: business_id IS NULL).
+ * - Inserts when missing.
+ * - Updates ONLY missing/blank fields when found AND founder_confirmed = false.
+ * - Never overwrites a founder-confirmed record.
+ */
+export async function scanInternalModules(): Promise<ScanResult> {
+  const existing = await fetchSystems();
+  const byKey = new Map<string, AIComplianceSystem>();
+  for (const s of existing) {
+    if (s.business_id == null) byKey.set(s.system_name, s);
+  }
+  const out: ScanResult = { inserted: 0, updated: 0, skipped: 0, details: [] };
+
+  for (const seed of MODULE_SCAN_REGISTRY) {
+    const found = byKey.get(seed.key);
+    if (!found) {
+      const row: Partial<AIComplianceSystem> = {
+        business_id: null,
+        system_name: seed.key,
+        system_type: seed.system_type,
+        owner_role: seed.owner_role ?? "founder",
+        provider: null,
+        purpose: seed.purpose,
+        internal_or_external: seed.internal_or_external,
+        autonomy_level: seed.autonomy_level,
+        uses_personal_data: !!seed.uses_personal_data,
+        uses_sensitive_data: !!seed.uses_sensitive_data,
+        handles_children_data: !!seed.handles_children_data,
+        handles_health_data: !!seed.handles_health_data,
+        handles_financial_data: !!seed.handles_financial_data,
+        handles_legal_data: !!seed.handles_legal_data,
+        external_action_capable: !!seed.external_action_capable,
+        current_status: seed.current_status ?? "under_review",
+        risk_level: seed.default_risk,
+        founder_confirmed: false,
+      };
+      await upsertSystem(row);
+      out.inserted++;
+      out.details.push({ key: seed.key, action: "inserted" });
+      continue;
+    }
+    if (found.founder_confirmed) {
+      out.skipped++;
+      out.details.push({ key: seed.key, action: "skipped", reason: "founder-confirmed; not overwritten" });
+      continue;
+    }
+    const patch: Partial<AIComplianceSystem> = { id: found.id };
+    let changed = false;
+    const fill = <K extends keyof AIComplianceSystem>(k: K, v: AIComplianceSystem[K], blankOk: (cur: AIComplianceSystem[K]) => boolean) => {
+      if (blankOk(found[k])) { (patch as any)[k] = v; changed = true; }
+    };
+    fill("purpose", seed.purpose as any, c => !c);
+    fill("system_type", seed.system_type as any, c => !c || c === "other");
+    fill("autonomy_level", seed.autonomy_level as any, c => !c);
+    fill("internal_or_external", seed.internal_or_external as any, c => !c);
+    fill("owner_role", (seed.owner_role ?? "founder") as any, c => !c);
+    // Risk: only raise, never lower automatically.
+    const rank: Record<RiskLevel, number> = { low: 0, medium: 1, high: 2, critical: 3 };
+    if (rank[seed.default_risk] > rank[found.risk_level]) {
+      (patch as any).risk_level = seed.default_risk; changed = true;
+    }
+    if (changed) {
+      await upsertSystem(patch);
+      out.updated++;
+      out.details.push({ key: seed.key, action: "updated" });
+    } else {
+      out.skipped++;
+      out.details.push({ key: seed.key, action: "skipped", reason: "already complete" });
+    }
+  }
+  return out;
+}
+
+/* ---------------- Extended gap synthesis (hardened, idempotent) ---------------- */
+
+const STALE_REVIEW_DAYS = 180;
+const REGULATED_DATA = (s: AIComplianceSystem) =>
+  s.uses_sensitive_data || s.handles_children_data || s.handles_health_data ||
+  s.handles_financial_data || s.handles_legal_data;
+
+export function synthesizeGapsExtended(input: {
+  profiles: ComplianceProfile[];
+  systems: AIComplianceSystem[];
+  flows: AIDataFlowRecord[];
+  oversight: AIHumanOversightRecord[];
+  evidence: AIComplianceEvidenceItem[];
+  triggers: ApprovalTrigger[];
+}): SynthGap[] {
+  const base = synthesizeGaps({
+    profiles: input.profiles, systems: input.systems,
+    flows: input.flows, oversight: input.oversight, triggers: input.triggers,
+  });
+  const extra: SynthGap[] = [];
+  const { systems, evidence } = input;
+
+  if (systems.length === 0) {
+    extra.push({
+      business_id: null, system_id: null,
+      gap_title: "No AI systems inventoried",
+      gap_description: "Run a module scan or add systems manually.",
+      severity: "high", source: "module_scan",
+      required_action: "Run Module Scan or add systems in AI Compliance → Systems.",
+      action_owner: "founder", due_date: null, status: "open",
+      founder_decision_required: true,
+    });
+  }
+
+  const evBySys = new Map<string, AIComplianceEvidenceItem[]>();
+  for (const e of evidence) {
+    if (!e.system_id) continue;
+    const arr = evBySys.get(e.system_id) ?? []; arr.push(e); evBySys.set(e.system_id, arr);
+  }
+  const evidenceTypes = new Set(evidence.map(e => e.evidence_type));
+
+  for (const s of systems) {
+    if ((s.risk_level === "critical" || s.risk_level === "high") && !s.founder_confirmed) {
+      extra.push({
+        business_id: s.business_id, system_id: s.id,
+        gap_title: `High/critical system not founder-confirmed: ${s.system_name}`,
+        gap_description: "High/critical risk system has not been confirmed by the founder.",
+        severity: "high", source: "ai_compliance_systems",
+        required_action: "Founder must review and confirm system inventory entry.",
+        action_owner: "founder", due_date: null, status: "open",
+        founder_decision_required: true,
+      });
+    }
+    if (!s.next_review_due_at) {
+      extra.push({
+        business_id: s.business_id, system_id: s.id,
+        gap_title: `No next-review date: ${s.system_name}`,
+        gap_description: "System has no scheduled review.",
+        severity: "low", source: "ai_compliance_systems",
+        required_action: "Set a next review date.",
+        action_owner: "founder", due_date: null, status: "open",
+        founder_decision_required: false,
+      });
+    } else if (s.last_reviewed_at && (Date.now() - new Date(s.last_reviewed_at).getTime()) > STALE_REVIEW_DAYS * 86400000) {
+      extra.push({
+        business_id: s.business_id, system_id: s.id,
+        gap_title: `Stale review: ${s.system_name}`,
+        gap_description: `Last reviewed > ${STALE_REVIEW_DAYS} days ago.`,
+        severity: "medium", source: "ai_compliance_systems",
+        required_action: "Re-review system and update review dates.",
+        action_owner: "founder", due_date: null, status: "open",
+        founder_decision_required: false,
+      });
+    }
+    if ((s.risk_level === "critical" || s.risk_level === "high") && (evBySys.get(s.id) ?? []).length === 0) {
+      extra.push({
+        business_id: s.business_id, system_id: s.id,
+        gap_title: `Evidence pack missing for high/critical system: ${s.system_name}`,
+        gap_description: "No evidence items attached to this system.",
+        severity: "high", source: "ai_compliance_evidence_items",
+        required_action: "Attach evidence (policy, audit, approval log, data flow).",
+        action_owner: "founder", due_date: null, status: "open",
+        founder_decision_required: true,
+      });
+    }
+    if (REGULATED_DATA(s) && (evBySys.get(s.id) ?? []).filter(e => e.evidence_type === "risk_assessment" || e.evidence_type === "approval_log").length === 0) {
+      extra.push({
+        business_id: s.business_id, system_id: s.id,
+        gap_title: `No review evidence for regulated-data system: ${s.system_name}`,
+        gap_description: "Regulated data (health/finance/legal/children) without review evidence.",
+        severity: "critical", source: "ai_compliance_evidence_items",
+        required_action: "Attach a risk assessment or approval log; consider adviser review.",
+        action_owner: "founder", due_date: null, status: "open",
+        founder_decision_required: true,
+      });
+    }
+    if (s.external_action_capable && (evBySys.get(s.id) ?? []).filter(e => e.evidence_type === "approval_log" || e.evidence_type === "audit_log").length === 0) {
+      extra.push({
+        business_id: s.business_id, system_id: s.id,
+        gap_title: `External-action system without oversight evidence: ${s.system_name}`,
+        gap_description: "External-action capable system has no oversight/approval evidence.",
+        severity: "critical", source: "ai_human_oversight_records",
+        required_action: "Attach approval log or audit log proving founder oversight.",
+        action_owner: "founder", due_date: null, status: "open",
+        founder_decision_required: true,
+      });
+    }
+  }
+
+  const has = (t: string) => evidenceTypes.has(t as any);
+  if (!has("policy")) {
+    extra.push({
+      business_id: null, system_id: null,
+      gap_title: "No policy evidence registered",
+      gap_description: "No AI usage / privacy / security / automation safety policy evidence on file.",
+      severity: "medium", source: "policies",
+      required_action: "Attach links to current policies in Evidence Pack.",
+      action_owner: "founder", due_date: null, status: "open",
+      founder_decision_required: false,
+    });
+  }
+  if (!has("incident_record")) {
+    extra.push({
+      business_id: null, system_id: null,
+      gap_title: "No incident escalation evidence",
+      gap_description: "No evidence of incident escalation paths for AI harm, wrong-send, data leak, hallucinated claim or external-action failure.",
+      severity: "high", source: "incidents",
+      required_action: "Attach escalation path evidence to Evidence Pack.",
+      action_owner: "founder", due_date: null, status: "open",
+      founder_decision_required: true,
+    });
+  }
+
+  // Dedupe by stable key — never emit two synthesised rows for the same gap.
+  const seen = new Set<string>();
+  const all = [...base, ...extra].filter(g => {
+    const k = gapDedupKey(g);
+    if (seen.has(k)) return false;
+    seen.add(k); return true;
+  });
+  return all;
+}
+
+export function gapDedupKey(g: Pick<SynthGap, "business_id" | "system_id" | "gap_title">): string {
+  return `${g.business_id ?? "_"}|${g.system_id ?? "_"}|${g.gap_title}`;
+}
+
+/**
+ * Materialise only synth gaps that don't already exist as open/in_progress/blocked rows.
+ * Done/parked gaps are NOT reopened automatically.
+ */
+export async function materialiseGapsIdempotent(synth: SynthGap[]): Promise<{ inserted: number; skipped: number }> {
+  if (synth.length === 0) return { inserted: 0, skipped: 0 };
+  const existing = await fetchGapActions();
+  const active = new Set(existing.filter(g => g.status !== "done" && g.status !== "parked").map(gapDedupKey));
+  const fresh = synth.filter(s => !active.has(gapDedupKey(s)));
+  if (fresh.length === 0) return { inserted: 0, skipped: synth.length };
+  const { error } = await sb().from("ai_compliance_gap_actions").insert(fresh);
+  if (error) throw error;
+  return { inserted: fresh.length, skipped: synth.length - fresh.length };
+}
+
+/* ---------------- Command Centre aggregator ---------------- */
+
+export type CommandCentreStatus = "clear" | "needs_review" | "blocked";
+
+export type CommandCentreSummary = {
+  status: CommandCentreStatus;
+  systems: number;
+  critical_or_high: number;
+  external_action: number;
+  sensitive_data: number;
+  open_gaps: number;
+  founder_decisions_required: number;
+  next_review_due_at: string | null;
+  blocking_reasons: string[];
+  founder_items: {
+    title: string;
+    severity: SynthGap["severity"];
+    source: string | null;
+    business_id: string | null;
+    system_id: string | null;
+    due_date: string | null;
+  }[];
+};
+
+export function aggregateCommandCentre(input: {
+  systems: AIComplianceSystem[];
+  flows: AIDataFlowRecord[];
+  oversight: AIHumanOversightRecord[];
+  evidence: AIComplianceEvidenceItem[];
+  gaps: AIComplianceGapAction[];
+  profiles: ComplianceProfile[];
+  triggers: ApprovalTrigger[];
+}): CommandCentreSummary {
+  const { systems, flows, oversight, evidence, gaps, profiles, triggers } = input;
+  const sum = summarizeCompliance({ systems, flows, oversight, evidence, gaps });
+  const synth = synthesizeGapsExtended({ profiles, systems, flows, oversight, evidence, triggers });
+
+  const flowsBySys = new Set(flows.map(f => f.system_id).filter(Boolean) as string[]);
+  const oversightBySys = new Set(oversight.map(o => o.system_id).filter(Boolean) as string[]);
+
+  const founder_items_src: SynthGap[] = [
+    ...gaps
+      .filter(g => (g.founder_decision_required || g.severity === "critical" || g.severity === "high") &&
+                   g.status !== "done" && g.status !== "parked")
+      .map(g => ({
+        business_id: g.business_id, system_id: g.system_id,
+        gap_title: g.gap_title, gap_description: g.gap_description,
+        severity: g.severity, source: g.source,
+        required_action: g.required_action, action_owner: g.action_owner,
+        due_date: g.due_date, status: g.status,
+        founder_decision_required: g.founder_decision_required,
+      })),
+    ...synth.filter(s => s.founder_decision_required || s.severity === "critical" || s.severity === "high"),
+    ...systems
+      .filter(s => (s.risk_level === "critical" || s.risk_level === "high") && !s.founder_confirmed)
+      .map(s => ({
+        business_id: s.business_id, system_id: s.id,
+        gap_title: `Confirm high/critical system: ${s.system_name}`,
+        gap_description: null, severity: "high" as const,
+        source: "ai_compliance_systems", required_action: "Founder confirmation required.",
+        action_owner: "founder", due_date: null, status: "open" as const,
+        founder_decision_required: true,
+      })),
+    ...systems
+      .filter(s => (s.uses_sensitive_data || s.handles_children_data || s.handles_health_data) && !flowsBySys.has(s.id))
+      .map(s => ({
+        business_id: s.business_id, system_id: s.id,
+        gap_title: `Sensitive-data system without data-flow: ${s.system_name}`,
+        gap_description: null, severity: "critical" as const,
+        source: "ai_data_flow_records", required_action: "Document data flow.",
+        action_owner: "founder", due_date: null, status: "open" as const,
+        founder_decision_required: true,
+      })),
+    ...systems
+      .filter(s => s.external_action_capable && !oversightBySys.has(s.id))
+      .map(s => ({
+        business_id: s.business_id, system_id: s.id,
+        gap_title: `External-action system without oversight: ${s.system_name}`,
+        gap_description: null, severity: "critical" as const,
+        source: "ai_human_oversight_records", required_action: "Attach approval/oversight evidence.",
+        action_owner: "founder", due_date: null, status: "open" as const,
+        founder_decision_required: true,
+      })),
+  ];
+
+  // Dedupe.
+  const seen = new Set<string>();
+  const founder_items = founder_items_src
+    .filter(g => { const k = gapDedupKey(g); if (seen.has(k)) return false; seen.add(k); return true; })
+    .map(g => ({
+      title: g.gap_title, severity: g.severity, source: g.source,
+      business_id: g.business_id, system_id: g.system_id, due_date: g.due_date,
+    }));
+
+  const blocking_reasons: string[] = [];
+  for (const s of systems) {
+    if (s.external_action_capable && !oversightBySys.has(s.id))
+      blocking_reasons.push(`External-action system without oversight: ${s.system_name}`);
+    if ((s.uses_sensitive_data || s.handles_children_data || s.handles_health_data) && !flowsBySys.has(s.id))
+      blocking_reasons.push(`Sensitive-data system without data-flow: ${s.system_name}`);
+  }
+
+  let status: CommandCentreStatus = "clear";
+  const criticalActive = gaps.some(g => g.severity === "critical" && g.status !== "done" && g.status !== "parked");
+  if (blocking_reasons.length > 0 || criticalActive) status = "blocked";
+  else if (sum.open_gaps > 0 || founder_items.length > 0 || systems.length === 0) status = "needs_review";
+
+  return {
+    status,
+    systems: sum.systems,
+    critical_or_high: sum.critical_or_high,
+    external_action: sum.external_action,
+    sensitive_data: sum.sensitive_data,
+    open_gaps: sum.open_gaps,
+    founder_decisions_required: founder_items.length,
+    next_review_due_at: sum.next_review_due_at,
+    blocking_reasons: Array.from(new Set(blocking_reasons)),
+    founder_items: founder_items.slice(0, 25),
+  };
+}
+
+/* ---------------- Evidence roll-up ---------------- */
+
+export type EvidenceCategory =
+  | "ai_gateway" | "ai_usage_ledger" | "approval_gates" | "audit_ledger"
+  | "business_compliance" | "privacy" | "incidents" | "policies"
+  | "security_access" | "connectors" | "scheduled_jobs"
+  | "external_action_gates" | "technical_manual" | "user_manual" | "other";
+
+export type EvidenceRollupRow = {
+  category: EvidenceCategory;
+  label: string;
+  count: number;
+  current: number;
+  stale: number;
+  missing: boolean;
+};
+
+const EVIDENCE_CATEGORY_MAP: { category: EvidenceCategory; label: string; match: (e: AIComplianceEvidenceItem) => boolean }[] = [
+  { category: "ai_gateway", label: "AI Gateway requests", match: e => /gateway/i.test(e.source_module ?? "") },
+  { category: "ai_usage_ledger", label: "AI usage ledger", match: e => /usage/i.test(e.source_module ?? "") },
+  { category: "approval_gates", label: "Approval gates", match: e => e.evidence_type === "approval_log" || /approval/i.test(e.source_module ?? "") },
+  { category: "audit_ledger", label: "Audit ledger", match: e => e.evidence_type === "audit_log" || /audit/i.test(e.source_module ?? "") },
+  { category: "business_compliance", label: "Business compliance profiles/rules/triggers", match: e => /compliance/i.test(e.source_module ?? "") },
+  { category: "privacy", label: "Privacy / DSAR / retention / processors", match: e => /privacy|dsar|retention|processor/i.test(`${e.source_module ?? ""} ${e.title}`) },
+  { category: "incidents", label: "Incidents", match: e => e.evidence_type === "incident_record" || /incident/i.test(e.source_module ?? "") },
+  { category: "policies", label: "Policies / legal pages", match: e => e.evidence_type === "policy" },
+  { category: "security_access", label: "Security / access governance", match: e => /security|access/i.test(e.source_module ?? "") },
+  { category: "connectors", label: "Connectors / vendor records", match: e => e.evidence_type === "vendor_record" || /connector|vendor/i.test(e.source_module ?? "") },
+  { category: "scheduled_jobs", label: "Scheduled jobs / cron controls", match: e => /schedul|cron/i.test(`${e.source_module ?? ""} ${e.title}`) },
+  { category: "external_action_gates", label: "External action gates", match: e => /external|smartlead|metricool|apollo|publish/i.test(`${e.source_module ?? ""} ${e.title}`) },
+  { category: "technical_manual", label: "Technical manual references", match: e => e.evidence_type === "technical_manual" },
+  { category: "user_manual", label: "User manual references", match: e => e.evidence_type === "user_manual" },
+];
+
+export function rollupEvidence(evidence: AIComplianceEvidenceItem[]): EvidenceRollupRow[] {
+  const out: EvidenceRollupRow[] = [];
+  for (const { category, label, match } of EVIDENCE_CATEGORY_MAP) {
+    const items = evidence.filter(match);
+    out.push({
+      category, label,
+      count: items.length,
+      current: items.filter(i => i.review_status === "current").length,
+      stale: items.filter(i => i.review_status === "stale").length,
+      missing: items.length === 0,
+    });
+  }
+  return out;
+}
