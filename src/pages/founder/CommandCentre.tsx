@@ -24,6 +24,7 @@ import FundingRadarCommandPanel from "@/components/founder/funding/FundingRadarC
 import ReputationCrisisCommsPanel from "@/components/founder/brand/ReputationCrisisCommsPanel";
 import KPIOKRPerformancePanel from "@/components/founder/analytics/KPIOKRPerformancePanel";
 import FounderAlertEscalationPanel from "@/components/founder/command/FounderAlertEscalationPanel";
+import AIComplianceControlPanel from "@/components/founder/ai-compliance/AIComplianceControlPanel";
 import CommandCentreUsabilityReportPanel from "@/components/founder/command/CommandCentreUsabilityReportPanel";
 import FounderCockpit from "@/components/founder/command/FounderCockpit";
 import StartUsingLiftorNote from "@/components/founder/command/StartUsingLiftorNote";
@@ -806,6 +807,7 @@ const CommandCentre = () => {
       <div className="max-w-7xl mx-auto px-4 pt-4"><AIRuntimeHealthMiniCard /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><AIAlertsMiniWidget /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><FounderAlertEscalationPanel /></div>
+      <AIComplianceControlPanel />
       <WhatNeedsAttentionToday />
       <div className="max-w-7xl mx-auto px-4 pt-4"><CustomerSalesEngineCard /></div>
       <div className="max-w-7xl mx-auto px-4 pt-4"><VoiceProviderStatusCard /></div>
