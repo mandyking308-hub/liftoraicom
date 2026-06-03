@@ -461,6 +461,328 @@ export type Database = {
         }
         Relationships: []
       }
+      acquisition_funding_deal_structures: {
+        Row: {
+          cash_upfront: number | null
+          created_at: string
+          debt_required: number | null
+          deferred_payment_amount: number | null
+          earn_out_amount: number | null
+          founder_approval_status: string
+          id: string
+          investor_equity_required: number | null
+          legal_review_required: boolean
+          notes: string | null
+          opportunity_id: string
+          recommended_structure: string | null
+          regulatory_risk: string | null
+          revenue_share_terms: string | null
+          seller_finance_amount: number | null
+          spv_required: boolean
+          tax_review_required: boolean
+          total_purchase_price: number | null
+          updated_at: string
+        }
+        Insert: {
+          cash_upfront?: number | null
+          created_at?: string
+          debt_required?: number | null
+          deferred_payment_amount?: number | null
+          earn_out_amount?: number | null
+          founder_approval_status?: string
+          id?: string
+          investor_equity_required?: number | null
+          legal_review_required?: boolean
+          notes?: string | null
+          opportunity_id: string
+          recommended_structure?: string | null
+          regulatory_risk?: string | null
+          revenue_share_terms?: string | null
+          seller_finance_amount?: number | null
+          spv_required?: boolean
+          tax_review_required?: boolean
+          total_purchase_price?: number | null
+          updated_at?: string
+        }
+        Update: {
+          cash_upfront?: number | null
+          created_at?: string
+          debt_required?: number | null
+          deferred_payment_amount?: number | null
+          earn_out_amount?: number | null
+          founder_approval_status?: string
+          id?: string
+          investor_equity_required?: number | null
+          legal_review_required?: boolean
+          notes?: string | null
+          opportunity_id?: string
+          recommended_structure?: string | null
+          regulatory_risk?: string | null
+          revenue_share_terms?: string | null
+          seller_finance_amount?: number | null
+          spv_required?: boolean
+          tax_review_required?: boolean
+          total_purchase_price?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "acquisition_funding_deal_structures_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "acquisition_funding_opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      acquisition_funding_opportunities: {
+        Row: {
+          asking_price: number | null
+          asset_quality_score: number | null
+          brand_value_score: number | null
+          category: string
+          country: string | null
+          created_at: string
+          current_arr: number | null
+          current_mrr: number | null
+          customer_count: number | null
+          distress_signal: string
+          email_list_size: number | null
+          founder_approval_required: boolean
+          founder_approved: boolean
+          id: string
+          legal_risk_score: number | null
+          liftor_fit_score: number | null
+          liftor_operating_advantage: string | null
+          notes: string | null
+          opportunity_name: string
+          overall_priority_score: number | null
+          owner_reason_for_sale: string | null
+          profit_ttm: number | null
+          recommended_action: string
+          replacement_cost_score: number | null
+          revenue_ttm: number | null
+          social_following: number | null
+          source: string | null
+          source_url: string | null
+          turnaround_potential_score: number | null
+          updated_at: string
+          user_count: number | null
+        }
+        Insert: {
+          asking_price?: number | null
+          asset_quality_score?: number | null
+          brand_value_score?: number | null
+          category?: string
+          country?: string | null
+          created_at?: string
+          current_arr?: number | null
+          current_mrr?: number | null
+          customer_count?: number | null
+          distress_signal?: string
+          email_list_size?: number | null
+          founder_approval_required?: boolean
+          founder_approved?: boolean
+          id?: string
+          legal_risk_score?: number | null
+          liftor_fit_score?: number | null
+          liftor_operating_advantage?: string | null
+          notes?: string | null
+          opportunity_name: string
+          overall_priority_score?: number | null
+          owner_reason_for_sale?: string | null
+          profit_ttm?: number | null
+          recommended_action?: string
+          replacement_cost_score?: number | null
+          revenue_ttm?: number | null
+          social_following?: number | null
+          source?: string | null
+          source_url?: string | null
+          turnaround_potential_score?: number | null
+          updated_at?: string
+          user_count?: number | null
+        }
+        Update: {
+          asking_price?: number | null
+          asset_quality_score?: number | null
+          brand_value_score?: number | null
+          category?: string
+          country?: string | null
+          created_at?: string
+          current_arr?: number | null
+          current_mrr?: number | null
+          customer_count?: number | null
+          distress_signal?: string
+          email_list_size?: number | null
+          founder_approval_required?: boolean
+          founder_approved?: boolean
+          id?: string
+          legal_risk_score?: number | null
+          liftor_fit_score?: number | null
+          liftor_operating_advantage?: string | null
+          notes?: string | null
+          opportunity_name?: string
+          overall_priority_score?: number | null
+          owner_reason_for_sale?: string | null
+          profit_ttm?: number | null
+          recommended_action?: string
+          replacement_cost_score?: number | null
+          revenue_ttm?: number | null
+          social_following?: number | null
+          source?: string | null
+          source_url?: string | null
+          turnaround_potential_score?: number | null
+          updated_at?: string
+          user_count?: number | null
+        }
+        Relationships: []
+      }
+      acquisition_funding_pitch_packs: {
+        Row: {
+          acquisition_memo: string | null
+          created_at: string
+          distress_or_value_gap: string | null
+          due_diligence_required: string | null
+          expected_return_routes: string | null
+          founder_approval_status: string
+          funder_shortlist: Json
+          funding_required: number | null
+          id: string
+          investment_thesis: string | null
+          key_risks: string | null
+          liftor_advantage: string | null
+          ninety_day_relaunch_plan: string | null
+          opportunity_id: string
+          pitch_status: string
+          proposed_capital_stack: string | null
+          twelve_month_growth_plan: string | null
+          updated_at: string
+          why_now: string | null
+          why_this_asset: string | null
+        }
+        Insert: {
+          acquisition_memo?: string | null
+          created_at?: string
+          distress_or_value_gap?: string | null
+          due_diligence_required?: string | null
+          expected_return_routes?: string | null
+          founder_approval_status?: string
+          funder_shortlist?: Json
+          funding_required?: number | null
+          id?: string
+          investment_thesis?: string | null
+          key_risks?: string | null
+          liftor_advantage?: string | null
+          ninety_day_relaunch_plan?: string | null
+          opportunity_id: string
+          pitch_status?: string
+          proposed_capital_stack?: string | null
+          twelve_month_growth_plan?: string | null
+          updated_at?: string
+          why_now?: string | null
+          why_this_asset?: string | null
+        }
+        Update: {
+          acquisition_memo?: string | null
+          created_at?: string
+          distress_or_value_gap?: string | null
+          due_diligence_required?: string | null
+          expected_return_routes?: string | null
+          founder_approval_status?: string
+          funder_shortlist?: Json
+          funding_required?: number | null
+          id?: string
+          investment_thesis?: string | null
+          key_risks?: string | null
+          liftor_advantage?: string | null
+          ninety_day_relaunch_plan?: string | null
+          opportunity_id?: string
+          pitch_status?: string
+          proposed_capital_stack?: string | null
+          twelve_month_growth_plan?: string | null
+          updated_at?: string
+          why_now?: string | null
+          why_this_asset?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "acquisition_funding_pitch_packs_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "acquisition_funding_opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      acquisition_funding_sources: {
+        Row: {
+          accepts_loss_making: boolean
+          accepts_pre_revenue: boolean
+          contact_email: string | null
+          contact_name: string | null
+          contact_url: string | null
+          created_at: string
+          funder_name: string
+          funder_type: string
+          geography: string | null
+          id: string
+          next_action: string | null
+          notes: string | null
+          preferred_asset_type: string | null
+          preferred_deal_size_max: number | null
+          preferred_deal_size_min: number | null
+          preferred_structure: string
+          requires_profitability: boolean
+          risk_appetite: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          accepts_loss_making?: boolean
+          accepts_pre_revenue?: boolean
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_url?: string | null
+          created_at?: string
+          funder_name: string
+          funder_type?: string
+          geography?: string | null
+          id?: string
+          next_action?: string | null
+          notes?: string | null
+          preferred_asset_type?: string | null
+          preferred_deal_size_max?: number | null
+          preferred_deal_size_min?: number | null
+          preferred_structure?: string
+          requires_profitability?: boolean
+          risk_appetite?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          accepts_loss_making?: boolean
+          accepts_pre_revenue?: boolean
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_url?: string | null
+          created_at?: string
+          funder_name?: string
+          funder_type?: string
+          geography?: string | null
+          id?: string
+          next_action?: string | null
+          notes?: string | null
+          preferred_asset_type?: string | null
+          preferred_deal_size_max?: number | null
+          preferred_deal_size_min?: number | null
+          preferred_structure?: string
+          requires_profitability?: boolean
+          risk_appetite?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       activity_log: {
         Row: {
           business_name: string
