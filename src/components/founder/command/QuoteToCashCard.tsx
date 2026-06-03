@@ -12,7 +12,7 @@ export default function QuoteToCashCard() {
     const head = { count: "exact" as const, head: true };
     const today = new Date(); today.setHours(0,0,0,0);
     const monthStart = new Date(today.getFullYear(), today.getMonth(), 1).toISOString();
-    const safe = (p:any)=>p.catch(()=>({count:0, data:[]}));
+    const safe = (p:any)=>Promise.resolve(p).then(r=>r, ()=>({count:0, data:[]}));
     Promise.all([
       safe(sb.from("qtc_quotes").select("id", head).eq("quote_status","approval_required")),
       safe(sb.from("qtc_invoices").select("id", head).eq("invoice_status","draft")),
