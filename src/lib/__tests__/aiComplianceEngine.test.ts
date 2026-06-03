@@ -1,5 +1,9 @@
-import { describe, it, expect } from "vitest";
-import { classifyRisk, synthesizeGaps, type AIComplianceSystem } from "@/lib/aiComplianceEngine";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import {
+  classifyRisk, synthesizeGaps, synthesizeGapsExtended,
+  aggregateCommandCentre, MODULE_SCAN_REGISTRY, gapDedupKey,
+  type AIComplianceSystem,
+} from "@/lib/aiComplianceEngine";
 import type { ComplianceProfile, ApprovalTrigger } from "@/lib/businessComplianceEngine";
 
 const baseSystem = (over: Partial<AIComplianceSystem> = {}): AIComplianceSystem => ({
