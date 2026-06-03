@@ -364,6 +364,15 @@ import BCClaims from "./pages/founder/business-compliance/Claims";
 import BCChannels from "./pages/founder/business-compliance/Channels";
 import BCApprovalTriggers from "./pages/founder/business-compliance/ApprovalTriggers";
 
+// AI Compliance Control Layer
+import AICOverview from "./pages/founder/ai-compliance/Overview";
+import AICSystems from "./pages/founder/ai-compliance/Systems";
+import AICDataFlows from "./pages/founder/ai-compliance/DataFlows";
+import AICOversight from "./pages/founder/ai-compliance/Oversight";
+import AICEvidence from "./pages/founder/ai-compliance/Evidence";
+import AICRisk from "./pages/founder/ai-compliance/Risk";
+import AICGaps from "./pages/founder/ai-compliance/Gaps";
+
 // Multi-Business Context Guard
 import CGOverview from "./pages/founder/context-guard/Overview";
 import CGEvents from "./pages/founder/context-guard/Events";
