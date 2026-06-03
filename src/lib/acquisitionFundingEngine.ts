@@ -272,7 +272,7 @@ export function requiresUKRegulatoryReview(d: Partial<AFDealStructure>): boolean
   return false;
 }
 
-export function stampRegulatoryFlags<T extends Partial<AFDealStructure>>(d: T): T {
+export function stampRegulatoryFlags(d: Partial<AFDealStructure>): Partial<AFDealStructure> {
   const needs = requiresUKRegulatoryReview(d);
   return {
     ...d,
