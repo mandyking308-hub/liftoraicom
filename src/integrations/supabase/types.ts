@@ -2139,6 +2139,205 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_compliance_evidence_items: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          evidence_type: string
+          id: string
+          next_review_due_at: string | null
+          owner: string | null
+          review_status: string
+          source_module: string | null
+          source_record_id: string | null
+          source_table: string | null
+          summary: string | null
+          system_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          evidence_type?: string
+          id?: string
+          next_review_due_at?: string | null
+          owner?: string | null
+          review_status?: string
+          source_module?: string | null
+          source_record_id?: string | null
+          source_table?: string | null
+          summary?: string | null
+          system_id?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          evidence_type?: string
+          id?: string
+          next_review_due_at?: string | null
+          owner?: string | null
+          review_status?: string
+          source_module?: string | null
+          source_record_id?: string | null
+          source_table?: string | null
+          summary?: string | null
+          system_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_compliance_evidence_items_system_id_fkey"
+            columns: ["system_id"]
+            isOneToOne: false
+            referencedRelation: "ai_compliance_systems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_compliance_gap_actions: {
+        Row: {
+          action_owner: string | null
+          business_id: string | null
+          created_at: string
+          due_date: string | null
+          founder_decision_required: boolean
+          gap_description: string | null
+          gap_title: string
+          id: string
+          required_action: string | null
+          severity: string
+          source: string | null
+          status: string
+          system_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          action_owner?: string | null
+          business_id?: string | null
+          created_at?: string
+          due_date?: string | null
+          founder_decision_required?: boolean
+          gap_description?: string | null
+          gap_title: string
+          id?: string
+          required_action?: string | null
+          severity?: string
+          source?: string | null
+          status?: string
+          system_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          action_owner?: string | null
+          business_id?: string | null
+          created_at?: string
+          due_date?: string | null
+          founder_decision_required?: boolean
+          gap_description?: string | null
+          gap_title?: string
+          id?: string
+          required_action?: string | null
+          severity?: string
+          source?: string | null
+          status?: string
+          system_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_compliance_gap_actions_system_id_fkey"
+            columns: ["system_id"]
+            isOneToOne: false
+            referencedRelation: "ai_compliance_systems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_compliance_systems: {
+        Row: {
+          autonomy_level: string
+          business_id: string | null
+          created_at: string
+          current_status: string
+          external_action_capable: boolean
+          founder_confirmed: boolean
+          handles_children_data: boolean
+          handles_financial_data: boolean
+          handles_health_data: boolean
+          handles_legal_data: boolean
+          id: string
+          internal_or_external: string
+          last_reviewed_at: string | null
+          next_review_due_at: string | null
+          notes: string | null
+          owner_role: string | null
+          provider: string | null
+          purpose: string | null
+          risk_level: string
+          system_name: string
+          system_type: string
+          updated_at: string
+          uses_personal_data: boolean
+          uses_sensitive_data: boolean
+        }
+        Insert: {
+          autonomy_level?: string
+          business_id?: string | null
+          created_at?: string
+          current_status?: string
+          external_action_capable?: boolean
+          founder_confirmed?: boolean
+          handles_children_data?: boolean
+          handles_financial_data?: boolean
+          handles_health_data?: boolean
+          handles_legal_data?: boolean
+          id?: string
+          internal_or_external?: string
+          last_reviewed_at?: string | null
+          next_review_due_at?: string | null
+          notes?: string | null
+          owner_role?: string | null
+          provider?: string | null
+          purpose?: string | null
+          risk_level?: string
+          system_name: string
+          system_type?: string
+          updated_at?: string
+          uses_personal_data?: boolean
+          uses_sensitive_data?: boolean
+        }
+        Update: {
+          autonomy_level?: string
+          business_id?: string | null
+          created_at?: string
+          current_status?: string
+          external_action_capable?: boolean
+          founder_confirmed?: boolean
+          handles_children_data?: boolean
+          handles_financial_data?: boolean
+          handles_health_data?: boolean
+          handles_legal_data?: boolean
+          id?: string
+          internal_or_external?: string
+          last_reviewed_at?: string | null
+          next_review_due_at?: string | null
+          notes?: string | null
+          owner_role?: string | null
+          provider?: string | null
+          purpose?: string | null
+          risk_level?: string
+          system_name?: string
+          system_type?: string
+          updated_at?: string
+          uses_personal_data?: boolean
+          uses_sensitive_data?: boolean
+        }
+        Relationships: []
+      }
       ai_concurrency_leases: {
         Row: {
           acquired_at: string
@@ -2386,6 +2585,83 @@ export type Database = {
           task_id?: string | null
         }
         Relationships: []
+      }
+      ai_data_flow_records: {
+        Row: {
+          business_id: string | null
+          children_data: boolean
+          created_at: string
+          cross_border_transfer: boolean
+          data_categories: string[]
+          destination_system: string
+          founder_confirmed: boolean
+          id: string
+          lawful_basis: string | null
+          personal_data: boolean
+          processor_or_controller_note: string | null
+          retention_period: string | null
+          review_status: string
+          security_controls: string | null
+          sensitive_data: boolean
+          source_system: string
+          storage_location: string | null
+          system_id: string | null
+          transfer_jurisdiction: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          children_data?: boolean
+          created_at?: string
+          cross_border_transfer?: boolean
+          data_categories?: string[]
+          destination_system: string
+          founder_confirmed?: boolean
+          id?: string
+          lawful_basis?: string | null
+          personal_data?: boolean
+          processor_or_controller_note?: string | null
+          retention_period?: string | null
+          review_status?: string
+          security_controls?: string | null
+          sensitive_data?: boolean
+          source_system: string
+          storage_location?: string | null
+          system_id?: string | null
+          transfer_jurisdiction?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          children_data?: boolean
+          created_at?: string
+          cross_border_transfer?: boolean
+          data_categories?: string[]
+          destination_system?: string
+          founder_confirmed?: boolean
+          id?: string
+          lawful_basis?: string | null
+          personal_data?: boolean
+          processor_or_controller_note?: string | null
+          retention_period?: string | null
+          review_status?: string
+          security_controls?: string | null
+          sensitive_data?: boolean
+          source_system?: string
+          storage_location?: string | null
+          system_id?: string | null
+          transfer_jurisdiction?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_data_flow_records_system_id_fkey"
+            columns: ["system_id"]
+            isOneToOne: false
+            referencedRelation: "ai_compliance_systems"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ai_draft_quality_reviews: {
         Row: {
@@ -2908,6 +3184,62 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      ai_human_oversight_records: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          decided_by: string | null
+          decision_notes: string | null
+          evidence_url: string | null
+          external_action_blocked: boolean
+          human_decision: string
+          id: string
+          oversight_type: string
+          proposed_ai_action: string | null
+          system_id: string | null
+          trigger_reason: string | null
+          trigger_source: string | null
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          decided_by?: string | null
+          decision_notes?: string | null
+          evidence_url?: string | null
+          external_action_blocked?: boolean
+          human_decision?: string
+          id?: string
+          oversight_type: string
+          proposed_ai_action?: string | null
+          system_id?: string | null
+          trigger_reason?: string | null
+          trigger_source?: string | null
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          decided_by?: string | null
+          decision_notes?: string | null
+          evidence_url?: string | null
+          external_action_blocked?: boolean
+          human_decision?: string
+          id?: string
+          oversight_type?: string
+          proposed_ai_action?: string | null
+          system_id?: string | null
+          trigger_reason?: string | null
+          trigger_source?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_human_oversight_records_system_id_fkey"
+            columns: ["system_id"]
+            isOneToOne: false
+            referencedRelation: "ai_compliance_systems"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ai_kill_switch_state: {
         Row: {
