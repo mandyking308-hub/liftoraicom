@@ -35,7 +35,7 @@ export default function AICSystems() {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<Partial<AIComplianceSystem>>(emptyDraft());
 
-  const load = () => fetchSystems().then(setRows).catch((e) => toast.error(e.message ?? "Failed to load"));
+  const load = () => { fetchSystems().then(setRows).catch((e) => toast.error(e.message ?? "Failed to load")); };
   useEffect(load, []);
 
   const save = async () => {
