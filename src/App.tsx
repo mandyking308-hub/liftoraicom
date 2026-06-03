@@ -463,6 +463,12 @@ import PETBusinesses from "./pages/founder/portfolio-exit-targets/Businesses";
 import PETDetail from "./pages/founder/portfolio-exit-targets/Detail";
 import PETAlerts from "./pages/founder/portfolio-exit-targets/Alerts";
 import PETSettings from "./pages/founder/portfolio-exit-targets/Settings";
+import DROverview from "./pages/founder/distressed-radar/Overview";
+import DRAcquisition from "./pages/founder/distressed-radar/Acquisition";
+import DRAcquisitionDetail from "./pages/founder/distressed-radar/AcquisitionDetail";
+import DRDisposal from "./pages/founder/distressed-radar/Disposal";
+import DRFinancing from "./pages/founder/distressed-radar/Financing";
+import DRSources from "./pages/founder/distressed-radar/Sources";
 import PortfolioDiversityOverview from "./pages/founder/portfolio-diversity/Overview";
 import WorkQueueOverview from "./pages/founder/work-queue/Overview";
 import WorkQueueToday from "./pages/founder/work-queue/Today";
@@ -1283,6 +1289,12 @@ const App = () => (
             <Route path="/founder/portfolio-exit-targets/alerts" element={<FounderRoute><PETAlerts /></FounderRoute>} />
             <Route path="/founder/portfolio-exit-targets/settings" element={<FounderRoute><PETSettings /></FounderRoute>} />
             <Route path="/founder/portfolio-exit-targets/:id" element={<FounderRoute><PETDetail /></FounderRoute>} />
+            <Route path="/founder/distressed-radar" element={<FounderRoute><DROverview /></FounderRoute>} />
+            <Route path="/founder/distressed-radar/acquisition" element={<FounderRoute><DRAcquisition /></FounderRoute>} />
+            <Route path="/founder/distressed-radar/acquisition/:id" element={<FounderRoute><DRAcquisitionDetail /></FounderRoute>} />
+            <Route path="/founder/distressed-radar/disposal" element={<FounderRoute><DRDisposal /></FounderRoute>} />
+            <Route path="/founder/distressed-radar/financing" element={<FounderRoute><DRFinancing /></FounderRoute>} />
+            <Route path="/founder/distressed-radar/sources" element={<FounderRoute><DRSources /></FounderRoute>} />
             <Route path="/founder/portfolio-diversity" element={<FounderRoute><PortfolioDiversityOverview /></FounderRoute>} />
             <Route path="/founder/work-queue" element={<FounderRoute><WorkQueueOverview /></FounderRoute>} />
             <Route path="/founder/work-queue/today" element={<FounderRoute><WorkQueueToday /></FounderRoute>} />
