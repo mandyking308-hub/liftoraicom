@@ -11,6 +11,7 @@ import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import {
   fetchEvidence, upsertEvidence, fetchSystems, fetchOversight, fetchFlows,
+  rollupEvidence,
   type AIComplianceEvidenceItem, type AIComplianceSystem,
 } from "@/lib/aiComplianceEngine";
 
@@ -54,6 +55,26 @@ export default function AICEvidence() {
         <Card label="Oversight events" value={counts.oversight} />
         <Card label="Evidence items" value={rows.length} />
       </div>
+
+      <AICSection title="Evidence roll-up" description="Coverage across the categories Liftor evidences. Empty categories show ‘Not available yet’ — no fake records.">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 text-xs">
+          {rollupEvidence(rows).map(r => (
+            <div key={r.category} className="rounded border border-border/50 p-2 bg-background/40 flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <p className="font-medium truncate">{r.label}</p>
+                {r.missing ? (
+                  <p className="text-[10px] text-muted-foreground">Not available yet</p>
+                ) : (
+                  <p className="text-[10px] text-muted-foreground">{r.count} items · {r.current} current{r.stale ? ` · ${r.stale} stale` : ""}</p>
+                )}
+              </div>
+              <Badge variant="outline" className={`text-[10px] shrink-0 ${r.missing ? "bg-destructive/15 text-destructive border-destructive/30" : r.current > 0 ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30" : "bg-yellow-500/15 text-yellow-300 border-yellow-500/30"}`}>
+                {r.missing ? "missing" : r.current > 0 ? "current" : "review"}
+              </Badge>
+            </div>
+          ))}
+        </div>
+      </AICSection>
 
       <AICSection title="Evidence index" description={`${rows.length} items · ${rows.filter(r => r.review_status === "current").length} current`} actions={
         <Dialog open={open} onOpenChange={setOpen}>
