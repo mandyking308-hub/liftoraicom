@@ -707,6 +707,14 @@ export type CommandCentreSummary = {
     system_id: string | null;
     due_date: string | null;
   }[];
+  /** Persisted (tracked) gap rows that are open or in_progress. */
+  materialised_gaps: number;
+  /** Live-computed review items synthesised from current state. */
+  computed_review_items: number;
+  /** Count of blocking reasons (external-action without oversight, sensitive without flow, etc.). */
+  blocking_issues: number;
+  /** Top three founder items, oldest-style preview for Command Centre. */
+  top_items: CommandCentreSummary["founder_items"];
 };
 
 export function aggregateCommandCentre(input: {
