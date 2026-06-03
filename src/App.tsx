@@ -469,6 +469,12 @@ import DRAcquisitionDetail from "./pages/founder/distressed-radar/AcquisitionDet
 import DRDisposal from "./pages/founder/distressed-radar/Disposal";
 import DRFinancing from "./pages/founder/distressed-radar/Financing";
 import DRSources from "./pages/founder/distressed-radar/Sources";
+import AFOverview from "./pages/founder/acquisition-funding/Overview";
+import AFOpportunities from "./pages/founder/acquisition-funding/Opportunities";
+import AFOpportunityDetail from "./pages/founder/acquisition-funding/OpportunityDetail";
+import AFFunders from "./pages/founder/acquisition-funding/Funders";
+import AFDeals from "./pages/founder/acquisition-funding/Deals";
+import AFPitches from "./pages/founder/acquisition-funding/Pitches";
 import PortfolioDiversityOverview from "./pages/founder/portfolio-diversity/Overview";
 import WorkQueueOverview from "./pages/founder/work-queue/Overview";
 import WorkQueueToday from "./pages/founder/work-queue/Today";
@@ -1295,6 +1301,12 @@ const App = () => (
             <Route path="/founder/distressed-radar/disposal" element={<FounderRoute><DRDisposal /></FounderRoute>} />
             <Route path="/founder/distressed-radar/financing" element={<FounderRoute><DRFinancing /></FounderRoute>} />
             <Route path="/founder/distressed-radar/sources" element={<FounderRoute><DRSources /></FounderRoute>} />
+            <Route path="/founder/acquisition-funding" element={<FounderRoute><AFOverview /></FounderRoute>} />
+            <Route path="/founder/acquisition-funding/opportunities" element={<FounderRoute><AFOpportunities /></FounderRoute>} />
+            <Route path="/founder/acquisition-funding/opportunities/:id" element={<FounderRoute><AFOpportunityDetail /></FounderRoute>} />
+            <Route path="/founder/acquisition-funding/funders" element={<FounderRoute><AFFunders /></FounderRoute>} />
+            <Route path="/founder/acquisition-funding/deals" element={<FounderRoute><AFDeals /></FounderRoute>} />
+            <Route path="/founder/acquisition-funding/pitches" element={<FounderRoute><AFPitches /></FounderRoute>} />
             <Route path="/founder/portfolio-diversity" element={<FounderRoute><PortfolioDiversityOverview /></FounderRoute>} />
             <Route path="/founder/work-queue" element={<FounderRoute><WorkQueueOverview /></FounderRoute>} />
             <Route path="/founder/work-queue/today" element={<FounderRoute><WorkQueueToday /></FounderRoute>} />
