@@ -1,104 +1,108 @@
-## Liftor Autonomous Apollo-to-Outreach Pipeline
+# Liftor Global AI Compliance Control Layer
 
-Convert the current manual-approval-per-batch flow into a policy-controlled autonomous pipeline. Founder approves the policy once; Liftor executes within it. All existing safety guardrails remain hard-enforced.
+A founder-only compliance spine that ties together AI system inventory, data flows, human oversight, approval gates, evidence and risk classification — built on top of the existing business compliance, privacy, incidents, audit and AI usage modules.
 
-### 1. Data model (new migration)
+## Scope
 
-**`business_autopilot_settings`** (one row per business, FK `business_name`):
-- `apollo_candidate_pull_enabled boolean default true`
-- `apollo_email_reveal_autonomous boolean default false` (founder must enable)
-- `apollo_reveal_daily_credit_budget int default 50`
-- `apollo_reveal_monthly_credit_budget int default 500`
-- `apollo_reveal_min_quality_score numeric default 7`
-- `apollo_reveal_max_domain_frequency int default 2`
-- `apollo_reveal_exclude_legacy_hold boolean default true`
-- `apollo_reveal_exclude_previous_no_email boolean default true`
-- `apollo_reveal_exclude_existing_crm boolean default true`
-- `apollo_reveal_exclude_duplicates boolean default true`
-- `apollo_reveal_exclude_poor_fit boolean default true`
-- `auto_promote_after_valid_reveal boolean default true`
-- `auto_promote_only_verified_email boolean default true`
-- `auto_promote_only_crm_new boolean default true`
-- `auto_promote_only_campaign_fit boolean default true`
-- `auto_queue_after_promotion boolean default true`
-- `auto_queue_campaign_id uuid` (resolves to "Early Access Collaboration Test")
-- `auto_queue_step int default 1`
-- `auto_queue_domain_cap int default 2`
-- `auto_send_after_queue boolean default false`
-- `sending_provider_mode text default 'ionos_proof'` — `ionos_proof | external_scale`
-- `daily_send_budget int default 20`
-- RLS: founder/admin only via `has_role`.
+In scope:
+- New founder route `/founder/ai-compliance` (founder-protected, no public access).
+- 5 new Supabase tables + RLS, plus a deterministic risk classifier in TypeScript.
+- Cross-links to existing modules (business compliance, approvals, privacy, incidents, AI usage, policies). No duplication.
+- Gap engine that turns existing business compliance signals into actionable items.
+- Evidence Pack view (UI/data only, no PDF export yet).
+- Tests for the risk classifier + smoke render test.
+- Internal docs: `docs/AI_COMPLIANCE_CONTROL_LAYER.md`.
 
-**`apollo_credit_ledger`** (append-only):
-- `business_name`, `function_source` (`reveal | enrich`), `credits_used int`, `apollo_person_ids text[]`, `created_at`.
-- RLS: founder read.
+Out of scope (explicit):
+- No external sending, no API calls, no Smartlead/Apollo/outreach state changes.
+- No PDF/CSV export wired up yet.
+- No "EU AI Act certified" claims — wording stays "readiness / evidence-ready / approval-gated".
+- No seeded fake customers/revenue.
 
-**`autopilot_run_log`** (append-only audit):
-- `business_name`, `stage` (`reveal|promote|queue|send|skip`), `actor` (`autopilot|founder`), `candidate_id`, `contact_id`, `outcome`, `reason`, `metadata jsonb`, `created_at`.
+## Routes
 
-**`founder_decision_queue`**:
-- `business_name`, `decision_type` (`policy_change|budget_increase|ambiguous_lead|provider_approval|enable_auto_send|large_suppression|copy_change`), `payload jsonb`, `status` (`pending|approved|rejected`), `requested_at`, `resolved_at`, `resolver_user_id`.
-- RLS: founder/admin.
+- `/founder/ai-compliance` (Overview) — summary cards + "What needs Mandy today".
+- `/founder/ai-compliance/systems` — AI System Inventory.
+- `/founder/ai-compliance/data-flows` — Data Flow Register.
+- `/founder/ai-compliance/oversight` — Human Oversight + Approval/Intervention Log.
+- `/founder/ai-compliance/evidence` — Evidence Pack.
+- `/founder/ai-compliance/risk` — Risk Classifier explorer.
+- `/founder/ai-compliance/gaps` — Gaps & Actions.
 
-Seed a NeonCandy row with the defaults above.
+All wrapped in `FounderRoute`, registered alongside existing founder routes in `App.tsx`.
 
-### 2. Edge functions
+## Database (single migration)
 
-**New `autopilot-orchestrator`** (cron every 15 min + manual trigger):
-Single entry point that runs the pipeline for one business at a time:
-1. Load policy from `business_autopilot_settings`.
-2. Compute today/month credit usage from `apollo_credit_ledger`; stop reveal stage if budget exceeded.
-3. Query `lead_quality_profiles` for candidates in `email_reveal_required` matching: score ≥ threshold, not in CRM, not duplicate (apollo_person_id), not bounced/suppressed/internal, not previous-no-email, not poor-fit, domain count under cap. Order by `reveal_score desc`.
-4. Compute `reveal_batch_size = min(eligible_count, daily_remaining, monthly_remaining)`. No artificial 25 cap.
-5. If `apollo_email_reveal_autonomous` → call internal Apollo enrichment; classify outcomes (`safe_to_promote_after_reveal | already_in_crm_after_reveal | reveal_attempted_no_email | reveal_invalid_email | needs_founder_review`). Log credit spend.
-6. If `auto_promote_after_valid_reveal` → for `safe_to_promote_after_reveal` rows that are verified, CRM-new, campaign-fit, not suppressed: insert into `contacts` + `business_contact_relationship`, link back to `lead_quality_profiles.promoted_contact_id`.
-7. If `auto_queue_after_promotion` → insert Step 1 rows in `email_queue` for promoted contacts that pass `crm-send-check` style guardrails and respect `auto_queue_domain_cap`. Reuses existing inbox assignment + NeonCandy `hello@neoncandy.online` hard guard.
-8. If `auto_send_after_queue=false` → stop. Otherwise rely on existing `outreach-send-worker` (no change), bounded by `daily_send_budget` and `sending_provider_mode`.
-9. Every action writes a row in `autopilot_run_log`. Anything ambiguous (catch-all email, score in grey zone, suspected duplicate) → row in `founder_decision_queue` instead of acting.
+Tables, all founder/service-role only (no anon, no authenticated read for non-founders — enforced via `has_role(auth.uid(),'founder')` policy that already exists in the project):
 
-**Update `lead-quality-autopilot`**: stop recommending "Review Apollo email reveal shortlist" when policy `apollo_email_reveal_autonomous=true` — instead recommend "View autonomous pipeline status".
+1. `ai_compliance_systems` — inventory of AI systems, autonomy level, data sensitivity flags, external action capability, risk level, review dates.
+2. `ai_data_flow_records` — source→destination flows, data categories, lawful basis, retention, cross-border, review status.
+3. `ai_human_oversight_records` — every approval/rejection/override/escalation/kill-switch, with decision_by and evidence link.
+4. `ai_compliance_evidence_items` — pointers to evidence (policy, audit log, approval log, etc.) with review status.
+5. `ai_compliance_gap_actions` — open gaps surfaced by the engine, severity, owner, due date, status.
 
-**Update `apollo-pull-verified`**: after staging candidates, if `apollo_candidate_pull_enabled=true` and `apollo_email_reveal_autonomous=true` invoke `autopilot-orchestrator` (fire-and-forget) so a fresh pull immediately enters the policy flow.
+Each table:
+- `id uuid pk`, `created_at`, `updated_at` with trigger.
+- Full GRANT block (service_role full; authenticated SELECT/INSERT/UPDATE/DELETE so founder UI works; no anon).
+- RLS: only users with `founder` role can read/write (uses existing `has_role` SECURITY DEFINER function).
 
-**Cron**: `pg_cron` job every 15 minutes invoking `autopilot-orchestrator` for each business with `apollo_candidate_pull_enabled=true`.
+## Code structure
 
-**No change** to `outreach-send-worker`, `crm-send-check`, suppression logic — guardrails remain authoritative.
+- `src/lib/aiComplianceEngine.ts` — fetch/upsert helpers, risk classifier, gap synthesis, summary aggregator. Pure functions where possible.
+- `src/lib/__tests__/aiComplianceEngine.test.ts` — unit tests for `classifyRisk()` and `synthesizeGaps()` (deterministic, no Supabase).
+- `src/pages/founder/ai-compliance/_shared.tsx` — layout, tabs, status badges (mirrors `business-compliance/_shared`).
+- `src/pages/founder/ai-compliance/Overview.tsx` + `Systems.tsx` + `DataFlows.tsx` + `Oversight.tsx` + `Evidence.tsx` + `Risk.tsx` + `Gaps.tsx`.
+- `src/components/founder/ai-compliance/` — `SystemRowDialog`, `DataFlowDialog`, `OversightDialog`, `WhatNeedsMandyPanel`, `EvidencePackView`.
+- Register routes in `src/App.tsx` and add a nav entry in the founder sidebar (wherever the existing AI/compliance links live).
 
-### 3. UI changes
+## Risk classifier (deterministic)
 
-**New `src/components/founder/AutopilotPolicyPanel.tsx`** — form bound to `business_autopilot_settings` with grouped toggles + budget inputs. "Save policy" writes one row; saving sensitive changes (enabling auto-send, raising credit budget >2x, changing provider) inserts a `founder_decision_queue` row tagged auto-approved by the saving founder.
+`classifyRisk(system)` returns `{ level, score, reasons[] }`. Scoring adds points for: external_action_capable, autonomy ∈ {semi_autonomous, autonomous_internal, external_action_capable}, sensitive/children/health/financial/legal data, outbound contact, regulated-domain purpose keywords, missing data flow, missing oversight, missing founder confirmation, stale/no review date. Thresholds → low/medium/high/critical. Reasons are returned so the UI can show why.
 
-**New `src/components/founder/AutonomousPipelineStatus.tsx`** — Command Centre section showing live counters (today/this run):
-- Apollo candidates pulled · passed quality policy · revealed · credits used today/month (with budget bars)
-- Valid emails returned · no-email outcomes · auto-promoted · auto-queued · waiting for send provider
-- Blocked by policy (with breakdown) · founder decisions pending
-- Next automatic run time
-- Policy status row: Reveal / Auto-promote / Auto-queue / Auto-send ON/OFF chips, credit budget remaining, sending provider mode.
+## Gap engine
 
-**`src/components/founder/ApolloRevealShortlist.tsx`** (existing): collapse to read-only "Recent autonomous reveal batches" when `apollo_email_reveal_autonomous=true`. Keep manual override button.
+`synthesizeGaps({ businessProfiles, systems, flows, oversight, triggers })` emits gap rows for:
+- critical/high business profile with zero systems inventoried
+- system with no matching data flow record
+- system with sensitive/personal data but no oversight events ever
+- external_action_capable system with no approval trigger covering it
+- system with no founder_confirmed
+- review overdue (next_review_due_at < now)
 
-**`src/pages/founder/CommandCentre.tsx`**: insert `AutonomousPipelineStatus` near the top of the Apollo section and `AutopilotPolicyPanel` inside a collapsible "Operating policy" card.
+Persisted into `ai_compliance_gap_actions` only on explicit founder action ("Materialise gaps") — by default we compute them live to avoid noise. This keeps the table for tracked, owned actions.
 
-**New `src/components/founder/FounderDecisionQueue.tsx`** — list pending `founder_decision_queue` items with approve/reject buttons.
+## UI principles
 
-### 4. Safety (unchanged hard guardrails)
+- Reuse `tech-card`, existing badge palette, founder layout.
+- Empty states say what's missing and link to the right module instead of fabricating data.
+- "What needs Mandy today" panel = only items with `founder_decision_required = true` OR severity ∈ {high, critical} OR review overdue.
 
-- `outreach-send-worker` continues to enforce: bounced/suppressed/internal block, duplicate-pending block, NeonCandy inbox guard, sequence chain-on-success.
-- `crm-send-check` still gates queue insertion.
-- `auto_send_after_queue` defaults to **false** — IONOS proof mode only. Founder must explicitly enable scaled sending after external provider is configured.
-- All policy changes, budget overrides, and `auto_send_after_queue=true` flips create `founder_decision_queue` audit rows.
+## Integrations (read-only cross-references)
 
-### 5. Acceptance verification
+- Business compliance: reuse `businessComplianceEngine` for profiles/triggers → feed gap engine.
+- Approval gates: when an approval decision is recorded elsewhere, expose helper `recordOversightFromApproval()` for future wiring; do not modify existing approval modules in this pass.
+- Privacy / incidents / policies / AI usage: Evidence Pack reads from existing tables if present; otherwise shows "evidence missing — link from <module>".
 
-After deploy:
-- `business_autopilot_settings` has a NeonCandy row with `auto_send_after_queue=false`.
-- Manual trigger of `autopilot-orchestrator` for NeonCandy in `dry_run=true` returns a plan: how many would reveal, promote, queue.
-- `autopilot_run_log` has rows for every action.
-- No live sends occur (auto-send off).
-- No Apollo credits are spent during this implementation task (orchestrator default `dry_run=true` for first run; founder flips to live via UI).
+## Safety guarantees
 
-### Notes / out of scope
+- No edits to outreach/Smartlead/Apollo/auto_send_enabled.
+- No new secrets, no edge functions, no external API calls.
+- No public routes added.
+- Existing routes untouched apart from adding new ones.
 
-- External provider (Smartlead) integration: stub `sending_provider_mode='external_scale'` only — actual provider code in a follow-up.
-- `auto_send_after_queue` flag is wired but stays off; existing send worker handles the rest.
-- No AI calls anywhere in orchestrator — all checks are deterministic.
+## Acceptance checks
+
+- `/founder/ai-compliance` renders behind FounderRoute.
+- CRUD for systems / data flows / oversight against Supabase.
+- Gap engine produces meaningful items from real data.
+- Evidence Pack reflects real state with clear empty states.
+- `classifyRisk` unit tests pass.
+- Build passes.
+
+## Execution order
+
+1. Write & submit migration (5 tables + RLS + GRANTs + updated_at trigger reuse).
+2. After approval: add engine + tests.
+3. Add pages, dialogs, shared layout, route registration, sidebar link.
+4. Add docs.
+5. Verify build.
