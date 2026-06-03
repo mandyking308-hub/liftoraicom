@@ -49,11 +49,11 @@ describe("classifyRisk", () => {
     expect(r.reasons.some(x => /overdue/i.test(x))).toBe(true);
   });
 
-  it("marks medium when only personal data + external surface", () => {
+  it("escalates to medium once personal data, external surface and missing data-flow combine", () => {
     const r = classifyRisk(baseSystem({
       uses_personal_data: true,
       internal_or_external: "external",
-    }));
+    }), { hasDataFlow: false, hasOversight: false });
     expect(["medium", "high"]).toContain(r.level);
   });
 });
