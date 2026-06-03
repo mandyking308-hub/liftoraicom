@@ -40708,6 +40708,182 @@ export type Database = {
           },
         ]
       }
+      portfolio_exit_target_alerts: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          alert_code: string
+          alert_message: string
+          business_name: string
+          id: string
+          metric_value: number | null
+          notes: string | null
+          target_id: string
+          triggered_at: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_code: string
+          alert_message: string
+          business_name: string
+          id?: string
+          metric_value?: number | null
+          notes?: string | null
+          target_id: string
+          triggered_at?: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_code?: string
+          alert_message?: string
+          business_name?: string
+          id?: string
+          metric_value?: number | null
+          notes?: string | null
+          target_id?: string
+          triggered_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portfolio_exit_target_alerts_target_id_fkey"
+            columns: ["target_id"]
+            isOneToOne: false
+            referencedRelation: "portfolio_exit_targets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      portfolio_exit_target_settings: {
+        Row: {
+          created_at: string
+          default_target_arr_gbp: number
+          default_target_arr_usd: number
+          gbp_usd_rate: number
+          id: string
+          notes: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          default_target_arr_gbp?: number
+          default_target_arr_usd?: number
+          gbp_usd_rate?: number
+          id?: string
+          notes?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          default_target_arr_gbp?: number
+          default_target_arr_usd?: number
+          gbp_usd_rate?: number
+          id?: string
+          notes?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      portfolio_exit_targets: {
+        Row: {
+          ai_operated_score: number | null
+          business_id: string | null
+          business_name: string
+          business_status: string
+          buyer_fit_category: string | null
+          churn_percent: number | null
+          compliance_readiness_score: number | null
+          created_at: string
+          current_active_customers: number
+          customer_acquisition_cost: number | null
+          evidence_pack_status: string | null
+          exit_stage: string | null
+          founder_approved: boolean
+          founder_dependency_score: number | null
+          founder_override_notes: string | null
+          gross_margin_percent: number | null
+          id: string
+          likely_exit_route: string | null
+          monthly_ai_cost: number
+          monthly_human_delivery_cost: number
+          monthly_other_operating_cost: number
+          monthly_price_per_customer: number
+          next_action: string | null
+          repeatability_score: number | null
+          revenue_model: string
+          target_arr_gbp: number | null
+          target_arr_usd: number | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          ai_operated_score?: number | null
+          business_id?: string | null
+          business_name: string
+          business_status?: string
+          buyer_fit_category?: string | null
+          churn_percent?: number | null
+          compliance_readiness_score?: number | null
+          created_at?: string
+          current_active_customers?: number
+          customer_acquisition_cost?: number | null
+          evidence_pack_status?: string | null
+          exit_stage?: string | null
+          founder_approved?: boolean
+          founder_dependency_score?: number | null
+          founder_override_notes?: string | null
+          gross_margin_percent?: number | null
+          id?: string
+          likely_exit_route?: string | null
+          monthly_ai_cost?: number
+          monthly_human_delivery_cost?: number
+          monthly_other_operating_cost?: number
+          monthly_price_per_customer?: number
+          next_action?: string | null
+          repeatability_score?: number | null
+          revenue_model?: string
+          target_arr_gbp?: number | null
+          target_arr_usd?: number | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          ai_operated_score?: number | null
+          business_id?: string | null
+          business_name?: string
+          business_status?: string
+          buyer_fit_category?: string | null
+          churn_percent?: number | null
+          compliance_readiness_score?: number | null
+          created_at?: string
+          current_active_customers?: number
+          customer_acquisition_cost?: number | null
+          evidence_pack_status?: string | null
+          exit_stage?: string | null
+          founder_approved?: boolean
+          founder_dependency_score?: number | null
+          founder_override_notes?: string | null
+          gross_margin_percent?: number | null
+          id?: string
+          likely_exit_route?: string | null
+          monthly_ai_cost?: number
+          monthly_human_delivery_cost?: number
+          monthly_other_operating_cost?: number
+          monthly_price_per_customer?: number
+          next_action?: string | null
+          repeatability_score?: number | null
+          revenue_model?: string
+          target_arr_gbp?: number | null
+          target_arr_usd?: number | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       portfolio_history_events: {
         Row: {
           audit_metadata: Json
