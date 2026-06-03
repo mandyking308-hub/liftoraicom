@@ -11,6 +11,8 @@ import {
 } from "@/lib/aiComplianceEngine";
 import { fetchProfiles, fetchTriggers, type ComplianceProfile, type ApprovalTrigger } from "@/lib/businessComplianceEngine";
 import { toast } from "sonner";
+import GuidedSetupCard from "@/components/founder/ai-compliance/GuidedSetupCard";
+import IncidentChecklistCard from "@/components/founder/ai-compliance/IncidentChecklistCard";
 
 export default function AICOverview() {
   const [systems, setSystems] = useState<AIComplianceSystem[]>([]);
@@ -88,11 +90,13 @@ export default function AICOverview() {
         <AICStat label="Critical / high risk" value={sum.critical_or_high} />
         <AICStat label="External-action capable" value={sum.external_action} />
         <AICStat label="Sensitive-data systems" value={sum.sensitive_data} />
-        <AICStat label="Open compliance gaps" value={sum.open_gaps} />
+        <AICStat label="Materialised gaps" value={sum.open_gaps} hint="Tracked gap rows (open/in_progress)" />
+        <AICStat label="Computed review items" value={synth.length} hint="Live-synthesised — not yet tracked" />
         <AICStat label="Founder approvals logged" value={sum.founder_approvals} />
-        <AICStat label="Evidence current" value={`${sum.evidence_current}/${sum.evidence_total}`} />
         <AICStat label="Next review due" value={sum.next_review_due_at ? new Date(sum.next_review_due_at).toLocaleDateString() : "—"} />
       </div>
+
+      <GuidedSetupCard onChanged={load} />
 
       <AICSection title="What needs Mandy today"
         description="Founder-decision items only — high/critical severity or explicit approval gates. No generic compliance advice.">
@@ -113,6 +117,8 @@ export default function AICOverview() {
           </ul>
         )}
       </AICSection>
+
+      <IncidentChecklistCard />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <AICSection title="Cross-references" description="Existing modules this layer reads from.">
