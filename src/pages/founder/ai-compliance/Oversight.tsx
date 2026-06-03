@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { AICLayout, AICSection, EmptyState } from "./_shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,9 +12,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import {
-  fetchOversight, recordOversight, fetchSystems,
+  fetchOversight, recordOversight, fetchSystems, fetchFlows, buildReviewPacket,
   type AIHumanOversightRecord, type AIComplianceSystem,
+  type AIDataFlowRecord,
 } from "@/lib/aiComplianceEngine";
+import ReviewDialog from "@/components/founder/ai-compliance/ReviewDialog";
 
 const TYPES = ["founder_approval","human_review","escalation","kill_switch","override","rejection","manual_check"] as const;
 const DECISIONS = ["approved","rejected","changed","escalated","parked"] as const;
@@ -25,14 +28,21 @@ function emptyDraft(): Partial<AIHumanOversightRecord> {
 export default function AICOversight() {
   const [rows, setRows] = useState<AIHumanOversightRecord[]>([]);
   const [systems, setSystems] = useState<AIComplianceSystem[]>([]);
+  const [flows, setFlows] = useState<AIDataFlowRecord[]>([]);
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<Partial<AIHumanOversightRecord>>(emptyDraft());
+  const [reviewSystem, setReviewSystem] = useState<AIComplianceSystem | null>(null);
+  const [params] = useSearchParams();
 
   const load = () => {
     fetchOversight().then(setRows).catch(e => toast.error(e.message ?? "Failed"));
     fetchSystems().then(setSystems).catch(() => {});
+    fetchFlows().then(setFlows).catch(() => {});
   };
   useEffect(load, []);
+
+  const packet = buildReviewPacket({ systems, flows, oversight: rows });
+  const showPacket = params.get("packet") === "1" || systems.length > 0;
 
   const save = async () => {
     if (!draft.oversight_type) return;
@@ -42,6 +52,22 @@ export default function AICOversight() {
 
   return (
     <AICLayout title="Human Oversight & Intervention Log" subtitle="Every approval, rejection, override, escalation and kill-switch event.">
+      {showPacket && (
+        <AICSection
+          title="Founder review packet"
+          description="Review systems by priority. Record a founder review per system — default for high/critical or external-action systems is needs adviser."
+        >
+          <PacketGroup title="Priority 1 — External-action capable" items={packet.priority1_external_action} onReview={setReviewSystem} />
+          <PacketGroup title="Priority 2 — Sensitive-data" items={packet.priority2_sensitive_data} onReview={setReviewSystem} />
+          <PacketGroup title="Priority 3 — Internal AI control systems" items={packet.priority3_internal_control} onReview={setReviewSystem} />
+        </AICSection>
+      )}
+      <ReviewDialog
+        system={reviewSystem}
+        open={!!reviewSystem}
+        onOpenChange={(v) => { if (!v) setReviewSystem(null); }}
+        onDone={load}
+      />
       <AICSection title="Log" description={`${rows.length} events`} actions={
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild><Button size="sm" onClick={() => setDraft(emptyDraft())}><Plus className="h-3 w-3 mr-1" /> Log event</Button></DialogTrigger>
