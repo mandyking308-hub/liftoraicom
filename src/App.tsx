@@ -458,6 +458,11 @@ import ExitArchetypes from "./pages/founder/exit-metrics/Archetypes";
 import ExitReadiness from "./pages/founder/exit-metrics/Readiness";
 import ExitBuyerFit from "./pages/founder/exit-metrics/BuyerFit";
 import ExitDataRoom from "./pages/founder/exit-metrics/DataRoom";
+import PETDashboard from "./pages/founder/portfolio-exit-targets/Dashboard";
+import PETBusinesses from "./pages/founder/portfolio-exit-targets/Businesses";
+import PETDetail from "./pages/founder/portfolio-exit-targets/Detail";
+import PETAlerts from "./pages/founder/portfolio-exit-targets/Alerts";
+import PETSettings from "./pages/founder/portfolio-exit-targets/Settings";
 import PortfolioDiversityOverview from "./pages/founder/portfolio-diversity/Overview";
 import WorkQueueOverview from "./pages/founder/work-queue/Overview";
 import WorkQueueToday from "./pages/founder/work-queue/Today";
@@ -1273,6 +1278,11 @@ const App = () => (
             <Route path="/founder/exit-metrics/readiness" element={<FounderRoute><ExitReadiness /></FounderRoute>} />
             <Route path="/founder/exit-metrics/buyer-fit" element={<FounderRoute><ExitBuyerFit /></FounderRoute>} />
             <Route path="/founder/exit-metrics/data-room" element={<FounderRoute><ExitDataRoom /></FounderRoute>} />
+            <Route path="/founder/portfolio-exit-targets" element={<FounderRoute><PETDashboard /></FounderRoute>} />
+            <Route path="/founder/portfolio-exit-targets/businesses" element={<FounderRoute><PETBusinesses /></FounderRoute>} />
+            <Route path="/founder/portfolio-exit-targets/alerts" element={<FounderRoute><PETAlerts /></FounderRoute>} />
+            <Route path="/founder/portfolio-exit-targets/settings" element={<FounderRoute><PETSettings /></FounderRoute>} />
+            <Route path="/founder/portfolio-exit-targets/:id" element={<FounderRoute><PETDetail /></FounderRoute>} />
             <Route path="/founder/portfolio-diversity" element={<FounderRoute><PortfolioDiversityOverview /></FounderRoute>} />
             <Route path="/founder/work-queue" element={<FounderRoute><WorkQueueOverview /></FounderRoute>} />
             <Route path="/founder/work-queue/today" element={<FounderRoute><WorkQueueToday /></FounderRoute>} />
