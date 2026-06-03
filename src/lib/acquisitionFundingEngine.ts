@@ -189,7 +189,7 @@ export function computeScores(o: Partial<AFOpportunity>): AFScores {
   );
 
   const legal_risk_score = clamp(
-    (o.distress_signal === "bankruptcy" || o.distress_signal === "administration" || o.distress_signal === "liquidation" ? 50 : 10) +
+    (o.distress_signal === "bankruptcy" || o.distress_signal === "administration" || o.distress_signal === "liquidation" ? 70 : 10) +
     (!o.country ? 10 : 0) +
     (o.category === "trademark" || o.category === "ip" ? 15 : 0)
   );
