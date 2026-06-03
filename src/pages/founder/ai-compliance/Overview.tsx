@@ -5,6 +5,7 @@ import { AICLayout, AICSection, AICStat, SeverityBadge, EmptyState } from "./_sh
 import {
   fetchSystems, fetchFlows, fetchOversight, fetchEvidence, fetchGapActions,
   synthesizeGaps, summarizeCompliance, materialiseGaps,
+  synthesizeGapsExtended, materialiseGapsIdempotent, scanInternalModules,
   type AIComplianceSystem, type AIDataFlowRecord, type AIHumanOversightRecord,
   type AIComplianceEvidenceItem, type AIComplianceGapAction,
 } from "@/lib/aiComplianceEngine";
@@ -32,7 +33,10 @@ export default function AICOverview() {
   useEffect(load, []);
 
   const sum = useMemo(() => summarizeCompliance({ systems, flows, oversight, evidence, gaps }), [systems, flows, oversight, evidence, gaps]);
-  const synth = useMemo(() => synthesizeGaps({ profiles, systems, flows, oversight, triggers }), [profiles, systems, flows, oversight, triggers]);
+  const synth = useMemo(
+    () => synthesizeGapsExtended({ profiles, systems, flows, oversight, evidence, triggers }),
+    [profiles, systems, flows, oversight, evidence, triggers],
+  );
 
   const founderItems = [
     ...gaps.filter(g => (g.founder_decision_required || g.severity === "critical" || g.severity === "high") && g.status !== "done" && g.status !== "parked"),
@@ -42,11 +46,21 @@ export default function AICOverview() {
 
   const onMaterialise = async () => {
     try {
-      const count = await materialiseGaps(synth);
-      toast.success(`Materialised ${count} gap action${count === 1 ? "" : "s"}.`);
+      const r = await materialiseGapsIdempotent(synth);
+      toast.success(`Refreshed gap actions — ${r.inserted} new, ${r.skipped} already tracked.`);
       load();
     } catch (e: any) {
-      toast.error(e.message ?? "Failed to materialise gaps");
+      toast.error(e.message ?? "Failed to refresh gap actions");
+    }
+  };
+
+  const onScan = async () => {
+    try {
+      const r = await scanInternalModules();
+      toast.success(`Module scan: ${r.inserted} inserted, ${r.updated} updated, ${r.skipped} unchanged.`);
+      load();
+    } catch (e: any) {
+      toast.error(e.message ?? "Module scan failed");
     }
   };
 
@@ -55,9 +69,18 @@ export default function AICOverview() {
       title="AI Compliance Control"
       subtitle="Evidence, oversight, data-flow, approval and risk controls for Liftor's AI-operated businesses."
       actions={
-        <Button size="sm" variant="outline" onClick={onMaterialise} disabled={synth.length === 0}>
-          Materialise {synth.length} synthesised gap{synth.length === 1 ? "" : "s"}
-        </Button>
+        <div className="flex flex-wrap gap-2 items-center">
+          <span className="text-[10px] px-2 py-1 rounded border border-emerald-500/30 bg-emerald-500/10 text-emerald-400">
+            Visible in Command Centre
+          </span>
+          <Button size="sm" variant="outline" onClick={onScan}>Run module scan</Button>
+          <Button size="sm" variant="outline" onClick={onMaterialise} disabled={synth.length === 0}>
+            Refresh gap actions ({synth.length})
+          </Button>
+          <Button asChild size="sm" variant="outline">
+            <Link to="/founder/ai-compliance/gaps">View founder decisions</Link>
+          </Button>
+        </div>
       }
     >
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
