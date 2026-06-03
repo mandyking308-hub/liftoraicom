@@ -203,22 +203,42 @@ describe("MODULE_SCAN_REGISTRY", () => {
     }
   });
 
-  it("never seeds founder_confirmed=true (founder must confirm explicitly) — checked via scan call", async () => {
-    // Mock supabase to simulate empty DB then assert all inserted rows have founder_confirmed=false.
-    const inserted: any[] = [];
+  it("scan inserts only founder_confirmed=false rows and is idempotent (no duplicates on second run)", async () => {
+    // Use a fresh module instance with a mocked supabase client.
+    vi.resetModules();
+    const store: any[] = [];
     vi.doMock("@/integrations/supabase/client", () => ({
       supabase: {
         from: (_t: string) => ({
-          select: () => ({ order: () => Promise.resolve({ data: [], error: null }) }),
-          upsert: (row: any) => ({ select: () => ({ single: () => { inserted.push(row); return Promise.resolve({ data: { ...row, id: "mock" }, error: null }); } }) }),
-          insert: (rows: any) => ({ count: "exact" } as any),
+          select: () => ({ order: () => Promise.resolve({ data: [...store], error: null }) }),
+          upsert: (row: any) => ({
+            select: () => ({
+              single: () => {
+                if (row.id) {
+                  const i = store.findIndex(r => r.id === row.id);
+                  if (i >= 0) store[i] = { ...store[i], ...row };
+                } else {
+                  store.push({ ...row, id: `mock-${store.length + 1}` });
+                }
+                return Promise.resolve({ data: row, error: null });
+              },
+            }),
+          }),
+          insert: () => Promise.resolve({ data: null, error: null, count: 0 }),
+          delete: () => ({ eq: () => Promise.resolve({ error: null }) }),
         }),
       },
     }));
-    const { scanInternalModules } = await import("@/lib/aiComplianceEngine");
-    await scanInternalModules();
-    expect(inserted.length).toBeGreaterThan(0);
-    expect(inserted.every(r => r.founder_confirmed === false)).toBe(true);
+    const mod = await import("@/lib/aiComplianceEngine");
+    const r1 = await mod.scanInternalModules();
+    expect(r1.inserted).toBeGreaterThan(0);
+    expect(store.every((r: any) => r.founder_confirmed === false)).toBe(true);
+    const sizeAfter1 = store.length;
+
+    const r2 = await mod.scanInternalModules();
+    expect(r2.inserted).toBe(0); // idempotent
+    expect(store.length).toBe(sizeAfter1);
+
     vi.doUnmock("@/integrations/supabase/client");
     vi.resetModules();
   });
