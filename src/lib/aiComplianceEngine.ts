@@ -707,6 +707,14 @@ export type CommandCentreSummary = {
     system_id: string | null;
     due_date: string | null;
   }[];
+  /** Persisted (tracked) gap rows that are open or in_progress. */
+  materialised_gaps: number;
+  /** Live-computed review items synthesised from current state. */
+  computed_review_items: number;
+  /** Count of blocking reasons (external-action without oversight, sensitive without flow, etc.). */
+  blocking_issues: number;
+  /** Top three founder items, oldest-style preview for Command Centre. */
+  top_items: CommandCentreSummary["founder_items"];
 };
 
 export function aggregateCommandCentre(input: {
@@ -803,6 +811,10 @@ export function aggregateCommandCentre(input: {
     next_review_due_at: sum.next_review_due_at,
     blocking_reasons: Array.from(new Set(blocking_reasons)),
     founder_items: founder_items.slice(0, 25),
+    materialised_gaps: sum.open_gaps,
+    computed_review_items: synth.length,
+    blocking_issues: new Set(blocking_reasons).size,
+    top_items: founder_items.slice(0, 3),
   };
 }
 
@@ -854,3 +866,400 @@ export function rollupEvidence(evidence: AIComplianceEvidenceItem[]): EvidenceRo
   }
   return out;
 }
+
+/* ---------------- Baseline draft data-flow records ---------------- */
+
+export type BaselineFlowTemplate = {
+  source_system: string;
+  destination_system: string;
+  data_categories: string[];
+  personal_data: boolean;
+  sensitive_data: boolean;
+  lawful_basis: string;
+  retention_period: string;
+  storage_location: string;
+  cross_border_transfer: boolean;
+  security_controls: string;
+};
+
+const DEFAULT_BASELINE: BaselineFlowTemplate = {
+  source_system: "Liftor internal module",
+  destination_system: "Liftor internal module",
+  data_categories: ["to be confirmed by founder/adviser"],
+  personal_data: false,
+  sensitive_data: false,
+  lawful_basis: "to be confirmed by founder/adviser",
+  retention_period: "to be confirmed by founder/adviser",
+  storage_location: "Lovable Cloud (EU) — to be confirmed by founder/adviser",
+  cross_border_transfer: false,
+  security_controls: "RLS, founder-only access, audit ledger — to be confirmed",
+};
+
+/** Conservative draft template per system name (key matches MODULE_SCAN_REGISTRY). */
+export const BASELINE_FLOW_TEMPLATES: Record<string, Partial<BaselineFlowTemplate>> = {
+  "Smartlead Outreach": {
+    source_system: "Liftor CRM / outreach queue",
+    destination_system: "Smartlead (external SaaS) — founder approval-gated",
+    data_categories: ["prospect name", "prospect email", "company"],
+    personal_data: true,
+  },
+  "Apollo Lead Sourcing": {
+    source_system: "Apollo (external SaaS)",
+    destination_system: "Liftor CRM (founder approval-gated import)",
+    data_categories: ["prospect name", "prospect email", "company", "job title"],
+    personal_data: true,
+    cross_border_transfer: true,
+  },
+  "Social Publishing (Metricool)": {
+    source_system: "Liftor content drafts",
+    destination_system: "Metricool → public social channels (founder approval-gated)",
+    data_categories: ["public marketing content"],
+    personal_data: false,
+  },
+  "Data Ingestion Centre": {
+    source_system: "External data sources (to be enumerated)",
+    destination_system: "Liftor Cloud datastores",
+    data_categories: ["to be confirmed by founder/adviser"],
+    personal_data: true,
+    sensitive_data: true,
+  },
+  "AI Gateway": {
+    source_system: "Liftor internal callers",
+    destination_system: "AI providers (OpenAI / Google / Lovable AI)",
+    data_categories: ["prompts", "context snippets"],
+    personal_data: true,
+    cross_border_transfer: true,
+  },
+  "Liftor Brain": {
+    source_system: "Liftor internal context fabric",
+    destination_system: "AI Gateway → providers",
+    data_categories: ["strategy notes", "founder context"],
+    personal_data: true,
+    sensitive_data: true,
+  },
+  "AI Usage Ledger": {
+    source_system: "AI Gateway",
+    destination_system: "Liftor Cloud (ai_usage_log)",
+    data_categories: ["request metadata", "token counts", "cost"],
+  },
+  "AI Approval Gates": {
+    source_system: "Initiating module",
+    destination_system: "Founder approval queue",
+    data_categories: ["proposed action payload"],
+    personal_data: true,
+  },
+  "AI Security Centre": {
+    source_system: "Across Liftor surfaces",
+    destination_system: "Security telemetry tables",
+    data_categories: ["security events", "anomaly signals"],
+    personal_data: true,
+    sensitive_data: true,
+  },
+  "Business Compliance Rules": {
+    source_system: "Founder configuration",
+    destination_system: "Liftor Cloud (compliance tables)",
+    data_categories: ["compliance profile fields"],
+    sensitive_data: true,
+  },
+  "Privacy": {
+    source_system: "Subject requests / privacy events",
+    destination_system: "Liftor Cloud (privacy tables)",
+    data_categories: ["DSAR records", "retention notes"],
+    personal_data: true,
+    sensitive_data: true,
+  },
+  "Incidents": {
+    source_system: "Operational systems",
+    destination_system: "Incident ledger",
+    data_categories: ["incident reports"],
+    personal_data: true,
+    sensitive_data: true,
+  },
+  "Audit Ledger": {
+    source_system: "All actioning modules",
+    destination_system: "Audit ledger (append-only)",
+    data_categories: ["action metadata", "actor", "timestamp"],
+    personal_data: true,
+  },
+  "Policies": {
+    source_system: "Policy authoring",
+    destination_system: "Public legal pages & internal evidence",
+    data_categories: ["policy text"],
+  },
+  "Connectors": {
+    source_system: "External SaaS",
+    destination_system: "Liftor connector registry",
+    data_categories: ["credentials (encrypted)", "configuration"],
+    personal_data: true,
+  },
+  "Scheduled Jobs": {
+    source_system: "Scheduler",
+    destination_system: "Worker functions",
+    data_categories: ["job metadata"],
+  },
+  "Revenue Autopilot": {
+    source_system: "Liftor finance modules",
+    destination_system: "Liftor revenue tables",
+    data_categories: ["customer email", "amounts", "pricing"],
+    personal_data: true,
+  },
+  "Customer Sales": {
+    source_system: "CRM",
+    destination_system: "Sales pipeline tables",
+    data_categories: ["contact details", "deal notes"],
+    personal_data: true,
+  },
+  "Quote to Cash": {
+    source_system: "Proposal / quote engine",
+    destination_system: "Contracts + invoices",
+    data_categories: ["customer billing", "contract text"],
+    personal_data: true,
+    sensitive_data: true,
+  },
+  "M&A Portfolio Exit Intelligence": {
+    source_system: "Portfolio assets",
+    destination_system: "Founder-only M&A workspace",
+    data_categories: ["valuation", "buyer notes", "deal terms"],
+    personal_data: true,
+    sensitive_data: true,
+    cross_border_transfer: false,
+  },
+};
+
+function buildDraftFlow(s: AIComplianceSystem): Partial<AIDataFlowRecord> {
+  const tpl = { ...DEFAULT_BASELINE, ...(BASELINE_FLOW_TEMPLATES[s.system_name] ?? {}) };
+  return {
+    business_id: s.business_id,
+    system_id: s.id,
+    source_system: tpl.source_system ?? DEFAULT_BASELINE.source_system,
+    destination_system: tpl.destination_system ?? DEFAULT_BASELINE.destination_system,
+    data_categories: tpl.data_categories ?? DEFAULT_BASELINE.data_categories,
+    personal_data: tpl.personal_data ?? s.uses_personal_data,
+    sensitive_data: tpl.sensitive_data ?? s.uses_sensitive_data,
+    children_data: s.handles_children_data,
+    lawful_basis: tpl.lawful_basis ?? DEFAULT_BASELINE.lawful_basis,
+    processor_or_controller_note: "Draft — to be confirmed by founder/adviser.",
+    retention_period: tpl.retention_period ?? DEFAULT_BASELINE.retention_period,
+    storage_location: tpl.storage_location ?? DEFAULT_BASELINE.storage_location,
+    cross_border_transfer: tpl.cross_border_transfer ?? false,
+    transfer_jurisdiction: null,
+    security_controls: tpl.security_controls ?? DEFAULT_BASELINE.security_controls,
+    founder_confirmed: false,
+    review_status: s.uses_sensitive_data || s.external_action_capable ? "needs_adviser" : "draft",
+  };
+}
+
+export type DraftFlowResult = { inserted: number; skipped: number; protected: number; details: { system: string; action: "inserted" | "skipped" | "protected" }[] };
+
+/**
+ * Idempotent baseline draft data-flow creation.
+ * - Skips systems that already have any data-flow record.
+ * - Does NOT overwrite founder_confirmed records (counted as "protected").
+ * - Always inserts as draft / needs_adviser; never founder_confirmed.
+ */
+export async function createDraftBaselineFlows(opts?: { systemNames?: string[] }): Promise<DraftFlowResult> {
+  const [systems, flows] = await Promise.all([fetchSystems(), fetchFlows()]);
+  const flowsBySys = new Map<string, AIDataFlowRecord[]>();
+  for (const f of flows) {
+    if (!f.system_id) continue;
+    const arr = flowsBySys.get(f.system_id) ?? []; arr.push(f); flowsBySys.set(f.system_id, arr);
+  }
+  const out: DraftFlowResult = { inserted: 0, skipped: 0, protected: 0, details: [] };
+  const filter = opts?.systemNames ? new Set(opts.systemNames) : null;
+  for (const s of systems) {
+    if (filter && !filter.has(s.system_name)) continue;
+    const existing = flowsBySys.get(s.id) ?? [];
+    if (existing.some(f => f.founder_confirmed)) {
+      out.protected++; out.details.push({ system: s.system_name, action: "protected" }); continue;
+    }
+    if (existing.length > 0) {
+      out.skipped++; out.details.push({ system: s.system_name, action: "skipped" }); continue;
+    }
+    const draft = buildDraftFlow(s);
+    const { error } = await sb().from("ai_data_flow_records").insert(draft);
+    if (error) throw error;
+    out.inserted++; out.details.push({ system: s.system_name, action: "inserted" });
+  }
+  return out;
+}
+
+/* ---------------- Founder review packet ---------------- */
+
+export type ReviewPacketItem = {
+  system: AIComplianceSystem;
+  external_action: boolean;
+  has_flow: boolean;
+  has_oversight: boolean;
+  founder_confirmed: boolean;
+  needs_adviser: boolean;
+  next_safe_action: string;
+};
+export type ReviewPacket = {
+  priority1_external_action: ReviewPacketItem[];
+  priority2_sensitive_data: ReviewPacketItem[];
+  priority3_internal_control: ReviewPacketItem[];
+};
+
+const INTERNAL_CONTROL_KEYS = new Set([
+  "AI Gateway", "Liftor Brain", "AI Usage Ledger", "AI Approval Gates",
+  "AI Security Centre", "Business Compliance Rules", "Privacy", "Incidents",
+  "Audit Ledger", "Policies", "Connectors", "Scheduled Jobs",
+]);
+
+function nextSafeAction(s: AIComplianceSystem, hasFlow: boolean, hasOversight: boolean): string {
+  if (s.external_action_capable && !hasOversight) return "Record founder oversight before external send is permitted.";
+  if (!hasFlow) return "Create draft data-flow record (review with adviser).";
+  if (!s.founder_confirmed && (s.risk_level === "critical" || s.risk_level === "high")) return "Founder review required — default to needs adviser.";
+  if (!s.founder_confirmed) return "Confirm inventory entry (founder).";
+  return "Schedule next review.";
+}
+
+export function buildReviewPacket(input: {
+  systems: AIComplianceSystem[];
+  flows: AIDataFlowRecord[];
+  oversight: AIHumanOversightRecord[];
+}): ReviewPacket {
+  const flowsBySys = new Set(input.flows.map(f => f.system_id).filter(Boolean) as string[]);
+  const oversightBySys = new Set(input.oversight.map(o => o.system_id).filter(Boolean) as string[]);
+  const toItem = (s: AIComplianceSystem): ReviewPacketItem => {
+    const hasFlow = flowsBySys.has(s.id);
+    const hasOversight = oversightBySys.has(s.id);
+    const needsAdviser =
+      s.external_action_capable ||
+      s.uses_sensitive_data || s.handles_children_data || s.handles_health_data ||
+      s.handles_financial_data || s.handles_legal_data ||
+      s.risk_level === "critical" || s.risk_level === "high";
+    return {
+      system: s, external_action: s.external_action_capable,
+      has_flow: hasFlow, has_oversight: hasOversight,
+      founder_confirmed: s.founder_confirmed,
+      needs_adviser: needsAdviser,
+      next_safe_action: nextSafeAction(s, hasFlow, hasOversight),
+    };
+  };
+  const sensitive = (s: AIComplianceSystem) =>
+    s.uses_sensitive_data || s.handles_children_data || s.handles_health_data ||
+    s.handles_financial_data || s.handles_legal_data;
+  return {
+    priority1_external_action: input.systems.filter(s => s.external_action_capable).map(toItem),
+    priority2_sensitive_data: input.systems.filter(s => !s.external_action_capable && sensitive(s)).map(toItem),
+    priority3_internal_control: input.systems
+      .filter(s => !s.external_action_capable && !sensitive(s) && INTERNAL_CONTROL_KEYS.has(s.system_name))
+      .map(toItem),
+  };
+}
+
+/* ---------------- Founder review action ---------------- */
+
+export type FounderReviewDecision = "needs_adviser" | "parked" | "blocked" | "approved_as_draft";
+
+/** High/critical systems may never be 'approved_as_draft' via this entry point. */
+export function isDecisionAllowed(system: Pick<AIComplianceSystem, "risk_level" | "external_action_capable">, decision: FounderReviewDecision): boolean {
+  if (decision === "approved_as_draft") {
+    if (system.risk_level === "critical" || system.risk_level === "high") return false;
+    if (system.external_action_capable) return false;
+  }
+  return true;
+}
+
+export async function recordFounderReview(opts: {
+  system: AIComplianceSystem;
+  data_flow_reviewed: boolean;
+  external_gates_locked_confirmed: boolean;
+  adviser_review_required: boolean;
+  notes: string;
+  decision: FounderReviewDecision;
+  decided_by?: string | null;
+}): Promise<AIHumanOversightRecord> {
+  if (!isDecisionAllowed(opts.system, opts.decision)) {
+    throw new Error("High/critical or external-action systems cannot be approved as draft here — use needs adviser / parked / blocked.");
+  }
+  const human_decision: AIHumanOversightRecord["human_decision"] =
+    opts.decision === "approved_as_draft" ? "approved"
+    : opts.decision === "parked" ? "parked"
+    : opts.decision === "blocked" ? "rejected"
+    : "escalated";
+  return recordOversight({
+    business_id: opts.system.business_id,
+    system_id: opts.system.id,
+    oversight_type: "human_review",
+    trigger_source: "founder_review_packet",
+    trigger_reason: opts.adviser_review_required ? "adviser review required" : "founder review",
+    proposed_ai_action: null,
+    human_decision,
+    decided_by: opts.decided_by ?? "founder",
+    decision_notes:
+      `decision=${opts.decision}; ` +
+      `data_flow_reviewed=${opts.data_flow_reviewed}; ` +
+      `external_gates_locked_confirmed=${opts.external_gates_locked_confirmed}; ` +
+      `adviser_review_required=${opts.adviser_review_required}; ` +
+      `notes=${opts.notes || "—"}`,
+    external_action_blocked: !opts.external_gates_locked_confirmed && opts.system.external_action_capable,
+    evidence_url: null,
+  });
+}
+
+export async function confirmInventoryEntry(system: AIComplianceSystem): Promise<AIComplianceSystem> {
+  return upsertSystem({
+    id: system.id,
+    founder_confirmed: true,
+    last_reviewed_at: new Date().toISOString(),
+  });
+}
+
+/**
+ * Safer bulk action: confirm inventory only for selected LOW/MEDIUM, internal-only, non-external-action systems.
+ * High/critical or external-action systems are skipped (counted as 'skipped').
+ */
+export async function bulkConfirmLowRiskInternal(systems: AIComplianceSystem[]): Promise<{ confirmed: number; skipped: number; details: { system: string; ok: boolean; reason?: string }[] }> {
+  const out = { confirmed: 0, skipped: 0, details: [] as { system: string; ok: boolean; reason?: string }[] };
+  for (const s of systems) {
+    if (s.risk_level === "high" || s.risk_level === "critical") {
+      out.skipped++; out.details.push({ system: s.system_name, ok: false, reason: "risk too high for bulk" }); continue;
+    }
+    if (s.external_action_capable) {
+      out.skipped++; out.details.push({ system: s.system_name, ok: false, reason: "external-action capable" }); continue;
+    }
+    if (s.internal_or_external !== "internal") {
+      out.skipped++; out.details.push({ system: s.system_name, ok: false, reason: "not internal-only" }); continue;
+    }
+    await confirmInventoryEntry(s);
+    out.confirmed++; out.details.push({ system: s.system_name, ok: true });
+  }
+  return out;
+}
+
+/* ---------------- Incident escalation checklist (internal only) ---------------- */
+
+export type IncidentScenario =
+  | "wrong_send" | "hallucinated_external_claim" | "data_leak"
+  | "unauthorised_external_action" | "sensitive_data_mishandling"
+  | "provider_failure" | "approval_bypass_attempt";
+
+export type IncidentChecklistItem = {
+  scenario: IncidentScenario;
+  label: string;
+  internal_only: true;
+  steps: string[];
+};
+
+/**
+ * Internal-only readiness checklist. No external notifications, no adviser contact,
+ * no external reports. Liftor founder uses this as preparedness evidence.
+ */
+export const INCIDENT_ESCALATION_CHECKLIST: IncidentChecklistItem[] = [
+  { scenario: "wrong_send", label: "Wrong send (email / social / external action)", internal_only: true,
+    steps: ["Halt outbound queue", "Snapshot what was sent and to whom (internal log only)", "Record incident in Incidents module", "Founder decides on internal remediation"] },
+  { scenario: "hallucinated_external_claim", label: "Hallucinated external claim", internal_only: true,
+    steps: ["Capture exact AI output", "Block the surface that produced it", "Log to Incidents", "Founder reviews policy guardrails"] },
+  { scenario: "data_leak", label: "Data leak", internal_only: true,
+    steps: ["Rotate impacted secrets (no external notification yet)", "Scope which records were exposed internally", "Log to Incidents with sensitivity flag", "Founder decides next step internally"] },
+  { scenario: "unauthorised_external_action", label: "Unauthorised external action", internal_only: true,
+    steps: ["Disable the connector or external send flag", "Snapshot the action payload", "Log to Incidents", "Founder reviews approval gate"] },
+  { scenario: "sensitive_data_mishandling", label: "Sensitive-data mishandling", internal_only: true,
+    steps: ["Identify systems and data categories involved", "Pause the system if necessary", "Log to Incidents with sensitive flag", "Founder reviews data-flow record"] },
+  { scenario: "provider_failure", label: "Provider failure (AI / SaaS)", internal_only: true,
+    steps: ["Confirm scope of failure", "Switch routing where possible", "Log to Incidents", "Founder decides if a status communication is needed"] },
+  { scenario: "approval_bypass_attempt", label: "Approval bypass attempt", internal_only: true,
+    steps: ["Block the bypass path", "Snapshot the attempted action", "Log to Incidents", "Founder reviews approval gate hardening"] },
+];

@@ -130,13 +130,14 @@ function AIComplianceControlPanelInner() {
                 <Stat label="High / critical risk" value={summary.critical_or_high} />
                 <Stat label="External-action capable" value={summary.external_action} />
                 <Stat label="Sensitive-data systems" value={summary.sensitive_data} />
-                <Stat label="Open compliance gaps" value={summary.open_gaps} />
-                <Stat label="Founder decisions required" value={summary.founder_decisions_required} />
+                <Stat label="Materialised gaps" value={summary.materialised_gaps} />
+                <Stat label="Computed review items" value={summary.computed_review_items} />
+                <Stat label="Founder decisions required" value={summary.founder_decisions_required} tone={summary.founder_decisions_required > 0 ? "destructive" : undefined} />
+                <Stat label="Blocking issues" value={summary.blocking_issues} tone={summary.blocking_issues > 0 ? "destructive" : undefined} />
                 <Stat
                   label="Next review due"
                   value={summary.next_review_due_at ? new Date(summary.next_review_due_at).toLocaleDateString() : "—"}
                 />
-                <Stat label="Blocking issues" value={summary.blocking_reasons.length} tone={summary.blocking_reasons.length > 0 ? "destructive" : undefined} />
               </div>
 
               {summary.blocking_reasons.length > 0 && (
@@ -151,12 +152,15 @@ function AIComplianceControlPanelInner() {
               )}
 
               <div>
-                <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1">What needs Mandy today</p>
-                {summary.founder_items.length === 0 ? (
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Top 3 — what needs Mandy today</p>
+                  <Link to="/founder/ai-compliance" className="text-[11px] text-primary hover:underline">Open Guided Compliance Setup →</Link>
+                </div>
+                {summary.top_items.length === 0 ? (
                   <p className="text-xs text-muted-foreground">No AI compliance decisions require founder attention right now.</p>
                 ) : (
                   <ul className="text-xs space-y-1.5">
-                    {summary.founder_items.slice(0, 8).map((it, i) => (
+                    {summary.top_items.map((it, i) => (
                       <li key={i} className="flex items-start justify-between gap-2 rounded border border-border/50 px-2 py-1.5">
                         <div className="min-w-0">
                           <p className="truncate font-medium">{it.title}</p>
@@ -171,9 +175,9 @@ function AIComplianceControlPanelInner() {
                     ))}
                   </ul>
                 )}
-                {summary.founder_items.length > 8 && (
+                {summary.founder_decisions_required > summary.top_items.length && (
                   <p className="text-[10px] text-muted-foreground mt-1">
-                    +{summary.founder_items.length - 8} more — see <Link to="/founder/ai-compliance/gaps" className="text-primary hover:underline">Gaps & Actions</Link>.
+                    +{summary.founder_decisions_required - summary.top_items.length} more — use <Link to="/founder/ai-compliance" className="text-primary hover:underline">Guided Compliance Setup</Link> instead of processing one by one.
                   </p>
                 )}
               </div>
