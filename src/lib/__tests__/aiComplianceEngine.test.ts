@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   classifyRisk, synthesizeGaps, synthesizeGapsExtended,
   aggregateCommandCentre, MODULE_SCAN_REGISTRY, gapDedupKey,
+  isDecisionAllowed, INCIDENT_ESCALATION_CHECKLIST,
+  buildReviewPacket, bulkConfirmLowRiskInternal,
   type AIComplianceSystem,
 } from "@/lib/aiComplianceEngine";
 import type { ComplianceProfile, ApprovalTrigger } from "@/lib/businessComplianceEngine";
@@ -241,5 +243,147 @@ describe("MODULE_SCAN_REGISTRY", () => {
 
     vi.doUnmock("@/integrations/supabase/client");
     vi.resetModules();
+  });
+});
+
+describe("count logic — no misleading zero gaps", () => {
+  it("computed_review_items reflects synth state even when no materialised gaps", () => {
+    // external-action system + no oversight + not founder confirmed → should produce review items
+    const sys = baseSystem({
+      external_action_capable: true, business_id: "b1",
+      risk_level: "critical", founder_confirmed: false,
+      uses_personal_data: true,
+    });
+    const r = aggregateCommandCentre({
+      systems: [sys], flows: [], oversight: [], evidence: [], gaps: [],
+      profiles: [], triggers: [],
+    });
+    expect(r.materialised_gaps).toBe(0);
+    expect(r.computed_review_items).toBeGreaterThan(0);
+    expect(r.founder_decisions_required).toBeGreaterThan(0);
+    expect(r.blocking_issues).toBeGreaterThan(0);
+    expect(r.top_items.length).toBeLessThanOrEqual(3);
+    expect(r.status).toBe("blocked");
+  });
+});
+
+describe("createDraftBaselineFlows (idempotent, protects founder-confirmed)", () => {
+  it("is idempotent and never overwrites founder_confirmed", async () => {
+    vi.resetModules();
+    const sys = [{
+      id: "s-smartlead", business_id: null, system_name: "Smartlead Outreach",
+      system_type: "outreach", owner_role: null, provider: null, purpose: null,
+      internal_or_external: "external", autonomy_level: "external_action_capable",
+      uses_personal_data: true, uses_sensitive_data: false,
+      handles_children_data: false, handles_health_data: false,
+      handles_financial_data: false, handles_legal_data: false,
+      external_action_capable: true, current_status: "under_review",
+      risk_level: "critical", founder_confirmed: false,
+      last_reviewed_at: null, next_review_due_at: null, notes: null,
+      created_at: "", updated_at: "",
+    }];
+    const protectedFlow = {
+      id: "f-locked", business_id: null, system_id: "s-locked",
+      source_system: "x", destination_system: "y", data_categories: [],
+      personal_data: false, sensitive_data: false, children_data: false,
+      lawful_basis: null, processor_or_controller_note: null, retention_period: null,
+      storage_location: null, cross_border_transfer: false, transfer_jurisdiction: null,
+      security_controls: null, founder_confirmed: true, review_status: "approved",
+      created_at: "", updated_at: "",
+    };
+    const lockedSys = { ...sys[0], id: "s-locked", system_name: "Locked", external_action_capable: false, risk_level: "low" };
+    const allSys = [...sys, lockedSys];
+    const flows: any[] = [protectedFlow];
+
+    vi.doMock("@/integrations/supabase/client", () => ({
+      supabase: {
+        from: (t: string) => ({
+          select: () => ({ order: () => Promise.resolve({ data: t === "ai_compliance_systems" ? allSys : flows, error: null }) }),
+          insert: (row: any) => {
+            flows.push({ id: `f-${flows.length}`, ...row, created_at: "", updated_at: "" });
+            return Promise.resolve({ error: null });
+          },
+          upsert: () => ({ select: () => ({ single: () => Promise.resolve({ data: null, error: null }) }) }),
+          delete: () => ({ eq: () => Promise.resolve({ error: null }) }),
+        }),
+      },
+    }));
+    const mod = await import("@/lib/aiComplianceEngine");
+    const r1 = await mod.createDraftBaselineFlows();
+    expect(r1.inserted).toBe(1); // smartlead
+    expect(r1.protected).toBe(1); // locked sys had a founder_confirmed flow
+    // every inserted draft must NOT be founder_confirmed
+    expect(flows.filter(f => f.id?.startsWith("f-") && f.id !== "f-locked").every(f => f.founder_confirmed === false)).toBe(true);
+    // second run is idempotent
+    const r2 = await mod.createDraftBaselineFlows();
+    expect(r2.inserted).toBe(0);
+
+    vi.doUnmock("@/integrations/supabase/client");
+    vi.resetModules();
+  });
+});
+
+describe("founder review decisions", () => {
+  it("disallows approved_as_draft for high/critical or external-action systems", () => {
+    expect(isDecisionAllowed({ risk_level: "critical", external_action_capable: false }, "approved_as_draft")).toBe(false);
+    expect(isDecisionAllowed({ risk_level: "high", external_action_capable: false }, "approved_as_draft")).toBe(false);
+    expect(isDecisionAllowed({ risk_level: "low", external_action_capable: true }, "approved_as_draft")).toBe(false);
+    expect(isDecisionAllowed({ risk_level: "low", external_action_capable: false }, "approved_as_draft")).toBe(true);
+    expect(isDecisionAllowed({ risk_level: "critical", external_action_capable: true }, "needs_adviser")).toBe(true);
+    expect(isDecisionAllowed({ risk_level: "critical", external_action_capable: true }, "parked")).toBe(true);
+    expect(isDecisionAllowed({ risk_level: "critical", external_action_capable: true }, "blocked")).toBe(true);
+  });
+});
+
+describe("bulkConfirmLowRiskInternal (no bulk-approval of high/critical)", () => {
+  it("skips high/critical, external-action and non-internal systems", async () => {
+    vi.resetModules();
+    vi.doMock("@/integrations/supabase/client", () => ({
+      supabase: {
+        from: () => ({
+          upsert: () => ({ select: () => ({ single: () => Promise.resolve({ data: null, error: null }) }) }),
+          select: () => ({ order: () => Promise.resolve({ data: [], error: null }) }),
+        }),
+      },
+    }));
+    const mod = await import("@/lib/aiComplianceEngine");
+    const sysList = [
+      baseSystem({ id: "lo", risk_level: "low", external_action_capable: false, internal_or_external: "internal" }),
+      baseSystem({ id: "hi", risk_level: "critical", external_action_capable: false, internal_or_external: "internal" }),
+      baseSystem({ id: "ext", risk_level: "low", external_action_capable: true, internal_or_external: "internal" }),
+      baseSystem({ id: "mix", risk_level: "low", external_action_capable: false, internal_or_external: "external" }),
+    ];
+    const r = await mod.bulkConfirmLowRiskInternal(sysList);
+    expect(r.confirmed).toBe(1);
+    expect(r.skipped).toBe(3);
+    vi.doUnmock("@/integrations/supabase/client");
+    vi.resetModules();
+  });
+});
+
+describe("incident escalation checklist", () => {
+  it("covers required scenarios and is internal-only", () => {
+    const keys = INCIDENT_ESCALATION_CHECKLIST.map(c => c.scenario);
+    for (const required of [
+      "wrong_send","hallucinated_external_claim","data_leak",
+      "unauthorised_external_action","sensitive_data_mishandling",
+      "provider_failure","approval_bypass_attempt",
+    ]) {
+      expect(keys).toContain(required);
+    }
+    expect(INCIDENT_ESCALATION_CHECKLIST.every(c => c.internal_only === true)).toBe(true);
+  });
+});
+
+describe("buildReviewPacket", () => {
+  it("groups by external-action, sensitive-data, and internal control", () => {
+    const ext = baseSystem({ id: "e1", system_name: "Smartlead Outreach", external_action_capable: true });
+    const sens = baseSystem({ id: "s1", system_name: "Quote to Cash", handles_financial_data: true });
+    const internal = baseSystem({ id: "i1", system_name: "Audit Ledger" });
+    const p = buildReviewPacket({ systems: [ext, sens, internal], flows: [], oversight: [] });
+    expect(p.priority1_external_action.map(x => x.system.id)).toEqual(["e1"]);
+    expect(p.priority2_sensitive_data.map(x => x.system.id)).toEqual(["s1"]);
+    expect(p.priority3_internal_control.map(x => x.system.id)).toEqual(["i1"]);
+    expect(p.priority1_external_action[0].needs_adviser).toBe(true);
   });
 });
