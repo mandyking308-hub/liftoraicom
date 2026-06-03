@@ -811,6 +811,10 @@ export function aggregateCommandCentre(input: {
     next_review_due_at: sum.next_review_due_at,
     blocking_reasons: Array.from(new Set(blocking_reasons)),
     founder_items: founder_items.slice(0, 25),
+    materialised_gaps: sum.open_gaps,
+    computed_review_items: synth.length,
+    blocking_issues: new Set(blocking_reasons).size,
+    top_items: founder_items.slice(0, 3),
   };
 }
 
