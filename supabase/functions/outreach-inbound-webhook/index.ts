@@ -18,6 +18,11 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
   try {
+    const expected = Deno.env.get("OUTREACH_WEBHOOK_SECRET");
+    const provided = req.headers.get("x-webhook-secret");
+    if (!expected || !provided || provided !== expected) {
+      return json({ error: "unauthorized" }, 401);
+    }
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
