@@ -128,7 +128,7 @@ export async function generateMonthlyBatch(input: MonthlyBatchInput) {
   }).eq("id", batch.id);
 
   if (createdByUserId) {
-    try { await logAuditEvent({ workerId: null, eventType: "campaign_batch_generated", portalType: "founder", reason: `batch ${batch.id}` }); } catch {}
+    try { await logAuditEvent({ workerId: null, eventType: "campaign_batch_generated", reason: `batch ${batch.id}` }); } catch {}
   }
   return batch;
 }
@@ -146,19 +146,19 @@ export async function approvePack(packId: string, decision: "approved" | "change
       status: "founder_approved",
     }).eq("id", pack.business_campaign_plan_id);
   }
-  try { await logAuditEvent({ workerId: null, eventType: `campaign_pack_${decision}`, portalType: "founder", relatedTaskId: packId }); } catch {}
+  try { await logAuditEvent({ workerId: null, eventType: `campaign_pack_${decision}`, relatedTaskId: packId }); } catch {}
   return pack;
 }
 
 export async function parkPlan(planId: string) {
   await (supabase as any).from("business_campaign_plans").update({ status: "parked" }).eq("id", planId);
-  try { await logAuditEvent({ workerId: null, eventType: "campaign_plan_parked", portalType: "founder", relatedTaskId: planId }); } catch {}
+  try { await logAuditEvent({ workerId: null, eventType: "campaign_plan_parked", relatedTaskId: planId }); } catch {}
 }
 
 export async function blockAllExternalActions(planId: string) {
   await (supabase as any).from("outreach_campaign_drafts").update({ external_send_blocked: true }).eq("business_campaign_plan_id", planId);
   await (supabase as any).from("social_campaign_drafts").update({ external_publish_blocked: true }).eq("business_campaign_plan_id", planId);
-  try { await logAuditEvent({ workerId: null, eventType: "campaign_external_blocked", portalType: "founder", relatedTaskId: planId }); } catch {}
+  try { await logAuditEvent({ workerId: null, eventType: "campaign_external_blocked", relatedTaskId: planId }); } catch {}
 }
 
 export async function assignPlanRoles(planId: string, operatorId: string | null, oversightId: string | null) {
