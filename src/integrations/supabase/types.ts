@@ -62024,56 +62024,7 @@ export type Database = {
       }
       get_outbound_status: { Args: never; Returns: Json }
       get_outreach_send_cron_status: { Args: never; Returns: Json }
-      get_proposal_by_token: {
-        Args: { _token: string }
-        Returns: {
-          accept_token: string
-          accepted_at: string | null
-          architecture_components: Json
-          business_name: string
-          business_problem: string
-          contact_id: string
-          created_at: string
-          customer_success_profile_id: string | null
-          deal_id: string | null
-          estimated_annual_savings: string
-          estimated_cost_breakdown: Json
-          estimated_cost_range: string
-          estimated_productivity_gain: string
-          estimated_roi_period: string
-          estimated_roi_summary: string
-          estimated_scope: string
-          estimated_timeline: string
-          follow_up_completed_at: string | null
-          follow_up_due_at: string | null
-          id: string
-          include_demo: boolean
-          industry: string
-          onboarding_plan_id: string | null
-          processes_to_automate: string[]
-          project_scale: string
-          project_types: string[]
-          proposal_quality_score: number
-          proposal_score: number
-          quality_flags: Json
-          rejected_at: string | null
-          sent_at: string | null
-          status: Database["public"]["Enums"]["internal_proposal_status"]
-          suggested_solution: string
-          timeline: string
-          title: string
-          updated_at: string
-          version: number
-          view_token: string
-          viewed_at: string | null
-        }
-        SetofOptions: {
-          from: "*"
-          to: "internal_proposals"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
+      get_proposal_by_token: { Args: { _token: string }; Returns: Json }
       get_system_mode: { Args: never; Returns: string }
       has_live_ready_inbox: {
         Args: { _business_name: string }
