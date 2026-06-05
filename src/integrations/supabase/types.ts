@@ -61511,7 +61511,16 @@ export type Database = {
         | "failed"
         | "cancelled"
       apollo_segment_mode: "saved_list" | "people_search"
-      app_role: "admin" | "founder" | "client" | "partner"
+      app_role:
+        | "admin"
+        | "founder"
+        | "client"
+        | "partner"
+        | "technical_operator"
+        | "dubai_oversight"
+        | "professional_reviewer"
+        | "legal_research"
+        | "admin_support"
       assignment_sla_status: "on_track" | "at_risk" | "overdue" | "n_a"
       assignment_status: "assigned" | "in_progress" | "completed" | "failed"
       bcr_qualification:
@@ -62133,7 +62142,17 @@ export const Constants = {
         "cancelled",
       ],
       apollo_segment_mode: ["saved_list", "people_search"],
-      app_role: ["admin", "founder", "client", "partner"],
+      app_role: [
+        "admin",
+        "founder",
+        "client",
+        "partner",
+        "technical_operator",
+        "dubai_oversight",
+        "professional_reviewer",
+        "legal_research",
+        "admin_support",
+      ],
       assignment_sla_status: ["on_track", "at_risk", "overdue", "n_a"],
       assignment_status: ["assigned", "in_progress", "completed", "failed"],
       bcr_qualification: [
