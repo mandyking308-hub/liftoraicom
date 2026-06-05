@@ -132,6 +132,18 @@ class PollStageError extends Error {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  const cronSecret = Deno.env.get("CRON_SECRET");
+  const providedSecret = req.headers.get("x-cron-secret");
+  if (!cronSecret || !providedSecret || providedSecret !== cronSecret) {
+    return json({
+      ok: false,
+      code: ERROR_CODES.CONFIG_ERROR,
+      message: "unauthorized",
+      stage: "auth",
+      partial_counts: emptyCounts(),
+    }, 401);
+  }
+
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   const encKey = Deno.env.get("INBOX_CREDENTIALS_KEY");
