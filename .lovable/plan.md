@@ -1,108 +1,101 @@
-# Liftor Global AI Compliance Control Layer
+# Human Workforce Control — Build Plan
 
-A founder-only compliance spine that ties together AI system inventory, data flows, human oversight, approval gates, evidence and risk classification — built on top of the existing business compliance, privacy, incidents, audit and AI usage modules.
+A secure two-portal worker system with strict role isolation, time-windowed access, oversight review, and founder approval gates. No external sending, publishing, or data export.
 
-## Scope
+## 1. Database (one migration)
 
-In scope:
-- New founder route `/founder/ai-compliance` (founder-protected, no public access).
-- 5 new Supabase tables + RLS, plus a deterministic risk classifier in TypeScript.
-- Cross-links to existing modules (business compliance, approvals, privacy, incidents, AI usage, policies). No duplication.
-- Gap engine that turns existing business compliance signals into actionable items.
-- Evidence Pack view (UI/data only, no PDF export yet).
-- Tests for the risk classifier + smoke render test.
-- Internal docs: `docs/AI_COMPLIANCE_CONTROL_LAYER.md`.
+New `app_role` enum values: `technical_operator`, `dubai_oversight`, `professional_reviewer`, `legal_research`, `admin_support`. (`admin` already exists for founder; `has_role` already exists.)
 
-Out of scope (explicit):
-- No external sending, no API calls, no Smartlead/Apollo/outreach state changes.
-- No PDF/CSV export wired up yet.
-- No "EU AI Act certified" claims — wording stays "readiness / evidence-ready / approval-gated".
-- No seeded fake customers/revenue.
+New tables (all with `GRANT`s + RLS):
+- `worker_profiles`
+- `worker_access_windows`
+- `worker_sessions`
+- `worker_tasks`
+- `worker_task_logs`
+- `worker_evidence_uploads`
+- `worker_oversight_reviews`
+- `worker_audit_events`
+- `monthly_business_content_plans`
+- `monthly_content_items`
 
-## Routes
+Plus a small settings table `worker_kill_switch` (single row) for the emergency global lock.
 
-- `/founder/ai-compliance` (Overview) — summary cards + "What needs Mandy today".
-- `/founder/ai-compliance/systems` — AI System Inventory.
-- `/founder/ai-compliance/data-flows` — Data Flow Register.
-- `/founder/ai-compliance/oversight` — Human Oversight + Approval/Intervention Log.
-- `/founder/ai-compliance/evidence` — Evidence Pack.
-- `/founder/ai-compliance/risk` — Risk Classifier explorer.
-- `/founder/ai-compliance/gaps` — Gaps & Actions.
+### Security-definer helpers
+- `current_worker_id()` — resolves `auth.uid()` → `worker_profiles.id`.
+- `worker_has_active_window(worker_id, portal_type)` — checks active `worker_access_windows` AND not killed AND not revoked session.
+- `is_kill_switch_active()`.
 
-All wrapped in `FounderRoute`, registered alongside existing founder routes in `App.tsx`.
+### RLS pattern
+- Founder (`has_role(auth.uid(),'admin')`) = full read/write on everything.
+- Workers can only `SELECT/UPDATE` their **own** rows on `worker_tasks`, `worker_task_logs`, `worker_evidence_uploads`, `worker_sessions`, scoped further by `worker_has_active_window`.
+- Oversight roles can `SELECT` submitted tasks + logs + evidence assigned to workers, and `INSERT` `worker_oversight_reviews` (own rows only). They cannot edit task content.
+- `monthly_content_items` and `monthly_business_content_plans`: workers read only items linked to their assigned tasks; only founder can flip `founder_approved_*`. `external_publish_blocked` defaults `true` and only founder may flip it.
+- All tables: writes by anyone other than founder require an active access window for that portal.
 
-## Database (single migration)
+## 2. Auth & Roles
+- Reuse existing `user_roles` + `has_role`.
+- After signup, founder assigns role via Human Workforce Control. New worker is `status='pending'` until activated.
+- Operator login route validates role `technical_operator` only; oversight login route validates `dubai_oversight` or `professional_reviewer`.
+- Founder remains on `/founder/*` — workers redirected away with toast.
 
-Tables, all founder/service-role only (no anon, no authenticated read for non-founders — enforced via `has_role(auth.uid(),'founder')` policy that already exists in the project):
+## 3. Routes added in `src/App.tsx`
+- `/operator-login`, `/operator-portal`
+- `/oversight-login`, `/oversight-portal`
+- `/founder/human-workforce-control`
 
-1. `ai_compliance_systems` — inventory of AI systems, autonomy level, data sensitivity flags, external action capability, risk level, review dates.
-2. `ai_data_flow_records` — source→destination flows, data categories, lawful basis, retention, cross-border, review status.
-3. `ai_human_oversight_records` — every approval/rejection/override/escalation/kill-switch, with decision_by and evidence link.
-4. `ai_compliance_evidence_items` — pointers to evidence (policy, audit log, approval log, etc.) with review status.
-5. `ai_compliance_gap_actions` — open gaps surfaced by the engine, severity, owner, due date, status.
+Worker portals wrapped in `WorkerRoute` guard that:
+1. Verifies session + role match for portal.
+2. Calls RPC `assert_active_access_window(portal_type)`; on failure shows "No active access window. Please contact Mandy." and forces sign-out.
+3. Starts a `worker_sessions` row, polls every 30s, force-logs-out at `end_time` or `login_at + max_session_minutes`.
 
-Each table:
-- `id uuid pk`, `created_at`, `updated_at` with trigger.
-- Full GRANT block (service_role full; authenticated SELECT/INSERT/UPDATE/DELETE so founder UI works; no anon).
-- RLS: only users with `founder` role can read/write (uses existing `has_role` SECURITY DEFINER function).
+## 4. Operator Portal UI
+Single page, tabs:
+- **Today** — active window countdown, assigned tasks list.
+- **Task detail** — SOP/instructions, Start, Submit work log, Upload evidence (Supabase Storage bucket `worker-evidence`, private), Request clarification (creates log entry), Mark submitted.
+No send/publish/delete/export/secrets buttons.
 
-## Code structure
+## 5. Oversight Portal UI
+- Today's queue (tasks with `status='submitted'` assigned to operators).
+- For each task: operator logs, evidence (signed URLs), risk flags.
+- Buttons: Reviewed OK / Reviewed Issue / Escalated, notes, minutes spent.
+- "Confirm today's oversight complete" → inserts daily summary audit event.
 
-- `src/lib/aiComplianceEngine.ts` — fetch/upsert helpers, risk classifier, gap synthesis, summary aggregator. Pure functions where possible.
-- `src/lib/__tests__/aiComplianceEngine.test.ts` — unit tests for `classifyRisk()` and `synthesizeGaps()` (deterministic, no Supabase).
-- `src/pages/founder/ai-compliance/_shared.tsx` — layout, tabs, status badges (mirrors `business-compliance/_shared`).
-- `src/pages/founder/ai-compliance/Overview.tsx` + `Systems.tsx` + `DataFlows.tsx` + `Oversight.tsx` + `Evidence.tsx` + `Risk.tsx` + `Gaps.tsx`.
-- `src/components/founder/ai-compliance/` — `SystemRowDialog`, `DataFlowDialog`, `OversightDialog`, `WhatNeedsMandyPanel`, `EvidencePackView`.
-- Register routes in `src/App.tsx` and add a nav entry in the founder sidebar (wherever the existing AI/compliance links live).
+## 6. Founder Human Workforce Control UI
+Single page with sub-tabs:
+1. **Workers** — list, create, edit role/NDA/rate/status.
+2. **Access** — today's windows, active sessions, force-logout, revoke, extend (+30/+60), create one-off window, **kill switch toggle**.
+3. **Tasks** — assign, view all, approval queue (requires_founder_approval + submitted).
+4. **Oversight** — review status, missed reviews.
+5. **Monthly Content & Campaign Control** — per-business plan generator, plan/items table, approval gate.
+6. **Business Onboarding** — form to create new business onboarding bundle (AI starter pack stub creates plan + operator + oversight tasks; no external calls).
+7. **Audit log** — recent worker_audit_events.
 
-## Risk classifier (deterministic)
+## 7. Engines (`src/lib/`)
+- `humanWorkforce.ts` — types, fetchers, session lifecycle helpers, kill switch.
+- `monthlyContentPlanner.ts` — local deterministic generator that creates a 30-day skeleton plan + items + operator/oversight tasks (no external AI calls in this build).
+- `__tests__/humanWorkforce.test.ts` — access window validation, kill switch precedence, session expiry math, role→portal mapping, external-action defaults.
 
-`classifyRisk(system)` returns `{ level, score, reasons[] }`. Scoring adds points for: external_action_capable, autonomy ∈ {semi_autonomous, autonomous_internal, external_action_capable}, sensitive/children/health/financial/legal data, outbound contact, regulated-domain purpose keywords, missing data flow, missing oversight, missing founder confirmation, stale/no review date. Thresholds → low/medium/high/critical. Reasons are returned so the UI can show why.
+## 8. Audit logging
+Helper `logAuditEvent(event_type, portal_type, related_task_id?, metadata?)` called on: login, logout, forced_logout, failed_login, expired_session, task_view, task_edit, evidence_upload, review_action, founder_approval, kill_switch_toggle, window_created, window_revoked, window_extended.
 
-## Gap engine
+## 9. Storage
+Create private bucket `worker-evidence` via migration with RLS: workers can upload to `{worker_id}/{task_id}/...`; founder + matching oversight can read.
 
-`synthesizeGaps({ businessProfiles, systems, flows, oversight, triggers })` emits gap rows for:
-- critical/high business profile with zero systems inventoried
-- system with no matching data flow record
-- system with sensitive/personal data but no oversight events ever
-- external_action_capable system with no approval trigger covering it
-- system with no founder_confirmed
-- review overdue (next_review_due_at < now)
+## 10. Sidebar / nav
+Add **Human Workforce Control** entry to founder sidebar → `/founder/human-workforce-control`. No links to founder routes from worker portals.
 
-Persisted into `ai_compliance_gap_actions` only on explicit founder action ("Materialise gaps") — by default we compute them live to avoid noise. This keeps the table for tracked, owned actions.
+## 11. Hard constraints honoured
+- No external sending, publishing, Smartlead/Metricool/Gmail/GitHub/bank integration.
+- `external_action_blocked` defaults `true` on `worker_tasks`; `external_publish_blocked` defaults `true` on `monthly_content_items`.
+- No demo data inserted into live tables; UIs render real empty states.
+- No secrets, env vars, or founder data surfaced in worker portals.
 
-## UI principles
+## 12. Tests
+- Unit tests for engine logic (window active/expired, kill switch, session expiry, role/portal mapping, default blocks).
+- Re-run full vitest suite; must remain green.
 
-- Reuse `tech-card`, existing badge palette, founder layout.
-- Empty states say what's missing and link to the right module instead of fabricating data.
-- "What needs Mandy today" panel = only items with `founder_decision_required = true` OR severity ∈ {high, critical} OR review overdue.
-
-## Integrations (read-only cross-references)
-
-- Business compliance: reuse `businessComplianceEngine` for profiles/triggers → feed gap engine.
-- Approval gates: when an approval decision is recorded elsewhere, expose helper `recordOversightFromApproval()` for future wiring; do not modify existing approval modules in this pass.
-- Privacy / incidents / policies / AI usage: Evidence Pack reads from existing tables if present; otherwise shows "evidence missing — link from <module>".
-
-## Safety guarantees
-
-- No edits to outreach/Smartlead/Apollo/auto_send_enabled.
-- No new secrets, no edge functions, no external API calls.
-- No public routes added.
-- Existing routes untouched apart from adding new ones.
-
-## Acceptance checks
-
-- `/founder/ai-compliance` renders behind FounderRoute.
-- CRUD for systems / data flows / oversight against Supabase.
-- Gap engine produces meaningful items from real data.
-- Evidence Pack reflects real state with clear empty states.
-- `classifyRisk` unit tests pass.
-- Build passes.
-
-## Execution order
-
-1. Write & submit migration (5 tables + RLS + GRANTs + updated_at trigger reuse).
-2. After approval: add engine + tests.
-3. Add pages, dialogs, shared layout, route registration, sidebar link.
-4. Add docs.
-5. Verify build.
+## Out of scope (explicit)
+- Real publishing integrations.
+- Per-user OAuth to external networks.
+- Bank, GitHub, secret access for workers.
+- Real AI generation for content plans — placeholder deterministic generator with founder-approval gate.
