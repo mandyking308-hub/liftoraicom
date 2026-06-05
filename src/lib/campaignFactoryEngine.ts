@@ -128,7 +128,7 @@ export async function generateMonthlyBatch(input: MonthlyBatchInput) {
   }).eq("id", batch.id);
 
   if (createdByUserId) {
-    try { await logAuditEvent({ workerId: null, eventType: "campaign_batch_generated", reason: `batch ${batch.id}` }); } catch {}
+    try { await logAuditEvent({ workerId: null, eventType: "campaign_batch_generated", metadata: { batchId: batch.id } }); } catch {}
   }
   return batch;
 }
