@@ -117,8 +117,11 @@ export default function OperatorPortal() {
     window.location.href = "/operator-login";
   };
 
+  if (!worker) {
+    return <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">Loading…</div>;
+  }
   return (
-    <ManualAckGate workerId={worker?.id ?? ""} role="technical_operator">
+    <ManualAckGate workerId={worker.id} role="technical_operator">
     <div className="min-h-screen bg-background">
       <header className="border-b border-border/50 px-6 py-4 flex items-center justify-between">
         <div>
