@@ -121,4 +121,4 @@ export default function WorkerRoute({ portal, loginPath, children }: Props) {
   return <>{children}</>;
 }
 
-export { Props as WorkerRouteProps };
+export type { Props as WorkerRouteProps };
