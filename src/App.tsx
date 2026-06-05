@@ -25,6 +25,12 @@ import MondayReadinessOverview from "@/pages/founder/monday-readiness/Overview";
 import MondayLaunchOverview from "@/pages/founder/monday-launch/Overview";
 import PartnerRoute from "@/components/partner/PartnerRoute";
 import ScrollToTop from "@/components/ScrollToTop";
+import WorkerRoute from "@/components/worker/WorkerRoute";
+import OperatorLogin from "@/pages/worker/OperatorLogin";
+import OperatorPortal from "@/pages/worker/OperatorPortal";
+import OversightLogin from "@/pages/worker/OversightLogin";
+import OversightPortal from "@/pages/worker/OversightPortal";
+import HumanWorkforceControl from "@/pages/founder/HumanWorkforceControl";
 
 // Public pages
 import Index from "./pages/Index";
@@ -1692,6 +1698,34 @@ const App = () => (
             <Route path="/partner/projects/:id" element={<PartnerRoute><PartnerProjectDetail /></PartnerRoute>} />
             <Route path="/partner/documents" element={<PartnerRoute><PartnerDocuments /></PartnerRoute>} />
             <Route path="/partner/messages" element={<PartnerRoute><PartnerMessages /></PartnerRoute>} />
+
+            {/* Worker portals */}
+            <Route path="/operator-login" element={<OperatorLogin />} />
+            <Route
+              path="/operator-portal"
+              element={
+                <WorkerRoute portal="operator" loginPath="/operator-login">
+                  <OperatorPortal />
+                </WorkerRoute>
+              }
+            />
+            <Route path="/oversight-login" element={<OversightLogin />} />
+            <Route
+              path="/oversight-portal"
+              element={
+                <WorkerRoute portal="oversight" loginPath="/oversight-login">
+                  <OversightPortal />
+                </WorkerRoute>
+              }
+            />
+            <Route
+              path="/founder/human-workforce-control"
+              element={
+                <FounderRoute>
+                  <HumanWorkforceControl />
+                </FounderRoute>
+              }
+            />
 
             <Route path="*" element={<NotFound />} />
           </Routes>

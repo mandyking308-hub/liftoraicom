@@ -37333,6 +37333,128 @@ export type Database = {
           },
         ]
       }
+      monthly_business_content_plans: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          created_by_ai: boolean
+          founder_approved_at: string | null
+          founder_approved_by: string | null
+          id: string
+          month_start: string
+          operator_id: string | null
+          oversight_reviewer_id: string | null
+          plan_summary: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          created_by_ai?: boolean
+          founder_approved_at?: string | null
+          founder_approved_by?: string | null
+          id?: string
+          month_start: string
+          operator_id?: string | null
+          oversight_reviewer_id?: string | null
+          plan_summary?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          created_by_ai?: boolean
+          founder_approved_at?: string | null
+          founder_approved_by?: string | null
+          id?: string
+          month_start?: string
+          operator_id?: string | null
+          oversight_reviewer_id?: string | null
+          plan_summary?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "monthly_business_content_plans_operator_id_fkey"
+            columns: ["operator_id"]
+            isOneToOne: false
+            referencedRelation: "worker_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "monthly_business_content_plans_oversight_reviewer_id_fkey"
+            columns: ["oversight_reviewer_id"]
+            isOneToOne: false
+            referencedRelation: "worker_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      monthly_content_items: {
+        Row: {
+          asset_notes: string | null
+          business_id: string | null
+          caption: string | null
+          channel: string
+          content_date: string
+          content_type: string
+          created_at: string
+          cta: string | null
+          external_publish_blocked: boolean
+          hook: string | null
+          id: string
+          plan_id: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          asset_notes?: string | null
+          business_id?: string | null
+          caption?: string | null
+          channel: string
+          content_date: string
+          content_type: string
+          created_at?: string
+          cta?: string | null
+          external_publish_blocked?: boolean
+          hook?: string | null
+          id?: string
+          plan_id: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          asset_notes?: string | null
+          business_id?: string | null
+          caption?: string | null
+          channel?: string
+          content_date?: string
+          content_type?: string
+          created_at?: string
+          cta?: string | null
+          external_publish_blocked?: boolean
+          hook?: string | null
+          id?: string
+          plan_id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "monthly_content_items_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "monthly_business_content_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       multi_channel_inbound_events: {
         Row: {
           business_id: string | null
@@ -59399,6 +59521,433 @@ export type Database = {
           },
         ]
       }
+      worker_access_windows: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          end_time: string
+          id: string
+          max_session_minutes: number
+          portal_type: string
+          start_time: string
+          status: string
+          window_date: string
+          worker_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          end_time: string
+          id?: string
+          max_session_minutes?: number
+          portal_type: string
+          start_time: string
+          status?: string
+          window_date?: string
+          worker_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          end_time?: string
+          id?: string
+          max_session_minutes?: number
+          portal_type?: string
+          start_time?: string
+          status?: string
+          window_date?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "worker_access_windows_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "worker_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      worker_audit_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          metadata: Json
+          portal_type: string | null
+          related_task_id: string | null
+          worker_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          metadata?: Json
+          portal_type?: string | null
+          related_task_id?: string | null
+          worker_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          metadata?: Json
+          portal_type?: string | null
+          related_task_id?: string | null
+          worker_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "worker_audit_events_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "worker_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      worker_evidence_uploads: {
+        Row: {
+          created_at: string
+          evidence_type: string
+          file_url: string | null
+          id: string
+          notes: string | null
+          task_id: string
+          worker_id: string
+        }
+        Insert: {
+          created_at?: string
+          evidence_type: string
+          file_url?: string | null
+          id?: string
+          notes?: string | null
+          task_id: string
+          worker_id: string
+        }
+        Update: {
+          created_at?: string
+          evidence_type?: string
+          file_url?: string | null
+          id?: string
+          notes?: string | null
+          task_id?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "worker_evidence_uploads_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "worker_tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "worker_evidence_uploads_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "worker_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      worker_kill_switch: {
+        Row: {
+          active: boolean
+          id: boolean
+          reason: string | null
+          toggled_at: string
+          toggled_by: string | null
+        }
+        Insert: {
+          active?: boolean
+          id?: boolean
+          reason?: string | null
+          toggled_at?: string
+          toggled_by?: string | null
+        }
+        Update: {
+          active?: boolean
+          id?: boolean
+          reason?: string | null
+          toggled_at?: string
+          toggled_by?: string | null
+        }
+        Relationships: []
+      }
+      worker_oversight_reviews: {
+        Row: {
+          created_at: string
+          id: string
+          location_basis: string | null
+          minutes_spent: number | null
+          review_date: string
+          review_notes: string | null
+          review_status: string
+          reviewer_id: string
+          task_id: string
+          worker_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          location_basis?: string | null
+          minutes_spent?: number | null
+          review_date?: string
+          review_notes?: string | null
+          review_status: string
+          reviewer_id: string
+          task_id: string
+          worker_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          location_basis?: string | null
+          minutes_spent?: number | null
+          review_date?: string
+          review_notes?: string | null
+          review_status?: string
+          reviewer_id?: string
+          task_id?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "worker_oversight_reviews_reviewer_id_fkey"
+            columns: ["reviewer_id"]
+            isOneToOne: false
+            referencedRelation: "worker_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "worker_oversight_reviews_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "worker_tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "worker_oversight_reviews_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "worker_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      worker_profiles: {
+        Row: {
+          country: string | null
+          created_at: string
+          email: string
+          full_name: string
+          hourly_rate: number | null
+          id: string
+          nda_signed: boolean
+          notes: string | null
+          provider_company: string | null
+          role: string
+          status: string
+          timezone: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string
+          email: string
+          full_name: string
+          hourly_rate?: number | null
+          id?: string
+          nda_signed?: boolean
+          notes?: string | null
+          provider_company?: string | null
+          role: string
+          status?: string
+          timezone?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          country?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string
+          hourly_rate?: number | null
+          id?: string
+          nda_signed?: boolean
+          notes?: string | null
+          provider_company?: string | null
+          role?: string
+          status?: string
+          timezone?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      worker_sessions: {
+        Row: {
+          access_window_id: string | null
+          country_detected: string | null
+          created_at: string
+          device_fingerprint: string | null
+          forced_logout_at: string | null
+          id: string
+          ip_address: string | null
+          login_at: string
+          logout_at: string | null
+          status: string
+          worker_id: string
+        }
+        Insert: {
+          access_window_id?: string | null
+          country_detected?: string | null
+          created_at?: string
+          device_fingerprint?: string | null
+          forced_logout_at?: string | null
+          id?: string
+          ip_address?: string | null
+          login_at?: string
+          logout_at?: string | null
+          status?: string
+          worker_id: string
+        }
+        Update: {
+          access_window_id?: string | null
+          country_detected?: string | null
+          created_at?: string
+          device_fingerprint?: string | null
+          forced_logout_at?: string | null
+          id?: string
+          ip_address?: string | null
+          login_at?: string
+          logout_at?: string | null
+          status?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "worker_sessions_access_window_id_fkey"
+            columns: ["access_window_id"]
+            isOneToOne: false
+            referencedRelation: "worker_access_windows"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "worker_sessions_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "worker_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      worker_task_logs: {
+        Row: {
+          created_at: string
+          id: string
+          log_text: string
+          status_update: string | null
+          task_id: string
+          time_spent_minutes: number | null
+          worker_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          log_text: string
+          status_update?: string | null
+          task_id: string
+          time_spent_minutes?: number | null
+          worker_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          log_text?: string
+          status_update?: string | null
+          task_id?: string
+          time_spent_minutes?: number | null
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "worker_task_logs_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "worker_tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "worker_task_logs_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "worker_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      worker_tasks: {
+        Row: {
+          assigned_to: string | null
+          business_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          due_at: string | null
+          external_action_blocked: boolean
+          id: string
+          priority: string
+          requires_founder_approval: boolean
+          status: string
+          task_type: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          business_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_at?: string | null
+          external_action_blocked?: boolean
+          id?: string
+          priority?: string
+          requires_founder_approval?: boolean
+          status?: string
+          task_type: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          business_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_at?: string | null
+          external_action_blocked?: boolean
+          id?: string
+          priority?: string
+          requires_founder_approval?: boolean
+          status?: string
+          task_type?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "worker_tasks_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "worker_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workflow_activity_logs: {
         Row: {
           action: string
@@ -60758,6 +61307,7 @@ export type Database = {
         }
         Returns: Json
       }
+      current_worker_id: { Args: never; Returns: string }
       customer_sales_link_contact_by_email: {
         Args: { p_email: string }
         Returns: string
@@ -60978,8 +61528,11 @@ export type Database = {
         Args: { _business_name?: string; _feature_name: string }
         Returns: boolean
       }
+      is_founder: { Args: never; Returns: boolean }
       is_internal_email: { Args: { _email: string }; Returns: boolean }
       is_internal_identity: { Args: { _email: string }; Returns: boolean }
+      is_kill_switch_active: { Args: never; Returns: boolean }
+      is_oversight_reviewer: { Args: never; Returns: boolean }
       list_inbox_credentials_public: {
         Args: { _inbox_id: string }
         Returns: {
@@ -61449,6 +62002,10 @@ export type Database = {
       validate_inbox_mapping: { Args: { _inbox_id: string }; Returns: Json }
       validate_runtime_vs_documentation: { Args: never; Returns: Json }
       validate_system_integrity: { Args: never; Returns: Json }
+      worker_has_active_window: {
+        Args: { _portal_type: string; _worker_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       adviser_review_status:
@@ -61511,7 +62068,16 @@ export type Database = {
         | "failed"
         | "cancelled"
       apollo_segment_mode: "saved_list" | "people_search"
-      app_role: "admin" | "founder" | "client" | "partner"
+      app_role:
+        | "admin"
+        | "founder"
+        | "client"
+        | "partner"
+        | "technical_operator"
+        | "dubai_oversight"
+        | "professional_reviewer"
+        | "legal_research"
+        | "admin_support"
       assignment_sla_status: "on_track" | "at_risk" | "overdue" | "n_a"
       assignment_status: "assigned" | "in_progress" | "completed" | "failed"
       bcr_qualification:
@@ -62133,7 +62699,17 @@ export const Constants = {
         "cancelled",
       ],
       apollo_segment_mode: ["saved_list", "people_search"],
-      app_role: ["admin", "founder", "client", "partner"],
+      app_role: [
+        "admin",
+        "founder",
+        "client",
+        "partner",
+        "technical_operator",
+        "dubai_oversight",
+        "professional_reviewer",
+        "legal_research",
+        "admin_support",
+      ],
       assignment_sla_status: ["on_track", "at_risk", "overdue", "n_a"],
       assignment_status: ["assigned", "in_progress", "completed", "failed"],
       bcr_qualification: [
