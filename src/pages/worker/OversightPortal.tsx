@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import CampaignOversight from "@/components/worker/CampaignOversight";
+import ManualAckGate from "@/components/worker/ManualAckGate";
 import {
   fetchActiveWindow,
   fetchMyWorkerProfile,
@@ -99,7 +100,11 @@ export default function OversightPortal() {
     window.location.href = "/oversight-login";
   };
 
+  if (!worker) {
+    return <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">Loading…</div>;
+  }
   return (
+    <ManualAckGate workerId={worker.id} role={worker.role}>
     <div className="min-h-screen bg-background">
       <header className="border-b border-border/50 px-6 py-4 flex items-center justify-between">
         <div>
@@ -214,5 +219,6 @@ export default function OversightPortal() {
         </div>
       )}
     </div>
+    </ManualAckGate>
   );
 }
