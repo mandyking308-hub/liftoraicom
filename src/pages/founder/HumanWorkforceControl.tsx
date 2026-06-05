@@ -25,6 +25,7 @@ import {
   type WorkerRole,
 } from "@/lib/humanWorkforce";
 import { generateMonthlyPlan, approveMonthlyPlan } from "@/lib/monthlyContentPlanner";
+import HumanOversightChainPanel from "@/components/founder/command/HumanOversightChainPanel";
 
 const WORKER_ROLES: WorkerRole[] = [
   "technical_operator",
@@ -170,6 +171,10 @@ export default function HumanWorkforceControl() {
           </div>
         </div>
       </Card>
+
+      <div className="mb-6">
+        <HumanOversightChainPanel />
+      </div>
 
       <Tabs defaultValue="workers">
         <TabsList className="flex-wrap h-auto">
