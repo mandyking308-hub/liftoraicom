@@ -5659,6 +5659,7 @@ export type Database = {
           escalation_rules: string | null
           external_action_allowed: boolean
           failure_modes: string | null
+          founder_approval_required: boolean
           id: string
           input_requirements: Json
           operator_role_required: string | null
@@ -5666,6 +5667,7 @@ export type Database = {
           oversight_required: boolean
           runbook_name: string
           status: string
+          step_by_step_process: string | null
           trigger_description: string | null
           trigger_type: string
           updated_at: string
@@ -5678,6 +5680,7 @@ export type Database = {
           escalation_rules?: string | null
           external_action_allowed?: boolean
           failure_modes?: string | null
+          founder_approval_required?: boolean
           id?: string
           input_requirements?: Json
           operator_role_required?: string | null
@@ -5685,6 +5688,7 @@ export type Database = {
           oversight_required?: boolean
           runbook_name: string
           status?: string
+          step_by_step_process?: string | null
           trigger_description?: string | null
           trigger_type: string
           updated_at?: string
@@ -5697,6 +5701,7 @@ export type Database = {
           escalation_rules?: string | null
           external_action_allowed?: boolean
           failure_modes?: string | null
+          founder_approval_required?: boolean
           id?: string
           input_requirements?: Json
           operator_role_required?: string | null
@@ -5704,6 +5709,7 @@ export type Database = {
           oversight_required?: boolean
           runbook_name?: string
           status?: string
+          step_by_step_process?: string | null
           trigger_description?: string | null
           trigger_type?: string
           updated_at?: string
@@ -60080,6 +60086,57 @@ export type Database = {
           },
         ]
       }
+      worker_help_requests: {
+        Row: {
+          answer: string | null
+          created_at: string
+          escalated_to_founder: boolean
+          id: string
+          question: string
+          source_manual_sections: Json
+          status: string
+          task_id: string | null
+          worker_id: string | null
+        }
+        Insert: {
+          answer?: string | null
+          created_at?: string
+          escalated_to_founder?: boolean
+          id?: string
+          question: string
+          source_manual_sections?: Json
+          status?: string
+          task_id?: string | null
+          worker_id?: string | null
+        }
+        Update: {
+          answer?: string | null
+          created_at?: string
+          escalated_to_founder?: boolean
+          id?: string
+          question?: string
+          source_manual_sections?: Json
+          status?: string
+          task_id?: string | null
+          worker_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "worker_help_requests_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "worker_tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "worker_help_requests_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "worker_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       worker_kill_switch: {
         Row: {
           active: boolean
@@ -60101,6 +60158,86 @@ export type Database = {
           reason?: string | null
           toggled_at?: string
           toggled_by?: string | null
+        }
+        Relationships: []
+      }
+      worker_manual_sections: {
+        Row: {
+          applies_to_task_types: Json
+          created_at: string
+          display_order: number
+          id: string
+          manual_id: string | null
+          section_body: string | null
+          section_key: string
+          section_title: string
+        }
+        Insert: {
+          applies_to_task_types?: Json
+          created_at?: string
+          display_order?: number
+          id?: string
+          manual_id?: string | null
+          section_body?: string | null
+          section_key: string
+          section_title: string
+        }
+        Update: {
+          applies_to_task_types?: Json
+          created_at?: string
+          display_order?: number
+          id?: string
+          manual_id?: string | null
+          section_body?: string | null
+          section_key?: string
+          section_title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "worker_manual_sections_manual_id_fkey"
+            columns: ["manual_id"]
+            isOneToOne: false
+            referencedRelation: "worker_manuals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      worker_manuals: {
+        Row: {
+          created_at: string
+          founder_approved_at: string | null
+          founder_approved_by: string | null
+          id: string
+          manual_body: string | null
+          manual_title: string
+          manual_version: string
+          role: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          founder_approved_at?: string | null
+          founder_approved_by?: string | null
+          id?: string
+          manual_body?: string | null
+          manual_title: string
+          manual_version: string
+          role: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          founder_approved_at?: string | null
+          founder_approved_by?: string | null
+          id?: string
+          manual_body?: string | null
+          manual_title?: string
+          manual_version?: string
+          role?: string
+          status?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -60173,6 +60310,8 @@ export type Database = {
           full_name: string
           hourly_rate: number | null
           id: string
+          manual_acknowledged_at: string | null
+          manual_acknowledged_version: string | null
           nda_signed: boolean
           notes: string | null
           provider_company: string | null
@@ -60189,6 +60328,8 @@ export type Database = {
           full_name: string
           hourly_rate?: number | null
           id?: string
+          manual_acknowledged_at?: string | null
+          manual_acknowledged_version?: string | null
           nda_signed?: boolean
           notes?: string | null
           provider_company?: string | null
@@ -60205,6 +60346,8 @@ export type Database = {
           full_name?: string
           hourly_rate?: number | null
           id?: string
+          manual_acknowledged_at?: string | null
+          manual_acknowledged_version?: string | null
           nda_signed?: boolean
           notes?: string | null
           provider_company?: string | null
