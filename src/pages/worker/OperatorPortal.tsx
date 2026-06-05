@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import CampaignSetupTasks from "@/components/worker/CampaignSetupTasks";
 import {
   fetchActiveWindow,
   fetchAssignedTasks,
@@ -202,6 +203,11 @@ export default function OperatorPortal() {
           )}
         </Card>
       </main>
+      {worker && (
+        <div className="px-6 pb-10 max-w-5xl mx-auto">
+          <CampaignSetupTasks workerId={worker.id} />
+        </div>
+      )}
     </div>
   );
 }
