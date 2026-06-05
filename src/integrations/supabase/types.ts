@@ -5650,6 +5650,66 @@ export type Database = {
         }
         Relationships: []
       }
+      automation_runbooks: {
+        Row: {
+          approval_required: boolean
+          automation_area: string
+          business_id: string | null
+          created_at: string
+          escalation_rules: string | null
+          external_action_allowed: boolean
+          failure_modes: string | null
+          id: string
+          input_requirements: Json
+          operator_role_required: string | null
+          output_requirements: Json
+          oversight_required: boolean
+          runbook_name: string
+          status: string
+          trigger_description: string | null
+          trigger_type: string
+          updated_at: string
+        }
+        Insert: {
+          approval_required?: boolean
+          automation_area: string
+          business_id?: string | null
+          created_at?: string
+          escalation_rules?: string | null
+          external_action_allowed?: boolean
+          failure_modes?: string | null
+          id?: string
+          input_requirements?: Json
+          operator_role_required?: string | null
+          output_requirements?: Json
+          oversight_required?: boolean
+          runbook_name: string
+          status?: string
+          trigger_description?: string | null
+          trigger_type: string
+          updated_at?: string
+        }
+        Update: {
+          approval_required?: boolean
+          automation_area?: string
+          business_id?: string | null
+          created_at?: string
+          escalation_rules?: string | null
+          external_action_allowed?: boolean
+          failure_modes?: string | null
+          id?: string
+          input_requirements?: Json
+          operator_role_required?: string | null
+          output_requirements?: Json
+          oversight_required?: boolean
+          runbook_name?: string
+          status?: string
+          trigger_description?: string | null
+          trigger_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       automation_workflows: {
         Row: {
           automation_type: string
@@ -7242,6 +7302,74 @@ export type Database = {
           website?: string | null
         }
         Relationships: []
+      }
+      business_campaign_plans: {
+        Row: {
+          approval_summary: string | null
+          assigned_operator_id: string | null
+          assigned_oversight_id: string | null
+          batch_id: string | null
+          business_id: string | null
+          business_name: string
+          campaign_goal: string | null
+          campaign_theme: string | null
+          channels: Json
+          created_at: string
+          id: string
+          month_start: string
+          offer: string | null
+          risk_level: string
+          status: string
+          target_customer: string | null
+          updated_at: string
+        }
+        Insert: {
+          approval_summary?: string | null
+          assigned_operator_id?: string | null
+          assigned_oversight_id?: string | null
+          batch_id?: string | null
+          business_id?: string | null
+          business_name: string
+          campaign_goal?: string | null
+          campaign_theme?: string | null
+          channels?: Json
+          created_at?: string
+          id?: string
+          month_start: string
+          offer?: string | null
+          risk_level?: string
+          status?: string
+          target_customer?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approval_summary?: string | null
+          assigned_operator_id?: string | null
+          assigned_oversight_id?: string | null
+          batch_id?: string | null
+          business_id?: string | null
+          business_name?: string
+          campaign_goal?: string | null
+          campaign_theme?: string | null
+          channels?: Json
+          created_at?: string
+          id?: string
+          month_start?: string
+          offer?: string | null
+          risk_level?: string
+          status?: string
+          target_customer?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_campaign_plans_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_factory_batches"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       business_channel_accounts: {
         Row: {
@@ -12146,6 +12274,116 @@ export type Database = {
           },
         ]
       }
+      campaign_approval_packs: {
+        Row: {
+          approval_pack_summary: string | null
+          approval_pack_title: string
+          business_campaign_plan_id: string | null
+          business_id: string | null
+          created_at: string
+          decisions_required: Json
+          founder_decided_at: string | null
+          founder_decision: string | null
+          founder_notes: string | null
+          id: string
+          included_items: Json
+          risks: Json
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          approval_pack_summary?: string | null
+          approval_pack_title: string
+          business_campaign_plan_id?: string | null
+          business_id?: string | null
+          created_at?: string
+          decisions_required?: Json
+          founder_decided_at?: string | null
+          founder_decision?: string | null
+          founder_notes?: string | null
+          id?: string
+          included_items?: Json
+          risks?: Json
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          approval_pack_summary?: string | null
+          approval_pack_title?: string
+          business_campaign_plan_id?: string | null
+          business_id?: string | null
+          created_at?: string
+          decisions_required?: Json
+          founder_decided_at?: string | null
+          founder_decision?: string | null
+          founder_notes?: string | null
+          id?: string
+          included_items?: Json
+          risks?: Json
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_approval_packs_business_campaign_plan_id_fkey"
+            columns: ["business_campaign_plan_id"]
+            isOneToOne: false
+            referencedRelation: "business_campaign_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaign_factory_batches: {
+        Row: {
+          batch_month: string
+          batch_name: string
+          created_at: string
+          founder_approved_at: string | null
+          founder_approved_by: string | null
+          generated_by_ai: boolean
+          id: string
+          operator_id: string | null
+          oversight_reviewer_id: string | null
+          status: string
+          total_businesses: number
+          total_campaigns: number
+          total_content_items: number
+          updated_at: string
+        }
+        Insert: {
+          batch_month: string
+          batch_name: string
+          created_at?: string
+          founder_approved_at?: string | null
+          founder_approved_by?: string | null
+          generated_by_ai?: boolean
+          id?: string
+          operator_id?: string | null
+          oversight_reviewer_id?: string | null
+          status?: string
+          total_businesses?: number
+          total_campaigns?: number
+          total_content_items?: number
+          updated_at?: string
+        }
+        Update: {
+          batch_month?: string
+          batch_name?: string
+          created_at?: string
+          founder_approved_at?: string | null
+          founder_approved_by?: string | null
+          generated_by_ai?: boolean
+          id?: string
+          operator_id?: string | null
+          oversight_reviewer_id?: string | null
+          status?: string
+          total_businesses?: number
+          total_campaigns?: number
+          total_content_items?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       campaign_metrics: {
         Row: {
           bounce_rate: number
@@ -12186,6 +12424,88 @@ export type Database = {
             columns: ["campaign_id"]
             isOneToOne: true
             referencedRelation: "outreach_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaign_operator_checks: {
+        Row: {
+          business_campaign_plan_id: string | null
+          check_status: string
+          check_type: string
+          created_at: string
+          evidence_url: string | null
+          id: string
+          notes: string | null
+          operator_id: string | null
+        }
+        Insert: {
+          business_campaign_plan_id?: string | null
+          check_status: string
+          check_type: string
+          created_at?: string
+          evidence_url?: string | null
+          id?: string
+          notes?: string | null
+          operator_id?: string | null
+        }
+        Update: {
+          business_campaign_plan_id?: string | null
+          check_status?: string
+          check_type?: string
+          created_at?: string
+          evidence_url?: string | null
+          id?: string
+          notes?: string | null
+          operator_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_operator_checks_business_campaign_plan_id_fkey"
+            columns: ["business_campaign_plan_id"]
+            isOneToOne: false
+            referencedRelation: "business_campaign_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaign_oversight_checks: {
+        Row: {
+          business_campaign_plan_id: string | null
+          created_at: string
+          id: string
+          location_basis: string | null
+          minutes_spent: number | null
+          review_notes: string | null
+          review_status: string
+          reviewer_id: string | null
+        }
+        Insert: {
+          business_campaign_plan_id?: string | null
+          created_at?: string
+          id?: string
+          location_basis?: string | null
+          minutes_spent?: number | null
+          review_notes?: string | null
+          review_status: string
+          reviewer_id?: string | null
+        }
+        Update: {
+          business_campaign_plan_id?: string | null
+          created_at?: string
+          id?: string
+          location_basis?: string | null
+          minutes_spent?: number | null
+          review_notes?: string | null
+          review_status?: string
+          reviewer_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_oversight_checks_business_campaign_plan_id_fkey"
+            columns: ["business_campaign_plan_id"]
+            isOneToOne: false
+            referencedRelation: "business_campaign_plans"
             referencedColumns: ["id"]
           },
         ]
@@ -38851,6 +39171,65 @@ export type Database = {
         }
         Relationships: []
       }
+      outreach_campaign_drafts: {
+        Row: {
+          business_campaign_plan_id: string | null
+          business_id: string | null
+          campaign_name: string
+          compliance_checked: boolean
+          created_at: string
+          email_sequence: Json
+          external_send_blocked: boolean
+          founder_approved_at: string | null
+          id: string
+          lead_criteria: Json
+          smartlead_campaign_id: string | null
+          status: string
+          unsubscribe_required: boolean
+          updated_at: string
+        }
+        Insert: {
+          business_campaign_plan_id?: string | null
+          business_id?: string | null
+          campaign_name: string
+          compliance_checked?: boolean
+          created_at?: string
+          email_sequence?: Json
+          external_send_blocked?: boolean
+          founder_approved_at?: string | null
+          id?: string
+          lead_criteria?: Json
+          smartlead_campaign_id?: string | null
+          status?: string
+          unsubscribe_required?: boolean
+          updated_at?: string
+        }
+        Update: {
+          business_campaign_plan_id?: string | null
+          business_id?: string | null
+          campaign_name?: string
+          compliance_checked?: boolean
+          created_at?: string
+          email_sequence?: Json
+          external_send_blocked?: boolean
+          founder_approved_at?: string | null
+          id?: string
+          lead_criteria?: Json
+          smartlead_campaign_id?: string | null
+          status?: string
+          unsubscribe_required?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outreach_campaign_drafts_business_campaign_plan_id_fkey"
+            columns: ["business_campaign_plan_id"]
+            isOneToOne: false
+            referencedRelation: "business_campaign_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       outreach_campaigns: {
         Row: {
           business_name: string
@@ -49102,6 +49481,56 @@ export type Database = {
             columns: ["content_variant_id"]
             isOneToOne: false
             referencedRelation: "social_content_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_campaign_drafts: {
+        Row: {
+          business_campaign_plan_id: string | null
+          business_id: string | null
+          content_items: Json
+          created_at: string
+          external_publish_blocked: boolean
+          founder_approved_at: string | null
+          id: string
+          metricool_schedule_id: string | null
+          platform: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          business_campaign_plan_id?: string | null
+          business_id?: string | null
+          content_items?: Json
+          created_at?: string
+          external_publish_blocked?: boolean
+          founder_approved_at?: string | null
+          id?: string
+          metricool_schedule_id?: string | null
+          platform: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          business_campaign_plan_id?: string | null
+          business_id?: string | null
+          content_items?: Json
+          created_at?: string
+          external_publish_blocked?: boolean
+          founder_approved_at?: string | null
+          id?: string
+          metricool_schedule_id?: string | null
+          platform?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_campaign_drafts_business_campaign_plan_id_fkey"
+            columns: ["business_campaign_plan_id"]
+            isOneToOne: false
+            referencedRelation: "business_campaign_plans"
             referencedColumns: ["id"]
           },
         ]

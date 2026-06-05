@@ -31,6 +31,8 @@ import OperatorPortal from "@/pages/worker/OperatorPortal";
 import OversightLogin from "@/pages/worker/OversightLogin";
 import OversightPortal from "@/pages/worker/OversightPortal";
 import HumanWorkforceControl from "@/pages/founder/HumanWorkforceControl";
+import CampaignFactory from "@/pages/founder/CampaignFactory";
+import AutomationBook from "@/pages/founder/AutomationBook";
 
 // Public pages
 import Index from "./pages/Index";
@@ -1723,6 +1725,22 @@ const App = () => (
               element={
                 <FounderRoute>
                   <HumanWorkforceControl />
+                </FounderRoute>
+              }
+            />
+            <Route
+              path="/founder/campaign-factory"
+              element={
+                <FounderRoute>
+                  <CampaignFactory />
+                </FounderRoute>
+              }
+            />
+            <Route
+              path="/founder/automation-book"
+              element={
+                <FounderRoute>
+                  <AutomationBook />
                 </FounderRoute>
               }
             />
