@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import CampaignSetupTasks from "@/components/worker/CampaignSetupTasks";
+import AskLiftorHelp from "@/components/worker/AskLiftorHelp";
+import ManualAckGate from "@/components/worker/ManualAckGate";
 import {
   fetchActiveWindow,
   fetchAssignedTasks,
@@ -115,7 +117,11 @@ export default function OperatorPortal() {
     window.location.href = "/operator-login";
   };
 
+  if (!worker) {
+    return <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">Loading…</div>;
+  }
   return (
+    <ManualAckGate workerId={worker.id} role="technical_operator">
     <div className="min-h-screen bg-background">
       <header className="border-b border-border/50 px-6 py-4 flex items-center justify-between">
         <div>
@@ -199,6 +205,7 @@ export default function OperatorPortal() {
               <p className="text-[10px] text-muted-foreground">
                 You cannot publish, send, delete, export, or access secrets or founder systems from this portal.
               </p>
+              {worker && <AskLiftorHelp workerId={worker.id} taskId={active.id} />}
             </div>
           )}
         </Card>
@@ -209,5 +216,6 @@ export default function OperatorPortal() {
         </div>
       )}
     </div>
+    </ManualAckGate>
   );
 }

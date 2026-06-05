@@ -77,6 +77,8 @@ const navItems = [
   { label: "Campaign Factory", to: "/founder/campaign-factory", icon: Rocket },
   { label: "Automation Book", to: "/founder/automation-book", icon: BookOpen },
   { label: "Human Workforce Control", to: "/founder/human-workforce-control", icon: Users },
+  { label: "Worker Manuals", to: "/founder/worker-manuals", icon: BookOpenCheck },
+  { label: "Worker Help Audit", to: "/founder/worker-help-audit", icon: MessagesSquare },
 ];
 
 const FounderLayout = ({ children }: { children: React.ReactNode }) => {
