@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import CampaignSetupTasks from "@/components/worker/CampaignSetupTasks";
+import AskLiftorHelp from "@/components/worker/AskLiftorHelp";
 import {
   fetchActiveWindow,
   fetchAssignedTasks,
@@ -199,6 +200,7 @@ export default function OperatorPortal() {
               <p className="text-[10px] text-muted-foreground">
                 You cannot publish, send, delete, export, or access secrets or founder systems from this portal.
               </p>
+              {worker && <AskLiftorHelp workerId={worker.id} taskId={active.id} />}
             </div>
           )}
         </Card>
