@@ -61948,18 +61948,6 @@ export type Database = {
           },
         ]
       }
-      qtc_payment_architecture_readiness: {
-        Row: {
-          missing_business_id: number | null
-          missing_legal_entity: number | null
-          not_sale_ready: number | null
-          pending_transfer: number | null
-          temporary_payout_used: number | null
-          test_payments: number | null
-          total_payments: number | null
-        }
-        Relationships: []
-      }
       system_health_score: {
         Row: {
           assignment_completion_rate: number | null

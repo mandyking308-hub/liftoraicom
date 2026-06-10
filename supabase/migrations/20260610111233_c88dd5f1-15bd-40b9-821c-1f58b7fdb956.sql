@@ -1,0 +1,1 @@
+DROP VIEW IF EXISTS public.qtc_payment_architecture_readiness;
