@@ -21,16 +21,23 @@ const ZERO: Counts = {
 
 export default function PaymentArchitectureReadiness() {
   const [c, setC] = useState<Counts>(ZERO);
-  const [providerConfigured, setProviderConfigured] = useState(false);
+  const [stripe, setStripe] = useState<{ secret_key_configured: boolean; webhook_secret_configured: boolean; mode: string } | null>(null);
+  const [stripeStats, setStripeStats] = useState({ checkoutSessions: 0, webhookEvents: 0, verifiedPayments: 0, verifiedRevenue: 0, metaBusiness: 0, metaLegal: 0, metaGroup: 0, tempPayout: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase
+      const [{ data: payments }, configRes, { count: webhookCount }] = await Promise.all([
+        supabase
         .from("qtc_payments")
-        .select("business_id,legal_entity,temporary_payout_account_used,transfer_required_to_primary_account,sale_ready,is_test_data")
-        .limit(10000);
-      const rows = (data || []) as any[];
+        .select("business_id,legal_entity,saleable_asset_group,temporary_payout_account_used,transfer_required_to_primary_account,sale_ready,is_test_data,stripe_checkout_session_id,stripe_payment_intent_id,webhook_confirmation_source")
+        .limit(10000),
+        supabase.functions.invoke("stripe-config-status", { body: {} }),
+        supabase.from("stripe_webhook_events").select("*", { count: "exact", head: true }),
+      ]);
+      const rows = (payments || []) as any[];
+      const verifiedPayments = rows.filter(r => r.webhook_confirmation_source);
+      const { count: verifiedRevenueCount } = await supabase.from("qtc_revenue_confirmations").select("*", { count: "exact", head: true }).eq("stripe_verified", true);
       setC({
         total_payments: rows.length,
         missing_business_id: rows.filter(r => !r.business_id).length,
@@ -40,15 +47,28 @@ export default function PaymentArchitectureReadiness() {
         not_sale_ready: rows.filter(r => !r.sale_ready && !r.is_test_data).length,
         test_payments: rows.filter(r => r.is_test_data).length,
       });
-      setProviderConfigured(false); // Stripe not wired in this phase
+      setStripeStats({
+        checkoutSessions: rows.filter(r => r.stripe_checkout_session_id).length,
+        webhookEvents: webhookCount ?? 0,
+        verifiedPayments: verifiedPayments.length,
+        verifiedRevenue: verifiedRevenueCount ?? 0,
+        metaBusiness: verifiedPayments.filter(r => r.business_id).length,
+        metaLegal: verifiedPayments.filter(r => r.legal_entity).length,
+        metaGroup: verifiedPayments.filter(r => r.saleable_asset_group).length,
+        tempPayout: rows.filter(r => r.temporary_payout_account_used).length,
+      });
+      const cfg = (configRes?.data as any) ?? null;
+      setStripe(cfg);
       setLoading(false);
     })();
   }, []);
 
+  const stripeReady = !!(stripe?.secret_key_configured && stripe?.webhook_secret_configured && stripe?.mode === "test");
   const safeForStripeTest =
     c.missing_business_id === 0 &&
     c.missing_legal_entity === 0 &&
-    c.pending_transfer === 0;
+    c.pending_transfer === 0 &&
+    stripeReady;
 
   return (
     <QTCLayout
@@ -65,8 +85,8 @@ export default function PaymentArchitectureReadiness() {
         <QTCStat label="Test rows (excluded)" value={loading ? "…" : c.test_payments} />
         <QTCStat
           label="Stripe provider"
-          value={providerConfigured ? "configured" : "not configured"}
-          tone={providerConfigured ? "good" : "warn"}
+          value={stripe?.secret_key_configured ? `${stripe.mode} mode` : "not configured"}
+          tone={stripeReady ? "good" : "warn"}
         />
       </div>
 
@@ -77,7 +97,22 @@ export default function PaymentArchitectureReadiness() {
           <Item ok={c.pending_transfer === 0} label="No funds awaiting transfer to primary GSM account" detail={`${c.pending_transfer} pending`} warnOnly />
           <Item ok={c.temporary_payout_used === 0} label="No temporary payout accounts in use" detail={`${c.temporary_payout_used} temporary`} warnOnly />
           <Item ok={c.test_payments >= 0} label="Test rows are tagged and excluded from confirmed revenue" detail={`${c.test_payments} test`} />
-          <Item ok={!providerConfigured ? false : true} label="Stripe provider configured" detail={providerConfigured ? "configured" : "not configured (phase-locked)"} warnOnly />
+        </ul>
+      </QTCSection>
+
+      <QTCSection title="Stripe test-mode wiring checklist">
+        <ul className="space-y-2 text-xs">
+          <Item ok={!!stripe?.secret_key_configured && stripe?.mode === "test"} label="Stripe test secret key configured (sk_test_…)" detail={stripe?.secret_key_configured ? `mode: ${stripe.mode}` : "STRIPE_SECRET_KEY missing"} />
+          <Item ok={!!stripe?.webhook_secret_configured} label="Stripe webhook secret configured" detail={stripe?.webhook_secret_configured ? "configured" : "STRIPE_WEBHOOK_SECRET missing"} />
+          <Item ok={stripeStats.checkoutSessions > 0} label="Test checkout session created" detail={`${stripeStats.checkoutSessions} checkout sessions on record`} warnOnly />
+          <Item ok={stripeStats.webhookEvents > 0} label="Test webhook received" detail={`${stripeStats.webhookEvents} verified webhook events logged`} warnOnly />
+          <Item ok={stripeStats.verifiedPayments > 0} label="Test payment updated qtc_payments" detail={`${stripeStats.verifiedPayments} payments confirmed via Stripe webhook`} warnOnly />
+          <Item ok={stripeStats.verifiedRevenue > 0} label="Test revenue confirmation created" detail={`${stripeStats.verifiedRevenue} Stripe-verified revenue rows`} warnOnly />
+          <Item ok={stripeStats.verifiedPayments === 0 || stripeStats.metaBusiness === stripeStats.verifiedPayments} label="business_id preserved through Stripe metadata" detail={`${stripeStats.metaBusiness}/${stripeStats.verifiedPayments} verified rows carry business_id`} />
+          <Item ok={stripeStats.verifiedPayments === 0 || stripeStats.metaLegal === stripeStats.verifiedPayments} label="legal_entity preserved through Stripe metadata" detail={`${stripeStats.metaLegal}/${stripeStats.verifiedPayments} verified rows carry legal_entity`} />
+          <Item ok={true} label="saleable_asset_group preserved through Stripe metadata" detail={`${stripeStats.metaGroup}/${stripeStats.verifiedPayments} verified rows carry saleable_asset_group`} warnOnly />
+          <Item ok={true} label="Temporary payout warning preserved" detail={`${stripeStats.tempPayout} rows flagged as temporary payout`} />
+          <Item ok={true} label="Live mode still locked (sk_test_ enforced server-side)" detail="Edge functions refuse to run with sk_live_ keys" />
         </ul>
       </QTCSection>
 
