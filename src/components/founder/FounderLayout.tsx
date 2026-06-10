@@ -40,6 +40,7 @@ const navItems = [
   { label: "Proposals", to: "/founder/proposals", icon: FileInput },
   { label: "Lead Pipeline", to: "/founder/pipeline", icon: GitBranch },
   { label: "CRM", to: "/founder/crm", icon: Users },
+  { label: "Relationship Intelligence", to: "/founder/relationship-intelligence", icon: Network },
   { label: "Finance", to: "/founder/finance", icon: Banknote },
   { label: "Outreach", to: "/founder/outreach", icon: Send },
   { label: "Sending Health", to: "/founder/sending", icon: Radar },
