@@ -43834,69 +43834,138 @@ export type Database = {
       qtc_invoices: {
         Row: {
           audit_metadata: Json | null
+          brand_name: string | null
           business_id: string
+          business_name_snapshot: string | null
           contact_id: string | null
           created_at: string
           currency: string | null
+          customer_country: string | null
+          customer_state_region: string | null
+          customer_tax_id: string | null
           deal_id: string | null
           due_date: string | null
           founder_approval_required: boolean | null
           founder_approved_at: string | null
+          gross_amount: number | null
           id: string
           invoice_amount: number | null
           invoice_number: string | null
           invoice_status: string
+          is_test_data: boolean | null
+          legal_entity: string | null
+          legal_entity_jurisdiction: string | null
+          metadata_json: Json | null
+          net_amount: number | null
+          offer_id: string | null
           paid_at: string | null
           payment_link_url: string | null
           payment_provider: string | null
+          product_id: string | null
           provider_invoice_id: string | null
           quote_id: string | null
+          revenue_owner_entity: string | null
+          saleable_asset_group: string | null
           sent_at: string | null
+          stripe_customer_id: string | null
+          stripe_invoice_id: string | null
+          stripe_subscription_id: string | null
+          tax_amount: number | null
+          tax_jurisdiction: string | null
+          tax_rate: number | null
+          tax_type: string | null
           updated_at: string
+          website_url: string | null
         }
         Insert: {
           audit_metadata?: Json | null
+          brand_name?: string | null
           business_id: string
+          business_name_snapshot?: string | null
           contact_id?: string | null
           created_at?: string
           currency?: string | null
+          customer_country?: string | null
+          customer_state_region?: string | null
+          customer_tax_id?: string | null
           deal_id?: string | null
           due_date?: string | null
           founder_approval_required?: boolean | null
           founder_approved_at?: string | null
+          gross_amount?: number | null
           id?: string
           invoice_amount?: number | null
           invoice_number?: string | null
           invoice_status?: string
+          is_test_data?: boolean | null
+          legal_entity?: string | null
+          legal_entity_jurisdiction?: string | null
+          metadata_json?: Json | null
+          net_amount?: number | null
+          offer_id?: string | null
           paid_at?: string | null
           payment_link_url?: string | null
           payment_provider?: string | null
+          product_id?: string | null
           provider_invoice_id?: string | null
           quote_id?: string | null
+          revenue_owner_entity?: string | null
+          saleable_asset_group?: string | null
           sent_at?: string | null
+          stripe_customer_id?: string | null
+          stripe_invoice_id?: string | null
+          stripe_subscription_id?: string | null
+          tax_amount?: number | null
+          tax_jurisdiction?: string | null
+          tax_rate?: number | null
+          tax_type?: string | null
           updated_at?: string
+          website_url?: string | null
         }
         Update: {
           audit_metadata?: Json | null
+          brand_name?: string | null
           business_id?: string
+          business_name_snapshot?: string | null
           contact_id?: string | null
           created_at?: string
           currency?: string | null
+          customer_country?: string | null
+          customer_state_region?: string | null
+          customer_tax_id?: string | null
           deal_id?: string | null
           due_date?: string | null
           founder_approval_required?: boolean | null
           founder_approved_at?: string | null
+          gross_amount?: number | null
           id?: string
           invoice_amount?: number | null
           invoice_number?: string | null
           invoice_status?: string
+          is_test_data?: boolean | null
+          legal_entity?: string | null
+          legal_entity_jurisdiction?: string | null
+          metadata_json?: Json | null
+          net_amount?: number | null
+          offer_id?: string | null
           paid_at?: string | null
           payment_link_url?: string | null
           payment_provider?: string | null
+          product_id?: string | null
           provider_invoice_id?: string | null
           quote_id?: string | null
+          revenue_owner_entity?: string | null
+          saleable_asset_group?: string | null
           sent_at?: string | null
+          stripe_customer_id?: string | null
+          stripe_invoice_id?: string | null
+          stripe_subscription_id?: string | null
+          tax_amount?: number | null
+          tax_jurisdiction?: string | null
+          tax_rate?: number | null
+          tax_type?: string | null
           updated_at?: string
+          website_url?: string | null
         }
         Relationships: []
       }
@@ -43904,56 +43973,182 @@ export type Database = {
         Row: {
           amount: number | null
           audit_metadata: Json | null
+          brand_name: string | null
           business_id: string
+          business_name_snapshot: string | null
+          confirmation_source: string | null
           confirmed_revenue: boolean | null
           contact_id: string | null
           created_at: string
           currency: string | null
+          customer_country: string | null
+          customer_state_region: string | null
+          customer_tax_id: string | null
           deal_id: string | null
+          founder_approval_required: boolean | null
+          founder_approved_at: string | null
+          gross_amount: number | null
           id: string
           invoice_id: string | null
+          is_test_data: boolean | null
+          legal_entity: string | null
+          legal_entity_jurisdiction: string | null
+          metadata_json: Json | null
+          net_amount: number | null
+          offer_id: string | null
           payment_method: string | null
           payment_status: string
+          payout_account_status: string | null
+          product_id: string | null
           provider_name: string | null
           provider_payment_id: string | null
           received_at: string | null
+          refund_amount: number | null
+          refunded_at: string | null
+          revenue_owner_entity: string | null
+          sale_ready: boolean | null
+          saleable_asset_group: string | null
+          stripe_checkout_session_id: string | null
+          stripe_customer_id: string | null
+          stripe_event_id: string | null
+          stripe_fee_amount: number | null
+          stripe_invoice_id: string | null
+          stripe_payment_intent_id: string | null
+          stripe_price_id: string | null
+          stripe_product_id: string | null
+          stripe_subscription_id: string | null
+          tax_amount: number | null
+          tax_collected: number | null
+          tax_jurisdiction: string | null
+          tax_rate: number | null
+          tax_remittance_status: string | null
+          tax_reporting_period: string | null
+          tax_type: string | null
+          temporary_payout_account_used: boolean | null
+          temporary_payout_reason: string | null
+          transfer_required_to_primary_account: boolean | null
           updated_at: string
+          website_url: string | null
         }
         Insert: {
           amount?: number | null
           audit_metadata?: Json | null
+          brand_name?: string | null
           business_id: string
+          business_name_snapshot?: string | null
+          confirmation_source?: string | null
           confirmed_revenue?: boolean | null
           contact_id?: string | null
           created_at?: string
           currency?: string | null
+          customer_country?: string | null
+          customer_state_region?: string | null
+          customer_tax_id?: string | null
           deal_id?: string | null
+          founder_approval_required?: boolean | null
+          founder_approved_at?: string | null
+          gross_amount?: number | null
           id?: string
           invoice_id?: string | null
+          is_test_data?: boolean | null
+          legal_entity?: string | null
+          legal_entity_jurisdiction?: string | null
+          metadata_json?: Json | null
+          net_amount?: number | null
+          offer_id?: string | null
           payment_method?: string | null
           payment_status?: string
+          payout_account_status?: string | null
+          product_id?: string | null
           provider_name?: string | null
           provider_payment_id?: string | null
           received_at?: string | null
+          refund_amount?: number | null
+          refunded_at?: string | null
+          revenue_owner_entity?: string | null
+          sale_ready?: boolean | null
+          saleable_asset_group?: string | null
+          stripe_checkout_session_id?: string | null
+          stripe_customer_id?: string | null
+          stripe_event_id?: string | null
+          stripe_fee_amount?: number | null
+          stripe_invoice_id?: string | null
+          stripe_payment_intent_id?: string | null
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          stripe_subscription_id?: string | null
+          tax_amount?: number | null
+          tax_collected?: number | null
+          tax_jurisdiction?: string | null
+          tax_rate?: number | null
+          tax_remittance_status?: string | null
+          tax_reporting_period?: string | null
+          tax_type?: string | null
+          temporary_payout_account_used?: boolean | null
+          temporary_payout_reason?: string | null
+          transfer_required_to_primary_account?: boolean | null
           updated_at?: string
+          website_url?: string | null
         }
         Update: {
           amount?: number | null
           audit_metadata?: Json | null
+          brand_name?: string | null
           business_id?: string
+          business_name_snapshot?: string | null
+          confirmation_source?: string | null
           confirmed_revenue?: boolean | null
           contact_id?: string | null
           created_at?: string
           currency?: string | null
+          customer_country?: string | null
+          customer_state_region?: string | null
+          customer_tax_id?: string | null
           deal_id?: string | null
+          founder_approval_required?: boolean | null
+          founder_approved_at?: string | null
+          gross_amount?: number | null
           id?: string
           invoice_id?: string | null
+          is_test_data?: boolean | null
+          legal_entity?: string | null
+          legal_entity_jurisdiction?: string | null
+          metadata_json?: Json | null
+          net_amount?: number | null
+          offer_id?: string | null
           payment_method?: string | null
           payment_status?: string
+          payout_account_status?: string | null
+          product_id?: string | null
           provider_name?: string | null
           provider_payment_id?: string | null
           received_at?: string | null
+          refund_amount?: number | null
+          refunded_at?: string | null
+          revenue_owner_entity?: string | null
+          sale_ready?: boolean | null
+          saleable_asset_group?: string | null
+          stripe_checkout_session_id?: string | null
+          stripe_customer_id?: string | null
+          stripe_event_id?: string | null
+          stripe_fee_amount?: number | null
+          stripe_invoice_id?: string | null
+          stripe_payment_intent_id?: string | null
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          stripe_subscription_id?: string | null
+          tax_amount?: number | null
+          tax_collected?: number | null
+          tax_jurisdiction?: string | null
+          tax_rate?: number | null
+          tax_remittance_status?: string | null
+          tax_reporting_period?: string | null
+          tax_type?: string | null
+          temporary_payout_account_used?: boolean | null
+          temporary_payout_reason?: string | null
+          transfer_required_to_primary_account?: boolean | null
           updated_at?: string
+          website_url?: string | null
         }
         Relationships: []
       }
@@ -44024,7 +44219,9 @@ export type Database = {
         Row: {
           accepted_at: string | null
           audit_metadata: Json | null
+          brand_name: string | null
           business_id: string
+          business_name_snapshot: string | null
           contact_id: string | null
           created_at: string
           currency: string | null
@@ -44033,11 +44230,13 @@ export type Database = {
           founder_approval_required: boolean | null
           founder_approved_at: string | null
           id: string
+          legal_entity: string | null
           offer_id: string | null
           product_id: string | null
           quote_amount: number | null
           quote_number: string | null
           quote_status: string
+          saleable_asset_group: string | null
           sent_at: string | null
           tax_amount: number | null
           terms_summary: string | null
@@ -44048,7 +44247,9 @@ export type Database = {
         Insert: {
           accepted_at?: string | null
           audit_metadata?: Json | null
+          brand_name?: string | null
           business_id: string
+          business_name_snapshot?: string | null
           contact_id?: string | null
           created_at?: string
           currency?: string | null
@@ -44057,11 +44258,13 @@ export type Database = {
           founder_approval_required?: boolean | null
           founder_approved_at?: string | null
           id?: string
+          legal_entity?: string | null
           offer_id?: string | null
           product_id?: string | null
           quote_amount?: number | null
           quote_number?: string | null
           quote_status?: string
+          saleable_asset_group?: string | null
           sent_at?: string | null
           tax_amount?: number | null
           terms_summary?: string | null
@@ -44072,7 +44275,9 @@ export type Database = {
         Update: {
           accepted_at?: string | null
           audit_metadata?: Json | null
+          brand_name?: string | null
           business_id?: string
+          business_name_snapshot?: string | null
           contact_id?: string | null
           created_at?: string
           currency?: string | null
@@ -44081,11 +44286,13 @@ export type Database = {
           founder_approval_required?: boolean | null
           founder_approved_at?: string | null
           id?: string
+          legal_entity?: string | null
           offer_id?: string | null
           product_id?: string | null
           quote_amount?: number | null
           quote_number?: string | null
           quote_status?: string
+          saleable_asset_group?: string | null
           sent_at?: string | null
           tax_amount?: number | null
           terms_summary?: string | null
@@ -44098,7 +44305,9 @@ export type Database = {
       qtc_revenue_confirmations: {
         Row: {
           audit_metadata: Json | null
+          brand_name: string | null
           business_id: string
+          business_name_snapshot: string | null
           confirmation_source: string
           confirmed_at: string
           confirmed_by: string | null
@@ -44108,13 +44317,21 @@ export type Database = {
           deal_id: string | null
           id: string
           invoice_id: string | null
+          is_test_data: boolean | null
+          legal_entity: string | null
+          metadata_json: Json | null
           payment_id: string | null
           revenue_amount: number | null
+          revenue_owner_entity: string | null
           revenue_type: string
+          sale_ready: boolean | null
+          saleable_asset_group: string | null
         }
         Insert: {
           audit_metadata?: Json | null
+          brand_name?: string | null
           business_id: string
+          business_name_snapshot?: string | null
           confirmation_source: string
           confirmed_at?: string
           confirmed_by?: string | null
@@ -44124,13 +44341,21 @@ export type Database = {
           deal_id?: string | null
           id?: string
           invoice_id?: string | null
+          is_test_data?: boolean | null
+          legal_entity?: string | null
+          metadata_json?: Json | null
           payment_id?: string | null
           revenue_amount?: number | null
+          revenue_owner_entity?: string | null
           revenue_type: string
+          sale_ready?: boolean | null
+          saleable_asset_group?: string | null
         }
         Update: {
           audit_metadata?: Json | null
+          brand_name?: string | null
           business_id?: string
+          business_name_snapshot?: string | null
           confirmation_source?: string
           confirmed_at?: string
           confirmed_by?: string | null
@@ -44140,9 +44365,15 @@ export type Database = {
           deal_id?: string | null
           id?: string
           invoice_id?: string | null
+          is_test_data?: boolean | null
+          legal_entity?: string | null
+          metadata_json?: Json | null
           payment_id?: string | null
           revenue_amount?: number | null
+          revenue_owner_entity?: string | null
           revenue_type?: string
+          sale_ready?: boolean | null
+          saleable_asset_group?: string | null
         }
         Relationships: []
       }
@@ -61716,6 +61947,18 @@ export type Database = {
             referencedColumns: ["contact_id"]
           },
         ]
+      }
+      qtc_payment_architecture_readiness: {
+        Row: {
+          missing_business_id: number | null
+          missing_legal_entity: number | null
+          not_sale_ready: number | null
+          pending_transfer: number | null
+          temporary_payout_used: number | null
+          test_payments: number | null
+          total_payments: number | null
+        }
+        Relationships: []
       }
       system_health_score: {
         Row: {
