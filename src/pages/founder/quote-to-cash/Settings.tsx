@@ -1,6 +1,7 @@
+import { Link } from "react-router-dom";
 import { QTCLayout, QTCSection } from "./_shared";
 import { Badge } from "@/components/ui/badge";
-import { Lock } from "lucide-react";
+import { Lock, ArrowRight } from "lucide-react";
 
 export default function QTCSettings() {
   return (
@@ -27,6 +28,24 @@ export default function QTCSettings() {
           <li>Invoices default to <code>founder_approval_required = true</code>.</li>
           <li>Payments are confirmed only on real provider webhook or manual founder verification.</li>
           <li>Test rows tagged <code>LIVE_INTERNAL_TEST</code> never create a confirmed revenue row.</li>
+        </ul>
+      </QTCSection>
+      <QTCSection
+        title="Payment architecture readiness"
+        description="Pre-Stripe data check. Every payment must carry business, legal entity, payout status, gross/tax/fee/net so any individual business can be sold cleanly."
+        actions={
+          <Link to="/founder/quote-to-cash/payment-architecture-readiness" className="text-[11px] text-primary inline-flex items-center gap-1 hover:underline">
+            Open readiness <ArrowRight size={11} />
+          </Link>
+        }
+      >
+        <ul className="text-xs space-y-1 list-disc list-inside text-muted-foreground">
+          <li>Missing <code>business_id</code> → cannot be marked sale-ready.</li>
+          <li>Missing <code>legal_entity</code> → defaults to <code>GSM_LLC</code> with a confirm-entity warning.</li>
+          <li><code>temporary_payout_account_used = true</code> → funds flagged for reconciliation/transfer to primary GSM account.</li>
+          <li>Test rows are visually marked and excluded from confirmed revenue totals.</li>
+          <li>Manual payment confirmation remains available to founder/admin only and is audited.</li>
+          <li>No external Stripe mutation occurs in this phase.</li>
         </ul>
       </QTCSection>
     </QTCLayout>
