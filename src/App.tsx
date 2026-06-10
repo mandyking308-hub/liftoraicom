@@ -110,6 +110,7 @@ import CommandCentre from "./pages/founder/CommandCentre";
 import StarterPackMaterialiserPage from "./pages/founder/StarterPackMaterialiser";
 import BusinessOnboardingFactoryPage from "./pages/founder/BusinessOnboardingFactory";
 import VideoSopFactoryPage from "./pages/founder/VideoSopFactory";
+import RelationshipIntelligencePage from "./pages/founder/RelationshipIntelligence";
 import BusinessInternalActivationPage from "./pages/founder/BusinessInternalActivation";
 import BusinessDailyOperatingLoopPage from "./pages/founder/BusinessDailyOperatingLoop";
 import BusinessWeeklyReviewPage from "./pages/founder/BusinessWeeklyReview";
