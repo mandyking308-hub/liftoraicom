@@ -13,12 +13,14 @@ type P = {
   business_name_snapshot: string | null; brand_name: string | null; saleable_asset_group: string | null;
   legal_entity: string | null; payout_account_status: string | null;
   temporary_payout_account_used: boolean | null; temporary_payout_reason: string | null; transfer_required_to_primary_account: boolean | null;
+  stripe_checkout_session_id: string | null; stripe_payment_intent_id: string | null; stripe_invoice_id: string | null; stripe_subscription_id: string | null;
+  webhook_confirmation_source: string | null; stripe_test_mode: boolean | null;
   created_at: string;
 };
 
 export default function QTCPayments() {
   const [rows, setRows] = useState<P[]>([]);
-  const load = () => supabase.from("qtc_payments").select("id,payment_status,amount,gross_amount,tax_amount,stripe_fee_amount,net_amount,currency,provider_name,payment_method,received_at,confirmed_revenue,sale_ready,is_test_data,business_name_snapshot,brand_name,saleable_asset_group,legal_entity,payout_account_status,temporary_payout_account_used,temporary_payout_reason,transfer_required_to_primary_account,created_at").order("created_at",{ascending:false}).limit(200).then(r=>setRows((r.data as P[])||[]));
+  const load = () => supabase.from("qtc_payments").select("id,payment_status,amount,gross_amount,tax_amount,stripe_fee_amount,net_amount,currency,provider_name,payment_method,received_at,confirmed_revenue,sale_ready,is_test_data,business_name_snapshot,brand_name,saleable_asset_group,legal_entity,payout_account_status,temporary_payout_account_used,temporary_payout_reason,transfer_required_to_primary_account,stripe_checkout_session_id,stripe_payment_intent_id,stripe_invoice_id,stripe_subscription_id,webhook_confirmation_source,stripe_test_mode,created_at").order("created_at",{ascending:false}).limit(200).then(r=>setRows((r.data as P[])||[]));
   useEffect(()=>{ load(); },[]);
 
   const mark = async (id: string, payment_status: string) => {
@@ -57,10 +59,23 @@ export default function QTCPayments() {
                       ? <Badge variant="outline" className="text-[10px] bg-emerald-500/15 text-emerald-400 border-emerald-500/30">sale-ready</Badge>
                       : <Badge variant="outline" className="text-[10px] bg-muted text-muted-foreground">not sale-ready</Badge>}
                     {p.is_test_data && <Badge variant="outline" className="text-[10px] bg-yellow-500/15 text-yellow-300 border-yellow-500/30">TEST</Badge>}
+                    {p.stripe_test_mode && <Badge variant="outline" className="text-[10px] bg-blue-500/15 text-blue-400 border-blue-500/30">stripe test</Badge>}
+                    {p.webhook_confirmation_source
+                      ? <Badge variant="outline" className="text-[10px] bg-blue-500/15 text-blue-400 border-blue-500/30">stripe-verified</Badge>
+                      : (p.payment_status === "succeeded" && <Badge variant="outline" className="text-[10px] bg-orange-500/15 text-orange-400 border-orange-500/30">manual</Badge>)}
                     {p.temporary_payout_account_used && <Badge variant="outline" className="text-[10px] bg-orange-500/15 text-orange-400 border-orange-500/30">temp payout</Badge>}
                     {p.transfer_required_to_primary_account && <Badge variant="outline" className="text-[10px] bg-orange-500/15 text-orange-400 border-orange-500/30">transfer pending</Badge>}
                   </div>
                 </div>
+                {(p.stripe_checkout_session_id || p.stripe_payment_intent_id || p.stripe_invoice_id || p.stripe_subscription_id) && (
+                  <p className="text-[10px] text-muted-foreground font-mono break-all">
+                    {p.stripe_checkout_session_id && <>cs: {p.stripe_checkout_session_id} · </>}
+                    {p.stripe_payment_intent_id && <>pi: {p.stripe_payment_intent_id} · </>}
+                    {p.stripe_invoice_id && <>in: {p.stripe_invoice_id} · </>}
+                    {p.stripe_subscription_id && <>sub: {p.stripe_subscription_id} · </>}
+                    {p.webhook_confirmation_source && <>via {p.webhook_confirmation_source}</>}
+                  </p>
+                )}
                 {p.temporary_payout_account_used && (
                   <p className="text-[11px] text-orange-400">
                     ⚠ Funds temporarily held{p.temporary_payout_reason ? ` (${p.temporary_payout_reason})` : ""} — must be reconciled and transferred to the primary GSM account.

@@ -28,3 +28,6 @@ verify_jwt = false
 
 [functions.customer-voice-transcript-ingest]
 verify_jwt = false
+
+[functions.stripe-webhook]
+verify_jwt = false

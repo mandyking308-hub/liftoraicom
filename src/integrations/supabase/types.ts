@@ -19810,6 +19810,9 @@ export type Database = {
           product_id: string | null
           prohibited_claims: string[] | null
           requires_founder_approval: boolean
+          stripe_price_id: string | null
+          stripe_price_recurrence: string | null
+          stripe_product_id: string | null
           updated_at: string
           urgency_or_bonus: string | null
         }
@@ -19830,6 +19833,9 @@ export type Database = {
           product_id?: string | null
           prohibited_claims?: string[] | null
           requires_founder_approval?: boolean
+          stripe_price_id?: string | null
+          stripe_price_recurrence?: string | null
+          stripe_product_id?: string | null
           updated_at?: string
           urgency_or_bonus?: string | null
         }
@@ -19850,6 +19856,9 @@ export type Database = {
           product_id?: string | null
           prohibited_claims?: string[] | null
           requires_founder_approval?: boolean
+          stripe_price_id?: string | null
+          stripe_price_recurrence?: string | null
+          stripe_product_id?: string | null
           updated_at?: string
           urgency_or_bonus?: string | null
         }
@@ -19992,6 +20001,9 @@ export type Database = {
           product_type: string
           proof_points: string[] | null
           refund_policy: string | null
+          stripe_price_id: string | null
+          stripe_price_recurrence: string | null
+          stripe_product_id: string | null
           target_customer: string | null
           updated_at: string
         }
@@ -20021,6 +20033,9 @@ export type Database = {
           product_type?: string
           proof_points?: string[] | null
           refund_policy?: string | null
+          stripe_price_id?: string | null
+          stripe_price_recurrence?: string | null
+          stripe_product_id?: string | null
           target_customer?: string | null
           updated_at?: string
         }
@@ -20050,6 +20065,9 @@ export type Database = {
           product_type?: string
           proof_points?: string[] | null
           refund_policy?: string | null
+          stripe_price_id?: string | null
+          stripe_price_recurrence?: string | null
+          stripe_product_id?: string | null
           target_customer?: string | null
           updated_at?: string
         }
@@ -44017,6 +44035,7 @@ export type Database = {
           stripe_price_id: string | null
           stripe_product_id: string | null
           stripe_subscription_id: string | null
+          stripe_test_mode: boolean | null
           tax_amount: number | null
           tax_collected: number | null
           tax_jurisdiction: string | null
@@ -44028,6 +44047,7 @@ export type Database = {
           temporary_payout_reason: string | null
           transfer_required_to_primary_account: boolean | null
           updated_at: string
+          webhook_confirmation_source: string | null
           website_url: string | null
         }
         Insert: {
@@ -44077,6 +44097,7 @@ export type Database = {
           stripe_price_id?: string | null
           stripe_product_id?: string | null
           stripe_subscription_id?: string | null
+          stripe_test_mode?: boolean | null
           tax_amount?: number | null
           tax_collected?: number | null
           tax_jurisdiction?: string | null
@@ -44088,6 +44109,7 @@ export type Database = {
           temporary_payout_reason?: string | null
           transfer_required_to_primary_account?: boolean | null
           updated_at?: string
+          webhook_confirmation_source?: string | null
           website_url?: string | null
         }
         Update: {
@@ -44137,6 +44159,7 @@ export type Database = {
           stripe_price_id?: string | null
           stripe_product_id?: string | null
           stripe_subscription_id?: string | null
+          stripe_test_mode?: boolean | null
           tax_amount?: number | null
           tax_collected?: number | null
           tax_jurisdiction?: string | null
@@ -44148,6 +44171,7 @@ export type Database = {
           temporary_payout_reason?: string | null
           transfer_required_to_primary_account?: boolean | null
           updated_at?: string
+          webhook_confirmation_source?: string | null
           website_url?: string | null
         }
         Relationships: []
@@ -44326,6 +44350,8 @@ export type Database = {
           revenue_type: string
           sale_ready: boolean | null
           saleable_asset_group: string | null
+          stripe_event_id: string | null
+          stripe_verified: boolean | null
         }
         Insert: {
           audit_metadata?: Json | null
@@ -44350,6 +44376,8 @@ export type Database = {
           revenue_type: string
           sale_ready?: boolean | null
           saleable_asset_group?: string | null
+          stripe_event_id?: string | null
+          stripe_verified?: boolean | null
         }
         Update: {
           audit_metadata?: Json | null
@@ -44374,6 +44402,8 @@ export type Database = {
           revenue_type?: string
           sale_ready?: boolean | null
           saleable_asset_group?: string | null
+          stripe_event_id?: string | null
+          stripe_verified?: boolean | null
         }
         Relationships: []
       }
@@ -55646,6 +55676,54 @@ export type Database = {
           target_industry?: string | null
           title?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      stripe_webhook_events: {
+        Row: {
+          api_version: string | null
+          event_type: string
+          id: string
+          livemode: boolean
+          payload: Json
+          processed_at: string | null
+          processing_error: string | null
+          processing_status: string
+          received_at: string
+          related_business_id: string | null
+          related_invoice_id: string | null
+          related_payment_id: string | null
+          stripe_event_id: string
+        }
+        Insert: {
+          api_version?: string | null
+          event_type: string
+          id?: string
+          livemode?: boolean
+          payload: Json
+          processed_at?: string | null
+          processing_error?: string | null
+          processing_status?: string
+          received_at?: string
+          related_business_id?: string | null
+          related_invoice_id?: string | null
+          related_payment_id?: string | null
+          stripe_event_id: string
+        }
+        Update: {
+          api_version?: string | null
+          event_type?: string
+          id?: string
+          livemode?: boolean
+          payload?: Json
+          processed_at?: string | null
+          processing_error?: string | null
+          processing_status?: string
+          received_at?: string
+          related_business_id?: string | null
+          related_invoice_id?: string | null
+          related_payment_id?: string | null
+          stripe_event_id?: string
         }
         Relationships: []
       }
