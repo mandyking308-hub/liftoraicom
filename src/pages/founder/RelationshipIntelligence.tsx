@@ -12,6 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "@/hooks/use-toast";
 import { Network, Plus, Download, ShieldAlert, Lock, Pause, CheckCircle2, FileSignature } from "lucide-react";
+import { Sprout } from "lucide-react";
+import { RELATIONSHIP_SEED } from "./relationshipIntelligenceSeed";
 
 const sb: any = supabase as any;
 
@@ -50,6 +52,8 @@ export default function RelationshipIntelligence() {
   const [drawer, setDrawer] = useState<Contact | null>(null);
   const [form, setForm] = useState<any>(emptyForm);
   const [filters, setFilters] = useState({ type: "all", status: "all", disclosure: "all", trust: "all", jurisdiction: "", dueOnly: false, search: "" });
+  const [incompleteOnly, setIncompleteOnly] = useState(false);
+  const [seedResult, setSeedResult] = useState<null | { created: any[]; updated: any[]; skipped: any[]; missingPhone: any[]; followUp: any[]; restricted: any[] }>(null);
 
   const { data: contacts = [] } = useQuery<Contact[]>({
     queryKey: ["rni-contacts"],
@@ -132,13 +136,17 @@ export default function RelationshipIntelligence() {
     if (filters.trust !== "all" && c.trust_level !== filters.trust) return false;
     if (filters.jurisdiction && !(c.jurisdiction ?? "").toLowerCase().includes(filters.jurisdiction.toLowerCase())) return false;
     if (filters.dueOnly && !(c.next_action_at && new Date(c.next_action_at) <= new Date())) return false;
+    if (incompleteOnly) {
+      const incomplete = !c.phone || !c.website || !c.city_country || !c.email;
+      if (!incomplete) return false;
+    }
     if (filters.search) {
       const q = filters.search.toLowerCase();
       const hay = `${c.contact_name} ${c.organisation_name ?? ""} ${c.email ?? ""} ${(c.tags ?? []).join(" ")}`.toLowerCase();
       if (!hay.includes(q)) return false;
     }
     return true;
-  }), [contacts, filters]);
+  }), [contacts, filters, incompleteOnly]);
 
   const counts = useMemo(() => {
     const c = contacts as any[];
@@ -181,6 +189,64 @@ export default function RelationshipIntelligence() {
     URL.revokeObjectURL(url);
   }
 
+  const seed = useMutation({
+    mutationFn: async () => {
+      const { data: existing } = await sb.from("relationship_intelligence_contacts").select("id,contact_name,organisation_name,email,phone,website,jurisdiction,city_country,next_action_summary,ai_summary,founder_notes,meeting_summary,source_notes,tags");
+      const byEmail = new Map<string, any>();
+      const byNameOrg = new Map<string, any>();
+      for (const e of (existing ?? []) as any[]) {
+        if (e.email) byEmail.set(e.email.toLowerCase(), e);
+        byNameOrg.set(`${(e.contact_name ?? "").toLowerCase()}|${(e.organisation_name ?? "").toLowerCase()}`, e);
+      }
+      const created: any[] = [], updated: any[] = [], skipped: any[] = [];
+      const { data: u } = await sb.auth.getUser();
+      const actor = u?.user?.id ?? null;
+      for (const s of RELATIONSHIP_SEED) {
+        const match = (s.email && byEmail.get(s.email.toLowerCase())) || byNameOrg.get(`${s.contact_name.toLowerCase()}|${(s.organisation_name ?? "").toLowerCase()}`);
+        if (!match) {
+          const { data: ins, error } = await sb.from("relationship_intelligence_contacts").insert({ ...s, created_by: actor }).select("id,contact_name").single();
+          if (error) { skipped.push({ ...s, _reason: error.message }); continue; }
+          await sb.from("relationship_intelligence_events").insert({ contact_id: ins.id, event_type: "seeded", summary: "Created from Seed First Relationship Batch", actor_id: actor });
+          created.push({ ...s, id: ins.id });
+        } else {
+          const patch: any = {};
+          // Fill missing scalar fields only; never overwrite richer founder_notes / ai_summary / meeting_summary / source_notes if existing has content.
+          const fillIfBlank = (k: string) => { if (!match[k] && (s as any)[k]) patch[k] = (s as any)[k]; };
+          ["organisation_name","email","phone","website","jurisdiction","city_country","next_action_summary"].forEach(fillIfBlank);
+          for (const k of ["ai_summary","founder_notes","meeting_summary","source_notes"] as const) {
+            const cur = (match as any)[k];
+            if (!cur || cur.trim().length < 20) {
+              if ((s as any)[k]) patch[k] = (s as any)[k];
+            }
+          }
+          // Merge tags
+          const curTags: string[] = match.tags ?? [];
+          const merged = Array.from(new Set([...(curTags || []), ...s.tags]));
+          if (merged.length !== curTags.length) patch.tags = merged;
+          if (Object.keys(patch).length === 0) { skipped.push({ ...s, id: match.id, _reason: "already complete" }); continue; }
+          const { error } = await sb.from("relationship_intelligence_contacts").update(patch).eq("id", match.id);
+          if (error) { skipped.push({ ...s, id: match.id, _reason: error.message }); continue; }
+          await sb.from("relationship_intelligence_events").insert({ contact_id: match.id, event_type: "seed_updated", summary: `Filled missing fields: ${Object.keys(patch).join(", ")}`, actor_id: actor });
+          updated.push({ ...s, id: match.id, _filled: Object.keys(patch) });
+        }
+      }
+      const all = [...created, ...updated];
+      const result = {
+        created, updated, skipped,
+        missingPhone: RELATIONSHIP_SEED.filter(s => !s.phone),
+        followUp: all.filter((r: any) => (r.tags ?? []).includes("follow-up")),
+        restricted: all.filter((r: any) => r.disclosure_level === "restricted" || r.disclosure_level === "nda_before_detail"),
+      };
+      return result;
+    },
+    onSuccess: (r) => {
+      setSeedResult(r);
+      qc.invalidateQueries({ queryKey: ["rni-contacts"] });
+      toast({ title: "Seed batch complete", description: `${r.created.length} created, ${r.updated.length} updated, ${r.skipped.length} skipped` });
+    },
+    onError: (e: any) => toast({ title: "Seed failed", description: e.message, variant: "destructive" }),
+  });
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -190,9 +256,37 @@ export default function RelationshipIntelligence() {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={exportCsv}><Download className="h-4 w-4 mr-1" /> Export CSV</Button>
+          <Button variant="outline" size="sm" onClick={() => seed.mutate()} disabled={seed.isPending}>
+            <Sprout className="h-4 w-4 mr-1" /> {seed.isPending ? "Seeding…" : "Seed first relationship batch"}
+          </Button>
           <Button size="sm" onClick={() => { setEditing(null); setForm(emptyForm); setOpen(true); }}><Plus className="h-4 w-4 mr-1" /> Add relationship</Button>
         </div>
       </div>
+
+      {seedResult && (
+        <Card className="tech-card border-primary/40">
+          <CardHeader className="pb-2 flex flex-row items-center justify-between">
+            <CardTitle className="text-sm flex items-center gap-2"><Sprout className="h-4 w-4 text-primary" /> Seed batch results</CardTitle>
+            <Button variant="ghost" size="sm" onClick={() => setSeedResult(null)}>Dismiss</Button>
+          </CardHeader>
+          <CardContent className="text-xs space-y-3">
+            <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
+              <Stat label="Created" value={seedResult.created.length} tone="ok" />
+              <Stat label="Updated" value={seedResult.updated.length} />
+              <Stat label="Skipped" value={seedResult.skipped.length} />
+              <Stat label="Missing phone" value={seedResult.missingPhone.length} tone={seedResult.missingPhone.length ? "warn" : undefined} />
+              <Stat label="Follow-up" value={seedResult.followUp.length} tone={seedResult.followUp.length ? "warn" : undefined} />
+              <Stat label="NDA / restricted" value={seedResult.restricted.length} tone={seedResult.restricted.length ? "warn" : undefined} />
+            </div>
+            <SeedList title="Records created" items={seedResult.created} />
+            <SeedList title="Records updated (filled missing fields only — richer founder notes preserved)" items={seedResult.updated} showFilled />
+            <SeedList title="Records skipped" items={seedResult.skipped} showReason />
+            <SeedList title="Missing phone numbers" items={seedResult.missingPhone} />
+            <SeedList title="Requiring follow-up" items={seedResult.followUp} />
+            <SeedList title="Restricted / NDA-before-detail" items={seedResult.restricted} />
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
         {[
@@ -243,6 +337,11 @@ export default function RelationshipIntelligence() {
             <Input placeholder="Jurisdiction" value={filters.jurisdiction} onChange={e => setFilters({ ...filters, jurisdiction: e.target.value })} />
             <Button variant={filters.dueOnly ? "default" : "outline"} size="sm" onClick={() => setFilters({ ...filters, dueOnly: !filters.dueOnly })}>Due / overdue</Button>
           </CardContent></Card>
+          <div className="flex justify-end -mt-1">
+            <Button variant={incompleteOnly ? "default" : "outline"} size="sm" onClick={() => setIncompleteOnly(v => !v)}>
+              Incomplete contact details {incompleteOnly ? "(on)" : ""}
+            </Button>
+          </div>
 
           {filtered.length === 0 ? (
             <Card className="tech-card"><CardContent className="p-8 text-center text-sm text-muted-foreground">
