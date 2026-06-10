@@ -14,6 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import { AlertTriangle, Plus, Sparkles, Link as LinkIcon, UserPlus, CheckCircle2, ShieldAlert, Video } from "lucide-react";
+import ScriptStudio from "@/components/founder/video-sop/ScriptStudio";
 
 type Asset = any;
 type ScriptRow = any;
@@ -218,15 +219,16 @@ export default function VideoSopFactoryPage() {
   };
 
   const generateScript = async (asset: Asset) => {
-    const tpl = generateTemplateScript(asset);
-    const { error } = await supabase.from("video_sop_scripts" as any).insert({
-      asset_id: asset.id, business_id: asset.business_id, ...tpl,
-      generated_by_ai: false, ai_prompt_used: "internal_template_v1", status: "draft",
-    } as any);
+    const { data, error } = await supabase.functions.invoke("video-sop-generate-script", {
+      body: { asset_id: asset.id, mode: "ai" },
+    });
     if (error) { toast({ title: "Script failed", description: error.message, variant: "destructive" }); return; }
-    if (asset.status === "draft") await updateAssetStatus(asset, "script_generated");
-    await audit(asset.id, asset.business_id, "script_generated", "Structured draft script generated");
-    toast({ title: "Script draft generated" });
+    const d = data as any;
+    if (d?.error) { toast({ title: "Script failed", description: d.error, variant: "destructive" }); return; }
+    toast({
+      title: d?.ai_used ? `AI script v${d.version} generated` : `Template v${d.version} generated`,
+      description: d?.ai_error ? `AI fallback: ${d.ai_error}` : "Open Script Studio tab to review.",
+    });
     loadAll();
   };
 
@@ -431,6 +433,7 @@ export default function VideoSopFactoryPage() {
           <TabsList className="flex-wrap h-auto">
             <TabsTrigger value="production">Production tracker</TabsTrigger>
             <TabsTrigger value="assets">Assets</TabsTrigger>
+            <TabsTrigger value="studio">Script Studio</TabsTrigger>
             <TabsTrigger value="saleability">Saleability evidence</TabsTrigger>
             <TabsTrigger value="warnings">Warnings ({warnings.length})</TabsTrigger>
           </TabsList>
@@ -529,6 +532,10 @@ export default function VideoSopFactoryPage() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="studio">
+            <ScriptStudio assets={assets} />
           </TabsContent>
 
           <TabsContent value="saleability">

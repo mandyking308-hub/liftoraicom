@@ -59147,69 +59147,114 @@ export type Database = {
       video_sop_scripts: {
         Row: {
           ai_prompt_used: string | null
+          approved_at: string | null
+          approved_by: string | null
           asset_id: string
           business_id: string | null
+          buyer_handover_version: string | null
           callouts: string | null
           created_at: string
           customer_friendly_version: string | null
+          difficulty_level: string
           founder_notes: string | null
           generated_by_ai: boolean
           id: string
           learning_objective: string | null
+          metadata_json: Json
           on_screen_text: string | null
           operator_version: string | null
+          parent_script_id: string | null
+          privacy_flags: Json
+          quiz_json: Json
+          recommended_video_length: string | null
           scene_outline: string | null
+          scenes_json: Json
+          screen_recording_checklist_json: Json
           screen_recording_steps: string | null
           script_title: string | null
           short_description: string | null
+          source_text_snapshot: string | null
           status: string
+          target_audience: string | null
           updated_at: string
+          use_case: string | null
+          version_number: number
           video_length_target: string | null
           voiceover_script: string | null
           warnings: string | null
         }
         Insert: {
           ai_prompt_used?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
           asset_id: string
           business_id?: string | null
+          buyer_handover_version?: string | null
           callouts?: string | null
           created_at?: string
           customer_friendly_version?: string | null
+          difficulty_level?: string
           founder_notes?: string | null
           generated_by_ai?: boolean
           id?: string
           learning_objective?: string | null
+          metadata_json?: Json
           on_screen_text?: string | null
           operator_version?: string | null
+          parent_script_id?: string | null
+          privacy_flags?: Json
+          quiz_json?: Json
+          recommended_video_length?: string | null
           scene_outline?: string | null
+          scenes_json?: Json
+          screen_recording_checklist_json?: Json
           screen_recording_steps?: string | null
           script_title?: string | null
           short_description?: string | null
+          source_text_snapshot?: string | null
           status?: string
+          target_audience?: string | null
           updated_at?: string
+          use_case?: string | null
+          version_number?: number
           video_length_target?: string | null
           voiceover_script?: string | null
           warnings?: string | null
         }
         Update: {
           ai_prompt_used?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
           asset_id?: string
           business_id?: string | null
+          buyer_handover_version?: string | null
           callouts?: string | null
           created_at?: string
           customer_friendly_version?: string | null
+          difficulty_level?: string
           founder_notes?: string | null
           generated_by_ai?: boolean
           id?: string
           learning_objective?: string | null
+          metadata_json?: Json
           on_screen_text?: string | null
           operator_version?: string | null
+          parent_script_id?: string | null
+          privacy_flags?: Json
+          quiz_json?: Json
+          recommended_video_length?: string | null
           scene_outline?: string | null
+          scenes_json?: Json
+          screen_recording_checklist_json?: Json
           screen_recording_steps?: string | null
           script_title?: string | null
           short_description?: string | null
+          source_text_snapshot?: string | null
           status?: string
+          target_audience?: string | null
           updated_at?: string
+          use_case?: string | null
+          version_number?: number
           video_length_target?: string | null
           voiceover_script?: string | null
           warnings?: string | null
@@ -59220,6 +59265,13 @@ export type Database = {
             columns: ["asset_id"]
             isOneToOne: false
             referencedRelation: "video_sop_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "video_sop_scripts_parent_script_id_fkey"
+            columns: ["parent_script_id"]
+            isOneToOne: false
+            referencedRelation: "video_sop_scripts"
             referencedColumns: ["id"]
           },
         ]
