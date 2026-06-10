@@ -543,3 +543,32 @@ function NextActionForm({ onSubmit }: { onSubmit: (when: string, what: string) =
     </div>
   );
 }
+
+function Stat({ label, value, tone }: { label: string; value: number | string; tone?: "ok" | "warn" }) {
+  const cls = tone === "warn" ? "border-yellow-500/40 text-yellow-300" : tone === "ok" ? "border-emerald-500/40 text-emerald-300" : "border-border/50";
+  return (
+    <div className={`border ${cls} rounded p-2`}>
+      <p className="text-[10px] uppercase text-muted-foreground">{label}</p>
+      <p className="text-sm font-bold">{value}</p>
+    </div>
+  );
+}
+
+function SeedList({ title, items, showFilled, showReason }: { title: string; items: any[]; showFilled?: boolean; showReason?: boolean }) {
+  if (!items?.length) return null;
+  return (
+    <div>
+      <p className="text-[11px] uppercase text-muted-foreground mb-1">{title} ({items.length})</p>
+      <ul className="space-y-0.5">
+        {items.map((it, i) => (
+          <li key={i} className="text-xs">
+            • <span className="font-medium">{it.contact_name}</span>
+            {it.organisation_name ? <span className="text-muted-foreground"> — {it.organisation_name}</span> : null}
+            {showFilled && it._filled ? <span className="text-muted-foreground"> · filled: {it._filled.join(", ")}</span> : null}
+            {showReason && it._reason ? <span className="text-muted-foreground"> · {it._reason}</span> : null}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
