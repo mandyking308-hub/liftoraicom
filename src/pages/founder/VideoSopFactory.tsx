@@ -14,6 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import { AlertTriangle, Plus, Sparkles, Link as LinkIcon, UserPlus, CheckCircle2, ShieldAlert, Video } from "lucide-react";
+import ScriptStudio from "@/components/founder/video-sop/ScriptStudio";
 
 type Asset = any;
 type ScriptRow = any;
@@ -431,6 +432,7 @@ export default function VideoSopFactoryPage() {
           <TabsList className="flex-wrap h-auto">
             <TabsTrigger value="production">Production tracker</TabsTrigger>
             <TabsTrigger value="assets">Assets</TabsTrigger>
+            <TabsTrigger value="studio">Script Studio</TabsTrigger>
             <TabsTrigger value="saleability">Saleability evidence</TabsTrigger>
             <TabsTrigger value="warnings">Warnings ({warnings.length})</TabsTrigger>
           </TabsList>
@@ -529,6 +531,10 @@ export default function VideoSopFactoryPage() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="studio">
+            <ScriptStudio assets={assets} />
           </TabsContent>
 
           <TabsContent value="saleability">
