@@ -158,6 +158,7 @@ import LiftorMasterDryRunPanel from "@/components/founder/testing/LiftorMasterDr
 import LiftorMasterReconciliationPanel from "@/components/founder/testing/LiftorMasterReconciliationPanel";
 import FullManualFunctionControlPanel from "@/components/founder/command/FullManualFunctionControlPanel";
 import CRMContact360Panel from "@/components/founder/crm/CRMContact360Panel";
+import RelationshipIntelligenceCard from "@/components/founder/command/RelationshipIntelligenceCard";
 import CommandCentreMasterControlPlane from "@/components/founder/command/CommandCentreMasterControlPlane";
 import CustomerSalesEngineCard from "@/components/founder/command/CustomerSalesEngineCard";
 import VoiceProviderStatusCard from "@/components/founder/command/VoiceProviderStatusCard";
