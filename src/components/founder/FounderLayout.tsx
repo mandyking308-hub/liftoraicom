@@ -79,6 +79,7 @@ const navItems = [
   { label: "Human Workforce Control", to: "/founder/human-workforce-control", icon: Users },
   { label: "Worker Manuals", to: "/founder/worker-manuals", icon: BookOpenCheck },
   { label: "Worker Help Audit", to: "/founder/worker-help-audit", icon: MessagesSquare },
+  { label: "Video SOP Factory", to: "/founder/video-sop-factory", icon: MonitorPlay },
 ];
 
 const FounderLayout = ({ children }: { children: React.ReactNode }) => {
