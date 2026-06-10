@@ -211,6 +211,7 @@ import QTCInvoices from "./pages/founder/quote-to-cash/Invoices";
 import QTCPayments from "./pages/founder/quote-to-cash/Payments";
 import QTCRevenueConfirmation from "./pages/founder/quote-to-cash/RevenueConfirmation";
 import QTCSettings from "./pages/founder/quote-to-cash/Settings";
+import QTCPaymentArchitectureReadiness from "./pages/founder/quote-to-cash/PaymentArchitectureReadiness";
 import DeliveryOverview from "./pages/founder/delivery/Overview";
 import DeliveryOrders from "./pages/founder/delivery/Orders";
 import DeliveryTasks from "./pages/founder/delivery/Tasks";
@@ -1037,6 +1038,7 @@ const App = () => (
             <Route path="/founder/quote-to-cash/invoices" element={<FounderRoute><QTCInvoices /></FounderRoute>} />
             <Route path="/founder/quote-to-cash/payments" element={<FounderRoute><QTCPayments /></FounderRoute>} />
             <Route path="/founder/quote-to-cash/revenue-confirmation" element={<FounderRoute><QTCRevenueConfirmation /></FounderRoute>} />
+            <Route path="/founder/quote-to-cash/payment-architecture-readiness" element={<FounderRoute><QTCPaymentArchitectureReadiness /></FounderRoute>} />
             <Route path="/founder/quote-to-cash/settings" element={<FounderRoute><QTCSettings /></FounderRoute>} />
             <Route path="/founder/delivery" element={<FounderRoute><DeliveryOverview /></FounderRoute>} />
             <Route path="/founder/delivery/orders" element={<FounderRoute><DeliveryOrders /></FounderRoute>} />
