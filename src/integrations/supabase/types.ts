@@ -58960,6 +58960,323 @@ export type Database = {
         }
         Relationships: []
       }
+      video_sop_assets: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          asset_title: string
+          asset_type: string
+          audience_type: string
+          brand_name: string | null
+          business_id: string | null
+          business_name_snapshot: string | null
+          compliance_evidence: boolean
+          created_at: string
+          created_by: string | null
+          external_visibility: string
+          id: string
+          is_test_data: boolean
+          metadata_json: Json
+          priority: string
+          saleability_evidence: boolean
+          source_reference_id: string | null
+          source_text: string | null
+          source_type: string
+          status: string
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          asset_title: string
+          asset_type?: string
+          audience_type?: string
+          brand_name?: string | null
+          business_id?: string | null
+          business_name_snapshot?: string | null
+          compliance_evidence?: boolean
+          created_at?: string
+          created_by?: string | null
+          external_visibility?: string
+          id?: string
+          is_test_data?: boolean
+          metadata_json?: Json
+          priority?: string
+          saleability_evidence?: boolean
+          source_reference_id?: string | null
+          source_text?: string | null
+          source_type?: string
+          status?: string
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          asset_title?: string
+          asset_type?: string
+          audience_type?: string
+          brand_name?: string | null
+          business_id?: string | null
+          business_name_snapshot?: string | null
+          compliance_evidence?: boolean
+          created_at?: string
+          created_by?: string | null
+          external_visibility?: string
+          id?: string
+          is_test_data?: boolean
+          metadata_json?: Json
+          priority?: string
+          saleability_evidence?: boolean
+          source_reference_id?: string | null
+          source_text?: string | null
+          source_type?: string
+          status?: string
+          updated_at?: string
+          website_url?: string | null
+        }
+        Relationships: []
+      }
+      video_sop_audit_events: {
+        Row: {
+          actor_role: string | null
+          actor_user_id: string | null
+          asset_id: string | null
+          business_id: string | null
+          created_at: string
+          event_summary: string | null
+          event_type: string
+          id: string
+          metadata_json: Json
+        }
+        Insert: {
+          actor_role?: string | null
+          actor_user_id?: string | null
+          asset_id?: string | null
+          business_id?: string | null
+          created_at?: string
+          event_summary?: string | null
+          event_type: string
+          id?: string
+          metadata_json?: Json
+        }
+        Update: {
+          actor_role?: string | null
+          actor_user_id?: string | null
+          asset_id?: string | null
+          business_id?: string | null
+          created_at?: string
+          event_summary?: string | null
+          event_type?: string
+          id?: string
+          metadata_json?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_sop_audit_events_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "video_sop_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      video_sop_links: {
+        Row: {
+          access_notes: string | null
+          approved_for_customer_use: boolean
+          approved_for_saleability_pack: boolean
+          asset_id: string
+          business_id: string | null
+          created_at: string
+          duration_seconds: number | null
+          embed_url: string | null
+          external_tool: string
+          id: string
+          privacy_status: string
+          thumbnail_url: string | null
+          transcript_url: string | null
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          access_notes?: string | null
+          approved_for_customer_use?: boolean
+          approved_for_saleability_pack?: boolean
+          asset_id: string
+          business_id?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          embed_url?: string | null
+          external_tool?: string
+          id?: string
+          privacy_status?: string
+          thumbnail_url?: string | null
+          transcript_url?: string | null
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          access_notes?: string | null
+          approved_for_customer_use?: boolean
+          approved_for_saleability_pack?: boolean
+          asset_id?: string
+          business_id?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          embed_url?: string | null
+          external_tool?: string
+          id?: string
+          privacy_status?: string
+          thumbnail_url?: string | null
+          transcript_url?: string | null
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_sop_links_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "video_sop_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      video_sop_scripts: {
+        Row: {
+          ai_prompt_used: string | null
+          asset_id: string
+          business_id: string | null
+          callouts: string | null
+          created_at: string
+          customer_friendly_version: string | null
+          founder_notes: string | null
+          generated_by_ai: boolean
+          id: string
+          learning_objective: string | null
+          on_screen_text: string | null
+          operator_version: string | null
+          scene_outline: string | null
+          screen_recording_steps: string | null
+          script_title: string | null
+          short_description: string | null
+          status: string
+          updated_at: string
+          video_length_target: string | null
+          voiceover_script: string | null
+          warnings: string | null
+        }
+        Insert: {
+          ai_prompt_used?: string | null
+          asset_id: string
+          business_id?: string | null
+          callouts?: string | null
+          created_at?: string
+          customer_friendly_version?: string | null
+          founder_notes?: string | null
+          generated_by_ai?: boolean
+          id?: string
+          learning_objective?: string | null
+          on_screen_text?: string | null
+          operator_version?: string | null
+          scene_outline?: string | null
+          screen_recording_steps?: string | null
+          script_title?: string | null
+          short_description?: string | null
+          status?: string
+          updated_at?: string
+          video_length_target?: string | null
+          voiceover_script?: string | null
+          warnings?: string | null
+        }
+        Update: {
+          ai_prompt_used?: string | null
+          asset_id?: string
+          business_id?: string | null
+          callouts?: string | null
+          created_at?: string
+          customer_friendly_version?: string | null
+          founder_notes?: string | null
+          generated_by_ai?: boolean
+          id?: string
+          learning_objective?: string | null
+          on_screen_text?: string | null
+          operator_version?: string | null
+          scene_outline?: string | null
+          screen_recording_steps?: string | null
+          script_title?: string | null
+          short_description?: string | null
+          status?: string
+          updated_at?: string
+          video_length_target?: string | null
+          voiceover_script?: string | null
+          warnings?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_sop_scripts_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "video_sop_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      video_sop_training_assignments: {
+        Row: {
+          asset_id: string
+          assigned_to_email: string | null
+          assigned_to_name: string | null
+          assigned_to_type: string
+          business_id: string | null
+          completed_at: string | null
+          completion_required: boolean
+          completion_status: string
+          created_at: string
+          evidence_notes: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          asset_id: string
+          assigned_to_email?: string | null
+          assigned_to_name?: string | null
+          assigned_to_type?: string
+          business_id?: string | null
+          completed_at?: string | null
+          completion_required?: boolean
+          completion_status?: string
+          created_at?: string
+          evidence_notes?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          asset_id?: string
+          assigned_to_email?: string | null
+          assigned_to_name?: string | null
+          assigned_to_type?: string
+          business_id?: string | null
+          completed_at?: string | null
+          completion_required?: boolean
+          completion_status?: string
+          created_at?: string
+          evidence_notes?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_sop_training_assignments_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "video_sop_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       voc_churn_reasons: {
         Row: {
           business_name: string | null
