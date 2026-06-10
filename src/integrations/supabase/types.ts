@@ -44909,6 +44909,137 @@ export type Database = {
         }
         Relationships: []
       }
+      relationship_intelligence_contacts: {
+        Row: {
+          ai_summary: string | null
+          city_country: string | null
+          commercial_value_score: number
+          contact_name: string
+          created_at: string
+          created_by: string | null
+          disclosure_level: Database["public"]["Enums"]["rni_disclosure_level"]
+          email: string | null
+          founder_notes: string | null
+          id: string
+          jurisdiction: string | null
+          last_contact_at: string | null
+          meeting_summary: string | null
+          next_action_at: string | null
+          next_action_summary: string | null
+          opportunity_role: Database["public"]["Enums"]["rni_opportunity_role"]
+          organisation_name: string | null
+          phone: string | null
+          relationship_status: Database["public"]["Enums"]["rni_relationship_status"]
+          relationship_type: Database["public"]["Enums"]["rni_relationship_type"]
+          source: Database["public"]["Enums"]["rni_source"]
+          source_notes: string | null
+          strategic_value_score: number
+          tags: string[]
+          trust_level: Database["public"]["Enums"]["rni_trust_level"]
+          updated_at: string
+          urgency_score: number
+          website: string | null
+        }
+        Insert: {
+          ai_summary?: string | null
+          city_country?: string | null
+          commercial_value_score?: number
+          contact_name: string
+          created_at?: string
+          created_by?: string | null
+          disclosure_level?: Database["public"]["Enums"]["rni_disclosure_level"]
+          email?: string | null
+          founder_notes?: string | null
+          id?: string
+          jurisdiction?: string | null
+          last_contact_at?: string | null
+          meeting_summary?: string | null
+          next_action_at?: string | null
+          next_action_summary?: string | null
+          opportunity_role?: Database["public"]["Enums"]["rni_opportunity_role"]
+          organisation_name?: string | null
+          phone?: string | null
+          relationship_status?: Database["public"]["Enums"]["rni_relationship_status"]
+          relationship_type?: Database["public"]["Enums"]["rni_relationship_type"]
+          source?: Database["public"]["Enums"]["rni_source"]
+          source_notes?: string | null
+          strategic_value_score?: number
+          tags?: string[]
+          trust_level?: Database["public"]["Enums"]["rni_trust_level"]
+          updated_at?: string
+          urgency_score?: number
+          website?: string | null
+        }
+        Update: {
+          ai_summary?: string | null
+          city_country?: string | null
+          commercial_value_score?: number
+          contact_name?: string
+          created_at?: string
+          created_by?: string | null
+          disclosure_level?: Database["public"]["Enums"]["rni_disclosure_level"]
+          email?: string | null
+          founder_notes?: string | null
+          id?: string
+          jurisdiction?: string | null
+          last_contact_at?: string | null
+          meeting_summary?: string | null
+          next_action_at?: string | null
+          next_action_summary?: string | null
+          opportunity_role?: Database["public"]["Enums"]["rni_opportunity_role"]
+          organisation_name?: string | null
+          phone?: string | null
+          relationship_status?: Database["public"]["Enums"]["rni_relationship_status"]
+          relationship_type?: Database["public"]["Enums"]["rni_relationship_type"]
+          source?: Database["public"]["Enums"]["rni_source"]
+          source_notes?: string | null
+          strategic_value_score?: number
+          tags?: string[]
+          trust_level?: Database["public"]["Enums"]["rni_trust_level"]
+          updated_at?: string
+          urgency_score?: number
+          website?: string | null
+        }
+        Relationships: []
+      }
+      relationship_intelligence_events: {
+        Row: {
+          actor_id: string | null
+          contact_id: string
+          created_at: string
+          event_type: string
+          id: string
+          metadata: Json
+          summary: string | null
+        }
+        Insert: {
+          actor_id?: string | null
+          contact_id: string
+          created_at?: string
+          event_type: string
+          id?: string
+          metadata?: Json
+          summary?: string | null
+        }
+        Update: {
+          actor_id?: string | null
+          contact_id?: string
+          created_at?: string
+          event_type?: string
+          id?: string
+          metadata?: Json
+          summary?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "relationship_intelligence_events_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "relationship_intelligence_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       relationship_opportunities: {
         Row: {
           approval_required: boolean
@@ -63787,6 +63918,63 @@ export type Database = {
         | "delivered"
       retry_action_type: "send_email" | "ai_reply" | "assignment_retry"
       retry_status: "pending" | "completed" | "failed"
+      rni_disclosure_level:
+        | "public_only"
+        | "light_context"
+        | "nda_before_detail"
+        | "confidential_allowed"
+        | "restricted"
+      rni_opportunity_role:
+        | "customer"
+        | "adviser"
+        | "introducer"
+        | "supplier"
+        | "operator"
+        | "buyer"
+        | "partner"
+        | "investor"
+        | "intelligence_source"
+        | "gatekeeper"
+        | "unknown"
+      rni_relationship_status:
+        | "new"
+        | "active"
+        | "warm"
+        | "needs_follow_up"
+        | "waiting_on_them"
+        | "meeting_booked"
+        | "proposal_requested"
+        | "nda_required"
+        | "onboarding_pending"
+        | "parked"
+        | "rejected"
+        | "do_not_contact"
+      rni_relationship_type:
+        | "adviser"
+        | "supplier"
+        | "potential_customer"
+        | "referral_partner"
+        | "buyer"
+        | "investor"
+        | "finance_route"
+        | "government_trade_route"
+        | "property_residency_route"
+        | "operations_support"
+        | "school_education_contact"
+        | "legal_tax_contact"
+        | "m_and_a_contact"
+        | "media_content_contact"
+        | "other"
+      rni_source:
+        | "gmail"
+        | "calendar"
+        | "manual"
+        | "event"
+        | "referral"
+        | "website"
+        | "linkedin"
+        | "other"
+      rni_trust_level: "unknown" | "low" | "medium" | "high" | "vetted"
       seniority_level: "junior" | "manager" | "director" | "c-level"
       supplier_availability_status: "available" | "busy" | "unavailable"
       supplier_pipeline_stage:
@@ -64464,6 +64652,68 @@ export const Constants = {
       ],
       retry_action_type: ["send_email", "ai_reply", "assignment_retry"],
       retry_status: ["pending", "completed", "failed"],
+      rni_disclosure_level: [
+        "public_only",
+        "light_context",
+        "nda_before_detail",
+        "confidential_allowed",
+        "restricted",
+      ],
+      rni_opportunity_role: [
+        "customer",
+        "adviser",
+        "introducer",
+        "supplier",
+        "operator",
+        "buyer",
+        "partner",
+        "investor",
+        "intelligence_source",
+        "gatekeeper",
+        "unknown",
+      ],
+      rni_relationship_status: [
+        "new",
+        "active",
+        "warm",
+        "needs_follow_up",
+        "waiting_on_them",
+        "meeting_booked",
+        "proposal_requested",
+        "nda_required",
+        "onboarding_pending",
+        "parked",
+        "rejected",
+        "do_not_contact",
+      ],
+      rni_relationship_type: [
+        "adviser",
+        "supplier",
+        "potential_customer",
+        "referral_partner",
+        "buyer",
+        "investor",
+        "finance_route",
+        "government_trade_route",
+        "property_residency_route",
+        "operations_support",
+        "school_education_contact",
+        "legal_tax_contact",
+        "m_and_a_contact",
+        "media_content_contact",
+        "other",
+      ],
+      rni_source: [
+        "gmail",
+        "calendar",
+        "manual",
+        "event",
+        "referral",
+        "website",
+        "linkedin",
+        "other",
+      ],
+      rni_trust_level: ["unknown", "low", "medium", "high", "vetted"],
       seniority_level: ["junior", "manager", "director", "c-level"],
       supplier_availability_status: ["available", "busy", "unavailable"],
       supplier_pipeline_stage: [
