@@ -44021,6 +44021,9 @@ export type Database = {
           provider_name: string | null
           provider_payment_id: string | null
           received_at: string | null
+          reconciled_at: string | null
+          reconciled_by: string | null
+          reconciliation_notes: string | null
           refund_amount: number | null
           refunded_at: string | null
           revenue_owner_entity: string | null
@@ -44083,6 +44086,9 @@ export type Database = {
           provider_name?: string | null
           provider_payment_id?: string | null
           received_at?: string | null
+          reconciled_at?: string | null
+          reconciled_by?: string | null
+          reconciliation_notes?: string | null
           refund_amount?: number | null
           refunded_at?: string | null
           revenue_owner_entity?: string | null
@@ -44145,6 +44151,9 @@ export type Database = {
           provider_name?: string | null
           provider_payment_id?: string | null
           received_at?: string | null
+          reconciled_at?: string | null
+          reconciled_by?: string | null
+          reconciliation_notes?: string | null
           refund_amount?: number | null
           refunded_at?: string | null
           revenue_owner_entity?: string | null
