@@ -15,6 +15,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { toast } from "@/hooks/use-toast";
 import { AlertTriangle, Plus, Sparkles, Link as LinkIcon, UserPlus, CheckCircle2, ShieldAlert, Video } from "lucide-react";
 import ScriptStudio from "@/components/founder/video-sop/ScriptStudio";
+import {
+  RecordingQueuePanel,
+  LinkApprovalsPanel,
+  AssignmentsEvidencePanel,
+  TrainingMatrixPanel,
+  SaleabilityExportPanel,
+  SafetyPanel,
+  computeKpis,
+} from "@/components/founder/video-sop/VideoSopWorkflows";
 
 type Asset = any;
 type ScriptRow = any;
@@ -410,16 +419,22 @@ export default function VideoSopFactoryPage() {
 
         {/* Overview */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {[
-            { l: "Total assets", v: stats.total },
-            { l: "Drafts", v: stats.drafts },
-            { l: "Needs recording", v: stats.needs_recording },
-            { l: "Needs review", v: stats.needs_review },
-            { l: "Approved / published", v: stats.approved },
-            { l: "Customer-ready", v: stats.customer_ready },
-            { l: "Saleability evidence", v: stats.saleability },
-            { l: "Missing business_id", v: stats.missing_business, danger: stats.missing_business > 0 },
-          ].map((s) => (
+          {(() => {
+            const k = computeKpis(assets, scripts, links, assignments);
+            return [
+              { l: "Total assets", v: k.total_assets },
+              { l: "Scripts approved", v: k.scripts_approved },
+              { l: "Recordings pending", v: k.recordings_pending },
+              { l: "Videos awaiting review", v: k.videos_awaiting_review },
+              { l: "Customer-approved videos", v: k.customer_approved_videos },
+              { l: "Buyer-handover videos", v: k.buyer_handover_videos },
+              { l: "Assignments incomplete", v: k.assignments_incomplete },
+              { l: "Businesses missing customer video", v: k.businesses_missing_customer_video, danger: k.businesses_missing_customer_video > 0 },
+              { l: "Businesses missing operator video", v: k.businesses_missing_operator_video, danger: k.businesses_missing_operator_video > 0 },
+              { l: "Businesses with complete pack", v: k.businesses_complete_pack },
+              { l: "Missing business_id", v: stats.missing_business, danger: stats.missing_business > 0 },
+            ];
+          })().map((s) => (
             <Card key={s.l}>
               <CardContent className="p-4">
                 <div className="text-xs text-muted-foreground">{s.l}</div>
@@ -434,7 +449,13 @@ export default function VideoSopFactoryPage() {
             <TabsTrigger value="production">Production tracker</TabsTrigger>
             <TabsTrigger value="assets">Assets</TabsTrigger>
             <TabsTrigger value="studio">Script Studio</TabsTrigger>
+            <TabsTrigger value="recording">Recording queue</TabsTrigger>
+            <TabsTrigger value="links">Link approvals</TabsTrigger>
+            <TabsTrigger value="assignments">Training evidence</TabsTrigger>
+            <TabsTrigger value="matrix">Training matrix</TabsTrigger>
             <TabsTrigger value="saleability">Saleability evidence</TabsTrigger>
+            <TabsTrigger value="export">Saleability pack export</TabsTrigger>
+            <TabsTrigger value="safety">Safety</TabsTrigger>
             <TabsTrigger value="warnings">Warnings ({warnings.length})</TabsTrigger>
           </TabsList>
 
@@ -536,6 +557,30 @@ export default function VideoSopFactoryPage() {
 
           <TabsContent value="studio">
             <ScriptStudio assets={assets} />
+          </TabsContent>
+
+          <TabsContent value="recording">
+            <RecordingQueuePanel assets={assets} scripts={scripts} links={links} assignments={assignments} businesses={businesses} reload={loadAll} audit={audit} />
+          </TabsContent>
+
+          <TabsContent value="links">
+            <LinkApprovalsPanel assets={assets} scripts={scripts} links={links} assignments={assignments} businesses={businesses} reload={loadAll} audit={audit} />
+          </TabsContent>
+
+          <TabsContent value="assignments">
+            <AssignmentsEvidencePanel assets={assets} scripts={scripts} links={links} assignments={assignments} businesses={businesses} reload={loadAll} audit={audit} />
+          </TabsContent>
+
+          <TabsContent value="matrix">
+            <TrainingMatrixPanel assets={assets} scripts={scripts} links={links} assignments={assignments} businesses={businesses} reload={loadAll} audit={audit} />
+          </TabsContent>
+
+          <TabsContent value="export">
+            <SaleabilityExportPanel assets={assets} scripts={scripts} links={links} assignments={assignments} businesses={businesses} reload={loadAll} audit={audit} />
+          </TabsContent>
+
+          <TabsContent value="safety">
+            <SafetyPanel assets={assets} scripts={scripts} links={links} assignments={assignments} businesses={businesses} reload={loadAll} audit={audit} />
           </TabsContent>
 
           <TabsContent value="saleability">

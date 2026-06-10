@@ -58966,6 +58966,8 @@ export type Database = {
           approved_by: string | null
           asset_title: string
           asset_type: string
+          assigned_recorder_name: string | null
+          assigned_recorder_type: string | null
           audience_type: string
           brand_name: string | null
           business_id: string | null
@@ -58973,11 +58975,16 @@ export type Database = {
           compliance_evidence: boolean
           created_at: string
           created_by: string | null
+          demo_data_required: boolean
           external_visibility: string
           id: string
           is_test_data: boolean
           metadata_json: Json
           priority: string
+          privacy_warning_notes: string | null
+          recording_due_date: string | null
+          recording_method: string | null
+          recording_status: string
           saleability_evidence: boolean
           source_reference_id: string | null
           source_text: string | null
@@ -58991,6 +58998,8 @@ export type Database = {
           approved_by?: string | null
           asset_title: string
           asset_type?: string
+          assigned_recorder_name?: string | null
+          assigned_recorder_type?: string | null
           audience_type?: string
           brand_name?: string | null
           business_id?: string | null
@@ -58998,11 +59007,16 @@ export type Database = {
           compliance_evidence?: boolean
           created_at?: string
           created_by?: string | null
+          demo_data_required?: boolean
           external_visibility?: string
           id?: string
           is_test_data?: boolean
           metadata_json?: Json
           priority?: string
+          privacy_warning_notes?: string | null
+          recording_due_date?: string | null
+          recording_method?: string | null
+          recording_status?: string
           saleability_evidence?: boolean
           source_reference_id?: string | null
           source_text?: string | null
@@ -59016,6 +59030,8 @@ export type Database = {
           approved_by?: string | null
           asset_title?: string
           asset_type?: string
+          assigned_recorder_name?: string | null
+          assigned_recorder_type?: string | null
           audience_type?: string
           brand_name?: string | null
           business_id?: string | null
@@ -59023,11 +59039,16 @@ export type Database = {
           compliance_evidence?: boolean
           created_at?: string
           created_by?: string | null
+          demo_data_required?: boolean
           external_visibility?: string
           id?: string
           is_test_data?: boolean
           metadata_json?: Json
           priority?: string
+          privacy_warning_notes?: string | null
+          recording_due_date?: string | null
+          recording_method?: string | null
+          recording_status?: string
           saleability_evidence?: boolean
           source_reference_id?: string | null
           source_text?: string | null
@@ -59089,13 +59110,29 @@ export type Database = {
           approved_for_saleability_pack: boolean
           asset_id: string
           business_id: string | null
+          buyer_handover_approved_at: string | null
+          buyer_handover_approved_by: string | null
+          captions_available: boolean
+          contains_sensitive_content: boolean
           created_at: string
+          customer_visibility_approved_at: string | null
+          customer_visibility_approved_by: string | null
+          demo_data_used: boolean
           duration_seconds: number | null
           embed_url: string | null
           external_tool: string
           id: string
+          privacy_checked_at: string | null
+          privacy_checked_by: string | null
           privacy_status: string
+          rejection_reason: string | null
+          review_status: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          sensitive_content_waived_at: string | null
+          sensitive_content_waived_by: string | null
           thumbnail_url: string | null
+          transcript_checked: boolean
           transcript_url: string | null
           updated_at: string
           video_url: string | null
@@ -59106,13 +59143,29 @@ export type Database = {
           approved_for_saleability_pack?: boolean
           asset_id: string
           business_id?: string | null
+          buyer_handover_approved_at?: string | null
+          buyer_handover_approved_by?: string | null
+          captions_available?: boolean
+          contains_sensitive_content?: boolean
           created_at?: string
+          customer_visibility_approved_at?: string | null
+          customer_visibility_approved_by?: string | null
+          demo_data_used?: boolean
           duration_seconds?: number | null
           embed_url?: string | null
           external_tool?: string
           id?: string
+          privacy_checked_at?: string | null
+          privacy_checked_by?: string | null
           privacy_status?: string
+          rejection_reason?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          sensitive_content_waived_at?: string | null
+          sensitive_content_waived_by?: string | null
           thumbnail_url?: string | null
+          transcript_checked?: boolean
           transcript_url?: string | null
           updated_at?: string
           video_url?: string | null
@@ -59123,13 +59176,29 @@ export type Database = {
           approved_for_saleability_pack?: boolean
           asset_id?: string
           business_id?: string | null
+          buyer_handover_approved_at?: string | null
+          buyer_handover_approved_by?: string | null
+          captions_available?: boolean
+          contains_sensitive_content?: boolean
           created_at?: string
+          customer_visibility_approved_at?: string | null
+          customer_visibility_approved_by?: string | null
+          demo_data_used?: boolean
           duration_seconds?: number | null
           embed_url?: string | null
           external_tool?: string
           id?: string
+          privacy_checked_at?: string | null
+          privacy_checked_by?: string | null
           privacy_status?: string
+          rejection_reason?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          sensitive_content_waived_at?: string | null
+          sensitive_content_waived_by?: string | null
           thumbnail_url?: string | null
+          transcript_checked?: boolean
           transcript_url?: string | null
           updated_at?: string
           video_url?: string | null
@@ -59278,46 +59347,76 @@ export type Database = {
       }
       video_sop_training_assignments: {
         Row: {
+          approved_completion_at: string | null
+          approved_completion_by: string | null
           asset_id: string
           assigned_to_email: string | null
           assigned_to_name: string | null
           assigned_to_type: string
           business_id: string | null
           completed_at: string | null
+          completion_notes: string | null
           completion_required: boolean
           completion_status: string
           created_at: string
           evidence_notes: string | null
+          evidence_url: string | null
           id: string
+          quiz_passed: boolean
+          quiz_score: number | null
           updated_at: string
+          waived_at: string | null
+          waived_by: string | null
+          waiver_reason: string | null
+          watched_confirmed: boolean
         }
         Insert: {
+          approved_completion_at?: string | null
+          approved_completion_by?: string | null
           asset_id: string
           assigned_to_email?: string | null
           assigned_to_name?: string | null
           assigned_to_type?: string
           business_id?: string | null
           completed_at?: string | null
+          completion_notes?: string | null
           completion_required?: boolean
           completion_status?: string
           created_at?: string
           evidence_notes?: string | null
+          evidence_url?: string | null
           id?: string
+          quiz_passed?: boolean
+          quiz_score?: number | null
           updated_at?: string
+          waived_at?: string | null
+          waived_by?: string | null
+          waiver_reason?: string | null
+          watched_confirmed?: boolean
         }
         Update: {
+          approved_completion_at?: string | null
+          approved_completion_by?: string | null
           asset_id?: string
           assigned_to_email?: string | null
           assigned_to_name?: string | null
           assigned_to_type?: string
           business_id?: string | null
           completed_at?: string | null
+          completion_notes?: string | null
           completion_required?: boolean
           completion_status?: string
           created_at?: string
           evidence_notes?: string | null
+          evidence_url?: string | null
           id?: string
+          quiz_passed?: boolean
+          quiz_score?: number | null
           updated_at?: string
+          waived_at?: string | null
+          waived_by?: string | null
+          waiver_reason?: string | null
+          watched_confirmed?: boolean
         }
         Relationships: [
           {
