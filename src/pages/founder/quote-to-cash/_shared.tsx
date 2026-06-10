@@ -11,6 +11,7 @@ export const QTC_NAV: { to: string; label: string }[] = [
   { to: "/founder/quote-to-cash/invoices", label: "Invoices" },
   { to: "/founder/quote-to-cash/payments", label: "Payments" },
   { to: "/founder/quote-to-cash/revenue-confirmation", label: "Revenue confirmation" },
+  { to: "/founder/quote-to-cash/stripe-price-mapping", label: "Stripe price mapping" },
   { to: "/founder/quote-to-cash/payment-architecture-readiness", label: "Payment architecture readiness" },
   { to: "/founder/quote-to-cash/settings", label: "Settings" },
 ];
