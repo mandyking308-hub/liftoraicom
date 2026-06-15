@@ -159,6 +159,7 @@ import LiftorMasterReconciliationPanel from "@/components/founder/testing/Liftor
 import FullManualFunctionControlPanel from "@/components/founder/command/FullManualFunctionControlPanel";
 import CRMContact360Panel from "@/components/founder/crm/CRMContact360Panel";
 import RelationshipIntelligenceCard from "@/components/founder/command/RelationshipIntelligenceCard";
+import CarrenEstateCapitalInfluenceCard from "@/components/founder/command/CarrenEstateCapitalInfluenceCard";
 import CommandCentreMasterControlPlane from "@/components/founder/command/CommandCentreMasterControlPlane";
 import CustomerSalesEngineCard from "@/components/founder/command/CustomerSalesEngineCard";
 import VoiceProviderStatusCard from "@/components/founder/command/VoiceProviderStatusCard";
@@ -1503,6 +1504,7 @@ const CommandCentre = () => {
               <CRMHealthIntegrityPanel />
               <CRMContact360Panel />
               <RelationshipIntelligenceCard />
+              <CarrenEstateCapitalInfluenceCard />
             </Section>
 
             {/* SECTION 8 — Compliance / Legal / Rules */}
