@@ -7,7 +7,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Radio, Lock, ArrowLeft, ShieldAlert, Mail, Inbox, FileCheck2, Users, Mic, CalendarClock, Newspaper, Database, Settings as SettingsIcon, Loader2, Download } from "lucide-react";
+import { Radio, Lock, ArrowLeft, ShieldAlert, Mail, Inbox, FileCheck2, Users, Mic, CalendarClock, Newspaper, Database, Settings as SettingsIcon, Loader2, Download, Send, Copy, ExternalLink, Check, X as XIcon } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
