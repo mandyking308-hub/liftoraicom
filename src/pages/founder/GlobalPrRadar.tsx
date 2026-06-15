@@ -389,6 +389,7 @@ function EditorielleParserPanel({ onDone }: { onDone?: () => void }) {
 
 // ----------------- Opportunities -----------------
 function OpportunitiesTab() {
+  void DigestParserPanel; // ensure tree-shaker keeps panel
   const { data: rows = [], isLoading } = useTable("pr-opps-list", async () => {
     const { data } = await sb.from("media_opportunities")
       .select("id,deadline_at,title,category,publication_name,journalist_name,source_id,contact_route,urgency_score,risk_score,status,created_at")
