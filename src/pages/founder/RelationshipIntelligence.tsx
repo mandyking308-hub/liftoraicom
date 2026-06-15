@@ -463,6 +463,37 @@ export default function RelationshipIntelligence() {
             <Field label="AI summary (founder-curated)" full><Textarea rows={2} value={form.ai_summary ?? ""} onChange={e => setForm({ ...form, ai_summary: e.target.value })} /></Field>
             <Field label="Founder notes" full><Textarea rows={3} value={form.founder_notes ?? ""} onChange={e => setForm({ ...form, founder_notes: e.target.value })} placeholder="Avoid storing passwords, bank details or sensitive client info here." /></Field>
           </div>
+
+          <div className="mt-4 border-t border-border/40 pt-3">
+            <p className="text-xs uppercase text-muted-foreground mb-2">Capital &amp; Influence Classification</p>
+            <p className="text-[11px] text-muted-foreground mb-2">Relationship-only. No product literature, no solicitation, no client-money request, founder-only.</p>
+            <div className="grid md:grid-cols-2 gap-3">
+              <Field label="Capital lane"><Sel value={form.capital_lane ?? ""} onChange={v => setForm({ ...form, capital_lane: v })} options={CAPITAL_LANE} /></Field>
+              <Field label="Capital role"><Sel value={form.capital_role ?? "unknown"} onChange={v => setForm({ ...form, capital_role: v })} options={CAPITAL_ROLE} /></Field>
+              <Field label="Best vehicle"><Sel value={form.best_vehicle ?? ""} onChange={v => setForm({ ...form, best_vehicle: v })} options={BEST_VEHICLE} /></Field>
+              <Field label="Conversation posture"><Sel value={form.conversation_posture ?? ""} onChange={v => setForm({ ...form, conversation_posture: v })} options={CONVERSATION_POSTURE} /></Field>
+              <Field label="Outreach status"><Sel value={form.outreach_status ?? ""} onChange={v => setForm({ ...form, outreach_status: v })} options={OUTREACH_STATUS} /></Field>
+              <Field label="Compliance boundary"><Sel value={form.compliance_boundary ?? "relationship_only"} onChange={v => setForm({ ...form, compliance_boundary: v })} options={COMPLIANCE_BOUNDARY} /></Field>
+              <Field label="Source platform"><Sel value={form.source_platform ?? ""} onChange={v => setForm({ ...form, source_platform: v })} options={SOURCE_PLATFORM} /></Field>
+              <Field label="Facebook profile URL"><Input value={form.facebook_profile_url ?? ""} onChange={e => setForm({ ...form, facebook_profile_url: e.target.value })} /></Field>
+              <Field label="Age / age band"><Input value={form.age_or_age_band ?? ""} onChange={e => setForm({ ...form, age_or_age_band: e.target.value })} /></Field>
+              <Field label="HNW signal confidence"><Sel value={form.hnw_signal_confidence ?? "unknown"} onChange={v => setForm({ ...form, hnw_signal_confidence: v })} options={HNW_CONFIDENCE} /></Field>
+              <Field label="Philanthropy cause fit"><Sel value={form.philanthropy_cause_fit ?? ""} onChange={v => setForm({ ...form, philanthropy_cause_fit: v })} options={PHILANTHROPY_CAUSE} /></Field>
+              <Field label="Deal relevance"><Sel value={form.deal_relevance ?? ""} onChange={v => setForm({ ...form, deal_relevance: v })} options={DEAL_RELEVANCE} /></Field>
+              <Field label="Alignment quality"><Sel value={form.alignment_quality ?? "unknown"} onChange={v => setForm({ ...form, alignment_quality: v })} options={ALIGNMENT_QUALITY} /></Field>
+              <Field label="Park reason"><Sel value={form.park_reason ?? ""} onChange={v => setForm({ ...form, park_reason: v })} options={PARK_REASON} /></Field>
+              <Field label="Next move owner"><Sel value={form.next_move_owner ?? "mandy"} onChange={v => setForm({ ...form, next_move_owner: v })} options={NEXT_MOVE_OWNER} /></Field>
+              <Field label="Money signal / capital signal" full><Textarea rows={2} value={form.money_signal ?? ""} onChange={e => setForm({ ...form, money_signal: e.target.value })} placeholder="Observable signal only — do not record private financial detail." /></Field>
+              <Field label="Relationship angle" full><Textarea rows={2} value={form.relationship_angle ?? ""} onChange={e => setForm({ ...form, relationship_angle: e.target.value })} /></Field>
+              <Field label="Source evidence" full><Textarea rows={2} value={form.source_evidence ?? ""} onChange={e => setForm({ ...form, source_evidence: e.target.value })} /></Field>
+              <Field label="Priority notes" full><Textarea rows={2} value={form.priority_notes ?? ""} onChange={e => setForm({ ...form, priority_notes: e.target.value })} /></Field>
+              <Field label="Private capital notes (Carren Estate)" full><Textarea rows={2} value={form.private_capital_notes ?? ""} onChange={e => setForm({ ...form, private_capital_notes: e.target.value })} placeholder="Principal capital, acquisition-led value creation context." /></Field>
+              <Field label="Philanthropy notes (GHAT)" full><Textarea rows={2} value={form.philanthropy_notes ?? ""} onChange={e => setForm({ ...form, philanthropy_notes: e.target.value })} placeholder="Philanthropy alignment, cause fit, giving routes." /></Field>
+              <Field label="Elite context notes" full><Textarea rows={2} value={form.elite_context_notes ?? ""} onChange={e => setForm({ ...form, elite_context_notes: e.target.value })} /></Field>
+              <Field label="Disclosure warning" full><Input value={form.disclosure_warning ?? ""} onChange={e => setForm({ ...form, disclosure_warning: e.target.value })} placeholder="e.g. NDA before detail, restricted disclosure." /></Field>
+            </div>
+          </div>
+
           <DialogFooter>
             <Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
             <Button disabled={!form.contact_name || upsert.isPending} onClick={() => upsert.mutate(form)}>{editing ? "Save" : "Add"}</Button>
