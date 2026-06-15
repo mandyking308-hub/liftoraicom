@@ -120,3 +120,37 @@ stored as `pr_source_performance_snapshot` audit events.
   in any public-facing content.
 - Active + press-ready businesses only enter draftable PR campaigns.
 - Approved public claims only.
+
+## Gmail OAuth setup (founder/admin only)
+
+The PR intake worker calls Gmail with a server-side refresh token. Lovable Cloud
+secrets cannot be set programmatically from edge functions, so the founder must
+complete a one-time manual setup:
+
+1. **Google Cloud Console** — create an OAuth 2.0 **Web application** client.
+   - Authorised redirect URI:
+     `https://<project-ref>.functions.supabase.co/pr-gmail-oauth-callback`
+     (the exact URL is returned by `pr-gmail-oauth-start`).
+   - Enable the Gmail API.
+2. **Lovable Cloud secrets** — add:
+   - `GMAIL_CLIENT_ID`
+   - `GMAIL_CLIENT_SECRET`
+   - `PR_GMAIL_ACCOUNT` = `mandyking308@gmail.com`
+3. **Run OAuth** — Global PR Radar → Settings → **Start OAuth (intake read-only)**.
+   Sign in as `mandyking308@gmail.com`, approve, copy the refresh token shown on
+   the one-time callback page.
+4. **Add the refresh token** to Lovable Cloud secrets as `GMAIL_REFRESH_TOKEN`.
+5. **Verify** — click **Check Gmail connection**. Only when it reports
+   `ready_for_live_test: true` may the controlled live intake test be run.
+
+### Scopes requested
+- Intake (default): `gmail.readonly`, `gmail.labels`.
+- Draft (optional, founder-elected): adds `gmail.compose`. Drafts remain
+  approval-gated and Liftor never sends.
+
+### Token & safety guarantees
+- Refresh tokens are shown once on the callback page and never logged or stored
+  by Liftor. They live only in Lovable Cloud secrets.
+- `pr-gmail-connection-check` is read-only: it refreshes the token and lists
+  labels only. It does not ingest emails, write rows or create drafts.
+- Cron remains OFF. All PR intake runs are manual until separately approved.
