@@ -93,6 +93,17 @@ export default function RelationshipIntelligence() {
       const tags = typeof payload.tags === "string" ? payload.tags.split(",").map((t: string) => t.trim()).filter(Boolean) : (payload.tags ?? []);
       const next_action_at = payload.next_action_at ? new Date(payload.next_action_at).toISOString() : null;
       const row = { ...payload, tags, next_action_at };
+      // Convert "" to null for optional capital & influence text fields so the DB keeps NULLs
+      for (const k of [
+        "capital_lane","capital_role","money_signal","relationship_angle","best_vehicle",
+        "conversation_posture","outreach_status","compliance_boundary","source_platform",
+        "source_evidence","facebook_profile_url","age_or_age_band","hnw_signal_confidence",
+        "philanthropy_cause_fit","deal_relevance","alignment_quality","park_reason",
+        "next_move_owner","priority_notes","private_capital_notes","philanthropy_notes",
+        "elite_context_notes","disclosure_warning",
+      ]) {
+        if ((row as any)[k] === "") (row as any)[k] = null;
+      }
       if (editing?.id) {
         const { error } = await sb.from("relationship_intelligence_contacts").update(row).eq("id", editing.id);
         if (error) throw error;
