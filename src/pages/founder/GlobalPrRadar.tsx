@@ -1,14 +1,15 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import FounderLayout from "@/components/founder/FounderLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Radio, Lock, ArrowLeft, ShieldAlert, Mail, Inbox, FileCheck2, Users, Mic, CalendarClock, Newspaper, Database, Settings as SettingsIcon } from "lucide-react";
+import { Radio, Lock, ArrowLeft, ShieldAlert, Mail, Inbox, FileCheck2, Users, Mic, CalendarClock, Newspaper, Database, Settings as SettingsIcon, Loader2, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const sb: any = supabase;
 const ROW_LIMIT = 100;
@@ -153,15 +154,21 @@ function SourcesTab() {
 
 // ----------------- Inbound -----------------
 function InboundTab() {
+  const qc = useQueryClient();
   const { data: rows = [], isLoading } = useTable("pr-inbound-list", async () => {
     const { data } = await sb.from("pr_inbound_messages")
       .select("id,received_at,source_id,sender_email,sender_name,subject,processed_status,is_likely_opportunity,ai_processed,duplicate_of,created_at")
       .order("received_at", { ascending: false }).limit(ROW_LIMIT);
     return data ?? [];
   });
-  if (isLoading) return <div className="text-xs text-muted-foreground">Loading…</div>;
-  if (rows.length === 0) return <EmptyState>No PR emails have been ingested yet. Gmail intake will be added in Phase 4.</EmptyState>;
   return (
+    <div className="space-y-3">
+      <GmailIntakePanel onDone={() => {
+        qc.invalidateQueries({ queryKey: ["pr-inbound-list"] });
+        qc.invalidateQueries({ queryKey: ["pr-overview"] });
+      }} />
+      {isLoading ? <div className="text-xs text-muted-foreground">Loading…</div> :
+       rows.length === 0 ? <EmptyState>No PR emails have been ingested yet. Run a Gmail PR intake above to capture messages from the “Liftor/PR Opportunities” label and known PR-source senders.</EmptyState> :
     <Table>
       <TableHeader><TableRow>
         <TableHead>Received</TableHead><TableHead>Source</TableHead><TableHead>Sender</TableHead>
@@ -183,7 +190,92 @@ function InboundTab() {
           </TableRow>
         ))}
       </TableBody>
-    </Table>
+    </Table>}
+    </div>
+  );
+}
+
+// ----------------- Gmail Intake Control -----------------
+function GmailIntakePanel({ onDone }: { onDone?: () => void }) {
+  const [running, setRunning] = useState(false);
+  const [lookback, setLookback] = useState(7);
+  const [result, setResult] = useState<any | null>(null);
+
+  const run = async (dryRun: boolean) => {
+    setRunning(true);
+    setResult(null);
+    try {
+      const { data, error } = await sb.functions.invoke("pr-opportunity-email-ingest", {
+        body: { mode: "manual", lookback_days: lookback, dry_run: dryRun },
+      });
+      if (error) throw error;
+      setResult(data);
+      if (data?.ok) {
+        if (dryRun) toast.success(`Dry run: would insert ${data.inserted} of ${data.emails_seen} emails.`);
+        else toast.success(`Ingested ${data.inserted} new PR email(s).`);
+        onDone?.();
+      } else if (data?.reason === "gmail_not_configured") {
+        toast.error("Gmail not configured — see panel for missing secrets.");
+      } else {
+        toast.error(data?.message || data?.reason || "Intake failed");
+      }
+    } catch (e: any) {
+      toast.error(e?.message || "Intake failed");
+      setResult({ ok: false, reason: "invoke_error", message: String(e?.message || e) });
+    } finally {
+      setRunning(false);
+    }
+  };
+
+  return (
+    <Card className="tech-card border-primary/30">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm flex items-center gap-2"><Mail className="h-4 w-4 text-primary" />Gmail PR intake</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <p className="text-xs text-muted-foreground">
+          Liftor reads only the <span className="font-mono">Liftor/PR Opportunities</span> Gmail label and known PR-source senders.
+          It does not scan the whole inbox, does not extract opportunities, does not call AI, and does not send any reply.
+        </p>
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="text-xs text-muted-foreground flex items-center gap-1">
+            Lookback (days)
+            <input
+              type="number" min={1} max={30} value={lookback}
+              onChange={(e) => setLookback(Math.max(1, Math.min(30, Number(e.target.value) || 7)))}
+              className="w-16 rounded border border-border/40 bg-secondary/40 px-2 py-1 text-xs"
+              disabled={running}
+            />
+          </label>
+          <Button size="sm" variant="outline" disabled={running} onClick={() => run(true)}>
+            {running ? <Loader2 className="h-3 w-3 animate-spin" /> : null} Dry run
+          </Button>
+          <Button size="sm" disabled={running} onClick={() => run(false)}>
+            {running ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />} Run Gmail PR intake
+          </Button>
+        </div>
+        {result ? (
+          <div className={`rounded-md border p-2 text-[11px] ${result.ok ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-200" : "border-yellow-500/40 bg-yellow-500/10 text-yellow-200"}`}>
+            {result.ok ? (
+              <div className="space-y-0.5">
+                <div><b>Seen</b> {result.emails_seen} · <b>Inserted</b> {result.inserted} · <b>Duplicates</b> {result.skipped_duplicates} · <b>Unknown source</b> {result.skipped_unknown_source} · <b>Out of scope</b> {result.skipped_out_of_scope}</div>
+                <div>Labels resolved: {(result.labels_resolved ?? []).join(", ") || "—"}</div>
+                <div>Sources seen: {(result.sources_seen ?? []).join(", ") || "—"}</div>
+                {result.dry_run ? <div className="italic">Dry run — nothing was written.</div> : null}
+              </div>
+            ) : result.reason === "gmail_not_configured" ? (
+              <div className="space-y-1">
+                <div className="font-medium">Gmail is not configured.</div>
+                <div>Missing secrets: <span className="font-mono">{(result.missing ?? []).join(", ")}</span></div>
+                <div className="text-muted-foreground">Add these via Lovable Cloud secrets, then retry. No fake records were created.</div>
+              </div>
+            ) : (
+              <div><b>{result.reason || "error"}:</b> {result.message || "Unknown error"}</div>
+            )}
+          </div>
+        ) : null}
+      </CardContent>
+    </Card>
   );
 }
 
