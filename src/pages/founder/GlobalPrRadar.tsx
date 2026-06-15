@@ -133,6 +133,8 @@ function OverviewTab() {
       <Metric icon={<CalendarClock className="h-3.5 w-3.5" />} label="Quarterly PR due ≤30d" value={d.campaignsDue} />
       <Metric icon={<Newspaper className="h-3.5 w-3.5" />} label="Coverage mentions" value={d.coverageTotal} hint={`${d.coverageMonth} this month`} />
       <Metric icon={<ShieldAlert className="h-3.5 w-3.5" />} label="Press-readiness blockers" value={d.readinessBlocked} />
+      <Metric icon={<FileCheck2 className="h-3.5 w-3.5" />} label="Businesses press-ready" value={d.readinessReady} />
+      <Metric icon={<FileCheck2 className="h-3.5 w-3.5" />} label="Matches ready for draft" value={d.matchesReadyDraft} hint={`${d.matchesAwaitingAssets} need assets`} />
     </div>
   );
 }
