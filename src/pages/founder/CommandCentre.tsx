@@ -1506,6 +1506,7 @@ const CommandCentre = () => {
               <CRMContact360Panel />
               <RelationshipIntelligenceCard />
               <CarrenEstateCapitalInfluenceCard />
+              <GlobalPrRadarCard />
             </Section>
 
             {/* SECTION 8 — Compliance / Legal / Rules */}
