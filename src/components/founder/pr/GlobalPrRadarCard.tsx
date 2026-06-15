@@ -2,8 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Radio, Lock, Mail, Inbox, FileCheck2, Users, Mic, CalendarClock, Newspaper, ShieldAlert, Database } from "lucide-react";
+import { Radio, Lock, Mail, Inbox, FileCheck2, Users, Mic, CalendarClock, Newspaper, ShieldAlert, Database, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
 
 const sb: any = supabase;
 
@@ -159,7 +160,9 @@ export default function GlobalPrRadarCard() {
               Media opportunities, journalists, experts, quarterly PR and coverage control.
             </div>
           </div>
-          <Button size="sm" variant="outline" disabled title="Available in Phase 3">PR Workspace · Phase 3</Button>
+          <Link to="/founder/global-pr-radar">
+            <Button size="sm" variant="outline">Open Global PR Radar<ArrowRight className="h-3.5 w-3.5 ml-1" /></Button>
+          </Link>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
