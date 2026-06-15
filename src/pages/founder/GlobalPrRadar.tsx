@@ -124,6 +124,7 @@ function OverviewTab() {
   if (isLoading) return <div className="text-xs text-muted-foreground">Loading…</div>;
   const d = data!;
   return (
+    <div className="space-y-4">
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
       <Metric icon={<Database className="h-3.5 w-3.5" />} label="Sources configured" value={d.sources} />
       <Metric icon={<Mail className="h-3.5 w-3.5" />} label="PR emails today" value={d.inboundToday} />
@@ -139,6 +140,106 @@ function OverviewTab() {
       <Metric icon={<FileCheck2 className="h-3.5 w-3.5" />} label="Businesses press-ready" value={d.readinessReady} />
       <Metric icon={<FileCheck2 className="h-3.5 w-3.5" />} label="Matches ready for draft" value={d.matchesReadyDraft} hint={`${d.matchesAwaitingAssets} need assets`} />
     </div>
+    <SourcePerformancePanel />
+    <ThreeMonthReviewPanel />
+    </div>
+  );
+}
+
+function SourcePerformancePanel() {
+  const [running, setRunning] = useState(false);
+  const [rows, setRows] = useState<any[] | null>(null);
+  const run = async (save: boolean) => {
+    setRunning(true);
+    const { data, error } = await sb.functions.invoke("pr-source-performance-summary", { body: { save_snapshot: save } });
+    setRunning(false);
+    if (error || !data?.ok) { toast.error(error?.message || data?.message || "Failed"); return; }
+    setRows(data.summaries || []);
+    if (save) toast.success("Snapshot saved to audit log.");
+  };
+  const recCls: Record<string, string> = {
+    keep: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
+    upgrade: "bg-sky-500/15 text-sky-300 border-sky-500/30",
+    monitor: "bg-yellow-500/15 text-yellow-300 border-yellow-500/30",
+    park: "bg-zinc-500/15 text-zinc-300 border-zinc-500/30",
+    cancel: "bg-red-500/15 text-red-300 border-red-500/30",
+    needs_more_data: "bg-secondary text-muted-foreground border-border/50",
+  };
+  return (
+    <Card className="tech-card">
+      <CardHeader className="pb-2"><CardTitle className="text-sm flex items-center justify-between"><span className="flex items-center gap-2"><Database className="h-4 w-4 text-primary" />Source performance (last 90 days)</span>
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" disabled={running} onClick={() => run(false)}>{running ? <Loader2 className="h-3 w-3 animate-spin" /> : null} Refresh</Button>
+          <Button size="sm" disabled={running} onClick={() => run(true)}>Save snapshot</Button>
+        </div>
+      </CardTitle></CardHeader>
+      <CardContent>
+        {!rows ? <div className="text-xs text-muted-foreground">Refresh to compute per-source ROI metrics.</div> :
+         rows.length === 0 ? <EmptyState>No sources configured.</EmptyState> :
+         <Table>
+           <TableHeader><TableRow>
+             <TableHead>Source</TableHead><TableHead>Type</TableHead><TableHead>Msgs</TableHead><TableHead>Opps</TableHead><TableHead>Matches</TableHead>
+             <TableHead>Drafts</TableHead><TableHead>Approved</TableHead><TableHead>Submissions</TableHead><TableHead>Avg urgency</TableHead><TableHead>Avg risk</TableHead>
+             <TableHead>Cost</TableHead><TableHead>Recommendation</TableHead>
+           </TableRow></TableHeader>
+           <TableBody>
+             {rows.map((r: any) => (
+               <TableRow key={r.source_id}>
+                 <TableCell className="text-xs">{r.source_name}</TableCell>
+                 <TableCell>{typeBadge(r.source_type)}</TableCell>
+                 <TableCell className="text-xs tabular-nums">{r.inbound_messages}</TableCell>
+                 <TableCell className="text-xs tabular-nums">{r.opportunities_extracted}</TableCell>
+                 <TableCell className="text-xs tabular-nums">{r.opportunities_matched} <span className="text-muted-foreground">({r.strong_matches} strong)</span></TableCell>
+                 <TableCell className="text-xs tabular-nums">{r.pitch_drafts}</TableCell>
+                 <TableCell className="text-xs tabular-nums">{r.founder_approved_drafts}</TableCell>
+                 <TableCell className="text-xs tabular-nums">{r.gmail_drafts_created + r.platform_submissions}</TableCell>
+                 <TableCell className="text-xs tabular-nums">{r.avg_urgency ?? "—"}</TableCell>
+                 <TableCell className="text-xs tabular-nums">{r.avg_risk ?? "—"}</TableCell>
+                 <TableCell className="text-xs">{r.cost_status || "—"}</TableCell>
+                 <TableCell>{chip(r.decision_recommendation, recCls[r.decision_recommendation] || "bg-secondary text-muted-foreground border-border/50")}</TableCell>
+               </TableRow>
+             ))}
+           </TableBody>
+         </Table>}
+      </CardContent>
+    </Card>
+  );
+}
+
+function ThreeMonthReviewPanel() {
+  const items = [
+    "source performance + decision recommendations (keep/upgrade/monitor/park/cancel)",
+    "opportunities received by source",
+    "pitches drafted and founder approvals",
+    "Gmail drafts created and manual platform submissions",
+    "coverage mentions recorded (backlinks, SEO value, featured-in)",
+    "source costs and trial status",
+    "AI/usage cost (once enabled)",
+  ];
+  const checklist = [
+    "Gmail intake working",
+    "Email-feed parsers working (Editorielle, SoS, HARO, PressPlugs)",
+    "Active businesses marked is_active=true",
+    "Press packs completed (descriptions, claims, quotes, logo, images)",
+    "Media Atlas enriched (journalists + sector leaders)",
+    "Drafts approved and submitted",
+    "Coverage mentions recorded",
+    "Source performance refreshed and snapshot saved",
+  ];
+  return (
+    <Card className="tech-card">
+      <CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><CalendarClock className="h-4 w-4 text-primary" />Three-month PR review · 15 September 2026</CardTitle></CardHeader>
+      <CardContent className="grid md:grid-cols-2 gap-4">
+        <div>
+          <div className="text-xs font-medium mb-1">Scope of review</div>
+          <ul className="text-xs space-y-1">{items.map((s) => <li key={s} className="flex gap-2"><span className="text-muted-foreground">·</span>{s}</li>)}</ul>
+        </div>
+        <div>
+          <div className="text-xs font-medium mb-1">Review readiness checklist</div>
+          <ul className="text-xs space-y-1">{checklist.map((s) => <li key={s} className="flex gap-2"><span className="text-muted-foreground">▢</span>{s}</li>)}</ul>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
