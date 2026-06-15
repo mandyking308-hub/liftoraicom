@@ -1057,9 +1057,10 @@ function AtlasEditButton({ table, row, onDone }: { table: "journalist_relationsh
 
 // ----------------- Press Readiness -----------------
 function ReadinessTab() {
+  const qc = useQueryClient();
   const { data: rows = [], isLoading } = useTable("pr-readiness", async () => {
     const { data } = await sb.from("business_press_readiness")
-      .select("id,business_id,business_name,is_active,website_live,public_offer_live,press_ready_status,compliance_clearance_status,missing_items,approved_images,approved_logo,approved_company_quotes,approved_claims")
+      .select("*")
       .order("updated_at", { ascending: false }).limit(ROW_LIMIT);
     return data ?? [];
   });
@@ -1069,13 +1070,47 @@ function ReadinessTab() {
       .order("updated_at", { ascending: false }).limit(ROW_LIMIT);
     return data ?? [];
   });
+  const [activeOnly, setActiveOnly] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [complianceFilter, setComplianceFilter] = useState("all");
+  const [missingOnly, setMissingOnly] = useState(false);
+
+  const refresh = () => {
+    qc.invalidateQueries({ queryKey: ["pr-readiness"] });
+    qc.invalidateQueries({ queryKey: ["pr-readiness-lite"] });
+    qc.invalidateQueries({ queryKey: ["pr-packs"] });
+    qc.invalidateQueries({ queryKey: ["pr-overview"] });
+  };
+
+  const filteredRows = (rows as any[]).filter((r) => {
+    if (activeOnly && !r.is_active) return false;
+    if (statusFilter !== "all" && (r.press_ready_status || "not_active") !== statusFilter) return false;
+    if (complianceFilter !== "all" && (r.compliance_clearance_status || "not_checked") !== complianceFilter) return false;
+    if (missingOnly && (r.missing_items ?? []).length === 0) return false;
+    return true;
+  });
+
   if (isLoading) return <div className="text-xs text-muted-foreground">Loading…</div>;
   return (
     <div className="space-y-4">
+      <ReadinessSyncPanel onDone={refresh} />
+      <ReadinessEditButton row={null} label="Add manual press-readiness record" onDone={refresh} />
+      <div className="rounded-md border border-border/40 bg-secondary/20 p-2 flex flex-wrap gap-2 items-center text-xs">
+        <label className="flex items-center gap-1"><input type="checkbox" checked={activeOnly} onChange={(e) => setActiveOnly(e.target.checked)} /> Active only</label>
+        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="rounded border border-border/40 bg-secondary/40 px-2 py-1">
+          <option value="all">Any readiness</option>
+          {["ready","partially_ready","blocked","not_active"].map((v) => <option key={v}>{v}</option>)}
+        </select>
+        <select value={complianceFilter} onChange={(e) => setComplianceFilter(e.target.value)} className="rounded border border-border/40 bg-secondary/40 px-2 py-1">
+          <option value="all">Any compliance</option>
+          {["approved","clear","not_required","not_checked","blocked"].map((v) => <option key={v}>{v}</option>)}
+        </select>
+        <label className="flex items-center gap-1"><input type="checkbox" checked={missingOnly} onChange={(e) => setMissingOnly(e.target.checked)} /> With missing items</label>
+      </div>
       {rows.length === 0 && packs.length === 0 ? (
-        <EmptyState>No business press-readiness records yet. Business matching and press-pack setup will be added in later phases.</EmptyState>
+        <EmptyState>No business press-readiness records yet. Sync from canonical businesses above or add a manual record.</EmptyState>
       ) : null}
-      {rows.length > 0 && (
+      {filteredRows.length > 0 && (
         <Card className="tech-card">
           <CardHeader className="pb-2"><CardTitle className="text-sm">Press readiness</CardTitle></CardHeader>
           <CardContent>
@@ -1083,10 +1118,10 @@ function ReadinessTab() {
               <TableHeader><TableRow>
                 <TableHead>Business</TableHead><TableHead>Active</TableHead><TableHead>Website</TableHead>
                 <TableHead>Offer</TableHead><TableHead>Status</TableHead><TableHead>Compliance</TableHead>
-                <TableHead>Approved assets</TableHead><TableHead>Missing</TableHead>
+                <TableHead>Approved assets</TableHead><TableHead>Missing</TableHead><TableHead>Edit</TableHead>
               </TableRow></TableHeader>
               <TableBody>
-                {rows.map((r: any) => (
+                {filteredRows.map((r: any) => (
                   <TableRow key={r.id}>
                     <TableCell className="text-xs">{r.business_name || (r.business_id ? r.business_id.slice(0, 8) : "—")}</TableCell>
                     <TableCell className="text-xs">{r.is_active ? "Yes" : "—"}</TableCell>
@@ -1096,6 +1131,7 @@ function ReadinessTab() {
                     <TableCell>{chip(r.compliance_clearance_status || "not_checked")}</TableCell>
                     <TableCell className="text-xs">{`${(r.approved_images ?? []).length} img · ${(r.approved_logo ?? []).length} logo · ${(r.approved_company_quotes ?? []).length} quote · ${(r.approved_claims ?? []).length} claim`}</TableCell>
                     <TableCell className="text-xs max-w-[260px] truncate">{(r.missing_items ?? []).join(", ") || "—"}</TableCell>
+                    <TableCell><ReadinessEditButton row={r} onDone={refresh} /></TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -1129,6 +1165,196 @@ function ReadinessTab() {
           </CardContent>
         </Card>
       )}
+    </div>
+  );
+}
+
+function ReadinessSyncPanel({ onDone }: { onDone?: () => void }) {
+  const [running, setRunning] = useState(false);
+  const [dryRun, setDryRun] = useState(true);
+  const [result, setResult] = useState<any | null>(null);
+  const run = async () => {
+    setRunning(true); setResult(null);
+    try {
+      const { data, error } = await sb.functions.invoke("pr-press-readiness-sync", { body: { dry_run: dryRun } });
+      if (error) throw error;
+      setResult(data);
+      if (data?.ok) {
+        toast.success(dryRun
+          ? `Dry run: would insert ${data.would_insert} of ${data.businesses_seen}.`
+          : `Synced: +${data.inserted}, ~${data.updated} of ${data.businesses_seen}.`);
+        if (!dryRun) onDone?.();
+      } else toast.error(data?.reason || data?.message || "Sync failed");
+    } catch (e: any) {
+      toast.error(e?.message || "Sync failed");
+    } finally { setRunning(false); }
+  };
+  return (
+    <Card className="tech-card border-primary/30">
+      <CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><Database className="h-4 w-4 text-primary" />Sync active businesses</CardTitle></CardHeader>
+      <CardContent className="space-y-2">
+        <p className="text-xs text-muted-foreground">
+          Seeds a press-readiness row for every business in the canonical <span className="font-mono">businesses</span> table.
+          Never overwrites approved descriptions, assets, quotes or claims. Activation, website/offer status and approved
+          content must be set manually below — Liftor will not auto-mark any business as press-ready.
+        </p>
+        <div className="flex items-center gap-3 text-xs">
+          <label className="flex items-center gap-1"><input type="checkbox" checked={dryRun} onChange={(e) => setDryRun(e.target.checked)} disabled={running} /> Dry run</label>
+          <Button size="sm" disabled={running} onClick={run}>
+            {running ? <Loader2 className="h-3 w-3 animate-spin" /> : <Database className="h-3 w-3" />} Sync from canonical businesses
+          </Button>
+        </div>
+        {result ? (
+          <div className="rounded-md border border-border/40 bg-secondary/30 p-2 text-[11px]">
+            {result.ok
+              ? <span><b>Seen</b> {result.businesses_seen} · <b>+</b>{result.inserted ?? result.would_insert ?? 0} · <b>~</b>{result.updated ?? result.would_update ?? 0} {result.dry_run ? <i>· dry run</i> : null}</span>
+              : <span>{result.reason}: {result.message}</span>}
+          </div>
+        ) : null}
+      </CardContent>
+    </Card>
+  );
+}
+
+const READY_STATUSES = ["not_active","blocked","partially_ready","ready"];
+const COMPLIANCE_STATUSES = ["not_checked","not_required","approved","clear","blocked"];
+
+function ReadinessEditButton({ row, onDone, label }: { row: any | null; onDone?: () => void; label?: string }) {
+  const isNew = !row;
+  const [open, setOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState<any>(() => ({
+    business_id: row?.business_id || "",
+    business_name: row?.business_name || "",
+    is_active: !!row?.is_active,
+    website_live: !!row?.website_live,
+    public_offer_live: !!row?.public_offer_live,
+    approved_one_line_description: row?.approved_one_line_description || "",
+    approved_50_word_description: row?.approved_50_word_description || "",
+    approved_150_word_description: row?.approved_150_word_description || "",
+    approved_founder_quote: row?.approved_founder_quote || "",
+    approved_press_contact: row?.approved_press_contact || "",
+    compliance_clearance_status: row?.compliance_clearance_status || "not_checked",
+    press_ready_status: row?.press_ready_status || "not_active",
+    blocked_topics: (row?.blocked_topics ?? []).join(", "),
+    approved_claims: (row?.approved_claims ?? []).map((c: any) => typeof c === "string" ? c : JSON.stringify(c)).join("\n"),
+    approved_company_quotes: (row?.approved_company_quotes ?? []).map((c: any) => typeof c === "string" ? c : JSON.stringify(c)).join("\n"),
+    approved_logo: (row?.approved_logo ?? []).join("\n"),
+    approved_images: (row?.approved_images ?? []).join("\n"),
+    approved_case_studies: (row?.approved_case_studies ?? []).map((c: any) => typeof c === "string" ? c : JSON.stringify(c)).join("\n"),
+    missing_items: (row?.missing_items ?? []).join(", "),
+  }));
+  const set = (k: string, v: any) => setForm((f: any) => ({ ...f, [k]: v }));
+  const splitLines = (s: string) => s.split("\n").map((x) => x.trim()).filter(Boolean);
+  const splitCsv = (s: string) => s.split(",").map((x) => x.trim()).filter(Boolean);
+
+  const save = async () => {
+    if (isNew && !form.business_name.trim()) { toast.error("Business name required."); return; }
+    setSaving(true);
+    const patch: any = {
+      business_name: form.business_name || null,
+      is_active: !!form.is_active,
+      website_live: !!form.website_live,
+      public_offer_live: !!form.public_offer_live,
+      approved_one_line_description: form.approved_one_line_description || null,
+      approved_50_word_description: form.approved_50_word_description || null,
+      approved_150_word_description: form.approved_150_word_description || null,
+      approved_founder_quote: form.approved_founder_quote || null,
+      approved_press_contact: form.approved_press_contact || null,
+      compliance_clearance_status: form.compliance_clearance_status || "not_checked",
+      press_ready_status: form.press_ready_status || "not_active",
+      blocked_topics: splitCsv(form.blocked_topics),
+      approved_claims: splitLines(form.approved_claims),
+      approved_company_quotes: splitLines(form.approved_company_quotes),
+      approved_logo: splitLines(form.approved_logo),
+      approved_images: splitLines(form.approved_images),
+      approved_case_studies: splitLines(form.approved_case_studies),
+      missing_items: splitCsv(form.missing_items),
+    };
+    if (isNew && form.business_id.trim()) patch.business_id = form.business_id.trim();
+    let error: any = null;
+    if (isNew) ({ error } = await sb.from("business_press_readiness").insert(patch));
+    else ({ error } = await sb.from("business_press_readiness").update(patch).eq("id", row.id));
+    setSaving(false);
+    if (error) toast.error(error.message);
+    else { toast.success("Saved"); setOpen(false); onDone?.(); }
+  };
+
+  if (!open) return (
+    <Button size="sm" variant={isNew ? "default" : "outline"} onClick={() => setOpen(true)}>
+      {label || "Edit"}
+    </Button>
+  );
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => !saving && setOpen(false)}>
+      <Card className="tech-card max-w-2xl w-full max-h-[90vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
+        <CardHeader className="pb-2"><CardTitle className="text-sm">{isNew ? "New press-readiness record" : `Edit ${row?.business_name || "record"}`}</CardTitle></CardHeader>
+        <CardContent className="space-y-2 text-xs">
+          <label className="block">Business name
+            <input value={form.business_name} onChange={(e) => set("business_name", e.target.value)} className="mt-0.5 w-full rounded border border-border/40 bg-secondary/40 px-2 py-1" />
+          </label>
+          {isNew ? (
+            <label className="block">Business id (optional uuid; leave blank if unknown)
+              <input value={form.business_id} onChange={(e) => set("business_id", e.target.value)} placeholder="uuid" className="mt-0.5 w-full rounded border border-border/40 bg-secondary/40 px-2 py-1 font-mono" />
+            </label>
+          ) : null}
+          <div className="flex gap-4">
+            <label className="flex items-center gap-1"><input type="checkbox" checked={form.is_active} onChange={(e) => set("is_active", e.target.checked)} /> Active</label>
+            <label className="flex items-center gap-1"><input type="checkbox" checked={form.website_live} onChange={(e) => set("website_live", e.target.checked)} /> Website live</label>
+            <label className="flex items-center gap-1"><input type="checkbox" checked={form.public_offer_live} onChange={(e) => set("public_offer_live", e.target.checked)} /> Public offer live</label>
+          </div>
+          <label className="block">Press ready status
+            <select value={form.press_ready_status} onChange={(e) => set("press_ready_status", e.target.value)} className="mt-0.5 w-full rounded border border-border/40 bg-secondary/40 px-2 py-1">
+              {READY_STATUSES.map((v) => <option key={v}>{v}</option>)}
+            </select>
+          </label>
+          <label className="block">Compliance clearance
+            <select value={form.compliance_clearance_status} onChange={(e) => set("compliance_clearance_status", e.target.value)} className="mt-0.5 w-full rounded border border-border/40 bg-secondary/40 px-2 py-1">
+              {COMPLIANCE_STATUSES.map((v) => <option key={v}>{v}</option>)}
+            </select>
+          </label>
+          <label className="block">One-line description
+            <input value={form.approved_one_line_description} onChange={(e) => set("approved_one_line_description", e.target.value)} className="mt-0.5 w-full rounded border border-border/40 bg-secondary/40 px-2 py-1" />
+          </label>
+          <label className="block">50-word description
+            <textarea rows={2} value={form.approved_50_word_description} onChange={(e) => set("approved_50_word_description", e.target.value)} className="mt-0.5 w-full rounded border border-border/40 bg-secondary/40 px-2 py-1" />
+          </label>
+          <label className="block">150-word description
+            <textarea rows={4} value={form.approved_150_word_description} onChange={(e) => set("approved_150_word_description", e.target.value)} className="mt-0.5 w-full rounded border border-border/40 bg-secondary/40 px-2 py-1" />
+          </label>
+          <label className="block">Approved founder quote
+            <textarea rows={2} value={form.approved_founder_quote} onChange={(e) => set("approved_founder_quote", e.target.value)} className="mt-0.5 w-full rounded border border-border/40 bg-secondary/40 px-2 py-1" />
+          </label>
+          <label className="block">Approved company quotes (one per line)
+            <textarea rows={3} value={form.approved_company_quotes} onChange={(e) => set("approved_company_quotes", e.target.value)} className="mt-0.5 w-full rounded border border-border/40 bg-secondary/40 px-2 py-1" />
+          </label>
+          <label className="block">Approved claims (one per line)
+            <textarea rows={3} value={form.approved_claims} onChange={(e) => set("approved_claims", e.target.value)} className="mt-0.5 w-full rounded border border-border/40 bg-secondary/40 px-2 py-1" />
+          </label>
+          <label className="block">Approved case studies (one per line)
+            <textarea rows={2} value={form.approved_case_studies} onChange={(e) => set("approved_case_studies", e.target.value)} className="mt-0.5 w-full rounded border border-border/40 bg-secondary/40 px-2 py-1" />
+          </label>
+          <label className="block">Logo URLs (one per line)
+            <textarea rows={2} value={form.approved_logo} onChange={(e) => set("approved_logo", e.target.value)} className="mt-0.5 w-full rounded border border-border/40 bg-secondary/40 px-2 py-1 font-mono" />
+          </label>
+          <label className="block">Image URLs (one per line)
+            <textarea rows={3} value={form.approved_images} onChange={(e) => set("approved_images", e.target.value)} className="mt-0.5 w-full rounded border border-border/40 bg-secondary/40 px-2 py-1 font-mono" />
+          </label>
+          <label className="block">Press contact (email or note)
+            <input value={form.approved_press_contact} onChange={(e) => set("approved_press_contact", e.target.value)} className="mt-0.5 w-full rounded border border-border/40 bg-secondary/40 px-2 py-1" />
+          </label>
+          <label className="block">Blocked topics (comma-separated)
+            <input value={form.blocked_topics} onChange={(e) => set("blocked_topics", e.target.value)} className="mt-0.5 w-full rounded border border-border/40 bg-secondary/40 px-2 py-1" />
+          </label>
+          <label className="block">Missing items (comma-separated)
+            <input value={form.missing_items} onChange={(e) => set("missing_items", e.target.value)} className="mt-0.5 w-full rounded border border-border/40 bg-secondary/40 px-2 py-1" />
+          </label>
+          <div className="flex justify-end gap-2 pt-1">
+            <Button size="sm" variant="ghost" disabled={saving} onClick={() => setOpen(false)}>Cancel</Button>
+            <Button size="sm" disabled={saving} onClick={save}>{saving ? <Loader2 className="h-3 w-3 animate-spin" /> : null} Save</Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
