@@ -111,6 +111,7 @@ import StarterPackMaterialiserPage from "./pages/founder/StarterPackMaterialiser
 import BusinessOnboardingFactoryPage from "./pages/founder/BusinessOnboardingFactory";
 import VideoSopFactoryPage from "./pages/founder/VideoSopFactory";
 import RelationshipIntelligencePage from "./pages/founder/RelationshipIntelligence";
+import GlobalPrRadar from "./pages/founder/GlobalPrRadar";
 import BusinessInternalActivationPage from "./pages/founder/BusinessInternalActivation";
 import BusinessDailyOperatingLoopPage from "./pages/founder/BusinessDailyOperatingLoop";
 import BusinessWeeklyReviewPage from "./pages/founder/BusinessWeeklyReview";
@@ -953,6 +954,7 @@ const App = () => (
             <Route path="/founder/business-onboarding-factory" element={<FounderRoute><BusinessOnboardingFactoryPage /></FounderRoute>} />
             <Route path="/founder/video-sop-factory" element={<FounderRoute><VideoSopFactoryPage /></FounderRoute>} />
             <Route path="/founder/relationship-intelligence" element={<FounderRoute><RelationshipIntelligencePage /></FounderRoute>} />
+            <Route path="/founder/global-pr-radar" element={<FounderRoute><GlobalPrRadar /></FounderRoute>} />
             <Route path="/founder/business-internal-activation" element={<FounderRoute><BusinessInternalActivationPage /></FounderRoute>} />
             <Route path="/founder/business-daily-operating-loop" element={<FounderRoute><BusinessDailyOperatingLoopPage /></FounderRoute>} />
             <Route path="/founder/business-weekly-review" element={<FounderRoute><BusinessWeeklyReviewPage /></FounderRoute>} />
