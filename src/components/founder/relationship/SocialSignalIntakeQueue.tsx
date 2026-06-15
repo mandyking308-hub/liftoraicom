@@ -15,7 +15,7 @@ import {
   CAPITAL_LANE, CAPITAL_ROLE, BEST_VEHICLE, SOURCE_PLATFORM,
   HNW_CONFIDENCE, PHILANTHROPY_CAUSE, DEAL_RELEVANCE, ALIGNMENT_QUALITY,
   PARK_REASON, NEXT_MOVE_OWNER, COMPLIANCE_BOUNDARY,
-} from "./CapitalInfluenceTab";
+} from "./capitalTaxonomy";
 
 const sb: any = supabase as any;
 
