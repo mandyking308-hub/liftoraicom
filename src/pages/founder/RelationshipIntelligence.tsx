@@ -199,7 +199,11 @@ export default function RelationshipIntelligence() {
   }
 
   function exportCsv() {
-    const cols = ["contact_name","organisation_name","email","phone","jurisdiction","relationship_type","relationship_status","opportunity_role","trust_level","disclosure_level","commercial_value_score","strategic_value_score","urgency_score","last_contact_at","next_action_at","next_action_summary","tags"];
+    const cols = [
+      "contact_name","organisation_name","email","phone","jurisdiction","relationship_type","relationship_status","opportunity_role","trust_level","disclosure_level","commercial_value_score","strategic_value_score","urgency_score","last_contact_at","next_action_at","next_action_summary","tags",
+      // Capital & Influence
+      "capital_lane","capital_role","best_vehicle","conversation_posture","outreach_status","compliance_boundary","source_platform","source_evidence","facebook_profile_url","age_or_age_band","hnw_signal_confidence","philanthropy_cause_fit","deal_relevance","alignment_quality","park_reason","next_move_owner","money_signal","relationship_angle","priority_notes","private_capital_notes","philanthropy_notes","elite_context_notes","disclosure_warning",
+    ];
     const rows = [cols.join(",")];
     for (const c of filtered as any[]) {
       rows.push(cols.map(k => {
