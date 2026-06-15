@@ -133,8 +133,8 @@ Deno.serve(async (req) => {
     await admin.from("pr_audit_events").insert({
       event_type: "pr_gmail_draft_created",
       actor_user_id: user.id,
-      summary: `Gmail draft created (not sent) for ${recipient.replace(/^(.{2}).*(@.*)$/, "$1***$2")}`,
-      details: { draft_id: draft.id, submission_id: sub?.id ?? null, gmail_thread_id: gmailThreadId },
+      event_summary: `Gmail draft created (not sent) for ${recipient.replace(/^(.{2}).*(@.*)$/, "$1***$2")}`,
+      metadata: { draft_id: draft.id, submission_id: sub?.id ?? null, gmail_thread_id: gmailThreadId },
     });
 
     return json({ ok: true, gmail_draft_id: gmailDraftId, gmail_thread_id: gmailThreadId, submission_id: sub?.id ?? null, sent: false });

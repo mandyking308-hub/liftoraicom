@@ -283,8 +283,8 @@ Deno.serve(async (req) => {
     await admin.from("pr_audit_events").insert({
       event_type: "pr_pitch_draft_generated",
       actor_user_id: user.id,
-      summary: `Draft ${forceRegenerate ? "regenerated" : "generated"} (template) · risk=${risk} · send=${sendMethod} · missing=${missing.length}`,
-      details: { draft_id: draftId, opportunity_id: opp.id, business_id: readiness.business_id, draft_mode: "template", ai_used: false, ai_requested: draftMode === "ai_gateway" },
+      event_summary: `Draft ${forceRegenerate ? "regenerated" : "generated"} (template) · risk=${risk} · send=${sendMethod} · missing=${missing.length}`,
+      metadata: { draft_id: draftId, opportunity_id: opp.id, business_id: readiness.business_id, draft_mode: "template", ai_used: false, ai_requested: draftMode === "ai_gateway" },
     });
 
     return json({

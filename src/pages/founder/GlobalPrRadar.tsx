@@ -1613,8 +1613,8 @@ function DraftDetailDialog({ id, open, onOpenChange, onChanged }: { id: string |
       if (error) throw error;
       await sb.from("pr_audit_events").insert({
         event_type: status === "founder_approved" ? "pr_pitch_draft_approved" : status === "rejected" ? "pr_pitch_draft_rejected" : "pr_pitch_draft_returned",
-        summary: `Draft ${status}`,
-        details: { draft_id: row.id },
+        event_summary: `Draft ${status}`,
+        metadata: { draft_id: row.id },
       });
       toast.success(`Draft ${status.replace("_", " ")}`);
       setRow({ ...row, ...patch });
@@ -2320,6 +2320,13 @@ function SettingsTab() {
     "Platform-only records (Qwoted, HARO platform, etc.) require manual platform submission. Use Copy + Mark submitted.",
     "Approved business press-pack wording only — no invented claims, metrics, awards or endorsements.",
   ];
+  const activationNotes = [
+    "Gmail intake requires Supabase Gmail secrets (OAuth refresh token + client credentials). Without them the intake panel will report 'Gmail is not configured'.",
+    "Cron / scheduled workers are NOT active yet. The 13:15 / 17:30 schedule is intent only — every run is currently manual.",
+    "All PR functions (intake, parsing, enrichment, matching, drafting, planner, owned-media, performance summary) are manual-run until scheduled activation is separately approved.",
+    "Businesses must be manually marked is_active = true AND press_ready_status = 'ready' in Press Readiness before any pitch draft can be generated.",
+    "No external send anywhere. Gmail action creates a draft only. Platform-only routes require manual submission inside the platform.",
+  ];
 
   const Block = ({ title, items }: { title: string; items: (string | string[])[] }) => (
     <Card className="tech-card">
@@ -2343,6 +2350,7 @@ function SettingsTab() {
       <Block title="Schedule" items={schedule} />
       <Block title="Source rules" items={rules} />
       <Block title="Safety guidance" items={safety} />
+      <Block title="Activation status (read before live QA)" items={activationNotes} />
     </div>
   );
 }

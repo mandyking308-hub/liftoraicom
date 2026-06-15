@@ -77,7 +77,7 @@ Deno.serve(async (req) => {
       event_type: "business_press_readiness_sync",
       related_type: "business_press_readiness",
       event_summary: `Seeded ${inserted}, updated ${updated} (of ${businesses.length} canonical businesses).`,
-      details: { businesses_seen: businesses.length, inserted, updated, force_update: forceUpdate, business_id: businessId ?? null },
+      metadata: { businesses_seen: businesses.length, inserted, updated, force_update: forceUpdate, business_id: businessId ?? null },
     });
 
     return json({ ok: true, businesses_seen: businesses.length, inserted, updated });
