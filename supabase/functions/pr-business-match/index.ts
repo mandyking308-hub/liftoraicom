@@ -221,7 +221,7 @@ Deno.serve(async (req) => {
         event_type: "opportunity_business_match_run",
         related_type: "media_opportunity_matches",
         event_summary: `Matched ${opportunities.length} opportunities × ${businesses.length} businesses → +${inserted}, ~${updated}.`,
-        details: { opportunities_seen: opportunities.length, businesses_seen: businesses.length, inserted, updated, skipped, counts, opportunity_id: opportunityId ?? null, business_id: businessId ?? null, force_rematch: forceRematch },
+        metadata: { opportunities_seen: opportunities.length, businesses_seen: businesses.length, inserted, updated, skipped, counts, opportunity_id: opportunityId ?? null, business_id: businessId ?? null, force_rematch: forceRematch },
       });
     }
 
