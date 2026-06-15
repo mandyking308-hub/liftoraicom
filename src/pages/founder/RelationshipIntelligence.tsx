@@ -584,7 +584,7 @@ function Field({ label, children, full }: { label: string; children: React.React
   return <div className={full ? "md:col-span-2" : ""}><label className="text-xs text-muted-foreground block mb-1">{label}</label>{children}</div>;
 }
 function Sel({ value, onChange, options }: { value: string; onChange: (v: string) => void; options: readonly string[] }) {
-  return <Select value={value} onValueChange={onChange}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{options.map(o => <SelectItem key={o} value={o}>{pretty(o)}</SelectItem>)}</SelectContent></Select>;
+  return <Select value={value || undefined} onValueChange={onChange}><SelectTrigger><SelectValue placeholder="—" /></SelectTrigger><SelectContent>{options.map(o => <SelectItem key={o} value={o}>{pretty(o)}</SelectItem>)}</SelectContent></Select>;
 }
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return <div className="border-t border-border/40 pt-2"><p className="text-xs uppercase text-muted-foreground mb-1">{title}</p>{children}</div>;
