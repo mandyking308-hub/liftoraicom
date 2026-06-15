@@ -520,6 +520,7 @@ function OpportunitiesTab() {
 
 // ----------------- Media Atlas -----------------
 function MediaAtlasTab() {
+  const qc = useQueryClient();
   const { data: journalists = [] } = useTable("pr-journalists", async () => {
     const { data } = await sb.from("journalist_relationships")
       .select("id,name,publication_name,outlet_id,email,platform_name,country,beat,topics,contact_route,relationship_status,priority_score,do_not_contact,last_verified_at")
@@ -533,26 +534,74 @@ function MediaAtlasTab() {
     return data ?? [];
   });
 
+  const [search, setSearch] = useState("");
+  const [routeFilter, setRouteFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [permissionFilter, setPermissionFilter] = useState("all");
+  const [sourceFilter, setSourceFilter] = useState("all");
+  const [hideDnc, setHideDnc] = useState(false);
+
+  const s = search.trim().toLowerCase();
+  const matchText = (...parts: any[]) => !s || parts.some((p) => p && String(p).toLowerCase().includes(s));
+  const filteredJournalists = (journalists as any[]).filter((r) => {
+    if (hideDnc && r.do_not_contact) return false;
+    if (routeFilter !== "all" && (r.contact_route || "unknown") !== routeFilter) return false;
+    if (statusFilter !== "all" && (r.relationship_status || "new") !== statusFilter) return false;
+    return matchText(r.name, r.publication_name, r.email, r.beat, r.country, ...(r.topics ?? []));
+  });
+  const filteredLeaders = (leaders as any[]).filter((r) => {
+    if (sourceFilter !== "all" && (r.source_platform || "") !== sourceFilter) return false;
+    if (routeFilter !== "all" && (r.contact_route || "unknown") !== routeFilter) return false;
+    if (statusFilter !== "all" && (r.relationship_status || "new") !== statusFilter) return false;
+    if (permissionFilter !== "all" && (r.permission_status || "not_requested") !== permissionFilter) return false;
+    return matchText(r.name, r.title, r.company, r.country, ...(r.topics ?? []), ...(r.hashtags ?? []));
+  });
+
+  const refresh = () => {
+    qc.invalidateQueries({ queryKey: ["pr-journalists"] });
+    qc.invalidateQueries({ queryKey: ["pr-sector-leaders"] });
+    qc.invalidateQueries({ queryKey: ["pr-overview"] });
+  };
+
   return (
     <div className="space-y-4">
       <div className="text-[11px] text-muted-foreground">
         Qwoted records are platform-only unless a separate lawful contact route is recorded.
       </div>
+      <AtlasEnrichPanel onDone={refresh} />
+      <ManualImportPanel onDone={refresh} />
+      <div className="rounded-md border border-border/40 bg-secondary/20 p-2 flex flex-wrap gap-2 items-center text-xs">
+        <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search name / publication / topic…"
+          className="flex-1 min-w-[200px] rounded border border-border/40 bg-secondary/40 px-2 py-1" />
+        <select value={routeFilter} onChange={(e) => setRouteFilter(e.target.value)} className="rounded border border-border/40 bg-secondary/40 px-2 py-1">
+          <option value="all">Any route</option><option value="email">email</option><option value="platform_only">platform_only</option><option value="unknown">unknown</option>
+        </select>
+        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="rounded border border-border/40 bg-secondary/40 px-2 py-1">
+          <option value="all">Any status</option><option value="new">new</option><option value="warm">warm</option><option value="active">active</option><option value="dormant">dormant</option>
+        </select>
+        <select value={permissionFilter} onChange={(e) => setPermissionFilter(e.target.value)} className="rounded border border-border/40 bg-secondary/40 px-2 py-1">
+          <option value="all">Any permission</option><option value="not_requested">not_requested</option><option value="requested">requested</option><option value="granted">granted</option><option value="denied">denied</option>
+        </select>
+        <select value={sourceFilter} onChange={(e) => setSourceFilter(e.target.value)} className="rounded border border-border/40 bg-secondary/40 px-2 py-1">
+          <option value="all">Any source</option><option value="Qwoted">Qwoted</option><option value="Manual">Manual</option><option value="Public Web">Public Web</option><option value="Event">Event</option><option value="Press List">Press List</option>
+        </select>
+        <label className="flex items-center gap-1"><input type="checkbox" checked={hideDnc} onChange={(e) => setHideDnc(e.target.checked)} /> Hide DNC</label>
+      </div>
       <Tabs defaultValue="journalists">
         <TabsList>
-          <TabsTrigger value="journalists">Journalists / Media Contacts</TabsTrigger>
-          <TabsTrigger value="leaders">Sector Leaders / Experts</TabsTrigger>
+          <TabsTrigger value="journalists">Journalists / Media Contacts ({filteredJournalists.length})</TabsTrigger>
+          <TabsTrigger value="leaders">Sector Leaders / Experts ({filteredLeaders.length})</TabsTrigger>
         </TabsList>
         <TabsContent value="journalists" className="mt-3">
-          {journalists.length === 0 ? <EmptyState>No journalist relationships saved yet.</EmptyState> : (
+          {filteredJournalists.length === 0 ? <EmptyState>No journalist relationships match the current filters.</EmptyState> : (
             <Table>
               <TableHeader><TableRow>
                 <TableHead>Name</TableHead><TableHead>Publication</TableHead><TableHead>Email / Platform</TableHead>
                 <TableHead>Country</TableHead><TableHead>Beat / Topics</TableHead><TableHead>Route</TableHead>
-                <TableHead>Status</TableHead><TableHead>Priority</TableHead><TableHead>DNC</TableHead><TableHead>Verified</TableHead>
+                <TableHead>Status</TableHead><TableHead>Priority</TableHead><TableHead>DNC</TableHead><TableHead>Verified</TableHead><TableHead>Edit</TableHead>
               </TableRow></TableHeader>
               <TableBody>
-                {journalists.map((r: any) => (
+                {filteredJournalists.map((r: any) => (
                   <TableRow key={r.id}>
                     <TableCell className="text-xs">{r.name || "—"}</TableCell>
                     <TableCell className="text-xs">{r.publication_name || "—"}</TableCell>
@@ -564,6 +613,7 @@ function MediaAtlasTab() {
                     <TableCell className="text-xs tabular-nums">{r.priority_score ?? 0}</TableCell>
                     <TableCell className="text-xs">{r.do_not_contact ? "Yes" : "—"}</TableCell>
                     <TableCell className="text-xs">{fmtDateShort(r.last_verified_at)}</TableCell>
+                    <TableCell><AtlasEditButton table="journalist_relationships" row={r} onDone={refresh} /></TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -571,16 +621,16 @@ function MediaAtlasTab() {
           )}
         </TabsContent>
         <TabsContent value="leaders" className="mt-3">
-          {leaders.length === 0 ? <EmptyState>No sector leaders / expert targets saved yet.</EmptyState> : (
+          {filteredLeaders.length === 0 ? <EmptyState>No sector leaders / expert targets match the current filters.</EmptyState> : (
             <Table>
               <TableHeader><TableRow>
                 <TableHead>Name</TableHead><TableHead>Title</TableHead><TableHead>Company</TableHead>
                 <TableHead>Country</TableHead><TableHead>Source</TableHead><TableHead>Topics / Hashtags</TableHead>
                 <TableHead>Use case</TableHead><TableHead>Route</TableHead><TableHead>Permission</TableHead>
-                <TableHead>Status</TableHead><TableHead>Priority</TableHead>
+                <TableHead>Status</TableHead><TableHead>Priority</TableHead><TableHead>Edit</TableHead>
               </TableRow></TableHeader>
               <TableBody>
-                {leaders.map((r: any) => (
+                {filteredLeaders.map((r: any) => (
                   <TableRow key={r.id}>
                     <TableCell className="text-xs">{r.name || "—"}</TableCell>
                     <TableCell className="text-xs">{r.title || "—"}</TableCell>
@@ -593,6 +643,7 @@ function MediaAtlasTab() {
                     <TableCell>{chip(r.permission_status || "not_requested")}</TableCell>
                     <TableCell>{chip(r.relationship_status || "new")}</TableCell>
                     <TableCell className="text-xs tabular-nums">{r.priority_score ?? 0}</TableCell>
+                    <TableCell><AtlasEditButton table="sector_leader_profiles" row={r} onDone={refresh} /></TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -600,6 +651,236 @@ function MediaAtlasTab() {
           )}
         </TabsContent>
       </Tabs>
+    </div>
+  );
+}
+
+// ----------------- Atlas: enrich-from-opportunities panel -----------------
+function AtlasEnrichPanel({ onDone }: { onDone?: () => void }) {
+  const [running, setRunning] = useState(false);
+  const [limit, setLimit] = useState(50);
+  const [dryRun, setDryRun] = useState(true);
+  const [sourceName, setSourceName] = useState("");
+  const [result, setResult] = useState<any | null>(null);
+
+  const run = async () => {
+    setRunning(true); setResult(null);
+    try {
+      const payload: any = { limit, dry_run: dryRun };
+      if (sourceName.trim()) payload.source_name = sourceName.trim();
+      const { data, error } = await sb.functions.invoke("pr-media-atlas-enrich", { body: payload });
+      if (error) throw error;
+      setResult(data);
+      if (data?.ok) {
+        toast.success(dryRun
+          ? `Dry run: ${data.opportunities_seen} opps; ${data.journalists_inserted}+${data.outlets_inserted} would insert.`
+          : `Enriched ${data.opportunities_seen} opps → journalists +${data.journalists_inserted}, outlets +${data.outlets_inserted}.`);
+        if (!dryRun) onDone?.();
+      } else toast.error(data?.message || data?.reason || "Enrichment failed");
+    } catch (e: any) {
+      toast.error(e?.message || "Enrichment failed");
+      setResult({ ok: false, message: String(e?.message || e) });
+    } finally { setRunning(false); }
+  };
+
+  return (
+    <Card className="tech-card border-primary/30">
+      <CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><Users className="h-4 w-4 text-primary" />Build Media Atlas from opportunities</CardTitle></CardHeader>
+      <CardContent className="space-y-3">
+        <p className="text-xs text-muted-foreground">
+          Reads parsed opportunities and creates/updates outlets and journalists. No AI, no sending, no scraping.
+          Dedupes by email, then name + publication for journalists; by normalised name for outlets.
+        </p>
+        <div className="flex flex-wrap items-center gap-3">
+          <label className="text-xs text-muted-foreground flex items-center gap-1">Limit
+            <input type="number" min={1} max={200} value={limit}
+              onChange={(e) => setLimit(Math.max(1, Math.min(200, Number(e.target.value) || 50)))}
+              className="w-20 rounded border border-border/40 bg-secondary/40 px-2 py-1 text-xs" disabled={running} />
+          </label>
+          <label className="text-xs text-muted-foreground flex items-center gap-1">Source
+            <input value={sourceName} onChange={(e) => setSourceName(e.target.value)} placeholder="optional (e.g. Editorielle)"
+              className="w-44 rounded border border-border/40 bg-secondary/40 px-2 py-1 text-xs" disabled={running} />
+          </label>
+          <label className="text-xs text-muted-foreground flex items-center gap-1">
+            <input type="checkbox" checked={dryRun} onChange={(e) => setDryRun(e.target.checked)} disabled={running} /> Dry run
+          </label>
+          <Button size="sm" disabled={running} onClick={run}>
+            {running ? <Loader2 className="h-3 w-3 animate-spin" /> : <Users className="h-3 w-3" />} Build Media Atlas
+          </Button>
+        </div>
+        {result?.ok ? (
+          <div className="rounded-md border border-emerald-500/30 bg-emerald-500/10 text-emerald-200 p-2 text-[11px]">
+            <b>Seen</b> {result.opportunities_seen} · <b>Outlets</b> +{result.outlets_inserted}/~{result.outlets_updated} · <b>Journalists</b> +{result.journalists_inserted}/~{result.journalists_updated} · <b>Dup</b> {result.duplicates} · <b>Skipped</b> {result.skipped_low_confidence} {result.dry_run ? <span className="italic">· dry run</span> : null}
+          </div>
+        ) : result ? (
+          <div className="rounded-md border border-yellow-500/40 bg-yellow-500/10 text-yellow-200 p-2 text-[11px]">{result.reason || "error"}: {result.message}</div>
+        ) : null}
+      </CardContent>
+    </Card>
+  );
+}
+
+// ----------------- Manual / Qwoted import panel -----------------
+const IMPORT_SOURCES = ["Qwoted", "Manual", "Public Web", "Event", "Press List"] as const;
+const IMPORT_TYPES = ["auto_classify", "journalists", "sector_leaders", "outlets", "mixed"] as const;
+function ManualImportPanel({ onDone }: { onDone?: () => void }) {
+  const [running, setRunning] = useState(false);
+  const [sourcePlatform, setSourcePlatform] = useState<typeof IMPORT_SOURCES[number]>("Qwoted");
+  const [importType, setImportType] = useState<typeof IMPORT_TYPES[number]>("auto_classify");
+  const [text, setText] = useState("");
+  const [preview, setPreview] = useState<any | null>(null);
+
+  const run = async (dryRun: boolean) => {
+    if (!text.trim()) { toast.error("Paste some text first."); return; }
+    setRunning(true);
+    try {
+      const { data, error } = await sb.functions.invoke("pr-media-atlas-manual-import", {
+        body: { source_platform: sourcePlatform, import_type: importType, raw_text: text, dry_run: dryRun },
+      });
+      if (error) throw error;
+      setPreview(data);
+      if (data?.ok) {
+        toast.success(dryRun
+          ? `Preview: ${data.parsed} parsed; would insert ${data.sector_leaders_inserted + data.journalists_inserted + data.outlets_inserted}.`
+          : `Imported: leaders +${data.sector_leaders_inserted}, journalists +${data.journalists_inserted}, outlets +${data.outlets_inserted}.`);
+        if (!dryRun) { onDone?.(); setText(""); }
+      } else toast.error(data?.message || data?.reason || "Import failed");
+    } catch (e: any) {
+      toast.error(e?.message || "Import failed");
+    } finally { setRunning(false); }
+  };
+
+  return (
+    <Card className="tech-card border-primary/30">
+      <CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><Download className="h-4 w-4 text-primary" />Manual / Qwoted import</CardTitle></CardHeader>
+      <CardContent className="space-y-3">
+        <p className="text-xs text-muted-foreground">
+          Paste visible/manual text or CSV you have lawfully obtained. Liftor will not fetch URLs, scrape Qwoted/LinkedIn, contact anyone or send anything.
+          {sourcePlatform === "Qwoted" ? " Qwoted is platform-only — contact must happen inside Qwoted unless a separate lawful contact route is recorded." : ""}
+        </p>
+        <div className="flex flex-wrap items-center gap-2 text-xs">
+          <label className="flex items-center gap-1 text-muted-foreground">Source
+            <select value={sourcePlatform} onChange={(e) => setSourcePlatform(e.target.value as any)} disabled={running}
+              className="rounded border border-border/40 bg-secondary/40 px-2 py-1">
+              {IMPORT_SOURCES.map((s) => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </label>
+          <label className="flex items-center gap-1 text-muted-foreground">Type
+            <select value={importType} onChange={(e) => setImportType(e.target.value as any)} disabled={running}
+              className="rounded border border-border/40 bg-secondary/40 px-2 py-1">
+              {IMPORT_TYPES.map((s) => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </label>
+        </div>
+        <textarea value={text} onChange={(e) => setText(e.target.value)} rows={8} disabled={running}
+          placeholder={"CSV: name,title,company,country,topics,profile_url,email\n\nOr blocks:\nName: Jane Doe\nTitle: Head of AI\nCompany: Acme\nCountry: UK\nTopics: AI, leadership\nProfile URL: https://qwoted.com/..."}
+          className="w-full rounded border border-border/40 bg-secondary/40 px-2 py-1 text-xs font-mono" />
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" disabled={running} onClick={() => run(true)}>
+            {running ? <Loader2 className="h-3 w-3 animate-spin" /> : null} Preview import
+          </Button>
+          <Button size="sm" disabled={running || !preview?.ok} onClick={() => run(false)}>
+            {running ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />} Import records
+          </Button>
+        </div>
+        {preview?.ok ? (
+          <div className="rounded-md border border-border/40 bg-secondary/20 p-2 text-[11px] space-y-2">
+            <div><b>Parsed</b> {preview.parsed} · <b>Leaders</b> +{preview.sector_leaders_inserted} · <b>Journalists</b> +{preview.journalists_inserted} · <b>Outlets</b> +{preview.outlets_inserted} · <b>Dup</b> {preview.duplicates} · <b>Skipped</b> {preview.skipped_low_confidence} {preview.dry_run ? <span className="italic">· dry run</span> : null}</div>
+            {Array.isArray(preview.preview) && preview.preview.length ? (
+              <div className="max-h-60 overflow-auto">
+                <Table>
+                  <TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Class</TableHead><TableHead>Action</TableHead><TableHead>Company / Pub</TableHead><TableHead>Country</TableHead></TableRow></TableHeader>
+                  <TableBody>
+                    {preview.preview.map((p: any, i: number) => (
+                      <TableRow key={i}>
+                        <TableCell className="text-xs">{p.row?.name || "—"}</TableCell>
+                        <TableCell className="text-xs">{chip(p.classification)}</TableCell>
+                        <TableCell className="text-xs">{chip(p.action)}</TableCell>
+                        <TableCell className="text-xs">{p.row?.company || p.row?.publication || "—"}</TableCell>
+                        <TableCell className="text-xs">{p.row?.country || "—"}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+      </CardContent>
+    </Card>
+  );
+}
+
+// ----------------- Atlas edit drawer (safe fields) -----------------
+function AtlasEditButton({ table, row, onDone }: { table: "journalist_relationships" | "sector_leader_profiles"; row: any; onDone?: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [relStatus, setRelStatus] = useState<string>(row.relationship_status || "new");
+  const [priority, setPriority] = useState<number>(row.priority_score ?? 0);
+  const [useCase, setUseCase] = useState<string>(row.potential_use_case || "");
+  const [permission, setPermission] = useState<string>(row.permission_status || "not_requested");
+  const [caution, setCaution] = useState<string>(row.caution_notes || "");
+  const [dnc, setDnc] = useState<boolean>(!!row.do_not_contact);
+
+  const save = async () => {
+    setSaving(true);
+    const patch: Record<string, any> = {
+      relationship_status: relStatus,
+      priority_score: Math.max(0, Math.min(100, Number(priority) || 0)),
+      caution_notes: caution || null,
+    };
+    if (table === "journalist_relationships") patch.do_not_contact = dnc;
+    if (table === "sector_leader_profiles") {
+      patch.potential_use_case = useCase || null;
+      patch.permission_status = permission;
+    }
+    const { error } = await sb.from(table).update(patch).eq("id", row.id);
+    setSaving(false);
+    if (error) toast.error(error.message);
+    else { toast.success("Saved"); setOpen(false); onDone?.(); }
+  };
+
+  if (!open) return <Button size="sm" variant="outline" onClick={() => setOpen(true)}>Edit</Button>;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => !saving && setOpen(false)}>
+      <Card className="tech-card max-w-lg w-full" onClick={(e) => e.stopPropagation()}>
+        <CardHeader className="pb-2"><CardTitle className="text-sm">Edit {row.name || "record"}</CardTitle></CardHeader>
+        <CardContent className="space-y-2 text-xs">
+          <label className="block">Relationship status
+            <select value={relStatus} onChange={(e) => setRelStatus(e.target.value)} className="mt-0.5 w-full rounded border border-border/40 bg-secondary/40 px-2 py-1">
+              {["new","warm","active","dormant","blocked"].map((v) => <option key={v}>{v}</option>)}
+            </select>
+          </label>
+          <label className="block">Priority score (0–100)
+            <input type="number" min={0} max={100} value={priority} onChange={(e) => setPriority(Number(e.target.value))}
+              className="mt-0.5 w-full rounded border border-border/40 bg-secondary/40 px-2 py-1" />
+          </label>
+          {table === "sector_leader_profiles" ? (
+            <>
+              <label className="block">Potential use case
+                <select value={useCase} onChange={(e) => setUseCase(e.target.value)} className="mt-0.5 w-full rounded border border-border/40 bg-secondary/40 px-2 py-1">
+                  {["","expert_quote","patron_target","philanthropist_target","supporter_target","partner_target","sector_validation","market_signal","podcast_guest","advisory_contact","future_pr_relationship"].map((v) => <option key={v} value={v}>{v || "—"}</option>)}
+                </select>
+              </label>
+              <label className="block">Permission status
+                <select value={permission} onChange={(e) => setPermission(e.target.value)} className="mt-0.5 w-full rounded border border-border/40 bg-secondary/40 px-2 py-1">
+                  {["not_requested","requested","granted","denied"].map((v) => <option key={v}>{v}</option>)}
+                </select>
+              </label>
+            </>
+          ) : (
+            <label className="flex items-center gap-2"><input type="checkbox" checked={dnc} onChange={(e) => setDnc(e.target.checked)} /> Do not contact</label>
+          )}
+          <label className="block">Caution notes
+            <textarea value={caution} onChange={(e) => setCaution(e.target.value)} rows={2}
+              className="mt-0.5 w-full rounded border border-border/40 bg-secondary/40 px-2 py-1" />
+          </label>
+          <div className="flex justify-end gap-2 pt-1">
+            <Button size="sm" variant="ghost" disabled={saving} onClick={() => setOpen(false)}>Cancel</Button>
+            <Button size="sm" disabled={saving} onClick={save}>{saving ? <Loader2 className="h-3 w-3 animate-spin" /> : null} Save</Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
@@ -913,6 +1194,10 @@ function SettingsTab() {
     "No public figure / expert / philanthropist is described as endorsing or supporting unless permission is recorded.",
     "Do not expose Liftor private architecture, tax/entity/adviser structure, family/school details or non-public business details.",
     "Only active/live businesses should be pitched.",
+    "No Qwoted scraping. No LinkedIn scraping. No automated scraping of logged-in platforms.",
+    "No implied endorsement from any sector leader, patron or philanthropist.",
+    "Platform-only means: open platform, copy approved message, mark contacted later. Liftor does not send.",
+    "Direct email contact to a journalist requires a lawful contact route and founder approval.",
   ];
 
   const Block = ({ title, items }: { title: string; items: (string | string[])[] }) => (
