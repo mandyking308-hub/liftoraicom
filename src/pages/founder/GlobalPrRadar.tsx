@@ -293,7 +293,7 @@ function OpportunitiesTab() {
     return data ?? [];
   });
   if (isLoading) return <div className="text-xs text-muted-foreground">Loading…</div>;
-  if (rows.length === 0) return <EmptyState>No media opportunities have been extracted yet. Editorielle parser will be added in Phase 5.</EmptyState>;
+  if (rows.length === 0) return <EmptyState>No media opportunities have been extracted yet. Run the Editorielle parser from the Inbound Messages tab to extract opportunities from captured daily emails.</EmptyState>;
   return (
     <Table>
       <TableHeader><TableRow>
