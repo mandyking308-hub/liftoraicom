@@ -348,6 +348,7 @@ export default function RelationshipIntelligence() {
       <Tabs defaultValue="all">
         <TabsList className="flex-wrap h-auto">
           <TabsTrigger value="all">All contacts</TabsTrigger>
+          <TabsTrigger value="capital_influence">Capital &amp; Influence</TabsTrigger>
           <TabsTrigger value="gmail">Gmail suggestions</TabsTrigger>
           <TabsTrigger value="calendar">Calendar capture</TabsTrigger>
           <TabsTrigger value="advisers">Adviser map</TabsTrigger>
@@ -356,6 +357,10 @@ export default function RelationshipIntelligence() {
           <TabsTrigger value="buyers">Buyer / investor map</TabsTrigger>
           <TabsTrigger value="gov">Government / trade</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="capital_influence">
+          <CapitalInfluenceTab onEdit={(c) => openEdit(c)} />
+        </TabsContent>
 
         <TabsContent value="all" className="space-y-3">
           <Card className="tech-card"><CardContent className="p-3 grid md:grid-cols-7 gap-2">
