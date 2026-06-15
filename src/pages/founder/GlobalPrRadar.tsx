@@ -199,7 +199,7 @@ function InboundTab() {
             <TableCell className="text-xs">{r.source_id ? r.source_id.slice(0, 8) : "—"}</TableCell>
             <TableCell className="text-xs">{r.sender_name || r.sender_email || "—"}</TableCell>
             <TableCell className="text-xs max-w-[320px] truncate" title={r.subject || ""}>{r.subject || "—"}</TableCell>
-            <TableCell>{chip(r.processed_status || "—")}</TableCell>
+            <TableCell>{inboundStatusChip(r.processed_status)}</TableCell>
             <TableCell className="text-xs">{r.is_likely_opportunity ? "Yes" : "—"}</TableCell>
             <TableCell className="text-xs">{r.ai_processed ? "Yes" : "—"}</TableCell>
             <TableCell className="text-xs">{r.duplicate_of ? r.duplicate_of.slice(0, 8) : "—"}</TableCell>
