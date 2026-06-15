@@ -2279,6 +2279,103 @@ function RiskAuditTab() {
 }
 
 // ----------------- Settings -----------------
+function GmailConnectionPanel() {
+  const sb = supabase;
+  const [checking, setChecking] = useState(false);
+  const [starting, setStarting] = useState(false);
+  const [result, setResult] = useState<any>(null);
+
+  const runCheck = async () => {
+    setChecking(true); setResult(null);
+    try {
+      const { data, error } = await sb.functions.invoke("pr-gmail-connection-check", { body: {} });
+      if (error) throw error;
+      setResult(data);
+      if (data?.ok && data?.ready_for_live_test) toast.success("Gmail connection ready for controlled live test.");
+      else if (data?.reason === "gmail_not_configured") toast.error("Gmail not configured — see missing secrets below.");
+      else toast.warning(data?.reason || "Check finished with warnings.");
+    } catch (e: any) {
+      toast.error(e?.message || "Connection check failed");
+      setResult({ ok: false, reason: "invoke_error", message: String(e?.message || e) });
+    } finally { setChecking(false); }
+  };
+
+  const startOAuth = async (mode: "intake" | "draft") => {
+    setStarting(true);
+    try {
+      const { data, error } = await sb.functions.invoke("pr-gmail-oauth-start", { body: { mode } });
+      if (error) throw error;
+      if (!data?.ok) { toast.error(data?.message || data?.reason || "OAuth start failed"); return; }
+      window.open(data.url, "_blank", "noopener,noreferrer");
+      toast.info("Opening Google consent in a new tab.");
+    } catch (e: any) {
+      toast.error(e?.message || "OAuth start failed");
+    } finally { setStarting(false); }
+  };
+
+  const statusChip = (label: string, ok: boolean | null) => (
+    <span className={`text-[10px] px-2 py-0.5 rounded border ${ok === true ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-200" : ok === false ? "border-red-500/40 bg-red-500/10 text-red-200" : "border-border/40 bg-secondary/40 text-muted-foreground"}`}>
+      {label}
+    </span>
+  );
+
+  return (
+    <Card className="tech-card border-primary/30 md:col-span-2">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm flex items-center gap-2"><Mail className="h-4 w-4 text-primary" />Gmail connection (PR intake)</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <div className="grid sm:grid-cols-2 gap-2 text-xs">
+          <div><span className="text-muted-foreground">Expected account:</span> <span className="font-mono">mandyking308@gmail.com</span></div>
+          <div className="flex flex-wrap gap-1.5">
+            {statusChip("intake (read-only)", result ? (result.token_refresh_ok && result.labels_visible) : null)}
+            {statusChip("draft scope optional", null)}
+            {statusChip("cron inactive", false)}
+            {statusChip("no external send", true)}
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <Button size="sm" disabled={checking} onClick={runCheck}>
+            {checking ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />} Check Gmail connection
+          </Button>
+          <Button size="sm" variant="outline" disabled={starting} onClick={() => startOAuth("intake")}>
+            {starting ? <Loader2 className="h-3 w-3 animate-spin" /> : <ExternalLink className="h-3 w-3" />} Start OAuth (intake read-only)
+          </Button>
+          <Button size="sm" variant="outline" disabled={starting} onClick={() => startOAuth("draft")}>
+            Start OAuth (intake + draft, optional)
+          </Button>
+        </div>
+
+        {result ? (
+          <div className={`rounded-md border p-2 text-[11px] ${result.ok && result.ready_for_live_test ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-200" : "border-yellow-500/40 bg-yellow-500/10 text-yellow-200"}`}>
+            <div><b>Reason:</b> {result.ok ? (result.ready_for_live_test ? "ready" : "configured_with_warnings") : (result.reason || "error")}</div>
+            <div><b>Account:</b> {result.account || "—"}</div>
+            <div><b>Token refresh:</b> {result.token_refresh_ok ? "ok" : "no"} · <b>Labels visible:</b> {result.labels_visible ? "ok" : "no"}</div>
+            {result.missing?.length ? (<div><b>Missing secrets:</b> <span className="font-mono">{result.missing.join(", ")}</span></div>) : null}
+            {result.labels_missing?.length ? (<div><b>Missing labels:</b> <span className="font-mono">{result.labels_missing.join(", ")}</span></div>) : null}
+            {result.labels_found?.length ? (<div className="text-muted-foreground"><b>Found labels:</b> {result.labels_found.join(", ")}</div>) : null}
+            {result.message ? <div className="text-muted-foreground">{result.message}</div> : null}
+          </div>
+        ) : null}
+
+        <div className="text-[11px] text-muted-foreground space-y-1">
+          <div className="font-medium text-foreground">Setup guide (safe order)</div>
+          <ol className="list-decimal pl-4 space-y-0.5">
+            <li>In Google Cloud Console, create an OAuth 2.0 Web Client and authorise the callback URL shown by <span className="font-mono">pr-gmail-oauth-start</span>.</li>
+            <li>Add <span className="font-mono">GMAIL_CLIENT_ID</span>, <span className="font-mono">GMAIL_CLIENT_SECRET</span> and <span className="font-mono">PR_GMAIL_ACCOUNT</span> in Lovable Cloud secrets.</li>
+            <li>Click <b>Start OAuth (intake read-only)</b>. Sign in as <span className="font-mono">mandyking308@gmail.com</span>, approve, copy the refresh token from the callback page.</li>
+            <li>Add <span className="font-mono">GMAIL_REFRESH_TOKEN</span> in Lovable Cloud secrets.</li>
+            <li>Click <b>Check Gmail connection</b>. Only when it reports <i>ready</i> should the controlled live PR intake test run.</li>
+            <li>Draft-creation scope is optional and remains approval-gated; it never sends mail.</li>
+            <li>Cron stays OFF until separately approved.</li>
+          </ol>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 function SettingsTab() {
   const labels = [
     "Liftor/PR Opportunities",
@@ -2346,6 +2443,7 @@ function SettingsTab() {
 
   return (
     <div className="grid md:grid-cols-2 gap-4">
+      <GmailConnectionPanel />
       <Block title="Gmail labels expected" items={labels} />
       <Block title="Schedule" items={schedule} />
       <Block title="Source rules" items={rules} />

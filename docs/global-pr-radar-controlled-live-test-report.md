@@ -112,3 +112,21 @@ All runs remain founder-triggered.
 3. Before any pitch-draft attempt, seed at least one row in
    `business_press_readiness` with `is_active = true` and
    `press_ready_status = 'ready'` manually.
+
+## Founder-only Gmail OAuth helper (added after this report)
+
+A guided OAuth flow now exists in Global PR Radar → Settings:
+
+1. Create a Google Cloud OAuth 2.0 **Web** client. Authorise the callback URL
+   `https://<project-ref>.functions.supabase.co/pr-gmail-oauth-callback`.
+2. Add `GMAIL_CLIENT_ID`, `GMAIL_CLIENT_SECRET`, `PR_GMAIL_ACCOUNT` in
+   Lovable Cloud secrets.
+3. Click **Start OAuth (intake read-only)**, sign in as `mandyking308@gmail.com`,
+   approve, copy the one-time refresh token, add it as `GMAIL_REFRESH_TOKEN`.
+4. Click **Check Gmail connection** — `pr-gmail-connection-check` validates
+   secrets, refreshes the token and lists Gmail labels (no ingest, no writes,
+   no drafts, no send). Only when it returns `ready_for_live_test: true`
+   should this controlled live test be re-attempted.
+
+Draft-creation scope (`gmail.compose`) is a separate, optional OAuth mode.
+Cron remains OFF.
