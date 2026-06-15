@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -62,6 +63,12 @@ function pretty(s?: string | null) { return (s ?? "").replace(/_/g, " "); }
 
 export default function RelationshipIntelligence() {
   const qc = useQueryClient();
+  const [searchParams] = useSearchParams();
+  const urlTab = searchParams.get("tab");
+  const urlContact = searchParams.get("contact");
+  const [activeTab, setActiveTab] = useState<string>(urlTab === "capital-influence" ? "capital_influence" : "all");
+  const [positioningInitial, setPositioningInitial] = useState<string | null>(null);
+  const [linkedBanner, setLinkedBanner] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Contact | null>(null);
   const [drawer, setDrawer] = useState<Contact | null>(null);
@@ -78,6 +85,20 @@ export default function RelationshipIntelligence() {
       return data ?? [];
     },
   });
+
+  // Handle query params once contacts are loaded — auto-open Capital & Influence tab and try to open drawer.
+  useEffect(() => {
+    if (urlTab === "capital-influence") setActiveTab("capital_influence");
+    if (urlContact && contacts.length) {
+      const c = (contacts as any[]).find((x) => x.id === urlContact);
+      if (c) {
+        setDrawer(c);
+        setPositioningInitial(c.id);
+        setLinkedBanner(`${c.contact_name}${c.organisation_name ? " — " + c.organisation_name : ""}`);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlTab, urlContact, contacts.length]);
 
   const { data: events = [] } = useQuery<any[]>({
     queryKey: ["rni-events", drawer?.id],
@@ -345,7 +366,15 @@ export default function RelationshipIntelligence() {
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="all">
+      {linkedBanner && (
+        <Card className="tech-card border-primary/40 bg-primary/5">
+          <CardContent className="p-3 text-xs flex items-center justify-between gap-2">
+            <div>Linked contact selected: <span className="font-medium">{linkedBanner}</span></div>
+            <Button variant="ghost" size="sm" onClick={() => setLinkedBanner(null)}>Dismiss</Button>
+          </CardContent>
+        </Card>
+      )}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="flex-wrap h-auto">
           <TabsTrigger value="all">All contacts</TabsTrigger>
           <TabsTrigger value="capital_influence">Capital &amp; Influence</TabsTrigger>
@@ -359,7 +388,7 @@ export default function RelationshipIntelligence() {
         </TabsList>
 
         <TabsContent value="capital_influence">
-          <CapitalInfluenceTab onEdit={(c) => openEdit(c)} />
+          <CapitalInfluenceTab onEdit={(c) => openEdit(c)} initialPositioningContactId={positioningInitial} />
         </TabsContent>
 
         <TabsContent value="all" className="space-y-3">
