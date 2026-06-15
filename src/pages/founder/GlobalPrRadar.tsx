@@ -1689,20 +1689,26 @@ function DraftsTab() {
 
 // ----------------- Campaigns -----------------
 function CampaignsTab() {
+  const qc = useQueryClient();
   const { data: rows = [], isLoading } = useTable("pr-campaigns", async () => {
     const { data } = await sb.from("quarterly_pr_campaigns")
-      .select("id,business_id,quarter,year,campaign_theme,target_markets,owned_article_needed,status,due_date,founder_approval_status")
+      .select("id,business_id,quarter,year,campaign_theme,pitch_angle,target_markets,required_assets,owned_article_needed,status,due_date,founder_approval_status,updated_at")
       .order("due_date", { ascending: true, nullsFirst: false }).limit(ROW_LIMIT);
     return data ?? [];
   });
-  if (isLoading) return <div className="text-xs text-muted-foreground">Loading…</div>;
-  if (rows.length === 0) return <EmptyState>Quarterly PR planner will be activated in Phase 10.</EmptyState>;
   return (
+    <div className="space-y-3">
+      <QuarterlyPlannerPanel onDone={() => {
+        qc.invalidateQueries({ queryKey: ["pr-campaigns"] });
+        qc.invalidateQueries({ queryKey: ["pr-overview"] });
+      }} />
+      {isLoading ? <div className="text-xs text-muted-foreground">Loading…</div> :
+       rows.length === 0 ? <EmptyState>No quarterly PR campaigns yet. Use “Plan quarterly PR campaigns” above to seed one per active, press-ready business.</EmptyState> :
     <Table>
       <TableHeader><TableRow>
         <TableHead>Business</TableHead><TableHead>Quarter</TableHead><TableHead>Theme</TableHead>
-        <TableHead>Markets</TableHead><TableHead>Owned article</TableHead><TableHead>Status</TableHead>
-        <TableHead>Due</TableHead><TableHead>Approval</TableHead>
+        <TableHead>Markets</TableHead><TableHead>Missing</TableHead><TableHead>Owned art.</TableHead>
+        <TableHead>Status</TableHead><TableHead>Due</TableHead><TableHead>Approval</TableHead><TableHead></TableHead>
       </TableRow></TableHeader>
       <TableBody>
         {rows.map((r: any) => (
@@ -1711,32 +1717,138 @@ function CampaignsTab() {
             <TableCell className="text-xs">{[r.quarter, r.year].filter(Boolean).join(" ") || "—"}</TableCell>
             <TableCell className="text-xs max-w-[260px] truncate">{r.campaign_theme || "—"}</TableCell>
             <TableCell className="text-xs max-w-[220px] truncate">{(r.target_markets ?? []).join(", ") || "—"}</TableCell>
+            <TableCell className="text-xs max-w-[180px] truncate">{(r.required_assets ?? []).join(", ") || "—"}</TableCell>
             <TableCell className="text-xs">{r.owned_article_needed ? "Yes" : "—"}</TableCell>
-            <TableCell>{chip(r.status || "planned")}</TableCell>
+            <TableCell><CampaignStatusEditor row={r} onChanged={() => qc.invalidateQueries({ queryKey: ["pr-campaigns"] })} /></TableCell>
             <TableCell className="text-xs">{fmtDateShort(r.due_date)}</TableCell>
-            <TableCell>{chip(r.founder_approval_status || "not_requested")}</TableCell>
+            <TableCell><CampaignApprovalEditor row={r} onChanged={() => qc.invalidateQueries({ queryKey: ["pr-campaigns"] })} /></TableCell>
+            <TableCell><CampaignSpawnOwnedMedia row={r} /></TableCell>
           </TableRow>
         ))}
       </TableBody>
-    </Table>
+    </Table>}
+    </div>
+  );
+}
+
+const CAMPAIGN_STATUSES = ["planned","in_progress","needs_assets","founder_review","approved","completed","parked"] as const;
+const CAMPAIGN_APPROVALS = ["not_requested","requested","approved","rejected"] as const;
+
+function CampaignStatusEditor({ row, onChanged }: { row: any; onChanged: () => void }) {
+  const [v, setV] = useState<string>(row.status || "planned");
+  return (
+    <select value={v} disabled={false}
+      onChange={async (e) => {
+        const nv = e.target.value; setV(nv);
+        const { error } = await sb.from("quarterly_pr_campaigns").update({ status: nv }).eq("id", row.id);
+        if (error) { toast.error(error.message); setV(row.status || "planned"); } else { toast.success("Status updated"); onChanged(); }
+      }}
+      className="rounded border border-border/40 bg-secondary/40 px-1.5 py-0.5 text-[11px]">
+      {CAMPAIGN_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+    </select>
+  );
+}
+function CampaignApprovalEditor({ row, onChanged }: { row: any; onChanged: () => void }) {
+  const [v, setV] = useState<string>(row.founder_approval_status || "not_requested");
+  return (
+    <select value={v}
+      onChange={async (e) => {
+        const nv = e.target.value; setV(nv);
+        const { error } = await sb.from("quarterly_pr_campaigns").update({ founder_approval_status: nv }).eq("id", row.id);
+        if (error) { toast.error(error.message); setV(row.founder_approval_status || "not_requested"); } else { toast.success("Approval updated"); onChanged(); }
+      }}
+      className="rounded border border-border/40 bg-secondary/40 px-1.5 py-0.5 text-[11px]">
+      {CAMPAIGN_APPROVALS.map((s) => <option key={s} value={s}>{s}</option>)}
+    </select>
+  );
+}
+function CampaignSpawnOwnedMedia({ row }: { row: any }) {
+  const [running, setRunning] = useState(false);
+  const run = async () => {
+    setRunning(true);
+    const { data, error } = await sb.functions.invoke("pr-owned-media-create", {
+      body: { campaign_id: row.id, business_id: row.business_id, article_type: "newsroom_update" },
+    });
+    setRunning(false);
+    if (error || !data?.ok) toast.error(data?.reason || error?.message || "Failed");
+    else toast.success(`Owned-media draft created (${data.approval_status}).`);
+  };
+  return <Button size="sm" variant="ghost" disabled={running} onClick={run}>{running ? <Loader2 className="h-3 w-3 animate-spin" /> : "Owned"}</Button>;
+}
+
+function QuarterlyPlannerPanel({ onDone }: { onDone?: () => void }) {
+  const now = new Date();
+  const curQ = `Q${Math.floor(now.getUTCMonth() / 3) + 1}`;
+  const [quarter, setQuarter] = useState(curQ);
+  const [year, setYear] = useState(now.getUTCFullYear());
+  const [force, setForce] = useState(false);
+  const [dry, setDry] = useState(false);
+  const [running, setRunning] = useState(false);
+  const [result, setResult] = useState<any | null>(null);
+
+  const run = async () => {
+    setRunning(true); setResult(null);
+    try {
+      const { data, error } = await sb.functions.invoke("pr-quarterly-campaign-planner", {
+        body: { quarter, year, force_update: force, dry_run: dry },
+      });
+      if (error) throw error;
+      setResult(data);
+      if (data?.ok) { toast.success(`${dry ? "Dry run: " : ""}inserted ${data.inserted}, updated ${data.updated}, skipped ${data.skipped}.`); onDone?.(); }
+      else toast.error(data?.message || data?.reason || "Planner failed");
+    } catch (e: any) { toast.error(e?.message || "Planner failed"); setResult({ ok: false, message: String(e?.message || e) }); }
+    finally { setRunning(false); }
+  };
+
+  return (
+    <Card className="tech-card border-primary/30">
+      <CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><CalendarClock className="h-4 w-4 text-primary" />Quarterly PR planner</CardTitle></CardHeader>
+      <CardContent className="space-y-3">
+        <p className="text-xs text-muted-foreground">
+          Creates one quarterly campaign per active + press-ready business. Existing founder-entered themes/angles are preserved unless <span className="font-mono">force update</span> is on. No AI, no sending.
+        </p>
+        <div className="flex flex-wrap items-center gap-3">
+          <label className="text-xs text-muted-foreground flex items-center gap-1">Quarter
+            <select value={quarter} onChange={(e) => setQuarter(e.target.value)} className="rounded border border-border/40 bg-secondary/40 px-2 py-1 text-xs">
+              {["Q1","Q2","Q3","Q4"].map(q => <option key={q} value={q}>{q}</option>)}
+            </select>
+          </label>
+          <label className="text-xs text-muted-foreground flex items-center gap-1">Year
+            <input type="number" min={2025} max={2035} value={year} onChange={(e) => setYear(Number(e.target.value) || now.getUTCFullYear())} className="w-20 rounded border border-border/40 bg-secondary/40 px-2 py-1 text-xs" />
+          </label>
+          <label className="text-xs text-muted-foreground flex items-center gap-1"><input type="checkbox" checked={dry} onChange={(e) => setDry(e.target.checked)} />Dry run</label>
+          <label className="text-xs text-muted-foreground flex items-center gap-1"><input type="checkbox" checked={force} onChange={(e) => setForce(e.target.checked)} />Force update</label>
+          <Button size="sm" disabled={running} onClick={run}>{running ? <Loader2 className="h-3 w-3 animate-spin" /> : <CalendarClock className="h-3 w-3" />} Plan quarterly PR campaigns</Button>
+        </div>
+        {result ? (
+          <div className={`rounded-md border p-2 text-[11px] ${result.ok ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-200" : "border-yellow-500/40 bg-yellow-500/10 text-yellow-200"}`}>
+            {result.ok ? <div>Eligible {result.eligible} · Inserted {result.inserted} · Updated {result.updated} · Skipped {result.skipped} {result.dry_run ? <span className="italic">(dry run)</span> : null}</div>
+              : <div><b>{result.reason || "error"}:</b> {result.message || "Unknown error"}</div>}
+          </div>
+        ) : null}
+      </CardContent>
+    </Card>
   );
 }
 
 // ----------------- Owned Media -----------------
 function OwnedMediaTab() {
+  const qc = useQueryClient();
   const { data: rows = [], isLoading } = useTable("pr-owned", async () => {
     const { data } = await sb.from("owned_media_articles")
-      .select("id,business_id,title,article_type,publication_status,approval_status,publish_url,created_at")
+      .select("id,business_id,title,article_type,publication_status,approval_status,publish_url,created_at,campaign_id")
       .order("created_at", { ascending: false }).limit(ROW_LIMIT);
     return data ?? [];
   });
-  if (isLoading) return <div className="text-xs text-muted-foreground">Loading…</div>;
-  if (rows.length === 0) return <EmptyState>No owned-media articles yet.</EmptyState>;
   return (
+    <div className="space-y-3">
+      <OwnedMediaCreatePanel onDone={() => { qc.invalidateQueries({ queryKey: ["pr-owned"] }); }} />
+      {isLoading ? <div className="text-xs text-muted-foreground">Loading…</div> :
+       rows.length === 0 ? <EmptyState>No owned-media articles yet. Create one from a business or quarterly campaign.</EmptyState> :
     <Table>
       <TableHeader><TableRow>
         <TableHead>Business</TableHead><TableHead>Title</TableHead><TableHead>Type</TableHead>
-        <TableHead>Publication</TableHead><TableHead>Approval</TableHead><TableHead>URL</TableHead><TableHead>Created</TableHead>
+        <TableHead>Publication</TableHead><TableHead>Approval</TableHead><TableHead>URL</TableHead><TableHead>Created</TableHead><TableHead></TableHead>
       </TableRow></TableHeader>
       <TableBody>
         {rows.map((r: any) => (
@@ -1744,36 +1856,164 @@ function OwnedMediaTab() {
             <TableCell className="text-xs">{r.business_id ? r.business_id.slice(0, 8) : "—"}</TableCell>
             <TableCell className="text-xs max-w-[260px] truncate">{r.title || "—"}</TableCell>
             <TableCell className="text-xs">{r.article_type || "—"}</TableCell>
-            <TableCell>{chip(r.publication_status || "draft")}</TableCell>
-            <TableCell>{chip(r.approval_status || "draft")}</TableCell>
+            <TableCell><OwnedStatusEditor row={r} field="publication_status" options={["draft","ready_to_publish","published","archived"]} onChanged={() => qc.invalidateQueries({ queryKey: ["pr-owned"] })} /></TableCell>
+            <TableCell><OwnedStatusEditor row={r} field="approval_status" options={["draft","needs_assets","founder_review","approved","rejected"]} onChanged={() => qc.invalidateQueries({ queryKey: ["pr-owned"] })} /></TableCell>
             <TableCell className="text-xs max-w-[200px] truncate">{r.publish_url || "—"}</TableCell>
             <TableCell className="text-xs">{fmtDateShort(r.created_at)}</TableCell>
+            <TableCell><OwnedMediaDetail id={r.id} /></TableCell>
           </TableRow>
         ))}
       </TableBody>
-    </Table>
+    </Table>}
+    </div>
+  );
+}
+
+function OwnedStatusEditor({ row, field, options, onChanged }: { row: any; field: string; options: string[]; onChanged: () => void }) {
+  const [v, setV] = useState<string>(row[field] || options[0]);
+  return (
+    <select value={v}
+      onChange={async (e) => {
+        const nv = e.target.value; setV(nv);
+        const { error } = await sb.from("owned_media_articles").update({ [field]: nv }).eq("id", row.id);
+        if (error) { toast.error(error.message); setV(row[field] || options[0]); } else { toast.success("Updated"); onChanged(); }
+      }}
+      className="rounded border border-border/40 bg-secondary/40 px-1.5 py-0.5 text-[11px]">
+      {options.map(o => <option key={o} value={o}>{o}</option>)}
+    </select>
+  );
+}
+function OwnedMediaDetail({ id }: { id: string }) {
+  const [open, setOpen] = useState(false);
+  const [row, setRow] = useState<any | null>(null);
+  const [body, setBody] = useState("");
+  const [url, setUrl] = useState("");
+  const load = async () => {
+    const { data } = await sb.from("owned_media_articles").select("*").eq("id", id).single();
+    setRow(data); setBody(data?.draft_body || ""); setUrl(data?.publish_url || "");
+  };
+  return (
+    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (o) load(); }}>
+      <Button size="sm" variant="outline" onClick={() => setOpen(true)}>Edit</Button>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader><DialogTitle className="text-sm">{row?.title || "Owned media article"}</DialogTitle><DialogDescription className="text-xs">Approved public-safe content only. No private architecture / tax / family details.</DialogDescription></DialogHeader>
+        <div className="space-y-2">
+          <label className="text-xs text-muted-foreground">Publish URL</label>
+          <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://…" />
+          <label className="text-xs text-muted-foreground">Draft body</label>
+          <Textarea value={body} onChange={(e) => setBody(e.target.value)} rows={14} className="font-mono text-xs" />
+          <div className="flex justify-end gap-2">
+            <Button size="sm" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+            <Button size="sm" onClick={async () => {
+              const { error } = await sb.from("owned_media_articles").update({ draft_body: body, publish_url: url || null }).eq("id", id);
+              if (error) toast.error(error.message); else { toast.success("Saved"); setOpen(false); }
+            }}>Save</Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+const OWNED_TYPES = ["newsroom_update","blog_post","press_note","charity_update","product_announcement","expert_commentary","mini_report","case_study","founder_note"];
+function OwnedMediaCreatePanel({ onDone }: { onDone?: () => void }) {
+  const [businesses, setBusinesses] = useState<any[]>([]);
+  const [businessId, setBusinessId] = useState("");
+  const [type, setType] = useState(OWNED_TYPES[0]);
+  const [title, setTitle] = useState("");
+  const [running, setRunning] = useState(false);
+  useEffect(() => {
+    sb.from("business_press_readiness").select("business_id,business_name,is_active,press_ready_status").eq("is_active", true).order("business_name")
+      .then((r: any) => setBusinesses(r.data ?? []));
+  }, []);
+  const create = async (dry: boolean) => {
+    if (!businessId) { toast.error("Pick a business"); return; }
+    setRunning(true);
+    const { data, error } = await sb.functions.invoke("pr-owned-media-create", { body: { business_id: businessId, article_type: type, title: title || undefined, dry_run: dry } });
+    setRunning(false);
+    if (error || !data?.ok) toast.error(data?.reason || error?.message || "Failed");
+    else { toast.success(dry ? `Dry: ${data.preview?.body_chars || 0} chars` : `Created (${data.approval_status})`); if (!dry) onDone?.(); }
+  };
+  return (
+    <Card className="tech-card border-primary/30">
+      <CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><Newspaper className="h-4 w-4 text-primary" />Create owned-media article</CardTitle></CardHeader>
+      <CardContent className="space-y-3">
+        <p className="text-xs text-muted-foreground">Template-only draft seeded from approved press-pack fields. Not published anywhere.</p>
+        <div className="flex flex-wrap items-center gap-2">
+          <select value={businessId} onChange={(e) => setBusinessId(e.target.value)} className="rounded border border-border/40 bg-secondary/40 px-2 py-1 text-xs min-w-[200px]">
+            <option value="">Active business…</option>
+            {businesses.map((b: any) => <option key={b.business_id} value={b.business_id}>{b.business_name} ({b.press_ready_status})</option>)}
+          </select>
+          <select value={type} onChange={(e) => setType(e.target.value)} className="rounded border border-border/40 bg-secondary/40 px-2 py-1 text-xs">
+            {OWNED_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+          </select>
+          <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title (optional)" className="h-7 text-xs max-w-[260px]" />
+          <Button size="sm" variant="outline" disabled={running} onClick={() => create(true)}>Dry run</Button>
+          <Button size="sm" disabled={running} onClick={() => create(false)}>{running ? <Loader2 className="h-3 w-3 animate-spin" /> : null} Create draft</Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
 // ----------------- Coverage -----------------
 function CoverageTab() {
+  const qc = useQueryClient();
+  const [filters, setFilters] = useState<{ pub: string; type: string; thisMonth: boolean; hasBacklink: boolean; featured: boolean }>({ pub: "", type: "", thisMonth: false, hasBacklink: false, featured: false });
   const { data: rows = [], isLoading } = useTable("pr-coverage", async () => {
     const { data } = await sb.from("coverage_mentions")
-      .select("id,business_id,publication_name,article_title,article_url,published_at,coverage_type,backlink_url,seo_value_score,featured_in_allowed,reuse_permission_status")
+      .select("*")
       .order("published_at", { ascending: false, nullsFirst: false }).limit(ROW_LIMIT);
     return data ?? [];
   });
-  if (isLoading) return <div className="text-xs text-muted-foreground">Loading…</div>;
-  if (rows.length === 0) return <EmptyState>No coverage mentions recorded yet.</EmptyState>;
+  const startOfMonth = useMemo(() => { const d = new Date(); d.setDate(1); d.setHours(0,0,0,0); return d; }, []);
+  const filtered = rows.filter((r: any) => {
+    if (filters.pub && !(r.publication_name || "").toLowerCase().includes(filters.pub.toLowerCase())) return false;
+    if (filters.type && r.coverage_type !== filters.type) return false;
+    if (filters.thisMonth && (!r.published_at || new Date(r.published_at) < startOfMonth)) return false;
+    if (filters.hasBacklink && !r.backlink_url) return false;
+    if (filters.featured && !r.featured_in_allowed) return false;
+    return true;
+  });
+  const totalCoverage = rows.length;
+  const thisMonth = rows.filter((r: any) => r.published_at && new Date(r.published_at) >= startOfMonth).length;
+  const backlinks = rows.filter((r: any) => r.backlink_url).length;
+  const featured = rows.filter((r: any) => r.featured_in_allowed).length;
+  const avgSeo = rows.length ? Math.round(rows.reduce((a: number, r: any) => a + (r.seo_value_score || 0), 0) / rows.length) : 0;
   return (
+    <div className="space-y-3">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+        <Metric icon={<Newspaper className="h-3.5 w-3.5" />} label="Total coverage" value={totalCoverage} />
+        <Metric icon={<CalendarClock className="h-3.5 w-3.5" />} label="This month" value={thisMonth} />
+        <Metric icon={<ExternalLink className="h-3.5 w-3.5" />} label="Backlinks" value={backlinks} />
+        <Metric icon={<Check className="h-3.5 w-3.5" />} label="Featured-in allowed" value={featured} />
+        <Metric icon={<FileCheck2 className="h-3.5 w-3.5" />} label="Avg SEO value" value={avgSeo} />
+      </div>
+      <Card className="tech-card">
+        <CardHeader className="pb-2"><CardTitle className="text-sm flex items-center justify-between"><span className="flex items-center gap-2"><Newspaper className="h-4 w-4 text-primary" />Coverage</span>
+          <CoverageAddDialog onDone={() => qc.invalidateQueries({ queryKey: ["pr-coverage"] })} />
+        </CardTitle></CardHeader>
+        <CardContent className="space-y-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <Input placeholder="Publication filter" value={filters.pub} onChange={(e) => setFilters({ ...filters, pub: e.target.value })} className="h-7 text-xs max-w-[200px]" />
+            <select value={filters.type} onChange={(e) => setFilters({ ...filters, type: e.target.value })} className="rounded border border-border/40 bg-secondary/40 px-2 py-1 text-xs">
+              <option value="">Any type</option>
+              {["quote","feature","backlink","product_mention","founder_profile","charity_mention","expert_comment","owned_media","podcast","award","other"].map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
+            <label className="text-xs flex items-center gap-1"><input type="checkbox" checked={filters.thisMonth} onChange={(e) => setFilters({ ...filters, thisMonth: e.target.checked })} />This month</label>
+            <label className="text-xs flex items-center gap-1"><input type="checkbox" checked={filters.hasBacklink} onChange={(e) => setFilters({ ...filters, hasBacklink: e.target.checked })} />Has backlink</label>
+            <label className="text-xs flex items-center gap-1"><input type="checkbox" checked={filters.featured} onChange={(e) => setFilters({ ...filters, featured: e.target.checked })} />Featured allowed</label>
+          </div>
+          {isLoading ? <div className="text-xs text-muted-foreground">Loading…</div> :
+            filtered.length === 0 ? <EmptyState>No coverage mentions match. Use “Add coverage mention” to record one manually.</EmptyState> :
     <Table>
       <TableHeader><TableRow>
         <TableHead>Business</TableHead><TableHead>Publication</TableHead><TableHead>Title</TableHead>
         <TableHead>Published</TableHead><TableHead>Type</TableHead><TableHead>URL</TableHead>
-        <TableHead>Backlink</TableHead><TableHead>SEO</TableHead><TableHead>Feat. allowed</TableHead><TableHead>Reuse</TableHead>
+        <TableHead>Backlink</TableHead><TableHead>SEO</TableHead><TableHead>Feat. allowed</TableHead><TableHead>Reuse</TableHead><TableHead></TableHead>
       </TableRow></TableHeader>
       <TableBody>
-        {rows.map((r: any) => (
+        {filtered.map((r: any) => (
           <TableRow key={r.id}>
             <TableCell className="text-xs">{r.business_id ? r.business_id.slice(0, 8) : "—"}</TableCell>
             <TableCell className="text-xs">{r.publication_name || "—"}</TableCell>
@@ -1785,10 +2025,98 @@ function CoverageTab() {
             <TableCell className="text-xs tabular-nums">{r.seo_value_score ?? 0}</TableCell>
             <TableCell className="text-xs">{r.featured_in_allowed ? "Yes" : "—"}</TableCell>
             <TableCell>{chip(r.reuse_permission_status || "unknown")}</TableCell>
+            <TableCell><CoverageEditButton row={r} onDone={() => qc.invalidateQueries({ queryKey: ["pr-coverage"] })} /></TableCell>
           </TableRow>
         ))}
       </TableBody>
-    </Table>
+    </Table>}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+const COVERAGE_TYPES = ["quote","feature","backlink","product_mention","founder_profile","charity_mention","expert_comment","owned_media","podcast","award","other"];
+function blankCoverage() {
+  return {
+    business_id: "", publication_name: "", article_title: "", article_url: "",
+    published_at: "", coverage_type: "feature", quote_used: "", backlink_url: "",
+    screenshot_asset_url: "", pdf_asset_url: "", traffic_impact_notes: "",
+    lead_sales_impact_notes: "", seo_value_score: 0, reuse_permission_status: "unknown",
+    featured_in_allowed: false, notes: "",
+  };
+}
+function CoverageFormFields({ row, setRow }: { row: any; setRow: (r: any) => void }) {
+  return (
+    <div className="grid grid-cols-2 gap-2 text-xs">
+      <label>Business ID<Input value={row.business_id} onChange={(e) => setRow({ ...row, business_id: e.target.value })} placeholder="uuid" /></label>
+      <label>Publication<Input value={row.publication_name} onChange={(e) => setRow({ ...row, publication_name: e.target.value })} /></label>
+      <label className="col-span-2">Article title<Input value={row.article_title} onChange={(e) => setRow({ ...row, article_title: e.target.value })} /></label>
+      <label className="col-span-2">Article URL<Input value={row.article_url} onChange={(e) => setRow({ ...row, article_url: e.target.value })} /></label>
+      <label>Published at<Input type="datetime-local" value={row.published_at ? new Date(row.published_at).toISOString().slice(0, 16) : ""} onChange={(e) => setRow({ ...row, published_at: e.target.value ? new Date(e.target.value).toISOString() : "" })} /></label>
+      <label>Coverage type
+        <select value={row.coverage_type} onChange={(e) => setRow({ ...row, coverage_type: e.target.value })} className="w-full rounded border border-border/40 bg-background px-2 py-1 text-xs h-10">
+          {COVERAGE_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+        </select>
+      </label>
+      <label className="col-span-2">Quote used<Textarea rows={2} value={row.quote_used} onChange={(e) => setRow({ ...row, quote_used: e.target.value })} /></label>
+      <label>Backlink URL<Input value={row.backlink_url} onChange={(e) => setRow({ ...row, backlink_url: e.target.value })} /></label>
+      <label>SEO value (0-100)<Input type="number" min={0} max={100} value={row.seo_value_score} onChange={(e) => setRow({ ...row, seo_value_score: Number(e.target.value) || 0 })} /></label>
+      <label>Screenshot URL<Input value={row.screenshot_asset_url} onChange={(e) => setRow({ ...row, screenshot_asset_url: e.target.value })} /></label>
+      <label>PDF URL<Input value={row.pdf_asset_url} onChange={(e) => setRow({ ...row, pdf_asset_url: e.target.value })} /></label>
+      <label>Reuse permission
+        <select value={row.reuse_permission_status} onChange={(e) => setRow({ ...row, reuse_permission_status: e.target.value })} className="w-full rounded border border-border/40 bg-background px-2 py-1 text-xs h-10">
+          {["unknown","not_allowed","quote_allowed","full_reuse_allowed"].map(t => <option key={t} value={t}>{t}</option>)}
+        </select>
+      </label>
+      <label className="flex items-center gap-2 mt-5"><input type="checkbox" checked={!!row.featured_in_allowed} onChange={(e) => setRow({ ...row, featured_in_allowed: e.target.checked })} />Featured-in allowed</label>
+      <label className="col-span-2">Traffic notes<Textarea rows={2} value={row.traffic_impact_notes} onChange={(e) => setRow({ ...row, traffic_impact_notes: e.target.value })} /></label>
+      <label className="col-span-2">Lead/sales notes<Textarea rows={2} value={row.lead_sales_impact_notes} onChange={(e) => setRow({ ...row, lead_sales_impact_notes: e.target.value })} /></label>
+      <label className="col-span-2">Notes<Textarea rows={2} value={row.notes} onChange={(e) => setRow({ ...row, notes: e.target.value })} /></label>
+    </div>
+  );
+}
+function CoverageAddDialog({ onDone }: { onDone: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [row, setRow] = useState<any>(blankCoverage());
+  return (
+    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (o) setRow(blankCoverage()); }}>
+      <Button size="sm" onClick={() => setOpen(true)}>Add coverage mention</Button>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader><DialogTitle className="text-sm">Add coverage mention</DialogTitle><DialogDescription className="text-xs">Manual record only. Liftor does not scrape article URLs. “Featured in” is only displayed publicly if explicitly allowed.</DialogDescription></DialogHeader>
+        <CoverageFormFields row={row} setRow={setRow} />
+        <div className="flex justify-end gap-2 pt-2">
+          <Button size="sm" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+          <Button size="sm" onClick={async () => {
+            const payload = { ...row, business_id: row.business_id || null, published_at: row.published_at || null };
+            const { error } = await sb.from("coverage_mentions").insert(payload);
+            if (error) toast.error(error.message); else { toast.success("Coverage added"); setOpen(false); onDone(); }
+          }}>Add</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+function CoverageEditButton({ row, onDone }: { row: any; onDone: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [r, setR] = useState<any>(row);
+  return (
+    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (o) setR(row); }}>
+      <Button size="sm" variant="outline" onClick={() => setOpen(true)}>Edit</Button>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader><DialogTitle className="text-sm">Edit coverage mention</DialogTitle></DialogHeader>
+        <CoverageFormFields row={r} setRow={setR} />
+        <div className="flex justify-end gap-2 pt-2">
+          <Button size="sm" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+          <Button size="sm" onClick={async () => {
+            const { id, created_at, updated_at, ...patch } = r;
+            patch.business_id = patch.business_id || null; patch.published_at = patch.published_at || null;
+            const { error } = await sb.from("coverage_mentions").update(patch).eq("id", row.id);
+            if (error) toast.error(error.message); else { toast.success("Saved"); setOpen(false); onDone(); }
+          }}>Save</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
