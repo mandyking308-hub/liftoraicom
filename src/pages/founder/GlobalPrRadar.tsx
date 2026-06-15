@@ -33,6 +33,9 @@ function chip(text: string, cls = "bg-secondary text-muted-foreground border-bor
 const INBOUND_STATUS_CLS: Record<string, string> = {
   unprocessed: "bg-secondary text-muted-foreground border-border/50",
   parsed_editorielle: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
+  parsed_source_of_sources: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
+  parsed_haro: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
+  parsed_pressplugs: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
   no_opportunities_found: "bg-zinc-500/15 text-zinc-300 border-zinc-500/30",
   parse_error: "bg-red-500/15 text-red-300 border-red-500/30",
   needs_source_review: "bg-yellow-500/15 text-yellow-300 border-yellow-500/30",
