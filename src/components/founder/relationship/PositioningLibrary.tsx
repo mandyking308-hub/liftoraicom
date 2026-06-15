@@ -9,7 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { ShieldAlert, Copy, Save, BookOpen, Scale, Eye } from "lucide-react";
-import { CONVERSATION_POSTURE, COMPLIANCE_BOUNDARY } from "./CapitalInfluenceTab";
+import { CONVERSATION_POSTURE, COMPLIANCE_BOUNDARY } from "./capitalTaxonomy";
 
 const sb: any = supabase as any;
 
