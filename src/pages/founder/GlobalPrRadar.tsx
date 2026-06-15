@@ -30,6 +30,18 @@ function typeBadge(t?: string | null) {
 function chip(text: string, cls = "bg-secondary text-muted-foreground border-border/50") {
   return <Badge variant="outline" className={`${cls} text-[10px]`}>{text}</Badge>;
 }
+const INBOUND_STATUS_CLS: Record<string, string> = {
+  unprocessed: "bg-secondary text-muted-foreground border-border/50",
+  parsed_editorielle: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
+  no_opportunities_found: "bg-zinc-500/15 text-zinc-300 border-zinc-500/30",
+  parse_error: "bg-red-500/15 text-red-300 border-red-500/30",
+  needs_source_review: "bg-yellow-500/15 text-yellow-300 border-yellow-500/30",
+  needs_review: "bg-yellow-500/15 text-yellow-300 border-yellow-500/30",
+};
+function inboundStatusChip(s?: string | null) {
+  if (!s) return chip("—");
+  return chip(s, INBOUND_STATUS_CLS[s] ?? "bg-secondary text-muted-foreground border-border/50");
+}
 function fmtDate(d?: string | null) { return d ? new Date(d).toLocaleString() : "—"; }
 function fmtDateShort(d?: string | null) { return d ? new Date(d).toLocaleDateString() : "—"; }
 function EmptyState({ children }: { children: React.ReactNode }) {
@@ -167,6 +179,11 @@ function InboundTab() {
         qc.invalidateQueries({ queryKey: ["pr-inbound-list"] });
         qc.invalidateQueries({ queryKey: ["pr-overview"] });
       }} />
+      <EditorielleParserPanel onDone={() => {
+        qc.invalidateQueries({ queryKey: ["pr-inbound-list"] });
+        qc.invalidateQueries({ queryKey: ["pr-opps-list"] });
+        qc.invalidateQueries({ queryKey: ["pr-overview"] });
+      }} />
       {isLoading ? <div className="text-xs text-muted-foreground">Loading…</div> :
        rows.length === 0 ? <EmptyState>No PR emails have been ingested yet. Run a Gmail PR intake above to capture messages from the “Liftor/PR Opportunities” label and known PR-source senders.</EmptyState> :
     <Table>
@@ -182,7 +199,7 @@ function InboundTab() {
             <TableCell className="text-xs">{r.source_id ? r.source_id.slice(0, 8) : "—"}</TableCell>
             <TableCell className="text-xs">{r.sender_name || r.sender_email || "—"}</TableCell>
             <TableCell className="text-xs max-w-[320px] truncate" title={r.subject || ""}>{r.subject || "—"}</TableCell>
-            <TableCell>{chip(r.processed_status || "—")}</TableCell>
+            <TableCell>{inboundStatusChip(r.processed_status)}</TableCell>
             <TableCell className="text-xs">{r.is_likely_opportunity ? "Yes" : "—"}</TableCell>
             <TableCell className="text-xs">{r.ai_processed ? "Yes" : "—"}</TableCell>
             <TableCell className="text-xs">{r.duplicate_of ? r.duplicate_of.slice(0, 8) : "—"}</TableCell>
@@ -280,6 +297,89 @@ function GmailIntakePanel({ onDone }: { onDone?: () => void }) {
 }
 
 // ----------------- Opportunities -----------------
+// ----------------- Editorielle parser control -----------------
+function EditorielleParserPanel({ onDone }: { onDone?: () => void }) {
+  const [running, setRunning] = useState(false);
+  const [limit, setLimit] = useState(10);
+  const [dryRun, setDryRun] = useState(false);
+  const [forceReparse, setForceReparse] = useState(false);
+  const [result, setResult] = useState<any | null>(null);
+
+  const run = async () => {
+    setRunning(true);
+    setResult(null);
+    try {
+      const { data, error } = await sb.functions.invoke("pr-parse-editorielle", {
+        body: { limit, dry_run: dryRun, force_reparse: forceReparse },
+      });
+      if (error) throw error;
+      setResult(data);
+      if (data?.ok) {
+        toast.success(dryRun
+          ? `Dry run: ${data.opportunities_inserted} opportunities would be created.`
+          : `Parsed ${data.messages_parsed} email(s) → ${data.opportunities_inserted} opportunities.`);
+        onDone?.();
+      } else {
+        toast.error(data?.message || data?.reason || "Parser failed");
+      }
+    } catch (e: any) {
+      toast.error(e?.message || "Parser failed");
+      setResult({ ok: false, reason: "invoke_error", message: String(e?.message || e) });
+    } finally {
+      setRunning(false);
+    }
+  };
+
+  return (
+    <Card className="tech-card border-primary/30">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm flex items-center gap-2"><Radio className="h-4 w-4 text-primary" />Editorielle parser</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <p className="text-xs text-muted-foreground">
+          Rules-based parser. Splits captured Editorielle daily emails into individual media opportunities.
+          No AI, no sending, no drafting. Already-parsed emails are skipped unless <span className="font-mono">force reparse</span> is on.
+        </p>
+        <div className="flex flex-wrap items-center gap-3">
+          <label className="text-xs text-muted-foreground flex items-center gap-1">
+            Limit
+            <input
+              type="number" min={1} max={50} value={limit}
+              onChange={(e) => setLimit(Math.max(1, Math.min(50, Number(e.target.value) || 10)))}
+              className="w-16 rounded border border-border/40 bg-secondary/40 px-2 py-1 text-xs"
+              disabled={running}
+            />
+          </label>
+          <label className="text-xs text-muted-foreground flex items-center gap-1">
+            <input type="checkbox" checked={dryRun} onChange={(e) => setDryRun(e.target.checked)} disabled={running} />
+            Dry run
+          </label>
+          <label className="text-xs text-muted-foreground flex items-center gap-1">
+            <input type="checkbox" checked={forceReparse} onChange={(e) => setForceReparse(e.target.checked)} disabled={running} />
+            Force reparse
+          </label>
+          <Button size="sm" disabled={running} onClick={run}>
+            {running ? <Loader2 className="h-3 w-3 animate-spin" /> : <Radio className="h-3 w-3" />} Parse Editorielle emails
+          </Button>
+        </div>
+        {result ? (
+          <div className={`rounded-md border p-2 text-[11px] ${result.ok ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-200" : "border-yellow-500/40 bg-yellow-500/10 text-yellow-200"}`}>
+            {result.ok ? (
+              <div className="space-y-0.5">
+                <div><b>Seen</b> {result.messages_seen} · <b>Parsed</b> {result.messages_parsed} · <b>Inserted</b> {result.opportunities_inserted} · <b>Dup</b> {result.skipped_duplicates} · <b>Needs review</b> {result.needs_review} · <b>Errors</b> {result.parse_errors}</div>
+                {result.dry_run ? <div className="italic">Dry run — nothing was written.</div> : null}
+              </div>
+            ) : (
+              <div><b>{result.reason || "error"}:</b> {result.message || "Unknown error"}</div>
+            )}
+          </div>
+        ) : null}
+      </CardContent>
+    </Card>
+  );
+}
+
+// ----------------- Opportunities -----------------
 function OpportunitiesTab() {
   const { data: rows = [], isLoading } = useTable("pr-opps-list", async () => {
     const { data } = await sb.from("media_opportunities")
@@ -288,7 +388,7 @@ function OpportunitiesTab() {
     return data ?? [];
   });
   if (isLoading) return <div className="text-xs text-muted-foreground">Loading…</div>;
-  if (rows.length === 0) return <EmptyState>No media opportunities have been extracted yet. Editorielle parser will be added in Phase 5.</EmptyState>;
+  if (rows.length === 0) return <EmptyState>No media opportunities have been extracted yet. Run the Editorielle parser from the Inbound Messages tab to extract opportunities from captured daily emails.</EmptyState>;
   return (
     <Table>
       <TableHeader><TableRow>
