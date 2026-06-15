@@ -1194,6 +1194,10 @@ function SettingsTab() {
     "No public figure / expert / philanthropist is described as endorsing or supporting unless permission is recorded.",
     "Do not expose Liftor private architecture, tax/entity/adviser structure, family/school details or non-public business details.",
     "Only active/live businesses should be pitched.",
+    "No Qwoted scraping. No LinkedIn scraping. No automated scraping of logged-in platforms.",
+    "No implied endorsement from any sector leader, patron or philanthropist.",
+    "Platform-only means: open platform, copy approved message, mark contacted later. Liftor does not send.",
+    "Direct email contact to a journalist requires a lawful contact route and founder approval.",
   ];
 
   const Block = ({ title, items }: { title: string; items: (string | string[])[] }) => (
