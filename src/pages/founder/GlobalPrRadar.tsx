@@ -1886,6 +1886,10 @@ function SettingsTab() {
     "Press-ready means a live public offer/website, approved assets, claims, quotes and compliance clearance are all in place.",
     "Blocked topics on a business override the match score and force a 'block' recommendation.",
     "Inactive or partially-ready businesses are never marked draft_pitch — they are blocked, parked or marked needs_assets.",
+    "PR pitches require founder approval before any Gmail draft or platform action.",
+    "Gmail action creates a draft inside Gmail only — Liftor never sends.",
+    "Platform-only records (Qwoted, HARO platform, etc.) require manual platform submission. Use Copy + Mark submitted.",
+    "Approved business press-pack wording only — no invented claims, metrics, awards or endorsements.",
   ];
 
   const Block = ({ title, items }: { title: string; items: (string | string[])[] }) => (
