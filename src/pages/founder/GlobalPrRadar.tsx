@@ -387,9 +387,102 @@ function EditorielleParserPanel({ onDone }: { onDone?: () => void }) {
   );
 }
 
+// ----------------- Combined digest parser control (SoS / HARO / PressPlugs) -----------------
+const DIGEST_SOURCES = ["All digest sources", "Source of Sources", "HARO", "PressPlugs"] as const;
+function DigestParserPanel({ onDone }: { onDone?: () => void }) {
+  const [running, setRunning] = useState(false);
+  const [limit, setLimit] = useState(10);
+  const [dryRun, setDryRun] = useState(false);
+  const [forceReparse, setForceReparse] = useState(false);
+  const [sourceChoice, setSourceChoice] = useState<typeof DIGEST_SOURCES[number]>("All digest sources");
+  const [result, setResult] = useState<any | null>(null);
+
+  const run = async () => {
+    setRunning(true);
+    setResult(null);
+    try {
+      const payload: any = { limit, dry_run: dryRun, force_reparse: forceReparse };
+      if (sourceChoice !== "All digest sources") payload.source_name = sourceChoice;
+      const { data, error } = await sb.functions.invoke("pr-parse-email-digests", { body: payload });
+      if (error) throw error;
+      setResult(data);
+      if (data?.ok) {
+        toast.success(dryRun
+          ? `Dry run: ${data.opportunities_inserted} opportunities would be created.`
+          : `Parsed ${data.messages_parsed} email(s) → ${data.opportunities_inserted} opportunities.`);
+        onDone?.();
+      } else {
+        toast.error(data?.message || data?.reason || "Parser failed");
+      }
+    } catch (e: any) {
+      toast.error(e?.message || "Parser failed");
+      setResult({ ok: false, reason: "invoke_error", message: String(e?.message || e) });
+    } finally {
+      setRunning(false);
+    }
+  };
+
+  return (
+    <Card className="tech-card border-primary/30">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm flex items-center gap-2"><Radio className="h-4 w-4 text-primary" />Parse PR digest emails</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <p className="text-xs text-muted-foreground">
+          Rules-based parser for Source of Sources, HARO and PressPlugs digests. Splits captured emails into individual media opportunities.
+          No AI, no sending, no drafting. Already-parsed messages are skipped unless <span className="font-mono">force reparse</span> is on.
+        </p>
+        <div className="flex flex-wrap items-center gap-3">
+          <label className="text-xs text-muted-foreground flex items-center gap-1">
+            Source
+            <select
+              value={sourceChoice}
+              onChange={(e) => setSourceChoice(e.target.value as any)}
+              disabled={running}
+              className="rounded border border-border/40 bg-secondary/40 px-2 py-1 text-xs"
+            >
+              {DIGEST_SOURCES.map((s) => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </label>
+          <label className="text-xs text-muted-foreground flex items-center gap-1">
+            Limit
+            <input
+              type="number" min={1} max={50} value={limit}
+              onChange={(e) => setLimit(Math.max(1, Math.min(50, Number(e.target.value) || 10)))}
+              className="w-16 rounded border border-border/40 bg-secondary/40 px-2 py-1 text-xs"
+              disabled={running}
+            />
+          </label>
+          <label className="text-xs text-muted-foreground flex items-center gap-1">
+            <input type="checkbox" checked={dryRun} onChange={(e) => setDryRun(e.target.checked)} disabled={running} /> Dry run
+          </label>
+          <label className="text-xs text-muted-foreground flex items-center gap-1">
+            <input type="checkbox" checked={forceReparse} onChange={(e) => setForceReparse(e.target.checked)} disabled={running} /> Force reparse
+          </label>
+          <Button size="sm" disabled={running} onClick={run}>
+            {running ? <Loader2 className="h-3 w-3 animate-spin" /> : <Radio className="h-3 w-3" />} Parse digest emails
+          </Button>
+        </div>
+        {result ? (
+          <div className={`rounded-md border p-2 text-[11px] ${result.ok ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-200" : "border-yellow-500/40 bg-yellow-500/10 text-yellow-200"}`}>
+            {result.ok ? (
+              <div className="space-y-0.5">
+                <div><b>Sources</b> {(result.source_names ?? []).join(", ") || "—"}</div>
+                <div><b>Seen</b> {result.messages_seen} · <b>Parsed</b> {result.messages_parsed} · <b>Inserted</b> {result.opportunities_inserted} · <b>Dup</b> {result.skipped_duplicates} · <b>Needs review</b> {result.needs_review} · <b>Errors</b> {result.parse_errors}</div>
+                {result.dry_run ? <div className="italic">Dry run — nothing was written.</div> : null}
+              </div>
+            ) : (
+              <div><b>{result.reason || "error"}:</b> {result.message || "Unknown error"}</div>
+            )}
+          </div>
+        ) : null}
+      </CardContent>
+    </Card>
+  );
+}
+
 // ----------------- Opportunities -----------------
 function OpportunitiesTab() {
-  void DigestParserPanel; // ensure tree-shaker keeps panel
   const { data: rows = [], isLoading } = useTable("pr-opps-list", async () => {
     const { data } = await sb.from("media_opportunities")
       .select("id,deadline_at,title,category,publication_name,journalist_name,source_id,contact_route,urgency_score,risk_score,status,created_at")
