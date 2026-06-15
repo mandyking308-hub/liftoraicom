@@ -300,8 +300,8 @@ function renderSnippet(s: PositioningSnippet, c: any): string {
   if (c?.relationship_angle) angleBits.push(`Angle: ${c.relationship_angle}`);
   const angleLine = angleBits.length ? angleBits.join(" · ") : "";
   return s.body
-    .replaceAll("{{contact_name}}", name)
-    .replaceAll("{{relationship_angle_line}}", angleLine);
+    .split("{{contact_name}}").join(name)
+    .split("{{relationship_angle_line}}").join(angleLine);
 }
 
 export default function PositioningLibrary({
