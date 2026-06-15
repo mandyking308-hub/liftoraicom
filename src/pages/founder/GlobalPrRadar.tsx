@@ -483,23 +483,60 @@ function DigestParserPanel({ onDone }: { onDone?: () => void }) {
 
 // ----------------- Opportunities -----------------
 function OpportunitiesTab() {
+  const qc = useQueryClient();
   const { data: rows = [], isLoading } = useTable("pr-opps-list", async () => {
     const { data } = await sb.from("media_opportunities")
       .select("id,deadline_at,title,category,publication_name,journalist_name,source_id,contact_route,urgency_score,risk_score,status,created_at")
       .order("deadline_at", { ascending: true, nullsFirst: false }).limit(ROW_LIMIT);
     return data ?? [];
   });
+  const { data: matches = [] } = useTable("pr-opp-matches", async () => {
+    const { data } = await sb.from("media_opportunity_matches")
+      .select("id,opportunity_id,business_id,match_score,recommended_action,active_business_gate_status,press_readiness_status,missing_assets,risk_notes,created_at")
+      .order("match_score", { ascending: false }).limit(ROW_LIMIT);
+    return data ?? [];
+  });
+  const { data: readiness = [] } = useTable("pr-readiness-lite", async () => {
+    const { data } = await sb.from("business_press_readiness").select("business_id,business_name");
+    return data ?? [];
+  });
+  const bizName = useMemo(() => {
+    const m = new Map<string, string>();
+    (readiness as any[]).forEach((r) => m.set(r.business_id, r.business_name || r.business_id.slice(0, 8)));
+    return m;
+  }, [readiness]);
+  const bestByOpp = useMemo(() => {
+    const m = new Map<string, any>();
+    (matches as any[]).forEach((mt) => {
+      const cur = m.get(mt.opportunity_id);
+      if (!cur || (mt.match_score ?? -999) > (cur.match_score ?? -999)) m.set(mt.opportunity_id, mt);
+    });
+    return m;
+  }, [matches]);
+  const refresh = () => {
+    qc.invalidateQueries({ queryKey: ["pr-opps-list"] });
+    qc.invalidateQueries({ queryKey: ["pr-opp-matches"] });
+    qc.invalidateQueries({ queryKey: ["pr-overview"] });
+  };
+
   if (isLoading) return <div className="text-xs text-muted-foreground">Loading…</div>;
-  if (rows.length === 0) return <EmptyState>No media opportunities have been extracted yet. Run the Editorielle parser from the Inbound Messages tab to extract opportunities from captured daily emails.</EmptyState>;
   return (
-    <Table>
+    <div className="space-y-4">
+      <MatchPanel onDone={refresh} />
+      {rows.length === 0 ? (
+        <EmptyState>No media opportunities have been extracted yet. Run a parser from the Inbound Messages tab.</EmptyState>
+      ) : (
+      <Table>
       <TableHeader><TableRow>
         <TableHead>Deadline</TableHead><TableHead>Title</TableHead><TableHead>Category</TableHead>
         <TableHead>Publication</TableHead><TableHead>Journalist</TableHead><TableHead>Source</TableHead>
         <TableHead>Route</TableHead><TableHead>Urgency</TableHead><TableHead>Risk</TableHead><TableHead>Status</TableHead>
+        <TableHead>Best match</TableHead><TableHead>Score</TableHead><TableHead>Action</TableHead>
       </TableRow></TableHeader>
       <TableBody>
-        {rows.map((r: any) => (
+        {rows.map((r: any) => {
+          const m = bestByOpp.get(r.id);
+          return (
           <TableRow key={r.id}>
             <TableCell className="text-xs">{fmtDate(r.deadline_at)}</TableCell>
             <TableCell className="text-xs max-w-[260px] truncate">{r.title || "—"}</TableCell>
@@ -511,10 +548,143 @@ function OpportunitiesTab() {
             <TableCell className="text-xs tabular-nums">{r.urgency_score ?? 0}</TableCell>
             <TableCell className="text-xs tabular-nums">{r.risk_score ?? 0}</TableCell>
             <TableCell>{chip(r.status || "—")}</TableCell>
-          </TableRow>
-        ))}
+            <TableCell className="text-xs">{m ? (bizName.get(m.business_id) || m.business_id?.slice(0, 8)) : "—"}</TableCell>
+            <TableCell className="text-xs tabular-nums">{m ? m.match_score : "—"}</TableCell>
+            <TableCell>{m ? actionChip(m.recommended_action) : chip("—")}</TableCell>
+          </TableRow>);
+        })}
       </TableBody>
-    </Table>
+      </Table>
+      )}
+      <OpportunityMatchesSection matches={matches as any[]} bizName={bizName} />
+    </div>
+  );
+}
+
+// ----------------- Opportunity Matches -----------------
+function actionChip(a?: string | null) {
+  const map: Record<string, string> = {
+    draft_pitch: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
+    request_assets: "bg-amber-500/15 text-amber-300 border-amber-500/30",
+    prepare_only: "bg-blue-500/15 text-blue-300 border-blue-500/30",
+    park: "bg-zinc-500/15 text-zinc-300 border-zinc-500/30",
+    reject: "bg-secondary text-muted-foreground border-border/50",
+    block: "bg-red-500/15 text-red-300 border-red-500/30",
+  };
+  return chip(a || "—", map[a ?? ""] ?? "bg-secondary text-muted-foreground border-border/50");
+}
+
+function MatchPanel({ onDone }: { onDone?: () => void }) {
+  const [running, setRunning] = useState(false);
+  const [limit, setLimit] = useState(50);
+  const [dryRun, setDryRun] = useState(true);
+  const [forceRematch, setForceRematch] = useState(false);
+  const [opportunityId, setOpportunityId] = useState("");
+  const [result, setResult] = useState<any | null>(null);
+
+  const run = async () => {
+    setRunning(true); setResult(null);
+    try {
+      const payload: any = { limit, dry_run: dryRun, force_rematch: forceRematch };
+      if (opportunityId.trim()) payload.opportunity_id = opportunityId.trim();
+      const { data, error } = await sb.functions.invoke("pr-business-match", { body: payload });
+      if (error) throw error;
+      setResult(data);
+      if (data?.ok) {
+        if (data.reason === "no_active_businesses") {
+          toast.error("No active businesses. Mark a press-readiness record as active first.");
+        } else {
+          toast.success(dryRun
+            ? `Dry run: ${data.opportunities_seen} opp × ${data.businesses_seen} biz.`
+            : `Matched: +${data.matches_inserted} / ~${data.matches_updated}`);
+          if (!dryRun) onDone?.();
+        }
+      } else toast.error(data?.message || data?.reason || "Match failed");
+    } catch (e: any) {
+      toast.error(e?.message || "Match failed");
+    } finally { setRunning(false); }
+  };
+
+  return (
+    <Card className="tech-card border-primary/30">
+      <CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><FileCheck2 className="h-4 w-4 text-primary" />Match opportunities to active businesses</CardTitle></CardHeader>
+      <CardContent className="space-y-3">
+        <p className="text-xs text-muted-foreground">
+          Rules-based scoring only. Opportunities are only marked <i>draft_pitch</i> when the business is active, press-ready,
+          has a live website/offer, has compliance clearance and no blocked-topic conflict. No AI, no sending, no drafting.
+        </p>
+        <div className="flex flex-wrap items-center gap-3 text-xs">
+          <label className="flex items-center gap-1 text-muted-foreground">Limit
+            <input type="number" min={1} max={200} value={limit}
+              onChange={(e) => setLimit(Math.max(1, Math.min(200, Number(e.target.value) || 50)))}
+              className="w-20 rounded border border-border/40 bg-secondary/40 px-2 py-1" disabled={running} />
+          </label>
+          <label className="flex items-center gap-1 text-muted-foreground">Opportunity id
+            <input value={opportunityId} onChange={(e) => setOpportunityId(e.target.value)} placeholder="optional uuid"
+              className="w-64 rounded border border-border/40 bg-secondary/40 px-2 py-1 font-mono" disabled={running} />
+          </label>
+          <label className="flex items-center gap-1"><input type="checkbox" checked={dryRun} onChange={(e) => setDryRun(e.target.checked)} disabled={running} /> Dry run</label>
+          <label className="flex items-center gap-1"><input type="checkbox" checked={forceRematch} onChange={(e) => setForceRematch(e.target.checked)} disabled={running} /> Force rematch</label>
+          <Button size="sm" disabled={running} onClick={run}>
+            {running ? <Loader2 className="h-3 w-3 animate-spin" /> : <FileCheck2 className="h-3 w-3" />} Run matching
+          </Button>
+        </div>
+        {result?.ok ? (
+          <div className="rounded-md border border-emerald-500/30 bg-emerald-500/10 text-emerald-200 p-2 text-[11px]">
+            {result.reason === "no_active_businesses"
+              ? <span>No active businesses found. Activate at least one press-readiness record.</span>
+              : (<><b>Opps</b> {result.opportunities_seen} · <b>Biz</b> {result.businesses_seen} · <b>+</b>{result.matches_inserted} <b>~</b>{result.matches_updated} <b>=</b>{result.matches_skipped} · draft {result.draft_pitch} · assets {result.request_assets} · prep {result.prepare_only} · park {result.park} · reject {result.reject} · block {result.block} {result.dry_run ? <i>· dry run</i> : null}</>)}
+          </div>
+        ) : result ? (
+          <div className="rounded-md border border-yellow-500/40 bg-yellow-500/10 text-yellow-200 p-2 text-[11px]">{result.reason || "error"}: {result.message}</div>
+        ) : null}
+      </CardContent>
+    </Card>
+  );
+}
+
+function OpportunityMatchesSection({ matches, bizName }: { matches: any[]; bizName: Map<string, string> }) {
+  const { data: oppMap = new Map() } = useQuery({
+    queryKey: ["pr-opp-titles", matches.length],
+    queryFn: async () => {
+      const ids = Array.from(new Set(matches.map((m) => m.opportunity_id))).filter(Boolean);
+      if (!ids.length) return new Map<string, string>();
+      const { data } = await sb.from("media_opportunities").select("id,title").in("id", ids);
+      const m = new Map<string, string>();
+      (data ?? []).forEach((r: any) => m.set(r.id, r.title || r.id.slice(0, 8)));
+      return m;
+    },
+    staleTime: 30_000,
+  });
+  if (!matches.length) return null;
+  return (
+    <Card className="tech-card">
+      <CardHeader className="pb-2"><CardTitle className="text-sm">Opportunity matches</CardTitle></CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader><TableRow>
+            <TableHead>Opportunity</TableHead><TableHead>Business</TableHead><TableHead>Score</TableHead>
+            <TableHead>Action</TableHead><TableHead>Active</TableHead><TableHead>Readiness</TableHead>
+            <TableHead>Missing</TableHead><TableHead>Risk</TableHead><TableHead>When</TableHead>
+          </TableRow></TableHeader>
+          <TableBody>
+            {matches.map((m) => (
+              <TableRow key={m.id}>
+                <TableCell className="text-xs max-w-[260px] truncate">{(oppMap as Map<string, string>).get(m.opportunity_id) || m.opportunity_id?.slice(0, 8)}</TableCell>
+                <TableCell className="text-xs">{bizName.get(m.business_id) || m.business_id?.slice(0, 8)}</TableCell>
+                <TableCell className="text-xs tabular-nums">{m.match_score ?? 0}</TableCell>
+                <TableCell>{actionChip(m.recommended_action)}</TableCell>
+                <TableCell>{chip(m.active_business_gate_status || "—")}</TableCell>
+                <TableCell>{chip(m.press_readiness_status || "—")}</TableCell>
+                <TableCell className="text-xs">{(m.missing_assets ?? []).length}</TableCell>
+                <TableCell className="text-xs max-w-[180px] truncate">{m.risk_notes || "—"}</TableCell>
+                <TableCell className="text-xs">{fmtDateShort(m.created_at)}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
   );
 }
 
