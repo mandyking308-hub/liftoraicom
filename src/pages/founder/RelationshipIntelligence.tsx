@@ -14,6 +14,12 @@ import { toast } from "@/hooks/use-toast";
 import { Network, Plus, Download, ShieldAlert, Lock, Pause, CheckCircle2, FileSignature } from "lucide-react";
 import { Sprout } from "lucide-react";
 import { RELATIONSHIP_SEED } from "./relationshipIntelligenceSeed";
+import CapitalInfluenceTab, {
+  CAPITAL_LANE, CAPITAL_ROLE, BEST_VEHICLE, CONVERSATION_POSTURE,
+  OUTREACH_STATUS, COMPLIANCE_BOUNDARY, SOURCE_PLATFORM,
+  HNW_CONFIDENCE, PHILANTHROPY_CAUSE, DEAL_RELEVANCE, ALIGNMENT_QUALITY,
+  PARK_REASON, NEXT_MOVE_OWNER,
+} from "@/components/founder/relationship/CapitalInfluenceTab";
 
 const sb: any = supabase as any;
 
@@ -34,6 +40,15 @@ const emptyForm = {
   commercial_value_score: 1, strategic_value_score: 1, urgency_score: 1,
   next_action_at: "", next_action_summary: "", source: "manual", source_notes: "",
   meeting_summary: "", ai_summary: "", founder_notes: "", tags: "",
+  // Capital & Influence Classification
+  capital_lane: "", capital_role: "unknown", money_signal: "", relationship_angle: "",
+  best_vehicle: "", conversation_posture: "", outreach_status: "",
+  compliance_boundary: "relationship_only", source_platform: "", source_evidence: "",
+  facebook_profile_url: "", age_or_age_band: "",
+  hnw_signal_confidence: "unknown", philanthropy_cause_fit: "", deal_relevance: "",
+  alignment_quality: "unknown", park_reason: "", next_move_owner: "mandy",
+  priority_notes: "", private_capital_notes: "", philanthropy_notes: "",
+  elite_context_notes: "", disclosure_warning: "",
 };
 
 function disclosureTone(d: string) {
