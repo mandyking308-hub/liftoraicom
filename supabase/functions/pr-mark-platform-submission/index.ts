@@ -56,7 +56,7 @@ Deno.serve(async (req) => {
       event_type: "pr_platform_submission_marked",
       actor_user_id: user.id,
       summary: `Platform submission recorded${platformName ? ` (${platformName})` : ""}`,
-      details: { draft_id: draft.id, submission_id: sub?.id ?? null, platform_name: platformName },
+      metadata: { draft_id: draft.id, submission_id: sub?.id ?? null, platform_name: platformName },
     });
 
     return json({ ok: true, submission_id: sub?.id ?? null });
