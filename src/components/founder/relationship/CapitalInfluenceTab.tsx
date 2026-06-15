@@ -12,7 +12,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { toast } from "@/hooks/use-toast";
 import { ShieldAlert, Lock, Pause, CheckCircle2, FileSignature, Crown, HeartHandshake, Briefcase, TrendingUp, Facebook, AlertTriangle } from "lucide-react";
 import PositioningLibrary from "./PositioningLibrary";
-import { BookOpen } from "lucide-react";
+import SocialSignalIntakeQueue from "./SocialSignalIntakeQueue";
+import { BookOpen, Inbox } from "lucide-react";
 
 const sb: any = supabase as any;
 
@@ -236,6 +237,7 @@ export default function CapitalInfluenceTab({ onEdit, initialSub, initialPositio
           <TabsTrigger value="elite"><Briefcase className="h-3 w-3 mr-1" /> Elite Advisory</TabsTrigger>
           <TabsTrigger value="deal"><TrendingUp className="h-3 w-3 mr-1" /> Deal Flow</TabsTrigger>
           <TabsTrigger value="facebook"><Facebook className="h-3 w-3 mr-1" /> FB / Social Intake</TabsTrigger>
+          <TabsTrigger value="intake_queue"><Inbox className="h-3 w-3 mr-1" /> Signal Intake Queue</TabsTrigger>
           <TabsTrigger value="park"><Pause className="h-3 w-3 mr-1" /> Park / Do Not Prioritise</TabsTrigger>
           <TabsTrigger value="positioning"><BookOpen className="h-3 w-3 mr-1" /> Positioning Library</TabsTrigger>
         </TabsList>
@@ -272,6 +274,10 @@ export default function CapitalInfluenceTab({ onEdit, initialSub, initialPositio
 
         <TabsContent value="positioning">
           <PositioningLibrary contacts={contacts as any[]} initialContactId={positioningContactId} />
+        </TabsContent>
+
+        <TabsContent value="intake_queue">
+          <SocialSignalIntakeQueue />
         </TabsContent>
 
         <TabsContent value="facebook" className="space-y-3">
