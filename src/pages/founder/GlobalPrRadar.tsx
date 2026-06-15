@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import FounderLayout from "@/components/founder/FounderLayout";
@@ -1470,7 +1470,7 @@ function DraftDetailDialog({ id, open, onOpenChange, onChanged }: { id: string |
     setRow(data ?? null);
   }
   // load on open
-  useMemo(() => { if (open && id) load(); /* eslint-disable-next-line */ }, [open, id]);
+  useEffect(() => { if (open && id) load(); /* eslint-disable-next-line */ }, [open, id]);
 
   if (!row) {
     return (
