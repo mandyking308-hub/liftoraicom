@@ -187,6 +187,11 @@ function InboundTab() {
         qc.invalidateQueries({ queryKey: ["pr-opps-list"] });
         qc.invalidateQueries({ queryKey: ["pr-overview"] });
       }} />
+      <DigestParserPanel onDone={() => {
+        qc.invalidateQueries({ queryKey: ["pr-inbound-list"] });
+        qc.invalidateQueries({ queryKey: ["pr-opps-list"] });
+        qc.invalidateQueries({ queryKey: ["pr-overview"] });
+      }} />
       {isLoading ? <div className="text-xs text-muted-foreground">Loading…</div> :
        rows.length === 0 ? <EmptyState>No PR emails have been ingested yet. Run a Gmail PR intake above to capture messages from the “Liftor/PR Opportunities” label and known PR-source senders.</EmptyState> :
     <Table>
