@@ -11,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "@/hooks/use-toast";
 import { ShieldAlert, Lock, Pause, CheckCircle2, FileSignature, Crown, HeartHandshake, Briefcase, TrendingUp, Facebook, AlertTriangle } from "lucide-react";
+import PositioningLibrary from "./PositioningLibrary";
+import { BookOpen } from "lucide-react";
 
 const sb: any = supabase as any;
 
@@ -105,9 +107,10 @@ const emptyIntake = {
   founder_notes: "", priority_notes: "", next_action_summary: "", next_move_owner: "mandy",
 };
 
-export default function CapitalInfluenceTab({ onEdit }: { onEdit: (c: any) => void }) {
+export default function CapitalInfluenceTab({ onEdit, initialSub, initialPositioningContactId }: { onEdit: (c: any) => void; initialSub?: string; initialPositioningContactId?: string | null }) {
   const qc = useQueryClient();
-  const [sub, setSub] = useState("overview");
+  const [sub, setSub] = useState(initialSub || "overview");
+  const [positioningContactId, setPositioningContactId] = useState<string | null>(initialPositioningContactId ?? null);
   const [f, setF] = useState({
     capital_lane: "all", capital_role: "all", best_vehicle: "all", conversation_posture: "all",
     outreach_status: "all", compliance_boundary: "all", source_platform: "all",
@@ -234,6 +237,7 @@ export default function CapitalInfluenceTab({ onEdit }: { onEdit: (c: any) => vo
           <TabsTrigger value="deal"><TrendingUp className="h-3 w-3 mr-1" /> Deal Flow</TabsTrigger>
           <TabsTrigger value="facebook"><Facebook className="h-3 w-3 mr-1" /> FB / Social Intake</TabsTrigger>
           <TabsTrigger value="park"><Pause className="h-3 w-3 mr-1" /> Park / Do Not Prioritise</TabsTrigger>
+          <TabsTrigger value="positioning"><BookOpen className="h-3 w-3 mr-1" /> Positioning Library</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-3">
@@ -254,11 +258,21 @@ export default function CapitalInfluenceTab({ onEdit }: { onEdit: (c: any) => vo
           </div>
         </TabsContent>
 
-        <TabsContent value="capital"><LaneTable rows={laneRows("capital")} mode="capital" onEdit={onEdit} onQuick={(id, a) => quick.mutate({ id, action: a })} /></TabsContent>
-        <TabsContent value="ghat"><LaneTable rows={laneRows("ghat")} mode="philanthropy" onEdit={onEdit} onQuick={(id, a) => quick.mutate({ id, action: a })} /></TabsContent>
-        <TabsContent value="elite"><LaneTable rows={laneRows("elite")} mode="capital" onEdit={onEdit} onQuick={(id, a) => quick.mutate({ id, action: a })} /></TabsContent>
-        <TabsContent value="deal"><LaneTable rows={laneRows("deal")} mode="capital" onEdit={onEdit} onQuick={(id, a) => quick.mutate({ id, action: a })} /></TabsContent>
-        <TabsContent value="park"><LaneTable rows={laneRows("park")} mode="capital" onEdit={onEdit} onQuick={(id, a) => quick.mutate({ id, action: a })} /></TabsContent>
+        {(["capital","ghat","elite","deal","park"] as const).map((lane) => (
+          <TabsContent key={lane} value={lane}>
+            <LaneTable
+              rows={laneRows(lane)}
+              mode={lane === "ghat" ? "philanthropy" : "capital"}
+              onEdit={onEdit}
+              onQuick={(id, a) => quick.mutate({ id, action: a })}
+              onPositioning={(id) => { setPositioningContactId(id); setSub("positioning"); }}
+            />
+          </TabsContent>
+        ))}
+
+        <TabsContent value="positioning">
+          <PositioningLibrary contacts={contacts as any[]} initialContactId={positioningContactId} />
+        </TabsContent>
 
         <TabsContent value="facebook" className="space-y-3">
           <Card className="tech-card">
@@ -303,7 +317,7 @@ export default function CapitalInfluenceTab({ onEdit }: { onEdit: (c: any) => vo
   );
 }
 
-function LaneTable({ rows, mode, onEdit, onQuick }: { rows: any[]; mode: "capital" | "philanthropy"; onEdit: (c: any) => void; onQuick: (id: string, a: typeof QUICK_ACTIONS[number]) => void }) {
+function LaneTable({ rows, mode, onEdit, onQuick, onPositioning }: { rows: any[]; mode: "capital" | "philanthropy"; onEdit: (c: any) => void; onQuick: (id: string, a: typeof QUICK_ACTIONS[number]) => void; onPositioning?: (id: string) => void }) {
   if (!rows.length) {
     return <Card className="tech-card"><CardContent className="p-8 text-center text-sm text-muted-foreground">No records match this lane yet. Classify contacts via the edit form or the Facebook / social intake to populate this view.</CardContent></Card>;
   }
@@ -354,6 +368,9 @@ function LaneTable({ rows, mode, onEdit, onQuick }: { rows: any[]; mode: "capita
               <TableCell onClick={(e) => e.stopPropagation()}>
                 <div className="flex flex-col gap-1 min-w-[200px]">
                   <Button variant="ghost" size="sm" onClick={() => onEdit(c)}>Edit</Button>
+                  {onPositioning && (
+                    <Button variant="ghost" size="sm" onClick={() => onPositioning(c.id)}>Open Positioning</Button>
+                  )}
                   <details>
                     <summary className="text-[10px] text-muted-foreground cursor-pointer">Quick actions</summary>
                     <div className="flex flex-wrap gap-1 mt-1">
