@@ -1,14 +1,15 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import FounderLayout from "@/components/founder/FounderLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Radio, Lock, ArrowLeft, ShieldAlert, Mail, Inbox, FileCheck2, Users, Mic, CalendarClock, Newspaper, Database, Settings as SettingsIcon } from "lucide-react";
+import { Radio, Lock, ArrowLeft, ShieldAlert, Mail, Inbox, FileCheck2, Users, Mic, CalendarClock, Newspaper, Database, Settings as SettingsIcon, Loader2, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const sb: any = supabase;
 const ROW_LIMIT = 100;
