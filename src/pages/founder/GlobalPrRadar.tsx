@@ -73,7 +73,7 @@ async function fetchOverview() {
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const countOpts = { count: "exact" as const, head: true };
 
-  const [src, today, unproc, oppT, oppO, oppU, drafts, jour, sect, camps, covT, covM, blocked] = await Promise.all([
+  const [src, today, unproc, oppT, oppO, oppU, drafts, jour, sect, camps, covT, covM, blocked, ready, matchReady, matchAssets] = await Promise.all([
     sb.from("pr_sources").select("*", countOpts),
     sb.from("pr_inbound_messages").select("*", countOpts).gte("received_at", startOfDay.toISOString()),
     sb.from("pr_inbound_messages").select("*", countOpts).eq("processed_status", "unprocessed"),
@@ -87,6 +87,9 @@ async function fetchOverview() {
     sb.from("coverage_mentions").select("*", countOpts),
     sb.from("coverage_mentions").select("*", countOpts).gte("published_at", startOfMonth.toISOString()),
     sb.from("business_press_readiness").select("*", countOpts).in("press_ready_status", READINESS_BLOCKED_STATUSES),
+    sb.from("business_press_readiness").select("*", countOpts).eq("press_ready_status", "ready").eq("is_active", true),
+    sb.from("media_opportunity_matches").select("*", countOpts).eq("recommended_action", "draft_pitch"),
+    sb.from("media_opportunity_matches").select("*", countOpts).eq("recommended_action", "request_assets"),
   ]);
   return {
     sources: src.count ?? 0,
@@ -102,6 +105,9 @@ async function fetchOverview() {
     coverageTotal: covT.count ?? 0,
     coverageMonth: covM.count ?? 0,
     readinessBlocked: blocked.count ?? 0,
+    readinessReady: ready.count ?? 0,
+    matchesReadyDraft: matchReady.count ?? 0,
+    matchesAwaitingAssets: matchAssets.count ?? 0,
   };
 }
 
