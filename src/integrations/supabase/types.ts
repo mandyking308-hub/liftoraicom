@@ -10634,6 +10634,150 @@ export type Database = {
           },
         ]
       }
+      business_press_packs: {
+        Row: {
+          approved_claims: Json
+          approved_quote_bank: Json
+          availability_notes: string | null
+          blocked_claims: Json
+          business_id: string | null
+          company_backgrounder: string | null
+          created_at: string
+          founder_bio_public: string | null
+          id: string
+          image_asset_links: Json
+          logo_asset_links: Json
+          long_description: string | null
+          one_line_description: string | null
+          pack_name: string | null
+          press_contact_details: string | null
+          pricing_notes: string | null
+          product_service_details: string | null
+          short_description: string | null
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          approved_claims?: Json
+          approved_quote_bank?: Json
+          availability_notes?: string | null
+          blocked_claims?: Json
+          business_id?: string | null
+          company_backgrounder?: string | null
+          created_at?: string
+          founder_bio_public?: string | null
+          id?: string
+          image_asset_links?: Json
+          logo_asset_links?: Json
+          long_description?: string | null
+          one_line_description?: string | null
+          pack_name?: string | null
+          press_contact_details?: string | null
+          pricing_notes?: string | null
+          product_service_details?: string | null
+          short_description?: string | null
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          approved_claims?: Json
+          approved_quote_bank?: Json
+          availability_notes?: string | null
+          blocked_claims?: Json
+          business_id?: string | null
+          company_backgrounder?: string | null
+          created_at?: string
+          founder_bio_public?: string | null
+          id?: string
+          image_asset_links?: Json
+          logo_asset_links?: Json
+          long_description?: string | null
+          one_line_description?: string | null
+          pack_name?: string | null
+          press_contact_details?: string | null
+          pricing_notes?: string | null
+          product_service_details?: string | null
+          short_description?: string | null
+          updated_at?: string
+          website_url?: string | null
+        }
+        Relationships: []
+      }
+      business_press_readiness: {
+        Row: {
+          approved_150_word_description: string | null
+          approved_50_word_description: string | null
+          approved_case_studies: Json
+          approved_claims: Json
+          approved_company_quotes: Json
+          approved_founder_quote: string | null
+          approved_images: Json
+          approved_logo: Json
+          approved_one_line_description: string | null
+          approved_press_contact: string | null
+          blocked_topics: Json
+          business_id: string | null
+          business_name: string | null
+          compliance_clearance_status: string | null
+          created_at: string
+          id: string
+          is_active: boolean | null
+          missing_items: Json
+          press_ready_status: string | null
+          public_offer_live: boolean | null
+          updated_at: string
+          website_live: boolean | null
+        }
+        Insert: {
+          approved_150_word_description?: string | null
+          approved_50_word_description?: string | null
+          approved_case_studies?: Json
+          approved_claims?: Json
+          approved_company_quotes?: Json
+          approved_founder_quote?: string | null
+          approved_images?: Json
+          approved_logo?: Json
+          approved_one_line_description?: string | null
+          approved_press_contact?: string | null
+          blocked_topics?: Json
+          business_id?: string | null
+          business_name?: string | null
+          compliance_clearance_status?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          missing_items?: Json
+          press_ready_status?: string | null
+          public_offer_live?: boolean | null
+          updated_at?: string
+          website_live?: boolean | null
+        }
+        Update: {
+          approved_150_word_description?: string | null
+          approved_50_word_description?: string | null
+          approved_case_studies?: Json
+          approved_claims?: Json
+          approved_company_quotes?: Json
+          approved_founder_quote?: string | null
+          approved_images?: Json
+          approved_logo?: Json
+          approved_one_line_description?: string | null
+          approved_press_contact?: string | null
+          blocked_topics?: Json
+          business_id?: string | null
+          business_name?: string | null
+          compliance_clearance_status?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          missing_items?: Json
+          press_ready_status?: string | null
+          public_offer_live?: boolean | null
+          updated_at?: string
+          website_live?: boolean | null
+        }
+        Relationships: []
+      }
       business_rehearsal_runs: {
         Row: {
           blockers: Json
@@ -16172,6 +16316,93 @@ export type Database = {
             columns: ["page_draft_id"]
             isOneToOne: false
             referencedRelation: "website_landing_page_drafts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coverage_mentions: {
+        Row: {
+          article_title: string | null
+          article_url: string | null
+          backlink_url: string | null
+          business_id: string | null
+          coverage_type: string | null
+          created_at: string
+          featured_in_allowed: boolean | null
+          id: string
+          journalist_relationship_id: string | null
+          lead_sales_impact_notes: string | null
+          notes: string | null
+          outlet_id: string | null
+          pdf_asset_url: string | null
+          publication_name: string | null
+          published_at: string | null
+          quote_used: string | null
+          reuse_permission_status: string | null
+          screenshot_asset_url: string | null
+          seo_value_score: number | null
+          traffic_impact_notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          article_title?: string | null
+          article_url?: string | null
+          backlink_url?: string | null
+          business_id?: string | null
+          coverage_type?: string | null
+          created_at?: string
+          featured_in_allowed?: boolean | null
+          id?: string
+          journalist_relationship_id?: string | null
+          lead_sales_impact_notes?: string | null
+          notes?: string | null
+          outlet_id?: string | null
+          pdf_asset_url?: string | null
+          publication_name?: string | null
+          published_at?: string | null
+          quote_used?: string | null
+          reuse_permission_status?: string | null
+          screenshot_asset_url?: string | null
+          seo_value_score?: number | null
+          traffic_impact_notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          article_title?: string | null
+          article_url?: string | null
+          backlink_url?: string | null
+          business_id?: string | null
+          coverage_type?: string | null
+          created_at?: string
+          featured_in_allowed?: boolean | null
+          id?: string
+          journalist_relationship_id?: string | null
+          lead_sales_impact_notes?: string | null
+          notes?: string | null
+          outlet_id?: string | null
+          pdf_asset_url?: string | null
+          publication_name?: string | null
+          published_at?: string | null
+          quote_used?: string | null
+          reuse_permission_status?: string | null
+          screenshot_asset_url?: string | null
+          seo_value_score?: number | null
+          traffic_impact_notes?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coverage_mentions_journalist_relationship_id_fkey"
+            columns: ["journalist_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "journalist_relationships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coverage_mentions_outlet_id_fkey"
+            columns: ["outlet_id"]
+            isOneToOne: false
+            referencedRelation: "media_outlets"
             referencedColumns: ["id"]
           },
         ]
@@ -29777,6 +30008,104 @@ export type Database = {
           },
         ]
       }
+      journalist_relationships: {
+        Row: {
+          beat: string | null
+          caution_notes: string | null
+          city: string | null
+          contact_route: string | null
+          country: string | null
+          coverage_history_score: number | null
+          created_at: string
+          do_not_contact: boolean | null
+          email: string | null
+          first_seen_at: string | null
+          id: string
+          last_seen_at: string | null
+          last_verified_at: string | null
+          name: string | null
+          opt_out_at: string | null
+          outlet_id: string | null
+          platform_name: string | null
+          platform_profile_url: string | null
+          priority_score: number | null
+          publication_name: string | null
+          region_state: string | null
+          relationship_status: string | null
+          reply_history_score: number | null
+          source_first_seen: string | null
+          topics: Json
+          updated_at: string
+          warmth_score: number | null
+        }
+        Insert: {
+          beat?: string | null
+          caution_notes?: string | null
+          city?: string | null
+          contact_route?: string | null
+          country?: string | null
+          coverage_history_score?: number | null
+          created_at?: string
+          do_not_contact?: boolean | null
+          email?: string | null
+          first_seen_at?: string | null
+          id?: string
+          last_seen_at?: string | null
+          last_verified_at?: string | null
+          name?: string | null
+          opt_out_at?: string | null
+          outlet_id?: string | null
+          platform_name?: string | null
+          platform_profile_url?: string | null
+          priority_score?: number | null
+          publication_name?: string | null
+          region_state?: string | null
+          relationship_status?: string | null
+          reply_history_score?: number | null
+          source_first_seen?: string | null
+          topics?: Json
+          updated_at?: string
+          warmth_score?: number | null
+        }
+        Update: {
+          beat?: string | null
+          caution_notes?: string | null
+          city?: string | null
+          contact_route?: string | null
+          country?: string | null
+          coverage_history_score?: number | null
+          created_at?: string
+          do_not_contact?: boolean | null
+          email?: string | null
+          first_seen_at?: string | null
+          id?: string
+          last_seen_at?: string | null
+          last_verified_at?: string | null
+          name?: string | null
+          opt_out_at?: string | null
+          outlet_id?: string | null
+          platform_name?: string | null
+          platform_profile_url?: string | null
+          priority_score?: number | null
+          publication_name?: string | null
+          region_state?: string | null
+          relationship_status?: string | null
+          reply_history_score?: number | null
+          source_first_seen?: string | null
+          topics?: Json
+          updated_at?: string
+          warmth_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journalist_relationships_outlet_id_fkey"
+            columns: ["outlet_id"]
+            isOneToOne: false
+            referencedRelation: "media_outlets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       jurisdiction_adviser_review_items: {
         Row: {
           answer_summary: string | null
@@ -37249,6 +37578,399 @@ export type Database = {
         }
         Relationships: []
       }
+      media_opportunities: {
+        Row: {
+          beat: string | null
+          category: string | null
+          contact_route: string | null
+          country_market: string | null
+          created_at: string
+          deadline_at: string | null
+          exact_ask: string | null
+          global_relevance_score: number | null
+          id: string
+          inbound_message_id: string | null
+          journalist_email: string | null
+          journalist_name: string | null
+          opportunity_type: string | null
+          pitch_email: string | null
+          pitch_url: string | null
+          platform_contact_only: boolean | null
+          platform_name: string | null
+          publication_name: string | null
+          publication_value_score: number | null
+          region_state: string | null
+          relationship_value_score: number | null
+          request_summary: string | null
+          requested_assets: string | null
+          risk_score: number | null
+          sales_value_score: number | null
+          seo_value_score: number | null
+          source_id: string | null
+          status: string | null
+          title: string | null
+          topic: string | null
+          updated_at: string
+          urgency_score: number | null
+        }
+        Insert: {
+          beat?: string | null
+          category?: string | null
+          contact_route?: string | null
+          country_market?: string | null
+          created_at?: string
+          deadline_at?: string | null
+          exact_ask?: string | null
+          global_relevance_score?: number | null
+          id?: string
+          inbound_message_id?: string | null
+          journalist_email?: string | null
+          journalist_name?: string | null
+          opportunity_type?: string | null
+          pitch_email?: string | null
+          pitch_url?: string | null
+          platform_contact_only?: boolean | null
+          platform_name?: string | null
+          publication_name?: string | null
+          publication_value_score?: number | null
+          region_state?: string | null
+          relationship_value_score?: number | null
+          request_summary?: string | null
+          requested_assets?: string | null
+          risk_score?: number | null
+          sales_value_score?: number | null
+          seo_value_score?: number | null
+          source_id?: string | null
+          status?: string | null
+          title?: string | null
+          topic?: string | null
+          updated_at?: string
+          urgency_score?: number | null
+        }
+        Update: {
+          beat?: string | null
+          category?: string | null
+          contact_route?: string | null
+          country_market?: string | null
+          created_at?: string
+          deadline_at?: string | null
+          exact_ask?: string | null
+          global_relevance_score?: number | null
+          id?: string
+          inbound_message_id?: string | null
+          journalist_email?: string | null
+          journalist_name?: string | null
+          opportunity_type?: string | null
+          pitch_email?: string | null
+          pitch_url?: string | null
+          platform_contact_only?: boolean | null
+          platform_name?: string | null
+          publication_name?: string | null
+          publication_value_score?: number | null
+          region_state?: string | null
+          relationship_value_score?: number | null
+          request_summary?: string | null
+          requested_assets?: string | null
+          risk_score?: number | null
+          sales_value_score?: number | null
+          seo_value_score?: number | null
+          source_id?: string | null
+          status?: string | null
+          title?: string | null
+          topic?: string | null
+          updated_at?: string
+          urgency_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_opportunities_inbound_message_id_fkey"
+            columns: ["inbound_message_id"]
+            isOneToOne: false
+            referencedRelation: "pr_inbound_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_opportunities_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "pr_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_opportunity_matches: {
+        Row: {
+          active_business_gate_status: string | null
+          business_id: string | null
+          created_at: string
+          id: string
+          match_reason: string | null
+          match_score: number | null
+          missing_assets: Json
+          opportunity_id: string | null
+          press_readiness_status: string | null
+          recommended_action: string | null
+          risk_notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          active_business_gate_status?: string | null
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          match_reason?: string | null
+          match_score?: number | null
+          missing_assets?: Json
+          opportunity_id?: string | null
+          press_readiness_status?: string | null
+          recommended_action?: string | null
+          risk_notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active_business_gate_status?: string | null
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          match_reason?: string | null
+          match_score?: number | null
+          missing_assets?: Json
+          opportunity_id?: string | null
+          press_readiness_status?: string | null
+          recommended_action?: string | null
+          risk_notes?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_opportunity_matches_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "media_opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_outlets: {
+        Row: {
+          audience_type: string | null
+          backlink_value_score: number | null
+          beats: Json
+          caution_status: string | null
+          city: string | null
+          contact_page_url: string | null
+          country: string | null
+          created_at: string
+          domain_authority_estimate: number | null
+          id: string
+          outlet_name: string
+          outlet_type: string | null
+          pitch_policy_notes: string | null
+          quality_score: number | null
+          region_state: string | null
+          submission_url: string | null
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          audience_type?: string | null
+          backlink_value_score?: number | null
+          beats?: Json
+          caution_status?: string | null
+          city?: string | null
+          contact_page_url?: string | null
+          country?: string | null
+          created_at?: string
+          domain_authority_estimate?: number | null
+          id?: string
+          outlet_name: string
+          outlet_type?: string | null
+          pitch_policy_notes?: string | null
+          quality_score?: number | null
+          region_state?: string | null
+          submission_url?: string | null
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          audience_type?: string | null
+          backlink_value_score?: number | null
+          beats?: Json
+          caution_status?: string | null
+          city?: string | null
+          contact_page_url?: string | null
+          country?: string | null
+          created_at?: string
+          domain_authority_estimate?: number | null
+          id?: string
+          outlet_name?: string
+          outlet_type?: string | null
+          pitch_policy_notes?: string | null
+          quality_score?: number | null
+          region_state?: string | null
+          submission_url?: string | null
+          updated_at?: string
+          website_url?: string | null
+        }
+        Relationships: []
+      }
+      media_pitch_drafts: {
+        Row: {
+          ai_usage_id: string | null
+          approval_status: string | null
+          asset_checklist: Json
+          business_id: string | null
+          compliance_notes: string | null
+          created_at: string
+          created_by_ai: boolean | null
+          draft_body: string | null
+          draft_subject: string | null
+          founder_approved_at: string | null
+          id: string
+          journalist_relationship_id: string | null
+          opportunity_id: string | null
+          outlet_id: string | null
+          platform_instructions: string | null
+          quote_options: Json
+          risk_level: string | null
+          send_method: string | null
+          updated_at: string
+        }
+        Insert: {
+          ai_usage_id?: string | null
+          approval_status?: string | null
+          asset_checklist?: Json
+          business_id?: string | null
+          compliance_notes?: string | null
+          created_at?: string
+          created_by_ai?: boolean | null
+          draft_body?: string | null
+          draft_subject?: string | null
+          founder_approved_at?: string | null
+          id?: string
+          journalist_relationship_id?: string | null
+          opportunity_id?: string | null
+          outlet_id?: string | null
+          platform_instructions?: string | null
+          quote_options?: Json
+          risk_level?: string | null
+          send_method?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ai_usage_id?: string | null
+          approval_status?: string | null
+          asset_checklist?: Json
+          business_id?: string | null
+          compliance_notes?: string | null
+          created_at?: string
+          created_by_ai?: boolean | null
+          draft_body?: string | null
+          draft_subject?: string | null
+          founder_approved_at?: string | null
+          id?: string
+          journalist_relationship_id?: string | null
+          opportunity_id?: string | null
+          outlet_id?: string | null
+          platform_instructions?: string | null
+          quote_options?: Json
+          risk_level?: string | null
+          send_method?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_pitch_drafts_journalist_relationship_id_fkey"
+            columns: ["journalist_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "journalist_relationships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_pitch_drafts_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "media_opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_pitch_drafts_outlet_id_fkey"
+            columns: ["outlet_id"]
+            isOneToOne: false
+            referencedRelation: "media_outlets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_pitch_submissions: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          follow_up_due_at: string | null
+          gmail_thread_id: string | null
+          id: string
+          notes: string | null
+          opportunity_id: string | null
+          outcome_status: string | null
+          pitch_draft_id: string | null
+          platform_name: string | null
+          reply_status: string | null
+          submitted_at: string | null
+          submitted_by: string | null
+          submitted_via: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          follow_up_due_at?: string | null
+          gmail_thread_id?: string | null
+          id?: string
+          notes?: string | null
+          opportunity_id?: string | null
+          outcome_status?: string | null
+          pitch_draft_id?: string | null
+          platform_name?: string | null
+          reply_status?: string | null
+          submitted_at?: string | null
+          submitted_by?: string | null
+          submitted_via?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          follow_up_due_at?: string | null
+          gmail_thread_id?: string | null
+          id?: string
+          notes?: string | null
+          opportunity_id?: string | null
+          outcome_status?: string | null
+          pitch_draft_id?: string | null
+          platform_name?: string | null
+          reply_status?: string | null
+          submitted_at?: string | null
+          submitted_by?: string | null
+          submitted_via?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_pitch_submissions_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "media_opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_pitch_submissions_pitch_draft_id_fkey"
+            columns: ["pitch_draft_id"]
+            isOneToOne: false
+            referencedRelation: "media_pitch_drafts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       meeting_action_items: {
         Row: {
           action_owner: string | null
@@ -39315,6 +40037,79 @@ export type Database = {
             columns: ["campaign_id"]
             isOneToOne: false
             referencedRelation: "outreach_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      owned_media_articles: {
+        Row: {
+          approval_status: string | null
+          article_type: string | null
+          business_id: string | null
+          campaign_id: string | null
+          created_at: string
+          draft_body: string | null
+          id: string
+          publication_status: string | null
+          publish_url: string | null
+          related_journalist_id: string | null
+          related_opportunity_id: string | null
+          target_keywords: Json
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          approval_status?: string | null
+          article_type?: string | null
+          business_id?: string | null
+          campaign_id?: string | null
+          created_at?: string
+          draft_body?: string | null
+          id?: string
+          publication_status?: string | null
+          publish_url?: string | null
+          related_journalist_id?: string | null
+          related_opportunity_id?: string | null
+          target_keywords?: Json
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approval_status?: string | null
+          article_type?: string | null
+          business_id?: string | null
+          campaign_id?: string | null
+          created_at?: string
+          draft_body?: string | null
+          id?: string
+          publication_status?: string | null
+          publish_url?: string | null
+          related_journalist_id?: string | null
+          related_opportunity_id?: string | null
+          target_keywords?: Json
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "owned_media_articles_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "quarterly_pr_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owned_media_articles_related_journalist_id_fkey"
+            columns: ["related_journalist_id"]
+            isOneToOne: false
+            referencedRelation: "journalist_relationships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owned_media_articles_related_opportunity_id_fkey"
+            columns: ["related_opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "media_opportunities"
             referencedColumns: ["id"]
           },
         ]
@@ -42395,6 +43190,194 @@ export type Database = {
         }
         Relationships: []
       }
+      pr_audit_events: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          event_summary: string | null
+          event_type: string | null
+          id: string
+          metadata: Json
+          related_id: string | null
+          related_type: string | null
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          event_summary?: string | null
+          event_type?: string | null
+          id?: string
+          metadata?: Json
+          related_id?: string | null
+          related_type?: string | null
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          event_summary?: string | null
+          event_type?: string | null
+          id?: string
+          metadata?: Json
+          related_id?: string | null
+          related_type?: string | null
+        }
+        Relationships: []
+      }
+      pr_inbound_messages: {
+        Row: {
+          ai_processed: boolean | null
+          ai_usage_id: string | null
+          body_text: string | null
+          created_at: string
+          duplicate_of: string | null
+          gmail_message_id: string | null
+          gmail_thread_id: string | null
+          id: string
+          is_likely_opportunity: boolean | null
+          processed_status: string | null
+          raw_status: string | null
+          received_at: string | null
+          sender_email: string | null
+          sender_name: string | null
+          snippet: string | null
+          source_id: string | null
+          source_label: string | null
+          subject: string | null
+          updated_at: string
+        }
+        Insert: {
+          ai_processed?: boolean | null
+          ai_usage_id?: string | null
+          body_text?: string | null
+          created_at?: string
+          duplicate_of?: string | null
+          gmail_message_id?: string | null
+          gmail_thread_id?: string | null
+          id?: string
+          is_likely_opportunity?: boolean | null
+          processed_status?: string | null
+          raw_status?: string | null
+          received_at?: string | null
+          sender_email?: string | null
+          sender_name?: string | null
+          snippet?: string | null
+          source_id?: string | null
+          source_label?: string | null
+          subject?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ai_processed?: boolean | null
+          ai_usage_id?: string | null
+          body_text?: string | null
+          created_at?: string
+          duplicate_of?: string | null
+          gmail_message_id?: string | null
+          gmail_thread_id?: string | null
+          id?: string
+          is_likely_opportunity?: boolean | null
+          processed_status?: string | null
+          raw_status?: string | null
+          received_at?: string | null
+          sender_email?: string | null
+          sender_name?: string | null
+          snippet?: string | null
+          source_id?: string | null
+          source_label?: string | null
+          subject?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pr_inbound_messages_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "pr_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pr_risk_events: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          recommended_action: string | null
+          related_id: string | null
+          related_type: string | null
+          resolved_at: string | null
+          risk_category: string | null
+          risk_level: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          recommended_action?: string | null
+          related_id?: string | null
+          related_type?: string | null
+          resolved_at?: string | null
+          risk_category?: string | null
+          risk_level?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          recommended_action?: string | null
+          related_id?: string | null
+          related_type?: string | null
+          resolved_at?: string | null
+          risk_category?: string | null
+          risk_level?: string | null
+        }
+        Relationships: []
+      }
+      pr_sources: {
+        Row: {
+          account_email: string | null
+          cost_status: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          platform_status: string | null
+          sender_patterns: Json
+          source_name: string
+          source_type: string
+          trial_status: string | null
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          account_email?: string | null
+          cost_status?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          platform_status?: string | null
+          sender_patterns?: Json
+          source_name: string
+          source_type: string
+          trial_status?: string | null
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          account_email?: string | null
+          cost_status?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          platform_status?: string | null
+          sender_patterns?: Json
+          source_name?: string
+          source_type?: string
+          trial_status?: string | null
+          updated_at?: string
+          website_url?: string | null
+        }
+        Relationships: []
+      }
       priority_scores: {
         Row: {
           business_name: string
@@ -44413,6 +45396,66 @@ export type Database = {
           saleable_asset_group?: string | null
           stripe_event_id?: string | null
           stripe_verified?: boolean | null
+        }
+        Relationships: []
+      }
+      quarterly_pr_campaigns: {
+        Row: {
+          business_id: string | null
+          campaign_theme: string | null
+          created_at: string
+          due_date: string | null
+          founder_approval_status: string | null
+          id: string
+          owned_article_needed: boolean | null
+          pitch_angle: string | null
+          quarter: string | null
+          required_assets: Json
+          status: string | null
+          target_journalists: Json
+          target_markets: Json
+          target_outlet_types: Json
+          target_sector_leaders: Json
+          updated_at: string
+          year: number | null
+        }
+        Insert: {
+          business_id?: string | null
+          campaign_theme?: string | null
+          created_at?: string
+          due_date?: string | null
+          founder_approval_status?: string | null
+          id?: string
+          owned_article_needed?: boolean | null
+          pitch_angle?: string | null
+          quarter?: string | null
+          required_assets?: Json
+          status?: string | null
+          target_journalists?: Json
+          target_markets?: Json
+          target_outlet_types?: Json
+          target_sector_leaders?: Json
+          updated_at?: string
+          year?: number | null
+        }
+        Update: {
+          business_id?: string | null
+          campaign_theme?: string | null
+          created_at?: string
+          due_date?: string | null
+          founder_approval_status?: string | null
+          id?: string
+          owned_article_needed?: boolean | null
+          pitch_angle?: string | null
+          quarter?: string | null
+          required_assets?: Json
+          status?: string | null
+          target_journalists?: Json
+          target_markets?: Json
+          target_outlet_types?: Json
+          target_sector_leaders?: Json
+          updated_at?: string
+          year?: number | null
         }
         Relationships: []
       }
@@ -47272,6 +48315,78 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      sector_leader_profiles: {
+        Row: {
+          caution_notes: string | null
+          city: string | null
+          company: string | null
+          contact_route: string | null
+          country: string | null
+          created_at: string
+          hashtags: Json
+          id: string
+          latest_quote_or_signal: string | null
+          matched_business_id: string | null
+          name: string | null
+          permission_status: string | null
+          potential_use_case: string | null
+          priority_score: number | null
+          profile_url: string | null
+          region_state: string | null
+          relationship_status: string | null
+          source_platform: string | null
+          title: string | null
+          topics: Json
+          updated_at: string
+        }
+        Insert: {
+          caution_notes?: string | null
+          city?: string | null
+          company?: string | null
+          contact_route?: string | null
+          country?: string | null
+          created_at?: string
+          hashtags?: Json
+          id?: string
+          latest_quote_or_signal?: string | null
+          matched_business_id?: string | null
+          name?: string | null
+          permission_status?: string | null
+          potential_use_case?: string | null
+          priority_score?: number | null
+          profile_url?: string | null
+          region_state?: string | null
+          relationship_status?: string | null
+          source_platform?: string | null
+          title?: string | null
+          topics?: Json
+          updated_at?: string
+        }
+        Update: {
+          caution_notes?: string | null
+          city?: string | null
+          company?: string | null
+          contact_route?: string | null
+          country?: string | null
+          created_at?: string
+          hashtags?: Json
+          id?: string
+          latest_quote_or_signal?: string | null
+          matched_business_id?: string | null
+          name?: string | null
+          permission_status?: string | null
+          potential_use_case?: string | null
+          priority_score?: number | null
+          profile_url?: string | null
+          region_state?: string | null
+          relationship_status?: string | null
+          source_platform?: string | null
+          title?: string | null
+          topics?: Json
+          updated_at?: string
+        }
+        Relationships: []
       }
       security_alerts: {
         Row: {
