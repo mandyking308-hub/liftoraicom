@@ -73,7 +73,7 @@ async function fetchOverview() {
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const countOpts = { count: "exact" as const, head: true };
 
-  const [src, today, unproc, oppT, oppO, oppU, drafts, jour, sect, camps, covT, covM, blocked] = await Promise.all([
+  const [src, today, unproc, oppT, oppO, oppU, drafts, jour, sect, camps, covT, covM, blocked, ready, matchReady, matchAssets] = await Promise.all([
     sb.from("pr_sources").select("*", countOpts),
     sb.from("pr_inbound_messages").select("*", countOpts).gte("received_at", startOfDay.toISOString()),
     sb.from("pr_inbound_messages").select("*", countOpts).eq("processed_status", "unprocessed"),
@@ -87,6 +87,9 @@ async function fetchOverview() {
     sb.from("coverage_mentions").select("*", countOpts),
     sb.from("coverage_mentions").select("*", countOpts).gte("published_at", startOfMonth.toISOString()),
     sb.from("business_press_readiness").select("*", countOpts).in("press_ready_status", READINESS_BLOCKED_STATUSES),
+    sb.from("business_press_readiness").select("*", countOpts).eq("press_ready_status", "ready").eq("is_active", true),
+    sb.from("media_opportunity_matches").select("*", countOpts).eq("recommended_action", "draft_pitch"),
+    sb.from("media_opportunity_matches").select("*", countOpts).eq("recommended_action", "request_assets"),
   ]);
   return {
     sources: src.count ?? 0,
@@ -102,6 +105,9 @@ async function fetchOverview() {
     coverageTotal: covT.count ?? 0,
     coverageMonth: covM.count ?? 0,
     readinessBlocked: blocked.count ?? 0,
+    readinessReady: ready.count ?? 0,
+    matchesReadyDraft: matchReady.count ?? 0,
+    matchesAwaitingAssets: matchAssets.count ?? 0,
   };
 }
 
@@ -127,6 +133,8 @@ function OverviewTab() {
       <Metric icon={<CalendarClock className="h-3.5 w-3.5" />} label="Quarterly PR due ≤30d" value={d.campaignsDue} />
       <Metric icon={<Newspaper className="h-3.5 w-3.5" />} label="Coverage mentions" value={d.coverageTotal} hint={`${d.coverageMonth} this month`} />
       <Metric icon={<ShieldAlert className="h-3.5 w-3.5" />} label="Press-readiness blockers" value={d.readinessBlocked} />
+      <Metric icon={<FileCheck2 className="h-3.5 w-3.5" />} label="Businesses press-ready" value={d.readinessReady} />
+      <Metric icon={<FileCheck2 className="h-3.5 w-3.5" />} label="Matches ready for draft" value={d.matchesReadyDraft} hint={`${d.matchesAwaitingAssets} need assets`} />
     </div>
   );
 }
@@ -483,23 +491,60 @@ function DigestParserPanel({ onDone }: { onDone?: () => void }) {
 
 // ----------------- Opportunities -----------------
 function OpportunitiesTab() {
+  const qc = useQueryClient();
   const { data: rows = [], isLoading } = useTable("pr-opps-list", async () => {
     const { data } = await sb.from("media_opportunities")
       .select("id,deadline_at,title,category,publication_name,journalist_name,source_id,contact_route,urgency_score,risk_score,status,created_at")
       .order("deadline_at", { ascending: true, nullsFirst: false }).limit(ROW_LIMIT);
     return data ?? [];
   });
+  const { data: matches = [] } = useTable("pr-opp-matches", async () => {
+    const { data } = await sb.from("media_opportunity_matches")
+      .select("id,opportunity_id,business_id,match_score,recommended_action,active_business_gate_status,press_readiness_status,missing_assets,risk_notes,created_at")
+      .order("match_score", { ascending: false }).limit(ROW_LIMIT);
+    return data ?? [];
+  });
+  const { data: readiness = [] } = useTable("pr-readiness-lite", async () => {
+    const { data } = await sb.from("business_press_readiness").select("business_id,business_name");
+    return data ?? [];
+  });
+  const bizName = useMemo(() => {
+    const m = new Map<string, string>();
+    (readiness as any[]).forEach((r) => m.set(r.business_id, r.business_name || r.business_id.slice(0, 8)));
+    return m;
+  }, [readiness]);
+  const bestByOpp = useMemo(() => {
+    const m = new Map<string, any>();
+    (matches as any[]).forEach((mt) => {
+      const cur = m.get(mt.opportunity_id);
+      if (!cur || (mt.match_score ?? -999) > (cur.match_score ?? -999)) m.set(mt.opportunity_id, mt);
+    });
+    return m;
+  }, [matches]);
+  const refresh = () => {
+    qc.invalidateQueries({ queryKey: ["pr-opps-list"] });
+    qc.invalidateQueries({ queryKey: ["pr-opp-matches"] });
+    qc.invalidateQueries({ queryKey: ["pr-overview"] });
+  };
+
   if (isLoading) return <div className="text-xs text-muted-foreground">Loading…</div>;
-  if (rows.length === 0) return <EmptyState>No media opportunities have been extracted yet. Run the Editorielle parser from the Inbound Messages tab to extract opportunities from captured daily emails.</EmptyState>;
   return (
-    <Table>
+    <div className="space-y-4">
+      <MatchPanel onDone={refresh} />
+      {rows.length === 0 ? (
+        <EmptyState>No media opportunities have been extracted yet. Run a parser from the Inbound Messages tab.</EmptyState>
+      ) : (
+      <Table>
       <TableHeader><TableRow>
         <TableHead>Deadline</TableHead><TableHead>Title</TableHead><TableHead>Category</TableHead>
         <TableHead>Publication</TableHead><TableHead>Journalist</TableHead><TableHead>Source</TableHead>
         <TableHead>Route</TableHead><TableHead>Urgency</TableHead><TableHead>Risk</TableHead><TableHead>Status</TableHead>
+        <TableHead>Best match</TableHead><TableHead>Score</TableHead><TableHead>Action</TableHead>
       </TableRow></TableHeader>
       <TableBody>
-        {rows.map((r: any) => (
+        {rows.map((r: any) => {
+          const m = bestByOpp.get(r.id);
+          return (
           <TableRow key={r.id}>
             <TableCell className="text-xs">{fmtDate(r.deadline_at)}</TableCell>
             <TableCell className="text-xs max-w-[260px] truncate">{r.title || "—"}</TableCell>
@@ -511,10 +556,143 @@ function OpportunitiesTab() {
             <TableCell className="text-xs tabular-nums">{r.urgency_score ?? 0}</TableCell>
             <TableCell className="text-xs tabular-nums">{r.risk_score ?? 0}</TableCell>
             <TableCell>{chip(r.status || "—")}</TableCell>
-          </TableRow>
-        ))}
+            <TableCell className="text-xs">{m ? (bizName.get(m.business_id) || m.business_id?.slice(0, 8)) : "—"}</TableCell>
+            <TableCell className="text-xs tabular-nums">{m ? m.match_score : "—"}</TableCell>
+            <TableCell>{m ? actionChip(m.recommended_action) : chip("—")}</TableCell>
+          </TableRow>);
+        })}
       </TableBody>
-    </Table>
+      </Table>
+      )}
+      <OpportunityMatchesSection matches={matches as any[]} bizName={bizName} />
+    </div>
+  );
+}
+
+// ----------------- Opportunity Matches -----------------
+function actionChip(a?: string | null) {
+  const map: Record<string, string> = {
+    draft_pitch: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
+    request_assets: "bg-amber-500/15 text-amber-300 border-amber-500/30",
+    prepare_only: "bg-blue-500/15 text-blue-300 border-blue-500/30",
+    park: "bg-zinc-500/15 text-zinc-300 border-zinc-500/30",
+    reject: "bg-secondary text-muted-foreground border-border/50",
+    block: "bg-red-500/15 text-red-300 border-red-500/30",
+  };
+  return chip(a || "—", map[a ?? ""] ?? "bg-secondary text-muted-foreground border-border/50");
+}
+
+function MatchPanel({ onDone }: { onDone?: () => void }) {
+  const [running, setRunning] = useState(false);
+  const [limit, setLimit] = useState(50);
+  const [dryRun, setDryRun] = useState(true);
+  const [forceRematch, setForceRematch] = useState(false);
+  const [opportunityId, setOpportunityId] = useState("");
+  const [result, setResult] = useState<any | null>(null);
+
+  const run = async () => {
+    setRunning(true); setResult(null);
+    try {
+      const payload: any = { limit, dry_run: dryRun, force_rematch: forceRematch };
+      if (opportunityId.trim()) payload.opportunity_id = opportunityId.trim();
+      const { data, error } = await sb.functions.invoke("pr-business-match", { body: payload });
+      if (error) throw error;
+      setResult(data);
+      if (data?.ok) {
+        if (data.reason === "no_active_businesses") {
+          toast.error("No active businesses. Mark a press-readiness record as active first.");
+        } else {
+          toast.success(dryRun
+            ? `Dry run: ${data.opportunities_seen} opp × ${data.businesses_seen} biz.`
+            : `Matched: +${data.matches_inserted} / ~${data.matches_updated}`);
+          if (!dryRun) onDone?.();
+        }
+      } else toast.error(data?.message || data?.reason || "Match failed");
+    } catch (e: any) {
+      toast.error(e?.message || "Match failed");
+    } finally { setRunning(false); }
+  };
+
+  return (
+    <Card className="tech-card border-primary/30">
+      <CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><FileCheck2 className="h-4 w-4 text-primary" />Match opportunities to active businesses</CardTitle></CardHeader>
+      <CardContent className="space-y-3">
+        <p className="text-xs text-muted-foreground">
+          Rules-based scoring only. Opportunities are only marked <i>draft_pitch</i> when the business is active, press-ready,
+          has a live website/offer, has compliance clearance and no blocked-topic conflict. No AI, no sending, no drafting.
+        </p>
+        <div className="flex flex-wrap items-center gap-3 text-xs">
+          <label className="flex items-center gap-1 text-muted-foreground">Limit
+            <input type="number" min={1} max={200} value={limit}
+              onChange={(e) => setLimit(Math.max(1, Math.min(200, Number(e.target.value) || 50)))}
+              className="w-20 rounded border border-border/40 bg-secondary/40 px-2 py-1" disabled={running} />
+          </label>
+          <label className="flex items-center gap-1 text-muted-foreground">Opportunity id
+            <input value={opportunityId} onChange={(e) => setOpportunityId(e.target.value)} placeholder="optional uuid"
+              className="w-64 rounded border border-border/40 bg-secondary/40 px-2 py-1 font-mono" disabled={running} />
+          </label>
+          <label className="flex items-center gap-1"><input type="checkbox" checked={dryRun} onChange={(e) => setDryRun(e.target.checked)} disabled={running} /> Dry run</label>
+          <label className="flex items-center gap-1"><input type="checkbox" checked={forceRematch} onChange={(e) => setForceRematch(e.target.checked)} disabled={running} /> Force rematch</label>
+          <Button size="sm" disabled={running} onClick={run}>
+            {running ? <Loader2 className="h-3 w-3 animate-spin" /> : <FileCheck2 className="h-3 w-3" />} Run matching
+          </Button>
+        </div>
+        {result?.ok ? (
+          <div className="rounded-md border border-emerald-500/30 bg-emerald-500/10 text-emerald-200 p-2 text-[11px]">
+            {result.reason === "no_active_businesses"
+              ? <span>No active businesses found. Activate at least one press-readiness record.</span>
+              : (<><b>Opps</b> {result.opportunities_seen} · <b>Biz</b> {result.businesses_seen} · <b>+</b>{result.matches_inserted} <b>~</b>{result.matches_updated} <b>=</b>{result.matches_skipped} · draft {result.draft_pitch} · assets {result.request_assets} · prep {result.prepare_only} · park {result.park} · reject {result.reject} · block {result.block} {result.dry_run ? <i>· dry run</i> : null}</>)}
+          </div>
+        ) : result ? (
+          <div className="rounded-md border border-yellow-500/40 bg-yellow-500/10 text-yellow-200 p-2 text-[11px]">{result.reason || "error"}: {result.message}</div>
+        ) : null}
+      </CardContent>
+    </Card>
+  );
+}
+
+function OpportunityMatchesSection({ matches, bizName }: { matches: any[]; bizName: Map<string, string> }) {
+  const { data: oppMap = new Map() } = useQuery({
+    queryKey: ["pr-opp-titles", matches.length],
+    queryFn: async () => {
+      const ids = Array.from(new Set(matches.map((m) => m.opportunity_id))).filter(Boolean);
+      if (!ids.length) return new Map<string, string>();
+      const { data } = await sb.from("media_opportunities").select("id,title").in("id", ids);
+      const m = new Map<string, string>();
+      (data ?? []).forEach((r: any) => m.set(r.id, r.title || r.id.slice(0, 8)));
+      return m;
+    },
+    staleTime: 30_000,
+  });
+  if (!matches.length) return null;
+  return (
+    <Card className="tech-card">
+      <CardHeader className="pb-2"><CardTitle className="text-sm">Opportunity matches</CardTitle></CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader><TableRow>
+            <TableHead>Opportunity</TableHead><TableHead>Business</TableHead><TableHead>Score</TableHead>
+            <TableHead>Action</TableHead><TableHead>Active</TableHead><TableHead>Readiness</TableHead>
+            <TableHead>Missing</TableHead><TableHead>Risk</TableHead><TableHead>When</TableHead>
+          </TableRow></TableHeader>
+          <TableBody>
+            {matches.map((m) => (
+              <TableRow key={m.id}>
+                <TableCell className="text-xs max-w-[260px] truncate">{(oppMap as Map<string, string>).get(m.opportunity_id) || m.opportunity_id?.slice(0, 8)}</TableCell>
+                <TableCell className="text-xs">{bizName.get(m.business_id) || m.business_id?.slice(0, 8)}</TableCell>
+                <TableCell className="text-xs tabular-nums">{m.match_score ?? 0}</TableCell>
+                <TableCell>{actionChip(m.recommended_action)}</TableCell>
+                <TableCell>{chip(m.active_business_gate_status || "—")}</TableCell>
+                <TableCell>{chip(m.press_readiness_status || "—")}</TableCell>
+                <TableCell className="text-xs">{(m.missing_assets ?? []).length}</TableCell>
+                <TableCell className="text-xs max-w-[180px] truncate">{m.risk_notes || "—"}</TableCell>
+                <TableCell className="text-xs">{fmtDateShort(m.created_at)}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -887,9 +1065,10 @@ function AtlasEditButton({ table, row, onDone }: { table: "journalist_relationsh
 
 // ----------------- Press Readiness -----------------
 function ReadinessTab() {
+  const qc = useQueryClient();
   const { data: rows = [], isLoading } = useTable("pr-readiness", async () => {
     const { data } = await sb.from("business_press_readiness")
-      .select("id,business_id,business_name,is_active,website_live,public_offer_live,press_ready_status,compliance_clearance_status,missing_items,approved_images,approved_logo,approved_company_quotes,approved_claims")
+      .select("*")
       .order("updated_at", { ascending: false }).limit(ROW_LIMIT);
     return data ?? [];
   });
@@ -899,13 +1078,47 @@ function ReadinessTab() {
       .order("updated_at", { ascending: false }).limit(ROW_LIMIT);
     return data ?? [];
   });
+  const [activeOnly, setActiveOnly] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [complianceFilter, setComplianceFilter] = useState("all");
+  const [missingOnly, setMissingOnly] = useState(false);
+
+  const refresh = () => {
+    qc.invalidateQueries({ queryKey: ["pr-readiness"] });
+    qc.invalidateQueries({ queryKey: ["pr-readiness-lite"] });
+    qc.invalidateQueries({ queryKey: ["pr-packs"] });
+    qc.invalidateQueries({ queryKey: ["pr-overview"] });
+  };
+
+  const filteredRows = (rows as any[]).filter((r) => {
+    if (activeOnly && !r.is_active) return false;
+    if (statusFilter !== "all" && (r.press_ready_status || "not_active") !== statusFilter) return false;
+    if (complianceFilter !== "all" && (r.compliance_clearance_status || "not_checked") !== complianceFilter) return false;
+    if (missingOnly && (r.missing_items ?? []).length === 0) return false;
+    return true;
+  });
+
   if (isLoading) return <div className="text-xs text-muted-foreground">Loading…</div>;
   return (
     <div className="space-y-4">
+      <ReadinessSyncPanel onDone={refresh} />
+      <ReadinessEditButton row={null} label="Add manual press-readiness record" onDone={refresh} />
+      <div className="rounded-md border border-border/40 bg-secondary/20 p-2 flex flex-wrap gap-2 items-center text-xs">
+        <label className="flex items-center gap-1"><input type="checkbox" checked={activeOnly} onChange={(e) => setActiveOnly(e.target.checked)} /> Active only</label>
+        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="rounded border border-border/40 bg-secondary/40 px-2 py-1">
+          <option value="all">Any readiness</option>
+          {["ready","partially_ready","blocked","not_active"].map((v) => <option key={v}>{v}</option>)}
+        </select>
+        <select value={complianceFilter} onChange={(e) => setComplianceFilter(e.target.value)} className="rounded border border-border/40 bg-secondary/40 px-2 py-1">
+          <option value="all">Any compliance</option>
+          {["approved","clear","not_required","not_checked","blocked"].map((v) => <option key={v}>{v}</option>)}
+        </select>
+        <label className="flex items-center gap-1"><input type="checkbox" checked={missingOnly} onChange={(e) => setMissingOnly(e.target.checked)} /> With missing items</label>
+      </div>
       {rows.length === 0 && packs.length === 0 ? (
-        <EmptyState>No business press-readiness records yet. Business matching and press-pack setup will be added in later phases.</EmptyState>
+        <EmptyState>No business press-readiness records yet. Sync from canonical businesses above or add a manual record.</EmptyState>
       ) : null}
-      {rows.length > 0 && (
+      {filteredRows.length > 0 && (
         <Card className="tech-card">
           <CardHeader className="pb-2"><CardTitle className="text-sm">Press readiness</CardTitle></CardHeader>
           <CardContent>
@@ -913,10 +1126,10 @@ function ReadinessTab() {
               <TableHeader><TableRow>
                 <TableHead>Business</TableHead><TableHead>Active</TableHead><TableHead>Website</TableHead>
                 <TableHead>Offer</TableHead><TableHead>Status</TableHead><TableHead>Compliance</TableHead>
-                <TableHead>Approved assets</TableHead><TableHead>Missing</TableHead>
+                <TableHead>Approved assets</TableHead><TableHead>Missing</TableHead><TableHead>Edit</TableHead>
               </TableRow></TableHeader>
               <TableBody>
-                {rows.map((r: any) => (
+                {filteredRows.map((r: any) => (
                   <TableRow key={r.id}>
                     <TableCell className="text-xs">{r.business_name || (r.business_id ? r.business_id.slice(0, 8) : "—")}</TableCell>
                     <TableCell className="text-xs">{r.is_active ? "Yes" : "—"}</TableCell>
@@ -926,6 +1139,7 @@ function ReadinessTab() {
                     <TableCell>{chip(r.compliance_clearance_status || "not_checked")}</TableCell>
                     <TableCell className="text-xs">{`${(r.approved_images ?? []).length} img · ${(r.approved_logo ?? []).length} logo · ${(r.approved_company_quotes ?? []).length} quote · ${(r.approved_claims ?? []).length} claim`}</TableCell>
                     <TableCell className="text-xs max-w-[260px] truncate">{(r.missing_items ?? []).join(", ") || "—"}</TableCell>
+                    <TableCell><ReadinessEditButton row={r} onDone={refresh} /></TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -959,6 +1173,196 @@ function ReadinessTab() {
           </CardContent>
         </Card>
       )}
+    </div>
+  );
+}
+
+function ReadinessSyncPanel({ onDone }: { onDone?: () => void }) {
+  const [running, setRunning] = useState(false);
+  const [dryRun, setDryRun] = useState(true);
+  const [result, setResult] = useState<any | null>(null);
+  const run = async () => {
+    setRunning(true); setResult(null);
+    try {
+      const { data, error } = await sb.functions.invoke("pr-press-readiness-sync", { body: { dry_run: dryRun } });
+      if (error) throw error;
+      setResult(data);
+      if (data?.ok) {
+        toast.success(dryRun
+          ? `Dry run: would insert ${data.would_insert} of ${data.businesses_seen}.`
+          : `Synced: +${data.inserted}, ~${data.updated} of ${data.businesses_seen}.`);
+        if (!dryRun) onDone?.();
+      } else toast.error(data?.reason || data?.message || "Sync failed");
+    } catch (e: any) {
+      toast.error(e?.message || "Sync failed");
+    } finally { setRunning(false); }
+  };
+  return (
+    <Card className="tech-card border-primary/30">
+      <CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><Database className="h-4 w-4 text-primary" />Sync active businesses</CardTitle></CardHeader>
+      <CardContent className="space-y-2">
+        <p className="text-xs text-muted-foreground">
+          Seeds a press-readiness row for every business in the canonical <span className="font-mono">businesses</span> table.
+          Never overwrites approved descriptions, assets, quotes or claims. Activation, website/offer status and approved
+          content must be set manually below — Liftor will not auto-mark any business as press-ready.
+        </p>
+        <div className="flex items-center gap-3 text-xs">
+          <label className="flex items-center gap-1"><input type="checkbox" checked={dryRun} onChange={(e) => setDryRun(e.target.checked)} disabled={running} /> Dry run</label>
+          <Button size="sm" disabled={running} onClick={run}>
+            {running ? <Loader2 className="h-3 w-3 animate-spin" /> : <Database className="h-3 w-3" />} Sync from canonical businesses
+          </Button>
+        </div>
+        {result ? (
+          <div className="rounded-md border border-border/40 bg-secondary/30 p-2 text-[11px]">
+            {result.ok
+              ? <span><b>Seen</b> {result.businesses_seen} · <b>+</b>{result.inserted ?? result.would_insert ?? 0} · <b>~</b>{result.updated ?? result.would_update ?? 0} {result.dry_run ? <i>· dry run</i> : null}</span>
+              : <span>{result.reason}: {result.message}</span>}
+          </div>
+        ) : null}
+      </CardContent>
+    </Card>
+  );
+}
+
+const READY_STATUSES = ["not_active","blocked","partially_ready","ready"];
+const COMPLIANCE_STATUSES = ["not_checked","not_required","approved","clear","blocked"];
+
+function ReadinessEditButton({ row, onDone, label }: { row: any | null; onDone?: () => void; label?: string }) {
+  const isNew = !row;
+  const [open, setOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState<any>(() => ({
+    business_id: row?.business_id || "",
+    business_name: row?.business_name || "",
+    is_active: !!row?.is_active,
+    website_live: !!row?.website_live,
+    public_offer_live: !!row?.public_offer_live,
+    approved_one_line_description: row?.approved_one_line_description || "",
+    approved_50_word_description: row?.approved_50_word_description || "",
+    approved_150_word_description: row?.approved_150_word_description || "",
+    approved_founder_quote: row?.approved_founder_quote || "",
+    approved_press_contact: row?.approved_press_contact || "",
+    compliance_clearance_status: row?.compliance_clearance_status || "not_checked",
+    press_ready_status: row?.press_ready_status || "not_active",
+    blocked_topics: (row?.blocked_topics ?? []).join(", "),
+    approved_claims: (row?.approved_claims ?? []).map((c: any) => typeof c === "string" ? c : JSON.stringify(c)).join("\n"),
+    approved_company_quotes: (row?.approved_company_quotes ?? []).map((c: any) => typeof c === "string" ? c : JSON.stringify(c)).join("\n"),
+    approved_logo: (row?.approved_logo ?? []).join("\n"),
+    approved_images: (row?.approved_images ?? []).join("\n"),
+    approved_case_studies: (row?.approved_case_studies ?? []).map((c: any) => typeof c === "string" ? c : JSON.stringify(c)).join("\n"),
+    missing_items: (row?.missing_items ?? []).join(", "),
+  }));
+  const set = (k: string, v: any) => setForm((f: any) => ({ ...f, [k]: v }));
+  const splitLines = (s: string) => s.split("\n").map((x) => x.trim()).filter(Boolean);
+  const splitCsv = (s: string) => s.split(",").map((x) => x.trim()).filter(Boolean);
+
+  const save = async () => {
+    if (isNew && !form.business_name.trim()) { toast.error("Business name required."); return; }
+    setSaving(true);
+    const patch: any = {
+      business_name: form.business_name || null,
+      is_active: !!form.is_active,
+      website_live: !!form.website_live,
+      public_offer_live: !!form.public_offer_live,
+      approved_one_line_description: form.approved_one_line_description || null,
+      approved_50_word_description: form.approved_50_word_description || null,
+      approved_150_word_description: form.approved_150_word_description || null,
+      approved_founder_quote: form.approved_founder_quote || null,
+      approved_press_contact: form.approved_press_contact || null,
+      compliance_clearance_status: form.compliance_clearance_status || "not_checked",
+      press_ready_status: form.press_ready_status || "not_active",
+      blocked_topics: splitCsv(form.blocked_topics),
+      approved_claims: splitLines(form.approved_claims),
+      approved_company_quotes: splitLines(form.approved_company_quotes),
+      approved_logo: splitLines(form.approved_logo),
+      approved_images: splitLines(form.approved_images),
+      approved_case_studies: splitLines(form.approved_case_studies),
+      missing_items: splitCsv(form.missing_items),
+    };
+    if (isNew && form.business_id.trim()) patch.business_id = form.business_id.trim();
+    let error: any = null;
+    if (isNew) ({ error } = await sb.from("business_press_readiness").insert(patch));
+    else ({ error } = await sb.from("business_press_readiness").update(patch).eq("id", row.id));
+    setSaving(false);
+    if (error) toast.error(error.message);
+    else { toast.success("Saved"); setOpen(false); onDone?.(); }
+  };
+
+  if (!open) return (
+    <Button size="sm" variant={isNew ? "default" : "outline"} onClick={() => setOpen(true)}>
+      {label || "Edit"}
+    </Button>
+  );
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => !saving && setOpen(false)}>
+      <Card className="tech-card max-w-2xl w-full max-h-[90vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
+        <CardHeader className="pb-2"><CardTitle className="text-sm">{isNew ? "New press-readiness record" : `Edit ${row?.business_name || "record"}`}</CardTitle></CardHeader>
+        <CardContent className="space-y-2 text-xs">
+          <label className="block">Business name
+            <input value={form.business_name} onChange={(e) => set("business_name", e.target.value)} className="mt-0.5 w-full rounded border border-border/40 bg-secondary/40 px-2 py-1" />
+          </label>
+          {isNew ? (
+            <label className="block">Business id (optional uuid; leave blank if unknown)
+              <input value={form.business_id} onChange={(e) => set("business_id", e.target.value)} placeholder="uuid" className="mt-0.5 w-full rounded border border-border/40 bg-secondary/40 px-2 py-1 font-mono" />
+            </label>
+          ) : null}
+          <div className="flex gap-4">
+            <label className="flex items-center gap-1"><input type="checkbox" checked={form.is_active} onChange={(e) => set("is_active", e.target.checked)} /> Active</label>
+            <label className="flex items-center gap-1"><input type="checkbox" checked={form.website_live} onChange={(e) => set("website_live", e.target.checked)} /> Website live</label>
+            <label className="flex items-center gap-1"><input type="checkbox" checked={form.public_offer_live} onChange={(e) => set("public_offer_live", e.target.checked)} /> Public offer live</label>
+          </div>
+          <label className="block">Press ready status
+            <select value={form.press_ready_status} onChange={(e) => set("press_ready_status", e.target.value)} className="mt-0.5 w-full rounded border border-border/40 bg-secondary/40 px-2 py-1">
+              {READY_STATUSES.map((v) => <option key={v}>{v}</option>)}
+            </select>
+          </label>
+          <label className="block">Compliance clearance
+            <select value={form.compliance_clearance_status} onChange={(e) => set("compliance_clearance_status", e.target.value)} className="mt-0.5 w-full rounded border border-border/40 bg-secondary/40 px-2 py-1">
+              {COMPLIANCE_STATUSES.map((v) => <option key={v}>{v}</option>)}
+            </select>
+          </label>
+          <label className="block">One-line description
+            <input value={form.approved_one_line_description} onChange={(e) => set("approved_one_line_description", e.target.value)} className="mt-0.5 w-full rounded border border-border/40 bg-secondary/40 px-2 py-1" />
+          </label>
+          <label className="block">50-word description
+            <textarea rows={2} value={form.approved_50_word_description} onChange={(e) => set("approved_50_word_description", e.target.value)} className="mt-0.5 w-full rounded border border-border/40 bg-secondary/40 px-2 py-1" />
+          </label>
+          <label className="block">150-word description
+            <textarea rows={4} value={form.approved_150_word_description} onChange={(e) => set("approved_150_word_description", e.target.value)} className="mt-0.5 w-full rounded border border-border/40 bg-secondary/40 px-2 py-1" />
+          </label>
+          <label className="block">Approved founder quote
+            <textarea rows={2} value={form.approved_founder_quote} onChange={(e) => set("approved_founder_quote", e.target.value)} className="mt-0.5 w-full rounded border border-border/40 bg-secondary/40 px-2 py-1" />
+          </label>
+          <label className="block">Approved company quotes (one per line)
+            <textarea rows={3} value={form.approved_company_quotes} onChange={(e) => set("approved_company_quotes", e.target.value)} className="mt-0.5 w-full rounded border border-border/40 bg-secondary/40 px-2 py-1" />
+          </label>
+          <label className="block">Approved claims (one per line)
+            <textarea rows={3} value={form.approved_claims} onChange={(e) => set("approved_claims", e.target.value)} className="mt-0.5 w-full rounded border border-border/40 bg-secondary/40 px-2 py-1" />
+          </label>
+          <label className="block">Approved case studies (one per line)
+            <textarea rows={2} value={form.approved_case_studies} onChange={(e) => set("approved_case_studies", e.target.value)} className="mt-0.5 w-full rounded border border-border/40 bg-secondary/40 px-2 py-1" />
+          </label>
+          <label className="block">Logo URLs (one per line)
+            <textarea rows={2} value={form.approved_logo} onChange={(e) => set("approved_logo", e.target.value)} className="mt-0.5 w-full rounded border border-border/40 bg-secondary/40 px-2 py-1 font-mono" />
+          </label>
+          <label className="block">Image URLs (one per line)
+            <textarea rows={3} value={form.approved_images} onChange={(e) => set("approved_images", e.target.value)} className="mt-0.5 w-full rounded border border-border/40 bg-secondary/40 px-2 py-1 font-mono" />
+          </label>
+          <label className="block">Press contact (email or note)
+            <input value={form.approved_press_contact} onChange={(e) => set("approved_press_contact", e.target.value)} className="mt-0.5 w-full rounded border border-border/40 bg-secondary/40 px-2 py-1" />
+          </label>
+          <label className="block">Blocked topics (comma-separated)
+            <input value={form.blocked_topics} onChange={(e) => set("blocked_topics", e.target.value)} className="mt-0.5 w-full rounded border border-border/40 bg-secondary/40 px-2 py-1" />
+          </label>
+          <label className="block">Missing items (comma-separated)
+            <input value={form.missing_items} onChange={(e) => set("missing_items", e.target.value)} className="mt-0.5 w-full rounded border border-border/40 bg-secondary/40 px-2 py-1" />
+          </label>
+          <div className="flex justify-end gap-2 pt-1">
+            <Button size="sm" variant="ghost" disabled={saving} onClick={() => setOpen(false)}>Cancel</Button>
+            <Button size="sm" disabled={saving} onClick={save}>{saving ? <Loader2 className="h-3 w-3 animate-spin" /> : null} Save</Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
@@ -1198,6 +1602,9 @@ function SettingsTab() {
     "No implied endorsement from any sector leader, patron or philanthropist.",
     "Platform-only means: open platform, copy approved message, mark contacted later. Liftor does not send.",
     "Direct email contact to a journalist requires a lawful contact route and founder approval.",
+    "Press-ready means a live public offer/website, approved assets, claims, quotes and compliance clearance are all in place.",
+    "Blocked topics on a business override the match score and force a 'block' recommendation.",
+    "Inactive or partially-ready businesses are never marked draft_pitch — they are blocked, parked or marked needs_assets.",
   ];
 
   const Block = ({ title, items }: { title: string; items: (string | string[])[] }) => (
