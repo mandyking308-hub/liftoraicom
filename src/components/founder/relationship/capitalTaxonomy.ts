@@ -1,0 +1,15 @@
+export const CAPITAL_LANE = ["carren_estate_principal_capital","ghat_philanthropy_giving","elite_advisory_credibility","deal_flow_acquisition","media_influence_profile","school_social_soft_power","parked_not_priority"] as const;
+export const CAPITAL_ROLE = ["principal","family_office","private_bank","wealth_manager","financial_adviser","dfm","fund_manager","pe_fund","operating_partner","independent_sponsor","search_fund","m_and_a_adviser","corporate_development","strategic_acquirer","donor","foundation","philanthropy_adviser","private_client_lawyer","tax_adviser","accountant","property_adviser","media_contact","introducer","unknown"] as const;
+export const BEST_VEHICLE = ["carren_estate","ghat","both","liftor_hidden","adviser_only","park"] as const;
+export const CONVERSATION_POSTURE = ["principal_to_principal","philanthropy_alignment","elite_adviser","market_intelligence","deal_flow","operating_partnership","media_profile","no_contact"] as const;
+export const OUTREACH_STATUS = ["not_contacted","researched","ready_to_contact","contacted","replied","meeting_requested","meeting_booked","follow_up_due","parked","do_not_contact"] as const;
+export const COMPLIANCE_BOUNDARY = ["relationship_only","no_product_literature","no_solicitation","no_client_money_request","no_external_send_without_approval","legal_review_required","restricted"] as const;
+export const SOURCE_PLATFORM = ["gmail","calendar","facebook","linkedin","website","qouted_or_source_platform","event_list","manual","referral","public_research","other"] as const;
+export const HNW_CONFIDENCE = ["high","medium","low","unknown"] as const;
+export const PHILANTHROPY_CAUSE = ["global_health","health_access","children","education","africa_commonwealth","women_girls","poverty_relief","medical_access","humanitarian","unknown","not_applicable"] as const;
+export const DEAL_RELEVANCE = ["capital_source","deal_source","buyer_route","seller_route","operating_partner","co_investment_route","donor_route","adviser_route","media_route","not_relevant"] as const;
+export const ALIGNMENT_QUALITY = ["high","medium","low","poor","parasite_risk","unknown"] as const;
+export const PARK_REASON = ["too_narrow","over_selling","wants_fees_only","not_global_enough","no_money_route","low_trust","conflict_risk","time_waster","not_relevant","other"] as const;
+export const NEXT_MOVE_OWNER = ["mandy","chatgpt","adviser","waiting_on_them","no_action","unknown"] as const;
+export const DISCLOSURE = ["public_only","light_context","nda_before_detail","confidential_allowed","restricted"] as const;
+export const TRUST = ["unknown","low","medium","high","vetted"] as const;
