@@ -1613,8 +1613,8 @@ function DraftDetailDialog({ id, open, onOpenChange, onChanged }: { id: string |
       if (error) throw error;
       await sb.from("pr_audit_events").insert({
         event_type: status === "founder_approved" ? "pr_pitch_draft_approved" : status === "rejected" ? "pr_pitch_draft_rejected" : "pr_pitch_draft_returned",
-        summary: `Draft ${status}`,
-        details: { draft_id: row.id },
+        event_summary: `Draft ${status}`,
+        metadata: { draft_id: row.id },
       });
       toast.success(`Draft ${status.replace("_", " ")}`);
       setRow({ ...row, ...patch });

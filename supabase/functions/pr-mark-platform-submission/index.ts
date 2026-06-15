@@ -55,7 +55,7 @@ Deno.serve(async (req) => {
     await admin.from("pr_audit_events").insert({
       event_type: "pr_platform_submission_marked",
       actor_user_id: user.id,
-      summary: `Platform submission recorded${platformName ? ` (${platformName})` : ""}`,
+      event_summary: `Platform submission recorded${platformName ? ` (${platformName})` : ""}`,
       metadata: { draft_id: draft.id, submission_id: sub?.id ?? null, platform_name: platformName },
     });
 
