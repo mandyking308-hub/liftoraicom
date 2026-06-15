@@ -44911,28 +44911,51 @@ export type Database = {
       }
       relationship_intelligence_contacts: {
         Row: {
+          age_or_age_band: string | null
           ai_summary: string | null
+          alignment_quality: string | null
+          best_vehicle: string | null
+          capital_lane: string | null
+          capital_role: string | null
           city_country: string | null
           commercial_value_score: number
+          compliance_boundary: string | null
           contact_name: string
+          conversation_posture: string | null
           created_at: string
           created_by: string | null
+          deal_relevance: string | null
           disclosure_level: Database["public"]["Enums"]["rni_disclosure_level"]
+          disclosure_warning: string | null
+          elite_context_notes: string | null
           email: string | null
+          facebook_profile_url: string | null
           founder_notes: string | null
+          hnw_signal_confidence: string | null
           id: string
           jurisdiction: string | null
           last_contact_at: string | null
           meeting_summary: string | null
+          money_signal: string | null
           next_action_at: string | null
           next_action_summary: string | null
+          next_move_owner: string | null
           opportunity_role: Database["public"]["Enums"]["rni_opportunity_role"]
           organisation_name: string | null
+          outreach_status: string | null
+          park_reason: string | null
+          philanthropy_cause_fit: string | null
+          philanthropy_notes: string | null
           phone: string | null
+          priority_notes: string | null
+          private_capital_notes: string | null
+          relationship_angle: string | null
           relationship_status: Database["public"]["Enums"]["rni_relationship_status"]
           relationship_type: Database["public"]["Enums"]["rni_relationship_type"]
           source: Database["public"]["Enums"]["rni_source"]
+          source_evidence: string | null
           source_notes: string | null
+          source_platform: string | null
           strategic_value_score: number
           tags: string[]
           trust_level: Database["public"]["Enums"]["rni_trust_level"]
@@ -44941,28 +44964,51 @@ export type Database = {
           website: string | null
         }
         Insert: {
+          age_or_age_band?: string | null
           ai_summary?: string | null
+          alignment_quality?: string | null
+          best_vehicle?: string | null
+          capital_lane?: string | null
+          capital_role?: string | null
           city_country?: string | null
           commercial_value_score?: number
+          compliance_boundary?: string | null
           contact_name: string
+          conversation_posture?: string | null
           created_at?: string
           created_by?: string | null
+          deal_relevance?: string | null
           disclosure_level?: Database["public"]["Enums"]["rni_disclosure_level"]
+          disclosure_warning?: string | null
+          elite_context_notes?: string | null
           email?: string | null
+          facebook_profile_url?: string | null
           founder_notes?: string | null
+          hnw_signal_confidence?: string | null
           id?: string
           jurisdiction?: string | null
           last_contact_at?: string | null
           meeting_summary?: string | null
+          money_signal?: string | null
           next_action_at?: string | null
           next_action_summary?: string | null
+          next_move_owner?: string | null
           opportunity_role?: Database["public"]["Enums"]["rni_opportunity_role"]
           organisation_name?: string | null
+          outreach_status?: string | null
+          park_reason?: string | null
+          philanthropy_cause_fit?: string | null
+          philanthropy_notes?: string | null
           phone?: string | null
+          priority_notes?: string | null
+          private_capital_notes?: string | null
+          relationship_angle?: string | null
           relationship_status?: Database["public"]["Enums"]["rni_relationship_status"]
           relationship_type?: Database["public"]["Enums"]["rni_relationship_type"]
           source?: Database["public"]["Enums"]["rni_source"]
+          source_evidence?: string | null
           source_notes?: string | null
+          source_platform?: string | null
           strategic_value_score?: number
           tags?: string[]
           trust_level?: Database["public"]["Enums"]["rni_trust_level"]
@@ -44971,28 +45017,51 @@ export type Database = {
           website?: string | null
         }
         Update: {
+          age_or_age_band?: string | null
           ai_summary?: string | null
+          alignment_quality?: string | null
+          best_vehicle?: string | null
+          capital_lane?: string | null
+          capital_role?: string | null
           city_country?: string | null
           commercial_value_score?: number
+          compliance_boundary?: string | null
           contact_name?: string
+          conversation_posture?: string | null
           created_at?: string
           created_by?: string | null
+          deal_relevance?: string | null
           disclosure_level?: Database["public"]["Enums"]["rni_disclosure_level"]
+          disclosure_warning?: string | null
+          elite_context_notes?: string | null
           email?: string | null
+          facebook_profile_url?: string | null
           founder_notes?: string | null
+          hnw_signal_confidence?: string | null
           id?: string
           jurisdiction?: string | null
           last_contact_at?: string | null
           meeting_summary?: string | null
+          money_signal?: string | null
           next_action_at?: string | null
           next_action_summary?: string | null
+          next_move_owner?: string | null
           opportunity_role?: Database["public"]["Enums"]["rni_opportunity_role"]
           organisation_name?: string | null
+          outreach_status?: string | null
+          park_reason?: string | null
+          philanthropy_cause_fit?: string | null
+          philanthropy_notes?: string | null
           phone?: string | null
+          priority_notes?: string | null
+          private_capital_notes?: string | null
+          relationship_angle?: string | null
           relationship_status?: Database["public"]["Enums"]["rni_relationship_status"]
           relationship_type?: Database["public"]["Enums"]["rni_relationship_type"]
           source?: Database["public"]["Enums"]["rni_source"]
+          source_evidence?: string | null
           source_notes?: string | null
+          source_platform?: string | null
           strategic_value_score?: number
           tags?: string[]
           trust_level?: Database["public"]["Enums"]["rni_trust_level"]
