@@ -30,6 +30,18 @@ function typeBadge(t?: string | null) {
 function chip(text: string, cls = "bg-secondary text-muted-foreground border-border/50") {
   return <Badge variant="outline" className={`${cls} text-[10px]`}>{text}</Badge>;
 }
+const INBOUND_STATUS_CLS: Record<string, string> = {
+  unprocessed: "bg-secondary text-muted-foreground border-border/50",
+  parsed_editorielle: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
+  no_opportunities_found: "bg-zinc-500/15 text-zinc-300 border-zinc-500/30",
+  parse_error: "bg-red-500/15 text-red-300 border-red-500/30",
+  needs_source_review: "bg-yellow-500/15 text-yellow-300 border-yellow-500/30",
+  needs_review: "bg-yellow-500/15 text-yellow-300 border-yellow-500/30",
+};
+function inboundStatusChip(s?: string | null) {
+  if (!s) return chip("—");
+  return chip(s, INBOUND_STATUS_CLS[s] ?? "bg-secondary text-muted-foreground border-border/50");
+}
 function fmtDate(d?: string | null) { return d ? new Date(d).toLocaleString() : "—"; }
 function fmtDateShort(d?: string | null) { return d ? new Date(d).toLocaleDateString() : "—"; }
 function EmptyState({ children }: { children: React.ReactNode }) {
