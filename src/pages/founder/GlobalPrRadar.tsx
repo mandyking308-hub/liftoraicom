@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import FounderLayout from "@/components/founder/FounderLayout";
@@ -7,7 +7,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Radio, Lock, ArrowLeft, ShieldAlert, Mail, Inbox, FileCheck2, Users, Mic, CalendarClock, Newspaper, Database, Settings as SettingsIcon, Loader2, Download } from "lucide-react";
+import { Radio, Lock, ArrowLeft, ShieldAlert, Mail, Inbox, FileCheck2, Users, Mic, CalendarClock, Newspaper, Database, Settings as SettingsIcon, Loader2, Download, Send, Copy, ExternalLink, Check, X as XIcon } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -1368,40 +1371,318 @@ function ReadinessEditButton({ row, onDone, label }: { row: any | null; onDone?:
 }
 
 // ----------------- Drafts -----------------
+const APPROVAL_CLS: Record<string, string> = {
+  draft: "bg-secondary text-muted-foreground border-border/50",
+  needs_review: "bg-yellow-500/15 text-yellow-300 border-yellow-500/30",
+  founder_review: "bg-yellow-500/15 text-yellow-300 border-yellow-500/30",
+  founder_approved: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
+  rejected: "bg-red-500/15 text-red-300 border-red-500/30",
+  gmail_draft_created: "bg-sky-500/15 text-sky-300 border-sky-500/30",
+  submitted_manual: "bg-blue-500/15 text-blue-300 border-blue-500/30",
+};
+const RISK_CLS: Record<string, string> = {
+  low: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
+  medium: "bg-yellow-500/15 text-yellow-300 border-yellow-500/30",
+  high: "bg-red-500/15 text-red-300 border-red-500/30",
+};
+
+function DraftGeneratePanel({ onDone }: { onDone?: () => void }) {
+  const [matchId, setMatchId] = useState("");
+  const [dryRun, setDryRun] = useState(true);
+  const [force, setForce] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState<any | null>(null);
+
+  const { data: eligible = [] } = useTable("pr-drafts-eligible-matches", async () => {
+    const { data } = await sb.from("media_opportunity_matches")
+      .select("id,opportunity_id,business_id,match_score,recommended_action,created_at")
+      .in("recommended_action", ["draft_pitch", "request_assets", "prepare_only"])
+      .order("match_score", { ascending: false }).limit(25);
+    return data ?? [];
+  });
+
+  async function run() {
+    if (!matchId) { toast.error("Choose or paste a match id"); return; }
+    setBusy(true); setResult(null);
+    try {
+      const { data, error } = await sb.functions.invoke("pr-generate-pitch-draft", {
+        body: { match_id: matchId, draft_mode: "template", dry_run: dryRun, force_regenerate: force },
+      });
+      if (error) throw error;
+      setResult(data);
+      if (data?.ok) toast.success(dryRun ? "Dry run complete" : (data.deduped ? "Existing draft returned" : "Draft generated"));
+      else toast.error(`Blocked: ${data?.reason || "unknown"}`);
+      onDone?.();
+    } catch (e: any) { toast.error(e?.message || "Draft generation failed"); }
+    finally { setBusy(false); }
+  }
+
+  return (
+    <Card className="tech-card">
+      <CardHeader className="pb-2"><CardTitle className="text-sm">Generate pitch draft</CardTitle></CardHeader>
+      <CardContent className="space-y-2">
+        <div className="text-[11px] text-muted-foreground">
+          Template-based draft generator. AI Gateway drafting is deferred — drafts never include private founder, entity, tax or family detail. No external send. Blocked for inactive or not-press-ready businesses.
+        </div>
+        <div className="grid md:grid-cols-3 gap-2 items-end">
+          <div className="md:col-span-2">
+            <label className="text-[11px] text-muted-foreground">Match id (or pick eligible below)</label>
+            <Input value={matchId} onChange={(e) => setMatchId(e.target.value)} placeholder="match uuid" className="h-8 text-xs" />
+          </div>
+          <div className="flex items-center gap-3">
+            <label className="text-xs flex items-center gap-1"><input type="checkbox" checked={dryRun} onChange={(e) => setDryRun(e.target.checked)} /> Dry run</label>
+            <label className="text-xs flex items-center gap-1"><input type="checkbox" checked={force} onChange={(e) => setForce(e.target.checked)} /> Force regen</label>
+          </div>
+        </div>
+        {eligible.length ? (
+          <div className="max-h-32 overflow-auto rounded border border-border/40 p-1">
+            {eligible.map((m: any) => (
+              <button key={m.id} className={`block w-full text-left text-[11px] px-2 py-1 rounded hover:bg-secondary/40 ${matchId === m.id ? "bg-secondary/60" : ""}`}
+                onClick={() => setMatchId(m.id)}>
+                <span className="font-mono">{m.id.slice(0, 8)}</span> · score {m.match_score} · <i>{m.recommended_action}</i> · opp {m.opportunity_id?.slice(0,8)} · biz {m.business_id?.slice(0,8)}
+              </button>
+            ))}
+          </div>
+        ) : null}
+        <div className="flex items-center gap-2">
+          <Button size="sm" onClick={run} disabled={busy}>{busy ? <Loader2 className="h-3 w-3 animate-spin" /> : null} Generate</Button>
+          {result ? (
+            <div className="text-[11px] text-muted-foreground">
+              {result.ok
+                ? <>send={result.send_method} · risk={result.risk_level} · approval={result.approval_status} · missing={(result.missing_assets || []).length}{result.deduped ? " · existing" : ""}{result.dry_run ? " · dry" : ""}</>
+                : <span className="text-red-300">{result.reason}</span>}
+            </div>
+          ) : null}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function DraftDetailDialog({ id, open, onOpenChange, onChanged }: { id: string | null; open: boolean; onOpenChange: (v: boolean) => void; onChanged: () => void }) {
+  const [row, setRow] = useState<any | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [acting, setActing] = useState<string | null>(null);
+
+  async function load() {
+    if (!id) { setRow(null); return; }
+    const { data } = await sb.from("media_pitch_drafts").select("*").eq("id", id).maybeSingle();
+    setRow(data ?? null);
+  }
+  // load on open
+  useEffect(() => { if (open && id) load(); /* eslint-disable-next-line */ }, [open, id]);
+
+  if (!row) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-2xl"><div className="text-xs text-muted-foreground">Loading…</div></DialogContent>
+      </Dialog>
+    );
+  }
+
+  async function patch(p: any) {
+    setRow({ ...row, ...p });
+  }
+  async function save() {
+    setSaving(true);
+    try {
+      const { error } = await sb.from("media_pitch_drafts").update({
+        draft_subject: row.draft_subject,
+        draft_body: row.draft_body,
+        quote_options: row.quote_options,
+        asset_checklist: row.asset_checklist,
+        platform_instructions: row.platform_instructions,
+        compliance_notes: row.compliance_notes,
+        risk_level: row.risk_level,
+        approval_status: row.approval_status,
+        updated_at: new Date().toISOString(),
+      }).eq("id", row.id);
+      if (error) throw error;
+      toast.success("Saved");
+      onChanged();
+    } catch (e: any) { toast.error(e?.message || "Save failed"); }
+    finally { setSaving(false); }
+  }
+  async function decide(status: "founder_approved" | "rejected" | "needs_review") {
+    setActing(status);
+    try {
+      const patch: any = { approval_status: status, updated_at: new Date().toISOString() };
+      if (status === "founder_approved") patch.founder_approved_at = new Date().toISOString();
+      const { error } = await sb.from("media_pitch_drafts").update(patch).eq("id", row.id);
+      if (error) throw error;
+      await sb.from("pr_audit_events").insert({
+        event_type: status === "founder_approved" ? "pr_pitch_draft_approved" : status === "rejected" ? "pr_pitch_draft_rejected" : "pr_pitch_draft_returned",
+        summary: `Draft ${status}`,
+        details: { draft_id: row.id },
+      });
+      toast.success(`Draft ${status.replace("_", " ")}`);
+      setRow({ ...row, ...patch });
+      onChanged();
+    } catch (e: any) { toast.error(e?.message || "Action failed"); }
+    finally { setActing(null); }
+  }
+  async function createGmailDraft(dry = false) {
+    setActing("gmail");
+    try {
+      const { data, error } = await sb.functions.invoke("pr-create-gmail-draft", { body: { pitch_draft_id: row.id, dry_run: dry } });
+      if (error) throw error;
+      if (!data?.ok) { toast.error(data?.reason || "Gmail draft failed"); return; }
+      if (dry) toast.success(`Dry: would send to ${data.recipient_preview}`);
+      else { toast.success("Gmail draft created. It has not been sent."); await load(); onChanged(); }
+    } catch (e: any) { toast.error(e?.message || "Gmail draft failed"); }
+    finally { setActing(null); }
+  }
+  async function markPlatformSubmitted() {
+    setActing("platform");
+    try {
+      const platformName = window.prompt("Platform name (Qwoted, HARO, …):", "Qwoted") || null;
+      const note = window.prompt("Submission note (optional):", "") || null;
+      const { data, error } = await sb.functions.invoke("pr-mark-platform-submission", { body: { pitch_draft_id: row.id, platform_name: platformName, submission_note: note } });
+      if (error) throw error;
+      if (!data?.ok) { toast.error(data?.reason || "Failed"); return; }
+      toast.success("Marked submitted");
+      await load(); onChanged();
+    } catch (e: any) { toast.error(e?.message || "Failed"); }
+    finally { setActing(null); }
+  }
+  async function copyMessage() {
+    const txt = `${row.draft_subject || ""}\n\n${row.draft_body || ""}${row.platform_instructions ? `\n\n— Platform instructions —\n${row.platform_instructions}` : ""}`;
+    try { await navigator.clipboard.writeText(txt); toast.success("Copied to clipboard"); } catch { toast.error("Copy failed"); }
+  }
+
+  const canGmail = row.approval_status === "founder_approved" && row.send_method === "gmail_draft";
+  const canPlatform = row.send_method === "platform_copy_paste" || row.send_method === "manual_review_only";
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-sm">Pitch draft</DialogTitle>
+          <DialogDescription className="text-[11px]">
+            Approving allows Liftor to create a Gmail draft or prepare platform-copy workflow only. It does not send anything.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-2 text-xs">
+          <div className="flex flex-wrap gap-2">
+            {chip(row.approval_status || "draft", APPROVAL_CLS[row.approval_status || "draft"])}
+            {chip(`risk ${row.risk_level || "medium"}`, RISK_CLS[row.risk_level || "medium"])}
+            {chip(`send ${row.send_method || "manual_review_only"}`)}
+            {row.created_by_ai ? chip("AI-assisted") : chip("template")}
+          </div>
+          <div>
+            <label className="text-[11px] text-muted-foreground">Subject</label>
+            <Input value={row.draft_subject || ""} onChange={(e) => patch({ draft_subject: e.target.value })} className="h-8 text-xs" />
+          </div>
+          <div>
+            <label className="text-[11px] text-muted-foreground">Body</label>
+            <Textarea value={row.draft_body || ""} onChange={(e) => patch({ draft_body: e.target.value })} className="text-xs font-mono" rows={14} />
+          </div>
+          {row.platform_instructions != null ? (
+            <div>
+              <label className="text-[11px] text-muted-foreground">Platform instructions</label>
+              <Textarea value={row.platform_instructions || ""} onChange={(e) => patch({ platform_instructions: e.target.value })} className="text-xs" rows={4} />
+            </div>
+          ) : null}
+          <div className="grid md:grid-cols-2 gap-2">
+            <div>
+              <label className="text-[11px] text-muted-foreground">Quote options (JSON)</label>
+              <Textarea value={JSON.stringify(row.quote_options ?? [], null, 2)} onChange={(e) => { try { patch({ quote_options: JSON.parse(e.target.value) }); } catch {} }} className="text-[11px] font-mono" rows={4} />
+            </div>
+            <div>
+              <label className="text-[11px] text-muted-foreground">Asset checklist (JSON)</label>
+              <Textarea value={JSON.stringify(row.asset_checklist ?? [], null, 2)} onChange={(e) => { try { patch({ asset_checklist: JSON.parse(e.target.value) }); } catch {} }} className="text-[11px] font-mono" rows={4} />
+            </div>
+          </div>
+          <div>
+            <label className="text-[11px] text-muted-foreground">Compliance notes</label>
+            <Textarea value={row.compliance_notes || ""} onChange={(e) => patch({ compliance_notes: e.target.value })} className="text-xs" rows={3} />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="text-[11px] text-muted-foreground">Risk level</label>
+              <select value={row.risk_level || "medium"} onChange={(e) => patch({ risk_level: e.target.value })} className="w-full h-8 text-xs rounded border border-input bg-background px-2">
+                {["low", "medium", "high"].map((v) => <option key={v} value={v}>{v}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-[11px] text-muted-foreground">Approval status</label>
+              <select value={row.approval_status || "draft"} onChange={(e) => patch({ approval_status: e.target.value })} className="w-full h-8 text-xs rounded border border-input bg-background px-2">
+                {["draft","needs_review","founder_review","founder_approved","rejected","gmail_draft_created","submitted_manual"].map((v) => <option key={v} value={v}>{v}</option>)}
+              </select>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2 pt-2 border-t border-border/40">
+            <Button size="sm" variant="outline" onClick={save} disabled={saving}>{saving ? <Loader2 className="h-3 w-3 animate-spin" /> : null} Save edits</Button>
+            <Button size="sm" variant="outline" onClick={() => decide("needs_review")} disabled={!!acting}>Send to review</Button>
+            <Button size="sm" onClick={() => decide("founder_approved")} disabled={!!acting}><Check className="h-3 w-3" /> Approve</Button>
+            <Button size="sm" variant="destructive" onClick={() => decide("rejected")} disabled={!!acting}><XIcon className="h-3 w-3" /> Reject</Button>
+            <Button size="sm" variant="outline" onClick={copyMessage}><Copy className="h-3 w-3" /> Copy message</Button>
+            {canGmail ? (
+              <>
+                <Button size="sm" variant="outline" onClick={() => createGmailDraft(true)} disabled={!!acting}>Gmail dry run</Button>
+                <Button size="sm" onClick={() => createGmailDraft(false)} disabled={!!acting}><Mail className="h-3 w-3" /> Create Gmail draft</Button>
+              </>
+            ) : null}
+            {canPlatform ? (
+              <Button size="sm" variant="outline" onClick={markPlatformSubmitted} disabled={!!acting}><Send className="h-3 w-3" /> Mark submitted</Button>
+            ) : null}
+          </div>
+          <div className="text-[11px] text-muted-foreground pt-1">
+            No external send. Gmail action only creates a draft inside Gmail. Platform-only contact must happen inside the platform; no scraping, no automated send.
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function DraftsTab() {
+  const qc = useQueryClient();
+  const [openId, setOpenId] = useState<string | null>(null);
+  const refresh = () => { qc.invalidateQueries({ queryKey: ["pr-drafts"] }); qc.invalidateQueries({ queryKey: ["pr-overview"] }); };
+
   const { data: rows = [], isLoading } = useTable("pr-drafts", async () => {
     const { data } = await sb.from("media_pitch_drafts")
-      .select("id,opportunity_id,business_id,send_method,approval_status,risk_level,created_by_ai,created_at,founder_approved_at")
+      .select("id,opportunity_id,business_id,draft_subject,send_method,approval_status,risk_level,created_by_ai,created_at,founder_approved_at")
       .order("created_at", { ascending: false }).limit(ROW_LIMIT);
     return data ?? [];
   });
-  if (isLoading) return <div className="text-xs text-muted-foreground">Loading…</div>;
-  if (rows.length === 0) return <EmptyState>No pitch drafts yet. Drafting and approval workflow will be added in Phase 9. No external sending exists in this build.</EmptyState>;
+
   return (
     <div className="space-y-3">
-      <div className="text-[11px] text-muted-foreground">All send/approve/submit actions are disabled until Phase 9. No external sending in this build.</div>
-      <Table>
-        <TableHeader><TableRow>
-          <TableHead>Opportunity</TableHead><TableHead>Business</TableHead><TableHead>Send method</TableHead>
-          <TableHead>Approval</TableHead><TableHead>Risk</TableHead><TableHead>AI?</TableHead>
-          <TableHead>Created</TableHead><TableHead>Approved</TableHead><TableHead>Action</TableHead>
-        </TableRow></TableHeader>
-        <TableBody>
-          {rows.map((r: any) => (
-            <TableRow key={r.id}>
-              <TableCell className="text-xs">{r.opportunity_id ? r.opportunity_id.slice(0, 8) : "—"}</TableCell>
-              <TableCell className="text-xs">{r.business_id ? r.business_id.slice(0, 8) : "—"}</TableCell>
-              <TableCell className="text-xs">{r.send_method || "manual_review_only"}</TableCell>
-              <TableCell>{chip(r.approval_status || "draft")}</TableCell>
-              <TableCell>{chip(r.risk_level || "medium")}</TableCell>
-              <TableCell className="text-xs">{r.created_by_ai ? "Yes" : "—"}</TableCell>
-              <TableCell className="text-xs">{fmtDateShort(r.created_at)}</TableCell>
-              <TableCell className="text-xs">{fmtDateShort(r.founder_approved_at)}</TableCell>
-              <TableCell><Button size="sm" variant="outline" disabled>Phase 9</Button></TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <DraftGeneratePanel onDone={refresh} />
+      <div className="text-[11px] text-muted-foreground">
+        Approval workflow. No external sending in this build. Gmail action creates a draft only. Platform-only routes use copy / mark-submitted.
+      </div>
+      {isLoading ? <div className="text-xs text-muted-foreground">Loading…</div> :
+       rows.length === 0 ? <EmptyState>No pitch drafts yet. Generate from an eligible match above. Inactive or not-press-ready businesses are blocked at the generator.</EmptyState> :
+       (
+        <Table>
+          <TableHeader><TableRow>
+            <TableHead>Subject</TableHead><TableHead>Opportunity</TableHead><TableHead>Business</TableHead>
+            <TableHead>Send</TableHead><TableHead>Approval</TableHead><TableHead>Risk</TableHead><TableHead>AI?</TableHead>
+            <TableHead>Created</TableHead><TableHead>Approved</TableHead><TableHead></TableHead>
+          </TableRow></TableHeader>
+          <TableBody>
+            {rows.map((r: any) => (
+              <TableRow key={r.id}>
+                <TableCell className="text-xs max-w-[260px] truncate">{r.draft_subject || "—"}</TableCell>
+                <TableCell className="text-[11px] font-mono">{r.opportunity_id ? r.opportunity_id.slice(0, 8) : "—"}</TableCell>
+                <TableCell className="text-[11px] font-mono">{r.business_id ? r.business_id.slice(0, 8) : "—"}</TableCell>
+                <TableCell className="text-xs">{r.send_method || "manual_review_only"}</TableCell>
+                <TableCell>{chip(r.approval_status || "draft", APPROVAL_CLS[r.approval_status || "draft"])}</TableCell>
+                <TableCell>{chip(r.risk_level || "medium", RISK_CLS[r.risk_level || "medium"])}</TableCell>
+                <TableCell className="text-xs">{r.created_by_ai ? "Yes" : "—"}</TableCell>
+                <TableCell className="text-xs">{fmtDateShort(r.created_at)}</TableCell>
+                <TableCell className="text-xs">{fmtDateShort(r.founder_approved_at)}</TableCell>
+                <TableCell><Button size="sm" variant="outline" onClick={() => setOpenId(r.id)}>Open</Button></TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
+      <DraftDetailDialog id={openId} open={!!openId} onOpenChange={(v) => !v && setOpenId(null)} onChanged={refresh} />
     </div>
   );
 }
@@ -1605,6 +1886,10 @@ function SettingsTab() {
     "Press-ready means a live public offer/website, approved assets, claims, quotes and compliance clearance are all in place.",
     "Blocked topics on a business override the match score and force a 'block' recommendation.",
     "Inactive or partially-ready businesses are never marked draft_pitch — they are blocked, parked or marked needs_assets.",
+    "PR pitches require founder approval before any Gmail draft or platform action.",
+    "Gmail action creates a draft inside Gmail only — Liftor never sends.",
+    "Platform-only records (Qwoted, HARO platform, etc.) require manual platform submission. Use Copy + Mark submitted.",
+    "Approved business press-pack wording only — no invented claims, metrics, awards or endorsements.",
   ];
 
   const Block = ({ title, items }: { title: string; items: (string | string[])[] }) => (
