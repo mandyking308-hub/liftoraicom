@@ -504,3 +504,217 @@ function AskDialog({ state, onOpenChange, videos }: { state: { open: boolean; vi
     </Dialog>
   );
 }
+function CoveragePanel({ videos }: { videos: VideoRow[] }) {
+  const groups = useMemo(() => {
+    const m: Record<string, { business: string; area: string; videos: VideoRow[] }> = {};
+    for (const v of videos) {
+      const business = v.business_id ?? "—";
+      const areas = (v.module_coverage?.length ? v.module_coverage : [v.dashboard_area ?? "(unmapped)"]);
+      for (const area of areas) {
+        const key = `${business}::${area}`;
+        if (!m[key]) m[key] = { business, area: String(area), videos: [] };
+        m[key].videos.push(v);
+      }
+    }
+    return Object.values(m).sort((a, b) => a.business.localeCompare(b.business) || a.area.localeCompare(b.area));
+  }, [videos]);
+
+  const missingTranscript = videos.filter((v) => (v.transcript_segment_count ?? 0) === 0);
+  const blockedByPrivacy = videos.filter((v) => v.privacy_status === "flagged" || v.privacy_status === "blocked");
+  const buyerReady = videos.filter((v) => v.buyer_handover_ready);
+
+  return (
+    <Card className="tech-card">
+      <CardHeader className="pb-2"><CardTitle className="text-sm">Dashboard coverage map</CardTitle></CardHeader>
+      <CardContent className="text-xs space-y-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+          <div className="border border-border/40 rounded p-2"><div className="text-muted-foreground">Areas covered</div><div className="text-xl font-semibold">{groups.length}</div></div>
+          <div className="border border-border/40 rounded p-2"><div className="text-muted-foreground">Missing transcript</div><div className="text-xl font-semibold text-yellow-300">{missingTranscript.length}</div></div>
+          <div className="border border-border/40 rounded p-2"><div className="text-muted-foreground">Privacy blocked</div><div className="text-xl font-semibold text-red-300">{blockedByPrivacy.length}</div></div>
+          <div className="border border-border/40 rounded p-2"><div className="text-muted-foreground">Buyer-handover ready</div><div className="text-xl font-semibold text-blue-300">{buyerReady.length}</div></div>
+        </div>
+        {groups.length === 0 ? (
+          <p className="text-muted-foreground">No coverage yet. Register a video with a dashboard area or module coverage to start mapping.</p>
+        ) : (
+          <div className="space-y-2">
+            {groups.map((g) => (
+              <div key={`${g.business}-${g.area}`} className="border border-border/40 rounded p-2">
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="text-[10px]">business:{g.business.slice(0, 8)}</Badge>
+                  <Badge variant="outline" className="text-[10px]">area:{g.area}</Badge>
+                  <span className="ml-auto text-muted-foreground">{g.videos.length} video(s)</span>
+                </div>
+                <ul className="mt-1 ml-3 list-disc text-muted-foreground">
+                  {g.videos.map((v) => (
+                    <li key={v.id}>{v.title} — {v.transcript_segment_count} seg · privacy:{v.privacy_status ?? "unchecked"}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function AssignmentsPanel({ videos }: { videos: VideoRow[] }) {
+  const [videoId, setVideoId] = useState("");
+  const [role, setRole] = useState("operator");
+  const [dueDate, setDueDate] = useState("");
+  const [startSec, setStartSec] = useState("");
+  const [endSec, setEndSec] = useState("");
+  const qc = useQueryClient();
+
+  const listQ = useQuery({
+    queryKey: ["video-library-assignments"],
+    queryFn: async () => {
+      const { data, error } = await sb.from("video_library_training_assignments").select("*").order("created_at", { ascending: false }).limit(100);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const submit = async () => {
+    if (!videoId) { toast.error("Pick a video"); return; }
+    const payload: any = {
+      video_id: videoId,
+      assigned_to_role: role,
+      due_at: dueDate || null,
+      status: "assigned",
+    };
+    if (startSec) payload.start_seconds = Number(startSec);
+    if (endSec) payload.end_seconds = Number(endSec);
+    const { error } = await sb.from("video_library_training_assignments").insert(payload);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Assignment created");
+    setVideoId(""); setStartSec(""); setEndSec(""); setDueDate("");
+    qc.invalidateQueries({ queryKey: ["video-library-assignments"] });
+  };
+
+  return (
+    <Card className="tech-card">
+      <CardHeader className="pb-2"><CardTitle className="text-sm">Training assignments</CardTitle></CardHeader>
+      <CardContent className="text-xs space-y-3">
+        <div className="flex flex-wrap gap-2 items-end">
+          <select className="bg-background border border-border/50 rounded h-9 px-2 min-w-[200px]" value={videoId} onChange={(e) => setVideoId(e.target.value)}>
+            <option value="">— select video —</option>
+            {videos.map((v) => <option key={v.id} value={v.id}>{v.title}</option>)}
+          </select>
+          <select className="bg-background border border-border/50 rounded h-9 px-2" value={role} onChange={(e) => setRole(e.target.value)}>
+            {["operator","oversight","customer","founder","admin","adviser","buyer"].map((x) => <option key={x} value={x}>{x}</option>)}
+          </select>
+          <Input className="w-32" placeholder="start sec" value={startSec} onChange={(e) => setStartSec(e.target.value)} />
+          <Input className="w-32" placeholder="end sec" value={endSec} onChange={(e) => setEndSec(e.target.value)} />
+          <Input type="date" className="w-40" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+          <Button size="sm" onClick={submit}>Assign</Button>
+        </div>
+        <div className="space-y-1">
+          {(listQ.data ?? []).length === 0 && <p className="text-muted-foreground">No assignments yet.</p>}
+          {(listQ.data ?? []).map((a: any) => {
+            const v = videos.find((x) => x.id === a.video_id);
+            return (
+              <div key={a.id} className="border border-border/40 rounded p-2 flex items-center gap-2 flex-wrap">
+                <span className="font-medium">{v?.title ?? a.video_id}</span>
+                <Badge variant="outline" className="text-[10px]">{a.assigned_to_role ?? "?"}</Badge>
+                <Badge variant="outline" className="text-[10px]">{a.status}</Badge>
+                {a.start_seconds != null && <Badge variant="outline" className="text-[10px]">{fmtTime(a.start_seconds)} – {fmtTime(a.end_seconds ?? a.start_seconds)}</Badge>}
+                {a.due_at && <span className="text-muted-foreground">due {new Date(a.due_at).toLocaleDateString()}</span>}
+                {a.completed_at && <span className="text-emerald-300">done {new Date(a.completed_at).toLocaleDateString()}</span>}
+              </div>
+            );
+          })}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function PrivacyPanel({ videos, onChanged }: { videos: VideoRow[]; onChanged: () => void }) {
+  const flagged = videos.filter((v) => v.privacy_status === "flagged");
+  const unchecked = videos.filter((v) => !v.privacy_status || v.privacy_status === "unchecked");
+  const approve = async (id: string, status: string) => {
+    const { error } = await sb.from("video_library_items").update({ privacy_status: status, approved_at: new Date().toISOString() }).eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    await sb.from("video_library_audit_events").insert({ video_id: id, action: "privacy_approval", event_summary: `Privacy approved → ${status}` , metadata: { status } });
+    toast.success(`Updated to ${status}`); onChanged();
+  };
+  return (
+    <Card className="tech-card">
+      <CardHeader className="pb-2"><CardTitle className="text-sm">Privacy review</CardTitle></CardHeader>
+      <CardContent className="text-xs space-y-3">
+        <p className="text-muted-foreground">
+          Run a privacy scan from the Library tab. The scan flags emails, phone numbers, payment references, IBANs, API keys, JWTs, health/financial/confidential keywords. Flagged videos cannot be approved for customer, buyer or adviser visibility until reviewed.
+        </p>
+        <div>
+          <p className="font-medium mb-1">Flagged ({flagged.length})</p>
+          {flagged.length === 0 && <p className="text-muted-foreground">Nothing flagged.</p>}
+          {flagged.map((v) => (
+            <div key={v.id} className="border border-red-500/30 rounded p-2 mb-1 flex items-center gap-2 flex-wrap">
+              <span className="font-medium">{v.title}</span>
+              <Badge variant="outline" className="text-[10px]">{v.audience_type}</Badge>
+              <span className="ml-auto flex gap-1">
+                <Button size="sm" variant="outline" onClick={() => approve(v.id, "approved_internal")}>Approve internal</Button>
+                <Button size="sm" variant="outline" onClick={() => approve(v.id, "approved_customer")}>Approve customer</Button>
+                <Button size="sm" variant="outline" onClick={() => approve(v.id, "approved_buyer")}>Approve buyer</Button>
+                <Button size="sm" variant="outline" onClick={() => approve(v.id, "blocked")}>Block</Button>
+              </span>
+            </div>
+          ))}
+        </div>
+        <div>
+          <p className="font-medium mb-1">Unchecked ({unchecked.length})</p>
+          {unchecked.length === 0 && <p className="text-muted-foreground">All videos scanned.</p>}
+          {unchecked.map((v) => (
+            <div key={v.id} className="border border-border/40 rounded p-2 mb-1 text-muted-foreground">
+              {v.title} — run privacy scan from Library tab.
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function EvidencePanel({ videos }: { videos: VideoRow[] }) {
+  const ready = videos.filter((v) =>
+    (v.transcript_segment_count ?? 0) > 0 &&
+    !!v.external_url &&
+    (v.privacy_status === "approved_buyer" || v.privacy_status === "approved_internal" || v.privacy_status === "approved_customer") &&
+    (v.module_coverage?.length || v.dashboard_area)
+  );
+  const blockers = videos.filter((v) => !ready.includes(v));
+  return (
+    <Card className="tech-card">
+      <CardHeader className="pb-2"><CardTitle className="text-sm">Buyer / adviser handover evidence</CardTitle></CardHeader>
+      <CardContent className="text-xs space-y-3">
+        <p className="text-muted-foreground">A video qualifies as handover evidence when: searchable transcript exists, approved external link exists, privacy approved, and module/area coverage is mapped.</p>
+        <div>
+          <p className="font-medium mb-1 text-emerald-300">Ready ({ready.length})</p>
+          {ready.length === 0 && <p className="text-muted-foreground">No videos yet meet all handover criteria.</p>}
+          {ready.map((v) => (
+            <div key={v.id} className="border border-emerald-500/30 rounded p-2 mb-1 flex items-center gap-2 flex-wrap">
+              <span className="font-medium">{v.title}</span>
+              <Badge variant="outline" className="text-[10px]">{v.audience_type}</Badge>
+              <Badge variant="outline" className="text-[10px]">{v.transcript_segment_count} seg</Badge>
+              <Badge variant="outline" className="text-[10px]">privacy:{v.privacy_status}</Badge>
+              {v.external_url && <a className="ml-auto text-primary" href={v.external_url} target="_blank" rel="noreferrer">Open</a>}
+            </div>
+          ))}
+        </div>
+        <div>
+          <p className="font-medium mb-1">Blocked / incomplete ({blockers.length})</p>
+          {blockers.map((v) => (
+            <div key={v.id} className="border border-border/40 rounded p-2 mb-1 text-muted-foreground flex flex-wrap gap-2">
+              <span>{v.title}</span>
+              {(v.transcript_segment_count ?? 0) === 0 && <Badge variant="outline" className="text-[10px]">no transcript</Badge>}
+              {!v.external_url && <Badge variant="outline" className="text-[10px]">no external link</Badge>}
+              {(!v.privacy_status || v.privacy_status === "unchecked" || v.privacy_status === "flagged" || v.privacy_status === "blocked") && <Badge variant="outline" className="text-[10px]">privacy:{v.privacy_status ?? "unchecked"}</Badge>}
+              {!(v.module_coverage?.length || v.dashboard_area) && <Badge variant="outline" className="text-[10px]">no area / module coverage</Badge>}
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
