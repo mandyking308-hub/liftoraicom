@@ -21,3 +21,4 @@ System runs in `system_mode='test'` by default — no real outbound sends until 
 - [Procurement Engine](mem://features/procurement-engine) — Suppliers, assignments, load balancing.
 - [Proposal & Demo Engine](mem://features/proposal-demo-engine) — Internal proposals, demo access, intent.
 - [Execution Modes](mem://features/execution-modes) — Per-business gating of proposals/deals/invoicing/suppliers/outreach/demos via sales/outreach/hybrid modes.
+- [Searchable Video Library](mem://features/searchable-video-library) — Transcript-indexed video module at /founder/video-library with hybrid (keyword+semantic) search, ask-this-video Q&A, and redaction/access governance; external hosts only (Loom/Zoom/Panopto/Vimeo/YouTube), Liftor owns the intelligence layer.

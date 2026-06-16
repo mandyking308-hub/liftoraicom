@@ -60275,6 +60275,397 @@ export type Database = {
         }
         Relationships: []
       }
+      video_library_access_grants: {
+        Row: {
+          expires_at: string | null
+          granted_at: string
+          granted_by: string | null
+          grantee_business_id: string | null
+          grantee_role: string | null
+          grantee_user_id: string | null
+          id: string
+          revoked_at: string | null
+          scope: string
+          video_id: string
+        }
+        Insert: {
+          expires_at?: string | null
+          granted_at?: string
+          granted_by?: string | null
+          grantee_business_id?: string | null
+          grantee_role?: string | null
+          grantee_user_id?: string | null
+          id?: string
+          revoked_at?: string | null
+          scope?: string
+          video_id: string
+        }
+        Update: {
+          expires_at?: string | null
+          granted_at?: string
+          granted_by?: string | null
+          grantee_business_id?: string | null
+          grantee_role?: string | null
+          grantee_user_id?: string | null
+          id?: string
+          revoked_at?: string | null
+          scope?: string
+          video_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_library_access_grants_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "video_library_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      video_library_chapters: {
+        Row: {
+          created_at: string
+          end_seconds: number | null
+          id: string
+          start_seconds: number
+          summary: string | null
+          title: string
+          video_id: string
+        }
+        Insert: {
+          created_at?: string
+          end_seconds?: number | null
+          id?: string
+          start_seconds: number
+          summary?: string | null
+          title: string
+          video_id: string
+        }
+        Update: {
+          created_at?: string
+          end_seconds?: number | null
+          id?: string
+          start_seconds?: number
+          summary?: string | null
+          title?: string
+          video_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_library_chapters_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "video_library_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      video_library_export_packs: {
+        Row: {
+          audience: string
+          business_id: string | null
+          created_at: string
+          created_by: string | null
+          delivered_at: string | null
+          delivered_to: string | null
+          description: string | null
+          id: string
+          include_chapters: boolean
+          include_transcripts: boolean
+          status: string
+          title: string
+          updated_at: string
+          video_ids: string[]
+        }
+        Insert: {
+          audience?: string
+          business_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          delivered_at?: string | null
+          delivered_to?: string | null
+          description?: string | null
+          id?: string
+          include_chapters?: boolean
+          include_transcripts?: boolean
+          status?: string
+          title: string
+          updated_at?: string
+          video_ids?: string[]
+        }
+        Update: {
+          audience?: string
+          business_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          delivered_at?: string | null
+          delivered_to?: string | null
+          description?: string | null
+          id?: string
+          include_chapters?: boolean
+          include_transcripts?: boolean
+          status?: string
+          title?: string
+          updated_at?: string
+          video_ids?: string[]
+        }
+        Relationships: []
+      }
+      video_library_items: {
+        Row: {
+          business_id: string | null
+          contains_sensitive_info: boolean
+          created_at: string
+          created_by: string | null
+          description: string | null
+          duration_seconds: number | null
+          embedding_model: string | null
+          external_provider: string | null
+          external_url: string | null
+          id: string
+          language: string | null
+          metadata: Json
+          module_coverage: string[] | null
+          redaction_required: boolean
+          redaction_status: string
+          source_type: string
+          status: string
+          tags: string[] | null
+          thumbnail_url: string | null
+          title: string
+          transcript_segment_count: number
+          updated_at: string
+          visibility: string
+        }
+        Insert: {
+          business_id?: string | null
+          contains_sensitive_info?: boolean
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          duration_seconds?: number | null
+          embedding_model?: string | null
+          external_provider?: string | null
+          external_url?: string | null
+          id?: string
+          language?: string | null
+          metadata?: Json
+          module_coverage?: string[] | null
+          redaction_required?: boolean
+          redaction_status?: string
+          source_type?: string
+          status?: string
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title: string
+          transcript_segment_count?: number
+          updated_at?: string
+          visibility?: string
+        }
+        Update: {
+          business_id?: string | null
+          contains_sensitive_info?: boolean
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          duration_seconds?: number | null
+          embedding_model?: string | null
+          external_provider?: string | null
+          external_url?: string | null
+          id?: string
+          language?: string | null
+          metadata?: Json
+          module_coverage?: string[] | null
+          redaction_required?: boolean
+          redaction_status?: string
+          source_type?: string
+          status?: string
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title?: string
+          transcript_segment_count?: number
+          updated_at?: string
+          visibility?: string
+        }
+        Relationships: []
+      }
+      video_library_qa_log: {
+        Row: {
+          answer: string | null
+          asked_by: string | null
+          citations: Json
+          created_at: string
+          id: string
+          model_used: string | null
+          question: string
+          tokens_used: number | null
+          video_id: string
+        }
+        Insert: {
+          answer?: string | null
+          asked_by?: string | null
+          citations?: Json
+          created_at?: string
+          id?: string
+          model_used?: string | null
+          question: string
+          tokens_used?: number | null
+          video_id: string
+        }
+        Update: {
+          answer?: string | null
+          asked_by?: string | null
+          citations?: Json
+          created_at?: string
+          id?: string
+          model_used?: string | null
+          question?: string
+          tokens_used?: number | null
+          video_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_library_qa_log_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "video_library_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      video_library_redaction_reviews: {
+        Row: {
+          created_at: string
+          flagged_segment_ids: string[] | null
+          id: string
+          notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          video_id: string
+        }
+        Insert: {
+          created_at?: string
+          flagged_segment_ids?: string[] | null
+          id?: string
+          notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          video_id: string
+        }
+        Update: {
+          created_at?: string
+          flagged_segment_ids?: string[] | null
+          id?: string
+          notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          video_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_library_redaction_reviews_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "video_library_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      video_library_search_audit: {
+        Row: {
+          business_filter: string | null
+          created_at: string
+          id: string
+          latency_ms: number | null
+          query: string
+          results_count: number | null
+          search_mode: string
+          user_id: string | null
+          video_filter: string | null
+        }
+        Insert: {
+          business_filter?: string | null
+          created_at?: string
+          id?: string
+          latency_ms?: number | null
+          query: string
+          results_count?: number | null
+          search_mode?: string
+          user_id?: string | null
+          video_filter?: string | null
+        }
+        Update: {
+          business_filter?: string | null
+          created_at?: string
+          id?: string
+          latency_ms?: number | null
+          query?: string
+          results_count?: number | null
+          search_mode?: string
+          user_id?: string | null
+          video_filter?: string | null
+        }
+        Relationships: []
+      }
+      video_library_training_assignments: {
+        Row: {
+          assigned_by: string | null
+          assigned_to_role: string | null
+          assigned_to_user_id: string | null
+          business_id: string | null
+          completed_at: string | null
+          completed_sections: Json
+          created_at: string
+          due_at: string | null
+          id: string
+          required_sections: Json
+          status: string
+          updated_at: string
+          video_id: string
+        }
+        Insert: {
+          assigned_by?: string | null
+          assigned_to_role?: string | null
+          assigned_to_user_id?: string | null
+          business_id?: string | null
+          completed_at?: string | null
+          completed_sections?: Json
+          created_at?: string
+          due_at?: string | null
+          id?: string
+          required_sections?: Json
+          status?: string
+          updated_at?: string
+          video_id: string
+        }
+        Update: {
+          assigned_by?: string | null
+          assigned_to_role?: string | null
+          assigned_to_user_id?: string | null
+          business_id?: string | null
+          completed_at?: string | null
+          completed_sections?: Json
+          created_at?: string
+          due_at?: string | null
+          id?: string
+          required_sections?: Json
+          status?: string
+          updated_at?: string
+          video_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_library_training_assignments_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "video_library_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       video_sop_assets: {
         Row: {
           approved_at: string | null
@@ -60739,6 +61130,62 @@ export type Database = {
             columns: ["asset_id"]
             isOneToOne: false
             referencedRelation: "video_sop_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      video_transcript_segments: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          embedded_at: string | null
+          embedding: string | null
+          embedding_model: string | null
+          end_seconds: number
+          id: string
+          segment_index: number
+          speaker: string | null
+          start_seconds: number
+          text: string
+          text_tsv: unknown
+          video_id: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          embedded_at?: string | null
+          embedding?: string | null
+          embedding_model?: string | null
+          end_seconds: number
+          id?: string
+          segment_index: number
+          speaker?: string | null
+          start_seconds: number
+          text: string
+          text_tsv?: unknown
+          video_id: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          embedded_at?: string | null
+          embedding?: string | null
+          embedding_model?: string | null
+          end_seconds?: number
+          id?: string
+          segment_index?: number
+          speaker?: string | null
+          start_seconds?: number
+          text?: string
+          text_tsv?: unknown
+          video_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_transcript_segments_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "video_library_items"
             referencedColumns: ["id"]
           },
         ]
@@ -64235,6 +64682,28 @@ export type Database = {
       mark_send_failure: {
         Args: { _error: string; _queue_id: string }
         Returns: Json
+      }
+      match_video_segments: {
+        Args: {
+          business_filter?: string
+          match_count?: number
+          query_embedding: string
+          query_text: string
+          semantic_weight?: number
+          video_filter?: string
+        }
+        Returns: {
+          combined_score: number
+          end_seconds: number
+          keyword_score: number
+          segment_id: string
+          segment_index: number
+          semantic_score: number
+          speaker: string
+          start_seconds: number
+          text: string
+          video_id: string
+        }[]
       }
       next_valid_send_time: {
         Args: { _contact_id: string; _from?: string }
