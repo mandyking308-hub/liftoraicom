@@ -15,6 +15,24 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+// In-hub sub-navigation. All targets are existing, founder-only routes —
+// nothing is created or removed here. This card just makes the money,
+// filings and claims surfaces reachable from one place (Daily-Driver
+// Polish Pass 1, section N of the pre-live cleanup report).
+const FINANCE_HUB_TABS: { label: string; to: string; description: string }[] = [
+  { label: "Finance Overview",      to: "/founder/finance",                              description: "Targets vs actual, treasury, cost & margin." },
+  { label: "Revenue",               to: "/founder/revenue",                              description: "Revenue ledger and recognition view." },
+  { label: "Revenue Autopilot",     to: "/founder/revenue-autopilot",                    description: "Daily revenue loop — targets, tasks, gaps, approvals." },
+  { label: "Quote-to-Cash",         to: "/founder/quote-to-cash",                        description: "Proposals → quotes → invoices → payments." },
+  { label: "Collections",           to: "/founder/collections",                          description: "Overdue, reminders, payment plans, holds." },
+  { label: "Reconciliation",        to: "/founder/reconciliation",                       description: "Bank, payouts, refunds, unmatched items." },
+  { label: "Pricing & Margin",      to: "/founder/pricing-margin",                       description: "Breakeven, discounts, product-level margin." },
+  { label: "Portfolio FX",          to: "/founder/operating-loops/portfolio-fx",         description: "FX consolidation snapshots and warnings." },
+  { label: "Statutory Filings",     to: "/founder/operating-loops/statutory-filings",    description: "Tracking-only register for filings & deadlines." },
+  { label: "Corporate Secretarial", to: "/founder/operating-loops/corporate-secretarial",description: "Cadence for board, registers and minutes — tracking only." },
+  { label: "Insurance Claims",      to: "/founder/operating-loops/insurance-claims",     description: "Claim lifecycle log — broker handoff stays manual." },
+];
+
 type Row = {
   business_name: string;
   monthly_target: number;
@@ -108,6 +126,33 @@ const FinanceDashboard = () => {
             <Button asChild size="sm"><Link to="/founder/finance/payments"><PoundSterling className="mr-2 h-4 w-4" />Payments</Link></Button>
           </div>
         </div>
+
+        <Card className="tech-card border-primary/20">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">Finance Hub · sections</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+              {FINANCE_HUB_TABS.map((t) => {
+                const isActive = t.to === "/founder/finance";
+                return (
+                  <Link
+                    key={t.to}
+                    to={t.to}
+                    className={`block rounded-md border px-3 py-2 text-xs transition ${
+                      isActive
+                        ? "border-primary/60 bg-primary/10 text-primary"
+                        : "border-border/60 hover:border-primary/40 hover:bg-secondary text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <p className="text-sm font-medium text-foreground">{t.label}</p>
+                    <p className="mt-0.5 text-[11px] leading-snug">{t.description}</p>
+                  </Link>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {stats.map((s) => (
