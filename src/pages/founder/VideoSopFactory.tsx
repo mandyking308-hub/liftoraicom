@@ -417,6 +417,7 @@ export default function VideoSopFactoryPage() {
               </DialogFooter>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
 
         {/* Overview */}
