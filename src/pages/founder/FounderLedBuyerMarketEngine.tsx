@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
-import { Globe2, Users, Building2, Target, ShieldAlert, ClipboardCheck } from "lucide-react";
+import { Globe2, Users, Building2, Target, ShieldAlert, ClipboardCheck, Flame } from "lucide-react";
 
 /**
  * Founder-Led Buyer & Market Domination Engine.
@@ -16,20 +16,23 @@ export default function FounderLedBuyerMarketEngine() {
   const [buyers, setBuyers] = useState<any[]>([]);
   const [competitors, setCompetitors] = useState<any[]>([]);
   const [segments, setSegments] = useState<any[]>([]);
+  const [warmActions, setWarmActions] = useState<any[]>([]);
 
   useEffect(() => {
     (async () => {
       try {
-        const [p, b, c, s] = await Promise.all([
+        const [p, b, c, s, w] = await Promise.all([
           (supabase as any).from("business_exit_intelligence_profiles").select("*").order("twelve_month_review_date", { ascending: true }).limit(100),
           (supabase as any).from("founder_led_buyer_targets").select("*").order("updated_at", { ascending: false }).limit(100),
           (supabase as any).from("competitor_intelligence_map").select("*").order("updated_at", { ascending: false }).limit(100),
           (supabase as any).from("customer_prospect_segment_map").select("*").order("updated_at", { ascending: false }).limit(100),
+          (supabase as any).from("founder_led_buyer_warm_up_actions").select("*").order("due_date", { ascending: true }).limit(100),
         ]);
         setProfiles(p?.data ?? []);
         setBuyers(b?.data ?? []);
         setCompetitors(c?.data ?? []);
         setSegments(s?.data ?? []);
+        setWarmActions(w?.data ?? []);
       } catch { /* founder/admin gated */ }
     })();
   }, []);
