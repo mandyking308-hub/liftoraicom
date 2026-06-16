@@ -778,6 +778,13 @@ function EvidencePanel({ videos }: { videos: VideoRow[] }) {
               <Badge variant="outline" className="text-[10px]">{v.audience_type}</Badge>
               <Badge variant="outline" className="text-[10px]">{v.transcript_segment_count} seg</Badge>
               <Badge variant="outline" className="text-[10px]">privacy:{v.privacy_status}</Badge>
+              <Badge variant="outline" className={`text-[10px] ${v.buyer_handover_ready ? "bg-blue-500/15 text-blue-300 border-blue-500/30" : ""}`}>buyer-ready:{v.buyer_handover_ready ? "yes" : "no"}</Badge>
+              <Button size="sm" variant="outline" onClick={async () => {
+                const { data, error } = await sb.rpc("recompute_video_buyer_handover_ready", { _video_id: v.id });
+                if (error) { toast.error(error.message); return; }
+                await sb.from("video_library_audit_events").insert({ video_id: v.id, action: "buyer_handover_recomputed", event_summary: `buyer_handover_ready=${data}`, metadata: { ready: data } });
+                toast.success(`buyer_handover_ready = ${data}`);
+              }}>Recompute buyer-ready</Button>
               {v.external_url && <a className="ml-auto text-primary" href={v.external_url} target="_blank" rel="noreferrer">Open</a>}
             </div>
           ))}
@@ -791,9 +798,66 @@ function EvidencePanel({ videos }: { videos: VideoRow[] }) {
               {!v.external_url && <Badge variant="outline" className="text-[10px]">no external link</Badge>}
               {(!v.privacy_status || v.privacy_status === "unchecked" || v.privacy_status === "flagged" || v.privacy_status === "blocked") && <Badge variant="outline" className="text-[10px]">privacy:{v.privacy_status ?? "unchecked"}</Badge>}
               {!(v.module_coverage?.length || v.dashboard_area) && <Badge variant="outline" className="text-[10px]">no area / module coverage</Badge>}
+              {v.approval_status !== "approved" && <Badge variant="outline" className="text-[10px]">approval:{v.approval_status ?? "draft"}</Badge>}
             </div>
           ))}
         </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ApprovalPanel({ videos, onChanged }: { videos: VideoRow[]; onChanged: () => void }) {
+  const setStatus = async (v: VideoRow, status: string) => {
+    // Guard: cannot approve if privacy is flagged/unchecked/blocked
+    if (status === "approved" && (!v.privacy_status || ["unchecked","flagged","blocked"].includes(v.privacy_status))) {
+      toast.error(`Privacy must be approved first (current: ${v.privacy_status ?? "unchecked"})`);
+      return;
+    }
+    const patch: any = { approval_status: status };
+    if (status === "approved") patch.approved_at = new Date().toISOString();
+    const { error } = await sb.from("video_library_items").update(patch).eq("id", v.id);
+    if (error) { toast.error(error.message); return; }
+    await sb.from("video_library_audit_events").insert({
+      video_id: v.id, action: "approval_status_change",
+      event_summary: `Approval → ${status}`, metadata: { status, prev: v.approval_status },
+    });
+    // Recompute buyer-ready after approval changes
+    await sb.rpc("recompute_video_buyer_handover_ready", { _video_id: v.id });
+    toast.success(`Approval set to ${status}`);
+    onChanged();
+  };
+  const groups: Record<string, VideoRow[]> = { draft: [], review_required: [], approved: [], archived: [] };
+  for (const v of videos) {
+    const s = (v.approval_status ?? "draft") as string;
+    (groups[s] ?? (groups.draft)).push(v);
+  }
+  return (
+    <Card className="tech-card">
+      <CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><CheckCircle2 size={14} /> Approval workflow</CardTitle></CardHeader>
+      <CardContent className="text-xs space-y-3">
+        <p className="text-muted-foreground">
+          Customer, buyer or adviser visibility requires <strong>approval_status = approved</strong> AND privacy approved. Founder/admin only.
+        </p>
+        {(["draft","review_required","approved","archived"] as const).map((bucket) => (
+          <div key={bucket}>
+            <p className="font-medium mb-1">{bucket} ({groups[bucket].length})</p>
+            {groups[bucket].length === 0 && <p className="text-muted-foreground">—</p>}
+            {groups[bucket].map((v) => (
+              <div key={v.id} className="border border-border/40 rounded p-2 mb-1 flex items-center gap-2 flex-wrap">
+                <span className="font-medium">{v.title}</span>
+                <Badge variant="outline" className="text-[10px]">privacy:{v.privacy_status ?? "unchecked"}</Badge>
+                <Badge variant="outline" className="text-[10px]">{v.audience_type}</Badge>
+                <span className="ml-auto flex gap-1 flex-wrap">
+                  {bucket !== "review_required" && <Button size="sm" variant="outline" onClick={() => setStatus(v, "review_required")}>Send for review</Button>}
+                  {bucket !== "approved" && <Button size="sm" variant="outline" onClick={() => setStatus(v, "approved")}>Approve</Button>}
+                  {bucket !== "draft" && <Button size="sm" variant="outline" onClick={() => setStatus(v, "draft")}>Back to draft</Button>}
+                  {bucket !== "archived" && <Button size="sm" variant="outline" onClick={() => setStatus(v, "archived")}>Archive</Button>}
+                </span>
+              </div>
+            ))}
+          </div>
+        ))}
       </CardContent>
     </Card>
   );
