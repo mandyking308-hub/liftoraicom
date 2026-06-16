@@ -60322,6 +60322,47 @@ export type Database = {
           },
         ]
       }
+      video_library_audit_events: {
+        Row: {
+          action: string
+          actor_id: string | null
+          business_id: string | null
+          created_at: string
+          event_summary: string | null
+          id: string
+          metadata: Json
+          video_id: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          business_id?: string | null
+          created_at?: string
+          event_summary?: string | null
+          id?: string
+          metadata?: Json
+          video_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          business_id?: string | null
+          created_at?: string
+          event_summary?: string | null
+          id?: string
+          metadata?: Json
+          video_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_library_audit_events_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "video_library_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       video_library_chapters: {
         Row: {
           created_at: string
@@ -60413,10 +60454,17 @@ export type Database = {
       }
       video_library_items: {
         Row: {
+          approval_status: string
+          approved_at: string | null
+          approved_by: string | null
+          asset_id: string | null
+          audience_type: string
           business_id: string | null
+          buyer_handover_ready: boolean
           contains_sensitive_info: boolean
           created_at: string
           created_by: string | null
+          dashboard_area: string | null
           description: string | null
           duration_seconds: number | null
           embedding_model: string | null
@@ -60426,6 +60474,7 @@ export type Database = {
           language: string | null
           metadata: Json
           module_coverage: string[] | null
+          privacy_status: string
           redaction_required: boolean
           redaction_status: string
           source_type: string
@@ -60434,14 +60483,23 @@ export type Database = {
           thumbnail_url: string | null
           title: string
           transcript_segment_count: number
+          transcript_status: string
           updated_at: string
+          video_type: string
           visibility: string
         }
         Insert: {
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          asset_id?: string | null
+          audience_type?: string
           business_id?: string | null
+          buyer_handover_ready?: boolean
           contains_sensitive_info?: boolean
           created_at?: string
           created_by?: string | null
+          dashboard_area?: string | null
           description?: string | null
           duration_seconds?: number | null
           embedding_model?: string | null
@@ -60451,6 +60509,7 @@ export type Database = {
           language?: string | null
           metadata?: Json
           module_coverage?: string[] | null
+          privacy_status?: string
           redaction_required?: boolean
           redaction_status?: string
           source_type?: string
@@ -60459,14 +60518,23 @@ export type Database = {
           thumbnail_url?: string | null
           title: string
           transcript_segment_count?: number
+          transcript_status?: string
           updated_at?: string
+          video_type?: string
           visibility?: string
         }
         Update: {
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          asset_id?: string | null
+          audience_type?: string
           business_id?: string | null
+          buyer_handover_ready?: boolean
           contains_sensitive_info?: boolean
           created_at?: string
           created_by?: string | null
+          dashboard_area?: string | null
           description?: string | null
           duration_seconds?: number | null
           embedding_model?: string | null
@@ -60476,6 +60544,7 @@ export type Database = {
           language?: string | null
           metadata?: Json
           module_coverage?: string[] | null
+          privacy_status?: string
           redaction_required?: boolean
           redaction_status?: string
           source_type?: string
@@ -60484,10 +60553,20 @@ export type Database = {
           thumbnail_url?: string | null
           title?: string
           transcript_segment_count?: number
+          transcript_status?: string
           updated_at?: string
+          video_type?: string
           visibility?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "video_library_items_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "video_sop_assets"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       video_library_qa_log: {
         Row: {
@@ -61143,6 +61222,8 @@ export type Database = {
           embedding_model: string | null
           end_seconds: number
           id: string
+          keywords: string[]
+          privacy_flags: Json
           segment_index: number
           speaker: string | null
           start_seconds: number
@@ -61158,6 +61239,8 @@ export type Database = {
           embedding_model?: string | null
           end_seconds: number
           id?: string
+          keywords?: string[]
+          privacy_flags?: Json
           segment_index: number
           speaker?: string | null
           start_seconds: number
@@ -61173,6 +61256,8 @@ export type Database = {
           embedding_model?: string | null
           end_seconds?: number
           id?: string
+          keywords?: string[]
+          privacy_flags?: Json
           segment_index?: number
           speaker?: string | null
           start_seconds?: number
