@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { approveRelease, createRelease, fetchReleases, RELEASE_STATUSES, RELEASE_TYPES, updateRelease, type ReleaseItem } from "@/lib/operatingLoops/releaseWorkflowEngine";
 import { toast } from "sonner";
+import { markReleaseCommsReadyForReview } from "@/lib/lifecycleHandoffs";
 
 export default function ReleaseWorkflowPage() {
   const [rows, setRows] = useState<ReleaseItem[]>([]);
@@ -46,6 +47,16 @@ export default function ReleaseWorkflowPage() {
                     <SelectContent>{RELEASE_STATUSES.map(s => <SelectItem key={s} value={s} className="text-xs">{s.replace(/_/g," ")}</SelectItem>)}</SelectContent>
                   </Select>
                   {r.release_status === "founder_review" && <Button size="sm" variant="outline" onClick={async () => { await approveRelease(r.id); reload(); }}>Approve</Button>}
+                  {r.release_status !== "founder_review" && (r.customer_comms_draft ?? "").trim().length > 0 && (
+                    <Button size="sm" variant="outline"
+                      title="Marks the customer comms draft for founder review. Does not send."
+                      onClick={async () => {
+                        try { await markReleaseCommsReadyForReview(r.id); toast.success("Comms draft flagged for founder review"); reload(); }
+                        catch (e: any) { toast.error(e.message); }
+                      }}>
+                      Comms ready for review
+                    </Button>
+                  )}
                 </div>
               </div>
             ))}

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, ShieldCheck, ShieldAlert, FileText, Loader2 } from "lucide-react";
+import { ArrowLeft, ShieldCheck, ShieldAlert, FileText, Loader2, Gavel } from "lucide-react";
 import FounderLayout from "@/components/founder/FounderLayout";
 import CRMContact360Panel from "@/components/founder/crm/CRMContact360Panel";
 import CustomerContinuityTimeline from "@/components/founder/customer/CustomerContinuityTimeline";
@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { createDecisionFromCrmContact } from "@/lib/lifecycleHandoffs";
 
 type Contact = {
   id: string;
@@ -42,6 +43,7 @@ const CRMContactDetail = () => {
   const [check, setCheck] = useState<{ allowed: boolean; reason?: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [creatingDecision, setCreatingDecision] = useState(false);
 
   async function generateProposal() {
     if (!contact) return;
@@ -132,6 +134,31 @@ const CRMContactDetail = () => {
             >
               {generating ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <FileText className="h-4 w-4 mr-1" />}
               Generate Proposal
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={creatingDecision}
+              title="Creates a pending founder decision item rooted in this CRM contact. Internal only."
+              onClick={async () => {
+                setCreatingDecision(true);
+                try {
+                  await createDecisionFromCrmContact({
+                    contact_id: contact.id,
+                    contact_label: contact.name || contact.email,
+                    decision_title: `CRM follow-up: ${contact.name || contact.email}`,
+                    decision_summary: `Triggered from CRM contact ${contact.email} (${contact.company || "—"}, status ${contact.status}). Founder review required.`,
+                  });
+                  toast.success("Decision item drafted — open Founder Decisions to review.");
+                } catch (e: any) {
+                  toast.error(e?.message ?? "Could not draft decision");
+                } finally {
+                  setCreatingDecision(false);
+                }
+              }}
+            >
+              {creatingDecision ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Gavel className="h-4 w-4 mr-1" />}
+              Create decision item
             </Button>
             <Card className={`tech-card ${check?.allowed ? "border-primary/40" : "border-destructive/40"}`}>
               <CardContent className="p-3 flex items-center gap-2 text-sm">

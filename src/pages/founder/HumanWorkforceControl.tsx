@@ -26,6 +26,51 @@ import {
 } from "@/lib/humanWorkforce";
 import { generateMonthlyPlan, approveMonthlyPlan } from "@/lib/monthlyContentPlanner";
 import HumanOversightChainPanel from "@/components/founder/command/HumanOversightChainPanel";
+import { fetchTrainingAssignmentsForPeople, type TrainingAssignmentSummary } from "@/lib/lifecycleHandoffs";
+
+function TrainingEvidencePanel() {
+  const [rows, setRows] = useState<TrainingAssignmentSummary[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    fetchTrainingAssignmentsForPeople(50)
+      .then(setRows)
+      .finally(() => setLoading(false));
+  }, []);
+  const overdue = rows.filter(r => r.due_at && !r.completed_at && new Date(r.due_at) < new Date()).length;
+  const inFlight = rows.filter(r => r.status !== "completed" && !r.completed_at).length;
+  const completed = rows.filter(r => r.status === "completed" || r.completed_at).length;
+  return (
+    <Card className="p-4 space-y-3">
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <h3 className="font-semibold">Video Library training evidence (read-only)</h3>
+        <span className="text-[10px] text-muted-foreground">From Video Library → People oversight. View-only.</span>
+      </div>
+      <div className="grid grid-cols-3 gap-2 text-xs">
+        <div className="border border-border/50 rounded p-2"><p className="text-[10px] uppercase text-muted-foreground">Overdue</p><p className="text-sm font-bold text-amber-300">{overdue}</p></div>
+        <div className="border border-border/50 rounded p-2"><p className="text-[10px] uppercase text-muted-foreground">In flight</p><p className="text-sm font-bold">{inFlight}</p></div>
+        <div className="border border-border/50 rounded p-2"><p className="text-[10px] uppercase text-muted-foreground">Completed</p><p className="text-sm font-bold text-emerald-300">{completed}</p></div>
+      </div>
+      {loading ? <p className="text-xs text-muted-foreground">Loading…</p> : rows.length === 0 ? (
+        <p className="text-xs text-muted-foreground">No training assignments recorded yet.</p>
+      ) : (
+        <div className="space-y-1 max-h-[420px] overflow-auto">
+          {rows.map(r => (
+            <div key={r.id} className="border border-border/40 rounded p-2 text-xs flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <p className="font-medium truncate">{r.video_title ?? "Untitled video"}</p>
+                <p className="text-muted-foreground">
+                  {r.assigned_to_role ?? "role —"} · due {r.due_at ? new Date(r.due_at).toLocaleDateString() : "—"} ·
+                  {r.completed_at ? ` completed ${new Date(r.completed_at).toLocaleDateString()}` : ` status ${r.status}`}
+                </p>
+              </div>
+              <Badge variant="outline" className="text-[10px]">{r.status}</Badge>
+            </div>
+          ))}
+        </div>
+      )}
+    </Card>
+  );
+}
 
 const WORKER_ROLES: WorkerRole[] = [
   "technical_operator",
@@ -182,6 +227,7 @@ export default function HumanWorkforceControl() {
           <TabsTrigger value="access">Access</TabsTrigger>
           <TabsTrigger value="tasks">Tasks</TabsTrigger>
           <TabsTrigger value="oversight">Oversight</TabsTrigger>
+          <TabsTrigger value="training">Training</TabsTrigger>
           <TabsTrigger value="content">Monthly Content</TabsTrigger>
           <TabsTrigger value="onboarding">Business Onboarding</TabsTrigger>
           <TabsTrigger value="audit">Audit Log</TabsTrigger>
@@ -343,6 +389,10 @@ export default function HumanWorkforceControl() {
               <p className="text-xs text-destructive mt-3">{missedReviews.length} submitted task(s) still awaiting oversight.</p>
             )}
           </Card>
+        </TabsContent>
+
+        <TabsContent value="training" className="mt-4">
+          <TrainingEvidencePanel />
         </TabsContent>
 
         <TabsContent value="content" className="mt-4 grid gap-4 md:grid-cols-[1fr,1.4fr]">

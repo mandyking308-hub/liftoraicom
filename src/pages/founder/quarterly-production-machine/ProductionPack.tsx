@@ -6,6 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Download, FileText, Lock, Package } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Building2, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { Link as RLink } from "react-router-dom";
+import { createDraftBusinessShellFromPack } from "@/lib/lifecycleHandoffs";
 import {
   buildHandoffPack, buildProductionPack, classifyProductionCandidate,
   detectPortfolioCollision, evaluateCapacityGate, evaluateKillRules,
@@ -20,6 +24,8 @@ export default function ProductionPackPage() {
   const { quarter, year } = currentQuarter();
   const [loading, setLoading] = useState(true);
   const [pack, setPack] = useState<ProductionBuildPack | null>(null);
+  const [creatingShell, setCreatingShell] = useState(false);
+  const [draftShell, setDraftShell] = useState<{ id: string; name: string } | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -66,6 +72,23 @@ export default function ProductionPackPage() {
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
   };
 
+  const createShell = async () => {
+    if (!pack) return;
+    setCreatingShell(true);
+    try {
+      const shell = await createDraftBusinessShellFromPack({
+        candidate_name: pack.candidate.name,
+        production_pack_ref: `${quarter}-${year}`,
+      });
+      setDraftShell(shell);
+      toast.success("Draft business shell created — review in Business Onboarding Factory.");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not create draft shell");
+    } finally {
+      setCreatingShell(false);
+    }
+  };
+
   return (
     <FounderLayout>
       <div className="space-y-6">
@@ -77,7 +100,23 @@ export default function ProductionPackPage() {
             <Badge variant="outline">Q{quarter} {year}</Badge>
             {full && <Button size="sm" variant="outline" onClick={download}><Download className="h-3 w-3 mr-1" />Download pack JSON</Button>}
             <Button asChild size="sm" variant="outline"><Link to="/founder/quarterly-production-machine/lovable-pack"><FileText className="h-3 w-3 mr-1" />Lovable Prompt Pack →</Link></Button>
+            {full && (
+              <Button size="sm" onClick={createShell} disabled={creatingShell || !!draftShell}>
+                {creatingShell ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Building2 className="h-3 w-3 mr-1" />}
+                {draftShell ? "Shell created" : "Create draft business shell"}
+              </Button>
+            )}
+            {draftShell && (
+              <Button asChild size="sm" variant="outline">
+                <RLink to="/founder/business-onboarding-factory"><Building2 className="h-3 w-3 mr-1" />Open in Onboarding Factory →</RLink>
+              </Button>
+            )}
           </div>
+          {draftShell && (
+            <p className="text-[11px] text-muted-foreground mt-2">
+              Draft shell <span className="font-mono">{draftShell.name}</span> created. Status: draft — founder review required before any activation.
+            </p>
+          )}
         </div>
 
         {loading ? <p className="text-xs text-muted-foreground">Generating pack…</p> : !full ? (
