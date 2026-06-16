@@ -1753,6 +1753,7 @@ const CommandCentre = () => {
       })()}
     <div className="max-w-7xl mx-auto px-4 pb-6"><GroupHQOperatingPanel /></div>
     <div className="max-w-7xl mx-auto px-4 pb-6"><TreasuryCashflowControlPanel /></div>
+    <div className="max-w-7xl mx-auto px-4 pb-6"><OperatingLoopsAttentionPanel /></div>
     <div className="max-w-7xl mx-auto px-4 pb-6"><ContractsProcurementControlPanel /></div>
     <div className="max-w-7xl mx-auto px-4 pb-6"><PeopleAccessTrainingPanel /></div>
     <div className="max-w-7xl mx-auto px-4 pb-6"><RiskInsuranceIncidentPanel /></div>
