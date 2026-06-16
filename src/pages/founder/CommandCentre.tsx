@@ -7,6 +7,7 @@ import AICostGovernorPortfolio from "@/components/founder/ai/AICostGovernorPortf
 import AIAlertsMiniWidget from "@/components/founder/ai/AIAlertsMiniWidget";
 import GroupHQOperatingPanel from "@/components/founder/group/GroupHQOperatingPanel";
 import TreasuryCashflowControlPanel from "@/components/founder/finance/TreasuryCashflowControlPanel";
+import OperatingLoopsAttentionPanel from "@/components/founder/command/OperatingLoopsAttentionPanel";
 import ContractsProcurementControlPanel from "@/components/founder/legal/ContractsProcurementControlPanel";
 import PeopleAccessTrainingPanel from "@/components/founder/security/PeopleAccessTrainingPanel";
 import RiskInsuranceIncidentPanel from "@/components/founder/risk/RiskInsuranceIncidentPanel";
