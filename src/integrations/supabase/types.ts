@@ -26032,6 +26032,198 @@ export type Database = {
           },
         ]
       }
+      founder_led_buyer_targets: {
+        Row: {
+          business_id: string | null
+          business_name: string | null
+          buyer_name: string
+          created_at: string
+          evidence_links: Json
+          founder_approved_at: string | null
+          founder_approved_by: string | null
+          founder_approved_to_contact: boolean
+          id: string
+          likely_valuation_logic: string | null
+          notes: string | null
+          outreach_status: string
+          prior_acquisitions: string | null
+          relationship_status: string | null
+          sector: string | null
+          source_links: Json
+          strategic_fit: string | null
+          updated_at: string
+          why_they_might_buy: string | null
+        }
+        Insert: {
+          business_id?: string | null
+          business_name?: string | null
+          buyer_name: string
+          created_at?: string
+          evidence_links?: Json
+          founder_approved_at?: string | null
+          founder_approved_by?: string | null
+          founder_approved_to_contact?: boolean
+          id?: string
+          likely_valuation_logic?: string | null
+          notes?: string | null
+          outreach_status?: string
+          prior_acquisitions?: string | null
+          relationship_status?: string | null
+          sector?: string | null
+          source_links?: Json
+          strategic_fit?: string | null
+          updated_at?: string
+          why_they_might_buy?: string | null
+        }
+        Update: {
+          business_id?: string | null
+          business_name?: string | null
+          buyer_name?: string
+          created_at?: string
+          evidence_links?: Json
+          founder_approved_at?: string | null
+          founder_approved_by?: string | null
+          founder_approved_to_contact?: boolean
+          id?: string
+          likely_valuation_logic?: string | null
+          notes?: string | null
+          outreach_status?: string
+          prior_acquisitions?: string | null
+          relationship_status?: string | null
+          sector?: string | null
+          source_links?: Json
+          strategic_fit?: string | null
+          updated_at?: string
+          why_they_might_buy?: string | null
+        }
+        Relationships: []
+      }
+      founder_led_sale_readiness_scores: {
+        Row: {
+          business_id: string | null
+          business_name: string
+          buyer_fit_score: number | null
+          compliance_risk_score: number | null
+          contracts_ip_evidence_score: number | null
+          created_at: string
+          customer_concentration_score: number | null
+          data_room_readiness_score: number | null
+          finance_records_score: number | null
+          founder_notes: string | null
+          id: string
+          margin_score: number | null
+          overall_recommendation: string | null
+          revenue_quality_score: number | null
+          snapshot_at: string
+          sop_training_evidence_score: number | null
+          updated_at: string
+          valuation_confidence_score: number | null
+        }
+        Insert: {
+          business_id?: string | null
+          business_name: string
+          buyer_fit_score?: number | null
+          compliance_risk_score?: number | null
+          contracts_ip_evidence_score?: number | null
+          created_at?: string
+          customer_concentration_score?: number | null
+          data_room_readiness_score?: number | null
+          finance_records_score?: number | null
+          founder_notes?: string | null
+          id?: string
+          margin_score?: number | null
+          overall_recommendation?: string | null
+          revenue_quality_score?: number | null
+          snapshot_at?: string
+          sop_training_evidence_score?: number | null
+          updated_at?: string
+          valuation_confidence_score?: number | null
+        }
+        Update: {
+          business_id?: string | null
+          business_name?: string
+          buyer_fit_score?: number | null
+          compliance_risk_score?: number | null
+          contracts_ip_evidence_score?: number | null
+          created_at?: string
+          customer_concentration_score?: number | null
+          data_room_readiness_score?: number | null
+          finance_records_score?: number | null
+          founder_notes?: string | null
+          id?: string
+          margin_score?: number | null
+          overall_recommendation?: string | null
+          revenue_quality_score?: number | null
+          snapshot_at?: string
+          sop_training_evidence_score?: number | null
+          updated_at?: string
+          valuation_confidence_score?: number | null
+        }
+        Relationships: []
+      }
+      founder_led_sale_reviews: {
+        Row: {
+          business_id: string | null
+          business_name: string
+          created_at: string
+          evidence_gaps: Json
+          founder_acknowledged_at: string | null
+          founder_decision: string | null
+          id: string
+          launch_date: string | null
+          next_action: string | null
+          notes: string | null
+          operating_start_date: string | null
+          readiness_blockers: Json
+          review_due_date: string | null
+          sale_review_status: string
+          target_buyer_category: string | null
+          target_sale_value_cents: number | null
+          target_sale_value_currency: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          business_name: string
+          created_at?: string
+          evidence_gaps?: Json
+          founder_acknowledged_at?: string | null
+          founder_decision?: string | null
+          id?: string
+          launch_date?: string | null
+          next_action?: string | null
+          notes?: string | null
+          operating_start_date?: string | null
+          readiness_blockers?: Json
+          review_due_date?: string | null
+          sale_review_status?: string
+          target_buyer_category?: string | null
+          target_sale_value_cents?: number | null
+          target_sale_value_currency?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          business_name?: string
+          created_at?: string
+          evidence_gaps?: Json
+          founder_acknowledged_at?: string | null
+          founder_decision?: string | null
+          id?: string
+          launch_date?: string | null
+          next_action?: string | null
+          notes?: string | null
+          operating_start_date?: string | null
+          readiness_blockers?: Json
+          review_due_date?: string | null
+          sale_review_status?: string
+          target_buyer_category?: string | null
+          target_sale_value_cents?: number | null
+          target_sale_value_currency?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       founder_notification_queue: {
         Row: {
           alert_rule_id: string | null
