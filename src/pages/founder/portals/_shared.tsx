@@ -4,19 +4,32 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DoorOpen, ArrowLeft, Lock } from "lucide-react";
 
-export const PORTAL_NAV = [
-  { to: "/founder/portals",                 label: "Overview" },
-  { to: "/founder/portals/customer",        label: "Customer" },
-  { to: "/founder/portals/seller",          label: "Seller" },
-  { to: "/founder/portals/partner",         label: "Partner" },
-  { to: "/founder/portals/adviser",         label: "Adviser" },
-  { to: "/founder/portals/document-upload", label: "Upload" },
-  { to: "/founder/portals/access",          label: "Access events" },
-  { to: "/founder/portals/settings",        label: "Settings" },
+const PORTAL_NAV_SUFFIXES: { suffix: string; label: string }[] = [
+  { suffix: "",                  label: "Overview" },
+  { suffix: "/customer",         label: "Customer" },
+  { suffix: "/seller",           label: "Seller" },
+  { suffix: "/partner",          label: "Partner" },
+  { suffix: "/adviser",          label: "Adviser" },
+  { suffix: "/document-upload",  label: "Document Upload" },
+  { suffix: "/access",           label: "Access events" },
+  { suffix: "/settings",         label: "Settings" },
 ];
+
+/** Builds the portal sub-nav scoped to whichever prefix the user landed on
+ *  (`/founder/portals` or the founder/admin alias `/founder/portal-admin`),
+ *  so deep links and breadcrumbs stay internally consistent. */
+export function buildPortalNav(prefix: "/founder/portals" | "/founder/portal-admin") {
+  return PORTAL_NAV_SUFFIXES.map(n => ({ to: `${prefix}${n.suffix}`, label: n.label }));
+}
+
+// Back-compat export: default to the legacy /founder/portals prefix.
+export const PORTAL_NAV = buildPortalNav("/founder/portals");
 
 export function PortalsLayout({ title, subtitle, children }: { title: string; subtitle?: string; children: ReactNode }) {
   const { pathname } = useLocation();
+  const prefix: "/founder/portals" | "/founder/portal-admin" =
+    pathname.startsWith("/founder/portal-admin") ? "/founder/portal-admin" : "/founder/portals";
+  const nav = buildPortalNav(prefix);
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-4">
@@ -24,7 +37,8 @@ export function PortalsLayout({ title, subtitle, children }: { title: string; su
           <Link to="/founder/command-centre" className="hover:text-primary inline-flex items-center gap-1">
             <ArrowLeft size={12} /> Command Centre
           </Link>
-          <span>/</span><span>External Portals Architecture</span>
+          <span>/</span>
+          <span>{prefix === "/founder/portal-admin" ? "Portal Admin" : "External Portals Architecture"}</span>
         </div>
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
@@ -39,7 +53,7 @@ export function PortalsLayout({ title, subtitle, children }: { title: string; su
         </div>
         <Card className="tech-card">
           <div className="flex gap-1 overflow-x-auto p-2 text-xs">
-            {PORTAL_NAV.map(n => (
+            {nav.map(n => (
               <Link key={n.to} to={n.to}
                 className={`shrink-0 px-2 py-1 rounded border transition ${pathname === n.to ? "border-primary/60 bg-primary/10 text-primary" : "border-border/50 hover:bg-secondary text-muted-foreground hover:text-foreground"}`}>
                 {n.label}
