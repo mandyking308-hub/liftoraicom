@@ -966,6 +966,13 @@ const App = () => (
             <Route path="/founder/global-pr-radar" element={<FounderRoute><GlobalPrRadar /></FounderRoute>} />
             <Route path="/founder/video-library" element={<FounderRoute><VideoLibrary /></FounderRoute>} />
             <Route path="/founder/healthcare-overlay" element={<FounderRoute><HealthcareOverlay /></FounderRoute>} />
+            <Route path="/founder/insurance-claims" element={<FounderRoute><InsuranceClaimsPage /></FounderRoute>} />
+            <Route path="/founder/statutory-filings" element={<FounderRoute><StatutoryFilingsPage /></FounderRoute>} />
+            <Route path="/founder/corporate-secretarial" element={<FounderRoute><CorporateSecretarialPage /></FounderRoute>} />
+            <Route path="/founder/international-expansion" element={<FounderRoute><InternationalExpansionPage /></FounderRoute>} />
+            <Route path="/founder/data-room" element={<FounderRoute><DataRoomPage /></FounderRoute>} />
+            <Route path="/founder/release-workflow" element={<FounderRoute><ReleaseWorkflowPage /></FounderRoute>} />
+            <Route path="/founder/portfolio-fx" element={<FounderRoute><PortfolioFxPage /></FounderRoute>} />
             <Route path="/founder/business-internal-activation" element={<FounderRoute><BusinessInternalActivationPage /></FounderRoute>} />
             <Route path="/founder/business-daily-operating-loop" element={<FounderRoute><BusinessDailyOperatingLoopPage /></FounderRoute>} />
             <Route path="/founder/business-weekly-review" element={<FounderRoute><BusinessWeeklyReviewPage /></FounderRoute>} />
