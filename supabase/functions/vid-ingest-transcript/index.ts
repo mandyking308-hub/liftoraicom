@@ -164,9 +164,18 @@ Deno.serve(async (req) => {
 
     await admin.from("video_library_items").update({
       status: "ready",
+      transcript_status: "indexed",
       transcript_segment_count: rows.length,
       embedding_model: EMBED_MODEL,
     }).eq("id", videoId);
+
+    await admin.from("video_library_audit_events").insert({
+      video_id: videoId,
+      business_id: vid.business_id ?? null,
+      action: "transcript_ingested",
+      event_summary: `Ingested ${rows.length} transcript segments via ${EMBED_MODEL}`,
+      metadata: { segments: rows.length, model: EMBED_MODEL },
+    });
 
     return json({ ok: true, video_id: videoId, segments: rows.length, model: EMBED_MODEL });
   } catch (e: any) {
