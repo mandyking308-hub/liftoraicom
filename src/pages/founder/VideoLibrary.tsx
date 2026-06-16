@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ArrowLeft, Search, Upload, Video, MessageSquare, ExternalLink, Loader2, ShieldAlert, BookOpen } from "lucide-react";
+import { ArrowLeft, Search, Upload, Video, MessageSquare, ExternalLink, Loader2, ShieldAlert, BookOpen, Map, ClipboardCheck, Package } from "lucide-react";
 
 const sb: any = supabase;
 
@@ -22,6 +22,11 @@ type VideoRow = {
   module_coverage: string[] | null; tags: string[] | null;
   transcript_segment_count: number; redaction_status: string;
   business_id: string | null; created_at: string;
+  video_type?: string | null; audience_type?: string | null; dashboard_area?: string | null;
+  asset_id?: string | null;
+  approval_status?: string | null; transcript_status?: string | null; privacy_status?: string | null;
+  approved_by?: string | null; approved_at?: string | null;
+  buyer_handover_ready?: boolean | null;
 };
 
 function statusBadge(s: string) {
@@ -101,10 +106,14 @@ export default function VideoLibrary() {
         </div>
 
         <Tabs value={tab} onValueChange={setTab}>
-          <TabsList>
+          <TabsList className="flex-wrap h-auto">
             <TabsTrigger value="library"><Video size={12} className="mr-1" /> Library</TabsTrigger>
             <TabsTrigger value="search"><Search size={12} className="mr-1" /> Search</TabsTrigger>
             <TabsTrigger value="ask"><MessageSquare size={12} className="mr-1" /> Ask</TabsTrigger>
+            <TabsTrigger value="coverage"><Map size={12} className="mr-1" /> Coverage</TabsTrigger>
+            <TabsTrigger value="assignments"><ClipboardCheck size={12} className="mr-1" /> Assignments</TabsTrigger>
+            <TabsTrigger value="privacy"><ShieldAlert size={12} className="mr-1" /> Privacy</TabsTrigger>
+            <TabsTrigger value="evidence"><Package size={12} className="mr-1" /> Buyer / Adviser</TabsTrigger>
             <TabsTrigger value="governance"><ShieldAlert size={12} className="mr-1" /> Governance</TabsTrigger>
           </TabsList>
 
