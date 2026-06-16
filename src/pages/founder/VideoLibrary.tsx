@@ -188,6 +188,11 @@ export default function VideoLibrary() {
 
           <TabsContent value="ask"><AskPanel videos={videosQ.data ?? []} onOpen={(id, title) => setAskOpen({ open: true, videoId: id, title })} /></TabsContent>
 
+          <TabsContent value="coverage"><CoveragePanel videos={videosQ.data ?? []} /></TabsContent>
+          <TabsContent value="assignments"><AssignmentsPanel videos={videosQ.data ?? []} /></TabsContent>
+          <TabsContent value="privacy"><PrivacyPanel videos={videosQ.data ?? []} onChanged={() => qc.invalidateQueries({ queryKey: ["video-library"] })} /></TabsContent>
+          <TabsContent value="evidence"><EvidencePanel videos={videosQ.data ?? []} /></TabsContent>
+
           <TabsContent value="governance">
             <Card className="tech-card">
               <CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><ShieldAlert size={14} /> Governance &amp; privacy</CardTitle></CardHeader>
