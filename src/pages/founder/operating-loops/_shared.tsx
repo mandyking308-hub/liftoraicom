@@ -49,5 +49,5 @@ export function StatusBadge({ status }: { status: string }) {
     released: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
   };
   const cls = map[status] ?? "bg-secondary text-muted-foreground border-border";
-  return <Badge variant="outline" className={`text-[10px] ${cls}`}>{status.replaceAll("_"," ")}</Badge>;
+  return <Badge variant="outline" className={`text-[10px] ${cls}`}>{status.replace(/_/g," ")}</Badge>;
 }
