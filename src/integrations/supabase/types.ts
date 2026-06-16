@@ -27627,6 +27627,414 @@ export type Database = {
         }
         Relationships: []
       }
+      healthcare_audit_events: {
+        Row: {
+          actor_email: string | null
+          actor_id: string | null
+          business_id: string | null
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          event_type: string
+          id: string
+          new_value: Json | null
+          notes: string | null
+          previous_value: Json | null
+        }
+        Insert: {
+          actor_email?: string | null
+          actor_id?: string | null
+          business_id?: string | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type: string
+          event_type: string
+          id?: string
+          new_value?: Json | null
+          notes?: string | null
+          previous_value?: Json | null
+        }
+        Update: {
+          actor_email?: string | null
+          actor_id?: string | null
+          business_id?: string | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string
+          event_type?: string
+          id?: string
+          new_value?: Json | null
+          notes?: string | null
+          previous_value?: Json | null
+        }
+        Relationships: []
+      }
+      healthcare_clinical_incidents: {
+        Row: {
+          affected_person_category: string | null
+          business_id: string | null
+          complaint_linked: boolean
+          created_at: string
+          created_by: string | null
+          description: string | null
+          duty_of_candour_considered: boolean
+          evidence_links: Json | null
+          external_clinical_adviser_review_required: boolean
+          id: string
+          immediate_containment: string | null
+          incident_title: string
+          incident_type: string | null
+          insurance_linked: boolean
+          notes: string | null
+          occurred_at: string | null
+          regulator_notification_considered: boolean
+          reported_at: string
+          severity: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          affected_person_category?: string | null
+          business_id?: string | null
+          complaint_linked?: boolean
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          duty_of_candour_considered?: boolean
+          evidence_links?: Json | null
+          external_clinical_adviser_review_required?: boolean
+          id?: string
+          immediate_containment?: string | null
+          incident_title: string
+          incident_type?: string | null
+          insurance_linked?: boolean
+          notes?: string | null
+          occurred_at?: string | null
+          regulator_notification_considered?: boolean
+          reported_at?: string
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          affected_person_category?: string | null
+          business_id?: string | null
+          complaint_linked?: boolean
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          duty_of_candour_considered?: boolean
+          evidence_links?: Json | null
+          external_clinical_adviser_review_required?: boolean
+          id?: string
+          immediate_containment?: string | null
+          incident_title?: string
+          incident_type?: string | null
+          insurance_linked?: boolean
+          notes?: string | null
+          occurred_at?: string | null
+          regulator_notification_considered?: boolean
+          reported_at?: string
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      healthcare_credentials: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          created_by: string | null
+          credential_body: string | null
+          credential_type: string
+          evidence_link: string | null
+          expiry_date: string | null
+          id: string
+          issue_date: string | null
+          notes: string | null
+          person_name: string
+          registration_number: string | null
+          role: string | null
+          updated_at: string
+          verification_status: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          credential_body?: string | null
+          credential_type: string
+          evidence_link?: string | null
+          expiry_date?: string | null
+          id?: string
+          issue_date?: string | null
+          notes?: string | null
+          person_name: string
+          registration_number?: string | null
+          role?: string | null
+          updated_at?: string
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          credential_body?: string | null
+          credential_type?: string
+          evidence_link?: string | null
+          expiry_date?: string | null
+          id?: string
+          issue_date?: string | null
+          notes?: string | null
+          person_name?: string
+          registration_number?: string | null
+          role?: string | null
+          updated_at?: string
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: []
+      }
+      healthcare_data_governance: {
+        Row: {
+          access_control_review_status: string
+          business_id: string | null
+          business_name: string
+          created_at: string
+          created_by: string | null
+          dpia_required: boolean
+          dpia_status: string
+          explicit_consent_required: boolean
+          external_dpo_legal_review_required: boolean
+          external_dpo_legal_review_status: string
+          id: string
+          lawful_basis_recorded: string | null
+          notes: string | null
+          retention_policy_status: string
+          special_category_data_present: boolean
+          updated_at: string
+        }
+        Insert: {
+          access_control_review_status?: string
+          business_id?: string | null
+          business_name: string
+          created_at?: string
+          created_by?: string | null
+          dpia_required?: boolean
+          dpia_status?: string
+          explicit_consent_required?: boolean
+          external_dpo_legal_review_required?: boolean
+          external_dpo_legal_review_status?: string
+          id?: string
+          lawful_basis_recorded?: string | null
+          notes?: string | null
+          retention_policy_status?: string
+          special_category_data_present?: boolean
+          updated_at?: string
+        }
+        Update: {
+          access_control_review_status?: string
+          business_id?: string | null
+          business_name?: string
+          created_at?: string
+          created_by?: string | null
+          dpia_required?: boolean
+          dpia_status?: string
+          explicit_consent_required?: boolean
+          external_dpo_legal_review_required?: boolean
+          external_dpo_legal_review_status?: string
+          id?: string
+          lawful_basis_recorded?: string | null
+          notes?: string | null
+          retention_policy_status?: string
+          special_category_data_present?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      healthcare_readiness: {
+        Row: {
+          business_id: string | null
+          business_name: string
+          clinical_incident_status: string
+          created_at: string
+          created_by: string | null
+          credentialing_status: string
+          external_adviser_review_status: string
+          founder_approved: boolean
+          founder_approved_at: string | null
+          founder_approved_by: string | null
+          go_live_blocked: boolean
+          go_live_blocked_reason: string | null
+          id: string
+          notes: string | null
+          provider_onboarding_status: string
+          regulatory_evidence_status: string
+          safeguarding_status: string
+          special_category_data_status: string
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          business_name: string
+          clinical_incident_status?: string
+          created_at?: string
+          created_by?: string | null
+          credentialing_status?: string
+          external_adviser_review_status?: string
+          founder_approved?: boolean
+          founder_approved_at?: string | null
+          founder_approved_by?: string | null
+          go_live_blocked?: boolean
+          go_live_blocked_reason?: string | null
+          id?: string
+          notes?: string | null
+          provider_onboarding_status?: string
+          regulatory_evidence_status?: string
+          safeguarding_status?: string
+          special_category_data_status?: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          business_name?: string
+          clinical_incident_status?: string
+          created_at?: string
+          created_by?: string | null
+          credentialing_status?: string
+          external_adviser_review_status?: string
+          founder_approved?: boolean
+          founder_approved_at?: string | null
+          founder_approved_by?: string | null
+          go_live_blocked?: boolean
+          go_live_blocked_reason?: string | null
+          id?: string
+          notes?: string | null
+          provider_onboarding_status?: string
+          regulatory_evidence_status?: string
+          safeguarding_status?: string
+          special_category_data_status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      healthcare_regulatory_evidence: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          evidence_category: string
+          id: string
+          linked_document: string | null
+          notes: string | null
+          owner: string | null
+          review_date: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          evidence_category: string
+          id?: string
+          linked_document?: string | null
+          notes?: string | null
+          owner?: string | null
+          review_date?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          evidence_category?: string
+          id?: string
+          linked_document?: string | null
+          notes?: string | null
+          owner?: string | null
+          review_date?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      healthcare_safeguarding_records: {
+        Row: {
+          business_id: string | null
+          concern_title: string
+          concern_type: string | null
+          created_at: string
+          created_by: string | null
+          evidence_links: Json | null
+          external_adviser_review_required: boolean
+          external_referral_required: boolean
+          id: string
+          immediate_action: string | null
+          person_reference: string | null
+          reported_at: string
+          reported_by: string | null
+          resolution_notes: string | null
+          safeguarding_lead: string | null
+          severity: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          concern_title: string
+          concern_type?: string | null
+          created_at?: string
+          created_by?: string | null
+          evidence_links?: Json | null
+          external_adviser_review_required?: boolean
+          external_referral_required?: boolean
+          id?: string
+          immediate_action?: string | null
+          person_reference?: string | null
+          reported_at?: string
+          reported_by?: string | null
+          resolution_notes?: string | null
+          safeguarding_lead?: string | null
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          concern_title?: string
+          concern_type?: string | null
+          created_at?: string
+          created_by?: string | null
+          evidence_links?: Json | null
+          external_adviser_review_required?: boolean
+          external_referral_required?: boolean
+          id?: string
+          immediate_action?: string | null
+          person_reference?: string | null
+          reported_at?: string
+          reported_by?: string | null
+          resolution_notes?: string | null
+          safeguarding_lead?: string | null
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       human_operator_access: {
         Row: {
           access_level: string | null
@@ -64704,6 +65112,7 @@ export type Database = {
         Returns: boolean
       }
       is_founder: { Args: never; Returns: boolean }
+      is_founder_or_admin: { Args: { _uid: string }; Returns: boolean }
       is_internal_email: { Args: { _email: string }; Returns: boolean }
       is_internal_identity: { Args: { _email: string }; Returns: boolean }
       is_kill_switch_active: { Args: never; Returns: boolean }
