@@ -131,6 +131,7 @@ import ManualsHubPage from "./pages/founder/ManualsHub";
 import LiftorBrain from "./pages/founder/LiftorBrain";
 import PortfolioExitCommandCentre from "./pages/founder/PortfolioExitCommandCentre";
 import FounderLedExitSalesEngine from "./pages/founder/FounderLedExitSalesEngine";
+import FounderLedBuyerMarketEngine from "./pages/founder/FounderLedBuyerMarketEngine";
 import PortfolioExitAssetDetail from "./pages/founder/PortfolioExitAssetDetail";
 import MAIntelligenceWorkspace from "./pages/founder/MAIntelligenceWorkspace";
 import ExitValuationEngine from "./pages/founder/ExitValuationEngine";
@@ -984,6 +985,7 @@ const App = () => (
             <Route path="/founder/portfolio-exit" element={<FounderRoute><PortfolioExitCommandCentre /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/:assetId" element={<FounderRoute><PortfolioExitAssetDetail /></FounderRoute>} />
             <Route path="/founder/founder-led-exit" element={<FounderRoute><FounderLedExitSalesEngine /></FounderRoute>} />
+            <Route path="/founder/founder-led-buyer-market" element={<FounderRoute><FounderLedBuyerMarketEngine /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/intelligence" element={<FounderRoute><MAIntelligenceWorkspace /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/valuation" element={<FounderRoute><ExitValuationEngine /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/build-selector" element={<FounderRoute><QuarterlyBuildSelector /></FounderRoute>} />

@@ -8219,6 +8219,92 @@ export type Database = {
           },
         ]
       }
+      business_exit_intelligence_profiles: {
+        Row: {
+          business_id: string
+          business_model: string | null
+          business_name: string
+          created_at: string
+          data_room_open: boolean
+          for_sale: boolean
+          founder_decision: string | null
+          id: string
+          likely_buyer_rationale: string | null
+          likely_cash_rich_buyers: Json
+          likely_competitor_acquirers: Json
+          likely_financial_buyers: Json
+          likely_international_buyers: Json
+          likely_strategic_acquirers: Json
+          notes: string | null
+          operating_start_date: string | null
+          outreach_approved: boolean
+          sale_review_status: string
+          sector: string | null
+          target_buyer_categories: Json
+          target_customer_type: string | null
+          twelve_month_review_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          business_model?: string | null
+          business_name: string
+          created_at?: string
+          data_room_open?: boolean
+          for_sale?: boolean
+          founder_decision?: string | null
+          id?: string
+          likely_buyer_rationale?: string | null
+          likely_cash_rich_buyers?: Json
+          likely_competitor_acquirers?: Json
+          likely_financial_buyers?: Json
+          likely_international_buyers?: Json
+          likely_strategic_acquirers?: Json
+          notes?: string | null
+          operating_start_date?: string | null
+          outreach_approved?: boolean
+          sale_review_status?: string
+          sector?: string | null
+          target_buyer_categories?: Json
+          target_customer_type?: string | null
+          twelve_month_review_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          business_model?: string | null
+          business_name?: string
+          created_at?: string
+          data_room_open?: boolean
+          for_sale?: boolean
+          founder_decision?: string | null
+          id?: string
+          likely_buyer_rationale?: string | null
+          likely_cash_rich_buyers?: Json
+          likely_competitor_acquirers?: Json
+          likely_financial_buyers?: Json
+          likely_international_buyers?: Json
+          likely_strategic_acquirers?: Json
+          notes?: string | null
+          operating_start_date?: string | null
+          outreach_approved?: boolean
+          sale_review_status?: string
+          sector?: string | null
+          target_buyer_categories?: Json
+          target_customer_type?: string | null
+          twelve_month_review_date?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_exit_intelligence_profiles_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: true
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_exit_metric_values: {
         Row: {
           business_id: string | null
@@ -14557,6 +14643,80 @@ export type Database = {
           },
         ]
       }
+      competitor_intelligence_map: {
+        Row: {
+          business_id: string | null
+          buyer_relevance: string | null
+          competitor_name: string
+          created_at: string
+          customer_segment: string | null
+          id: string
+          lawful_public_source_only: boolean
+          market_gap: string | null
+          notes: string | null
+          pricing_notes: string | null
+          product_service: string | null
+          public_customer_evidence: string | null
+          risk_level: string | null
+          source_links: Json
+          strengths: string | null
+          updated_at: string
+          weaknesses: string | null
+          website: string | null
+          what_we_can_do_better: string | null
+        }
+        Insert: {
+          business_id?: string | null
+          buyer_relevance?: string | null
+          competitor_name: string
+          created_at?: string
+          customer_segment?: string | null
+          id?: string
+          lawful_public_source_only?: boolean
+          market_gap?: string | null
+          notes?: string | null
+          pricing_notes?: string | null
+          product_service?: string | null
+          public_customer_evidence?: string | null
+          risk_level?: string | null
+          source_links?: Json
+          strengths?: string | null
+          updated_at?: string
+          weaknesses?: string | null
+          website?: string | null
+          what_we_can_do_better?: string | null
+        }
+        Update: {
+          business_id?: string | null
+          buyer_relevance?: string | null
+          competitor_name?: string
+          created_at?: string
+          customer_segment?: string | null
+          id?: string
+          lawful_public_source_only?: boolean
+          market_gap?: string | null
+          notes?: string | null
+          pricing_notes?: string | null
+          product_service?: string | null
+          public_customer_evidence?: string | null
+          risk_level?: string | null
+          source_links?: Json
+          strengths?: string | null
+          updated_at?: string
+          weaknesses?: string | null
+          website?: string | null
+          what_we_can_do_better?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competitor_intelligence_map_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       competitor_learning_insights: {
         Row: {
           business_id: string | null
@@ -18681,6 +18841,83 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "customer_package_catalog_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_prospect_segment_map: {
+        Row: {
+          approval_status: string
+          business_id: string | null
+          buying_trigger: string | null
+          campaign_idea: string | null
+          competitor_overlap: boolean
+          compliance_status: string
+          created_at: string
+          customer_type: string | null
+          email_contact_source_status: string | null
+          geography: string | null
+          id: string
+          lawful_basis: string | null
+          notes: string | null
+          outreach_suitability: string | null
+          pain_point: string | null
+          public_data_source: string | null
+          segment_name: string
+          source_links: Json
+          target_priority: number | null
+          updated_at: string
+        }
+        Insert: {
+          approval_status?: string
+          business_id?: string | null
+          buying_trigger?: string | null
+          campaign_idea?: string | null
+          competitor_overlap?: boolean
+          compliance_status?: string
+          created_at?: string
+          customer_type?: string | null
+          email_contact_source_status?: string | null
+          geography?: string | null
+          id?: string
+          lawful_basis?: string | null
+          notes?: string | null
+          outreach_suitability?: string | null
+          pain_point?: string | null
+          public_data_source?: string | null
+          segment_name: string
+          source_links?: Json
+          target_priority?: number | null
+          updated_at?: string
+        }
+        Update: {
+          approval_status?: string
+          business_id?: string | null
+          buying_trigger?: string | null
+          campaign_idea?: string | null
+          competitor_overlap?: boolean
+          compliance_status?: string
+          created_at?: string
+          customer_type?: string | null
+          email_contact_source_status?: string | null
+          geography?: string | null
+          id?: string
+          lawful_basis?: string | null
+          notes?: string | null
+          outreach_suitability?: string | null
+          pain_point?: string | null
+          public_data_source?: string | null
+          segment_name?: string
+          source_links?: Json
+          target_priority?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_prospect_segment_map_business_id_fkey"
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
@@ -26034,66 +26271,96 @@ export type Database = {
       }
       founder_led_buyer_targets: {
         Row: {
+          acquisition_history: string | null
           business_id: string | null
           business_name: string | null
           buyer_name: string
+          buyer_type: string | null
+          cash_strength_notes: string | null
+          country_region: string | null
           created_at: string
+          draft_prepared: boolean
           evidence_links: Json
+          fit_score: number | null
           founder_approved_at: string | null
           founder_approved_by: string | null
           founder_approved_to_contact: boolean
           id: string
+          jurisdiction_compliance_status: string
           likely_valuation_logic: string | null
           notes: string | null
           outreach_status: string
           prior_acquisitions: string | null
+          public_source_evidence: string | null
           relationship_status: string | null
           sector: string | null
           source_links: Json
           strategic_fit: string | null
           updated_at: string
+          warm_path: string | null
+          website: string | null
           why_they_might_buy: string | null
         }
         Insert: {
+          acquisition_history?: string | null
           business_id?: string | null
           business_name?: string | null
           buyer_name: string
+          buyer_type?: string | null
+          cash_strength_notes?: string | null
+          country_region?: string | null
           created_at?: string
+          draft_prepared?: boolean
           evidence_links?: Json
+          fit_score?: number | null
           founder_approved_at?: string | null
           founder_approved_by?: string | null
           founder_approved_to_contact?: boolean
           id?: string
+          jurisdiction_compliance_status?: string
           likely_valuation_logic?: string | null
           notes?: string | null
           outreach_status?: string
           prior_acquisitions?: string | null
+          public_source_evidence?: string | null
           relationship_status?: string | null
           sector?: string | null
           source_links?: Json
           strategic_fit?: string | null
           updated_at?: string
+          warm_path?: string | null
+          website?: string | null
           why_they_might_buy?: string | null
         }
         Update: {
+          acquisition_history?: string | null
           business_id?: string | null
           business_name?: string | null
           buyer_name?: string
+          buyer_type?: string | null
+          cash_strength_notes?: string | null
+          country_region?: string | null
           created_at?: string
+          draft_prepared?: boolean
           evidence_links?: Json
+          fit_score?: number | null
           founder_approved_at?: string | null
           founder_approved_by?: string | null
           founder_approved_to_contact?: boolean
           id?: string
+          jurisdiction_compliance_status?: string
           likely_valuation_logic?: string | null
           notes?: string | null
           outreach_status?: string
           prior_acquisitions?: string | null
+          public_source_evidence?: string | null
           relationship_status?: string | null
           sector?: string | null
           source_links?: Json
           strategic_fit?: string | null
           updated_at?: string
+          warm_path?: string | null
+          website?: string | null
           why_they_might_buy?: string | null
         }
         Relationships: []
