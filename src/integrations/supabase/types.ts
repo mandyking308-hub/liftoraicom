@@ -26274,6 +26274,7 @@ export type Database = {
           acquisition_history: string | null
           business_id: string | null
           business_name: string | null
+          buyer_motive: string | null
           buyer_name: string
           buyer_type: string | null
           cash_strength_notes: string | null
@@ -26288,6 +26289,8 @@ export type Database = {
           id: string
           jurisdiction_compliance_status: string
           likely_valuation_logic: string | null
+          next_action_due_date: string | null
+          next_warm_up_action: string | null
           notes: string | null
           outreach_status: string
           prior_acquisitions: string | null
@@ -26298,6 +26301,8 @@ export type Database = {
           strategic_fit: string | null
           updated_at: string
           warm_path: string | null
+          warm_up_notes: string | null
+          warm_up_status: string
           website: string | null
           why_they_might_buy: string | null
         }
@@ -26305,6 +26310,7 @@ export type Database = {
           acquisition_history?: string | null
           business_id?: string | null
           business_name?: string | null
+          buyer_motive?: string | null
           buyer_name: string
           buyer_type?: string | null
           cash_strength_notes?: string | null
@@ -26319,6 +26325,8 @@ export type Database = {
           id?: string
           jurisdiction_compliance_status?: string
           likely_valuation_logic?: string | null
+          next_action_due_date?: string | null
+          next_warm_up_action?: string | null
           notes?: string | null
           outreach_status?: string
           prior_acquisitions?: string | null
@@ -26329,6 +26337,8 @@ export type Database = {
           strategic_fit?: string | null
           updated_at?: string
           warm_path?: string | null
+          warm_up_notes?: string | null
+          warm_up_status?: string
           website?: string | null
           why_they_might_buy?: string | null
         }
@@ -26336,6 +26346,7 @@ export type Database = {
           acquisition_history?: string | null
           business_id?: string | null
           business_name?: string | null
+          buyer_motive?: string | null
           buyer_name?: string
           buyer_type?: string | null
           cash_strength_notes?: string | null
@@ -26350,6 +26361,8 @@ export type Database = {
           id?: string
           jurisdiction_compliance_status?: string
           likely_valuation_logic?: string | null
+          next_action_due_date?: string | null
+          next_warm_up_action?: string | null
           notes?: string | null
           outreach_status?: string
           prior_acquisitions?: string | null
@@ -26360,10 +26373,77 @@ export type Database = {
           strategic_fit?: string | null
           updated_at?: string
           warm_path?: string | null
+          warm_up_notes?: string | null
+          warm_up_status?: string
           website?: string | null
           why_they_might_buy?: string | null
         }
         Relationships: []
+      }
+      founder_led_buyer_warm_up_actions: {
+        Row: {
+          action_summary: string | null
+          action_type: string
+          business_id: string | null
+          buyer_target_id: string | null
+          channel_hint: string | null
+          created_at: string
+          due_date: string | null
+          evidence_links: Json
+          founder_approval_required: boolean
+          founder_approved: boolean
+          founder_approved_at: string | null
+          founder_approved_by: string | null
+          id: string
+          notes: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          action_summary?: string | null
+          action_type: string
+          business_id?: string | null
+          buyer_target_id?: string | null
+          channel_hint?: string | null
+          created_at?: string
+          due_date?: string | null
+          evidence_links?: Json
+          founder_approval_required?: boolean
+          founder_approved?: boolean
+          founder_approved_at?: string | null
+          founder_approved_by?: string | null
+          id?: string
+          notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          action_summary?: string | null
+          action_type?: string
+          business_id?: string | null
+          buyer_target_id?: string | null
+          channel_hint?: string | null
+          created_at?: string
+          due_date?: string | null
+          evidence_links?: Json
+          founder_approval_required?: boolean
+          founder_approved?: boolean
+          founder_approved_at?: string | null
+          founder_approved_by?: string | null
+          id?: string
+          notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "founder_led_buyer_warm_up_actions_buyer_target_id_fkey"
+            columns: ["buyer_target_id"]
+            isOneToOne: false
+            referencedRelation: "founder_led_buyer_targets"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       founder_led_sale_readiness_scores: {
         Row: {
