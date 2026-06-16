@@ -2,6 +2,22 @@
 Date: 2026-06-16  
 Scope: Read-only audit of `src/pages/founder/*`, `supabase/functions/*`, Supabase tables, `.lovable/memory/*`, and `docs/*`. No fake data, no builds, no activations.
 
+## Update 2026-06-16: Operating Loops Closure Pack delivered
+
+The following P1/P2 gaps are now closed by founder/admin-only workflows with audit trails. See `docs/operating-loops-closure-pack.md`.
+
+| Gap | Status after closure pack |
+| --- | --- |
+| Insurance claim lifecycle | Closed-loop tracking — `/founder/insurance-claims` |
+| Tax / statutory filings calendar | Closed-loop tracking — `/founder/statutory-filings` |
+| Corporate secretarial cadence | Closed-loop tracking — `/founder/corporate-secretarial` |
+| International expansion runbook | Closed-loop tracking — `/founder/international-expansion` |
+| Investor data room hardening | Access governance + audit — `/founder/data-room` |
+| Roadmap → release → comms loop | Approval-gated workflow — `/founder/release-workflow` |
+| Portfolio FX consolidation | Read-only consolidation — `/founder/portfolio-fx` |
+
+All external actions (filings, broker/insurer sends, customer release comms, live investor links) remain adviser-led and out of scope by design.
+
 ## Coverage scale
 0 Missing · 1 Logged · 2 Managed · 3 Assisted · 4 Automated w/ approval · 5 Strategic intelligence
 

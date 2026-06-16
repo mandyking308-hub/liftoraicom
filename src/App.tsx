@@ -31,6 +31,13 @@ import OperatorPortal from "@/pages/worker/OperatorPortal";
 import OversightLogin from "@/pages/worker/OversightLogin";
 import OversightPortal from "@/pages/worker/OversightPortal";
 import HumanWorkforceControl from "@/pages/founder/HumanWorkforceControl";
+import InsuranceClaimsPage from "@/pages/founder/operating-loops/InsuranceClaims";
+import StatutoryFilingsPage from "@/pages/founder/operating-loops/StatutoryFilings";
+import CorporateSecretarialPage from "@/pages/founder/operating-loops/CorporateSecretarial";
+import InternationalExpansionPage from "@/pages/founder/operating-loops/InternationalExpansion";
+import DataRoomPage from "@/pages/founder/operating-loops/DataRoom";
+import ReleaseWorkflowPage from "@/pages/founder/operating-loops/ReleaseWorkflow";
+import PortfolioFxPage from "@/pages/founder/operating-loops/PortfolioFx";
 import CampaignFactory from "@/pages/founder/CampaignFactory";
 import AutomationBook from "@/pages/founder/AutomationBook";
 import WorkerManuals from "@/pages/founder/WorkerManuals";
@@ -959,6 +966,13 @@ const App = () => (
             <Route path="/founder/global-pr-radar" element={<FounderRoute><GlobalPrRadar /></FounderRoute>} />
             <Route path="/founder/video-library" element={<FounderRoute><VideoLibrary /></FounderRoute>} />
             <Route path="/founder/healthcare-overlay" element={<FounderRoute><HealthcareOverlay /></FounderRoute>} />
+            <Route path="/founder/insurance-claims" element={<FounderRoute><InsuranceClaimsPage /></FounderRoute>} />
+            <Route path="/founder/statutory-filings" element={<FounderRoute><StatutoryFilingsPage /></FounderRoute>} />
+            <Route path="/founder/corporate-secretarial" element={<FounderRoute><CorporateSecretarialPage /></FounderRoute>} />
+            <Route path="/founder/international-expansion" element={<FounderRoute><InternationalExpansionPage /></FounderRoute>} />
+            <Route path="/founder/data-room" element={<FounderRoute><DataRoomPage /></FounderRoute>} />
+            <Route path="/founder/release-workflow" element={<FounderRoute><ReleaseWorkflowPage /></FounderRoute>} />
+            <Route path="/founder/portfolio-fx" element={<FounderRoute><PortfolioFxPage /></FounderRoute>} />
             <Route path="/founder/business-internal-activation" element={<FounderRoute><BusinessInternalActivationPage /></FounderRoute>} />
             <Route path="/founder/business-daily-operating-loop" element={<FounderRoute><BusinessDailyOperatingLoopPage /></FounderRoute>} />
             <Route path="/founder/business-weekly-review" element={<FounderRoute><BusinessWeeklyReviewPage /></FounderRoute>} />
