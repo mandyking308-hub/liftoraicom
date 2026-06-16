@@ -130,6 +130,7 @@ import BuildPhaseCloseoutPage from "./pages/founder/BuildPhaseCloseout";
 import ManualsHubPage from "./pages/founder/ManualsHub";
 import LiftorBrain from "./pages/founder/LiftorBrain";
 import PortfolioExitCommandCentre from "./pages/founder/PortfolioExitCommandCentre";
+import FounderLedExitSalesEngine from "./pages/founder/FounderLedExitSalesEngine";
 import PortfolioExitAssetDetail from "./pages/founder/PortfolioExitAssetDetail";
 import MAIntelligenceWorkspace from "./pages/founder/MAIntelligenceWorkspace";
 import ExitValuationEngine from "./pages/founder/ExitValuationEngine";
