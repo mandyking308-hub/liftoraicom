@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ArrowLeft, Search, Upload, Video, MessageSquare, ExternalLink, Loader2, ShieldAlert, BookOpen, Map, ClipboardCheck, Package } from "lucide-react";
+import { ArrowLeft, Search, Upload, Video, MessageSquare, ExternalLink, Loader2, ShieldAlert, BookOpen, Map, ClipboardCheck, Package, CheckCircle2, Filter } from "lucide-react";
 
 const sb: any = supabase;
 
@@ -113,6 +113,7 @@ export default function VideoLibrary() {
             <TabsTrigger value="coverage"><Map size={12} className="mr-1" /> Coverage</TabsTrigger>
             <TabsTrigger value="assignments"><ClipboardCheck size={12} className="mr-1" /> Assignments</TabsTrigger>
             <TabsTrigger value="privacy"><ShieldAlert size={12} className="mr-1" /> Privacy</TabsTrigger>
+            <TabsTrigger value="approval"><CheckCircle2 size={12} className="mr-1" /> Approval</TabsTrigger>
             <TabsTrigger value="evidence"><Package size={12} className="mr-1" /> Buyer / Adviser</TabsTrigger>
             <TabsTrigger value="governance"><ShieldAlert size={12} className="mr-1" /> Governance</TabsTrigger>
           </TabsList>
@@ -191,6 +192,7 @@ export default function VideoLibrary() {
           <TabsContent value="coverage"><CoveragePanel videos={videosQ.data ?? []} /></TabsContent>
           <TabsContent value="assignments"><AssignmentsPanel videos={videosQ.data ?? []} /></TabsContent>
           <TabsContent value="privacy"><PrivacyPanel videos={videosQ.data ?? []} onChanged={() => qc.invalidateQueries({ queryKey: ["video-library"] })} /></TabsContent>
+          <TabsContent value="approval"><ApprovalPanel videos={videosQ.data ?? []} onChanged={() => qc.invalidateQueries({ queryKey: ["video-library"] })} /></TabsContent>
           <TabsContent value="evidence"><EvidencePanel videos={videosQ.data ?? []} /></TabsContent>
 
           <TabsContent value="governance">
@@ -374,15 +376,38 @@ function SearchPanel({ videos }: { videos: VideoRow[] }) {
   const [results, setResults] = useState<any[]>([]);
   const [busy, setBusy] = useState(false);
   const [meta, setMeta] = useState<{ latency_ms?: number; count?: number } | null>(null);
+  const [businessId, setBusinessId] = useState("");
+  const [areaF, setAreaF] = useState("");
+  const [moduleF, setModuleF] = useState("");
+  const [videoTypeF, setVideoTypeF] = useState("");
+  const [audienceF, setAudienceF] = useState("");
+  const [providerF, setProviderF] = useState("");
+  const [approvalF, setApprovalF] = useState("");
+  const [privacyF, setPrivacyF] = useState("");
 
   const videoById = useMemo(() => Object.fromEntries(videos.map((v) => [v.id, v])), [videos]);
+  const businesses = useMemo(() => Array.from(new Set(videos.map((v) => v.business_id).filter(Boolean))) as string[], [videos]);
+  const areas = useMemo(() => Array.from(new Set(videos.map((v) => v.dashboard_area).filter(Boolean))) as string[], [videos]);
+  const modules = useMemo(() => Array.from(new Set(videos.flatMap((v) => v.module_coverage ?? []))).filter(Boolean) as string[], [videos]);
+  const providers = useMemo(() => Array.from(new Set(videos.map((v) => v.external_provider).filter(Boolean))) as string[], [videos]);
 
   const run = async () => {
     if (!query.trim()) { toast.error("Enter a search query"); return; }
     setBusy(true);
     try {
       const { data, error } = await sb.functions.invoke("vid-search", {
-        body: { query, mode, limit: 25, video_id: videoId || null },
+        body: {
+          query, mode, limit: 25,
+          video_id: videoId || null,
+          business_id: businessId || null,
+          dashboard_area: areaF || null,
+          module: moduleF || null,
+          video_type: videoTypeF || null,
+          audience_type: audienceF || null,
+          external_provider: providerF || null,
+          approval_status: approvalF || null,
+          privacy_status: privacyF || null,
+        },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
@@ -410,6 +435,41 @@ function SearchPanel({ videos }: { videos: VideoRow[] }) {
           <Button size="sm" onClick={run} disabled={busy}>
             {busy && <Loader2 size={12} className="mr-1 animate-spin" />}<Search size={12} className="mr-1" />Search
           </Button>
+        </div>
+        <div className="flex flex-wrap gap-2 items-end border-t border-border/40 pt-2">
+          <span className="inline-flex items-center gap-1 text-muted-foreground"><Filter size={12} /> Filters:</span>
+          <select className="bg-background border border-border/50 rounded h-8 px-2" value={businessId} onChange={(e) => setBusinessId(e.target.value)}>
+            <option value="">Any business</option>
+            {businesses.map((b) => <option key={b} value={b}>{b.slice(0,8)}…</option>)}
+          </select>
+          <select className="bg-background border border-border/50 rounded h-8 px-2" value={areaF} onChange={(e) => setAreaF(e.target.value)}>
+            <option value="">Any area</option>
+            {areas.map((a) => <option key={a} value={a}>{a}</option>)}
+          </select>
+          <select className="bg-background border border-border/50 rounded h-8 px-2" value={moduleF} onChange={(e) => setModuleF(e.target.value)}>
+            <option value="">Any module</option>
+            {modules.map((m) => <option key={m} value={m}>{m}</option>)}
+          </select>
+          <select className="bg-background border border-border/50 rounded h-8 px-2" value={videoTypeF} onChange={(e) => setVideoTypeF(e.target.value)}>
+            <option value="">Any type</option>
+            {["sop","dashboard_walkthrough","customer_onboarding","operator_training","support_video","compliance_training","founder_training","buyer_handover","adviser_handover"].map((x) => <option key={x} value={x}>{x}</option>)}
+          </select>
+          <select className="bg-background border border-border/50 rounded h-8 px-2" value={audienceF} onChange={(e) => setAudienceF(e.target.value)}>
+            <option value="">Any audience</option>
+            {["founder","admin","operator","oversight","customer","buyer","adviser"].map((x) => <option key={x} value={x}>{x}</option>)}
+          </select>
+          <select className="bg-background border border-border/50 rounded h-8 px-2" value={providerF} onChange={(e) => setProviderF(e.target.value)}>
+            <option value="">Any provider</option>
+            {providers.map((p) => <option key={p} value={p}>{p}</option>)}
+          </select>
+          <select className="bg-background border border-border/50 rounded h-8 px-2" value={approvalF} onChange={(e) => setApprovalF(e.target.value)}>
+            <option value="">Any approval</option>
+            {["draft","review_required","approved","archived"].map((x) => <option key={x} value={x}>{x}</option>)}
+          </select>
+          <select className="bg-background border border-border/50 rounded h-8 px-2" value={privacyF} onChange={(e) => setPrivacyF(e.target.value)}>
+            <option value="">Any privacy</option>
+            {["unchecked","flagged","approved_internal","approved_customer","approved_buyer","blocked"].map((x) => <option key={x} value={x}>{x}</option>)}
+          </select>
         </div>
         {meta && <p className="text-[11px] text-muted-foreground">{meta.count} results · {meta.latency_ms}ms</p>}
         <div className="space-y-2">
@@ -641,6 +701,14 @@ function AssignmentsPanel({ videos }: { videos: VideoRow[] }) {
                 {a.start_seconds != null && <Badge variant="outline" className="text-[10px]">{fmtTime(a.start_seconds)} – {fmtTime(a.end_seconds ?? a.start_seconds)}</Badge>}
                 {a.due_at && <span className="text-muted-foreground">due {new Date(a.due_at).toLocaleDateString()}</span>}
                 {a.completed_at && <span className="text-emerald-300">done {new Date(a.completed_at).toLocaleDateString()}</span>}
+                {!a.completed_at && (
+                  <Button size="sm" variant="outline" className="ml-auto" onClick={async () => {
+                    const { error } = await sb.from("video_library_training_assignments").update({ status: "completed", completed_at: new Date().toISOString() }).eq("id", a.id);
+                    if (error) { toast.error(error.message); return; }
+                    toast.success("Marked complete");
+                    qc.invalidateQueries({ queryKey: ["video-library-assignments"] });
+                  }}>Mark complete</Button>
+                )}
               </div>
             );
           })}
@@ -718,6 +786,13 @@ function EvidencePanel({ videos }: { videos: VideoRow[] }) {
               <Badge variant="outline" className="text-[10px]">{v.audience_type}</Badge>
               <Badge variant="outline" className="text-[10px]">{v.transcript_segment_count} seg</Badge>
               <Badge variant="outline" className="text-[10px]">privacy:{v.privacy_status}</Badge>
+              <Badge variant="outline" className={`text-[10px] ${v.buyer_handover_ready ? "bg-blue-500/15 text-blue-300 border-blue-500/30" : ""}`}>buyer-ready:{v.buyer_handover_ready ? "yes" : "no"}</Badge>
+              <Button size="sm" variant="outline" onClick={async () => {
+                const { data, error } = await sb.rpc("recompute_video_buyer_handover_ready", { _video_id: v.id });
+                if (error) { toast.error(error.message); return; }
+                await sb.from("video_library_audit_events").insert({ video_id: v.id, action: "buyer_handover_recomputed", event_summary: `buyer_handover_ready=${data}`, metadata: { ready: data } });
+                toast.success(`buyer_handover_ready = ${data}`);
+              }}>Recompute buyer-ready</Button>
               {v.external_url && <a className="ml-auto text-primary" href={v.external_url} target="_blank" rel="noreferrer">Open</a>}
             </div>
           ))}
@@ -731,9 +806,66 @@ function EvidencePanel({ videos }: { videos: VideoRow[] }) {
               {!v.external_url && <Badge variant="outline" className="text-[10px]">no external link</Badge>}
               {(!v.privacy_status || v.privacy_status === "unchecked" || v.privacy_status === "flagged" || v.privacy_status === "blocked") && <Badge variant="outline" className="text-[10px]">privacy:{v.privacy_status ?? "unchecked"}</Badge>}
               {!(v.module_coverage?.length || v.dashboard_area) && <Badge variant="outline" className="text-[10px]">no area / module coverage</Badge>}
+              {v.approval_status !== "approved" && <Badge variant="outline" className="text-[10px]">approval:{v.approval_status ?? "draft"}</Badge>}
             </div>
           ))}
         </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ApprovalPanel({ videos, onChanged }: { videos: VideoRow[]; onChanged: () => void }) {
+  const setStatus = async (v: VideoRow, status: string) => {
+    // Guard: cannot approve if privacy is flagged/unchecked/blocked
+    if (status === "approved" && (!v.privacy_status || ["unchecked","flagged","blocked"].includes(v.privacy_status))) {
+      toast.error(`Privacy must be approved first (current: ${v.privacy_status ?? "unchecked"})`);
+      return;
+    }
+    const patch: any = { approval_status: status };
+    if (status === "approved") patch.approved_at = new Date().toISOString();
+    const { error } = await sb.from("video_library_items").update(patch).eq("id", v.id);
+    if (error) { toast.error(error.message); return; }
+    await sb.from("video_library_audit_events").insert({
+      video_id: v.id, action: "approval_status_change",
+      event_summary: `Approval → ${status}`, metadata: { status, prev: v.approval_status },
+    });
+    // Recompute buyer-ready after approval changes
+    await sb.rpc("recompute_video_buyer_handover_ready", { _video_id: v.id });
+    toast.success(`Approval set to ${status}`);
+    onChanged();
+  };
+  const groups: Record<string, VideoRow[]> = { draft: [], review_required: [], approved: [], archived: [] };
+  for (const v of videos) {
+    const s = (v.approval_status ?? "draft") as string;
+    (groups[s] ?? (groups.draft)).push(v);
+  }
+  return (
+    <Card className="tech-card">
+      <CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><CheckCircle2 size={14} /> Approval workflow</CardTitle></CardHeader>
+      <CardContent className="text-xs space-y-3">
+        <p className="text-muted-foreground">
+          Customer, buyer or adviser visibility requires <strong>approval_status = approved</strong> AND privacy approved. Founder/admin only.
+        </p>
+        {(["draft","review_required","approved","archived"] as const).map((bucket) => (
+          <div key={bucket}>
+            <p className="font-medium mb-1">{bucket} ({groups[bucket].length})</p>
+            {groups[bucket].length === 0 && <p className="text-muted-foreground">—</p>}
+            {groups[bucket].map((v) => (
+              <div key={v.id} className="border border-border/40 rounded p-2 mb-1 flex items-center gap-2 flex-wrap">
+                <span className="font-medium">{v.title}</span>
+                <Badge variant="outline" className="text-[10px]">privacy:{v.privacy_status ?? "unchecked"}</Badge>
+                <Badge variant="outline" className="text-[10px]">{v.audience_type}</Badge>
+                <span className="ml-auto flex gap-1 flex-wrap">
+                  {bucket !== "review_required" && <Button size="sm" variant="outline" onClick={() => setStatus(v, "review_required")}>Send for review</Button>}
+                  {bucket !== "approved" && <Button size="sm" variant="outline" onClick={() => setStatus(v, "approved")}>Approve</Button>}
+                  {bucket !== "draft" && <Button size="sm" variant="outline" onClick={() => setStatus(v, "draft")}>Back to draft</Button>}
+                  {bucket !== "archived" && <Button size="sm" variant="outline" onClick={() => setStatus(v, "archived")}>Archive</Button>}
+                </span>
+              </div>
+            ))}
+          </div>
+        ))}
       </CardContent>
     </Card>
   );

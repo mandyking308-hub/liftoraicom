@@ -60699,8 +60699,12 @@ export type Database = {
           completed_sections: Json
           created_at: string
           due_at: string | null
+          end_seconds: number | null
           id: string
+          notes: string | null
           required_sections: Json
+          segment_id: string | null
+          start_seconds: number | null
           status: string
           updated_at: string
           video_id: string
@@ -60714,8 +60718,12 @@ export type Database = {
           completed_sections?: Json
           created_at?: string
           due_at?: string | null
+          end_seconds?: number | null
           id?: string
+          notes?: string | null
           required_sections?: Json
+          segment_id?: string | null
+          start_seconds?: number | null
           status?: string
           updated_at?: string
           video_id: string
@@ -60729,13 +60737,24 @@ export type Database = {
           completed_sections?: Json
           created_at?: string
           due_at?: string | null
+          end_seconds?: number | null
           id?: string
+          notes?: string | null
           required_sections?: Json
+          segment_id?: string | null
+          start_seconds?: number | null
           status?: string
           updated_at?: string
           video_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "video_library_training_assignments_segment_id_fkey"
+            columns: ["segment_id"]
+            isOneToOne: false
+            referencedRelation: "video_transcript_segments"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "video_library_training_assignments_video_id_fkey"
             columns: ["video_id"]
@@ -64916,6 +64935,10 @@ export type Database = {
       recompute_supplier_score: {
         Args: { _supplier_id: string }
         Returns: number
+      }
+      recompute_video_buyer_handover_ready: {
+        Args: { _video_id: string }
+        Returns: boolean
       }
       record_inbound_poll: {
         Args: {

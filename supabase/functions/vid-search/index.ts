@@ -36,6 +36,13 @@ Deno.serve(async (req) => {
     const limit = Math.min(Math.max(parseInt(body.limit ?? 20, 10) || 20, 1), 100);
     const videoFilter = body.video_id ?? null;
     const businessFilter = body.business_id ?? null;
+    const moduleFilter = body.module ? String(body.module) : null;
+    const areaFilter = body.dashboard_area ? String(body.dashboard_area) : null;
+    const videoTypeFilter = body.video_type ? String(body.video_type) : null;
+    const audienceFilter = body.audience_type ? String(body.audience_type) : null;
+    const providerFilter = body.external_provider ? String(body.external_provider) : null;
+    const approvalFilter = body.approval_status ? String(body.approval_status) : null;
+    const privacyFilter = body.privacy_status ? String(body.privacy_status) : null;
     if (!query) return json({ error: "missing_query" }, 400);
 
     let embedding: number[] | null = null;
@@ -65,17 +72,30 @@ Deno.serve(async (req) => {
     });
     if (error) return json({ error: "search_failed", detail: error.message }, 500);
 
-    // join video titles for display
+    // join video titles + metadata for display + post-filter
     const ids = Array.from(new Set((data ?? []).map((r: any) => r.video_id)));
     let videos: Record<string, any> = {};
     if (ids.length) {
       const { data: vrows } = await admin.from("video_library_items")
-        .select("id,title,external_url,external_provider,duration_seconds,visibility")
+        .select("id,title,external_url,external_provider,duration_seconds,visibility,business_id,module_coverage,dashboard_area,video_type,audience_type,approval_status,privacy_status")
         .in("id", ids);
       for (const v of vrows ?? []) videos[v.id] = v;
     }
 
-    const results = (data ?? []).map((r: any) => ({
+    const filtered = (data ?? []).filter((r: any) => {
+      const v = videos[r.video_id];
+      if (!v) return true;
+      if (moduleFilter && !(v.module_coverage ?? []).includes(moduleFilter)) return false;
+      if (areaFilter && v.dashboard_area !== areaFilter) return false;
+      if (videoTypeFilter && v.video_type !== videoTypeFilter) return false;
+      if (audienceFilter && v.audience_type !== audienceFilter) return false;
+      if (providerFilter && v.external_provider !== providerFilter) return false;
+      if (approvalFilter && v.approval_status !== approvalFilter) return false;
+      if (privacyFilter && v.privacy_status !== privacyFilter) return false;
+      return true;
+    });
+
+    const results = filtered.map((r: any) => ({
       segment_id: r.segment_id,
       video_id: r.video_id,
       segment_index: r.segment_index,
