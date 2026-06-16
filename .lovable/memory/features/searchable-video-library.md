@@ -24,4 +24,12 @@ type: feature
 
 **Hosting model:** External video URLs only; Liftor never re-hosts media. Jump-to-timestamp URLs auto-built for YouTube/Vimeo/Loom.
 
-**Privacy:** Founder/admin gated by default. `contains_sensitive_info` + `redaction_required` + `redaction_status` flow before any wider visibility. Every search and Q&A is audited.
+**Privacy:** Founder/admin gated by default. `contains_sensitive_info` + `redaction_required` + `redaction_status` + `privacy_status` (unchecked/flagged/approved_internal/approved_customer/approved_buyer/blocked) flow before any wider visibility. Every search and Q&A is audited.
+
+**Phase 2 additions (live):**
+- `video_library_items` extended with `video_type`, `audience_type`, `dashboard_area`, `asset_id` (FK → `video_sop_assets`), `approval_status`, `transcript_status`, `privacy_status`, `approved_by`, `approved_at`, `buyer_handover_ready`.
+- `video_transcript_segments` extended with `privacy_flags jsonb` and `keywords text[]`.
+- New `video_library_audit_events` table (founder/admin only) — single audit trail for register, ingest, privacy_scan, privacy_approval, assignment.
+- New `vid-privacy-scan` edge function — regex scan for emails/phones/cards/IBAN/JWT/API keys + health/financial/confidential keywords. Updates segment `privacy_flags` and video `privacy_status`. No AI.
+- UI sub-tabs added under `/founder/video-library`: Coverage Map, Assignments, Privacy Review, Buyer / Adviser Evidence. Create dialog now collects video_type, audience_type, dashboard_area.
+- `VideoSopFactory` page links out to the Searchable Video Library.

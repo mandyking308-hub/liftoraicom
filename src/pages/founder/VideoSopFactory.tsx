@@ -325,6 +325,8 @@ export default function VideoSopFactoryPage() {
               (Loom/Guidde/Panopto/Synthesia/HeyGen) — links are captured manually.
             </p>
           </div>
+          <div className="flex gap-2">
+          <a href="/founder/video-library" className="inline-flex"><Button variant="outline"><Video size={16} /> Searchable Video Library</Button></a>
           <Dialog open={createOpen} onOpenChange={setCreateOpen}>
             <DialogTrigger asChild>
               <Button><Plus size={16} /> New asset</Button>
@@ -415,6 +417,7 @@ export default function VideoSopFactoryPage() {
               </DialogFooter>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
 
         {/* Overview */}
