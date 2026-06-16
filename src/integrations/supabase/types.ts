@@ -16320,6 +16320,104 @@ export type Database = {
           },
         ]
       }
+      corporate_secretarial_events: {
+        Row: {
+          actor: string | null
+          created_at: string
+          event_type: string
+          id: string
+          occurred_at: string
+          payload: Json | null
+          record_id: string
+        }
+        Insert: {
+          actor?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          occurred_at?: string
+          payload?: Json | null
+          record_id: string
+        }
+        Update: {
+          actor?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          occurred_at?: string
+          payload?: Json | null
+          record_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "corporate_secretarial_events_record_id_fkey"
+            columns: ["record_id"]
+            isOneToOne: false
+            referencedRelation: "corporate_secretarial_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      corporate_secretarial_records: {
+        Row: {
+          accounts_due: string | null
+          annual_confirmation_due: string | null
+          created_at: string
+          directors: Json | null
+          entity_id: string | null
+          entity_name: string
+          evidence_refs: Json | null
+          id: string
+          jurisdiction: string | null
+          licence_renewal_due: string | null
+          notes: string | null
+          psc_record: Json | null
+          registered_agent: string | null
+          registered_office: string | null
+          shareholders: Json | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          accounts_due?: string | null
+          annual_confirmation_due?: string | null
+          created_at?: string
+          directors?: Json | null
+          entity_id?: string | null
+          entity_name: string
+          evidence_refs?: Json | null
+          id?: string
+          jurisdiction?: string | null
+          licence_renewal_due?: string | null
+          notes?: string | null
+          psc_record?: Json | null
+          registered_agent?: string | null
+          registered_office?: string | null
+          shareholders?: Json | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          accounts_due?: string | null
+          annual_confirmation_due?: string | null
+          created_at?: string
+          directors?: Json | null
+          entity_id?: string | null
+          entity_name?: string
+          evidence_refs?: Json | null
+          id?: string
+          jurisdiction?: string | null
+          licence_renewal_due?: string | null
+          notes?: string | null
+          psc_record?: Json | null
+          registered_agent?: string | null
+          registered_office?: string | null
+          shareholders?: Json | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       coverage_mentions: {
         Row: {
           article_title: string | null
@@ -22512,6 +22610,78 @@ export type Database = {
         }
         Relationships: []
       }
+      data_room_access_tokens: {
+        Row: {
+          access_scope: string | null
+          allowed_folders: Json | null
+          approval_status: string | null
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          domain: string | null
+          download_allowed: boolean | null
+          email: string | null
+          expiry_at: string | null
+          id: string
+          investor_name: string
+          nda_status: string | null
+          notes: string | null
+          organisation: string | null
+          revoked_at: string | null
+          revoked_reason: string | null
+          token_hash: string | null
+          updated_at: string
+          view_only: boolean | null
+          watermark_enabled: boolean | null
+        }
+        Insert: {
+          access_scope?: string | null
+          allowed_folders?: Json | null
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          domain?: string | null
+          download_allowed?: boolean | null
+          email?: string | null
+          expiry_at?: string | null
+          id?: string
+          investor_name: string
+          nda_status?: string | null
+          notes?: string | null
+          organisation?: string | null
+          revoked_at?: string | null
+          revoked_reason?: string | null
+          token_hash?: string | null
+          updated_at?: string
+          view_only?: boolean | null
+          watermark_enabled?: boolean | null
+        }
+        Update: {
+          access_scope?: string | null
+          allowed_folders?: Json | null
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          domain?: string | null
+          download_allowed?: boolean | null
+          email?: string | null
+          expiry_at?: string | null
+          id?: string
+          investor_name?: string
+          nda_status?: string | null
+          notes?: string | null
+          organisation?: string | null
+          revoked_at?: string | null
+          revoked_reason?: string | null
+          token_hash?: string | null
+          updated_at?: string
+          view_only?: boolean | null
+          watermark_enabled?: boolean | null
+        }
+        Relationships: []
+      }
       data_room_items: {
         Row: {
           created_at: string
@@ -22592,6 +22762,89 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      data_room_share_requests: {
+        Row: {
+          created_at: string
+          founder_decided_at: string | null
+          founder_decided_by: string | null
+          founder_decision: string | null
+          id: string
+          investor_name: string
+          justification: string | null
+          organisation: string | null
+          requested_scope: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          founder_decided_at?: string | null
+          founder_decided_by?: string | null
+          founder_decision?: string | null
+          id?: string
+          investor_name: string
+          justification?: string | null
+          organisation?: string | null
+          requested_scope?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          founder_decided_at?: string | null
+          founder_decided_by?: string | null
+          founder_decision?: string | null
+          id?: string
+          investor_name?: string
+          justification?: string | null
+          organisation?: string | null
+          requested_scope?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      data_room_view_audit: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          ip_hash: string | null
+          item_ref: string | null
+          occurred_at: string
+          token_id: string | null
+          viewer_fingerprint: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          ip_hash?: string | null
+          item_ref?: string | null
+          occurred_at?: string
+          token_id?: string | null
+          viewer_fingerprint?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          ip_hash?: string | null
+          item_ref?: string | null
+          occurred_at?: string
+          token_id?: string | null
+          viewer_fingerprint?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_room_view_audit_token_id_fkey"
+            columns: ["token_id"]
+            isOneToOne: false
+            referencedRelation: "data_room_access_tokens"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       deals: {
         Row: {
@@ -26805,6 +27058,39 @@ export type Database = {
           },
         ]
       }
+      fx_rate_snapshots: {
+        Row: {
+          as_of: string
+          base_currency: string
+          created_at: string
+          currency: string
+          id: string
+          notes: string | null
+          rate: number
+          source: string | null
+        }
+        Insert: {
+          as_of?: string
+          base_currency?: string
+          created_at?: string
+          currency: string
+          id?: string
+          notes?: string | null
+          rate: number
+          source?: string | null
+        }
+        Update: {
+          as_of?: string
+          base_currency?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          notes?: string | null
+          rate?: number
+          source?: string | null
+        }
+        Relationships: []
+      }
       global_audit_events: {
         Row: {
           action_summary: string
@@ -29264,6 +29550,136 @@ export type Database = {
           },
         ]
       }
+      insurance_claim_events: {
+        Row: {
+          actor: string | null
+          claim_id: string
+          created_at: string
+          event_type: string
+          id: string
+          payload: Json | null
+        }
+        Insert: {
+          actor?: string | null
+          claim_id: string
+          created_at?: string
+          event_type: string
+          id?: string
+          payload?: Json | null
+        }
+        Update: {
+          actor?: string | null
+          claim_id?: string
+          created_at?: string
+          event_type?: string
+          id?: string
+          payload?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insurance_claim_events_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "insurance_claims"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      insurance_claims: {
+        Row: {
+          broker_contact: string | null
+          broker_name: string | null
+          business_id: string | null
+          claim_type: string
+          claim_value_estimate: number | null
+          created_at: string
+          currency: string | null
+          evidence_refs: Json | null
+          excess_amount: number | null
+          founder_approval_status: string | null
+          founder_approved_at: string | null
+          founder_approved_by: string | null
+          id: string
+          incident_date: string | null
+          incident_id: string | null
+          insurer: string | null
+          next_action: string | null
+          next_action_due: string | null
+          notes: string | null
+          opened_date: string | null
+          owner: string | null
+          policy_id: string | null
+          policy_reference: string | null
+          recovered_amount: number | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          broker_contact?: string | null
+          broker_name?: string | null
+          business_id?: string | null
+          claim_type: string
+          claim_value_estimate?: number | null
+          created_at?: string
+          currency?: string | null
+          evidence_refs?: Json | null
+          excess_amount?: number | null
+          founder_approval_status?: string | null
+          founder_approved_at?: string | null
+          founder_approved_by?: string | null
+          id?: string
+          incident_date?: string | null
+          incident_id?: string | null
+          insurer?: string | null
+          next_action?: string | null
+          next_action_due?: string | null
+          notes?: string | null
+          opened_date?: string | null
+          owner?: string | null
+          policy_id?: string | null
+          policy_reference?: string | null
+          recovered_amount?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          broker_contact?: string | null
+          broker_name?: string | null
+          business_id?: string | null
+          claim_type?: string
+          claim_value_estimate?: number | null
+          created_at?: string
+          currency?: string | null
+          evidence_refs?: Json | null
+          excess_amount?: number | null
+          founder_approval_status?: string | null
+          founder_approved_at?: string | null
+          founder_approved_by?: string | null
+          id?: string
+          incident_date?: string | null
+          incident_id?: string | null
+          insurer?: string | null
+          next_action?: string | null
+          next_action_due?: string | null
+          notes?: string | null
+          opened_date?: string | null
+          owner?: string | null
+          policy_id?: string | null
+          policy_reference?: string | null
+          recovered_amount?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insurance_claims_policy_id_fkey"
+            columns: ["policy_id"]
+            isOneToOne: false
+            referencedRelation: "insurance_policy_register"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       insurance_gap_assessments: {
         Row: {
           adviser_review_required: boolean
@@ -30101,6 +30517,110 @@ export type Database = {
           priority?: string | null
           response_time_minutes?: number | null
           source_module?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      international_expansion_events: {
+        Row: {
+          actor: string | null
+          created_at: string
+          event_type: string
+          id: string
+          payload: Json | null
+          run_id: string
+        }
+        Insert: {
+          actor?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          payload?: Json | null
+          run_id: string
+        }
+        Update: {
+          actor?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          payload?: Json | null
+          run_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "international_expansion_events_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "international_expansion_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      international_expansion_runs: {
+        Row: {
+          adviser_status: string | null
+          banking_status: string | null
+          business_id: string | null
+          created_at: string
+          evidence_refs: Json | null
+          founder_decided_at: string | null
+          founder_decision: string | null
+          go_no_go_status: string
+          id: string
+          launch_purpose: string | null
+          legal_review_status: string | null
+          localisation_status: string | null
+          market_relevance_notes: string | null
+          payments_status: string | null
+          privacy_status: string | null
+          regulatory_status: string | null
+          substance_notes: string | null
+          target_jurisdiction: string
+          tax_review_status: string | null
+          updated_at: string
+        }
+        Insert: {
+          adviser_status?: string | null
+          banking_status?: string | null
+          business_id?: string | null
+          created_at?: string
+          evidence_refs?: Json | null
+          founder_decided_at?: string | null
+          founder_decision?: string | null
+          go_no_go_status?: string
+          id?: string
+          launch_purpose?: string | null
+          legal_review_status?: string | null
+          localisation_status?: string | null
+          market_relevance_notes?: string | null
+          payments_status?: string | null
+          privacy_status?: string | null
+          regulatory_status?: string | null
+          substance_notes?: string | null
+          target_jurisdiction: string
+          tax_review_status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          adviser_status?: string | null
+          banking_status?: string | null
+          business_id?: string | null
+          created_at?: string
+          evidence_refs?: Json | null
+          founder_decided_at?: string | null
+          founder_decision?: string | null
+          go_no_go_status?: string
+          id?: string
+          launch_purpose?: string | null
+          legal_review_status?: string | null
+          localisation_status?: string | null
+          market_relevance_notes?: string | null
+          payments_status?: string | null
+          privacy_status?: string | null
+          regulatory_status?: string | null
+          substance_notes?: string | null
+          target_jurisdiction?: string
+          tax_review_status?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -43182,6 +43702,42 @@ export type Database = {
         }
         Relationships: []
       }
+      portfolio_fx_warnings: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          currency: string
+          id: string
+          last_seen_at: string | null
+          missing_rate: boolean | null
+          notes: string | null
+          resolved_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          currency: string
+          id?: string
+          last_seen_at?: string | null
+          missing_rate?: boolean | null
+          notes?: string | null
+          resolved_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          last_seen_at?: string | null
+          missing_rate?: boolean | null
+          notes?: string | null
+          resolved_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       portfolio_history_events: {
         Row: {
           audit_metadata: Json
@@ -46712,6 +47268,112 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      release_workflow_events: {
+        Row: {
+          actor: string | null
+          created_at: string
+          event_type: string
+          id: string
+          item_id: string
+          payload: Json | null
+        }
+        Insert: {
+          actor?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          item_id: string
+          payload?: Json | null
+        }
+        Update: {
+          actor?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          item_id?: string
+          payload?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "release_workflow_events_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "release_workflow_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      release_workflow_items: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          customer_comms_draft: string | null
+          customer_impact: string | null
+          documentation_status: string | null
+          founder_approved_at: string | null
+          founder_approved_by: string | null
+          id: string
+          internal_notes: string | null
+          planned_release_date: string | null
+          qa_status: string | null
+          release_status: string
+          release_title: string
+          release_type: string
+          released_at: string | null
+          roadmap_item_id: string | null
+          support_impact: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          customer_comms_draft?: string | null
+          customer_impact?: string | null
+          documentation_status?: string | null
+          founder_approved_at?: string | null
+          founder_approved_by?: string | null
+          id?: string
+          internal_notes?: string | null
+          planned_release_date?: string | null
+          qa_status?: string | null
+          release_status?: string
+          release_title: string
+          release_type?: string
+          released_at?: string | null
+          roadmap_item_id?: string | null
+          support_impact?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          customer_comms_draft?: string | null
+          customer_impact?: string | null
+          documentation_status?: string | null
+          founder_approved_at?: string | null
+          founder_approved_by?: string | null
+          id?: string
+          internal_notes?: string | null
+          planned_release_date?: string | null
+          qa_status?: string | null
+          release_status?: string
+          release_title?: string
+          release_type?: string
+          released_at?: string | null
+          roadmap_item_id?: string | null
+          support_impact?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "release_workflow_items_roadmap_item_id_fkey"
+            columns: ["roadmap_item_id"]
+            isOneToOne: false
+            referencedRelation: "product_roadmap_items"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       renewal_review_tasks: {
         Row: {
@@ -57132,6 +57794,113 @@ export type Database = {
           structured_payload?: Json
           subject?: string | null
           title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      statutory_filing_events: {
+        Row: {
+          actor: string | null
+          created_at: string
+          event_type: string
+          filing_id: string
+          id: string
+          payload: Json | null
+        }
+        Insert: {
+          actor?: string | null
+          created_at?: string
+          event_type: string
+          filing_id: string
+          id?: string
+          payload?: Json | null
+        }
+        Update: {
+          actor?: string | null
+          created_at?: string
+          event_type?: string
+          filing_id?: string
+          id?: string
+          payload?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "statutory_filing_events_filing_id_fkey"
+            columns: ["filing_id"]
+            isOneToOne: false
+            referencedRelation: "statutory_filings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      statutory_filings: {
+        Row: {
+          adviser_contact: string | null
+          authority: string | null
+          business_id: string | null
+          created_at: string
+          currency: string | null
+          due_date: string | null
+          entity_id: string | null
+          evidence_ref: string | null
+          filed_date: string | null
+          filing_category: string
+          filing_name: string
+          id: string
+          jurisdiction: string | null
+          notes: string | null
+          owner: string | null
+          payment_amount: number | null
+          payment_required: boolean | null
+          period_end: string | null
+          period_start: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          adviser_contact?: string | null
+          authority?: string | null
+          business_id?: string | null
+          created_at?: string
+          currency?: string | null
+          due_date?: string | null
+          entity_id?: string | null
+          evidence_ref?: string | null
+          filed_date?: string | null
+          filing_category: string
+          filing_name: string
+          id?: string
+          jurisdiction?: string | null
+          notes?: string | null
+          owner?: string | null
+          payment_amount?: number | null
+          payment_required?: boolean | null
+          period_end?: string | null
+          period_start?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          adviser_contact?: string | null
+          authority?: string | null
+          business_id?: string | null
+          created_at?: string
+          currency?: string | null
+          due_date?: string | null
+          entity_id?: string | null
+          evidence_ref?: string | null
+          filed_date?: string | null
+          filing_category?: string
+          filing_name?: string
+          id?: string
+          jurisdiction?: string | null
+          notes?: string | null
+          owner?: string | null
+          payment_amount?: number | null
+          payment_required?: boolean | null
+          period_end?: string | null
+          period_start?: string | null
+          status?: string
           updated_at?: string
         }
         Relationships: []
