@@ -26,6 +26,7 @@ import {
 } from "@/lib/humanWorkforce";
 import { generateMonthlyPlan, approveMonthlyPlan } from "@/lib/monthlyContentPlanner";
 import HumanOversightChainPanel from "@/components/founder/command/HumanOversightChainPanel";
+import { fetchTrainingAssignmentsForPeople, type TrainingAssignmentSummary } from "@/lib/lifecycleHandoffs";
 
 const WORKER_ROLES: WorkerRole[] = [
   "technical_operator",
@@ -182,6 +183,7 @@ export default function HumanWorkforceControl() {
           <TabsTrigger value="access">Access</TabsTrigger>
           <TabsTrigger value="tasks">Tasks</TabsTrigger>
           <TabsTrigger value="oversight">Oversight</TabsTrigger>
+          <TabsTrigger value="training">Training</TabsTrigger>
           <TabsTrigger value="content">Monthly Content</TabsTrigger>
           <TabsTrigger value="onboarding">Business Onboarding</TabsTrigger>
           <TabsTrigger value="audit">Audit Log</TabsTrigger>
