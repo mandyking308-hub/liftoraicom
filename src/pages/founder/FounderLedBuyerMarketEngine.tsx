@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
-import { Globe2, Users, Building2, Target, ShieldAlert, ClipboardCheck } from "lucide-react";
+import { Globe2, Users, Building2, Target, ShieldAlert, ClipboardCheck, Flame } from "lucide-react";
 
 /**
  * Founder-Led Buyer & Market Domination Engine.
@@ -16,20 +16,23 @@ export default function FounderLedBuyerMarketEngine() {
   const [buyers, setBuyers] = useState<any[]>([]);
   const [competitors, setCompetitors] = useState<any[]>([]);
   const [segments, setSegments] = useState<any[]>([]);
+  const [warmActions, setWarmActions] = useState<any[]>([]);
 
   useEffect(() => {
     (async () => {
       try {
-        const [p, b, c, s] = await Promise.all([
+        const [p, b, c, s, w] = await Promise.all([
           (supabase as any).from("business_exit_intelligence_profiles").select("*").order("twelve_month_review_date", { ascending: true }).limit(100),
           (supabase as any).from("founder_led_buyer_targets").select("*").order("updated_at", { ascending: false }).limit(100),
           (supabase as any).from("competitor_intelligence_map").select("*").order("updated_at", { ascending: false }).limit(100),
           (supabase as any).from("customer_prospect_segment_map").select("*").order("updated_at", { ascending: false }).limit(100),
+          (supabase as any).from("founder_led_buyer_warm_up_actions").select("*").order("due_date", { ascending: true }).limit(100),
         ]);
         setProfiles(p?.data ?? []);
         setBuyers(b?.data ?? []);
         setCompetitors(c?.data ?? []);
         setSegments(s?.data ?? []);
+        setWarmActions(w?.data ?? []);
       } catch { /* founder/admin gated */ }
     })();
   }, []);
@@ -177,23 +180,58 @@ export default function FounderLedBuyerMarketEngine() {
 
           <TabsContent value="warmup">
             <Card className="tech-card">
-              <CardHeader><CardTitle className="text-sm">Buyer warm-up workflow (founder-led)</CardTitle></CardHeader>
-              <CardContent className="text-xs">
-                <ol className="grid grid-cols-1 md:grid-cols-2 gap-1 list-[upper-alpha] pl-5">
-                  <li>Identify buyer</li>
-                  <li>Gather public evidence</li>
-                  <li>Score fit</li>
-                  <li>Identify warm path</li>
-                  <li>Draft soft relationship email</li>
-                  <li>Founder approves</li>
-                  <li>Contact made</li>
-                  <li>Response logged</li>
-                  <li>Relationship warmed</li>
-                  <li>Sale conversation ready</li>
-                  <li>Diligence / data room decision</li>
-                  <li>Offer / park / hold</li>
-                </ol>
-                <p className="text-muted-foreground mt-3">No automatic sending. Drafts only. Nothing leaves Liftor without explicit founder approval through existing gated sending controls.</p>
+              <CardHeader><CardTitle className="text-sm flex items-center gap-2"><Flame size={14}/> Buyer warm-up workflow (founder-led)</CardTitle></CardHeader>
+              <CardContent className="text-xs space-y-4">
+                <div className="text-muted-foreground">
+                  Internal warm-up only. Workflow labels: <em>Founder-Led Sale · Direct Buyer Warm-Up · Owner-Controlled Exit · Buyer Relationship Preparation · Adviser Optional / Completion Support Only</em>.
+                  Liftor prepares the buyer map, warm-up path, sale evidence and data room. External lawyers/tax advisers may support completion. M&amp;A advisers are optional and not required by default.
+                </div>
+
+                <div>
+                  <div className="text-muted-foreground mb-1">Buyer relationship warmth</div>
+                  {buyers.length === 0 ? (
+                    <p className="text-muted-foreground">No buyer targets yet.</p>
+                  ) : (
+                    <table className="w-full text-left">
+                      <thead className="text-muted-foreground"><tr><th className="py-1">Buyer</th><th>Warmth</th><th>Warm-up</th><th>Next action</th><th>Due</th><th>Approved</th></tr></thead>
+                      <tbody>
+                        {buyers.map((b) => (
+                          <tr key={b.id} className="border-t border-border/40">
+                            <td className="py-1">{b.buyer_name}</td>
+                            <td><Badge variant="outline" className="text-[10px]">{b.relationship_status ?? "cold"}</Badge></td>
+                            <td><Badge variant="outline" className="text-[10px]">{b.warm_up_status ?? "monitoring"}</Badge></td>
+                            <td>{b.next_warm_up_action ?? "—"}</td>
+                            <td>{b.next_action_due_date ?? "—"}</td>
+                            <td>{b.founder_approved_to_contact ? "Yes" : "No"}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+
+                <div>
+                  <div className="text-muted-foreground mb-1">Planned warm-up actions</div>
+                  {warmActions.length === 0 ? (
+                    <p className="text-muted-foreground">No warm-up actions planned. Drafts only — nothing is sent automatically.</p>
+                  ) : (
+                    <table className="w-full text-left">
+                      <thead className="text-muted-foreground"><tr><th className="py-1">Action</th><th>Status</th><th>Due</th><th>Founder approved</th></tr></thead>
+                      <tbody>
+                        {warmActions.map((a) => (
+                          <tr key={a.id} className="border-t border-border/40">
+                            <td className="py-1">{a.action_type}{a.action_summary ? ` — ${a.action_summary}` : ""}</td>
+                            <td><Badge variant="outline" className="text-[10px]">{a.status}</Badge></td>
+                            <td>{a.due_date ?? "—"}</td>
+                            <td>{a.founder_approved ? "Yes" : "No"}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+
+                <p className="text-muted-foreground">No automatic sending. Drafts only. Nothing leaves Liftor without explicit founder approval through existing gated sending controls.</p>
               </CardContent>
             </Card>
           </TabsContent>
