@@ -227,6 +227,9 @@ function CreateVideoDialog({ open, onOpenChange, onCreated }: { open: boolean; o
   const [visibility, setVisibility] = useState("founder_only");
   const [tags, setTags] = useState("");
   const [modules, setModules] = useState("");
+  const [videoType, setVideoType] = useState("sop");
+  const [audienceType, setAudienceType] = useState("founder");
+  const [dashboardArea, setDashboardArea] = useState("");
   const [busy, setBusy] = useState(false);
 
   const submit = async () => {
@@ -242,11 +245,17 @@ function CreateVideoDialog({ open, onOpenChange, onCreated }: { open: boolean; o
       tags: tags.split(",").map((s) => s.trim()).filter(Boolean),
       module_coverage: modules.split(",").map((s) => s.trim()).filter(Boolean),
       status: "draft",
+      video_type: videoType,
+      audience_type: audienceType,
+      dashboard_area: dashboardArea.trim() || null,
+      transcript_status: "missing",
+      privacy_status: "unchecked",
+      approval_status: "draft",
     });
     setBusy(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Video registered. Upload a transcript next.");
-    setTitle(""); setDescription(""); setExternalUrl(""); setTags(""); setModules("");
+    setTitle(""); setDescription(""); setExternalUrl(""); setTags(""); setModules(""); setDashboardArea("");
     onOpenChange(false); onCreated();
   };
 
@@ -278,6 +287,17 @@ function CreateVideoDialog({ open, onOpenChange, onCreated }: { open: boolean; o
           </label>
           <label className="col-span-2">Tags (comma-sep)<Input value={tags} onChange={(e) => setTags(e.target.value)} placeholder="onboarding, dashboard" /></label>
           <label className="col-span-2">Module coverage (comma-sep)<Input value={modules} onChange={(e) => setModules(e.target.value)} placeholder="referrals, invoicing, compliance" /></label>
+          <label>Video type
+            <select className="w-full bg-background border border-border/50 rounded h-9 px-2" value={videoType} onChange={(e) => setVideoType(e.target.value)}>
+              {["sop","dashboard_walkthrough","customer_onboarding","operator_training","support_video","compliance_training","founder_training","buyer_handover","adviser_handover"].map((x) => <option key={x} value={x}>{x}</option>)}
+            </select>
+          </label>
+          <label>Audience
+            <select className="w-full bg-background border border-border/50 rounded h-9 px-2" value={audienceType} onChange={(e) => setAudienceType(e.target.value)}>
+              {["founder","admin","operator","oversight","customer","buyer","adviser"].map((x) => <option key={x} value={x}>{x}</option>)}
+            </select>
+          </label>
+          <label className="col-span-2">Dashboard area<Input value={dashboardArea} onChange={(e) => setDashboardArea(e.target.value)} placeholder="e.g. referrals dashboard" /></label>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
