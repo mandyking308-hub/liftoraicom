@@ -117,6 +117,68 @@ const DAILY_CHECKLIST = [
   "Recommended actions",
 ];
 
+// 5-group simplified index over the AI Cost Governor surface.
+// Daily-Driver Polish Pass 1 (section N of the pre-live cleanup report):
+// no sub-pages are removed — this just lets the founder land on a
+// grouped view instead of facing 20 separate links.
+const AI_COST_GROUPS: Array<{
+  title: string;
+  description: string;
+  links: Array<{ label: string; to: string }>;
+}> = [
+  {
+    title: "Overview & Alerts",
+    description: "Live portfolio AI spend, daily action board, alerts and approval queue.",
+    links: [
+      { label: "Portfolio Overview", to: "/founder/ai-cost/live" },
+      { label: "Founder Action Board", to: "/founder/ai-cost/action-board" },
+      { label: "Live Alerts", to: "/founder/ai-cost/alerts" },
+      { label: "Human Approval Queue", to: "/founder/ai-cost/approvals" },
+      { label: "First-Use Setup", to: "/founder/ai-cost/first-use" },
+    ],
+  },
+  {
+    title: "Usage Ledger & Costs",
+    description: "Per-call usage, provider pricing, business budgets, ROI and monthly finance pack.",
+    links: [
+      { label: "Usage Ledger", to: "/founder/ai-cost/ledger" },
+      { label: "Provider Pricing Registry", to: "/founder/ai-cost/pricing" },
+      { label: "Business Budgets", to: "/founder/ai-cost/budgets" },
+      { label: "ROI Engine", to: "/founder/ai-cost/roi" },
+      { label: "Monthly AI Finance Pack", to: "/founder/ai-cost/finance" },
+    ],
+  },
+  {
+    title: "Model Routing & Runtime",
+    description: "Routing rules, runtime, orchestration and queue / kill switch controls.",
+    links: [
+      { label: "Model Routing Rules", to: "/founder/ai-cost/routing" },
+      { label: "AI Runtime", to: "/founder/ai-cost/runtime" },
+      { label: "Orchestration Live", to: "/founder/ai-cost/orchestration-live" },
+      { label: "Runtime Health Cockpit", to: "/founder/ai-cost/health" },
+      { label: "Queue Control & Kill Switch", to: "/founder/ai-cost/queue" },
+    ],
+  },
+  {
+    title: "Agent Controls & Permissions",
+    description: "Per-agent pause/limits, prompt templates, cached context and sandbox testing.",
+    links: [
+      { label: "Agent Cost Controls", to: "/founder/ai-cost/agent-controls" },
+      { label: "Prompt Templates", to: "/founder/ai-cost/templates" },
+      { label: "Cached Context", to: "/founder/ai-cost/context" },
+      { label: "Sandbox (optional)", to: "/founder/ai-cost/sandbox" },
+    ],
+  },
+  {
+    title: "Quality / Security / Compliance",
+    description: "Quality scoring, security & redaction — keep AI output trustworthy.",
+    links: [
+      { label: "Quality Scoring", to: "/founder/ai-cost/quality" },
+      { label: "Security & Redaction", to: "/founder/ai-cost/security" },
+    ],
+  },
+];
+
 export default function AICostGovernorHub() {
   return (
     <FounderLayout>
@@ -152,6 +214,40 @@ export default function AICostGovernorHub() {
             <ul className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-1 text-sm text-muted-foreground list-disc ml-5">
               {DAILY_CHECKLIST.map((c) => <li key={c}>{c}</li>)}
             </ul>
+          </CardContent>
+        </Card>
+
+        {/* Grouped 5-tab quick index so the AI Cost surface stays scannable. */}
+        <Card className="tech-card border-primary/20">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">AI Cost Governor · grouped index</CardTitle>
+            <p className="text-xs text-muted-foreground">
+              Same pages as below, grouped into five themes. No sub-pages removed.
+            </p>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2">
+              {AI_COST_GROUPS.map((g) => (
+                <div key={g.title} className="rounded-md border border-border/60 p-3 space-y-2">
+                  <div>
+                    <p className="text-sm font-semibold">{g.title}</p>
+                    <p className="text-[11px] text-muted-foreground leading-snug">{g.description}</p>
+                  </div>
+                  <ul className="space-y-1">
+                    {g.links.map((l) => (
+                      <li key={l.to}>
+                        <Link
+                          to={l.to}
+                          className="block text-[11px] px-2 py-1 rounded border border-border/40 hover:border-primary/50 hover:text-primary text-muted-foreground"
+                        >
+                          {l.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
 
