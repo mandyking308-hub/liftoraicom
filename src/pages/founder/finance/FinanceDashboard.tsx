@@ -27,10 +27,10 @@ const FINANCE_HUB_TABS: { label: string; to: string; description: string }[] = [
   { label: "Collections",           to: "/founder/collections",                          description: "Overdue, reminders, payment plans, holds." },
   { label: "Reconciliation",        to: "/founder/reconciliation",                       description: "Bank, payouts, refunds, unmatched items." },
   { label: "Pricing & Margin",      to: "/founder/pricing-margin",                       description: "Breakeven, discounts, product-level margin." },
-  { label: "Portfolio FX",          to: "/founder/operating-loops/portfolio-fx",         description: "FX consolidation snapshots and warnings." },
-  { label: "Statutory Filings",     to: "/founder/operating-loops/statutory-filings",    description: "Tracking-only register for filings & deadlines." },
-  { label: "Corporate Secretarial", to: "/founder/operating-loops/corporate-secretarial",description: "Cadence for board, registers and minutes — tracking only." },
-  { label: "Insurance Claims",      to: "/founder/operating-loops/insurance-claims",     description: "Claim lifecycle log — broker handoff stays manual." },
+  { label: "Portfolio FX",          to: "/founder/portfolio-fx",          description: "FX consolidation snapshots and warnings." },
+  { label: "Statutory Filings",     to: "/founder/statutory-filings",     description: "Tracking-only register for filings & deadlines." },
+  { label: "Corporate Secretarial", to: "/founder/corporate-secretarial", description: "Cadence for board, registers and minutes — tracking only." },
+  { label: "Insurance Claims",      to: "/founder/insurance-claims",      description: "Claim lifecycle log — broker handoff stays manual." },
 ];
 
 type Row = {
