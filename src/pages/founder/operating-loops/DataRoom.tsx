@@ -4,12 +4,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { approveToken, createToken, decideShareRequest, fetchShareRequests, fetchTokens, pendingApprovalCount, revokeToken, type DataRoomToken, type ShareRequest } from "@/lib/operatingLoops/dataRoomHardeningEngine";
 import { toast } from "sonner";
+import { fetchWindDownSummary, type WindDownSummary } from "@/lib/lifecycleHandoffs";
+import { AlertTriangle } from "lucide-react";
 
 export default function DataRoomPage() {
   const [tokens, setTokens] = useState<DataRoomToken[]>([]);
   const [reqs, setReqs] = useState<ShareRequest[]>([]);
+  const [windDown, setWindDown] = useState<WindDownSummary | null>(null);
   const [name, setName] = useState(""); const [org, setOrg] = useState("");
-  const reload = () => { fetchTokens().then(setTokens).catch(e => toast.error(e.message)); fetchShareRequests().then(setReqs).catch(() => {}); };
+  const reload = () => {
+    fetchTokens().then(setTokens).catch(e => toast.error(e.message));
+    fetchShareRequests().then(setReqs).catch(() => {});
+    fetchWindDownSummary().then(setWindDown).catch(() => setWindDown(null));
+  };
   useEffect(() => { reload(); }, []);
 
   const add = async () => { if (!name.trim()) return; try { await createToken({ investor_name: name.trim(), organisation: org }); setName(""); setOrg(""); reload(); toast.success("Access token recorded (no live link)."); } catch (e: any) { toast.error(e.message); } };
@@ -18,6 +25,23 @@ export default function DataRoomPage() {
     <OLLayout title="Investor data room hardening"
       subtitle="Per-investor access governance with watermarking, view-only defaults, NDA and audit trail."
       disclaimer="No live external sharing. Recording approved access intent only. Founder/admin must approve before any external link is created.">
+      {windDown && windDown.total > 0 && (
+        <div className="border border-amber-500/50 bg-amber-500/10 rounded p-3 text-xs flex items-start gap-2">
+          <AlertTriangle className="h-4 w-4 text-amber-400 mt-0.5" />
+          <div className="space-y-1">
+            <p className="font-medium text-amber-300">
+              Wind-down records present ({windDown.active} active of {windDown.total})
+            </p>
+            <p className="text-amber-200/80">
+              Data tied to these businesses must be reviewed before any new investor share is approved.
+              Nothing has been deleted or auto-revoked.
+              {windDown.business_names.length > 0 && (
+                <> Affected: <span className="font-mono">{windDown.business_names.join(", ")}</span>.</>
+              )}
+            </p>
+          </div>
+        </div>
+      )}
       <div className="grid grid-cols-3 gap-2">
         <div className="border border-border/50 rounded p-2"><p className="text-[10px] uppercase text-muted-foreground">Tokens</p><p className="text-sm font-bold">{tokens.length}</p></div>
         <div className="border border-border/50 rounded p-2"><p className="text-[10px] uppercase text-muted-foreground">Pending approvals</p><p className="text-sm font-bold">{pendingApprovalCount(tokens, reqs)}</p></div>
