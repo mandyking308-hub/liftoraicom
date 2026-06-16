@@ -130,12 +130,23 @@ export default function VideoLibrary() {
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-semibold text-sm">{v.title}</span>
                       {statusBadge(v.status)}
+                      {v.video_type && <Badge variant="outline" className="text-[10px]">{v.video_type}</Badge>}
+                      {v.audience_type && <Badge variant="outline" className="text-[10px]">{v.audience_type}</Badge>}
+                      {v.dashboard_area && <Badge variant="outline" className="text-[10px]">area:{v.dashboard_area}</Badge>}
                       <Badge variant="outline" className="text-[10px]">{v.source_type}</Badge>
                       {v.external_provider && <Badge variant="outline" className="text-[10px]">{v.external_provider}</Badge>}
                       <Badge variant="outline" className="text-[10px]">{v.visibility}</Badge>
                       <Badge variant="outline" className="text-[10px] bg-primary/10 text-primary border-primary/30">
                         {v.transcript_segment_count} segments
                       </Badge>
+                      {v.transcript_status && <Badge variant="outline" className="text-[10px]">tx:{v.transcript_status}</Badge>}
+                      {v.privacy_status && (
+                        <Badge variant="outline" className={`text-[10px] ${v.privacy_status === 'flagged' ? 'bg-red-500/15 text-red-300 border-red-500/30' : v.privacy_status === 'approved_internal' ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30' : ''}`}>
+                          privacy:{v.privacy_status}
+                        </Badge>
+                      )}
+                      {v.approval_status && <Badge variant="outline" className="text-[10px]">{v.approval_status}</Badge>}
+                      {v.buyer_handover_ready && <Badge variant="outline" className="text-[10px] bg-blue-500/15 text-blue-300 border-blue-500/30">buyer-ready</Badge>}
                       {v.duration_seconds ? <span className="text-muted-foreground">{fmtTime(v.duration_seconds)}</span> : null}
                       <span className="ml-auto text-muted-foreground">{new Date(v.created_at).toLocaleDateString()}</span>
                     </div>
@@ -152,6 +163,14 @@ export default function VideoLibrary() {
                       </Button>
                       <Button size="sm" variant="outline" onClick={() => setAskOpen({ open: true, videoId: v.id, title: v.title })} disabled={v.transcript_segment_count === 0}>
                         <MessageSquare size={12} className="mr-1" /> Ask
+                      </Button>
+                      <Button size="sm" variant="outline" disabled={v.transcript_segment_count === 0} onClick={async () => {
+                        const { data, error } = await sb.functions.invoke("vid-privacy-scan", { body: { video_id: v.id } });
+                        if (error || data?.error) { toast.error(error?.message || data?.error || "Scan failed"); return; }
+                        toast.success(`Privacy: ${data.privacy_status} (${data.total_flags} flag${data.total_flags===1?'':'s'})`);
+                        qc.invalidateQueries({ queryKey: ["video-library"] });
+                      }}>
+                        <ShieldAlert size={12} className="mr-1" /> Privacy scan
                       </Button>
                       {v.external_url && (
                         <a href={v.external_url} target="_blank" rel="noreferrer" className="text-primary text-xs inline-flex items-center gap-1 ml-auto">
