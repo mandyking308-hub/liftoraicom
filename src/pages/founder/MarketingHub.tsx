@@ -4,6 +4,9 @@ import MarketingContentFunnelPanel from "@/components/founder/marketing/Marketin
 import CompetitorLearningPositioningPanel from "@/components/founder/strategy/CompetitorLearningPositioningPanel";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { fetchReleasesAwaitingCommsReview, type AwaitingCommsReview } from "@/lib/lifecycleHandoffs";
+import { Megaphone } from "lucide-react";
 
 // In-hub sub-navigation. All targets are existing founder-only routes —
 // nothing is created here. Posting / publishing / external sharing stay
@@ -20,6 +23,9 @@ const MARKETING_HUB_TABS: { label: string; to: string; description: string }[] =
 ];
 
 export default function MarketingHub() {
+  const [pendingComms, setPendingComms] = useState<AwaitingCommsReview[]>([]);
+  useEffect(() => { fetchReleasesAwaitingCommsReview().then(setPendingComms).catch(() => setPendingComms([])); }, []);
+
   return (
     <FounderLayout>
       <div className="max-w-7xl mx-auto space-y-4">
@@ -59,6 +65,49 @@ export default function MarketingHub() {
                 );
               })}
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Release Workflow → Marketing handoff: read-only list of release
+            customer-comms drafts that have been flagged for founder review.
+            No sending. Link goes back to Release Workflow. */}
+        <Card className="tech-card">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Megaphone className="h-4 w-4 text-primary" />
+              Release comms awaiting founder review ({pendingComms.length})
+              <Badge variant="outline" className="ml-2 text-[10px] bg-yellow-500/15 text-yellow-300 border-yellow-500/30">
+                Internal review only — no send
+              </Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {pendingComms.length === 0 ? (
+              <p className="text-xs text-muted-foreground">
+                No release comms drafts are awaiting review. New ones appear here when an engineer flags a
+                Release Workflow item with "Comms ready for review".
+              </p>
+            ) : (
+              <ul className="space-y-2">
+                {pendingComms.map((r) => (
+                  <li key={r.id} className="border border-border/50 rounded p-2 text-xs space-y-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-medium text-sm">{r.release_title}</span>
+                      <Badge variant="outline" className="text-[10px]">{r.release_type}</Badge>
+                      <span className="text-muted-foreground ml-auto">
+                        {new Date(r.updated_at).toLocaleString()}
+                      </span>
+                    </div>
+                    <p className="text-muted-foreground line-clamp-2 whitespace-pre-wrap">
+                      {r.customer_comms_draft}
+                    </p>
+                    <Link to="/founder/release-workflow" className="text-primary hover:underline">
+                      Open in Release Workflow →
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
           </CardContent>
         </Card>
 
