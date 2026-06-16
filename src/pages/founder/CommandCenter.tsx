@@ -31,6 +31,7 @@ const statusClass = (s: string) => {
 };
 
 const CommandCenter = () => {
+  // Legacy view — keep route alive but warn the user.
   // Systems
   const { data: systems = [] } = useQuery({
     queryKey: ["cc-systems"],
