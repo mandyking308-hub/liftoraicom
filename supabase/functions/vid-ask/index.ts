@@ -8,7 +8,7 @@ import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 
 const EMBED_MODEL = "openai/text-embedding-3-small";
 const EMBED_DIMS = 1536;
-const CHAT_MODEL = "google/gemini-3-flash-preview";
+const CHAT_MODEL = "google/gemini-2.5-flash";
 const GATEWAY_EMBED_URL = "https://ai.gateway.lovable.dev/v1/embeddings";
 const GATEWAY_CHAT_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
