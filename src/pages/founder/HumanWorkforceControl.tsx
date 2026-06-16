@@ -347,6 +347,10 @@ export default function HumanWorkforceControl() {
           </Card>
         </TabsContent>
 
+        <TabsContent value="training" className="mt-4">
+          <TrainingEvidencePanel />
+        </TabsContent>
+
         <TabsContent value="content" className="mt-4 grid gap-4 md:grid-cols-[1fr,1.4fr]">
           <Card className="p-4 space-y-2">
             <h3 className="font-semibold">Generate monthly content plan</h3>
