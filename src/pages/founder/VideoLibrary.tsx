@@ -113,6 +113,7 @@ export default function VideoLibrary() {
             <TabsTrigger value="coverage"><Map size={12} className="mr-1" /> Coverage</TabsTrigger>
             <TabsTrigger value="assignments"><ClipboardCheck size={12} className="mr-1" /> Assignments</TabsTrigger>
             <TabsTrigger value="privacy"><ShieldAlert size={12} className="mr-1" /> Privacy</TabsTrigger>
+            <TabsTrigger value="approval"><CheckCircle2 size={12} className="mr-1" /> Approval</TabsTrigger>
             <TabsTrigger value="evidence"><Package size={12} className="mr-1" /> Buyer / Adviser</TabsTrigger>
             <TabsTrigger value="governance"><ShieldAlert size={12} className="mr-1" /> Governance</TabsTrigger>
           </TabsList>
@@ -191,6 +192,7 @@ export default function VideoLibrary() {
           <TabsContent value="coverage"><CoveragePanel videos={videosQ.data ?? []} /></TabsContent>
           <TabsContent value="assignments"><AssignmentsPanel videos={videosQ.data ?? []} /></TabsContent>
           <TabsContent value="privacy"><PrivacyPanel videos={videosQ.data ?? []} onChanged={() => qc.invalidateQueries({ queryKey: ["video-library"] })} /></TabsContent>
+          <TabsContent value="approval"><ApprovalPanel videos={videosQ.data ?? []} onChanged={() => qc.invalidateQueries({ queryKey: ["video-library"] })} /></TabsContent>
           <TabsContent value="evidence"><EvidencePanel videos={videosQ.data ?? []} /></TabsContent>
 
           <TabsContent value="governance">
