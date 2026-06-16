@@ -222,7 +222,7 @@ function RecordTab({
     for (const f of fields) {
       if (f.required && !vals[f.name]) return toast.error(`${f.label} required`);
     }
-    const payload = { ...vals, created_by: user?.id ?? null };
+    const payload: Record<string, any> = { ...vals, created_by: user?.id ?? null };
     const { data: row, error } = await sb.from(table).insert(payload).select().single();
     if (error) return toast.error(error.message);
     await writeAudit(entityType, row.id, "created", payload, user?.id ?? null, user?.email ?? null, payload.business_id ?? null);
