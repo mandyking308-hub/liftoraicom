@@ -982,6 +982,7 @@ const App = () => (
             <Route path="/founder/manuals-hub" element={<FounderRoute><ManualsHubPage /></FounderRoute>} />
             <Route path="/founder/portfolio-exit" element={<FounderRoute><PortfolioExitCommandCentre /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/:assetId" element={<FounderRoute><PortfolioExitAssetDetail /></FounderRoute>} />
+            <Route path="/founder/founder-led-exit" element={<FounderRoute><FounderLedExitSalesEngine /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/intelligence" element={<FounderRoute><MAIntelligenceWorkspace /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/valuation" element={<FounderRoute><ExitValuationEngine /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/build-selector" element={<FounderRoute><QuarterlyBuildSelector /></FounderRoute>} />

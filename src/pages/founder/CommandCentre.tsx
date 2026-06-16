@@ -9,6 +9,7 @@ import GroupHQOperatingPanel from "@/components/founder/group/GroupHQOperatingPa
 import TreasuryCashflowControlPanel from "@/components/founder/finance/TreasuryCashflowControlPanel";
 import OperatingLoopsAttentionPanel from "@/components/founder/command/OperatingLoopsAttentionPanel";
 import LifecycleAttentionPanel from "@/components/founder/command/LifecycleAttentionPanel";
+import FounderLedExitAttentionPanel from "@/components/founder/command/FounderLedExitAttentionPanel";
 import ContractsProcurementControlPanel from "@/components/founder/legal/ContractsProcurementControlPanel";
 import PeopleAccessTrainingPanel from "@/components/founder/security/PeopleAccessTrainingPanel";
 import RiskInsuranceIncidentPanel from "@/components/founder/risk/RiskInsuranceIncidentPanel";
@@ -1756,6 +1757,7 @@ const CommandCentre = () => {
     <div className="max-w-7xl mx-auto px-4 pb-6"><TreasuryCashflowControlPanel /></div>
     <div className="max-w-7xl mx-auto px-4 pb-6"><OperatingLoopsAttentionPanel /></div>
     <div className="max-w-7xl mx-auto px-4 pb-6"><LifecycleAttentionPanel /></div>
+    <div className="max-w-7xl mx-auto px-4 pb-6"><FounderLedExitAttentionPanel /></div>
     <div className="max-w-7xl mx-auto px-4 pb-6"><ContractsProcurementControlPanel /></div>
     <div className="max-w-7xl mx-auto px-4 pb-6"><PeopleAccessTrainingPanel /></div>
     <div className="max-w-7xl mx-auto px-4 pb-6"><RiskInsuranceIncidentPanel /></div>
