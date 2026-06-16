@@ -1593,6 +1593,17 @@ const App = () => (
             <Route path="/founder/portals/document-upload" element={<FounderRoute><PortalsDocumentUploadAdmin /></FounderRoute>} />
             <Route path="/founder/portals/access" element={<FounderRoute><PortalsAccessPage /></FounderRoute>} />
             <Route path="/founder/portals/settings" element={<FounderRoute><PortalsSettings /></FounderRoute>} />
+            {/* Cleanup alias: founder/admin portal management lives under /founder/portal-admin/*
+                to avoid clashing with the public /portal/* customer/partner/seller surfaces.
+                Legacy /founder/portals/* routes above remain alive to keep deep links working. */}
+            <Route path="/founder/portal-admin" element={<FounderRoute><PortalsOverview /></FounderRoute>} />
+            <Route path="/founder/portal-admin/customer" element={<FounderRoute><PortalsCustomerAdmin /></FounderRoute>} />
+            <Route path="/founder/portal-admin/seller" element={<FounderRoute><PortalsSellerAdmin /></FounderRoute>} />
+            <Route path="/founder/portal-admin/partner" element={<FounderRoute><PortalsPartnerAdmin /></FounderRoute>} />
+            <Route path="/founder/portal-admin/adviser" element={<FounderRoute><PortalsAdviserAdmin /></FounderRoute>} />
+            <Route path="/founder/portal-admin/document-upload" element={<FounderRoute><PortalsDocumentUploadAdmin /></FounderRoute>} />
+            <Route path="/founder/portal-admin/access" element={<FounderRoute><PortalsAccessPage /></FounderRoute>} />
+            <Route path="/founder/portal-admin/settings" element={<FounderRoute><PortalsSettings /></FounderRoute>} />
             <Route path="/founder/customer-upgrades" element={<FounderRoute><CustomerUpgradesHub /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/opportunities" element={<FounderRoute><CustomerUpgradesOpportunities /></FounderRoute>} />
             <Route path="/founder/customer-upgrades/product-ladders" element={<FounderRoute><CustomerUpgradesProductLadders /></FounderRoute>} />
