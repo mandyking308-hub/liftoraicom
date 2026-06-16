@@ -701,6 +701,14 @@ function AssignmentsPanel({ videos }: { videos: VideoRow[] }) {
                 {a.start_seconds != null && <Badge variant="outline" className="text-[10px]">{fmtTime(a.start_seconds)} – {fmtTime(a.end_seconds ?? a.start_seconds)}</Badge>}
                 {a.due_at && <span className="text-muted-foreground">due {new Date(a.due_at).toLocaleDateString()}</span>}
                 {a.completed_at && <span className="text-emerald-300">done {new Date(a.completed_at).toLocaleDateString()}</span>}
+                {!a.completed_at && (
+                  <Button size="sm" variant="outline" className="ml-auto" onClick={async () => {
+                    const { error } = await sb.from("video_library_training_assignments").update({ status: "completed", completed_at: new Date().toISOString() }).eq("id", a.id);
+                    if (error) { toast.error(error.message); return; }
+                    toast.success("Marked complete");
+                    qc.invalidateQueries({ queryKey: ["video-library-assignments"] });
+                  }}>Mark complete</Button>
+                )}
               </div>
             );
           })}
