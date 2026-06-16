@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ArrowLeft, Search, Upload, Video, MessageSquare, ExternalLink, Loader2, ShieldAlert, BookOpen, Map, ClipboardCheck, Package } from "lucide-react";
+import { ArrowLeft, Search, Upload, Video, MessageSquare, ExternalLink, Loader2, ShieldAlert, BookOpen, Map, ClipboardCheck, Package, CheckCircle2, Filter } from "lucide-react";
 
 const sb: any = supabase;
 
@@ -374,15 +374,38 @@ function SearchPanel({ videos }: { videos: VideoRow[] }) {
   const [results, setResults] = useState<any[]>([]);
   const [busy, setBusy] = useState(false);
   const [meta, setMeta] = useState<{ latency_ms?: number; count?: number } | null>(null);
+  const [businessId, setBusinessId] = useState("");
+  const [areaF, setAreaF] = useState("");
+  const [moduleF, setModuleF] = useState("");
+  const [videoTypeF, setVideoTypeF] = useState("");
+  const [audienceF, setAudienceF] = useState("");
+  const [providerF, setProviderF] = useState("");
+  const [approvalF, setApprovalF] = useState("");
+  const [privacyF, setPrivacyF] = useState("");
 
   const videoById = useMemo(() => Object.fromEntries(videos.map((v) => [v.id, v])), [videos]);
+  const businesses = useMemo(() => Array.from(new Set(videos.map((v) => v.business_id).filter(Boolean))) as string[], [videos]);
+  const areas = useMemo(() => Array.from(new Set(videos.map((v) => v.dashboard_area).filter(Boolean))) as string[], [videos]);
+  const modules = useMemo(() => Array.from(new Set(videos.flatMap((v) => v.module_coverage ?? []))).filter(Boolean) as string[], [videos]);
+  const providers = useMemo(() => Array.from(new Set(videos.map((v) => v.external_provider).filter(Boolean))) as string[], [videos]);
 
   const run = async () => {
     if (!query.trim()) { toast.error("Enter a search query"); return; }
     setBusy(true);
     try {
       const { data, error } = await sb.functions.invoke("vid-search", {
-        body: { query, mode, limit: 25, video_id: videoId || null },
+        body: {
+          query, mode, limit: 25,
+          video_id: videoId || null,
+          business_id: businessId || null,
+          dashboard_area: areaF || null,
+          module: moduleF || null,
+          video_type: videoTypeF || null,
+          audience_type: audienceF || null,
+          external_provider: providerF || null,
+          approval_status: approvalF || null,
+          privacy_status: privacyF || null,
+        },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
@@ -410,6 +433,41 @@ function SearchPanel({ videos }: { videos: VideoRow[] }) {
           <Button size="sm" onClick={run} disabled={busy}>
             {busy && <Loader2 size={12} className="mr-1 animate-spin" />}<Search size={12} className="mr-1" />Search
           </Button>
+        </div>
+        <div className="flex flex-wrap gap-2 items-end border-t border-border/40 pt-2">
+          <span className="inline-flex items-center gap-1 text-muted-foreground"><Filter size={12} /> Filters:</span>
+          <select className="bg-background border border-border/50 rounded h-8 px-2" value={businessId} onChange={(e) => setBusinessId(e.target.value)}>
+            <option value="">Any business</option>
+            {businesses.map((b) => <option key={b} value={b}>{b.slice(0,8)}…</option>)}
+          </select>
+          <select className="bg-background border border-border/50 rounded h-8 px-2" value={areaF} onChange={(e) => setAreaF(e.target.value)}>
+            <option value="">Any area</option>
+            {areas.map((a) => <option key={a} value={a}>{a}</option>)}
+          </select>
+          <select className="bg-background border border-border/50 rounded h-8 px-2" value={moduleF} onChange={(e) => setModuleF(e.target.value)}>
+            <option value="">Any module</option>
+            {modules.map((m) => <option key={m} value={m}>{m}</option>)}
+          </select>
+          <select className="bg-background border border-border/50 rounded h-8 px-2" value={videoTypeF} onChange={(e) => setVideoTypeF(e.target.value)}>
+            <option value="">Any type</option>
+            {["sop","dashboard_walkthrough","customer_onboarding","operator_training","support_video","compliance_training","founder_training","buyer_handover","adviser_handover"].map((x) => <option key={x} value={x}>{x}</option>)}
+          </select>
+          <select className="bg-background border border-border/50 rounded h-8 px-2" value={audienceF} onChange={(e) => setAudienceF(e.target.value)}>
+            <option value="">Any audience</option>
+            {["founder","admin","operator","oversight","customer","buyer","adviser"].map((x) => <option key={x} value={x}>{x}</option>)}
+          </select>
+          <select className="bg-background border border-border/50 rounded h-8 px-2" value={providerF} onChange={(e) => setProviderF(e.target.value)}>
+            <option value="">Any provider</option>
+            {providers.map((p) => <option key={p} value={p}>{p}</option>)}
+          </select>
+          <select className="bg-background border border-border/50 rounded h-8 px-2" value={approvalF} onChange={(e) => setApprovalF(e.target.value)}>
+            <option value="">Any approval</option>
+            {["draft","review_required","approved","archived"].map((x) => <option key={x} value={x}>{x}</option>)}
+          </select>
+          <select className="bg-background border border-border/50 rounded h-8 px-2" value={privacyF} onChange={(e) => setPrivacyF(e.target.value)}>
+            <option value="">Any privacy</option>
+            {["unchecked","flagged","approved_internal","approved_customer","approved_buyer","blocked"].map((x) => <option key={x} value={x}>{x}</option>)}
+          </select>
         </div>
         {meta && <p className="text-[11px] text-muted-foreground">{meta.count} results · {meta.latency_ms}ms</p>}
         <div className="space-y-2">
