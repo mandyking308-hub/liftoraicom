@@ -958,6 +958,7 @@ const App = () => (
             <Route path="/founder/relationship-intelligence" element={<FounderRoute><RelationshipIntelligencePage /></FounderRoute>} />
             <Route path="/founder/global-pr-radar" element={<FounderRoute><GlobalPrRadar /></FounderRoute>} />
             <Route path="/founder/video-library" element={<FounderRoute><VideoLibrary /></FounderRoute>} />
+            <Route path="/founder/healthcare-overlay" element={<FounderRoute><HealthcareOverlay /></FounderRoute>} />
             <Route path="/founder/business-internal-activation" element={<FounderRoute><BusinessInternalActivationPage /></FounderRoute>} />
             <Route path="/founder/business-daily-operating-loop" element={<FounderRoute><BusinessDailyOperatingLoopPage /></FounderRoute>} />
             <Route path="/founder/business-weekly-review" element={<FounderRoute><BusinessWeeklyReviewPage /></FounderRoute>} />
