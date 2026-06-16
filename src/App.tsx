@@ -113,6 +113,7 @@ import VideoSopFactoryPage from "./pages/founder/VideoSopFactory";
 import RelationshipIntelligencePage from "./pages/founder/RelationshipIntelligence";
 import GlobalPrRadar from "./pages/founder/GlobalPrRadar";
 import VideoLibrary from "./pages/founder/VideoLibrary";
+import HealthcareOverlay from "./pages/founder/HealthcareOverlay";
 import BusinessInternalActivationPage from "./pages/founder/BusinessInternalActivation";
 import BusinessDailyOperatingLoopPage from "./pages/founder/BusinessDailyOperatingLoop";
 import BusinessWeeklyReviewPage from "./pages/founder/BusinessWeeklyReview";
