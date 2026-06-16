@@ -4,7 +4,9 @@ import LiftorBuildPhaseCloseoutPanel from "@/components/founder/activation/Lifto
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
-import { Lock } from "lucide-react";
+import { Lock, ArrowRight, Rocket } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const HANDOVER_TEXT = `LIFTOR FINAL BUILD HANDOVER — 21A–22J CLOSEOUT
 
@@ -137,6 +139,34 @@ export default function BuildPhaseCloseout() {
         </div>
 
         <LiftorBuildPhaseCloseoutPanel />
+
+        {/* Daily-driver handoff: surface Monday Readiness as the explicit
+            next action after a build closeout. No automatic go-live — this
+            card is navigation only. */}
+        <Card className="tech-card border-primary/40">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Rocket className="h-4 w-4 text-primary" /> Next action · Review Monday Readiness
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 text-xs">
+            <p className="text-muted-foreground">
+              Closeout records do not trigger go-live. The launch decision lives in Monday Readiness /
+              Monday Launch — founder review required.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <Button asChild size="sm" variant="outline">
+                <Link to="/founder/monday-readiness">Monday Readiness <ArrowRight className="h-3 w-3 ml-1" /></Link>
+              </Button>
+              <Button asChild size="sm" variant="outline">
+                <Link to="/founder/monday-launch">Monday Launch <ArrowRight className="h-3 w-3 ml-1" /></Link>
+              </Button>
+              <Button asChild size="sm" variant="ghost">
+                <Link to="/founder/external-activation-readiness">External Activation Readiness</Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         <Card className="tech-card">
           <CardHeader>
