@@ -327,3 +327,158 @@ export async function promoteDraftToBusiness(state: TunnelState): Promise<string
     return (data as { id: string } | null)?.id ?? null;
   } catch { return null; }
 }
+
+// ---------------------------------------------------------------------------
+// Promote setup into Liftor modules (draft writes only).
+// Each area attempts a single safe insert into a known target table.
+// On RLS / missing columns / unavailable table, records a manual next action.
+// All writes are explicitly draft / not live / no external side effects.
+// ---------------------------------------------------------------------------
+
+type PromoteAttempt = {
+  area: ModuleAreaKey;
+  table: string;
+  payload: Record<string, unknown>;
+  note: string;
+};
+
+function buildAttempts(state: TunnelState): PromoteAttempt[] {
+  const bizId = state.businessId;
+  const bizName = state.businessName;
+  const today = new Date();
+  const periodStart = today.toISOString().slice(0, 10);
+  const periodEnd = new Date(today.getTime() + 30 * 86400 * 1000).toISOString().slice(0, 10);
+  return [
+    {
+      area: "marketing",
+      table: "marketing_campaign_briefs",
+      payload: {
+        business_id: bizId,
+        campaign_name: `${bizName} — setup-tunnel draft brief`,
+        campaign_type: "draft_from_setup_tunnel",
+        status: "draft",
+      },
+      note: "Draft marketing brief created. No publishing. Founder must edit & approve.",
+    },
+    {
+      area: "sales",
+      table: "outreach_campaign_drafts",
+      payload: {
+        business_id: bizId,
+        campaign_name: `${bizName} — setup-tunnel outreach draft`,
+        status: "draft",
+      },
+      note: "Draft outreach campaign created. Provider OFF. No sending until founder approval.",
+    },
+    {
+      area: "crm",
+      table: "__skip__",
+      payload: {},
+      note: "CRM wiring is manual: assign inbox + status in /founder/crm. No contacts auto-created.",
+    },
+    {
+      area: "support",
+      table: "customer_onboarding_plans",
+      payload: {
+        business_id: bizId,
+        plan_name: `${bizName} — setup-tunnel onboarding plan (draft)`,
+        status: "draft",
+      },
+      note: "Draft onboarding plan created. No customer emails sent.",
+    },
+    {
+      area: "operations",
+      table: "business_operating_runbooks",
+      payload: {
+        business_id: bizId,
+        runbook_key: `setup_tunnel_${bizId.slice(0, 8)}`,
+        runbook_name: `${bizName} — daily loop (setup tunnel draft)`,
+        runbook_type: "daily_operating_loop",
+        status: "draft",
+      },
+      note: "Draft daily operating runbook created. No cron / no auto-execution.",
+    },
+    {
+      area: "finance",
+      table: "cashflow_forecasts",
+      payload: {
+        business_id: bizId,
+        forecast_name: `${bizName} — setup-tunnel 30-day draft forecast`,
+        period_start: periodStart,
+        period_end: periodEnd,
+      },
+      note: "Draft 30-day cashflow forecast skeleton created. No invoicing triggered.",
+    },
+    {
+      area: "evidence",
+      table: "data_room_profiles",
+      payload: {
+        business_id: bizId,
+        data_room_name: `${bizName} — setup-tunnel data room profile (closed)`,
+        status: "closed",
+      },
+      note: "Data room profile registered as CLOSED. No external tokens issued.",
+    },
+    {
+      area: "exit",
+      table: "__skip__",
+      payload: {},
+      note: "Buyer warm-up stays quiet. Add buyer targets manually in /founder/portfolio-exit/buyer-warmup.",
+    },
+  ];
+}
+
+export async function promoteIntoLiftorModules(
+  state: TunnelState,
+): Promise<ModuleConnections> {
+  if (!isUuid(state.businessId)) {
+    throw new Error("Confirm the draft business first (must be a real businesses row).");
+  }
+  const attempts = buildAttempts(state);
+  const out: ModuleConnections = { ...(state.moduleConnections ?? {}) };
+  const nowIso = new Date().toISOString();
+  for (const a of attempts) {
+    if (a.table === "__skip__") {
+      out[a.area] = {
+        status: "manual_action_needed",
+        target_table: null,
+        draft_record_id: null,
+        note: a.note,
+        attempted_at: nowIso,
+      };
+      continue;
+    }
+    try {
+      const { data, error } = await (supabase.from(a.table as any) as any)
+        .insert(a.payload)
+        .select("id")
+        .single();
+      if (error) {
+        out[a.area] = {
+          status: "manual_action_needed",
+          target_table: a.table,
+          draft_record_id: null,
+          note: `Manual wiring needed in ${a.table}: ${error.message}`,
+          attempted_at: nowIso,
+        };
+      } else {
+        out[a.area] = {
+          status: "connected",
+          target_table: a.table,
+          draft_record_id: (data as { id?: string } | null)?.id ?? null,
+          note: a.note,
+          attempted_at: nowIso,
+        };
+      }
+    } catch (e: any) {
+      out[a.area] = {
+        status: "manual_action_needed",
+        target_table: a.table,
+        draft_record_id: null,
+        note: `Manual wiring needed in ${a.table}: ${e?.message ?? "table unavailable"}`,
+        attempted_at: nowIso,
+      };
+    }
+  }
+  return out;
+}
