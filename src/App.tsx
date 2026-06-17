@@ -121,6 +121,7 @@ import StartHereSetupBusiness from "./pages/founder/StartHereSetupBusiness";
 import FounderUserGuide from "./pages/founder/FounderUserGuide";
 import BusinessSetupTunnel from "./pages/founder/BusinessSetupTunnel";
 import DailyOperator from "./pages/founder/DailyOperator";
+import FounderMoney from "./pages/founder/FounderMoney";
 import VideoSopFactoryPage from "./pages/founder/VideoSopFactory";
 import RelationshipIntelligencePage from "./pages/founder/RelationshipIntelligence";
 import GlobalPrRadar from "./pages/founder/GlobalPrRadar";
@@ -971,6 +972,7 @@ const App = () => (
             <Route path="/founder/user-guide" element={<FounderRoute><FounderUserGuide /></FounderRoute>} />
             <Route path="/founder/business-setup-tunnel" element={<FounderRoute><BusinessSetupTunnel /></FounderRoute>} />
             <Route path="/founder/daily-operator" element={<FounderRoute><DailyOperator /></FounderRoute>} />
+            <Route path="/founder/money" element={<FounderRoute><FounderMoney /></FounderRoute>} />
             <Route path="/founder/starter-pack-materialiser" element={<FounderRoute><StarterPackMaterialiserPage /></FounderRoute>} />
             <Route path="/founder/business-onboarding-factory" element={<FounderRoute><BusinessOnboardingFactoryPage /></FounderRoute>} />
             <Route path="/founder/video-sop-factory" element={<FounderRoute><VideoSopFactoryPage /></FounderRoute>} />

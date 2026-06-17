@@ -6,6 +6,7 @@ const LINKS: { label: string; to: string }[] = [
   { label: "Start setup tunnel", to: "/founder/business-setup-tunnel" },
   { label: "Continue business setup", to: "/founder/business-setup-tunnel?mode=continue" },
   { label: "Open daily operator", to: "/founder/daily-operator" },
+  { label: "Money — overnight view", to: "/founder/money" },
   { label: "Open user guide", to: "/founder/user-guide" },
   { label: "Ask Liftor", to: "/founder/copilot" },
   { label: "Start Here", to: "/founder/start-here" },
