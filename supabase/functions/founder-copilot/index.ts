@@ -126,6 +126,14 @@ serve(async (req) => {
       safe(supabase.from("business_exit_intelligence_profiles").select("business_id, twelve_month_review_date, twelve_month_review_status").limit(50) as any),
     ]);
 
+    const tunnelRuns = await safe(
+      supabase
+        .from("business_setup_tunnel_runs")
+        .select("id, business_id, draft_business_name, is_draft, setup_status, current_step, overall_completeness, missing_context_json, updated_at")
+        .order("updated_at", { ascending: false })
+        .limit(50) as any,
+    );
+
     const liftorContext = {
       businesses: businesses || [],
       activation_profiles: activationProfiles || [],
@@ -150,6 +158,7 @@ serve(async (req) => {
       buyer_targets: buyerTargets || [],
       buyer_warm_up_actions: buyerWarmActions || [],
       exit_intelligence_profiles: exitProfiles || [],
+      setup_tunnel_runs: tunnelRuns || [],
     };
 
     const platformContext = JSON.stringify({
