@@ -197,6 +197,34 @@ export function fieldCounts(): Record<StepKey, number> {
 }
 
 // ---------------------------------------------------------------------------
+// Module connections — which Liftor area each setup tunnel is wired into.
+// Each connection is draft-only: no sends, no providers, no publishing.
+// ---------------------------------------------------------------------------
+
+export const MODULE_AREAS = [
+  { key: "marketing", label: "Marketing", route: "/founder/marketing" },
+  { key: "sales", label: "Sales / outreach", route: "/founder/crm" },
+  { key: "crm", label: "CRM / contacts", route: "/founder/crm" },
+  { key: "support", label: "Customer onboarding & support", route: "/founder/customer-onboarding" },
+  { key: "operations", label: "Operations / daily loop / SOPs", route: "/founder/daily-operator" },
+  { key: "finance", label: "Finance / accounting / compliance", route: "/founder/finance" },
+  { key: "evidence", label: "Evidence / data room readiness", route: "/founder/data-room" },
+  { key: "exit", label: "Exit / buyer warm-up readiness", route: "/founder/portfolio-exit/buyer-warmup" },
+] as const;
+
+export type ModuleAreaKey = (typeof MODULE_AREAS)[number]["key"];
+
+export type ModuleConnection = {
+  status: "connected" | "manual_action_needed" | "not_attempted";
+  target_table: string | null;
+  draft_record_id: string | null;
+  note: string;
+  attempted_at: string;
+};
+
+export type ModuleConnections = Partial<Record<ModuleAreaKey, ModuleConnection>>;
+
+// ---------------------------------------------------------------------------
 // Supabase persistence (founder-only). localStorage is fallback only.
 // Table: business_setup_tunnel_runs (RLS: admin/founder only).
 // ---------------------------------------------------------------------------
@@ -212,6 +240,7 @@ type RemoteRow = {
   steps_json: any;
   missing_context_json: any;
   safety_warnings_json: any;
+  module_connections_json?: any;
   created_at: string;
   updated_at: string;
 };
