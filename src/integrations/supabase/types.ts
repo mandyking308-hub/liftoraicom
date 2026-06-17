@@ -11285,6 +11285,62 @@ export type Database = {
           },
         ]
       }
+      business_setup_tunnel_runs: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          created_by: string | null
+          current_step: string | null
+          draft_business_name: string
+          id: string
+          is_draft: boolean
+          missing_context_json: Json
+          overall_completeness: number
+          safety_warnings_json: Json
+          setup_status: string
+          steps_json: Json
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_step?: string | null
+          draft_business_name: string
+          id?: string
+          is_draft?: boolean
+          missing_context_json?: Json
+          overall_completeness?: number
+          safety_warnings_json?: Json
+          setup_status?: string
+          steps_json?: Json
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_step?: string | null
+          draft_business_name?: string
+          id?: string
+          is_draft?: boolean
+          missing_context_json?: Json
+          overall_completeness?: number
+          safety_warnings_json?: Json
+          setup_status?: string
+          steps_json?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_setup_tunnel_runs_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_social_brain_extractions: {
         Row: {
           business_id: string

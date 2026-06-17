@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import {
   TUNNEL_STEPS, STEP_FIELDS, fieldCounts, load, save, listAll, newState,
   stepCompleteness, overallCompleteness, type TunnelState, type StepKey,
+  loadRemote, saveRemote, listAllRemote, promoteDraftToBusiness,
 } from "@/lib/businessSetupTunnel";
 
 type BusinessRow = { id: string; name: string };
@@ -42,16 +43,25 @@ export default function BusinessSetupTunnel() {
     })();
   }, []);
 
-  const drafts = useMemo(() => listAll(), [state?.updatedAt, mode]);
+  const [remoteDrafts, setRemoteDrafts] = useState<TunnelState[]>([]);
+  useEffect(() => {
+    (async () => { setRemoteDrafts(await listAllRemote()); })();
+  }, [state?.updatedAt, mode]);
+  const drafts = useMemo(() => {
+    const local = listAll();
+    const seen = new Set(remoteDrafts.map((d) => d.businessId));
+    return [...remoteDrafts, ...local.filter((d) => !seen.has(d.businessId))];
+  }, [remoteDrafts, state?.updatedAt, mode]);
 
   const neonCandy = useMemo(
     () => businesses.find((b) => /neon\s*candy/i.test(b.name || "")),
     [businesses],
   );
 
-  function pick(b: BusinessRow) {
-    const existing = load(b.id);
-    setState(existing ?? newState(b.id, b.name, false));
+  async function pick(b: BusinessRow) {
+    const remote = await loadRemote(b.id);
+    const local = load(b.id);
+    setState(remote ?? local ?? newState(b.id, b.name, false));
     setStepIdx(0);
   }
   function pickDraft(s: TunnelState) { setState(s); setStepIdx(0); }
@@ -60,6 +70,7 @@ export default function BusinessSetupTunnel() {
     const id = slugify(newName);
     const s = newState(id, newName.trim(), true);
     save(s); setState(s); setStepIdx(0);
+    saveRemote(s, counts);
   }
 
   function updateField(stepKey: StepKey, fieldKey: string, value: string) {
@@ -76,6 +87,7 @@ export default function BusinessSetupTunnel() {
       },
     };
     setState(next); save(next);
+    saveRemote(next, counts);
   }
 
   function markStep(stepKey: StepKey, status: "saved" | "skipped") {
@@ -85,8 +97,39 @@ export default function BusinessSetupTunnel() {
       steps: { ...state.steps, [stepKey]: { ...state.steps[stepKey], status, updatedAt: new Date().toISOString() } },
     };
     setState(next); save(next);
+    saveRemote(next, counts);
     if (stepIdx < TUNNEL_STEPS.length - 1) setStepIdx(stepIdx + 1);
     toast.success(status === "saved" ? "Saved. Next step ready." : "Skipped (still incomplete).");
+  }
+
+  async function confirmCreateRealBusiness() {
+    if (!state || !state.isDraft) return;
+    const newId = await promoteDraftToBusiness(state);
+    if (!newId) { toast.error("Could not create draft business. Try again."); return; }
+    const next: TunnelState = { ...state, businessId: newId, isDraft: false };
+    setState(next); save(next);
+    await saveRemote(next, counts);
+    toast.success("Draft business created. No external activation — stays draft.");
+  }
+
+  async function promoteIntoLiftorModules() {
+    if (!state) return;
+    if (!state.businessId || state.businessId.startsWith("draft:")) {
+      toast.error("Confirm the draft business first (creates a real businesses row).");
+      return;
+    }
+    const notes: string[] = [];
+    const tryUpsert = async (table: string, payload: Record<string, unknown>) => {
+      try {
+        const { error } = await (supabase.from(table as any) as any).insert(payload);
+        if (error) notes.push(`${table}: manual next action — ${error.message}`);
+      } catch (e: any) { notes.push(`${table}: manual next action — ${e?.message ?? "table unavailable"}`); }
+    };
+    await tryUpsert("business_activation_profiles", { business_id: state.businessId, status: "draft", stage: "setup_tunnel" });
+    await tryUpsert("business_onboarding_factory_runs", { business_id: state.businessId, status: "draft" });
+    await tryUpsert("business_runtime_activation", { business_id: state.businessId, runtime_mode: "simulation", is_live: false });
+    if (notes.length) toast.warning(`Promoted with notes: ${notes.length} manual next actions logged.`);
+    else toast.success("Promoted to Liftor modules as drafts only. Nothing live.");
   }
 
   // ---------- No business selected ----------
@@ -149,7 +192,7 @@ export default function BusinessSetupTunnel() {
               <CardContent className="space-y-2">
                 <Label>Draft business name (e.g. "Acme Marketing")</Label>
                 <Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Business name" />
-                <p className="text-xs text-muted-foreground">Draft is saved locally only. No external action. No live launch.</p>
+                <p className="text-xs text-muted-foreground">Draft is saved to your founder-only workspace. No external action. No live launch until you explicitly approve.</p>
                 <Button onClick={createNew}>Create draft & start tunnel</Button>
               </CardContent>
             </Card>
@@ -279,6 +322,23 @@ export default function BusinessSetupTunnel() {
             ].map(([l, t]) => (
               <Button key={t} asChild variant="outline" size="sm" className="justify-start"><Link to={t}>{l}</Link></Button>
             ))}
+          </CardContent>
+        </Card>
+
+        <Card className="border-primary/40">
+          <CardHeader className="pb-2"><CardTitle className="text-sm">Promote setup into Liftor modules</CardTitle></CardHeader>
+          <CardContent className="space-y-3 text-xs text-muted-foreground">
+            {state.isDraft && (
+              <div className="space-y-2">
+                <p>This is still a local draft business. Before promoting into Liftor modules, confirm and create a real (draft / not-live) business row.</p>
+                <Button size="sm" onClick={confirmCreateRealBusiness}>Confirm draft → create real business (draft, not live)</Button>
+              </div>
+            )}
+            <p>When the 11 steps are complete, you can promote setup into the existing Liftor modules. This writes draft records only. No emails, no providers, no publishing, no buyer outreach, no data-room tokens, no healthcare go-live.</p>
+            <Button size="sm" variant="outline" onClick={promoteIntoLiftorModules} disabled={state.isDraft}>
+              Promote into Liftor modules (drafts only)
+            </Button>
+            {state.isDraft && <p className="text-amber-500">Disabled until the draft business is confirmed.</p>}
           </CardContent>
         </Card>
       </div>

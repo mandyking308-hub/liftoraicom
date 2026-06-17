@@ -73,11 +73,11 @@ export default function BuyerWarmUpAttentionPanel() {
         </CardTitle>
       </CardHeader>
       <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2">
-        <Item to="/founder/founder-led-buyer-market" label="Buyers warming up" count={c?.warming ?? 0} icon={Flame} />
-        <Item to="/founder/founder-led-buyer-market" label="Buyers awaiting founder approval" count={c?.awaitingApproval ?? 0} icon={UserCheck} />
+        <Item to="/founder/portfolio-exit/buyer-warmup" label="Buyers warming up" count={c?.warming ?? 0} icon={Flame} />
+        <Item to="/founder/portfolio-exit/buyer-warmup" label="Buyers awaiting founder approval" count={c?.awaitingApproval ?? 0} icon={UserCheck} />
         <Item to="/founder/founder-led-exit" label="Approaching 12-month sale review" count={c?.approachingReview ?? 0} icon={ClipboardCheck} />
         <Item to="/founder/founder-led-exit" label="Sale conversations ready" count={c?.saleConversationReady ?? 0} icon={Handshake} />
-        <Item to="/founder/founder-led-buyer-market" label="Data room blockers before contact" count={c?.dataRoomBlockers ?? 0} icon={FileLock} />
+        <Item to="/founder/portfolio-exit/buyer-warmup" label="Data room blockers before contact" count={c?.dataRoomBlockers ?? 0} icon={FileLock} />
       </CardContent>
     </Card>
   );

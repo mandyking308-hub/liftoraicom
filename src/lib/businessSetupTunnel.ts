@@ -1,5 +1,6 @@
 // Liftor Business Setup Tunnel state — persisted to localStorage only.
 // No backend writes; safe for founder draft work. No external side effects.
+import { supabase } from "@/integrations/supabase/client";
 
 export const TUNNEL_STEPS = [
   { key: "identity", label: "Business identity" },
@@ -193,4 +194,102 @@ export function fieldCounts(): Record<StepKey, number> {
   const out = {} as Record<StepKey, number>;
   (Object.keys(STEP_FIELDS) as StepKey[]).forEach((k) => { out[k] = STEP_FIELDS[k].length; });
   return out;
+}
+
+// ---------------------------------------------------------------------------
+// Supabase persistence (founder-only). localStorage is fallback only.
+// Table: business_setup_tunnel_runs (RLS: admin/founder only).
+// ---------------------------------------------------------------------------
+
+type RemoteRow = {
+  id: string;
+  business_id: string | null;
+  draft_business_name: string;
+  is_draft: boolean;
+  setup_status: string;
+  current_step: string | null;
+  overall_completeness: number;
+  steps_json: any;
+  missing_context_json: any;
+  safety_warnings_json: any;
+  created_at: string;
+  updated_at: string;
+};
+
+function rowToState(r: RemoteRow): TunnelState {
+  const steps = (r.steps_json && typeof r.steps_json === "object") ? r.steps_json as Record<StepKey, StepState> : ({} as Record<StepKey, StepState>);
+  for (const s of TUNNEL_STEPS) if (!steps[s.key]) steps[s.key] = emptyStep();
+  return {
+    businessId: r.business_id ?? `draft:${r.id}`,
+    businessName: r.draft_business_name,
+    isDraft: r.is_draft,
+    steps,
+    createdAt: r.created_at,
+    updatedAt: r.updated_at,
+  };
+}
+
+function isUuid(id: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+}
+
+export async function loadRemote(businessId: string): Promise<TunnelState | null> {
+  try {
+    const q = (supabase.from as any)("business_setup_tunnel_runs").select("*").order("updated_at", { ascending: false }).limit(1);
+    const { data } = isUuid(businessId)
+      ? await q.eq("business_id", businessId)
+      : await q.eq("draft_business_name", businessId.replace(/^draft:/, ""));
+    const row = (data as RemoteRow[] | null)?.[0];
+    return row ? rowToState(row) : null;
+  } catch { return null; }
+}
+
+export async function saveRemote(state: TunnelState, counts: Record<StepKey, number>): Promise<string | null> {
+  try {
+    const overall = overallCompleteness(state, counts);
+    const currentStep = TUNNEL_STEPS.find((s) => state.steps[s.key].status !== "saved")?.key ?? null;
+    const missing: string[] = [];
+    TUNNEL_STEPS.forEach((s) => { if (state.steps[s.key].status !== "saved") missing.push(s.key); });
+    const safety = ["no_external_send", "no_provider_activation", "no_buyer_contact", "data_room_closed", "healthcare_blocked"];
+    const { data: existing } = isUuid(state.businessId)
+      ? await (supabase.from as any)("business_setup_tunnel_runs").select("id").eq("business_id", state.businessId).limit(1)
+      : await (supabase.from as any)("business_setup_tunnel_runs").select("id").eq("draft_business_name", state.businessName).is("business_id", null).limit(1);
+    const row = {
+      business_id: isUuid(state.businessId) ? state.businessId : null,
+      draft_business_name: state.businessName,
+      is_draft: state.isDraft,
+      setup_status: overall >= 100 ? "complete" : "in_progress",
+      current_step: currentStep,
+      overall_completeness: overall,
+      steps_json: state.steps,
+      missing_context_json: missing,
+      safety_warnings_json: safety,
+    };
+    const existingId = (existing as { id: string }[] | null)?.[0]?.id;
+    if (existingId) {
+      await (supabase.from as any)("business_setup_tunnel_runs").update(row).eq("id", existingId);
+      return existingId;
+    }
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data: inserted } = await (supabase.from as any)("business_setup_tunnel_runs").insert({ ...row, created_by: user?.id ?? null }).select("id").single();
+    return (inserted as { id: string } | null)?.id ?? null;
+  } catch { return null; }
+}
+
+export async function listAllRemote(): Promise<TunnelState[]> {
+  try {
+    const { data } = await (supabase.from as any)("business_setup_tunnel_runs").select("*").order("updated_at", { ascending: false }).limit(100);
+    return ((data as RemoteRow[] | null) ?? []).map(rowToState);
+  } catch { return []; }
+}
+
+// Create a real draft business row when founder confirms a new draft.
+// No status flags exist on `businesses`; we only insert name. Returns new uuid.
+export async function promoteDraftToBusiness(state: TunnelState): Promise<string | null> {
+  if (isUuid(state.businessId)) return state.businessId;
+  try {
+    const { data, error } = await supabase.from("businesses").insert({ name: state.businessName }).select("id").single();
+    if (error) return null;
+    return (data as { id: string } | null)?.id ?? null;
+  } catch { return null; }
 }

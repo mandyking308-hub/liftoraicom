@@ -66,11 +66,11 @@ export default function FounderLedExitAttentionPanel() {
       </CardHeader>
       <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
         <Item to="/founder/founder-led-exit" label="12-month sale review due" count={c?.reviewDue ?? 0} icon={ClipboardCheck} />
-        <Item to="/founder/founder-led-buyer-market" label="Approaching 12-month review" count={c?.approachingReview ?? 0} icon={ClipboardCheck} />
+        <Item to="/founder/portfolio-exit/buyer-warmup" label="Approaching 12-month review" count={c?.approachingReview ?? 0} icon={ClipboardCheck} />
         <Item to="/founder/founder-led-exit" label="Marked prepare for sale" count={c?.prepareForSale ?? 0} icon={Handshake} />
         <Item to="/founder/founder-led-exit" label="Buyer outreach awaiting approval" count={c?.awaitingApproval ?? 0} icon={UserCheck} />
-        <Item to="/founder/founder-led-buyer-market" label="High-fit buyers identified" count={c?.highFitBuyers ?? 0} icon={UserCheck} />
-        <Item to="/founder/founder-led-buyer-market" label="Data room readiness blockers" count={c?.dataRoomBlockers ?? 0} icon={FileLock} />
+        <Item to="/founder/portfolio-exit/buyer-warmup" label="High-fit buyers identified" count={c?.highFitBuyers ?? 0} icon={UserCheck} />
+        <Item to="/founder/portfolio-exit/buyer-warmup" label="Data room readiness blockers" count={c?.dataRoomBlockers ?? 0} icon={FileLock} />
         <Item to="/founder/founder-led-exit" label="Active offers / diligence" count={c?.activeOffersOrDiligence ?? 0} icon={FileLock} />
       </CardContent>
     </Card>
