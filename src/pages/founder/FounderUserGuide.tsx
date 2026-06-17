@@ -65,7 +65,7 @@ const SECTIONS: { title: string; body: string[] }[] = [
     "4. /founder/business-activation", "5. /founder/start-here/setup-business",
     "6. /founder/business-onboarding-factory", "7. /founder/starter-pack-materialiser",
     "8. /founder/monday-readiness", "9. /founder/data-room",
-    "10. /founder/founder-led-buyer-market",
+    "10. /founder/portfolio-exit/buyer-warmup",
   ]},
   { title: "Daily 15-minute founder routine", body: [
     "Open Start Here → Command Centre attention panel → Approvals Ops → one business' lifecycle → one Co-Pilot question.",
