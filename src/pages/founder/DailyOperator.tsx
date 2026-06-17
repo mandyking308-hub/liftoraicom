@@ -4,7 +4,14 @@ import FounderLayout from "@/components/founder/FounderLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { listAll, overallCompleteness, fieldCounts, TUNNEL_STEPS, type TunnelState } from "@/lib/businessSetupTunnel";
+import {
+  listAll,
+  listAllRemote,
+  overallCompleteness,
+  fieldCounts,
+  TUNNEL_STEPS,
+  type TunnelState,
+} from "@/lib/businessSetupTunnel";
 
 type Biz = { id: string; name: string };
 
@@ -22,19 +29,32 @@ const LANES: { key: string; title: string; from: string[] }[] = [
 
 export default function DailyOperator() {
   const [businesses, setBusinesses] = useState<Biz[]>([]);
+  const [remoteDrafts, setRemoteDrafts] = useState<TunnelState[]>([]);
   const [selectedId, setSelectedId] = useState<string>("");
   const counts = useMemo(fieldCounts, []);
 
   useEffect(() => {
     (async () => {
       try {
-        const { data } = await supabase.from("businesses").select("id, name").limit(200);
+        const [{ data }, tunnelRuns] = await Promise.all([
+          supabase.from("businesses").select("id, name").limit(200),
+          listAllRemote(),
+        ]);
         setBusinesses((data as unknown as Biz[]) || []);
-      } catch { setBusinesses([]); }
+        setRemoteDrafts(tunnelRuns);
+      } catch {
+        setBusinesses([]);
+        setRemoteDrafts([]);
+      }
     })();
   }, []);
 
-  const drafts = useMemo(() => listAll(), []);
+  const localDrafts = useMemo(() => listAll(), []);
+  const drafts = useMemo(() => {
+    const seen = new Set(remoteDrafts.map((d) => d.businessId));
+    return [...remoteDrafts, ...localDrafts.filter((d) => !seen.has(d.businessId))];
+  }, [remoteDrafts, localDrafts]);
+
   const allOptions = useMemo(() => {
     const map = new Map<string, { id: string; name: string }>();
     businesses.forEach((b) => map.set(b.id, b));
@@ -54,7 +74,7 @@ export default function DailyOperator() {
       <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
         <div>
           <h1 className="text-2xl font-semibold">Daily Business Operator</h1>
-          <p className="text-sm text-muted-foreground mt-1">Founder-only daily view. No external sending. No automated actions.</p>
+          <p className="text-sm text-muted-foreground mt-1">Founder-only daily view. Reads the setup tunnel spine first, with local draft fallback. No external sending. No automated actions.</p>
         </div>
 
         <Card>
