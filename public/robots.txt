@@ -12,5 +12,8 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /founder/
+Disallow: /portal-admin/
+Disallow: /portal/
 
 Sitemap: https://liftorai.com/sitemap.xml
