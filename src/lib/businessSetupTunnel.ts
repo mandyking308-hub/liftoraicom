@@ -249,11 +249,14 @@ type RemoteRow = {
 function rowToState(r: RemoteRow): TunnelState {
   const steps = (r.steps_json && typeof r.steps_json === "object") ? r.steps_json as Record<StepKey, StepState> : ({} as Record<StepKey, StepState>);
   for (const s of TUNNEL_STEPS) if (!steps[s.key]) steps[s.key] = emptyStep();
+  const moduleConnections = (r.module_connections_json && typeof r.module_connections_json === "object")
+    ? r.module_connections_json as ModuleConnections : {};
   return {
     businessId: r.business_id ?? `draft:${r.id}`,
     businessName: r.draft_business_name,
     isDraft: r.is_draft,
     steps,
+    moduleConnections,
     createdAt: r.created_at,
     updatedAt: r.updated_at,
   };
@@ -294,6 +297,7 @@ export async function saveRemote(state: TunnelState, counts: Record<StepKey, num
       steps_json: state.steps,
       missing_context_json: missing,
       safety_warnings_json: safety,
+      module_connections_json: state.moduleConnections ?? {},
     };
     const existingId = (existing as { id: string }[] | null)?.[0]?.id;
     if (existingId) {
