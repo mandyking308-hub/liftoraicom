@@ -39,6 +39,19 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // Safely query optional tables — never crash if a table is missing/empty.
+    const safe = async <T,>(p: Promise<{ data: T | null }>): Promise<T | null> => {
+      try { const r = await p; return r.data ?? null; } catch { return null; }
+    };
+    const safeCount = async (table: string, filter?: (q: any) => any): Promise<number | null> => {
+      try {
+        let q: any = supabase.from(table).select("*", { count: "exact", head: true });
+        if (filter) q = filter(q);
+        const { count } = await q;
+        return count ?? null;
+      } catch { return null; }
+    };
+
     // Gather platform signals in parallel
     const [
       { data: workflows },
@@ -62,6 +75,83 @@ serve(async (req) => {
       supabase.from("system_templates").select("name, template_type, usage_count").limit(20),
     ]);
 
+    // Liftor founder/lifecycle context (best-effort; tolerant of missing tables)
+    const [
+      businesses,
+      activationProfiles,
+      onboardingRuns,
+      runtimeActivation,
+      dailyRuns,
+      weeklyRuns,
+      approvalItems,
+      masterWork,
+      fundingShortlist,
+      maBuildCandidates,
+      healthcareReadiness,
+      insuranceClaims,
+      statutoryFilings,
+      corpSec,
+      intlExpansion,
+      releaseItems,
+      exitTargets,
+      exitAlerts,
+      dataRoomTokens,
+      videoAssignments,
+      buyerTargets,
+      buyerWarmActions,
+      exitProfiles,
+    ] = await Promise.all([
+      safe(supabase.from("businesses").select("id, name, status").limit(50) as any),
+      safe(supabase.from("business_activation_profiles").select("business_id, status, stage").limit(50) as any),
+      safe(supabase.from("business_onboarding_factory_runs").select("business_id, status, readiness_score, created_at").order("created_at", { ascending: false }).limit(20) as any),
+      safe(supabase.from("business_runtime_activation").select("business_id, runtime_mode, is_live").limit(50) as any),
+      safe(supabase.from("business_daily_operating_runs").select("business_id, status, created_at").order("created_at", { ascending: false }).limit(20) as any),
+      safe(supabase.from("business_weekly_review_runs").select("business_id, status, created_at").order("created_at", { ascending: false }).limit(20) as any),
+      safe(supabase.from("founder_approval_items").select("id, title, status, priority, created_at").eq("status", "pending").limit(30) as any),
+      safe(supabase.from("master_work_items").select("id, title, status, priority").limit(30) as any),
+      safe(supabase.from("funding_shortlist").select("id, status").limit(20) as any),
+      safe(supabase.from("ma_build_candidates").select("id, status").limit(20) as any),
+      safe(supabase.from("healthcare_readiness").select("business_id, status, is_live").limit(20) as any),
+      safe(supabase.from("insurance_claims").select("id, status").limit(20) as any),
+      safe(supabase.from("statutory_filings").select("id, status, due_date").limit(20) as any),
+      safe(supabase.from("corporate_secretarial_records").select("id, status").limit(20) as any),
+      safe(supabase.from("international_expansion_runs").select("id, status").limit(20) as any),
+      safe(supabase.from("release_workflow_items").select("id, status").limit(20) as any),
+      safe(supabase.from("portfolio_exit_targets").select("id, status, business_id").limit(20) as any),
+      safe(supabase.from("portfolio_exit_target_alerts").select("id, status, severity").limit(20) as any),
+      safeCount("data_room_access_tokens", (q) => q.eq("status", "active")),
+      safe(supabase.from("video_library_training_assignments").select("id, status").limit(20) as any),
+      safe(supabase.from("founder_led_buyer_targets").select("id, warm_up_status, founder_approved_to_contact").limit(30) as any),
+      safe(supabase.from("founder_led_buyer_warm_up_actions").select("id, status, founder_approval_required, founder_approved").limit(30) as any),
+      safe(supabase.from("business_exit_intelligence_profiles").select("business_id, twelve_month_review_date, twelve_month_review_status").limit(50) as any),
+    ]);
+
+    const liftorContext = {
+      businesses: businesses || [],
+      activation_profiles: activationProfiles || [],
+      onboarding_runs: onboardingRuns || [],
+      runtime_activation: runtimeActivation || [],
+      daily_runs: dailyRuns || [],
+      weekly_runs: weeklyRuns || [],
+      founder_approvals_pending: approvalItems || [],
+      master_work_items: masterWork || [],
+      funding_shortlist: fundingShortlist || [],
+      ma_build_candidates: maBuildCandidates || [],
+      healthcare_readiness: healthcareReadiness || [],
+      insurance_claims_summary: { count: (insuranceClaims || []).length },
+      statutory_filings: statutoryFilings || [],
+      corporate_secretarial: corpSec || [],
+      international_expansion: intlExpansion || [],
+      release_items: releaseItems || [],
+      portfolio_exit_targets: exitTargets || [],
+      portfolio_exit_alerts: exitAlerts || [],
+      data_room_active_tokens: dataRoomTokens ?? 0,
+      training_assignments: videoAssignments || [],
+      buyer_targets: buyerTargets || [],
+      buyer_warm_up_actions: buyerWarmActions || [],
+      exit_intelligence_profiles: exitProfiles || [],
+    };
+
     const platformContext = JSON.stringify({
       workflows: workflows || [],
       agents: agents || [],
@@ -72,9 +162,10 @@ serve(async (req) => {
       strategy_insights: strategyInsights || [],
       revenue: revenue || [],
       templates: templates || [],
+      liftor: liftorContext,
     });
 
-    const systemPrompt = `You are the Liftor AI Founder Co-Pilot. You are an intelligent assistant that helps the founder understand and manage the Liftor AI platform.
+    const systemPrompt = `You are the Liftor AI Founder Co-Pilot. You help Mandy (founder) understand and operate the Liftor private founder operating system.
 
 You have access to real-time platform data. Use it to answer questions accurately.
 
@@ -88,7 +179,26 @@ GUIDELINES:
 - Use markdown formatting for clarity
 - If asked about something not in the data, say so honestly
 - Always be strategic and actionable in your recommendations
-- You are speaking to the founder/CEO — be direct and business-focused`;
+- You are speaking to the founder/CEO — be direct and business-focused
+
+SAFETY RULES:
+- Healthcare overlay is NOT LIVE / BLOCKED — never recommend flipping it live without clinical + insurance + founder sign-off.
+- Data room is closed by default — never recommend issuing external tokens without founder approval.
+- Buyer warm-up is quiet tracking — never recommend outbound contact unless founder_approved_to_contact is true.
+- Never recommend enabling cron, sending emails, activating providers, or exposing founder/admin routes publicly.
+- Treat all activation as draft / not_live unless data confirms otherwise.
+
+KNOWN QUESTIONS YOU SHOULD ANSWER WELL:
+- "What should I do first?" → point to /founder/start-here.
+- "Which business needs setup?" → use businesses + activation_profiles + onboarding_runs.
+- "What is missing before launch?" → use onboarding_runs.readiness_score + activation_profiles.stage.
+- "What is blocked?" → master_work_items where status implies blocked.
+- "What needs founder approval?" → founder_approvals_pending.
+- "Is healthcare still blocked?" → healthcare_readiness.is_live (should be false everywhere).
+- "Is anything external live?" → runtime_activation.is_live / runtime_mode; data_room_active_tokens.
+- "Which businesses are due for sale review?" → exit_intelligence_profiles.twelve_month_review_status.
+- "What should I test next?" → cite next pending approval / lowest readiness business.
+- "What are my first 10 clicks?" → list the StartHere 10-step path.`;
 
     const __gwInput = {
       action_type: "founder_copilot_stream",
