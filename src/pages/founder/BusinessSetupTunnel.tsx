@@ -14,7 +14,7 @@ import {
   stepCompleteness, overallCompleteness, type TunnelState, type StepKey,
 } from "@/lib/businessSetupTunnel";
 
-type BusinessRow = { id: string; name: string; status?: string | null };
+type BusinessRow = { id: string; name: string };
 
 function slugify(s: string): string {
   return "draft:" + s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60) || "draft:unnamed";
@@ -35,8 +35,8 @@ export default function BusinessSetupTunnel() {
   useEffect(() => {
     (async () => {
       try {
-        const { data } = await supabase.from("businesses").select("id, name, status").limit(200);
-        setBusinesses((data as BusinessRow[]) || []);
+        const { data } = await supabase.from("businesses").select("id, name").limit(200);
+        setBusinesses((data as unknown as BusinessRow[]) || []);
       } catch { setBusinesses([]); }
       setLoadingBiz(false);
     })();
@@ -134,7 +134,7 @@ export default function BusinessSetupTunnel() {
                     <div key={b.id} className="flex items-center justify-between border border-border/40 rounded p-2">
                       <div>
                         <div className="text-sm font-medium">{b.name}</div>
-                        <div className="text-xs text-muted-foreground">Status: {b.status || "—"} · Setup: {score}%</div>
+                        <div className="text-xs text-muted-foreground">Setup: {score}%</div>
                       </div>
                       <Button size="sm" variant="outline" onClick={() => pick(b)}>Open</Button>
                     </div>
