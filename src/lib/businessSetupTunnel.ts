@@ -235,7 +235,7 @@ function isUuid(id: string): boolean {
 
 export async function loadRemote(businessId: string): Promise<TunnelState | null> {
   try {
-    const q = supabase.from("business_setup_tunnel_runs").select("*").order("updated_at", { ascending: false }).limit(1);
+    const q = (supabase.from as any)("business_setup_tunnel_runs").select("*").order("updated_at", { ascending: false }).limit(1);
     const { data } = isUuid(businessId)
       ? await q.eq("business_id", businessId)
       : await q.eq("draft_business_name", businessId.replace(/^draft:/, ""));
@@ -252,8 +252,8 @@ export async function saveRemote(state: TunnelState, counts: Record<StepKey, num
     TUNNEL_STEPS.forEach((s) => { if (state.steps[s.key].status !== "saved") missing.push(s.key); });
     const safety = ["no_external_send", "no_provider_activation", "no_buyer_contact", "data_room_closed", "healthcare_blocked"];
     const { data: existing } = isUuid(state.businessId)
-      ? await supabase.from("business_setup_tunnel_runs").select("id").eq("business_id", state.businessId).limit(1)
-      : await supabase.from("business_setup_tunnel_runs").select("id").eq("draft_business_name", state.businessName).is("business_id", null).limit(1);
+      ? await (supabase.from as any)("business_setup_tunnel_runs").select("id").eq("business_id", state.businessId).limit(1)
+      : await (supabase.from as any)("business_setup_tunnel_runs").select("id").eq("draft_business_name", state.businessName).is("business_id", null).limit(1);
     const row = {
       business_id: isUuid(state.businessId) ? state.businessId : null,
       draft_business_name: state.businessName,
@@ -267,18 +267,18 @@ export async function saveRemote(state: TunnelState, counts: Record<StepKey, num
     };
     const existingId = (existing as { id: string }[] | null)?.[0]?.id;
     if (existingId) {
-      await supabase.from("business_setup_tunnel_runs").update(row).eq("id", existingId);
+      await (supabase.from as any)("business_setup_tunnel_runs").update(row).eq("id", existingId);
       return existingId;
     }
     const { data: { user } } = await supabase.auth.getUser();
-    const { data: inserted } = await supabase.from("business_setup_tunnel_runs").insert({ ...row, created_by: user?.id ?? null }).select("id").single();
+    const { data: inserted } = await (supabase.from as any)("business_setup_tunnel_runs").insert({ ...row, created_by: user?.id ?? null }).select("id").single();
     return (inserted as { id: string } | null)?.id ?? null;
   } catch { return null; }
 }
 
 export async function listAllRemote(): Promise<TunnelState[]> {
   try {
-    const { data } = await supabase.from("business_setup_tunnel_runs").select("*").order("updated_at", { ascending: false }).limit(100);
+    const { data } = await (supabase.from as any)("business_setup_tunnel_runs").select("*").order("updated_at", { ascending: false }).limit(100);
     return ((data as RemoteRow[] | null) ?? []).map(rowToState);
   } catch { return []; }
 }
