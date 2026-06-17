@@ -305,6 +305,39 @@ export default function BusinessSetupTunnel() {
             <div className="flex flex-wrap gap-2">
               <Button onClick={() => markStep(stepDef.key, "saved")}>Save and continue</Button>
               <Button variant="outline" onClick={() => markStep(stepDef.key, "skipped")}>Skip for now</Button>
+              {stepDef.key === "commercial" && (
+                <Button variant="secondary" onClick={async () => {
+                  if (!state) return;
+                  const f = state.steps.commercial.fields;
+                  const input: SalesTargetInput = {
+                    target_monthly_revenue: Number(f.target_monthly_revenue) || 0,
+                    target_annual_revenue: Number(f.target_annual_revenue) || 0,
+                    target_mrr: Number(f.target_mrr) || 0,
+                    target_arr: Number(f.target_arr) || 0,
+                    currency: f.currency || "GBP",
+                    average_order_value: Number(f.average_order_value) || 0,
+                    subscription_price: Number(f.subscription_price) || 0,
+                    conversion_rate: Number(f.conversion_rate) || 0,
+                    lead_to_call_rate: Number(f.lead_to_call_rate) || 0,
+                    call_to_sale_rate: Number(f.call_to_sale_rate) || 0,
+                    churn_rate: Number(f.churn_rate) || 0,
+                    gross_margin: Number(f.gross_margin) || 0,
+                    sales_cycle_days: Number(f.sales_cycle_days) || 0,
+                    target_first_sale_date: f.target_first_sale_date || null,
+                    target_first_1k_date: f.target_first_1k_date || null,
+                    target_first_10k_month_date: f.target_first_10k_month_date || null,
+                    commercial_stage: (f.commercial_stage || "setup") as any,
+                    max_safe_outreach_per_day: Number(f.max_safe_outreach_per_day) || 0,
+                    founder_approval_required: (f.founder_approval_required || "yes").toLowerCase() !== "no",
+                  };
+                  const bizId = state.businessId.startsWith("draft:") ? null : state.businessId;
+                  const targetId = await saveSalesTarget(bizId, state.businessName, input);
+                  const rollup = await loadCurrentRevenueRollup(bizId);
+                  const pace = calculatePace(input, rollup.mtd, rollup.mrr, rollup.arr);
+                  await savePaceCalculation(bizId, state.businessName, targetId, pace);
+                  toast.success(`Pace: ${pace.pace_status.toUpperCase()} · ${pace.recommended_daily_action}`);
+                }}>Save target & calculate pace</Button>
+              )}
               <Button asChild variant="ghost"><Link to="/founder/copilot">Ask Liftor</Link></Button>
               {stepIdx > 0 && <Button variant="ghost" onClick={() => setStepIdx(stepIdx - 1)}>← Previous</Button>}
               {stepIdx < TUNNEL_STEPS.length - 1 && <Button variant="ghost" onClick={() => setStepIdx(stepIdx + 1)}>Next →</Button>}

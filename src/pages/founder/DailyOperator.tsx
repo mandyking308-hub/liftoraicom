@@ -13,6 +13,7 @@ import {
   MODULE_AREAS,
   type TunnelState,
 } from "@/lib/businessSetupTunnel";
+import { listLatestPaceAll, listSalesTargetsAll, loadCurrentRevenueRollup } from "@/lib/commercialPace";
 
 type Biz = { id: string; name: string };
 
@@ -32,23 +33,36 @@ export default function DailyOperator() {
   const [businesses, setBusinesses] = useState<Biz[]>([]);
   const [remoteDrafts, setRemoteDrafts] = useState<TunnelState[]>([]);
   const [selectedId, setSelectedId] = useState<string>("");
+  const [pace, setPace] = useState<any[]>([]);
+  const [targets, setTargets] = useState<any[]>([]);
+  const [rollup, setRollup] = useState<any | null>(null);
   const counts = useMemo(fieldCounts, []);
 
   useEffect(() => {
     (async () => {
       try {
-        const [{ data }, tunnelRuns] = await Promise.all([
+        const [{ data }, tunnelRuns, p, t] = await Promise.all([
           supabase.from("businesses").select("id, name").limit(200),
           listAllRemote(),
+          listLatestPaceAll(),
+          listSalesTargetsAll(),
         ]);
         setBusinesses((data as unknown as Biz[]) || []);
         setRemoteDrafts(tunnelRuns);
+        setPace(p); setTargets(t);
       } catch {
         setBusinesses([]);
         setRemoteDrafts([]);
       }
     })();
   }, []);
+
+  useEffect(() => {
+    (async () => {
+      if (!selectedId || selectedId.startsWith("draft:")) { setRollup(null); return; }
+      setRollup(await loadCurrentRevenueRollup(selectedId));
+    })();
+  }, [selectedId]);
 
   const localDrafts = useMemo(() => listAll(), []);
   const drafts = useMemo(() => {
