@@ -3,10 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 const LINKS: { label: string; to: string }[] = [
+  { label: "Start setup tunnel", to: "/founder/business-setup-tunnel" },
+  { label: "Continue business setup", to: "/founder/business-setup-tunnel?mode=continue" },
+  { label: "Open daily operator", to: "/founder/daily-operator" },
+  { label: "Open user guide", to: "/founder/user-guide" },
+  { label: "Ask Liftor", to: "/founder/copilot" },
   { label: "Start Here", to: "/founder/start-here" },
-  { label: "Setup a Business", to: "/founder/start-here/setup-business" },
-  { label: "Founder User Guide", to: "/founder/user-guide" },
-  { label: "AI Co-Pilot", to: "/founder/copilot" },
 ];
 
 export default function StartHereCard() {

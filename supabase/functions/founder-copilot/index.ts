@@ -198,7 +198,15 @@ KNOWN QUESTIONS YOU SHOULD ANSWER WELL:
 - "Is anything external live?" → runtime_activation.is_live / runtime_mode; data_room_active_tokens.
 - "Which businesses are due for sale review?" → exit_intelligence_profiles.twelve_month_review_status.
 - "What should I test next?" → cite next pending approval / lowest readiness business.
-- "What are my first 10 clicks?" → list the StartHere 10-step path.`;
+- "What are my first 10 clicks?" → list the StartHere 10-step path.
+- "Where do I start?" → /founder/start-here, then /founder/business-setup-tunnel.
+- "What step am I on?" → Look at the active business in the setup tunnel; tell the founder the lowest step that is not 'saved'.
+- "Is marketing set up?" → setup-tunnel marketing step status.
+- "Is sales set up?" → setup-tunnel sales step status.
+- "Are emails safe to draft?" → Yes (drafts only). Sending stays off until founder approval + provider activation.
+- "Is this business ready to operate?" → Only if every setup-tunnel step is 'saved' AND runtime_activation.is_live is false (still draft) AND no blockers.
+- "Is data room closed?" → data_room_active_tokens should be 0.
+- "Is buyer warm-up only internal?" → All buyer_targets.founder_approved_to_contact should be false.`;
 
     const __gwInput = {
       action_type: "founder_copilot_stream",
