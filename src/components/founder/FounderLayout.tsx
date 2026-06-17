@@ -19,6 +19,10 @@ const navGroups: NavGroup[] = [
   {
     label: "Control / Command Centre", icon: Command, defaultOpen: true,
     items: [
+      { label: "Start Here", to: "/founder/start-here", icon: Sparkles },
+      { label: "Business Setup Tunnel", to: "/founder/business-setup-tunnel", icon: Workflow },
+      { label: "Daily Operator", to: "/founder/daily-operator", icon: ClipboardCheck },
+      { label: "Founder User Guide", to: "/founder/user-guide", icon: BookOpenCheck },
       { label: "Command Centre", to: "/founder/command-centre", icon: Command },
       { label: "Overview", to: "/founder", icon: LayoutDashboard },
       { label: "Priority", to: "/founder/priority", icon: TrendingUp, badge: "priority" },
