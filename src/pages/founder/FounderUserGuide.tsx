@@ -12,11 +12,23 @@ const SECTIONS: { title: string; body: string[] }[] = [
   { title: "What to open first each morning", body: [
     "Start at /founder/start-here. Then Command Centre. Then check safety gates and what needs attention today.",
   ]},
-  { title: "How to add a business", body: [
-    "Use the Setup Business wizard at /founder/start-here/setup-business. It always saves as draft / not live.",
+  { title: "How to wire in NeonCandy", body: [
+    "Open /founder/business-setup-tunnel?mode=existing. If NeonCandy exists, a 'Wire NeonCandy' card appears at the top. Work through the 11 tunnel steps in order.",
   ]},
-  { title: "How to run the setup wizard", body: [
-    "Six steps: shell → basics → evidence → dry-run readiness → confirm & save → next steps. Confirmation requires typing FOUNDER APPROVED.",
+  { title: "How to add a new business", body: [
+    "Open /founder/business-setup-tunnel?mode=new. Give it a name (e.g. 'Acme Marketing'). It saves as a local draft and walks you through the same 11 steps.",
+  ]},
+  { title: "What order to follow in the setup tunnel", body: [
+    "Identity → Web/domain/email → Knowledge/manuals → Offer/product → Customer/market → Marketing → Sales → Onboarding/support → Operations → Finance/compliance → Evidence/data room/exit.",
+  ]},
+  { title: "How to use the Daily Business Operator", body: [
+    "Open /founder/daily-operator. Pick a business. See today's priority, blockers, waiting-on-founder / adviser, and the per-area task lanes. Empty lanes = nothing flagged from the tunnel.",
+  ]},
+  { title: "How to know a business is ready", body: [
+    "Every setup-tunnel step is 'saved' (not 'skipped' or 'in_progress'), and runtime_activation is still draft until you explicitly flip it.",
+  ]},
+  { title: "How to know a business is not ready", body: [
+    "Any step is 'not_started' or 'skipped'; or readiness score < 100%; or any safety blocker (healthcare/data-room/buyer outreach) is flagged amber.",
   ]},
   { title: "How to use Command Centre", body: [
     "Command Centre shows alerts, cost governor, attention items, lifecycle, agents and operating loops. Read first, click into anything that's amber/red.",
