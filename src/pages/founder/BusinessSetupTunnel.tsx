@@ -13,6 +13,8 @@ import {
   TUNNEL_STEPS, STEP_FIELDS, fieldCounts, load, save, listAll, newState,
   stepCompleteness, overallCompleteness, type TunnelState, type StepKey,
   loadRemote, saveRemote, listAllRemote, promoteDraftToBusiness,
+  promoteIntoLiftorModules as runPromoteIntoLiftorModules,
+  MODULE_AREAS, type ModuleConnections,
 } from "@/lib/businessSetupTunnel";
 
 type BusinessRow = { id: string; name: string };
@@ -118,18 +120,25 @@ export default function BusinessSetupTunnel() {
       toast.error("Confirm the draft business first (creates a real businesses row).");
       return;
     }
-    const notes: string[] = [];
-    const tryUpsert = async (table: string, payload: Record<string, unknown>) => {
-      try {
-        const { error } = await (supabase.from(table as any) as any).insert(payload);
-        if (error) notes.push(`${table}: manual next action — ${error.message}`);
-      } catch (e: any) { notes.push(`${table}: manual next action — ${e?.message ?? "table unavailable"}`); }
-    };
-    await tryUpsert("business_activation_profiles", { business_id: state.businessId, status: "draft", stage: "setup_tunnel" });
-    await tryUpsert("business_onboarding_factory_runs", { business_id: state.businessId, status: "draft" });
-    await tryUpsert("business_runtime_activation", { business_id: state.businessId, runtime_mode: "simulation", is_live: false });
-    if (notes.length) toast.warning(`Promoted with notes: ${notes.length} manual next actions logged.`);
-    else toast.success("Promoted to Liftor modules as drafts only. Nothing live.");
+    try {
+      // Legacy three (unchanged) — keep activation spine bootstrapped.
+      const bootstrap = async (table: string, payload: Record<string, unknown>) => {
+        try { await (supabase.from(table as any) as any).insert(payload); } catch { /* tolerated */ }
+      };
+      await bootstrap("business_activation_profiles", { business_id: state.businessId, status: "draft", stage: "setup_tunnel" });
+      await bootstrap("business_onboarding_factory_runs", { business_id: state.businessId, status: "draft" });
+      await bootstrap("business_runtime_activation", { business_id: state.businessId, runtime_mode: "simulation", is_live: false });
+
+      const moduleConnections = await runPromoteIntoLiftorModules(state);
+      const next: TunnelState = { ...state, moduleConnections };
+      setState(next); save(next);
+      await saveRemote(next, counts);
+      const connected = Object.values(moduleConnections).filter((c) => c?.status === "connected").length;
+      const manual = Object.values(moduleConnections).filter((c) => c?.status === "manual_action_needed").length;
+      toast.success(`Promoted as drafts only. ${connected} connected, ${manual} need manual wiring. Nothing live.`);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Promotion failed.");
+    }
   }
 
   // ---------- No business selected ----------
