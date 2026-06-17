@@ -324,6 +324,23 @@ export default function BusinessSetupTunnel() {
             ))}
           </CardContent>
         </Card>
+
+        <Card className="border-primary/40">
+          <CardHeader className="pb-2"><CardTitle className="text-sm">Promote setup into Liftor modules</CardTitle></CardHeader>
+          <CardContent className="space-y-3 text-xs text-muted-foreground">
+            {state.isDraft && (
+              <div className="space-y-2">
+                <p>This is still a local draft business. Before promoting into Liftor modules, confirm and create a real (draft / not-live) business row.</p>
+                <Button size="sm" onClick={confirmCreateRealBusiness}>Confirm draft → create real business (draft, not live)</Button>
+              </div>
+            )}
+            <p>When the 11 steps are complete, you can promote setup into the existing Liftor modules. This writes draft records only. No emails, no providers, no publishing, no buyer outreach, no data-room tokens, no healthcare go-live.</p>
+            <Button size="sm" variant="outline" onClick={promoteIntoLiftorModules} disabled={state.isDraft}>
+              Promote into Liftor modules (drafts only)
+            </Button>
+            {state.isDraft && <p className="text-amber-500">Disabled until the draft business is confirmed.</p>}
+          </CardContent>
+        </Card>
       </div>
     </FounderLayout>
   );
