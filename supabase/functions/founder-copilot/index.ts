@@ -217,6 +217,17 @@ KNOWN QUESTIONS YOU SHOULD ANSWER WELL:
 - "Is data room closed?" → data_room_active_tokens should be 0.
 - "Is buyer warm-up only internal?" → All buyer_targets.founder_approved_to_contact should be false.`;
 
+    // Setup tunnel-aware answers — appended so existing prompt structure is preserved.
+    const tunnelHints = `\n\nSETUP TUNNEL DATA (canonical setup journey at /founder/business-setup-tunnel):\n` +
+      `Use setup_tunnel_runs to answer:\n` +
+      `- "Which setup step is incomplete?" → row.missing_context_json / current_step.\n` +
+      `- "Which business is closest to ready?" → highest overall_completeness < 100.\n` +
+      `- "Is NeonCandy fully wired?" → match draft_business_name ~ /neon\\s*candy/i OR business_id of the matching business; report overall_completeness, current_step, is_draft.\n` +
+      `- "Is the new marketing business only a draft or properly attached?" → is_draft + whether business_id is set.\n` +
+      `- "What should I do next?" → lowest-completeness business, then its current_step.\n` +
+      `Canonical routes: setup tunnel /founder/business-setup-tunnel, daily operator /founder/daily-operator, buyer warm-up /founder/portfolio-exit/buyer-warmup, finance /founder/finance, marketing /founder/marketing.`;
+    const finalSystemPrompt = systemPrompt + tunnelHints;
+
     const __gwInput = {
       action_type: "founder_copilot_stream",
       task_category: "founder_copilot",
@@ -225,7 +236,7 @@ KNOWN QUESTIONS YOU SHOULD ANSWER WELL:
       risk_level: "medium" as const,
       request_type: "copilot_chat",
       messages: [
-        { role: "system" as const, content: systemPrompt },
+        { role: "system" as const, content: finalSystemPrompt },
         ...messages,
       ],
       metadata: { streaming: true },
