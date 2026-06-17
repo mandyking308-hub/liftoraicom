@@ -116,6 +116,9 @@ import CommandCenter from "./pages/founder/CommandCenter";
 import CommandCentre from "./pages/founder/CommandCentre";
 import StarterPackMaterialiserPage from "./pages/founder/StarterPackMaterialiser";
 import BusinessOnboardingFactoryPage from "./pages/founder/BusinessOnboardingFactory";
+import StartHere from "./pages/founder/StartHere";
+import StartHereSetupBusiness from "./pages/founder/StartHereSetupBusiness";
+import FounderUserGuide from "./pages/founder/FounderUserGuide";
 import VideoSopFactoryPage from "./pages/founder/VideoSopFactory";
 import RelationshipIntelligencePage from "./pages/founder/RelationshipIntelligence";
 import GlobalPrRadar from "./pages/founder/GlobalPrRadar";
@@ -961,6 +964,9 @@ const App = () => (
             <Route path="/founder/executions/:id" element={<FounderRoute><ExecutionDetail /></FounderRoute>} />
             <Route path="/founder/command-centre" element={<FounderRoute><CommandCentre /></FounderRoute>} />
             <Route path="/founder/command-center" element={<Navigate to="/founder/command-centre" replace />} />
+            <Route path="/founder/start-here" element={<FounderRoute><StartHere /></FounderRoute>} />
+            <Route path="/founder/start-here/setup-business" element={<FounderRoute><StartHereSetupBusiness /></FounderRoute>} />
+            <Route path="/founder/user-guide" element={<FounderRoute><FounderUserGuide /></FounderRoute>} />
             <Route path="/founder/starter-pack-materialiser" element={<FounderRoute><StarterPackMaterialiserPage /></FounderRoute>} />
             <Route path="/founder/business-onboarding-factory" element={<FounderRoute><BusinessOnboardingFactoryPage /></FounderRoute>} />
             <Route path="/founder/video-sop-factory" element={<FounderRoute><VideoSopFactoryPage /></FounderRoute>} />
