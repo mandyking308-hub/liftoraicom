@@ -129,7 +129,7 @@ serve(async (req) => {
     const tunnelRuns = await safe(
       supabase
         .from("business_setup_tunnel_runs")
-        .select("id, business_id, draft_business_name, is_draft, setup_status, current_step, overall_completeness, missing_context_json, updated_at")
+        .select("id, business_id, draft_business_name, is_draft, setup_status, current_step, overall_completeness, missing_context_json, module_connections_json, updated_at")
         .order("updated_at", { ascending: false })
         .limit(50) as any,
     );
@@ -225,6 +225,17 @@ KNOWN QUESTIONS YOU SHOULD ANSWER WELL:
       `- "Is NeonCandy fully wired?" → match draft_business_name ~ /neon\\s*candy/i OR business_id of the matching business; report overall_completeness, current_step, is_draft.\n` +
       `- "Is the new marketing business only a draft or properly attached?" → is_draft + whether business_id is set.\n` +
       `- "What should I do next?" → lowest-completeness business, then its current_step.\n` +
+      `\nMODULE CONNECTIONS — each row.module_connections_json is a map of {marketing, sales, crm, support, operations, finance, evidence, exit} → { status: connected | manual_action_needed | not_attempted, target_table, draft_record_id, note }. Use it to answer:\n` +
+      `- "Which setup areas are connected?" → keys where status = "connected".\n` +
+      `- "Which setup areas still need manual wiring?" → keys where status != "connected" (manual_action_needed or not_attempted) and explain the note.\n` +
+      `- "Is marketing connected?" → module_connections_json.marketing.status.\n` +
+      `- "Is sales connected?" → module_connections_json.sales.status.\n` +
+      `- "Is CRM connected?" → module_connections_json.crm.status (CRM is manual-by-design — assign inbox + status in /founder/crm).\n` +
+      `- "Is support connected?" → module_connections_json.support.status.\n` +
+      `- "Is operations connected?" → module_connections_json.operations.status.\n` +
+      `- "Is finance connected?" → module_connections_json.finance.status.\n` +
+      `- "Is evidence / data room connected?" → module_connections_json.evidence.status (data room stays CLOSED — no tokens issued).\n` +
+      `- "Is buyer warm-up connected?" → module_connections_json.exit.status (buyer warm-up stays quiet — manual targets only).\n` +
       `Canonical routes: setup tunnel /founder/business-setup-tunnel, daily operator /founder/daily-operator, buyer warm-up /founder/portfolio-exit/buyer-warmup, finance /founder/finance, marketing /founder/marketing.`;
     const finalSystemPrompt = systemPrompt + tunnelHints;
 
