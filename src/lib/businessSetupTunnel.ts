@@ -29,6 +29,7 @@ export type TunnelState = {
   businessName: string;
   isDraft: boolean;
   steps: Record<StepKey, StepState>;
+  moduleConnections?: ModuleConnections;
   createdAt: string;
   updatedAt: string;
 };
