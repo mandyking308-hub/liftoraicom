@@ -348,6 +348,28 @@ export default function BusinessSetupTunnel() {
               Promote into Liftor modules (drafts only)
             </Button>
             {state.isDraft && <p className="text-amber-500">Disabled until the draft business is confirmed.</p>}
+
+            <div className="pt-3 border-t border-border/40 space-y-2">
+              <div className="text-foreground font-medium">Module connections</div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {MODULE_AREAS.map((a) => {
+                  const c = state.moduleConnections?.[a.key];
+                  const status = c?.status ?? "not_attempted";
+                  const color = status === "connected" ? "text-emerald-500"
+                    : status === "manual_action_needed" ? "text-amber-500" : "text-muted-foreground";
+                  return (
+                    <div key={a.key} className="border border-border/40 rounded p-2">
+                      <div className="flex items-center justify-between">
+                        <div className="font-medium text-foreground">{a.label}</div>
+                        <span className={`text-[10px] uppercase ${color}`}>{status.replace(/_/g, " ")}</span>
+                      </div>
+                      <div className="text-[11px]">{c?.note ?? "Not attempted yet — run promote."}</div>
+                      {c?.target_table && <div className="text-[10px] text-muted-foreground">target: {c.target_table}{c.draft_record_id ? ` · #${c.draft_record_id.slice(0, 8)}` : ""}</div>}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
