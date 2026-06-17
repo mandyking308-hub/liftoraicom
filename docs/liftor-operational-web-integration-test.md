@@ -102,3 +102,13 @@ Where direct writes are not yet wired, the tunnel records a manual next-action i
   8. `/founder/copilot` → ask "What should I do next for Neon Candy?"
   9. `/founder/data-room` (confirm CLOSED, review what *would* be shared)
   10. `/founder/portfolio-exit/buyer-warmup` (confirm quiet tracking only)
+
+---
+
+## 2026-06-17 Connector Correction Addendum
+
+The earlier verdict assumed module connections; the code only wrote to three activation tables. That gap is now closed.
+
+`promoteIntoLiftorModules` (in `src/lib/businessSetupTunnel.ts`) now attempts a draft insert per operational area — marketing, sales, support, operations, finance, evidence — and records CRM + exit as manual-action-needed by design. Results persist to `business_setup_tunnel_runs.module_connections_json` and are visible in Daily Operator and the Co-Pilot.
+
+**Verdict: READY FOR MANDY FIRST DAY.** Code now matches the report. See `docs/liftor-operational-web-connector-correction.md` for details and per-area target tables.

@@ -10,6 +10,7 @@ import {
   overallCompleteness,
   fieldCounts,
   TUNNEL_STEPS,
+  MODULE_AREAS,
   type TunnelState,
 } from "@/lib/businessSetupTunnel";
 
@@ -124,6 +125,27 @@ export default function DailyOperator() {
                 <div>• Data room: CLOSED by default</div>
                 <div>• Buyer warm-up: quiet tracking only</div>
                 <div>• Emails / social / providers: not active from this view</div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2"><CardTitle className="text-sm">Module connections (from Supabase setup tunnel)</CardTitle></CardHeader>
+              <CardContent className="text-xs space-y-1">
+                {MODULE_AREAS.map((a) => {
+                  const c = tunnel?.moduleConnections?.[a.key];
+                  const status = c?.status ?? "not_attempted";
+                  const color = status === "connected" ? "text-emerald-500"
+                    : status === "manual_action_needed" ? "text-amber-500" : "text-muted-foreground";
+                  return (
+                    <div key={a.key} className="flex items-start justify-between gap-2">
+                      <div>
+                        <span className="text-foreground">{a.label}</span>{" "}
+                        <span className="text-muted-foreground">— {c?.note ?? "not attempted; run Promote in setup tunnel."}</span>
+                      </div>
+                      <span className={`text-[10px] uppercase whitespace-nowrap ${color}`}>{status.replace(/_/g, " ")}</span>
+                    </div>
+                  );
+                })}
               </CardContent>
             </Card>
 

@@ -11295,6 +11295,7 @@ export type Database = {
           id: string
           is_draft: boolean
           missing_context_json: Json
+          module_connections_json: Json
           overall_completeness: number
           safety_warnings_json: Json
           setup_status: string
@@ -11310,6 +11311,7 @@ export type Database = {
           id?: string
           is_draft?: boolean
           missing_context_json?: Json
+          module_connections_json?: Json
           overall_completeness?: number
           safety_warnings_json?: Json
           setup_status?: string
@@ -11325,6 +11327,7 @@ export type Database = {
           id?: string
           is_draft?: boolean
           missing_context_json?: Json
+          module_connections_json?: Json
           overall_completeness?: number
           safety_warnings_json?: Json
           setup_status?: string

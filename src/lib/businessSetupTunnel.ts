@@ -29,6 +29,7 @@ export type TunnelState = {
   businessName: string;
   isDraft: boolean;
   steps: Record<StepKey, StepState>;
+  moduleConnections?: ModuleConnections;
   createdAt: string;
   updatedAt: string;
 };
@@ -197,6 +198,34 @@ export function fieldCounts(): Record<StepKey, number> {
 }
 
 // ---------------------------------------------------------------------------
+// Module connections — which Liftor area each setup tunnel is wired into.
+// Each connection is draft-only: no sends, no providers, no publishing.
+// ---------------------------------------------------------------------------
+
+export const MODULE_AREAS = [
+  { key: "marketing", label: "Marketing", route: "/founder/marketing" },
+  { key: "sales", label: "Sales / outreach", route: "/founder/crm" },
+  { key: "crm", label: "CRM / contacts", route: "/founder/crm" },
+  { key: "support", label: "Customer onboarding & support", route: "/founder/customer-onboarding" },
+  { key: "operations", label: "Operations / daily loop / SOPs", route: "/founder/daily-operator" },
+  { key: "finance", label: "Finance / accounting / compliance", route: "/founder/finance" },
+  { key: "evidence", label: "Evidence / data room readiness", route: "/founder/data-room" },
+  { key: "exit", label: "Exit / buyer warm-up readiness", route: "/founder/portfolio-exit/buyer-warmup" },
+] as const;
+
+export type ModuleAreaKey = (typeof MODULE_AREAS)[number]["key"];
+
+export type ModuleConnection = {
+  status: "connected" | "manual_action_needed" | "not_attempted";
+  target_table: string | null;
+  draft_record_id: string | null;
+  note: string;
+  attempted_at: string;
+};
+
+export type ModuleConnections = Partial<Record<ModuleAreaKey, ModuleConnection>>;
+
+// ---------------------------------------------------------------------------
 // Supabase persistence (founder-only). localStorage is fallback only.
 // Table: business_setup_tunnel_runs (RLS: admin/founder only).
 // ---------------------------------------------------------------------------
@@ -212,6 +241,7 @@ type RemoteRow = {
   steps_json: any;
   missing_context_json: any;
   safety_warnings_json: any;
+  module_connections_json?: any;
   created_at: string;
   updated_at: string;
 };
@@ -219,11 +249,14 @@ type RemoteRow = {
 function rowToState(r: RemoteRow): TunnelState {
   const steps = (r.steps_json && typeof r.steps_json === "object") ? r.steps_json as Record<StepKey, StepState> : ({} as Record<StepKey, StepState>);
   for (const s of TUNNEL_STEPS) if (!steps[s.key]) steps[s.key] = emptyStep();
+  const moduleConnections = (r.module_connections_json && typeof r.module_connections_json === "object")
+    ? r.module_connections_json as ModuleConnections : {};
   return {
     businessId: r.business_id ?? `draft:${r.id}`,
     businessName: r.draft_business_name,
     isDraft: r.is_draft,
     steps,
+    moduleConnections,
     createdAt: r.created_at,
     updatedAt: r.updated_at,
   };
@@ -264,6 +297,7 @@ export async function saveRemote(state: TunnelState, counts: Record<StepKey, num
       steps_json: state.steps,
       missing_context_json: missing,
       safety_warnings_json: safety,
+      module_connections_json: state.moduleConnections ?? {},
     };
     const existingId = (existing as { id: string }[] | null)?.[0]?.id;
     if (existingId) {
@@ -292,4 +326,159 @@ export async function promoteDraftToBusiness(state: TunnelState): Promise<string
     if (error) return null;
     return (data as { id: string } | null)?.id ?? null;
   } catch { return null; }
+}
+
+// ---------------------------------------------------------------------------
+// Promote setup into Liftor modules (draft writes only).
+// Each area attempts a single safe insert into a known target table.
+// On RLS / missing columns / unavailable table, records a manual next action.
+// All writes are explicitly draft / not live / no external side effects.
+// ---------------------------------------------------------------------------
+
+type PromoteAttempt = {
+  area: ModuleAreaKey;
+  table: string;
+  payload: Record<string, unknown>;
+  note: string;
+};
+
+function buildAttempts(state: TunnelState): PromoteAttempt[] {
+  const bizId = state.businessId;
+  const bizName = state.businessName;
+  const today = new Date();
+  const periodStart = today.toISOString().slice(0, 10);
+  const periodEnd = new Date(today.getTime() + 30 * 86400 * 1000).toISOString().slice(0, 10);
+  return [
+    {
+      area: "marketing",
+      table: "marketing_campaign_briefs",
+      payload: {
+        business_id: bizId,
+        campaign_name: `${bizName} — setup-tunnel draft brief`,
+        campaign_type: "draft_from_setup_tunnel",
+        status: "draft",
+      },
+      note: "Draft marketing brief created. No publishing. Founder must edit & approve.",
+    },
+    {
+      area: "sales",
+      table: "outreach_campaign_drafts",
+      payload: {
+        business_id: bizId,
+        campaign_name: `${bizName} — setup-tunnel outreach draft`,
+        status: "draft",
+      },
+      note: "Draft outreach campaign created. Provider OFF. No sending until founder approval.",
+    },
+    {
+      area: "crm",
+      table: "__skip__",
+      payload: {},
+      note: "CRM wiring is manual: assign inbox + status in /founder/crm. No contacts auto-created.",
+    },
+    {
+      area: "support",
+      table: "customer_onboarding_plans",
+      payload: {
+        business_id: bizId,
+        plan_name: `${bizName} — setup-tunnel onboarding plan (draft)`,
+        status: "draft",
+      },
+      note: "Draft onboarding plan created. No customer emails sent.",
+    },
+    {
+      area: "operations",
+      table: "business_operating_runbooks",
+      payload: {
+        business_id: bizId,
+        runbook_key: `setup_tunnel_${bizId.slice(0, 8)}`,
+        runbook_name: `${bizName} — daily loop (setup tunnel draft)`,
+        runbook_type: "daily_operating_loop",
+        status: "draft",
+      },
+      note: "Draft daily operating runbook created. No cron / no auto-execution.",
+    },
+    {
+      area: "finance",
+      table: "cashflow_forecasts",
+      payload: {
+        business_id: bizId,
+        forecast_name: `${bizName} — setup-tunnel 30-day draft forecast`,
+        period_start: periodStart,
+        period_end: periodEnd,
+      },
+      note: "Draft 30-day cashflow forecast skeleton created. No invoicing triggered.",
+    },
+    {
+      area: "evidence",
+      table: "data_room_profiles",
+      payload: {
+        business_id: bizId,
+        data_room_name: `${bizName} — setup-tunnel data room profile (closed)`,
+        status: "closed",
+      },
+      note: "Data room profile registered as CLOSED. No external tokens issued.",
+    },
+    {
+      area: "exit",
+      table: "__skip__",
+      payload: {},
+      note: "Buyer warm-up stays quiet. Add buyer targets manually in /founder/portfolio-exit/buyer-warmup.",
+    },
+  ];
+}
+
+export async function promoteIntoLiftorModules(
+  state: TunnelState,
+): Promise<ModuleConnections> {
+  if (!isUuid(state.businessId)) {
+    throw new Error("Confirm the draft business first (must be a real businesses row).");
+  }
+  const attempts = buildAttempts(state);
+  const out: ModuleConnections = { ...(state.moduleConnections ?? {}) };
+  const nowIso = new Date().toISOString();
+  for (const a of attempts) {
+    if (a.table === "__skip__") {
+      out[a.area] = {
+        status: "manual_action_needed",
+        target_table: null,
+        draft_record_id: null,
+        note: a.note,
+        attempted_at: nowIso,
+      };
+      continue;
+    }
+    try {
+      const { data, error } = await (supabase.from(a.table as any) as any)
+        .insert(a.payload)
+        .select("id")
+        .single();
+      if (error) {
+        out[a.area] = {
+          status: "manual_action_needed",
+          target_table: a.table,
+          draft_record_id: null,
+          note: `Manual wiring needed in ${a.table}: ${error.message}`,
+          attempted_at: nowIso,
+        };
+      } else {
+        out[a.area] = {
+          status: "connected",
+          target_table: a.table,
+          draft_record_id: (data as { id?: string } | null)?.id ?? null,
+          note: a.note,
+          attempted_at: nowIso,
+        };
+      }
+    } catch (e: any) {
+      out[a.area] = {
+        status: "manual_action_needed",
+        target_table: a.table,
+        draft_record_id: null,
+        note: `Manual wiring needed in ${a.table}: ${e?.message ?? "table unavailable"}`,
+        attempted_at: nowIso,
+      };
+    }
+  }
+  return out;
 }

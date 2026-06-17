@@ -13,6 +13,8 @@ import {
   TUNNEL_STEPS, STEP_FIELDS, fieldCounts, load, save, listAll, newState,
   stepCompleteness, overallCompleteness, type TunnelState, type StepKey,
   loadRemote, saveRemote, listAllRemote, promoteDraftToBusiness,
+  promoteIntoLiftorModules as runPromoteIntoLiftorModules,
+  MODULE_AREAS, type ModuleConnections,
 } from "@/lib/businessSetupTunnel";
 
 type BusinessRow = { id: string; name: string };
@@ -118,18 +120,25 @@ export default function BusinessSetupTunnel() {
       toast.error("Confirm the draft business first (creates a real businesses row).");
       return;
     }
-    const notes: string[] = [];
-    const tryUpsert = async (table: string, payload: Record<string, unknown>) => {
-      try {
-        const { error } = await (supabase.from(table as any) as any).insert(payload);
-        if (error) notes.push(`${table}: manual next action — ${error.message}`);
-      } catch (e: any) { notes.push(`${table}: manual next action — ${e?.message ?? "table unavailable"}`); }
-    };
-    await tryUpsert("business_activation_profiles", { business_id: state.businessId, status: "draft", stage: "setup_tunnel" });
-    await tryUpsert("business_onboarding_factory_runs", { business_id: state.businessId, status: "draft" });
-    await tryUpsert("business_runtime_activation", { business_id: state.businessId, runtime_mode: "simulation", is_live: false });
-    if (notes.length) toast.warning(`Promoted with notes: ${notes.length} manual next actions logged.`);
-    else toast.success("Promoted to Liftor modules as drafts only. Nothing live.");
+    try {
+      // Legacy three (unchanged) — keep activation spine bootstrapped.
+      const bootstrap = async (table: string, payload: Record<string, unknown>) => {
+        try { await (supabase.from(table as any) as any).insert(payload); } catch { /* tolerated */ }
+      };
+      await bootstrap("business_activation_profiles", { business_id: state.businessId, status: "draft", stage: "setup_tunnel" });
+      await bootstrap("business_onboarding_factory_runs", { business_id: state.businessId, status: "draft" });
+      await bootstrap("business_runtime_activation", { business_id: state.businessId, runtime_mode: "simulation", is_live: false });
+
+      const moduleConnections = await runPromoteIntoLiftorModules(state);
+      const next: TunnelState = { ...state, moduleConnections };
+      setState(next); save(next);
+      await saveRemote(next, counts);
+      const connected = Object.values(moduleConnections).filter((c) => c?.status === "connected").length;
+      const manual = Object.values(moduleConnections).filter((c) => c?.status === "manual_action_needed").length;
+      toast.success(`Promoted as drafts only. ${connected} connected, ${manual} need manual wiring. Nothing live.`);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Promotion failed.");
+    }
   }
 
   // ---------- No business selected ----------
@@ -339,6 +348,28 @@ export default function BusinessSetupTunnel() {
               Promote into Liftor modules (drafts only)
             </Button>
             {state.isDraft && <p className="text-amber-500">Disabled until the draft business is confirmed.</p>}
+
+            <div className="pt-3 border-t border-border/40 space-y-2">
+              <div className="text-foreground font-medium">Module connections</div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {MODULE_AREAS.map((a) => {
+                  const c = state.moduleConnections?.[a.key];
+                  const status = c?.status ?? "not_attempted";
+                  const color = status === "connected" ? "text-emerald-500"
+                    : status === "manual_action_needed" ? "text-amber-500" : "text-muted-foreground";
+                  return (
+                    <div key={a.key} className="border border-border/40 rounded p-2">
+                      <div className="flex items-center justify-between">
+                        <div className="font-medium text-foreground">{a.label}</div>
+                        <span className={`text-[10px] uppercase ${color}`}>{status.replace(/_/g, " ")}</span>
+                      </div>
+                      <div className="text-[11px]">{c?.note ?? "Not attempted yet — run promote."}</div>
+                      {c?.target_table && <div className="text-[10px] text-muted-foreground">target: {c.target_table}{c.draft_record_id ? ` · #${c.draft_record_id.slice(0, 8)}` : ""}</div>}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
