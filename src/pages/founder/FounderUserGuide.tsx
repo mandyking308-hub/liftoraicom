@@ -62,7 +62,7 @@ const SECTIONS: { title: string; body: string[] }[] = [
   ]},
   { title: "First 10 clicks for tomorrow", body: [
     "1. /founder/start-here", "2. /founder/command-centre", "3. /founder/runtime-mode",
-    "4. /founder/business-activation", "5. /founder/start-here/setup-business",
+    "4. /founder/business-activation", "5. /founder/business-setup-tunnel",
     "6. /founder/business-onboarding-factory", "7. /founder/starter-pack-materialiser",
     "8. /founder/monday-readiness", "9. /founder/data-room",
     "10. /founder/portfolio-exit/buyer-warmup",
