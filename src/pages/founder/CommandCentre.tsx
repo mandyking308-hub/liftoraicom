@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import FounderLayout from "@/components/founder/FounderLayout";
 import StartHereCard from "@/components/founder/command/StartHereCard";
+import MoneyOvernightCard from "@/components/founder/command/MoneyOvernightCard";
 import AIUsageMiniWidget from "@/components/founder/ai/AIUsageMiniWidget";
 import AIRuntimeHealthMiniCard from "@/components/founder/ai/AIRuntimeHealthMiniCard";
 import AIPromptReuseWidget from "@/components/founder/ai/AIPromptReuseWidget";
@@ -808,6 +809,7 @@ const CommandCentre = () => {
     <FounderLayout>
       <CommandCentreViewModeBar />
       <StartHereCard />
+      <MoneyOvernightCard />
       <StartUsingLiftorNote />
       <FounderCockpit />
       <div className="max-w-7xl mx-auto px-4 pt-4"><ControlFabricCard /></div>

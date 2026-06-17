@@ -134,6 +134,15 @@ serve(async (req) => {
         .limit(50) as any,
     );
 
+    // Commercial (money / sales target / pace) context — best-effort
+    const [salesTargets, paceCalcs, revenueEvents30d, dailySnaps, stripeWebhookCount] = await Promise.all([
+      safe(supabase.from("business_sales_targets").select("business_id, draft_business_name, currency, target_monthly_revenue, target_annual_revenue, target_mrr, target_arr, average_order_value, subscription_price, conversion_rate, churn_rate, commercial_stage, founder_approval_required").limit(100) as any),
+      safe(supabase.from("business_sales_pace_calculations").select("business_id, sales_needed_month, sales_needed_week, sales_needed_day, leads_needed_month, leads_needed_week, leads_needed_day, revenue_gap, current_month_revenue, current_mrr, current_arr, pace_status, recommended_daily_action, calculated_at").order("calculated_at", { ascending: false }).limit(100) as any),
+      safe(supabase.from("business_revenue_events").select("business_id, event_type, amount, currency, occurred_at").gte("occurred_at", new Date(Date.now() - 30 * 86400000).toISOString()).limit(500) as any),
+      safe(supabase.from("business_commercial_daily_snapshots").select("business_id, snapshot_date, revenue_today, revenue_yesterday, revenue_month_to_date, mrr, arr, failed_payments, pace_status, recommended_focus").order("snapshot_date", { ascending: false }).limit(60) as any),
+      safeCount("stripe_webhook_events"),
+    ]);
+
     const liftorContext = {
       businesses: businesses || [],
       activation_profiles: activationProfiles || [],
@@ -159,6 +168,11 @@ serve(async (req) => {
       buyer_warm_up_actions: buyerWarmActions || [],
       exit_intelligence_profiles: exitProfiles || [],
       setup_tunnel_runs: tunnelRuns || [],
+      sales_targets: salesTargets || [],
+      pace_calcs: paceCalcs || [],
+      revenue_events_30d: revenueEvents30d || [],
+      commercial_daily_snapshots: dailySnaps || [],
+      stripe_webhook_event_count: stripeWebhookCount ?? 0,
     };
 
     const platformContext = JSON.stringify({
@@ -237,7 +251,23 @@ KNOWN QUESTIONS YOU SHOULD ANSWER WELL:
       `- "Is evidence / data room connected?" → module_connections_json.evidence.status (data room stays CLOSED — no tokens issued).\n` +
       `- "Is buyer warm-up connected?" → module_connections_json.exit.status (buyer warm-up stays quiet — manual targets only).\n` +
       `Canonical routes: setup tunnel /founder/business-setup-tunnel, daily operator /founder/daily-operator, buyer warm-up /founder/portfolio-exit/buyer-warmup, finance /founder/finance, marketing /founder/marketing.`;
-    const finalSystemPrompt = systemPrompt + tunnelHints;
+
+    const moneyHints = `\n\nCOMMERCIAL / MONEY DATA (canonical money view at /founder/money):\n` +
+      `- "How much money did we make last night?" → sum revenue_events_30d.amount where event_type in (payment_succeeded,subscription_created,subscription_renewed,invoice_paid) and occurred_at within the last calendar day before today.\n` +
+      `- "How much revenue this month?" → sum the same revenue-bearing events with occurred_at >= start of current month, or pace_calcs.current_month_revenue.\n` +
+      `- "MRR / ARR?" → most recent pace_calcs.current_mrr/current_arr per business; fall back to summing subscription_created+renewed amounts over 30d for MRR; ARR = MRR*12.\n` +
+      `- "How many subscriptions went through?" → count revenue_events_30d.event_type in (subscription_created,subscription_renewed).\n` +
+      `- "How many failed payments?" → count event_type in (subscription_failed,invoice_failed).\n` +
+      `- "Which business is behind target?" → pace_calcs where pace_status='behind'.\n` +
+      `- "What pace should X go at today?" → pace_calcs.recommended_daily_action for that business, plus leads_needed_day and sales_needed_day.\n` +
+      `- "How many leads do we need this week?" → pace_calcs.leads_needed_week.\n` +
+      `- "How many sales do we need this month?" → pace_calcs.sales_needed_month.\n` +
+      `- "What is the revenue gap?" → pace_calcs.revenue_gap.\n` +
+      `- "Are we ready to send or only draft?" → sales_targets.founder_approval_required=true means drafts only; sending is blocked until founder approval AND provider activation.\n` +
+      `- If sales_targets is empty for a business, instruct the founder to open /founder/business-setup-tunnel step "Sales target & revenue pace" and click "Save target & calculate pace".\n` +
+      `- If stripe_webhook_event_count=0, the Stripe / payment feed is not connected. Tell the founder Liftor will not fake revenue; manual events can be logged at /founder/money.\n`;
+
+    const finalSystemPrompt = systemPrompt + tunnelHints + moneyHints;
 
     const __gwInput = {
       action_type: "founder_copilot_stream",

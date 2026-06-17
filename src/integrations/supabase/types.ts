@@ -7458,6 +7458,80 @@ export type Database = {
         }
         Relationships: []
       }
+      business_commercial_daily_snapshots: {
+        Row: {
+          active_customers: number
+          arr: number
+          business_id: string | null
+          churned_subscriptions: number
+          created_at: string
+          failed_payments: number
+          id: string
+          leads_created: number
+          mrr: number
+          new_subscriptions: number
+          pace_status: string
+          recommended_focus: string | null
+          refunds: number
+          renewed_subscriptions: number
+          revenue_month_to_date: number
+          revenue_today: number
+          revenue_yesterday: number
+          sales_closed: number
+          snapshot_date: string
+        }
+        Insert: {
+          active_customers?: number
+          arr?: number
+          business_id?: string | null
+          churned_subscriptions?: number
+          created_at?: string
+          failed_payments?: number
+          id?: string
+          leads_created?: number
+          mrr?: number
+          new_subscriptions?: number
+          pace_status?: string
+          recommended_focus?: string | null
+          refunds?: number
+          renewed_subscriptions?: number
+          revenue_month_to_date?: number
+          revenue_today?: number
+          revenue_yesterday?: number
+          sales_closed?: number
+          snapshot_date?: string
+        }
+        Update: {
+          active_customers?: number
+          arr?: number
+          business_id?: string | null
+          churned_subscriptions?: number
+          created_at?: string
+          failed_payments?: number
+          id?: string
+          leads_created?: number
+          mrr?: number
+          new_subscriptions?: number
+          pace_status?: string
+          recommended_focus?: string | null
+          refunds?: number
+          renewed_subscriptions?: number
+          revenue_month_to_date?: number
+          revenue_today?: number
+          revenue_yesterday?: number
+          sales_closed?: number
+          snapshot_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_commercial_daily_snapshots_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_compliance_profiles: {
         Row: {
           business_id: string
@@ -11028,6 +11102,62 @@ export type Database = {
           },
         ]
       }
+      business_revenue_events: {
+        Row: {
+          amount: number
+          business_id: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          customer_reference: string | null
+          event_type: string
+          external_event_id: string | null
+          id: string
+          occurred_at: string
+          raw_json: Json
+          source: string
+          subscription_reference: string | null
+        }
+        Insert: {
+          amount?: number
+          business_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          customer_reference?: string | null
+          event_type: string
+          external_event_id?: string | null
+          id?: string
+          occurred_at?: string
+          raw_json?: Json
+          source?: string
+          subscription_reference?: string | null
+        }
+        Update: {
+          amount?: number
+          business_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          customer_reference?: string | null
+          event_type?: string
+          external_event_id?: string | null
+          id?: string
+          occurred_at?: string
+          raw_json?: Json
+          source?: string
+          subscription_reference?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_revenue_events_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_revenue_targets: {
         Row: {
           business_id: string | null
@@ -11222,6 +11352,188 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "business_runtime_activation_log_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_sales_pace_calculations: {
+        Row: {
+          business_id: string | null
+          calculated_at: string
+          created_at: string
+          current_arr: number
+          current_month_revenue: number
+          current_mrr: number
+          draft_business_name: string | null
+          id: string
+          leads_needed_day: number
+          leads_needed_month: number
+          leads_needed_week: number
+          pace_status: string
+          projected_arr: number
+          projected_mrr: number
+          recommended_daily_action: string | null
+          revenue_gap: number
+          sales_needed_day: number
+          sales_needed_month: number
+          sales_needed_week: number
+          sales_target_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          calculated_at?: string
+          created_at?: string
+          current_arr?: number
+          current_month_revenue?: number
+          current_mrr?: number
+          draft_business_name?: string | null
+          id?: string
+          leads_needed_day?: number
+          leads_needed_month?: number
+          leads_needed_week?: number
+          pace_status?: string
+          projected_arr?: number
+          projected_mrr?: number
+          recommended_daily_action?: string | null
+          revenue_gap?: number
+          sales_needed_day?: number
+          sales_needed_month?: number
+          sales_needed_week?: number
+          sales_target_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          calculated_at?: string
+          created_at?: string
+          current_arr?: number
+          current_month_revenue?: number
+          current_mrr?: number
+          draft_business_name?: string | null
+          id?: string
+          leads_needed_day?: number
+          leads_needed_month?: number
+          leads_needed_week?: number
+          pace_status?: string
+          projected_arr?: number
+          projected_mrr?: number
+          recommended_daily_action?: string | null
+          revenue_gap?: number
+          sales_needed_day?: number
+          sales_needed_month?: number
+          sales_needed_week?: number
+          sales_target_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_sales_pace_calculations_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_sales_pace_calculations_sales_target_id_fkey"
+            columns: ["sales_target_id"]
+            isOneToOne: false
+            referencedRelation: "business_sales_targets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_sales_targets: {
+        Row: {
+          average_order_value: number
+          business_id: string | null
+          call_to_sale_rate: number
+          churn_rate: number
+          commercial_stage: string
+          conversion_rate: number
+          created_at: string
+          created_by: string | null
+          currency: string
+          draft_business_name: string | null
+          founder_approval_required: boolean
+          gross_margin: number
+          id: string
+          lead_to_call_rate: number
+          max_safe_outreach_per_day: number
+          notes: string | null
+          sales_cycle_days: number
+          subscription_price: number
+          target_annual_revenue: number
+          target_arr: number
+          target_first_10k_month_date: string | null
+          target_first_1k_date: string | null
+          target_first_sale_date: string | null
+          target_monthly_revenue: number
+          target_mrr: number
+          updated_at: string
+        }
+        Insert: {
+          average_order_value?: number
+          business_id?: string | null
+          call_to_sale_rate?: number
+          churn_rate?: number
+          commercial_stage?: string
+          conversion_rate?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          draft_business_name?: string | null
+          founder_approval_required?: boolean
+          gross_margin?: number
+          id?: string
+          lead_to_call_rate?: number
+          max_safe_outreach_per_day?: number
+          notes?: string | null
+          sales_cycle_days?: number
+          subscription_price?: number
+          target_annual_revenue?: number
+          target_arr?: number
+          target_first_10k_month_date?: string | null
+          target_first_1k_date?: string | null
+          target_first_sale_date?: string | null
+          target_monthly_revenue?: number
+          target_mrr?: number
+          updated_at?: string
+        }
+        Update: {
+          average_order_value?: number
+          business_id?: string | null
+          call_to_sale_rate?: number
+          churn_rate?: number
+          commercial_stage?: string
+          conversion_rate?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          draft_business_name?: string | null
+          founder_approval_required?: boolean
+          gross_margin?: number
+          id?: string
+          lead_to_call_rate?: number
+          max_safe_outreach_per_day?: number
+          notes?: string | null
+          sales_cycle_days?: number
+          subscription_price?: number
+          target_annual_revenue?: number
+          target_arr?: number
+          target_first_10k_month_date?: string | null
+          target_first_1k_date?: string | null
+          target_first_sale_date?: string | null
+          target_monthly_revenue?: number
+          target_mrr?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_sales_targets_business_id_fkey"
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
