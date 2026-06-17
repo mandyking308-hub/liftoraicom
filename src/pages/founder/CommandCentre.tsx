@@ -809,6 +809,7 @@ const CommandCentre = () => {
     <FounderLayout>
       <CommandCentreViewModeBar />
       <StartHereCard />
+      <MoneyOvernightCard />
       <StartUsingLiftorNote />
       <FounderCockpit />
       <div className="max-w-7xl mx-auto px-4 pt-4"><ControlFabricCard /></div>

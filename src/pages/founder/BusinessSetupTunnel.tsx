@@ -16,6 +16,10 @@ import {
   promoteIntoLiftorModules as runPromoteIntoLiftorModules,
   MODULE_AREAS, type ModuleConnections,
 } from "@/lib/businessSetupTunnel";
+import {
+  calculatePace, saveSalesTarget, savePaceCalculation, loadCurrentRevenueRollup,
+  type SalesTargetInput,
+} from "@/lib/commercialPace";
 
 type BusinessRow = { id: string; name: string };
 
