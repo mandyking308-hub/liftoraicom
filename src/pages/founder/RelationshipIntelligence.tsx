@@ -307,6 +307,9 @@ export default function RelationshipIntelligence() {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={exportCsv}><Download className="h-4 w-4 mr-1" /> Export CSV</Button>
+          <Button variant="outline" size="sm" asChild>
+            <a href="/founder/relationship-intelligence/import"><Upload className="h-4 w-4 mr-1" /> Workbook upsert import</a>
+          </Button>
           <Button variant="outline" size="sm" onClick={() => seed.mutate()} disabled={seed.isPending}>
             <Sprout className="h-4 w-4 mr-1" /> {seed.isPending ? "Seeding…" : "Seed first relationship batch"}
           </Button>
