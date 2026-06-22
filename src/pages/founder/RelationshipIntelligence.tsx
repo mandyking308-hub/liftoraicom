@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "@/hooks/use-toast";
-import { Network, Plus, Download, ShieldAlert, Lock, Pause, CheckCircle2, FileSignature } from "lucide-react";
+import { Network, Plus, Download, ShieldAlert, Lock, Pause, CheckCircle2, FileSignature, Upload } from "lucide-react";
 import { Sprout } from "lucide-react";
 import { RELATIONSHIP_SEED } from "./relationshipIntelligenceSeed";
 import CapitalInfluenceTab, {
