@@ -48026,6 +48026,137 @@ export type Database = {
           },
         ]
       }
+      relationship_intelligence_import_audit: {
+        Row: {
+          actual_totals: Json
+          blocked_duplicates: number
+          committed_by: string | null
+          control_totals_match: boolean
+          created_at: string
+          created_count: number
+          details: Json
+          expected_totals: Json
+          held_count: number
+          id: string
+          missing_email: number
+          missing_phone: number
+          missing_website: number
+          skipped_count: number
+          source_pack: string | null
+          total_rows: number
+          updated_count: number
+          workbook_name: string
+        }
+        Insert: {
+          actual_totals?: Json
+          blocked_duplicates?: number
+          committed_by?: string | null
+          control_totals_match?: boolean
+          created_at?: string
+          created_count?: number
+          details?: Json
+          expected_totals?: Json
+          held_count?: number
+          id?: string
+          missing_email?: number
+          missing_phone?: number
+          missing_website?: number
+          skipped_count?: number
+          source_pack?: string | null
+          total_rows?: number
+          updated_count?: number
+          workbook_name: string
+        }
+        Update: {
+          actual_totals?: Json
+          blocked_duplicates?: number
+          committed_by?: string | null
+          control_totals_match?: boolean
+          created_at?: string
+          created_count?: number
+          details?: Json
+          expected_totals?: Json
+          held_count?: number
+          id?: string
+          missing_email?: number
+          missing_phone?: number
+          missing_website?: number
+          skipped_count?: number
+          source_pack?: string | null
+          total_rows?: number
+          updated_count?: number
+          workbook_name?: string
+        }
+        Relationships: []
+      }
+      relationship_intelligence_import_holds: {
+        Row: {
+          contact_name: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          organisation: string | null
+          phone: string | null
+          preferred_email: string | null
+          raw_row: Json
+          reason: string
+          resolved_at: string | null
+          resolved_by: string | null
+          resolved_contact_id: string | null
+          source_pack: string | null
+          status: string
+          updated_at: string
+          website: string | null
+          workbook_name: string
+        }
+        Insert: {
+          contact_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organisation?: string | null
+          phone?: string | null
+          preferred_email?: string | null
+          raw_row?: Json
+          reason?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          resolved_contact_id?: string | null
+          source_pack?: string | null
+          status?: string
+          updated_at?: string
+          website?: string | null
+          workbook_name: string
+        }
+        Update: {
+          contact_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organisation?: string | null
+          phone?: string | null
+          preferred_email?: string | null
+          raw_row?: Json
+          reason?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          resolved_contact_id?: string | null
+          source_pack?: string | null
+          status?: string
+          updated_at?: string
+          website?: string | null
+          workbook_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "relationship_intelligence_import_holds_resolved_contact_id_fkey"
+            columns: ["resolved_contact_id"]
+            isOneToOne: false
+            referencedRelation: "relationship_intelligence_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       relationship_opportunities: {
         Row: {
           approval_required: boolean
