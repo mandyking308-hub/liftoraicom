@@ -124,6 +124,7 @@ import DailyOperator from "./pages/founder/DailyOperator";
 import FounderMoney from "./pages/founder/FounderMoney";
 import VideoSopFactoryPage from "./pages/founder/VideoSopFactory";
 import RelationshipIntelligencePage from "./pages/founder/RelationshipIntelligence";
+import RelationshipIntelligenceImport from "./pages/founder/RelationshipIntelligenceImport";
 import GlobalPrRadar from "./pages/founder/GlobalPrRadar";
 import VideoLibrary from "./pages/founder/VideoLibrary";
 import HealthcareOverlay from "./pages/founder/HealthcareOverlay";
