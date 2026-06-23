@@ -6,7 +6,6 @@ import HowItWorksSection from "@/components/home/HowItWorksSection";
 import ProblemSection from "@/components/home/ProblemSection";
 import WhatWeBuildSection from "@/components/home/WhatWeBuildSection";
 import SystemCredibilitySection from "@/components/home/SystemCredibilitySection";
-import ProcessSection from "@/components/home/ProcessSection";
 import PlatformSection from "@/components/home/PlatformSection";
 import BrainSection from "@/components/home/BrainSection";
 import ClientsSection from "@/components/home/ClientsSection";
@@ -25,7 +24,6 @@ const Index = () => (
       <ProblemSection />
       <WhatWeBuildSection />
       <SystemCredibilitySection />
-      <ProcessSection />
       <PlatformSection />
       <BrainSection />
       <ClientsSection />
