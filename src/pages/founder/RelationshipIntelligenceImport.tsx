@@ -11,7 +11,34 @@ import { toast } from "sonner";
 import { Upload, ArrowLeft, ShieldAlert, CheckCircle2, AlertTriangle, Lock } from "lucide-react";
 
 const TARGET_SHEET = "Lovable_Import_UPSERT";
-const EXPECTED = { total_rows: 84, create_new: 36, update_existing: 45, review_hold: 3, emails: 81, phones: 64, websites: 81 };
+
+interface ImportPreset {
+  id: string;
+  label: string;
+  workbook_name: string;
+  source_pack: string;
+  totals: { total_rows: number; create_new: number; update_existing: number; review_hold: number; emails: number; phones: number; websites: number };
+  match_filename?: RegExp;
+}
+
+const PRESETS: ImportPreset[] = [
+  {
+    id: "missed_contacts_29may_29jun_2026",
+    label: "Missed contacts 29 May → 29 Jun 2026 (LOCKED)",
+    workbook_name: "Liftor_RI_MISSED_CONTACTS_29MAY-29JUN_2026_FINAL_LOCKED.xlsx",
+    source_pack: "gmail_monthly_backfill_2026_05_29_to_2026_06_29",
+    totals: { total_rows: 90, create_new: 87, update_existing: 0, review_hold: 3, emails: 87, phones: 27, websites: 88 },
+    match_filename: /MISSED_CONTACTS_29MAY[-_]?29JUN_2026/i,
+  },
+  {
+    id: "weekly_15_22_jun_2026",
+    label: "Weekly sweep 15 → 22 Jun 2026",
+    workbook_name: "Liftor_RI_UPSERT_15-22_JUN_2026_FINAL.xlsx",
+    source_pack: "gmail_weekly_sweep_2026_06_15_to_2026_06_22",
+    totals: { total_rows: 84, create_new: 36, update_existing: 45, review_hold: 3, emails: 81, phones: 64, websites: 81 },
+    match_filename: /UPSERT_15[-_]?22_JUN_2026/i,
+  },
+];
 
 type Action = "CREATE_NEW" | "UPDATE_EXISTING" | "REVIEW_HOLD_NO_UNIQUE_EMAIL";
 
@@ -106,8 +133,11 @@ function resolvedBadge(r: string) {
 export default function RelationshipIntelligenceImport() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [rows, setRows] = useState<InRow[]>([]);
-  const [workbookName, setWorkbookName] = useState("Liftor_RI_UPSERT_15-22_JUN_2026_FINAL.xlsx");
-  const [sourcePack, setSourcePack] = useState("gmail_weekly_sweep_2026_06_15_to_2026_06_22");
+  const [presetId, setPresetId] = useState<string>(PRESETS[0].id);
+  const preset = PRESETS.find((p) => p.id === presetId) ?? PRESETS[0];
+  const EXPECTED = preset.totals;
+  const [workbookName, setWorkbookName] = useState(PRESETS[0].workbook_name);
+  const [sourcePack, setSourcePack] = useState(PRESETS[0].source_pack);
   const [previewing, setPreviewing] = useState(false);
   const [committing, setCommitting] = useState(false);
   const [plan, setPlan] = useState<any[] | null>(null);
@@ -139,13 +169,18 @@ export default function RelationshipIntelligenceImport() {
       phones: localTotals.phones === EXPECTED.phones,
       websites: localTotals.websites === EXPECTED.websites,
     };
-  }, [localTotals]);
+  }, [localTotals, EXPECTED]);
   const allTotalsMatch = Object.values(totalsCheck).every(Boolean);
 
   async function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
     if (!f) return;
     setWorkbookName(f.name);
+    const detected = PRESETS.find((p) => p.match_filename?.test(f.name));
+    if (detected) {
+      setPresetId(detected.id);
+      setSourcePack(detected.source_pack);
+    }
     try {
       const buf = await f.arrayBuffer();
       const wb = XLSX.read(buf, { type: "array" });
@@ -248,6 +283,23 @@ export default function RelationshipIntelligenceImport() {
             <div className="space-y-1">
               <Label htmlFor="xlsx">.xlsx file (uses sheet <code>{TARGET_SHEET}</code>)</Label>
               <Input id="xlsx" ref={fileRef} type="file" accept=".xlsx" onChange={onFileChange} />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="preset">Control-totals preset</Label>
+              <select
+                id="preset"
+                className="w-full bg-background border border-border/50 rounded px-2 py-1 text-xs"
+                value={presetId}
+                onChange={(e) => {
+                  const p = PRESETS.find((x) => x.id === e.target.value);
+                  if (p) { setPresetId(p.id); setSourcePack(p.source_pack); setWorkbookName((n) => n || p.workbook_name); }
+                }}
+              >
+                {PRESETS.map((p) => (
+                  <option key={p.id} value={p.id}>{p.label}</option>
+                ))}
+              </select>
+              <p className="text-[10px] text-muted-foreground">Expected: {EXPECTED.total_rows} rows · {EXPECTED.create_new} create · {EXPECTED.update_existing} update · {EXPECTED.review_hold} hold.</p>
             </div>
           </CardContent>
         </Card>
