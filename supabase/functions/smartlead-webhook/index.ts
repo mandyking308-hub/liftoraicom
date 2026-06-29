@@ -64,12 +64,10 @@ Deno.serve(async (req) => {
   const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const SECRET = Deno.env.get("SMARTLEAD_WEBHOOK_SECRET") ?? null;
 
-  // Verify shared secret if configured (header or query). Never echo it.
-  const url = new URL(req.url);
+  // Verify shared secret if configured (headers only — never accept secret in URL). Never echo it.
   const provided =
     req.headers.get("x-smartlead-signature") ??
     req.headers.get("x-webhook-secret") ??
-    url.searchParams.get("secret") ??
     null;
 
   if (SECRET && SECRET.length > 0) {

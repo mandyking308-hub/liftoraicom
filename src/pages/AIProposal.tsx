@@ -17,15 +17,18 @@ import SystemCredibilitySection from "@/components/home/SystemCredibilitySection
 const generateProposalPDF = (form: FormData, proposal: Proposal) => {
   const date = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 
+  const esc = (s: unknown): string =>
+    String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
+
   const archList = (proposal.architecture_components || [])
-    .map((c) => `<tr><td style="padding:6px 12px;border:1px solid #e2e8f0;font-size:13px;">${c.name}</td><td style="padding:6px 12px;border:1px solid #e2e8f0;font-size:13px;text-transform:capitalize;">${c.type}</td></tr>`)
+    .map((c) => `<tr><td style="padding:6px 12px;border:1px solid #e2e8f0;font-size:13px;">${esc(c.name)}</td><td style="padding:6px 12px;border:1px solid #e2e8f0;font-size:13px;text-transform:capitalize;">${esc(c.type)}</td></tr>`)
     .join("");
 
   const costRows = (proposal.estimated_cost_breakdown || [])
-    .map((c) => `<tr><td style="padding:6px 12px;border:1px solid #e2e8f0;font-size:13px;">${c.category}</td><td style="padding:6px 12px;border:1px solid #e2e8f0;font-size:13px;text-align:right;">${c.estimate}</td></tr>`)
+    .map((c) => `<tr><td style="padding:6px 12px;border:1px solid #e2e8f0;font-size:13px;">${esc(c.category)}</td><td style="padding:6px 12px;border:1px solid #e2e8f0;font-size:13px;text-align:right;">${esc(c.estimate)}</td></tr>`)
     .join("");
 
-  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>AI System Proposal – ${form.companyName}</title>
+  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>AI System Proposal – ${esc(form.companyName)}</title>
 <style>
   @page { margin: 30mm 20mm; }
   body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #1e293b; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 40px; }
@@ -62,24 +65,24 @@ const generateProposalPDF = (form: FormData, proposal: Proposal) => {
   <h1>AI System Proposal</h1>
   <p class="subtitle">Prepared by Liftor AI</p>
   <div class="meta">
-    <span>${date}</span>
-    <span>${form.industry} · ${form.projectTypes.join(", ")}</span>
-    <span>${form.companyName}</span>
+    <span>${esc(date)}</span>
+    <span>${esc(form.industry)} · ${esc((form.projectTypes || []).join(", "))}</span>
+    <span>${esc(form.companyName)}</span>
   </div>
 </div>
 
 <h2>1. Executive Summary</h2>
-<p>${proposal.suggested_solution}</p>
+<p>${esc(proposal.suggested_solution)}</p>
 
 <h2>2. System Architecture Overview</h2>
 <p>The proposed system comprises the following major components:</p>
 ${archList ? `<table><thead><tr><th>Component</th><th>Type</th></tr></thead><tbody>${archList}</tbody></table>` : "<p>Architecture details will be defined during technical discovery.</p>"}
 
 <h2>3. Implementation Scope</h2>
-<p>${proposal.estimated_scope}</p>
+<p>${esc(proposal.estimated_scope)}</p>
 
 <h2>4. Implementation Timeline</h2>
-<p><strong>Estimated Timeline:</strong> ${proposal.estimated_timeline}</p>
+<p><strong>Estimated Timeline:</strong> ${esc(proposal.estimated_timeline)}</p>
 <p>The implementation will follow structured phases:</p>
 <ul>
   <li><strong>Phase 1:</strong> Architecture Design & Technical Discovery</li>
@@ -92,7 +95,7 @@ ${proposal.estimated_cost_range ? `
 <h2>5. Estimated Investment</h2>
 <div class="highlight-box">
   <p style="font-size:12px;color:#64748b;margin:0;">Total Estimated Investment</p>
-  <p class="big">${proposal.estimated_cost_range}</p>
+  <p class="big">${esc(proposal.estimated_cost_range)}</p>
 </div>
 ${costRows ? `<table><thead><tr><th>Category</th><th style="text-align:right;">Estimate</th></tr></thead><tbody>${costRows}</tbody></table>` : ""}
 <p style="font-size:11px;color:#94a3b8;">Investment estimates are indicative and depend on system complexity, integrations, and deployment scale.</p>
@@ -101,17 +104,17 @@ ${costRows ? `<table><thead><tr><th>Category</th><th style="text-align:right;">E
 ${proposal.estimated_annual_savings ? `
 <h2>6. Projected Business Impact</h2>
 <div class="roi-grid">
-  <div class="roi-card"><p class="label">Annual Operational Savings</p><p class="value">${proposal.estimated_annual_savings}</p></div>
-  <div class="roi-card"><p class="label">Return on Investment</p><p class="value">${proposal.estimated_roi_period}</p></div>
-  <div class="roi-card"><p class="label">Productivity Improvement</p><p class="value">${proposal.estimated_productivity_gain}</p></div>
+  <div class="roi-card"><p class="label">Annual Operational Savings</p><p class="value">${esc(proposal.estimated_annual_savings)}</p></div>
+  <div class="roi-card"><p class="label">Return on Investment</p><p class="value">${esc(proposal.estimated_roi_period)}</p></div>
+  <div class="roi-card"><p class="label">Productivity Improvement</p><p class="value">${esc(proposal.estimated_productivity_gain)}</p></div>
 </div>
 <h3>Strategic Impact</h3>
-<p>${proposal.estimated_roi_summary}</p>
+<p>${esc(proposal.estimated_roi_summary)}</p>
 ${proposal.estimated_cost_range ? `
 <div class="vs-bar">
-  <div><p style="font-size:11px;color:#64748b;margin:0 0 4px;">Investment</p><p style="font-size:14px;font-weight:600;margin:0;">${proposal.estimated_cost_range}</p></div>
+  <div><p style="font-size:11px;color:#64748b;margin:0 0 4px;">Investment</p><p style="font-size:14px;font-weight:600;margin:0;">${esc(proposal.estimated_cost_range)}</p></div>
   <div class="arrow">→</div>
-  <div><p style="font-size:11px;color:#64748b;margin:0 0 4px;">Expected Annual Savings</p><p style="font-size:14px;font-weight:600;color:#166534;margin:0;">${proposal.estimated_annual_savings}</p></div>
+  <div><p style="font-size:11px;color:#64748b;margin:0 0 4px;">Expected Annual Savings</p><p style="font-size:14px;font-weight:600;color:#166534;margin:0;">${esc(proposal.estimated_annual_savings)}</p></div>
 </div>` : ""}
 ` : ""}
 
