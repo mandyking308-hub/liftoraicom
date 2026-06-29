@@ -284,6 +284,23 @@ export default function RelationshipIntelligenceImport() {
               <Label htmlFor="xlsx">.xlsx file (uses sheet <code>{TARGET_SHEET}</code>)</Label>
               <Input id="xlsx" ref={fileRef} type="file" accept=".xlsx" onChange={onFileChange} />
             </div>
+            <div className="space-y-1">
+              <Label htmlFor="preset">Control-totals preset</Label>
+              <select
+                id="preset"
+                className="w-full bg-background border border-border/50 rounded px-2 py-1 text-xs"
+                value={presetId}
+                onChange={(e) => {
+                  const p = PRESETS.find((x) => x.id === e.target.value);
+                  if (p) { setPresetId(p.id); setSourcePack(p.source_pack); setWorkbookName((n) => n || p.workbook_name); }
+                }}
+              >
+                {PRESETS.map((p) => (
+                  <option key={p.id} value={p.id}>{p.label}</option>
+                ))}
+              </select>
+              <p className="text-[10px] text-muted-foreground">Expected: {EXPECTED.total_rows} rows · {EXPECTED.create_new} create · {EXPECTED.update_existing} update · {EXPECTED.review_hold} hold.</p>
+            </div>
           </CardContent>
         </Card>
 
