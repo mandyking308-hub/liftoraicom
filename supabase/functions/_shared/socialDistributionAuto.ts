@@ -8,6 +8,7 @@
  * authorisation event, so no interactive confirmation phrase is required.
  */
 import { audit } from "./socialDistributionDb.ts";
+import { shouldAutoDispatch } from "./socialDistributionLogic.ts";
 import { loadContext, submitJob } from "./socialDistributionSubmit.ts";
 
 export interface AutoDispatchResult {
@@ -22,11 +23,7 @@ export interface AutoDispatchResult {
   job_ids: string[];
 }
 
-export function shouldAutoDispatch(policyMode: string, paused: boolean): { go: boolean; reason?: string } {
-  if (paused) return { go: false, reason: "emergency_pause_active" };
-  if (policyMode !== "approved_batch_autopilot") return { go: false, reason: `policy_${policyMode}` };
-  return { go: true };
-}
+export { shouldAutoDispatch };
 
 export async function autoDispatchApprovedBatch(
   admin: any,
