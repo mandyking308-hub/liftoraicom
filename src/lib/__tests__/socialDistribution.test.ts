@@ -154,3 +154,24 @@ describe("social distribution fabric", () => {
     expect(summariseStatuses([{ distribution_status: "scheduled" }, { distribution_status: "scheduled" }, {}]).scheduled).toBe(2);
   });
 });
+
+import { classifySubmissionOutcome, mapProviderStatus } from "../../../supabase/functions/_shared/socialDistributionLogic";
+
+describe("submission outcome + provider status mapping", () => {
+  it("only auto-retries provably safe failures", () => {
+    expect(classifySubmissionOutcome({ phase: "preflight", message: "bad input" }).retry_safe).toBe(true);
+    expect(classifySubmissionOutcome({ phase: "response", httpStatus: 429 })).toMatchObject({ retry_safe: true, ambiguous: false });
+    expect(classifySubmissionOutcome({ phase: "transport", message: "timeout" })).toMatchObject({ retry_safe: false, ambiguous: true, reason: "submission_unknown" });
+    expect(classifySubmissionOutcome({ phase: "response", httpStatus: 502 }).ambiguous).toBe(true);
+    expect(classifySubmissionOutcome({ phase: "response", httpStatus: 400, message: "invalid" })).toMatchObject({ retry_safe: true, error_class: "hard" });
+  });
+
+  it("maps only proven provider statuses and never infers", () => {
+    expect(mapProviderStatus("sent")).toBe("sent");
+    expect(mapProviderStatus("error")).toBe("failed");
+    expect(mapProviderStatus("scheduled")).toBe("scheduled");
+    expect(mapProviderStatus("draft")).toBeNull();
+    expect(mapProviderStatus("weird_new_status")).toBeNull();
+    expect(mapProviderStatus("")).toBeNull();
+  });
+});
