@@ -45,6 +45,7 @@ export interface AutoDispatchResult {
   failed: number;
   duplicate: number;
   unknown: number;
+  materialisation_blocked: number;
   job_ids: string[];
   materialisation_blockers?: Array<{ source_id: string; blockers: string[] }>;
 }
@@ -62,7 +63,8 @@ export async function autoDispatchApprovedBatch(
     publish_queue_batch_id: args.publish_queue_batch_id ?? null,
     approved_items: reviews.length,
     jobs_existing: 0, jobs_created: 0, jobs_eligible: 0,
-    submitted: 0, blocked: 0, failed: 0, duplicate: 0, unknown: 0, job_ids: [],
+    submitted: 0, blocked: 0, failed: 0, duplicate: 0, unknown: 0,
+    materialisation_blocked: 0, job_ids: [],
   };
 
   const ctx = await loadContext(admin, args.business_id, args.provider ?? "buffer");
@@ -98,6 +100,7 @@ export async function autoDispatchApprovedBatch(
     jobs = mat.jobs.filter((j: any) => !j.provider_post_id).slice(0, ctx.policy.max_batch_size);
     base.jobs_existing = mat.existing;
     base.jobs_created = mat.created;
+    base.materialisation_blocked = mat.blocked;
     materialisation_blockers = mat.blockers.length ? mat.blockers : undefined;
   } else {
     return { ...base, reason: "no_batch_scope", policy_mode: ctx.policy.mode };
@@ -106,6 +109,7 @@ export async function autoDispatchApprovedBatch(
   if (jobs.length === 0) {
     const out = {
       ...base, attempted: true, policy_mode: ctx.policy.mode,
+      blocked: base.materialisation_blocked,
       error: "no_publish_jobs_for_approved_items", materialisation_blockers,
     };
     await audit(admin, {
@@ -115,16 +119,18 @@ export async function autoDispatchApprovedBatch(
     return out;
   }
 
-  const results = [];
+  const results: any[] = [];
   for (const j of jobs) results.push(await submitJob(admin, args.business_id, j, ctx, false));
 
+  const ELIGIBLE_STATUSES = ["scheduled", "sent", "retrying", "dead_letter", "submission_unknown"];
   const out: AutoDispatchResult = {
     ...base,
     attempted: true,
     policy_mode: ctx.policy.mode,
-    jobs_eligible: results.filter((r: any) => r.status !== "blocked").length,
+    // Only real attempts count as eligible - duplicates/blocked never do.
+    jobs_eligible: results.filter((r: any) => ELIGIBLE_STATUSES.includes(r.status)).length,
     submitted: results.filter((r: any) => r.ok).length,
-    blocked: results.filter((r: any) => r.status === "blocked").length,
+    blocked: results.filter((r: any) => r.status === "blocked").length + base.materialisation_blocked,
     failed: results.filter((r: any) => r.status === "retrying" || r.status === "dead_letter").length,
     duplicate: results.filter((r: any) => r.status === "duplicate").length,
     unknown: results.filter((r: any) => r.status === "submission_unknown").length,

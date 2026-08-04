@@ -15,6 +15,7 @@ const { autoDispatchApprovedBatch } = await import("../../../supabase/functions/
 const { evaluateJob, loadContext, submitJob, handleFailure } = await import("../../../supabase/functions/_shared/socialDistributionSubmit");
 const { resolveJobPayload, composePostText, evaluateAssetRights, evaluateApprovalReview } =
   await import("../../../supabase/functions/_shared/socialPayloadResolver");
+const { materialiseJobsForReviews } = await import("../../../supabase/functions/_shared/socialJobMaterialise");
 
 /* ------------------------------------------------------------------ */
 /* Minimal in-memory supabase mock                                     */
@@ -161,6 +162,83 @@ describe("canonical payload resolution", () => {
       .toContain("approval_not_decided");
     expect(evaluateApprovalReview({ id: "r", business_id: BIZ, review_status: "approved", decided_at: "now", approval_blockers: [], risk_level: "high" }, BIZ))
       .toContain("approval_risk_too_high");
+  });
+
+  it("hydrates a true legacy pointer-only job with no FK columns", async () => {
+    const p = await resolveJobPayload(makeAdmin(baseDb()), BIZ, legacyJob({ content_item_id: null }));
+    expect(p.text).toBe("Real approved caption\n\nBook a call\n\n#liftor");
+    expect(p.media).toHaveLength(1);
+    expect(p.sources.content_item_id).toBe("content-1");
+    expect(p.blockers).toEqual([]);
+  });
+
+  it("blocks an unrecognised legacy pointer source", async () => {
+    const p = await resolveJobPayload(makeAdmin(baseDb()), BIZ, legacyJob({
+      content_item_id: null, publish_payload: { source: "social_secrets", source_id: "x" },
+    }));
+    expect(p.blockers).toContain("unsupported_legacy_source");
+  });
+
+  it("blocks a cross-business legacy pointer", async () => {
+    const db = baseDb();
+    db.social_content_items[0].business_id = "biz-other";
+    const p = await resolveJobPayload(makeAdmin(db), BIZ, legacyJob({ content_item_id: null }));
+    expect(p.blockers).toContain("cross_business_content_item");
+  });
+
+  it("blocks mixed link + media instead of silently dropping the link", async () => {
+    const db = baseDb();
+    db.social_content_items[0].link_url = "https://liftorai.com/offer";
+    const p = await resolveJobPayload(makeAdmin(db), BIZ, legacyJob());
+    expect(p.blockers).toContain("mixed_link_and_media_unsupported");
+    expect(p.link_url).toBe("https://liftorai.com/offer");
+  });
+
+  it("blocks an invalid link URL", async () => {
+    const db = baseDb();
+    db.social_content_items[0].link_url = "http://localhost/offer";
+    db.social_content_items[0].asset_id = null;
+    const p = await resolveJobPayload(makeAdmin(db), BIZ, legacyJob());
+    expect(p.blockers).toContain("invalid_link_url");
+  });
+
+  it("blocks a snapshot whose media has no resolvable asset reference", async () => {
+    const db = baseDb();
+    db.social_content_items[0].asset_id = null;
+    const p = await resolveJobPayload(makeAdmin(db), BIZ, legacyJob({
+      publish_payload: {
+        snapshot_version: 1, text: "Snapshot caption", asset_id: null,
+        media: [{ url: "https://cdn.example.com/a.jpg" }],
+      },
+    }));
+    expect(p.blockers).toContain("snapshot_asset_reference_missing");
+  });
+});
+
+describe("materialisation business scoping", () => {
+  const review = { id: "rev-1", business_id: BIZ };
+
+  it("cannot reuse or mutate a job with the same idempotency key in another business", async () => {
+    const db = baseDb();
+    const foreign: any = {
+      id: "job-foreign", business_id: "biz-other", approval_review_id: null,
+      idempotency_key: "shared", provider_post_id: null,
+    };
+    db.social_publish_jobs.push(foreign);
+    const admin = makeAdmin(db);
+    const mat = await materialiseJobsForReviews(admin, BIZ, [review]);
+    expect(mat.jobs.every((j: any) => j.business_id === BIZ)).toBe(true);
+    expect(foreign.approval_review_id).toBeNull();
+    expect(foreign.business_id).toBe("biz-other");
+  });
+
+  it("blocks materialisation when the authoritative review is not approved", async () => {
+    const db = baseDb();
+    db.social_approval_reviews[0].review_status = "pending";
+    const mat = await materialiseJobsForReviews(makeAdmin(db), BIZ, [review]);
+    expect(mat.created).toBe(0);
+    expect(mat.blocked).toBe(1);
+    expect(mat.blockers[0].blockers).toContain("approval_not_approved");
   });
 });
 

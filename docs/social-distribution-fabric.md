@@ -26,7 +26,7 @@ CSV/manual exports are unchanged and remain the fallback path.
 **Buffer usage**
 - Endpoint `https://api.buffer.com` (override via `BUFFER_GRAPHQL_URL`), `Authorization: Bearer <BUFFER_API_KEY>` server-side only.
 - `createPost` input: `channelId`, `text`, `schedulingType: automatic`, `mode: customScheduled`, ISO `dueAt`, and `assets`. **No `organizationId`** — the organisation ID is only used for organisation/channel discovery and querying.
-- `assets` is an ordered union list, one supported key per item: `{ image: { url } }`, `{ video: { url, metadata? } }`, `{ document: { url, title? } }`, `{ link: { url, title? } }`. Asset kind is derived only from an explicit type, MIME type, or file extension; anything unknown blocks the job with `unsupported_media_type` — never guessed. A link asset is never mixed with image/video/document assets.
+- `assets` is an ordered union list, one supported key per item: `{ image: { url } }`, `{ video: { url, metadata? } }`, `{ document: { url, title? } }`, `{ link: { url, title? } }`. Asset kind is derived only from an explicit type, MIME type, or file extension; anything unknown blocks the job with `unsupported_media_type` — never guessed. A link asset is never mixed with image/video/document assets: if a job has both a `link_url` and media, the canonical resolver blocks it with `mixed_link_and_media_unsupported`, and a non-HTTPS/unusable link blocks with `invalid_link_url`. Preview shows the blocker and `provider_input` is `null`.
 - Reconciliation uses the connection shape `posts { edges { node { id status dueAt channelId } } }`. Because the current supported posts *filter* input cannot be proven locally, `social-distribution-reconcile` returns `provider_reconciliation_not_supported_yet` and mutates nothing unless an operator sets `BUFFER_POSTS_QUERY_VERIFIED=true` after validating the query.
 - Both top-level GraphQL errors and typed `MutationError` responses are handled. A job is only marked `scheduled`/`sent` when Buffer returns a real post ID.
 
@@ -102,4 +102,4 @@ resolves it.
 immediately before `createPost`; endpoint stays `https://api.buffer.com`; the
 asset union format is unchanged; `organizationId` is not in `CreatePostInput`;
 link assets are never mixed with image/video/document assets; preview shows
-blockers instead of silently dropping unsupported media.
+blockers instead of silently dropping unsupported media. Legacy jobs whose `publish_payload` holds only `{source, source_id}` are hydrated via a fixed allowlist (`content_item`, `content_variant`, `calendar_item`); any other source blocks with `unsupported_legacy_source`. Snapshot jobs resolve media via `payload.asset_id` and block with `snapshot_asset_reference_missing` rather than sending text-only.
