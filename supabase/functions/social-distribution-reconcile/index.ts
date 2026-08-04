@@ -1,5 +1,5 @@
 import { corsHeaders, json, requireFounder } from "../_shared/socialAuth.ts";
-import { bufferGraphQL, bufferKeyPresent, POSTS_QUERY } from "../_shared/bufferClient.ts";
+import { bufferGraphQL, bufferKeyPresent, parsePostsConnection, POSTS_QUERY, postsQueryVerified } from "../_shared/bufferClient.ts";
 import { audit, getConnection } from "../_shared/socialDistributionDb.ts";
 
 Deno.serve(async (req) => {
@@ -13,11 +13,18 @@ Deno.serve(async (req) => {
   const conn = await getConnection(a.admin, business_id);
   if (!conn?.provider_organization_id) return json({ ok: false, error: "provider_organization_missing" });
 
-  const res = await bufferGraphQL<{ posts: any[] }>(POSTS_QUERY, { organizationId: conn.provider_organization_id });
+  // The current supported posts filter input is not provable from a local
+  // schema document, so we refuse to ship a speculative query by default.
+  if (!postsQueryVerified()) {
+    await audit(a.admin, { business_id, action: "distribution_reconcile_skipped", result_json: { reason: "provider_reconciliation_not_supported_yet" } });
+    return json({ ok: false, error: "provider_reconciliation_not_supported_yet", unchanged: true, no_statuses_mutated: true });
+  }
+
+  const res = await bufferGraphQL(POSTS_QUERY, { organizationId: conn.provider_organization_id });
   if (!res.ok) return json({ ok: false, error: res.errorMessage, unchanged: true });
 
   const byId = new Map<string, any>();
-  for (const p of res.data?.posts ?? []) byId.set(String(p.id), p);
+  for (const p of parsePostsConnection(res.data)) byId.set(p.id, p);
 
   const { data: jobs } = await a.admin.from("social_publish_jobs").select("id, provider_post_id, distribution_status")
     .eq("business_id", business_id).not("provider_post_id", "is", null).limit(500);
@@ -27,6 +34,7 @@ Deno.serve(async (req) => {
     const p = byId.get(String(j.provider_post_id));
     if (!p) { unknown++; continue; }
     const status = String(p.status ?? "").toLowerCase();
+    if (!status) { unknown++; continue; }
     const dist = status === "sent" ? "sent" : status === "error" ? "failed" : "scheduled";
     if (dist !== j.distribution_status) {
       await a.admin.from("social_publish_jobs").update({
