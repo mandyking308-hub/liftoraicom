@@ -146,6 +146,23 @@ async function fetchOne(admin: any, table: string, id: string | null | undefined
   return data ?? null;
 }
 
+/** Recognised legacy publish_payload pointer sources -> authoritative table. */
+const LEGACY_SOURCE_TABLES: Record<string, "social_content_items" | "social_content_variants" | "social_calendar_items"> = {
+  content_item: "social_content_items",
+  content_variant: "social_content_variants",
+  calendar_item: "social_calendar_items",
+};
+
+/** HTTPS-only, non-local link validation. */
+export function isValidLinkUrl(url: string): boolean {
+  let parsed: URL;
+  try { parsed = new URL(url); } catch { return false; }
+  if (parsed.protocol !== "https:") return false;
+  if (parsed.hostname === "localhost" || parsed.hostname.endsWith(".local")) return false;
+  if (parsed.hostname.startsWith("127.") || parsed.hostname === "0.0.0.0") return false;
+  return true;
+}
+
 /**
  * Resolves the exact caption + media Buffer would receive for a job.
  * A stored snapshot (publish_payload.snapshot_version) supplies the text;
@@ -160,10 +177,26 @@ export async function resolveJobPayload(
   const blockers: string[] = [];
   const payload = job.publish_payload ?? {};
 
+  // True legacy rows may only carry { source, source_id } pointers.
+  let pointerVariantId: string | null = null;
+  let pointerContentId: string | null = null;
+  let pointerCalendarId: string | null = null;
+  const hasFk = !!(job.content_variant_id || job.content_item_id || job.calendar_item_id);
+  const pointerSource = typeof payload.source === "string" ? payload.source : null;
+  const pointerId = typeof payload.source_id === "string" ? payload.source_id : null;
+  if (!hasFk && pointerSource) {
+    const table = LEGACY_SOURCE_TABLES[pointerSource];
+    if (!table || !pointerId) {
+      blockers.push("unsupported_legacy_source");
+    } else if (table === "social_content_variants") pointerVariantId = pointerId;
+    else if (table === "social_content_items") pointerContentId = pointerId;
+    else pointerCalendarId = pointerId;
+  }
+
   const [variant, content, calendar] = await Promise.all([
-    fetchOne(admin, "social_content_variants", job.content_variant_id),
-    fetchOne(admin, "social_content_items", job.content_item_id),
-    fetchOne(admin, "social_calendar_items", job.calendar_item_id),
+    fetchOne(admin, "social_content_variants", job.content_variant_id ?? pointerVariantId),
+    fetchOne(admin, "social_content_items", job.content_item_id ?? pointerContentId),
+    fetchOne(admin, "social_calendar_items", job.calendar_item_id ?? pointerCalendarId),
   ]);
 
   blockers.push(...evaluateVariantReadiness(variant, business_id));
@@ -189,16 +222,29 @@ export async function resolveJobPayload(
   }
   if (!text) blockers.push("empty_content");
 
-  const link_url = (payload.snapshot_version ? payload.link_url : null)
+  const link_url: string | null = (payload.snapshot_version ? payload.link_url : null)
     ?? variant?.link_url ?? content?.link_url ?? null;
 
-  const asset_id = variant?.asset_id ?? content?.asset_id ?? calendar?.asset_id ?? payload.asset_id ?? null;
+  // For snapshot jobs the snapshot's own asset reference wins, so media is
+  // never silently lost when the live content row no longer exposes asset_id.
+  const asset_id = payload.snapshot_version
+    ? (payload.asset_id ?? variant?.asset_id ?? content?.asset_id ?? calendar?.asset_id ?? null)
+    : (variant?.asset_id ?? content?.asset_id ?? calendar?.asset_id ?? payload.asset_id ?? null);
   const media: MediaAsset[] = [];
   if (asset_id) {
     const asset = await fetchOne(admin, "social_assets", asset_id);
     const rightsBlockers = evaluateAssetRights(asset, business_id, now);
     if (rightsBlockers.length) blockers.push(...rightsBlockers);
     else media.push(assetToMedia(asset));
+  } else if (payload.snapshot_version && Array.isArray(payload.media) && payload.media.length > 0) {
+    blockers.push("snapshot_asset_reference_missing");
+  }
+
+  // Link handling must be truthful: never silently drop an unusable or
+  // unsupported link attachment.
+  if (typeof link_url === "string" && link_url.trim()) {
+    if (!isValidLinkUrl(link_url.trim())) blockers.push("invalid_link_url");
+    else if (media.length > 0) blockers.push("mixed_link_and_media_unsupported");
   }
 
   return {
@@ -207,9 +253,9 @@ export async function resolveJobPayload(
     link_url: link_url ?? null,
     blockers: Array.from(new Set(blockers)),
     sources: {
-      content_item_id: job.content_item_id ?? null,
-      content_variant_id: job.content_variant_id ?? null,
-      calendar_item_id: job.calendar_item_id ?? null,
+      content_item_id: job.content_item_id ?? pointerContentId ?? null,
+      content_variant_id: job.content_variant_id ?? pointerVariantId ?? null,
+      calendar_item_id: job.calendar_item_id ?? pointerCalendarId ?? null,
       asset_id,
       approval_review_id: job.approval_review_id ?? null,
       hydrated_from,
