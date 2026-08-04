@@ -1,25 +1,41 @@
-/** Shared submit pipeline used by social-distribution-submit and -retry. */
+/** Shared submit pipeline used by preview, manual submit, retry and auto-dispatch. */
 import { bufferGraphQL, bufferKeyPresent, CREATE_POST_MUTATION, readCreatePostResult } from "./bufferClient.ts";
 import {
-  buildCreatePostInput, buildDistributionIdempotencyKey, classifyProviderError,
-  computeNextRetryAt, evaluateSubmission, MAX_ATTEMPTS, type PolicyMode,
+  buildCreatePostInput, buildDistributionIdempotencyKey, classifySubmissionOutcome,
+  computeNextRetryAt, evaluateSubmission, MAX_ATTEMPTS, type MediaAsset, type PolicyMode,
 } from "./socialDistributionLogic.ts";
-import { audit, gateUnlocked, getConnection, getPolicy, isPaused, jobApproved, jobMedia, jobText, resolveChannel } from "./socialDistributionDb.ts";
+import { audit, gateUnlocked, getConnection, getPolicy, isPaused, resolveChannel } from "./socialDistributionDb.ts";
+import { resolveApproval, resolveJobPayload, type ResolvedPayload } from "./socialPayloadResolver.ts";
 
 export interface JobEvaluation {
   job_id: string;
   platform: string | null;
   scheduled_for: string | null;
   channel_id: string | null;
+  external_channel_id: string | null;
   channel_label: string | null;
   eligible: boolean;
   blockers: string[];
   idempotency_key: string | null;
+  /** Exact final caption that would be sent to Buffer. */
+  text: string;
   text_preview: string;
+  media: MediaAsset[];
   media_count: number;
+  link_url: string | null;
+  hydrated_from: ResolvedPayload["sources"]["hydrated_from"];
+  /** The exact CreatePostInput Buffer would receive (null when not eligible). */
+  provider_input: Record<string, unknown> | null;
 }
 
-export async function loadContext(admin: any, business_id: string, provider = "buffer") {
+export interface DistributionContext {
+  policy: { mode: PolicyMode; allow_share_now: boolean; max_batch_size: number };
+  connection: any;
+  paused: boolean;
+  gate: boolean;
+}
+
+export async function loadContext(admin: any, business_id: string, provider = "buffer"): Promise<DistributionContext> {
   const [policy, connection, paused, gate] = await Promise.all([
     getPolicy(admin, business_id, provider),
     getConnection(admin, business_id, provider),
@@ -31,12 +47,16 @@ export async function loadContext(admin: any, business_id: string, provider = "b
 
 export async function evaluateJob(
   admin: any, business_id: string, job: any,
-  ctx: { policy: { mode: PolicyMode; allow_share_now: boolean }; connection: any; paused: boolean; gate: boolean },
+  ctx: DistributionContext,
   share_now = false,
 ): Promise<JobEvaluation> {
-  const { mapping, channel } = await resolveChannel(admin, business_id, job.platform);
-  const text = jobText(job);
-  const media = jobMedia(job);
+  const [{ mapping, channel }, payload, approval] = await Promise.all([
+    resolveChannel(admin, business_id, job.platform),
+    resolveJobPayload(admin, business_id, job),
+    resolveApproval(admin, business_id, job),
+  ]);
+
+  const shareNow = share_now && ctx.policy.allow_share_now;
   const evaluation = evaluateSubmission({
     job,
     business_id,
@@ -46,41 +66,73 @@ export async function evaluateJob(
     connection_present: !!ctx.connection && ctx.connection.connection_status !== "error",
     connection_organization_id: ctx.connection?.provider_organization_id ?? null,
     gate_unlocked: ctx.gate,
-    approved: jobApproved(job),
+    approved: approval.approved,
     policy_mode: ctx.policy.mode,
     paused: ctx.paused,
-    text,
-    media_urls: media,
-    share_now: share_now && ctx.policy.allow_share_now,
+    text: payload.text,
+    media_urls: payload.media,
+    share_now: shareNow,
   });
+
+  const blockers = Array.from(new Set([
+    ...evaluation.blockers,
+    ...payload.blockers,
+    ...(approval.approved ? [] : approval.blockers),
+  ]));
+
+  const externalChannelId = channel?.external_channel_id ? String(channel.external_channel_id).trim() : "";
+  if (channel && !externalChannelId) blockers.push("provider_channel_id_missing");
+
+  const eligible = blockers.length === 0;
+  const idempotency_key = channel
+    ? buildDistributionIdempotencyKey({
+        business_id, job_id: job.id, channel_id: channel.id,
+        scheduled_for: shareNow ? null : job.scheduled_for,
+      })
+    : null;
+
   return {
     job_id: job.id,
     platform: job.platform ?? null,
     scheduled_for: job.scheduled_for ?? null,
     channel_id: channel?.id ?? null,
+    external_channel_id: externalChannelId || null,
     channel_label: channel ? `${channel.service ?? "channel"}: ${channel.display_name ?? channel.name ?? channel.external_channel_id}` : null,
-    eligible: evaluation.eligible,
-    blockers: evaluation.blockers,
-    idempotency_key: channel
-      ? buildDistributionIdempotencyKey({ business_id, job_id: job.id, channel_id: channel.id, scheduled_for: share_now ? null : job.scheduled_for })
+    eligible,
+    blockers,
+    idempotency_key,
+    text: payload.text,
+    text_preview: payload.text.slice(0, 280),
+    media: payload.media,
+    media_count: payload.media.length,
+    link_url: payload.link_url,
+    hydrated_from: payload.sources.hydrated_from,
+    provider_input: eligible && externalChannelId
+      ? buildCreatePostInput({
+          channelId: externalChannelId,
+          text: payload.text,
+          dueAt: job.scheduled_for,
+          shareNow,
+          mediaUrls: payload.media,
+          linkAttachment: payload.link_url ? { url: payload.link_url } : null,
+        })
       : null,
-    text_preview: text.slice(0, 140),
-    media_count: media.length,
   };
 }
 
 export async function submitJob(
   admin: any, business_id: string, job: any,
-  ctx: { policy: { mode: PolicyMode; allow_share_now: boolean }; connection: any; paused: boolean; gate: boolean },
+  ctx: DistributionContext,
   share_now = false,
 ) {
   const ev = await evaluateJob(admin, business_id, job, ctx, share_now);
-  if (!ev.eligible || !ev.channel_id || !ev.idempotency_key) {
+  if (!ev.eligible || !ev.channel_id || !ev.idempotency_key || !ev.external_channel_id || !ev.provider_input) {
+    const blockers = ev.blockers.length ? ev.blockers : ["provider_channel_id_missing"];
     await admin.from("social_publish_jobs").update({
-      distribution_status: "blocked", last_error: ev.blockers.join(","),
+      distribution_status: "blocked", last_error: blockers.join(","),
     }).eq("id", job.id);
-    await audit(admin, { business_id, publish_job_id: job.id, action: "distribution_blocked", result_json: { blockers: ev.blockers } });
-    return { job_id: job.id, ok: false, status: "blocked", blockers: ev.blockers };
+    await audit(admin, { business_id, publish_job_id: job.id, action: "distribution_blocked", result_json: { blockers } });
+    return { job_id: job.id, ok: false, status: "blocked", blockers };
   }
 
   if (!bufferKeyPresent()) {
@@ -105,24 +157,27 @@ export async function submitJob(
     return { job_id: job.id, ok: false, status: "duplicate", blockers: ["idempotency_conflict"], error: claimError?.message ?? "already_claimed" };
   }
 
-  const { data: channelRow } = await admin.from("social_provider_channels").select("external_channel_id").eq("id", ev.channel_id).maybeSingle();
-  const input = buildCreatePostInput({
-    channelId: channelRow?.external_channel_id,
-    text: jobText(job),
-    dueAt: job.scheduled_for,
-    shareNow: share_now && ctx.policy.allow_share_now,
-    mediaUrls: jobMedia(job),
-  });
-
-  const res = await bufferGraphQL(CREATE_POST_MUTATION, { input });
+  // The provider input is the exact object shown by preview - no drift.
+  const res = await bufferGraphQL(CREATE_POST_MUTATION, { input: ev.provider_input });
   const attempt = (job.attempt_count ?? 0) + 1;
 
   if (!res.ok) {
-    return await handleFailure(admin, business_id, job.id, res.errorMessage ?? "provider_error", res.status, attempt);
+    return await handleFailure(admin, business_id, job.id, {
+      message: res.errorMessage ?? "provider_error",
+      httpStatus: res.status,
+      phase: res.phase ?? "transport",
+      attempt,
+    });
   }
   const parsed = readCreatePostResult(res.data);
   if (parsed.error || !parsed.postId) {
-    return await handleFailure(admin, business_id, job.id, parsed.error ?? "no_post_id_returned", res.status, attempt);
+    return await handleFailure(admin, business_id, job.id, {
+      message: parsed.error ?? "no_post_id_returned",
+      httpStatus: res.status,
+      // Buffer answered; a MutationError means nothing was created.
+      phase: parsed.error ? "response" : "transport",
+      attempt,
+    });
   }
 
   const scheduled = share_now ? "sent" : "scheduled";
@@ -147,22 +202,46 @@ export async function submitJob(
   return { job_id: job.id, ok: true, status: scheduled, provider_post_id: parsed.postId };
 }
 
-async function handleFailure(admin: any, business_id: string, job_id: string, message: string, httpStatus: number, attempt: number) {
-  const cls = classifyProviderError(message, httpStatus);
-  const next = cls === "transient" ? computeNextRetryAt(attempt) : null;
-  const dead = cls === "hard" || attempt >= MAX_ATTEMPTS;
+export async function handleFailure(
+  admin: any, business_id: string, job_id: string,
+  args: { message: string; httpStatus?: number; phase: "preflight" | "transport" | "response"; attempt: number },
+) {
+  const outcome = classifySubmissionOutcome({ phase: args.phase, httpStatus: args.httpStatus, message: args.message });
+
+  if (outcome.ambiguous) {
+    // Buffer may already have created the post. Keep the idempotency claim so
+    // nothing auto-retries; reconciliation or the founder resolves it.
+    await admin.from("social_publish_jobs").update({
+      distribution_status: "submission_unknown",
+      last_error: args.message,
+      next_retry_at: null,
+      dead_letter_reason: `ambiguous:${args.message}`,
+      dead_lettered_at: new Date().toISOString(),
+      external_execution_attempted: true,
+      external_execution_at: new Date().toISOString(),
+    }).eq("id", job_id);
+    await audit(admin, {
+      business_id, publish_job_id: job_id, action: "distribution_submission_unknown",
+      error_message: args.message, provider_calls: 1,
+      result_json: { phase: args.phase, http_status: args.httpStatus ?? null, requires_reconciliation: true },
+    });
+    return { job_id, ok: false, status: "submission_unknown", error: args.message, error_class: outcome.error_class };
+  }
+
+  const dead = outcome.error_class === "hard" || args.attempt >= MAX_ATTEMPTS;
+  const next = !dead && outcome.error_class === "transient" ? computeNextRetryAt(args.attempt) : null;
   await admin.from("social_publish_jobs").update({
     distribution_status: dead ? "dead_letter" : "retrying",
-    last_error: message,
+    last_error: args.message,
     next_retry_at: next ? next.toISOString() : null,
-    dead_letter_reason: dead ? `${cls}:${message}` : null,
+    dead_letter_reason: dead ? `${outcome.error_class}:${args.message}` : null,
     dead_lettered_at: dead ? new Date().toISOString() : null,
-    // A failed submit must release the key so a corrected retry can run.
+    // Provably nothing was created, so releasing the key is safe.
     distribution_idempotency_key: null,
   }).eq("id", job_id);
   await audit(admin, {
     business_id, publish_job_id: job_id, action: dead ? "distribution_dead_letter" : "distribution_failed",
-    error_message: message, result_json: { error_class: cls, attempt },
+    error_message: args.message, result_json: { error_class: outcome.error_class, phase: args.phase, attempt: args.attempt, reason: outcome.reason },
   });
-  return { job_id, ok: false, status: dead ? "dead_letter" : "retrying", error: message, error_class: cls };
+  return { job_id, ok: false, status: dead ? "dead_letter" : "retrying", error: args.message, error_class: outcome.error_class };
 }
