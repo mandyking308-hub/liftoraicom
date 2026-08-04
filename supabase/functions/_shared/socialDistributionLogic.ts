@@ -335,3 +335,27 @@ export function summariseStatuses(jobs: Array<{ distribution_status?: string | n
   }
   return totals;
 }
+
+/** Parses Buffer's current posts connection shape. Never invents a status. */
+export function parsePostsConnection(
+  data: any,
+): Array<{ id: string; status?: string | null; dueAt?: string | null; channelId?: string | null }> {
+  const edges = data?.posts?.edges;
+  if (!Array.isArray(edges)) return [];
+  return edges
+    .map((e: any) => e?.node)
+    .filter((n: any) => n?.id)
+    .map((n: any) => ({
+      id: String(n.id),
+      status: n.status ?? null,
+      dueAt: n.dueAt ?? null,
+      channelId: n.channelId ?? null,
+    }));
+}
+
+/** Pure policy gate for approval-driven auto-dispatch. */
+export function shouldAutoDispatch(policyMode: string, paused: boolean): { go: boolean; reason?: string } {
+  if (paused) return { go: false, reason: "emergency_pause_active" };
+  if (policyMode !== "approved_batch_autopilot") return { go: false, reason: `policy_${policyMode}` };
+  return { go: true };
+}
