@@ -24,13 +24,25 @@ CSV/manual exports are unchanged and remain the fallback path.
 - `social-distribution-retry` — retries only transient failures, honouring exponential backoff (60s base, ×2, 1h cap, 5 attempts); hard auth/validation errors go straight to dead letter.
 
 **Buffer usage**
-- Endpoint `https://api.buffer.com/graphql` (override via `BUFFER_GRAPHQL_URL`), `Authorization: Bearer <BUFFER_API_KEY>` server-side only.
-- `createPost` input: `schedulingType: automatic`, `mode: customScheduled`, ISO `dueAt`, `text`, `channelId`, and the current `assets: [{ source: { url } }]` format. `shareNow` only when explicitly selected *and* the policy allows it. `linkAttachment` is never mixed with non-empty assets.
+- Endpoint `https://api.buffer.com` (override via `BUFFER_GRAPHQL_URL`), `Authorization: Bearer <BUFFER_API_KEY>` server-side only.
+- `createPost` input: `channelId`, `text`, `schedulingType: automatic`, `mode: customScheduled`, ISO `dueAt`, and `assets`. **No `organizationId`** — the organisation ID is only used for organisation/channel discovery and querying.
+- `assets` is an ordered union list, one supported key per item: `{ image: { url } }`, `{ video: { url, metadata? } }`, `{ document: { url, title? } }`, `{ link: { url, title? } }`. Asset kind is derived only from an explicit type, MIME type, or file extension; anything unknown blocks the job with `unsupported_media_type` — never guessed. A link asset is never mixed with image/video/document assets.
+- Reconciliation uses the connection shape `posts { edges { node { id status dueAt channelId } } }`. Because the current supported posts *filter* input cannot be proven locally, `social-distribution-reconcile` returns `provider_reconciliation_not_supported_yet` and mutates nothing unless an operator sets `BUFFER_POSTS_QUERY_VERIFIED=true` after validating the query.
 - Both top-level GraphQL errors and typed `MutationError` responses are handled. A job is only marked `scheduled`/`sent` when Buffer returns a real post ID.
+
+**Approval-driven autopilot (event-driven, not a button)**
+- `social-approval-batch-decision-apply` is the authoritative server-side approval completion path. After a batch is successfully approved it calls `autoDispatchApprovedBatch` (`_shared/socialDistributionAuto.ts`) server-side.
+- Auto-dispatch runs **only** when the business/provider policy is `approved_batch_autopilot` and no emergency pause is active. `test`, `approval_required` and `paused` never auto-submit.
+- It reuses the identical gate, mapping, pause, approval, idempotency, validation and audit checks as manual dispatch. The founder's batch approval is the authorisation event, so no confirmation phrase applies on this route; the manual `social-distribution-submit` route still requires `DISTRIBUTE APPROVED BATCH`.
+- Audit entries: `approval_batch_approved` (policy mode, pause state, whether auto-dispatch ran) and `approval_auto_dispatch` (eligible / submitted / blocked / failed / duplicate counts and job IDs).
+- **Submission is not publication.** Auto-dispatch schedules the post inside Buffer; Buffer performs the actual timed publish later at `dueAt`. Liftor only records `sent` from real provider data.
+
+**Idempotency**
+- Claims go through the security-definer RPC `social_claim_distribution_job(job, business, key, channel)`, which updates exactly one unclaimed, unsent job and returns whether the claim succeeded. Zero-row updates can no longer be mistaken for success, so simultaneous clicks or repeated approval events cannot both call Buffer.
 
 **UI** — added to the existing Social Publishing dashboard (`/founder/social-autopilot/publishing`): connection status (never the key), Test connection, organisation selector, Sync channels, per-business channel mapping with network badges and disconnected/locked/paused flags, policy mode switch, Emergency Pause/Resume with confirmation, Distribution Preview with blockers, Approve & Distribute Batch, status totals (blocked / ready / submitting / scheduled / sent / failed / retrying / dead-letter), job-level provider ID/status/error, Retry and Reconcile. CSV/manual export panels are untouched.
 
-**Tests** — `src/lib/__tests__/socialDistribution.test.ts` (14 tests, passing) covers idempotency stability, locked gate, test-mode default, missing/cross-business channel mapping, disconnected/locked/paused channels, duplicate click (`already_submitted`), invalid/expired media, past `dueAt`, transient retry backoff and hard-failure classification.
+**Tests** — `src/lib/__tests__/socialDistribution.test.ts` (19 tests, passing) covers idempotency stability, locked gate, test-mode default, missing/cross-business channel mapping, disconnected/locked/paused channels, duplicate click (`already_submitted`), invalid/expired media, unsupported/unknown media types, image and video asset shapes, past `dueAt`, transient retry backoff, hard-failure classification, the posts connection parser, and auto-dispatch policy gating (test / approval_required / paused blocked, autopilot allowed).
 
 ## What remains blocked (external steps only)
 
