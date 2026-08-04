@@ -54,3 +54,52 @@ Nothing publishes today. To go live for one business:
 5. Map the channels to the business.
 6. Unlock a `social_provider_execution_gates` row for provider `buffer`, and move the business policy off `test`.
 7. Prove with one private/low-risk scheduled post before enabling `approved_batch_autopilot`.
+
+## Final correctness pass (end-to-end last mile)
+
+**Approval batch vs publish queue batch.** `social_approval_batches.id` and
+`social_publish_queue_batches.id` are separate domains and are no longer
+interchangeable. `autoDispatchApprovedBatch` takes `approval_batch_id`
+(audit/reference only) and `publish_queue_batch_id` (a real job filter).
+Approval-driven runs scope jobs by the approved `review_ids` /
+`approval_review_id`; `queue_batch_id` is used only when the caller supplies a
+genuine publish queue batch ID. Both IDs are audited separately.
+
+**Canonical payload resolver** (`_shared/socialPayloadResolver.ts`) is the one
+source of the final post for preview, manual submit, retry and auto-dispatch:
+variant → content item → calendar item, with `business_id` equality enforced on
+every joined row, live re-checks of publish readiness / compliance / quality /
+approval, `social_assets` rights (revoked, expired, consent, commercial/public
+use, cross-business), and text composed only from the approved caption + CTA +
+hashtags. Legacy pointer-only payloads (`{ source, source_id }`) hydrate
+automatically; new jobs store an immutable `snapshot_version: 1` payload.
+Preview returns the exact `provider_input` that is submitted — no drift.
+
+**Approval verification** is read from `social_approval_reviews`
+(`review_status='approved'`, `decided_at` present, no `approval_blockers`,
+risk not high/critical, same business). `provider_locked` / `queued` / merely
+having an `approval_review_id` is never treated as approval.
+
+**Jobs for approved items.** If approved review items have no publish job,
+`materialiseJobsForReviews` creates them server-side reusing the existing
+`socialPublishLogic` eligibility + idempotency key. Results report
+`approved_items`, `jobs_existing`, `jobs_created`, `jobs_eligible`,
+`submitted`, `blocked`, `failed`, `duplicate`, `unknown`, and the explicit
+error `no_publish_jobs_for_approved_items`.
+
+**Reconciliation** maps only proven statuses (`sent`, `error`, `scheduled`).
+Anything else leaves Liftor unchanged and is counted/audited as
+`unknown_provider_status`.
+
+**Duplicate-post safety.** Failures are classified by phase: preflight and
+explicit provider responses (429, 4xx, GraphQL MutationError) are safe — the
+claim is released for retry. Transport failures (timeout/connection loss) and
+5xx are ambiguous: the job becomes `submission_unknown`, the idempotency claim
+is retained, nothing auto-retries, and reconciliation or founder review
+resolves it.
+
+**Final guards.** A non-empty external Buffer channel ID is required
+immediately before `createPost`; endpoint stays `https://api.buffer.com`; the
+asset union format is unchanged; `organizationId` is not in `CreatePostInput`;
+link assets are never mixed with image/video/document assets; preview shows
+blockers instead of silently dropping unsupported media.
