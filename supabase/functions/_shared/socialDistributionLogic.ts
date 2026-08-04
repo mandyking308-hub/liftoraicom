@@ -65,7 +65,7 @@ export interface SubmissionContext {
   policy_mode: PolicyMode;
   paused: boolean;
   text: string;
-  media_urls?: string[];
+  media_urls?: Array<string | MediaAsset>;
   now?: Date;
   share_now?: boolean;
 }
@@ -73,6 +73,91 @@ export interface SubmissionContext {
 export interface Eligibility {
   eligible: boolean;
   blockers: string[];
+}
+
+/* ------------------------------------------------------------------ */
+/* Media assets (Buffer current union format)                          */
+/* ------------------------------------------------------------------ */
+
+export interface MediaAsset {
+  url: string;
+  /** Explicit asset type from the source record, when present. */
+  type?: string | null;
+  mime_type?: string | null;
+  metadata?: Record<string, unknown> | null;
+  title?: string | null;
+}
+
+export type AssetKind = "image" | "video" | "document" | "link" | "unknown";
+
+const EXPLICIT_TYPES: Record<string, AssetKind> = {
+  image: "image", photo: "image", gif: "image",
+  video: "video",
+  document: "document", pdf: "document",
+  link: "link", url: "link",
+};
+
+const EXTENSION_TYPES: Record<string, AssetKind> = {
+  jpg: "image", jpeg: "image", png: "image", gif: "image", webp: "image", heic: "image",
+  mp4: "video", mov: "video", m4v: "video", webm: "video",
+  pdf: "document",
+};
+
+export function normaliseAsset(input: string | MediaAsset): MediaAsset {
+  return typeof input === "string" ? { url: input } : { ...input };
+}
+
+/**
+ * Determines the asset kind from explicit type, MIME type, then file
+ * extension only. Anything else is "unknown" and must block the job -
+ * we never guess and never submit a broken asset.
+ */
+export function classifyAssetKind(asset: MediaAsset): AssetKind {
+  const explicit = (asset.type ?? "").trim().toLowerCase();
+  if (explicit && EXPLICIT_TYPES[explicit]) return EXPLICIT_TYPES[explicit];
+
+  const mime = (asset.mime_type ?? "").trim().toLowerCase();
+  if (mime.startsWith("image/")) return "image";
+  if (mime.startsWith("video/")) return "video";
+  if (mime === "application/pdf") return "document";
+  if (mime) return "unknown";
+
+  let path = "";
+  try { path = new URL(asset.url).pathname.toLowerCase(); } catch { return "unknown"; }
+  const ext = path.includes(".") ? path.split(".").pop()! : "";
+  return EXTENSION_TYPES[ext] ?? "unknown";
+}
+
+/** Builds the ordered Buffer assets union list, preserving media metadata. */
+export function buildAssets(inputs: Array<string | MediaAsset>): {
+  assets: Array<Record<string, unknown>>;
+  blockers: string[];
+} {
+  const assets: Array<Record<string, unknown>> = [];
+  const blockers: string[] = [];
+  for (const raw of inputs) {
+    const asset = normaliseAsset(raw);
+    if (!isDurableMediaUrl(asset.url)) {
+      if (!blockers.includes("invalid_media_url")) blockers.push("invalid_media_url");
+      continue;
+    }
+    const kind = classifyAssetKind(asset);
+    if (kind === "unknown") {
+      if (!blockers.includes("unsupported_media_type")) blockers.push("unsupported_media_type");
+      continue;
+    }
+    if (kind === "image") assets.push({ image: { url: asset.url } });
+    else if (kind === "video") {
+      assets.push({
+        video: asset.metadata ? { url: asset.url, metadata: asset.metadata } : { url: asset.url },
+      });
+    } else if (kind === "document") {
+      assets.push({ document: asset.title ? { url: asset.url, title: asset.title } : { url: asset.url } });
+    } else {
+      assets.push({ link: asset.title ? { url: asset.url, title: asset.title } : { url: asset.url } });
+    }
+  }
+  return { assets, blockers };
 }
 
 const MIN_LEAD_MS = 60_000; // Buffer needs a future dueAt
@@ -154,12 +239,7 @@ export function evaluateSubmission(ctx: SubmissionContext): Eligibility {
     }
   }
 
-  for (const url of ctx.media_urls ?? []) {
-    if (!isDurableMediaUrl(url)) {
-      blockers.push("invalid_media_url");
-      break;
-    }
-  }
+  for (const b of buildAssets(ctx.media_urls ?? []).blockers) blockers.push(b);
 
   if (ctx.job.provider_post_id) blockers.push("already_submitted");
   if (ctx.job.distribution_status === "dead_letter") blockers.push("dead_letter");
@@ -167,22 +247,22 @@ export function evaluateSubmission(ctx: SubmissionContext): Eligibility {
   return { eligible: blockers.length === 0, blockers };
 }
 
-/** Buffer CreatePostInput builder (current assets array format). */
+/**
+ * Buffer CreatePostInput builder.
+ * organizationId is intentionally NOT included - it is used only for
+ * organisation/channel discovery and querying.
+ */
 export function buildCreatePostInput(args: {
-  organizationId: string;
   channelId: string;
   text: string;
   dueAt?: string | null;
   shareNow?: boolean;
-  mediaUrls?: string[];
+  mediaUrls?: Array<string | MediaAsset>;
   linkAttachment?: { url: string; title?: string } | null;
 }): Record<string, unknown> {
-  const assets = (args.mediaUrls ?? []).filter(isDurableMediaUrl).map((url) => ({
-    source: { url },
-  }));
+  const { assets } = buildAssets(args.mediaUrls ?? []);
 
   const input: Record<string, unknown> = {
-    organizationId: args.organizationId,
     channelId: args.channelId,
     text: args.text,
     schedulingType: "automatic",
@@ -197,9 +277,13 @@ export function buildCreatePostInput(args: {
 
   if (assets.length > 0) {
     input.assets = assets;
-    // Never mix linkAttachment metadata with non-empty assets.
-  } else if (args.linkAttachment?.url) {
-    input.linkAttachment = args.linkAttachment;
+    // Never mix a link attachment with image/video/document assets.
+  } else if (args.linkAttachment?.url && isDurableMediaUrl(args.linkAttachment.url)) {
+    input.assets = [{
+      link: args.linkAttachment.title
+        ? { url: args.linkAttachment.url, title: args.linkAttachment.title }
+        : { url: args.linkAttachment.url },
+    }];
   }
 
   return input;
