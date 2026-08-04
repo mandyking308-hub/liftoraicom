@@ -54,36 +54,10 @@ export async function resolveChannel(admin: any, business_id: string, platform?:
   return { mapping: match, channel: match.channel };
 }
 
-export function jobText(job: any): string {
-  const p = job.publish_payload ?? {};
-  return String(p.text ?? p.caption ?? p.body ?? job.metadata?.text ?? "").trim();
-}
-
-/** Preserves explicit type / MIME / metadata from the stored social assets. */
-export function jobMedia(job: any): Array<{ url: string; type?: string | null; mime_type?: string | null; metadata?: Record<string, unknown> | null; title?: string | null }> {
-  const p = job.publish_payload ?? {};
-  const raw = p.media ?? p.media_urls ?? p.assets ?? [];
-  if (!Array.isArray(raw)) return [];
-  return raw
-    .map((a: any) => {
-      if (typeof a === "string") return { url: a };
-      const url = a?.url ?? a?.source?.url ?? a?.public_url ?? a?.media_url;
-      if (!url) return null;
-      return {
-        url: String(url),
-        type: a.asset_type ?? a.media_type ?? a.type ?? null,
-        mime_type: a.mime_type ?? a.content_type ?? a.mimeType ?? null,
-        metadata: a.metadata ?? null,
-        title: a.title ?? null,
-      };
-    })
-    .filter(Boolean) as any[];
-}
-
-export function jobApproved(job: any): boolean {
-  const okStatus = ["approved", "approved_internal", "ready", "ready_for_provider", "provider_locked", "queued"];
-  const notApproved = ["rejected", "draft", "cancelled", "blocked", "needs_review"];
-  if (notApproved.includes(String(job.status ?? ""))) return false;
-  if (!job.approval_review_id) return false;
-  return okStatus.includes(String(job.status ?? ""));
-}
+/*
+ * jobText / jobMedia / jobApproved were removed deliberately.
+ * Text and media now come from the canonical resolver
+ * (socialPayloadResolver.resolveJobPayload) and approval is verified against
+ * social_approval_reviews (socialPayloadResolver.resolveApproval), so job
+ * status alone can never be mistaken for approval.
+ */
