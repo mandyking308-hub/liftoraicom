@@ -359,3 +359,70 @@ export function shouldAutoDispatch(policyMode: string, paused: boolean): { go: b
   if (policyMode !== "approved_batch_autopilot") return { go: false, reason: `policy_${policyMode}` };
   return { go: true };
 }
+
+/* ------------------------------------------------------------------ */
+/* Submission outcome classification (duplicate-post safety)           */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Where a failure happened relative to the provider mutation.
+ * - preflight: we never transmitted a request (missing key, bad input)
+ * - transport: request may or may not have reached/been applied by Buffer
+ * - response:  Buffer answered, so the outcome is knowable from the response
+ */
+export type FailurePhase = "preflight" | "transport" | "response";
+
+export interface SubmissionOutcome {
+  /** Safe to release the idempotency claim and retry automatically. */
+  retry_safe: boolean;
+  /** Buffer may already have created the post - never auto-retry. */
+  ambiguous: boolean;
+  error_class: ErrorClass;
+  reason: string;
+}
+
+export function classifySubmissionOutcome(args: {
+  phase: FailurePhase;
+  httpStatus?: number;
+  message?: string;
+}): SubmissionOutcome {
+  const message = args.message ?? "provider_error";
+  if (args.phase === "preflight") {
+    return { retry_safe: true, ambiguous: false, error_class: "hard", reason: message };
+  }
+  if (args.phase === "transport") {
+    // Connection loss / timeout after the request left us: Buffer may have
+    // accepted the post. Never auto-retry - reconcile or founder review.
+    return { retry_safe: false, ambiguous: true, error_class: "transient", reason: "submission_unknown" };
+  }
+  // Provider responded.
+  if (args.httpStatus === 429) {
+    return { retry_safe: true, ambiguous: false, error_class: "transient", reason: "rate_limited" };
+  }
+  if (args.httpStatus && args.httpStatus >= 500) {
+    // A 5xx can still have mutated state server-side.
+    return { retry_safe: false, ambiguous: true, error_class: "transient", reason: "submission_unknown" };
+  }
+  if (args.httpStatus && args.httpStatus >= 400) {
+    return { retry_safe: true, ambiguous: false, error_class: "hard", reason: message };
+  }
+  // GraphQL-level error with a 200: the mutation was rejected, nothing created.
+  return { retry_safe: true, ambiguous: false, error_class: classifyProviderError(message, args.httpStatus), reason: message };
+}
+
+/* ------------------------------------------------------------------ */
+/* Reconciliation status mapping (explicit allowlist only)             */
+/* ------------------------------------------------------------------ */
+
+const PROVIDER_STATUS_MAP: Record<string, DistributionStatus> = {
+  sent: "sent",
+  error: "failed",
+  scheduled: "scheduled",
+};
+
+/** Returns null for any unproven/unmapped provider status - never infers. */
+export function mapProviderStatus(status?: string | null): DistributionStatus | null {
+  const key = String(status ?? "").trim().toLowerCase();
+  if (!key) return null;
+  return PROVIDER_STATUS_MAP[key] ?? null;
+}

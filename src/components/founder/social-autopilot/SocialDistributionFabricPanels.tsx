@@ -225,13 +225,13 @@ export function DistributionPreviewPanel({ businessId }: { businessId: string })
 
   const preview = async () => {
     setBusy(true);
-    setOut(await call("social-distribution-preview", { business_id: businessId, batch_id: batchId || null }));
+    setOut(await call("social-distribution-preview", { business_id: businessId, publish_queue_batch_id: batchId || null }));
     setBusy(false);
   };
   const distribute = async () => {
     if (!confirm("Submit every eligible approved job in this batch to Buffer?")) return;
     setBusy(true);
-    setResult(await call("social-distribution-submit", { business_id: businessId, batch_id: batchId || null, job_ids: batchId ? null : (out?.evaluations ?? []).filter((e: any) => e.eligible).map((e: any) => e.job_id), confirmation_phrase: phrase }));
+    setResult(await call("social-distribution-submit", { business_id: businessId, publish_queue_batch_id: batchId || null, job_ids: batchId ? null : (out?.evaluations ?? []).filter((e: any) => e.eligible).map((e: any) => e.job_id), confirmation_phrase: phrase }));
     setBusy(false); preview();
   };
   const retry = async () => {
@@ -252,14 +252,14 @@ export function DistributionPreviewPanel({ businessId }: { businessId: string })
       <CardHeader><CardTitle className="text-base">Distribution preview & batch dispatch</CardTitle></CardHeader>
       <CardContent className="space-y-3 text-xs">
         <div className="flex flex-wrap gap-2 items-center">
-          <Input className="h-8 w-64" placeholder="Queue batch id (optional)" value={batchId} onChange={(e) => setBatchId(e.target.value)} />
+          <Input className="h-8 w-64" placeholder="Publish queue batch id (optional)" value={batchId} onChange={(e) => setBatchId(e.target.value)} />
           <Button size="sm" variant="outline" disabled={!businessId || busy} onClick={preview}>Preview</Button>
           <Button size="sm" variant="outline" disabled={!businessId || busy} onClick={retry}>Retry transient failures</Button>
           <Button size="sm" variant="outline" disabled={!businessId || busy} onClick={reconcile}>Reconcile with Buffer</Button>
         </div>
         {out && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-            {["blocked", "ready", "submitting", "scheduled", "sent", "failed", "retrying", "dead_letter"].map((k) => (
+            {["blocked", "ready", "submitting", "scheduled", "sent", "failed", "retrying", "submission_unknown", "dead_letter"].map((k) => (
               <div key={k} className="border rounded p-2 flex justify-between"><span className="text-muted-foreground">{k}</span><span className="font-mono">{totals[k] ?? 0}</span></div>
             ))}
           </div>
@@ -272,7 +272,16 @@ export function DistributionPreviewPanel({ businessId }: { businessId: string })
                   <span className="truncate">{e.channel_label ?? "no channel mapped"} — {e.text_preview || "(no text)"}</span>
                   <Badge variant={e.eligible ? "secondary" : "outline"} className="text-[10px]">{e.eligible ? "ready" : "blocked"}</Badge>
                 </div>
-                {!e.eligible && <p className="text-[10px] text-yellow-400 mt-1">{e.blockers.join(", ")}</p>}
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  source: {e.hydrated_from} · media: {e.media_count}{e.link_url ? " · link" : ""}
+                </p>
+                {e.blockers?.length > 0 && <p className="text-[10px] text-yellow-400 mt-1">{e.blockers.join(", ")}</p>}
+                {e.provider_input && (
+                  <details className="mt-1">
+                    <summary className="text-[10px] cursor-pointer text-muted-foreground">Exact payload Buffer would receive</summary>
+                    <pre className="text-[10px] p-2 bg-secondary/40 rounded mt-1 overflow-x-auto">{JSON.stringify(e.provider_input, null, 2)}</pre>
+                  </details>
+                )}
               </div>
             ))}
           </div>

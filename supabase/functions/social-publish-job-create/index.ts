@@ -1,5 +1,6 @@
 import { corsHeaders, json, requireFounder } from "../_shared/socialAuth.ts";
 import { evaluateContentItem, evaluateCalendarItem, buildJobIdempotencyKey, type EligibilityCheck } from "../_shared/socialPublishLogic.ts";
+import { buildPayloadSnapshot, resolveJobPayload } from "../_shared/socialPayloadResolver.ts";
 
 const PHRASE = "CREATE SOCIAL PUBLISH JOBS";
 
@@ -32,6 +33,12 @@ Deno.serve(async (req) => {
     const idem = buildJobIdempotencyKey(e);
     const { data: existing } = await a.admin.from("social_publish_jobs").select("id").eq("idempotency_key", idem).maybeSingle();
     if (existing) { skipped.push({ idempotency_key: idem, existing_id: existing.id }); continue; }
+    const payload = await resolveJobPayload(a.admin, business_id, {
+      content_variant_id: e.content_variant_id ?? null,
+      content_item_id: e.content_item_id ?? null,
+      calendar_item_id: e.calendar_item_id ?? null,
+      publish_payload: {},
+    });
     const insert = {
       business_id, content_item_id: e.content_item_id, calendar_item_id: e.calendar_item_id,
       content_variant_id: e.content_variant_id, campaign_plan_id: e.campaign_plan_id, content_pack_id: e.content_pack_id,
@@ -40,7 +47,12 @@ Deno.serve(async (req) => {
       execution_gate_status: "locked", execution_attempt_allowed: false, external_execution_attempted: false,
       manual_export_status: "not_exported", founder_final_approval_required: true,
       idempotency_key: idem, provider_capability_required: e.provider_capability_required,
-      publish_payload: { source: e.source, source_id: e.source_id }, is_test_data,
+      publish_payload: buildPayloadSnapshot({
+        text: payload.text, media: payload.media, link_url: payload.link_url,
+        asset_id: payload.sources.asset_id ?? null,
+        source: e.source, source_id: e.source_id,
+      }),
+      is_test_data,
     };
     const { data: ins, error } = await a.admin.from("social_publish_jobs").insert(insert).select().maybeSingle();
     if (error) { skipped.push({ idempotency_key: idem, error: error.message }); continue; }

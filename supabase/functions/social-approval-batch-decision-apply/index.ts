@@ -39,7 +39,9 @@ Deno.serve(async (req) => {
   if (decision === "approve" && applied > 0) {
     auto_dispatch = await autoDispatchApprovedBatch(a.admin, {
       business_id,
-      batch_id: body.batch_id,
+      approval_batch_id: body.batch_id,
+      publish_queue_batch_id: body.publish_queue_batch_id ?? null,
+      approved_reviews: safe.map((r: any) => ({ ...r, review_status: "approved", decided_at: now })),
       review_ids: safe.map((r: any) => r.id),
     });
   }

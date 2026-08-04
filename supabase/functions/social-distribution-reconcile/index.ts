@@ -1,5 +1,6 @@
 import { corsHeaders, json, requireFounder } from "../_shared/socialAuth.ts";
 import { bufferGraphQL, bufferKeyPresent, parsePostsConnection, POSTS_QUERY, postsQueryVerified } from "../_shared/bufferClient.ts";
+import { mapProviderStatus } from "../_shared/socialDistributionLogic.ts";
 import { audit, getConnection } from "../_shared/socialDistributionDb.ts";
 
 Deno.serve(async (req) => {
@@ -29,13 +30,14 @@ Deno.serve(async (req) => {
   const { data: jobs } = await a.admin.from("social_publish_jobs").select("id, provider_post_id, distribution_status")
     .eq("business_id", business_id).not("provider_post_id", "is", null).limit(500);
 
-  let updated = 0; let unknown = 0;
+  let updated = 0; let unknown = 0; let unknownStatus = 0;
   for (const j of jobs ?? []) {
     const p = byId.get(String(j.provider_post_id));
     if (!p) { unknown++; continue; }
-    const status = String(p.status ?? "").toLowerCase();
-    if (!status) { unknown++; continue; }
-    const dist = status === "sent" ? "sent" : status === "error" ? "failed" : "scheduled";
+    // Explicit allowlist only - an unmapped provider status never changes
+    // Liftor state and is counted as unknown_provider_status.
+    const dist = mapProviderStatus(p.status);
+    if (!dist) { unknownStatus++; continue; }
     if (dist !== j.distribution_status) {
       await a.admin.from("social_publish_jobs").update({
         distribution_status: dist, provider_status: p.status ?? null,
@@ -44,6 +46,12 @@ Deno.serve(async (req) => {
       updated++;
     }
   }
-  await audit(a.admin, { business_id, action: "distribution_reconcile", result_json: { updated, not_found_in_provider: unknown } });
-  return json({ ok: true, checked: jobs?.length ?? 0, updated, not_found_in_provider: unknown, no_results_invented: true });
+  await audit(a.admin, {
+    business_id, action: "distribution_reconcile",
+    result_json: { updated, not_found_in_provider: unknown, unknown_provider_status: unknownStatus },
+  });
+  return json({
+    ok: true, checked: jobs?.length ?? 0, updated,
+    not_found_in_provider: unknown, unknown_provider_status: unknownStatus, no_results_invented: true,
+  });
 });
