@@ -59,11 +59,25 @@ export function jobText(job: any): string {
   return String(p.text ?? p.caption ?? p.body ?? job.metadata?.text ?? "").trim();
 }
 
-export function jobMedia(job: any): string[] {
+/** Preserves explicit type / MIME / metadata from the stored social assets. */
+export function jobMedia(job: any): Array<{ url: string; type?: string | null; mime_type?: string | null; metadata?: Record<string, unknown> | null; title?: string | null }> {
   const p = job.publish_payload ?? {};
-  const raw = p.media_urls ?? p.assets ?? [];
+  const raw = p.media ?? p.media_urls ?? p.assets ?? [];
   if (!Array.isArray(raw)) return [];
-  return raw.map((a: any) => (typeof a === "string" ? a : a?.url ?? a?.source?.url)).filter(Boolean);
+  return raw
+    .map((a: any) => {
+      if (typeof a === "string") return { url: a };
+      const url = a?.url ?? a?.source?.url ?? a?.public_url ?? a?.media_url;
+      if (!url) return null;
+      return {
+        url: String(url),
+        type: a.asset_type ?? a.media_type ?? a.type ?? null,
+        mime_type: a.mime_type ?? a.content_type ?? a.mimeType ?? null,
+        metadata: a.metadata ?? null,
+        title: a.title ?? null,
+      };
+    })
+    .filter(Boolean) as any[];
 }
 
 export function jobApproved(job: any): boolean {
