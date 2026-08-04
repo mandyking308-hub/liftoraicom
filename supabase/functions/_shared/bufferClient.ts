@@ -90,22 +90,7 @@ export function postsQueryVerified(): boolean {
   return (Deno.env.get("BUFFER_POSTS_QUERY_VERIFIED") ?? "").trim().toLowerCase() === "true";
 }
 
-/** Parses the current connection shape. Never invents a status. */
-export function parsePostsConnection(
-  data: any,
-): Array<{ id: string; status?: string | null; dueAt?: string | null; channelId?: string | null }> {
-  const edges = data?.posts?.edges;
-  if (!Array.isArray(edges)) return [];
-  return edges
-    .map((e: any) => e?.node)
-    .filter((n: any) => n?.id)
-    .map((n: any) => ({
-      id: String(n.id),
-      status: n.status ?? null,
-      dueAt: n.dueAt ?? null,
-      channelId: n.channelId ?? null,
-    }));
-}
+export { parsePostsConnection } from "./socialDistributionLogic.ts";
 
 /** Normalises a createPost payload into a typed result, never inventing success. */
 export function readCreatePostResult(data: any): { postId?: string; status?: string; dueAt?: string; error?: string } {
