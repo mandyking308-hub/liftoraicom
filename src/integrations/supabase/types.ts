@@ -52540,6 +52540,59 @@ export type Database = {
         }
         Relationships: []
       }
+      social_business_channel_map: {
+        Row: {
+          active: boolean
+          business_id: string
+          channel_id: string
+          created_at: string
+          id: string
+          is_default: boolean
+          is_test_data: boolean
+          mapped_by: string | null
+          notes: string | null
+          platform: string | null
+          provider: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          business_id: string
+          channel_id: string
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          is_test_data?: boolean
+          mapped_by?: string | null
+          notes?: string | null
+          platform?: string | null
+          provider?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          business_id?: string
+          channel_id?: string
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          is_test_data?: boolean
+          mapped_by?: string | null
+          notes?: string | null
+          platform?: string | null
+          provider?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_business_channel_map_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "social_provider_channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       social_business_profiles: {
         Row: {
           approval_required: boolean
@@ -54830,6 +54883,78 @@ export type Database = {
           rule_name?: string
           tone_notes?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      social_distribution_pauses: {
+        Row: {
+          actor: string | null
+          created_at: string
+          id: string
+          paused: boolean
+          reason: string | null
+          scope: string
+          scope_key: string
+          updated_at: string
+        }
+        Insert: {
+          actor?: string | null
+          created_at?: string
+          id?: string
+          paused?: boolean
+          reason?: string | null
+          scope: string
+          scope_key?: string
+          updated_at?: string
+        }
+        Update: {
+          actor?: string | null
+          created_at?: string
+          id?: string
+          paused?: boolean
+          reason?: string | null
+          scope?: string
+          scope_key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      social_distribution_policies: {
+        Row: {
+          allow_share_now: boolean
+          business_id: string
+          created_at: string
+          id: string
+          max_batch_size: number
+          notes: string | null
+          policy_mode: string
+          provider: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          allow_share_now?: boolean
+          business_id: string
+          created_at?: string
+          id?: string
+          max_batch_size?: number
+          notes?: string | null
+          policy_mode?: string
+          provider?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          allow_share_now?: boolean
+          business_id?: string
+          created_at?: string
+          id?: string
+          max_batch_size?: number
+          notes?: string | null
+          policy_mode?: string
+          provider?: string
+          updated_at?: string
+          updated_by?: string | null
         }
         Relationships: []
       }
@@ -57176,22 +57301,97 @@ export type Database = {
         }
         Relationships: []
       }
+      social_provider_channels: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          external_channel_id: string
+          external_link: string | null
+          id: string
+          is_disconnected: boolean
+          is_locked: boolean
+          is_queue_paused: boolean
+          is_test_data: boolean
+          last_synced_at: string
+          name: string | null
+          provider: string
+          provider_connection_id: string | null
+          provider_organization_id: string
+          raw_json: Json
+          service: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          external_channel_id: string
+          external_link?: string | null
+          id?: string
+          is_disconnected?: boolean
+          is_locked?: boolean
+          is_queue_paused?: boolean
+          is_test_data?: boolean
+          last_synced_at?: string
+          name?: string | null
+          provider?: string
+          provider_connection_id?: string | null
+          provider_organization_id: string
+          raw_json?: Json
+          service?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          external_channel_id?: string
+          external_link?: string | null
+          id?: string
+          is_disconnected?: boolean
+          is_locked?: boolean
+          is_queue_paused?: boolean
+          is_test_data?: boolean
+          last_synced_at?: string
+          name?: string | null
+          provider?: string
+          provider_connection_id?: string | null
+          provider_organization_id?: string
+          raw_json?: Json
+          service?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_provider_channels_provider_connection_id_fkey"
+            columns: ["provider_connection_id"]
+            isOneToOne: false
+            referencedRelation: "social_provider_connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       social_provider_connections: {
         Row: {
           account_reference: string | null
           business_id: string
           capabilities_json: Json
           connected_account_id: string | null
+          connection_mode: string
           connection_name: string
           connection_status: string
           created_at: string
           id: string
           is_test_data: boolean
+          last_channel_sync_at: string | null
           last_checked_at: string | null
           last_error: string | null
           metadata: Json
           notes: string | null
           provider: string
+          provider_organization_id: string | null
+          provider_organization_name: string | null
           token_reference: string | null
           updated_at: string
         }
@@ -57200,16 +57400,20 @@ export type Database = {
           business_id: string
           capabilities_json?: Json
           connected_account_id?: string | null
+          connection_mode?: string
           connection_name: string
           connection_status?: string
           created_at?: string
           id?: string
           is_test_data?: boolean
+          last_channel_sync_at?: string | null
           last_checked_at?: string | null
           last_error?: string | null
           metadata?: Json
           notes?: string | null
           provider: string
+          provider_organization_id?: string | null
+          provider_organization_name?: string | null
           token_reference?: string | null
           updated_at?: string
         }
@@ -57218,16 +57422,20 @@ export type Database = {
           business_id?: string
           capabilities_json?: Json
           connected_account_id?: string | null
+          connection_mode?: string
           connection_name?: string
           connection_status?: string
           created_at?: string
           id?: string
           is_test_data?: boolean
+          last_channel_sync_at?: string | null
           last_checked_at?: string | null
           last_error?: string | null
           metadata?: Json
           notes?: string | null
           provider?: string
+          provider_organization_id?: string | null
+          provider_organization_name?: string | null
           token_reference?: string | null
           updated_at?: string
         }
@@ -57316,6 +57524,7 @@ export type Database = {
       social_publish_jobs: {
         Row: {
           approval_review_id: string | null
+          attempt_count: number
           block_reason: string | null
           business_id: string
           calendar_item_id: string | null
@@ -57324,6 +57533,10 @@ export type Database = {
           content_pack_id: string | null
           content_variant_id: string | null
           created_at: string | null
+          dead_letter_reason: string | null
+          dead_lettered_at: string | null
+          distribution_idempotency_key: string | null
+          distribution_status: string
           error_message: string | null
           execution_attempt_allowed: boolean
           execution_gate_status: string
@@ -57337,25 +57550,34 @@ export type Database = {
           is_test_data: boolean | null
           job_type: string
           last_attempt_at: string | null
+          last_error: string | null
           manual_export_status: string
+          mapped_channel_id: string | null
           metadata: Json | null
+          next_retry_at: string | null
           platform: string
           provider: string
           provider_adapter_id: string | null
           provider_capability_required: string | null
           provider_connection_id: string | null
           provider_external_id: string | null
+          provider_post_id: string | null
+          provider_response_summary: Json
+          provider_status: string | null
           publish_payload: Json
+          published_at: string | null
           queue_batch_id: string | null
           response_json: Json | null
           retry_count: number | null
           scheduled_for: string | null
           social_account_id: string | null
           status: string | null
+          submitted_at: string | null
           updated_at: string | null
         }
         Insert: {
           approval_review_id?: string | null
+          attempt_count?: number
           block_reason?: string | null
           business_id: string
           calendar_item_id?: string | null
@@ -57364,6 +57586,10 @@ export type Database = {
           content_pack_id?: string | null
           content_variant_id?: string | null
           created_at?: string | null
+          dead_letter_reason?: string | null
+          dead_lettered_at?: string | null
+          distribution_idempotency_key?: string | null
+          distribution_status?: string
           error_message?: string | null
           execution_attempt_allowed?: boolean
           execution_gate_status?: string
@@ -57377,25 +57603,34 @@ export type Database = {
           is_test_data?: boolean | null
           job_type: string
           last_attempt_at?: string | null
+          last_error?: string | null
           manual_export_status?: string
+          mapped_channel_id?: string | null
           metadata?: Json | null
+          next_retry_at?: string | null
           platform: string
           provider: string
           provider_adapter_id?: string | null
           provider_capability_required?: string | null
           provider_connection_id?: string | null
           provider_external_id?: string | null
+          provider_post_id?: string | null
+          provider_response_summary?: Json
+          provider_status?: string | null
           publish_payload?: Json
+          published_at?: string | null
           queue_batch_id?: string | null
           response_json?: Json | null
           retry_count?: number | null
           scheduled_for?: string | null
           social_account_id?: string | null
           status?: string | null
+          submitted_at?: string | null
           updated_at?: string | null
         }
         Update: {
           approval_review_id?: string | null
+          attempt_count?: number
           block_reason?: string | null
           business_id?: string
           calendar_item_id?: string | null
@@ -57404,6 +57639,10 @@ export type Database = {
           content_pack_id?: string | null
           content_variant_id?: string | null
           created_at?: string | null
+          dead_letter_reason?: string | null
+          dead_lettered_at?: string | null
+          distribution_idempotency_key?: string | null
+          distribution_status?: string
           error_message?: string | null
           execution_attempt_allowed?: boolean
           execution_gate_status?: string
@@ -57417,21 +57656,29 @@ export type Database = {
           is_test_data?: boolean | null
           job_type?: string
           last_attempt_at?: string | null
+          last_error?: string | null
           manual_export_status?: string
+          mapped_channel_id?: string | null
           metadata?: Json | null
+          next_retry_at?: string | null
           platform?: string
           provider?: string
           provider_adapter_id?: string | null
           provider_capability_required?: string | null
           provider_connection_id?: string | null
           provider_external_id?: string | null
+          provider_post_id?: string | null
+          provider_response_summary?: Json
+          provider_status?: string | null
           publish_payload?: Json
+          published_at?: string | null
           queue_batch_id?: string | null
           response_json?: Json | null
           retry_count?: number | null
           scheduled_for?: string | null
           social_account_id?: string | null
           status?: string | null
+          submitted_at?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -57440,6 +57687,13 @@ export type Database = {
             columns: ["content_item_id"]
             isOneToOne: false
             referencedRelation: "social_content_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_publish_jobs_mapped_channel_id_fkey"
+            columns: ["mapped_channel_id"]
+            isOneToOne: false
+            referencedRelation: "social_provider_channels"
             referencedColumns: ["id"]
           },
           {
