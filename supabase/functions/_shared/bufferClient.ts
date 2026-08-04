@@ -19,6 +19,8 @@ export interface GqlResult<T> {
   status: number;
   data?: T;
   errorMessage?: string;
+  /** Where the failure happened relative to the provider mutation. */
+  phase?: "preflight" | "transport" | "response";
 }
 
 export async function bufferGraphQL<T = any>(
@@ -26,7 +28,7 @@ export async function bufferGraphQL<T = any>(
   variables: Record<string, unknown> = {},
 ): Promise<GqlResult<T>> {
   const key = (Deno.env.get("BUFFER_API_KEY") ?? "").trim();
-  if (!key) return { ok: false, status: 0, errorMessage: "buffer_api_key_missing" };
+  if (!key) return { ok: false, status: 0, errorMessage: "buffer_api_key_missing", phase: "preflight" };
 
   let res: Response;
   try {
@@ -39,7 +41,8 @@ export async function bufferGraphQL<T = any>(
       body: JSON.stringify({ query, variables }),
     });
   } catch (e) {
-    return { ok: false, status: 0, errorMessage: `network_error: ${(e as Error).message}` };
+    // The request may already have reached Buffer - treat as ambiguous.
+    return { ok: false, status: 0, errorMessage: `network_error: ${(e as Error).message}`, phase: "transport" };
   }
 
   let body: any = null;
@@ -51,12 +54,13 @@ export async function bufferGraphQL<T = any>(
       ok: false,
       status: res.status,
       errorMessage: body?.errors?.[0]?.message ?? `http_${res.status}`,
+      phase: "response",
     };
   }
   if (body?.errors?.length) {
-    return { ok: false, status: res.status, errorMessage: String(body.errors[0]?.message ?? "graphql_error") };
+    return { ok: false, status: res.status, errorMessage: String(body.errors[0]?.message ?? "graphql_error"), phase: "response" };
   }
-  return { ok: true, status: res.status, data: body?.data as T };
+  return { ok: true, status: res.status, data: body?.data as T, phase: "response" };
 }
 
 export const ORGANIZATIONS_QUERY = `query { account { organizations { id name ownerEmail } } }`;
