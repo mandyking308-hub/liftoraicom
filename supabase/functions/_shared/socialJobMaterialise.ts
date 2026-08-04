@@ -6,7 +6,7 @@
  * than the manual social-publish-job-create path.
  */
 import { buildJobIdempotencyKey, evaluateCalendarItem, evaluateContentItem, type EligibilityCheck } from "./socialPublishLogic.ts";
-import { buildPayloadSnapshot, resolveJobPayload } from "./socialPayloadResolver.ts";
+import { buildPayloadSnapshot, evaluateApprovalReview, resolveJobPayload } from "./socialPayloadResolver.ts";
 import { audit } from "./socialDistributionDb.ts";
 
 export interface MaterialiseResult {
@@ -38,8 +38,18 @@ export async function materialiseJobsForReviews(
   // 2. Materialise missing ones from the approved content / calendar items.
   for (const review of reviews) {
     if (covered.has(review.id)) continue;
-    const contentId = review.content_item_id ?? null;
-    const calendarId = review.calendar_item_id ?? null;
+
+    // Never trust a caller-supplied review object: re-fetch the authoritative
+    // row scoped to this business and validate it before creating anything.
+    const { data: authoritative } = await admin.from("social_approval_reviews").select("*")
+      .eq("id", review.id).eq("business_id", business_id).maybeSingle();
+    const reviewBlockers = evaluateApprovalReview(authoritative, business_id);
+    if (reviewBlockers.length) {
+      out.blocked++; out.blockers.push({ source_id: review.id, blockers: reviewBlockers });
+      continue;
+    }
+    const contentId = authoritative.content_item_id ?? null;
+    const calendarId = authoritative.calendar_item_id ?? null;
     if (!contentId && !calendarId) {
       out.blocked++; out.blockers.push({ source_id: review.id, blockers: ["review_has_no_content_source"] });
       continue;
@@ -67,13 +77,18 @@ export async function materialiseJobsForReviews(
     }
 
     const idem = buildJobIdempotencyKey(check);
-    const { data: existing } = await admin.from("social_publish_jobs").select("*").eq("idempotency_key", idem).maybeSingle();
-    if (existing) {
+    const { data: existing } = await admin.from("social_publish_jobs").select("*")
+      .eq("business_id", business_id).eq("idempotency_key", idem).maybeSingle();
+    if (existing && existing.business_id === business_id) {
       if (!existing.approval_review_id) {
-        await admin.from("social_publish_jobs").update({ approval_review_id: review.id }).eq("id", existing.id);
+        await admin.from("social_publish_jobs").update({ approval_review_id: review.id })
+          .eq("id", existing.id).eq("business_id", business_id);
         existing.approval_review_id = review.id;
       }
       out.jobs.push(existing); out.existing++;
+      continue;
+    } else if (existing) {
+      out.blocked++; out.blockers.push({ source_id: check.source_id, blockers: ["cross_business_job_conflict"] });
       continue;
     }
 
