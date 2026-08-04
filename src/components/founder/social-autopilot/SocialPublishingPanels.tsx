@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
+import { SocialDistributionFabricDashboard } from "./SocialDistributionFabricPanels";
 
 async function call(path: string, init: RequestInit) {
   const { data: sess } = await supabase.auth.getSession();
@@ -241,6 +242,7 @@ export function SocialPublishingDashboard({ businessId }: { businessId: string }
   return (
     <div className="space-y-4">
       <SocialPublishingHealthPanel businessId={businessId} />
+      <SocialDistributionFabricDashboard businessId={businessId} />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <SocialPublishQueuePreviewPanel businessId={businessId} />
         <SocialPublishBatchPanel businessId={businessId} />
