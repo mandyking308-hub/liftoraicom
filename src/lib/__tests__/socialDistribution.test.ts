@@ -1,7 +1,8 @@
 import { describe, it, expect } from "vitest";
 import {
-  buildCreatePostInput, buildDistributionIdempotencyKey, classifyProviderError,
-  computeNextRetryAt, evaluateSubmission, isDurableMediaUrl, summariseStatuses,
+  buildAssets, buildCreatePostInput, buildDistributionIdempotencyKey, classifyAssetKind, classifyProviderError,
+  computeNextRetryAt, evaluateSubmission, isDurableMediaUrl, parsePostsConnection,
+  shouldAutoDispatch, summariseStatuses,
   type SubmissionContext,
 } from "../../../supabase/functions/_shared/socialDistributionLogic";
 
@@ -77,20 +78,63 @@ describe("social distribution fabric", () => {
     expect(a).not.toBe(c);
   });
 
-  it("builds a customScheduled Buffer input with assets and no linkAttachment mixing", () => {
+  it("builds a customScheduled Buffer input with the image asset union and no organizationId", () => {
     const input = buildCreatePostInput({
-      organizationId: "org", channelId: "ch", text: "hi", dueAt: future,
+      channelId: "ch", text: "hi", dueAt: future,
       mediaUrls: ["https://cdn.example.com/a.jpg"], linkAttachment: { url: "https://x.com" },
     });
     expect(input.mode).toBe("customScheduled");
     expect(input.schedulingType).toBe("automatic");
     expect(input.dueAt).toBe(future);
-    expect(input.assets).toEqual([{ source: { url: "https://cdn.example.com/a.jpg" } }]);
+    expect(input.organizationId).toBeUndefined();
+    expect(input.assets).toEqual([{ image: { url: "https://cdn.example.com/a.jpg" } }]);
     expect(input.linkAttachment).toBeUndefined();
   });
 
+  it("builds video assets preserving metadata and classifies by type/MIME/extension", () => {
+    const { assets, blockers } = buildAssets([
+      { url: "https://cdn.example.com/a.mp4", mime_type: "video/mp4", metadata: { duration: 12 } },
+      { url: "https://cdn.example.com/doc", type: "pdf" },
+    ]);
+    expect(blockers).toEqual([]);
+    expect(assets[0]).toEqual({ video: { url: "https://cdn.example.com/a.mp4", metadata: { duration: 12 } } });
+    expect(assets[1]).toEqual({ document: { url: "https://cdn.example.com/doc" } });
+    expect(classifyAssetKind({ url: "https://cdn.example.com/a.png" })).toBe("image");
+    expect(classifyAssetKind({ url: "https://cdn.example.com/a.xyz" })).toBe("unknown");
+  });
+
+  it("blocks unknown or unsupported media types instead of guessing", () => {
+    expect(buildAssets([{ url: "https://cdn.example.com/file.xyz" }]).blockers).toContain("unsupported_media_type");
+    expect(buildAssets([{ url: "https://cdn.example.com/a", mime_type: "application/zip" }]).blockers).toContain("unsupported_media_type");
+    expect(evaluateSubmission(base({ media_urls: [{ url: "https://cdn.example.com/f.xyz" }] })).blockers)
+      .toContain("unsupported_media_type");
+  });
+
+  it("only auto-dispatches on approved_batch_autopilot, never in test/approval_required/paused", () => {
+    expect(shouldAutoDispatch("test", false).go).toBe(false);
+    expect(shouldAutoDispatch("approval_required", false).go).toBe(false);
+    expect(shouldAutoDispatch("paused", false).go).toBe(false);
+    expect(shouldAutoDispatch("approved_batch_autopilot", true).go).toBe(false);
+    expect(shouldAutoDispatch("approved_batch_autopilot", false).go).toBe(true);
+  });
+
+  it("keeps approval-driven dispatch blocked for locked gate or missing mapping and idempotent on repeat", () => {
+    const auto = base({ policy_mode: "approved_batch_autopilot" });
+    expect(evaluateSubmission({ ...auto, gate_unlocked: false }).blockers).toContain("execution_gate_locked");
+    expect(evaluateSubmission({ ...auto, channel: null }).blockers).toContain("channel_not_mapped");
+    const submitted = evaluateSubmission({ ...auto, job: { ...auto.job, provider_post_id: "buffer-1" } });
+    expect(submitted.blockers).toContain("already_submitted");
+    expect(submitted.eligible).toBe(false);
+  });
+
+  it("parses the current posts connection shape without inventing statuses", () => {
+    expect(parsePostsConnection({ posts: { edges: [{ node: { id: "1", status: "sent" } }, { node: {} }] } }))
+      .toEqual([{ id: "1", status: "sent", dueAt: null, channelId: null }]);
+    expect(parsePostsConnection({ posts: [] })).toEqual([]);
+  });
+
   it("uses shareNow only when explicitly selected", () => {
-    const input = buildCreatePostInput({ organizationId: "o", channelId: "c", text: "t", shareNow: true });
+    const input = buildCreatePostInput({ channelId: "c", text: "t", shareNow: true });
     expect(input.mode).toBe("shareNow");
     expect(input.dueAt).toBeUndefined();
   });

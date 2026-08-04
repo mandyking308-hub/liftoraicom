@@ -1,4 +1,5 @@
 import { corsHeaders, json, requireFounder } from "../_shared/socialAuth.ts";
+import { autoDispatchApprovedBatch } from "../_shared/socialDistributionAuto.ts";
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   const a = await requireFounder(req); if ("error" in a) return a.error;
@@ -31,5 +32,17 @@ Deno.serve(async (req) => {
     applied++;
   }
   await a.admin.from("social_approval_batches").update({ batch_status: applied === reviews?.length ? "approved_internal" : "partially_approved", approved_count: applied }).eq("id", body.batch_id);
-  return json({ ok:true, applied, excluded_for_individual_review: excluded_ids.length, no_external_action:true, no_publish_job_created:true });
+
+  // Approval-driven autopilot: the founder's batch approval is the
+  // authorisation event. Runs server-side, reuses every distribution check.
+  let auto_dispatch: unknown = { attempted: false, reason: "not_an_approval" };
+  if (decision === "approve" && applied > 0) {
+    auto_dispatch = await autoDispatchApprovedBatch(a.admin, {
+      business_id,
+      batch_id: body.batch_id,
+      review_ids: safe.map((r: any) => r.id),
+    });
+  }
+
+  return json({ ok:true, applied, excluded_for_individual_review: excluded_ids.length, auto_dispatch, no_publish_job_created:true });
 });

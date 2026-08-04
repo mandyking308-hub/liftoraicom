@@ -67524,6 +67524,15 @@ export type Database = {
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      social_claim_distribution_job: {
+        Args: {
+          p_business_id: string
+          p_channel_id: string
+          p_idempotency_key: string
+          p_job_id: string
+        }
+        Returns: boolean
+      }
       suggest_replacement_supplier: {
         Args: { _assignment_id: string }
         Returns: {

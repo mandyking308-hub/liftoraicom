@@ -88,21 +88,25 @@ export async function submitJob(
     return { job_id: job.id, ok: false, status: "blocked", blockers: ["buffer_api_key_missing"] };
   }
 
-  // Idempotency: claim the key before calling the provider.
-  const { error: claimError } = await admin.from("social_publish_jobs").update({
-    distribution_idempotency_key: ev.idempotency_key,
-    distribution_status: "submitting",
-    mapped_channel_id: ev.channel_id,
-    attempt_count: (job.attempt_count ?? 0) + 1,
-    last_attempt_at: new Date().toISOString(),
-  }).eq("id", job.id).is("provider_post_id", null);
-  if (claimError) {
-    return { job_id: job.id, ok: false, status: "duplicate", blockers: ["idempotency_conflict"], error: claimError.message };
+  // Idempotency: atomically claim the job via an RPC that updates exactly one
+  // unclaimed row and reports whether the claim succeeded. Two simultaneous
+  // clicks or approval events can never both reach Buffer.
+  const { data: claimed, error: claimError } = await admin.rpc("social_claim_distribution_job", {
+    p_job_id: job.id,
+    p_business_id: business_id,
+    p_idempotency_key: ev.idempotency_key,
+    p_channel_id: ev.channel_id,
+  });
+  if (claimError || claimed !== true) {
+    await audit(admin, {
+      business_id, publish_job_id: job.id, action: "distribution_claim_rejected",
+      result_json: { reason: claimError?.message ?? "already_claimed" },
+    });
+    return { job_id: job.id, ok: false, status: "duplicate", blockers: ["idempotency_conflict"], error: claimError?.message ?? "already_claimed" };
   }
 
   const { data: channelRow } = await admin.from("social_provider_channels").select("external_channel_id").eq("id", ev.channel_id).maybeSingle();
   const input = buildCreatePostInput({
-    organizationId: ctx.connection.provider_organization_id,
     channelId: channelRow?.external_channel_id,
     text: jobText(job),
     dueAt: job.scheduled_for,

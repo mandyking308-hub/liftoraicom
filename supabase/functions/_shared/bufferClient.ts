@@ -4,7 +4,7 @@
  * logged, or persisted.
  */
 
-const DEFAULT_ENDPOINT = "https://api.buffer.com/graphql";
+const DEFAULT_ENDPOINT = "https://api.buffer.com";
 
 export function bufferKeyPresent(): boolean {
   return !!(Deno.env.get("BUFFER_API_KEY") ?? "").trim();
@@ -74,9 +74,23 @@ export const CREATE_POST_MUTATION = `mutation CreatePost($input: CreatePostInput
   }
 }`;
 
+/**
+ * Buffer exposes posts as a relay-style connection. The precise supported
+ * filter input for the current schema is NOT proven from a local schema
+ * document, so reconciliation stays disabled unless an operator explicitly
+ * sets BUFFER_POSTS_QUERY_VERIFIED=true after validating the query.
+ */
 export const POSTS_QUERY = `query GetPosts($organizationId: OrganizationId!) {
-  posts(input:{organizationId:$organizationId}) { id status dueAt channelId }
+  posts(input:{organizationId:$organizationId}) {
+    edges { node { id status dueAt channelId } }
+  }
 }`;
+
+export function postsQueryVerified(): boolean {
+  return (Deno.env.get("BUFFER_POSTS_QUERY_VERIFIED") ?? "").trim().toLowerCase() === "true";
+}
+
+export { parsePostsConnection } from "./socialDistributionLogic.ts";
 
 /** Normalises a createPost payload into a typed result, never inventing success. */
 export function readCreatePostResult(data: any): { postId?: string; status?: string; dueAt?: string; error?: string } {
