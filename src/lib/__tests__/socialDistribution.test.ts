@@ -1,11 +1,10 @@
 import { describe, it, expect } from "vitest";
 import {
   buildAssets, buildCreatePostInput, buildDistributionIdempotencyKey, classifyAssetKind, classifyProviderError,
-  computeNextRetryAt, evaluateSubmission, isDurableMediaUrl, summariseStatuses,
+  computeNextRetryAt, evaluateSubmission, isDurableMediaUrl, parsePostsConnection,
+  shouldAutoDispatch, summariseStatuses,
   type SubmissionContext,
 } from "../../../supabase/functions/_shared/socialDistributionLogic";
-import { shouldAutoDispatch } from "../../../supabase/functions/_shared/socialDistributionAuto";
-import { parsePostsConnection } from "../../../supabase/functions/_shared/bufferClient";
 
 const future = new Date(Date.now() + 3600_000).toISOString();
 
