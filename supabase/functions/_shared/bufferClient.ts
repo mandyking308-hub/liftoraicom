@@ -6,12 +6,17 @@
 
 const DEFAULT_ENDPOINT = "https://api.buffer.com";
 
+/** Runtime-agnostic env read (the shared logic is also imported by the test suite). */
+function envGet(name: string): string {
+  return (globalThis as any).Deno?.env?.get(name) ?? "";
+}
+
 export function bufferKeyPresent(): boolean {
-  return !!(Deno.env.get("BUFFER_API_KEY") ?? "").trim();
+  return !!envGet("BUFFER_API_KEY").trim();
 }
 
 export function bufferEndpoint(): string {
-  return (Deno.env.get("BUFFER_GRAPHQL_URL") ?? "").trim() || DEFAULT_ENDPOINT;
+  return envGet("BUFFER_GRAPHQL_URL").trim() || DEFAULT_ENDPOINT;
 }
 
 export interface GqlResult<T> {
@@ -27,7 +32,7 @@ export async function bufferGraphQL<T = any>(
   query: string,
   variables: Record<string, unknown> = {},
 ): Promise<GqlResult<T>> {
-  const key = (Deno.env.get("BUFFER_API_KEY") ?? "").trim();
+  const key = envGet("BUFFER_API_KEY").trim();
   if (!key) return { ok: false, status: 0, errorMessage: "buffer_api_key_missing", phase: "preflight" };
 
   let res: Response;
@@ -91,7 +96,7 @@ export const POSTS_QUERY = `query GetPosts($organizationId: OrganizationId!) {
 }`;
 
 export function postsQueryVerified(): boolean {
-  return (Deno.env.get("BUFFER_POSTS_QUERY_VERIFIED") ?? "").trim().toLowerCase() === "true";
+  return envGet("BUFFER_POSTS_QUERY_VERIFIED").trim().toLowerCase() === "true";
 }
 
 export { parsePostsConnection } from "./socialDistributionLogic.ts";
