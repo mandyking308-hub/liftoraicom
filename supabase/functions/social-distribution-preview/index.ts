@@ -9,12 +9,13 @@ Deno.serve(async (req) => {
   const url = new URL(req.url);
   const business_id = body.business_id ?? url.searchParams.get("business_id");
   if (!business_id) return json({ ok: false, error: "business_id_required" }, 400);
-  const batch_id = body.batch_id ?? null;
+  // Publish QUEUE batch ID only (never a social_approval_batches.id).
+  const publish_queue_batch_id = body.publish_queue_batch_id ?? body.batch_id ?? null;
   const job_ids: string[] | null = body.job_ids ?? null;
 
   const ctx = await loadContext(a.admin, business_id);
   let q = a.admin.from("social_publish_jobs").select("*").eq("business_id", business_id).limit(200);
-  if (batch_id) q = q.eq("queue_batch_id", batch_id);
+  if (publish_queue_batch_id) q = q.eq("queue_batch_id", publish_queue_batch_id);
   if (job_ids?.length) q = q.in("id", job_ids);
   const { data: jobs } = await q;
 

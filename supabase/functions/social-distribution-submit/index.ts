@@ -8,10 +8,12 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   const a = await requireFounder(req); if ("error" in a) return a.error;
   let body: any = {}; try { body = await req.json(); } catch {}
-  const { business_id, job_ids, batch_id, share_now = false, confirmation_phrase, dry_run = false } = body;
+  const { business_id, job_ids, share_now = false, confirmation_phrase, dry_run = false } = body;
+  // Publish QUEUE batch (social_publish_queue_batches.id) - not an approval batch ID.
+  const publish_queue_batch_id = body.publish_queue_batch_id ?? body.batch_id ?? null;
   if (!business_id) return json({ ok: false, error: "business_id_required" }, 400);
-  if (!batch_id && !(Array.isArray(job_ids) && job_ids.length)) {
-    return json({ ok: false, error: "job_ids_or_batch_id_required" }, 400);
+  if (!publish_queue_batch_id && !(Array.isArray(job_ids) && job_ids.length)) {
+    return json({ ok: false, error: "job_ids_or_publish_queue_batch_id_required" }, 400);
   }
   if (dry_run) return json({ ok: true, dry_run: true, message: "Use social-distribution-preview for a full dry run." });
   if (confirmation_phrase !== PHRASE) return json({ ok: false, error: "confirmation_phrase_required", phrase_required: PHRASE }, 400);
@@ -20,7 +22,7 @@ Deno.serve(async (req) => {
   if (ctx.paused) return json({ ok: false, error: "emergency_pause_active" }, 409);
 
   let q = a.admin.from("social_publish_jobs").select("*").eq("business_id", business_id).limit(ctx.policy.max_batch_size);
-  if (batch_id) q = q.eq("queue_batch_id", batch_id);
+  if (publish_queue_batch_id) q = q.eq("queue_batch_id", publish_queue_batch_id);
   if (job_ids?.length) q = q.in("id", job_ids);
   const { data: jobs } = await q;
   if (!jobs?.length) return json({ ok: false, error: "no_jobs_found" }, 404);
@@ -29,7 +31,7 @@ Deno.serve(async (req) => {
   for (const j of jobs) results.push(await submitJob(a.admin, business_id, j, ctx, share_now));
 
   await audit(a.admin, {
-    business_id, queue_batch_id: batch_id ?? null, action: "distribution_batch_submit",
+    business_id, queue_batch_id: publish_queue_batch_id, action: "distribution_batch_submit",
     provider_calls: results.filter((r) => r.status !== "blocked").length,
     posts_scheduled: results.filter((r) => r.status === "scheduled").length,
     result_json: { total: results.length, ok: results.filter((r) => r.ok).length },
