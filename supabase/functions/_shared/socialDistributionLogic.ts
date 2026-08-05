@@ -645,3 +645,46 @@ export function mapProviderStatus(status?: string | null): DistributionStatus | 
   if (!key) return null;
   return PROVIDER_STATUS_MAP[key] ?? null;
 }
+
+/* ------------------------------------------------------------------ */
+/* Unattended maintenance selection (bounded, retry-safe only)         */
+/* ------------------------------------------------------------------ */
+
+export interface MaintenanceJobCandidate {
+  id: string;
+  distribution_status?: string | null;
+  next_retry_at?: string | null;
+  provider_post_id?: string | null;
+}
+
+/**
+ * Retry-safe jobs whose backoff has elapsed.
+ * `submission_unknown` is NEVER selected — Buffer may already hold the post.
+ */
+export function selectRetryDueJobs<T extends MaintenanceJobCandidate>(
+  jobs: T[],
+  now: Date = new Date(),
+  limit = 25,
+): T[] {
+  return jobs
+    .filter((j) => {
+      if (j.provider_post_id) return false;
+      if ((j.distribution_status ?? "") !== "retrying") return false;
+      if (!j.next_retry_at) return false;
+      const t = new Date(j.next_retry_at).getTime();
+      return !Number.isNaN(t) && t <= now.getTime();
+    })
+    .sort((a, b) => new Date(a.next_retry_at ?? 0).getTime() - new Date(b.next_retry_at ?? 0).getTime())
+    .slice(0, Math.max(0, limit));
+}
+
+/** Bounded set of provider-side jobs worth reconciling. */
+export function selectReconcileCandidates<T extends MaintenanceJobCandidate>(
+  jobs: T[],
+  limit = 100,
+): T[] {
+  const wanted = ["scheduled", "draft_in_provider", "submission_unknown", "submitting"];
+  return jobs
+    .filter((j) => !!j.provider_post_id && wanted.includes(j.distribution_status ?? ""))
+    .slice(0, Math.max(0, limit));
+}
