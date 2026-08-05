@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 export default function SocialAutopilotDiagnosticsPanel() {
   const [providers, setProviders] = useState<any[]>([]);
   const [health, setHealth] = useState<any>(null);
+  const [dist, setDist] = useState<any>(null);
   const [brain, setBrain] = useState<{ sources: number; extractions: number; logs: number; profile: any } | null>(null);
 
   useEffect(() => {
@@ -21,6 +22,16 @@ export default function SocialAutopilotDiagnosticsPanel() {
         const h = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/social-autopilot-healthcheck${businessId ? `?business_id=${businessId}` : ""}`, { headers });
         setHealth(await h.json());
       } catch { /* */ }
+      if (businessId) {
+        try {
+          const d = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/social-distribution-health`, {
+            method: "POST",
+            headers: { ...headers, "Content-Type": "application/json" },
+            body: JSON.stringify({ business_id: businessId }),
+          });
+          setDist(await d.json());
+        } catch { /* */ }
+      }
       if (businessId) {
         const [{ count: sc }, { count: ec }, { count: lc }, { data: prof }] = await Promise.all([
           supabase.from("business_social_knowledge_sources").select("id", { count: "exact", head: true }).eq("business_id", businessId),
