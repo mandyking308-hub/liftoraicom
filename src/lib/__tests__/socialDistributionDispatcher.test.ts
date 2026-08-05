@@ -217,17 +217,18 @@ describe("dispatcher safety", () => {
   });
 
   it("retries a transient rate limit and then succeeds", async () => {
-    const admin = makeAdmin(baseDb());
+    const db = baseDb();
+    const admin = makeAdmin(db);
     (globalThis as any).fetch = vi.fn(async () => new Response(JSON.stringify({ errors: [{ message: "rate limit" }] }), { status: 429 }));
     const ctx = await loadContext(admin, BIZ);
     const first: any = await submitJob(admin, BIZ, job(), ctx);
     expect(first.status).toBe("retrying");
     mockBuffer("buf-retry");
-    const stored = (admin as any).from("social_publish_jobs");
-    const retried: any = await submitJob(admin, BIZ, job({ attempt_count: 1 }), ctx);
+    // Claim is released on a transient failure; a later dispatcher pass retries.
+    const retryAdmin = makeAdmin(db);
+    const retried: any = await submitJob(retryAdmin, BIZ, job({ attempt_count: 1 }), ctx);
     expect(retried.ok).toBe(true);
     expect(retried.provider_post_id).toBe("buf-retry");
-    expect(stored).toBeTruthy();
   });
 
   it("kill switch stops all provider calls without deleting the job", async () => {
