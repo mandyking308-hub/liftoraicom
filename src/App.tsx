@@ -818,6 +818,7 @@ import ClientPortal from "./pages/founder/ClientPortal";
 import CreativeAssetsHub from "./pages/founder/CreativeAssetsHub";
 import SocialBrain from "./pages/founder/SocialBrain";
 import SocialAutopilotPage from "./pages/founder/SocialAutopilotPage";
+import SocialRelationshipsPage from "./pages/founder/SocialRelationshipsPage";
 import FounderCoPilot from "./pages/founder/FounderCoPilot";
 import PlatformTesting from "./pages/founder/PlatformTesting";
 import FounderLegalConsole from "./pages/founder/FounderLegalConsole";
@@ -1703,6 +1704,13 @@ const App = () => (
             <Route path="/founder/social-autopilot/settings" element={<FounderRoute><SocialAutopilotPage /></FounderRoute>} />
             <Route path="/founder/social-autopilot/funnels" element={<FounderRoute><SocialAutopilotPage /></FounderRoute>} />
             <Route path="/founder/social-autopilot/ads" element={<FounderRoute><SocialAutopilotPage /></FounderRoute>} />
+            <Route path="/founder/social-relationships" element={<FounderRoute><SocialRelationshipsPage /></FounderRoute>} />
+            <Route path="/founder/social-relationships/connections" element={<FounderRoute><SocialRelationshipsPage /></FounderRoute>} />
+            <Route path="/founder/social-relationships/discovery" element={<FounderRoute><SocialRelationshipsPage /></FounderRoute>} />
+            <Route path="/founder/social-relationships/targets" element={<FounderRoute><SocialRelationshipsPage /></FounderRoute>} />
+            <Route path="/founder/social-relationships/queue" element={<FounderRoute><SocialRelationshipsPage /></FounderRoute>} />
+            <Route path="/founder/social-relationships/inbox" element={<FounderRoute><SocialRelationshipsPage /></FounderRoute>} />
+            <Route path="/founder/social-relationships/policies" element={<FounderRoute><SocialRelationshipsPage /></FounderRoute>} />
             <Route path="/founder/copilot" element={<FounderRoute><FounderCoPilot /></FounderRoute>} />
             <Route path="/founder/testing" element={<FounderRoute><PlatformTesting /></FounderRoute>} />
             <Route path="/founder/legal" element={<FounderRoute><FounderLegalConsole /></FounderRoute>} />
