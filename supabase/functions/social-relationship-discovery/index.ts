@@ -1,6 +1,12 @@
 import { corsHeaders, json, requireFounder, loadContext, audit } from "../_shared/socialRelationshipDb.ts";
 import { getRelationshipAdapter } from "../_shared/socialRelationshipProvider.ts";
-import { capabilityMap, actionSupported, scoreProfile, crmDedupeKey } from "../_shared/socialRelationshipLogic.ts";
+import {
+  capabilityMap,
+  actionSupported,
+  externalCallsAllowed,
+  scoreProfile,
+  crmDedupeKey,
+} from "../_shared/socialRelationshipLogic.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -29,9 +35,14 @@ Deno.serve(async (req) => {
   if (!account) return json({ ok: false, error: "account_not_found" }, 404);
 
   const caps = capabilityMap(
-    (await a.admin.from("social_relationship_capabilities").select("capability, supported").eq("account_id", account.id)).data ?? [],
+    (await a.admin
+      .from("social_relationship_capabilities")
+      .select("capability, supported")
+      .eq("business_id", business_id)
+      .eq("account_id", account.id)).data ?? [],
   );
-  const supported = actionSupported(caps, "sync_profile");
+  // Discovery needs a real profile_search capability — never simulate it.
+  const supported = { supported: caps.profile_search === true, reason: "profile_search_unsupported" };
 
   const { data: search } = await a.admin
     .from("social_relationship_searches")
@@ -44,6 +55,7 @@ Deno.serve(async (req) => {
 
   const blockers: string[] = [];
   if (!supported.supported) blockers.push("capability_unsupported:profile_search");
+  if (!externalCallsAllowed(ctx.mode)) blockers.push(`mode_blocks_external_calls:${ctx.mode}`);
   if (!ctx.connection?.last_test_ok) blockers.push("provider_not_connected");
   const paused = ctx.pauses.some((p: any) => p.is_paused && (p.scope === "global" || p.business_id === business_id));
   if (paused) blockers.push("paused");

@@ -1,5 +1,5 @@
 import { corsHeaders, json, requireFounder, audit } from "../_shared/socialRelationshipDb.ts";
-import { scoreProfile } from "../_shared/socialRelationshipLogic.ts";
+import { normaliseSuppressionReason, scoreProfile } from "../_shared/socialRelationshipLogic.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
     const { data: profiles } = await a.admin.from("social_relationship_profiles").select("*").in("id", profile_ids).eq("business_id", business_id);
     let added = 0, skipped = 0;
     for (const p of profiles ?? []) {
-      const { data: exists } = await a.admin.from("social_relationship_targets").select("id").eq("target_list_id", target_list_id).eq("profile_id", p.id).maybeSingle();
+      const { data: exists } = await a.admin.from("social_relationship_targets").select("id").eq("business_id", business_id).eq("target_list_id", target_list_id).eq("profile_id", p.id).maybeSingle();
       if (exists) { skipped++; continue; }
       const { score, reasons } = scoreProfile(p, body.criteria ?? {});
       await a.admin.from("social_relationship_targets").insert({
@@ -57,8 +57,8 @@ Deno.serve(async (req) => {
       });
       added++;
     }
-    const { count } = await a.admin.from("social_relationship_targets").select("id", { count: "exact", head: true }).eq("target_list_id", target_list_id);
-    await a.admin.from("social_relationship_target_lists").update({ targets_count: count ?? 0 }).eq("id", target_list_id);
+    const { count } = await a.admin.from("social_relationship_targets").select("id", { count: "exact", head: true }).eq("business_id", business_id).eq("target_list_id", target_list_id);
+    await a.admin.from("social_relationship_target_lists").update({ targets_count: count ?? 0 }).eq("id", target_list_id).eq("business_id", business_id);
     await audit(a.admin, { business_id, event: "target_list_populated", actor: "founder", actor_user_id: a.user.id, detail: { target_list_id, added, skipped } });
     return json({ ok: true, added, skipped, targets_count: count ?? 0 });
   }
@@ -97,7 +97,7 @@ Deno.serve(async (req) => {
       provider_profile_id: body.provider_profile_id ?? null,
       profile_url: body.profile_url ?? null,
       email: body.email ?? null,
-      reason: String(body.reason ?? "founder_suppressed"),
+      reason: normaliseSuppressionReason(body.reason),
       detail: body.detail ?? null,
       created_by: a.user.id,
     }).select("*").maybeSingle();
@@ -106,7 +106,11 @@ Deno.serve(async (req) => {
   }
 
   if (action === "list_suppressions") {
-    const { data } = await a.admin.from("social_relationship_suppressions").select("*").order("created_at", { ascending: false }).limit(200);
+    const { data } = await a.admin
+      .from("social_relationship_suppressions")
+      .select("*")
+      .or(`business_id.eq.${business_id},business_id.is.null`)
+      .order("created_at", { ascending: false }).limit(200);
     return json({ ok: true, suppressions: data ?? [] });
   }
 

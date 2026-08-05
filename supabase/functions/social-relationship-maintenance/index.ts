@@ -37,6 +37,8 @@ Deno.serve(async (req) => {
     limit: Number(body.limit ?? 10),
     now,
     actor: "maintenance",
+    // Unattended dispatch is permitted ONLY under approved_batch_autopilot.
+    require_autopilot: true,
   });
 
   await audit(admin, {
