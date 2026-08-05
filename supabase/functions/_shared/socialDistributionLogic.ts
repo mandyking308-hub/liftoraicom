@@ -6,7 +6,12 @@
  * truth, no drift).
  */
 
-export type PolicyMode = "test" | "approval_required" | "approved_batch_autopilot" | "paused";
+export type PolicyMode =
+  | "test"
+  | "approval_required"
+  | "draft_to_buffer"
+  | "approved_batch_autopilot"
+  | "paused";
 
 /** Per-channel distribution mode. Every mapping starts at OFF. */
 export type ChannelDispatchMode = "OFF" | "DRAFT_TO_BUFFER" | "AUTO_SCHEDULE";
@@ -21,9 +26,25 @@ export function normaliseDispatchMode(value?: string | null): ChannelDispatchMod
 export const POLICY_MODES: PolicyMode[] = [
   "test",
   "approval_required",
+  "draft_to_buffer",
   "approved_batch_autopilot",
   "paused",
 ];
+
+/**
+ * Effective per-job mode. A `draft_to_buffer` business policy forces every
+ * mapped channel to the draft path (it can never publish or schedule), while
+ * OFF channels stay OFF. Any other policy defers to the channel mode.
+ */
+export function resolveEffectiveDispatchMode(
+  policy_mode: PolicyMode | string,
+  channel_mode?: string | null,
+): ChannelDispatchMode {
+  const channel = normaliseDispatchMode(channel_mode);
+  if (channel === "OFF") return "OFF";
+  if (policy_mode === "draft_to_buffer") return "DRAFT_TO_BUFFER";
+  return channel;
+}
 
 export type DistributionStatus =
   | "not_submitted"
@@ -392,6 +413,9 @@ export interface DistributionHealthInput {
   last_dispatch_run_at?: string | null;
   last_dispatch_failed?: boolean;
   dispatcher_schedule_registered: boolean;
+  /** Last unattended maintenance (retry + reconcile) heartbeat, if any. */
+  last_maintenance_run_at?: string | null;
+  maintenance_schedule_registered?: boolean;
   failed_jobs?: number;
   now?: Date;
 }
@@ -401,6 +425,7 @@ export interface DistributionHealth {
   reason: string;
   detail: string;
   dispatcher: "LIVE" | "STALE" | "CONFIGURATION_REQUIRED" | "FAILING";
+  maintenance: "LIVE" | "STALE" | "CONFIGURATION_REQUIRED";
 }
 
 /** Dispatcher is considered healthy if it reported within this window. */
@@ -417,34 +442,55 @@ export function computeDistributionHealth(i: DistributionHealthInput): Distribut
       : fresh ? "LIVE"
       : "STALE";
 
+  const lastMaint = i.last_maintenance_run_at ? new Date(i.last_maintenance_run_at).getTime() : null;
+  const maintFresh = lastMaint !== null && now.getTime() - lastMaint <= DISPATCH_HEARTBEAT_STALE_MS;
+  const maintenance: DistributionHealth["maintenance"] =
+    !i.maintenance_schedule_registered ? "CONFIGURATION_REQUIRED" : maintFresh ? "LIVE" : "STALE";
+
   if (i.paused) {
-    return { state: "BLOCKED", reason: "emergency_pause_active", detail: "Kill switch engaged — no provider calls are made. Queued content is untouched.", dispatcher };
+    return { state: "BLOCKED", reason: "emergency_pause_active", detail: "Kill switch engaged — no provider calls are made. Queued content is untouched.", dispatcher, maintenance };
   }
   if (!i.secrets_present) {
-    return { state: "NOT_CONFIGURED", reason: "buffer_secrets_missing", detail: "BUFFER_API_KEY / BUFFER_ORGANIZATION_ID are not set.", dispatcher };
+    return { state: "NOT_CONFIGURED", reason: "buffer_secrets_missing", detail: "BUFFER_API_KEY / BUFFER_ORGANIZATION_ID are not set.", dispatcher, maintenance };
   }
   if (!i.connection_ok || !i.organization_id_present) {
-    return { state: "NOT_CONFIGURED", reason: "provider_not_connected", detail: "Buffer connection has not been tested and an organisation selected.", dispatcher };
+    return { state: "NOT_CONFIGURED", reason: "provider_not_connected", detail: "Buffer connection has not been tested and an organisation selected.", dispatcher, maintenance };
   }
   if (i.mapped_channels === 0) {
-    return { state: "CONNECTED", reason: "no_channels_mapped", detail: "Buffer is reachable. Map at least one channel to this business.", dispatcher };
+    return { state: "CONNECTED", reason: "no_channels_mapped", detail: "Buffer is reachable. Map at least one channel to this business.", dispatcher, maintenance };
   }
   if (!i.gate_unlocked || i.policy_mode === "test" || i.policy_mode === "paused") {
-    return { state: "MAPPED", reason: !i.gate_unlocked ? "execution_gate_locked" : `policy_${i.policy_mode}`, detail: "Channels mapped. Arm the execution gate and leave test mode to allow provider calls.", dispatcher };
+    return { state: "MAPPED", reason: !i.gate_unlocked ? "execution_gate_locked" : `policy_${i.policy_mode}`, detail: "Channels mapped. Arm the execution gate and leave test mode to allow provider calls.", dispatcher, maintenance };
+  }
+  if (i.policy_mode === "draft_to_buffer") {
+    return {
+      state: "ARMED",
+      reason: "draft_to_buffer_mode",
+      detail: "Approved posts are handed to Buffer as DRAFTS only — nothing is scheduled or published.",
+      dispatcher, maintenance,
+    };
   }
   if (i.auto_schedule_channels === 0) {
-    return { state: "ARMED", reason: "no_auto_schedule_channels", detail: "Armed, but every channel is OFF or DRAFT_TO_BUFFER — nothing auto-schedules.", dispatcher };
+    return { state: "ARMED", reason: "no_auto_schedule_channels", detail: "Armed, but every channel is OFF or DRAFT_TO_BUFFER — nothing auto-schedules.", dispatcher, maintenance };
   }
   if (dispatcher === "CONFIGURATION_REQUIRED") {
-    return { state: "ARMED", reason: "dispatcher_schedule_missing", detail: "CONFIGURATION REQUIRED — the 5-minute dispatcher cron hook is not registered.", dispatcher };
+    return { state: "ARMED", reason: "dispatcher_schedule_missing", detail: "CONFIGURATION REQUIRED — the 5-minute dispatcher cron hook is not registered.", dispatcher, maintenance };
+  }
+  if (maintenance === "CONFIGURATION_REQUIRED") {
+    return { state: "ARMED", reason: "maintenance_schedule_missing", detail: "CONFIGURATION REQUIRED — the unattended maintenance (retry + reconcile) cron hook is not registered.", dispatcher, maintenance };
   }
   if (dispatcher === "FAILING" || (i.failed_jobs ?? 0) > 0) {
-    return { state: "DEGRADED", reason: dispatcher === "FAILING" ? "dispatcher_run_failed" : "failed_jobs_present", detail: "Distribution is live but the last run or some jobs failed.", dispatcher };
+    return { state: "DEGRADED", reason: dispatcher === "FAILING" ? "dispatcher_run_failed" : "failed_jobs_present", detail: "Distribution is live but the last run or some jobs failed.", dispatcher, maintenance };
   }
-  if (dispatcher === "STALE") {
-    return { state: "DEGRADED", reason: "dispatcher_heartbeat_stale", detail: "No dispatcher heartbeat in the last 30 minutes.", dispatcher };
+  if (dispatcher === "STALE" || maintenance === "STALE") {
+    return {
+      state: "DEGRADED",
+      reason: dispatcher === "STALE" ? "dispatcher_heartbeat_stale" : "maintenance_heartbeat_stale",
+      detail: "No scheduled heartbeat in the last 30 minutes.",
+      dispatcher, maintenance,
+    };
   }
-  return { state: "LIVE", reason: "ok", detail: "Approved jobs are being scheduled to Buffer automatically.", dispatcher };
+  return { state: "LIVE", reason: "ok", detail: "Approved jobs are being scheduled to Buffer automatically and maintained unattended.", dispatcher, maintenance };
 }
 
 export type ErrorClass = "transient" | "hard";
@@ -511,11 +557,21 @@ export function parsePostsConnection(
     }));
 }
 
+/** Relay page info for bounded reconciliation paging. */
+export function parsePostsPageInfo(data: any): { hasNextPage: boolean; endCursor: string | null } {
+  const pi = data?.posts?.pageInfo;
+  return { hasNextPage: !!pi?.hasNextPage, endCursor: pi?.endCursor ?? null };
+}
+
 /** Pure policy gate for approval-driven auto-dispatch. */
-export function shouldAutoDispatch(policyMode: string, paused: boolean): { go: boolean; reason?: string } {
+export function shouldAutoDispatch(
+  policyMode: string,
+  paused: boolean,
+): { go: boolean; reason?: string; mode?: "schedule" | "draft" } {
   if (paused) return { go: false, reason: "emergency_pause_active" };
+  if (policyMode === "draft_to_buffer") return { go: true, mode: "draft" };
   if (policyMode !== "approved_batch_autopilot") return { go: false, reason: `policy_${policyMode}` };
-  return { go: true };
+  return { go: true, mode: "schedule" };
 }
 
 /* ------------------------------------------------------------------ */
@@ -573,9 +629,20 @@ export function classifySubmissionOutcome(args: {
 /* ------------------------------------------------------------------ */
 
 const PROVIDER_STATUS_MAP: Record<string, DistributionStatus> = {
+  // Published
   sent: "sent",
-  error: "failed",
+  published: "sent",
+  // Waiting in Buffer (queued/scheduled)
   scheduled: "scheduled",
+  buffer: "scheduled",
+  queued: "scheduled",
+  pending: "scheduled",
+  // Provider-side draft
+  draft: "draft_in_provider",
+  drafts: "draft_in_provider",
+  // Provider-side failure
+  error: "failed",
+  failed: "failed",
 };
 
 /** Returns null for any unproven/unmapped provider status - never infers. */
@@ -583,4 +650,47 @@ export function mapProviderStatus(status?: string | null): DistributionStatus | 
   const key = String(status ?? "").trim().toLowerCase();
   if (!key) return null;
   return PROVIDER_STATUS_MAP[key] ?? null;
+}
+
+/* ------------------------------------------------------------------ */
+/* Unattended maintenance selection (bounded, retry-safe only)         */
+/* ------------------------------------------------------------------ */
+
+export interface MaintenanceJobCandidate {
+  id: string;
+  distribution_status?: string | null;
+  next_retry_at?: string | null;
+  provider_post_id?: string | null;
+}
+
+/**
+ * Retry-safe jobs whose backoff has elapsed.
+ * `submission_unknown` is NEVER selected — Buffer may already hold the post.
+ */
+export function selectRetryDueJobs<T extends MaintenanceJobCandidate>(
+  jobs: T[],
+  now: Date = new Date(),
+  limit = 25,
+): T[] {
+  return jobs
+    .filter((j) => {
+      if (j.provider_post_id) return false;
+      if ((j.distribution_status ?? "") !== "retrying") return false;
+      if (!j.next_retry_at) return false;
+      const t = new Date(j.next_retry_at).getTime();
+      return !Number.isNaN(t) && t <= now.getTime();
+    })
+    .sort((a, b) => new Date(a.next_retry_at ?? 0).getTime() - new Date(b.next_retry_at ?? 0).getTime())
+    .slice(0, Math.max(0, limit));
+}
+
+/** Bounded set of provider-side jobs worth reconciling. */
+export function selectReconcileCandidates<T extends MaintenanceJobCandidate>(
+  jobs: T[],
+  limit = 100,
+): T[] {
+  const wanted = ["scheduled", "draft_in_provider", "submission_unknown", "submitting"];
+  return jobs
+    .filter((j) => !!j.provider_post_id && wanted.includes(j.distribution_status ?? ""))
+    .slice(0, Math.max(0, limit));
 }

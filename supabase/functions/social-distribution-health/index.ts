@@ -7,7 +7,7 @@ import { corsHeaders, json, requireFounder } from "../_shared/socialAuth.ts";
 import { bufferKeyPresent } from "../_shared/bufferClient.ts";
 import { gateUnlocked, getConnection, getPolicy, isPaused } from "../_shared/socialDistributionDb.ts";
 import { computeDistributionHealth, normaliseDispatchMode, summariseStatuses } from "../_shared/socialDistributionLogic.ts";
-import { dispatchScheduleRegistered } from "../_shared/socialDispatchAuth.ts";
+import { dispatchScheduleRegistered, maintenanceScheduleRegistered } from "../_shared/socialDispatchAuth.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -25,16 +25,18 @@ Deno.serve(async (req) => {
     gateUnlocked(admin, business_id, provider),
   ]);
 
-  const [{ data: maps }, { data: jobs }, { data: runs }, { data: pauses }] = await Promise.all([
+  const [{ data: maps }, { data: jobs }, { data: runs }, { data: maintRuns }, { data: pauses }] = await Promise.all([
     admin.from("social_business_channel_map").select("dispatch_mode, active").eq("business_id", business_id).eq("provider", provider),
     admin.from("social_publish_jobs").select("distribution_status, next_retry_at, scheduled_for, provider_post_id").eq("business_id", business_id).limit(1000),
-    admin.from("social_distribution_dispatch_runs").select("*").eq("provider", provider).order("started_at", { ascending: false }).limit(1),
+    admin.from("social_distribution_dispatch_runs").select("*").eq("provider", provider).eq("trigger_source", "scheduler").order("started_at", { ascending: false }).limit(1),
+    admin.from("social_distribution_dispatch_runs").select("*").eq("provider", provider).eq("trigger_source", "scheduler_maintenance").order("started_at", { ascending: false }).limit(1),
     admin.from("social_distribution_pauses").select("scope, scope_key, paused, reason").eq("paused", true),
   ]);
 
   const activeMaps = (maps ?? []).filter((m: any) => m.active);
   const autoSchedule = activeMaps.filter((m: any) => normaliseDispatchMode(m.dispatch_mode) === "AUTO_SCHEDULE").length;
   const lastRun = (runs ?? [])[0] ?? null;
+  const lastMaint = (maintRuns ?? [])[0] ?? null;
   const totals = summariseStatuses(jobs ?? []);
   const now = Date.now();
   const due = (jobs ?? []).filter((j: any) =>
@@ -53,6 +55,8 @@ Deno.serve(async (req) => {
     last_dispatch_run_at: lastRun?.finished_at ?? lastRun?.started_at ?? null,
     last_dispatch_failed: lastRun?.run_status === "completed_with_errors" || lastRun?.run_status === "failed",
     dispatcher_schedule_registered: dispatchScheduleRegistered(),
+    last_maintenance_run_at: lastMaint?.finished_at ?? lastMaint?.started_at ?? null,
+    maintenance_schedule_registered: maintenanceScheduleRegistered(),
     failed_jobs: (totals.dead_letter ?? 0) + (totals.failed ?? 0),
   });
 
@@ -81,6 +85,12 @@ Deno.serve(async (req) => {
       schedule_registered: dispatchScheduleRegistered(),
       last_run_at: lastRun?.finished_at ?? lastRun?.started_at ?? null,
       last_run_status: lastRun?.run_status ?? null,
+    },
+    maintenance: {
+      status: health.maintenance,
+      schedule_registered: maintenanceScheduleRegistered(),
+      last_run_at: lastMaint?.finished_at ?? lastMaint?.started_at ?? null,
+      last_run_status: lastMaint?.run_status ?? null,
     },
   });
 });

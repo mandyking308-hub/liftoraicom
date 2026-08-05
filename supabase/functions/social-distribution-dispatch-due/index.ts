@@ -33,7 +33,7 @@ Deno.serve(async (req) => {
   let pq = admin.from("social_distribution_policies")
     .select("business_id, policy_mode, max_batch_size")
     .eq("provider", provider)
-    .eq("policy_mode", "approved_batch_autopilot")
+    .in("policy_mode", ["approved_batch_autopilot", "draft_to_buffer"])
     .limit(MAX_BUSINESSES);
   if (only_business_id) pq = pq.eq("business_id", only_business_id);
   const { data: policies, error: policyError } = await pq;
@@ -69,7 +69,10 @@ Deno.serve(async (req) => {
     const results: any[] = [];
     for (const job of due) {
       if (dry_run) { results.push({ job_id: job.id, status: "dry_run" }); continue; }
-      results.push(await submitJob(admin, business_id, job, ctx, false, { require_auto_schedule: true }));
+      results.push(await submitJob(admin, business_id, job, ctx, false, {
+        // draft_to_buffer businesses may only ever produce Buffer drafts.
+        allowed_modes: decision.mode === "draft" ? ["DRAFT_TO_BUFFER"] : ["AUTO_SCHEDULE"],
+      }));
     }
 
     const count = (s: string) => results.filter((r) => r.status === s).length;
