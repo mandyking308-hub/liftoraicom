@@ -35,6 +35,7 @@ import { SocialEngagementFlowDashboard } from "@/components/founder/social-autop
 import { SocialEngagementInboxDashboard } from "@/components/founder/social-autopilot/SocialEngagementInboxPanels";
 import { SocialAnalyticsDashboard } from "@/components/founder/social-autopilot/SocialAnalyticsPanels";
 import { SocialCompetitorTrendDashboard } from "@/components/founder/social-autopilot/SocialCompetitorTrendPanels";
+import { SocialViralRadarDashboard } from "@/components/founder/social-autopilot/SocialViralRadarPanels";
 import { WebsiteFunnelDashboard } from "@/components/founder/social-autopilot/WebsiteFunnelPanels";
 import { PaidMediaDashboard } from "@/components/founder/social-autopilot/PaidMediaPanels";
 
@@ -342,6 +343,10 @@ export default function SocialAutopilotPage() {
         <div className="space-y-4">
           <h2 className="text-lg font-semibold mt-6">Competitor Watch + Trend Intelligence</h2>
           <SocialCompetitorTrendDashboard businessId={businessId} />
+        </div>
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold mt-6">Viral Opportunity Radar / Viral Conversion Intelligence</h2>
+          <SocialViralRadarDashboard businessId={businessId} />
         </div>
         <div className="space-y-4">
           <h2 className="text-lg font-semibold mt-6">Website / Funnel / Lead Magnet Engine</h2>
