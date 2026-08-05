@@ -29,3 +29,25 @@ export async function requireFounderOrScheduler(req: Request) {
 export function dispatchScheduleRegistered(): boolean {
   return (Deno.env.get("SOCIAL_DISPATCH_CRON_REGISTERED") ?? "").trim().toLowerCase() === "true";
 }
+
+/**
+ * Strict scheduler-only auth for the unattended maintenance runner.
+ * A founder browser token is NOT accepted — this endpoint runs headless with
+ * the service role and the shared SOCIAL_DISPATCH_SECRET only.
+ */
+export function requireScheduler(req: Request) {
+  const secret = (Deno.env.get("SOCIAL_DISPATCH_SECRET") ?? "").trim();
+  if (!secret) return { error: json({ ok: false, error: "dispatch_secret_not_configured" }, 401) } as const;
+  const provided = (req.headers.get("x-dispatch-secret") ?? "").trim();
+  if (provided !== secret) return { error: json({ ok: false, error: "unauthorized" }, 401) } as const;
+  const admin = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    { auth: { persistSession: false } },
+  );
+  return { admin, trigger_source: "scheduler_maintenance" as const };
+}
+
+export function maintenanceScheduleRegistered(): boolean {
+  return (Deno.env.get("SOCIAL_MAINTENANCE_CRON_REGISTERED") ?? "").trim().toLowerCase() === "true";
+}

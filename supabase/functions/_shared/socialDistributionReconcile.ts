@@ -96,8 +96,8 @@ export async function reconcileBusiness(
         provider_status: p.status ?? null,
       };
       if (dist === "sent") patch.published_at = new Date().toISOString();
-      // Buffer only returns a URL when it has one — never invented.
-      if (p.url) patch.external_post_url = p.url;
+      // Buffer's posts connection does not return a public permalink for the
+      // fields we query, so no external URL is ever stored or invented.
       await admin.from("social_publish_jobs").update(patch).eq("id", j.id);
       updated++;
     }
