@@ -254,6 +254,12 @@ export function DistributionHealthPanel({ businessId }: { businessId: string }) 
           <span className={health?.dispatcher?.status === "LIVE" ? "text-emerald-400" : "text-yellow-400"}>
             {health?.dispatcher?.status ?? "—"}{health?.dispatcher?.schedule_registered ? "" : " (CONFIGURATION REQUIRED)"}
           </span>
+          <span className="text-muted-foreground">Maintenance (retry + reconcile)</span>
+          <span className={health?.maintenance?.status === "LIVE" ? "text-emerald-400" : "text-yellow-400"}>
+            {health?.maintenance?.status ?? "—"}{health?.maintenance?.schedule_registered ? "" : " (CONFIGURATION REQUIRED)"}
+          </span>
+          <span className="text-muted-foreground">Last maintenance run</span>
+          <span className="font-mono">{health?.maintenance?.last_run_at ? new Date(health.maintenance.last_run_at).toLocaleString() : "never"}</span>
           <span className="text-muted-foreground">Last run</span>
           <span className="font-mono">{health?.dispatcher?.last_run_at ? new Date(health.dispatcher.last_run_at).toLocaleString() : "never"}</span>
           <span className="text-muted-foreground">Channels</span>
@@ -294,6 +300,12 @@ export function DistributionPolicyPanel({ businessId }: { businessId: string }) 
   useEffect(() => { load(); }, [businessId]);
 
   const setMode = async (mode: string) => {
+    if (mode === "approved_batch_autopilot") {
+      // Deliberate two-step arming — never a single accidental click.
+      if (!confirm("Arm automatic publishing? Approved posts will be scheduled in Buffer with no further clicks.")) return;
+      const typed = prompt(`Type ${CONFIRM_PHRASE} to confirm automatic publishing.`);
+      if ((typed ?? "").trim() !== CONFIRM_PHRASE) return;
+    }
     if (policy) await supabase.from("social_distribution_policies").update({ policy_mode: mode }).eq("id", policy.id);
     else await supabase.from("social_distribution_policies").insert({ business_id: businessId, provider: "buffer", policy_mode: mode });
     load();
@@ -315,14 +327,16 @@ export function DistributionPolicyPanel({ businessId }: { businessId: string }) 
       <CardHeader><CardTitle className="text-base flex items-center gap-2"><Lock size={14} /> Distribution policy</CardTitle></CardHeader>
       <CardContent className="text-xs space-y-3">
         <div className="flex flex-wrap gap-2">
-          {["test", "approval_required", "approved_batch_autopilot", "paused"].map((m) => (
+          {POLICY_MODE_LABELS.map(([m, label]) => (
             <Button key={m} size="sm" variant={(policy?.policy_mode ?? "test") === m ? "default" : "outline"} disabled={!businessId} onClick={() => setMode(m)}>
-              {m}
+              {label}
             </Button>
           ))}
         </div>
         <p className="text-muted-foreground">
-          New businesses default to <b>test</b> — nothing is ever submitted until a founder unlocks the execution gate and moves off test mode.
+          New businesses default to <b>Off (test)</b> — nothing is ever submitted until a founder unlocks the execution gate and moves off test mode.
+          <b> Draft to Buffer</b> hands approved posts to Buffer as drafts only; they are never scheduled or published.
+          <b> Automatic publishing</b> schedules approved posts at their exact time and requires a typed confirmation.
         </p>
         <div className="flex items-center justify-between border rounded p-2">
           <span className="flex items-center gap-2">
