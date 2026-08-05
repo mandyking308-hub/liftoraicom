@@ -75,9 +75,16 @@ export default function SocialAutopilotDiagnosticsPanel() {
             <span>Inbox</span><span>{health?.inbox_messages_count ?? 0}</span>
             <span>Performance logs</span><span>{health?.performance_logs_count ?? 0}</span>
             <span>Test data</span><span>{health?.test_data_count ?? 0}</span>
-            <span>External publish</span><span className="text-yellow-400">LOCKED</span>
+            <span>External publish (Buffer)</span>
+            <span className={dist?.health?.state === "LIVE" ? "text-emerald-400" : "text-yellow-400"}>
+              {dist?.health?.state ?? "UNKNOWN"}{dist?.health?.reason ? ` — ${dist.health.reason}` : ""}
+            </span>
+            <span>Dispatcher</span>
+            <span className={dist?.dispatcher?.status === "LIVE" ? "text-emerald-400" : "text-yellow-400"}>{dist?.dispatcher?.status ?? "—"}</span>
+            <span>Auto-schedule channels</span><span>{dist?.channels?.auto_schedule ?? 0} of {dist?.channels?.mapped ?? 0} mapped</span>
+            <span>Due / scheduled / failed</span>
+            <span>{dist?.counts?.due ?? 0} / {dist?.counts?.scheduled ?? 0} / {dist?.counts?.failed ?? 0}</span>
             <span>DM send</span><span className="text-yellow-400">LOCKED</span>
-            <span>Provider execution</span><span className="text-yellow-400">LOCKED</span>
           </div>
         </div>
         {brain && (
