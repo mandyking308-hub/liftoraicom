@@ -10,7 +10,12 @@
  * returned to callers, logged, or persisted.
  */
 
-import { validateProviderBaseUrl, type CapabilityKey } from "./socialRelationshipLogic.ts";
+import {
+  parseRetryAfterSeconds,
+  validateCallbackUrl,
+  validateProviderBaseUrl,
+  type CapabilityKey,
+} from "./socialRelationshipLogic.ts";
 
 export interface ProviderCallResult<T = unknown> {
   ok: boolean;
@@ -18,6 +23,7 @@ export interface ProviderCallResult<T = unknown> {
   data?: T;
   error?: string;
   transport_error?: boolean;
+  retry_after_seconds?: number | null;
   provider_calls: number;
 }
 
@@ -90,9 +96,11 @@ export interface SocialRelationshipAdapter {
 const UNIPILE_CAPS: Record<string, Partial<Record<CapabilityKey, boolean>>> = {
   linkedin: {
     profile_search: true,
-    company_search: true,
+    // company_search / follow have NO implemented provider method — they must
+    // block visibly rather than silently simulate success.
+    company_search: false,
     invite_connect: true,
-    follow: true,
+    follow: false,
     start_chat: true,
     send_message: true,
     read_chats: true,
@@ -152,19 +160,19 @@ function fullCapMatrix(partial: Partial<Record<CapabilityKey, boolean>>): Record
 export class UnipileAdapter implements SocialRelationshipAdapter {
   readonly provider = "unipile";
   private apiKey: string;
-  private baseUrl: string | null;
+  private baseRoot: string | null;
   private baseUrlError: string | null;
 
   constructor(env: { apiKey?: string | null; dsn?: string | null } = {}) {
     this.apiKey = (env.apiKey ?? Deno.env.get("UNIPILE_API_KEY") ?? "").trim();
     const raw = (env.dsn ?? Deno.env.get("UNIPILE_DSN") ?? "").trim();
     const v = validateProviderBaseUrl(raw);
-    this.baseUrl = v.ok ? `${v.url}/api/v1` : null;
+    this.baseRoot = v.ok ? String(v.url) : null;
     this.baseUrlError = v.ok ? null : (v.reason ?? "base_url_invalid");
   }
 
   configured(): boolean {
-    return Boolean(this.apiKey) && Boolean(this.baseUrl);
+    return Boolean(this.apiKey) && Boolean(this.baseRoot);
   }
 
   configurationError(): string | null {
@@ -178,29 +186,47 @@ export class UnipileAdapter implements SocialRelationshipAdapter {
 
   private async call<T>(
     path: string,
-    init: { method?: string; body?: unknown; query?: Record<string, string | number | undefined> } = {},
+    init: {
+      method?: string;
+      body?: unknown;
+      form?: Record<string, string | string[]>;
+      query?: Record<string, string | number | undefined>;
+      apiVersion?: "v1" | "v2";
+      timeoutMs?: number;
+    } = {},
   ): Promise<ProviderCallResult<T>> {
     if (!this.configured()) {
       return { ok: false, http_status: 0, error: this.configurationError() ?? "not_configured", provider_calls: 0 };
     }
     // Path is built internally only — no caller-supplied absolute URLs.
     const safePath = `/${String(path).replace(/^\/+/, "").replace(/\.\./g, "")}`;
-    const url = new URL(`${this.baseUrl}${safePath}`);
+    const url = new URL(`${this.baseRoot}/api/${init.apiVersion ?? "v1"}${safePath}`);
     for (const [k, v] of Object.entries(init.query ?? {})) {
       if (v !== undefined && v !== null && `${v}` !== "") url.searchParams.set(k, String(v));
     }
     if (url.protocol !== "https:") {
       return { ok: false, http_status: 0, error: "non_https_blocked", provider_calls: 0 };
     }
+
+    const headers: Record<string, string> = { "X-API-KEY": this.apiKey, accept: "application/json" };
+    let body: BodyInit | undefined;
+    if (init.form) {
+      // multipart/form-data — the boundary MUST be set by fetch, so we never
+      // set content-type manually here.
+      body = buildUnipileForm(init.form);
+    } else if (init.body !== undefined) {
+      headers["content-type"] = "application/json";
+      body = JSON.stringify(init.body);
+    }
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), Math.max(1000, init.timeoutMs ?? 20000));
     try {
       const res = await fetch(url.toString(), {
         method: init.method ?? "GET",
-        headers: {
-          "X-API-KEY": this.apiKey,
-          accept: "application/json",
-          ...(init.body ? { "content-type": "application/json" } : {}),
-        },
-        body: init.body ? JSON.stringify(init.body) : undefined,
+        headers,
+        body,
+        signal: controller.signal,
       });
       const text = await res.text();
       let parsed: unknown = null;
@@ -213,7 +239,8 @@ export class UnipileAdapter implements SocialRelationshipAdapter {
         return {
           ok: false,
           http_status: res.status,
-          error: typeof parsed === "object" ? JSON.stringify(parsed).slice(0, 500) : String(text).slice(0, 500),
+          error: sanitiseProviderError(parsed ?? text, this.apiKey, this.baseRoot),
+          retry_after_seconds: parseRetryAfterSeconds(res.headers.get("retry-after")),
           provider_calls: 1,
         };
       }
@@ -223,10 +250,12 @@ export class UnipileAdapter implements SocialRelationshipAdapter {
       return {
         ok: false,
         http_status: 0,
-        error: String((e as Error)?.message ?? e).slice(0, 300),
+        error: sanitiseProviderError((e as Error)?.message ?? e, this.apiKey, this.baseRoot),
         transport_error: true,
         provider_calls: 1,
       };
+    } finally {
+      clearTimeout(timer);
     }
   }
 
@@ -273,7 +302,7 @@ export class UnipileAdapter implements SocialRelationshipAdapter {
   async startChat(account_id: string, provider_profile_id: string, text: string) {
     const r = await this.call<Record<string, unknown>>("chats", {
       method: "POST",
-      body: { account_id, attendees_ids: [provider_profile_id], text },
+      form: { account_id, text, attendees_ids: [provider_profile_id] },
     });
     const d = (r.data ?? {}) as Record<string, unknown>;
     return {
@@ -288,7 +317,7 @@ export class UnipileAdapter implements SocialRelationshipAdapter {
   async sendMessage(account_id: string, chat_id: string, text: string) {
     const r = await this.call<Record<string, unknown>>(`chats/${encodeURIComponent(chat_id)}/messages`, {
       method: "POST",
-      body: { account_id, text },
+      form: { account_id, text },
     });
     return { ...r, data: { provider_id: extractProviderId(r.data) } };
   }
@@ -309,24 +338,24 @@ export class UnipileAdapter implements SocialRelationshipAdapter {
   }
 
   async registerWebhook(callback_url: string, secret?: string | null) {
-    const v = validateProviderBaseUrl(callback_url);
-    // callback must be an https URL; allowlist check does not apply to our own host
-    let ok = false;
-    try {
-      const u = new URL(callback_url);
-      ok = u.protocol === "https:";
-    } catch {
-      ok = false;
+    const v = validateCallbackUrl(callback_url);
+    if (!v.ok) {
+      return {
+        ok: false,
+        http_status: 0,
+        error: v.reason ?? "callback_url_invalid",
+        provider_calls: 0,
+        data: { webhook_id: null },
+      };
     }
-    if (!ok && !v.ok) {
-      return { ok: false, http_status: 0, error: "callback_url_invalid", provider_calls: 0, data: { webhook_id: null } };
-    }
-    const r = await this.call<Record<string, unknown>>("webhooks", {
+    // Current documented endpoint registration route (v2).
+    const r = await this.call<Record<string, unknown>>("webhooks/endpoints", {
+      apiVersion: "v2",
       method: "POST",
       body: {
-        request_url: callback_url,
-        source: "messaging",
-        format: "json",
+        name: "liftor-social-relationship",
+        url: v.url,
+        events: ["message_received", "message_sent", "relation_created", "invitation_accepted"],
         // Secret travels in a header, never in the URL.
         headers: secret ? [{ key: "x-social-relationship-secret", value: secret }] : undefined,
       },
@@ -336,6 +365,33 @@ export class UnipileAdapter implements SocialRelationshipAdapter {
 }
 
 /* ------------------------------------------------------- response parsing */
+
+/** Build multipart/form-data for Unipile chat endpoints. Repeated keys for arrays. */
+export function buildUnipileForm(fields: Record<string, string | string[]>): FormData {
+  const fd = new FormData();
+  for (const [k, v] of Object.entries(fields)) {
+    if (Array.isArray(v)) {
+      for (const item of v) if (item !== undefined && item !== null && `${item}` !== "") fd.append(k, String(item));
+    } else if (v !== undefined && v !== null && `${v}` !== "") {
+      fd.append(k, String(v));
+    }
+  }
+  return fd;
+}
+
+/** Never leak the API key or DSN in an error string. */
+export function sanitiseProviderError(input: unknown, apiKey?: string | null, baseRoot?: string | null): string {
+  let text = typeof input === "string" ? input : (() => {
+    try { return JSON.stringify(input); } catch { return String(input); }
+  })();
+  text = String(text ?? "");
+  for (const secret of [apiKey, baseRoot]) {
+    const s = String(secret ?? "").trim();
+    if (s.length > 3) text = text.split(s).join("[redacted]");
+  }
+  text = text.replace(/(api[_-]?key|authorization|x-api-key|token)"?\s*[:=]\s*"?[^",}\s]+/gi, "$1:[redacted]");
+  return text.slice(0, 500);
+}
 
 export function extractProviderId(data: unknown): string | null {
   if (!data || typeof data !== "object") return null;

@@ -1,5 +1,13 @@
 import { corsHeaders, json, requireFounder, loadContext, audit, gateAction } from "../_shared/socialRelationshipDb.ts";
-import { buildIdempotencyKey, jitterDelaySeconds } from "../_shared/socialRelationshipLogic.ts";
+import {
+  buildIdempotencyKey,
+  confirmationAccepted,
+  decisionToStatus,
+  externalCallsAllowed,
+  jitterDelaySeconds,
+  CANCELLABLE_ACTION_STATUSES,
+  SEND_CONFIRMATION_PHRASE,
+} from "../_shared/socialRelationshipLogic.ts";
 import { renderTemplate, runDueActions } from "../_shared/socialRelationshipRunner.ts";
 
 Deno.serve(async (req) => {
@@ -31,12 +39,12 @@ Deno.serve(async (req) => {
     if (!list) return json({ ok: false, error: "list_not_found" }, 404);
     if (list.status !== "approved") return json({ ok: false, error: "target_list_not_approved" }, 400);
     const { data: account } = await a.admin.from("social_relationship_accounts")
-      .select("*").eq("id", list.account_id ?? body.account_id ?? "").maybeSingle();
+      .select("*").eq("id", list.account_id ?? body.account_id ?? "").eq("business_id", business_id).maybeSingle();
     if (!account) return json({ ok: false, error: "account_not_found" }, 404);
 
     const { data: targets } = await a.admin.from("social_relationship_targets")
       .select("*, profile:social_relationship_profiles(*)")
-      .eq("target_list_id", target_list_id).eq("target_status", "approved").limit(500);
+      .eq("business_id", business_id).eq("target_list_id", target_list_id).eq("target_status", "approved").limit(500);
 
     const batch_id = crypto.randomUUID();
     const created: any[] = [];
@@ -50,9 +58,11 @@ Deno.serve(async (req) => {
         business_id, account_id: account.id, action_type,
         target_ref: t.profile?.provider_profile_id ?? t.profile_id, nonce: batch_id.slice(0, 8),
       });
-      const status =
-        gate.decision === "blocked" ? "blocked" :
-        gate.decision === "draft" ? "draft" : "pending_approval";
+      // Canonical vocabulary only. A freshly queued action is NEVER 'ready':
+      // it always waits for explicit batch approval.
+      const status = gate.decision === "blocked" ? "blocked"
+        : gate.decision === "draft" ? decisionToStatus("draft")
+        : "pending_approval";
       if (status === "blocked") blocked++;
       const { data: row } = await a.admin.from("social_relationship_action_queue").insert({
         business_id, account_id: account.id, target_id: t.id, profile_id: t.profile_id,
@@ -72,10 +82,10 @@ Deno.serve(async (req) => {
     const { data: row } = await a.admin.from("social_relationship_action_queue")
       .select("*, profile:social_relationship_profiles(*)").eq("id", String(body.action_id ?? "")).eq("business_id", business_id).maybeSingle();
     if (!row) return json({ ok: false, error: "action_not_found" }, 404);
-    const { data: account } = await a.admin.from("social_relationship_accounts").select("*").eq("id", row.account_id).maybeSingle();
+    const { data: account } = await a.admin.from("social_relationship_accounts").select("*").eq("id", row.account_id).eq("business_id", business_id).maybeSingle();
     const gate = await gateAction(a.admin, ctx, {
       business_id, action_type: row.action_type, account, profile: row.profile,
-      target: row.target_id ? (await a.admin.from("social_relationship_targets").select("*").eq("id", row.target_id).maybeSingle()).data : null,
+      target: row.target_id ? (await a.admin.from("social_relationship_targets").select("*").eq("id", row.target_id).eq("business_id", business_id).maybeSingle()).data : null,
       batch_approved: Boolean(row.approved_at),
     });
     return json({ ok: true, action: row, rendered: renderTemplate(row.payload?.message ?? "", row.profile), gate, no_external_action: true });
@@ -96,12 +106,12 @@ Deno.serve(async (req) => {
     for (const r of rows ?? []) {
       offset += jitterDelaySeconds(ctx.policy);
       await a.admin.from("social_relationship_action_queue").update({
-        action_status: "approved",
+        action_status: "ready",
         approved_by: a.user.id,
         approved_at: new Date().toISOString(),
         scheduled_for: new Date(Date.now() + offset * 1000).toISOString(),
         not_before: new Date(Date.now() + offset * 1000).toISOString(),
-      }).eq("id", r.id);
+      }).eq("id", r.id).eq("business_id", business_id);
       approved++;
     }
     await audit(a.admin, { business_id, event: "queue_approved", actor: "founder", actor_user_id: a.user.id, detail: { approved, batch_id } });
@@ -113,12 +123,25 @@ Deno.serve(async (req) => {
     const { data } = await a.admin.from("social_relationship_action_queue")
       .update({ action_status: "cancelled", blocked_reason: "founder_cancelled" })
       .in("id", ids).eq("business_id", business_id)
-      .not("action_status", "in", "(completed,submitted)").select("id");
+      .in("action_status", CANCELLABLE_ACTION_STATUSES).select("id");
     await audit(a.admin, { business_id, event: "queue_cancelled", actor: "founder", actor_user_id: a.user.id, detail: { count: (data ?? []).length } });
     return json({ ok: true, cancelled: (data ?? []).length });
   }
 
   if (action === "run_due") {
+    // Explicit founder confirmation is mandatory before ANYTHING leaves Liftor.
+    if (!confirmationAccepted(body.confirmation)) {
+      return json({
+        ok: false,
+        error: "confirmation_required",
+        required_phrase: SEND_CONFIRMATION_PHRASE,
+        hint: `Type "${SEND_CONFIRMATION_PHRASE}" to dispatch approved actions.`,
+      }, 400);
+    }
+    if (!externalCallsAllowed(ctx.mode)) {
+      return json({ ok: false, error: "mode_blocks_external_actions", mode: ctx.mode }, 400);
+    }
+    await audit(a.admin, { business_id, event: "manual_dispatch_confirmed", event_status: "approval", actor: "founder", actor_user_id: a.user.id, detail: { mode: ctx.mode } });
     const result = await runDueActions(a.admin, {
       business_id, limit: Number(body.limit ?? 5), actor: "founder", actor_user_id: a.user.id,
     });
@@ -128,7 +151,7 @@ Deno.serve(async (req) => {
   if (action === "resolve_unknown") {
     const outcome = String(body.outcome ?? "sent");
     const { data } = await a.admin.from("social_relationship_action_queue").update({
-      action_status: outcome === "sent" ? "completed" : "dead_letter",
+      action_status: outcome === "sent" ? "sent" : "dead_letter",
       completed_at: new Date().toISOString(),
       blocked_reason: outcome === "sent" ? null : "founder_marked_not_sent",
     }).eq("id", String(body.action_id ?? "")).eq("business_id", business_id).eq("action_status", "submission_unknown").select("id").maybeSingle();

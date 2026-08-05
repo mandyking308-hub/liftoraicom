@@ -646,3 +646,319 @@ export function computeRelationshipHealth(input: {
   if (!input.webhook_registered) return { state: "ARMED", reason: "webhook_not_registered" };
   return { state: "LIVE", reason: "autopilot_active" };
 }
+
+/* =================================================================
+ * PRODUCTION QA REPAIR — canonical status vocabulary + safety gates
+ * The vocabulary below is the SINGLE source of truth and matches the
+ * database CHECK constraints exactly. Nothing may write a status that
+ * is not listed here.
+ * ================================================================= */
+
+export const ACTION_STATUSES = [
+  "draft",
+  "blocked",
+  "pending_approval",
+  "ready",
+  "submitting",
+  "sent",
+  "accepted",
+  "replied",
+  "failed",
+  "retrying",
+  "submission_unknown",
+  "dead_letter",
+  "cancelled",
+] as const;
+export type ActionStatus = (typeof ACTION_STATUSES)[number];
+
+/** Statuses the runner may pick up. */
+export const RUNNABLE_ACTION_STATUSES: ActionStatus[] = ["ready", "retrying"];
+/** Statuses that prove a submission already left Liftor. */
+export const TERMINAL_SUBMITTED_STATUSES: ActionStatus[] = [
+  "submitting",
+  "sent",
+  "accepted",
+  "replied",
+  "submission_unknown",
+];
+/** Statuses that may still be cancelled by the founder. */
+export const CANCELLABLE_ACTION_STATUSES: ActionStatus[] = [
+  "draft",
+  "blocked",
+  "pending_approval",
+  "ready",
+  "retrying",
+];
+
+export function isActionStatus(value: unknown): value is ActionStatus {
+  return (ACTION_STATUSES as readonly string[]).includes(String(value));
+}
+
+/** Map a gate decision to the queue status. Never invents a status. */
+export function decisionToStatus(decision: ActionDecision): ActionStatus {
+  switch (decision) {
+    case "blocked":
+      return "blocked";
+    case "draft":
+      return "draft";
+    case "pending_approval":
+      return "pending_approval";
+    case "ready":
+      return "ready";
+    default:
+      return "draft";
+  }
+}
+
+/** Status for a provider-confirmed success, by action type. */
+export function successStatusFor(action_type: string): ActionStatus {
+  if (action_type === "accept_or_decline_received_invitation") return "accepted";
+  if (action_type === "reply_message") return "replied";
+  return "sent";
+}
+
+export const TARGET_STATUSES = [
+  "pending",
+  "approved",
+  "rejected",
+  "suppressed",
+  "invited",
+  "connected",
+  "in_conversation",
+  "qualified",
+  "closed",
+] as const;
+export type TargetStatus = (typeof TARGET_STATUSES)[number];
+
+/** Post-action target status — 'actioned' is NOT a valid value. */
+export function targetStatusAfterAction(action_type: string): TargetStatus {
+  if (action_type === "send_invitation") return "invited";
+  if (action_type === "start_chat" || action_type === "send_message" || action_type === "reply_message") {
+    return "in_conversation";
+  }
+  return "approved";
+}
+
+export const ACCOUNT_STATUSES = [
+  "unknown",
+  "ok",
+  "credentials",
+  "disconnected",
+  "challenge",
+  "rate_limited",
+  "cooldown",
+  "disabled",
+] as const;
+export type AccountStatus = (typeof ACCOUNT_STATUSES)[number];
+
+/** 'restricted' is NOT a valid account status — map provider failures safely. */
+export function accountStatusForHttp(http_status: number | null | undefined): AccountStatus | null {
+  if (http_status === 429) return "rate_limited";
+  if (http_status === 401) return "credentials";
+  if (http_status === 403) return "challenge";
+  return null;
+}
+
+export const SUPPRESSION_REASONS = [
+  "opt_out",
+  "negative_reply",
+  "complaint",
+  "do_not_contact",
+  "client",
+  "supplier",
+  "duplicate_person",
+  "high_risk",
+  "manual",
+] as const;
+
+export function normaliseSuppressionReason(value: unknown): string {
+  const v = String(value ?? "").trim().toLowerCase();
+  return (SUPPRESSION_REASONS as readonly string[]).includes(v) ? v : "manual";
+}
+
+/* ------------------------------------------------- founder confirmation */
+
+/** Exact phrase the founder must type before anything leaves Liftor. */
+export const SEND_CONFIRMATION_PHRASE = "SEND FOR REAL";
+
+/** Manual runs always require the phrase — regardless of mode. */
+export function confirmationAccepted(phrase: unknown): boolean {
+  return String(phrase ?? "").trim().toUpperCase() === SEND_CONFIRMATION_PHRASE;
+}
+
+/** Only approved-batch autopilot may dispatch unattended. */
+export function unattendedDispatchAllowed(mode: RelationshipMode | string): boolean {
+  return normaliseMode(mode) === "approved_batch_autopilot";
+}
+
+/** No live provider search or send in the safe-off modes. */
+export function externalCallsAllowed(mode: RelationshipMode | string): boolean {
+  const m = normaliseMode(mode);
+  return m === "approval_required" || m === "approved_batch_autopilot";
+}
+
+/* ------------------------------------------------- timezone-aware windows */
+
+/** Local (policy timezone) calendar day + ISO week-start, for usage windows. */
+export function localWindowStarts(now: Date, timezone?: string | null): { day: string; week: string } {
+  const tz = timezone || "Europe/London";
+  let y: number, m: number, d: number, weekday: number;
+  try {
+    const parts = new Intl.DateTimeFormat("en-GB", {
+      timeZone: tz,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      weekday: "short",
+    }).formatToParts(now);
+    const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
+    y = Number(get("year"));
+    m = Number(get("month"));
+    d = Number(get("day"));
+    weekday = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(get("weekday"));
+    if (!y || !m || !d) throw new Error("bad_parts");
+    if (weekday < 0) weekday = new Date(Date.UTC(y, m - 1, d)).getUTCDay();
+  } catch {
+    y = now.getUTCFullYear();
+    m = now.getUTCMonth() + 1;
+    d = now.getUTCDate();
+    weekday = now.getUTCDay();
+  }
+  const day = `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+  const mondayOffset = (weekday + 6) % 7;
+  const wk = new Date(Date.UTC(y, m - 1, d));
+  wk.setUTCDate(wk.getUTCDate() - mondayOffset);
+  return { day, week: wk.toISOString().slice(0, 10) };
+}
+
+/* ------------------------------------------------ webhook HMAC verification */
+
+export interface SignatureParts {
+  timestamp: number | null;
+  v0: string | null;
+}
+
+/** Parse `t=1699999999,v0=abc...` (Unipile-Signature). */
+export function parseUnipileSignatureHeader(header: string | null | undefined): SignatureParts {
+  const out: SignatureParts = { timestamp: null, v0: null };
+  for (const chunk of String(header ?? "").split(",")) {
+    const [k, v] = chunk.split("=");
+    const key = String(k ?? "").trim();
+    const val = String(v ?? "").trim();
+    if (key === "t" && /^\d+$/.test(val)) out.timestamp = Number(val);
+    if (key === "v0" && val) out.v0 = val.toLowerCase();
+  }
+  return out;
+}
+
+export function timingSafeEqualHex(a: string, b: string): boolean {
+  const x = String(a ?? "");
+  const y = String(b ?? "");
+  if (x.length !== y.length || !x.length) return false;
+  let diff = 0;
+  for (let i = 0; i < x.length; i++) diff |= x.charCodeAt(i) ^ y.charCodeAt(i);
+  return diff === 0;
+}
+
+export async function hmacSha256Hex(secret: string, message: string): Promise<string> {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey("raw", enc.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, [
+    "sign",
+  ]);
+  const sig = await crypto.subtle.sign("HMAC", key, enc.encode(message));
+  return Array.from(new Uint8Array(sig))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+export const WEBHOOK_MAX_SKEW_SECONDS = 300;
+
+/**
+ * Verify a Unipile webhook: HMAC-SHA256 over `${t}.${rawBody}`, rejecting
+ * signatures older (or further in the future) than 5 minutes.
+ */
+export async function verifyUnipileWebhookSignature(input: {
+  header: string | null | undefined;
+  rawBody: string;
+  secret: string;
+  now?: Date;
+}): Promise<{ valid: boolean; reason: string }> {
+  if (!input.secret) return { valid: false, reason: "hmac_secret_not_configured" };
+  const parts = parseUnipileSignatureHeader(input.header);
+  if (parts.timestamp === null || !parts.v0) return { valid: false, reason: "signature_header_malformed" };
+  const nowSec = Math.floor((input.now ?? new Date()).getTime() / 1000);
+  if (Math.abs(nowSec - parts.timestamp) > WEBHOOK_MAX_SKEW_SECONDS) {
+    return { valid: false, reason: "signature_expired" };
+  }
+  const expected = await hmacSha256Hex(input.secret, `${parts.timestamp}.${input.rawBody}`);
+  return timingSafeEqualHex(expected, parts.v0)
+    ? { valid: true, reason: "ok" }
+    : { valid: false, reason: "signature_mismatch" };
+}
+
+/** Stable dedupe key when the provider gives us no event id. */
+export async function stablePayloadHash(rawBody: string): Promise<string> {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(String(rawBody ?? "")));
+  return Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("")
+    .slice(0, 48);
+}
+
+/** Never persist tokens, keys or signatures from an inbound payload. */
+const SENSITIVE_PAYLOAD_KEYS = /(secret|token|api[_-]?key|authorization|password|signature|cookie|access[_-]?key)/i;
+
+export function sanitiseWebhookPayload(payload: unknown, depth = 0): unknown {
+  if (depth > 4) return "[truncated]";
+  if (Array.isArray(payload)) return payload.slice(0, 25).map((v) => sanitiseWebhookPayload(v, depth + 1));
+  if (payload && typeof payload === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(payload as Record<string, unknown>)) {
+      if (SENSITIVE_PAYLOAD_KEYS.test(k)) {
+        out[k] = "[redacted]";
+        continue;
+      }
+      out[k] = sanitiseWebhookPayload(v, depth + 1);
+    }
+    return out;
+  }
+  if (typeof payload === "string") return payload.slice(0, 2000);
+  return payload;
+}
+
+/* ------------------------------------------------------- callback URL */
+
+/**
+ * Webhook callback URLs are derived from our own functions host, never from
+ * arbitrary user input.
+ */
+export function validateCallbackUrl(
+  raw: string | null | undefined,
+  allowedHostSuffixes: string[] = [".supabase.co", ".functions.supabase.co", ".lovable.app"],
+): { ok: boolean; url?: string; reason?: string } {
+  const value = String(raw ?? "").trim();
+  if (!value) return { ok: false, reason: "callback_url_missing" };
+  let u: URL;
+  try {
+    u = new URL(value);
+  } catch {
+    return { ok: false, reason: "callback_url_unparseable" };
+  }
+  if (u.protocol !== "https:") return { ok: false, reason: "callback_url_not_https" };
+  if (u.username || u.password || u.search) return { ok: false, reason: "callback_url_unsafe" };
+  const host = u.hostname.toLowerCase();
+  if (!allowedHostSuffixes.some((s) => host === s.replace(/^\./, "") || host.endsWith(s))) {
+    return { ok: false, reason: "callback_url_host_not_allowlisted" };
+  }
+  return { ok: true, url: `https://${u.host}${u.pathname.replace(/\/+$/, "")}` };
+}
+
+/** Retry-After may be seconds or an HTTP date. */
+export function parseRetryAfterSeconds(header: string | null | undefined, now = new Date()): number | null {
+  const v = String(header ?? "").trim();
+  if (!v) return null;
+  if (/^\d+$/.test(v)) return Math.max(0, Math.min(86400, Number(v)));
+  const t = Date.parse(v);
+  if (Number.isNaN(t)) return null;
+  return Math.max(0, Math.min(86400, Math.round((t - now.getTime()) / 1000)));
+}

@@ -11,6 +11,7 @@ import {
   limitFor,
   normaliseMode,
   resolvePause,
+  localWindowStarts,
   type ActionType,
   type EvaluateActionResult,
   type PolicyRow,
@@ -121,12 +122,9 @@ export async function loadContext(
   };
 }
 
-export function windowStarts(now = new Date()) {
-  const day = now.toISOString().slice(0, 10);
-  const d = new Date(now);
-  const dow = (d.getUTCDay() + 6) % 7; // Monday = 0
-  d.setUTCDate(d.getUTCDate() - dow);
-  return { day, week: d.toISOString().slice(0, 10) };
+/** Usage windows follow the POLICY timezone, not UTC. */
+export function windowStarts(now = new Date(), timezone?: string | null) {
+  return localWindowStarts(now, timezone);
 }
 
 export async function usageFor(
@@ -135,8 +133,9 @@ export async function usageFor(
   account_id: string,
   action_type: string,
   now = new Date(),
+  timezone?: string | null,
 ) {
-  const w = windowStarts(now);
+  const w = windowStarts(now, timezone);
   const { data } = await admin
     .from("social_relationship_rate_limits")
     .select("window_kind, window_start, used_count")
@@ -155,8 +154,9 @@ export async function bumpUsage(
   account_id: string,
   action_type: string,
   now = new Date(),
+  timezone?: string | null,
 ) {
-  const w = windowStarts(now);
+  const w = windowStarts(now, timezone);
   for (const [kind, start] of [["day", w.day], ["week", w.week]] as const) {
     const { data: existing } = await admin
       .from("social_relationship_rate_limits")
@@ -191,11 +191,14 @@ export async function isSuppressed(
   profile: { network?: string | null; provider_profile_id?: string | null; profile_url?: string | null } | null,
 ): Promise<{ suppressed: boolean; reason?: string }> {
   if (!profile) return { suppressed: false };
+  // Business isolation: only this business's rows plus explicit global rows.
   const { data } = await admin
     .from("social_relationship_suppressions")
-    .select("scope, network, provider_profile_id, profile_url, reason, business_id");
+    .select("scope, network, provider_profile_id, profile_url, reason, business_id")
+    .or(`business_id.eq.${business_id},business_id.is.null`);
   for (const s of data ?? []) {
     if (s.business_id && s.business_id !== business_id) continue;
+    if (!s.business_id && s.scope !== "global") continue;
     if (s.provider_profile_id && profile.provider_profile_id && s.provider_profile_id === profile.provider_profile_id) {
       return { suppressed: true, reason: s.reason };
     }
@@ -240,11 +243,12 @@ export async function gateAction(
           await admin
             .from("social_relationship_capabilities")
             .select("capability, supported")
+            .eq("business_id", input.business_id)
             .eq("account_id", account.id)
         ).data ?? [],
       )
     : {};
-  const usage = account ? await usageFor(admin, input.business_id, account.id, String(input.action_type), now) : { day: 0, week: 0 };
+  const usage = account ? await usageFor(admin, input.business_id, account.id, String(input.action_type), now, ctx.policy.timezone) : { day: 0, week: 0 };
   const sup = await isSuppressed(admin, input.business_id, input.profile ?? null);
   const pause = resolvePause(ctx.pauses as any, {
     business_id: input.business_id,
