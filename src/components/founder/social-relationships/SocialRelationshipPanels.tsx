@@ -30,6 +30,32 @@ export async function callRelationshipFn<T = any>(
 
 const MODES = ["test_only", "draft_actions", "approval_required", "approved_batch_autopilot", "paused"] as const;
 
+/** Must match SEND_CONFIRMATION_PHRASE on the server. */
+export const SEND_CONFIRMATION_PHRASE = "SEND FOR REAL";
+
+/** Modes in which the engine may make real provider calls. */
+const EXTERNAL_MODES = ["approval_required", "approved_batch_autopilot"];
+
+function ConfirmPhraseField({
+  value,
+  onChange,
+  label = "Type the confirmation phrase to allow real provider actions",
+}: { value: string; onChange: (v: string) => void; label?: string }) {
+  return (
+    <div>
+      <Label className="text-[11px]">{label}</Label>
+      <Input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={SEND_CONFIRMATION_PHRASE}
+        aria-label="confirmation phrase"
+      />
+    </div>
+  );
+}
+
+const confirmOk = (v: string) => v.trim().toUpperCase() === SEND_CONFIRMATION_PHRASE;
+
 const STATE_TONE: Record<string, string> = {
   LIVE: "text-emerald-400",
   ARMED: "text-yellow-400",
@@ -131,6 +157,7 @@ export function RelationshipOverviewPanel({ businessId, onRefresh }: { businessI
 /* ------------------------------------------------------------ connections */
 
 export function RelationshipConnectionsPanel({ businessId }: { businessId: string }) {
+  const [confirmPhrase, setConfirmPhrase] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [result, setResult] = useState<any>(null);
   const [accounts, setAccounts] = useState<any[]>([]);
@@ -172,6 +199,11 @@ export function RelationshipConnectionsPanel({ businessId }: { businessId: strin
           <Button size="sm" variant="outline" onClick={() => run("sync_accounts")} disabled={!businessId || busy !== null}>Sync accounts</Button>
           <Button size="sm" variant="outline" onClick={() => run("register_webhook")} disabled={!businessId || busy !== null}>Register webhook</Button>
         </div>
+        <ConfirmPhraseField
+          value={confirmPhrase}
+          onChange={setConfirmPhrase}
+          label="Declaring a real account arms it for live use — type the confirmation phrase"
+        />
         <div className="space-y-1">
           {accounts.map((acc) => (
             <div key={acc.id} className="flex items-center justify-between p-2 rounded bg-secondary/40 text-xs">
@@ -183,7 +215,10 @@ export function RelationshipConnectionsPanel({ businessId }: { businessId: strin
                 <Label className="text-[10px]">Real account declared</Label>
                 <Switch
                   checked={acc.real_account_declared === true}
-                  onCheckedChange={(v) => run("declare_real_account", { account_id: acc.id, declared: v })}
+                  disabled={acc.real_account_declared !== true && !confirmOk(confirmPhrase)}
+                  onCheckedChange={(v) =>
+                    run("declare_real_account", { account_id: acc.id, declared: v, confirmation: confirmPhrase })
+                  }
                 />
               </div>
             </div>
@@ -208,6 +243,7 @@ export function RelationshipDiscoveryPanel({ businessId }: { businessId: string 
   const [lists, setLists] = useState<any[]>([]);
   const [listId, setListId] = useState("");
   const [busy, setBusy] = useState(false);
+  const [confirmPhrase, setConfirmPhrase] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -223,6 +259,7 @@ export function RelationshipDiscoveryPanel({ businessId }: { businessId: string 
     setBusy(true);
     const res = await callRelationshipFn("social-relationship-discovery", {
       business_id: businessId, action: "run_search", account_id: accountId, criteria,
+      confirmation: confirmPhrase,
     });
     setBusy(false);
     setResults(res?.results ?? []);
@@ -253,8 +290,13 @@ export function RelationshipDiscoveryPanel({ businessId }: { businessId: string 
           <Input placeholder="Industry" value={criteria.industry} onChange={(e) => setCriteria({ ...criteria, industry: e.target.value })} />
           <Input placeholder="Location" value={criteria.location} onChange={(e) => setCriteria({ ...criteria, location: e.target.value })} />
         </div>
+        <ConfirmPhraseField
+          value={confirmPhrase}
+          onChange={setConfirmPhrase}
+          label="A live search is a real provider call — type the confirmation phrase"
+        />
         <div className="flex gap-2">
-          <Button size="sm" onClick={search} disabled={!accountId || busy}>Run search</Button>
+          <Button size="sm" onClick={search} disabled={!accountId || busy || !confirmOk(confirmPhrase)}>Run search</Button>
           <select className="h-9 rounded-md border bg-background px-2 text-xs" value={listId} onChange={(e) => setListId(e.target.value)}>
             <option value="">Add results to list…</option>
             {lists.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
@@ -373,6 +415,7 @@ export function RelationshipActionQueuePanel({ businessId }: { businessId: strin
   const [lists, setLists] = useState<any[]>([]);
   const [listId, setListId] = useState("");
   const [actionType, setActionType] = useState("send_invitation");
+  const [confirmPhrase, setConfirmPhrase] = useState("");
   const [message, setMessage] = useState("Hi {{first_name}} — enjoyed what {{company}} is doing. Worth connecting?");
   const [mode, setMode] = useState("test_only");
   const { toast } = useToast();
@@ -392,7 +435,9 @@ export function RelationshipActionQueuePanel({ businessId }: { businessId: strin
     const r = await callRelationshipFn("social-relationship-actions", { business_id: businessId, action, ...extra });
     toast({
       title: r?.ok ? action.split("_").join(" ") : `${action} failed`,
-      description: r?.ok ? JSON.stringify({ created: r.created, approved: r.approved, sent: r.sent, blocked: r.blocked }) : String(r?.error ?? ""),
+      description: r?.ok
+        ? JSON.stringify({ created: r.created, approved: r.approved, sent: r.sent, blocked: r.blocked })
+        : String(r?.hint ?? r?.error ?? ""),
       variant: r?.ok ? undefined : "destructive",
     });
     await load();
@@ -413,18 +458,42 @@ export function RelationshipActionQueuePanel({ businessId }: { businessId: strin
           <select className="h-9 rounded-md border bg-background px-2 text-xs" value={actionType} onChange={(e) => setActionType(e.target.value)}>
             <option value="send_invitation">Send invitation</option>
             <option value="start_chat">Start chat</option>
-            <option value="follow">Follow</option>
           </select>
           <Button size="sm" disabled={!listId} onClick={() => call("enqueue_from_list", { target_list_id: listId, action_type: actionType, message })}>
             Queue actions
           </Button>
         </div>
         <Textarea rows={3} value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Message template — {{first_name}}, {{company}}, {{job_title}}" />
-        <div className="flex gap-2">
-          <Button size="sm" variant="outline" disabled={!pending.length} onClick={() => call("approve_batch", { action_ids: pending.map((a) => a.id) })}>
+        <ConfirmPhraseField
+          value={confirmPhrase}
+          onChange={setConfirmPhrase}
+          label={`Running due actions sends on real accounts — type "${SEND_CONFIRMATION_PHRASE}"`}
+        />
+        <div className="flex flex-wrap gap-2 items-center">
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={!pending.length || !EXTERNAL_MODES.includes(mode)}
+            title={EXTERNAL_MODES.includes(mode) ? undefined : `Blocked: mode is ${mode}`}
+            onClick={() => call("approve_batch", { action_ids: pending.map((a) => a.id) })}
+          >
             Approve {pending.length} pending
           </Button>
-          <Button size="sm" variant="outline" onClick={() => call("run_due", { limit: 5 })}>Run due actions</Button>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={!confirmOk(confirmPhrase) || !EXTERNAL_MODES.includes(mode)}
+            title={
+              !EXTERNAL_MODES.includes(mode)
+                ? `Blocked: mode is ${mode}`
+                : !confirmOk(confirmPhrase)
+                  ? "Blocked: confirmation phrase required"
+                  : undefined
+            }
+            onClick={() => call("run_due", { limit: 5, confirmation: confirmPhrase })}
+          >
+            Run due actions
+          </Button>
           <Button size="sm" variant="ghost" onClick={load}><RefreshCw size={14} /></Button>
         </div>
         <div className="space-y-1 max-h-80 overflow-y-auto">
@@ -436,7 +505,9 @@ export function RelationshipActionQueuePanel({ businessId }: { businessId: strin
                   <p className="text-muted-foreground">{a.rendered_preview?.slice(0, 120)}</p>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Badge variant={a.action_status === "completed" ? "default" : "secondary"}>{a.action_status}</Badge>
+                  <Badge variant={["sent", "accepted", "replied"].includes(a.action_status) ? "default" : "secondary"}>
+                    {a.action_status}
+                  </Badge>
                   {a.action_status === "submission_unknown" && (
                     <>
                       <Button size="sm" variant="outline" onClick={() => call("resolve_unknown", { action_id: a.id, outcome: "sent" })}>Was sent</Button>
@@ -586,6 +657,7 @@ export function RelationshipInboxPanel({ businessId }: { businessId: string }) {
 export function RelationshipPoliciesPanel({ businessId }: { businessId: string }) {
   const [policy, setPolicy] = useState<any>({});
   const [paused, setPaused] = useState(false);
+  const [confirmPhrase, setConfirmPhrase] = useState("");
   const { toast } = useToast();
 
   const load = useCallback(async () => {
@@ -599,13 +671,14 @@ export function RelationshipPoliciesPanel({ businessId }: { businessId: string }
   useEffect(() => { load(); }, [load]);
 
   const save = async () => {
-    const r = await callRelationshipFn("social-relationship-provider", { business_id: businessId, provider: "unipile", action: "save_policy", policy });
-    toast({ title: r?.ok ? "Policy saved" : "Save failed", description: r?.ok ? undefined : String(r?.error), variant: r?.ok ? undefined : "destructive" });
+    const r = await callRelationshipFn("social-relationship-provider", { business_id: businessId, provider: "unipile", action: "save_policy", policy, confirmation: confirmPhrase });
+    toast({ title: r?.ok ? "Policy saved" : "Save failed", description: r?.ok ? undefined : String(r?.hint ?? r?.error), variant: r?.ok ? undefined : "destructive" });
     load();
   };
 
   const togglePause = async (v: boolean) => {
-    const r = await callRelationshipFn("social-relationship-provider", { business_id: businessId, provider: "unipile", action: "set_pause", scope: "business", is_paused: v, reason: "founder_toggle" });
+    const r = await callRelationshipFn("social-relationship-provider", { business_id: businessId, provider: "unipile", action: "set_pause", scope: "business", is_paused: v, reason: "founder_toggle", confirmation: confirmPhrase });
+    if (!r?.ok) toast({ title: "Pause change blocked", description: String(r?.hint ?? r?.error ?? ""), variant: "destructive" });
     if (r?.ok) setPaused(v);
     load();
   };
@@ -626,7 +699,7 @@ export function RelationshipPoliciesPanel({ businessId }: { businessId: string }
             <p className="font-semibold text-red-400">Emergency pause (this business)</p>
             <p className="text-muted-foreground">Stops every queued and scheduled relationship action immediately.</p>
           </div>
-          <Switch checked={paused} onCheckedChange={togglePause} />
+          <Switch checked={paused} disabled={paused && !confirmOk(confirmPhrase)} onCheckedChange={togglePause} />
         </div>
         <div>
           <Label className="text-[11px]">Mode</Label>
@@ -662,7 +735,18 @@ export function RelationshipPoliciesPanel({ businessId }: { businessId: string }
             </div>
           ))}
         </div>
-        <Button size="sm" onClick={save} disabled={!businessId}>Save policy</Button>
+        <ConfirmPhraseField
+          value={confirmPhrase}
+          onChange={setConfirmPhrase}
+          label={`Releasing a pause or arming a live mode requires "${SEND_CONFIRMATION_PHRASE}"`}
+        />
+        <Button
+          size="sm"
+          onClick={save}
+          disabled={!businessId || (EXTERNAL_MODES.includes(String(policy.mode)) && !confirmOk(confirmPhrase))}
+        >
+          Save policy
+        </Button>
       </CardContent>
     </Card>
   );
