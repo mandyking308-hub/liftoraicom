@@ -447,7 +447,8 @@ export function classifyIntent(text: string): SocialIntent {
   if (HIGH_VALUE_PATTERNS.some((r) => r.test(t)) || INVESTOR_PATTERNS.some((r) => r.test(t))) return "high_value";
   if (NEGATIVE_PATTERNS.some((r) => r.test(t))) return "not_interested";
   if (INTEREST_PATTERNS.some((r) => r.test(t))) return "interested";
-  if (t.includes("?")) return "question";
+  if (t.includes("?") || /^(what|how|why|when|where|who|can you|could you|do you|does it|is it|are you)\b/i.test(t.trim()))
+    return "question";
   return "neutral";
 }
 
