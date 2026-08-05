@@ -88,25 +88,15 @@ export async function runDueActions(
       continue;
     }
 
-    // Idempotency: never submit the same logical action twice.
-    const { data: dupe } = await admin
-      .from("social_relationship_action_queue")
-      .select("id, action_status")
-      .eq("idempotency_key", action.idempotency_key)
-      .in("action_status", ["submitted", "completed", "submission_unknown"])
-      .neq("id", action.id)
-      .maybeSingle();
-    if (dupe) {
-      await admin.from("social_relationship_action_queue")
-        .update({ action_status: "cancelled", blocked_reason: "duplicate_idempotency_key" }).eq("id", action.id);
+    // Idempotency: atomic row-locked claim in Postgres. Never submit the same
+    // logical action twice, even with two concurrent workers.
+    const { data: claim, error: claimError } = await admin
+      .rpc("social_relationship_claim_action", { p_action_id: action.id });
+    if (claimError || claim !== "claimed") {
       out.blocked++;
-      out.details.push({ id: action.id, outcome: "duplicate" });
+      out.details.push({ id: action.id, outcome: claim === "duplicate" ? "duplicate" : "not_claimable" });
       continue;
     }
-
-    await admin.from("social_relationship_action_queue").update({
-      action_status: "submitted", submitted_at: new Date().toISOString(), attempt_count: (action.attempt_count ?? 0) + 1,
-    }).eq("id", action.id);
 
     const adapter = getRelationshipAdapter(account.provider);
     const text = renderTemplate(String(action.payload?.message ?? ""), profile);
