@@ -275,6 +275,7 @@ describe("distribution health state machine", () => {
     policy_mode: "approved_batch_autopilot", paused: false,
     last_dispatch_run_at: new Date().toISOString(), last_dispatch_failed: false,
     dispatcher_schedule_registered: true, failed_jobs: 0,
+    last_maintenance_run_at: new Date().toISOString(), maintenance_schedule_registered: true,
   } as const;
 
   it("reports NOT_CONFIGURED without secrets", () => {
