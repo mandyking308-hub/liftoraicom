@@ -81,6 +81,8 @@ export default function SocialAutopilotDiagnosticsPanel() {
             </span>
             <span>Dispatcher</span>
             <span className={dist?.dispatcher?.status === "LIVE" ? "text-emerald-400" : "text-yellow-400"}>{dist?.dispatcher?.status ?? "—"}</span>
+            <span>Maintenance (retry + reconcile)</span>
+            <span className={dist?.maintenance?.status === "LIVE" ? "text-emerald-400" : "text-yellow-400"}>{dist?.maintenance?.status ?? "—"}</span>
             <span>Auto-schedule channels</span><span>{dist?.channels?.auto_schedule ?? 0} of {dist?.channels?.mapped ?? 0} mapped</span>
             <span>Due / scheduled / failed</span>
             <span>{dist?.counts?.due ?? 0} / {dist?.counts?.scheduled ?? 0} / {dist?.counts?.failed ?? 0}</span>
