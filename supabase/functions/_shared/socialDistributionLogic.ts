@@ -413,6 +413,9 @@ export interface DistributionHealthInput {
   last_dispatch_run_at?: string | null;
   last_dispatch_failed?: boolean;
   dispatcher_schedule_registered: boolean;
+  /** Last unattended maintenance (retry + reconcile) heartbeat, if any. */
+  last_maintenance_run_at?: string | null;
+  maintenance_schedule_registered?: boolean;
   failed_jobs?: number;
   now?: Date;
 }
@@ -422,6 +425,7 @@ export interface DistributionHealth {
   reason: string;
   detail: string;
   dispatcher: "LIVE" | "STALE" | "CONFIGURATION_REQUIRED" | "FAILING";
+  maintenance: "LIVE" | "STALE" | "CONFIGURATION_REQUIRED";
 }
 
 /** Dispatcher is considered healthy if it reported within this window. */
@@ -438,34 +442,55 @@ export function computeDistributionHealth(i: DistributionHealthInput): Distribut
       : fresh ? "LIVE"
       : "STALE";
 
+  const lastMaint = i.last_maintenance_run_at ? new Date(i.last_maintenance_run_at).getTime() : null;
+  const maintFresh = lastMaint !== null && now.getTime() - lastMaint <= DISPATCH_HEARTBEAT_STALE_MS;
+  const maintenance: DistributionHealth["maintenance"] =
+    !i.maintenance_schedule_registered ? "CONFIGURATION_REQUIRED" : maintFresh ? "LIVE" : "STALE";
+
   if (i.paused) {
-    return { state: "BLOCKED", reason: "emergency_pause_active", detail: "Kill switch engaged — no provider calls are made. Queued content is untouched.", dispatcher };
+    return { state: "BLOCKED", reason: "emergency_pause_active", detail: "Kill switch engaged — no provider calls are made. Queued content is untouched.", dispatcher, maintenance };
   }
   if (!i.secrets_present) {
-    return { state: "NOT_CONFIGURED", reason: "buffer_secrets_missing", detail: "BUFFER_API_KEY / BUFFER_ORGANIZATION_ID are not set.", dispatcher };
+    return { state: "NOT_CONFIGURED", reason: "buffer_secrets_missing", detail: "BUFFER_API_KEY / BUFFER_ORGANIZATION_ID are not set.", dispatcher, maintenance };
   }
   if (!i.connection_ok || !i.organization_id_present) {
-    return { state: "NOT_CONFIGURED", reason: "provider_not_connected", detail: "Buffer connection has not been tested and an organisation selected.", dispatcher };
+    return { state: "NOT_CONFIGURED", reason: "provider_not_connected", detail: "Buffer connection has not been tested and an organisation selected.", dispatcher, maintenance };
   }
   if (i.mapped_channels === 0) {
-    return { state: "CONNECTED", reason: "no_channels_mapped", detail: "Buffer is reachable. Map at least one channel to this business.", dispatcher };
+    return { state: "CONNECTED", reason: "no_channels_mapped", detail: "Buffer is reachable. Map at least one channel to this business.", dispatcher, maintenance };
   }
   if (!i.gate_unlocked || i.policy_mode === "test" || i.policy_mode === "paused") {
-    return { state: "MAPPED", reason: !i.gate_unlocked ? "execution_gate_locked" : `policy_${i.policy_mode}`, detail: "Channels mapped. Arm the execution gate and leave test mode to allow provider calls.", dispatcher };
+    return { state: "MAPPED", reason: !i.gate_unlocked ? "execution_gate_locked" : `policy_${i.policy_mode}`, detail: "Channels mapped. Arm the execution gate and leave test mode to allow provider calls.", dispatcher, maintenance };
+  }
+  if (i.policy_mode === "draft_to_buffer") {
+    return {
+      state: "ARMED",
+      reason: "draft_to_buffer_mode",
+      detail: "Approved posts are handed to Buffer as DRAFTS only — nothing is scheduled or published.",
+      dispatcher, maintenance,
+    };
   }
   if (i.auto_schedule_channels === 0) {
-    return { state: "ARMED", reason: "no_auto_schedule_channels", detail: "Armed, but every channel is OFF or DRAFT_TO_BUFFER — nothing auto-schedules.", dispatcher };
+    return { state: "ARMED", reason: "no_auto_schedule_channels", detail: "Armed, but every channel is OFF or DRAFT_TO_BUFFER — nothing auto-schedules.", dispatcher, maintenance };
   }
   if (dispatcher === "CONFIGURATION_REQUIRED") {
-    return { state: "ARMED", reason: "dispatcher_schedule_missing", detail: "CONFIGURATION REQUIRED — the 5-minute dispatcher cron hook is not registered.", dispatcher };
+    return { state: "ARMED", reason: "dispatcher_schedule_missing", detail: "CONFIGURATION REQUIRED — the 5-minute dispatcher cron hook is not registered.", dispatcher, maintenance };
+  }
+  if (maintenance === "CONFIGURATION_REQUIRED") {
+    return { state: "ARMED", reason: "maintenance_schedule_missing", detail: "CONFIGURATION REQUIRED — the unattended maintenance (retry + reconcile) cron hook is not registered.", dispatcher, maintenance };
   }
   if (dispatcher === "FAILING" || (i.failed_jobs ?? 0) > 0) {
-    return { state: "DEGRADED", reason: dispatcher === "FAILING" ? "dispatcher_run_failed" : "failed_jobs_present", detail: "Distribution is live but the last run or some jobs failed.", dispatcher };
+    return { state: "DEGRADED", reason: dispatcher === "FAILING" ? "dispatcher_run_failed" : "failed_jobs_present", detail: "Distribution is live but the last run or some jobs failed.", dispatcher, maintenance };
   }
-  if (dispatcher === "STALE") {
-    return { state: "DEGRADED", reason: "dispatcher_heartbeat_stale", detail: "No dispatcher heartbeat in the last 30 minutes.", dispatcher };
+  if (dispatcher === "STALE" || maintenance === "STALE") {
+    return {
+      state: "DEGRADED",
+      reason: dispatcher === "STALE" ? "dispatcher_heartbeat_stale" : "maintenance_heartbeat_stale",
+      detail: "No scheduled heartbeat in the last 30 minutes.",
+      dispatcher, maintenance,
+    };
   }
-  return { state: "LIVE", reason: "ok", detail: "Approved jobs are being scheduled to Buffer automatically.", dispatcher };
+  return { state: "LIVE", reason: "ok", detail: "Approved jobs are being scheduled to Buffer automatically and maintained unattended.", dispatcher, maintenance };
 }
 
 export type ErrorClass = "transient" | "hard";
