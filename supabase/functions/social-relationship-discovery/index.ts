@@ -3,6 +3,7 @@ import { getRelationshipAdapter } from "../_shared/socialRelationshipProvider.ts
 import {
   capabilityMap,
   actionSupported,
+  confirmationAccepted,
   externalCallsAllowed,
   scoreProfile,
   crmDedupeKey,
@@ -28,6 +29,9 @@ Deno.serve(async (req) => {
 
   if (action !== "run_search") return json({ ok: false, error: "unknown_action" }, 400);
 
+  if (!confirmationAccepted(body.confirmation)) {
+    return json({ ok: false, error: "confirmation_required", required_phrase: "SEND FOR REAL", blocked: true }, 400);
+  }
   const account_id = String(body.account_id ?? "");
   const criteria = body.criteria ?? {};
   const { data: account } = await a.admin
