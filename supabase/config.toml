@@ -40,3 +40,9 @@ verify_jwt = false
 
 [functions.social-distribution-maintenance]
 verify_jwt = false
+
+[functions.social-relationship-webhook]
+verify_jwt = false
+
+[functions.social-relationship-maintenance]
+verify_jwt = false
