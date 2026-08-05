@@ -133,10 +133,15 @@ describe("status contract", () => {
       .filter((t) => t.includes("social_relationship_claim_action"))
       .slice(-1)[0];
     expect(sql).toBeTruthy();
-    expect(sql).toContain("'submitting'");
-    expect(sql).toContain("IN ('ready','retrying')");
-    expect(sql).toContain("FOR UPDATE");
-    expect(sql).not.toContain("'approved'");
+    const fn = sql.slice(sql.indexOf("CREATE OR REPLACE FUNCTION public.social_relationship_claim_action"));
+    expect(fn).toContain("action_status = 'submitting'");
+    expect(fn).toContain("IN ('ready','retrying')");
+    expect(fn).toContain("FOR UPDATE");
+    // a second claim is impossible
+    expect(fn).toContain("IN ('submitting','sent','accepted','replied','submission_unknown')");
+    expect(fn).toContain("RETURN 'duplicate'");
+    expect(fn).not.toContain("'approved'");
+    expect(fn).not.toContain("'completed'");
   });
 });
 
