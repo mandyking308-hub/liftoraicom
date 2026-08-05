@@ -230,7 +230,12 @@ export function evaluateSubmission(ctx: SubmissionContext): Eligibility {
     blockers.push("channel_not_mapped");
   } else {
     if (ctx.mapping_active === false) blockers.push("channel_mapping_inactive");
-    if (normaliseDispatchMode(ctx.dispatch_mode) === "OFF") blockers.push("channel_mode_off");
+    // `undefined` means the caller did not supply a mapping mode (legacy call
+    // sites / pure evaluations). Any supplied value is enforced strictly and
+    // anything unrecognised collapses to OFF.
+    if (ctx.dispatch_mode !== undefined && normaliseDispatchMode(ctx.dispatch_mode) === "OFF") {
+      blockers.push("channel_mode_off");
+    }
     if (ctx.mapping_business_id && ctx.mapping_business_id !== ctx.business_id) {
       blockers.push("cross_business_channel_mapping");
     }
