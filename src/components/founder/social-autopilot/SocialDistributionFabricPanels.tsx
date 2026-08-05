@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { AlertTriangle, Lock, RefreshCw, ShieldCheck } from "lucide-react";
+import { Activity, AlertTriangle, Lock, RefreshCw, ShieldCheck } from "lucide-react";
 
 const CONFIRM_PHRASE = "DISTRIBUTE APPROVED BATCH";
+
+const DISPATCH_MODES = ["OFF", "DRAFT_TO_BUFFER", "AUTO_SCHEDULE"] as const;
 
 async function call(path: string, body?: unknown) {
   const { data: sess } = await supabase.auth.getSession();
@@ -121,9 +123,18 @@ export function ChannelMappingPanel({ businessId, organizationId }: { businessId
     } else {
       await supabase.from("social_business_channel_map").insert({
         business_id: businessId, channel_id: channel.id, provider: "buffer",
-        platform: channel.service ?? null, active: true,
+        platform: channel.service ?? null, active: true, dispatch_mode: "OFF",
       });
     }
+    setBusy(false); load();
+  };
+
+  const setMode = async (channel: any, mode: string) => {
+    const existing = maps.find((m) => m.channel_id === channel.id);
+    if (!existing) return;
+    if (mode === "AUTO_SCHEDULE" && !confirm(`Enable automatic publishing to ${channel.display_name ?? channel.name}? Approved jobs will be scheduled in Buffer without further clicks.`)) return;
+    setBusy(true);
+    await supabase.from("social_business_channel_map").update({ dispatch_mode: mode }).eq("id", existing.id);
     setBusy(false); load();
   };
 
@@ -134,24 +145,135 @@ export function ChannelMappingPanel({ businessId, organizationId }: { businessId
         <Button size="sm" variant="outline" onClick={load}><RefreshCw size={12} /></Button>
       </CardHeader>
       <CardContent className="text-xs space-y-2">
+        <p className="text-muted-foreground">
+          Every channel starts at <b>OFF</b>. <b>DRAFT_TO_BUFFER</b> creates Buffer drafts only. <b>AUTO_SCHEDULE</b> lets the
+          automatic dispatcher schedule approved posts at their exact time. Manual CSV export remains available as a fallback.
+        </p>
         {channels.length === 0 && <p className="text-muted-foreground">No channels synced yet. Test the connection, select an organisation, then Sync channels.</p>}
         {channels.map((c) => {
           const m = maps.find((x) => x.channel_id === c.id);
           return (
-            <div key={c.id} className="flex items-center justify-between border rounded p-2 gap-2">
-              <div className="flex items-center gap-2 min-w-0">
-                <ServiceBadge service={c.service} />
-                <span className="truncate">{c.display_name ?? c.name ?? c.external_channel_id}</span>
-                {c.is_disconnected && <Badge variant="destructive" className="text-[10px]">disconnected</Badge>}
-                {c.is_locked && <Badge variant="destructive" className="text-[10px]">locked</Badge>}
-                {c.is_queue_paused && <Badge variant="outline" className="text-[10px]">queue paused</Badge>}
+            <div key={c.id} className="border rounded p-2 space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <ServiceBadge service={c.service} />
+                  <span className="truncate">{c.display_name ?? c.name ?? c.external_channel_id}</span>
+                  {c.is_disconnected && <Badge variant="destructive" className="text-[10px]">disconnected</Badge>}
+                  {c.is_locked && <Badge variant="destructive" className="text-[10px]">locked</Badge>}
+                  {c.is_queue_paused && <Badge variant="outline" className="text-[10px]">queue paused</Badge>}
+                </div>
+                <Button size="sm" variant={m?.active ? "default" : "outline"} disabled={busy} onClick={() => toggle(c)}>
+                  {m?.active ? "Mapped" : "Map to business"}
+                </Button>
               </div>
-              <Button size="sm" variant={m?.active ? "default" : "outline"} disabled={busy} onClick={() => toggle(c)}>
-                {m?.active ? "Mapped" : "Map to business"}
-              </Button>
+              {m?.active && (
+                <div className="flex flex-wrap items-center gap-1">
+                  <span className="text-[10px] text-muted-foreground mr-1">Publishing mode</span>
+                  {DISPATCH_MODES.map((mode) => (
+                    <Button key={mode} size="sm" variant={(m.dispatch_mode ?? "OFF") === mode ? "default" : "outline"}
+                      className="h-6 text-[10px]" disabled={busy} onClick={() => setMode(c, mode)}>
+                      {mode}
+                    </Button>
+                  ))}
+                </div>
+              )}
             </div>
           );
         })}
+      </CardContent>
+    </Card>
+  );
+}
+
+const STATE_TONE: Record<string, string> = {
+  LIVE: "text-emerald-400",
+  ARMED: "text-blue-400",
+  MAPPED: "text-blue-300",
+  CONNECTED: "text-muted-foreground",
+  NOT_CONFIGURED: "text-muted-foreground",
+  DEGRADED: "text-yellow-400",
+  BLOCKED: "text-red-400",
+};
+
+export function DistributionHealthPanel({ businessId }: { businessId: string }) {
+  const [health, setHealth] = useState<any>(null);
+  const [busy, setBusy] = useState(false);
+
+  const load = async () => {
+    if (!businessId) return;
+    setBusy(true);
+    setHealth(await call("social-distribution-health", { business_id: businessId }));
+    setBusy(false);
+  };
+  useEffect(() => { load(); }, [businessId]);
+
+  const kill = async (scope: "global" | "business", on: boolean) => {
+    const label = scope === "global" ? "EVERY business and provider" : "this business";
+    if (!confirm(`${on ? "Engage" : "Release"} the kill switch for ${label}? Queued content is never deleted.`)) return;
+    const scope_key = scope === "global" ? "all" : businessId;
+    const { data: existing } = await supabase.from("social_distribution_pauses").select("id")
+      .eq("scope", scope).eq("scope_key", scope_key).maybeSingle();
+    if (existing) await supabase.from("social_distribution_pauses").update({ paused: on, reason: "founder_kill_switch" }).eq("id", existing.id);
+    else await supabase.from("social_distribution_pauses").insert({ scope, scope_key, paused: on, reason: "founder_kill_switch" });
+    load();
+  };
+
+  const runNow = async () => {
+    setBusy(true);
+    await call("social-distribution-dispatch-due", { business_id: businessId });
+    setBusy(false); load();
+  };
+
+  const state = health?.health?.state ?? "—";
+  const c = health?.counts ?? {};
+  const switches = health?.kill_switches ?? [];
+  const globalOn = switches.some((s: any) => s.scope === "global");
+  const businessOn = switches.some((s: any) => s.scope === "business" && s.scope_key === businessId);
+
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle className="text-base flex items-center gap-2"><Activity size={14} /> Distribution health</CardTitle>
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" disabled={!businessId || busy} onClick={runNow}>Run dispatcher now</Button>
+          <Button size="sm" variant="outline" disabled={busy} onClick={load}><RefreshCw size={12} /></Button>
+        </div>
+      </CardHeader>
+      <CardContent className="text-xs space-y-3">
+        <div className="flex items-center gap-2">
+          <span className={`text-sm font-semibold ${STATE_TONE[state] ?? ""}`}>{state}</span>
+          <span className="text-muted-foreground">{health?.health?.detail}</span>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+          {["due", "scheduled", "draft_in_provider", "blocked", "failed", "published", "retrying", "submission_unknown"].map((k) => (
+            <div key={k} className="border rounded p-2 flex justify-between"><span className="text-muted-foreground">{k}</span><span className="font-mono">{c[k] ?? 0}</span></div>
+          ))}
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <span className="text-muted-foreground">Dispatcher</span>
+          <span className={health?.dispatcher?.status === "LIVE" ? "text-emerald-400" : "text-yellow-400"}>
+            {health?.dispatcher?.status ?? "—"}{health?.dispatcher?.schedule_registered ? "" : " (CONFIGURATION REQUIRED)"}
+          </span>
+          <span className="text-muted-foreground">Last run</span>
+          <span className="font-mono">{health?.dispatcher?.last_run_at ? new Date(health.dispatcher.last_run_at).toLocaleString() : "never"}</span>
+          <span className="text-muted-foreground">Channels</span>
+          <span className="font-mono">
+            {health?.channels?.mapped ?? 0} mapped · {health?.channels?.auto_schedule ?? 0} auto · {health?.channels?.draft ?? 0} draft · {health?.channels?.off ?? 0} off
+          </span>
+        </div>
+        <div className="border rounded p-2 space-y-2">
+          <p className="flex items-center gap-2 font-semibold"><AlertTriangle size={14} className={globalOn || businessOn ? "text-red-400" : "text-muted-foreground"} /> Emergency kill switch</p>
+          <div className="flex flex-wrap gap-2">
+            <Button size="sm" variant={businessOn ? "outline" : "destructive"} disabled={!businessId} onClick={() => kill("business", !businessOn)}>
+              {businessOn ? "Release business kill switch" : "Kill switch — this business"}
+            </Button>
+            <Button size="sm" variant={globalOn ? "outline" : "destructive"} onClick={() => kill("global", !globalOn)}>
+              {globalOn ? "Release portfolio kill switch" : "Kill switch — whole portfolio"}
+            </Button>
+          </div>
+          <p className="text-[10px] text-muted-foreground">Blocks every new provider call immediately. Queued content and schedules are preserved.</p>
+        </div>
+        <Out data={health?.health} />
       </CardContent>
     </Card>
   );
