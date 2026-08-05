@@ -1,5 +1,27 @@
 # Liftor Viral Opportunity Radar / Viral Conversion Intelligence
 
+## Stage 1 status (foundation) — honest state
+
+Architecture principle: **buy data, build the brain.** Liftor owns normalisation,
+scoring, ranking and brief generation; any signal vendor is a replaceable input
+behind the provider registry in `supabase/functions/_shared/socialViralProvider.ts`.
+
+- **Tubular is NOT connected.** No real provider call has ever been made. The
+  adapter is a safe-off shell that returns `NOT_CONFIGURED` or
+  `API_CONTRACT_UNCONFIRMED` and never invents endpoints or payloads.
+- **Active mode: manual import only** (`ManualImportAdapter`, zero network calls).
+- **Activation blockers:** (1) `TUBULAR_API_KEY` not available; (2)
+  `TUBULAR_API_CONTRACT_CONFIRMED` not set — real request/response shapes must be
+  confirmed against vendor documentation before any call is written; (3) TikTok
+  and other platform coverage, rate limits and historical depth unverified;
+  (4) commercial data-usage/contract rights for storing and scoring third-party
+  signals still to confirm.
+- Secrets live in server-side env only and are never persisted in rows
+  (`secret_ref_name` stores a name, never a value) and never returned to the browser.
+- Provider status can never read `connected`/live without a real successful
+  authenticated sync — enforced by `resolveProviderStatus` and covered by tests.
+- All scores are labelled **potential, not guaranteed performance**.
+
 Extension of the existing Social Autopilot. Buffer publishing, the Content Factory,
 the Social Relationship Engine and every existing module are untouched. The radar
 produces **briefs**, never posts.
