@@ -170,7 +170,9 @@ describe("submission outcome + provider status mapping", () => {
     expect(mapProviderStatus("sent")).toBe("sent");
     expect(mapProviderStatus("error")).toBe("failed");
     expect(mapProviderStatus("scheduled")).toBe("scheduled");
-    expect(mapProviderStatus("draft")).toBeNull();
+    expect(mapProviderStatus("draft")).toBe("draft_in_provider");
+    expect(mapProviderStatus("buffer")).toBe("scheduled");
+    expect(mapProviderStatus("published")).toBe("sent");
     expect(mapProviderStatus("weird_new_status")).toBeNull();
     expect(mapProviderStatus("")).toBeNull();
   });
