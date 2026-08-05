@@ -187,11 +187,19 @@ export function isDurableMediaUrl(url: string): boolean {
   if (parsed.protocol !== "https:") return false;
   if (parsed.hostname === "localhost" || parsed.hostname.endsWith(".local")) return false;
   if (parsed.hostname.startsWith("127.") || parsed.hostname === "0.0.0.0") return false;
-  const exp = parsed.searchParams.get("Expires") || parsed.searchParams.get("expires");
-  if (exp && /^\d+$/.test(exp)) {
-    const ms = exp.length <= 10 ? Number(exp) * 1000 : Number(exp);
-    if (ms < Date.now()) return false;
+  // Signed / expiring URLs are never durable: Buffer fetches media later and a
+  // short-lived signature would break the post. Block instead of silently
+  // degrading to a text-only post.
+  const SIGNED_PARAMS = [
+    "x-amz-signature", "x-amz-expires", "x-amz-credential",
+    "x-goog-signature", "x-goog-expires",
+    "signature", "sig", "token", "expires", "se", "sp", "sv",
+  ];
+  for (const [key] of parsed.searchParams.entries()) {
+    if (SIGNED_PARAMS.includes(key.toLowerCase())) return false;
   }
+  // Supabase Storage signed-object URLs.
+  if (parsed.pathname.includes("/object/sign/")) return false;
   return true;
 }
 
