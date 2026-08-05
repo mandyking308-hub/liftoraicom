@@ -3,6 +3,37 @@
 Separate networking/conversation arm. Social Autopilot content generation and
 Buffer publishing are untouched.
 
+## Foundation (Stage 1)
+
+**Data layer** — one production migration creates 18 `social_relationship_*`
+tables (provider connections, accounts, capabilities, searches, profiles,
+target lists, targets, action queue, conversations, messages, webhook events,
+rate limits, suppressions, audit, policies, pauses, escalations, CRM links).
+Every table has RLS enabled with founder/admin-only policies plus explicit
+GRANTs; supporting indexes cover business scoping, due-queue scans, batch
+lookups, conversation recency, suppression lookups and audit history.
+
+**Idempotency claims** — `social_relationship_action_queue` carries a
+`UNIQUE (business_id, idempotency_key)` constraint, and the security-definer
+RPC `social_relationship_claim_action(p_action_id)` performs the transition to
+`submitted` under a row lock. It returns `claimed`, `duplicate` (a matching
+key is already submitted/completed/unknown — the action is cancelled),
+`not_claimable` or `not_found`. EXECUTE is granted to `service_role` only, so
+concurrent workers can never double-send.
+
+**Shared logic** — `_shared/socialRelationshipLogic.ts` holds provider-neutral
+types and pure safety logic (mode normalisation, `validateProviderBaseUrl`
+HTTPS + allow-listed host validation, capability maps, pause resolution,
+working hours, jitter, rate limits, idempotency key building, opt-out and
+intent classification, escalation detection, health scoring).
+`_shared/socialRelationshipProvider.ts` is the secure Unipile client (HTTPS and
+host validated, secrets read server-side only, safe-off gates when unset).
+Unit tests: `src/lib/__tests__/socialRelationshipEngine.test.ts` (32 tests,
+fully mocked — no provider calls).
+
+Buffer publishing and the Social Autopilot content pack generator are
+untouched by this stage.
+
 ## Safety model (safe-off by default)
 Policy modes: `test_only` (default) → `draft_actions` → `approval_required` →
 `approved_batch_autopilot` → `paused`. Nothing external happens in the first two.
