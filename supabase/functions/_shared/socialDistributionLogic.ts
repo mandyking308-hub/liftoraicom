@@ -8,6 +8,16 @@
 
 export type PolicyMode = "test" | "approval_required" | "approved_batch_autopilot" | "paused";
 
+/** Per-channel distribution mode. Every mapping starts at OFF. */
+export type ChannelDispatchMode = "OFF" | "DRAFT_TO_BUFFER" | "AUTO_SCHEDULE";
+
+export const CHANNEL_DISPATCH_MODES: ChannelDispatchMode[] = ["OFF", "DRAFT_TO_BUFFER", "AUTO_SCHEDULE"];
+
+export function normaliseDispatchMode(value?: string | null): ChannelDispatchMode {
+  const v = String(value ?? "").trim().toUpperCase();
+  return (CHANNEL_DISPATCH_MODES as string[]).includes(v) ? (v as ChannelDispatchMode) : "OFF";
+}
+
 export const POLICY_MODES: PolicyMode[] = [
   "test",
   "approval_required",
@@ -64,6 +74,8 @@ export interface SubmissionContext {
   gate_unlocked: boolean;
   approved: boolean;
   policy_mode: PolicyMode;
+  /** Per-channel mode from social_business_channel_map.dispatch_mode. */
+  dispatch_mode?: ChannelDispatchMode | string | null;
   paused: boolean;
   text: string;
   media_urls?: Array<string | MediaAsset>;
@@ -218,6 +230,7 @@ export function evaluateSubmission(ctx: SubmissionContext): Eligibility {
     blockers.push("channel_not_mapped");
   } else {
     if (ctx.mapping_active === false) blockers.push("channel_mapping_inactive");
+    if (normaliseDispatchMode(ctx.dispatch_mode) === "OFF") blockers.push("channel_mode_off");
     if (ctx.mapping_business_id && ctx.mapping_business_id !== ctx.business_id) {
       blockers.push("cross_business_channel_mapping");
     }
