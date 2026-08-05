@@ -68745,6 +68745,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      social_relationship_claim_action: {
+        Args: { p_action_id: string }
+        Returns: string
+      }
       suggest_replacement_supplier: {
         Args: { _assignment_id: string }
         Returns: {
