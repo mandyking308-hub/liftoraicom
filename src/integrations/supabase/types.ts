@@ -59921,6 +59921,610 @@ export type Database = {
           },
         ]
       }
+      social_viral_audit: {
+        Row: {
+          action: string
+          actor_user_id: string | null
+          after_json: Json | null
+          before_json: Json | null
+          business_id: string
+          created_at: string
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          is_test_data: boolean
+          notes: string | null
+          provider_calls: number
+          scraped_pages: number
+        }
+        Insert: {
+          action: string
+          actor_user_id?: string | null
+          after_json?: Json | null
+          before_json?: Json | null
+          business_id: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          is_test_data?: boolean
+          notes?: string | null
+          provider_calls?: number
+          scraped_pages?: number
+        }
+        Update: {
+          action?: string
+          actor_user_id?: string | null
+          after_json?: Json | null
+          before_json?: Json | null
+          business_id?: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          is_test_data?: boolean
+          notes?: string | null
+          provider_calls?: number
+          scraped_pages?: number
+        }
+        Relationships: []
+      }
+      social_viral_content_briefs: {
+        Row: {
+          brief_status: string
+          brief_title: string
+          business_id: string
+          content_item_id: string | null
+          content_pack_id: string | null
+          conversion_route: string | null
+          correlation_key: string | null
+          created_at: string
+          cta: string | null
+          hook_directions: string[]
+          id: string
+          intended_outcome: string | null
+          is_test_data: boolean
+          landing_page_mapping: string | null
+          opportunity_id: string
+          original_angle: string | null
+          performance_status: string
+          publish_by: string | null
+          retention_structure: string | null
+          risk_notes: string[]
+          score_snapshot_id: string | null
+          source_links: string[]
+          suggested_formats: string[]
+          suggested_platforms: string[]
+          target_audience: string | null
+          updated_at: string
+          why_rising: string | null
+        }
+        Insert: {
+          brief_status?: string
+          brief_title: string
+          business_id: string
+          content_item_id?: string | null
+          content_pack_id?: string | null
+          conversion_route?: string | null
+          correlation_key?: string | null
+          created_at?: string
+          cta?: string | null
+          hook_directions?: string[]
+          id?: string
+          intended_outcome?: string | null
+          is_test_data?: boolean
+          landing_page_mapping?: string | null
+          opportunity_id: string
+          original_angle?: string | null
+          performance_status?: string
+          publish_by?: string | null
+          retention_structure?: string | null
+          risk_notes?: string[]
+          score_snapshot_id?: string | null
+          source_links?: string[]
+          suggested_formats?: string[]
+          suggested_platforms?: string[]
+          target_audience?: string | null
+          updated_at?: string
+          why_rising?: string | null
+        }
+        Update: {
+          brief_status?: string
+          brief_title?: string
+          business_id?: string
+          content_item_id?: string | null
+          content_pack_id?: string | null
+          conversion_route?: string | null
+          correlation_key?: string | null
+          created_at?: string
+          cta?: string | null
+          hook_directions?: string[]
+          id?: string
+          intended_outcome?: string | null
+          is_test_data?: boolean
+          landing_page_mapping?: string | null
+          opportunity_id?: string
+          original_angle?: string | null
+          performance_status?: string
+          publish_by?: string | null
+          retention_structure?: string | null
+          risk_notes?: string[]
+          score_snapshot_id?: string | null
+          source_links?: string[]
+          suggested_formats?: string[]
+          suggested_platforms?: string[]
+          target_audience?: string | null
+          updated_at?: string
+          why_rising?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_viral_content_briefs_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "social_viral_opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_viral_content_briefs_score_snapshot_id_fkey"
+            columns: ["score_snapshot_id"]
+            isOneToOne: false
+            referencedRelation: "social_viral_score_snapshots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_viral_opportunities: {
+        Row: {
+          audience_fit_score: number
+          blockers: string[]
+          business_id: string
+          business_objective: string
+          confidence_level: string
+          confidence_score: number
+          conversion_potential_score: number
+          conversion_route: string | null
+          created_at: string
+          freshness_deadline: string | null
+          id: string
+          is_test_data: boolean
+          opportunity_status: string
+          opportunity_summary: string | null
+          opportunity_title: string
+          overall_score: number
+          platform: string | null
+          provenance: Json
+          requires_compliance_review: boolean
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          risk_flags: string[]
+          safety_score: number
+          signal_id: string | null
+          target_audience: string | null
+          timing_saturation_score: number
+          trend_velocity_score: number
+          updated_at: string
+          viral_reach_score: number
+          watchlist_id: string | null
+        }
+        Insert: {
+          audience_fit_score?: number
+          blockers?: string[]
+          business_id: string
+          business_objective?: string
+          confidence_level?: string
+          confidence_score?: number
+          conversion_potential_score?: number
+          conversion_route?: string | null
+          created_at?: string
+          freshness_deadline?: string | null
+          id?: string
+          is_test_data?: boolean
+          opportunity_status?: string
+          opportunity_summary?: string | null
+          opportunity_title: string
+          overall_score?: number
+          platform?: string | null
+          provenance?: Json
+          requires_compliance_review?: boolean
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          risk_flags?: string[]
+          safety_score?: number
+          signal_id?: string | null
+          target_audience?: string | null
+          timing_saturation_score?: number
+          trend_velocity_score?: number
+          updated_at?: string
+          viral_reach_score?: number
+          watchlist_id?: string | null
+        }
+        Update: {
+          audience_fit_score?: number
+          blockers?: string[]
+          business_id?: string
+          business_objective?: string
+          confidence_level?: string
+          confidence_score?: number
+          conversion_potential_score?: number
+          conversion_route?: string | null
+          created_at?: string
+          freshness_deadline?: string | null
+          id?: string
+          is_test_data?: boolean
+          opportunity_status?: string
+          opportunity_summary?: string | null
+          opportunity_title?: string
+          overall_score?: number
+          platform?: string | null
+          provenance?: Json
+          requires_compliance_review?: boolean
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          risk_flags?: string[]
+          safety_score?: number
+          signal_id?: string | null
+          target_audience?: string | null
+          timing_saturation_score?: number
+          trend_velocity_score?: number
+          updated_at?: string
+          viral_reach_score?: number
+          watchlist_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_viral_opportunities_signal_id_fkey"
+            columns: ["signal_id"]
+            isOneToOne: false
+            referencedRelation: "social_viral_signals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_viral_opportunities_watchlist_id_fkey"
+            columns: ["watchlist_id"]
+            isOneToOne: false
+            referencedRelation: "social_viral_watchlists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_viral_provider_connections: {
+        Row: {
+          business_id: string
+          capabilities: Json
+          capability_verification: string
+          config_notes: string | null
+          connection_status: string
+          consecutive_failures: number
+          created_at: string
+          display_name: string
+          id: string
+          is_test_data: boolean
+          last_successful_sync_at: string | null
+          last_test_result: string | null
+          last_tested_at: string | null
+          provider_slug: string
+          secret_ref_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          capabilities?: Json
+          capability_verification?: string
+          config_notes?: string | null
+          connection_status?: string
+          consecutive_failures?: number
+          created_at?: string
+          display_name: string
+          id?: string
+          is_test_data?: boolean
+          last_successful_sync_at?: string | null
+          last_test_result?: string | null
+          last_tested_at?: string | null
+          provider_slug: string
+          secret_ref_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          capabilities?: Json
+          capability_verification?: string
+          config_notes?: string | null
+          connection_status?: string
+          consecutive_failures?: number
+          created_at?: string
+          display_name?: string
+          id?: string
+          is_test_data?: boolean
+          last_successful_sync_at?: string | null
+          last_test_result?: string | null
+          last_tested_at?: string | null
+          provider_slug?: string
+          secret_ref_name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      social_viral_score_snapshots: {
+        Row: {
+          blockers: string[]
+          business_id: string
+          component_scores: Json
+          confidence_score: number
+          created_at: string
+          formula_version: string
+          id: string
+          inputs_digest: string | null
+          is_test_data: boolean
+          opportunity_id: string
+          overall_score: number
+          scored_at: string
+          weights: Json
+        }
+        Insert: {
+          blockers?: string[]
+          business_id: string
+          component_scores?: Json
+          confidence_score?: number
+          created_at?: string
+          formula_version?: string
+          id?: string
+          inputs_digest?: string | null
+          is_test_data?: boolean
+          opportunity_id: string
+          overall_score?: number
+          scored_at?: string
+          weights?: Json
+        }
+        Update: {
+          blockers?: string[]
+          business_id?: string
+          component_scores?: Json
+          confidence_score?: number
+          created_at?: string
+          formula_version?: string
+          id?: string
+          inputs_digest?: string | null
+          is_test_data?: boolean
+          opportunity_id?: string
+          overall_score?: number
+          scored_at?: string
+          weights?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_viral_score_snapshots_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "social_viral_opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_viral_signals: {
+        Row: {
+          business_id: string
+          canonical_url: string | null
+          created_at: string
+          creator_handle: string | null
+          evidence_level: string
+          external_id: string
+          freshness_deadline: string | null
+          geography: string | null
+          id: string
+          is_test_data: boolean
+          language: string | null
+          metrics: Json
+          observed_at: string
+          platform: string
+          provider_slug: string
+          published_at: string | null
+          sanitised_payload: Json
+          signal_status: string
+          source_type: string
+          sync_run_id: string | null
+          title: string | null
+          topic: string | null
+          updated_at: string
+          watchlist_id: string | null
+        }
+        Insert: {
+          business_id: string
+          canonical_url?: string | null
+          created_at?: string
+          creator_handle?: string | null
+          evidence_level?: string
+          external_id: string
+          freshness_deadline?: string | null
+          geography?: string | null
+          id?: string
+          is_test_data?: boolean
+          language?: string | null
+          metrics?: Json
+          observed_at?: string
+          platform: string
+          provider_slug: string
+          published_at?: string | null
+          sanitised_payload?: Json
+          signal_status?: string
+          source_type?: string
+          sync_run_id?: string | null
+          title?: string | null
+          topic?: string | null
+          updated_at?: string
+          watchlist_id?: string | null
+        }
+        Update: {
+          business_id?: string
+          canonical_url?: string | null
+          created_at?: string
+          creator_handle?: string | null
+          evidence_level?: string
+          external_id?: string
+          freshness_deadline?: string | null
+          geography?: string | null
+          id?: string
+          is_test_data?: boolean
+          language?: string | null
+          metrics?: Json
+          observed_at?: string
+          platform?: string
+          provider_slug?: string
+          published_at?: string | null
+          sanitised_payload?: Json
+          signal_status?: string
+          source_type?: string
+          sync_run_id?: string | null
+          title?: string | null
+          topic?: string | null
+          updated_at?: string
+          watchlist_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_viral_signals_sync_run_id_fkey"
+            columns: ["sync_run_id"]
+            isOneToOne: false
+            referencedRelation: "social_viral_sync_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_viral_signals_watchlist_id_fkey"
+            columns: ["watchlist_id"]
+            isOneToOne: false
+            referencedRelation: "social_viral_watchlists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_viral_sync_runs: {
+        Row: {
+          accepted_count: number
+          business_id: string
+          created_at: string
+          duplicate_count: number
+          error_summary: string | null
+          finished_at: string | null
+          id: string
+          is_test_data: boolean
+          provider_calls: number
+          provider_slug: string
+          rejected_count: number
+          requested_count: number
+          run_mode: string
+          run_status: string
+          started_at: string
+          watchlist_id: string | null
+        }
+        Insert: {
+          accepted_count?: number
+          business_id: string
+          created_at?: string
+          duplicate_count?: number
+          error_summary?: string | null
+          finished_at?: string | null
+          id?: string
+          is_test_data?: boolean
+          provider_calls?: number
+          provider_slug: string
+          rejected_count?: number
+          requested_count?: number
+          run_mode?: string
+          run_status?: string
+          started_at?: string
+          watchlist_id?: string | null
+        }
+        Update: {
+          accepted_count?: number
+          business_id?: string
+          created_at?: string
+          duplicate_count?: number
+          error_summary?: string | null
+          finished_at?: string | null
+          id?: string
+          is_test_data?: boolean
+          provider_calls?: number
+          provider_slug?: string
+          rejected_count?: number
+          requested_count?: number
+          run_mode?: string
+          run_status?: string
+          started_at?: string
+          watchlist_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_viral_sync_runs_watchlist_id_fkey"
+            columns: ["watchlist_id"]
+            isOneToOne: false
+            referencedRelation: "social_viral_watchlists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_viral_watchlists: {
+        Row: {
+          audience_description: string | null
+          business_id: string
+          business_objective: string
+          competitor_handles: string[]
+          conversion_route: string | null
+          created_at: string
+          excluded_topics: string[]
+          geographies: string[]
+          id: string
+          is_test_data: boolean
+          keywords: string[]
+          languages: string[]
+          niche: string | null
+          platforms: string[]
+          updated_at: string
+          watchlist_name: string
+          watchlist_status: string
+        }
+        Insert: {
+          audience_description?: string | null
+          business_id: string
+          business_objective?: string
+          competitor_handles?: string[]
+          conversion_route?: string | null
+          created_at?: string
+          excluded_topics?: string[]
+          geographies?: string[]
+          id?: string
+          is_test_data?: boolean
+          keywords?: string[]
+          languages?: string[]
+          niche?: string | null
+          platforms?: string[]
+          updated_at?: string
+          watchlist_name: string
+          watchlist_status?: string
+        }
+        Update: {
+          audience_description?: string | null
+          business_id?: string
+          business_objective?: string
+          competitor_handles?: string[]
+          conversion_route?: string | null
+          created_at?: string
+          excluded_topics?: string[]
+          geographies?: string[]
+          id?: string
+          is_test_data?: boolean
+          keywords?: string[]
+          languages?: string[]
+          niche?: string | null
+          platforms?: string[]
+          updated_at?: string
+          watchlist_name?: string
+          watchlist_status?: string
+        }
+        Relationships: []
+      }
       sop_agent_usage: {
         Row: {
           active: boolean

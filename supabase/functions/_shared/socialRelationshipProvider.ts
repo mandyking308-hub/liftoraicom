@@ -17,6 +17,15 @@ import {
   type CapabilityKey,
 } from "./socialRelationshipLogic.ts";
 
+/** Reads an Edge Function environment secret without depending on Deno types. */
+function envGet(key: string): string {
+  try {
+    return ((globalThis as any).Deno?.env?.get(key) as string | undefined) ?? "";
+  } catch {
+    return "";
+  }
+}
+
 export interface ProviderCallResult<T = unknown> {
   ok: boolean;
   http_status: number;
@@ -164,8 +173,8 @@ export class UnipileAdapter implements SocialRelationshipAdapter {
   private baseUrlError: string | null;
 
   constructor(env: { apiKey?: string | null; dsn?: string | null } = {}) {
-    this.apiKey = (env.apiKey ?? Deno.env.get("UNIPILE_API_KEY") ?? "").trim();
-    const raw = (env.dsn ?? Deno.env.get("UNIPILE_DSN") ?? "").trim();
+    this.apiKey = (env.apiKey ?? envGet("UNIPILE_API_KEY")).trim();
+    const raw = (env.dsn ?? envGet("UNIPILE_DSN")).trim();
     const v = validateProviderBaseUrl(raw);
     this.baseRoot = v.ok ? String(v.url) : null;
     this.baseUrlError = v.ok ? null : (v.reason ?? "base_url_invalid");
@@ -463,7 +472,7 @@ export function parseUnipileProfiles(data: unknown, network: string): ProviderPr
 export class ManyChatAdapter implements SocialRelationshipAdapter {
   readonly provider = "manychat";
   configured(): boolean {
-    return Boolean((Deno.env.get("MANYCHAT_API_KEY") ?? "").trim());
+    return Boolean(envGet("MANYCHAT_API_KEY").trim());
   }
   capabilities(): Record<CapabilityKey, boolean> {
     return fullCapMatrix({ webhook_support: true });
