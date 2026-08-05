@@ -21,6 +21,7 @@ export default function SocialAutopilotCommandCentreBlock() {
   const [competitor, setCompetitor] = useState<any>(null);
   const [funnel, setFunnel] = useState<any>(null);
   const [paidMedia, setPaidMedia] = useState<any>(null);
+  const [dist, setDist] = useState<any>(null);
   const businessId = typeof window !== "undefined" ? localStorage.getItem("liftor.activeBusinessId") || "" : "";
 
   useEffect(() => {
@@ -70,6 +71,12 @@ export default function SocialAutopilotCommandCentreBlock() {
           const pm = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/paid-media-healthcheck`,
             { method: "POST", headers: { Authorization: `Bearer ${session?.access_token ?? ""}`, "Content-Type": "application/json" }, body: JSON.stringify({ business_id: businessId }) });
           setPaidMedia(await pm.json());
+          const dh = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/social-distribution-health`, {
+            method: "POST",
+            headers: { Authorization: `Bearer ${session?.access_token ?? ""}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ business_id: businessId }),
+          });
+          setDist(await dh.json());
         }
       } catch { /* ignore */ }
     })();
@@ -89,8 +96,14 @@ export default function SocialAutopilotCommandCentreBlock() {
           <Megaphone size={16} /> Social Autopilot
         </CardTitle>
         <div className="flex items-center gap-2">
-          <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-400">
-            <Lock size={10} className="mr-1" /> Provider execution LOCKED
+          <Badge
+            variant="secondary"
+            className={dist?.health?.state === "LIVE"
+              ? "bg-emerald-500/20 text-emerald-400"
+              : "bg-yellow-500/20 text-yellow-400"}
+          >
+            {dist?.health?.state !== "LIVE" && <Lock size={10} className="mr-1" />}
+            Provider execution: {dist?.health?.state ?? "UNKNOWN"}
           </Badge>
           <Link to="/founder/social-autopilot"><Button size="sm" variant="outline">Open</Button></Link>
         </div>
@@ -107,7 +120,7 @@ export default function SocialAutopilotCommandCentreBlock() {
           {stat("Reply drafts", data?.reply_jobs_pending_approval)}
           {stat("Perf logs", data?.performance_logs_count)}
           {stat("Test data", data?.test_data_count)}
-          {stat("Ext publish", "OFF")}
+          {stat("Ext publish", dist?.health?.state ?? "OFF")}
           {stat("DM send", "OFF")}
         </div>
         {businessId && (
@@ -226,7 +239,9 @@ export default function SocialAutopilotCommandCentreBlock() {
         )}
         {businessId && publishing && (
           <div className="mt-3 p-3 rounded bg-secondary/40">
-            <p className="text-xs font-semibold mb-1 flex items-center gap-1"><Lock size={12} /> Publishing Queue (provider execution locked)</p>
+            <p className="text-xs font-semibold mb-1 flex items-center gap-1">
+              {dist?.health?.state !== "LIVE" && <Lock size={12} />} Publishing Queue (Buffer gateway: {dist?.health?.state ?? "UNKNOWN"})
+            </p>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-[11px]">
               <span>Jobs: {publishing.publish_jobs_total ?? 0}</span>
               <span>Queued: {publishing.queued_jobs ?? 0}</span>
