@@ -114,7 +114,7 @@ describe("Social Relationship Engine production runtime contract", () => {
     expect(webhook).toContain("immediateStop");
     expect(webhook).toContain('target_status: "suppressed"');
     expect(webhook).toContain('action_status: "cancelled"');
-    expect(webhook).toContain('conversation_status = "suppressed"').or.toContain('conversation_status: "suppressed"');
+    expect(webhook).toContain('patch.conversation_status = "suppressed"');
     expect(webhook).toContain("founder_approval_items");
   });
 
