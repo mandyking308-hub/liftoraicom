@@ -6,7 +6,12 @@
  * truth, no drift).
  */
 
-export type PolicyMode = "test" | "approval_required" | "approved_batch_autopilot" | "paused";
+export type PolicyMode =
+  | "test"
+  | "approval_required"
+  | "draft_to_buffer"
+  | "approved_batch_autopilot"
+  | "paused";
 
 /** Per-channel distribution mode. Every mapping starts at OFF. */
 export type ChannelDispatchMode = "OFF" | "DRAFT_TO_BUFFER" | "AUTO_SCHEDULE";
@@ -21,9 +26,25 @@ export function normaliseDispatchMode(value?: string | null): ChannelDispatchMod
 export const POLICY_MODES: PolicyMode[] = [
   "test",
   "approval_required",
+  "draft_to_buffer",
   "approved_batch_autopilot",
   "paused",
 ];
+
+/**
+ * Effective per-job mode. A `draft_to_buffer` business policy forces every
+ * mapped channel to the draft path (it can never publish or schedule), while
+ * OFF channels stay OFF. Any other policy defers to the channel mode.
+ */
+export function resolveEffectiveDispatchMode(
+  policy_mode: PolicyMode | string,
+  channel_mode?: string | null,
+): ChannelDispatchMode {
+  const channel = normaliseDispatchMode(channel_mode);
+  if (channel === "OFF") return "OFF";
+  if (policy_mode === "draft_to_buffer") return "DRAFT_TO_BUFFER";
+  return channel;
+}
 
 export type DistributionStatus =
   | "not_submitted"
@@ -512,10 +533,14 @@ export function parsePostsConnection(
 }
 
 /** Pure policy gate for approval-driven auto-dispatch. */
-export function shouldAutoDispatch(policyMode: string, paused: boolean): { go: boolean; reason?: string } {
+export function shouldAutoDispatch(
+  policyMode: string,
+  paused: boolean,
+): { go: boolean; reason?: string; mode?: "schedule" | "draft" } {
   if (paused) return { go: false, reason: "emergency_pause_active" };
+  if (policyMode === "draft_to_buffer") return { go: true, mode: "draft" };
   if (policyMode !== "approved_batch_autopilot") return { go: false, reason: `policy_${policyMode}` };
-  return { go: true };
+  return { go: true, mode: "schedule" };
 }
 
 /* ------------------------------------------------------------------ */
@@ -573,9 +598,20 @@ export function classifySubmissionOutcome(args: {
 /* ------------------------------------------------------------------ */
 
 const PROVIDER_STATUS_MAP: Record<string, DistributionStatus> = {
+  // Published
   sent: "sent",
-  error: "failed",
+  published: "sent",
+  // Waiting in Buffer (queued/scheduled)
   scheduled: "scheduled",
+  buffer: "scheduled",
+  queued: "scheduled",
+  pending: "scheduled",
+  // Provider-side draft
+  draft: "draft_in_provider",
+  drafts: "draft_in_provider",
+  // Provider-side failure
+  error: "failed",
+  failed: "failed",
 };
 
 /** Returns null for any unproven/unmapped provider status - never infers. */
