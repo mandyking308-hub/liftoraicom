@@ -32,6 +32,7 @@ export type DistributionStatus =
   | "submitting"
   | "scheduled"
   | "sent"
+  | "draft_in_provider"
   | "failed"
   | "retrying"
   | "dead_letter"
@@ -476,7 +477,7 @@ export function computeNextRetryAt(attemptCount: number, from: Date = new Date()
 export function summariseStatuses(jobs: Array<{ distribution_status?: string | null }>) {
   const totals: Record<string, number> = {
     blocked: 0, ready: 0, not_submitted: 0, submitting: 0,
-    scheduled: 0, sent: 0, failed: 0, retrying: 0, dead_letter: 0, submission_unknown: 0,
+    scheduled: 0, sent: 0, draft_in_provider: 0, failed: 0, retrying: 0, dead_letter: 0, submission_unknown: 0,
   };
   for (const j of jobs) {
     const k = j.distribution_status ?? "not_submitted";
