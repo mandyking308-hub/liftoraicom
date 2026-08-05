@@ -37,3 +37,6 @@ verify_jwt = false
 
 [functions.social-distribution-dispatch-due]
 verify_jwt = false
+
+[functions.social-distribution-maintenance]
+verify_jwt = false
