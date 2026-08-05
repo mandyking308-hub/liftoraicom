@@ -48,7 +48,7 @@ export function SafetyBanner({ mode, state }: { mode: string; state?: string }) 
       {live ? <CheckCircle2 size={14} className="mt-0.5" /> : <Lock size={14} className="mt-0.5" />}
       <div>
         <p className="font-semibold">
-          {live ? "Relationship autopilot active" : `Safe mode — ${mode.replaceAll("_", " ")}`}
+          {live ? "Relationship autopilot active" : `Safe mode — ${mode.split("_").join(" ")}`}
         </p>
         <p className="text-muted-foreground mt-0.5">
           {live
@@ -391,7 +391,7 @@ export function RelationshipActionQueuePanel({ businessId }: { businessId: strin
   const call = async (action: string, extra: Record<string, unknown> = {}) => {
     const r = await callRelationshipFn("social-relationship-actions", { business_id: businessId, action, ...extra });
     toast({
-      title: r?.ok ? action.replaceAll("_", " ") : `${action} failed`,
+      title: r?.ok ? action.split("_").join(" ") : `${action} failed`,
       description: r?.ok ? JSON.stringify({ created: r.created, approved: r.approved, sent: r.sent, blocked: r.blocked }) : String(r?.error ?? ""),
       variant: r?.ok ? undefined : "destructive",
     });
