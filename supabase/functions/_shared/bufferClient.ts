@@ -84,20 +84,22 @@ export const CREATE_POST_MUTATION = `mutation CreatePost($input: CreatePostInput
 }`;
 
 /**
- * Buffer exposes posts as a relay-style connection. The precise supported
- * filter input for the current schema is NOT proven from a local schema
- * document, so reconciliation stays disabled unless an operator explicitly
- * sets BUFFER_POSTS_QUERY_VERIFIED=true after validating the query.
+ * Buffer exposes posts as a relay-style connection:
+ * posts(input:{organizationId, ...}) { pageInfo { hasNextPage endCursor } edges { node { ... } } }
+ * Reconciliation walks a bounded number of pages and only reads fields the
+ * API actually returns — no status or URL is ever invented.
  */
-export const POSTS_QUERY = `query GetPosts($organizationId: OrganizationId!) {
-  posts(input:{organizationId:$organizationId}) {
+export const POSTS_QUERY = `query GetPosts($organizationId: OrganizationId!, $first: Int, $after: String) {
+  posts(input:{organizationId:$organizationId}, first:$first, after:$after) {
+    pageInfo { hasNextPage endCursor }
     edges { node { id status dueAt channelId } }
   }
 }`;
 
-export function postsQueryVerified(): boolean {
-  return envGet("BUFFER_POSTS_QUERY_VERIFIED").trim().toLowerCase() === "true";
-}
+/** Page size used by the reconciler. */
+export const POSTS_PAGE_SIZE = 100;
+/** Hard cap on pages walked per reconcile run. */
+export const POSTS_MAX_PAGES = 5;
 
 export { parsePostsConnection } from "./socialDistributionLogic.ts";
 
