@@ -10,6 +10,14 @@ const CONFIRM_PHRASE = "DISTRIBUTE APPROVED BATCH";
 
 const DISPATCH_MODES = ["OFF", "DRAFT_TO_BUFFER", "AUTO_SCHEDULE"] as const;
 
+const POLICY_MODE_LABELS: Array<[string, string]> = [
+  ["test", "Off (test)"],
+  ["approval_required", "Approval required"],
+  ["draft_to_buffer", "Draft to Buffer"],
+  ["approved_batch_autopilot", "Automatic publishing"],
+  ["paused", "Paused"],
+];
+
 async function call(path: string, body?: unknown) {
   const { data: sess } = await supabase.auth.getSession();
   const token = sess.session?.access_token ?? "";
