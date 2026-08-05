@@ -120,6 +120,25 @@ export async function runDueActions(
       continue;
     }
 
+    if (action.target_id && !target) {
+      out.blocked++;
+      await admin.from("social_relationship_action_queue").update({
+        action_status: "blocked",
+        blocked_reason: "target_not_in_business",
+      }).eq("id", action.id).eq("business_id", action.business_id);
+      out.details.push({ id: action.id, outcome: "blocked", blockers: ["target_not_in_business"] });
+      continue;
+    }
+    if (action.profile_id && !profile) {
+      out.blocked++;
+      await admin.from("social_relationship_action_queue").update({
+        action_status: "blocked",
+        blocked_reason: "profile_not_in_business",
+      }).eq("id", action.id).eq("business_id", action.business_id);
+      out.details.push({ id: action.id, outcome: "blocked", blockers: ["profile_not_in_business"] });
+      continue;
+    }
+
     const notBefore = action.not_before ?? action.scheduled_for;
     if (notBefore && new Date(notBefore).getTime() > now.getTime()) {
       out.details.push({ id: action.id, outcome: "not_due" });
