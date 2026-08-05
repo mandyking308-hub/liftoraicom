@@ -25,7 +25,7 @@ Key modules
 - `supabase/functions/_shared/socialDistributionSubmit.ts` — per-job evaluation, claim, submit, failure handling.
 - `supabase/functions/_shared/socialDistributionReconcile.ts` — bounded, business-scoped status reconciliation.
 - `supabase/functions/_shared/socialDistributionAuto.ts` — approval-driven dispatch of an approved batch.
-- Edge functions: `social-buffer-channels-sync`, `social-distribution-submit`, `social-distribution-dispatch-due`, `social-distribution-reconcile`, `social-distribution-maintenance`, `social-distribution-health`.
+- Edge functions: `social-buffer-channel-sync`, `social-distribution-submit`, `social-distribution-dispatch-due`, `social-distribution-reconcile`, `social-distribution-maintenance`, `social-distribution-health`.
 
 ## Modes
 
@@ -48,10 +48,9 @@ every non-OFF channel; OFF channels always stay off. UI label: **Draft to Buffer
 | Secret | Purpose | Required |
 | --- | --- | --- |
 | `BUFFER_API_KEY` | Bearer token for `https://api.buffer.com` | Yes |
-| `BUFFER_ORGANIZATION_ID` | Default Buffer organisation for channel sync | Yes |
+| `BUFFER_ORGANIZATION_ID` | OPTIONAL fallback organisation, used only when `social_provider_connections.provider_organization_id` is empty | No |
 | `SOCIAL_DISPATCH_SECRET` | Scheduler auth (`x-dispatch-secret`) for the dispatcher and the maintenance runner | Yes for unattended operation |
-| `SOCIAL_DISPATCH_CRON_REGISTERED` | Set to `true` only after the dispatcher cron hook exists | Yes for `LIVE` |
-| `SOCIAL_MAINTENANCE_CRON_REGISTERED` | Set to `true` only after the maintenance cron hook exists | Yes for `LIVE` |
+| `SOCIAL_DISPATCH_CRON_REGISTERED` | Single canonical schedule flag for BOTH cron hooks. Set to `true` only after both are registered | Yes for `LIVE` |
 
 Secrets are never returned in API responses, UI or audit payloads.
 `social-distribution-maintenance` accepts the scheduler secret **only** — a founder
@@ -59,13 +58,13 @@ browser token is rejected.
 
 ## Setup steps
 
-1. Add `BUFFER_API_KEY` and `BUFFER_ORGANIZATION_ID` in Project Settings → Secrets.
+1. Add `BUFFER_API_KEY` in Project Settings → Secrets. `BUFFER_ORGANIZATION_ID` is optional: the founder-selected organisation stored on the business connection row is always used first. No secret is ever stored in a normal database table.
 2. Social Autopilot → Publishing → **Test connection**, pick the organisation.
 3. **Sync channels** (dry-run preview first, then founder-confirmed sync).
 4. Map channels to the business. Every channel starts at **OFF**.
 5. Set the per-channel mode: `DRAFT_TO_BUFFER` or `AUTO_SCHEDULE`.
 6. Unlock the execution gate and set the policy (`draft_to_buffer` first, `approved_batch_autopilot` later — the latter needs the typed phrase `DISTRIBUTE APPROVED BATCH`).
-7. Register both cron hooks below, then set `SOCIAL_DISPATCH_SECRET`, `SOCIAL_DISPATCH_CRON_REGISTERED=true` and `SOCIAL_MAINTENANCE_CRON_REGISTERED=true`.
+7. Register both cron hooks below, then set `SOCIAL_DISPATCH_SECRET` and `SOCIAL_DISPATCH_CRON_REGISTERED=true`.
 
 ## Scheduled jobs — CONFIGURATION REQUIRED (not registered yet)
 
@@ -92,7 +91,13 @@ select cron.schedule('social-distribution-maintenance', '*/5 * * * *',
        body := '{}'::jsonb) $$);
 ```
 
-Then set `SOCIAL_DISPATCH_CRON_REGISTERED=true` and `SOCIAL_MAINTENANCE_CRON_REGISTERED=true`.
+Then set `SOCIAL_DISPATCH_CRON_REGISTERED=true` (single flag for both hooks).
+
+Status in this project: **CONFIGURATION REQUIRED** — `pg_cron`, `pg_net` and Vault are
+available, but no schedule and no `SOCIAL_DISPATCH_SECRET` exist yet. The secret is
+supplied as an Edge Function secret and echoed only inside the protected cron header
+above; it is never committed, never stored in an ordinary table and never returned by
+any endpoint. Nothing here claims the cron is registered.
 
 ## Maintenance runner behaviour
 
@@ -104,7 +109,8 @@ Every run (bounded, max 10 businesses):
 
 ## Reconciliation rules
 
-- Relay `posts(input:{organizationId}, first:100, after:$cursor)`; at most 5 pages, stops early once every wanted post ID is found.
+- Relay `posts(input:{organizationId}, first:50, after:$cursor)` with `pageInfo { hasNextPage endCursor }`; hard caps of **2 pages / 100 posts** per run, stopping early once every wanted post ID is found. The organisation is the business connection row first, `BUFFER_ORGANIZATION_ID` second.
+- `externalLink` is not requested on `posts` because the current schema does not accept it there; reconciliation therefore never stores an external URL.
 - Only jobs of this business with a `provider_post_id`, and only channels mapped to this business.
 - Explicit status allowlist: `sent`/`published` → `sent`; `scheduled`/`buffer`/`queued`/`pending` → `scheduled`; `draft` → `draft_in_provider`; `error`/`failed` → `failed`. Anything else is left unchanged and counted as `unknown_provider_status`.
 - Buffer returns no permalink for the queried fields, so no external post URL is stored or invented.
@@ -114,18 +120,18 @@ Every run (bounded, max 10 businesses):
 `NOT_CONFIGURED → CONNECTED → MAPPED → ARMED → LIVE`, plus `DEGRADED` and `BLOCKED`.
 **LIVE requires** secrets, a tested connection with an organisation, mapped
 auto-schedule channels, an unlocked gate, autopilot policy, **and** fresh
-(<30 min) dispatcher *and* maintenance heartbeats with both schedules registered.
+(<30 min) dispatcher *and* maintenance heartbeats with `SOCIAL_DISPATCH_CRON_REGISTERED=true`.
 `draft_to_buffer` reports `ARMED — draft_to_buffer_mode` by design.
 
 ## Live-readiness checklist
 
-- [ ] `BUFFER_API_KEY` / `BUFFER_ORGANIZATION_ID` set
+- [ ] `BUFFER_API_KEY` set (`BUFFER_ORGANIZATION_ID` optional fallback only)
 - [ ] Connection test green, organisation selected
 - [ ] Channels synced, none disconnected/locked/paused
 - [ ] Channels mapped and set to `AUTO_SCHEDULE`
 - [ ] Execution gate unlocked, policy armed with the typed confirmation
 - [ ] Media at stable public HTTPS URLs (signed/expiring URLs are blocked, never downgraded to text)
-- [ ] Both cron hooks registered and both `*_CRON_REGISTERED` flags `true`
+- [ ] Both cron hooks registered and `SOCIAL_DISPATCH_CRON_REGISTERED=true`
 - [ ] Health shows **LIVE** with fresh dispatcher and maintenance heartbeats
 
 ## One-business low-risk proof procedure

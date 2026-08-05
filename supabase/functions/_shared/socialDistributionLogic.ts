@@ -451,7 +451,7 @@ export function computeDistributionHealth(i: DistributionHealthInput): Distribut
     return { state: "BLOCKED", reason: "emergency_pause_active", detail: "Kill switch engaged — no provider calls are made. Queued content is untouched.", dispatcher, maintenance };
   }
   if (!i.secrets_present) {
-    return { state: "NOT_CONFIGURED", reason: "buffer_secrets_missing", detail: "BUFFER_API_KEY / BUFFER_ORGANIZATION_ID are not set.", dispatcher, maintenance };
+    return { state: "NOT_CONFIGURED", reason: "buffer_secrets_missing", detail: "BUFFER_API_KEY is not set (BUFFER_ORGANIZATION_ID is an optional fallback).", dispatcher, maintenance };
   }
   if (!i.connection_ok || !i.organization_id_present) {
     return { state: "NOT_CONFIGURED", reason: "provider_not_connected", detail: "Buffer connection has not been tested and an organisation selected.", dispatcher, maintenance };
@@ -477,7 +477,7 @@ export function computeDistributionHealth(i: DistributionHealthInput): Distribut
     return { state: "ARMED", reason: "dispatcher_schedule_missing", detail: "CONFIGURATION REQUIRED — the 5-minute dispatcher cron hook is not registered.", dispatcher, maintenance };
   }
   if (maintenance === "CONFIGURATION_REQUIRED") {
-    return { state: "ARMED", reason: "maintenance_schedule_missing", detail: "CONFIGURATION REQUIRED — the unattended maintenance (retry + reconcile) cron hook is not registered.", dispatcher, maintenance };
+    return { state: "ARMED", reason: "maintenance_schedule_missing", detail: "CONFIGURATION REQUIRED — SOCIAL_DISPATCH_CRON_REGISTERED is not true / the maintenance cron hook is not registered.", dispatcher, maintenance };
   }
   if (dispatcher === "FAILING" || (i.failed_jobs ?? 0) > 0) {
     return { state: "DEGRADED", reason: dispatcher === "FAILING" ? "dispatcher_run_failed" : "failed_jobs_present", detail: "Distribution is live but the last run or some jobs failed.", dispatcher, maintenance };

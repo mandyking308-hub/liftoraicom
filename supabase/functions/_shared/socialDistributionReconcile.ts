@@ -8,7 +8,7 @@
  */
 import {
   bufferGraphQL, bufferKeyPresent, parsePostsConnection, parsePostsPageInfo,
-  POSTS_MAX_PAGES, POSTS_PAGE_SIZE, POSTS_QUERY,
+  POSTS_MAX_PAGES, POSTS_MAX_TOTAL, POSTS_PAGE_SIZE, POSTS_QUERY, resolveOrganizationId,
 } from "./bufferClient.ts";
 import { mapProviderStatus, selectReconcileCandidates } from "./socialDistributionLogic.ts";
 import { audit, getConnection, isPaused } from "./socialDistributionDb.ts";
@@ -40,7 +40,9 @@ export async function reconcileBusiness(
   if (await isPaused(admin, business_id, provider)) return EMPTY({ error: "emergency_pause_active", unchanged: true });
 
   const conn = await getConnection(admin, business_id, provider);
-  if (!conn?.provider_organization_id) return EMPTY({ error: "provider_organization_missing", unchanged: true });
+  // Founder-selected organisation first, secure env fallback second.
+  const organizationId = resolveOrganizationId(conn?.provider_organization_id);
+  if (!organizationId) return EMPTY({ error: "provider_organization_missing", unchanged: true });
 
   // Only channels mapped to THIS business may ever be reconciled.
   const { data: maps } = await admin.from("social_business_channel_map")
@@ -62,15 +64,18 @@ export async function reconcileBusiness(
   const byId = new Map<string, any>();
   let cursor: string | null = null;
   let pages = 0;
-  while (pages < POSTS_MAX_PAGES) {
+  let scanned = 0;
+  while (pages < POSTS_MAX_PAGES && scanned < POSTS_MAX_TOTAL) {
     const res: any = await bufferGraphQL(POSTS_QUERY, {
-      organizationId: conn.provider_organization_id,
-      first: POSTS_PAGE_SIZE,
+      organizationId,
+      first: Math.min(POSTS_PAGE_SIZE, POSTS_MAX_TOTAL - scanned),
       after: cursor,
     });
     if (!res.ok) return EMPTY({ error: res.errorMessage, unchanged: true, pages_read: pages });
     pages++;
-    for (const p of parsePostsConnection(res.data)) {
+    const page = parsePostsConnection(res.data);
+    scanned += page.length;
+    for (const p of page) {
       if (wanted.has(p.id)) byId.set(p.id, p);
     }
     const info = parsePostsPageInfo(res.data);

@@ -1,5 +1,5 @@
 /** Shared submit pipeline used by preview, manual submit, retry and auto-dispatch. */
-import { bufferGraphQL, bufferKeyPresent, CREATE_POST_MUTATION, readCreatePostResult } from "./bufferClient.ts";
+import { bufferGraphQL, bufferKeyPresent, CREATE_POST_MUTATION, readCreatePostResult, resolveOrganizationId } from "./bufferClient.ts";
 import {
   buildCreatePostInput, buildDistributionIdempotencyKey, classifySubmissionOutcome,
   computeNextRetryAt, evaluateSubmission, MAX_ATTEMPTS, normaliseDispatchMode,
@@ -74,7 +74,7 @@ export async function evaluateJob(
     mapping_business_id: mapping?.business_id ?? null,
     dispatch_mode: mapping ? dispatch_mode : undefined,
     connection_present: !!ctx.connection && ctx.connection.connection_status !== "error",
-    connection_organization_id: ctx.connection?.provider_organization_id ?? null,
+    connection_organization_id: resolveOrganizationId(ctx.connection?.provider_organization_id) || null,
     gate_unlocked: ctx.gate,
     approved: approval.approved,
     policy_mode: ctx.policy.mode,

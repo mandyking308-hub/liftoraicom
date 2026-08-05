@@ -4,10 +4,10 @@
  * healthy dispatcher heartbeat all agree.
  */
 import { corsHeaders, json, requireFounder } from "../_shared/socialAuth.ts";
-import { bufferKeyPresent } from "../_shared/bufferClient.ts";
+import { bufferKeyPresent, resolveOrganizationId } from "../_shared/bufferClient.ts";
 import { gateUnlocked, getConnection, getPolicy, isPaused } from "../_shared/socialDistributionDb.ts";
 import { computeDistributionHealth, normaliseDispatchMode, summariseStatuses } from "../_shared/socialDistributionLogic.ts";
-import { dispatchScheduleRegistered, maintenanceScheduleRegistered } from "../_shared/socialDispatchAuth.ts";
+import { dispatchScheduleRegistered } from "../_shared/socialDispatchAuth.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
 
   const health = computeDistributionHealth({
     secrets_present: bufferKeyPresent(),
-    organization_id_present: !!connection?.provider_organization_id,
+    organization_id_present: !!resolveOrganizationId(connection?.provider_organization_id),
     connection_ok: !!connection && connection.connection_status !== "error",
     mapped_channels: activeMaps.length,
     auto_schedule_channels: autoSchedule,
@@ -56,7 +56,7 @@ Deno.serve(async (req) => {
     last_dispatch_failed: lastRun?.run_status === "completed_with_errors" || lastRun?.run_status === "failed",
     dispatcher_schedule_registered: dispatchScheduleRegistered(),
     last_maintenance_run_at: lastMaint?.finished_at ?? lastMaint?.started_at ?? null,
-    maintenance_schedule_registered: maintenanceScheduleRegistered(),
+    maintenance_schedule_registered: dispatchScheduleRegistered(),
     failed_jobs: (totals.dead_letter ?? 0) + (totals.failed ?? 0),
   });
 
@@ -88,7 +88,7 @@ Deno.serve(async (req) => {
     },
     maintenance: {
       status: health.maintenance,
-      schedule_registered: maintenanceScheduleRegistered(),
+      schedule_registered: dispatchScheduleRegistered(),
       last_run_at: lastMaint?.finished_at ?? lastMaint?.started_at ?? null,
       last_run_status: lastMaint?.run_status ?? null,
     },

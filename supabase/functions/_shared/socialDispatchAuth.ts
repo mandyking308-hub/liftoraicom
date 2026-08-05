@@ -26,6 +26,10 @@ export async function requireFounderOrScheduler(req: Request) {
   return { admin: a.admin, trigger_source: "founder" as const };
 }
 
+/**
+ * Single canonical schedule flag for BOTH the dispatcher and the unattended
+ * maintenance runner: SOCIAL_DISPATCH_CRON_REGISTERED.
+ */
 export function dispatchScheduleRegistered(): boolean {
   return (Deno.env.get("SOCIAL_DISPATCH_CRON_REGISTERED") ?? "").trim().toLowerCase() === "true";
 }
@@ -46,8 +50,4 @@ export function requireScheduler(req: Request) {
     { auth: { persistSession: false } },
   );
   return { admin, trigger_source: "scheduler_maintenance" as const };
-}
-
-export function maintenanceScheduleRegistered(): boolean {
-  return (Deno.env.get("SOCIAL_MAINTENANCE_CRON_REGISTERED") ?? "").trim().toLowerCase() === "true";
 }
