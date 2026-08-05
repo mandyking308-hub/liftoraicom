@@ -123,7 +123,7 @@ export async function evaluateJob(
       ? buildCreatePostInput({
           channelId: externalChannelId,
           text: payload.text,
-      dueAt: job.scheduled_for,
+          dueAt: job.scheduled_for,
           shareNow: shareNow && !save_to_draft,
           mediaUrls: payload.media,
           linkAttachment: payload.link_url ? { url: payload.link_url } : null,
@@ -137,13 +137,14 @@ export async function submitJob(
   admin: any, business_id: string, job: any,
   ctx: DistributionContext,
   share_now = false,
-  opts: { require_auto_schedule?: boolean } = {},
+  opts: { require_auto_schedule?: boolean; allowed_modes?: ChannelDispatchMode[] } = {},
 ) {
   const ev = await evaluateJob(admin, business_id, job, ctx, share_now);
-  if (opts.require_auto_schedule && ev.dispatch_mode !== "AUTO_SCHEDULE") {
+  const allowed = opts.allowed_modes ?? (opts.require_auto_schedule ? (["AUTO_SCHEDULE"] as ChannelDispatchMode[]) : null);
+  if (allowed && !allowed.includes(ev.dispatch_mode)) {
     await audit(admin, {
       business_id, publish_job_id: job.id, action: "distribution_skipped_not_auto_schedule",
-      result_json: { dispatch_mode: ev.dispatch_mode },
+      result_json: { dispatch_mode: ev.dispatch_mode, allowed_modes: allowed },
     });
     return { job_id: job.id, ok: false, status: "skipped", blockers: ["channel_mode_not_auto_schedule"] };
   }
@@ -201,14 +202,15 @@ export async function submitJob(
     });
   }
 
-  const scheduled = share_now ? "sent" : "scheduled";
+  const publishedNow = share_now && !ev.save_to_draft;
+  const scheduled = publishedNow ? "sent" : "scheduled";
   await admin.from("social_publish_jobs").update({
     distribution_status: ev.save_to_draft ? "draft_in_provider" : scheduled,
     provider_post_id: parsed.postId,
     provider_status: parsed.status ?? null,
     provider_response_summary: { post_id: parsed.postId, status: parsed.status ?? null, due_at: parsed.dueAt ?? null },
     submitted_at: new Date().toISOString(),
-    published_at: share_now ? new Date().toISOString() : null,
+    published_at: publishedNow ? new Date().toISOString() : null,
     external_execution_attempted: true,
     external_execution_at: new Date().toISOString(),
     last_error: null,
@@ -217,7 +219,7 @@ export async function submitJob(
 
   await audit(admin, {
     business_id, publish_job_id: job.id, action: "distribution_submitted",
-    posts_scheduled: share_now || ev.save_to_draft ? 0 : 1, provider_calls: 1,
+    posts_scheduled: publishedNow || ev.save_to_draft ? 0 : 1, provider_calls: 1,
     result_json: { provider_post_id: parsed.postId, provider_status: parsed.status ?? null, dispatch_mode: ev.dispatch_mode },
   });
   return {
