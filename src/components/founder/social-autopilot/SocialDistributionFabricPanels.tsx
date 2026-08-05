@@ -460,6 +460,7 @@ export function SocialDistributionFabricDashboard({ businessId }: { businessId: 
         <DistributionPolicyPanel businessId={businessId} />
       </div>
       <ChannelMappingPanel businessId={businessId} organizationId={org} />
+      <DistributionHealthPanel businessId={businessId} />
       <DistributionPreviewPanel businessId={businessId} />
       <DistributionJobStatusPanel businessId={businessId} />
     </div>
