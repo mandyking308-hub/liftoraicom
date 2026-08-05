@@ -34,3 +34,6 @@ verify_jwt = false
 
 [functions.pr-gmail-oauth-callback]
 verify_jwt = false
+
+[functions.social-distribution-dispatch-due]
+verify_jwt = false

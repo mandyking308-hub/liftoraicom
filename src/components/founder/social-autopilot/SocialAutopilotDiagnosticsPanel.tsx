@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 export default function SocialAutopilotDiagnosticsPanel() {
   const [providers, setProviders] = useState<any[]>([]);
   const [health, setHealth] = useState<any>(null);
+  const [dist, setDist] = useState<any>(null);
   const [brain, setBrain] = useState<{ sources: number; extractions: number; logs: number; profile: any } | null>(null);
 
   useEffect(() => {
@@ -21,6 +22,16 @@ export default function SocialAutopilotDiagnosticsPanel() {
         const h = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/social-autopilot-healthcheck${businessId ? `?business_id=${businessId}` : ""}`, { headers });
         setHealth(await h.json());
       } catch { /* */ }
+      if (businessId) {
+        try {
+          const d = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/social-distribution-health`, {
+            method: "POST",
+            headers: { ...headers, "Content-Type": "application/json" },
+            body: JSON.stringify({ business_id: businessId }),
+          });
+          setDist(await d.json());
+        } catch { /* */ }
+      }
       if (businessId) {
         const [{ count: sc }, { count: ec }, { count: lc }, { data: prof }] = await Promise.all([
           supabase.from("business_social_knowledge_sources").select("id", { count: "exact", head: true }).eq("business_id", businessId),
@@ -64,9 +75,16 @@ export default function SocialAutopilotDiagnosticsPanel() {
             <span>Inbox</span><span>{health?.inbox_messages_count ?? 0}</span>
             <span>Performance logs</span><span>{health?.performance_logs_count ?? 0}</span>
             <span>Test data</span><span>{health?.test_data_count ?? 0}</span>
-            <span>External publish</span><span className="text-yellow-400">LOCKED</span>
+            <span>External publish (Buffer)</span>
+            <span className={dist?.health?.state === "LIVE" ? "text-emerald-400" : "text-yellow-400"}>
+              {dist?.health?.state ?? "UNKNOWN"}{dist?.health?.reason ? ` — ${dist.health.reason}` : ""}
+            </span>
+            <span>Dispatcher</span>
+            <span className={dist?.dispatcher?.status === "LIVE" ? "text-emerald-400" : "text-yellow-400"}>{dist?.dispatcher?.status ?? "—"}</span>
+            <span>Auto-schedule channels</span><span>{dist?.channels?.auto_schedule ?? 0} of {dist?.channels?.mapped ?? 0} mapped</span>
+            <span>Due / scheduled / failed</span>
+            <span>{dist?.counts?.due ?? 0} / {dist?.counts?.scheduled ?? 0} / {dist?.counts?.failed ?? 0}</span>
             <span>DM send</span><span className="text-yellow-400">LOCKED</span>
-            <span>Provider execution</span><span className="text-yellow-400">LOCKED</span>
           </div>
         </div>
         {brain && (

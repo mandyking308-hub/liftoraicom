@@ -2,7 +2,8 @@
 import { bufferGraphQL, bufferKeyPresent, CREATE_POST_MUTATION, readCreatePostResult } from "./bufferClient.ts";
 import {
   buildCreatePostInput, buildDistributionIdempotencyKey, classifySubmissionOutcome,
-  computeNextRetryAt, evaluateSubmission, MAX_ATTEMPTS, type MediaAsset, type PolicyMode,
+  computeNextRetryAt, evaluateSubmission, MAX_ATTEMPTS, normaliseDispatchMode,
+  type ChannelDispatchMode, type MediaAsset, type PolicyMode,
 } from "./socialDistributionLogic.ts";
 import { audit, gateUnlocked, getConnection, getPolicy, isPaused, resolveChannel } from "./socialDistributionDb.ts";
 import { resolveApproval, resolveJobPayload, type ResolvedPayload } from "./socialPayloadResolver.ts";
@@ -14,6 +15,8 @@ export interface JobEvaluation {
   channel_id: string | null;
   external_channel_id: string | null;
   channel_label: string | null;
+  dispatch_mode: ChannelDispatchMode;
+  save_to_draft: boolean;
   eligible: boolean;
   blockers: string[];
   idempotency_key: string | null;
@@ -57,12 +60,15 @@ export async function evaluateJob(
   ]);
 
   const shareNow = share_now && ctx.policy.allow_share_now;
+  const dispatch_mode = normaliseDispatchMode(mapping?.dispatch_mode);
+  const save_to_draft = dispatch_mode === "DRAFT_TO_BUFFER";
   const evaluation = evaluateSubmission({
     job,
     business_id,
     channel,
     mapping_active: mapping ? !!mapping.active : undefined,
     mapping_business_id: mapping?.business_id ?? null,
+    dispatch_mode: mapping ? dispatch_mode : undefined,
     connection_present: !!ctx.connection && ctx.connection.connection_status !== "error",
     connection_organization_id: ctx.connection?.provider_organization_id ?? null,
     gate_unlocked: ctx.gate,
@@ -98,6 +104,8 @@ export async function evaluateJob(
     channel_id: channel?.id ?? null,
     external_channel_id: externalChannelId || null,
     channel_label: channel ? `${channel.service ?? "channel"}: ${channel.display_name ?? channel.name ?? channel.external_channel_id}` : null,
+    dispatch_mode,
+    save_to_draft,
     eligible,
     blockers,
     idempotency_key,
@@ -115,6 +123,7 @@ export async function evaluateJob(
           shareNow,
           mediaUrls: payload.media,
           linkAttachment: payload.link_url ? { url: payload.link_url } : null,
+          saveToDraft: save_to_draft,
         })
       : null,
   };
@@ -124,8 +133,16 @@ export async function submitJob(
   admin: any, business_id: string, job: any,
   ctx: DistributionContext,
   share_now = false,
+  opts: { require_auto_schedule?: boolean } = {},
 ) {
   const ev = await evaluateJob(admin, business_id, job, ctx, share_now);
+  if (opts.require_auto_schedule && ev.dispatch_mode !== "AUTO_SCHEDULE") {
+    await audit(admin, {
+      business_id, publish_job_id: job.id, action: "distribution_skipped_not_auto_schedule",
+      result_json: { dispatch_mode: ev.dispatch_mode },
+    });
+    return { job_id: job.id, ok: false, status: "skipped", blockers: ["channel_mode_not_auto_schedule"] };
+  }
   if (!ev.eligible || !ev.channel_id || !ev.idempotency_key || !ev.external_channel_id || !ev.provider_input) {
     const blockers = ev.blockers.length ? ev.blockers : ["provider_channel_id_missing"];
     await admin.from("social_publish_jobs").update({
@@ -182,7 +199,7 @@ export async function submitJob(
 
   const scheduled = share_now ? "sent" : "scheduled";
   await admin.from("social_publish_jobs").update({
-    distribution_status: scheduled,
+    distribution_status: ev.save_to_draft ? "draft_in_provider" : scheduled,
     provider_post_id: parsed.postId,
     provider_status: parsed.status ?? null,
     provider_response_summary: { post_id: parsed.postId, status: parsed.status ?? null, due_at: parsed.dueAt ?? null },
@@ -196,10 +213,14 @@ export async function submitJob(
 
   await audit(admin, {
     business_id, publish_job_id: job.id, action: "distribution_submitted",
-    posts_scheduled: share_now ? 0 : 1, provider_calls: 1,
-    result_json: { provider_post_id: parsed.postId, provider_status: parsed.status ?? null },
+    posts_scheduled: share_now || ev.save_to_draft ? 0 : 1, provider_calls: 1,
+    result_json: { provider_post_id: parsed.postId, provider_status: parsed.status ?? null, dispatch_mode: ev.dispatch_mode },
   });
-  return { job_id: job.id, ok: true, status: scheduled, provider_post_id: parsed.postId };
+  return {
+    job_id: job.id, ok: true,
+    status: ev.save_to_draft ? "draft_in_provider" : scheduled,
+    provider_post_id: parsed.postId,
+  };
 }
 
 export async function handleFailure(

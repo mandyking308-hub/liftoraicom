@@ -52546,6 +52546,7 @@ export type Database = {
           business_id: string
           channel_id: string
           created_at: string
+          dispatch_mode: string
           id: string
           is_default: boolean
           is_test_data: boolean
@@ -52560,6 +52561,7 @@ export type Database = {
           business_id: string
           channel_id: string
           created_at?: string
+          dispatch_mode?: string
           id?: string
           is_default?: boolean
           is_test_data?: boolean
@@ -52574,6 +52576,7 @@ export type Database = {
           business_id?: string
           channel_id?: string
           created_at?: string
+          dispatch_mode?: string
           id?: string
           is_default?: boolean
           is_test_data?: boolean
@@ -54883,6 +54886,63 @@ export type Database = {
           rule_name?: string
           tone_notes?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      social_distribution_dispatch_runs: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          error_message: string | null
+          finished_at: string | null
+          id: string
+          jobs_blocked: number
+          jobs_considered: number
+          jobs_dispatched: number
+          jobs_duplicate: number
+          jobs_failed: number
+          jobs_unknown: number
+          provider: string
+          result_json: Json
+          run_status: string
+          started_at: string
+          trigger_source: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          finished_at?: string | null
+          id?: string
+          jobs_blocked?: number
+          jobs_considered?: number
+          jobs_dispatched?: number
+          jobs_duplicate?: number
+          jobs_failed?: number
+          jobs_unknown?: number
+          provider?: string
+          result_json?: Json
+          run_status?: string
+          started_at?: string
+          trigger_source?: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          finished_at?: string | null
+          id?: string
+          jobs_blocked?: number
+          jobs_considered?: number
+          jobs_dispatched?: number
+          jobs_duplicate?: number
+          jobs_failed?: number
+          jobs_unknown?: number
+          provider?: string
+          result_json?: Json
+          run_status?: string
+          started_at?: string
+          trigger_source?: string
         }
         Relationships: []
       }

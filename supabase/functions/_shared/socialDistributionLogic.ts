@@ -8,6 +8,16 @@
 
 export type PolicyMode = "test" | "approval_required" | "approved_batch_autopilot" | "paused";
 
+/** Per-channel distribution mode. Every mapping starts at OFF. */
+export type ChannelDispatchMode = "OFF" | "DRAFT_TO_BUFFER" | "AUTO_SCHEDULE";
+
+export const CHANNEL_DISPATCH_MODES: ChannelDispatchMode[] = ["OFF", "DRAFT_TO_BUFFER", "AUTO_SCHEDULE"];
+
+export function normaliseDispatchMode(value?: string | null): ChannelDispatchMode {
+  const v = String(value ?? "").trim().toUpperCase();
+  return (CHANNEL_DISPATCH_MODES as string[]).includes(v) ? (v as ChannelDispatchMode) : "OFF";
+}
+
 export const POLICY_MODES: PolicyMode[] = [
   "test",
   "approval_required",
@@ -22,6 +32,7 @@ export type DistributionStatus =
   | "submitting"
   | "scheduled"
   | "sent"
+  | "draft_in_provider"
   | "failed"
   | "retrying"
   | "dead_letter"
@@ -64,6 +75,8 @@ export interface SubmissionContext {
   gate_unlocked: boolean;
   approved: boolean;
   policy_mode: PolicyMode;
+  /** Per-channel mode from social_business_channel_map.dispatch_mode. */
+  dispatch_mode?: ChannelDispatchMode | string | null;
   paused: boolean;
   text: string;
   media_urls?: Array<string | MediaAsset>;
@@ -174,11 +187,19 @@ export function isDurableMediaUrl(url: string): boolean {
   if (parsed.protocol !== "https:") return false;
   if (parsed.hostname === "localhost" || parsed.hostname.endsWith(".local")) return false;
   if (parsed.hostname.startsWith("127.") || parsed.hostname === "0.0.0.0") return false;
-  const exp = parsed.searchParams.get("Expires") || parsed.searchParams.get("expires");
-  if (exp && /^\d+$/.test(exp)) {
-    const ms = exp.length <= 10 ? Number(exp) * 1000 : Number(exp);
-    if (ms < Date.now()) return false;
+  // Signed / expiring URLs are never durable: Buffer fetches media later and a
+  // short-lived signature would break the post. Block instead of silently
+  // degrading to a text-only post.
+  const SIGNED_PARAMS = [
+    "x-amz-signature", "x-amz-expires", "x-amz-credential",
+    "x-goog-signature", "x-goog-expires",
+    "signature", "sig", "token", "expires", "se", "sp", "sv",
+  ];
+  for (const [key] of parsed.searchParams.entries()) {
+    if (SIGNED_PARAMS.includes(key.toLowerCase())) return false;
   }
+  // Supabase Storage signed-object URLs.
+  if (parsed.pathname.includes("/object/sign/")) return false;
   return true;
 }
 
@@ -218,6 +239,12 @@ export function evaluateSubmission(ctx: SubmissionContext): Eligibility {
     blockers.push("channel_not_mapped");
   } else {
     if (ctx.mapping_active === false) blockers.push("channel_mapping_inactive");
+    // `undefined` means the caller did not supply a mapping mode (legacy call
+    // sites / pure evaluations). Any supplied value is enforced strictly and
+    // anything unrecognised collapses to OFF.
+    if (ctx.dispatch_mode !== undefined && normaliseDispatchMode(ctx.dispatch_mode) === "OFF") {
+      blockers.push("channel_mode_off");
+    }
     if (ctx.mapping_business_id && ctx.mapping_business_id !== ctx.business_id) {
       blockers.push("cross_business_channel_mapping");
     }
@@ -260,6 +287,8 @@ export function buildCreatePostInput(args: {
   shareNow?: boolean;
   mediaUrls?: Array<string | MediaAsset>;
   linkAttachment?: { url: string; title?: string } | null;
+  /** DRAFT_TO_BUFFER creates a Buffer draft instead of a queued post. */
+  saveToDraft?: boolean;
 }): Record<string, unknown> {
   const { assets } = buildAssets(args.mediaUrls ?? []);
 
@@ -268,6 +297,8 @@ export function buildCreatePostInput(args: {
     text: args.text,
     schedulingType: "automatic",
   };
+
+  if (args.saveToDraft) input.saveToDraft = true;
 
   if (args.shareNow) {
     input.mode = "shareNow";
@@ -288,6 +319,132 @@ export function buildCreatePostInput(args: {
   }
 
   return input;
+}
+
+/* ------------------------------------------------------------------ */
+/* Automatic dispatcher: due-job selection                             */
+/* ------------------------------------------------------------------ */
+
+/** How far ahead of dueAt a job is handed to Buffer for scheduling. */
+export const DISPATCH_LOOKAHEAD_MS = 60 * 60 * 1000;
+
+export interface DueJobCandidate {
+  id: string;
+  scheduled_for?: string | null;
+  distribution_status?: string | null;
+  provider_post_id?: string | null;
+  next_retry_at?: string | null;
+}
+
+/**
+ * Pure selection of jobs the automatic dispatcher may attempt.
+ * - fresh jobs whose scheduled time falls inside the lookahead window
+ * - retrying jobs whose backoff has elapsed
+ * Anything already submitted, ambiguous or dead-lettered is never selected.
+ */
+export function selectDueJobs<T extends DueJobCandidate>(
+  jobs: T[],
+  now: Date = new Date(),
+  limit = 25,
+): T[] {
+  const horizon = now.getTime() + DISPATCH_LOOKAHEAD_MS;
+  const eligible = jobs.filter((j) => {
+    if (j.provider_post_id) return false;
+    const status = j.distribution_status ?? "not_submitted";
+    if (["scheduled", "sent", "submitting", "dead_letter", "submission_unknown"].includes(status)) return false;
+    if (status === "retrying") {
+      if (!j.next_retry_at) return false;
+      return new Date(j.next_retry_at).getTime() <= now.getTime();
+    }
+    if (!j.scheduled_for) return false;
+    const due = new Date(j.scheduled_for).getTime();
+    if (Number.isNaN(due)) return false;
+    return due <= horizon;
+  });
+  eligible.sort((a, b) =>
+    new Date(a.scheduled_for ?? 0).getTime() - new Date(b.scheduled_for ?? 0).getTime());
+  return eligible.slice(0, Math.max(0, limit));
+}
+
+/* ------------------------------------------------------------------ */
+/* Truthful distribution health state machine                          */
+/* ------------------------------------------------------------------ */
+
+export type DistributionHealthState =
+  | "NOT_CONFIGURED"
+  | "CONNECTED"
+  | "MAPPED"
+  | "ARMED"
+  | "LIVE"
+  | "DEGRADED"
+  | "BLOCKED";
+
+export interface DistributionHealthInput {
+  secrets_present: boolean;
+  organization_id_present: boolean;
+  connection_ok: boolean;
+  mapped_channels: number;
+  auto_schedule_channels: number;
+  gate_unlocked: boolean;
+  policy_mode: PolicyMode | string;
+  paused: boolean;
+  /** Last successful dispatcher heartbeat, if any. */
+  last_dispatch_run_at?: string | null;
+  last_dispatch_failed?: boolean;
+  dispatcher_schedule_registered: boolean;
+  failed_jobs?: number;
+  now?: Date;
+}
+
+export interface DistributionHealth {
+  state: DistributionHealthState;
+  reason: string;
+  detail: string;
+  dispatcher: "LIVE" | "STALE" | "CONFIGURATION_REQUIRED" | "FAILING";
+}
+
+/** Dispatcher is considered healthy if it reported within this window. */
+export const DISPATCH_HEARTBEAT_STALE_MS = 30 * 60 * 1000;
+
+export function computeDistributionHealth(i: DistributionHealthInput): DistributionHealth {
+  const now = i.now ?? new Date();
+  const lastRun = i.last_dispatch_run_at ? new Date(i.last_dispatch_run_at).getTime() : null;
+  const fresh = lastRun !== null && now.getTime() - lastRun <= DISPATCH_HEARTBEAT_STALE_MS;
+
+  const dispatcher: DistributionHealth["dispatcher"] =
+    !i.dispatcher_schedule_registered ? "CONFIGURATION_REQUIRED"
+      : i.last_dispatch_failed ? "FAILING"
+      : fresh ? "LIVE"
+      : "STALE";
+
+  if (i.paused) {
+    return { state: "BLOCKED", reason: "emergency_pause_active", detail: "Kill switch engaged — no provider calls are made. Queued content is untouched.", dispatcher };
+  }
+  if (!i.secrets_present) {
+    return { state: "NOT_CONFIGURED", reason: "buffer_secrets_missing", detail: "BUFFER_API_KEY / BUFFER_ORGANIZATION_ID are not set.", dispatcher };
+  }
+  if (!i.connection_ok || !i.organization_id_present) {
+    return { state: "NOT_CONFIGURED", reason: "provider_not_connected", detail: "Buffer connection has not been tested and an organisation selected.", dispatcher };
+  }
+  if (i.mapped_channels === 0) {
+    return { state: "CONNECTED", reason: "no_channels_mapped", detail: "Buffer is reachable. Map at least one channel to this business.", dispatcher };
+  }
+  if (!i.gate_unlocked || i.policy_mode === "test" || i.policy_mode === "paused") {
+    return { state: "MAPPED", reason: !i.gate_unlocked ? "execution_gate_locked" : `policy_${i.policy_mode}`, detail: "Channels mapped. Arm the execution gate and leave test mode to allow provider calls.", dispatcher };
+  }
+  if (i.auto_schedule_channels === 0) {
+    return { state: "ARMED", reason: "no_auto_schedule_channels", detail: "Armed, but every channel is OFF or DRAFT_TO_BUFFER — nothing auto-schedules.", dispatcher };
+  }
+  if (dispatcher === "CONFIGURATION_REQUIRED") {
+    return { state: "ARMED", reason: "dispatcher_schedule_missing", detail: "CONFIGURATION REQUIRED — the 5-minute dispatcher cron hook is not registered.", dispatcher };
+  }
+  if (dispatcher === "FAILING" || (i.failed_jobs ?? 0) > 0) {
+    return { state: "DEGRADED", reason: dispatcher === "FAILING" ? "dispatcher_run_failed" : "failed_jobs_present", detail: "Distribution is live but the last run or some jobs failed.", dispatcher };
+  }
+  if (dispatcher === "STALE") {
+    return { state: "DEGRADED", reason: "dispatcher_heartbeat_stale", detail: "No dispatcher heartbeat in the last 30 minutes.", dispatcher };
+  }
+  return { state: "LIVE", reason: "ok", detail: "Approved jobs are being scheduled to Buffer automatically.", dispatcher };
 }
 
 export type ErrorClass = "transient" | "hard";
@@ -328,7 +485,7 @@ export function computeNextRetryAt(attemptCount: number, from: Date = new Date()
 export function summariseStatuses(jobs: Array<{ distribution_status?: string | null }>) {
   const totals: Record<string, number> = {
     blocked: 0, ready: 0, not_submitted: 0, submitting: 0,
-    scheduled: 0, sent: 0, failed: 0, retrying: 0, dead_letter: 0, submission_unknown: 0,
+    scheduled: 0, sent: 0, draft_in_provider: 0, failed: 0, retrying: 0, dead_letter: 0, submission_unknown: 0,
   };
   for (const j of jobs) {
     const k = j.distribution_status ?? "not_submitted";

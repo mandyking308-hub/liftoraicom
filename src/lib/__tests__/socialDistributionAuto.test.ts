@@ -79,7 +79,7 @@ function baseDb(over: Partial<DB> = {}): DB {
     social_provider_connections: [{ business_id: BIZ, provider: "buffer", connection_status: "connected", provider_organization_id: "org-1" }],
     social_distribution_pauses: [],
     social_provider_execution_gates: [{ business_id: BIZ, provider: "buffer", gate_status: "unlocked" }],
-    social_business_channel_map: [{ id: "map-1", business_id: BIZ, platform: "instagram", active: true, is_default: true, channel: { id: "ch-1", external_channel_id: "ext-ch-1", service: "instagram", display_name: "IG" } }],
+    social_business_channel_map: [{ id: "map-1", business_id: BIZ, platform: "instagram", active: true, dispatch_mode: "AUTO_SCHEDULE", is_default: true, channel: { id: "ch-1", external_channel_id: "ext-ch-1", service: "instagram", display_name: "IG" } }],
     social_approval_reviews: [{ id: "rev-1", business_id: BIZ, review_status: "approved", decided_at: new Date().toISOString(), approval_blockers: [], risk_level: "low", content_item_id: "content-1" }],
     social_content_items: [{ id: "content-1", business_id: BIZ, caption: "Real approved caption", cta: "Book a call", hashtags: "#liftor", link_url: null, asset_id: "asset-1", publish_readiness: "approved_internal", approval_status: "approved", compliance_status: "clear", platform: "instagram", provider: "buffer", planned_at: future }],
     social_content_variants: [],
