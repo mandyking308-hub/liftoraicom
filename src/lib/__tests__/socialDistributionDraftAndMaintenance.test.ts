@@ -237,6 +237,79 @@ describe("bounded status reconciliation", () => {
     expect(parsePostsPageInfo({})).toEqual({ hasNextPage: false, endCursor: null });
     expect(mapProviderStatus("draft")).toBe("draft_in_provider");
   });
+
+  it("walks bounded pages and never exceeds the hard page cap", async () => {
+    const db = baseDb("approved_batch_autopilot", {
+      social_publish_jobs: [
+        { id: "job-1", business_id: BIZ, provider_post_id: "buf-1", distribution_status: "scheduled", provider_status: "scheduled" },
+        { id: "job-9", business_id: BIZ, provider_post_id: "buf-missing", distribution_status: "scheduled", provider_status: "scheduled" },
+      ],
+    });
+    const admin = makeAdmin(db);
+    const calls: any[] = [];
+    let page = 0;
+    (globalThis as any).fetch = vi.fn(async (_u: any, init: any) => {
+      calls.push(JSON.parse(init.body));
+      page++;
+      return new Response(JSON.stringify({
+        data: {
+          posts: {
+            pageInfo: { hasNextPage: true, endCursor: `cursor-${page}` },
+            edges: page === 2
+              ? [{ node: { id: "buf-1", status: "sent", channelId: "ext-ch-1" } }]
+              : [{ node: { id: "other", status: "sent", channelId: "ext-ch-1" } }],
+          },
+        },
+      }), { status: 200 });
+    });
+    const r: any = await reconcileBusiness(admin, BIZ);
+    expect(r.ok).toBe(true);
+    expect(r.pages_read).toBe(2);          // POSTS_MAX_PAGES
+    expect(calls).toHaveLength(2);
+    expect(calls[0].variables.first).toBeLessThanOrEqual(100);
+    expect(calls[1].variables.after).toBe("cursor-1");
+    expect(r.updated).toBe(1);
+    expect(r.not_found_in_provider).toBe(1); // never invented
+  });
+
+  it("only reconciles jobs of the requested business and mapped channels", async () => {
+    const admin = makeAdmin(baseDb("approved_batch_autopilot", {
+      social_publish_jobs: [
+        { id: "job-1", business_id: BIZ, provider_post_id: "buf-1", distribution_status: "scheduled", provider_status: "scheduled" },
+        { id: "job-x", business_id: "other-biz", provider_post_id: "buf-x", distribution_status: "scheduled", provider_status: "scheduled" },
+        { id: "job-2", business_id: BIZ, provider_post_id: "buf-2", distribution_status: "scheduled", provider_status: "scheduled" },
+      ],
+    }));
+    mockBuffer({
+      posts: {
+        pageInfo: { hasNextPage: false, endCursor: null },
+        edges: [
+          { node: { id: "buf-1", status: "sent", channelId: "ext-ch-1" } },
+          { node: { id: "buf-x", status: "sent", channelId: "ext-ch-1" } },
+          { node: { id: "buf-2", status: "sent", channelId: "someone-elses-channel" } },
+        ],
+      },
+    });
+    const r: any = await reconcileBusiness(admin, BIZ);
+    expect(r.checked).toBe(2);              // other-biz job never considered
+    expect(r.updated).toBe(1);              // unmapped channel skipped
+    expect(r.not_found_in_provider).toBe(1);
+  });
+
+  it("falls back to the optional BUFFER_ORGANIZATION_ID env when the connection has none", async () => {
+    env.BUFFER_ORGANIZATION_ID = "env-org";
+    const admin = makeAdmin(baseDb("approved_batch_autopilot", {
+      social_provider_connections: [{ business_id: BIZ, provider: "buffer", connection_status: "connected", provider_organization_id: null }],
+      social_publish_jobs: [{ id: "job-1", business_id: BIZ, provider_post_id: "buf-1", distribution_status: "scheduled", provider_status: "scheduled" }],
+    }));
+    const calls = mockBuffer({
+      posts: { pageInfo: { hasNextPage: false, endCursor: null }, edges: [{ node: { id: "buf-1", status: "sent", channelId: "ext-ch-1" } }] },
+    });
+    const r: any = await reconcileBusiness(admin, BIZ);
+    expect(r.ok).toBe(true);
+    expect(calls[0].variables.organizationId).toBe("env-org");
+    env.BUFFER_ORGANIZATION_ID = "";
+  });
 });
 
 /* ---------------- maintenance health ---------------- */

@@ -15,6 +15,22 @@ export function bufferKeyPresent(): boolean {
   return !!envGet("BUFFER_API_KEY").trim();
 }
 
+/**
+ * OPTIONAL secure fallback organisation ID.
+ * The founder-selected organisation stored on
+ * `social_provider_connections.provider_organization_id` always wins; this env
+ * value is only used when that row has none.
+ */
+export function bufferOrganizationFallback(): string {
+  return envGet("BUFFER_ORGANIZATION_ID").trim();
+}
+
+/** Resolve the organisation to use: connection row first, env fallback second. */
+export function resolveOrganizationId(connectionOrgId?: string | null): string {
+  const fromConn = (connectionOrgId ?? "").trim();
+  return fromConn || bufferOrganizationFallback();
+}
+
 export function bufferEndpoint(): string {
   return envGet("BUFFER_GRAPHQL_URL").trim() || DEFAULT_ENDPOINT;
 }
@@ -97,9 +113,11 @@ export const POSTS_QUERY = `query GetPosts($organizationId: OrganizationId!, $fi
 }`;
 
 /** Page size used by the reconciler. */
-export const POSTS_PAGE_SIZE = 100;
+export const POSTS_PAGE_SIZE = 50;
 /** Hard cap on pages walked per reconcile run. */
-export const POSTS_MAX_PAGES = 5;
+export const POSTS_MAX_PAGES = 2;
+/** Hard cap on total provider posts read per reconcile run. */
+export const POSTS_MAX_TOTAL = 100;
 
 export { parsePostsConnection, parsePostsPageInfo } from "./socialDistributionLogic.ts";
 
