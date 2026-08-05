@@ -3,6 +3,7 @@ import { bufferGraphQL, bufferKeyPresent, CREATE_POST_MUTATION, readCreatePostRe
 import {
   buildCreatePostInput, buildDistributionIdempotencyKey, classifySubmissionOutcome,
   computeNextRetryAt, evaluateSubmission, MAX_ATTEMPTS, normaliseDispatchMode,
+  resolveEffectiveDispatchMode,
   type ChannelDispatchMode, type MediaAsset, type PolicyMode,
 } from "./socialDistributionLogic.ts";
 import { audit, gateUnlocked, getConnection, getPolicy, isPaused, resolveChannel } from "./socialDistributionDb.ts";
@@ -60,7 +61,10 @@ export async function evaluateJob(
   ]);
 
   const shareNow = share_now && ctx.policy.allow_share_now;
-  const dispatch_mode = normaliseDispatchMode(mapping?.dispatch_mode);
+  const channel_mode = normaliseDispatchMode(mapping?.dispatch_mode);
+  // A `draft_to_buffer` business policy forces the draft path for every
+  // mapped channel — it can never schedule or publish.
+  const dispatch_mode = resolveEffectiveDispatchMode(ctx.policy.mode, channel_mode);
   const save_to_draft = dispatch_mode === "DRAFT_TO_BUFFER";
   const evaluation = evaluateSubmission({
     job,
@@ -119,8 +123,8 @@ export async function evaluateJob(
       ? buildCreatePostInput({
           channelId: externalChannelId,
           text: payload.text,
-          dueAt: job.scheduled_for,
-          shareNow,
+      dueAt: job.scheduled_for,
+          shareNow: shareNow && !save_to_draft,
           mediaUrls: payload.media,
           linkAttachment: payload.link_url ? { url: payload.link_url } : null,
           saveToDraft: save_to_draft,

@@ -101,7 +101,7 @@ export const POSTS_PAGE_SIZE = 100;
 /** Hard cap on pages walked per reconcile run. */
 export const POSTS_MAX_PAGES = 5;
 
-export { parsePostsConnection } from "./socialDistributionLogic.ts";
+export { parsePostsConnection, parsePostsPageInfo } from "./socialDistributionLogic.ts";
 
 /** Normalises a createPost payload into a typed result, never inventing success. */
 export function readCreatePostResult(data: any): { postId?: string; status?: string; dueAt?: string; error?: string } {

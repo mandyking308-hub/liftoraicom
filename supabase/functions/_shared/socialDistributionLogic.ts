@@ -557,6 +557,12 @@ export function parsePostsConnection(
     }));
 }
 
+/** Relay page info for bounded reconciliation paging. */
+export function parsePostsPageInfo(data: any): { hasNextPage: boolean; endCursor: string | null } {
+  const pi = data?.posts?.pageInfo;
+  return { hasNextPage: !!pi?.hasNextPage, endCursor: pi?.endCursor ?? null };
+}
+
 /** Pure policy gate for approval-driven auto-dispatch. */
 export function shouldAutoDispatch(
   policyMode: string,
