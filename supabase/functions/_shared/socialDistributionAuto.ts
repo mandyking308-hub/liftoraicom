@@ -122,7 +122,7 @@ export async function autoDispatchApprovedBatch(
   const results: any[] = [];
   for (const j of jobs) results.push(await submitJob(admin, args.business_id, j, ctx, false));
 
-  const ELIGIBLE_STATUSES = ["scheduled", "sent", "retrying", "dead_letter", "submission_unknown"];
+  const ELIGIBLE_STATUSES = ["scheduled", "sent", "draft_in_provider", "retrying", "dead_letter", "submission_unknown"];
   const out: AutoDispatchResult = {
     ...base,
     attempted: true,
