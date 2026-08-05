@@ -57918,6 +57918,1158 @@ export type Database = {
         }
         Relationships: []
       }
+      social_relationship_accounts: {
+        Row: {
+          account_handle: string | null
+          account_name: string | null
+          account_status: string
+          business_id: string
+          connection_id: string
+          cooldown_until: string | null
+          created_at: string
+          id: string
+          is_test_data: boolean
+          last_error: string | null
+          last_sync_at: string | null
+          network: string
+          provider: string
+          provider_account_id: string
+          provider_metadata: Json
+          real_account_declared: boolean
+          updated_at: string
+        }
+        Insert: {
+          account_handle?: string | null
+          account_name?: string | null
+          account_status?: string
+          business_id: string
+          connection_id: string
+          cooldown_until?: string | null
+          created_at?: string
+          id?: string
+          is_test_data?: boolean
+          last_error?: string | null
+          last_sync_at?: string | null
+          network: string
+          provider: string
+          provider_account_id: string
+          provider_metadata?: Json
+          real_account_declared?: boolean
+          updated_at?: string
+        }
+        Update: {
+          account_handle?: string | null
+          account_name?: string | null
+          account_status?: string
+          business_id?: string
+          connection_id?: string
+          cooldown_until?: string | null
+          created_at?: string
+          id?: string
+          is_test_data?: boolean
+          last_error?: string | null
+          last_sync_at?: string | null
+          network?: string
+          provider?: string
+          provider_account_id?: string
+          provider_metadata?: Json
+          real_account_declared?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_relationship_accounts_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "social_relationship_provider_connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_relationship_action_queue: {
+        Row: {
+          account_id: string | null
+          action_status: string
+          action_type: string
+          approved_at: string | null
+          approved_by: string | null
+          attempt_count: number
+          batch_id: string | null
+          blocked_reason: string | null
+          business_id: string
+          completed_at: string | null
+          conversation_id: string | null
+          created_at: string
+          id: string
+          idempotency_key: string
+          is_test_data: boolean
+          last_error: string | null
+          max_attempts: number
+          network: string
+          not_before: string | null
+          payload: Json
+          profile_id: string | null
+          provider_action_id: string | null
+          provider_response: Json | null
+          rendered_preview: string | null
+          scheduled_for: string | null
+          submitted_at: string | null
+          target_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_id?: string | null
+          action_status?: string
+          action_type: string
+          approved_at?: string | null
+          approved_by?: string | null
+          attempt_count?: number
+          batch_id?: string | null
+          blocked_reason?: string | null
+          business_id: string
+          completed_at?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          idempotency_key: string
+          is_test_data?: boolean
+          last_error?: string | null
+          max_attempts?: number
+          network: string
+          not_before?: string | null
+          payload?: Json
+          profile_id?: string | null
+          provider_action_id?: string | null
+          provider_response?: Json | null
+          rendered_preview?: string | null
+          scheduled_for?: string | null
+          submitted_at?: string | null
+          target_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string | null
+          action_status?: string
+          action_type?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          attempt_count?: number
+          batch_id?: string | null
+          blocked_reason?: string | null
+          business_id?: string
+          completed_at?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          idempotency_key?: string
+          is_test_data?: boolean
+          last_error?: string | null
+          max_attempts?: number
+          network?: string
+          not_before?: string | null
+          payload?: Json
+          profile_id?: string | null
+          provider_action_id?: string | null
+          provider_response?: Json | null
+          rendered_preview?: string | null
+          scheduled_for?: string | null
+          submitted_at?: string | null
+          target_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_relationship_action_queue_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "social_relationship_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_relationship_action_queue_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "social_relationship_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_relationship_action_queue_target_id_fkey"
+            columns: ["target_id"]
+            isOneToOne: false
+            referencedRelation: "social_relationship_targets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_relationship_audit: {
+        Row: {
+          account_id: string | null
+          action_id: string | null
+          actor: string
+          actor_user_id: string | null
+          business_id: string | null
+          conversation_id: string | null
+          created_at: string
+          detail: Json
+          event: string
+          event_status: string
+          id: string
+          provider: string | null
+          provider_calls: number
+        }
+        Insert: {
+          account_id?: string | null
+          action_id?: string | null
+          actor?: string
+          actor_user_id?: string | null
+          business_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          detail?: Json
+          event: string
+          event_status?: string
+          id?: string
+          provider?: string | null
+          provider_calls?: number
+        }
+        Update: {
+          account_id?: string | null
+          action_id?: string | null
+          actor?: string
+          actor_user_id?: string | null
+          business_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          detail?: Json
+          event?: string
+          event_status?: string
+          id?: string
+          provider?: string | null
+          provider_calls?: number
+        }
+        Relationships: []
+      }
+      social_relationship_capabilities: {
+        Row: {
+          account_id: string
+          business_id: string
+          capability: string
+          created_at: string
+          detail: Json
+          id: string
+          source: string
+          supported: boolean
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          business_id: string
+          capability: string
+          created_at?: string
+          detail?: Json
+          id?: string
+          source?: string
+          supported?: boolean
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          business_id?: string
+          capability?: string
+          created_at?: string
+          detail?: Json
+          id?: string
+          source?: string
+          supported?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_relationship_capabilities_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "social_relationship_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_relationship_conversations: {
+        Row: {
+          account_id: string | null
+          ai_last_used_at: string | null
+          ai_replies_day: string | null
+          ai_replies_today: number
+          business_id: string
+          conversation_status: string
+          created_at: string
+          crm_contact_id: string | null
+          escalation_pending: boolean
+          escalation_reason: string | null
+          id: string
+          intent_history: Json
+          is_test_data: boolean
+          last_inbound_at: string | null
+          last_intent: string | null
+          last_message_at: string | null
+          last_outbound_at: string | null
+          network: string
+          priority_boost: number
+          profile_id: string | null
+          provider_chat_id: string
+          subject: string | null
+          unread_count: number
+          updated_at: string
+        }
+        Insert: {
+          account_id?: string | null
+          ai_last_used_at?: string | null
+          ai_replies_day?: string | null
+          ai_replies_today?: number
+          business_id: string
+          conversation_status?: string
+          created_at?: string
+          crm_contact_id?: string | null
+          escalation_pending?: boolean
+          escalation_reason?: string | null
+          id?: string
+          intent_history?: Json
+          is_test_data?: boolean
+          last_inbound_at?: string | null
+          last_intent?: string | null
+          last_message_at?: string | null
+          last_outbound_at?: string | null
+          network: string
+          priority_boost?: number
+          profile_id?: string | null
+          provider_chat_id: string
+          subject?: string | null
+          unread_count?: number
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string | null
+          ai_last_used_at?: string | null
+          ai_replies_day?: string | null
+          ai_replies_today?: number
+          business_id?: string
+          conversation_status?: string
+          created_at?: string
+          crm_contact_id?: string | null
+          escalation_pending?: boolean
+          escalation_reason?: string | null
+          id?: string
+          intent_history?: Json
+          is_test_data?: boolean
+          last_inbound_at?: string | null
+          last_intent?: string | null
+          last_message_at?: string | null
+          last_outbound_at?: string | null
+          network?: string
+          priority_boost?: number
+          profile_id?: string | null
+          provider_chat_id?: string
+          subject?: string | null
+          unread_count?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_relationship_conversations_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "social_relationship_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_relationship_conversations_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "social_relationship_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_relationship_crm_links: {
+        Row: {
+          business_id: string
+          conversation_id: string | null
+          created_at: string
+          crm_contact_id: string | null
+          crm_lead_status: string | null
+          detail: Json
+          first_touch_at: string | null
+          id: string
+          link_status: string
+          profile_id: string
+          source_platform: string | null
+          source_target_list_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          conversation_id?: string | null
+          created_at?: string
+          crm_contact_id?: string | null
+          crm_lead_status?: string | null
+          detail?: Json
+          first_touch_at?: string | null
+          id?: string
+          link_status?: string
+          profile_id: string
+          source_platform?: string | null
+          source_target_list_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          conversation_id?: string | null
+          created_at?: string
+          crm_contact_id?: string | null
+          crm_lead_status?: string | null
+          detail?: Json
+          first_touch_at?: string | null
+          id?: string
+          link_status?: string
+          profile_id?: string
+          source_platform?: string | null
+          source_target_list_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_relationship_crm_links_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "social_relationship_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_relationship_crm_links_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "social_relationship_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_relationship_crm_links_source_target_list_id_fkey"
+            columns: ["source_target_list_id"]
+            isOneToOne: false
+            referencedRelation: "social_relationship_target_lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_relationship_escalations: {
+        Row: {
+          action_id: string | null
+          business_id: string
+          category: string
+          conversation_id: string | null
+          created_at: string
+          escalation_status: string
+          id: string
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          action_id?: string | null
+          business_id: string
+          category: string
+          conversation_id?: string | null
+          created_at?: string
+          escalation_status?: string
+          id?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          action_id?: string | null
+          business_id?: string
+          category?: string
+          conversation_id?: string | null
+          created_at?: string
+          escalation_status?: string
+          id?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          summary?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_relationship_escalations_action_id_fkey"
+            columns: ["action_id"]
+            isOneToOne: false
+            referencedRelation: "social_relationship_action_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_relationship_escalations_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "social_relationship_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_relationship_messages: {
+        Row: {
+          action_id: string | null
+          ai_generated: boolean
+          business_id: string
+          content: string
+          conversation_id: string
+          created_at: string
+          direction: string
+          id: string
+          is_test_data: boolean
+          message_status: string
+          metadata: Json
+          network: string
+          provider_message_id: string | null
+          provider_timestamp: string | null
+          updated_at: string
+        }
+        Insert: {
+          action_id?: string | null
+          ai_generated?: boolean
+          business_id: string
+          content?: string
+          conversation_id: string
+          created_at?: string
+          direction: string
+          id?: string
+          is_test_data?: boolean
+          message_status?: string
+          metadata?: Json
+          network: string
+          provider_message_id?: string | null
+          provider_timestamp?: string | null
+          updated_at?: string
+        }
+        Update: {
+          action_id?: string | null
+          ai_generated?: boolean
+          business_id?: string
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          direction?: string
+          id?: string
+          is_test_data?: boolean
+          message_status?: string
+          metadata?: Json
+          network?: string
+          provider_message_id?: string | null
+          provider_timestamp?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_relationship_messages_action_id_fkey"
+            columns: ["action_id"]
+            isOneToOne: false
+            referencedRelation: "social_relationship_action_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_relationship_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "social_relationship_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_relationship_pauses: {
+        Row: {
+          account_id: string | null
+          business_id: string | null
+          created_at: string
+          id: string
+          is_paused: boolean
+          paused_at: string
+          paused_by: string | null
+          provider: string | null
+          reason: string | null
+          released_at: string | null
+          scope: string
+          updated_at: string
+        }
+        Insert: {
+          account_id?: string | null
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          is_paused?: boolean
+          paused_at?: string
+          paused_by?: string | null
+          provider?: string | null
+          reason?: string | null
+          released_at?: string | null
+          scope: string
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string | null
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          is_paused?: boolean
+          paused_at?: string
+          paused_by?: string | null
+          provider?: string | null
+          reason?: string | null
+          released_at?: string | null
+          scope?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_relationship_pauses_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "social_relationship_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_relationship_policies: {
+        Row: {
+          account_id: string | null
+          allow_ai_autosend: boolean
+          allow_connect_then_dm: boolean
+          business_id: string
+          cooldown_minutes_after_warning: number
+          created_at: string
+          daily_invite_limit: number
+          daily_message_limit: number
+          id: string
+          max_ai_replies_per_conversation_per_day: number
+          max_delay_seconds: number
+          min_delay_seconds: number
+          mode: string
+          require_real_account_declaration: boolean
+          timezone: string
+          updated_at: string
+          updated_by: string | null
+          weekly_invite_limit: number
+          weekly_message_limit: number
+          working_days: number[]
+          working_hours_end: number
+          working_hours_start: number
+        }
+        Insert: {
+          account_id?: string | null
+          allow_ai_autosend?: boolean
+          allow_connect_then_dm?: boolean
+          business_id: string
+          cooldown_minutes_after_warning?: number
+          created_at?: string
+          daily_invite_limit?: number
+          daily_message_limit?: number
+          id?: string
+          max_ai_replies_per_conversation_per_day?: number
+          max_delay_seconds?: number
+          min_delay_seconds?: number
+          mode?: string
+          require_real_account_declaration?: boolean
+          timezone?: string
+          updated_at?: string
+          updated_by?: string | null
+          weekly_invite_limit?: number
+          weekly_message_limit?: number
+          working_days?: number[]
+          working_hours_end?: number
+          working_hours_start?: number
+        }
+        Update: {
+          account_id?: string | null
+          allow_ai_autosend?: boolean
+          allow_connect_then_dm?: boolean
+          business_id?: string
+          cooldown_minutes_after_warning?: number
+          created_at?: string
+          daily_invite_limit?: number
+          daily_message_limit?: number
+          id?: string
+          max_ai_replies_per_conversation_per_day?: number
+          max_delay_seconds?: number
+          min_delay_seconds?: number
+          mode?: string
+          require_real_account_declaration?: boolean
+          timezone?: string
+          updated_at?: string
+          updated_by?: string | null
+          weekly_invite_limit?: number
+          weekly_message_limit?: number
+          working_days?: number[]
+          working_hours_end?: number
+          working_hours_start?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_relationship_policies_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "social_relationship_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_relationship_profiles: {
+        Row: {
+          business_id: string
+          company_name: string | null
+          created_at: string
+          full_name: string | null
+          headline: string | null
+          id: string
+          industry: string | null
+          is_test_data: boolean
+          job_title: string | null
+          location: string | null
+          network: string
+          profile_url: string | null
+          provider_metadata: Json
+          provider_profile_id: string
+          relationship_status: string
+          risk_flags: Json
+          source: string
+          source_search_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          company_name?: string | null
+          created_at?: string
+          full_name?: string | null
+          headline?: string | null
+          id?: string
+          industry?: string | null
+          is_test_data?: boolean
+          job_title?: string | null
+          location?: string | null
+          network: string
+          profile_url?: string | null
+          provider_metadata?: Json
+          provider_profile_id: string
+          relationship_status?: string
+          risk_flags?: Json
+          source?: string
+          source_search_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          company_name?: string | null
+          created_at?: string
+          full_name?: string | null
+          headline?: string | null
+          id?: string
+          industry?: string | null
+          is_test_data?: boolean
+          job_title?: string | null
+          location?: string | null
+          network?: string
+          profile_url?: string | null
+          provider_metadata?: Json
+          provider_profile_id?: string
+          relationship_status?: string
+          risk_flags?: Json
+          source?: string
+          source_search_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_relationship_profiles_source_search_id_fkey"
+            columns: ["source_search_id"]
+            isOneToOne: false
+            referencedRelation: "social_relationship_searches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_relationship_provider_connections: {
+        Row: {
+          base_url: string | null
+          business_id: string | null
+          connection_status: string
+          created_at: string
+          credentials_present: boolean
+          display_name: string | null
+          id: string
+          is_test_data: boolean
+          last_error: string | null
+          last_test_at: string | null
+          last_test_ok: boolean | null
+          provider: string
+          provider_metadata: Json
+          updated_at: string
+          webhook_registered: boolean
+          webhook_status: string | null
+        }
+        Insert: {
+          base_url?: string | null
+          business_id?: string | null
+          connection_status?: string
+          created_at?: string
+          credentials_present?: boolean
+          display_name?: string | null
+          id?: string
+          is_test_data?: boolean
+          last_error?: string | null
+          last_test_at?: string | null
+          last_test_ok?: boolean | null
+          provider: string
+          provider_metadata?: Json
+          updated_at?: string
+          webhook_registered?: boolean
+          webhook_status?: string | null
+        }
+        Update: {
+          base_url?: string | null
+          business_id?: string | null
+          connection_status?: string
+          created_at?: string
+          credentials_present?: boolean
+          display_name?: string | null
+          id?: string
+          is_test_data?: boolean
+          last_error?: string | null
+          last_test_at?: string | null
+          last_test_ok?: boolean | null
+          provider?: string
+          provider_metadata?: Json
+          updated_at?: string
+          webhook_registered?: boolean
+          webhook_status?: string | null
+        }
+        Relationships: []
+      }
+      social_relationship_rate_limits: {
+        Row: {
+          account_id: string
+          action_type: string
+          business_id: string
+          created_at: string
+          id: string
+          updated_at: string
+          used_count: number
+          window_kind: string
+          window_start: string
+        }
+        Insert: {
+          account_id: string
+          action_type: string
+          business_id: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          used_count?: number
+          window_kind: string
+          window_start: string
+        }
+        Update: {
+          account_id?: string
+          action_type?: string
+          business_id?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          used_count?: number
+          window_kind?: string
+          window_start?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_relationship_rate_limits_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "social_relationship_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_relationship_searches: {
+        Row: {
+          account_id: string | null
+          blocked_reason: string | null
+          business_id: string
+          created_at: string
+          created_by: string | null
+          criteria: Json
+          id: string
+          is_test_data: boolean
+          last_run_at: string | null
+          network: string
+          provider_calls: number
+          results_count: number
+          search_type: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          account_id?: string | null
+          blocked_reason?: string | null
+          business_id: string
+          created_at?: string
+          created_by?: string | null
+          criteria?: Json
+          id?: string
+          is_test_data?: boolean
+          last_run_at?: string | null
+          network: string
+          provider_calls?: number
+          results_count?: number
+          search_type?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string | null
+          blocked_reason?: string | null
+          business_id?: string
+          created_at?: string
+          created_by?: string | null
+          criteria?: Json
+          id?: string
+          is_test_data?: boolean
+          last_run_at?: string | null
+          network?: string
+          provider_calls?: number
+          results_count?: number
+          search_type?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_relationship_searches_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "social_relationship_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_relationship_suppressions: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          created_by: string | null
+          detail: string | null
+          email: string | null
+          id: string
+          network: string | null
+          profile_url: string | null
+          provider_profile_id: string | null
+          reason: string
+          scope: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          detail?: string | null
+          email?: string | null
+          id?: string
+          network?: string | null
+          profile_url?: string | null
+          provider_profile_id?: string | null
+          reason: string
+          scope?: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          detail?: string | null
+          email?: string | null
+          id?: string
+          network?: string | null
+          profile_url?: string | null
+          provider_profile_id?: string | null
+          reason?: string
+          scope?: string
+        }
+        Relationships: []
+      }
+      social_relationship_target_lists: {
+        Row: {
+          account_id: string | null
+          approval_note: string | null
+          approved_at: string | null
+          approved_by: string | null
+          business_id: string
+          created_at: string
+          id: string
+          is_test_data: boolean
+          name: string
+          network: string
+          objective: string | null
+          status: string
+          targets_count: number
+          updated_at: string
+        }
+        Insert: {
+          account_id?: string | null
+          approval_note?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          business_id: string
+          created_at?: string
+          id?: string
+          is_test_data?: boolean
+          name: string
+          network: string
+          objective?: string | null
+          status?: string
+          targets_count?: number
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string | null
+          approval_note?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          business_id?: string
+          created_at?: string
+          id?: string
+          is_test_data?: boolean
+          name?: string
+          network?: string
+          objective?: string | null
+          status?: string
+          targets_count?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_relationship_target_lists_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "social_relationship_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_relationship_targets: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          blocked_reason: string | null
+          business_id: string
+          created_at: string
+          first_touch_at: string | null
+          id: string
+          is_test_data: boolean
+          profile_id: string
+          score: number
+          score_reasons: Json
+          target_list_id: string
+          target_status: string
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          blocked_reason?: string | null
+          business_id: string
+          created_at?: string
+          first_touch_at?: string | null
+          id?: string
+          is_test_data?: boolean
+          profile_id: string
+          score?: number
+          score_reasons?: Json
+          target_list_id: string
+          target_status?: string
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          blocked_reason?: string | null
+          business_id?: string
+          created_at?: string
+          first_touch_at?: string | null
+          id?: string
+          is_test_data?: boolean
+          profile_id?: string
+          score?: number
+          score_reasons?: Json
+          target_list_id?: string
+          target_status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_relationship_targets_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "social_relationship_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_relationship_targets_target_list_id_fkey"
+            columns: ["target_list_id"]
+            isOneToOne: false
+            referencedRelation: "social_relationship_target_lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_relationship_webhook_events: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          event_type: string | null
+          id: string
+          payload: Json
+          processed_at: string | null
+          processing_error: string | null
+          processing_status: string
+          provider: string
+          provider_event_id: string
+          signature_valid: boolean
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          event_type?: string | null
+          id?: string
+          payload?: Json
+          processed_at?: string | null
+          processing_error?: string | null
+          processing_status?: string
+          provider: string
+          provider_event_id: string
+          signature_valid?: boolean
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          event_type?: string | null
+          id?: string
+          payload?: Json
+          processed_at?: string | null
+          processing_error?: string | null
+          processing_status?: string
+          provider?: string
+          provider_event_id?: string
+          signature_valid?: boolean
+        }
+        Relationships: []
+      }
       social_reply_jobs: {
         Row: {
           approval_status: string | null

@@ -15,6 +15,7 @@ const MARKETING_HUB_TABS: { label: string; to: string; description: string }[] =
   { label: "Marketing Overview",    to: "/founder/marketing",             description: "Content funnel, briefs and competitor learning — drafts only." },
   { label: "Social",                to: "/founder/social",                description: "Social brain: planning, posts and assets (no publishing)." },
   { label: "Social Autopilot",      to: "/founder/social-autopilot",      description: "Planning, calendar and queue — publishing stays paused." },
+  { label: "Social Relationships",  to: "/founder/social-relationships",  description: "Networking, conversations and relationship building — founder-gated." },
   { label: "Campaign Factory",      to: "/founder/campaign-factory",      description: "Internal campaign briefs and assemblies." },
   { label: "Assets",                to: "/founder/assets",                description: "Creative assets hub — drafts and approved versions." },
   { label: "Global PR Radar",       to: "/founder/global-pr-radar",       description: "PR signals and watchlist — internal only." },
