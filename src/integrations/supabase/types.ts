@@ -27260,6 +27260,90 @@ export type Database = {
         }
         Relationships: []
       }
+      funding_investors: {
+        Row: {
+          accepts_pre_idea: boolean
+          accepts_pre_incorporation: boolean
+          check_max_usd: number | null
+          check_min_usd: number | null
+          check_notes: string | null
+          created_at: string
+          decision_timeline_days: number | null
+          fit_score: number | null
+          fund_name: string
+          geography: string[]
+          hq_location: string | null
+          id: string
+          inception_stage: boolean
+          lead_rounds: boolean | null
+          notes: string | null
+          priority: string
+          sectors: string[]
+          source_claim: string | null
+          source_type: string
+          source_url: string | null
+          special_criteria: string | null
+          stages: string[]
+          status: string
+          updated_at: string
+          verification_status: string
+        }
+        Insert: {
+          accepts_pre_idea?: boolean
+          accepts_pre_incorporation?: boolean
+          check_max_usd?: number | null
+          check_min_usd?: number | null
+          check_notes?: string | null
+          created_at?: string
+          decision_timeline_days?: number | null
+          fit_score?: number | null
+          fund_name: string
+          geography?: string[]
+          hq_location?: string | null
+          id?: string
+          inception_stage?: boolean
+          lead_rounds?: boolean | null
+          notes?: string | null
+          priority?: string
+          sectors?: string[]
+          source_claim?: string | null
+          source_type?: string
+          source_url?: string | null
+          special_criteria?: string | null
+          stages?: string[]
+          status?: string
+          updated_at?: string
+          verification_status?: string
+        }
+        Update: {
+          accepts_pre_idea?: boolean
+          accepts_pre_incorporation?: boolean
+          check_max_usd?: number | null
+          check_min_usd?: number | null
+          check_notes?: string | null
+          created_at?: string
+          decision_timeline_days?: number | null
+          fit_score?: number | null
+          fund_name?: string
+          geography?: string[]
+          hq_location?: string | null
+          id?: string
+          inception_stage?: boolean
+          lead_rounds?: boolean | null
+          notes?: string | null
+          priority?: string
+          sectors?: string[]
+          source_claim?: string | null
+          source_type?: string
+          source_url?: string | null
+          special_criteria?: string | null
+          stages?: string[]
+          status?: string
+          updated_at?: string
+          verification_status?: string
+        }
+        Relationships: []
+      }
       funding_market_maps: {
         Row: {
           ai_disruption_potential_score: number | null
