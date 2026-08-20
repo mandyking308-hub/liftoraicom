@@ -1,0 +1,1 @@
+SELECT jsonb_build_object('batches_run', (public.run_billionaire_enrichment_batches(20, 50))->'batches_run', 'remaining', (SELECT count(*) FROM public.billionaire_enrichment_queue q WHERE q.status IN ('pending','in_progress') OR COALESCE(q.batch_key,'') NOT LIKE 'access_2026_b%'));
