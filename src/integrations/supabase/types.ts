@@ -6689,6 +6689,51 @@ export type Database = {
           },
         ]
       }
+      billionaire_enrichment_batches: {
+        Row: {
+          batch_key: string
+          batch_size: number
+          completed_at: string | null
+          id: string
+          metadata: Json
+          notes: string | null
+          records_candidate_only: number
+          records_no_route: number
+          records_selected: number
+          records_with_verified_route: number
+          started_at: string
+          status: string
+        }
+        Insert: {
+          batch_key: string
+          batch_size?: number
+          completed_at?: string | null
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          records_candidate_only?: number
+          records_no_route?: number
+          records_selected?: number
+          records_with_verified_route?: number
+          started_at?: string
+          status?: string
+        }
+        Update: {
+          batch_key?: string
+          batch_size?: number
+          completed_at?: string | null
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          records_candidate_only?: number
+          records_no_route?: number
+          records_selected?: number
+          records_with_verified_route?: number
+          started_at?: string
+          status?: string
+        }
+        Relationships: []
+      }
       billionaire_enrichment_queue: {
         Row: {
           attempts: number
