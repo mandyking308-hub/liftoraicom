@@ -68928,6 +68928,34 @@ export type Database = {
         }
         Relationships: []
       }
+      billionaire_completion_metrics: {
+        Row: {
+          ambiguous_matches: number | null
+          coverage_records: number | null
+          current_wealth: number | null
+          dropoff_candidates: number | null
+          enrichment_queue: number | null
+          falling: number | null
+          family_offices_unique: number | null
+          foundations_unique: number | null
+          giving_pledge: number | null
+          matched_high_confidence: number | null
+          new_2026_names: number | null
+          no_route: number | null
+          outreach_ready: number | null
+          philanthropy_network_matched: number | null
+          researched_candidate_only: number | null
+          rising: number | null
+          snapshot_2026_rows: number | null
+          stable: number | null
+          stale_wealth: number | null
+          universe_2025: number | null
+          verified_public_institutional: number | null
+          verified_warm_intermediary: number | null
+          wealth_match_review_queue: number | null
+        }
+        Relationships: []
+      }
       blocked_sends_24h: {
         Row: {
           block_reason: string | null
