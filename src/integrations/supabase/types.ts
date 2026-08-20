@@ -6276,6 +6276,564 @@ export type Database = {
           },
         ]
       }
+      billionaire_access_pathways: {
+        Row: {
+          accessibility_score: number
+          affiliation_id: string | null
+          billionaire_id: string
+          cause_fit: Json
+          cause_fit_score: number
+          confidence_score: number
+          contact_url: string | null
+          created_at: string
+          geography_fit: Json
+          id: string
+          intermediary_name: string | null
+          intermediary_title: string | null
+          last_verified_at: string | null
+          linkedin_url: string | null
+          metadata: Json
+          organisation_name: string | null
+          outreach_allowed: boolean
+          pathway_type: string
+          priority_score: number | null
+          public_email: string | null
+          route_name: string
+          route_notes: string | null
+          route_status: string
+          source_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          accessibility_score?: number
+          affiliation_id?: string | null
+          billionaire_id: string
+          cause_fit?: Json
+          cause_fit_score?: number
+          confidence_score?: number
+          contact_url?: string | null
+          created_at?: string
+          geography_fit?: Json
+          id?: string
+          intermediary_name?: string | null
+          intermediary_title?: string | null
+          last_verified_at?: string | null
+          linkedin_url?: string | null
+          metadata?: Json
+          organisation_name?: string | null
+          outreach_allowed?: boolean
+          pathway_type: string
+          priority_score?: number | null
+          public_email?: string | null
+          route_name: string
+          route_notes?: string | null
+          route_status?: string
+          source_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          accessibility_score?: number
+          affiliation_id?: string | null
+          billionaire_id?: string
+          cause_fit?: Json
+          cause_fit_score?: number
+          confidence_score?: number
+          contact_url?: string | null
+          created_at?: string
+          geography_fit?: Json
+          id?: string
+          intermediary_name?: string | null
+          intermediary_title?: string | null
+          last_verified_at?: string | null
+          linkedin_url?: string | null
+          metadata?: Json
+          organisation_name?: string | null
+          outreach_allowed?: boolean
+          pathway_type?: string
+          priority_score?: number | null
+          public_email?: string | null
+          route_name?: string
+          route_notes?: string | null
+          route_status?: string
+          source_url?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billionaire_access_pathways_affiliation_id_fkey"
+            columns: ["affiliation_id"]
+            isOneToOne: false
+            referencedRelation: "billionaire_affiliations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billionaire_access_pathways_billionaire_id_fkey"
+            columns: ["billionaire_id"]
+            isOneToOne: false
+            referencedRelation: "billionaire_access_summary"
+            referencedColumns: ["billionaire_id"]
+          },
+          {
+            foreignKeyName: "billionaire_access_pathways_billionaire_id_fkey"
+            columns: ["billionaire_id"]
+            isOneToOne: false
+            referencedRelation: "billionaire_intelligence"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      billionaire_affiliations: {
+        Row: {
+          affiliation_type: string
+          billionaire_id: string
+          cause_areas: Json
+          confidence_score: number
+          created_at: string
+          evidence_summary: string | null
+          evidence_url: string | null
+          geography_focus: Json
+          id: string
+          last_verified_at: string | null
+          metadata: Json
+          organisation_name: string
+          role_or_relationship: string | null
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          affiliation_type: string
+          billionaire_id: string
+          cause_areas?: Json
+          confidence_score?: number
+          created_at?: string
+          evidence_summary?: string | null
+          evidence_url?: string | null
+          geography_focus?: Json
+          id?: string
+          last_verified_at?: string | null
+          metadata?: Json
+          organisation_name: string
+          role_or_relationship?: string | null
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          affiliation_type?: string
+          billionaire_id?: string
+          cause_areas?: Json
+          confidence_score?: number
+          created_at?: string
+          evidence_summary?: string | null
+          evidence_url?: string | null
+          geography_focus?: Json
+          id?: string
+          last_verified_at?: string | null
+          metadata?: Json
+          organisation_name?: string
+          role_or_relationship?: string | null
+          updated_at?: string
+          website_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billionaire_affiliations_billionaire_id_fkey"
+            columns: ["billionaire_id"]
+            isOneToOne: false
+            referencedRelation: "billionaire_access_summary"
+            referencedColumns: ["billionaire_id"]
+          },
+          {
+            foreignKeyName: "billionaire_affiliations_billionaire_id_fkey"
+            columns: ["billionaire_id"]
+            isOneToOne: false
+            referencedRelation: "billionaire_intelligence"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      billionaire_candidate_routes: {
+        Row: {
+          billionaire_id: string
+          candidate_type: string
+          confidence_score: number
+          created_at: string
+          derived_from: string
+          evidence_summary: string | null
+          id: string
+          metadata: Json
+          organisation_name: string
+          outreach_allowed: boolean
+          route_basis: string
+          source_affiliation_id: string | null
+          source_url: string | null
+          updated_at: string
+          verification_state: string
+          website_url: string | null
+        }
+        Insert: {
+          billionaire_id: string
+          candidate_type: string
+          confidence_score?: number
+          created_at?: string
+          derived_from?: string
+          evidence_summary?: string | null
+          id?: string
+          metadata?: Json
+          organisation_name: string
+          outreach_allowed?: boolean
+          route_basis: string
+          source_affiliation_id?: string | null
+          source_url?: string | null
+          updated_at?: string
+          verification_state?: string
+          website_url?: string | null
+        }
+        Update: {
+          billionaire_id?: string
+          candidate_type?: string
+          confidence_score?: number
+          created_at?: string
+          derived_from?: string
+          evidence_summary?: string | null
+          id?: string
+          metadata?: Json
+          organisation_name?: string
+          outreach_allowed?: boolean
+          route_basis?: string
+          source_affiliation_id?: string | null
+          source_url?: string | null
+          updated_at?: string
+          verification_state?: string
+          website_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billionaire_candidate_routes_billionaire_id_fkey"
+            columns: ["billionaire_id"]
+            isOneToOne: false
+            referencedRelation: "billionaire_access_summary"
+            referencedColumns: ["billionaire_id"]
+          },
+          {
+            foreignKeyName: "billionaire_candidate_routes_billionaire_id_fkey"
+            columns: ["billionaire_id"]
+            isOneToOne: false
+            referencedRelation: "billionaire_intelligence"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billionaire_candidate_routes_source_affiliation_id_fkey"
+            columns: ["source_affiliation_id"]
+            isOneToOne: false
+            referencedRelation: "billionaire_affiliations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      billionaire_coverage: {
+        Row: {
+          africa_relevance_score: number
+          billionaire_id: string
+          candidate_route_count: number
+          citizenship: string | null
+          company_route_count: number
+          created_at: string
+          current_networth_as_of: string | null
+          current_networth_usd_m: number | null
+          enrichment_status: string
+          evidence: Json
+          family_office_count: number
+          foundation_count: number
+          full_name: string | null
+          ghat_fit_score: number
+          ghat_priority_score: number
+          giving_pledge_signal: boolean
+          has_family_office: boolean
+          has_foundation: boolean
+          health_relevance_score: number
+          historical_networth_as_of: string | null
+          historical_networth_usd_m: number | null
+          id: string
+          last_enriched_at: string | null
+          liquidity_capacity_score: number
+          next_enrichment_priority: number
+          outreach_blocker_reason: string | null
+          outreach_readiness: string
+          philanthropy_intensity_score: number
+          primary_industry: string | null
+          research_confidence: number
+          updated_at: string
+          urgency_priority_score: number
+          verified_institutional_routes: number
+          verified_intermediary_routes: number
+          wealth_data_freshness: string
+          wealth_trajectory: string
+        }
+        Insert: {
+          africa_relevance_score?: number
+          billionaire_id: string
+          candidate_route_count?: number
+          citizenship?: string | null
+          company_route_count?: number
+          created_at?: string
+          current_networth_as_of?: string | null
+          current_networth_usd_m?: number | null
+          enrichment_status?: string
+          evidence?: Json
+          family_office_count?: number
+          foundation_count?: number
+          full_name?: string | null
+          ghat_fit_score?: number
+          ghat_priority_score?: number
+          giving_pledge_signal?: boolean
+          has_family_office?: boolean
+          has_foundation?: boolean
+          health_relevance_score?: number
+          historical_networth_as_of?: string | null
+          historical_networth_usd_m?: number | null
+          id?: string
+          last_enriched_at?: string | null
+          liquidity_capacity_score?: number
+          next_enrichment_priority?: number
+          outreach_blocker_reason?: string | null
+          outreach_readiness?: string
+          philanthropy_intensity_score?: number
+          primary_industry?: string | null
+          research_confidence?: number
+          updated_at?: string
+          urgency_priority_score?: number
+          verified_institutional_routes?: number
+          verified_intermediary_routes?: number
+          wealth_data_freshness?: string
+          wealth_trajectory?: string
+        }
+        Update: {
+          africa_relevance_score?: number
+          billionaire_id?: string
+          candidate_route_count?: number
+          citizenship?: string | null
+          company_route_count?: number
+          created_at?: string
+          current_networth_as_of?: string | null
+          current_networth_usd_m?: number | null
+          enrichment_status?: string
+          evidence?: Json
+          family_office_count?: number
+          foundation_count?: number
+          full_name?: string | null
+          ghat_fit_score?: number
+          ghat_priority_score?: number
+          giving_pledge_signal?: boolean
+          has_family_office?: boolean
+          has_foundation?: boolean
+          health_relevance_score?: number
+          historical_networth_as_of?: string | null
+          historical_networth_usd_m?: number | null
+          id?: string
+          last_enriched_at?: string | null
+          liquidity_capacity_score?: number
+          next_enrichment_priority?: number
+          outreach_blocker_reason?: string | null
+          outreach_readiness?: string
+          philanthropy_intensity_score?: number
+          primary_industry?: string | null
+          research_confidence?: number
+          updated_at?: string
+          urgency_priority_score?: number
+          verified_institutional_routes?: number
+          verified_intermediary_routes?: number
+          wealth_data_freshness?: string
+          wealth_trajectory?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billionaire_coverage_billionaire_id_fkey"
+            columns: ["billionaire_id"]
+            isOneToOne: true
+            referencedRelation: "billionaire_access_summary"
+            referencedColumns: ["billionaire_id"]
+          },
+          {
+            foreignKeyName: "billionaire_coverage_billionaire_id_fkey"
+            columns: ["billionaire_id"]
+            isOneToOne: true
+            referencedRelation: "billionaire_intelligence"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      billionaire_enrichment_queue: {
+        Row: {
+          attempts: number
+          batch_key: string | null
+          billionaire_id: string
+          created_at: string
+          id: string
+          last_checked_at: string | null
+          last_result: string | null
+          next_check_at: string
+          notes: string | null
+          priority: number
+          source_types_checked: Json
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          batch_key?: string | null
+          billionaire_id: string
+          created_at?: string
+          id?: string
+          last_checked_at?: string | null
+          last_result?: string | null
+          next_check_at?: string
+          notes?: string | null
+          priority?: number
+          source_types_checked?: Json
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          batch_key?: string | null
+          billionaire_id?: string
+          created_at?: string
+          id?: string
+          last_checked_at?: string | null
+          last_result?: string | null
+          next_check_at?: string
+          notes?: string | null
+          priority?: number
+          source_types_checked?: Json
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billionaire_enrichment_queue_billionaire_id_fkey"
+            columns: ["billionaire_id"]
+            isOneToOne: true
+            referencedRelation: "billionaire_access_summary"
+            referencedColumns: ["billionaire_id"]
+          },
+          {
+            foreignKeyName: "billionaire_enrichment_queue_billionaire_id_fkey"
+            columns: ["billionaire_id"]
+            isOneToOne: true
+            referencedRelation: "billionaire_intelligence"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      billionaire_intelligence: {
+        Row: {
+          age: number | null
+          citizenship: string | null
+          full_name: string
+          gender: string | null
+          id: string
+          imported_at: string
+          industries: Json
+          networth_usd_m: number | null
+          profile_uri: string
+          raw_record: Json
+          snapshot_date: string
+          source_name: string
+          source_rank: number
+          source_url: string | null
+          wealth_sources: Json
+        }
+        Insert: {
+          age?: number | null
+          citizenship?: string | null
+          full_name: string
+          gender?: string | null
+          id?: string
+          imported_at?: string
+          industries?: Json
+          networth_usd_m?: number | null
+          profile_uri: string
+          raw_record?: Json
+          snapshot_date: string
+          source_name?: string
+          source_rank: number
+          source_url?: string | null
+          wealth_sources?: Json
+        }
+        Update: {
+          age?: number | null
+          citizenship?: string | null
+          full_name?: string
+          gender?: string | null
+          id?: string
+          imported_at?: string
+          industries?: Json
+          networth_usd_m?: number | null
+          profile_uri?: string
+          raw_record?: Json
+          snapshot_date?: string
+          source_name?: string
+          source_rank?: number
+          source_url?: string | null
+          wealth_sources?: Json
+        }
+        Relationships: []
+      }
+      billionaire_network_links: {
+        Row: {
+          billionaire_id: string
+          confidence_score: number
+          created_at: string
+          id: string
+          match_method: string
+          network_member_id: string
+          outreach_allowed: boolean
+          route_status: string
+        }
+        Insert: {
+          billionaire_id: string
+          confidence_score?: number
+          created_at?: string
+          id?: string
+          match_method: string
+          network_member_id: string
+          outreach_allowed?: boolean
+          route_status?: string
+        }
+        Update: {
+          billionaire_id?: string
+          confidence_score?: number
+          created_at?: string
+          id?: string
+          match_method?: string
+          network_member_id?: string
+          outreach_allowed?: boolean
+          route_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billionaire_network_links_billionaire_id_fkey"
+            columns: ["billionaire_id"]
+            isOneToOne: false
+            referencedRelation: "billionaire_access_summary"
+            referencedColumns: ["billionaire_id"]
+          },
+          {
+            foreignKeyName: "billionaire_network_links_billionaire_id_fkey"
+            columns: ["billionaire_id"]
+            isOneToOne: false
+            referencedRelation: "billionaire_intelligence"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billionaire_network_links_network_member_id_fkey"
+            columns: ["network_member_id"]
+            isOneToOne: false
+            referencedRelation: "philanthropy_network_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       booking_events: {
         Row: {
           audit_metadata: Json
@@ -29315,6 +29873,60 @@ export type Database = {
         }
         Relationships: []
       }
+      historical_investor_connections: {
+        Row: {
+          billionaire_link_status: string
+          connection_status: string
+          connection_type: string
+          created_at: string
+          evidence_summary: string | null
+          first_connected_at: string | null
+          id: string
+          metadata: Json
+          organisation_name: string | null
+          outreach_allowed: boolean
+          person_name: string
+          philanthropy_link_status: string
+          source_reference: string | null
+          source_system: string
+          updated_at: string
+        }
+        Insert: {
+          billionaire_link_status?: string
+          connection_status?: string
+          connection_type: string
+          created_at?: string
+          evidence_summary?: string | null
+          first_connected_at?: string | null
+          id?: string
+          metadata?: Json
+          organisation_name?: string | null
+          outreach_allowed?: boolean
+          person_name: string
+          philanthropy_link_status?: string
+          source_reference?: string | null
+          source_system: string
+          updated_at?: string
+        }
+        Update: {
+          billionaire_link_status?: string
+          connection_status?: string
+          connection_type?: string
+          created_at?: string
+          evidence_summary?: string | null
+          first_connected_at?: string | null
+          id?: string
+          metadata?: Json
+          organisation_name?: string | null
+          outreach_allowed?: boolean
+          person_name?: string
+          philanthropy_link_status?: string
+          source_reference?: string | null
+          source_system?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       human_operator_access: {
         Row: {
           access_level: string | null
@@ -43709,6 +44321,33 @@ export type Database = {
           scorecard_type?: string
           social_score?: number | null
           summary?: string | null
+        }
+        Relationships: []
+      }
+      philanthropy_network_members: {
+        Row: {
+          id: string
+          last_verified_at: string
+          member_display_name: string
+          metadata: Json
+          network_name: string
+          source_url: string
+        }
+        Insert: {
+          id?: string
+          last_verified_at?: string
+          member_display_name: string
+          metadata?: Json
+          network_name: string
+          source_url: string
+        }
+        Update: {
+          id?: string
+          last_verified_at?: string
+          member_display_name?: string
+          metadata?: Json
+          network_name?: string
+          source_url?: string
         }
         Relationships: []
       }
@@ -61100,6 +61739,69 @@ export type Database = {
         }
         Relationships: []
       }
+      strategic_access_intermediaries: {
+        Row: {
+          access_scope: Json
+          active: boolean
+          business_email: string | null
+          created_at: string
+          evidence_date: string | null
+          id: string
+          intermediary_type: string
+          notes: string | null
+          organisation_name: string | null
+          outreach_allowed: boolean
+          person_name: string
+          relationship_evidence: string | null
+          relationship_strength: string
+          role_title: string | null
+          source_reference: string | null
+          source_system: string
+          updated_at: string
+          warm_intro_count: number
+        }
+        Insert: {
+          access_scope?: Json
+          active?: boolean
+          business_email?: string | null
+          created_at?: string
+          evidence_date?: string | null
+          id?: string
+          intermediary_type: string
+          notes?: string | null
+          organisation_name?: string | null
+          outreach_allowed?: boolean
+          person_name: string
+          relationship_evidence?: string | null
+          relationship_strength?: string
+          role_title?: string | null
+          source_reference?: string | null
+          source_system?: string
+          updated_at?: string
+          warm_intro_count?: number
+        }
+        Update: {
+          access_scope?: Json
+          active?: boolean
+          business_email?: string | null
+          created_at?: string
+          evidence_date?: string | null
+          id?: string
+          intermediary_type?: string
+          notes?: string | null
+          organisation_name?: string | null
+          outreach_allowed?: boolean
+          person_name?: string
+          relationship_evidence?: string | null
+          relationship_strength?: string
+          role_title?: string | null
+          source_reference?: string | null
+          source_system?: string
+          updated_at?: string
+          warm_intro_count?: number
+        }
+        Relationships: []
+      }
       strategic_account_list_items: {
         Row: {
           created_at: string | null
@@ -68091,6 +68793,21 @@ export type Database = {
           },
         ]
       }
+      billionaire_access_summary: {
+        Row: {
+          access_route_count: number | null
+          affiliation_count: number | null
+          best_priority_score: number | null
+          best_route: string | null
+          best_route_organisation: string | null
+          billionaire_id: string | null
+          citizenship: string | null
+          full_name: string | null
+          networth_usd_m: number | null
+          source_rank: number | null
+        }
+        Relationships: []
+      }
       blocked_sends_24h: {
         Row: {
           block_reason: string | null
@@ -69263,6 +69980,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      rebuild_billionaire_coverage: { Args: never; Returns: Json }
       rebuild_full_manual: { Args: never; Returns: Json }
       recalculate_priority: {
         Args: {

@@ -124,6 +124,7 @@ import DailyOperator from "./pages/founder/DailyOperator";
 import FounderMoney from "./pages/founder/FounderMoney";
 import VideoSopFactoryPage from "./pages/founder/VideoSopFactory";
 import RelationshipIntelligencePage from "./pages/founder/RelationshipIntelligence";
+import BillionaireIntelligence from "./pages/founder/BillionaireIntelligence";
 import RelationshipIntelligenceImport from "./pages/founder/RelationshipIntelligenceImport";
 import GlobalPrRadar from "./pages/founder/GlobalPrRadar";
 import VideoLibrary from "./pages/founder/VideoLibrary";
@@ -979,6 +980,7 @@ const App = () => (
             <Route path="/founder/business-onboarding-factory" element={<FounderRoute><BusinessOnboardingFactoryPage /></FounderRoute>} />
             <Route path="/founder/video-sop-factory" element={<FounderRoute><VideoSopFactoryPage /></FounderRoute>} />
             <Route path="/founder/relationship-intelligence" element={<FounderRoute><RelationshipIntelligencePage /></FounderRoute>} />
+            <Route path="/founder/billionaire-intelligence" element={<FounderRoute><BillionaireIntelligence /></FounderRoute>} />
             <Route path="/founder/relationship-intelligence/import" element={<FounderRoute><RelationshipIntelligenceImport /></FounderRoute>} />
             <Route path="/founder/global-pr-radar" element={<FounderRoute><GlobalPrRadar /></FounderRoute>} />
             <Route path="/founder/video-library" element={<FounderRoute><VideoLibrary /></FounderRoute>} />
