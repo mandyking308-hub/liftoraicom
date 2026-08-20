@@ -69746,6 +69746,7 @@ export type Database = {
         Args: { p_email: string }
         Returns: string
       }
+      derive_billionaire_route_evidence_states: { Args: never; Returns: Json }
       detect_anomalies: { Args: never; Returns: Json }
       detect_orphan_content: { Args: never; Returns: Json }
       domain_for_inbox: { Args: { _inbox_id: string }; Returns: string }
@@ -69990,12 +69991,17 @@ export type Database = {
         Args: { _asset_id: string }
         Returns: number
       }
+      map_billionaire_network_evidence: { Args: never; Returns: Json }
       mark_contact_for_founder_review: {
         Args: { _contact_id: string; _note?: string }
         Returns: string
       }
       mark_send_failure: {
         Args: { _error: string; _queue_id: string }
+        Returns: Json
+      }
+      match_billionaire_wealth_snapshots: {
+        Args: { _snapshot_date?: string; _source?: string }
         Returns: Json
       }
       match_video_segments: {
