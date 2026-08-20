@@ -1,0 +1,1 @@
+SELECT public.run_billionaire_enrichment_batches(10, 50);
