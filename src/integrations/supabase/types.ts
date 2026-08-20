@@ -6298,9 +6298,11 @@ export type Database = {
           pathway_type: string
           priority_score: number | null
           public_email: string | null
+          route_access_mode: string
           route_evidence_state: string
           route_name: string
           route_notes: string | null
+          route_restriction_notes: string | null
           route_status: string
           source_url: string | null
           updated_at: string
@@ -6326,9 +6328,11 @@ export type Database = {
           pathway_type: string
           priority_score?: number | null
           public_email?: string | null
+          route_access_mode?: string
           route_evidence_state?: string
           route_name: string
           route_notes?: string | null
+          route_restriction_notes?: string | null
           route_status?: string
           source_url?: string | null
           updated_at?: string
@@ -6354,9 +6358,11 @@ export type Database = {
           pathway_type?: string
           priority_score?: number | null
           public_email?: string | null
+          route_access_mode?: string
           route_evidence_state?: string
           route_name?: string
           route_notes?: string | null
+          route_restriction_notes?: string | null
           route_status?: string
           source_url?: string | null
           updated_at?: string
@@ -6463,11 +6469,14 @@ export type Database = {
           derived_from: string
           evidence_summary: string | null
           id: string
+          last_reviewed_at: string | null
           metadata: Json
           organisation_name: string
           outreach_allowed: boolean
           priority_rank: number
+          route_access_mode: string
           route_basis: string
+          route_restriction_notes: string | null
           source_affiliation_id: string | null
           source_url: string | null
           updated_at: string
@@ -6482,11 +6491,14 @@ export type Database = {
           derived_from?: string
           evidence_summary?: string | null
           id?: string
+          last_reviewed_at?: string | null
           metadata?: Json
           organisation_name: string
           outreach_allowed?: boolean
           priority_rank?: number
+          route_access_mode?: string
           route_basis: string
+          route_restriction_notes?: string | null
           source_affiliation_id?: string | null
           source_url?: string | null
           updated_at?: string
@@ -6501,11 +6513,14 @@ export type Database = {
           derived_from?: string
           evidence_summary?: string | null
           id?: string
+          last_reviewed_at?: string | null
           metadata?: Json
           organisation_name?: string
           outreach_allowed?: boolean
           priority_rank?: number
+          route_access_mode?: string
           route_basis?: string
+          route_restriction_notes?: string | null
           source_affiliation_id?: string | null
           source_url?: string | null
           updated_at?: string
@@ -70129,6 +70144,10 @@ export type Database = {
         Args: { _invoice_id: string }
         Returns: undefined
       }
+      process_billionaire_enrichment_batch: {
+        Args: { p_batch_size?: number }
+        Returns: Json
+      }
       process_retry_queue: { Args: never; Returns: Json }
       proposals_needing_followup: {
         Args: never
@@ -70276,6 +70295,10 @@ export type Database = {
       resolve_entity_country: {
         Args: { _business?: string; _contact_id: string }
         Returns: string
+      }
+      run_billionaire_enrichment_batches: {
+        Args: { p_batch_size?: number; p_max_batches?: number }
+        Returns: Json
       }
       run_compliance_checks: {
         Args: {
