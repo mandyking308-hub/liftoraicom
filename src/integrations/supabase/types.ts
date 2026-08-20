@@ -6298,6 +6298,7 @@ export type Database = {
           pathway_type: string
           priority_score: number | null
           public_email: string | null
+          route_evidence_state: string
           route_name: string
           route_notes: string | null
           route_status: string
@@ -6325,6 +6326,7 @@ export type Database = {
           pathway_type: string
           priority_score?: number | null
           public_email?: string | null
+          route_evidence_state?: string
           route_name: string
           route_notes?: string | null
           route_status?: string
@@ -6352,6 +6354,7 @@ export type Database = {
           pathway_type?: string
           priority_score?: number | null
           public_email?: string | null
+          route_evidence_state?: string
           route_name?: string
           route_notes?: string | null
           route_status?: string
@@ -6463,6 +6466,7 @@ export type Database = {
           metadata: Json
           organisation_name: string
           outreach_allowed: boolean
+          priority_rank: number
           route_basis: string
           source_affiliation_id: string | null
           source_url: string | null
@@ -6481,6 +6485,7 @@ export type Database = {
           metadata?: Json
           organisation_name: string
           outreach_allowed?: boolean
+          priority_rank?: number
           route_basis: string
           source_affiliation_id?: string | null
           source_url?: string | null
@@ -6499,6 +6504,7 @@ export type Database = {
           metadata?: Json
           organisation_name?: string
           outreach_allowed?: boolean
+          priority_rank?: number
           route_basis?: string
           source_affiliation_id?: string | null
           source_url?: string | null
@@ -6539,7 +6545,10 @@ export type Database = {
           company_route_count: number
           created_at: string
           current_networth_as_of: string | null
+          current_networth_change_pct: number | null
+          current_networth_source: string | null
           current_networth_usd_m: number | null
+          dropoff_candidate: boolean
           enrichment_status: string
           evidence: Json
           family_office_count: number
@@ -6560,12 +6569,16 @@ export type Database = {
           outreach_blocker_reason: string | null
           outreach_readiness: string
           philanthropy_intensity_score: number
+          philanthropy_network_matches: number
           primary_industry: string | null
           research_confidence: number
+          researched_route_count: number
+          snapshot_match_status: string
           updated_at: string
           urgency_priority_score: number
           verified_institutional_routes: number
           verified_intermediary_routes: number
+          warm_relationship_evidence_count: number
           wealth_data_freshness: string
           wealth_trajectory: string
         }
@@ -6577,7 +6590,10 @@ export type Database = {
           company_route_count?: number
           created_at?: string
           current_networth_as_of?: string | null
+          current_networth_change_pct?: number | null
+          current_networth_source?: string | null
           current_networth_usd_m?: number | null
+          dropoff_candidate?: boolean
           enrichment_status?: string
           evidence?: Json
           family_office_count?: number
@@ -6598,12 +6614,16 @@ export type Database = {
           outreach_blocker_reason?: string | null
           outreach_readiness?: string
           philanthropy_intensity_score?: number
+          philanthropy_network_matches?: number
           primary_industry?: string | null
           research_confidence?: number
+          researched_route_count?: number
+          snapshot_match_status?: string
           updated_at?: string
           urgency_priority_score?: number
           verified_institutional_routes?: number
           verified_intermediary_routes?: number
+          warm_relationship_evidence_count?: number
           wealth_data_freshness?: string
           wealth_trajectory?: string
         }
@@ -6615,7 +6635,10 @@ export type Database = {
           company_route_count?: number
           created_at?: string
           current_networth_as_of?: string | null
+          current_networth_change_pct?: number | null
+          current_networth_source?: string | null
           current_networth_usd_m?: number | null
+          dropoff_candidate?: boolean
           enrichment_status?: string
           evidence?: Json
           family_office_count?: number
@@ -6636,12 +6659,16 @@ export type Database = {
           outreach_blocker_reason?: string | null
           outreach_readiness?: string
           philanthropy_intensity_score?: number
+          philanthropy_network_matches?: number
           primary_industry?: string | null
           research_confidence?: number
+          researched_route_count?: number
+          snapshot_match_status?: string
           updated_at?: string
           urgency_priority_score?: number
           verified_institutional_routes?: number
           verified_intermediary_routes?: number
+          warm_relationship_evidence_count?: number
           wealth_data_freshness?: string
           wealth_trajectory?: string
         }
@@ -6830,6 +6857,99 @@ export type Database = {
             columns: ["network_member_id"]
             isOneToOne: false
             referencedRelation: "philanthropy_network_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      billionaire_wealth_snapshots: {
+        Row: {
+          billionaire_id: string | null
+          citizenship: string | null
+          country: string | null
+          created_at: string
+          id: string
+          industry: string | null
+          match_confidence: number
+          match_method: string | null
+          match_notes: string | null
+          match_status: string
+          networth_usd_m: number | null
+          normalized_name: string
+          official_source_url: string | null
+          raw_record: Json
+          snapshot_date: string
+          source_metadata: Json
+          source_name: string
+          source_name_raw: string
+          source_of_wealth: string | null
+          source_rank: number | null
+          source_type: string
+          source_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          billionaire_id?: string | null
+          citizenship?: string | null
+          country?: string | null
+          created_at?: string
+          id?: string
+          industry?: string | null
+          match_confidence?: number
+          match_method?: string | null
+          match_notes?: string | null
+          match_status?: string
+          networth_usd_m?: number | null
+          normalized_name: string
+          official_source_url?: string | null
+          raw_record?: Json
+          snapshot_date: string
+          source_metadata?: Json
+          source_name: string
+          source_name_raw: string
+          source_of_wealth?: string | null
+          source_rank?: number | null
+          source_type?: string
+          source_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          billionaire_id?: string | null
+          citizenship?: string | null
+          country?: string | null
+          created_at?: string
+          id?: string
+          industry?: string | null
+          match_confidence?: number
+          match_method?: string | null
+          match_notes?: string | null
+          match_status?: string
+          networth_usd_m?: number | null
+          normalized_name?: string
+          official_source_url?: string | null
+          raw_record?: Json
+          snapshot_date?: string
+          source_metadata?: Json
+          source_name?: string
+          source_name_raw?: string
+          source_of_wealth?: string | null
+          source_rank?: number | null
+          source_type?: string
+          source_url?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billionaire_wealth_snapshots_billionaire_id_fkey"
+            columns: ["billionaire_id"]
+            isOneToOne: false
+            referencedRelation: "billionaire_access_summary"
+            referencedColumns: ["billionaire_id"]
+          },
+          {
+            foreignKeyName: "billionaire_wealth_snapshots_billionaire_id_fkey"
+            columns: ["billionaire_id"]
+            isOneToOne: false
+            referencedRelation: "billionaire_intelligence"
             referencedColumns: ["id"]
           },
         ]
@@ -68808,6 +68928,34 @@ export type Database = {
         }
         Relationships: []
       }
+      billionaire_completion_metrics: {
+        Row: {
+          ambiguous_matches: number | null
+          coverage_records: number | null
+          current_wealth: number | null
+          dropoff_candidates: number | null
+          enrichment_queue: number | null
+          falling: number | null
+          family_offices_unique: number | null
+          foundations_unique: number | null
+          giving_pledge: number | null
+          matched_high_confidence: number | null
+          new_2026_names: number | null
+          no_route: number | null
+          outreach_ready: number | null
+          philanthropy_network_matched: number | null
+          researched_candidate_only: number | null
+          rising: number | null
+          snapshot_2026_rows: number | null
+          stable: number | null
+          stale_wealth: number | null
+          universe_2025: number | null
+          verified_public_institutional: number | null
+          verified_warm_intermediary: number | null
+          wealth_match_review_queue: number | null
+        }
+        Relationships: []
+      }
       blocked_sends_24h: {
         Row: {
           block_reason: string | null
@@ -69555,6 +69703,7 @@ export type Database = {
         Returns: string
       }
       auto_resolve_system_events: { Args: never; Returns: number }
+      bi_normalize_name: { Args: { _n: string }; Returns: string }
       check_outreach_allowed:
         | { Args: { _contact_id: string }; Returns: Json }
         | {
@@ -69625,6 +69774,7 @@ export type Database = {
         Args: { p_email: string }
         Returns: string
       }
+      derive_billionaire_route_evidence_states: { Args: never; Returns: Json }
       detect_anomalies: { Args: never; Returns: Json }
       detect_orphan_content: { Args: never; Returns: Json }
       domain_for_inbox: { Args: { _inbox_id: string }; Returns: string }
@@ -69869,12 +70019,17 @@ export type Database = {
         Args: { _asset_id: string }
         Returns: number
       }
+      map_billionaire_network_evidence: { Args: never; Returns: Json }
       mark_contact_for_founder_review: {
         Args: { _contact_id: string; _note?: string }
         Returns: string
       }
       mark_send_failure: {
         Args: { _error: string; _queue_id: string }
+        Returns: Json
+      }
+      match_billionaire_wealth_snapshots: {
+        Args: { _snapshot_date?: string; _source?: string }
         Returns: Json
       }
       match_video_segments: {
