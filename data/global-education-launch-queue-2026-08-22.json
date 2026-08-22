@@ -1,0 +1,55 @@
+{
+  "queue_name": "Global Education First Launch",
+  "created": "2026-08-22",
+  "send_status": "DO_NOT_SEND_UNTIL_EXPLICIT_APPROVAL",
+  "first_account": {
+    "organisation": "Inspired Education Group",
+    "account_priority": "A+",
+    "reason": "Strong global scale, premium private-school positioning, digital/AI orientation, and a well-mapped multi-person buying committee with verified work emails.",
+    "account_stage": "research_ready",
+    "recommended_entry_strategy": "Lead with one product-specific education problem and a small pilot/group evaluation proposition; use an education champion and technical buyer in parallel rather than emailing the whole committee at once.",
+    "primary_education_champion": {
+      "name": "Mark Snell",
+      "title": "UK Education Director",
+      "email": "mark.snell@inspirededu.com"
+    },
+    "primary_technical_buyer": {
+      "name": "Torben Lundberg",
+      "title": "CIO",
+      "email": "torben.lundberg@inspirededu.com"
+    },
+    "commercial_growth_buyer": {
+      "name": "Steve Axe",
+      "title": "Chief Marketing Officer",
+      "email": "steve.axe@inspirededu.com"
+    },
+    "uk_executive_sponsor": {
+      "name": "Ashley Harrold",
+      "title": "CEO UK",
+      "email": "ashley.harrold@inspirededu.com"
+    },
+    "group_executive_sponsor": {
+      "name": "Glenn Andrew",
+      "title": "Chief Executive Officer",
+      "email": "glenn.andrew@inspirededu.com"
+    },
+    "tomorrow_workflow": [
+      "Refresh account news and strategic signals",
+      "Select which of the four education products is the best first wedge",
+      "Build one account-specific value hypothesis",
+      "Choose primary champion and one supporting buyer",
+      "Draft human first-touch message and follow-up path",
+      "Obtain explicit approval before any sequence enrollment or email send"
+    ]
+  },
+  "next_accounts_after_first": [
+    "GEMS Education",
+    "International Schools Partnership Limited",
+    "Cognita Schools",
+    "Nord Anglia Education",
+    "Globeducate",
+    "Dukes Education",
+    "Taaleem UAE",
+    "SABIS"
+  ]
+}
