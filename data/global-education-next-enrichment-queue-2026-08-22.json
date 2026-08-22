@@ -1,7 +1,7 @@
 {
   "status": "SEARCHED_NOT_YET_ENRICHED",
   "reason": "Apollo enrichment is credit-consuming; preserve candidate IDs and role structure before the next approved enrichment batch.",
-  "candidate_count": 31,
+  "candidate_count": 50,
   "groups": [
     {
       "group": "ACS International Schools",
@@ -62,6 +62,40 @@
         {"apollo_person_id":"54a28a58746869382541dd2a","first_name":"Myles","last_name_masked":"Mc***y","title":"CTO","apollo_has_email":true},
         {"apollo_person_id":"6700dfb25f60ba00015e640e","first_name":"Anna","last_name_masked":"La***t","title":"Group Director of Marketing & Admissions","apollo_has_email":true},
         {"apollo_person_id":"664db0cd3bc10100017ed5ce","first_name":"Alexander","last_name_masked":"Ha***s","title":"Director of Education - Orbital school","apollo_has_email":false}
+      ]
+    },
+    {
+      "group": "Taylor's Education Group",
+      "candidates": [
+        {"apollo_person_id":"5f8e663c9ac29a0001463a0e","first_name":"Izwan","last_name_masked":"Is***l","title":"Group Chief Technology Officer","apollo_has_email":true},
+        {"apollo_person_id":"57d591d2a6da9853d62bff2f","first_name":"Sarah","last_name_masked":"Li***g","title":"Director, Transformation & Innovation","apollo_has_email":true},
+        {"apollo_person_id":"54a6fe667468696de7cb480b","first_name":"Renay","last_name_masked":"Pu","title":"Director of Marketing, Digital & Reservations","apollo_has_email":true},
+        {"apollo_person_id":"57e1d2dea6da9856d293e8dc","first_name":"Logendra","last_name_masked":"Po***h","title":"Program Director, Postgraduate Program School of Education","apollo_has_email":true},
+        {"apollo_person_id":"54a30fc07468693fda444a51","first_name":"Arnab","last_name_masked":"Ma***l","title":"Director, Workforce Strategy and People Tech","apollo_has_email":true}
+      ]
+    },
+    {
+      "group": "BASIS International Schools",
+      "candidates": [
+        {"apollo_person_id":"658d5aef8b124500017b605e","first_name":"Marguerite","last_name_masked":"Co***y","title":"Senior CIO BASIS Schools, China","apollo_has_email":true},
+        {"apollo_person_id":"56b553d2f3e5bb0d9e024ccc","first_name":"Alan","last_name_masked":"Ad***e","title":"Director of College Admissions","apollo_has_email":true},
+        {"apollo_person_id":"61fd3175e0df4a00018bbcf3","first_name":"Morgon","last_name_masked":"Wi***s","title":"Director of College Admissions","apollo_has_email":true},
+        {"apollo_person_id":"5d45c36b80f93eb4d4d09aaa","first_name":"AJ","last_name_masked":"Lee","title":"Director of College Admissions","apollo_has_email":false},
+        {"apollo_person_id":"57e15998a6da987de59c253d","first_name":"Bram","last_name_masked":"Ca***n","title":"Director of College Admissions","apollo_has_email":false},
+        {"apollo_person_id":"66cb1aa89c8fb700019e46ca","first_name":"Timothy","last_name_masked":"Fr***n","title":"Director of College Admissions","apollo_has_email":false},
+        {"apollo_person_id":"57dae188a6da984a44df8d15","first_name":"Chelsie","last_name_masked":"Bo***c","title":"Director of College Admissions","apollo_has_email":false},
+        {"apollo_person_id":"5b2a8f03a6da988abad8eb23","first_name":"Ashley","last_name_masked":"Ba***s","title":"Director of College Admissions","apollo_has_email":false},
+        {"apollo_person_id":"68c2893ab138e3000133633d","first_name":"Huixian","last_name_masked":"Shu","title":"Vice Director of Early Childhood Education","apollo_has_email":false},
+        {"apollo_person_id":"5f57997ce2797f00018129e9","first_name":"Tonya","last_name_masked":"Pa***m","title":"Chief Instructional Officer","apollo_has_email":true}
+      ]
+    },
+    {
+      "group": "Dulwich College International",
+      "candidates": [
+        {"apollo_person_id":"65337fa787285e00017b7081","first_name":"Lesley","last_name_masked":"Me***r","title":"Chief Education Officer","apollo_has_email":true},
+        {"apollo_person_id":"60897f2c499cef0001dbac7d","first_name":"Kim","last_name_masked":"Me***k","title":"Director of Admissions, Marketing and Communications - Bangkok","apollo_has_email":false},
+        {"apollo_person_id":"54a31d327468693fda370955","first_name":"Jennifer","last_name_masked":"Ch***g","title":"Education Director of Creative Arts","apollo_has_email":false},
+        {"apollo_person_id":"54a4d1c07468692abf22d365","first_name":"Lihui","last_name_masked":"Shi","title":"Deputy Director of Finance","apollo_has_email":false}
       ]
     }
   ]
