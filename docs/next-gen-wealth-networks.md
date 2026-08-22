@@ -37,7 +37,7 @@ This lets the same research asset support multiple founder workstreams without d
 
 ## Live data — 22 August 2026
 
-The live registry contains **141 active network records**:
+The live registry retains **141 total network records**: **140 active** and **1 merged/historical**. The merged record is Beacon Collaborative, retained with provenance after its May 2025 merger into NPC rather than being deleted.
 
 - Tier 1: 42
 - Tier 2: 79
@@ -49,12 +49,20 @@ The live registry contains **141 active network records**:
 
 Tier 1 has public route coverage for **42 / 42 networks**.
 
-Contact enrichment is continuing through Tier 2 and then Tier 3. Missing personal emails are never guessed. Where an organisation only publishes a form, the form is stored. Where an inbox is shared, it is explicitly labelled as a shared institutional inbox rather than represented as a named person's personal email.
+Current enrichment coverage:
+
+- **67 networks** have public contact intelligence stored.
+- **51** meet the current completion standard: named public professional contact plus a usable public email or contact route and source evidence, or an explicitly resolved lifecycle state.
+- **17** have partial/public-route intelligence and remain under manual review.
+- **73** remain pending for enrichment.
+- Tier 2 currently has contact coverage for **25 / 79 networks** and is the active research pass.
+
+Missing personal emails are never guessed. Where an organisation only publishes a form, the form is stored. Where an inbox is shared, it is explicitly labelled as a shared institutional inbox rather than represented as a named person's personal email.
 
 ## GitHub data and schema
 
 - `data/philanthropy-network-registry-2026-08-22.jsonl` — organisation snapshot.
-- `data/philanthropy-network-contacts-2026-08-22.jsonl` — verified public contact evidence snapshot.
+- `data/philanthropy-network-contacts-2026-08-22.jsonl` — dated public-contact evidence snapshot; the live database is authoritative while enrichment is in progress.
 - `supabase/migrations/20260822093600_philanthropy_network_intelligence.sql` — registry/contact/research schema and RLS.
 - `supabase/migrations/20260822104000_wealth_intelligence_crm_firewall.sql` — hard Wealth Intelligence domain / CRM firewall.
 
