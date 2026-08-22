@@ -1,0 +1,65 @@
+{
+  "as_of": "2026-08-22",
+  "data_domain": "wealth_intelligence",
+  "authoritative_store": "Supabase production database",
+  "registry_records": 141,
+  "lifecycle": {
+    "active": 138,
+    "historical": 1,
+    "merged": 1,
+    "duplicate_unverified": 1
+  },
+  "tiers": {
+    "tier_1": 42,
+    "tier_2": 79,
+    "tier_3": 20
+  },
+  "contact_evidence_rows": 143,
+  "networks_with_contact_or_resolution_route": 141,
+  "networks_with_named_public_person": 92,
+  "networks_with_public_email": 106,
+  "networks_with_public_phone": 63,
+  "networks_with_web_route": 141,
+  "networks_with_official_site_verified_contact_evidence": 128,
+  "research_queue": {
+    "complete": 141,
+    "pending": 0
+  },
+  "crm_firewall": {
+    "registry_records_with_crm_sync_allowed_true": 0,
+    "contact_records_with_crm_sync_allowed_true": 0,
+    "rule": "Wealth Intelligence is never auto-synced to CRM. A genuine relationship requires a separately created CRM record."
+  },
+  "lifecycle_exceptions": [
+    {
+      "network": "Ask the Circle",
+      "status": "historical",
+      "note": "Former CEO tenure through 2017 corroborated; no distinct current operating route verified."
+    },
+    {
+      "network": "Beacon Collaborative",
+      "status": "merged",
+      "successor": "NPC",
+      "merged_at": "2025-05-19"
+    },
+    {
+      "network": "Single Family Office Association Hong Kong (SFOAHK)",
+      "status": "duplicate_unverified",
+      "probable_canonical_record": "Family Office Association Hong Kong (FOAHK)",
+      "note": "No distinct current entity independently verified; record retained for audit rather than deleted."
+    },
+    {
+      "network": "ALIGN — Connecting the Family and the Family Office",
+      "status": "active",
+      "entity_type": "conference_series",
+      "publisher": "Family Business Magazine"
+    }
+  ],
+  "quality_rules": [
+    "Never infer or guess personal emails.",
+    "Label shared inboxes as shared institutional routes.",
+    "Treat form-only, invitation-only and warm-introduction routes as valid access states.",
+    "Preserve no-solicitation, confidentiality and no-unsolicited-funding restrictions.",
+    "Retain merged, historical and duplicate records with lifecycle provenance rather than deleting them."
+  ]
+}
