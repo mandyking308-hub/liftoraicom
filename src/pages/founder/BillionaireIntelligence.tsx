@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "@/hooks/use-toast";
 import { AlertTriangle, Crown, Lock, RefreshCw, ShieldCheck } from "lucide-react";
+import NetworkRegistryTab from "@/components/founder/billionaire/NetworkRegistryTab";
 import {
   fetchCoverage, fetchCoverageStats, fetchFacets, fetchQueue, rebuildCoverage,
   updateQueueBatch, routeState, isStaleWealth, fetchCompletionMetrics, fetchSnapshotRows,
@@ -133,6 +134,7 @@ export default function BillionaireIntelligence() {
       <Tabs defaultValue="prospects">
         <TabsList>
           <TabsTrigger value="prospects">Prospects</TabsTrigger>
+          <TabsTrigger value="networks">Next-gen networks</TabsTrigger>
           <TabsTrigger value="enrichment">Batch enrichment</TabsTrigger>
           <TabsTrigger value="wealth">2026 wealth match</TabsTrigger>
           <TabsTrigger value="outreach">Batch outreach readiness</TabsTrigger>
@@ -230,6 +232,10 @@ export default function BillionaireIntelligence() {
               </TableBody>
             </Table>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="networks" className="space-y-3">
+          <NetworkRegistryTab />
         </TabsContent>
 
         <TabsContent value="enrichment" className="space-y-3">
