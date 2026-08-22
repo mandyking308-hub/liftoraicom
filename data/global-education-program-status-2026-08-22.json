@@ -3,27 +3,35 @@
   "as_of": "2026-08-22",
   "target_groups": 120,
   "target_contacts": 2500,
-  "groups_completed": 6,
-  "contacts_enriched": 60,
-  "verified_work_emails": 56,
-  "held_no_unique_email": 4,
-  "apollo_credits_consumed": 60,
+  "groups_seeded": 9,
+  "target_account_contacts_enriched": 84,
+  "verified_work_emails": 74,
+  "held_no_unique_email": 10,
+  "wrong_entity_research_preserved_separately": 2,
+  "apollo_credits_consumed": 86,
   "apollo_master_label": "Global Education 100 — Master Buyers",
   "liftor_import_path": "supabase/functions/ri-upsert-import/index.ts",
   "live_database_write_status": "blocked_from_current_connector_permissions; import-ready files committed in repo",
-  "completed_groups": [
+  "seeded_groups": [
     {"group": "Nord Anglia Education", "contacts": 10, "verified_emails": 10, "held": 0},
     {"group": "Inspired Education Group", "contacts": 10, "verified_emails": 9, "held": 1},
     {"group": "Cognita Schools", "contacts": 10, "verified_emails": 9, "held": 1},
     {"group": "International Schools Partnership Limited", "contacts": 10, "verified_emails": 10, "held": 0},
     {"group": "GEMS Education", "contacts": 10, "verified_emails": 10, "held": 0},
-    {"group": "Globeducate", "contacts": 10, "verified_emails": 8, "held": 2}
+    {"group": "Globeducate", "contacts": 10, "verified_emails": 8, "held": 2},
+    {"group": "Dukes Education", "contacts": 10, "verified_emails": 8, "held": 2},
+    {"group": "Taaleem UAE", "contacts": 5, "verified_emails": 3, "held": 2},
+    {"group": "SABIS", "contacts": 9, "verified_emails": 7, "held": 2}
   ],
   "source_files": [
     "data/global-education-buyers-2026-08-22.jsonl",
     "data/global-education-buyers-isp-2026-08-22.jsonl",
     "data/global-education-buyers-gems-2026-08-22.jsonl",
-    "data/global-education-buyers-globeducate-2026-08-22.jsonl"
+    "data/global-education-buyers-globeducate-2026-08-22.jsonl",
+    "data/global-education-buyers-dukes-2026-08-22.jsonl",
+    "data/global-education-buyers-taaleem-uae-2026-08-22.jsonl",
+    "data/global-education-buyers-sabis-2026-08-22.jsonl",
+    "data/global-education-research-entity-exclusions-2026-08-22.jsonl"
   ],
   "first_launch_candidate": {
     "group": "Inspired Education Group",
@@ -34,5 +42,5 @@
     "executive_sponsor": "Glenn Andrew — Chief Executive Officer",
     "uk_executive": "Ashley Harrold — CEO UK"
   },
-  "next_build_rule": "Continue wealthy groups first; weight contacts by account value; preserve all useful records; hold rather than discard records without unique verified email; validate ambiguous or stale remits before outreach."
+  "next_build_rule": "Continue wealthy groups first; weight contacts by account value; preserve all useful records; hold rather than discard records without unique verified email; validate ambiguous or stale remits before outreach; keep similarly named entities separated by domain and organization identity."
 }
