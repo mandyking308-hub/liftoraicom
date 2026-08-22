@@ -3,12 +3,12 @@
   "as_of": "2026-08-22",
   "target_groups": 120,
   "target_contacts": 2500,
-  "groups_seeded": 9,
-  "target_account_contacts_enriched": 84,
-  "verified_work_emails": 74,
-  "held_no_unique_email": 10,
+  "groups_seeded": 13,
+  "target_account_contacts_enriched": 96,
+  "verified_work_emails": 84,
+  "held_no_unique_email_or_validation": 12,
   "wrong_entity_research_preserved_separately": 2,
-  "apollo_credits_consumed": 86,
+  "apollo_credits_consumed": 98,
   "apollo_master_label": "Global Education 100 — Master Buyers",
   "liftor_import_path": "supabase/functions/ri-upsert-import/index.ts",
   "live_database_write_status": "blocked_from_current_connector_permissions; import-ready files committed in repo",
@@ -21,7 +21,11 @@
     {"group": "Globeducate", "contacts": 10, "verified_emails": 8, "held": 2},
     {"group": "Dukes Education", "contacts": 10, "verified_emails": 8, "held": 2},
     {"group": "Taaleem UAE", "contacts": 5, "verified_emails": 3, "held": 2},
-    {"group": "SABIS", "contacts": 9, "verified_emails": 7, "held": 2}
+    {"group": "SABIS", "contacts": 9, "verified_emails": 7, "held": 2},
+    {"group": "Aldar Education", "contacts": 4, "verified_emails": 4, "held": 0},
+    {"group": "Fortes Education", "contacts": 1, "verified_emails": 1, "held": 0},
+    {"group": "Innoventures Education", "contacts": 3, "verified_emails": 2, "held": 1},
+    {"group": "ESOL Education", "contacts": 4, "verified_emails": 3, "held": 1}
   ],
   "source_files": [
     "data/global-education-buyers-2026-08-22.jsonl",
@@ -31,6 +35,7 @@
     "data/global-education-buyers-dukes-2026-08-22.jsonl",
     "data/global-education-buyers-taaleem-uae-2026-08-22.jsonl",
     "data/global-education-buyers-sabis-2026-08-22.jsonl",
+    "data/global-education-buyers-gulf-batch-2-2026-08-22.jsonl",
     "data/global-education-research-entity-exclusions-2026-08-22.jsonl"
   ],
   "first_launch_candidate": {
