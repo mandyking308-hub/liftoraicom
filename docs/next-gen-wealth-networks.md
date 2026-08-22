@@ -2,13 +2,23 @@
 
 ## Purpose
 
-Liftor now maintains a founder-only research register of organisations that can provide institutional or relationship routes into next-generation wealth holders, inheritors, family offices, philanthropic families, donor communities and impact investors.
+Liftor maintains a founder-only research register of organisations that can provide institutional or relationship routes into next-generation wealth holders, inheritors, family offices, philanthropic families, donor communities and impact investors.
 
 This is an **intelligence layer, not an outreach permission list**. A high priority score means a network is strategically relevant to GHAT; it does not mean the organisation or its members permit unsolicited fundraising.
 
+## Architecture — deliberately separate from Billionaire Intelligence
+
+The network ecosystem is stored independently from the billionaire universe:
+
+1. `public.philanthropy_network_registry` — organisation/network records.
+2. `public.philanthropy_network_contacts` — public institutional routes, named public professional contacts, shared inboxes, public phones and contact/application pages, each with its own evidence source.
+3. `public.philanthropy_network_research_queue` — the enrichment backlog for missing website/contact/person/email/route evidence.
+
+There is **no automatic foreign key from these three tables into `billionaire_intelligence`**. A network or contact does not become a billionaire record. If a public member identity is later evidenced and safely matched, cross-over must happen through explicit evidence/link tables such as `philanthropy_network_members` and `billionaire_network_links`, preserving provenance and confidence.
+
 ## Live data — 22 August 2026
 
-The live `public.philanthropy_network_registry` contains **141 active network records** from the initial global mapping pass:
+The live `public.philanthropy_network_registry` contains **141 active network records**:
 
 - Tier 1: 42
 - Tier 2: 79
@@ -20,7 +30,25 @@ The live `public.philanthropy_network_registry` contains **141 active network re
 - Official-site-checked: 70
 - Explicitly marked needs-verification: 11
 
+The contact-enrichment layer currently contains **18 verified public contact records across 17 Tier-1 networks**. At this pass:
+
+- 8 networks meet the full working standard of named person + public email/shared institutional inbox + contact page;
+- 9 networks have a verified route but still have at least one missing person/email field and remain `needs_manual_review`;
+- 124 networks remain queued for enrichment.
+
+Missing personal emails are never guessed. Where an organisation only publishes a form, the form is stored. Where an inbox is shared, it is explicitly labelled as a shared inbox rather than represented as the named person's personal email.
+
 The initial research sweep used official organisation sites where available, plus a current maintained family-office network directory and the Young Donor Network's historical youth-philanthropy map. Historical directory entries are deliberately marked for refresh rather than treated as current facts.
+
+## GitHub data snapshots
+
+The repository carries portable snapshots as well as the live database:
+
+- `data/philanthropy-network-registry-2026-08-22.jsonl` — all 141 organisation records, one JSON object per line.
+- `data/philanthropy-network-contacts-2026-08-22.jsonl` — current verified public contact evidence.
+- `supabase/migrations/20260822093600_philanthropy_network_intelligence.sql` — reproducible founder-only registry/contact/research-queue schema and RLS.
+
+The live database remains the working source of truth; dated GitHub data files are auditable snapshots.
 
 ## Priority tiers
 
@@ -35,10 +63,12 @@ Broader wealth-peer networks, professional/advisory ecosystems, platforms and co
 
 ## Source states
 
-- `official_site_verified` — existence/current proposition was checked against the organisation's own site during the research pass. This does **not** verify permission to approach members.
+- `official_site_verified` — current information checked against the organisation's own site. This does **not** verify permission to approach members.
 - `reputable_directory_current` — present in a current maintained ecosystem directory; official route should still be checked before action.
 - `historical_directory_needs_refresh` — came from an older youth-philanthropy map and must be refreshed before being treated as current.
 - `needs_verification` — plausible/relevant record retained for research, but current public details need a dedicated verification pass.
+
+Contact records separately carry their own `verification_status`, `source_url`, `last_verified_at` and notes. This prevents an organisation-level verification from being misread as verification of a specific email or person.
 
 ## Access and outreach boundary
 
@@ -53,16 +83,23 @@ Before any external approach Liftor must separately verify:
 5. the relevance of the proposed GHAT work;
 6. whether outreach has been explicitly approved under Liftor's existing outreach controls.
 
-No private emails, phone numbers, addresses or inferred personal contact details were created in this mapping pass.
+Restrictions are preserved as data. Examples include NEXUS's no-solicitation boundary, Threshold's no-unsolicited-funding-request boundary and Resource Generation's member-confidentiality/privacy considerations.
+
+No private addresses or inferred private contact details are created. Only public professional/institutional routes are stored.
 
 ## UI
 
-`src/components/founder/billionaire/NetworkRegistryTab.tsx` contains the founder UI for the register: summary counts, tier/source/focus filters, GHAT route notes and source links. It is intentionally read-only and displays an outreach-safety banner. Integration into the existing Billionaire Intelligence tab strip remains a small wiring change if the app builder is unavailable.
+`src/components/founder/billionaire/NetworkRegistryTab.tsx` is contact-aware and remains read-only. It displays:
 
-## Database
+- network/tier/region/focus;
+- website and evidence state;
+- named contact and role where verified;
+- public email/shared inbox or contact form;
+- contact-coverage filters;
+- GHAT route notes and access restrictions.
 
-Live table: `public.philanthropy_network_registry`
+The component still requires its small parent-tab wiring/publish step if it is not already mounted in the founder Billionaire Intelligence view. No send action is implemented here.
 
-Key fields include network name, category, priority tier, region, audience, website/source URLs, source status, access mode, inheritor/next-gen/family-office/philanthropy/impact flags, membership-size notes, GHAT route notes, status and verification timestamps.
+## Security
 
-RLS is enabled. `authenticated` users have table privileges but the row policy restricts access to founder/admin roles using the project's existing `has_role` convention. `service_role` retains full access.
+All three network-intelligence tables have RLS enabled. `authenticated` receives table privileges, while row policies restrict access to founder/admin roles using Liftor's existing `has_role` convention. `service_role` retains full access.
