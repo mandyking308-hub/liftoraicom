@@ -14,12 +14,13 @@
     "tier_2": 79,
     "tier_3": 20
   },
+  "active_records_with_website": 138,
   "contact_evidence_rows": 143,
   "networks_with_contact_or_resolution_route": 141,
   "networks_with_named_public_person": 92,
   "networks_with_public_email": 106,
   "networks_with_public_phone": 63,
-  "networks_with_web_route": 141,
+  "networks_with_web_or_resolution_route": 141,
   "networks_with_official_site_verified_contact_evidence": 128,
   "research_queue": {
     "complete": 141,
