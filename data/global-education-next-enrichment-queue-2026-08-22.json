@@ -1,0 +1,68 @@
+{
+  "status": "SEARCHED_NOT_YET_ENRICHED",
+  "reason": "Apollo enrichment is credit-consuming; preserve candidate IDs and role structure before the next approved enrichment batch.",
+  "candidate_count": 31,
+  "groups": [
+    {
+      "group": "ACS International Schools",
+      "candidates": [
+        {"apollo_person_id":"68787cddae71b7000178a0a9","first_name":"Graeme","last_name_masked":"La***e","title":"Chief Operating Officer (COO)","apollo_has_email":false},
+        {"apollo_person_id":"683ae72c1b8136000127719b","first_name":"Robert","last_name_masked":"Ha***n","title":"Chief Executive Officer","apollo_has_email":true},
+        {"apollo_person_id":"6713da33229da30001535dc9","first_name":"Hazel","last_name_masked":"Kay","title":"Executive Director Marketing, Development and Admissions","apollo_has_email":true}
+      ]
+    },
+    {
+      "group": "AISL Harrow Schools",
+      "candidates": [
+        {"apollo_person_id":"5b275775a6da98c3296cb787","first_name":"Ahmed","last_name_masked":"Hu***n","title":"Chief Education Officer","apollo_has_email":true},
+        {"apollo_person_id":"54a3d3387468692abfc69b15","first_name":"Clare","last_name_masked":"Ch***u","title":"Chief Operating Officer","apollo_has_email":true},
+        {"apollo_person_id":"62b0295874b8b6000172375b","first_name":"Catherine","last_name_masked":"De***g","title":"Associate Director of Admissions","apollo_has_email":false},
+        {"apollo_person_id":"54a1283769702dcef9c8af00","first_name":"Cassie","last_name_masked":"Lo***d","title":"Director of Wellbeing, Lower School","apollo_has_email":false},
+        {"apollo_person_id":"60dc4a1e4c3ea30001de4323","first_name":"Bryce","last_name_masked":"Wan","title":"Group CEO","apollo_has_email":false},
+        {"apollo_person_id":"619dfb0a4d780e0001c645e2","first_name":"Elvina","last_name_masked":"Ts***n","title":"Group Director - Marketing & Communications","apollo_has_email":true},
+        {"apollo_person_id":"67418d80cd822000017cb92e","first_name":"Charles","last_name_masked":"El***n","title":"Director of Education","apollo_has_email":false},
+        {"apollo_person_id":"54a73c86746869730a1ab621","first_name":"Ruth","last_name_masked":"Wh***k","title":"Associate Director of Education","apollo_has_email":false},
+        {"apollo_person_id":"5cd9526e80f93e47067e4484","first_name":"Vanessa","last_name_masked":"Sz***n","title":"Associate Director of Education","apollo_has_email":false},
+        {"apollo_person_id":"5f603dde7c8ea200011621f3","first_name":"Stuart","last_name_masked":"Bl***e","title":"Associate Director of Education","apollo_has_email":true},
+        {"apollo_person_id":"613303783681f100014c9aa3","first_name":"Gary","last_name_masked":"Au","title":"Director of Finance","apollo_has_email":true},
+        {"apollo_person_id":"557148607369642be16b2e00","first_name":"Isabel","last_name_masked":"Xu","title":"Director of Bilingual Education","apollo_has_email":true},
+        {"apollo_person_id":"5e8b39a62236740001ab80a7","first_name":"Rowena","last_name_masked":"Wo***g","title":"Associate Director of Finance","apollo_has_email":false},
+        {"apollo_person_id":"61c03f47bec3050001c017fd","first_name":"Tessa","last_name_masked":"Ho","title":"Associate Director of Education - Early Years","apollo_has_email":false}
+      ]
+    },
+    {
+      "group": "XCL Education",
+      "candidates": [
+        {"apollo_person_id":"54a7ace5746869730ad9864b","first_name":"Gilles","last_name_masked":"Ma***e","title":"Group Chief Executive Officer","apollo_has_email":true},
+        {"apollo_person_id":"69f1e5d1bf72a60001e546a8","first_name":"David","last_name_masked":"Mc***n","title":"Group Chief Technology Officer","apollo_has_email":true},
+        {"apollo_person_id":"6a76d27e6d1bd90001b98ae8","first_name":"Anthony","last_name_masked":"Pa***n","title":"Chief Executive Officer - Malaysia","apollo_has_email":false},
+        {"apollo_person_id":"625e83805a7e8d000143f758","first_name":"Wendy","last_name_masked":"Lai","title":"Director of Marketing Strategy and Innovation","apollo_has_email":false},
+        {"apollo_person_id":"60d415c48b284e000119c222","first_name":"Li","last_name_masked":"Loo","title":"Director of Marketing & Communications","apollo_has_email":true},
+        {"apollo_person_id":"60d35291238283000112cdf9","first_name":"Tammy","last_name_masked":"Mu***y","title":"XCL CEO Singapore Schools / Head of School XWA","apollo_has_email":true},
+        {"apollo_person_id":"60ccc4a87046b00001483f6f","first_name":"Janice","last_name_masked":"Foo","title":"Director of Admission & Marketing - Malaysia","apollo_has_email":false}
+      ]
+    },
+    {
+      "group": "Beaconhouse School System",
+      "candidates": [
+        {"apollo_person_id":"6819d8fa0f87c00001e581df","first_name":"Roohi","last_name_masked":"Haq","title":"Consultant to the CEO","apollo_has_email":false},
+        {"apollo_person_id":"61690d9b3755a30001dd2411","first_name":"Fareeha","last_name_masked":"Ah***d","title":"Director of Education Development","apollo_has_email":true}
+      ]
+    },
+    {
+      "group": "YCYW Education Network",
+      "candidates": [
+        {"apollo_person_id":"629ff36c56be230001e7fdaf","first_name":"Esther","last_name_masked":"Ch***n","title":"Deputy Chief Executive Officer (K-12 Education)","apollo_has_email":true},
+        {"apollo_person_id":"57d959eca6da98723a1ac904","first_name":"Christopher","last_name_masked":"Hu***y","title":"Director for Science, Technology and Educational Futures","apollo_has_email":true}
+      ]
+    },
+    {
+      "group": "Orbital Education",
+      "candidates": [
+        {"apollo_person_id":"54a28a58746869382541dd2a","first_name":"Myles","last_name_masked":"Mc***y","title":"CTO","apollo_has_email":true},
+        {"apollo_person_id":"6700dfb25f60ba00015e640e","first_name":"Anna","last_name_masked":"La***t","title":"Group Director of Marketing & Admissions","apollo_has_email":true},
+        {"apollo_person_id":"664db0cd3bc10100017ed5ce","first_name":"Alexander","last_name_masked":"Ha***s","title":"Director of Education - Orbital school","apollo_has_email":false}
+      ]
+    }
+  ]
+}
