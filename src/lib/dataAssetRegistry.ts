@@ -11,6 +11,7 @@ export type DataAsset = {
   sourceOfTruth: string;
   primaryUse: string;
   recordDefinition: string;
+  buyerPools?: string[];
   locations: string[];
   knownStats?: Array<{ label: string; value: number | string; note?: string }>;
   lastReviewed: string;
@@ -26,11 +27,16 @@ export type DataAsset = {
  * map of where each dataset lives so research is not lost when data is split
  * across Liftor Supabase, repository files and other portfolio applications.
  *
+ * Portfolio CRM flow:
+ * Data Asset -> Buyer Pool -> Organisation -> Person -> Business Relevance ->
+ * Campaign Eligibility -> Conversation -> Proposal -> Deal -> Customer -> Revenue.
+ *
  * Rule for every future dataset:
  * 1. register it here;
  * 2. identify its source of truth and physical locations;
  * 3. record what a row means and how it is used;
- * 4. preserve non-actionable/history rows rather than silently deleting them.
+ * 4. map every reusable buyer pool it can feed;
+ * 5. preserve non-actionable/history rows rather than silently deleting them.
  */
 export const DATA_ASSETS: DataAsset[] = [
   {
@@ -46,6 +52,7 @@ export const DATA_ASSETS: DataAsset[] = [
     primaryUse: "GHAT fundraising intelligence, relationship mapping and controlled outreach readiness",
     recordDefinition:
       "Person → wealth snapshot → foundation/family office/company routes → evidence → verification → readiness",
+    buyerPools: ["hnw-family-office", "founders-investors", "philanthropy-funders"],
     locations: [
       "Supabase: billionaire_coverage",
       "Supabase: billionaire_wealth_snapshots",
@@ -54,6 +61,7 @@ export const DATA_ASSETS: DataAsset[] = [
       "Supabase: philanthropy network evidence mappings",
       "UI: /founder/billionaire-intelligence",
       "Code: src/lib/billionaireCoverage.ts",
+      "Portfolio CRM model: src/lib/portfolioCrmModel.ts",
     ],
     knownStats: [
       { label: "2025 source universe", value: 2754, note: "Expected Forbes-derived universe used by the coverage engine" },
@@ -77,12 +85,14 @@ export const DATA_ASSETS: DataAsset[] = [
     primaryUse: "Next-gen relationship intelligence, GHAT routes, community/network mapping and future partnerships",
     recordDefinition:
       "Network → focus/audience → access mode → public contact route → source evidence → verification state",
+    buyerPools: ["hnw-family-office", "philanthropy-funders", "founders-investors"],
     locations: [
       "Supabase: philanthropy_network_registry",
       "Supabase: philanthropy_network_contacts",
       "UI: /founder/billionaire-intelligence → Next-gen networks",
       "Research note: docs/next-gen-wealth-networks.md",
       "Migration: supabase/migrations/20260822093600_philanthropy_network_intelligence.sql",
+      "Portfolio CRM model: src/lib/portfolioCrmModel.ts",
     ],
     lastReviewed: "2026-08-23",
     retentionRule: "Keep historic and currently inaccessible networks; mark verification/freshness instead of deleting them.",
@@ -94,14 +104,24 @@ export const DATA_ASSETS: DataAsset[] = [
     name: "Global Education Sales Data",
     category: "commercial",
     description:
-      "Education groups, premium school operators and named decision-makers built for high-value education outreach.",
+      "Education groups, premium school operators and named decision-makers built for high-value education outreach and reusable cross-portfolio targeting.",
     status: "repo_ready",
     system: "Liftor GitHub data store",
     repository: "mandyking308-hub/liftoraicom",
     sourceOfTruth: "data/global-education-program-status-2026-08-22.json + listed JSONL source files",
-    primaryUse: "Education-sector commercial outreach and account-based sales",
+    primaryUse: "Education-sector commercial outreach, account-based sales and reusable functional targeting across Liftor businesses",
     recordDefinition:
-      "Education group/account → buyer role → named contact → current employer → verified work email → outreach hold/readiness",
+      "Education group/account → buyer role → named contact → current employer → verified work email → business relevance → outreach hold/readiness",
+    buyerPools: [
+      "education-leadership",
+      "enterprise-operations",
+      "supply-chain-procurement",
+      "finance-treasury",
+      "governance-risk",
+      "hr-people-benefits",
+      "marketing-comms",
+      "professional-learning",
+    ],
     locations: [
       "data/global-education-program-status-2026-08-22.json",
       "data/global-education-buyers-2026-08-22.jsonl",
@@ -115,6 +135,8 @@ export const DATA_ASSETS: DataAsset[] = [
       "data/global-education-buyers-premium-batch-3-2026-08-22.jsonl",
       "data/global-education-research-entity-exclusions-2026-08-22.jsonl",
       "Import route: supabase/functions/ri-upsert-import/index.ts",
+      "Portfolio CRM architecture: docs/portfolio-crm-architecture-2026-08-23.md",
+      "Pool overlays: src/data/portfolioCrmPoolOverrides.ts",
     ],
     knownStats: [
       { label: "Groups seeded", value: 22 },
@@ -141,6 +163,7 @@ export const DATA_ASSETS: DataAsset[] = [
     primaryUse: "Global Health Access Trust grant pipeline, applications, funding relationships and post-award reporting",
     recordDefinition:
       "Funder → opportunity → eligibility/deadline → project fit → application → award → reporting obligation",
+    buyerPools: ["philanthropy-funders"],
     locations: [
       "GHAT Supabase: funding_funders",
       "GHAT Supabase: funding_opportunities",
@@ -152,6 +175,7 @@ export const DATA_ASSETS: DataAsset[] = [
       "GHAT Supabase: funding_radar_events",
       "GHAT UI: src/pages/admin/AdminFundingPage.tsx",
       "GHAT data model: src/lib/funding.ts",
+      "Liftor Portfolio CRM ecosystem pool: philanthropy-funders",
     ],
     lastReviewed: "2026-08-23",
     retentionRule: "Keep closed, expired and currently ineligible opportunities as historical intelligence; update status and dates rather than deleting them.",
