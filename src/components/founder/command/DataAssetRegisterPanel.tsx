@@ -115,7 +115,7 @@ export default function DataAssetRegisterPanel() {
             </Badge>
           </div>
           <p className="text-[11px] text-muted-foreground mt-1 max-w-3xl">
-            Master map of what data the portfolio has built, where the source of truth sits, what each record means and what it is used for. Historical, stale, unmatched and currently unusable research is retained and statused rather than silently discarded.
+            Master map of what data the portfolio has built, where the source of truth sits, what each record means, which reusable buyer pools it feeds and what it is used for. Historical, stale, unmatched and currently unusable research is retained and statused rather than silently discarded.
           </p>
         </div>
         <div className="text-[10px] text-muted-foreground flex items-center gap-1.5">
@@ -194,6 +194,19 @@ export default function DataAssetRegisterPanel() {
                 <p><span className="text-muted-foreground">Used for:</span> {asset.primaryUse}</p>
               </div>
 
+              {(asset.buyerPools?.length ?? 0) > 0 && (
+                <div className="rounded border border-primary/20 bg-primary/5 p-2">
+                  <p className="text-[8px] uppercase text-muted-foreground mb-1">Reusable portfolio buyer pools</p>
+                  <div className="flex flex-wrap gap-1">
+                    {asset.buyerPools?.map((pool) => (
+                      <Badge key={pool} variant="outline" className="text-[9px] border-primary/30 text-primary">
+                        {pool.replaceAll("-", " ")}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <details className="rounded border border-border/50 px-2 py-1.5">
                 <summary className="cursor-pointer text-[10px] font-medium">Physical locations ({asset.locations.length})</summary>
                 <div className="mt-1.5 space-y-1">
@@ -225,7 +238,7 @@ export default function DataAssetRegisterPanel() {
       </div>
 
       <div className="rounded border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-[10px] text-muted-foreground">
-        <strong className="text-foreground">New-data rule:</strong> every material dataset must be added to this register with a source of truth, physical storage path, record definition, purpose, counts/completeness where available, last review date and retention rule. Data can be held, archived or marked stale; useful research should not disappear because it is not actionable today.
+        <strong className="text-foreground">New-data rule:</strong> every material dataset must be added to this register with a source of truth, physical storage path, record definition, reusable buyer-pool mapping, purpose, counts/completeness where available, last review date and retention rule. Data can be held, archived or marked stale; useful research should not disappear because it is not actionable today.
       </div>
     </div>
   );
