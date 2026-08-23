@@ -12,20 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import { loadPortfolioContacts, type PortfolioContactRow } from "@/lib/portfolioCrmQueries";
 import { toast } from "sonner";
-
-type Contact = {
-  id: string;
-  email: string;
-  name: string;
-  company: string;
-  status: string;
-  assigned_business: string;
-  conversation_active: boolean;
-  last_contacted_at: string | null;
-  last_replied_at: string | null;
-  created_at: string;
-};
 
 const STATUSES = ["NEW", "CONTACTED", "ENGAGED", "QUALIFIED", "CLIENT", "SUPPLIER", "DO_NOT_CONTACT"];
 
@@ -40,35 +28,35 @@ const CRMContacts = () => {
   const initialStatus = params.get("status") ?? "ALL";
   const [statusFilter, setStatusFilter] = useState<string>(initialStatus);
   const [search, setSearch] = useState("");
-  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [contacts, setContacts] = useState<PortfolioContactRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ email: "", name: "", company: "", role: "", source: "", assigned_business: "" });
 
   useEffect(() => {
     void load();
-  }, [statusFilter]);
+  }, []);
 
   async function load() {
     setLoading(true);
-    let q = supabase.from("contacts").select("*").order("created_at", { ascending: false }).limit(200);
-    if (statusFilter !== "ALL") q = q.eq("status", statusFilter as never);
-    const { data, error } = await q;
-    if (error) toast.error(error.message);
-    setContacts((data as Contact[]) ?? []);
-    setLoading(false);
+    try {
+      setContacts(await loadPortfolioContacts(500));
+    } catch (error) {
+      toast.error((error as Error).message);
+    } finally {
+      setLoading(false);
+    }
   }
 
   const filtered = useMemo(() => {
-    if (!search.trim()) return contacts;
-    const s = search.toLowerCase();
-    return contacts.filter(
-      (c) =>
-        c.email.toLowerCase().includes(s) ||
-        c.name.toLowerCase().includes(s) ||
-        c.company.toLowerCase().includes(s),
-    );
-  }, [contacts, search]);
+    const q = search.trim().toLowerCase();
+    return contacts.filter((c) => {
+      if (statusFilter !== "ALL" && c.status !== statusFilter) return false;
+      if (!q) return true;
+      const relationshipNames = c.business_relationships.map((r) => r.business_name).join(" ");
+      return `${c.email} ${c.name ?? ""} ${c.company ?? ""} ${relationshipNames}`.toLowerCase().includes(q);
+    });
+  }, [contacts, search, statusFilter]);
 
   async function handleCreate() {
     if (!form.email.trim()) {
@@ -88,7 +76,7 @@ const CRMContacts = () => {
       toast.error(error.message);
       return;
     }
-    toast.success("Contact saved");
+    toast.success("Contact saved to master portfolio CRM");
     setOpen(false);
     setForm({ email: "", name: "", company: "", role: "", source: "", assigned_business: "" });
     void load();
@@ -107,7 +95,9 @@ const CRMContacts = () => {
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Contacts</h1>
-            <p className="text-muted-foreground mt-1 text-sm">Master contact registry — single source of truth across all businesses.</p>
+            <p className="text-muted-foreground mt-1 text-sm">
+              One master person record across the portfolio. Business relevance is many-to-many and lives in business relationships, not in a single assigned business.
+            </p>
           </div>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
@@ -115,16 +105,16 @@ const CRMContacts = () => {
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Add or update contact</DialogTitle>
+                <DialogTitle>Add or update master contact</DialogTitle>
               </DialogHeader>
               <div className="space-y-3">
                 {[
                   { k: "email", label: "Email *" },
                   { k: "name", label: "Name" },
-                  { k: "company", label: "Company" },
+                  { k: "company", label: "Organisation / company" },
                   { k: "role", label: "Role" },
                   { k: "source", label: "Source" },
-                  { k: "assigned_business", label: "Assigned business" },
+                  { k: "assigned_business", label: "Initial business (legacy compatibility only)" },
                 ].map((f) => (
                   <div key={f.k} className="space-y-1.5">
                     <Label className="text-xs uppercase tracking-wider text-muted-foreground">{f.label}</Label>
@@ -134,6 +124,9 @@ const CRMContacts = () => {
                     />
                   </div>
                 ))}
+                <p className="text-xs text-muted-foreground">
+                  The initial business field is retained only so older workflows keep working. Add all real portfolio relevance through business relationships.
+                </p>
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
@@ -148,7 +141,7 @@ const CRMContacts = () => {
             <div className="flex flex-wrap gap-3 items-center">
               <div className="relative flex-1 min-w-[220px]">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search email, name or company" className="pl-9" />
+                <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search person, organisation or portfolio business" className="pl-9" />
               </div>
               <Select value={statusFilter} onValueChange={changeStatus}>
                 <SelectTrigger className="w-[200px]"><SelectValue /></SelectTrigger>
@@ -163,30 +156,39 @@ const CRMContacts = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Company</TableHead>
+                    <TableHead>Person</TableHead>
+                    <TableHead>Organisation</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Business</TableHead>
+                    <TableHead>Portfolio relationships</TableHead>
                     <TableHead>Conversation</TableHead>
                     <TableHead>Last reply</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {loading ? (
-                    <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-6">Loading…</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-6">Loading…</TableCell></TableRow>
                   ) : filtered.length === 0 ? (
-                    <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-6">No contacts yet.</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-6">No contacts yet.</TableCell></TableRow>
                   ) : (
                     filtered.map((c) => (
                       <TableRow key={c.id}>
-                        <TableCell className="font-medium">
-                          <Link to={`/founder/crm/contacts/${c.id}`} className="hover:text-primary">{c.email}</Link>
+                        <TableCell>
+                          <Link to={`/founder/crm/contacts/${c.id}`} className="font-medium hover:text-primary">{c.name || c.email}</Link>
+                          <div className="text-xs text-muted-foreground">{c.email}</div>
                         </TableCell>
-                        <TableCell>{c.name || "—"}</TableCell>
                         <TableCell>{c.company || "—"}</TableCell>
                         <TableCell><Badge variant={statusVariant(c.status)}>{c.status}</Badge></TableCell>
-                        <TableCell>{c.assigned_business || "—"}</TableCell>
+                        <TableCell>
+                          <div className="flex flex-wrap gap-1">
+                            {c.business_relationships.length === 0 ? (
+                              <span className="text-xs text-muted-foreground">No business relationship yet</span>
+                            ) : c.business_relationships.map((r) => (
+                              <Badge key={r.id} variant={r.do_not_contact ? "destructive" : "outline"} className="text-[10px]">
+                                {r.business_name} · {r.qualification}
+                              </Badge>
+                            ))}
+                          </div>
+                        </TableCell>
                         <TableCell>{c.conversation_active ? <Badge>Active</Badge> : <span className="text-muted-foreground text-xs">Idle</span>}</TableCell>
                         <TableCell className="text-muted-foreground text-xs">
                           {c.last_replied_at ? new Date(c.last_replied_at).toLocaleString() : "—"}
