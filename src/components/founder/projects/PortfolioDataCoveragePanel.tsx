@@ -1,7 +1,17 @@
 import { Database, FolderTree, Layers3, Rocket, ShieldCheck } from "lucide-react";
-import { PORTFOLIO_COMMERCIAL_MAP, PORTFOLIO_SOURCE_PROJECT_COUNT, REUSE_POOLS } from "@/data/portfolioCommercialMap";
+import {
+  PORTFOLIO_COMMERCIAL_MAP,
+  PORTFOLIO_SOURCE_PROJECT_COUNT,
+  REUSE_POOLS,
+  getReusePoolLabel,
+} from "@/data/portfolioCommercialMap";
 import { POOL_DATA_COVERAGE, getBusinessDataDecision } from "@/data/portfolioDataCoverage";
-import { GROUPED_SOURCE_PROJECT_COUNT, PORTFOLIO_LAUNCH_GROUPS, UNGROUPED_PORTFOLIO_BUSINESSES } from "@/data/portfolioLaunchGroups";
+import {
+  GROUPED_SOURCE_PROJECT_COUNT,
+  PORTFOLIO_LAUNCH_GROUPS,
+  UNGROUPED_PORTFOLIO_BUSINESSES,
+} from "@/data/portfolioLaunchGroups";
+import { getAllDataPoolIdsForBusiness, getCrossUseReasons } from "@/data/portfolioDataCrossUse";
 
 const coverageClass: Record<string, string> = {
   covered: "bg-emerald-500/10 text-emerald-300 border-emerald-500/30",
@@ -54,7 +64,7 @@ export default function PortfolioDataCoveragePanel() {
               <h2 className="font-semibold">Whole-portfolio data coverage</h2>
             </div>
             <p className="text-sm text-muted-foreground mt-1">
-              Nothing is allowed to disappear between product, data and launch planning. Every mapped project has an explicit primary group and data decision: reuse an existing asset, build/buy a shared dataset, review the ICP before spending, or record that no commercial sales data is required.
+              Release grouping and data reuse are separate. Every source project has one primary release group for sequencing, but a business may use several datasets across sectors. That many-to-many relationship is what lets one data purchase unlock additional businesses without duplicating the underlying account universe.
             </p>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 min-w-[360px]">
@@ -66,12 +76,12 @@ export default function PortfolioDataCoveragePanel() {
             <div className="rounded-lg border border-border/60 bg-background/60 p-3">
               <p className="text-[10px] uppercase text-muted-foreground">Grouped projects</p>
               <p className="text-xl font-bold">{GROUPED_SOURCE_PROJECT_COUNT}</p>
-              <p className="text-[10px] text-muted-foreground">in primary groups</p>
+              <p className="text-[10px] text-muted-foreground">in release groups</p>
             </div>
             <div className="rounded-lg border border-border/60 bg-background/60 p-3">
               <p className="text-[10px] uppercase text-muted-foreground">Business families</p>
               <p className="text-xl font-bold">{explicitDecisionCount}</p>
-              <p className="text-[10px] text-muted-foreground">with a data decision</p>
+              <p className="text-[10px] text-muted-foreground">with data decisions</p>
             </div>
             <div className="rounded-lg border border-border/60 bg-background/60 p-3">
               <p className="text-[10px] uppercase text-muted-foreground">Unassigned</p>
@@ -85,10 +95,10 @@ export default function PortfolioDataCoveragePanel() {
       <div className="rounded-xl border border-primary/30 bg-primary/5 p-4">
         <div className="flex items-center gap-2 mb-1">
           <FolderTree size={17} className="text-primary" />
-          <h2 className="font-semibold">Master project list — grouped for data purchase and Liftor release</h2>
+          <h2 className="font-semibold">Master project list — release group + every usable data group</h2>
         </div>
         <p className="text-xs text-muted-foreground mb-4">
-          This is the operational view: all source projects, including unfinished ones, shown under one primary data/release group. Secondary overlaps still exist, but they do not obscure the release plan.
+          All source projects are shown, including unfinished ones. The section they sit under is their primary release home; the Data groups column is intentionally many-to-many and can include datasets from other sectors.
         </p>
 
         <div className="space-y-3">
@@ -121,7 +131,7 @@ export default function PortfolioDataCoveragePanel() {
                 </div>
 
                 <div className="mt-3 rounded-lg border border-border/50 bg-background/50 p-3">
-                  <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Dataset for this group</p>
+                  <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Primary dataset plan for this release group</p>
                   <p className="text-sm mt-1">{group.datasetPlan}</p>
                   <p className="text-xs text-muted-foreground mt-2"><span className="font-medium text-foreground">Release:</span> {group.releaseNote}</p>
                 </div>
@@ -132,16 +142,41 @@ export default function PortfolioDataCoveragePanel() {
                       <tr>
                         <th className="py-2 pr-4">Source project</th>
                         <th className="py-2 pr-4">Business family</th>
+                        <th className="py-2 pr-4">All usable data groups</th>
                         <th className="py-2">Current state</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {businesses.flatMap((business) =>
-                        business.sourceProjects.map((project) => (
-                          <tr key={`${business.id}-${project}`} className="border-b border-border/40 last:border-0">
+                      {businesses.flatMap((business) => {
+                        const poolIds = getAllDataPoolIdsForBusiness(business);
+                        const crossUse = getCrossUseReasons(business.id);
+                        return business.sourceProjects.map((project) => (
+                          <tr key={`${business.id}-${project}`} className="border-b border-border/40 last:border-0 align-top">
                             <td className="py-2 pr-4 font-medium">{project}</td>
                             <td className="py-2 pr-4 text-muted-foreground">{business.business}</td>
-                            <td className="py-2 text-muted-foreground">
+                            <td className="py-2 pr-4 min-w-[300px]">
+                              {poolIds.length > 0 ? (
+                                <div className="flex flex-wrap gap-1">
+                                  {poolIds.map((poolId) => (
+                                    <span key={poolId} className="text-[10px] px-1.5 py-0.5 rounded border border-primary/20 bg-primary/5 text-primary">
+                                      {getReusePoolLabel(poolId)}
+                                    </span>
+                                  ))}
+                                </div>
+                              ) : (
+                                <span className="text-muted-foreground">No commercial data group assigned</span>
+                              )}
+                              {crossUse.length > 0 && (
+                                <div className="mt-1 space-y-1">
+                                  {crossUse.map((link) => (
+                                    <p key={`${link.businessId}-${link.poolId}`} className="text-[10px] text-amber-300">
+                                      Cross-sector reuse: {getReusePoolLabel(link.poolId)} — {link.reason}
+                                    </p>
+                                  ))}
+                                </div>
+                              )}
+                            </td>
+                            <td className="py-2 text-muted-foreground min-w-[180px]">
                               {business.status === "review"
                                 ? "Unfinished / review before data spend"
                                 : business.status === "internal"
@@ -153,8 +188,8 @@ export default function PortfolioDataCoveragePanel() {
                                       : "Commercial"}
                             </td>
                           </tr>
-                        )),
-                      )}
+                        ));
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -167,22 +202,22 @@ export default function PortfolioDataCoveragePanel() {
       <div className="rounded-xl border border-border/60 bg-card p-4">
         <div className="flex items-center gap-2 mb-3">
           <Layers3 size={16} className="text-primary" />
-          <h2 className="font-semibold">Secondary reusable buyer pools</h2>
+          <h2 className="font-semibold">Dataset view — every business each pool can reach</h2>
         </div>
         <p className="text-xs text-muted-foreground mb-3">
-          The primary groups above control data-buy and release planning. These secondary pools show where the same records may legitimately be reused across groups.
+          This is the inverse view. It shows the leverage of each data asset across the portfolio, including explicit cross-sector reuse links such as Education → Procitron.
         </p>
         <div className="grid xl:grid-cols-2 gap-3">
           {REUSE_POOLS.map((pool) => {
             const coverage = POOL_DATA_COVERAGE.find((item) => item.poolId === pool.id);
-            const businesses = PORTFOLIO_COMMERCIAL_MAP.filter((business) => business.reusePools.includes(pool.id));
+            const businesses = PORTFOLIO_COMMERCIAL_MAP.filter((business) => getAllDataPoolIdsForBusiness(business).includes(pool.id));
             if (!coverage) return null;
             return (
               <div key={pool.id} className="rounded-lg border border-border/60 p-3 space-y-2">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <h3 className="text-sm font-semibold">{pool.label}</h3>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">Touches {businesses.length} business {businesses.length === 1 ? "family" : "families"}</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">Can feed {businesses.length} business {businesses.length === 1 ? "family" : "families"}</p>
                   </div>
                   <span className={`text-[10px] px-2 py-1 rounded-full border ${coverageClass[coverage.status]}`}>
                     {coverageLabel[coverage.status]}
@@ -231,7 +266,7 @@ export default function PortfolioDataCoveragePanel() {
         <h2 className="font-semibold mb-3">Exceptions are visible, not omitted</h2>
         <div className="grid md:grid-cols-2 gap-2">
           {decisions
-            .filter(({ business }) => business.status === "review" || business.status === "internal" || business.reusePools.length === 0)
+            .filter(({ business }) => business.status === "review" || business.status === "internal" || getAllDataPoolIdsForBusiness(business).length === 0)
             .map(({ business, decision }) => (
               <div key={business.id} className="rounded-lg border border-border/60 px-3 py-2">
                 <div className="flex items-center justify-between gap-2">
