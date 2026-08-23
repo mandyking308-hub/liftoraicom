@@ -18,6 +18,7 @@ import CRMContact360Panel from "@/components/founder/crm/CRMContact360Panel";
 import PortfolioCrmSummaryPanel from "@/components/founder/crm/PortfolioCrmSummaryPanel";
 import PortfolioCrmArchitecturePanel from "@/components/founder/crm/PortfolioCrmArchitecturePanel";
 import PortfolioCrmEducationWavePanel from "@/components/founder/crm/PortfolioCrmEducationWavePanel";
+import PortfolioDataLeveragePanel from "@/components/founder/crm/PortfolioDataLeveragePanel";
 import RelationshipIntelligencePromotionPanel from "@/components/founder/crm/RelationshipIntelligencePromotionPanel";
 import PortfolioContactRelationshipsTable from "@/components/founder/crm/PortfolioContactRelationshipsTable";
 import CustomerFeedbackSurveyPanel from "@/components/founder/customer/CustomerFeedbackSurveyPanel";
@@ -104,7 +105,7 @@ const CRMDashboard = () => {
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Portfolio CRM & Sanity Control</h1>
             <p className="text-muted-foreground mt-1 text-sm">
-              One master relationship system across the portfolio: shared data assets, reusable organisations and people, separate business qualification and outreach safeguards.
+              One master relationship system across the portfolio: shared data assets, reusable accounts and people, separate business qualification and outreach safeguards.
             </p>
           </div>
           <div className="flex gap-2">
@@ -126,6 +127,7 @@ const CRMDashboard = () => {
         <PortfolioCrmSummaryPanel />
         <PortfolioCrmArchitecturePanel />
         <PortfolioCrmEducationWavePanel />
+        <PortfolioDataLeveragePanel />
         <RelationshipIntelligencePromotionPanel />
         <PortfolioContactRelationshipsTable />
 
