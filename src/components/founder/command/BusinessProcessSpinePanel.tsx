@@ -59,6 +59,7 @@ import BackupRecoveryCard from "./BackupRecoveryCard";
 import DecisionRegisterCard from "./DecisionRegisterCard";
 import PortfolioMemoryCard from "./PortfolioMemoryCard";
 import ControlFabricCard from "./ControlFabricCard";
+import DataAssetRegisterPanel from "./DataAssetRegisterPanel";
 import ScheduledJobsCard from "./ScheduledJobsCard";
 import SystemConfigCard from "./SystemConfigCard";
 import ConnectorHealthCard from "./ConnectorHealthCard";
@@ -110,6 +111,8 @@ export default function BusinessProcessSpinePanel() {
       <BusinessProcessHealthCard />
 
       <ControlFabricCard />
+
+      <DataAssetRegisterPanel />
 
       <UnifiedNotificationsCard />
 
