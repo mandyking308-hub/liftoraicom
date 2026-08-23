@@ -10,11 +10,36 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const DEFAULT_EDUCATION_SOURCE = "apollo_global_education_2026-08-22";
+const DEFAULT_EDUCATION_WAVE_1 = [
+  "The Aurelia World",
+  "Kingsbridge Global",
+  "Kindnesss",
+  "Squishy D",
+].join("\n");
+
+const EDUCATION_WAVE_1_RULES = [
+  {
+    business_name: "The Aurelia World",
+    keywords: ["ceo", "headteacher", "head teacher", "education director", "director of education", "academic director", "digital learning", "innovation", "safeguarding", "admissions", "parent experience", "marketing and admissions", "school director"],
+  },
+  {
+    business_name: "Kingsbridge Global",
+    keywords: ["ceo", "headteacher", "head teacher", "education director", "director of education", "academic director", "admissions", "international school", "school director", "school group", "education group"],
+  },
+  {
+    business_name: "Kindnesss",
+    keywords: ["headteacher", "head teacher", "pastoral", "wellbeing", "well-being", "safeguarding", "student experience", "social impact", "csr", "community", "education director"],
+  },
+  {
+    business_name: "Squishy D",
+    keywords: ["senco", "send", "special educational", "inclusion", "learning support", "student support", "wellbeing", "well-being", "pastoral", "school partnerships"],
+  },
+];
 
 export default function RelationshipIntelligencePromotionPanel() {
   const [tag, setTag] = useState("education");
   const [sourcePack, setSourcePack] = useState(DEFAULT_EDUCATION_SOURCE);
-  const [businessText, setBusinessText] = useState("");
+  const [businessText, setBusinessText] = useState(DEFAULT_EDUCATION_WAVE_1);
   const [busy, setBusy] = useState<"preview" | "commit" | null>(null);
   const [result, setResult] = useState<any>(null);
 
@@ -23,9 +48,14 @@ export default function RelationshipIntelligencePromotionPanel() {
     [businessText],
   );
 
+  const selectedRules = useMemo(
+    () => EDUCATION_WAVE_1_RULES.filter((rule) => businessNames.includes(rule.business_name)),
+    [businessNames],
+  );
+
   const run = async (dryRun: boolean) => {
     if (!businessNames.length) {
-      toast.error("Add the Education Wave 1 Liftor business names first.");
+      toast.error("Add at least one Liftor business first.");
       return;
     }
     setBusy(dryRun ? "preview" : "commit");
@@ -36,6 +66,8 @@ export default function RelationshipIntelligencePromotionPanel() {
           tag: tag.trim() || undefined,
           source_pack_contains: sourcePack.trim() || undefined,
           business_names: businessNames,
+          business_rules: selectedRules,
+          link_mode: "matched_only",
           relevance_category: "education-leadership",
           limit: 1000,
         },
@@ -43,7 +75,7 @@ export default function RelationshipIntelligencePromotionPanel() {
       if (error) throw error;
       setResult(data);
       if (dryRun) toast.success("Education CRM promotion preview generated — nothing was changed or sent.");
-      else toast.success("Approved education records promoted/matched to CRM. Nothing was queued or sent.");
+      else toast.success("Role-matched education records promoted/matched to CRM. Nothing was queued or sent.");
     } catch (error) {
       toast.error((error as Error).message || "Promotion bridge failed");
     } finally {
@@ -57,7 +89,7 @@ export default function RelationshipIntelligencePromotionPanel() {
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div>
             <CardTitle className="text-base flex items-center gap-2"><DatabaseZap className="h-4 w-4 text-primary" /> Relationship Intelligence → CRM</CardTitle>
-            <p className="text-xs text-muted-foreground mt-1">Controlled promotion for the Education dataset. Dedupe first; create many business relationships; never auto-send.</p>
+            <p className="text-xs text-muted-foreground mt-1">Education Wave 1 is preloaded. Liftor matches role/evidence to each business instead of attaching every education contact to every product.</p>
           </div>
           <Badge variant="outline" className="gap-1"><ShieldCheck className="h-3 w-3" /> No auto-send</Badge>
         </div>
@@ -78,17 +110,16 @@ export default function RelationshipIntelligencePromotionPanel() {
           <Textarea
             value={businessText}
             onChange={(e) => setBusinessText(e.target.value)}
-            placeholder="Enter the four business names, one per line or comma-separated. The same master people can be linked to all four without duplication."
             rows={4}
           />
-          <p className="text-[11px] text-muted-foreground">{businessNames.length} business{businessNames.length === 1 ? "" : "es"} selected. Preview before committing.</p>
+          <p className="text-[11px] text-muted-foreground">{businessNames.length} business{businessNames.length === 1 ? "" : "es"} selected. Unmatched people stay in Relationship Intelligence for later portfolio reuse; they are not forced into an irrelevant business relationship.</p>
         </div>
         <div className="flex gap-2 flex-wrap">
           <Button variant="outline" size="sm" disabled={busy !== null} onClick={() => run(true)}>
-            {busy === "preview" ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}Preview promotion
+            {busy === "preview" ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}Preview role matches
           </Button>
           <Button size="sm" disabled={busy !== null || !result?.dry_run} onClick={() => run(false)}>
-            {busy === "commit" ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}Promote approved records
+            {busy === "commit" ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}Promote approved matches
           </Button>
         </div>
 
