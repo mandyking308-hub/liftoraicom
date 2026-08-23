@@ -1,0 +1,164 @@
+export type DataAssetStatus = "live" | "repo_ready" | "external_live";
+
+export type DataAsset = {
+  id: string;
+  name: string;
+  category: "funding" | "wealth" | "commercial" | "relationship";
+  description: string;
+  status: DataAssetStatus;
+  system: string;
+  repository: string;
+  sourceOfTruth: string;
+  primaryUse: string;
+  recordDefinition: string;
+  locations: string[];
+  knownStats?: Array<{ label: string; value: number | string; note?: string }>;
+  lastReviewed: string;
+  retentionRule: string;
+  drillThrough?: string;
+  repositoryUrl: string;
+};
+
+/**
+ * Master inventory of strategic data assets owned/built across the portfolio.
+ *
+ * This file is deliberately explicit rather than inferred. It is the durable
+ * map of where each dataset lives so research is not lost when data is split
+ * across Liftor Supabase, repository files and other portfolio applications.
+ *
+ * Rule for every future dataset:
+ * 1. register it here;
+ * 2. identify its source of truth and physical locations;
+ * 3. record what a row means and how it is used;
+ * 4. preserve non-actionable/history rows rather than silently deleting them.
+ */
+export const DATA_ASSETS: DataAsset[] = [
+  {
+    id: "billionaire-intelligence",
+    name: "Billionaire Intelligence",
+    category: "wealth",
+    description:
+      "Billionaire universe, wealth snapshots, foundations, family-office/company routes, route verification, GHAT fit and enrichment state.",
+    status: "live",
+    system: "Liftor Supabase",
+    repository: "mandyking308-hub/liftoraicom",
+    sourceOfTruth: "billionaire_coverage + billionaire_wealth_snapshots",
+    primaryUse: "GHAT fundraising intelligence, relationship mapping and controlled outreach readiness",
+    recordDefinition:
+      "Person → wealth snapshot → foundation/family office/company routes → evidence → verification → readiness",
+    locations: [
+      "Supabase: billionaire_coverage",
+      "Supabase: billionaire_wealth_snapshots",
+      "Supabase: billionaire_enrichment_queue",
+      "Supabase: billionaire_candidate_routes",
+      "Supabase: philanthropy network evidence mappings",
+      "UI: /founder/billionaire-intelligence",
+      "Code: src/lib/billionaireCoverage.ts",
+    ],
+    knownStats: [
+      { label: "2025 source universe", value: 2754, note: "Expected Forbes-derived universe used by the coverage engine" },
+      { label: "2026 source snapshot", value: 3428, note: "Expected Forbes 2026 derivative snapshot rows" },
+    ],
+    lastReviewed: "2026-08-23",
+    retentionRule: "Preserve historical wealth, unmatched names, stale records and unverified candidate routes; do not delete useful research.",
+    drillThrough: "/founder/billionaire-intelligence",
+    repositoryUrl: "https://github.com/mandyking308-hub/liftoraicom",
+  },
+  {
+    id: "next-gen-wealth-networks",
+    name: "Rich Kids / Next-Gen Wealth Networks",
+    category: "relationship",
+    description:
+      "Inherited-wealth, next-generation, family-office, philanthropy and impact networks with public institutional contact routes.",
+    status: "live",
+    system: "Liftor Supabase",
+    repository: "mandyking308-hub/liftoraicom",
+    sourceOfTruth: "philanthropy_network_registry + philanthropy_network_contacts",
+    primaryUse: "Next-gen relationship intelligence, GHAT routes, community/network mapping and future partnerships",
+    recordDefinition:
+      "Network → focus/audience → access mode → public contact route → source evidence → verification state",
+    locations: [
+      "Supabase: philanthropy_network_registry",
+      "Supabase: philanthropy_network_contacts",
+      "UI: /founder/billionaire-intelligence → Next-gen networks",
+      "Research note: docs/next-gen-wealth-networks.md",
+      "Migration: supabase/migrations/20260822093600_philanthropy_network_intelligence.sql",
+    ],
+    lastReviewed: "2026-08-23",
+    retentionRule: "Keep historic and currently inaccessible networks; mark verification/freshness instead of deleting them.",
+    drillThrough: "/founder/billionaire-intelligence",
+    repositoryUrl: "https://github.com/mandyking308-hub/liftoraicom/blob/main/docs/next-gen-wealth-networks.md",
+  },
+  {
+    id: "global-education-sales",
+    name: "Global Education Sales Data",
+    category: "commercial",
+    description:
+      "Education groups, premium school operators and named decision-makers built for high-value education outreach.",
+    status: "repo_ready",
+    system: "Liftor GitHub data store",
+    repository: "mandyking308-hub/liftoraicom",
+    sourceOfTruth: "data/global-education-program-status-2026-08-22.json + listed JSONL source files",
+    primaryUse: "Education-sector commercial outreach and account-based sales",
+    recordDefinition:
+      "Education group/account → buyer role → named contact → current employer → verified work email → outreach hold/readiness",
+    locations: [
+      "data/global-education-program-status-2026-08-22.json",
+      "data/global-education-buyers-2026-08-22.jsonl",
+      "data/global-education-buyers-isp-2026-08-22.jsonl",
+      "data/global-education-buyers-gems-2026-08-22.jsonl",
+      "data/global-education-buyers-globeducate-2026-08-22.jsonl",
+      "data/global-education-buyers-dukes-2026-08-22.jsonl",
+      "data/global-education-buyers-taaleem-uae-2026-08-22.jsonl",
+      "data/global-education-buyers-sabis-2026-08-22.jsonl",
+      "data/global-education-buyers-gulf-batch-2-2026-08-22.jsonl",
+      "data/global-education-buyers-premium-batch-3-2026-08-22.jsonl",
+      "data/global-education-research-entity-exclusions-2026-08-22.jsonl",
+      "Import route: supabase/functions/ri-upsert-import/index.ts",
+    ],
+    knownStats: [
+      { label: "Groups seeded", value: 22 },
+      { label: "Contacts enriched", value: 146 },
+      { label: "Verified work emails", value: 109 },
+      { label: "Held / not yet verified", value: 37 },
+      { label: "Target groups", value: 120 },
+      { label: "Target contacts", value: 2500 },
+    ],
+    lastReviewed: "2026-08-23",
+    retentionRule: "Preserve missing, stale, mismatched and unverified rows in a held state; never discard research merely because it is not send-ready.",
+    repositoryUrl: "https://github.com/mandyking308-hub/liftoraicom/tree/main/data",
+  },
+  {
+    id: "ghat-grants",
+    name: "GHAT Grants & Funding Database",
+    category: "funding",
+    description:
+      "Funders, grant opportunities, applications, fundable projects, readiness, awards, obligations and funding radar history.",
+    status: "external_live",
+    system: "GHAT Supabase",
+    repository: "mandyking308-hub/globalhealthaccesstrust",
+    sourceOfTruth: "GHAT funding_* tables",
+    primaryUse: "Global Health Access Trust grant pipeline, applications, funding relationships and post-award reporting",
+    recordDefinition:
+      "Funder → opportunity → eligibility/deadline → project fit → application → award → reporting obligation",
+    locations: [
+      "GHAT Supabase: funding_funders",
+      "GHAT Supabase: funding_opportunities",
+      "GHAT Supabase: funding_projects",
+      "GHAT Supabase: funding_applications",
+      "GHAT Supabase: funding_awards",
+      "GHAT Supabase: funding_reporting_obligations",
+      "GHAT Supabase: funding_readiness_items",
+      "GHAT Supabase: funding_radar_events",
+      "GHAT UI: src/pages/admin/AdminFundingPage.tsx",
+      "GHAT data model: src/lib/funding.ts",
+    ],
+    lastReviewed: "2026-08-23",
+    retentionRule: "Keep closed, expired and currently ineligible opportunities as historical intelligence; update status and dates rather than deleting them.",
+    repositoryUrl: "https://github.com/mandyking308-hub/globalhealthaccesstrust",
+  },
+];
+
+export function getDataAsset(id: string) {
+  return DATA_ASSETS.find((asset) => asset.id === id);
+}
