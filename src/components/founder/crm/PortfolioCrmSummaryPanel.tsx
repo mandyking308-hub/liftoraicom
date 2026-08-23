@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { getPortfolioCrmSummary } from "@/lib/portfolioCrmQueries";
 
 export default function PortfolioCrmSummaryPanel() {
-  const [stats, setStats] = useState({ people: 0, crmOrganisationNames: 0, canonicalOrganisations: 0, businessRelationships: 0 });
+  const [stats, setStats] = useState({ people: 0, crmOrganisationNames: 0, clientTenantOrganisations: 0, businessRelationships: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -15,8 +15,8 @@ export default function PortfolioCrmSummaryPanel() {
 
   const rows = [
     ["Master people", stats.people, Users, "One CRM person record"],
-    ["CRM organisation names", stats.crmOrganisationNames, Building2, "Distinct company names currently carried on contacts"],
-    ["Canonical organisations", stats.canonicalOrganisations, Building2, "Records already in Liftor's organisations layer"],
+    ["CRM company names", stats.crmOrganisationNames, Building2, "Temporary organisation identity carried on contacts until CRM accounts are persisted"],
+    ["Client / tenant orgs", stats.clientTenantOrganisations, Building2, "Existing delivery organisations — deliberately kept separate from prospect accounts"],
     ["Business relationships", stats.businessRelationships, Network, "Many-to-many contact ↔ business links"],
   ] as const;
 
