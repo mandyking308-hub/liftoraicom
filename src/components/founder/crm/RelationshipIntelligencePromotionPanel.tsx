@@ -37,6 +37,7 @@ const EDUCATION_WAVE_1_RULES = [
 ];
 
 export default function RelationshipIntelligencePromotionPanel() {
+  const bridgeEnabled = import.meta.env.VITE_RI_PROMOTION_BRIDGE_ENABLED === "true";
   const [tag, setTag] = useState("education");
   const [sourcePack, setSourcePack] = useState(DEFAULT_EDUCATION_SOURCE);
   const [businessText, setBusinessText] = useState(DEFAULT_EDUCATION_WAVE_1);
@@ -54,6 +55,10 @@ export default function RelationshipIntelligencePromotionPanel() {
   );
 
   const run = async (dryRun: boolean) => {
+    if (!bridgeEnabled) {
+      toast.error("CRM promotion backend is not deployed/enabled yet.");
+      return;
+    }
     if (!businessNames.length) {
       toast.error("Add at least one Liftor business first.");
       return;
@@ -91,10 +96,18 @@ export default function RelationshipIntelligencePromotionPanel() {
             <CardTitle className="text-base flex items-center gap-2"><DatabaseZap className="h-4 w-4 text-primary" /> Relationship Intelligence → CRM</CardTitle>
             <p className="text-xs text-muted-foreground mt-1">Education Wave 1 is preloaded. Liftor matches role/evidence to each business instead of attaching every education contact to every product.</p>
           </div>
-          <Badge variant="outline" className="gap-1"><ShieldCheck className="h-3 w-3" /> No auto-send</Badge>
+          <div className="flex gap-2 flex-wrap">
+            <Badge variant="outline" className="gap-1"><ShieldCheck className="h-3 w-3" /> No auto-send</Badge>
+            <Badge variant={bridgeEnabled ? "default" : "secondary"}>{bridgeEnabled ? "Backend enabled" : "Backend deployment pending"}</Badge>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        {!bridgeEnabled && (
+          <div className="rounded-md border border-amber-500/30 bg-amber-500/5 p-3 text-xs text-muted-foreground">
+            The GitHub implementation is ready, but live Supabase deployment is intentionally not assumed. Deploy <code className="text-foreground">ri-promote-to-crm</code>, verify it, then set <code className="text-foreground">VITE_RI_PROMOTION_BRIDGE_ENABLED=true</code> to activate these controls.
+          </div>
+        )}
         <div className="grid md:grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <Label className="text-xs">Dataset tag</Label>
@@ -107,18 +120,14 @@ export default function RelationshipIntelligencePromotionPanel() {
         </div>
         <div className="space-y-1.5">
           <Label className="text-xs">Education Wave 1 Liftor businesses</Label>
-          <Textarea
-            value={businessText}
-            onChange={(e) => setBusinessText(e.target.value)}
-            rows={4}
-          />
+          <Textarea value={businessText} onChange={(e) => setBusinessText(e.target.value)} rows={4} />
           <p className="text-[11px] text-muted-foreground">{businessNames.length} business{businessNames.length === 1 ? "" : "es"} selected. Unmatched people stay in Relationship Intelligence for later portfolio reuse; they are not forced into an irrelevant business relationship.</p>
         </div>
         <div className="flex gap-2 flex-wrap">
-          <Button variant="outline" size="sm" disabled={busy !== null} onClick={() => run(true)}>
+          <Button variant="outline" size="sm" disabled={!bridgeEnabled || busy !== null} onClick={() => run(true)}>
             {busy === "preview" ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}Preview role matches
           </Button>
-          <Button size="sm" disabled={busy !== null || !result?.dry_run} onClick={() => run(false)}>
+          <Button size="sm" disabled={!bridgeEnabled || busy !== null || !result?.dry_run} onClick={() => run(false)}>
             {busy === "commit" ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}Promote approved matches
           </Button>
         </div>
