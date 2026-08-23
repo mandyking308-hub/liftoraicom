@@ -15,6 +15,11 @@ import CRMCustomerLifecyclePanel from "@/components/founder/crm/CRMCustomerLifec
 import CRMHealthIntegrityPanel from "@/components/founder/crm/CRMHealthIntegrityPanel";
 import CRMCustomerMemoryDashboard from "@/components/founder/crm/CRMCustomerMemoryDashboard";
 import CRMContact360Panel from "@/components/founder/crm/CRMContact360Panel";
+import PortfolioCrmSummaryPanel from "@/components/founder/crm/PortfolioCrmSummaryPanel";
+import PortfolioCrmArchitecturePanel from "@/components/founder/crm/PortfolioCrmArchitecturePanel";
+import PortfolioCrmEducationWavePanel from "@/components/founder/crm/PortfolioCrmEducationWavePanel";
+import RelationshipIntelligencePromotionPanel from "@/components/founder/crm/RelationshipIntelligencePromotionPanel";
+import PortfolioContactRelationshipsTable from "@/components/founder/crm/PortfolioContactRelationshipsTable";
 import CustomerFeedbackSurveyPanel from "@/components/founder/customer/CustomerFeedbackSurveyPanel";
 import MultiChannelInboxPanel from "@/components/founder/channels/MultiChannelInboxPanel";
 import CustomerJourneyControlBoard from "@/components/founder/command/CustomerJourneyControlBoard";
@@ -72,7 +77,6 @@ const CRMDashboard = () => {
     setRepliesLast7(repliesRes.count ?? 0);
     setInboxes(inboxRes.data ?? []);
 
-    // Aggregate status counts client-side
     const counts = new Map<string, number>();
     (contactsRes.data ?? []).forEach((row) => {
       const s = row.status as string;
@@ -98,9 +102,9 @@ const CRMDashboard = () => {
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">CRM & Sanity Control</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Portfolio CRM & Sanity Control</h1>
             <p className="text-muted-foreground mt-1 text-sm">
-              Master contact registry, conversation engine and outreach safeguards.
+              One master relationship system across the portfolio: shared data assets, reusable organisations and people, separate business qualification and outreach safeguards.
             </p>
           </div>
           <div className="flex gap-2">
@@ -118,6 +122,12 @@ const CRMDashboard = () => {
             </Button>
           </div>
         </div>
+
+        <PortfolioCrmSummaryPanel />
+        <PortfolioCrmArchitecturePanel />
+        <PortfolioCrmEducationWavePanel />
+        <RelationshipIntelligencePromotionPanel />
+        <PortfolioContactRelationshipsTable />
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {stats.map((s) => (
@@ -207,6 +217,7 @@ const CRMDashboard = () => {
             </ul>
           </CardContent>
         </Card>
+
         <CRMCustomerMemoryDashboard />
         <CRMInteractionLedgerPanel />
         <HumanAccountManagerPanel />
@@ -224,7 +235,7 @@ const CRMDashboard = () => {
         <SocialEngagementInboxPanel />
         <CustomerFeedbackSurveyPanel />
       </div>
-    <div className="max-w-7xl mx-auto px-4 pb-6"><StrategicProspectingAgentPanel /></div>
+      <div className="max-w-7xl mx-auto px-4 pb-6"><StrategicProspectingAgentPanel /></div>
     </FounderLayout>
   );
 };
