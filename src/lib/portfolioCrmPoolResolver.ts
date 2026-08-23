@@ -1,4 +1,5 @@
 import { PORTFOLIO_COMMERCIAL_MAP, REUSE_POOLS } from "@/data/portfolioCommercialMap";
+import { PORTFOLIO_CRM_POOL_OVERRIDES, PORTFOLIO_POOL_DIMENSIONS } from "@/data/portfolioCrmPoolOverrides";
 
 const normalise = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 
@@ -36,11 +37,18 @@ export function resolvePortfolioBusiness(businessName: string | null | undefined
 }
 
 export function resolveBusinessPools(businessName: string | null | undefined) {
-  return resolvePortfolioBusiness(businessName)?.reusePools ?? [];
+  const business = resolvePortfolioBusiness(businessName);
+  if (!business) return [];
+  const overrides = PORTFOLIO_CRM_POOL_OVERRIDES[business.business] ?? [];
+  return Array.from(new Set([...business.reusePools, ...overrides]));
 }
 
 export function poolLabel(poolId: string) {
   return REUSE_POOLS.find((pool) => pool.id === poolId)?.label ?? poolId;
+}
+
+export function poolDimension(poolId: string) {
+  return PORTFOLIO_POOL_DIMENSIONS[poolId] ?? "ecosystem";
 }
 
 export function uniquePoolsForBusinesses(businessNames: Array<string | null | undefined>) {
