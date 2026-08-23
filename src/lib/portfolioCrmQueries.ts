@@ -51,19 +51,21 @@ export async function loadPortfolioContacts(limit = 200): Promise<PortfolioConta
 }
 
 export async function getPortfolioCrmSummary() {
-  const [{ count: people }, { count: relationships }, { data: organisationRows }] = await Promise.all([
+  const [peopleRes, relationshipsRes, contactOrgNamesRes, canonicalOrgRes] = await Promise.all([
     sb.from("contacts").select("id", { count: "exact", head: true }),
     sb.from("business_contact_relationships").select("id", { count: "exact", head: true }),
     sb.from("contacts").select("company").not("company", "is", null).limit(5000),
+    sb.from("organisations").select("id", { count: "exact", head: true }),
   ]);
 
-  const organisations = new Set(
-    (organisationRows ?? []).map((r: any) => (r.company ?? "").trim().toLowerCase()).filter(Boolean),
+  const crmOrganisationNames = new Set(
+    (contactOrgNamesRes.data ?? []).map((r: any) => (r.company ?? "").trim().toLowerCase()).filter(Boolean),
   ).size;
 
   return {
-    people: people ?? 0,
-    organisations,
-    businessRelationships: relationships ?? 0,
+    people: peopleRes.count ?? 0,
+    crmOrganisationNames,
+    canonicalOrganisations: canonicalOrgRes.count ?? 0,
+    businessRelationships: relationshipsRes.count ?? 0,
   };
 }
