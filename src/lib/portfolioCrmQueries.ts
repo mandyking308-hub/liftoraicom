@@ -51,7 +51,7 @@ export async function loadPortfolioContacts(limit = 200): Promise<PortfolioConta
 }
 
 export async function getPortfolioCrmSummary() {
-  const [peopleRes, relationshipsRes, contactOrgNamesRes, canonicalOrgRes] = await Promise.all([
+  const [peopleRes, relationshipsRes, contactOrgNamesRes, tenantOrgRes] = await Promise.all([
     sb.from("contacts").select("id", { count: "exact", head: true }),
     sb.from("business_contact_relationships").select("id", { count: "exact", head: true }),
     sb.from("contacts").select("company").not("company", "is", null).limit(5000),
@@ -65,7 +65,7 @@ export async function getPortfolioCrmSummary() {
   return {
     people: peopleRes.count ?? 0,
     crmOrganisationNames,
-    canonicalOrganisations: canonicalOrgRes.count ?? 0,
+    clientTenantOrganisations: tenantOrgRes.count ?? 0,
     businessRelationships: relationshipsRes.count ?? 0,
   };
 }

@@ -18,15 +18,18 @@ export type BusinessRelevanceLevel = "high" | "medium" | "low" | "review" | "not
 
 export const PORTFOLIO_CRM_PRINCIPLES = {
   personTruth: "contacts",
+  accountTruth: "crm_accounts (planned); contacts.company remains compatibility data until migration",
+  clientOrganisationTruth: "organisations (client/tenant delivery layer only)",
   businessRelationshipTruth: "business_contact_relationships",
   researchTruth: "relationship_intelligence_contacts",
   legacySingleBusinessField: "assigned_business",
   rules: [
     "Store each person once in the master CRM contact registry.",
-    "Store each organisation once and attach people to it.",
+    "Store each commercial/prospect organisation once as a CRM account and attach people to it.",
+    "Do not use the existing client/tenant organisations table as the prospect-account database; link to it only when an account becomes a client/tenant.",
     "A person may have many business relationships without duplication.",
     "Relationship Intelligence remains the research/evidence layer.",
-    "Only approved research records are promoted into the operational CRM.",
+    "Only role/evidence-matched or founder-approved research records are promoted into the operational CRM.",
     "Global suppression overrides every business relationship.",
     "Business-specific DNC remains scoped to the relevant business relationship.",
     "Importing or promoting data never sends outreach automatically.",
@@ -36,7 +39,7 @@ export const PORTFOLIO_CRM_PRINCIPLES = {
 export const PORTFOLIO_CRM_PIPELINE = [
   "Data Asset",
   "Buyer Pool",
-  "Organisation",
+  "CRM Account",
   "Person",
   "Business Relevance",
   "Campaign Eligibility",
