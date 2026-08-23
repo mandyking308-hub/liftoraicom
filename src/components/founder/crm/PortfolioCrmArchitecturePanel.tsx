@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Database, Building2, UserRound, Network, ShieldCheck } from "lucide-react";
 import { PORTFOLIO_CRM_PIPELINE, PORTFOLIO_CRM_PRINCIPLES } from "@/lib/portfolioCrmModel";
+import { PORTFOLIO_POOL_DIMENSION_HELP } from "@/data/portfolioCrmPoolOverrides";
 
 const iconFor = (label: string) => {
   if (label === "Data Asset" || label === "Buyer Pool") return Database;
@@ -57,6 +58,18 @@ export default function PortfolioCrmArchitecturePanel() {
               Dataset imports never send. Approved people are deduplicated into the master CRM, then linked to every genuinely relevant business with independent qualification, campaign eligibility and suppression.
             </p>
           </div>
+        </div>
+
+        <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-xs">
+          <p className="font-medium mb-2">Data pools have three dimensions — and they overlap</p>
+          <div className="grid md:grid-cols-3 gap-3 text-muted-foreground">
+            <div><Badge variant="outline" className="mb-1">Sector</Badge><p>{PORTFOLIO_POOL_DIMENSION_HELP.sector}</p></div>
+            <div><Badge variant="outline" className="mb-1">Function</Badge><p>{PORTFOLIO_POOL_DIMENSION_HELP.function}</p></div>
+            <div><Badge variant="outline" className="mb-1">Ecosystem</Badge><p>{PORTFOLIO_POOL_DIMENSION_HELP.ecosystem}</p></div>
+          </div>
+          <p className="mt-3 text-foreground">
+            Example: an Education organisation can supply a CEO for an education product, a Procurement Director for Procitron, a CIO for Nexara, a CMO for Velocity and a Governance lead for Governexa — without buying the organisation again.
+          </p>
         </div>
       </CardContent>
     </Card>
