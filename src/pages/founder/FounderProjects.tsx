@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import FounderLayout from "@/components/founder/FounderLayout";
+import PortfolioDataCoveragePanel from "@/components/founder/projects/PortfolioDataCoveragePanel";
 import { ArrowRight, Clock, Database, Layers3, Search, UsersRound } from "lucide-react";
 import {
   PORTFOLIO_BUSINESS_COUNT,
@@ -37,7 +38,9 @@ const FounderProjects = () => {
       if (projRes.data) setProjects(projRes.data);
       if (profRes.data) {
         const map: Record<string, string> = {};
-        profRes.data.forEach((p) => { map[p.id] = p.company_name || p.full_name || "Unknown"; });
+        profRes.data.forEach((p) => {
+          map[p.id] = p.company_name || p.full_name || "Unknown";
+        });
         setProfiles(map);
       }
       setLoading(false);
@@ -61,8 +64,14 @@ const FounderProjects = () => {
         b.decisionMakers.join(" "),
         b.overlapWith.join(" "),
         b.sourceProjects.join(" "),
-      ].join(" ").toLowerCase();
-      return (!q || text.includes(q)) && (sector === "all" || b.sector === sector) && (pool === "all" || b.reusePools.includes(pool));
+      ]
+        .join(" ")
+        .toLowerCase();
+      return (
+        (!q || text.includes(q)) &&
+        (sector === "all" || b.sector === sector) &&
+        (pool === "all" || b.reusePools.includes(pool))
+      );
     });
   }, [search, sector, pool]);
 
@@ -75,7 +84,7 @@ const FounderProjects = () => {
         <div className="mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold">Projects & Portfolio Intelligence</h1>
           <p className="text-muted-foreground mt-1">
-            Client delivery projects plus the commercial map of the Lovable portfolio: what each business sells, who buys it and where contact data can be reused.
+            The whole portfolio in one place: every source project, what it sells, who buys it, which shared data pool can feed it, and where the next data purchase creates the most launch leverage.
           </p>
         </div>
 
@@ -83,14 +92,18 @@ const FounderProjects = () => {
           <button
             type="button"
             onClick={() => setView("portfolio")}
-            className={`px-4 py-2 text-sm border-b-2 transition-colors ${view === "portfolio" ? "border-primary text-primary" : "border-transparent text-muted-foreground"}`}
+            className={`px-4 py-2 text-sm border-b-2 transition-colors ${
+              view === "portfolio" ? "border-primary text-primary" : "border-transparent text-muted-foreground"
+            }`}
           >
             Portfolio commercial map
           </button>
           <button
             type="button"
             onClick={() => setView("client")}
-            className={`px-4 py-2 text-sm border-b-2 transition-colors ${view === "client" ? "border-primary text-primary" : "border-transparent text-muted-foreground"}`}
+            className={`px-4 py-2 text-sm border-b-2 transition-colors ${
+              view === "client" ? "border-primary text-primary" : "border-transparent text-muted-foreground"
+            }`}
           >
             Client projects
           </button>
@@ -126,13 +139,15 @@ const FounderProjects = () => {
               </div>
             </div>
 
+            <PortfolioDataCoveragePanel />
+
             <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
               <div className="flex items-start gap-3">
                 <Database size={18} className="text-primary mt-0.5" />
                 <div>
                   <h2 className="font-semibold">Reuse data before buying more data</h2>
                   <p className="text-sm text-muted-foreground mt-1">
-                    The unit of planning is the buyer pool, not the website. One verified enterprise account can be relevant to several portfolio companies; role-level contacts are then selected for the specific offer. Existing wealth, education, philanthropy and relationship-intelligence assets should be matched here before any new Apollo allocation.
+                    The unit of planning is the buyer pool, not the website. One verified organisation or decision-maker can be relevant to several portfolio businesses, while campaign history and positioning remain business-specific. Existing education, wealth, philanthropy and relationship assets are matched first; Apollo is used to fill portfolio-level gaps rather than recreate the same universe for each product.
                   </p>
                 </div>
               </div>
@@ -151,7 +166,9 @@ const FounderProjects = () => {
                       key={p.id}
                       type="button"
                       onClick={() => setPool(pool === p.id ? "all" : p.id)}
-                      className={`text-left rounded-lg border p-3 transition-colors ${pool === p.id ? "border-primary bg-primary/10" : "border-border/60 hover:border-primary/30"}`}
+                      className={`text-left rounded-lg border p-3 transition-colors ${
+                        pool === p.id ? "border-primary bg-primary/10" : "border-border/60 hover:border-primary/30"
+                      }`}
                     >
                       <div className="flex items-center justify-between gap-2">
                         <span className="text-sm font-medium">{p.label}</span>
@@ -180,7 +197,11 @@ const FounderProjects = () => {
                 className="h-10 rounded-lg border border-border bg-background px-3 text-sm"
               >
                 <option value="all">All sectors</option>
-                {sectors.map((s) => <option key={s} value={s}>{s}</option>)}
+                {sectors.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
               </select>
               <select
                 value={pool}
@@ -188,12 +209,16 @@ const FounderProjects = () => {
                 className="h-10 rounded-lg border border-border bg-background px-3 text-sm"
               >
                 <option value="all">All reusable pools</option>
-                {REUSE_POOLS.map((p) => <option key={p.id} value={p.id}>{p.label}</option>)}
+                {REUSE_POOLS.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.label}
+                  </option>
+                ))}
               </select>
             </div>
 
             <p className="text-xs text-muted-foreground">
-              Showing {filtered.length} of {PORTFOLIO_BUSINESS_COUNT} business families · Lovable workspace snapshot: 23 Aug 2026.
+              Showing {filtered.length} of {PORTFOLIO_BUSINESS_COUNT} business families · {PORTFOLIO_SOURCE_PROJECT_COUNT} source projects accounted for · Lovable workspace snapshot: 23 Aug 2026.
             </p>
 
             <div className="space-y-3">
@@ -208,7 +233,9 @@ const FounderProjects = () => {
                         </span>
                       </div>
                       <p className="text-sm text-muted-foreground mt-2">{b.offer}</p>
-                      <p className="text-xs mt-3"><span className="text-muted-foreground">Sector:</span> {b.sector}</p>
+                      <p className="text-xs mt-3">
+                        <span className="text-muted-foreground">Sector:</span> {b.sector}
+                      </p>
                       <p className="text-[11px] text-muted-foreground mt-2">Lovable source: {b.sourceProjects.join(" · ")}</p>
                     </div>
 
@@ -220,7 +247,9 @@ const FounderProjects = () => {
                       {b.decisionMakers.length > 0 && (
                         <div className="flex flex-wrap gap-1.5 mt-2">
                           {b.decisionMakers.map((role) => (
-                            <span key={role} className="text-[11px] px-2 py-1 rounded bg-secondary/70">{role}</span>
+                            <span key={role} className="text-[11px] px-2 py-1 rounded bg-secondary/70">
+                              {role}
+                            </span>
                           ))}
                         </div>
                       )}
@@ -229,25 +258,29 @@ const FounderProjects = () => {
                     <div className="xl:w-[24%] min-w-0">
                       <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Reusable data</p>
                       <div className="flex flex-wrap gap-1.5">
-                        {b.reusePools.length ? b.reusePools.map((id) => (
-                          <button
-                            type="button"
-                            key={id}
-                            onClick={() => setPool(id)}
-                            className="text-[11px] px-2 py-1 rounded border border-primary/20 bg-primary/5 text-primary hover:bg-primary/10"
-                          >
-                            {getReusePoolLabel(id)}
-                          </button>
-                        )) : <span className="text-xs text-muted-foreground">No commercial pool assigned</span>}
+                        {b.reusePools.length ? (
+                          b.reusePools.map((id) => (
+                            <button
+                              type="button"
+                              key={id}
+                              onClick={() => setPool(id)}
+                              className="text-[11px] px-2 py-1 rounded border border-primary/20 bg-primary/5 text-primary hover:bg-primary/10"
+                            >
+                              {getReusePoolLabel(id)}
+                            </button>
+                          ))
+                        ) : (
+                          <span className="text-xs text-muted-foreground">
+                            {b.status === "internal" ? "No commercial data required" : "No commercial pool assigned"}
+                          </span>
+                        )}
                       </div>
                     </div>
 
                     <div className="xl:flex-1 min-w-0">
                       <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Portfolio overlap</p>
                       <p className="text-sm">{b.overlapWith.length ? b.overlapWith.join(" · ") : "None assigned"}</p>
-                      {b.outreachConstraint && (
-                        <p className="text-xs text-amber-300 mt-2">Control: {b.outreachConstraint}</p>
-                      )}
+                      {b.outreachConstraint && <p className="text-xs text-amber-300 mt-2">Control: {b.outreachConstraint}</p>}
                       {b.note && <p className="text-xs text-muted-foreground mt-2">Review note: {b.note}</p>}
                     </div>
                   </div>
@@ -270,11 +303,17 @@ const FounderProjects = () => {
                 <div>
                   <div className="flex items-center gap-3 mb-1">
                     <h3 className="font-semibold">{p.name}</h3>
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${p.status === "active" ? "bg-primary/10 text-primary" : "bg-secondary text-muted-foreground"}`}>
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded-full ${
+                        p.status === "active" ? "bg-primary/10 text-primary" : "bg-secondary text-muted-foreground"
+                      }`}
+                    >
                       {p.status}
                     </span>
                   </div>
-                  <p className="text-sm text-muted-foreground">{profiles[p.client_id] || "Unknown Client"} · {p.project_type}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {profiles[p.client_id] || "Unknown Client"} · {p.project_type}
+                  </p>
                   <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
                     <Clock size={12} /> {p.current_stage}
                     {p.expected_timeline && <span className="ml-2">· {p.expected_timeline}</span>}
