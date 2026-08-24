@@ -74,6 +74,7 @@ const navGroups: NavGroup[] = [
       { label: "Operations", to: "/founder/operations", icon: Globe },
       { label: "Organisations", to: "/founder/organisations", icon: Building2 },
       { label: "CRM", to: "/founder/crm", icon: Users },
+      { label: "Billionaire Access", to: "/founder/crm/billionaire-access", icon: Coins },
       { label: "Conversations", to: "/founder/conversations", icon: MessagesSquare },
       { label: "Outreach", to: "/founder/outreach", icon: Send },
       { label: "Sending Health", to: "/founder/sending", icon: Radar },
