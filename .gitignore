@@ -23,8 +23,8 @@ dist-ssr
 *.sln
 *.sw?
 
-# Local env files (Lovable Cloud writes .env automatically; never commit real values)
-.env
+# Lovable needs the committed .env for browser-visible VITE_* build values.
+# Never put service-role keys or private backend secrets in .env.
 .env.*
 !.env.example
 
