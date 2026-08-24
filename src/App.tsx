@@ -827,6 +827,7 @@ import ComplianceDashboard from "./pages/founder/compliance/ComplianceDashboard"
 import ComplianceEvents from "./pages/founder/compliance/ComplianceEvents";
 import ComplianceRules from "./pages/founder/compliance/ComplianceRules";
 import CRMDashboard from "./pages/founder/CRMDashboard";
+import BillionaireAccessResearch from "./pages/founder/BillionaireAccessResearch";
 import PriorityDashboard from "./pages/founder/priority/PriorityDashboard";
 import SendingHealth from "./pages/founder/sending/SendingHealth";
 import SystemDashboard from "./pages/founder/system/SystemDashboard";
@@ -1720,6 +1721,7 @@ const App = () => (
             <Route path="/founder/compliance/events" element={<FounderRoute><ComplianceEvents /></FounderRoute>} />
             <Route path="/founder/compliance/rules" element={<FounderRoute><ComplianceRules /></FounderRoute>} />
             <Route path="/founder/crm" element={<FounderRoute><CRMDashboard /></FounderRoute>} />
+            <Route path="/founder/crm/billionaire-access" element={<FounderRoute><BillionaireAccessResearch /></FounderRoute>} />
             <Route path="/founder/crm/contacts" element={<FounderRoute><CRMContacts /></FounderRoute>} />
             <Route path="/founder/crm/contacts/:id" element={<FounderRoute><CRMContactDetail /></FounderRoute>} />
             <Route path="/founder/crm/inboxes" element={<FounderRoute><CRMInboxes /></FounderRoute>} />
