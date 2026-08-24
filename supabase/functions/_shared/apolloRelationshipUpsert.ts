@@ -42,7 +42,7 @@ export interface UpsertStats {
   errors: string[];
 }
 
-const MASKED_EMAIL = /email_not_unlocked|not_unlocked|domain\.com$/i;
+const MASKED_EMAIL = /email_not_unlocked|not_unlocked/i;
 
 export const isRealEmail = (email?: string | null) =>
   !!email && email.includes("@") && !MASKED_EMAIL.test(email);
@@ -61,6 +61,23 @@ export const personTitle = (p: ApolloPersonLike) =>
   (p.title || p.headline || p.employment_history?.find((e) => e?.current)?.title || "").trim();
 
 const normKey = (v: string) => v.toLowerCase().replace(/\s+/g, " ").trim();
+
+// Matches an existing full name against Apollo's masked form, e.g.
+// existing "Anique Seldon" vs Apollo first_name "Anique" + "Se***n".
+export function maskedNameMatches(existingName: string, first: string, masked: string): boolean {
+  if (!existingName || !first || !masked) return false;
+  const parts = normKey(existingName).split(" ");
+  if (parts.length < 2) return false;
+  if (parts[0] !== normKey(first)) return false;
+  const surname = parts[parts.length - 1];
+  const m = normKey(masked);
+  const stars = (m.match(/\*/g) ?? []).length;
+  if (stars === 0) return surname === m;
+  const head = m.slice(0, m.indexOf("*"));
+  const tail = m.slice(m.lastIndexOf("*") + 1);
+  if (surname.length !== m.length) return false;
+  return surname.startsWith(head) && surname.endsWith(tail);
+}
 
 export async function upsertApolloPeople(
   admin: any,
@@ -95,7 +112,22 @@ export async function upsertApolloPeople(
         .maybeSingle();
       existing = byId.data ?? null;
 
-      // 2) dedupe by normalised name + organisation
+      // 2a) dedupe against pre-existing verified rows using the masked surname
+      if (!existing && p.first_name && p.last_name_obfuscated && org) {
+        const byFirst = await admin
+          .from("relationship_intelligence_contacts")
+          .select("id, email, tags, apollo_person_id, email_status, organisation_name, contact_name, role_or_title")
+          .ilike("contact_name", `${p.first_name} %`)
+          .limit(50);
+        existing =
+          (byFirst.data ?? []).find(
+            (r: any) =>
+              normKey(r.organisation_name ?? "") === normKey(org) &&
+              maskedNameMatches(r.contact_name ?? "", p.first_name!, p.last_name_obfuscated!),
+          ) ?? null;
+      }
+
+      // 2b) dedupe by normalised name + organisation
       if (!existing) {
         const byName = await admin
           .from("relationship_intelligence_contacts")
