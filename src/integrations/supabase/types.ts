@@ -49348,6 +49348,7 @@ export type Database = {
           age_or_age_band: string | null
           ai_summary: string | null
           alignment_quality: string | null
+          apollo_person_id: string | null
           best_vehicle: string | null
           capital_lane: string | null
           capital_role: string | null
@@ -49363,14 +49364,18 @@ export type Database = {
           disclosure_warning: string | null
           elite_context_notes: string | null
           email: string | null
+          email_status: string | null
+          email_status_reason: string | null
           facebook_profile_url: string | null
           founder_notes: string | null
           hnw_signal_confidence: string | null
           id: string
           jurisdiction: string | null
           last_contact_at: string | null
+          last_synced_at: string | null
           meeting_summary: string | null
           money_signal: string | null
+          next_action: string | null
           next_action_at: string | null
           next_action_summary: string | null
           next_move_owner: string | null
@@ -49401,6 +49406,7 @@ export type Database = {
           age_or_age_band?: string | null
           ai_summary?: string | null
           alignment_quality?: string | null
+          apollo_person_id?: string | null
           best_vehicle?: string | null
           capital_lane?: string | null
           capital_role?: string | null
@@ -49416,14 +49422,18 @@ export type Database = {
           disclosure_warning?: string | null
           elite_context_notes?: string | null
           email?: string | null
+          email_status?: string | null
+          email_status_reason?: string | null
           facebook_profile_url?: string | null
           founder_notes?: string | null
           hnw_signal_confidence?: string | null
           id?: string
           jurisdiction?: string | null
           last_contact_at?: string | null
+          last_synced_at?: string | null
           meeting_summary?: string | null
           money_signal?: string | null
+          next_action?: string | null
           next_action_at?: string | null
           next_action_summary?: string | null
           next_move_owner?: string | null
@@ -49454,6 +49464,7 @@ export type Database = {
           age_or_age_band?: string | null
           ai_summary?: string | null
           alignment_quality?: string | null
+          apollo_person_id?: string | null
           best_vehicle?: string | null
           capital_lane?: string | null
           capital_role?: string | null
@@ -49469,14 +49480,18 @@ export type Database = {
           disclosure_warning?: string | null
           elite_context_notes?: string | null
           email?: string | null
+          email_status?: string | null
+          email_status_reason?: string | null
           facebook_profile_url?: string | null
           founder_notes?: string | null
           hnw_signal_confidence?: string | null
           id?: string
           jurisdiction?: string | null
           last_contact_at?: string | null
+          last_synced_at?: string | null
           meeting_summary?: string | null
           money_signal?: string | null
+          next_action?: string | null
           next_action_at?: string | null
           next_action_summary?: string | null
           next_move_owner?: string | null
