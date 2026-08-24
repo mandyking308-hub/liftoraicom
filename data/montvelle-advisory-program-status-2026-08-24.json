@@ -1,0 +1,47 @@
+{
+  "program": "Montvelle Professional Advisory Network",
+  "date": "2026-08-24",
+  "database_stage": "global_core_built",
+  "selection_rule": "Best-in-class global institutions and major international networks only; no small local firms in the core universe.",
+  "research_rule": "Public institutional routes only. No Apollo, no guessed emails, no individual prospecting during database build.",
+  "total_organisations": 150,
+  "advisory_verticals": 15,
+  "batches": [
+    { "batch": 1, "records": 50 },
+    { "batch": 2, "records": 50 },
+    { "batch": 3, "records": 50 }
+  ],
+  "category_counts": {
+    "private_client_law": 25,
+    "tax_accounting": 18,
+    "private_banking_wealth": 20,
+    "fiduciary_corporate_services": 12,
+    "immigration_residency": 6,
+    "global_mobility_relocation": 6,
+    "real_estate_advisory": 8,
+    "insurance_risk": 6,
+    "security_intelligence": 6,
+    "corporate_finance_ma": 12,
+    "executive_search": 8,
+    "reputation_crisis": 8,
+    "private_health": 8,
+    "art_collectibles": 4,
+    "philanthropy_family_governance": 3
+  },
+  "key_counts": {
+    "law_firms": 25,
+    "accountancy_tax_networks": 18,
+    "private_banks_wealth_managers": 20,
+    "fiduciary_family_office_corporate_services": 12,
+    "corporate_finance_ma": 12
+  },
+  "source_files": [
+    "src/data/montvelleAdvisoryNetwork.ts",
+    "src/data/montvelleAdvisoryExpansionBatch3.ts",
+    "src/data/montvelleAdvisoryNetworkAll.ts",
+    "data/montvelle-advisory-public-routes-batch-3-2026-08-24.jsonl"
+  ],
+  "ui": "Portfolio CRM -> Montvelle Professional Advisory Network",
+  "outreach_started": false,
+  "next_stage": "Continue public-route enrichment where a record currently has only the official corporate website; preserve every global-core record and never manufacture an email address."
+}
