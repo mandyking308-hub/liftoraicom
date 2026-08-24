@@ -3,11 +3,11 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Building2, Globe2, Network, Phone, Route, Search, Send, ShieldCheck } from "lucide-react";
 import {
-  MONTVELLE_SUPPLIERS,
   MONTVELLE_SUPPLIER_BUILD_RULES,
   MONTVELLE_SUPPLIER_CATEGORY_LABELS,
   type MontvelleSupplierCategory,
 } from "@/data/montvelleSupplierSeed";
+import { ALL_MONTVELLE_SUPPLIERS } from "@/data/montvelleSupplierRegistry";
 import {
   ALL_MONTVELLE_OPERATIONAL_ROUTES,
   getAllMontvelleOperationalRoutes,
@@ -20,13 +20,13 @@ export default function MontvelleSupplierNetworkPanel() {
   const [routesOnly, setRoutesOnly] = useState(false);
 
   const categories = useMemo(
-    () => Array.from(new Set(MONTVELLE_SUPPLIERS.map((supplier) => supplier.category))).sort(),
+    () => Array.from(new Set(ALL_MONTVELLE_SUPPLIERS.map((supplier) => supplier.category))).sort(),
     [],
   );
 
   const filtered = useMemo(() => {
     const normalized = query.trim().toLowerCase();
-    return MONTVELLE_SUPPLIERS.filter((supplier) => {
+    return ALL_MONTVELLE_SUPPLIERS.filter((supplier) => {
       const routes = getAllMontvelleOperationalRoutes(supplier.id);
       if (category !== "all" && supplier.category !== category) return false;
       if (multipliersOnly && !supplier.networkMultiplier) return false;
@@ -50,8 +50,8 @@ export default function MontvelleSupplierNetworkPanel() {
     });
   }, [category, multipliersOnly, query, routesOnly]);
 
-  const multiplierCount = MONTVELLE_SUPPLIERS.filter((supplier) => supplier.networkMultiplier).length;
-  const globalCount = MONTVELLE_SUPPLIERS.filter((supplier) => supplier.coverage === "Global").length;
+  const multiplierCount = ALL_MONTVELLE_SUPPLIERS.filter((supplier) => supplier.networkMultiplier).length;
+  const globalCount = ALL_MONTVELLE_SUPPLIERS.filter((supplier) => supplier.coverage === "Global").length;
   const suppliersWithRoutes = new Set(ALL_MONTVELLE_OPERATIONAL_ROUTES.map((route) => route.supplierId)).size;
 
   return (
@@ -75,8 +75,8 @@ export default function MontvelleSupplierNetworkPanel() {
       </CardHeader>
       <CardContent className="space-y-5">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <Stat icon={Building2} label="Seed suppliers" value={MONTVELLE_SUPPLIERS.length} />
-          <Stat icon={Route} label="Verified operational routes" value={ALL_MONTVELLE_OPERATIONAL_ROUTES.length} />
+          <Stat icon={Building2} label="Suppliers" value={ALL_MONTVELLE_SUPPLIERS.length} />
+          <Stat icon={Route} label="Operational routes" value={ALL_MONTVELLE_OPERATIONAL_ROUTES.length} />
           <Stat icon={Phone} label="Suppliers with routes" value={suppliersWithRoutes} />
           <Stat icon={Network} label="Network multipliers" value={multiplierCount} />
         </div>
@@ -187,7 +187,7 @@ export default function MontvelleSupplierNetworkPanel() {
 
         <div className="flex items-center justify-between gap-3 flex-wrap text-[11px] text-muted-foreground">
           <span>Current enrichment is deliberately based on supplier-published routes, not Apollo or guessed contact patterns.</span>
-          <span>{globalCount} seed suppliers are marked Global.</span>
+          <span>{globalCount} suppliers are marked Global.</span>
         </div>
       </CardContent>
     </Card>
