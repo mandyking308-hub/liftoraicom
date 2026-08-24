@@ -13,6 +13,8 @@ import { MONTVELLE_OPERATIONAL_ROUTES_BATCH_100_04_1 } from "./montvelleOperatio
 import { MONTVELLE_OPERATIONAL_ROUTES_BATCH_100_04_2 } from "./montvelleOperationalRoutesBatch100_04b";
 import { MONTVELLE_OPERATIONAL_ROUTES_BATCH_100_05_1 } from "./montvelleOperationalRoutesBatch100_05a";
 import { MONTVELLE_OPERATIONAL_ROUTES_BATCH_100_05_2 } from "./montvelleOperationalRoutesBatch100_05b";
+import { MONTVELLE_OPERATIONAL_ROUTES_BATCH_100_06_1 } from "./montvelleOperationalRoutesBatch100_06a";
+import { MONTVELLE_OPERATIONAL_ROUTES_BATCH_100_06_2 } from "./montvelleOperationalRoutesBatch100_06b";
 
 export const ALL_MONTVELLE_OPERATIONAL_ROUTES: MontvelleOperationalRoute[] = [
   ...MONTVELLE_OPERATIONAL_ROUTES,
@@ -27,6 +29,8 @@ export const ALL_MONTVELLE_OPERATIONAL_ROUTES: MontvelleOperationalRoute[] = [
   ...MONTVELLE_OPERATIONAL_ROUTES_BATCH_100_04_2,
   ...MONTVELLE_OPERATIONAL_ROUTES_BATCH_100_05_1,
   ...MONTVELLE_OPERATIONAL_ROUTES_BATCH_100_05_2,
+  ...MONTVELLE_OPERATIONAL_ROUTES_BATCH_100_06_1,
+  ...MONTVELLE_OPERATIONAL_ROUTES_BATCH_100_06_2,
 ];
 
 export function getAllMontvelleOperationalRoutes(supplierId: string) {
