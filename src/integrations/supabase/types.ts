@@ -6276,6 +6276,74 @@ export type Database = {
           },
         ]
       }
+      billionaire_2026_expansion_pool: {
+        Row: {
+          citizenship: string | null
+          country: string | null
+          created_at: string
+          expansion_status: string
+          full_name: string
+          id: string
+          industry: string | null
+          match_status: string
+          metadata: Json
+          networth_usd_m: number | null
+          outreach_allowed: boolean
+          route_status: string
+          snapshot_id: string
+          source_of_wealth: string | null
+          source_rank: number | null
+          source_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          citizenship?: string | null
+          country?: string | null
+          created_at?: string
+          expansion_status?: string
+          full_name: string
+          id?: string
+          industry?: string | null
+          match_status: string
+          metadata?: Json
+          networth_usd_m?: number | null
+          outreach_allowed?: boolean
+          route_status?: string
+          snapshot_id: string
+          source_of_wealth?: string | null
+          source_rank?: number | null
+          source_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          citizenship?: string | null
+          country?: string | null
+          created_at?: string
+          expansion_status?: string
+          full_name?: string
+          id?: string
+          industry?: string | null
+          match_status?: string
+          metadata?: Json
+          networth_usd_m?: number | null
+          outreach_allowed?: boolean
+          route_status?: string
+          snapshot_id?: string
+          source_of_wealth?: string | null
+          source_rank?: number | null
+          source_url?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billionaire_2026_expansion_pool_snapshot_id_fkey"
+            columns: ["snapshot_id"]
+            isOneToOne: true
+            referencedRelation: "billionaire_wealth_snapshots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       billionaire_access_pathways: {
         Row: {
           accessibility_score: number
@@ -6558,6 +6626,7 @@ export type Database = {
           candidate_route_count: number
           citizenship: string | null
           company_route_count: number
+          coverage_finalized_at: string | null
           created_at: string
           current_networth_as_of: string | null
           current_networth_change_pct: number | null
@@ -6567,6 +6636,8 @@ export type Database = {
           enrichment_status: string
           evidence: Json
           family_office_count: number
+          final_next_action: string | null
+          final_resolution: string | null
           foundation_count: number
           full_name: string | null
           ghat_fit_score: number
@@ -6586,8 +6657,10 @@ export type Database = {
           philanthropy_intensity_score: number
           philanthropy_network_matches: number
           primary_industry: string | null
+          primary_route: Json
           research_confidence: number
           researched_route_count: number
+          route_verification_required: boolean
           snapshot_match_status: string
           updated_at: string
           urgency_priority_score: number
@@ -6603,6 +6676,7 @@ export type Database = {
           candidate_route_count?: number
           citizenship?: string | null
           company_route_count?: number
+          coverage_finalized_at?: string | null
           created_at?: string
           current_networth_as_of?: string | null
           current_networth_change_pct?: number | null
@@ -6612,6 +6686,8 @@ export type Database = {
           enrichment_status?: string
           evidence?: Json
           family_office_count?: number
+          final_next_action?: string | null
+          final_resolution?: string | null
           foundation_count?: number
           full_name?: string | null
           ghat_fit_score?: number
@@ -6631,8 +6707,10 @@ export type Database = {
           philanthropy_intensity_score?: number
           philanthropy_network_matches?: number
           primary_industry?: string | null
+          primary_route?: Json
           research_confidence?: number
           researched_route_count?: number
+          route_verification_required?: boolean
           snapshot_match_status?: string
           updated_at?: string
           urgency_priority_score?: number
@@ -6648,6 +6726,7 @@ export type Database = {
           candidate_route_count?: number
           citizenship?: string | null
           company_route_count?: number
+          coverage_finalized_at?: string | null
           created_at?: string
           current_networth_as_of?: string | null
           current_networth_change_pct?: number | null
@@ -6657,6 +6736,8 @@ export type Database = {
           enrichment_status?: string
           evidence?: Json
           family_office_count?: number
+          final_next_action?: string | null
+          final_resolution?: string | null
           foundation_count?: number
           full_name?: string | null
           ghat_fit_score?: number
@@ -6676,8 +6757,10 @@ export type Database = {
           philanthropy_intensity_score?: number
           philanthropy_network_matches?: number
           primary_industry?: string | null
+          primary_route?: Json
           research_confidence?: number
           researched_route_count?: number
+          route_verification_required?: boolean
           snapshot_match_status?: string
           updated_at?: string
           urgency_priority_score?: number
@@ -6812,6 +6895,79 @@ export type Database = {
           },
         ]
       }
+      billionaire_institution_links: {
+        Row: {
+          billionaire_id: string
+          confidence_score: number | null
+          created_at: string
+          evidence_url: string | null
+          id: string
+          institution_id: string
+          is_primary_philanthropic_vehicle: boolean
+          is_wealth_source_ecosystem: boolean
+          last_verified_at: string | null
+          link_type: string
+          metadata: Json
+          relationship_evidence: string | null
+          relationship_strength: string | null
+          updated_at: string
+        }
+        Insert: {
+          billionaire_id: string
+          confidence_score?: number | null
+          created_at?: string
+          evidence_url?: string | null
+          id?: string
+          institution_id: string
+          is_primary_philanthropic_vehicle?: boolean
+          is_wealth_source_ecosystem?: boolean
+          last_verified_at?: string | null
+          link_type: string
+          metadata?: Json
+          relationship_evidence?: string | null
+          relationship_strength?: string | null
+          updated_at?: string
+        }
+        Update: {
+          billionaire_id?: string
+          confidence_score?: number | null
+          created_at?: string
+          evidence_url?: string | null
+          id?: string
+          institution_id?: string
+          is_primary_philanthropic_vehicle?: boolean
+          is_wealth_source_ecosystem?: boolean
+          last_verified_at?: string | null
+          link_type?: string
+          metadata?: Json
+          relationship_evidence?: string | null
+          relationship_strength?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billionaire_institution_links_billionaire_id_fkey"
+            columns: ["billionaire_id"]
+            isOneToOne: false
+            referencedRelation: "billionaire_access_summary"
+            referencedColumns: ["billionaire_id"]
+          },
+          {
+            foreignKeyName: "billionaire_institution_links_billionaire_id_fkey"
+            columns: ["billionaire_id"]
+            isOneToOne: false
+            referencedRelation: "billionaire_intelligence"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billionaire_institution_links_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "philanthropic_institutions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       billionaire_intelligence: {
         Row: {
           age: number | null
@@ -6917,6 +7073,63 @@ export type Database = {
             columns: ["network_member_id"]
             isOneToOne: false
             referencedRelation: "philanthropy_network_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      billionaire_outreach_exclusions: {
+        Row: {
+          billionaire_id: string
+          created_at: string
+          effective_date: string | null
+          exclusion_type: string
+          id: string
+          metadata: Json
+          reason: string
+          reviewed_at: string
+          source_url: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          billionaire_id: string
+          created_at?: string
+          effective_date?: string | null
+          exclusion_type: string
+          id?: string
+          metadata?: Json
+          reason: string
+          reviewed_at?: string
+          source_url?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          billionaire_id?: string
+          created_at?: string
+          effective_date?: string | null
+          exclusion_type?: string
+          id?: string
+          metadata?: Json
+          reason?: string
+          reviewed_at?: string
+          source_url?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billionaire_outreach_exclusions_billionaire_id_fkey"
+            columns: ["billionaire_id"]
+            isOneToOne: false
+            referencedRelation: "billionaire_access_summary"
+            referencedColumns: ["billionaire_id"]
+          },
+          {
+            foreignKeyName: "billionaire_outreach_exclusions_billionaire_id_fkey"
+            columns: ["billionaire_id"]
+            isOneToOne: false
+            referencedRelation: "billionaire_intelligence"
             referencedColumns: ["id"]
           },
         ]
@@ -44504,6 +44717,173 @@ export type Database = {
         }
         Relationships: []
       }
+      philanthropic_institutions: {
+        Row: {
+          access_mode: string | null
+          africa_relevance_score: number | null
+          causes: Json
+          contact_url: string | null
+          created_at: string
+          current_opportunity: string | null
+          eligibility: Json
+          funding_scale_text: string | null
+          funding_url: string | null
+          geographies: Json
+          ghat_fit_score: number | null
+          health_relevance_score: number | null
+          id: string
+          institution_type: string
+          last_verified_at: string | null
+          metadata: Json
+          name: string
+          normalized_name: string | null
+          public_email: string | null
+          relationship_route: string | null
+          restrictions: string | null
+          route_class: string | null
+          source_evidence: string | null
+          source_url: string | null
+          status: string
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          access_mode?: string | null
+          africa_relevance_score?: number | null
+          causes?: Json
+          contact_url?: string | null
+          created_at?: string
+          current_opportunity?: string | null
+          eligibility?: Json
+          funding_scale_text?: string | null
+          funding_url?: string | null
+          geographies?: Json
+          ghat_fit_score?: number | null
+          health_relevance_score?: number | null
+          id?: string
+          institution_type: string
+          last_verified_at?: string | null
+          metadata?: Json
+          name: string
+          normalized_name?: string | null
+          public_email?: string | null
+          relationship_route?: string | null
+          restrictions?: string | null
+          route_class?: string | null
+          source_evidence?: string | null
+          source_url?: string | null
+          status?: string
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          access_mode?: string | null
+          africa_relevance_score?: number | null
+          causes?: Json
+          contact_url?: string | null
+          created_at?: string
+          current_opportunity?: string | null
+          eligibility?: Json
+          funding_scale_text?: string | null
+          funding_url?: string | null
+          geographies?: Json
+          ghat_fit_score?: number | null
+          health_relevance_score?: number | null
+          id?: string
+          institution_type?: string
+          last_verified_at?: string | null
+          metadata?: Json
+          name?: string
+          normalized_name?: string | null
+          public_email?: string | null
+          relationship_route?: string | null
+          restrictions?: string | null
+          route_class?: string | null
+          source_evidence?: string | null
+          source_url?: string | null
+          status?: string
+          updated_at?: string
+          website_url?: string | null
+        }
+        Relationships: []
+      }
+      philanthropy_network_contacts: {
+        Row: {
+          contact_page_url: string | null
+          contact_type: string
+          created_at: string
+          crm_sync_allowed: boolean
+          data_domain: string
+          id: string
+          is_primary: boolean
+          last_verified_at: string | null
+          linkedin_url: string | null
+          metadata: Json
+          network_id: string
+          notes: string | null
+          person_name: string | null
+          preferred_channel: string
+          public_email: string | null
+          public_phone: string | null
+          role_title: string | null
+          source_url: string
+          updated_at: string
+          verification_status: string
+        }
+        Insert: {
+          contact_page_url?: string | null
+          contact_type?: string
+          created_at?: string
+          crm_sync_allowed?: boolean
+          data_domain?: string
+          id?: string
+          is_primary?: boolean
+          last_verified_at?: string | null
+          linkedin_url?: string | null
+          metadata?: Json
+          network_id: string
+          notes?: string | null
+          person_name?: string | null
+          preferred_channel?: string
+          public_email?: string | null
+          public_phone?: string | null
+          role_title?: string | null
+          source_url: string
+          updated_at?: string
+          verification_status?: string
+        }
+        Update: {
+          contact_page_url?: string | null
+          contact_type?: string
+          created_at?: string
+          crm_sync_allowed?: boolean
+          data_domain?: string
+          id?: string
+          is_primary?: boolean
+          last_verified_at?: string | null
+          linkedin_url?: string | null
+          metadata?: Json
+          network_id?: string
+          notes?: string | null
+          person_name?: string | null
+          preferred_channel?: string
+          public_email?: string | null
+          public_phone?: string | null
+          role_title?: string | null
+          source_url?: string
+          updated_at?: string
+          verification_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "philanthropy_network_contacts_network_id_fkey"
+            columns: ["network_id"]
+            isOneToOne: false
+            referencedRelation: "philanthropy_network_registry"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       philanthropy_network_members: {
         Row: {
           id: string
@@ -44530,6 +44910,152 @@ export type Database = {
           source_url?: string
         }
         Relationships: []
+      }
+      philanthropy_network_registry: {
+        Row: {
+          access_mode: string
+          audience: string | null
+          category: string
+          country_focus: string[]
+          created_at: string
+          crm_sync_allowed: boolean
+          data_domain: string
+          family_office_focus: boolean
+          ghat_route_notes: string | null
+          id: string
+          impact_investing_focus: boolean
+          inheritor_focus: boolean
+          intended_uses: string[]
+          last_verified_at: string | null
+          membership_size_note: string | null
+          metadata: Json
+          network_name: string
+          next_gen_focus: boolean
+          philanthropy_focus: boolean
+          priority_tier: number
+          region: string
+          source_status: string
+          source_url: string | null
+          status: string
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          access_mode?: string
+          audience?: string | null
+          category: string
+          country_focus?: string[]
+          created_at?: string
+          crm_sync_allowed?: boolean
+          data_domain?: string
+          family_office_focus?: boolean
+          ghat_route_notes?: string | null
+          id?: string
+          impact_investing_focus?: boolean
+          inheritor_focus?: boolean
+          intended_uses?: string[]
+          last_verified_at?: string | null
+          membership_size_note?: string | null
+          metadata?: Json
+          network_name: string
+          next_gen_focus?: boolean
+          philanthropy_focus?: boolean
+          priority_tier?: number
+          region?: string
+          source_status?: string
+          source_url?: string | null
+          status?: string
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          access_mode?: string
+          audience?: string | null
+          category?: string
+          country_focus?: string[]
+          created_at?: string
+          crm_sync_allowed?: boolean
+          data_domain?: string
+          family_office_focus?: boolean
+          ghat_route_notes?: string | null
+          id?: string
+          impact_investing_focus?: boolean
+          inheritor_focus?: boolean
+          intended_uses?: string[]
+          last_verified_at?: string | null
+          membership_size_note?: string | null
+          metadata?: Json
+          network_name?: string
+          next_gen_focus?: boolean
+          philanthropy_focus?: boolean
+          priority_tier?: number
+          region?: string
+          source_status?: string
+          source_url?: string | null
+          status?: string
+          updated_at?: string
+          website_url?: string | null
+        }
+        Relationships: []
+      }
+      philanthropy_network_research_queue: {
+        Row: {
+          attempts: number
+          created_at: string
+          data_domain: string
+          fields_needed: string[]
+          id: string
+          last_checked_at: string | null
+          last_result: string | null
+          metadata: Json
+          network_id: string
+          next_check_at: string | null
+          notes: string | null
+          priority: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          data_domain?: string
+          fields_needed?: string[]
+          id?: string
+          last_checked_at?: string | null
+          last_result?: string | null
+          metadata?: Json
+          network_id: string
+          next_check_at?: string | null
+          notes?: string | null
+          priority?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          data_domain?: string
+          fields_needed?: string[]
+          id?: string
+          last_checked_at?: string | null
+          last_result?: string | null
+          metadata?: Json
+          network_id?: string
+          next_check_at?: string | null
+          notes?: string | null
+          priority?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "philanthropy_network_research_queue_network_id_fkey"
+            columns: ["network_id"]
+            isOneToOne: true
+            referencedRelation: "philanthropy_network_registry"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       platform_cost_records: {
         Row: {
@@ -69016,6 +69542,177 @@ export type Database = {
         }
         Relationships: []
       }
+      billionaire_ghat_actionable: {
+        Row: {
+          africa_relevance_score: number | null
+          billionaire_id: string | null
+          candidate_route_count: number | null
+          citizenship: string | null
+          company_route_count: number | null
+          created_at: string | null
+          current_networth_as_of: string | null
+          current_networth_change_pct: number | null
+          current_networth_source: string | null
+          current_networth_usd_m: number | null
+          dropoff_candidate: boolean | null
+          enrichment_status: string | null
+          evidence: Json | null
+          family_office_count: number | null
+          foundation_count: number | null
+          full_name: string | null
+          ghat_fit_score: number | null
+          ghat_priority_score: number | null
+          giving_pledge_signal: boolean | null
+          has_family_office: boolean | null
+          has_foundation: boolean | null
+          health_relevance_score: number | null
+          historical_networth_as_of: string | null
+          historical_networth_usd_m: number | null
+          id: string | null
+          last_enriched_at: string | null
+          liquidity_capacity_score: number | null
+          next_enrichment_priority: number | null
+          outreach_blocker_reason: string | null
+          outreach_readiness: string | null
+          philanthropy_intensity_score: number | null
+          philanthropy_network_matches: number | null
+          primary_industry: string | null
+          research_confidence: number | null
+          researched_route_count: number | null
+          snapshot_match_status: string | null
+          updated_at: string | null
+          urgency_priority_score: number | null
+          verified_institutional_routes: number | null
+          verified_intermediary_routes: number | null
+          warm_relationship_evidence_count: number | null
+          wealth_data_freshness: string | null
+          wealth_trajectory: string | null
+        }
+        Insert: {
+          africa_relevance_score?: number | null
+          billionaire_id?: string | null
+          candidate_route_count?: number | null
+          citizenship?: string | null
+          company_route_count?: number | null
+          created_at?: string | null
+          current_networth_as_of?: string | null
+          current_networth_change_pct?: number | null
+          current_networth_source?: string | null
+          current_networth_usd_m?: number | null
+          dropoff_candidate?: boolean | null
+          enrichment_status?: string | null
+          evidence?: Json | null
+          family_office_count?: number | null
+          foundation_count?: number | null
+          full_name?: string | null
+          ghat_fit_score?: number | null
+          ghat_priority_score?: number | null
+          giving_pledge_signal?: boolean | null
+          has_family_office?: boolean | null
+          has_foundation?: boolean | null
+          health_relevance_score?: number | null
+          historical_networth_as_of?: string | null
+          historical_networth_usd_m?: number | null
+          id?: string | null
+          last_enriched_at?: string | null
+          liquidity_capacity_score?: number | null
+          next_enrichment_priority?: number | null
+          outreach_blocker_reason?: string | null
+          outreach_readiness?: string | null
+          philanthropy_intensity_score?: number | null
+          philanthropy_network_matches?: number | null
+          primary_industry?: string | null
+          research_confidence?: number | null
+          researched_route_count?: number | null
+          snapshot_match_status?: string | null
+          updated_at?: string | null
+          urgency_priority_score?: number | null
+          verified_institutional_routes?: number | null
+          verified_intermediary_routes?: number | null
+          warm_relationship_evidence_count?: number | null
+          wealth_data_freshness?: string | null
+          wealth_trajectory?: string | null
+        }
+        Update: {
+          africa_relevance_score?: number | null
+          billionaire_id?: string | null
+          candidate_route_count?: number | null
+          citizenship?: string | null
+          company_route_count?: number | null
+          created_at?: string | null
+          current_networth_as_of?: string | null
+          current_networth_change_pct?: number | null
+          current_networth_source?: string | null
+          current_networth_usd_m?: number | null
+          dropoff_candidate?: boolean | null
+          enrichment_status?: string | null
+          evidence?: Json | null
+          family_office_count?: number | null
+          foundation_count?: number | null
+          full_name?: string | null
+          ghat_fit_score?: number | null
+          ghat_priority_score?: number | null
+          giving_pledge_signal?: boolean | null
+          has_family_office?: boolean | null
+          has_foundation?: boolean | null
+          health_relevance_score?: number | null
+          historical_networth_as_of?: string | null
+          historical_networth_usd_m?: number | null
+          id?: string | null
+          last_enriched_at?: string | null
+          liquidity_capacity_score?: number | null
+          next_enrichment_priority?: number | null
+          outreach_blocker_reason?: string | null
+          outreach_readiness?: string | null
+          philanthropy_intensity_score?: number | null
+          philanthropy_network_matches?: number | null
+          primary_industry?: string | null
+          research_confidence?: number | null
+          researched_route_count?: number | null
+          snapshot_match_status?: string | null
+          updated_at?: string | null
+          urgency_priority_score?: number | null
+          verified_institutional_routes?: number | null
+          verified_intermediary_routes?: number | null
+          warm_relationship_evidence_count?: number | null
+          wealth_data_freshness?: string | null
+          wealth_trajectory?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billionaire_coverage_billionaire_id_fkey"
+            columns: ["billionaire_id"]
+            isOneToOne: true
+            referencedRelation: "billionaire_access_summary"
+            referencedColumns: ["billionaire_id"]
+          },
+          {
+            foreignKeyName: "billionaire_coverage_billionaire_id_fkey"
+            columns: ["billionaire_id"]
+            isOneToOne: true
+            referencedRelation: "billionaire_intelligence"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      billionaire_operational_coverage: {
+        Row: {
+          coverage_finalized_at: string | null
+          final_next_action: string | null
+          final_resolution: string | null
+          full_name: string | null
+          ghat_priority_score: number | null
+          networth_as_of: string | null
+          networth_usd_m: number | null
+          outreach_allowed: boolean | null
+          primary_route: Json | null
+          record_id: string | null
+          route_verification_required: boolean | null
+          universe: string | null
+          wealth_trajectory: string | null
+        }
+        Relationships: []
+      }
       blocked_sends_24h: {
         Row: {
           block_reason: string | null
@@ -70149,6 +70846,7 @@ export type Database = {
         Returns: Json
       }
       process_retry_queue: { Args: never; Returns: Json }
+      propagate_billionaire_institution_access: { Args: never; Returns: Json }
       proposals_needing_followup: {
         Args: never
         Returns: {
