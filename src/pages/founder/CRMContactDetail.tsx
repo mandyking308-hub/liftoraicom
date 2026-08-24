@@ -18,20 +18,50 @@ import { createDecisionFromCrmContact } from "@/lib/lifecycleHandoffs";
 
 type Contact = {
   id: string;
-  email: string;
-  name: string;
-  company: string;
-  role: string;
+  email: string | null;
+  name: string | null;
+  company: string | null;
+  role: string | null;
   status: string;
-  source: string;
-  assigned_business: string;
+  source: string | null;
+  assigned_business: string | null;
   assigned_inbox_id: string | null;
   conversation_active: boolean;
   last_contacted_at: string | null;
   last_replied_at: string | null;
+  first_name?: string | null;
+  last_name?: string | null;
+  phone?: string | null;
+  linkedin_url?: string | null;
+  apollo_person_id?: string | null;
+  apollo_organization_id?: string | null;
+  email_verified_status?: string | null;
+  sendable_status?: string | null;
+  apollo_enrichment_status?: string | null;
+  tags?: string[] | null;
+  notes?: string | null;
+  data_source?: string | null;
+  source_platform?: string | null;
+  source_record_id?: string | null;
+  compliance_status?: string | null;
+  country?: string | null;
+  seniority?: string | null;
 };
 
 const STATUSES = ["NEW", "CONTACTED", "ENGAGED", "QUALIFIED", "CLIENT", "SUPPLIER", "DO_NOT_CONTACT"];
+
+function emailReadiness(c: Contact): { label: string; detail: string; tone: "ok" | "warn" | "muted" } {
+  const v = (c.email_verified_status ?? "").toLowerCase();
+  if (v === "reveal_required") return { label: "Reveal required", detail: "Apollo person known, work email not revealed. No sending possible.", tone: "warn" };
+  if (!c.email) return { label: "No email on file", detail: "No usable email address stored for this contact.", tone: "muted" };
+  if (v === "" || v === "verified" || v === "exact" || v === "valid") return { label: "Exact / verified email", detail: c.email, tone: "ok" };
+  return { label: v.replace(/_/g, " "), detail: c.email, tone: "warn" };
+}
+
+const Info = ({ label, value }: { label: string; value?: string | null }) => (
+  <p><span className="text-muted-foreground/70">{label}:</span> {value || "—"}</p>
+);
+
 
 const CRMContactDetail = () => {
   const { id } = useParams<{ id: string }>();
