@@ -5,7 +5,7 @@
 // It never calls people/match, people/bulk_match or phone reveal, so it
 // consumes ZERO Apollo lead/enrichment credits.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { upsertApolloPeople } from "../_shared/apolloRelationshipUpsert.ts";
+import { loadRelationshipCache, upsertApolloPeople } from "../_shared/apolloRelationshipUpsert.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -125,7 +125,7 @@ Deno.serve(async (req) => {
   const orgs = body.orgs?.length ? body.orgs : DEFAULT_ORGS;
   const titles = body.titles?.length ? body.titles : DEFAULT_TITLES;
   const perPage = Math.min(Math.max(body.per_page ?? 100, 1), 100);
-  const pages = Math.min(Math.max(body.pages ?? 1, 1), 5);
+  const pages = Math.min(Math.max(body.pages ?? 1, 1), 10);
   const startPage = Math.max(body.start_page ?? 1, 1);
 
   const { data: conn } = await admin
@@ -162,6 +162,7 @@ Deno.serve(async (req) => {
     return count ?? 0;
   };
 
+  const cache = await loadRelationshipCache(admin, "school_education_contact");
   let current = await countEducation();
   const target = body.target_total ?? 2500;
 
@@ -223,6 +224,7 @@ Deno.serve(async (req) => {
         recovered_on: RECOVERED_ON,
         outreach_status: "do_not_contact_yet",
         role_tagger: roleTagger,
+        cache,
       });
 
       totals.inserted += stats.inserted;
