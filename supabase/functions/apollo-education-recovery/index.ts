@@ -205,6 +205,7 @@ Deno.serve(async (req) => {
           page,
           returned: people.length,
           pagination: data?.pagination ?? null,
+          raw_first: people[0] ?? null,
           sample: people.slice(0, 3).map((p) => ({
             id: p.id, name: p.name, title: p.title, org: p.organization?.name,
             email: p.email, email_status: p.email_status, has_email: p.has_email,
