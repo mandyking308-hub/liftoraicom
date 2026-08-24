@@ -7,6 +7,8 @@ import { MONTVELLE_SUPPLIERS_BATCH_100_03_1 } from "./montvelleSuppliersBatch100
 import { MONTVELLE_SUPPLIERS_BATCH_100_03_2 } from "./montvelleSuppliersBatch100_03b";
 import { MONTVELLE_SUPPLIERS_BATCH_100_04_1 } from "./montvelleSuppliersBatch100_04a";
 import { MONTVELLE_SUPPLIERS_BATCH_100_04_2 } from "./montvelleSuppliersBatch100_04b";
+import { MONTVELLE_SUPPLIERS_BATCH_100_05_1 } from "./montvelleSuppliersBatch100_05a";
+import { MONTVELLE_SUPPLIERS_BATCH_100_05_2 } from "./montvelleSuppliersBatch100_05b";
 
 export const ALL_MONTVELLE_SUPPLIERS: MontvelleSupplier[] = [
   ...MONTVELLE_SUPPLIERS,
@@ -18,6 +20,8 @@ export const ALL_MONTVELLE_SUPPLIERS: MontvelleSupplier[] = [
   ...MONTVELLE_SUPPLIERS_BATCH_100_03_2,
   ...MONTVELLE_SUPPLIERS_BATCH_100_04_1,
   ...MONTVELLE_SUPPLIERS_BATCH_100_04_2,
+  ...MONTVELLE_SUPPLIERS_BATCH_100_05_1,
+  ...MONTVELLE_SUPPLIERS_BATCH_100_05_2,
 ];
 
 export function getMontvelleSupplier(supplierId: string) {
