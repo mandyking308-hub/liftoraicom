@@ -64,17 +64,22 @@ Useful data is retained. Records may be held, archived, marked stale, expired, u
 ### 3. Global Education Sales Data
 
 - **Category:** Commercial intelligence
-- **System:** Liftor GitHub `data/` store; import-ready for Liftor
+- **System:** Liftor production database (recovered 24 August 2026)
 - **Repository:** `mandyking308-hub/liftoraicom`
-- **Source of truth:** `data/global-education-program-status-2026-08-22.json` plus its listed JSONL files
-- **Current known state:** 22 groups seeded; 146 contacts enriched; 109 verified work emails; 37 held; target 120 groups / 2,500 contacts
+- **Source of truth:** `public.relationship_intelligence_contacts`, tag `education_customer_universe` (read live)
+- **Current live state (verified 24 Aug 2026):** 2,519 contacts; 266 distinct organisations; 109 verified work emails; 1,424 email reveal required; 986 no email currently on file (109 + 1,424 + 986 = 2,519)
+- **Original targets:** 2,500 contacts (exceeded); 120 groups (historical target, not a current actual)
+- **Provenance (current status file):** `data/global-education-program-status-2026-08-24.json`
+- **Historical checkpoint (unchanged):** `data/global-education-program-status-2026-08-22.json` plus its listed JSONL files — 22 groups seeded, 146 contacts, 109 verified emails, 37 held. These are the original saved checkpoint only and must not be shown as current holdings.
+- **Recovery note:** `docs/apollo-education-universe-recovery-2026-08-24.md`
 - **Import route:** `supabase/functions/ri-upsert-import/index.ts`
 - **Portfolio CRM architecture:** `docs/portfolio-crm-architecture-2026-08-23.md`
 - **Pool overlays:** `src/data/portfolioCrmPoolOverrides.ts`
-- **Record model:** education group/account → buyer role → named contact → current employer → verified work email → business relevance → hold/readiness state
+- **Record model:** education group/account → buyer role → named contact → current employer → email state (verified / reveal required / none on file) → business relevance → hold/readiness state
 - **Reusable pools:** `education-leadership`, `enterprise-operations`, `supply-chain-procurement`, `finance-treasury`, `governance-risk`, `hr-people-benefits`, `marketing-comms`, `professional-learning`
 - **Use:** high-value education account-based sales and reusable cross-portfolio targeting. The same education organisation can supply different functional buyers to different Liftor businesses instead of being bought again for each project.
-- **Retention:** preserve missing, stale, mismatched and unverified records in a held state rather than discarding them.
+- **Retention:** preserve missing, stale, mismatched and unverified records in a held state rather than discarding them. Reveal-required records are not verified emails. Historical snapshot counts must never overwrite live counts.
+
 
 ### 4. GHAT Grants & Funding Database
 
