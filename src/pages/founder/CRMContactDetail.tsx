@@ -152,10 +152,16 @@ const CRMContactDetail = () => {
 
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">{contact.name || contact.email}</h1>
-            <p className="text-sm text-muted-foreground mt-1">{contact.email} · {contact.company || "—"}</p>
+            <h1 className="text-2xl font-bold tracking-tight">
+              {contact.name || [contact.first_name, contact.last_name].filter(Boolean).join(" ") || contact.email || "Unnamed contact"}
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">{contact.email || "No email on file"} · {contact.company || "—"}</p>
           </div>
           <div className="flex items-center gap-2">
+            <Button size="sm" variant="outline" onClick={() => navigate("/founder/outreach")} title="Campaign execution lives in Outreach, not on the master contact record">
+              <Send className="h-4 w-4 mr-1" /> Open Outreach
+            </Button>
+
             <Button
               size="sm"
               onClick={generateProposal}
