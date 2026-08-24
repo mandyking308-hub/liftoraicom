@@ -156,9 +156,28 @@ const CRMContacts = () => {
           </Dialog>
         </div>
 
+        {educationMode && (
+          <Card className="tech-card border-primary/40">
+            <CardContent className="p-4 flex items-center justify-between gap-4 flex-wrap">
+              <div>
+                <p className="text-sm font-semibold">Global Education Customer Universe</p>
+                <p className="text-xs text-muted-foreground">
+                  Master CRM records tagged <code>{EDUCATION_TAG}</code>. Read-only view — nothing here is sendable until a business relationship and campaign approve it.
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-[10px] uppercase text-muted-foreground">Education contacts</p>
+                <p className="text-xl font-bold text-primary">{loading ? "…" : datasetScoped.length}</p>
+                <p className="text-[10px] text-muted-foreground">{filtered.length} shown with current filters</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <Card className="tech-card">
           <CardContent className="p-4 space-y-4">
             <div className="flex flex-wrap gap-3 items-center">
+
               <div className="relative flex-1 min-w-[220px]">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search person, organisation or portfolio business" className="pl-9" />
