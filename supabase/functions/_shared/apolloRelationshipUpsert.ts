@@ -79,10 +79,38 @@ export function maskedNameMatches(existingName: string, first: string, masked: s
   return surname.startsWith(head) && surname.endsWith(tail);
 }
 
+export interface ExistingRow {
+  id: string;
+  contact_name?: string | null;
+  organisation_name?: string | null;
+  role_or_title?: string | null;
+  email?: string | null;
+  email_status?: string | null;
+  apollo_person_id?: string | null;
+  tags?: string[] | null;
+}
+
+// Loads the existing universe once so a batch does not issue 3 lookups per person.
+export async function loadRelationshipCache(admin: any, relationship_type: string): Promise<ExistingRow[]> {
+  const rows: ExistingRow[] = [];
+  const pageSize = 1000;
+  for (let from = 0; from < 20000; from += pageSize) {
+    const { data, error } = await admin
+      .from("relationship_intelligence_contacts")
+      .select("id, contact_name, organisation_name, role_or_title, email, email_status, apollo_person_id, tags")
+      .eq("relationship_type", relationship_type)
+      .range(from, from + pageSize - 1);
+    if (error) throw new Error(error.message);
+    rows.push(...(data ?? []));
+    if (!data || data.length < pageSize) break;
+  }
+  return rows;
+}
+
 export async function upsertApolloPeople(
   admin: any,
   people: ApolloPersonLike[],
-  opts: UpsertOptions,
+  opts: UpsertOptions & { cache?: ExistingRow[] },
 ): Promise<UpsertStats> {
   const stats: UpsertStats = {
     inserted: 0,
@@ -92,6 +120,15 @@ export async function upsertApolloPeople(
     verified_email_preserved: 0,
     errors: [],
   };
+
+  const cache = opts.cache ?? (await loadRelationshipCache(admin, opts.relationship_type));
+  const byApolloId = new Map<string, ExistingRow>();
+  const byNameOrg = new Map<string, ExistingRow>();
+  for (const r of cache) {
+    if (r.apollo_person_id) byApolloId.set(r.apollo_person_id, r);
+    byNameOrg.set(`${normKey(r.contact_name ?? "")}|${normKey(r.organisation_name ?? "")}`, r);
+  }
+  const pendingInserts: Record<string, unknown>[] = [];
 
   for (const p of people) {
     try {
@@ -104,43 +141,21 @@ export async function upsertApolloPeople(
       }
 
       // 1) dedupe by Apollo person id
-      let existing: any = null;
-      const byId = await admin
-        .from("relationship_intelligence_contacts")
-        .select("id, email, tags, apollo_person_id, email_status, organisation_name, role_or_title")
-        .eq("apollo_person_id", p.id)
-        .maybeSingle();
-      existing = byId.data ?? null;
+      let existing: ExistingRow | null = byApolloId.get(p.id) ?? null;
 
-      // 2a) dedupe against pre-existing verified rows using the masked surname
+      // 2a) dedupe by normalised name + organisation
+      if (!existing) existing = byNameOrg.get(`${normKey(name)}|${normKey(org)}`) ?? null;
+
+      // 2b) dedupe against pre-existing verified rows using the masked surname
       if (!existing && p.first_name && p.last_name_obfuscated && org) {
-        const byFirst = await admin
-          .from("relationship_intelligence_contacts")
-          .select("id, email, tags, apollo_person_id, email_status, organisation_name, contact_name, role_or_title")
-          .ilike("contact_name", `${p.first_name} %`)
-          .limit(50);
         existing =
-          (byFirst.data ?? []).find(
-            (r: any) =>
+          cache.find(
+            (r) =>
               normKey(r.organisation_name ?? "") === normKey(org) &&
               maskedNameMatches(r.contact_name ?? "", p.first_name!, p.last_name_obfuscated!),
           ) ?? null;
       }
 
-      // 2b) dedupe by normalised name + organisation
-      if (!existing) {
-        const byName = await admin
-          .from("relationship_intelligence_contacts")
-          .select("id, email, tags, apollo_person_id, email_status, organisation_name, contact_name, role_or_title")
-          .ilike("contact_name", name)
-          .limit(20);
-        existing =
-          (byName.data ?? []).find(
-            (r: any) =>
-              normKey(r.contact_name ?? "") === normKey(name) &&
-              normKey(r.organisation_name ?? "") === normKey(org),
-          ) ?? null;
-      }
 
       const hasEmail = p.has_email === true || (typeof p.email_status === "string" && p.email_status.length > 0 && p.email_status !== "no_email");
       const realEmail = isRealEmail(p.email) ? String(p.email) : null;
