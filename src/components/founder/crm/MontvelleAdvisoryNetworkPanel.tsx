@@ -6,12 +6,12 @@ import {
   MONTVELLE_ADVISORY_CATEGORY_LABELS,
   MONTVELLE_ADVISORY_NETWORK,
   type MontvelleAdvisoryCategory,
-} from "@/data/montvelleAdvisoryNetwork";
+} from "@/data/montvelleAdvisoryNetworkAll";
 
 export default function MontvelleAdvisoryNetworkPanel() {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<MontvelleAdvisoryCategory | "all">("all");
-  const [emailReadyOnly, setEmailReadyOnly] = useState(false);
+  const [publishedEmailOnly, setPublishedEmailOnly] = useState(false);
   const [leadersOnly, setLeadersOnly] = useState(false);
 
   const categories = useMemo(
@@ -23,7 +23,7 @@ export default function MontvelleAdvisoryNetworkPanel() {
     const normalized = query.trim().toLowerCase();
     return MONTVELLE_ADVISORY_NETWORK.filter((firm) => {
       if (category !== "all" && firm.category !== category) return false;
-      if (emailReadyOnly && !firm.publicEmail) return false;
+      if (publishedEmailOnly && !firm.publicEmail) return false;
       if (leadersOnly && firm.tier !== "global_leader") return false;
       if (!normalized) return true;
       return [
@@ -39,9 +39,9 @@ export default function MontvelleAdvisoryNetworkPanel() {
         .toLowerCase()
         .includes(normalized);
     });
-  }, [category, emailReadyOnly, leadersOnly, query]);
+  }, [category, publishedEmailOnly, leadersOnly, query]);
 
-  const emailReadyCount = MONTVELLE_ADVISORY_NETWORK.filter((firm) => Boolean(firm.publicEmail)).length;
+  const publishedEmailCount = MONTVELLE_ADVISORY_NETWORK.filter((firm) => Boolean(firm.publicEmail)).length;
   const routedCount = MONTVELLE_ADVISORY_NETWORK.filter(
     (firm) => firm.routeStatus !== "official_site_only",
   ).length;
@@ -55,13 +55,13 @@ export default function MontvelleAdvisoryNetworkPanel() {
               <Network className="h-4 w-4 text-primary" /> Montvelle Professional Advisory Network
             </CardTitle>
             <p className="text-xs text-muted-foreground mt-1 max-w-3xl">
-              Global institutional firms for high-trust private-client routing. Public business routes are stored separately from relationship status so inclusion never implies partnership.
+              Global institutional advisory database for high-trust client routing. Build the complete public-route asset first; outreach remains a separate later stage.
             </p>
           </div>
           <div className="flex gap-2 flex-wrap">
             <Badge variant="outline">Global institutions only</Badge>
             <Badge variant="outline">Official/public routes only</Badge>
-            <Badge>Private-client advisory</Badge>
+            <Badge>Database build only</Badge>
           </div>
         </div>
       </CardHeader>
@@ -70,14 +70,14 @@ export default function MontvelleAdvisoryNetworkPanel() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <Stat icon={Building2} label="Organisations" value={MONTVELLE_ADVISORY_NETWORK.length} />
           <Stat icon={Globe2} label="Advisory verticals" value={categories.length} />
-          <Stat icon={Send} label="Published email routes" value={emailReadyCount} />
+          <Stat icon={Send} label="Published email routes" value={publishedEmailCount} />
           <Stat icon={ShieldCheck} label="Specific public routes" value={routedCount} />
         </div>
 
         <div className="rounded-md border border-primary/30 bg-primary/5 p-3 text-xs">
-          <div className="font-medium">Montvelle advisory routing rule</div>
+          <div className="font-medium">Montvelle database rule</div>
           <div className="text-muted-foreground mt-1">
-            Start with the client outcome, then route to the strongest relevant institutional firm. A published inbox or enquiry form is a contact route only; no firm is described as a Montvelle partner, adviser or preferred provider until a real relationship has been established and recorded.
+            Capture the strongest global institutional firms first, together with their official website, public enquiry route and any genuinely published general business inbox. No Apollo, no guessed email patterns and no outreach during the database-build stage.
           </div>
         </div>
 
@@ -87,13 +87,13 @@ export default function MontvelleAdvisoryNetworkPanel() {
             text="Prioritise recognised international firms with meaningful cross-border capability; avoid small local providers unless a later client case requires a specialist exception."
           />
           <RuleCard
-            title="Email integrity"
-            text="Only supplier-published business inboxes are stored as email-ready. Never manufacture email patterns or use privacy/DPO addresses for outreach."
+            title="Public-route integrity"
+            text="Store supplier-published business inboxes and official web routes only. Never manufacture email patterns or use privacy/DPO addresses as business contacts."
             icon={Send}
           />
           <RuleCard
             title="Relationship guardrail"
-            text="Prospect, contacted, active and preferred are separate states. Database inclusion is sourcing intelligence, not endorsement or guaranteed access."
+            text="Database inclusion is sourcing intelligence only. It does not mean partner, approved adviser, preferred provider or guaranteed client access."
             icon={ShieldCheck}
           />
         </div>
@@ -123,10 +123,10 @@ export default function MontvelleAdvisoryNetworkPanel() {
           <label className="h-9 rounded-md border border-input px-3 flex items-center gap-2 text-xs cursor-pointer select-none">
             <input
               type="checkbox"
-              checked={emailReadyOnly}
-              onChange={(event) => setEmailReadyOnly(event.target.checked)}
+              checked={publishedEmailOnly}
+              onChange={(event) => setPublishedEmailOnly(event.target.checked)}
             />
-            Email-ready only
+            Published email only
           </label>
           <label className="h-9 rounded-md border border-input px-3 flex items-center gap-2 text-xs cursor-pointer select-none">
             <input
@@ -143,7 +143,7 @@ export default function MontvelleAdvisoryNetworkPanel() {
             <div>Organisation</div>
             <div>Category</div>
             <div>Best for</div>
-            <div>Public route / status</div>
+            <div>Public route</div>
           </div>
           <div className="divide-y divide-border/60 max-h-[760px] overflow-auto">
             {filtered.map((firm) => (
@@ -157,7 +157,7 @@ export default function MontvelleAdvisoryNetworkPanel() {
                     <Badge variant={firm.tier === "global_leader" ? "secondary" : "outline"}>
                       {firm.tier === "global_leader" ? "Global leader" : "Global specialist"}
                     </Badge>
-                    <Badge variant="outline">{firm.relationshipStatus}</Badge>
+                    <Badge variant="outline">database record</Badge>
                   </div>
                 </div>
                 <div>{MONTVELLE_ADVISORY_CATEGORY_LABELS[firm.category]}</div>
@@ -166,7 +166,7 @@ export default function MontvelleAdvisoryNetworkPanel() {
                   {firm.publicEmail ? (
                     <div className="font-medium break-all">{firm.publicEmail}</div>
                   ) : (
-                    <div className="text-muted-foreground">No published business inbox stored</div>
+                    <div className="text-muted-foreground">Official public route stored</div>
                   )}
                   <div className="mt-1.5 flex gap-2 flex-wrap">
                     <a
@@ -187,7 +187,7 @@ export default function MontvelleAdvisoryNetworkPanel() {
                     </a>
                   </div>
                   <div className="mt-1.5 text-[11px] text-muted-foreground">
-                    {firm.routeStatus.replaceAll("_", " ")} · {firm.outreachStatus.replaceAll("_", " ")}
+                    {firm.routeStatus.replaceAll("_", " ")}
                   </div>
                 </div>
               </div>
@@ -201,8 +201,8 @@ export default function MontvelleAdvisoryNetworkPanel() {
         </div>
 
         <div className="flex items-center justify-between gap-3 flex-wrap text-[11px] text-muted-foreground">
-          <span>Public contact routes are evidence fields; relationship status must be earned and updated separately.</span>
-          <span>{emailReadyCount} firms currently have a published business email stored for controlled outreach.</span>
+          <span>Public routes are evidence fields. No outreach is triggered by this database panel.</span>
+          <span>{publishedEmailCount} firms currently have a published business email stored.</span>
         </div>
       </CardContent>
     </Card>
