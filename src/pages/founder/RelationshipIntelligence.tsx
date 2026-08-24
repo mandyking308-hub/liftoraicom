@@ -80,11 +80,22 @@ export default function RelationshipIntelligence() {
   const { data: contacts = [] } = useQuery<Contact[]>({
     queryKey: ["rni-contacts"],
     queryFn: async () => {
-      const { data, error } = await sb.from("relationship_intelligence_contacts").select("*").order("updated_at", { ascending: false }).limit(1000);
-      if (error) throw error;
-      return data ?? [];
+      const PAGE = 1000;
+      const all: any[] = [];
+      for (let from = 0; from < 50000; from += PAGE) {
+        const { data, error } = await sb
+          .from("relationship_intelligence_contacts")
+          .select("*")
+          .order("updated_at", { ascending: false })
+          .range(from, from + PAGE - 1);
+        if (error) throw error;
+        all.push(...(data ?? []));
+        if (!data || data.length < PAGE) break;
+      }
+      return all;
     },
   });
+
 
   // Handle query params once contacts are loaded — auto-open Capital & Influence tab and try to open drawer.
   useEffect(() => {
