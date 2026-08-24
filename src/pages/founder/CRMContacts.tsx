@@ -101,9 +101,12 @@ const CRMContacts = () => {
 
   function changeStatus(value: string) {
     setStatusFilter(value);
-    if (value === "ALL") setParams({});
-    else setParams({ status: value });
+    const next: Record<string, string> = {};
+    if (dataset) next.dataset = dataset;
+    if (value !== "ALL") next.status = value;
+    setParams(next);
   }
+
 
   return (
     <FounderLayout>
