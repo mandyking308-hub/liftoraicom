@@ -4,6 +4,7 @@ import PortfolioCrmArchitecturePanel from "@/components/founder/crm/PortfolioCrm
 import PortfolioCrmEducationWavePanel from "@/components/founder/crm/PortfolioCrmEducationWavePanel";
 import PortfolioContactRelationshipsTable from "@/components/founder/crm/PortfolioContactRelationshipsTable";
 import MontvelleSupplierNetworkPanel from "@/components/founder/crm/MontvelleSupplierNetworkPanel";
+import MontvelleAdvisoryNetworkPanel from "@/components/founder/crm/MontvelleAdvisoryNetworkPanel";
 
 export default function PortfolioCRM() {
   return (
@@ -18,6 +19,7 @@ export default function PortfolioCRM() {
         <PortfolioCrmSummaryPanel />
         <PortfolioCrmArchitecturePanel />
         <MontvelleSupplierNetworkPanel />
+        <MontvelleAdvisoryNetworkPanel />
         <PortfolioCrmEducationWavePanel />
         <div>
           <h2 className="text-lg font-semibold mb-2">People → all relevant Liftor businesses</h2>
