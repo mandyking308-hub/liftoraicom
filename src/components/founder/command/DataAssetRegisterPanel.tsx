@@ -14,7 +14,38 @@ type LocalMetrics = {
   nextGenNetworks: number | null;
   nextGenContacts: number | null;
   nextGenPublicEmails: number | null;
+  educationContacts: number | null;
+  educationOrganisations: number | null;
+  educationVerifiedEmails: number | null;
+  educationRevealRequired: number | null;
+  educationNoEmail: number | null;
 };
+
+const EDU_TAG = "education_customer_universe";
+
+async function educationOrganisationCount(): Promise<number | null> {
+  try {
+    const names = new Set<string>();
+    const pageSize = 1000;
+    for (let from = 0; from < 20000; from += pageSize) {
+      const { data, error } = await sb
+        .from("relationship_intelligence_contacts")
+        .select("organisation_name")
+        .contains("tags", [EDU_TAG])
+        .not("organisation_name", "is", null)
+        .range(from, from + pageSize - 1);
+      if (error) return null;
+      for (const row of data ?? []) {
+        const name = (row.organisation_name ?? "").trim();
+        if (name) names.add(name);
+      }
+      if (!data || data.length < pageSize) break;
+    }
+    return names.size;
+  } catch {
+    return null;
+  }
+}
 
 async function safeCount(table: string, build: (q: any) => any = (q) => q): Promise<number | null> {
   try {
@@ -44,6 +75,22 @@ async function loadLocalMetrics(): Promise<LocalMetrics> {
     safeCount("philanthropy_network_contacts", (q) => q.not("public_email", "is", null)),
   ]);
 
+  const [
+    educationContacts,
+    educationOrganisations,
+    educationVerifiedEmails,
+    educationRevealRequired,
+    educationNoEmail,
+  ] = await Promise.all([
+    safeCount("relationship_intelligence_contacts", (q) => q.contains("tags", [EDU_TAG])),
+    educationOrganisationCount(),
+    safeCount("relationship_intelligence_contacts", (q) =>
+      q.contains("tags", [EDU_TAG]).is("email_status", null).not("email", "is", null),
+    ),
+    safeCount("relationship_intelligence_contacts", (q) => q.contains("tags", [EDU_TAG]).eq("email_status", "reveal_required")),
+    safeCount("relationship_intelligence_contacts", (q) => q.contains("tags", [EDU_TAG]).eq("email_status", "no_email_on_file")),
+  ]);
+
   return {
     billionaires,
     billionaireVerifiedRoutes,
@@ -51,6 +98,11 @@ async function loadLocalMetrics(): Promise<LocalMetrics> {
     nextGenNetworks,
     nextGenContacts,
     nextGenPublicEmails,
+    educationContacts,
+    educationOrganisations,
+    educationVerifiedEmails,
+    educationRevealRequired,
+    educationNoEmail,
   };
 }
 
@@ -87,6 +139,16 @@ function liveStats(asset: DataAsset, metrics?: LocalMetrics) {
       { label: "Active networks", value: metricText(metrics.nextGenNetworks) },
       { label: "Contact routes", value: metricText(metrics.nextGenContacts) },
       { label: "Public emails", value: metricText(metrics.nextGenPublicEmails) },
+    ];
+  }
+  if (asset.id === "global-education-sales") {
+    return [
+      { label: "Organisations represented", value: metricText(metrics.educationOrganisations) },
+      { label: "Contacts in Liftor", value: metricText(metrics.educationContacts) },
+      { label: "Verified work emails", value: metricText(metrics.educationVerifiedEmails) },
+      { label: "Email reveal required", value: metricText(metrics.educationRevealRequired) },
+      { label: "No email on file", value: metricText(metrics.educationNoEmail) },
+      { label: "Original target 2,500", value: (metrics.educationContacts ?? 0) > 2500 ? "Exceeded" : "In progress" },
     ];
   }
   return [] as Array<{ label: string; value: string }>;
@@ -177,7 +239,7 @@ export default function DataAssetRegisterPanel() {
                       <p className="text-xs font-semibold tabular-nums">{metrics.isLoading ? "…" : s.value}</p>
                     </div>
                   ))}
-                  {(asset.knownStats ?? []).slice(0, live.length ? 3 : 6).map((s) => (
+                  {(asset.knownStats ?? []).slice(0, live.length ? 0 : 6).map((s) => (
                     <div key={s.label} className="rounded border border-border/50 px-2 py-1.5" title={s.note}>
                       <p className="text-[8px] uppercase text-muted-foreground">{s.label}</p>
                       <p className="text-xs font-semibold tabular-nums">{typeof s.value === "number" ? s.value.toLocaleString() : s.value}</p>
@@ -205,6 +267,23 @@ export default function DataAssetRegisterPanel() {
                     ))}
                   </div>
                 </div>
+              )}
+
+              {(asset.historicalStats?.length ?? 0) > 0 && (
+                <details className="rounded border border-border/50 px-2 py-1.5">
+                  <summary className="cursor-pointer text-[10px] font-medium">Provenance / historical checkpoint (not current holdings)</summary>
+                  <div className="mt-1.5 grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                    {asset.historicalStats?.map((s) => (
+                      <div key={s.label} className="rounded border border-border/50 px-2 py-1.5" title={s.note}>
+                        <p className="text-[8px] uppercase text-muted-foreground">{s.label}</p>
+                        <p className="text-xs font-semibold tabular-nums">{typeof s.value === "number" ? s.value.toLocaleString() : s.value}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-[9px] text-muted-foreground mt-1.5">
+                    Historical GitHub checkpoint figures are preserved for provenance only and never overwrite live production counts.
+                  </p>
+                </details>
               )}
 
               <details className="rounded border border-border/50 px-2 py-1.5">

@@ -1,0 +1,51 @@
+{
+  "program": "Global Education Sales Dataset",
+  "as_of": "2026-08-24",
+  "status": "recovered_into_production",
+  "current_source_of_truth": {
+    "system": "Liftor production database",
+    "table": "public.relationship_intelligence_contacts",
+    "filter_tag": "education_customer_universe",
+    "note": "Current counts must always be read live from this table. This file is a dated provenance record, not the source of truth."
+  },
+  "predecessor_status_file": "data/global-education-program-status-2026-08-22.json",
+  "predecessor_note": "The 2026-08-22 checkpoint is preserved unchanged as history. Its counts (22 groups seeded, 146 contacts, 109 verified emails, 37 held) describe the original saved GitHub checkpoint only and must not be presented as current holdings.",
+  "live_counts_verified_2026_08_24": {
+    "total_contacts": 2519,
+    "distinct_organisations": 266,
+    "verified_work_emails": 109,
+    "email_reveal_required": 1424,
+    "no_email_on_file": 986
+  },
+  "count_integrity": "109 + 1424 + 986 = 2519",
+  "original_targets": {
+    "target_contacts": 2500,
+    "target_contacts_state": "exceeded",
+    "target_groups": 120,
+    "target_groups_state": "historical_target_only_not_current_actual"
+  },
+  "quality_rules": [
+    "Reveal-required records are NOT verified emails and must never be counted as send-ready.",
+    "Verified emails are never overwritten with masked or null data.",
+    "No additional verified emails may be inferred or invented.",
+    "Historical snapshot counts must never overwrite live production counts."
+  ],
+  "retention_rule": "Preserve missing, stale, mismatched and unverified records in a held state. Hold rather than delete.",
+  "recovery_reference": "docs/apollo-education-universe-recovery-2026-08-24.md",
+  "recovery_runner": "supabase/functions/apollo-education-recovery/index.ts",
+  "import_route": "supabase/functions/ri-upsert-import/index.ts",
+  "historical_checkpoint_files": [
+    "data/global-education-program-status-2026-08-22.json",
+    "data/global-education-buyers-2026-08-22.jsonl",
+    "data/global-education-buyers-isp-2026-08-22.jsonl",
+    "data/global-education-buyers-gems-2026-08-22.jsonl",
+    "data/global-education-buyers-globeducate-2026-08-22.jsonl",
+    "data/global-education-buyers-dukes-2026-08-22.jsonl",
+    "data/global-education-buyers-taaleem-uae-2026-08-22.jsonl",
+    "data/global-education-buyers-sabis-2026-08-22.jsonl",
+    "data/global-education-buyers-gulf-batch-2-2026-08-22.jsonl",
+    "data/global-education-buyers-premium-batch-3-2026-08-22.jsonl",
+    "data/global-education-research-entity-exclusions-2026-08-22.jsonl"
+  ],
+  "outreach_state": "No outreach queued or sent. Records remain held until founder approval."
+}
