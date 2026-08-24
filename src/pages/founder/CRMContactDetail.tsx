@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, ShieldCheck, ShieldAlert, FileText, Loader2, Gavel } from "lucide-react";
+import { ArrowLeft, ShieldCheck, ShieldAlert, FileText, Loader2, Gavel, Send } from "lucide-react";
 import FounderLayout from "@/components/founder/FounderLayout";
 import CRMContact360Panel from "@/components/founder/crm/CRMContact360Panel";
 import CustomerContinuityTimeline from "@/components/founder/customer/CustomerContinuityTimeline";
@@ -142,6 +142,8 @@ const CRMContactDetail = () => {
       </FounderLayout>
     );
   }
+
+  const readiness = emailReadiness(contact);
 
   return (
     <FounderLayout>
