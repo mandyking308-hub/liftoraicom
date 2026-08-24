@@ -9,6 +9,7 @@ export interface ApolloPersonLike {
   id?: string;
   first_name?: string | null;
   last_name?: string | null;
+  last_name_obfuscated?: string | null;
   name?: string | null;
   title?: string | null;
   headline?: string | null;
@@ -46,8 +47,10 @@ const MASKED_EMAIL = /email_not_unlocked|not_unlocked|domain\.com$/i;
 export const isRealEmail = (email?: string | null) =>
   !!email && email.includes("@") && !MASKED_EMAIL.test(email);
 
+// Apollo's credit-free api_search masks surnames (e.g. "Pr***e"). Preserve the
+// masked form exactly — never invent hidden characters.
 export const personName = (p: ApolloPersonLike) =>
-  (p.name || `${p.first_name ?? ""} ${p.last_name ?? ""}`).trim();
+  (p.name || `${p.first_name ?? ""} ${p.last_name ?? p.last_name_obfuscated ?? ""}`).trim();
 
 export const personOrg = (p: ApolloPersonLike) =>
   (p.organization?.name ||
