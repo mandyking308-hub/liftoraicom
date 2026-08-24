@@ -25,7 +25,7 @@ export type MontvelleOperationalRoute = {
   accessPrerequisite?: string;
   hours?: string;
   sourceUrl: string;
-  sourceAuthority: "supplier_official";
+  sourceAuthority: "supplier_official" | "network_official";
   lastVerified: string;
   usableForFulfilment: boolean;
   notes?: string;
