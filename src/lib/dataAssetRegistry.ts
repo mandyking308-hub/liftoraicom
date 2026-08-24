@@ -14,6 +14,8 @@ export type DataAsset = {
   buyerPools?: string[];
   locations: string[];
   knownStats?: Array<{ label: string; value: number | string; note?: string }>;
+  /** Historical checkpoint figures preserved for provenance only. Never treated as current holdings. */
+  historicalStats?: Array<{ label: string; value: number | string; note?: string }>;
   lastReviewed: string;
   retentionRule: string;
   drillThrough?: string;
