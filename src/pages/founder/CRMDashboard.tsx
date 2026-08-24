@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Users, Activity, Ban, Send, Mail, Inbox as InboxIcon, MessageCircle } from "lucide-react";
+import { Users, Activity, Ban, Send, Mail, Inbox as InboxIcon, MessageCircle, Coins } from "lucide-react";
 import FounderLayout from "@/components/founder/FounderLayout";
+import BillionaireAccessResearchPanel from "@/components/founder/crm/BillionaireAccessResearchPanel";
 import StrategicProspectingAgentPanel from "@/components/founder/prospecting/StrategicProspectingAgentPanel";
 import CRMInteractionLedgerPanel from "@/components/founder/crm/CRMInteractionLedgerPanel";
 import HumanAccountManagerPanel from "@/components/founder/customer/HumanAccountManagerPanel";
@@ -109,6 +110,12 @@ const CRMDashboard = () => {
             </p>
           </div>
           <div className="flex gap-2">
+            <Button asChild variant="secondary" size="sm">
+              <Link to="/founder/crm/billionaire-access">
+                <Coins className="mr-2 h-4 w-4" />
+                Billionaire access data
+              </Link>
+            </Button>
             <Button asChild variant="outline" size="sm">
               <Link to="/founder/crm/inboxes">
                 <InboxIcon className="mr-2 h-4 w-4" />
@@ -123,6 +130,8 @@ const CRMDashboard = () => {
             </Button>
           </div>
         </div>
+
+        <BillionaireAccessResearchPanel />
 
         <PortfolioCrmSummaryPanel />
         <PortfolioCrmArchitecturePanel />
