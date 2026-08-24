@@ -6459,6 +6459,94 @@ export type Database = {
           },
         ]
       }
+      billionaire_access_research_2026: {
+        Row: {
+          access_mode: string | null
+          billionaire_id: string | null
+          billionaire_name: string
+          correction_notes: string | null
+          created_at: string
+          evidence_file: string
+          institutional_route: string
+          match_confidence: number
+          match_status: string
+          metadata: Json
+          normalized_name: string | null
+          official_source: string | null
+          outreach_allowed: boolean
+          restriction_notes: string | null
+          reviewed_at: string
+          snapshot_id: string | null
+          source_row: number
+          updated_at: string
+          verification_status: string
+        }
+        Insert: {
+          access_mode?: string | null
+          billionaire_id?: string | null
+          billionaire_name: string
+          correction_notes?: string | null
+          created_at?: string
+          evidence_file: string
+          institutional_route: string
+          match_confidence?: number
+          match_status?: string
+          metadata?: Json
+          normalized_name?: string | null
+          official_source?: string | null
+          outreach_allowed?: boolean
+          restriction_notes?: string | null
+          reviewed_at: string
+          snapshot_id?: string | null
+          source_row: number
+          updated_at?: string
+          verification_status: string
+        }
+        Update: {
+          access_mode?: string | null
+          billionaire_id?: string | null
+          billionaire_name?: string
+          correction_notes?: string | null
+          created_at?: string
+          evidence_file?: string
+          institutional_route?: string
+          match_confidence?: number
+          match_status?: string
+          metadata?: Json
+          normalized_name?: string | null
+          official_source?: string | null
+          outreach_allowed?: boolean
+          restriction_notes?: string | null
+          reviewed_at?: string
+          snapshot_id?: string | null
+          source_row?: number
+          updated_at?: string
+          verification_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billionaire_access_research_2026_billionaire_id_fkey"
+            columns: ["billionaire_id"]
+            isOneToOne: false
+            referencedRelation: "billionaire_access_summary"
+            referencedColumns: ["billionaire_id"]
+          },
+          {
+            foreignKeyName: "billionaire_access_research_2026_billionaire_id_fkey"
+            columns: ["billionaire_id"]
+            isOneToOne: false
+            referencedRelation: "billionaire_intelligence"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billionaire_access_research_2026_snapshot_id_fkey"
+            columns: ["snapshot_id"]
+            isOneToOne: false
+            referencedRelation: "billionaire_wealth_snapshots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       billionaire_affiliations: {
         Row: {
           affiliation_type: string
@@ -49260,6 +49348,7 @@ export type Database = {
           age_or_age_band: string | null
           ai_summary: string | null
           alignment_quality: string | null
+          apollo_person_id: string | null
           best_vehicle: string | null
           capital_lane: string | null
           capital_role: string | null
@@ -49275,14 +49364,18 @@ export type Database = {
           disclosure_warning: string | null
           elite_context_notes: string | null
           email: string | null
+          email_status: string | null
+          email_status_reason: string | null
           facebook_profile_url: string | null
           founder_notes: string | null
           hnw_signal_confidence: string | null
           id: string
           jurisdiction: string | null
           last_contact_at: string | null
+          last_synced_at: string | null
           meeting_summary: string | null
           money_signal: string | null
+          next_action: string | null
           next_action_at: string | null
           next_action_summary: string | null
           next_move_owner: string | null
@@ -49298,6 +49391,7 @@ export type Database = {
           relationship_angle: string | null
           relationship_status: Database["public"]["Enums"]["rni_relationship_status"]
           relationship_type: Database["public"]["Enums"]["rni_relationship_type"]
+          role_or_title: string | null
           source: Database["public"]["Enums"]["rni_source"]
           source_evidence: string | null
           source_notes: string | null
@@ -49313,6 +49407,7 @@ export type Database = {
           age_or_age_band?: string | null
           ai_summary?: string | null
           alignment_quality?: string | null
+          apollo_person_id?: string | null
           best_vehicle?: string | null
           capital_lane?: string | null
           capital_role?: string | null
@@ -49328,14 +49423,18 @@ export type Database = {
           disclosure_warning?: string | null
           elite_context_notes?: string | null
           email?: string | null
+          email_status?: string | null
+          email_status_reason?: string | null
           facebook_profile_url?: string | null
           founder_notes?: string | null
           hnw_signal_confidence?: string | null
           id?: string
           jurisdiction?: string | null
           last_contact_at?: string | null
+          last_synced_at?: string | null
           meeting_summary?: string | null
           money_signal?: string | null
+          next_action?: string | null
           next_action_at?: string | null
           next_action_summary?: string | null
           next_move_owner?: string | null
@@ -49351,6 +49450,7 @@ export type Database = {
           relationship_angle?: string | null
           relationship_status?: Database["public"]["Enums"]["rni_relationship_status"]
           relationship_type?: Database["public"]["Enums"]["rni_relationship_type"]
+          role_or_title?: string | null
           source?: Database["public"]["Enums"]["rni_source"]
           source_evidence?: string | null
           source_notes?: string | null
@@ -49366,6 +49466,7 @@ export type Database = {
           age_or_age_band?: string | null
           ai_summary?: string | null
           alignment_quality?: string | null
+          apollo_person_id?: string | null
           best_vehicle?: string | null
           capital_lane?: string | null
           capital_role?: string | null
@@ -49381,14 +49482,18 @@ export type Database = {
           disclosure_warning?: string | null
           elite_context_notes?: string | null
           email?: string | null
+          email_status?: string | null
+          email_status_reason?: string | null
           facebook_profile_url?: string | null
           founder_notes?: string | null
           hnw_signal_confidence?: string | null
           id?: string
           jurisdiction?: string | null
           last_contact_at?: string | null
+          last_synced_at?: string | null
           meeting_summary?: string | null
           money_signal?: string | null
+          next_action?: string | null
           next_action_at?: string | null
           next_action_summary?: string | null
           next_move_owner?: string | null
@@ -49404,6 +49509,7 @@ export type Database = {
           relationship_angle?: string | null
           relationship_status?: Database["public"]["Enums"]["rni_relationship_status"]
           relationship_type?: Database["public"]["Enums"]["rni_relationship_type"]
+          role_or_title?: string | null
           source?: Database["public"]["Enums"]["rni_source"]
           source_evidence?: string | null
           source_notes?: string | null
@@ -69498,6 +69604,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      billionaire_access_research_2026_summary: {
+        Row: {
+          ambiguous: number | null
+          any_outreach_enabled: boolean | null
+          deceased_remove_from_active_outreach: number | null
+          enhanced_compliance_review: number | null
+          historical_ids_linked: number | null
+          legal_compliance_block: number | null
+          manual_review: number | null
+          matched: number | null
+          missing_snapshot: number | null
+          new_2026_names: number | null
+          snapshot_rows_linked: number | null
+          source_rows: number | null
+          verified_institutional_restricted: number | null
+          verified_institutional_source_age_warning: number | null
+          verified_institutional_switchboard_or_postal: number | null
+          verified_public_institutional: number | null
+        }
+        Relationships: []
       }
       billionaire_access_summary: {
         Row: {
