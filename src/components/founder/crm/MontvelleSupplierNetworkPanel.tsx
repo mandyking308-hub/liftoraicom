@@ -9,9 +9,9 @@ import {
   type MontvelleSupplierCategory,
 } from "@/data/montvelleSupplierSeed";
 import {
-  MONTVELLE_OPERATIONAL_ROUTES,
-  getMontvelleOperationalRoutes,
-} from "@/data/montvelleOperationalRoutes";
+  ALL_MONTVELLE_OPERATIONAL_ROUTES,
+  getAllMontvelleOperationalRoutes,
+} from "@/data/montvelleOperationalRouteRegistry";
 
 export default function MontvelleSupplierNetworkPanel() {
   const [query, setQuery] = useState("");
@@ -27,7 +27,7 @@ export default function MontvelleSupplierNetworkPanel() {
   const filtered = useMemo(() => {
     const normalized = query.trim().toLowerCase();
     return MONTVELLE_SUPPLIERS.filter((supplier) => {
-      const routes = getMontvelleOperationalRoutes(supplier.id);
+      const routes = getAllMontvelleOperationalRoutes(supplier.id);
       if (category !== "all" && supplier.category !== category) return false;
       if (multipliersOnly && !supplier.networkMultiplier) return false;
       if (routesOnly && routes.length === 0) return false;
@@ -52,7 +52,7 @@ export default function MontvelleSupplierNetworkPanel() {
 
   const multiplierCount = MONTVELLE_SUPPLIERS.filter((supplier) => supplier.networkMultiplier).length;
   const globalCount = MONTVELLE_SUPPLIERS.filter((supplier) => supplier.coverage === "Global").length;
-  const suppliersWithRoutes = new Set(MONTVELLE_OPERATIONAL_ROUTES.map((route) => route.supplierId)).size;
+  const suppliersWithRoutes = new Set(ALL_MONTVELLE_OPERATIONAL_ROUTES.map((route) => route.supplierId)).size;
 
   return (
     <Card className="tech-card border-primary/20">
@@ -76,7 +76,7 @@ export default function MontvelleSupplierNetworkPanel() {
       <CardContent className="space-y-5">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <Stat icon={Building2} label="Seed suppliers" value={MONTVELLE_SUPPLIERS.length} />
-          <Stat icon={Route} label="Verified operational routes" value={MONTVELLE_OPERATIONAL_ROUTES.length} />
+          <Stat icon={Route} label="Verified operational routes" value={ALL_MONTVELLE_OPERATIONAL_ROUTES.length} />
           <Stat icon={Phone} label="Suppliers with routes" value={suppliersWithRoutes} />
           <Stat icon={Network} label="Network multipliers" value={multiplierCount} />
         </div>
@@ -141,7 +141,7 @@ export default function MontvelleSupplierNetworkPanel() {
           </div>
           <div className="divide-y divide-border/60 max-h-[720px] overflow-auto">
             {filtered.map((supplier) => {
-              const routes = getMontvelleOperationalRoutes(supplier.id);
+              const routes = getAllMontvelleOperationalRoutes(supplier.id);
               const primaryRoute = routes.find((route) => route.usableForFulfilment) ?? routes[0];
               const phone = primaryRoute?.channels.find((channel) => channel.channel === "phone" || channel.channel === "whatsapp");
               const email = primaryRoute?.channels.find((channel) => channel.channel === "email");
