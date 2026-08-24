@@ -262,7 +262,7 @@ export default function DataAssetRegisterPanel() {
                   <div className="flex flex-wrap gap-1">
                     {asset.buyerPools?.map((pool) => (
                       <Badge key={pool} variant="outline" className="text-[9px] border-primary/30 text-primary">
-                        {pool.replaceAll("-", " ")}
+                        {pool.replace(/-/g, " ")}
                       </Badge>
                     ))}
                   </div>

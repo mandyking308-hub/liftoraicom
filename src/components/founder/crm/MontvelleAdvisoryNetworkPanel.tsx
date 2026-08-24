@@ -187,7 +187,7 @@ export default function MontvelleAdvisoryNetworkPanel() {
                     </a>
                   </div>
                   <div className="mt-1.5 text-[11px] text-muted-foreground">
-                    {firm.routeStatus.replaceAll("_", " ")}
+                    {firm.routeStatus.replace(/_/g, " ")}
                   </div>
                 </div>
               </div>
