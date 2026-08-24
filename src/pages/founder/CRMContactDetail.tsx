@@ -247,12 +247,59 @@ const CRMContactDetail = () => {
           <Card className="tech-card">
             <CardHeader><CardTitle className="text-sm">Identity</CardTitle></CardHeader>
             <CardContent className="text-xs text-muted-foreground space-y-1">
-              <p>Role: {contact.role || "—"}</p>
-              <p>Source: {contact.source || "—"}</p>
-              <p>Business: {contact.assigned_business || "—"}</p>
+              <Info label="Role / title" value={contact.role} />
+              <Info label="Seniority" value={contact.seniority} />
+              <Info label="Phone" value={contact.phone} />
+              <Info label="Country" value={contact.country} />
+              <Info label="LinkedIn" value={contact.linkedin_url} />
+              <Info label="Source" value={contact.source} />
+              <Info label="Business" value={contact.assigned_business} />
             </CardContent>
           </Card>
         </div>
+
+        <div className="grid md:grid-cols-3 gap-4">
+          <Card className={`tech-card ${readiness.tone === "ok" ? "border-primary/40" : ""}`}>
+            <CardHeader><CardTitle className="text-sm">Email readiness</CardTitle></CardHeader>
+            <CardContent className="text-xs text-muted-foreground space-y-2">
+              <Badge variant={readiness.tone === "ok" ? "default" : "outline"} className={readiness.tone === "warn" ? "text-yellow-300 border-yellow-300/40" : ""}>
+                {readiness.label}
+              </Badge>
+              <p>{readiness.detail}</p>
+              <Info label="Verified status" value={contact.email_verified_status} />
+              <Info label="Sendable status" value={contact.sendable_status} />
+              <Info label="Enrichment" value={contact.apollo_enrichment_status} />
+            </CardContent>
+          </Card>
+
+          <Card className="tech-card">
+            <CardHeader><CardTitle className="text-sm">Provenance</CardTitle></CardHeader>
+            <CardContent className="text-xs text-muted-foreground space-y-1">
+              <Info label="Data source" value={contact.data_source} />
+              <Info label="Source platform" value={contact.source_platform} />
+              <Info label="Source record" value={contact.source_record_id} />
+              <Info label="Apollo person" value={contact.apollo_person_id} />
+              <Info label="Apollo organisation" value={contact.apollo_organization_id} />
+              <Info label="Compliance status" value={contact.compliance_status} />
+            </CardContent>
+          </Card>
+
+          <Card className="tech-card">
+            <CardHeader><CardTitle className="text-sm">Tags & notes</CardTitle></CardHeader>
+            <CardContent className="text-xs text-muted-foreground space-y-2">
+              <div className="flex flex-wrap gap-1">
+                {(contact.tags ?? []).length === 0 ? <span>No tags</span> : (contact.tags ?? []).map((t) => (
+                  <Badge key={t} variant="outline" className="text-[10px]">{t}</Badge>
+                ))}
+              </div>
+              <p className="whitespace-pre-wrap">{contact.notes || "No notes."}</p>
+              <p className="text-[11px] text-muted-foreground/80">
+                Campaign execution does not run from this master record. Sending is controlled through business_contact_relationships plus inbox and campaign controls in Outreach.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
 
         <Tabs defaultValue="comms">
           <TabsList>
