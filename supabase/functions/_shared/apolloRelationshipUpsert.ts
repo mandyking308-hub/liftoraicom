@@ -189,6 +189,12 @@ export async function upsertApolloPeople(
 
       const location = [p.city, p.state, p.country].filter(Boolean).join(", ");
 
+      if (existing && existing.id === "pending") {
+        // duplicate inside this same batch — already queued for insert
+        stats.skipped_duplicate += 1;
+        continue;
+      }
+
       if (existing) {
         const mergedTags = Array.from(new Set([...(existing.tags ?? []), ...tags]));
         const patch: Record<string, unknown> = {
