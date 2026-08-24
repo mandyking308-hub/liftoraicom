@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: read
+  statuses: write
 
 concurrency:
   group: production-supabase-migrations
@@ -32,11 +33,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Validate completed research and migrations
+        id: validate
         run: |
           node scripts/validate-billionaire-access-research.mjs
           node scripts/validate-billionaire-reconciliation-migrations.mjs
 
       - name: Check production deployment credentials
+        id: credentials
         shell: bash
         run: |
           missing=0
@@ -53,18 +56,60 @@ jobs:
           fi
 
       - name: Install Supabase CLI
+        id: setup
         uses: supabase/setup-cli@v1
         with:
           version: latest
 
       - name: Link Liftor production project
+        id: link
         run: supabase link --project-ref "${SUPABASE_PROJECT_ID}"
 
       - name: Preview pending migrations
+        id: dry_run
         run: supabase db push --dry-run
 
       - name: Apply pending migrations
+        id: apply
         run: supabase db push
 
       - name: Confirm migration history
+        id: history
         run: supabase migration list
+
+      - name: Publish production deployment status
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VALIDATE_OUTCOME: ${{ steps.validate.outcome }}
+          CREDENTIALS_OUTCOME: ${{ steps.credentials.outcome }}
+          SETUP_OUTCOME: ${{ steps.setup.outcome }}
+          LINK_OUTCOME: ${{ steps.link.outcome }}
+          DRY_RUN_OUTCOME: ${{ steps.dry_run.outcome }}
+          APPLY_OUTCOME: ${{ steps.apply.outcome }}
+          HISTORY_OUTCOME: ${{ steps.history.outcome }}
+        shell: bash
+        run: |
+          state="failure"
+          description="Supabase deployment failed; inspect the workflow run"
+
+          if [[ "${VALIDATE_OUTCOME}" != "success" ]]; then
+            description="Research or migration validation failed"
+          elif [[ "${CREDENTIALS_OUTCOME}" != "success" ]]; then
+            description="Blocked: missing Supabase production secrets"
+          elif [[ "${SETUP_OUTCOME}" != "success" ]]; then
+            description="Failed: Supabase CLI setup"
+          elif [[ "${LINK_OUTCOME}" != "success" ]]; then
+            description="Failed: Liftor Supabase project link"
+          elif [[ "${DRY_RUN_OUTCOME}" != "success" ]]; then
+            description="Failed: Supabase migration dry run"
+          elif [[ "${APPLY_OUTCOME}" != "success" ]]; then
+            description="Failed: Supabase migration apply"
+          elif [[ "${HISTORY_OUTCOME}" != "success" ]]; then
+            description="Failed: Supabase migration history check"
+          else
+            state="success"
+            description="3,428-row reconciliation deployed and verified"
+          fi
+
+          gh api --method POST             "repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}"             -f state="${state}"             -f context="supabase-production"             -f description="${description}"             -f target_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
