@@ -49391,6 +49391,7 @@ export type Database = {
           relationship_angle: string | null
           relationship_status: Database["public"]["Enums"]["rni_relationship_status"]
           relationship_type: Database["public"]["Enums"]["rni_relationship_type"]
+          role_or_title: string | null
           source: Database["public"]["Enums"]["rni_source"]
           source_evidence: string | null
           source_notes: string | null
@@ -49449,6 +49450,7 @@ export type Database = {
           relationship_angle?: string | null
           relationship_status?: Database["public"]["Enums"]["rni_relationship_status"]
           relationship_type?: Database["public"]["Enums"]["rni_relationship_type"]
+          role_or_title?: string | null
           source?: Database["public"]["Enums"]["rni_source"]
           source_evidence?: string | null
           source_notes?: string | null
@@ -49507,6 +49509,7 @@ export type Database = {
           relationship_angle?: string | null
           relationship_status?: Database["public"]["Enums"]["rni_relationship_status"]
           relationship_type?: Database["public"]["Enums"]["rni_relationship_type"]
+          role_or_title?: string | null
           source?: Database["public"]["Enums"]["rni_source"]
           source_evidence?: string | null
           source_notes?: string | null
