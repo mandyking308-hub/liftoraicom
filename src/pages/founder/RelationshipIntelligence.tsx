@@ -333,6 +333,25 @@ export default function RelationshipIntelligence() {
         </div>
       </div>
 
+      {educationMode && (
+        <Card className="tech-card border-primary/40">
+          <CardContent className="p-4 flex items-center justify-between gap-4 flex-wrap">
+            <div>
+              <p className="text-sm font-semibold">Global Education Customer Universe</p>
+              <p className="text-xs text-muted-foreground">Filtered on tag <code>education_customer_universe</code> — read-only view of the recovered universe.</p>
+            </div>
+            <div className="text-right">
+              <p className="text-[10px] uppercase text-muted-foreground">Education rows</p>
+              <p className="text-xl font-bold text-primary">
+                {(contacts as any[]).filter((c) => (c.tags ?? []).includes("education_customer_universe")).length}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+
+
       {seedResult && (
         <Card className="tech-card border-primary/40">
           <CardHeader className="pb-2 flex flex-row items-center justify-between">
