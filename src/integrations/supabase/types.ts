@@ -16970,7 +16970,7 @@ export type Database = {
           data_source: string | null
           do_not_contact_at: string | null
           do_not_contact_reason: string | null
-          email: string
+          email: string | null
           email_verified_status: string
           enriched_at: string | null
           first_imported_business: string | null
@@ -17036,7 +17036,7 @@ export type Database = {
           data_source?: string | null
           do_not_contact_at?: string | null
           do_not_contact_reason?: string | null
-          email: string
+          email?: string | null
           email_verified_status?: string
           enriched_at?: string | null
           first_imported_business?: string | null
@@ -17102,7 +17102,7 @@ export type Database = {
           data_source?: string | null
           do_not_contact_at?: string | null
           do_not_contact_reason?: string | null
-          email?: string
+          email?: string | null
           email_verified_status?: string
           enriched_at?: string | null
           first_imported_business?: string | null
@@ -71294,7 +71294,7 @@ export type Database = {
           data_source: string | null
           do_not_contact_at: string | null
           do_not_contact_reason: string | null
-          email: string
+          email: string | null
           email_verified_status: string
           enriched_at: string | null
           first_imported_business: string | null

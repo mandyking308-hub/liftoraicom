@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, ShieldCheck, ShieldAlert, FileText, Loader2, Gavel } from "lucide-react";
+import { ArrowLeft, ShieldCheck, ShieldAlert, FileText, Loader2, Gavel, Send } from "lucide-react";
 import FounderLayout from "@/components/founder/FounderLayout";
 import CRMContact360Panel from "@/components/founder/crm/CRMContact360Panel";
 import CustomerContinuityTimeline from "@/components/founder/customer/CustomerContinuityTimeline";
@@ -18,20 +18,50 @@ import { createDecisionFromCrmContact } from "@/lib/lifecycleHandoffs";
 
 type Contact = {
   id: string;
-  email: string;
-  name: string;
-  company: string;
-  role: string;
+  email: string | null;
+  name: string | null;
+  company: string | null;
+  role: string | null;
   status: string;
-  source: string;
-  assigned_business: string;
+  source: string | null;
+  assigned_business: string | null;
   assigned_inbox_id: string | null;
   conversation_active: boolean;
   last_contacted_at: string | null;
   last_replied_at: string | null;
+  first_name?: string | null;
+  last_name?: string | null;
+  phone?: string | null;
+  linkedin_url?: string | null;
+  apollo_person_id?: string | null;
+  apollo_organization_id?: string | null;
+  email_verified_status?: string | null;
+  sendable_status?: string | null;
+  apollo_enrichment_status?: string | null;
+  tags?: string[] | null;
+  notes?: string | null;
+  data_source?: string | null;
+  source_platform?: string | null;
+  source_record_id?: string | null;
+  compliance_status?: string | null;
+  country?: string | null;
+  seniority?: string | null;
 };
 
 const STATUSES = ["NEW", "CONTACTED", "ENGAGED", "QUALIFIED", "CLIENT", "SUPPLIER", "DO_NOT_CONTACT"];
+
+function emailReadiness(c: Contact): { label: string; detail: string; tone: "ok" | "warn" | "muted" } {
+  const v = (c.email_verified_status ?? "").toLowerCase();
+  if (v === "reveal_required") return { label: "Reveal required", detail: "Apollo person known, work email not revealed. No sending possible.", tone: "warn" };
+  if (!c.email) return { label: "No email on file", detail: "No usable email address stored for this contact.", tone: "muted" };
+  if (v === "" || v === "verified" || v === "exact" || v === "valid") return { label: "Exact / verified email", detail: c.email, tone: "ok" };
+  return { label: v.replace(/_/g, " "), detail: c.email, tone: "warn" };
+}
+
+const Info = ({ label, value }: { label: string; value?: string | null }) => (
+  <p><span className="text-muted-foreground/70">{label}:</span> {value || "—"}</p>
+);
+
 
 const CRMContactDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -113,6 +143,8 @@ const CRMContactDetail = () => {
     );
   }
 
+  const readiness = emailReadiness(contact);
+
   return (
     <FounderLayout>
       <div className="max-w-5xl mx-auto space-y-6">
@@ -122,10 +154,16 @@ const CRMContactDetail = () => {
 
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">{contact.name || contact.email}</h1>
-            <p className="text-sm text-muted-foreground mt-1">{contact.email} · {contact.company || "—"}</p>
+            <h1 className="text-2xl font-bold tracking-tight">
+              {contact.name || [contact.first_name, contact.last_name].filter(Boolean).join(" ") || contact.email || "Unnamed contact"}
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">{contact.email || "No email on file"} · {contact.company || "—"}</p>
           </div>
           <div className="flex items-center gap-2">
+            <Button size="sm" variant="outline" onClick={() => navigate("/founder/outreach")} title="Campaign execution lives in Outreach, not on the master contact record">
+              <Send className="h-4 w-4 mr-1" /> Open Outreach
+            </Button>
+
             <Button
               size="sm"
               onClick={generateProposal}
@@ -211,12 +249,59 @@ const CRMContactDetail = () => {
           <Card className="tech-card">
             <CardHeader><CardTitle className="text-sm">Identity</CardTitle></CardHeader>
             <CardContent className="text-xs text-muted-foreground space-y-1">
-              <p>Role: {contact.role || "—"}</p>
-              <p>Source: {contact.source || "—"}</p>
-              <p>Business: {contact.assigned_business || "—"}</p>
+              <Info label="Role / title" value={contact.role} />
+              <Info label="Seniority" value={contact.seniority} />
+              <Info label="Phone" value={contact.phone} />
+              <Info label="Country" value={contact.country} />
+              <Info label="LinkedIn" value={contact.linkedin_url} />
+              <Info label="Source" value={contact.source} />
+              <Info label="Business" value={contact.assigned_business} />
             </CardContent>
           </Card>
         </div>
+
+        <div className="grid md:grid-cols-3 gap-4">
+          <Card className={`tech-card ${readiness.tone === "ok" ? "border-primary/40" : ""}`}>
+            <CardHeader><CardTitle className="text-sm">Email readiness</CardTitle></CardHeader>
+            <CardContent className="text-xs text-muted-foreground space-y-2">
+              <Badge variant={readiness.tone === "ok" ? "default" : "outline"} className={readiness.tone === "warn" ? "text-yellow-300 border-yellow-300/40" : ""}>
+                {readiness.label}
+              </Badge>
+              <p>{readiness.detail}</p>
+              <Info label="Verified status" value={contact.email_verified_status} />
+              <Info label="Sendable status" value={contact.sendable_status} />
+              <Info label="Enrichment" value={contact.apollo_enrichment_status} />
+            </CardContent>
+          </Card>
+
+          <Card className="tech-card">
+            <CardHeader><CardTitle className="text-sm">Provenance</CardTitle></CardHeader>
+            <CardContent className="text-xs text-muted-foreground space-y-1">
+              <Info label="Data source" value={contact.data_source} />
+              <Info label="Source platform" value={contact.source_platform} />
+              <Info label="Source record" value={contact.source_record_id} />
+              <Info label="Apollo person" value={contact.apollo_person_id} />
+              <Info label="Apollo organisation" value={contact.apollo_organization_id} />
+              <Info label="Compliance status" value={contact.compliance_status} />
+            </CardContent>
+          </Card>
+
+          <Card className="tech-card">
+            <CardHeader><CardTitle className="text-sm">Tags & notes</CardTitle></CardHeader>
+            <CardContent className="text-xs text-muted-foreground space-y-2">
+              <div className="flex flex-wrap gap-1">
+                {(contact.tags ?? []).length === 0 ? <span>No tags</span> : (contact.tags ?? []).map((t) => (
+                  <Badge key={t} variant="outline" className="text-[10px]">{t}</Badge>
+                ))}
+              </div>
+              <p className="whitespace-pre-wrap">{contact.notes || "No notes."}</p>
+              <p className="text-[11px] text-muted-foreground/80">
+                Campaign execution does not run from this master record. Sending is controlled through business_contact_relationships plus inbox and campaign controls in Outreach.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
 
         <Tabs defaultValue="comms">
           <TabsList>

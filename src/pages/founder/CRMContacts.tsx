@@ -16,6 +16,7 @@ import { loadPortfolioContacts, type PortfolioContactRow } from "@/lib/portfolio
 import { toast } from "sonner";
 
 const STATUSES = ["NEW", "CONTACTED", "ENGAGED", "QUALIFIED", "CLIENT", "SUPPLIER", "DO_NOT_CONTACT"];
+const EDUCATION_TAG = "education_customer_universe";
 
 const statusVariant = (s: string) => {
   if (s === "DO_NOT_CONTACT") return "destructive" as const;
@@ -23,11 +24,21 @@ const statusVariant = (s: string) => {
   return "outline" as const;
 };
 
+function emailReadiness(c: PortfolioContactRow): { label: string; tone: "ok" | "warn" | "muted" } {
+  const v = (c.email_verified_status ?? "").toLowerCase();
+  if (c.email && (v === "" || v === "verified" || v === "exact" || v === "valid")) return { label: "Verified email", tone: "ok" };
+  if (v === "reveal_required") return { label: "Reveal required", tone: "warn" };
+  if (!c.email) return { label: "No email on file", tone: "muted" };
+  return { label: v.replace(/_/g, " ") || "Unknown", tone: "warn" };
+}
+
 const CRMContacts = () => {
   const [params, setParams] = useSearchParams();
   const initialStatus = params.get("status") ?? "ALL";
+  const dataset = params.get("dataset");
+  const educationMode = dataset === "education";
   const [statusFilter, setStatusFilter] = useState<string>(initialStatus);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(params.get("search") ?? "");
   const [contacts, setContacts] = useState<PortfolioContactRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
@@ -40,7 +51,7 @@ const CRMContacts = () => {
   async function load() {
     setLoading(true);
     try {
-      setContacts(await loadPortfolioContacts(500));
+      setContacts(await loadPortfolioContacts());
     } catch (error) {
       toast.error((error as Error).message);
     } finally {
@@ -48,15 +59,21 @@ const CRMContacts = () => {
     }
   }
 
+  const datasetScoped = useMemo(
+    () => (educationMode ? contacts.filter((c) => (c.tags ?? []).includes(EDUCATION_TAG)) : contacts),
+    [contacts, educationMode],
+  );
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return contacts.filter((c) => {
+    return datasetScoped.filter((c) => {
       if (statusFilter !== "ALL" && c.status !== statusFilter) return false;
       if (!q) return true;
       const relationshipNames = c.business_relationships.map((r) => r.business_name).join(" ");
-      return `${c.email} ${c.name ?? ""} ${c.company ?? ""} ${relationshipNames}`.toLowerCase().includes(q);
+      return `${c.email ?? ""} ${c.name ?? ""} ${c.company ?? ""} ${c.role ?? ""} ${relationshipNames}`.toLowerCase().includes(q);
     });
-  }, [contacts, search, statusFilter]);
+  }, [datasetScoped, search, statusFilter]);
+
 
   async function handleCreate() {
     if (!form.email.trim()) {
@@ -84,9 +101,12 @@ const CRMContacts = () => {
 
   function changeStatus(value: string) {
     setStatusFilter(value);
-    if (value === "ALL") setParams({});
-    else setParams({ status: value });
+    const next: Record<string, string> = {};
+    if (dataset) next.dataset = dataset;
+    if (value !== "ALL") next.status = value;
+    setParams(next);
   }
+
 
   return (
     <FounderLayout>
@@ -136,9 +156,28 @@ const CRMContacts = () => {
           </Dialog>
         </div>
 
+        {educationMode && (
+          <Card className="tech-card border-primary/40">
+            <CardContent className="p-4 flex items-center justify-between gap-4 flex-wrap">
+              <div>
+                <p className="text-sm font-semibold">Global Education Customer Universe</p>
+                <p className="text-xs text-muted-foreground">
+                  Master CRM records tagged <code>{EDUCATION_TAG}</code>. Read-only view — nothing here is sendable until a business relationship and campaign approve it.
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-[10px] uppercase text-muted-foreground">Education contacts</p>
+                <p className="text-xl font-bold text-primary">{loading ? "…" : datasetScoped.length}</p>
+                <p className="text-[10px] text-muted-foreground">{filtered.length} shown with current filters</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <Card className="tech-card">
           <CardContent className="p-4 space-y-4">
             <div className="flex flex-wrap gap-3 items-center">
+
               <div className="relative flex-1 min-w-[220px]">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search person, organisation or portfolio business" className="pl-9" />
@@ -157,27 +196,41 @@ const CRMContacts = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Person</TableHead>
+                    <TableHead>Email readiness</TableHead>
                     <TableHead>Organisation</TableHead>
+                    <TableHead>Role / title</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Sendable</TableHead>
                     <TableHead>Portfolio relationships</TableHead>
-                    <TableHead>Conversation</TableHead>
                     <TableHead>Last reply</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {loading ? (
-                    <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-6">Loading…</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-6">Loading…</TableCell></TableRow>
                   ) : filtered.length === 0 ? (
-                    <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-6">No contacts yet.</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-6">No contacts yet.</TableCell></TableRow>
                   ) : (
-                    filtered.map((c) => (
+                    filtered.map((c) => {
+                      const readiness = emailReadiness(c);
+                      return (
                       <TableRow key={c.id}>
                         <TableCell>
-                          <Link to={`/founder/crm/contacts/${c.id}`} className="font-medium hover:text-primary">{c.name || c.email}</Link>
-                          <div className="text-xs text-muted-foreground">{c.email}</div>
+                          <Link to={`/founder/crm/contacts/${c.id}`} className="font-medium hover:text-primary">{c.name || c.email || "Unnamed contact"}</Link>
+                          <div className="text-xs text-muted-foreground">{c.email || "No email on file"}</div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={readiness.tone === "ok" ? "default" : "outline"}
+                            className={`text-[10px] ${readiness.tone === "warn" ? "text-yellow-300 border-yellow-300/40" : ""}`}
+                          >
+                            {readiness.label}
+                          </Badge>
                         </TableCell>
                         <TableCell>{c.company || "—"}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">{c.role || "—"}</TableCell>
                         <TableCell><Badge variant={statusVariant(c.status)}>{c.status}</Badge></TableCell>
+                        <TableCell className="text-xs text-muted-foreground">{(c.sendable_status ?? "unknown").replace(/_/g, " ")}</TableCell>
                         <TableCell>
                           <div className="flex flex-wrap gap-1">
                             {c.business_relationships.length === 0 ? (
@@ -189,14 +242,15 @@ const CRMContacts = () => {
                             ))}
                           </div>
                         </TableCell>
-                        <TableCell>{c.conversation_active ? <Badge>Active</Badge> : <span className="text-muted-foreground text-xs">Idle</span>}</TableCell>
                         <TableCell className="text-muted-foreground text-xs">
                           {c.last_replied_at ? new Date(c.last_replied_at).toLocaleString() : "—"}
                         </TableCell>
                       </TableRow>
-                    ))
+                      );
+                    })
                   )}
                 </TableBody>
+
               </Table>
             </div>
           </CardContent>
