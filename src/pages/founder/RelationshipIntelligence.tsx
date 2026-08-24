@@ -66,6 +66,10 @@ export default function RelationshipIntelligence() {
   const [searchParams] = useSearchParams();
   const urlTab = searchParams.get("tab");
   const urlContact = searchParams.get("contact");
+  const urlDataset = searchParams.get("dataset");
+  const urlSearch = searchParams.get("search");
+  const educationMode = urlDataset === "education";
+  const initialSearch = educationMode ? "education_customer_universe" : (urlSearch ?? "");
   const [activeTab, setActiveTab] = useState<string>(urlTab === "capital-influence" ? "capital_influence" : "all");
   const [positioningInitial, setPositioningInitial] = useState<string | null>(null);
   const [linkedBanner, setLinkedBanner] = useState<string | null>(null);
@@ -73,7 +77,8 @@ export default function RelationshipIntelligence() {
   const [editing, setEditing] = useState<Contact | null>(null);
   const [drawer, setDrawer] = useState<Contact | null>(null);
   const [form, setForm] = useState<any>(emptyForm);
-  const [filters, setFilters] = useState({ type: "all", status: "all", disclosure: "all", trust: "all", jurisdiction: "", dueOnly: false, search: "" });
+  const [filters, setFilters] = useState({ type: "all", status: "all", disclosure: "all", trust: "all", jurisdiction: "", dueOnly: false, search: initialSearch });
+
   const [incompleteOnly, setIncompleteOnly] = useState(false);
   const [seedResult, setSeedResult] = useState<null | { created: any[]; updated: any[]; skipped: any[]; missingPhone: any[]; followUp: any[]; restricted: any[] }>(null);
 
