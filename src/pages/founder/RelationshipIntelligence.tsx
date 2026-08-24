@@ -66,6 +66,10 @@ export default function RelationshipIntelligence() {
   const [searchParams] = useSearchParams();
   const urlTab = searchParams.get("tab");
   const urlContact = searchParams.get("contact");
+  const urlDataset = searchParams.get("dataset");
+  const urlSearch = searchParams.get("search");
+  const educationMode = urlDataset === "education";
+  const initialSearch = educationMode ? "education_customer_universe" : (urlSearch ?? "");
   const [activeTab, setActiveTab] = useState<string>(urlTab === "capital-influence" ? "capital_influence" : "all");
   const [positioningInitial, setPositioningInitial] = useState<string | null>(null);
   const [linkedBanner, setLinkedBanner] = useState<string | null>(null);
@@ -73,18 +77,30 @@ export default function RelationshipIntelligence() {
   const [editing, setEditing] = useState<Contact | null>(null);
   const [drawer, setDrawer] = useState<Contact | null>(null);
   const [form, setForm] = useState<any>(emptyForm);
-  const [filters, setFilters] = useState({ type: "all", status: "all", disclosure: "all", trust: "all", jurisdiction: "", dueOnly: false, search: "" });
+  const [filters, setFilters] = useState({ type: "all", status: "all", disclosure: "all", trust: "all", jurisdiction: "", dueOnly: false, search: initialSearch });
+
   const [incompleteOnly, setIncompleteOnly] = useState(false);
   const [seedResult, setSeedResult] = useState<null | { created: any[]; updated: any[]; skipped: any[]; missingPhone: any[]; followUp: any[]; restricted: any[] }>(null);
 
   const { data: contacts = [] } = useQuery<Contact[]>({
     queryKey: ["rni-contacts"],
     queryFn: async () => {
-      const { data, error } = await sb.from("relationship_intelligence_contacts").select("*").order("updated_at", { ascending: false }).limit(1000);
-      if (error) throw error;
-      return data ?? [];
+      const PAGE = 1000;
+      const all: any[] = [];
+      for (let from = 0; from < 50000; from += PAGE) {
+        const { data, error } = await sb
+          .from("relationship_intelligence_contacts")
+          .select("*")
+          .order("updated_at", { ascending: false })
+          .range(from, from + PAGE - 1);
+        if (error) throw error;
+        all.push(...(data ?? []));
+        if (!data || data.length < PAGE) break;
+      }
+      return all;
     },
   });
+
 
   // Handle query params once contacts are loaded — auto-open Capital & Influence tab and try to open drawer.
   useEffect(() => {
@@ -316,6 +332,25 @@ export default function RelationshipIntelligence() {
           <Button size="sm" onClick={() => { setEditing(null); setForm(emptyForm); setOpen(true); }}><Plus className="h-4 w-4 mr-1" /> Add relationship</Button>
         </div>
       </div>
+
+      {educationMode && (
+        <Card className="tech-card border-primary/40">
+          <CardContent className="p-4 flex items-center justify-between gap-4 flex-wrap">
+            <div>
+              <p className="text-sm font-semibold">Global Education Customer Universe</p>
+              <p className="text-xs text-muted-foreground">Filtered on tag <code>education_customer_universe</code> — read-only view of the recovered universe.</p>
+            </div>
+            <div className="text-right">
+              <p className="text-[10px] uppercase text-muted-foreground">Education rows</p>
+              <p className="text-xl font-bold text-primary">
+                {(contacts as any[]).filter((c) => (c.tags ?? []).includes("education_customer_universe")).length}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+
 
       {seedResult && (
         <Card className="tech-card border-primary/40">

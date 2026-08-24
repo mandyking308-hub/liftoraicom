@@ -160,7 +160,7 @@ export default function MontvelleSupplierNetworkPanel() {
                     <div className="flex gap-1.5 flex-wrap">
                       {supplier.networkMultiplier && <Badge variant="secondary">Multiplier</Badge>}
                       {routes.length > 0 ? <Badge>{routes.length} route{routes.length === 1 ? "" : "s"}</Badge> : <Badge variant="outline">Route research needed</Badge>}
-                      <Badge variant="outline">{supplier.outreachStatus.replaceAll("_", " ")}</Badge>
+                      <Badge variant="outline">{supplier.outreachStatus.replace(/_/g, " ")}</Badge>
                     </div>
                     {primaryRoute ? (
                       <div className="mt-2 space-y-1 text-muted-foreground">
