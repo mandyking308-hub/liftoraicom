@@ -16,6 +16,7 @@ import { loadPortfolioContacts, type PortfolioContactRow } from "@/lib/portfolio
 import { toast } from "sonner";
 
 const STATUSES = ["NEW", "CONTACTED", "ENGAGED", "QUALIFIED", "CLIENT", "SUPPLIER", "DO_NOT_CONTACT"];
+const EDUCATION_TAG = "education_customer_universe";
 
 const statusVariant = (s: string) => {
   if (s === "DO_NOT_CONTACT") return "destructive" as const;
@@ -23,11 +24,21 @@ const statusVariant = (s: string) => {
   return "outline" as const;
 };
 
+function emailReadiness(c: PortfolioContactRow): { label: string; tone: "ok" | "warn" | "muted" } {
+  const v = (c.email_verified_status ?? "").toLowerCase();
+  if (c.email && (v === "" || v === "verified" || v === "exact" || v === "valid")) return { label: "Verified email", tone: "ok" };
+  if (v === "reveal_required") return { label: "Reveal required", tone: "warn" };
+  if (!c.email) return { label: "No email on file", tone: "muted" };
+  return { label: v.replace(/_/g, " ") || "Unknown", tone: "warn" };
+}
+
 const CRMContacts = () => {
   const [params, setParams] = useSearchParams();
   const initialStatus = params.get("status") ?? "ALL";
+  const dataset = params.get("dataset");
+  const educationMode = dataset === "education";
   const [statusFilter, setStatusFilter] = useState<string>(initialStatus);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(params.get("search") ?? "");
   const [contacts, setContacts] = useState<PortfolioContactRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
@@ -40,7 +51,7 @@ const CRMContacts = () => {
   async function load() {
     setLoading(true);
     try {
-      setContacts(await loadPortfolioContacts(500));
+      setContacts(await loadPortfolioContacts());
     } catch (error) {
       toast.error((error as Error).message);
     } finally {
@@ -48,15 +59,21 @@ const CRMContacts = () => {
     }
   }
 
+  const datasetScoped = useMemo(
+    () => (educationMode ? contacts.filter((c) => (c.tags ?? []).includes(EDUCATION_TAG)) : contacts),
+    [contacts, educationMode],
+  );
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return contacts.filter((c) => {
+    return datasetScoped.filter((c) => {
       if (statusFilter !== "ALL" && c.status !== statusFilter) return false;
       if (!q) return true;
       const relationshipNames = c.business_relationships.map((r) => r.business_name).join(" ");
-      return `${c.email} ${c.name ?? ""} ${c.company ?? ""} ${relationshipNames}`.toLowerCase().includes(q);
+      return `${c.email ?? ""} ${c.name ?? ""} ${c.company ?? ""} ${c.role ?? ""} ${relationshipNames}`.toLowerCase().includes(q);
     });
-  }, [contacts, search, statusFilter]);
+  }, [datasetScoped, search, statusFilter]);
+
 
   async function handleCreate() {
     if (!form.email.trim()) {
