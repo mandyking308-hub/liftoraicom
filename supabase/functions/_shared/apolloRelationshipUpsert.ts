@@ -252,5 +252,35 @@ export async function upsertApolloPeople(
     }
   }
 
+  // Bulk insert in chunks. The Apollo result is only "complete" once this succeeds.
+  for (let i = 0; i < pendingInserts.length; i += 200) {
+    const chunk = pendingInserts.slice(i, i + 200);
+    const { data, error } = await admin
+      .from("relationship_intelligence_contacts")
+      .insert(chunk)
+      .select("id, contact_name, organisation_name, apollo_person_id, email, email_status, role_or_title, tags");
+    if (error) {
+      // fall back to row-by-row so one bad row cannot lose the whole page
+      for (const row of chunk) {
+        const { data: one, error: e2 } = await admin
+          .from("relationship_intelligence_contacts")
+          .insert(row)
+          .select("id, contact_name, organisation_name, apollo_person_id, email, email_status, role_or_title, tags")
+          .maybeSingle();
+        if (e2) {
+          if ((e2.message ?? "").includes("ux_ric_apollo_person_id")) stats.skipped_duplicate += 1;
+          else stats.errors.push(String(e2.message).slice(0, 200));
+          continue;
+        }
+        stats.inserted += 1;
+        if (one) cache.push(one as ExistingRow);
+      }
+      continue;
+    }
+    stats.inserted += (data ?? []).length;
+    for (const r of data ?? []) cache.push(r as ExistingRow);
+  }
+
   return stats;
+
 }
