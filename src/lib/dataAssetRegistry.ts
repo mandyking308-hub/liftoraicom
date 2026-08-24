@@ -181,6 +181,37 @@ export const DATA_ASSETS: DataAsset[] = [
     repositoryUrl: "https://github.com/mandyking308-hub/liftoraicom/tree/main/src/data",
   },
   {
+    id: "montvelle-professional-advisory-network",
+    name: "Montvelle Professional Advisory Network",
+    category: "commercial",
+    description:
+      "Curated global institutional advisory network for Montvelle clients spanning private-client law, tax, wealth, fiduciary services, immigration, mobility, property, insurance, security, corporate finance, executive search, reputation, private health, art and philanthropy.",
+    status: "repo_ready",
+    system: "Liftor Portfolio CRM",
+    repository: "mandyking308-hub/liftoraicom",
+    sourceOfTruth: "src/data/montvelleAdvisoryNetwork.ts",
+    primaryUse: "Montvelle client advisory routing, professional introductions, relationship development and controlled institutional outreach",
+    recordDefinition:
+      "Organisation → advisory category → global tier → official/public route → best-for cases → outreach status → relationship status",
+    buyerPools: ["hnw-family-office", "founders-investors", "enterprise-operations"],
+    locations: [
+      "Data: src/data/montvelleAdvisoryNetwork.ts",
+      "UI: Portfolio CRM → Montvelle Professional Advisory Network",
+      "Component: src/components/founder/crm/MontvelleAdvisoryNetworkPanel.tsx",
+      "Outreach: public business routes only; never infer private emails or relationship status",
+    ],
+    knownStats: [
+      { label: "Institutional organisations", value: 100 },
+      { label: "Advisory verticals", value: 15 },
+      { label: "Published business inboxes", value: 9 },
+      { label: "Selection rule", value: "Global institutional firms only" },
+      { label: "Public route rule", value: "Official/public routes only; no guessed emails" },
+    ],
+    lastReviewed: "2026-08-24",
+    retentionRule: "Preserve identified, held and contacted firms; re-verify routes and update relationship status instead of deleting useful research.",
+    repositoryUrl: "https://github.com/mandyking308-hub/liftoraicom/tree/main/src/data",
+  },
+  {
     id: "ghat-grants",
     name: "GHAT Grants & Funding Database",
     category: "funding",
