@@ -242,15 +242,11 @@ export async function upsertApolloPeople(
         last_synced_at: new Date().toISOString(),
       };
 
-      const { error } = await admin.from("relationship_intelligence_contacts").insert(insert);
-      if (error) {
-        if ((error.message ?? "").includes("ux_ric_apollo_person_id")) {
-          stats.skipped_duplicate += 1;
-          continue;
-        }
-        throw new Error(error.message);
-      }
-      stats.inserted += 1;
+      // queue for bulk insert; also guard against duplicates inside this batch
+      byApolloId.set(p.id, { id: "pending", contact_name: name, organisation_name: org, apollo_person_id: p.id, email: realEmail, tags: Array.from(tags) as string[] });
+      byNameOrg.set(`${normKey(name)}|${normKey(org)}`, byApolloId.get(p.id)!);
+      pendingInserts.push(insert);
+
     } catch (e) {
       stats.errors.push(String((e as Error).message).slice(0, 200));
     }
