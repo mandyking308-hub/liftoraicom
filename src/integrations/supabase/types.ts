@@ -6459,6 +6459,94 @@ export type Database = {
           },
         ]
       }
+      billionaire_access_research_2026: {
+        Row: {
+          access_mode: string | null
+          billionaire_id: string | null
+          billionaire_name: string
+          correction_notes: string | null
+          created_at: string
+          evidence_file: string
+          institutional_route: string
+          match_confidence: number
+          match_status: string
+          metadata: Json
+          normalized_name: string | null
+          official_source: string | null
+          outreach_allowed: boolean
+          restriction_notes: string | null
+          reviewed_at: string
+          snapshot_id: string | null
+          source_row: number
+          updated_at: string
+          verification_status: string
+        }
+        Insert: {
+          access_mode?: string | null
+          billionaire_id?: string | null
+          billionaire_name: string
+          correction_notes?: string | null
+          created_at?: string
+          evidence_file: string
+          institutional_route: string
+          match_confidence?: number
+          match_status?: string
+          metadata?: Json
+          normalized_name?: string | null
+          official_source?: string | null
+          outreach_allowed?: boolean
+          restriction_notes?: string | null
+          reviewed_at: string
+          snapshot_id?: string | null
+          source_row: number
+          updated_at?: string
+          verification_status: string
+        }
+        Update: {
+          access_mode?: string | null
+          billionaire_id?: string | null
+          billionaire_name?: string
+          correction_notes?: string | null
+          created_at?: string
+          evidence_file?: string
+          institutional_route?: string
+          match_confidence?: number
+          match_status?: string
+          metadata?: Json
+          normalized_name?: string | null
+          official_source?: string | null
+          outreach_allowed?: boolean
+          restriction_notes?: string | null
+          reviewed_at?: string
+          snapshot_id?: string | null
+          source_row?: number
+          updated_at?: string
+          verification_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billionaire_access_research_2026_billionaire_id_fkey"
+            columns: ["billionaire_id"]
+            isOneToOne: false
+            referencedRelation: "billionaire_access_summary"
+            referencedColumns: ["billionaire_id"]
+          },
+          {
+            foreignKeyName: "billionaire_access_research_2026_billionaire_id_fkey"
+            columns: ["billionaire_id"]
+            isOneToOne: false
+            referencedRelation: "billionaire_intelligence"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billionaire_access_research_2026_snapshot_id_fkey"
+            columns: ["snapshot_id"]
+            isOneToOne: false
+            referencedRelation: "billionaire_wealth_snapshots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       billionaire_affiliations: {
         Row: {
           affiliation_type: string
@@ -69498,6 +69586,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      billionaire_access_research_2026_summary: {
+        Row: {
+          ambiguous: number | null
+          any_outreach_enabled: boolean | null
+          deceased_remove_from_active_outreach: number | null
+          enhanced_compliance_review: number | null
+          historical_ids_linked: number | null
+          legal_compliance_block: number | null
+          manual_review: number | null
+          matched: number | null
+          missing_snapshot: number | null
+          new_2026_names: number | null
+          snapshot_rows_linked: number | null
+          source_rows: number | null
+          verified_institutional_restricted: number | null
+          verified_institutional_source_age_warning: number | null
+          verified_institutional_switchboard_or_postal: number | null
+          verified_public_institutional: number | null
+        }
+        Relationships: []
       }
       billionaire_access_summary: {
         Row: {
