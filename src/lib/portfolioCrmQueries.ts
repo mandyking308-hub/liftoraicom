@@ -4,10 +4,14 @@ const sb: any = supabase as any;
 
 export type PortfolioContactRow = {
   id: string;
-  email: string;
+  email: string | null;
   name: string | null;
   company: string | null;
+  role: string | null;
   status: string;
+  tags: string[] | null;
+  email_verified_status: string | null;
+  sendable_status: string | null;
   last_replied_at: string | null;
   conversation_active: boolean;
   business_relationships: Array<{
@@ -21,34 +25,48 @@ export type PortfolioContactRow = {
   }>;
 };
 
-export async function loadPortfolioContacts(limit = 200): Promise<PortfolioContactRow[]> {
-  const { data: contacts, error } = await sb
-    .from("contacts")
-    .select("id,email,name,company,status,last_replied_at,conversation_active")
-    .order("created_at", { ascending: false })
-    .limit(limit);
-  if (error) throw error;
+const sel = (s: string): string => s;
 
-  const ids = (contacts ?? []).map((c: any) => c.id);
+/** Loads all master CRM contacts using safe 1000-row pages (no 500-row ceiling). */
+export async function loadPortfolioContacts(maxRows = 50000): Promise<PortfolioContactRow[]> {
+  const PAGE = 1000;
+  const contacts: any[] = [];
+  for (let from = 0; from < maxRows; from += PAGE) {
+    const { data, error } = await sb
+      .from("contacts")
+      .select(sel("id,email,name,company,role,status,tags,email_verified_status,sendable_status,last_replied_at,conversation_active"))
+      .order("created_at", { ascending: false })
+      .range(from, Math.min(from + PAGE, maxRows) - 1);
+    if (error) throw error;
+    contacts.push(...(data ?? []));
+    if (!data || data.length < PAGE) break;
+  }
+
+  const ids = contacts.map((c: any) => c.id);
   if (!ids.length) return [];
 
-  const { data: relationships, error: relError } = await sb
-    .from("business_contact_relationships")
-    .select("id,contact_id,business_name,qualification,current_stage,campaign_eligible,do_not_contact,relevance_category")
-    .in("contact_id", ids);
-  if (relError) throw relError;
+  const relationships: any[] = [];
+  for (let i = 0; i < ids.length; i += 500) {
+    const { data, error } = await sb
+      .from("business_contact_relationships")
+      .select(sel("id,contact_id,business_name,qualification,current_stage,campaign_eligible,do_not_contact,relevance_category"))
+      .in("contact_id", ids.slice(i, i + 500));
+    if (error) throw error;
+    relationships.push(...(data ?? []));
+  }
 
   const byContact = new Map<string, any[]>();
-  for (const r of relationships ?? []) {
+  for (const r of relationships) {
     if (!byContact.has(r.contact_id)) byContact.set(r.contact_id, []);
     byContact.get(r.contact_id)!.push(r);
   }
 
-  return (contacts ?? []).map((c: any) => ({
+  return contacts.map((c: any) => ({
     ...c,
     business_relationships: byContact.get(c.id) ?? [],
   }));
 }
+
 
 export async function getPortfolioCrmSummary() {
   const [peopleRes, relationshipsRes, contactOrgNamesRes, tenantOrgRes] = await Promise.all([
