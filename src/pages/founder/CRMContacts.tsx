@@ -196,27 +196,41 @@ const CRMContacts = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Person</TableHead>
+                    <TableHead>Email readiness</TableHead>
                     <TableHead>Organisation</TableHead>
+                    <TableHead>Role / title</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Sendable</TableHead>
                     <TableHead>Portfolio relationships</TableHead>
-                    <TableHead>Conversation</TableHead>
                     <TableHead>Last reply</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {loading ? (
-                    <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-6">Loading…</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-6">Loading…</TableCell></TableRow>
                   ) : filtered.length === 0 ? (
-                    <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-6">No contacts yet.</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-6">No contacts yet.</TableCell></TableRow>
                   ) : (
-                    filtered.map((c) => (
+                    filtered.map((c) => {
+                      const readiness = emailReadiness(c);
+                      return (
                       <TableRow key={c.id}>
                         <TableCell>
-                          <Link to={`/founder/crm/contacts/${c.id}`} className="font-medium hover:text-primary">{c.name || c.email}</Link>
-                          <div className="text-xs text-muted-foreground">{c.email}</div>
+                          <Link to={`/founder/crm/contacts/${c.id}`} className="font-medium hover:text-primary">{c.name || c.email || "Unnamed contact"}</Link>
+                          <div className="text-xs text-muted-foreground">{c.email || "No email on file"}</div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={readiness.tone === "ok" ? "default" : "outline"}
+                            className={`text-[10px] ${readiness.tone === "warn" ? "text-yellow-300 border-yellow-300/40" : ""}`}
+                          >
+                            {readiness.label}
+                          </Badge>
                         </TableCell>
                         <TableCell>{c.company || "—"}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">{c.role || "—"}</TableCell>
                         <TableCell><Badge variant={statusVariant(c.status)}>{c.status}</Badge></TableCell>
+                        <TableCell className="text-xs text-muted-foreground">{(c.sendable_status ?? "unknown").replace(/_/g, " ")}</TableCell>
                         <TableCell>
                           <div className="flex flex-wrap gap-1">
                             {c.business_relationships.length === 0 ? (
@@ -228,14 +242,15 @@ const CRMContacts = () => {
                             ))}
                           </div>
                         </TableCell>
-                        <TableCell>{c.conversation_active ? <Badge>Active</Badge> : <span className="text-muted-foreground text-xs">Idle</span>}</TableCell>
                         <TableCell className="text-muted-foreground text-xs">
                           {c.last_replied_at ? new Date(c.last_replied_at).toLocaleString() : "—"}
                         </TableCell>
                       </TableRow>
-                    ))
+                      );
+                    })
                   )}
                 </TableBody>
+
               </Table>
             </div>
           </CardContent>
