@@ -151,6 +151,36 @@ export const DATA_ASSETS: DataAsset[] = [
     repositoryUrl: "https://github.com/mandyking308-hub/liftoraicom/tree/main/data",
   },
   {
+    id: "montvelle-global-supplier-network",
+    name: "Montvelle Global Supplier Network",
+    category: "commercial",
+    description:
+      "Curated 5/6-star global supplier universe for Montvelle spanning luxury networks, private clubs, hotels, aviation, yachts, chauffeurs, destination management, villas, concierge, property, staffing, security, wellness and specialist sourcing.",
+    status: "repo_ready",
+    system: "Liftor Portfolio CRM",
+    repository: "mandyking308-hub/liftoraicom",
+    sourceOfTruth: "src/data/montvelleSupplierSeed.ts",
+    primaryUse: "Montvelle supplier sourcing, network leverage, supplier outreach planning and relationship conversion",
+    recordDefinition:
+      "Organisation → supplier category → geographic coverage → multiplier reach → lifecycle status → outreach status → public-name status → relationship",
+    buyerPools: ["hnw-family-office", "enterprise-operations", "founders-investors"],
+    locations: [
+      "Data: src/data/montvelleSupplierSeed.ts",
+      "UI: Portfolio CRM → Montvelle Global Supplier Network",
+      "Component: src/components/founder/crm/MontvelleSupplierNetworkPanel.tsx",
+      "Outreach: separate supplier-contact workstream; do not infer relationship from inclusion",
+    ],
+    knownStats: [
+      { label: "Initial curated suppliers", value: 78 },
+      { label: "Supplier verticals", value: 20 },
+      { label: "Build priority", value: "Global network multipliers first" },
+      { label: "Public naming rule", value: "Factual sourcing reference until relationship confirmed" },
+    ],
+    lastReviewed: "2026-08-24",
+    retentionRule: "Keep identified and held suppliers for future use; update status rather than deleting research. Outreach and relationship evidence remain separate from inclusion in the sourcing universe.",
+    repositoryUrl: "https://github.com/mandyking308-hub/liftoraicom/tree/main/src/data",
+  },
+  {
     id: "ghat-grants",
     name: "GHAT Grants & Funding Database",
     category: "funding",
