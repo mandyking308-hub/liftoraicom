@@ -6,7 +6,11 @@ import { Layers, Lock, Download } from "lucide-react";
 import {
   SLIM_MANDY_MANUAL_MARKDOWN,
   SLIM_MANDY_MANUAL_FILENAME,
+  SLIM_MANDY_MANUAL_VERSION,
 } from "@/lib/slimMandyManualContent";
+import { LIFTOR_USER_MANUAL_VERSION } from "@/lib/liftorUserManualContent";
+import { ARCHITECTURE_SYNC_VERSION } from "@/lib/manualArchitectureSync2026";
+
 
 export default function ManualsHierarchyPanel() {
   const downloadSlim = () => {
@@ -44,12 +48,16 @@ export default function ManualsHierarchyPanel() {
       <CardContent className="space-y-3">
         <ol className="text-xs text-muted-foreground space-y-1 list-decimal list-inside">
           <li>Command Centre Truth Sync — live state</li>
-          <li>Full Technical Manual — canonical architecture</li>
-          <li>User Manual — operator guide</li>
+          <li>Full Technical Manual — canonical architecture · {ARCHITECTURE_SYNC_VERSION}</li>
+          <li>User Manual — operator guide · v{LIFTOR_USER_MANUAL_VERSION}</li>
           <li>Build Log — historical decisions</li>
           <li>Business Manuals — selected business scope</li>
-          <li>Slim Mandy Manual — portable handover only</li>
+          <li>Slim Mandy Manual — portable handover only · v{SLIM_MANDY_MANUAL_VERSION}</li>
         </ol>
+        <p className="text-[11px] text-muted-foreground">
+          Current-architecture map: Full Technical Manual, Section 100 — August 2026 Architecture Reconciliation.
+        </p>
+
         <div className="flex flex-wrap gap-2">
           <Button size="sm" asChild>
             <Link to="/founder/manuals-hub">Open Manuals Hub</Link>

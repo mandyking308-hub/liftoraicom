@@ -1,4 +1,6 @@
 import { format } from "date-fns";
+import { ARCHITECTURE_SYNC_MARKDOWN, ARCHITECTURE_SYNC_VERSION } from "./manualArchitectureSync2026";
+
 
 export interface ManualLiveData {
   orgCount: number;
@@ -26,10 +28,12 @@ export const generateManualMarkdown = (data: ManualLiveData): string => {
   return `# Liftor AI — Founder Manual
 ## Complete Engineering-Level Platform Documentation
 
-**Version:** 5.2 — Build Closeout / Go-To-Use Edition (15 May 2026)
+**Version:** ${ARCHITECTURE_SYNC_VERSION}
+**Previous version:** 5.2 — Build Closeout / Go-To-Use Edition (15 May 2026) — retained below as history
 **Generated:** ${now}
 **Classification:** Founder / Internal Engineering / Investor Documentation
 **Status:** Live — Auto-generated from platform state
+**Canonical current-architecture section:** SECTION 100 (August 2026 Architecture Reconciliation) at the end of this manual
 
 ---
 
@@ -59,6 +63,7 @@ export const generateManualMarkdown = (data: ManualLiveData): string => {
 13. Platform Build Log
 14. Documentation Engine
 15. Export System
+100. **Current Liftor Architecture — August 2026 Reconciliation (canonical current-state section)**
 
 ---
 
@@ -4167,7 +4172,9 @@ export const FINAL_CARRIER_GRADE_QA_NOTE = `
 ### Ready for live internal operation: **YES**.
 
 *End of Final Carrier-Grade QA (v5.9.10).*
+${ARCHITECTURE_SYNC_MARKDOWN}
 `;
+
 
 export const CONTROL_FABRIC_TECH_NOTE = `
 ## Control Fabric — Final Integration
