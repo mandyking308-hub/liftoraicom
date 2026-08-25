@@ -218,7 +218,7 @@ Two layers exist side by side:
 1. **Business operating context (siloed).** Each business has its own operating state:
    activation stage, offers, campaigns, conversations, deals, delivery, support, finance
    activity, social profile, content, targets and evidence. Business context must not
-   cross-contaminate. \`/founder/cross-contamination\` and \`/founder/context-guard\` exist
+   cross-contaminate. \`/founder/cross-contamination\` and \`/founder/context-fabric\` exist
    specifically to detect and prevent bleed between silos.
 2. **Shared portfolio estate (canonical, reusable).** People, organisations, reusable data
    assets and buyer pools are portfolio-level assets stored once and reused. A person is
