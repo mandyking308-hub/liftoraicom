@@ -1,6 +1,6 @@
 // Liftor User Manual — plain-English operating guide (separate from Founder/Technical Manual)
 
-export const LIFTOR_USER_MANUAL_VERSION = "1.5 — Live-First Founder-Use Edition (25 May 2026)";
+export const LIFTOR_USER_MANUAL_VERSION = "1.6 — August 2026 Architecture Reconciliation (25 August 2026)";
 
 export interface ManualSection {
   number: number;
@@ -1326,3 +1326,98 @@ const QUOTE_TO_CASH_ENGINE = {
   ].join(" "),
 };
 LIFTOR_FULL_GUIDE.push(QUOTE_TO_CASH_ENGINE);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// August 2026 Architecture Reconciliation — plain-English operator sections.
+// Added 25 August 2026. Command Centre remains the start point; these sections
+// describe modules that existed in code but were missing from the User Manual.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const ARCHITECTURE_SYNC_USER_SECTIONS: ManualSection[] = [
+  {
+    number: 97,
+    key: "one-system-many-businesses",
+    title: "97. One system, many businesses (how your data is shared)",
+    body: "Liftor is one operating system that runs all your businesses, not a separate copy per business. Two things are true at once. First, each business has its own private operating context — its offers, campaigns, conversations, deals, delivery, support, finance activity and content stay inside that business and must never leak into another. Second, people, organisations and reusable data assets are stored once for the whole portfolio and shared. So the same person can be relevant to two businesses without being duplicated. What stays business-specific is the commercial relationship: whether that business may contact them, how relevant they are, and what has happened between them.",
+  },
+  {
+    number: 98,
+    key: "crm-vs-relationship-intelligence",
+    title: "98. CRM vs Relationship Intelligence (which one to open)",
+    body: "Open /founder/crm/contacts when you want the operational CRM — real people you can work commercially. Open /founder/relationship-intelligence when you want research and evidence you have gathered but not yet made operational. Research does not become CRM automatically. It is promoted through a controlled bridge only when the role/evidence matches or you approve it. Nothing you import or promote ever sends anything.",
+  },
+  {
+    number: 99,
+    key: "data-asset-register-user",
+    title: "99. Data Asset Register and reusable buyer pools",
+    body: "The Data Asset Register on the Command Centre shows every reusable data asset you own, with live counts read from the live database rather than an old saved file. The Global Education asset currently holds 2,519 contacts across 266 organisations: 109 verified work emails, 1,424 needing an email reveal, 986 with no email on file. Old GitHub status files are kept as history only. Rule: hold data, never delete it, and never let an old snapshot overwrite live counts.",
+  },
+  {
+    number: 100,
+    key: "pr-and-visibility",
+    title: "100. PR, press and visibility (Global PR Radar)",
+    body: "Open /founder/global-pr-radar. It holds the media atlas, journalist and outlet intelligence, press readiness per business, pitch drafts, owned-media plans and quarterly PR campaign planning. Everything is prepared internally. No pitch, press release or media email leaves Liftor without your explicit approval.",
+  },
+  {
+    number: 101,
+    key: "social-three-engines",
+    title: "101. The three social engines and what each is for",
+    body: "Social Autopilot (/founder/social-autopilot) plans and drafts your content, runs the calendar, approval queue and publishing queue. The Social Relationship Engine (/founder/social-relationships) is about people: finding targets, tracking relationship health, handling the engagement inbox and matching to CRM. The Social Viral Opportunity Radar (/founder/social) watches for trends worth reacting to and scores opportunities so you can turn one into a brief. Publishing and DMs remain approval-gated in all three.",
+  },
+  {
+    number: 102,
+    key: "radars-and-capital",
+    title: "102. Radars: distressed, acquisition and funding",
+    body: "Distressed Radar (/founder/distressed-radar) surfaces businesses in trouble that could be opportunities. Funding Radar (/founder/funding-radar) runs funding discovery through shortlist, readiness and adviser pack. Acquisition Funding (/founder/acquisition-funding) covers how a deal would actually be paid for. All three prepare information; none of them contact anyone.",
+  },
+  {
+    number: 103,
+    key: "wealth-intelligence-user",
+    title: "103. Billionaire and wealth network intelligence",
+    body: "Open /founder/billionaire-intelligence for the wealth coverage registry, wealth snapshots, philanthropy and Giving Pledge mapping, next-gen wealth networks, and how strong your verified route to a person is. This is intelligence only. Any approach is a separate, deliberate, approved decision.",
+  },
+  {
+    number: 104,
+    key: "exit-and-buyers-user",
+    title: "104. Exit engines and buyer warm-up",
+    body: "Founder-Led Exit Sales Engine (/founder/founder-led-exit) tracks exit targets and readiness. The Buyer & Market Domination Engine (/founder/founder-led-buyer-market) keeps quiet profiles of potential acquirers and competitors. Buyer warm-up is tracking only — contacting a buyer is blocked in the database itself unless you have explicitly marked that buyer approved to contact.",
+  },
+  {
+    number: 105,
+    key: "imports-identity-search",
+    title: "105. Importing data, removing duplicates and finding anything",
+    body: "Import/Migration Centre (/founder/imports) stages any import so you can preview it before it lands. Identity Resolution (/founder/identity-resolution) is where you resolve duplicate people and organisations. Global Search (/founder/search) searches across record types, modules and manuals. Imports never enqueue outreach, and deduping never deletes the record you might still need — Liftor holds rather than removes.",
+  },
+  {
+    number: 106,
+    key: "legal-entity-stack-user",
+    title: "106. Legal, entity and filings stack",
+    body: "Entity Map (/founder/entity-map) holds your legal entities, required-policy matrix and revenue routing rules. Contracts, Corporate Secretarial, Statutory Filings, Jurisdiction & Tax, International Expansion, Insurance & Liability and IP Assets each have their own page. Liftor never files anything, never emails an adviser and never changes an entity, bank or shareholder. Sensitive items go to the adviser queue instead of being answered as AI advice.",
+  },
+  {
+    number: 107,
+    key: "evidence-and-data-room-user",
+    title: "107. Documents, evidence, data room and adviser packs",
+    body: "Document Vault (/founder/documents) is your evidence store. Data Room (/founder/data-room) is closed by default and issues no external links. Adviser Pack (/founder/adviser-pack) assembles a pack for an adviser but does not send it. If you need to share, that is a separate approved action you take yourself.",
+  },
+  {
+    number: 108,
+    key: "ai-governance-user",
+    title: "108. Keeping AI spend and behaviour under control",
+    body: "AI Cost Governor (/founder/ai-cost) shows budgets, usage, provider pricing and ROI. AI Evals (/founder/ai-evals) tests that AI behaviour has not regressed. Agent Capabilities (/founder/agent-capabilities) lists exactly what each agent may do and what stays founder-only. If something feels like it is doing too much, that is the page to check.",
+  },
+  {
+    number: 109,
+    key: "healthcare-overlay-user",
+    title: "109. Healthcare overlay — what it actually is",
+    body: "The Healthcare Overlay (/founder/healthcare-overlay) is a generic readiness overlay for internal preparation. It is NOT LIVE and BLOCKED by default, and there are no clinical decision features in Liftor. Do not treat it as a healthcare product.",
+  },
+  {
+    number: 110,
+    key: "manual-hierarchy-user",
+    title: "110. Which manual to trust",
+    body: "In order: the Command Centre Truth Sync is what is true right now; the Full Technical Manual is the canonical architecture (Section 100 is the current August 2026 map); this User Manual tells you how to operate it; the Build Log is history; Business Manuals hold business-specific tone, offers and rules; the Slim Mandy Manual is a portable summary for handover only and is never the technical source of truth.",
+  },
+];
+
+ARCHITECTURE_SYNC_USER_SECTIONS.forEach((s) => LIFTOR_FULL_GUIDE.push(s));
