@@ -63,6 +63,7 @@ export const generateManualMarkdown = (data: ManualLiveData): string => {
 13. Platform Build Log
 14. Documentation Engine
 15. Export System
+100. **Current Liftor Architecture — August 2026 Reconciliation (canonical current-state section)**
 
 ---
 
