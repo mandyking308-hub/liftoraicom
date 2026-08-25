@@ -1,4 +1,6 @@
 import { format } from "date-fns";
+import { ARCHITECTURE_SYNC_MARKDOWN, ARCHITECTURE_SYNC_VERSION } from "./manualArchitectureSync2026";
+
 
 export interface ManualLiveData {
   orgCount: number;
