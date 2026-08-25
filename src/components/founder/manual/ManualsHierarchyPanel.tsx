@@ -6,7 +6,11 @@ import { Layers, Lock, Download } from "lucide-react";
 import {
   SLIM_MANDY_MANUAL_MARKDOWN,
   SLIM_MANDY_MANUAL_FILENAME,
+  SLIM_MANDY_MANUAL_VERSION,
 } from "@/lib/slimMandyManualContent";
+import { LIFTOR_USER_MANUAL_VERSION } from "@/lib/liftorUserManualContent";
+import { ARCHITECTURE_SYNC_VERSION } from "@/lib/manualArchitectureSync2026";
+
 
 export default function ManualsHierarchyPanel() {
   const downloadSlim = () => {
