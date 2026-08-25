@@ -4167,7 +4167,9 @@ export const FINAL_CARRIER_GRADE_QA_NOTE = `
 ### Ready for live internal operation: **YES**.
 
 *End of Final Carrier-Grade QA (v5.9.10).*
+${ARCHITECTURE_SYNC_MARKDOWN}
 `;
+
 
 export const CONTROL_FABRIC_TECH_NOTE = `
 ## Control Fabric — Final Integration
