@@ -306,8 +306,11 @@ export function compareField(
   let hits = 0;
   for (const t of a) if (b.has(t)) hits++;
   const overlap = Math.round((hits / a.size) * 100) / 100;
+  // Critical fields are held to a stricter bar: near-zero overlap on purpose /
+  // ICP / offers / pricing / brand / approval rules is treated as a contradiction.
+  const weakFloor = critical ? 0.25 : 0.12;
   const status: FieldStatus =
-    overlap >= 0.34 ? "MATCH" : overlap >= 0.12 ? "WEAK_MATCH" : "CONTRADICTION";
+    overlap >= 0.34 ? "MATCH" : overlap >= weakFloor ? "WEAK_MATCH" : "CONTRADICTION";
   return { field, critical, status, overlap, source_value: clip(src), derived_value: clip(der) };
 }
 
