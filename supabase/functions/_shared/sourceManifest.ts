@@ -366,7 +366,8 @@ export function deriveFromLiftor(
   business: Record<string, any> | null,
 ): Partial<Record<ManifestField, string>> {
   // Placeholder seeds are NOT derived understanding — treat as not found.
-  const PLACEHOLDER = /(awaiting founder population|knowledge brain seeded|placeholder|not yet populated|tbd)/i;
+  const PLACEHOLDER =
+    /(awaiting founder population|knowledge brain seeded|placeholder|not yet populated|\btbd\b|pending\s*[—-]|trained on \d+ sources|derived from [a-z/ ]*uploads|refine after reviewing|starter offer)/i;
   const t = (v: unknown) => {
     const s = asText(v);
     if (!s) return undefined;
@@ -383,7 +384,7 @@ export function deriveFromLiftor(
     onboarding_delivery_support: t(pack?.onboarding_flow) ?? t(pack?.complaints_flow),
     marketing_social_pr: t(pack?.social_content_plan) ?? t(pack?.marketing_assets_needed),
     policies_compliance: t(profile?.compliance_notes) ?? t(profile?.required_disclaimers),
-    approval_rules: t(profile?.escalation_rules) ?? t(pack?.go_live_blockers),
+    approval_rules: t(profile?.escalation_rules),
     risks_gaps: t(pack?.go_live_blockers),
   };
 }
