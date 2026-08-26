@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, Upload, BrainCircuit, Package, ShieldCheck } from "lucide-react";
+import BusinessSourceManifestBlock from "./BusinessSourceManifestBlock";
 
 const UPLOAD_TYPES = [
   "technical_manual","user_manual","website","brand_guide","offer_sheet","pricing_sheet",
@@ -162,6 +163,8 @@ export const BusinessKnowledgeUploadTrainingPanel = () => {
             </Button>
           </div>
         </div>
+
+        {businessId && <BusinessSourceManifestBlock businessId={businessId} />}
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
           <MiniList title="Recent uploads" rows={uploads.slice(0,8).map(u => `${u.upload_type} · ${u.upload_title} · ${u.processing_status}`)} empty="No uploads yet" />

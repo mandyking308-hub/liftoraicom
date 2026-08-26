@@ -183,6 +183,41 @@ Deno.serve(async (req) => {
       .select("id").eq("business_id", business_id).eq("external_send_allowed", true).limit(1);
     if (leak && leak.length > 0) blockers.push("sendable_items_present");
 
+    // Source fidelity gate — a critical-field contradiction between the registered
+    // source manifest and Liftor's derived understanding blocks internal activation.
+    const { data: manifestRows } = await svc.from("business_knowledge_uploads")
+      .select("id,metadata").eq("business_id", business_id).eq("upload_type", "source_manifest")
+      .order("created_at", { ascending: false });
+    const currentManifest = (manifestRows ?? []).find((m: any) => m?.metadata?.superseded !== true)
+      ?? (manifestRows ?? [])[0];
+    const fidelity = (currentManifest as any)?.metadata?.fidelity ?? null;
+    if (!currentManifest) {
+      missing_context.push("no_source_manifest");
+    } else if (!fidelity) {
+      missing_context.push("source_fidelity_not_checked");
+    } else if (fidelity.verdict === "FIDELITY_FAIL") {
+      blockers.push("source_fidelity_fail");
+      risk_warnings.push(
+        `Source fidelity FAIL — critical field contradictions: ${(fidelity.mismatches ?? [])
+          .map((m: any) => m.field).join(", ")}`,
+      );
+    } else if (fidelity.verdict === "FIDELITY_REVIEW") {
+      risk_warnings.push("source_fidelity_review_recommended");
+    }
+
+    if (!dry_run && blockers.includes("source_fidelity_fail")) {
+      return j({
+        ok: false,
+        blocked: true,
+        error: "source_fidelity_fail",
+        business_id,
+        fidelity,
+        next_step: "Founder review required: reconcile source manifest vs derived understanding, then rerun business-source-fidelity-check.",
+      }, 409);
+    }
+
+
+
     // Readiness score
     let score = 0;
     if (factory) score += 25;
