@@ -360,9 +360,12 @@ export function deriveFromLiftor(
   pack: Record<string, any> | null,
   business: Record<string, any> | null,
 ): Partial<Record<ManifestField, string>> {
+  // Placeholder seeds are NOT derived understanding — treat as not found.
+  const PLACEHOLDER = /(awaiting founder population|knowledge brain seeded|placeholder|not yet populated|tbd)/i;
   const t = (v: unknown) => {
     const s = asText(v);
-    return s ? s : undefined;
+    if (!s) return undefined;
+    return PLACEHOLDER.test(s) ? undefined : s;
   };
   return {
     business_identity: t(business?.name),
