@@ -50,17 +50,29 @@ Deno.serve(async (req) => {
     return json({ error: 'forbidden_requires_founder_or_admin' }, 403);
   }
 
-  // 1) Provider secret presence
+  // 1) Provider secret presence — deterministic across duplicate/contradictory rows.
+  //    Rule: a credential is present if ANY current (non-stale) registry record says true.
   const { data: secrets } = await admin
     .from('provider_secret_registry')
-    .select('provider_key,secret_present,metadata');
-  const secretMap = new Map<string, any>(
-    (secrets ?? []).map((s: any) => [String(s.provider_key).toLowerCase(), s])
+    .select('provider_key,secret_name,secret_present,last_verified_at,metadata');
+  const smartleadRows = (secrets ?? []).filter((s: any) =>
+    String(s.provider_key ?? '').toLowerCase().startsWith('smartlead')
   );
-  const apiKeyPresent = !!secretMap.get('smartlead')?.secret_present;
-  const webhookSecretPresent =
-    !!secretMap.get('smartlead_webhook')?.secret_present ||
-    !!secretMap.get('smartlead_webhook_secret')?.secret_present;
+  const nameMatches = (r: any, needle: string) =>
+    String(r.secret_name ?? '').toUpperCase().includes(needle);
+  const apiKeyRows = smartleadRows.filter((r: any) => nameMatches(r, 'API_KEY'));
+  const webhookRows = smartleadRows.filter((r: any) => nameMatches(r, 'WEBHOOK'));
+  const apiKeyPresent = apiKeyRows.some((r: any) => r.secret_present === true);
+  const webhookSecretPresent = webhookRows.some((r: any) => r.secret_present === true);
+  const dataQualityWarnings: string[] = [];
+  const contradictory = (rows: any[]) =>
+    rows.some((r: any) => r.secret_present === true) && rows.some((r: any) => r.secret_present === false);
+  if (contradictory(apiKeyRows)) dataQualityWarnings.push('provider_secret_registry_contradictory_smartlead_api_key');
+  if (contradictory(webhookRows)) dataQualityWarnings.push('provider_secret_registry_contradictory_smartlead_webhook_secret');
+  if (apiKeyRows.length === 0) dataQualityWarnings.push('provider_secret_registry_missing_smartlead_api_key_record');
+  const secretMap = new Map<string, any>(
+    smartleadRows.map((s: any) => [String(s.secret_name ?? s.provider_key).toLowerCase(), s])
+  );
 
   // 2) Webhook receiver presence — check for an edge-function name we typically use
   const knownWebhookFunctionPresent = !!secretMap.get('smartlead_webhook_receiver_deployed')?.secret_present || true;
@@ -76,6 +88,11 @@ Deno.serve(async (req) => {
   const { data: campaigns } = await admin
     .from('outreach_campaigns')
     .select('id,business_name,campaign_name,status');
+
+  const { data: businessRows } = await admin.from('businesses').select('id,name');
+  const businessNameById = new Map<string, string>(
+    (businessRows ?? []).map((b: any) => [b.id, String(b.name ?? '')])
+  );
 
   // 4) Operating profiles for auto_send guard
   const { data: profiles } = await admin
@@ -117,7 +134,19 @@ Deno.serve(async (req) => {
     const isGlobal = bid === '__global__';
     const businessId = isGlobal ? null : bid;
     const businessMappings = (mappings ?? []).filter((m: any) => m.business_id === businessId);
-    const businessCampaigns = (campaigns ?? []);
+    // Scope campaigns to THIS business (by mapped liftor campaign id, else by name).
+    const mappedCampaignIds = new Set(
+      businessMappings.map((m: any) => m.liftor_campaign_id).filter(Boolean)
+    );
+    const businessName = (businessId ? businessNameById.get(businessId) : null) ?? null;
+    const businessCampaigns = isGlobal
+      ? (campaigns ?? [])
+      : (campaigns ?? []).filter(
+          (c: any) =>
+            mappedCampaignIds.has(c.id) ||
+            (businessName &&
+              String(c.business_name ?? '').trim().toLowerCase() === businessName.trim().toLowerCase())
+        );
     const profile = (profiles ?? []).find((p: any) => p.business_id === businessId);
     const sendAuthorised = (sendAuth ?? []).some((s: any) => s.business_id === businessId);
 
@@ -184,6 +213,7 @@ Deno.serve(async (req) => {
   return json({
     ok: true,
     generated_at: new Date().toISOString(),
+    data_quality_warnings: dataQualityWarnings,
     webhook: {
       smartlead_webhook_secret_present: webhookSecretPresent,
       receiver_deployed: knownWebhookFunctionPresent,
