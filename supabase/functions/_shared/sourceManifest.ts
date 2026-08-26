@@ -336,11 +336,16 @@ export function runFidelityCheck(
     : 0;
   const mismatches = comparisons.filter((c) => c.status === "CONTRADICTION");
   const criticalContradiction = mismatches.some((c) => c.critical);
+  // If no critical field could be compared at all, the check is inconclusive → review.
+  const criticalComparable = comparisons.some(
+    (c) => c.critical && (c.status === "MATCH" || c.status === "WEAK_MATCH" || c.status === "CONTRADICTION"),
+  );
   const verdict = criticalContradiction
     ? "FIDELITY_FAIL"
-    : mismatches.length > 0 || score < 50
+    : mismatches.length > 0 || score < 60 || !criticalComparable
       ? "FIDELITY_REVIEW"
       : "FIDELITY_PASS";
+
   return {
     verdict,
     score,
