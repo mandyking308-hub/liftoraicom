@@ -168,6 +168,49 @@ URL inside Smartlead, then re-runs the Scale Operations Dry-Run Dashboard.
 Only after every stage flips to ready/deferred do we consider enabling the
 lead push feature flag for a controlled first batch.
 
+### 0z.8 Smartlead → Liftor contact import (7 Sep 2026)
+
+Direction is inbound only: leads that ALREADY exist in a mapped Smartlead
+campaign are pulled into Liftor so Liftor keeps the data and reply/relationship
+history while Smartlead remains the sender.
+
+- Edge function: \`smartlead-campaign-lead-import\` (founder/admin only).
+- Logic: \`supabase/functions/_shared/smartleadLeadImport.ts\` (unit tested).
+- UI: "Import existing Smartlead contacts" panel in the Command Centre outbound
+  section. Shows processed / created / updated / held / skipped / errors plus a
+  Continue button for the next offset.
+- Provider call: \`GET /api/v1/campaigns/{campaign_id}/leads?offset=&limit=\`
+  (limit capped at 100). One page per invocation, resumable by offset.
+- Writes: \`contacts\`, \`business_contact_relationships\`,
+  \`outbound_provider_lead_mappings\` (\`push_status = imported_from_provider\`).
+
+Invariants:
+- Dedupe on Smartlead lead id first, then normalised email.
+- Verification status is stored exactly as supplied; missing stays \`unknown\`
+  and stronger local verification is never downgraded.
+- Suppression, do-not-contact, bounce and unsubscribe flags can only be set,
+  never cleared. Suppressed contacts are HELD (provenance only).
+- Campaign membership is not consent: new contacts land as \`needs_review\` and
+  \`campaign_eligible = false\`.
+- Records attach only to the business on the selected mapping; unmapped or
+  ambiguous campaigns return \`campaign_not_mapped\` / \`ambiguous_campaign_mapping\`
+  instead of guessing ownership.
+- 401/403 are reported as account/key entitlement failures, distinct from an
+  empty lead list.
+
+Remaining steps before live use:
+1. Deploy \`smartlead-campaign-lead-import\` (not deployed by this build).
+2. Resolve Smartlead API entitlement — GETs returned 403 on 26 Aug 2026; a plan
+   upgrade alone is not confirmed to fix it.
+3. Create an active, unambiguous campaign mapping per portfolio business.
+4. Run the panel in Preview first, then import page by page.
+
+Webhook readiness note: \`smartlead-controlled-activation\` no longer claims the
+receiver is deployed. It reports \`verified_deployed\` only on an explicit
+registry attestation, otherwise \`not_verified\`; code presence is not evidence.
+
+
+
 ---
 
 ## SECTION 0 — OPERATIONAL HANDOVER — NEONCANDY / OUTREACH (1 MAY 2026)
