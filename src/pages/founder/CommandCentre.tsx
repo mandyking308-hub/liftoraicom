@@ -97,6 +97,7 @@ import SmartleadScaleSetupChecklist from "@/components/founder/integrations/Smar
 import SmartleadCampaignMappingPreview from "@/components/founder/integrations/SmartleadCampaignMappingPreview";
 import SmartleadLeadPushPreview from "@/components/founder/integrations/SmartleadLeadPushPreview";
 import SmartleadCampaignDiscoveryPanel from "@/components/founder/integrations/SmartleadCampaignDiscoveryPanel";
+import SmartleadContactImportPanel from "@/components/founder/integrations/SmartleadContactImportPanel";
 import BulkSendPreviewPanel from "@/components/founder/integrations/BulkSendPreviewPanel";
 import SmartleadScaleNextActionBanner from "@/components/founder/integrations/SmartleadScaleNextActionBanner";
 import OutboundChannelLanesPanel from "@/components/founder/integrations/OutboundChannelLanesPanel";
@@ -1609,6 +1610,7 @@ const CommandCentre = () => {
             <SmartleadScaleSetupChecklist />
             <SmartleadCampaignMappingPreview />
             <SmartleadCampaignDiscoveryPanel />
+            <SmartleadContactImportPanel />
             <SmartleadLeadPushPreview />
             <BulkSendPreviewPanel />
             <ScaleOperationsDryRunDashboard />

@@ -74,10 +74,16 @@ Deno.serve(async (req) => {
     smartleadRows.map((s: any) => [String(s.secret_name ?? s.provider_key).toLowerCase(), s])
   );
 
-  // 2) Webhook receiver presence — check for an edge-function name we typically use
-  const knownWebhookFunctionPresent = !!secretMap.get('smartlead_webhook_receiver_deployed')?.secret_present || true;
-  // We don't actually probe edge-function listing here; treat as deployed if a related
-  // entry exists. Operator can override via checklist row.
+  // 2) Webhook receiver deployment — we do NOT probe the edge-function listing here and
+  // source code presence is not deployment evidence. Report 'verified_deployed' only when
+  // a registry record explicitly attests it; otherwise 'not_verified'.
+  const receiverAttestation = secretMap.get('smartlead_webhook_receiver_deployed');
+  const receiverDeployedStatus: 'verified_deployed' | 'not_verified' =
+    receiverAttestation?.secret_present === true ? 'verified_deployed' : 'not_verified';
+  if (receiverDeployedStatus === 'not_verified') {
+    dataQualityWarnings.push('smartlead_webhook_receiver_deployment_unverified');
+  }
+
 
   // 3) Campaign + mapping
   const { data: mappings } = await admin
@@ -216,8 +222,14 @@ Deno.serve(async (req) => {
     data_quality_warnings: dataQualityWarnings,
     webhook: {
       smartlead_webhook_secret_present: webhookSecretPresent,
-      receiver_deployed: knownWebhookFunctionPresent,
-      capture_mode_ready: webhookSecretPresent,
+      receiver_deployed: receiverDeployedStatus,
+      receiver_deployment_evidence:
+        receiverDeployedStatus === 'verified_deployed'
+          ? 'provider_secret_registry_attestation'
+          : 'none — source code presence is not deployment evidence',
+      capture_mode_ready: false,
+      capture_mode_note:
+        'Live capture cannot be confirmed from code. Requires a verified deployed receiver plus an observed inbound test event.',
       latest_test_event_captured: false,
     },
     auto_send_anywhere: autoSendAnywhere,
