@@ -156,18 +156,18 @@ describe("mapping resolution", () => {
   it("errors actionably when the campaign is unmapped", () => {
     const r = resolveMapping([], {});
     expect(r.ok).toBe(false);
-    if (!r.ok) expect(r.error).toBe("campaign_not_mapped");
+    expect((r as { error?: string }).error).toBe("campaign_not_mapped");
   });
 
   it("refuses to guess when several mappings match", () => {
     const r = resolveMapping([row({}), row({ id: "m2", provider_campaign_id: "sl-99" })], {});
     expect(r.ok).toBe(false);
-    if (!r.ok) expect(r.error).toBe("ambiguous_campaign_mapping");
+    expect((r as { error?: string }).error).toBe("ambiguous_campaign_mapping");
   });
 
   it("rejects incomplete mappings", () => {
     const r = resolveMapping([row({ business_id: null })], {});
-    if (!r.ok) expect(r.error).toBe("incomplete_campaign_mapping");
+    expect((r as { error?: string }).error).toBe("incomplete_campaign_mapping");
   });
 
   it("resolves an unambiguous mapping", () => {
