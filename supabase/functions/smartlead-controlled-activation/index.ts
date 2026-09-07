@@ -222,8 +222,14 @@ Deno.serve(async (req) => {
     data_quality_warnings: dataQualityWarnings,
     webhook: {
       smartlead_webhook_secret_present: webhookSecretPresent,
-      receiver_deployed: knownWebhookFunctionPresent,
-      capture_mode_ready: webhookSecretPresent,
+      receiver_deployed: receiverDeployedStatus,
+      receiver_deployment_evidence:
+        receiverDeployedStatus === 'verified_deployed'
+          ? 'provider_secret_registry_attestation'
+          : 'none — source code presence is not deployment evidence',
+      capture_mode_ready: false,
+      capture_mode_note:
+        'Live capture cannot be confirmed from code. Requires a verified deployed receiver plus an observed inbound test event.',
       latest_test_event_captured: false,
     },
     auto_send_anywhere: autoSendAnywhere,
