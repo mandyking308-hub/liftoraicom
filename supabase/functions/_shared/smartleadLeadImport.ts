@@ -410,7 +410,7 @@ export function planContactWrite(
     business_name: ctx.business_name,
     // Campaign membership is not consent — never eligible from an import.
     campaign_eligible: false,
-    notes: `Imported from Smartlead campaign ${ctx.provider_campaign_id} on ${ctx.imported_at}. Provider lead status: ${lead.campaign_lead_status ?? "unknown"}. Membership is not send consent.`,
+    notes: `Imported from Smartlead campaign ${ctx.provider_campaign_id} on ${ctx.imported_at}. Provider lead status: ${lead.campaign_lead_status ?? "unknown"}. Membership is not send consent; eligibility follows the existing cohort/policy model.`,
   };
   if (lead.is_unsubscribed || lead.is_bounced || locallySuppressed) {
     relationship_patch.do_not_contact = true;
@@ -448,7 +448,8 @@ export function planContactWrite(
         company: lead.company ?? "",
         role: lead.role ?? "",
         status: lead.is_unsubscribed || lead.is_bounced ? "DO_NOT_CONTACT" : "NEW",
-        // Membership is never readiness: imported contacts need review before any send.
+        // Membership is never readiness. Eligibility is decided by the existing cohort/policy
+        // model, not by a per-contact approval loop.
         sendable_status: lead.is_unsubscribed || lead.is_bounced ? "suppressed" : "needs_review",
         ...provenance,
         ...patch,

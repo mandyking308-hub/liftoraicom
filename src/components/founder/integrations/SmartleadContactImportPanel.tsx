@@ -118,8 +118,9 @@ export default function SmartleadContactImportPanel() {
 
       <p className="text-[10px] text-muted-foreground">
         Imports into Liftor only. Smartlead is queried with GET requests. Campaign membership is not
-        consent: imported contacts land as needs-review and existing suppression / do-not-contact is
-        never cleared.
+        consent. Imported contacts enter the normal cohort/policy eligibility model — unknown
+        verification or any suppression flag blocks eligibility — and existing suppression /
+        do-not-contact is never cleared. No per-contact approval loop.
       </p>
     </Card>
   );

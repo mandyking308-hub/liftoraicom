@@ -1,6 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import {
-  buildLeadMappingRow,
   buildLeadsPath,
   classifySmartleadHttp,
   clampOffset,
@@ -10,13 +9,21 @@ import {
   type ExistingContact,
   mapSmartleadLead,
   type MappingRow,
+  normaliseEmail,
   parseLeadsEnvelope,
-  planContactWrite,
   resolveMapping,
-  tally,
 } from "../_shared/smartleadLeadImport.ts";
+import {
+  type ImportStore,
+  type LeadMappingRecord,
+  type RelationshipRecord,
+  runImportPage,
+} from "../_shared/smartleadImportRunner.ts";
 
 const SMARTLEAD_BASE_URL = "https://server.smartlead.ai/api/v1";
+
+const CONTACT_COLUMNS =
+  "id,email,first_name,last_name,name,company,role,linkedin_url,phone,country,email_verified_status,sendable_status,do_not_contact_at,is_globally_suppressed,hard_bounced,unsubscribed_at,archived_at,assigned_business,source_record_id";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -45,6 +52,17 @@ async function getJson(path: string, apiKey: string, timeoutMs = 20_000) {
   }
 }
 
+function throwOn(error: { message: string; code?: string } | null, what: string) {
+  if (!error) return;
+  const code = error.code ?? "";
+  if (code === "23514") {
+    throw new Error(
+      `${what}_check_constraint_violation: outbound_provider_lead_mappings.push_status does not yet allow 'imported_from_provider'. Apply the prepared idempotency migration first.`,
+    );
+  }
+  throw new Error(`${what}: ${error.message}`);
+}
+
 /**
  * Smartlead -> Liftor contact import.
  *
@@ -52,7 +70,8 @@ async function getJson(path: string, apiKey: string, timeoutMs = 20_000) {
  * contacts + business_contact_relationships + outbound_provider_lead_mappings.
  * One page per call (paginated, resumable via `offset`).
  *
- * Never sends, never pushes leads, never mutates Smartlead.
+ * Never sends, never pushes leads, never mutates Smartlead. `dry_run` performs
+ * zero writes of any kind, including mapping metadata.
  */
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -73,7 +92,8 @@ Deno.serve(async (req) => {
   if (ue || !u?.user) return json({ ok: false, error: "auth_invalid" }, 401);
 
   const admin = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
-  const { data: roles } = await admin.from("user_roles").select("role").eq("user_id", u.user.id);
+  const { data: roles, error: roleErr } = await admin.from("user_roles").select("role").eq("user_id", u.user.id);
+  if (roleErr) return json({ ok: false, error: "role_lookup_failed", detail: roleErr.message }, 500);
   const roleSet = new Set((roles ?? []).map((r: { role: string }) => r.role));
   if (!roleSet.has("founder") && !roleSet.has("admin")) return json({ ok: false, error: "forbidden" }, 403);
 
@@ -118,8 +138,18 @@ Deno.serve(async (req) => {
     }, 424);
   }
 
-  const { data: biz } = await admin.from("businesses").select("id,name").eq("id", mapping.business_id!).maybeSingle();
-  const business_name = String((biz as { name?: string } | null)?.name ?? "");
+  // Business lookup is a prerequisite — fail closed rather than importing with a blank name.
+  const { data: biz, error: bizErr } = await admin
+    .from("businesses").select("id,name").eq("id", mapping.business_id!).maybeSingle();
+  if (bizErr) return json({ ok: false, error: "business_lookup_failed", detail: bizErr.message }, 500);
+  const business_name = String((biz as { name?: string } | null)?.name ?? "").trim();
+  if (!business_name) {
+    return json({
+      ok: false,
+      error: "mapped_business_not_found",
+      actionable: "The mapping points at a business row that does not exist. Fix the mapping before importing.",
+    }, 409);
+  }
 
   // 2) Read one page of leads — GET only.
   const res = await getJson(buildLeadsPath(mapping.provider_campaign_id!, offset, limit), SMARTLEAD_API_KEY);
@@ -135,14 +165,12 @@ Deno.serve(async (req) => {
       distinguishes_empty_list: "This is a provider access error, NOT an empty campaign.",
       resume_offset: offset,
       counters: emptyCounters(),
-    }, cls.kind === "unauthorized" || cls.kind === "forbidden" ? 502 : 502);
+    }, 502);
   }
 
   const leads = envelope.leads.map(mapSmartleadLead);
   const continuation = computeContinuation(offset, envelope.leads.length, limit, envelope.total_leads);
-  const counters = emptyCounters();
   const imported_at = new Date().toISOString();
-  const details: Array<Record<string, unknown>> = [];
 
   if (leads.length === 0) {
     return json({
@@ -152,123 +180,121 @@ Deno.serve(async (req) => {
       business_id: mapping.business_id,
       provider_campaign_id: mapping.provider_campaign_id,
       total_leads_reported: envelope.total_leads,
-      counters,
+      counters: emptyCounters(),
       continuation,
       dry_run,
       safety: { smartlead_writes: 0, emails_sent: 0, leads_pushed: 0, mode: "read_only_get" },
     });
   }
 
-  // 3) Existing contacts by normalised email (dedupe) + existing provider lead ids.
-  const emails = Array.from(new Set(leads.map((l) => l.email).filter(Boolean))) as string[];
-  const providerLeadIds = leads.map((l) => l.provider_lead_id).filter(Boolean) as string[];
-
-  const { data: existingContacts } = emails.length
-    ? await admin.from("contacts")
-      .select("id,email,first_name,last_name,name,company,role,linkedin_url,phone,country,email_verified_status,sendable_status,do_not_contact_at,is_globally_suppressed,hard_bounced,unsubscribed_at,archived_at,assigned_business,source_record_id")
-      .in("email", emails)
-    : { data: [] as ExistingContact[] };
-  const byEmail = new Map<string, ExistingContact>();
-  for (const c of (existingContacts ?? []) as ExistingContact[]) {
-    if (c.email) byEmail.set(c.email.trim().toLowerCase(), c);
-  }
-
-  const { data: existingLeadMaps } = providerLeadIds.length
-    ? await admin.from("outbound_provider_lead_mappings")
-      .select("id,provider_lead_id,liftor_contact_id")
-      .eq("provider_type", "smartlead")
-      .eq("provider_campaign_id", mapping.provider_campaign_id!)
-      .in("provider_lead_id", providerLeadIds)
-    : { data: [] as Array<{ id: string; provider_lead_id: string | null; liftor_contact_id: string }> };
-  const leadMapByProviderId = new Map<string, { id: string; liftor_contact_id: string }>();
-  for (const r of (existingLeadMaps ?? []) as Array<{ id: string; provider_lead_id: string | null; liftor_contact_id: string }>) {
-    if (r.provider_lead_id) leadMapByProviderId.set(r.provider_lead_id, { id: r.id, liftor_contact_id: r.liftor_contact_id });
-  }
-
-  const ctx = {
-    business_id: mapping.business_id!,
-    business_name,
-    provider_campaign_id: mapping.provider_campaign_id!,
-    imported_at,
-  };
-
-  for (const lead of leads) {
-    const knownMap = lead.provider_lead_id ? leadMapByProviderId.get(lead.provider_lead_id) : undefined;
-    let existing = lead.email ? byEmail.get(lead.email) ?? null : null;
-    if (!existing && knownMap) {
-      const { data: c } = await admin.from("contacts")
-        .select("id,email,first_name,last_name,name,company,role,linkedin_url,phone,country,email_verified_status,sendable_status,do_not_contact_at,is_globally_suppressed,hard_bounced,unsubscribed_at,archived_at,assigned_business,source_record_id")
-        .eq("id", knownMap.liftor_contact_id).maybeSingle();
-      existing = (c as ExistingContact | null) ?? null;
-    }
-
-    const plan = planContactWrite(lead, existing, ctx);
-    if (plan.action === "skip" && !existing) {
-      tally(counters, "skip");
-      details.push({ email: lead.email, action: "skip", reason: plan.reason });
-      continue;
-    }
-
-    if (dry_run) {
-      tally(counters, plan.action);
-      details.push({ email: lead.email, action: plan.action, reason: plan.reason, warnings: plan.warnings });
-      continue;
-    }
-
-    try {
-      let contactId = existing?.id ?? knownMap?.liftor_contact_id ?? null;
-
-      if (plan.action === "create") {
-        const { data: ins, error: insErr } = await admin.from("contacts")
-          .insert(plan.contact_patch).select("id").single();
-        if (insErr) throw new Error(insErr.message);
-        contactId = (ins as { id: string }).id;
-      } else if (contactId && Object.keys(plan.contact_patch).length > 0) {
-        const { error: upErr } = await admin.from("contacts").update(plan.contact_patch).eq("id", contactId);
-        if (upErr) throw new Error(upErr.message);
+  // 3) Supabase-backed store. Every read/write surfaces its error (no silent ignores).
+  const store: ImportStore = {
+    async findContactsByEmails(emails) {
+      // Case-insensitive match: contacts.email is a case-sensitive column.
+      const or = emails.map((e) => `email.ilike.${e.replace(/[,()]/g, "")}`).join(",");
+      const { data, error } = await admin.from("contacts").select(CONTACT_COLUMNS).or(or);
+      throwOn(error, "contacts_select_failed");
+      return (data ?? []) as ExistingContact[];
+    },
+    async findContactById(id) {
+      const { data, error } = await admin.from("contacts").select(CONTACT_COLUMNS).eq("id", id).maybeSingle();
+      throwOn(error, "contact_by_id_failed");
+      return (data as ExistingContact | null) ?? null;
+    },
+    async findLeadMappings(providerCampaignId, emails, providerLeadIds) {
+      const { data, error } = await admin
+        .from("outbound_provider_lead_mappings")
+        .select("id,provider_lead_id,contact_email,liftor_contact_id")
+        .eq("provider_type", "smartlead")
+        .eq("provider_campaign_id", providerCampaignId);
+      throwOn(error, "provider_lead_mapping_select_failed");
+      const emailSet = new Set(emails);
+      const idSet = new Set(providerLeadIds);
+      return ((data ?? []) as LeadMappingRecord[]).filter((r) =>
+        (r.provider_lead_id && idSet.has(r.provider_lead_id)) ||
+        (normaliseEmail(r.contact_email) && emailSet.has(normaliseEmail(r.contact_email)!))
+      );
+    },
+    async insertContact(patch) {
+      const { data, error } = await admin.from("contacts").insert(patch).select("id").single();
+      if (error && (error as { code?: string }).code === "23505") {
+        // Concurrent import created it first — adopt the existing row instead of failing.
+        const email = String(patch.email ?? "");
+        const { data: found, error: findErr } = await admin
+          .from("contacts").select("id").ilike("email", email).limit(1).maybeSingle();
+        throwOn(findErr, "contact_conflict_recovery_failed");
+        if (found) return { id: (found as { id: string }).id };
       }
-      if (!contactId) throw new Error("contact_id_unresolved");
-
-      // Business association — only the mapped business.
-      if (plan.relationship_patch) {
-        const { data: rel } = await admin.from("business_contact_relationships")
-          .select("id,do_not_contact")
-          .eq("contact_id", contactId).eq("business_id", ctx.business_id).maybeSingle();
-        const relRow = rel as { id: string; do_not_contact: boolean } | null;
-        if (relRow) {
-          const patch: Record<string, unknown> = { ...plan.relationship_patch };
-          // Never clear an existing do-not-contact on re-import.
-          if (relRow.do_not_contact && patch.do_not_contact !== true) delete patch.do_not_contact;
-          await admin.from("business_contact_relationships").update(patch).eq("id", relRow.id);
-        } else {
-          await admin.from("business_contact_relationships")
-            .insert({ ...plan.relationship_patch, contact_id: contactId });
+      throwOn(error, "contact_insert_failed");
+      return { id: (data as { id: string }).id };
+    },
+    async updateContact(id, patch) {
+      const { error } = await admin.from("contacts").update(patch).eq("id", id);
+      throwOn(error, "contact_update_failed");
+    },
+    async findRelationship(contactId, businessName, businessId) {
+      const { data, error } = await admin
+        .from("business_contact_relationships")
+        .select("id,do_not_contact,business_id,business_name")
+        .eq("contact_id", contactId);
+      throwOn(error, "relationship_select_failed");
+      const rows = (data ?? []) as Array<RelationshipRecord & { business_id: string | null; business_name: string }>;
+      return rows.find((r) => r.business_id === businessId || r.business_name === businessName) ?? null;
+    },
+    async insertRelationship(row) {
+      const { error } = await admin.from("business_contact_relationships").insert(row);
+      if (error && (error as { code?: string }).code === "23505") return; // unique(contact_id,business_name)
+      throwOn(error, "relationship_insert_failed");
+    },
+    async updateRelationship(id, patch) {
+      const { error } = await admin.from("business_contact_relationships").update(patch).eq("id", id);
+      throwOn(error, "relationship_update_failed");
+    },
+    async insertLeadMapping(row) {
+      const { data, error } = await admin.from("outbound_provider_lead_mappings").insert(row).select("id").single();
+      if (error && (error as { code?: string }).code === "23505") {
+        // unique(provider_type, provider_campaign_id, lower(contact_email))
+        const { data: found, error: findErr } = await admin
+          .from("outbound_provider_lead_mappings").select("id")
+          .eq("provider_type", "smartlead")
+          .eq("provider_campaign_id", String(row.provider_campaign_id ?? ""))
+          .ilike("contact_email", String(row.contact_email ?? ""))
+          .limit(1).maybeSingle();
+        throwOn(findErr, "lead_mapping_conflict_recovery_failed");
+        if (found) {
+          const id = (found as { id: string }).id;
+          const { error: upErr } = await admin.from("outbound_provider_lead_mappings").update(row).eq("id", id);
+          throwOn(upErr, "lead_mapping_conflict_update_failed");
+          return { id };
         }
       }
+      throwOn(error, "lead_mapping_insert_failed");
+      return { id: (data as { id: string }).id };
+    },
+    async updateLeadMapping(id, patch) {
+      const { error } = await admin.from("outbound_provider_lead_mappings").update(patch).eq("id", id);
+      throwOn(error, "lead_mapping_update_failed");
+    },
+    async touchMappingSync(campaignMappingId, at) {
+      const { error } = await admin
+        .from("outbound_provider_campaign_mappings").update({ last_synced_at: at }).eq("id", campaignMappingId);
+      throwOn(error, "mapping_sync_update_failed");
+    },
+  };
 
-      const mapRow = buildLeadMappingRow(lead, {
-        ...ctx,
-        campaign_mapping_id: mapping.id,
-        liftor_campaign_id: mapping.liftor_campaign_id!,
-        liftor_contact_id: contactId,
-      });
-      if (knownMap) {
-        await admin.from("outbound_provider_lead_mappings").update(mapRow).eq("id", knownMap.id);
-      } else {
-        await admin.from("outbound_provider_lead_mappings").insert(mapRow);
-      }
+  const result = await runImportPage({ leads, mapping, business_name, imported_at, dry_run, store });
 
-      tally(counters, plan.action);
-      details.push({ email: lead.email, action: plan.action, reason: plan.reason, warnings: plan.warnings });
-    } catch (e) {
-      tally(counters, "error");
-      details.push({ email: lead.email, action: "error", reason: (e as Error).message });
-    }
+  if (!result.ok) {
+    return json({
+      ok: false,
+      error: result.prerequisite_error,
+      detail: result.prerequisite_detail,
+      actionable: "Prerequisite lookup failed — nothing was written. Retry; no partial state was created.",
+      resume_offset: offset,
+      counters: result.counters,
+      dry_run,
+    }, 500);
   }
-
-  await admin.from("outbound_provider_campaign_mappings")
-    .update({ last_synced_at: imported_at })
-    .eq("id", mapping.id);
 
   return json({
     ok: true,
@@ -279,10 +305,23 @@ Deno.serve(async (req) => {
     provider_campaign_id: mapping.provider_campaign_id,
     provider_campaign_name: mapping.provider_campaign_name,
     page: { offset, limit, returned: leads.length, total_leads_reported: envelope.total_leads },
-    continuation,
-    counters,
-    details: details.slice(0, 200),
-    consent_note: "Smartlead campaign membership is not consent and not send readiness. Imported contacts require review before any outreach.",
-    safety: { smartlead_writes: 0, emails_sent: 0, leads_pushed: 0, mode: "read_only_get" },
+    // The checkpoint may only advance when every row of this page resolved.
+    page_complete: result.page_complete,
+    continuation: result.page_complete
+      ? continuation
+      : { has_more: continuation.has_more, next_offset: null },
+    resume_offset: result.page_complete ? continuation.next_offset : offset,
+    unresolved_rows: result.unresolved_rows,
+    counters: result.counters,
+    details: result.details.slice(0, 200),
+    consent_note:
+      "Smartlead campaign membership is not consent and not send readiness. Imported contacts follow the existing approved cohort/policy eligibility model; unknown verification or any suppression flag blocks eligibility. No per-contact approval loop is introduced.",
+    safety: {
+      smartlead_writes: 0,
+      emails_sent: 0,
+      leads_pushed: 0,
+      mode: "read_only_get",
+      liftor_writes: dry_run ? 0 : result.writes,
+    },
   });
 });
