@@ -191,7 +191,11 @@ Invariants:
 - Suppression, do-not-contact, bounce and unsubscribe flags can only be set,
   never cleared. Suppressed contacts are HELD (provenance only).
 - Campaign membership is not consent: new contacts land as \`needs_review\` and
-  \`campaign_eligible = false\`.
+  \`campaign_eligible = false\`. Eligibility is then decided by the existing
+  cohort/policy model — there is no per-contact approval loop.
+- Preview (\`dry_run\`) performs zero writes, including \`last_synced_at\`. A page is
+  only marked complete (and the resume offset only advances) when every row resolved;
+  a rerun repairs missing relationship/provenance rows without duplicating contacts.
 - Records attach only to the business on the selected mapping; unmapped or
   ambiguous campaigns return \`campaign_not_mapped\` / \`ambiguous_campaign_mapping\`
   instead of guessing ownership.
@@ -199,6 +203,11 @@ Invariants:
   empty lead list.
 
 Remaining steps before live use:
+0. Apply the prepared idempotency migration in
+   \`docs/smartlead-import-idempotency-migration.sql.md\` (NOT applied): it widens the
+   \`push_status\` check to allow \`imported_from_provider\`, adds a unique provider-lead
+   index and a case-insensitive contact email index. Until it is applied every
+   provenance insert fails closed with an actionable 23514 error.
 1. Deploy \`smartlead-campaign-lead-import\` (not deployed by this build).
 2. Resolve Smartlead API entitlement — GETs returned 403 on 26 Aug 2026; a plan
    upgrade alone is not confirmed to fix it.
