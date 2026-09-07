@@ -1610,6 +1610,7 @@ const CommandCentre = () => {
             <SmartleadScaleSetupChecklist />
             <SmartleadCampaignMappingPreview />
             <SmartleadCampaignDiscoveryPanel />
+            <SmartleadContactImportPanel />
             <SmartleadLeadPushPreview />
             <BulkSendPreviewPanel />
             <ScaleOperationsDryRunDashboard />
