@@ -235,7 +235,8 @@ export function mapSmartleadLead(row: SmartleadLeadRaw): NormalisedLead {
 
   const first = str(inner.first_name);
   const last = str(inner.last_name);
-  const full = str(inner.name) ?? [first, last].filter(Boolean).join(" ").trim() || null;
+  const joined = [first, last].filter(Boolean).join(" ").trim();
+  const full = str(inner.name) ?? (joined || null);
 
   return {
     provider_lead_id: providerId,
