@@ -389,6 +389,16 @@ Deno.serve(async (req) => {
     webhook_configured: webhookConfigured,
     analytics_window: { start_date: startDate, end_date: endDate, timezone: "Europe/London" },
     analytics_overview_ok: overviewRes.ok,
+    // Sanitized structure probe: key NAMES only, no values — confirms the
+    // documented data.overall_stats nesting without leaking raw objects.
+    analytics_structure_probe: overviewRes.ok
+      ? {
+          body_keys: analyticsBody && typeof analyticsBody === "object" ? Object.keys(analyticsBody).slice(0, 20) : [],
+          data_keys: analyticsData && typeof analyticsData === "object" ? Object.keys(analyticsData).slice(0, 20) : [],
+          overall_stats_keys:
+            overall && typeof overall === "object" ? Object.keys(overall).slice(0, 30) : [],
+        }
+      : null,
     analytics_totals: overviewRes.ok
       ? {
           sent_count: num(overall?.sent, overall?.sent_count),
