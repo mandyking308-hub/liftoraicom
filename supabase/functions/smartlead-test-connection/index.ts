@@ -384,29 +384,33 @@ Deno.serve(async (req) => {
     webhook_check_status: webhookCheckStatus,
     webhook_campaigns_checked: webhookCampaignsChecked,
     webhook_count: webhookCount,
+    liftor_receiver_webhook_count: liftorWebhookCount,
+    expected_receiver_path: EXPECTED_RECEIVER_PATH,
     webhook_configured: webhookConfigured,
     analytics_window: { start_date: startDate, end_date: endDate, timezone: "Europe/London" },
     analytics_overview_ok: overviewRes.ok,
     analytics_totals: overviewRes.ok
       ? {
-          sent_count: num(analyticsSource?.sent_count),
-          open_count: num(analyticsSource?.open_count),
-          click_count: num(analyticsSource?.click_count),
-          reply_count: num(analyticsSource?.reply_count),
-          bounce_count: num(analyticsSource?.bounce_count),
-          unsubscribed_count: num(analyticsSource?.unsubscribed_count),
-          total_count: num(analyticsSource?.total_count),
+          sent_count: num(overall?.sent, overall?.sent_count),
+          open_count: num(overall?.opened, overall?.open_count),
+          click_count: num(overall?.clicked, overall?.click_count),
+          reply_count: num(overall?.replied, overall?.reply_count),
+          bounce_count: num(overall?.bounced, overall?.bounce_count),
+          unsubscribed_count: num(overall?.unsubscribed, overall?.unsubscribed_count),
+          total_count: num(overall?.unique_lead_count, overall?.total_count),
         }
       : null,
     warnings,
     blockers,
     error: lastError,
-    response_excerpts: testOk
+    // Fixed HTTP-status diagnostics only — no provider response text or URLs.
+    failure_diagnostics: testOk
       ? null
       : {
-          campaigns: campaignsRes.raw_excerpt,
-          email_accounts: accountsRes.raw_excerpt,
+          campaigns: campaignsRes.diagnostic,
+          email_accounts: accountsRes.diagnostic,
         },
+
     notes:
       "Read-only: campaigns + email-accounts (whitelisted fields) + analytics/overall-stats-v2 + per-campaign webhooks. Mailbox authentication is reported from is_smtp_success/is_imap_success only, never inferred from HTTP 200. No campaign created, no leads pushed, no email-accounts added, no warmup enabled, no webhook created, no emails sent.",
   });
