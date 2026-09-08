@@ -311,8 +311,8 @@ Deno.serve(async (req) => {
   if (testOk && webhookCheckStatus === "not_applicable_no_campaigns") {
     blockers.push("webhook_check_not_applicable_no_campaigns");
   }
-  if (testOk && webhookCheckConclusive && (webhookCount ?? 0) === 0) {
-    blockers.push("no_smartlead_webhook_configured");
+  if (testOk && webhookCheckConclusive && (liftorWebhookCount ?? 0) === 0) {
+    blockers.push("no_liftor_receiver_webhook_configured");
   }
   if (testOk && !overviewRes.ok) warnings.push(`analytics_overall_stats_v2_http_${overviewRes.status}`);
   if (testOk && accountsRes.ok && smtpVerifiedAccountCount === 0 && sendingAccountsPresent) {
@@ -321,7 +321,7 @@ Deno.serve(async (req) => {
 
   const lastError = testOk
     ? null
-    : `campaigns_http_${campaignsRes.status} accounts_http_${accountsRes.status}`;
+    : `campaigns_${campaignsRes.diagnostic ?? "ok"} accounts_${accountsRes.diagnostic ?? "ok"}`;
 
   const providerUpdate: Record<string, unknown> = {
     status: testOk ? "connected" : "error",
@@ -331,13 +331,27 @@ Deno.serve(async (req) => {
     last_error: testOk ? null : lastError,
     updated_at: new Date().toISOString(),
   };
-  if (webhookCheckConclusive) providerUpdate.webhook_configured = (webhookCount ?? 0) > 0;
+  if (webhookCheckConclusive) providerUpdate.webhook_configured = (liftorWebhookCount ?? 0) > 0;
 
   await admin.from("outbound_providers").update(providerUpdate).eq("id", provider.id);
 
   const analyticsBody: any = overviewRes.ok ? (overviewRes.body ?? {}) : {};
-  const analyticsSource = analyticsBody?.data ?? analyticsBody;
-  const num = (v: unknown) => (typeof v === "number" ? v : null);
+  const analyticsData: any = analyticsBody?.data ?? analyticsBody;
+  // Documented shape: data.overall_stats { sent, opened, clicked, replied,
+  // bounced, unsubscribed, unique_lead_count } as numeric STRINGS.
+  const overall: any = analyticsData?.overall_stats ?? analyticsData ?? {};
+  /** Accepts finite numbers and non-empty numeric strings. Absent => null. */
+  const num = (...vals: unknown[]) => {
+    for (const v of vals) {
+      if (typeof v === "number" && Number.isFinite(v)) return v;
+      if (typeof v === "string" && v.trim() !== "") {
+        const n = Number(v.trim());
+        if (Number.isFinite(n)) return n;
+      }
+    }
+    return null;
+  };
+
 
   return json({
     ok: testOk,
