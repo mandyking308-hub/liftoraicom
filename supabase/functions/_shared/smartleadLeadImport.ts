@@ -69,7 +69,7 @@ const MASKED_RE = /^[*x•.\s]+$/i;
 
 export function normaliseEmail(value: unknown): string | null {
   const s = String(value ?? "").trim().toLowerCase();
-  if (!s || !s.includes("@")) return null;
+  if (!s || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s) || s.includes("***")) return null;
   return s;
 }
 
@@ -180,7 +180,7 @@ export function classifySmartleadHttp(status: number, malformed = false): HttpCl
     return {
       kind: "forbidden",
       retryable: false,
-      actionable: "Smartlead returned 403 — the key exists but the account/plan does not entitle API access to this campaign. Not an empty campaign. Confirm API entitlement with Smartlead before assuming a plan change fixes it.",
+      actionable: "Smartlead returned 403 — access was refused. Check key validity, account permissions and plan entitlement. This is an access error, not an empty campaign. Upgrading alone may not fix it.",
     };
   }
   if (status === 404) {
@@ -219,7 +219,7 @@ export function mapSmartleadLead(row: SmartleadLeadRaw): NormalisedLead {
   const status = str(inner.status ?? inner.lead_status ?? inner.campaign_lead_map_status);
   const statusKey = (status ?? "").toLowerCase();
 
-  const providerId = str(inner.lead_id ?? inner.id ?? (row as Record<string, unknown>).lead_id);
+  const providerId = str(inner.lead_id ?? (row.lead as Record<string, unknown> | undefined)?.id ?? inner.id);
 
   // Verification status is only what the provider actually supplied.
   const rawVerification = inner.verification_status ?? inner.email_verification_status ??
