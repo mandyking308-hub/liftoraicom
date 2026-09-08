@@ -224,17 +224,44 @@ Deno.serve(async (req) => {
     | "unverified_request_failed"
     | "unverified_campaigns_unreadable" = "unverified_campaigns_unreadable";
   let webhookCount: number | null = null;
+  let liftorWebhookCount: number | null = null;
   let webhookCampaignsChecked = 0;
   const webhookStatuses: Array<{ campaign_id: unknown; http_status: number }> = [];
+
+  // A webhook only proves Liftor is wired when it targets THIS project's
+  // receiver: <SUPABASE_URL origin>/functions/v1/smartlead-webhook.
+  // Query params are ignored for matching and URLs are never returned.
+  const expectedOrigin = (() => {
+    try {
+      return new URL(SUPABASE_URL).origin.toLowerCase();
+    } catch {
+      return null;
+    }
+  })();
+  const EXPECTED_RECEIVER_PATH = "/functions/v1/smartlead-webhook";
+  const matchesLiftorReceiver = (raw: unknown): boolean => {
+    if (typeof raw !== "string" || !raw || !expectedOrigin) return false;
+    try {
+      const u = new URL(raw);
+      return (
+        u.origin.toLowerCase() === expectedOrigin &&
+        u.pathname.replace(/\/+$/, "").toLowerCase() === EXPECTED_RECEIVER_PATH
+      );
+    } catch {
+      return false;
+    }
+  };
 
   if (!campaignsRes.ok) {
     webhookCheckStatus = "unverified_campaigns_unreadable";
   } else if (campaigns.length === 0) {
     webhookCheckStatus = "not_applicable_no_campaigns";
     webhookCount = null;
+    liftorWebhookCount = null;
   } else {
     const scan = campaignSummaries.filter((c) => c.id != null).slice(0, WEBHOOK_CAMPAIGN_SCAN_CAP);
     let total = 0;
+    let liftorTotal = 0;
     let anyFailed = false;
     for (const c of scan) {
       await new Promise((r) => setTimeout(r, 250));
@@ -244,10 +271,16 @@ Deno.serve(async (req) => {
       );
       webhookCampaignsChecked += 1;
       webhookStatuses.push({ campaign_id: c.id, http_status: res.status });
-      if (res.ok) total += asArray(res.body).length;
-      else anyFailed = true;
+      if (res.ok) {
+        const hooks = asArray(res.body);
+        total += hooks.length;
+        liftorTotal += hooks.filter((h: any) =>
+          matchesLiftorReceiver(h?.webhook_url ?? h?.url ?? h?.target_url),
+        ).length;
+      } else anyFailed = true;
     }
     webhookCount = total;
+    liftorWebhookCount = liftorTotal;
     if (anyFailed) {
       webhookCheckStatus = "unverified_request_failed";
       warnings.push("campaign_webhook_read_failed");
@@ -260,9 +293,13 @@ Deno.serve(async (req) => {
   }
 
   const webhookCheckConclusive = webhookCheckStatus === "verified";
-  // Compatibility field for the existing UI. Only true on a conclusive check;
-  // never overwrite known config from an inapplicable/unverified check.
-  const webhookConfigured = webhookCheckConclusive ? (webhookCount ?? 0) > 0 : !!provider.webhook_configured;
+  if (webhookCheckConclusive && !expectedOrigin) warnings.push("receiver_origin_unresolvable");
+  // Compatibility field for the existing UI. Only true when a conclusive scan
+  // found a webhook pointing at THIS project's Liftor receiver; never overwrite
+  // known config from an inapplicable/unverified check.
+  const webhookConfigured = webhookCheckConclusive
+    ? (liftorWebhookCount ?? 0) > 0
+    : !!provider.webhook_configured;
 
   // API authentication health is judged on campaigns + email-accounts only.
   const testOk = campaignsRes.ok && accountsRes.ok;
