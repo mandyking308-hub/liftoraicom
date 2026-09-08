@@ -14,6 +14,21 @@ const json = (b: unknown, s = 200) =>
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 
+/**
+ * Fixed, non-leaking diagnostic string for a Smartlead call.
+ * Never contains provider response text, URLs (which carry api_key) or the key.
+ */
+function statusDiagnostic(status: number, kind: "http" | "network" | "timeout"): string {
+  if (kind === "timeout") return "request_timeout";
+  if (kind === "network") return "network_error";
+  if (status === 401) return "http_401_unauthorized";
+  if (status === 403) return "http_403_forbidden";
+  if (status === 404) return "http_404_not_found";
+  if (status === 429) return "http_429_rate_limited";
+  if (status >= 500) return `http_${status}_provider_error`;
+  return `http_${status}_unexpected`;
+}
+
 async function smartleadGet(path: string, apiKey: string, timeoutMs = 12_000) {
   const sep = path.includes("?") ? "&" : "?";
   const url = `${SMARTLEAD_BASE_URL}${path}${sep}api_key=${encodeURIComponent(apiKey)}`;
@@ -26,15 +41,29 @@ async function smartleadGet(path: string, apiKey: string, timeoutMs = 12_000) {
     try {
       parsed = JSON.parse(text);
     } catch {
-      /* keep raw */
+      /* body intentionally discarded — never surfaced */
     }
-    return { ok: res.ok, status: res.status, body: parsed, raw_excerpt: text.slice(0, 400) };
+    return {
+      ok: res.ok,
+      status: res.status,
+      body: parsed,
+      diagnostic: res.ok ? null : statusDiagnostic(res.status, "http"),
+    };
   } catch (e: any) {
-    return { ok: false, status: 0, body: null, raw_excerpt: `fetch_error: ${e?.message ?? String(e)}` };
+    // Exception messages can embed the request URL (which carries api_key).
+    // Only a fixed classification is ever returned.
+    const aborted = e?.name === "AbortError";
+    return {
+      ok: false,
+      status: 0,
+      body: null,
+      diagnostic: statusDiagnostic(0, aborted ? "timeout" : "network"),
+    };
   } finally {
     clearTimeout(t);
   }
 }
+
 
 /**
  * Smartlead read-only connection test.
