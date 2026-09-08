@@ -52,7 +52,7 @@ export interface ImportStore {
     emails: string[],
     providerLeadIds: string[],
   ): Promise<LeadMappingRecord[]>;
-  insertContact(patch: Record<string, unknown>): Promise<{ id: string }>;
+  insertContact(patch: Record<string, unknown>): Promise<{ id: string; created?: boolean; contact?: ExistingContact }>;
   updateContact(id: string, patch: Record<string, unknown>): Promise<void>;
   findRelationship(contactId: string, businessName: string, businessId: string): Promise<RelationshipRecord | null>;
   insertRelationship(row: Record<string, unknown>): Promise<void>;
@@ -180,7 +180,7 @@ export async function runImportPage(input: RunPageInput): Promise<RunPageResult>
       }
     }
 
-    const plan = planContactWrite(lead, existing, ctx);
+    let plan = planContactWrite(lead, existing, ctx);
 
     if (plan.action === "skip" && !existing) {
       tally(counters, "skip");
@@ -228,9 +228,21 @@ export async function runImportPage(input: RunPageInput): Promise<RunPageResult>
     try {
       if (plan.action === "create" && !contactId) {
         const ins = await store.insertContact(plan.contact_patch);
-        writes += 1;
         contactId = ins.id;
-        createdContactId = ins.id;
+        if (ins.created === false) {
+          // A concurrent import won the insert. Re-plan from the actual row,
+          // including its suppression flags; never report adoption as creation.
+          existing = ins.contact ?? await store.findContactById(ins.id);
+          if (!existing) throw new Error("concurrent_contact_not_found");
+          plan = planContactWrite(lead, existing, ctx);
+          if (Object.keys(plan.contact_patch).length) {
+            await store.updateContact(ins.id, plan.contact_patch);
+            writes += 1;
+          }
+        } else {
+          writes += 1;
+          createdContactId = ins.id;
+        }
       } else if (contactId && Object.keys(plan.contact_patch).length > 0) {
         await store.updateContact(contactId, plan.contact_patch);
         writes += 1;
@@ -274,6 +286,11 @@ export async function runImportPage(input: RunPageInput): Promise<RunPageResult>
       if (knownMap) {
         await store.updateLeadMapping(knownMap.id, mapRow);
         writes += 1;
+        const refreshed = { ...knownMap, provider_lead_id: lead.provider_lead_id ?? knownMap.provider_lead_id,
+          contact_email: lead.email, liftor_contact_id: contactId };
+        if (knownMap.provider_lead_id) mapByProviderId.delete(knownMap.provider_lead_id);
+        if (refreshed.provider_lead_id) mapByProviderId.set(refreshed.provider_lead_id, refreshed);
+        if (emailKey) mapByEmail.set(emailKey, refreshed);
       } else {
         const insMap = await store.insertLeadMapping(mapRow);
         writes += 1;
@@ -325,7 +342,7 @@ export async function runImportPage(input: RunPageInput): Promise<RunPageResult>
     });
   }
 
-  const page_complete = unresolved === 0;
+  let page_complete = unresolved === 0;
 
   // Sync metadata is a write: never in preview, never while rows are unresolved.
   if (!dry_run && page_complete) {
@@ -333,7 +350,11 @@ export async function runImportPage(input: RunPageInput): Promise<RunPageResult>
       await store.touchMappingSync(mapping.id, imported_at);
       writes += 1;
     } catch {
-      // Non-fatal: the page really did import. Surface it as a detail only.
+      // Metadata is the durable checkpoint. Retry this idempotent page if it
+      // cannot be recorded; never claim that continuation is safe.
+      page_complete = false;
+      unresolved += 1;
+      counters.errors += 1;
       details.push({
         email: null,
         provider_lead_id: null,

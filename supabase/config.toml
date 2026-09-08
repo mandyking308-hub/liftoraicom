@@ -46,3 +46,6 @@ verify_jwt = false
 
 [functions.social-relationship-maintenance]
 verify_jwt = false
+
+[functions.smartlead-message-sync]
+verify_jwt = true

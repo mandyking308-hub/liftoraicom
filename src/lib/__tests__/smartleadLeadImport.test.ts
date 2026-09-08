@@ -183,3 +183,9 @@ describe("counters", () => {
     expect(c).toEqual({ processed: 3, created: 1, updated: 0, held: 1, skipped: 0, errors: 1 });
   });
 });
+
+
+it("uses the nested lead identity, not the campaign-membership row id", () => {
+  const mapped = mapSmartleadLead({id: 999, lead: {id: 123,email:"real@example.com"}, status:"STARTED"});
+  expect(mapped.provider_lead_id).toBe("123");
+});

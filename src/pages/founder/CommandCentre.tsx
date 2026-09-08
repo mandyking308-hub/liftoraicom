@@ -95,6 +95,7 @@ import OutboundProviderEnginePanel from "@/components/founder/integrations/Outbo
 import BulkSendEngineBlueprint from "@/components/founder/integrations/BulkSendEngineBlueprint";
 import SmartleadScaleSetupChecklist from "@/components/founder/integrations/SmartleadScaleSetupChecklist";
 import SmartleadCampaignMappingPreview from "@/components/founder/integrations/SmartleadCampaignMappingPreview";
+import SmartleadReplySyncPanel from "@/components/founder/integrations/SmartleadReplySyncPanel";
 import SmartleadLeadPushPreview from "@/components/founder/integrations/SmartleadLeadPushPreview";
 import SmartleadCampaignDiscoveryPanel from "@/components/founder/integrations/SmartleadCampaignDiscoveryPanel";
 import SmartleadContactImportPanel from "@/components/founder/integrations/SmartleadContactImportPanel";
@@ -908,8 +909,8 @@ const CommandCentre = () => {
         // Send Apply, controlled live batch, Pooja proof-send) is parked and
         // surfaced as a SECONDARY native-lane action, never as the global top.
         const smartleadTopActions = [
-          { msg: 'Smartlead scale: create draft campaign "NeonCandy - Early Access Collaboration Test" then re-run readiness', to: "/founder/integrations#smartlead-scale-setup-checklist", tone: "primary" as const },
-          { msg: "Smartlead scale: enable warmup for hello@neoncandy.online inside Smartlead", to: "/founder/integrations#smartlead-scale-setup-checklist", tone: "warn" as const },
+          { msg: 'Smartlead outreach: save the business mailbox plan and complete the Winnr setup', to: "/founder/command-centre#smartlead-scale-setup-checklist", tone: "primary" as const },
+          { msg: "Smartlead outreach: import purchased mailboxes and enable warmup", to: "/founder/command-centre#smartlead-scale-setup-checklist", tone: "warn" as const },
         ];
         const nativeLaneSecondary: { msg: string; to: string; tone: "danger" | "warn" }[] = [];
         if (sendUnsafe) {
@@ -1612,6 +1613,7 @@ const CommandCentre = () => {
             <SmartleadCampaignDiscoveryPanel />
             <SmartleadContactImportPanel />
             <SmartleadLeadPushPreview />
+            <SmartleadReplySyncPanel />
             <BulkSendPreviewPanel />
             <ScaleOperationsDryRunDashboard />
             <SocialMediaBrainPanel />
@@ -1866,7 +1868,7 @@ function DailyOperatorNextActionsCard() {
     { msg: "Create Pre-Live Baseline (after dry-run)", to: "" },
     { msg: "Set Revenue Target and dry-run plan", to: "" },
     { msg: "Upload / register Neon Candy knowledge assets + manuals", to: "" },
-    { msg: "Create Smartlead draft campaign + enable warmup manually when ready", to: "/founder/integrations#smartlead-scale-setup-checklist" },
+    { msg: "Prepare Winnr mailboxes, connect Smartlead and map each business campaign", to: "/founder/command-centre#smartlead-scale-setup-checklist" },
   ];
   return (
     <div className="max-w-7xl mx-auto px-4 pt-4">
@@ -1907,7 +1909,7 @@ function CommandCentreFunctionalityMapCard() {
     { feature: "Human Layer (onboarding · support · win-back)", route: "/founder/support", where: "Diagnostic + route", daily: false, diag: true },
     { feature: "Prospecting / Apollo (legacy lane)", route: "/founder/outreach", where: "Diagnostic + route", daily: false, diag: true },
     { feature: "Social Brain · Content Factory · Marketing", route: "/founder/marketing", where: "Diagnostic + route", daily: false, diag: true },
-    { feature: "Smartlead Scale Lane", route: "/founder/integrations#smartlead-scale-setup-checklist", where: "Diagnostic + route", daily: false, diag: true },
+    { feature: "Smartlead Scale Lane", route: "/founder/command-centre#smartlead-scale-setup-checklist", where: "Diagnostic + route", daily: false, diag: true },
     { feature: "Native IONOS lane (parked)", route: "/founder/outreach/queue-audit", where: "Diagnostic + route (legacy)", daily: false, diag: true },
     { feature: "Proposals · Demos · Deals", route: "/founder/proposals/internal", where: "Diagnostic + route", daily: false, diag: true },
     { feature: "Invoices · Payments · Recurring Revenue", route: "/founder/finance/dashboard", where: "Diagnostic + route", daily: false, diag: true },

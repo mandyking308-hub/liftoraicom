@@ -1,153 +1,58 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, ShieldAlert, Lock } from "lucide-react";
 
 export default function SmartleadLeadPushPreview() {
-  const [data, setData] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
-  const [applyData, setApplyData] = useState<any>(null);
-  const [applyLoading, setApplyLoading] = useState(false);
-  const [confirmation, setConfirmation] = useState("");
-  const [mappingId, setMappingId] = useState("");
-
-  const run = async () => {
-    setLoading(true);
-    const { data: res, error } = await supabase.functions.invoke(
-      "smartlead-lead-push-preview",
-      { body: { limit: 25, campaign_mapping_id: mappingId || undefined } },
-    );
-    setLoading(false);
-    setData(error ? { ok: false, error: error.message } : res);
+  const [mappings,setMappings]=useState<any[]>([]);
+  const [mappingId,setMappingId]=useState("");
+  const [preview,setPreview]=useState<any>(null);
+  const [result,setResult]=useState<any>(null);
+  const [confirmation,setConfirmation]=useState("");
+  const [busy,setBusy]=useState(false);
+  const [error,setError]=useState("");
+  useEffect(()=>{
+    supabase.from("outbound_provider_campaign_mappings").select("id,provider_campaign_name,provider_campaign_id")
+      .eq("provider_type","smartlead").eq("is_active",true).eq("mapping_status","mapped").order("id").then(({data,error})=>{
+        if(error)setError("Could not load campaign mappings.");else setMappings(data??[]);
+      });
+  },[]);
+  const run=async(apply=false)=>{
+    setBusy(true);setError("");
+    try {
+      const {data,error}=await supabase.functions.invoke(apply?"smartlead-lead-push-apply":"smartlead-lead-push-preview",{
+        body:apply?{campaign_mapping_id:mappingId,contact_ids:preview.contact_ids,dry_run:false,confirmation_phrase:confirmation}
+          :{campaign_mapping_id:mappingId},
+      });
+      if(error)throw error;
+      if(apply){setResult(data);setPreview(null);setConfirmation("");}else setPreview(data);
+      if(data?.ok===false)setError(data.error??data.action??"The operation could not complete.");
+    }catch{setError("The transfer service could not complete the request. Check the connection and deployment; preview again before retrying.");}
+    finally{setBusy(false);}
   };
-
-  const tryApply = async () => {
-    setApplyLoading(true);
-    const { data: res, error } = await supabase.functions.invoke(
-      "smartlead-lead-push-apply",
-      {
-        body: {
-          dry_run: true,
-          confirmation_phrase: confirmation,
-          campaign_mapping_id: mappingId || data?.campaign_mapping_id,
-          max_batch_size: 5,
-        },
-      },
-    );
-    setApplyLoading(false);
-    setApplyData(error ? { ok: false, error: error.message } : res);
-  };
-
-  return (
-    <Card className="p-5 space-y-3 border-2 border-border/60 scroll-mt-24">
-      <div className="flex items-center justify-between gap-2 flex-wrap">
-        <div className="flex items-center gap-2">
-          <Send className="h-4 w-4 text-primary" />
-          <h3 className="text-base font-semibold">Smartlead Lead Push Preview</h3>
-          <Badge variant="outline" className="text-[10px]">dry-run</Badge>
-        </div>
-        <div className="flex gap-2 items-center">
-          <Input
-            value={mappingId}
-            onChange={(e) => setMappingId(e.target.value)}
-            placeholder="campaign_mapping_id (optional)"
-            className="h-8 text-[11px] w-[260px]"
-          />
-          <Button size="sm" variant="outline" onClick={run} disabled={loading}>
-            {loading ? "Running…" : "Run dry-run preview"}
-          </Button>
-        </div>
-      </div>
-      <p className="text-[11px] text-muted-foreground">
-        No leads pushed. No Smartlead POST calls. No emails sent.
-      </p>
-
-      {data && data.lead_push_ready === false && (
-        <div className="rounded border border-amber-500/40 bg-amber-500/5 p-3 text-[11px] text-amber-200 flex items-start gap-2">
-          <ShieldAlert className="h-3.5 w-3.5 mt-0.5" />
-          <div>
-            <div className="font-semibold">Lead push not ready</div>
-            <div>Blocker: {data.blocker ?? "unknown"}.</div>
-            <div className="mt-1">{data.notes}</div>
-          </div>
-        </div>
-      )}
-
-      {data && data.lead_push_ready && (
-        <>
-          <div className="grid sm:grid-cols-3 gap-2 text-[11px]">
-            <div className="rounded border border-border/60 p-2">
-              <div className="text-muted-foreground">Eligible</div>
-              <div className="font-mono text-sm">{data.eligible_count}</div>
-            </div>
-            <div className="rounded border border-border/60 p-2">
-              <div className="text-muted-foreground">Excluded</div>
-              <div className="font-mono text-sm">{data.excluded_count}</div>
-            </div>
-            <div className="rounded border border-border/60 p-2">
-              <div className="text-muted-foreground">Mapping</div>
-              <div className="font-mono text-[10px] truncate">
-                {data.provider_campaign_name ?? data.provider_campaign_id ?? "—"}
-              </div>
-            </div>
-          </div>
-          {data.excluded_reasons && Object.keys(data.excluded_reasons).length > 0 && (
-            <div className="rounded border border-border/60 p-2 text-[11px]">
-              <div className="font-medium mb-1">Exclusion reasons</div>
-              {Object.entries(data.excluded_reasons).map(([k, v]) => (
-                <div key={k} className="flex justify-between font-mono">
-                  <span>{k}</span>
-                  <span>{String(v)}</span>
-                </div>
-              ))}
-            </div>
-          )}
-          {data.preview?.[0] && (
-            <div>
-              <div className="text-[11px] font-medium mb-1">Exact Smartlead payload preview (first lead)</div>
-              <pre className="rounded border border-border/60 bg-background/40 p-2 text-[10px] overflow-auto max-h-64">
-                {JSON.stringify(data.preview[0], null, 2)}
-              </pre>
-            </div>
-          )}
-        </>
-      )}
-
-      <div className="rounded border border-destructive/40 bg-destructive/5 p-3 space-y-2">
-        <div className="flex items-center gap-2 text-[12px] font-semibold">
-          <Lock className="h-3.5 w-3.5" />
-          Apply (DISABLED)
-          <Badge variant="destructive" className="text-[10px]">feature flag off</Badge>
-        </div>
-        <p className="text-[11px] text-muted-foreground">
-          Apply is gated by SMARTLEAD_LEAD_PUSH_ENABLED + confirmation phrase
-          <code className="ml-1">PUSH SMARTLEAD LEADS</code> + active mapping. Until flag is on,
-          calling this returns blocked with zero provider calls.
-        </p>
-        <div className="flex gap-2 items-center flex-wrap">
-          <Input
-            value={confirmation}
-            onChange={(e) => setConfirmation(e.target.value)}
-            placeholder="Type: PUSH SMARTLEAD LEADS"
-            className="h-8 text-[11px] w-[260px]"
-          />
-          <Button size="sm" variant="outline" onClick={tryApply} disabled={applyLoading}>
-            {applyLoading ? "Calling…" : "Test apply (will be blocked)"}
-          </Button>
-        </div>
-        {applyData && (
-          <pre className="rounded border border-border/60 bg-background/40 p-2 text-[10px] overflow-auto max-h-48">
-            {JSON.stringify(applyData, null, 2)}
-          </pre>
-        )}
-      </div>
-
-      <p className="text-[10px] text-muted-foreground">
-        No leads pushed. No Smartlead POST calls. No emails sent.
-      </p>
-    </Card>
-  );
+  return <Card className="p-5 space-y-4">
+    <h3 className="text-lg font-semibold">Transfer Liftor contacts to a Smartlead campaign</h3>
+    <p className="text-sm text-muted-foreground">Transfer up to 50 eligible contacts at a time into a draft or paused campaign. Launch and daily sending are managed in Smartlead.</p>
+    <label className="block text-sm">Campaign
+      <select className="block w-full mt-1 p-2 border rounded bg-background" value={mappingId} disabled={busy} onChange={e=>{setMappingId(e.target.value);setPreview(null);setResult(null);setConfirmation("");}}>
+        <option value="">Choose a mapped campaign</option>
+        {mappings.map(m=><option key={m.id} value={m.id}>{m.provider_campaign_name??m.provider_campaign_id}</option>)}
+      </select>
+    </label>
+    <Button variant="outline" disabled={!mappingId||busy} onClick={()=>run()}>Preview eligible contacts</Button>
+    {error&&<p className="text-sm text-destructive" role="alert">{error}</p>}
+    {preview?.ok&&<>
+      <p className="text-sm">{preview.eligible_count} eligible contacts in this batch. Existing campaign members and suppressed contacts are excluded.</p>
+      <div className="max-h-60 overflow-auto"><table className="w-full text-sm"><thead><tr><th className="text-left">Contact</th><th className="text-left">Company</th><th className="text-left">Email</th></tr></thead>
+        <tbody>{preview.preview?.map((p:any)=><tr key={p.email}><td>{p.first_name} {p.last_name}</td><td>{p.company_name}</td><td>{p.email}</td></tr>)}</tbody></table></div>
+      {preview.apply_disabled?<p className="text-sm">Contact transfer is not enabled for this business. Complete the connection and business activation setup first.</p>:preview.eligible_count>0&&<>
+        <label className="block text-sm">To transfer this batch, enter PUSH SMARTLEAD LEADS<Input value={confirmation} onChange={e=>setConfirmation(e.target.value)}/></label>
+        <Button disabled={busy||confirmation!=="PUSH SMARTLEAD LEADS"} onClick={()=>run(true)}>Transfer reviewed batch</Button>
+      </>}
+    </>}
+    {result&&<p className="text-sm" role="status">{result.blocked?"Transfer remains disabled.":result.reconciliation_required?
+      "The provider result needs reconciliation. Import this campaign into Liftor to check its members; these contacts remain reserved to prevent another upload."
+      :`${result.leads_pushed??0} contacts transferred. The campaign has not been started.`}</p>}
+  </Card>;
 }

@@ -241,3 +241,17 @@ describe("webhook readiness API contract", () => {
     expect(full.capture_mode_ready).toBe(true);
   });
 });
+
+
+describe("checkpoint and concurrent adoption regressions", () => {
+  it("does not advance the page when the durable checkpoint write fails", async () => {
+    const m=mockStore();m.store.touchMappingSync=async()=>{throw new Error("database unavailable");};
+    const result=await runImportPage({...base,dry_run:false,leads:[lead()],store:m.store});
+    expect(result.page_complete).toBe(false);expect(result.unresolved_rows).toBe(1);expect(result.counters.errors).toBe(1);
+  });
+  it("replans a concurrent insert conflict as a held existing contact", async () => {
+    const m=mockStore();m.store.insertContact=async()=>({id:"concurrent",created:false,contact:{id:"concurrent",email:"a@x.com",is_globally_suppressed:true}});
+    const result=await runImportPage({...base,dry_run:false,leads:[lead()],store:m.store});
+    expect(result.counters.created).toBe(0);expect(result.counters.held).toBe(1);expect(m.rels[0].do_not_contact).toBe(true);
+  });
+});

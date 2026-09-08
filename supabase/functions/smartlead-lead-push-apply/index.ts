@@ -1,96 +1,45 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { corsHeaders, json, founderContext, objectBody, RequestError, errorResponse } from "../_shared/smartleadEdge.ts";
+import { loadSmartleadMappings } from "../_shared/smartleadImportStore.ts";
+import { resolveMapping } from "../_shared/smartleadLeadImport.ts";
+import { smartleadRequest } from "../_shared/smartleadClient.ts";
+import { transferLeads } from "../_shared/smartleadTransfer.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-};
-const json = (b: unknown, s = 200) =>
-  new Response(JSON.stringify(b), {
-    status: s,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
-
-const CONFIRMATION = "PUSH SMARTLEAD LEADS";
-
-/**
- * Smartlead Lead Push APPLY — DISABLED BY DEFAULT.
- *
- * This function exists so the future apply path is wired, audited, and
- * gated behind:
- *   1. SMARTLEAD_LEAD_PUSH_ENABLED=true env flag
- *   2. dry_run=false
- *   3. confirmation_phrase exact match
- *   4. founder/admin auth
- * Without all four, NO Smartlead POST is made, NO leads pushed, NO
- * emails sent. Today this returns blocked.
- */
-Deno.serve(async (req) => {
+Deno.serve(async req => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
-
-  const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-  const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-  const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
-  const FEATURE_FLAG = (Deno.env.get("SMARTLEAD_LEAD_PUSH_ENABLED") ?? "").toLowerCase() === "true";
-
-  const auth = req.headers.get("Authorization") ?? "";
-  if (!auth.startsWith("Bearer ")) return json({ ok: false, error: "auth_missing" }, 401);
-
-  const userClient = createClient(SUPABASE_URL, ANON_KEY, {
-    global: { headers: { Authorization: auth } },
-    auth: { persistSession: false },
-  });
-  const { data: u, error: ue } = await userClient.auth.getUser(auth.replace("Bearer ", ""));
-  if (ue || !u?.user) return json({ ok: false, error: "auth_invalid" }, 401);
-
-  const admin = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
-  const { data: roles } = await admin.from("user_roles").select("role").eq("user_id", u.user.id);
-  const roleSet = new Set((roles ?? []).map((r: any) => r.role));
-  if (!roleSet.has("founder") && !roleSet.has("admin")) {
-    return json({ ok: false, error: "forbidden" }, 403);
+  try {
+    const { db, apiKey } = await founderContext(req);
+    const body = await objectBody(req);
+    const gates = { feature_flag_on: Deno.env.get("SMARTLEAD_LEAD_PUSH_ENABLED") === "true",
+      confirmation_match: body.confirmation_phrase === "PUSH SMARTLEAD LEADS", not_dry_run: body.dry_run === false };
+    if (!Object.values(gates).every(Boolean)) return json({ ok: true, blocked: true, gates, leads_pushed: 0, provider_calls: 0 });
+    if (!apiKey) throw new RequestError("smartlead_api_key_missing", 424);
+    if (typeof body.campaign_mapping_id !== "string") throw new RequestError("campaign_mapping_required");
+    const ids = body.contact_ids;
+    if (!Array.isArray(ids) || ids.length < 1 || ids.length > 50 || ids.some(id => typeof id !== "string" || !/^[0-9a-f-]{36}$/i.test(id)))
+      throw new RequestError("select_1_to_50_previewed_contacts");
+    const resolution = resolveMapping(await loadSmartleadMappings(db, body), { campaign_mapping_id: body.campaign_mapping_id });
+    if (!resolution.ok) throw new RequestError(resolution.error, 409);
+    const m = resolution.mapping;
+    const operation = crypto.randomUUID();
+    const result = await transferLeads({
+      readCampaign: () => smartleadRequest(apiKey, `/campaigns/${encodeURIComponent(m.provider_campaign_id!)}`),
+      claim: async () => {
+        const r = await db.rpc("smartlead_claim_transfer", { p_mapping: m.id, p_ids: [...new Set(ids)], p_operation: operation });
+        if (r.error) throw new RequestError("transfer_claim_failed_check_business_and_action_gates", 409);
+        return r.data ?? [];
+      },
+      addLeads: payload => smartleadRequest(apiKey, `/campaigns/${encodeURIComponent(m.provider_campaign_id!)}/leads`, "POST", payload),
+      record: async (mappingIds, status, response) => {
+        const r = await db.from("outbound_provider_lead_mappings").update({ push_status: status, provider_response: response,
+          ...(status === "pushed" ? { pushed_at: new Date().toISOString() } : {}) })
+          .in("id", mappingIds).eq("push_status", "pushing").select("id");
+        if (r.error || r.data?.length !== mappingIds.length) throw new Error("transfer_record_failed");
+      },
+    }, m.business_id!, m.liftor_campaign_id!);
+    return json({ ...result, campaign_mapping_id: m.id, operation_id: operation, campaign_started: false });
+  } catch (error) {
+    if (error instanceof Error && error.message === "campaign_must_be_draft_or_paused")
+      return json({ ok: false, error: error.message, leads_pushed: 0 }, 409);
+    return errorResponse(error);
   }
-
-  let body: any = {};
-  try { body = await req.json(); } catch { /* */ }
-  const dry_run: boolean = body.dry_run !== false; // default true
-  const confirmation_phrase: string = String(body.confirmation_phrase ?? "");
-  const campaign_mapping_id: string | null = body.campaign_mapping_id ?? null;
-  const max_batch_size = Math.min(Math.max(Number(body.max_batch_size ?? 5), 1), 50);
-
-  // Hard safety gates — ALL must pass before any external POST
-  const gates = {
-    feature_flag_on: FEATURE_FLAG,
-    confirmation_match: confirmation_phrase === CONFIRMATION,
-    not_dry_run: dry_run === false,
-    has_mapping_id: !!campaign_mapping_id,
-  };
-  const allow_post =
-    gates.feature_flag_on && gates.confirmation_match && gates.not_dry_run && gates.has_mapping_id;
-
-  if (!allow_post) {
-    return json({
-      ok: true,
-      blocked: true,
-      reason: "smartlead_lead_push_disabled",
-      gates,
-      dry_run,
-      provider_calls: 0,
-      leads_pushed: 0,
-      max_batch_size,
-      notes:
-        "No leads pushed. No Smartlead POST calls. No emails sent. Apply path is intentionally disabled.",
-    });
-  }
-
-  // The block below intentionally never runs in current build because
-  // SMARTLEAD_LEAD_PUSH_ENABLED is not configured. Kept for future wiring.
-  return json({
-    ok: false,
-    blocked: true,
-    reason: "post_path_not_implemented_yet",
-    provider_calls: 0,
-    leads_pushed: 0,
-    notes:
-      "Future apply path: would record provider_lead_id into outbound_provider_lead_mappings after a successful POST. Not implemented in this build.",
-  });
 });

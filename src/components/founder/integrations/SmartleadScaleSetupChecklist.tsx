@@ -1,368 +1,103 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
-import {
-  AlertTriangle,
-  CheckCircle2,
-  CircleDashed,
-  ListChecks,
-  Lock,
-  RefreshCcw,
-  XCircle,
-} from "lucide-react";
+import { ExternalLink, RefreshCcw } from "lucide-react";
+import { mailboxCapacity, validateMailboxPlan, type MailboxPlan } from "@/lib/smartleadMailboxPlan";
 
-type StepStatus = "complete" | "blocked" | "unknown" | "not_ready" | "disabled";
-
-type Step = {
-  n: number;
-  title: string;
-  status: StepStatus;
-  current?: string;
-  reason?: string;
-  action?: string;
-};
-
-const statusMeta: Record<StepStatus, { label: string; cls: string; Icon: any }> = {
-  complete: {
-    label: "complete",
-    cls: "border-emerald-500/40 bg-emerald-500/10 text-emerald-300",
-    Icon: CheckCircle2,
-  },
-  blocked: {
-    label: "blocked / missing",
-    cls: "border-amber-500/40 bg-amber-500/10 text-amber-300",
-    Icon: XCircle,
-  },
-  unknown: {
-    label: "unknown",
-    cls: "border-border/60 bg-muted/30 text-muted-foreground",
-    Icon: CircleDashed,
-  },
-  not_ready: {
-    label: "not ready",
-    cls: "border-border/60 bg-muted/30 text-muted-foreground",
-    Icon: CircleDashed,
-  },
-  disabled: {
-    label: "no",
-    cls: "border-rose-500/40 bg-rose-500/10 text-rose-300",
-    Icon: Lock,
-  },
-};
-
-function StepRow({ step }: { step: Step }) {
-  const meta = statusMeta[step.status];
-  const Icon = meta.Icon;
-  return (
-    <div className="rounded-md border border-border/60 p-3 space-y-1.5">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-start gap-2">
-          <span className="text-[11px] font-mono text-muted-foreground mt-0.5">
-            {String(step.n).padStart(2, "0")}
-          </span>
-          <span className="text-sm font-medium text-foreground">{step.title}</span>
-        </div>
-        <Badge variant="outline" className={`text-[10px] ${meta.cls}`}>
-          <Icon className="mr-1 h-3 w-3" />
-          {meta.label}
-        </Badge>
-      </div>
-      {step.current && (
-        <div className="text-[11px] text-muted-foreground">
-          <span className="text-muted-foreground/70">Current:</span>{" "}
-          <span className="font-mono text-foreground/80">{step.current}</span>
-        </div>
-      )}
-      {step.reason && (
-        <div className="text-[11px] text-muted-foreground">
-          <span className="text-muted-foreground/70">Reason:</span> {step.reason}
-        </div>
-      )}
-      {step.action && (
-        <div className="text-[11px] text-amber-200/90">
-          <span className="text-amber-300">Founder action:</span> {step.action}
-        </div>
-      )}
-    </div>
-  );
-}
-
+type Business = { id: string; name: string };
 export default function SmartleadScaleSetupChecklist() {
-  const [readiness, setReadiness] = useState<any>(null);
+  const [businesses, setBusinesses] = useState<Business[]>([]);
+  const [plans, setPlans] = useState<MailboxPlan[]>([]);
+  const [error, setError] = useState("");
   const [test, setTest] = useState<any>(null);
+  const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [testing, setTesting] = useState(false);
-
-  const loadReadiness = async () => {
-    const { data } = await supabase.functions.invoke("provider-readiness-check", { body: {} });
-    setReadiness(data);
-    setLoading(false);
-  };
-
   useEffect(() => {
-    loadReadiness();
-    // Auto-run readiness test once on mount so the checklist reflects live
-    // Smartlead state (mailbox count, campaign count, warmup) instead of
-    // showing "unknown" until the founder clicks Re-run.
-    rerunTest();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    let active = true;
+    Promise.all([
+      supabase.from("businesses").select("id,name").order("name"),
+      (supabase as any).from("smartlead_business_setup").select("*").order("business_id"),
+    ]).then(([b,p]) => {
+      if (!active) return;
+      setBusinesses(b.data ?? []);
+      if (b.error || p.error) setError("The outreach setup could not be loaded. Check database access and deploy the Smartlead setup migration before saving.");
+      else setPlans(p.data ?? []);
+      setLoading(false);
+    }).catch(() => { if (active) { setError("The outreach setup could not be loaded."); setLoading(false); } });
+    return () => { active = false; };
   }, []);
-
-  const rerunTest = async () => {
-    setTesting(true);
-    const { data, error } = await supabase.functions.invoke("smartlead-test-connection", {
-      body: {},
-    });
-    setTesting(false);
-    if (error) {
-      toast({
-        title: "Smartlead readiness test failed",
-        description: error.message,
-        variant: "destructive",
-      });
-      return;
-    }
-    setTest(data);
-    toast({
-      title: data?.ok ? "Readiness test complete" : "Readiness test result",
-      description: data?.ok
-        ? `Connected · ${data.email_account_count ?? 0} mailboxes · ${data.campaign_count ?? 0} campaigns`
-        : data?.reason ?? data?.error ?? "See checklist.",
-    });
-    loadReadiness();
+  const update = (id: string, patch: Partial<MailboxPlan>) => setPlans(rows => rows.map(r => r.business_id === id ? { ...r, ...patch } : r));
+  const add = (id: string) => {
+    if (!id || plans.some(p => p.business_id === id)) return;
+    setPlans([...plans, { business_id:id,website:"",sender_name:"",reply_owner_email:"",proposed_domains:[],mailbox_target:50,daily_per_mailbox:20 }]);
   };
-
-  const sl = readiness?.smartlead_provider;
-  const credentialsPresent = !!(test?.credentials_present ?? sl?.credentials_present);
-  const emailAccountCount: number | null =
-    test?.email_account_count ?? null;
-  const campaignCount: number | null = test?.campaign_count ?? null;
-  const sendingAccountsPresent =
-    test?.sending_accounts_present ?? (emailAccountCount != null ? emailAccountCount > 0 : null);
-  const warmupAccountCount: number | null = test?.warmup_account_count ?? null;
-  const webhooks404 = test?.http_status?.webhooks === 404;
-  const analytics404 = test?.http_status?.analytics_overview === 404;
-
-  const mailboxStatus: StepStatus =
-    sendingAccountsPresent === true
-      ? "complete"
-      : sendingAccountsPresent === false
-        ? "blocked"
-        : "unknown";
-
-  const campaignStatus: StepStatus =
-    campaignCount == null ? "unknown" : campaignCount > 0 ? "complete" : "blocked";
-
-  const warmupStatus: StepStatus =
-    sendingAccountsPresent === true
-      ? warmupAccountCount === 0
-        ? "blocked"
-        : warmupAccountCount && warmupAccountCount > 0
-          ? "complete"
-          : "unknown"
-      : "unknown";
-
-  const sequenceStatus: StepStatus =
-    campaignStatus === "complete" ? "unknown" : "not_ready";
-
-  const leadPushStatus: StepStatus =
-    campaignStatus === "complete" ? "unknown" : "not_ready";
-
-  const webhookStatus: StepStatus =
-    campaignStatus === "complete" ? "unknown" : "not_ready";
-
-  const analyticsStatus: StepStatus =
-    campaignStatus === "complete" ? "unknown" : "not_ready";
-
-  const steps: Step[] = [
-    {
-      n: 1,
-      title: "API key connected",
-      status: credentialsPresent ? "complete" : "blocked",
-      current: credentialsPresent
-        ? "SMARTLEAD_API_KEY present (server-side)"
-        : "SMARTLEAD_API_KEY missing",
-      action: credentialsPresent
-        ? undefined
-        : "Add SMARTLEAD_API_KEY in secrets, then rerun the readiness test.",
-    },
-    {
-      n: 2,
-      title: "Sending mailbox connected",
-      status: mailboxStatus,
-      current:
-        emailAccountCount == null
-          ? "Run readiness test to fetch"
-          : `email_account_count = ${emailAccountCount}`,
-      action:
-        mailboxStatus === "complete"
-          ? undefined
-          : "Connect at least one sending email account inside Smartlead (Smartlead → Email Accounts → Add).",
-    },
-    {
-      n: 3,
-      title: "Warmup configured",
-      status: warmupStatus,
-      reason:
-        warmupStatus === "complete"
-          ? `Warmup detected on ${warmupAccountCount} mailbox(es).`
-          : warmupStatus === "blocked"
-            ? "warmup_account_count = 0 — enable warmup in Smartlead per mailbox."
-            : sendingAccountsPresent === true
-              ? "Mailbox exists — verify warmup is enabled in Smartlead per mailbox."
-              : "Unknown until at least one email account exists.",
-      action:
-        sendingAccountsPresent === true
-          ? "Enable / confirm warmup in Smartlead for each connected mailbox."
-          : undefined,
-    },
-    {
-      n: 4,
-      title: "Campaign created",
-      status: campaignStatus,
-      current:
-        campaignCount == null
-          ? "Run readiness test to fetch"
-          : `campaign_count = ${campaignCount}`,
-      action:
-        campaignStatus === "complete"
-          ? undefined
-          : "Create a draft campaign in Smartlead, or later allow Liftor to create one in a controlled setup task.",
-    },
-    {
-      n: 5,
-      title: "Campaign sequence mapped",
-      status: sequenceStatus,
-      reason:
-        campaignStatus === "complete"
-          ? "Campaign exists — sequence mapping not yet implemented."
-          : "No Smartlead campaign exists yet.",
-    },
-    {
-      n: 6,
-      title: "Lead push preview ready",
-      status: leadPushStatus,
-      reason:
-        campaignStatus === "complete"
-          ? "Campaign exists — lead push preview not yet implemented."
-          : "No campaign exists yet.",
-    },
-    {
-      n: 7,
-      title: "Webhook configured",
-      status: webhookStatus,
-      reason:
-        campaignStatus === "complete"
-          ? "Campaign exists — retry webhook discovery on the per-campaign path."
-          : webhooks404
-            ? "No campaign/webhook path confirmed yet. Global /webhooks returned 404 on this tenant; retry webhook discovery once a campaign exists (non-blocking until then)."
-            : "No campaign/webhook path confirmed yet.",
-    },
-    {
-      n: 8,
-      title: "Analytics available",
-      status: analyticsStatus,
-      reason: analytics404
-        ? "Global /analytics/overview returned 404 on this tenant — non-blocking until a campaign exists; use campaign-level analytics once a campaign exists."
-        : "No campaign exists yet — use campaign-level analytics once one is created.",
-    },
-    {
-      n: 9,
-      title: "Scale sending enabled",
-      status: "disabled",
-      reason:
-        "Disabled until mailbox, campaign, lead push preview, webhook and batch preview are complete.",
-    },
-  ];
-
-  const headlineBlocked =
-    !credentialsPresent ||
-    mailboxStatus !== "complete" ||
-    campaignStatus !== "complete";
-
-  return (
-    <Card
-      id="smartlead-scale-setup-checklist"
-      data-testid="smartlead-scale-setup-checklist"
-      className="p-5 space-y-4 border-2 border-border/60 scroll-mt-24"
-    >
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div className="flex items-center gap-2">
-          <ListChecks className="h-4 w-4 text-primary" />
-          <h3 className="text-base font-semibold">Smartlead Scale Setup Checklist</h3>
-          <Badge variant="outline" className="text-[10px]">
-            read-only
-          </Badge>
+  const save = async () => {
+    const problem = validateMailboxPlan(plans);
+    if (problem) { toast({title:problem,variant:"destructive"}); return; }
+    setBusy(true);
+    try {
+      const result = await (supabase as any).from("smartlead_business_setup").upsert(plans.map(p=>({...p,proposed_domains:p.proposed_domains.map(d=>d.trim().toLowerCase()).filter(Boolean),updated_at:new Date().toISOString()})),{onConflict:"business_id"});
+      if(result.error) throw result.error;
+      toast({title:"Mailbox plan saved",description:"Ready to use when ordering and assigning the sending accounts."});
+    } catch { toast({title:"Could not save mailbox plan",variant:"destructive"}); }
+    finally { setBusy(false); }
+  };
+  const check = async () => {
+    setBusy(true);
+    try {
+      const result = await supabase.functions.invoke("smartlead-test-connection",{body:{}});
+      if(result.error) throw result.error;
+      setTest(result.data);
+    } catch { setTest({ok:false,error:"Connection check failed. No account state verified."}); }
+    finally { setBusy(false); }
+  };
+  const capacity = mailboxCapacity(plans);
+  return <Card id="smartlead-scale-setup-checklist" data-testid="smartlead-scale-setup-checklist" className="p-5 space-y-5 scroll-mt-24">
+    <div className="flex items-start justify-between gap-4 flex-wrap">
+      <div><h3 className="text-lg font-semibold">Set up outreach for your businesses</h3>
+        <p className="text-sm text-muted-foreground">Plan the mailboxes, connect Smartlead, then prepare each business’s campaign.</p></div>
+      <Button variant="outline" onClick={check} disabled={busy} data-testid="smartlead-rerun-readiness-btn"><RefreshCcw className="mr-2 h-4 w-4"/>Check Smartlead connection</Button>
+    </div>
+    <div className="grid sm:grid-cols-3 gap-3 text-sm">
+      <div className="border rounded-lg p-3"><strong>Smartlead Unlimited Smart · $174/month</strong><p>150,000 campaign sends and 50,000 verified prospect emails monthly.</p><a className="underline" href="https://www.smartlead.ai/pricing" target="_blank" rel="noreferrer">View Smartlead plan</a></div>
+      <div className="border rounded-lg p-3"><strong>Winnr Enterprise · $189/month</strong><p>200 mailboxes with space for 40 sending domains.</p><a className="underline" href="https://winnr.app/" target="_blank" rel="noreferrer">Open Winnr <ExternalLink className="inline h-3 w-3"/></a></div>
+      <div className="border rounded-lg p-3"><strong>$363/month combined</strong><p>Before domains, taxes and optional extras. Published prices checked 8 September 2026.</p><p className="mt-1">Saving a plan does not purchase or connect accounts.</p></div>
+    </div>
+    <div className="rounded-lg bg-muted/40 p-3 text-sm" role="status">
+      {test ? test.ok ? <>Connection verified. {test.email_account_count} mailboxes found; {test.warmup_account_count} have warmup enabled. Sending readiness still needs checking for each campaign.</>
+        : <>Connection not verified: {test.error ?? test.reason ?? "Check account credentials."}</>
+        : <>Connection has not been checked in this session. Mailbox purchases and warmup are separate from the Smartlead subscription.</>}
+    </div>
+    {error && <p className="text-sm text-destructive" role="alert">{error}</p>}
+    {!loading && !error && <>
+      <label className="block text-sm font-medium">Add a business from Liftor
+        <select aria-label="Add a business from Liftor" className="block mt-2 w-full rounded border bg-background p-2" value="" onChange={e=>add(e.target.value)}>
+          <option value="">Choose a business</option>
+          {businesses.filter(b=>!plans.some(p=>p.business_id===b.id)).map(b=><option key={b.id} value={b.id}>{b.name}</option>)}
+        </select>
+      </label>
+      {plans.map(p=><fieldset key={p.business_id} className="border rounded-lg p-4 space-y-3">
+        <legend className="px-2 font-semibold">{businesses.find(b=>b.id===p.business_id)?.name ?? "Business"}</legend>
+        <div className="grid sm:grid-cols-2 gap-3">
+          <label className="text-sm">Business website<Input value={p.website} onChange={e=>update(p.business_id,{website:e.target.value})} placeholder="https://yourbusiness.com"/></label>
+          <label className="text-sm">Sender display name<Input value={p.sender_name} onChange={e=>update(p.business_id,{sender_name:e.target.value})}/></label>
+          <label className="text-sm">Person managing replies · email<Input type="email" value={p.reply_owner_email} onChange={e=>update(p.business_id,{reply_owner_email:e.target.value})}/></label>
+          <label className="text-sm">Proposed sending domains · comma separated<Input value={p.proposed_domains.join(",")} onChange={e=>update(p.business_id,{proposed_domains:e.target.value.split(",")})}/></label>
+          <label className="text-sm">Mailbox target<Input type="number" min={1} max={200} value={p.mailbox_target} onChange={e=>update(p.business_id,{mailbox_target:Number(e.target.value)})}/></label>
+          <label className="text-sm">Campaign emails per mailbox daily after warmup<Input type="number" min={1} max={50} value={p.daily_per_mailbox} onChange={e=>update(p.business_id,{daily_per_mailbox:Number(e.target.value)})}/></label>
         </div>
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={rerunTest}
-          disabled={testing || loading}
-          data-testid="smartlead-rerun-readiness-btn"
-        >
-          <RefreshCcw className={`h-3 w-3 mr-1 ${testing ? "animate-spin" : ""}`} />
-          {testing ? "Re-running…" : "Re-run Smartlead Readiness Test"}
-        </Button>
-      </div>
-
-      <div
-        className={`rounded-md border p-3 ${
-          headlineBlocked
-            ? "border-amber-500/40 bg-amber-500/5"
-            : "border-emerald-500/40 bg-emerald-500/5"
-        }`}
-      >
-        <div className="flex items-start gap-2">
-          <AlertTriangle
-            className={`h-4 w-4 mt-0.5 ${
-              headlineBlocked ? "text-amber-400" : "text-emerald-400"
-            }`}
-          />
-          <div>
-            <div
-              className={`text-sm font-semibold ${
-                headlineBlocked ? "text-amber-200" : "text-emerald-200"
-              }`}
-            >
-              {headlineBlocked
-                ? "SMARTLEAD CONNECTED BUT NOT READY TO SEND"
-                : "SMARTLEAD CONNECTED — CORE PREREQUISITES MET"}
-            </div>
-            <p className="text-[11px] text-muted-foreground mt-1">
-              {headlineBlocked
-                ? "Smartlead mailbox exists, but no campaign exists yet."
-                : "Mailbox and campaign exist. Continue with sequence mapping, lead push preview and webhook setup."}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        {steps.map((s) => (
-          <StepRow key={s.n} step={s} />
-        ))}
-      </div>
-
-      <div className="rounded-md border border-primary/30 bg-primary/5 p-3">
-        <div className="text-xs font-semibold text-primary mb-1">Next founder action</div>
-        <p className="text-[11px] text-foreground/90">
-          {!credentialsPresent
-            ? "Add SMARTLEAD_API_KEY in secrets, then rerun the readiness test."
-            : mailboxStatus !== "complete"
-              ? "Connect one sending mailbox in Smartlead, then rerun the readiness test."
-              : campaignStatus !== "complete"
-                ? "Create a draft campaign in Smartlead, then rerun the readiness test."
-                : "Proceed to Smartlead Adapter v2: campaign sequence mapping + lead push preview (no sends)."}
-        </p>
-        <p className="text-[10px] text-muted-foreground mt-2">
-          This task does not create the mailbox, campaign, leads or webhooks from Liftor and
-          does not send any email. Read-only Smartlead endpoints only.
-        </p>
-      </div>
-    </Card>
-  );
+      </fieldset>)}
+      <p className="text-sm"><strong>{capacity.mailboxes} planned mailboxes · {capacity.daily.toLocaleString()} emails/day · {capacity.monthly.toLocaleString()} over 22 working days.</strong> Initial emails and follow-ups share this capacity. Actual volume depends on account health; new domains need warmup.</p>
+      <Button onClick={save} disabled={busy || plans.length===0}>Save mailbox plan</Button>
+    </>}
+    <ol className="list-decimal pl-5 text-sm space-y-2">
+      <li>Order the agreed mailboxes and business-specific sending domains in Winnr.</li>
+      <li>Export Winnr’s Smartlead mailbox file, import it in Smartlead and enable warmup.</li>
+      <li>Use SmartProspect to select contacts, add them to a draft campaign and map that campaign to its Liftor business below.</li>
+      <li>Import contacts into Liftor. Review the sequence, sender assignments and schedule in Smartlead before launch.</li>
+    </ol>
+  </Card>;
 }
