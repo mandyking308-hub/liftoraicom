@@ -14,6 +14,21 @@ const json = (b: unknown, s = 200) =>
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 
+/**
+ * Fixed, non-leaking diagnostic string for a Smartlead call.
+ * Never contains provider response text, URLs (which carry api_key) or the key.
+ */
+function statusDiagnostic(status: number, kind: "http" | "network" | "timeout"): string {
+  if (kind === "timeout") return "request_timeout";
+  if (kind === "network") return "network_error";
+  if (status === 401) return "http_401_unauthorized";
+  if (status === 403) return "http_403_forbidden";
+  if (status === 404) return "http_404_not_found";
+  if (status === 429) return "http_429_rate_limited";
+  if (status >= 500) return `http_${status}_provider_error`;
+  return `http_${status}_unexpected`;
+}
+
 async function smartleadGet(path: string, apiKey: string, timeoutMs = 12_000) {
   const sep = path.includes("?") ? "&" : "?";
   const url = `${SMARTLEAD_BASE_URL}${path}${sep}api_key=${encodeURIComponent(apiKey)}`;
@@ -26,15 +41,29 @@ async function smartleadGet(path: string, apiKey: string, timeoutMs = 12_000) {
     try {
       parsed = JSON.parse(text);
     } catch {
-      /* keep raw */
+      /* body intentionally discarded — never surfaced */
     }
-    return { ok: res.ok, status: res.status, body: parsed, raw_excerpt: text.slice(0, 400) };
+    return {
+      ok: res.ok,
+      status: res.status,
+      body: parsed,
+      diagnostic: res.ok ? null : statusDiagnostic(res.status, "http"),
+    };
   } catch (e: any) {
-    return { ok: false, status: 0, body: null, raw_excerpt: `fetch_error: ${e?.message ?? String(e)}` };
+    // Exception messages can embed the request URL (which carries api_key).
+    // Only a fixed classification is ever returned.
+    const aborted = e?.name === "AbortError";
+    return {
+      ok: false,
+      status: 0,
+      body: null,
+      diagnostic: statusDiagnostic(0, aborted ? "timeout" : "network"),
+    };
   } finally {
     clearTimeout(t);
   }
 }
+
 
 /**
  * Smartlead read-only connection test.
@@ -195,17 +224,44 @@ Deno.serve(async (req) => {
     | "unverified_request_failed"
     | "unverified_campaigns_unreadable" = "unverified_campaigns_unreadable";
   let webhookCount: number | null = null;
+  let liftorWebhookCount: number | null = null;
   let webhookCampaignsChecked = 0;
   const webhookStatuses: Array<{ campaign_id: unknown; http_status: number }> = [];
+
+  // A webhook only proves Liftor is wired when it targets THIS project's
+  // receiver: <SUPABASE_URL origin>/functions/v1/smartlead-webhook.
+  // Query params are ignored for matching and URLs are never returned.
+  const expectedOrigin = (() => {
+    try {
+      return new URL(SUPABASE_URL).origin.toLowerCase();
+    } catch {
+      return null;
+    }
+  })();
+  const EXPECTED_RECEIVER_PATH = "/functions/v1/smartlead-webhook";
+  const matchesLiftorReceiver = (raw: unknown): boolean => {
+    if (typeof raw !== "string" || !raw || !expectedOrigin) return false;
+    try {
+      const u = new URL(raw);
+      return (
+        u.origin.toLowerCase() === expectedOrigin &&
+        u.pathname.replace(/\/+$/, "").toLowerCase() === EXPECTED_RECEIVER_PATH
+      );
+    } catch {
+      return false;
+    }
+  };
 
   if (!campaignsRes.ok) {
     webhookCheckStatus = "unverified_campaigns_unreadable";
   } else if (campaigns.length === 0) {
     webhookCheckStatus = "not_applicable_no_campaigns";
     webhookCount = null;
+    liftorWebhookCount = null;
   } else {
     const scan = campaignSummaries.filter((c) => c.id != null).slice(0, WEBHOOK_CAMPAIGN_SCAN_CAP);
     let total = 0;
+    let liftorTotal = 0;
     let anyFailed = false;
     for (const c of scan) {
       await new Promise((r) => setTimeout(r, 250));
@@ -215,10 +271,16 @@ Deno.serve(async (req) => {
       );
       webhookCampaignsChecked += 1;
       webhookStatuses.push({ campaign_id: c.id, http_status: res.status });
-      if (res.ok) total += asArray(res.body).length;
-      else anyFailed = true;
+      if (res.ok) {
+        const hooks = asArray(res.body);
+        total += hooks.length;
+        liftorTotal += hooks.filter((h: any) =>
+          matchesLiftorReceiver(h?.webhook_url ?? h?.url ?? h?.target_url),
+        ).length;
+      } else anyFailed = true;
     }
     webhookCount = total;
+    liftorWebhookCount = liftorTotal;
     if (anyFailed) {
       webhookCheckStatus = "unverified_request_failed";
       warnings.push("campaign_webhook_read_failed");
@@ -231,9 +293,13 @@ Deno.serve(async (req) => {
   }
 
   const webhookCheckConclusive = webhookCheckStatus === "verified";
-  // Compatibility field for the existing UI. Only true on a conclusive check;
-  // never overwrite known config from an inapplicable/unverified check.
-  const webhookConfigured = webhookCheckConclusive ? (webhookCount ?? 0) > 0 : !!provider.webhook_configured;
+  if (webhookCheckConclusive && !expectedOrigin) warnings.push("receiver_origin_unresolvable");
+  // Compatibility field for the existing UI. Only true when a conclusive scan
+  // found a webhook pointing at THIS project's Liftor receiver; never overwrite
+  // known config from an inapplicable/unverified check.
+  const webhookConfigured = webhookCheckConclusive
+    ? (liftorWebhookCount ?? 0) > 0
+    : !!provider.webhook_configured;
 
   // API authentication health is judged on campaigns + email-accounts only.
   const testOk = campaignsRes.ok && accountsRes.ok;
@@ -245,8 +311,8 @@ Deno.serve(async (req) => {
   if (testOk && webhookCheckStatus === "not_applicable_no_campaigns") {
     blockers.push("webhook_check_not_applicable_no_campaigns");
   }
-  if (testOk && webhookCheckConclusive && (webhookCount ?? 0) === 0) {
-    blockers.push("no_smartlead_webhook_configured");
+  if (testOk && webhookCheckConclusive && (liftorWebhookCount ?? 0) === 0) {
+    blockers.push("no_liftor_receiver_webhook_configured");
   }
   if (testOk && !overviewRes.ok) warnings.push(`analytics_overall_stats_v2_http_${overviewRes.status}`);
   if (testOk && accountsRes.ok && smtpVerifiedAccountCount === 0 && sendingAccountsPresent) {
@@ -255,7 +321,7 @@ Deno.serve(async (req) => {
 
   const lastError = testOk
     ? null
-    : `campaigns_http_${campaignsRes.status} accounts_http_${accountsRes.status}`;
+    : `campaigns_${campaignsRes.diagnostic ?? "ok"} accounts_${accountsRes.diagnostic ?? "ok"}`;
 
   const providerUpdate: Record<string, unknown> = {
     status: testOk ? "connected" : "error",
@@ -265,13 +331,27 @@ Deno.serve(async (req) => {
     last_error: testOk ? null : lastError,
     updated_at: new Date().toISOString(),
   };
-  if (webhookCheckConclusive) providerUpdate.webhook_configured = (webhookCount ?? 0) > 0;
+  if (webhookCheckConclusive) providerUpdate.webhook_configured = (liftorWebhookCount ?? 0) > 0;
 
   await admin.from("outbound_providers").update(providerUpdate).eq("id", provider.id);
 
   const analyticsBody: any = overviewRes.ok ? (overviewRes.body ?? {}) : {};
-  const analyticsSource = analyticsBody?.data ?? analyticsBody;
-  const num = (v: unknown) => (typeof v === "number" ? v : null);
+  const analyticsData: any = analyticsBody?.data ?? analyticsBody;
+  // Documented shape: data.overall_stats { sent, opened, clicked, replied,
+  // bounced, unsubscribed, unique_lead_count } as numeric STRINGS.
+  const overall: any = analyticsData?.overall_stats ?? analyticsData ?? {};
+  /** Accepts finite numbers and non-empty numeric strings. Absent => null. */
+  const num = (...vals: unknown[]) => {
+    for (const v of vals) {
+      if (typeof v === "number" && Number.isFinite(v)) return v;
+      if (typeof v === "string" && v.trim() !== "") {
+        const n = Number(v.trim());
+        if (Number.isFinite(n)) return n;
+      }
+    }
+    return null;
+  };
+
 
   return json({
     ok: testOk,
@@ -304,29 +384,33 @@ Deno.serve(async (req) => {
     webhook_check_status: webhookCheckStatus,
     webhook_campaigns_checked: webhookCampaignsChecked,
     webhook_count: webhookCount,
+    liftor_receiver_webhook_count: liftorWebhookCount,
+    expected_receiver_path: EXPECTED_RECEIVER_PATH,
     webhook_configured: webhookConfigured,
     analytics_window: { start_date: startDate, end_date: endDate, timezone: "Europe/London" },
     analytics_overview_ok: overviewRes.ok,
     analytics_totals: overviewRes.ok
       ? {
-          sent_count: num(analyticsSource?.sent_count),
-          open_count: num(analyticsSource?.open_count),
-          click_count: num(analyticsSource?.click_count),
-          reply_count: num(analyticsSource?.reply_count),
-          bounce_count: num(analyticsSource?.bounce_count),
-          unsubscribed_count: num(analyticsSource?.unsubscribed_count),
-          total_count: num(analyticsSource?.total_count),
+          sent_count: num(overall?.sent, overall?.sent_count),
+          open_count: num(overall?.opened, overall?.open_count),
+          click_count: num(overall?.clicked, overall?.click_count),
+          reply_count: num(overall?.replied, overall?.reply_count),
+          bounce_count: num(overall?.bounced, overall?.bounce_count),
+          unsubscribed_count: num(overall?.unsubscribed, overall?.unsubscribed_count),
+          total_count: num(overall?.unique_lead_count, overall?.total_count),
         }
       : null,
     warnings,
     blockers,
     error: lastError,
-    response_excerpts: testOk
+    // Fixed HTTP-status diagnostics only — no provider response text or URLs.
+    failure_diagnostics: testOk
       ? null
       : {
-          campaigns: campaignsRes.raw_excerpt,
-          email_accounts: accountsRes.raw_excerpt,
+          campaigns: campaignsRes.diagnostic,
+          email_accounts: accountsRes.diagnostic,
         },
+
     notes:
       "Read-only: campaigns + email-accounts (whitelisted fields) + analytics/overall-stats-v2 + per-campaign webhooks. Mailbox authentication is reported from is_smtp_success/is_imap_success only, never inferred from HTTP 200. No campaign created, no leads pushed, no email-accounts added, no warmup enabled, no webhook created, no emails sent.",
   });
