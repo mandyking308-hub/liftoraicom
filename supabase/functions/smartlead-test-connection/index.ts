@@ -108,29 +108,37 @@ Deno.serve(async (req) => {
     });
   }
 
-  // Read-only Smartlead calls only:
+  // Read-only Smartlead calls only (documented endpoints):
   //   GET /campaigns/?include_tags=true
   //   GET /email-accounts/?offset=0&limit=100
-  //   GET /webhooks
-  //   GET /analytics/overview
+  //   GET /analytics/overall-stats-v2?start_date=&end_date=&timezone=
+  //   GET /campaigns/{campaign_id}/webhooks   (per discovered campaign, bounded)
   // No mutations. Spaced lightly to respect 10 req / 2s rate limit.
+  const ACCOUNT_PAGE_LIMIT = 100;
+  const WEBHOOK_CAMPAIGN_SCAN_CAP = 10;
+
   const campaignsRes = await smartleadGet("/campaigns/?include_tags=true", SMARTLEAD_API_KEY!);
   await new Promise((r) => setTimeout(r, 250));
   const accountsRes = await smartleadGet(
-    "/email-accounts/?offset=0&limit=100",
+    `/email-accounts/?offset=0&limit=${ACCOUNT_PAGE_LIMIT}`,
     SMARTLEAD_API_KEY!,
   );
   await new Promise((r) => setTimeout(r, 250));
-  const webhooksRes = await smartleadGet("/webhooks", SMARTLEAD_API_KEY!);
-  await new Promise((r) => setTimeout(r, 250));
-  const overviewRes = await smartleadGet("/analytics/overview", SMARTLEAD_API_KEY!);
+
+  const now = new Date();
+  const iso = (d: Date) => d.toISOString().slice(0, 10);
+  const startDate = iso(new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)));
+  const endDate = iso(now);
+  const analyticsPath =
+    `/analytics/overall-stats-v2?start_date=${startDate}&end_date=${endDate}` +
+    `&timezone=${encodeURIComponent("Europe/London")}`;
+  const overviewRes = await smartleadGet(analyticsPath, SMARTLEAD_API_KEY!);
 
   const asArray = (b: any): any[] =>
     Array.isArray(b) ? b : Array.isArray(b?.data) ? b.data : Array.isArray(b?.results) ? b.results : [];
 
   const campaigns = asArray(campaignsRes.body);
   const accounts = asArray(accountsRes.body);
-  const webhooks = asArray(webhooksRes.body);
 
   const campaignCount = campaignsRes.ok ? campaigns.length : null;
   const activeCampaignCount = campaignsRes.ok
@@ -146,47 +154,129 @@ Deno.serve(async (req) => {
         status: c?.status ?? null,
       }))
     : [];
+
   const emailAccountCount = accountsRes.ok ? accounts.length : null;
+  const emailAccountCountTruncated = accountsRes.ok
+    ? accounts.length >= ACCOUNT_PAGE_LIMIT
+    : null;
+
+  // Whitelisted account fields ONLY. Raw provider objects, passwords, tokens
+  // and keys are never returned or logged.
+  const accountSummaries = accountsRes.ok
+    ? accounts.slice(0, ACCOUNT_PAGE_LIMIT).map((a: any) => ({
+        id: a?.id ?? null,
+        from_email: a?.from_email ?? a?.email ?? null,
+        from_name: a?.from_name ?? null,
+        is_smtp_success: typeof a?.is_smtp_success === "boolean" ? a.is_smtp_success : null,
+        is_imap_success: typeof a?.is_imap_success === "boolean" ? a.is_imap_success : null,
+        warmup_status: a?.warmup_details?.status ?? null,
+        message_per_day: a?.message_per_day ?? null,
+      }))
+    : [];
+
   const warmupAccountCount = accountsRes.ok
-    ? accounts.filter(
-        (a) =>
-          a?.warmup_details?.status === "ACTIVE" ||
-          a?.warmup_status === "ACTIVE" ||
-          a?.warmup_enabled === true,
-      ).length
+    ? accountSummaries.filter((a) => String(a.warmup_status ?? "").toUpperCase() === "ACTIVE").length
+    : null;
+  const smtpVerifiedAccountCount = accountsRes.ok
+    ? accountSummaries.filter((a) => a.is_smtp_success === true).length
+    : null;
+  const imapVerifiedAccountCount = accountsRes.ok
+    ? accountSummaries.filter((a) => a.is_imap_success === true).length
     : null;
   const sendingAccountsPresent = (emailAccountCount ?? 0) > 0;
-  const webhookCount = webhooksRes.ok ? webhooks.length : null;
-  const webhookConfigured = (webhookCount ?? 0) > 0;
 
+  // Per-campaign webhook discovery (documented route). Global GET /webhooks is
+  // not a confirmed route and is no longer called.
+  const warnings: string[] = [];
+  let webhookCheckStatus:
+    | "not_applicable_no_campaigns"
+    | "verified"
+    | "incomplete_capped"
+    | "unverified_request_failed"
+    | "unverified_campaigns_unreadable" = "unverified_campaigns_unreadable";
+  let webhookCount: number | null = null;
+  let webhookCampaignsChecked = 0;
+  const webhookStatuses: Array<{ campaign_id: unknown; http_status: number }> = [];
+
+  if (!campaignsRes.ok) {
+    webhookCheckStatus = "unverified_campaigns_unreadable";
+  } else if (campaigns.length === 0) {
+    webhookCheckStatus = "not_applicable_no_campaigns";
+    webhookCount = null;
+  } else {
+    const scan = campaignSummaries.filter((c) => c.id != null).slice(0, WEBHOOK_CAMPAIGN_SCAN_CAP);
+    let total = 0;
+    let anyFailed = false;
+    for (const c of scan) {
+      await new Promise((r) => setTimeout(r, 250));
+      const res = await smartleadGet(
+        `/campaigns/${encodeURIComponent(String(c.id))}/webhooks`,
+        SMARTLEAD_API_KEY!,
+      );
+      webhookCampaignsChecked += 1;
+      webhookStatuses.push({ campaign_id: c.id, http_status: res.status });
+      if (res.ok) total += asArray(res.body).length;
+      else anyFailed = true;
+    }
+    webhookCount = total;
+    if (anyFailed) {
+      webhookCheckStatus = "unverified_request_failed";
+      warnings.push("campaign_webhook_read_failed");
+    } else if (campaigns.length > scan.length) {
+      webhookCheckStatus = "incomplete_capped";
+      warnings.push(`campaign_webhook_scan_capped_at_${WEBHOOK_CAMPAIGN_SCAN_CAP}`);
+    } else {
+      webhookCheckStatus = "verified";
+    }
+  }
+
+  const webhookCheckConclusive = webhookCheckStatus === "verified";
+  // Compatibility field for the existing UI. Only true on a conclusive check;
+  // never overwrite known config from an inapplicable/unverified check.
+  const webhookConfigured = webhookCheckConclusive ? (webhookCount ?? 0) > 0 : !!provider.webhook_configured;
+
+  // API authentication health is judged on campaigns + email-accounts only.
   const testOk = campaignsRes.ok && accountsRes.ok;
   const blockers: string[] = [];
   if (!campaignsRes.ok) blockers.push(`campaigns_endpoint_http_${campaignsRes.status}`);
   if (!accountsRes.ok) blockers.push(`email_accounts_endpoint_http_${accountsRes.status}`);
   if (testOk && !sendingAccountsPresent) blockers.push("no_sending_accounts_in_smartlead");
   if (testOk && (campaignCount ?? 0) === 0) blockers.push("no_campaigns_in_smartlead");
-  if (testOk && !webhookConfigured) blockers.push("no_smartlead_webhook_configured");
+  if (testOk && webhookCheckStatus === "not_applicable_no_campaigns") {
+    blockers.push("webhook_check_not_applicable_no_campaigns");
+  }
+  if (testOk && webhookCheckConclusive && (webhookCount ?? 0) === 0) {
+    blockers.push("no_smartlead_webhook_configured");
+  }
+  if (testOk && !overviewRes.ok) warnings.push(`analytics_overall_stats_v2_http_${overviewRes.status}`);
+  if (testOk && accountsRes.ok && smtpVerifiedAccountCount === 0 && sendingAccountsPresent) {
+    blockers.push("no_mailbox_with_verified_smtp");
+  }
 
   const lastError = testOk
     ? null
     : `campaigns_http_${campaignsRes.status} accounts_http_${accountsRes.status}`;
 
-  await admin
-    .from("outbound_providers")
-    .update({
-      status: testOk ? "connected" : "error",
-      provider_health: testOk ? "ok" : "error",
-      credentials_present: true,
-      webhook_configured: webhookConfigured,
-      last_test_at: new Date().toISOString(),
-      last_error: testOk ? null : lastError,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", provider.id);
+  const providerUpdate: Record<string, unknown> = {
+    status: testOk ? "connected" : "error",
+    provider_health: testOk ? "ok" : "error",
+    credentials_present: true,
+    last_test_at: new Date().toISOString(),
+    last_error: testOk ? null : lastError,
+    updated_at: new Date().toISOString(),
+  };
+  if (webhookCheckConclusive) providerUpdate.webhook_configured = (webhookCount ?? 0) > 0;
+
+  await admin.from("outbound_providers").update(providerUpdate).eq("id", provider.id);
+
+  const analyticsBody: any = overviewRes.ok ? (overviewRes.body ?? {}) : {};
+  const analyticsSource = analyticsBody?.data ?? analyticsBody;
+  const num = (v: unknown) => (typeof v === "number" ? v : null);
 
   return json({
     ok: testOk,
     tested: true,
+    tested_at: new Date().toISOString(),
     provider_id: provider.id,
     base_url: SMARTLEAD_BASE_URL,
     auth_method: "api_key_query_param",
@@ -194,7 +284,9 @@ Deno.serve(async (req) => {
     http_status: {
       campaigns: campaignsRes.status,
       email_accounts: accountsRes.status,
-      webhooks: webhooksRes.status,
+      campaign_webhooks: webhookStatuses,
+      analytics_overall_stats_v2: overviewRes.status,
+      // Legacy key kept for the existing UI.
       analytics_overview: overviewRes.status,
     },
     campaign_count: campaignCount,
@@ -202,11 +294,31 @@ Deno.serve(async (req) => {
     drafted_campaign_count: draftedCampaignCount,
     campaigns: campaignSummaries,
     email_account_count: emailAccountCount,
+    email_account_count_truncated: emailAccountCountTruncated,
+    email_account_page_limit: ACCOUNT_PAGE_LIMIT,
+    email_accounts: accountSummaries,
+    smtp_verified_account_count: smtpVerifiedAccountCount,
+    imap_verified_account_count: imapVerifiedAccountCount,
     warmup_account_count: warmupAccountCount,
     sending_accounts_present: sendingAccountsPresent,
+    webhook_check_status: webhookCheckStatus,
+    webhook_campaigns_checked: webhookCampaignsChecked,
     webhook_count: webhookCount,
     webhook_configured: webhookConfigured,
+    analytics_window: { start_date: startDate, end_date: endDate, timezone: "Europe/London" },
     analytics_overview_ok: overviewRes.ok,
+    analytics_totals: overviewRes.ok
+      ? {
+          sent_count: num(analyticsSource?.sent_count),
+          open_count: num(analyticsSource?.open_count),
+          click_count: num(analyticsSource?.click_count),
+          reply_count: num(analyticsSource?.reply_count),
+          bounce_count: num(analyticsSource?.bounce_count),
+          unsubscribed_count: num(analyticsSource?.unsubscribed_count),
+          total_count: num(analyticsSource?.total_count),
+        }
+      : null,
+    warnings,
     blockers,
     error: lastError,
     response_excerpts: testOk
@@ -216,6 +328,7 @@ Deno.serve(async (req) => {
           email_accounts: accountsRes.raw_excerpt,
         },
     notes:
-      "Read-only: campaigns + email-accounts + webhooks + analytics/overview. No campaign created, no leads pushed, no email-accounts added, no webhook created, no emails sent.",
+      "Read-only: campaigns + email-accounts (whitelisted fields) + analytics/overall-stats-v2 + per-campaign webhooks. Mailbox authentication is reported from is_smtp_success/is_imap_success only, never inferred from HTTP 200. No campaign created, no leads pushed, no email-accounts added, no warmup enabled, no webhook created, no emails sent.",
   });
 });
+
