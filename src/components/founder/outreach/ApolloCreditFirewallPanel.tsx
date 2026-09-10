@@ -91,18 +91,24 @@ const ApolloCreditFirewallPanel = () => {
           </div>
         </div>
 
-        <div className="grid sm:grid-cols-2 gap-3">
+        <div className="grid sm:grid-cols-3 gap-3">
           <div className="rounded-lg border border-border/50 p-3">
-            <p className="text-[11px] text-muted-foreground flex items-center gap-1.5"><Database className="h-3 w-3" /> Education master accounts</p>
+            <p className="text-[11px] text-muted-foreground flex items-center gap-1.5"><Database className="h-3 w-3" /> Education companies (CRM)</p>
             <p className="text-lg font-semibold tabular-nums">{data.accountCount}</p>
-            <p className="text-[11px] text-muted-foreground">{data.accountCount === 0 ? "Universe not yet imported" : "Research only — not outreach-eligible"}</p>
+            <p className="text-[11px] text-muted-foreground">{data.accountCount === 0 ? "Not yet loaded" : "Research only — not outreach-eligible"}</p>
           </div>
           <div className="rounded-lg border border-border/50 p-3">
-            <p className="text-[11px] text-muted-foreground flex items-center gap-1.5"><Users className="h-3 w-3" /> Education research candidates</p>
+            <p className="text-[11px] text-muted-foreground flex items-center gap-1.5"><Users className="h-3 w-3" /> Education people (CRM)</p>
             <p className="text-lg font-semibold tabular-nums">{data.candidateCount}</p>
-            <p className="text-[11px] text-muted-foreground">Free search only · no email revealed</p>
+            <p className="text-[11px] text-muted-foreground">Free search only · non-sendable</p>
+          </div>
+          <div className="rounded-lg border border-border/50 p-3">
+            <p className="text-[11px] text-muted-foreground flex items-center gap-1.5"><Lock className="h-3 w-3" /> Business emails revealed</p>
+            <p className="text-lg font-semibold tabular-nums">{data.revealedCount}</p>
+            <p className="text-[11px] text-muted-foreground">Founder-selected reveal only</p>
           </div>
         </div>
+
 
         <p className="text-[11px] text-muted-foreground leading-relaxed">
           Every paid Apollo request must first obtain an atomic reservation from this firewall. With paid
