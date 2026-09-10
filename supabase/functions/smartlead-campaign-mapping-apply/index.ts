@@ -159,6 +159,7 @@ Deno.serve(async (req) => {
     provider_id: provider.id,
     provider_type: "smartlead",
     provider_campaign_id: providerCampaignId,
+    idempotency_token: buildIdempotencyToken(liftorCampaignId),
     provider_campaign_name: providerCampaignName,
     provider_campaign_status: providerCampaignStatus ? String(providerCampaignStatus) : null,
     mapping_status: "mapped",

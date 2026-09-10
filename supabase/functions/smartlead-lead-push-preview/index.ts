@@ -1,5 +1,4 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { evaluateOutboundSendability } from "../_shared/outboundSendability.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -77,23 +76,21 @@ Deno.serve(async (req) => {
   const liftor_campaign_id = mapping.liftor_campaign_id;
   const provider_campaign_id = mapping.provider_campaign_id;
 
-  // Already-pushed guard — any existing mapping for this campaign, in any state.
+  // Already-pushed guard
   const { data: alreadyPushed } = await admin
     .from("outbound_provider_lead_mappings")
-    .select("contact_email, liftor_contact_id, push_status")
+    .select("contact_email, push_status")
     .eq("provider_type", "smartlead")
-    .eq("provider_campaign_id", provider_campaign_id ?? "");
+    .eq("provider_campaign_id", provider_campaign_id ?? "")
+    .in("push_status", ["pushed", "pushing"]);
   const pushedEmails = new Set(
     (alreadyPushed ?? []).map((r: any) => (r.contact_email ?? "").toLowerCase().trim()),
-  );
-  const pushedContactIds = new Set(
-    (alreadyPushed ?? []).map((r: any) => r.liftor_contact_id).filter(Boolean),
   );
 
   let q = admin
     .from("contacts")
     .select(
-      "id, email, first_name, last_name, name, company, linkedin_url, source_platform, lawful_basis, unsubscribe_token, sendable_status, email_verified_status, reveal_status, status, is_globally_suppressed, global_suppression_at, hard_bounced, unsubscribed_at, do_not_contact_at, conversation_active, archived_at, founder_review_requested_at, assigned_business, active_campaign_id, compliance_status, do_not_contact",
+      "id, email, first_name, last_name, name, company, linkedin_url, source_platform, lawful_basis, unsubscribe_token, sendable_status, is_globally_suppressed, hard_bounced, unsubscribed_at, archived_at, founder_review_requested_at, assigned_business, active_campaign_id, compliance_status, do_not_contact",
     )
     .limit(500);
   if (business_id) q = q.eq("assigned_business", business_id);
@@ -124,26 +121,23 @@ Deno.serve(async (req) => {
     if (!c.email) { exclude("missing_email"); continue; }
     const emailKey = String(c.email).toLowerCase().trim();
     if (seenEmails.has(emailKey)) { exclude("duplicate_email"); continue; }
-    if (pushedEmails.has(emailKey) || pushedContactIds.has(c.id)) {
-      exclude("already_mapped_to_smartlead_campaign"); continue;
-    }
+    if (pushedEmails.has(emailKey)) { exclude("already_pushed_to_smartlead_campaign"); continue; }
     if (business_id && c.assigned_business && c.assigned_business !== business_id) {
       exclude("wrong_business"); continue;
     }
     if (c.archived_at) { exclude("archived"); continue; }
     if (c.do_not_contact) { exclude("do_not_contact"); continue; }
-
-    // Canonical suppression/compliance gate — the SAME evaluator used by the
-    // apply and dry-run paths, so all three can never disagree.
-    const verdict = evaluateOutboundSendability(c);
-    if (!verdict.sendable) { exclude(verdict.blockers[0]); continue; }
-
+    if (c.is_globally_suppressed) { exclude("suppressed"); continue; }
+    if (c.hard_bounced) { exclude("bounced"); continue; }
+    if (c.unsubscribed_at) { exclude("unsubscribed"); continue; }
     if (c.compliance_status && c.compliance_status !== "outreach_allowed") {
       exclude(`compliance_${c.compliance_status}`); continue;
     }
     if (!c.lawful_basis) { exclude("missing_lawful_basis"); continue; }
     if (!c.unsubscribe_token) { exclude("missing_unsubscribe_token"); continue; }
-    if (c.conversation_active) { exclude("conversation_active"); continue; }
+    if (c.sendable_status && c.sendable_status !== "sendable") {
+      exclude(`sendable_status_${c.sendable_status}`); continue;
+    }
     if (c.founder_review_requested_at) { exclude("review_required"); continue; }
 
     const queue = queueByContact.get(c.id) ?? [];

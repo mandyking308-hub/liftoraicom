@@ -1,27 +1,20 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import {
-  CANONICAL_CHECKLIST_KEYS,
-  computeActivationChecklist,
-  type ChecklistInputs,
-} from "../_shared/smartleadActivationChecklist.ts";
-import { LEGACY_NEON_CANDY_ESTATE } from "../_shared/mailboxRegistrationParser.ts";
+import { computeActivationChecklist } from "../_shared/smartleadActivationChecklist.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 const json = (b: unknown, s = 200) =>
-  new Response(JSON.stringify(b), {
-    status: s,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
+  new Response(JSON.stringify(b), { status: s, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
 /**
- * Recomputes the canonical 12-key Smartlead activation checklist from live
- * evidence and writes it to the EXISTING public.smartlead_activation_checklist.
+ * Smartlead Activation Checklist Refresh — READ-ONLY / WRITE-CHECKLIST ONLY.
  *
- * Read-only against Smartlead. Never sends. Never reports green on assumption.
+ * Recomputes the canonical 12-key activation checklist for a business/campaign
+ * and optionally persists it to smartlead_activation_checklist. No provider
+ * calls. Neon Candy is explicitly excluded from education sending.
  */
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -42,150 +35,160 @@ Deno.serve(async (req) => {
 
   const admin = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
   const { data: roles } = await admin.from("user_roles").select("role").eq("user_id", u.user.id);
-  const roleSet = new Set((roles ?? []).map((r: { role: string }) => r.role));
+  const roleSet = new Set((roles ?? []).map((r: any) => r.role));
   if (!roleSet.has("founder") && !roleSet.has("admin")) {
     return json({ ok: false, error: "forbidden" }, 403);
   }
 
-  let body: Record<string, unknown> = {};
-  try {
-    body = await req.json();
-  } catch { /* GET-style call is fine */ }
-  const estateKey = String(body.estate_key ?? "").trim() || null;
-  const persist = body.persist !== false;
+  let body: any = {};
+  try { body = await req.json(); } catch { /* */ }
 
-  const count = async (
-    table: string,
-    build: (q: ReturnType<typeof admin.from>) => unknown,
-  ): Promise<number> => {
-    // deno-lint-ignore no-explicit-any
-    const q: any = build(admin.from(table) as any);
-    const { count: c } = await q;
-    return c ?? 0;
-  };
+  const business_id: string | null = body.business_id ?? null;
+  const liftor_campaign_id: string | null = body.liftor_campaign_id ?? null;
+  const persist: boolean = body.persist !== false; // default true
 
-  const { data: provider } = await admin
-    .from("outbound_providers")
-    .select("id, status, credentials_present, provider_health, webhook_configured, last_test_at")
-    .eq("provider_type", "smartlead")
-    .maybeSingle();
+  if (!business_id) return json({ ok: false, error: "business_id_required" }, 400);
 
-  const [
-    receivedEvents,
-    processedEvents,
-    suppressionEvents,
-    campaignMappings,
-    activeCampaignMappings,
-    leadMappings,
-    sendingDomains,
-  ] = await Promise.all([
-    count("outbound_provider_events", (q) =>
-      // deno-lint-ignore no-explicit-any
-      (q as any).select("id", { count: "exact", head: true }).eq("provider_type", "smartlead")),
-    count("outbound_provider_events", (q) =>
-      // deno-lint-ignore no-explicit-any
-      (q as any).select("id", { count: "exact", head: true }).eq("provider_type", "smartlead").eq("processing_status", "processed")),
-    count("outbound_provider_events", (q) =>
-      // deno-lint-ignore no-explicit-any
-      (q as any).select("id", { count: "exact", head: true }).eq("provider_type", "smartlead").in("provider_event_type", ["email_bounced", "lead_unsubscribed"])),
-    count("outbound_provider_campaign_mappings", (q) =>
-      // deno-lint-ignore no-explicit-any
-      (q as any).select("id", { count: "exact", head: true }).eq("provider_type", "smartlead")),
-    count("outbound_provider_campaign_mappings", (q) =>
-      // deno-lint-ignore no-explicit-any
-      (q as any).select("id", { count: "exact", head: true }).eq("provider_type", "smartlead").eq("mapping_status", "mapped").eq("is_active", true)),
-    count("outbound_provider_lead_mappings", (q) =>
-      // deno-lint-ignore no-explicit-any
-      (q as any).select("id", { count: "exact", head: true }).eq("provider_type", "smartlead")),
-    count("sending_domains", (q) =>
-      // deno-lint-ignore no-explicit-any
-      (q as any).select("id", { count: "exact", head: true })),
-  ]);
+  // Fetch business name
+  const { data: business } = await admin
+    .from("businesses")
+    .select("id, business_name")
+    .eq("id", business_id)
+    .single();
+  const business_name = business?.business_name ?? "";
 
-  // Mailbox estate — the legacy Neon Candy estate is never counted as
-  // education/portfolio sending capacity.
-  let mailboxQ = admin
-    .from("inboxes")
-    .select("id, provider_ready, warmup_ready, warmup_status, daily_send_limit, ramp_daily_cap, estate_key")
-    .neq("estate_key", LEGACY_NEON_CANDY_ESTATE);
-  if (estateKey) mailboxQ = mailboxQ.eq("estate_key", estateKey);
+  // Explicit Neon Candy protection
+  if (business_name.toLowerCase().startsWith("neon candy")) {
+    return json({
+      ok: true,
+      checklist: [],
+      notes: "Neon Candy is a segregated legacy estate and is excluded from this activation checklist.",
+      persisted: false,
+    });
+  }
+
+  // Domain
+  const { data: domains } = await admin
+    .from("sending_domains")
+    .select("id")
+    .eq("business_id", business_id)
+    .limit(1);
+
+  // Mailboxes
+  let mailboxQ = admin.from("inboxes").select("id, provider_ready, warmup_ready, estate_key");
+  if (liftor_campaign_id) {
+    // If a campaign is given, restrict to mailboxes allowed for that campaign's business.
+    mailboxQ = mailboxQ.eq("business_name", business_name);
+  } else {
+    mailboxQ = mailboxQ.eq("business_name", business_name);
+  }
   const { data: mailboxes } = await mailboxQ;
-  const estate = mailboxes ?? [];
+  const mailboxCount = (mailboxes ?? []).filter((m: any) => (m.estate_key ?? "").toLowerCase() !== "neon-candy-legacy").length;
+  const providerReadyCount = (mailboxes ?? []).filter((m: any) => m.provider_ready === true).length;
+  const warmupReadyCount = (mailboxes ?? []).filter((m: any) => m.warmup_ready === true).length;
 
-  const inputs: ChecklistInputs = {
-    provider: provider
-      ? {
-          exists: true,
-          status: provider.status,
-          credentials_present: provider.credentials_present,
-          provider_health: provider.provider_health,
-          webhook_configured: provider.webhook_configured,
-          last_test_at: provider.last_test_at,
-        }
-      : null,
-    webhook_secret_present: (Deno.env.get("SMARTLEAD_WEBHOOK_SECRET") ?? "").length > 0,
-    received_event_count: receivedEvents,
-    processed_event_count: processedEvents,
-    suppression_event_count: suppressionEvents,
-    campaign_mapping_count: campaignMappings,
-    active_campaign_mapping_count: activeCampaignMappings,
-    lead_mapping_count: leadMappings,
-    estate_mailbox_count: estate.length,
-    estate_mailbox_provider_ready_count: estate.filter((m) => m.provider_ready === true).length,
-    estate_mailbox_warmed_count: estate.filter(
-      (m) => m.warmup_ready === true || String(m.warmup_status ?? "").toLowerCase() === "completed",
-    ).length,
-    estate_mailbox_with_caps_count: estate.filter(
-      (m) => Number(m.daily_send_limit ?? 0) > 0 && Number(m.ramp_daily_cap ?? 0) > 0,
-    ).length,
-    sending_domain_count: sendingDomains,
-    // Proven evidence only. Both stay false until the real thing happens.
-    dry_run_test_passed: false,
-    founder_live_approval: false,
+  // Provider
+  const { data: providers } = await admin
+    .from("outbound_providers")
+    .select("id, provider_type, connected, webhook_configured")
+    .eq("provider_type", "smartlead")
+    .limit(1);
+  const provider = providers?.[0];
+
+  // Campaign mapping
+  let mappingQ = admin
+    .from("outbound_provider_campaign_mappings")
+    .select("id, provider_campaign_id, mapping_status, is_active")
+    .eq("provider_type", "smartlead")
+    .eq("business_id", business_id);
+  if (liftor_campaign_id) mappingQ = mappingQ.eq("liftor_campaign_id", liftor_campaign_id);
+  const { data: mappings } = await mappingQ.limit(1);
+  const mapping = mappings?.[0];
+
+  // Liftor campaign approval
+  let campaignApproved = false;
+  if (liftor_campaign_id) {
+    const { data: campaign } = await admin
+      .from("campaigns")
+      .select("id, approval_status")
+      .eq("id", liftor_campaign_id)
+      .single();
+    campaignApproved = campaign?.approval_status === "approved";
+  }
+
+  // Eligible leads (sendable_status = sendable, not suppressed)
+  const { data: eligibleLeads } = await admin
+    .from("contacts")
+    .select("id", { count: "exact" })
+    .eq("assigned_business", business_id)
+    .eq("sendable_status", "sendable")
+    .is("do_not_contact_at", null)
+    .is("unsubscribed_at", null)
+    .eq("hard_bounced", false)
+    .eq("is_globally_suppressed", false)
+    .limit(1000);
+
+  // Founder approval (look for a recent approval log entry)
+  const { data: approvals } = await admin
+    .from("founder_approval_log")
+    .select("id")
+    .eq("business_id", business_id)
+    .eq("approval_type", "smartlead_send")
+    .eq("status", "approved")
+    .limit(1);
+
+  const input = {
+    business_name,
+    business_id,
+    liftor_campaign_id,
+    provider_campaign_id: mapping?.provider_campaign_id ?? null,
+    has_sending_domain: (domains ?? []).length > 0,
+    mailbox_count: mailboxCount,
+    provider_ready_mailbox_count: providerReadyCount,
+    warmup_ready_mailbox_count: warmupReadyCount,
+    smartlead_provider_connected: provider?.connected === true,
+    smartlead_webhook_configured: provider?.webhook_configured === true,
+    liftor_campaign_approved: campaignApproved,
+    smartlead_campaign_mapped: mapping?.mapping_status === "mapped" && mapping?.is_active === true,
+    eligible_lead_count: eligibleLeads?.length ?? 0,
+    founder_final_approval_recorded: (approvals ?? []).length > 0,
   };
 
-  const report = computeActivationChecklist(inputs);
+  const checklist = computeActivationChecklist(input);
 
-  let persisted = 0;
+  let persisted = false;
   if (persist) {
     const nowIso = new Date().toISOString();
-    for (const item of report.items) {
-      const row = {
-        checklist_key: item.checklist_key,
-        checklist_label: item.checklist_label,
-        status: item.status,
-        blocker_reason: item.blocker_reason,
-        metadata: item.metadata,
-        last_checked_at: nowIso,
-        updated_at: nowIso,
-      };
-      const { data: existing } = await admin
-        .from("smartlead_activation_checklist")
-        .select("id")
-        .eq("checklist_key", item.checklist_key)
-        .is("business_id", null)
-        .is("liftor_campaign_id", null)
-        .maybeSingle();
-      if (existing?.id) {
-        await admin.from("smartlead_activation_checklist").update(row).eq("id", existing.id);
-      } else {
-        await admin.from("smartlead_activation_checklist").insert(row);
-      }
-      persisted += 1;
-    }
+    const rows = checklist.map((item) => ({
+      business_id,
+      liftor_campaign_id,
+      provider_campaign_id: input.provider_campaign_id,
+      checklist_key: item.key,
+      checklist_label: item.label,
+      status: item.status,
+      blocker_reason: item.blocker_reason,
+      metadata: item.metadata,
+      last_checked_at: nowIso,
+      updated_at: nowIso,
+    }));
+    const { error } = await admin.from("smartlead_activation_checklist").upsert(rows, {
+      onConflict: "business_id,liftor_campaign_id,checklist_key",
+    });
+    if (error) return json({ ok: false, error: "persist_failed", detail: error.message }, 500);
+    persisted = true;
   }
 
   return json({
     ok: true,
+    business_id,
+    liftor_campaign_id,
+    checklist,
+    summary: {
+      ready: checklist.filter((i) => i.status === "ready").length,
+      not_ready: checklist.filter((i) => i.status === "not_ready").length,
+      blocked: checklist.filter((i) => i.status === "blocked").length,
+    },
     persisted,
-    canonical_keys: CANONICAL_CHECKLIST_KEYS,
-    ready_count: report.ready_count,
-    not_ready_count: report.not_ready_count,
-    blocked_count: report.blocked_count,
-    ready_for_live_send: report.ready_for_live_send,
-    blockers: report.blockers,
-    items: report.items,
-    evidence: inputs,
-    notes: "Read-only recompute. No Smartlead call, no mailbox change, no email sent.",
+    notes: "No provider calls made. Neon Candy excluded.",
   });
 });
