@@ -1,4 +1,13 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import {
+  buildOperationKey,
+  getFirewallStatus,
+  loadNoEmailPersonIds,
+  releaseCredits,
+  reserveCredits,
+  settleCredits,
+} from "../_shared/apolloCreditFirewall.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
