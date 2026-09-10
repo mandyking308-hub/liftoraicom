@@ -2,11 +2,11 @@
 // NOT the technical source of truth. Do NOT use to overwrite the User Manual or Full Technical Manual.
 // v1.2 refresh (10 Sep 2026) — September reconciliation current-state summary. Kept deliberately slim.
 
-export const SLIM_MANDY_MANUAL_VERSION = "1.4 — 10 September 2026 (CRM-Native Education Correction)";
+export const SLIM_MANDY_MANUAL_VERSION = "1.5 — 10 September 2026 (CRM-Native Education Correction, Quality Gate)";
 
 export const SLIM_MANDY_MANUAL_MARKDOWN = `# Slim Mandy Manual
 
-_Version 1.4 — 10 September 2026_
+_Version 1.5 — 10 September 2026_
 
 _Portable summary. Safe to upload to ChatGPT or share with advisers. Not the full technical source of truth (that is the Full Technical Manual, Sections 100 and 101)._
 
@@ -58,4 +58,4 @@ GitHub \`main\` is the code source of truth. Work in discrete reviewed branches.
 Any external gate, auto_send, cron, Smartlead campaign start or lead push, Apollo paid enrichment, buyer contact approval, data-room sharing, portal invites, payments or filings.
 `;
 
-export const SLIM_MANDY_MANUAL_FILENAME = `liftor-slim-mandy-manual-v1.4-2026-09-10.md`;
+export const SLIM_MANDY_MANUAL_FILENAME = `liftor-slim-mandy-manual-v1.5-2026-09-10.md`;
