@@ -261,10 +261,13 @@ checkpoints, not current truth. Reusable pools are declared in
 \`src/lib/portfolioCrmModel.ts\` (\`PortfolioDataPoolId\`) and resolved through
 \`portfolioCrmPoolResolver.ts\`.
 
-**Education portfolio data asset (current):** 2,519 contacts, 266 organisations, 109 verified
-work emails, 1,424 reveal-required, 986 no email on file — tagged
-\`education_customer_universe\`, reusable across education-relevant businesses. Retention
-rule: hold, never delete; stale snapshots must never overwrite live counts.
+**Education portfolio data asset (August 2026 statement — SUPERSEDED by Section 101):**
+2,519 contacts, 266 organisations, 109 verified work emails, 1,424 reveal-required, 986 no
+email on file — tagged \`education_customer_universe\`. These figures are HISTORICAL RECOVERY
+EVIDENCE only. The live check on 10 September 2026 found **zero** rows with
+\`relationship_type = 'school_education_contact'\` in \`relationship_intelligence_contacts\`.
+Do not quote the 2,519/2,520 figures as a verified current live holding. Retention rule is
+unchanged: hold, never delete; stale snapshots must never overwrite live counts.
 
 ## 100.4 Complete current module inventory
 ${renderInventoryTable()}
