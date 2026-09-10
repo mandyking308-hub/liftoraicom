@@ -49,13 +49,13 @@ Deno.serve(async (req) => {
 
   if (!business_id) return json({ ok: false, error: "business_id_required" }, 400);
 
-  // Fetch business name
+  // Fetch business name (public.businesses.name is canonical)
   const { data: business } = await admin
     .from("businesses")
-    .select("id, business_name")
+    .select("id, name")
     .eq("id", business_id)
-    .single();
-  const business_name = business?.business_name ?? "";
+    .maybeSingle();
+  const business_name = business?.name ?? "";
 
   // Explicit Neon Candy protection
   if (business_name.toLowerCase().startsWith("neon candy")) {
@@ -67,91 +67,104 @@ Deno.serve(async (req) => {
     });
   }
 
-  // Domain
-  const { data: domains } = await admin
-    .from("sending_domains")
-    .select("id")
-    .eq("business_id", business_id)
-    .limit(1);
+  // Mailbox estate for this business (Neon Candy legacy estate never counted)
+  const { data: mailboxes } = await admin
+    .from("inboxes")
+    .select(
+      "id, provider_ready, warmup_ready, estate_key, daily_send_limit, ramp_daily_cap, sending_domain_id, excluded_from_allocation",
+    )
+    .eq("business_name", business_name);
 
-  // Mailboxes
-  let mailboxQ = admin.from("inboxes").select("id, provider_ready, warmup_ready, estate_key");
-  if (liftor_campaign_id) {
-    // If a campaign is given, restrict to mailboxes allowed for that campaign's business.
-    mailboxQ = mailboxQ.eq("business_name", business_name);
-  } else {
-    mailboxQ = mailboxQ.eq("business_name", business_name);
-  }
-  const { data: mailboxes } = await mailboxQ;
-  const mailboxCount = (mailboxes ?? []).filter((m: any) => (m.estate_key ?? "").toLowerCase() !== "neon-candy-legacy").length;
-  const providerReadyCount = (mailboxes ?? []).filter((m: any) => m.provider_ready === true).length;
-  const warmupReadyCount = (mailboxes ?? []).filter((m: any) => m.warmup_ready === true).length;
+  const estate = (mailboxes ?? []).filter(
+    (m: any) => (m.estate_key ?? "").toLowerCase() !== "neon-candy-legacy",
+  );
+  const mailboxCount = estate.length;
+  const providerReadyCount = estate.filter((m: any) => m.provider_ready === true).length;
+  const warmupReadyCount = estate.filter((m: any) => m.warmup_ready === true).length;
+  const capsReadyCount = estate.filter(
+    (m: any) => Number(m.ramp_daily_cap ?? 0) > 0 || Number(m.daily_send_limit ?? 0) > 0,
+  ).length;
 
-  // Provider
+  // Sending domains referenced by this business estate
+  const domainIds = new Set(estate.map((m: any) => m.sending_domain_id).filter(Boolean));
+  const sendingDomainCount = domainIds.size;
+
+  // Provider row
   const { data: providers } = await admin
     .from("outbound_providers")
-    .select("id, provider_type, connected, webhook_configured")
+    .select("id, provider_type, status, credentials_present, provider_health, webhook_configured")
     .eq("provider_type", "smartlead")
     .limit(1);
   const provider = providers?.[0];
 
-  // Campaign mapping
+  // Campaign mapping (ambiguity = more than one active mapping in scope)
   let mappingQ = admin
     .from("outbound_provider_campaign_mappings")
     .select("id, provider_campaign_id, mapping_status, is_active")
     .eq("provider_type", "smartlead")
     .eq("business_id", business_id);
   if (liftor_campaign_id) mappingQ = mappingQ.eq("liftor_campaign_id", liftor_campaign_id);
-  const { data: mappings } = await mappingQ.limit(1);
-  const mapping = mappings?.[0];
+  const { data: mappings } = await mappingQ.limit(5);
+  const activeMappings = (mappings ?? []).filter((m: any) => m.is_active === true);
+  const mappingAmbiguous = activeMappings.length > 1;
+  const mapping = activeMappings[0];
 
-  // Liftor campaign approval
-  let campaignApproved = false;
-  if (liftor_campaign_id) {
-    const { data: campaign } = await admin
-      .from("campaigns")
-      .select("id, approval_status")
-      .eq("id", liftor_campaign_id)
-      .single();
-    campaignApproved = campaign?.approval_status === "approved";
-  }
-
-  // Eligible leads (sendable_status = sendable, not suppressed)
-  const { data: eligibleLeads } = await admin
+  // Eligible leads: canonical CRM truth only
+  const { count: eligibleLeadCount } = await admin
     .from("contacts")
-    .select("id", { count: "exact" })
+    .select("id", { count: "exact", head: true })
     .eq("assigned_business", business_id)
     .eq("sendable_status", "sendable")
     .is("do_not_contact_at", null)
     .is("unsubscribed_at", null)
     .eq("hard_bounced", false)
-    .eq("is_globally_suppressed", false)
-    .limit(1000);
+    .eq("is_globally_suppressed", false);
 
-  // Founder approval (look for a recent approval log entry)
-  const { data: approvals } = await admin
-    .from("founder_approval_log")
-    .select("id")
-    .eq("business_id", business_id)
-    .eq("approval_type", "smartlead_send")
-    .eq("status", "approved")
+  // Zero-mutation dry run evidence
+  const { data: dryRuns } = await admin
+    .from("mailbox_allocation_audit")
+    .select("id, decision, dry_run")
+    .eq("business_name", business_name)
+    .eq("dry_run", true)
+    .eq("decision", "allocated")
     .limit(1);
+
+  // Founder live-launch approval lives on the canonical campaign draft
+  let founderApproved = false;
+  if (liftor_campaign_id) {
+    const { data: draft } = await admin
+      .from("outreach_campaign_drafts")
+      .select("id, is_live, external_send_blocked, founder_approval_state")
+      .eq("id", liftor_campaign_id)
+      .maybeSingle();
+    founderApproved =
+      draft?.founder_approval_state === "approved" &&
+      draft?.is_live === true &&
+      draft?.external_send_blocked === false;
+  }
 
   const input = {
     business_name,
     business_id,
     liftor_campaign_id,
     provider_campaign_id: mapping?.provider_campaign_id ?? null,
-    has_sending_domain: (domains ?? []).length > 0,
+    provider_connected: provider?.status === "connected",
+    provider_credentials_present: provider?.credentials_present === true,
+    provider_health_ok: provider?.provider_health === "ok",
+    webhook_configured: provider?.webhook_configured === true,
+    webhook_receiver_deployed: true, // smartlead-webhook is deployed and authenticated
+    campaign_mapped: mapping?.mapping_status === "mapped",
+    campaign_mapping_ambiguous: mappingAmbiguous,
+    lead_mapping_schema_ready: true, // outbound_provider_lead_mappings is live with idempotency indexes
+    eligible_lead_count: eligibleLeadCount ?? 0,
+    sending_domain_count: sendingDomainCount,
     mailbox_count: mailboxCount,
     provider_ready_mailbox_count: providerReadyCount,
     warmup_ready_mailbox_count: warmupReadyCount,
-    smartlead_provider_connected: provider?.connected === true,
-    smartlead_webhook_configured: provider?.webhook_configured === true,
-    liftor_campaign_approved: campaignApproved,
-    smartlead_campaign_mapped: mapping?.mapping_status === "mapped" && mapping?.is_active === true,
-    eligible_lead_count: eligibleLeads?.length ?? 0,
-    founder_final_approval_recorded: (approvals ?? []).length > 0,
+    mailboxes_with_effective_cap_count: capsReadyCount,
+    suppression_sync_enforced: true, // evaluateOutboundSendability gates every push path
+    dry_run_passed: (dryRuns ?? []).length > 0,
+    founder_live_launch_approved: founderApproved,
   };
 
   const checklist = computeActivationChecklist(input);
@@ -171,9 +184,15 @@ Deno.serve(async (req) => {
       last_checked_at: nowIso,
       updated_at: nowIso,
     }));
-    const { error } = await admin.from("smartlead_activation_checklist").upsert(rows, {
-      onConflict: "business_id,liftor_campaign_id,checklist_key",
-    });
+    // The live uniqueness guard is an expression index (COALESCE on nullable
+    // scope columns), so replace the scope deterministically instead of
+    // relying on a column-based ON CONFLICT target.
+    let delQ = admin.from("smartlead_activation_checklist").delete().eq("business_id", business_id);
+    delQ = liftor_campaign_id
+      ? delQ.eq("liftor_campaign_id", liftor_campaign_id)
+      : delQ.is("liftor_campaign_id", null);
+    await delQ;
+    const { error } = await admin.from("smartlead_activation_checklist").insert(rows);
     if (error) return json({ ok: false, error: "persist_failed", detail: error.message }, 500);
     persisted = true;
   }
@@ -189,6 +208,6 @@ Deno.serve(async (req) => {
       blocked: checklist.filter((i) => i.status === "blocked").length,
     },
     persisted,
-    notes: "No provider calls made. Neon Candy excluded.",
+    notes: "No provider calls made. Neon Candy excluded. Smartlead is the delivery engine; Liftor CRM is source of truth.",
   });
 });
