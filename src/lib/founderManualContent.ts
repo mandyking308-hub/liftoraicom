@@ -29,11 +29,12 @@ export const generateManualMarkdown = (data: ManualLiveData): string => {
 ## Complete Engineering-Level Platform Documentation
 
 **Version:** ${ARCHITECTURE_SYNC_VERSION}
-**Previous version:** 5.2 — Build Closeout / Go-To-Use Edition (15 May 2026) — retained below as history
+**Previous versions:** 6.0 — August 2026 Architecture Reconciliation (25 August 2026); 5.2 — Build Closeout / Go-To-Use Edition (15 May 2026) — both retained below as history
 **Generated:** ${now}
 **Classification:** Founder / Internal Engineering / Investor Documentation
 **Status:** Live — Auto-generated from platform state
-**Canonical current-architecture section:** SECTION 100 (August 2026 Architecture Reconciliation) at the end of this manual
+**Canonical current-architecture sections:** SECTION 100 (August 2026 whole-platform reconciliation) and SECTION 101 (10 September 2026 reconciliation delta) at the end of this manual. Where they conflict on *current* state, SECTION 101 controls.
+**September 2026 truth in one paragraph:** Apollo free People Search, staging, qualification and selective founder-approved reveal work, but Neon Candy-specific defaults remain in several search/quality paths and there is **no portfolio-wide Apollo credit firewall yet** — automatic paid enrichment stays OFF. Smartlead is **connected** with substantial code implemented, but the audited live state shows **0 campaign mappings, 0 lead mappings, 0 provider events and 0 activation-checklist rows**; Smartlead is the *delivery* lane, not the preferred education prospect-data source. The current 8 sending domains / 2 inboxes are **legacy Neon Candy infrastructure**, not the planned education sending estate. The operational CRM (81 contacts, 68 business relationships) is distinct from Relationship Intelligence and the research pools. The historical 2,520-row education recovery is **evidence only** — the 10 September live check found **zero** \`school_education_contact\` rows in \`relationship_intelligence_contacts\`, so it must not be quoted as a current live count. A business **source-manifest / source-fidelity** layer has been added since August. Build discipline is **GitHub-first**: \`main\` is the code source of truth and every architecture change ships its manual update in the same build unit.
 
 ---
 

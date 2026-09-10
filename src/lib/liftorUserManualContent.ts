@@ -1,6 +1,6 @@
 // Liftor User Manual — plain-English operating guide (separate from Founder/Technical Manual)
 
-export const LIFTOR_USER_MANUAL_VERSION = "1.6 — August 2026 Architecture Reconciliation (25 August 2026)";
+export const LIFTOR_USER_MANUAL_VERSION = "1.7 — September 2026 Architecture Reconciliation (10 September 2026)";
 
 export interface ManualSection {
   number: number;
@@ -1417,7 +1417,13 @@ export const ARCHITECTURE_SYNC_USER_SECTIONS: ManualSection[] = [
     number: 110,
     key: "manual-hierarchy-user",
     title: "110. Which manual to trust",
-    body: "In order: the Command Centre Truth Sync is what is true right now; the Full Technical Manual is the canonical architecture (Section 100 is the current August 2026 map); this User Manual tells you how to operate it; the Build Log is history; Business Manuals hold business-specific tone, offers and rules; the Slim Mandy Manual is a portable summary for handover only and is never the technical source of truth.",
+    body: "In order: the Command Centre Truth Sync is what is true right now; the Full Technical Manual is the canonical architecture (Section 100 is the August 2026 whole-platform map and Section 101 is the current 10 September 2026 delta — where they disagree about today, Section 101 wins); this User Manual tells you how to operate it; the Build Log is history; Business Manuals hold business-specific tone, offers and rules; the Slim Mandy Manual is a portable summary for handover only and is never the technical source of truth.",
+  },
+  {
+    number: 111,
+    key: "september-2026-current-state",
+    title: "111. Where things actually stand — 10 September 2026",
+    body: "Read this before you touch outreach. WORKING AND SAFE: everything internal — Command Centre, Daily Operator, business setup and onboarding, knowledge and the new source-manifest/fidelity check, drafting, approvals, finance and reporting review, and free Apollo people search that only stages candidates for review. STILL GATED, DO NOT START YET: paid Apollo enrichment (there is no portfolio-wide credit limit built yet, so automatic paid reveal stays off) and live Smartlead sending. Smartlead is connected and a lot of the plumbing exists, but the live check found no campaign links, no lead links, no events and no completed activation checklist — so the loop is not finished and nothing should be pushed or started. Smartlead is how emails would be delivered; it is not where education prospect data comes from. The 8 sending domains and 2 mailboxes on file are old Neon Candy infrastructure, not the planned education sending setup. Your working CRM (81 people, 68 business links) is a different thing from Relationship Intelligence research lists. And the 2,520-row education list from August is historical evidence only — the live check on 10 September found none of it in Relationship Intelligence, so treat restoring it as its own deliberate job, not a done deal.",
   },
 ];
 
