@@ -124,23 +124,26 @@ Deno.serve(async (req) => {
     if (!c.email) { exclude("missing_email"); continue; }
     const emailKey = String(c.email).toLowerCase().trim();
     if (seenEmails.has(emailKey)) { exclude("duplicate_email"); continue; }
-    if (pushedEmails.has(emailKey)) { exclude("already_pushed_to_smartlead_campaign"); continue; }
+    if (pushedEmails.has(emailKey) || pushedContactIds.has(c.id)) {
+      exclude("already_mapped_to_smartlead_campaign"); continue;
+    }
     if (business_id && c.assigned_business && c.assigned_business !== business_id) {
       exclude("wrong_business"); continue;
     }
     if (c.archived_at) { exclude("archived"); continue; }
     if (c.do_not_contact) { exclude("do_not_contact"); continue; }
-    if (c.is_globally_suppressed) { exclude("suppressed"); continue; }
-    if (c.hard_bounced) { exclude("bounced"); continue; }
-    if (c.unsubscribed_at) { exclude("unsubscribed"); continue; }
+
+    // Canonical suppression/compliance gate — the SAME evaluator used by the
+    // apply and dry-run paths, so all three can never disagree.
+    const verdict = evaluateOutboundSendability(c);
+    if (!verdict.sendable) { exclude(verdict.blockers[0]); continue; }
+
     if (c.compliance_status && c.compliance_status !== "outreach_allowed") {
       exclude(`compliance_${c.compliance_status}`); continue;
     }
     if (!c.lawful_basis) { exclude("missing_lawful_basis"); continue; }
     if (!c.unsubscribe_token) { exclude("missing_unsubscribe_token"); continue; }
-    if (c.sendable_status && c.sendable_status !== "sendable") {
-      exclude(`sendable_status_${c.sendable_status}`); continue;
-    }
+    if (c.conversation_active) { exclude("conversation_active"); continue; }
     if (c.founder_review_requested_at) { exclude("review_required"); continue; }
 
     const queue = queueByContact.get(c.id) ?? [];
