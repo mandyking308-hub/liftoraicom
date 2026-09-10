@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Globe, Mailbox, RefreshCw, ShieldAlert } from "lucide-react";
 import {
   buildEstateSnapshot,
+  evaluateMailboxReadiness,
   evaluateSenderInfrastructureReadiness,
   GSM_EVERGREEN_DEFAULT_PER_BUSINESS,
   GSM_OWNER_LEGAL_ENTITY,
@@ -200,7 +201,12 @@ export default function GSMOutboundPage() {
                 {mailboxes.map((m) => (
                   <div key={m.id} className="flex items-center justify-between rounded-md border border-border/60 px-3 py-2">
                     <span>{m.email}</span>
-                    <Badge variant="secondary">{m.readiness_state ?? "unknown"}</Badge>
+                    <Badge variant="secondary">
+                      {evaluateMailboxReadiness(
+                        m,
+                        domains.find((d) => d.id === m.sending_domain_id) ?? null,
+                      ).readiness_state}
+                    </Badge>
                   </div>
                 ))}
               </div>
