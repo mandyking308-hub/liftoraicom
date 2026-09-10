@@ -1,6 +1,6 @@
 // Liftor User Manual — plain-English operating guide (separate from Founder/Technical Manual)
 
-export const LIFTOR_USER_MANUAL_VERSION = "1.8 — Apollo Credit Firewall & Education Universe Infrastructure (10 September 2026)";
+export const LIFTOR_USER_MANUAL_VERSION = "1.9 — Apollo Credit Firewall & Education Universe Infrastructure (10 September 2026)";
 
 export interface ManualSection {
   number: number;
