@@ -30079,6 +30079,7 @@ export type Database = {
           released_at: string | null
           released_reason: string | null
           sticky_until: string | null
+          thread_sticky: boolean
           updated_at: string
         }
         Insert: {
@@ -30096,6 +30097,7 @@ export type Database = {
           released_at?: string | null
           released_reason?: string | null
           sticky_until?: string | null
+          thread_sticky?: boolean
           updated_at?: string
         }
         Update: {
@@ -30113,6 +30115,7 @@ export type Database = {
           released_at?: string | null
           released_reason?: string | null
           sticky_until?: string | null
+          thread_sticky?: boolean
           updated_at?: string
         }
         Relationships: [
@@ -30122,6 +30125,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "businesses"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gsm_mailbox_allocations_mailbox_id_fkey"
+            columns: ["mailbox_id"]
+            isOneToOne: false
+            referencedRelation: "gsm_mailbox_readiness"
+            referencedColumns: ["mailbox_id"]
           },
           {
             foreignKeyName: "gsm_mailbox_allocations_mailbox_id_fkey"
@@ -30146,6 +30156,7 @@ export type Database = {
           created_at: string
           email: string
           estate_classification: string
+          health_score: number
           id: string
           imap_status: string
           last_error: string | null
@@ -30174,6 +30185,7 @@ export type Database = {
           created_at?: string
           email: string
           estate_classification?: string
+          health_score?: number
           id?: string
           imap_status?: string
           last_error?: string | null
@@ -30202,6 +30214,7 @@ export type Database = {
           created_at?: string
           email?: string
           estate_classification?: string
+          health_score?: number
           id?: string
           imap_status?: string
           last_error?: string | null
@@ -30292,12 +30305,14 @@ export type Database = {
         Row: {
           created_at: string
           current_business_id: string | null
+          desired_capacity: number | null
           id: string
           metadata: Json
           notes: string | null
           pool_key: string
           pool_name: string
           pool_type: string
+          priority: number
           state: string
           target_capacity: number
           updated_at: string
@@ -30305,12 +30320,14 @@ export type Database = {
         Insert: {
           created_at?: string
           current_business_id?: string | null
+          desired_capacity?: number | null
           id?: string
           metadata?: Json
           notes?: string | null
           pool_key: string
           pool_name: string
           pool_type: string
+          priority?: number
           state?: string
           target_capacity?: number
           updated_at?: string
@@ -30318,12 +30335,14 @@ export type Database = {
         Update: {
           created_at?: string
           current_business_id?: string | null
+          desired_capacity?: number | null
           id?: string
           metadata?: Json
           notes?: string | null
           pool_key?: string
           pool_name?: string
           pool_type?: string
+          priority?: number
           state?: string
           target_capacity?: number
           updated_at?: string
@@ -71236,6 +71255,77 @@ export type Database = {
         }
         Relationships: []
       }
+      gsm_mailbox_readiness: {
+        Row: {
+          active: boolean | null
+          campaign_ready: boolean | null
+          configured_daily_limit: number | null
+          email: string | null
+          estate_classification: string | null
+          health_score: number | null
+          imap_status: string | null
+          mailbox_id: string | null
+          provider: string | null
+          provider_mailbox_id: string | null
+          quarantined_reason: string | null
+          readiness_state: string | null
+          retired: boolean | null
+          sending_domain_id: string | null
+          smartlead_email_account_id: string | null
+          smartlead_status: string | null
+          smtp_status: string | null
+          warmup_status: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          campaign_ready?: never
+          configured_daily_limit?: number | null
+          email?: string | null
+          estate_classification?: string | null
+          health_score?: number | null
+          imap_status?: string | null
+          mailbox_id?: string | null
+          provider?: string | null
+          provider_mailbox_id?: string | null
+          quarantined_reason?: string | null
+          readiness_state?: string | null
+          retired?: boolean | null
+          sending_domain_id?: string | null
+          smartlead_email_account_id?: string | null
+          smartlead_status?: string | null
+          smtp_status?: string | null
+          warmup_status?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          campaign_ready?: never
+          configured_daily_limit?: number | null
+          email?: string | null
+          estate_classification?: string | null
+          health_score?: number | null
+          imap_status?: string | null
+          mailbox_id?: string | null
+          provider?: string | null
+          provider_mailbox_id?: string | null
+          quarantined_reason?: string | null
+          readiness_state?: string | null
+          retired?: boolean | null
+          sending_domain_id?: string | null
+          smartlead_email_account_id?: string | null
+          smartlead_status?: string | null
+          smtp_status?: string | null
+          warmup_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gsm_mailboxes_sending_domain_id_fkey"
+            columns: ["sending_domain_id"]
+            isOneToOne: false
+            referencedRelation: "gsm_sending_domains"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       high_intent_review_queue: {
         Row: {
           assigned_business: string | null
@@ -71922,6 +72012,24 @@ export type Database = {
       get_outreach_send_cron_status: { Args: never; Returns: Json }
       get_proposal_by_token: { Args: { _token: string }; Returns: Json }
       get_system_mode: { Args: never; Returns: string }
+      gsm_mailbox_is_campaign_ready: {
+        Args: {
+          _active: boolean
+          _configured_daily_limit: number
+          _email: string
+          _estate_classification: string
+          _health_score: number
+          _imap_status: string
+          _quarantined_reason: string
+          _readiness_state: string
+          _retired: boolean
+          _smartlead_email_account_id: string
+          _smartlead_status: string
+          _smtp_status: string
+          _warmup_status: string
+        }
+        Returns: boolean
+      }
       has_live_ready_inbox: {
         Args: { _business_name: string }
         Returns: boolean
