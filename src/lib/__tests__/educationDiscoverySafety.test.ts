@@ -145,7 +145,7 @@ describe("both selected reveal paths stay CRM-native and firewalled", () => {
     expect(source).toContain("getFirewallStatus");
     expect(source).toContain("reserveCredits");
     expect(source).toContain("settleCredits");
-    expect(source).toContain("reveal_personal_emails: false".replace(": false", "")); // parameter present
+    expect(source).toContain("reveal_personal_emails");
     expect(source).not.toContain("reveal_personal_emails=true");
     expect(source).not.toContain("reveal_phone_number: true");
     expect(source).not.toContain("reveal_phone_number=true");
