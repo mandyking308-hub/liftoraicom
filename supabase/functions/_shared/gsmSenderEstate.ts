@@ -25,6 +25,9 @@ export const GSM_LAUNCH_TARGET_CAPACITY = 30;
 export const GSM_EVERGREEN_TARGET_CAPACITY = 20;
 export const GSM_EVERGREEN_DEFAULT_PER_BUSINESS = 5;
 
+/** A mailbox below this provider health score is never campaign-ready. */
+export const GSM_MIN_HEALTH_SCORE = 70;
+
 /** Legacy estate that must never be pulled into the GSM portfolio estate. */
 export const NON_GSM_EXCLUDED_EMAILS = ["hello@neoncandy.online"];
 export const NON_GSM_EXCLUDED_DOMAINS = ["neoncandy.online"];
@@ -79,6 +82,7 @@ export interface GsmMailboxSignals {
   warmup_status?: string | null;
   provider_health?: string | null;
   configured_daily_limit?: number | null;
+  health_score?: number | null;
   quarantined_reason?: string | null;
   retired?: boolean | null;
   active?: boolean | null;
@@ -172,6 +176,9 @@ export function evaluateMailboxReadiness(
   if (m.active === false) setState("retired", "inactive");
   if (m.quarantined_reason) setState("quarantined", `quarantined:${m.quarantined_reason}`);
   if (BAD_HEALTH.has(norm(m.provider_health))) setState("quarantined", "provider_health_bad");
+  if (m.health_score !== undefined && m.health_score !== null && Number(m.health_score) < GSM_MIN_HEALTH_SCORE) {
+    setState("quarantined", `health_score_below_${GSM_MIN_HEALTH_SCORE}`);
+  }
 
   if (!m.provider_mailbox_id && !m.smartlead_email_account_id) {
     setState("provisioned_pending", "no_provider_identifier");
@@ -479,6 +486,86 @@ export function buildEstateSnapshot(
     evergreen_target: GSM_EVERGREEN_TARGET_CAPACITY,
     evergreen_allocated: active.filter((a) => norm(a.pool_key ?? "") === GSM_EVERGREEN_POOL_KEY).length,
     neon_candy_excluded: true,
+    engine_version: GSM_ESTATE_VERSION,
+  };
+}
+
+
+// ---------------------------------------------------------------------------
+// Smartlead sender selection (provider-neutral, no hard-coded addresses)
+// ---------------------------------------------------------------------------
+
+export interface GsmSmartleadSenderSelection {
+  smartlead_email_account_ids: string[];
+  mailbox_ids: string[];
+  pinned_sender_retained: string | null;
+  rejected: GsmSelectionRejection[];
+  shortfall: number;
+  engine_version: string;
+}
+
+/**
+ * Is a sender already pinned to a live thread still usable?
+ * Thread stickiness never overrides a hard readiness block.
+ */
+export function pinnedSenderStillUsable(
+  pinnedMailboxId: string | null | undefined,
+  mailboxes: GsmMailboxSignals[],
+  domains: GsmDomainSignals[],
+): boolean {
+  if (!pinnedMailboxId) return false;
+  const m = mailboxes.find((x) => x.id === pinnedMailboxId);
+  if (!m || isExcludedFromGsmEstate(m.email)) return false;
+  const domainById = new Map(domains.filter((d) => d.id).map((d) => [d.id as string, d]));
+  const r = evaluateMailboxReadiness(m, m.sending_domain_id ? domainById.get(m.sending_domain_id) : null);
+  return r.campaign_ready;
+}
+
+/**
+ * Resolve campaign-ready Smartlead sender account ids for a business/pool request.
+ * Returns provider ids only — never email strings — and never a warming,
+ * quarantined, retired, unhealthy or Smartlead-disconnected mailbox.
+ */
+export function selectSmartleadSenderAccountIds(
+  mailboxes: GsmMailboxSignals[],
+  domains: GsmDomainSignals[],
+  allocations: GsmAllocationRecord[],
+  req: GsmSelectionRequest & { pinned_mailbox_id?: string | null },
+): GsmSmartleadSenderSelection {
+  const byId = new Map(mailboxes.map((m) => [m.id, m]));
+  const pinnedUsable = pinnedSenderStillUsable(req.pinned_mailbox_id, mailboxes, domains);
+  const result = selectGsmMailboxes(mailboxes, domains, allocations, req);
+
+  const ids: string[] = [];
+  const mailboxIds: string[] = [];
+  const pushed = new Set<string>();
+
+  if (pinnedUsable && req.pinned_mailbox_id) {
+    const pinned = byId.get(req.pinned_mailbox_id);
+    const sl = pinned?.smartlead_email_account_id;
+    if (pinned && sl) {
+      ids.push(sl);
+      mailboxIds.push(pinned.id);
+      pushed.add(pinned.id);
+    }
+  }
+
+  for (const c of result.selected) {
+    if (pushed.has(c.mailbox_id)) continue;
+    const sl = byId.get(c.mailbox_id)?.smartlead_email_account_id;
+    if (!sl) continue;
+    ids.push(sl);
+    mailboxIds.push(c.mailbox_id);
+    pushed.add(c.mailbox_id);
+  }
+
+  const requested = Math.max(0, Math.floor(req.requested_count));
+  return {
+    smartlead_email_account_ids: ids,
+    mailbox_ids: mailboxIds,
+    pinned_sender_retained: pinnedUsable ? (req.pinned_mailbox_id ?? null) : null,
+    rejected: result.rejected,
+    shortfall: Math.max(0, requested - ids.length),
     engine_version: GSM_ESTATE_VERSION,
   };
 }
