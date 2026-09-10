@@ -569,6 +569,15 @@ Smartlead state is untouched.
   key, escalation-only CRM transitions), \`mailboxAllocator.ts\` (deterministic, auditable mailbox
   selection), \`mailboxRegistrationParser.ts\` (bulk CSV estate registration) and
   \`smartleadActivationChecklist.ts\` (canonical 12-key readiness).
+- **Canonical activation checklist keys** (machine-readable, persisted to
+  \`smartlead_activation_checklist\`, recomputed by \`smartlead-activation-refresh\` and shown on the
+  founder page): \`provider_connection\`, \`webhook_configured\`, \`campaign_mapping_ready\`,
+  \`lead_mapping_ready\`, \`event_return_ready\`, \`sending_domains_ready\`, \`mailbox_estate_ready\`,
+  \`warmup_ready\`, \`sender_caps_ready\`, \`suppression_sync_ready\`,
+  \`first_end_to_end_test_ready\`, \`live_launch_approval\`. Today: provider connection ready;
+  webhook, education domains, mailbox estate, warmup, caps, dry run and live launch approval all
+  not-ready or blocked. The refresh reads only canonical live schema (\`businesses.name\`,
+  \`outreach_campaign_drafts\`, \`inboxes\`, \`mailbox_allocation_audit\`) and makes no provider call.
 - **Campaign mapping** is one Smartlead mapping per Liftor campaign per provider, protected by a
   unique index plus an idempotency token, storing \`provider_campaign_id\`, sync status, error and
   \`last_synced_at\`. Ambiguous provider identity fails closed. This build never creates a campaign
