@@ -162,15 +162,69 @@ Deno.serve(async (req) => {
     notes: `unlock_selected: requested by ${u.user.id} · shortlist=${rows.length} · targets=${targets.length}`,
   }).select("id").maybeSingle();
 
+  // ---- PORTFOLIO APOLLO CREDIT FIREWALL ---------------------------------
+  const firewall = await getFirewallStatus(admin);
+  if (!firewall.ok || !firewall.paid_enrichment_enabled || firewall.hard_credit_limit <= 0) {
+    return json({
+      error: "apollo_credit_firewall_blocked",
+      firewall_reason: firewall.reason ?? (firewall.paid_enrichment_enabled ? "hard_credit_limit_zero" : "paid_enrichment_disabled"),
+      detail: "Portfolio Apollo paid enrichment is disabled or has no credit budget. No paid Apollo request was made.",
+      credits_remaining: firewall.credits_remaining,
+    }, 412);
+  }
+  const noEmailAlready = await loadNoEmailPersonIds(
+    admin,
+    targets.map((t: any) => String(t.lead?.apollo_person_id ?? "")).filter(Boolean),
+  );
+
   const results: any[] = [];
   let unlocked = 0, failed = 0;
   let already_in_crm_after_unlock = 0;
+  let firewall_blocked = 0;
   for (const t of targets) {
     const pid = t.lead!.apollo_person_id as string;
+    if (noEmailAlready.has(pid)) {
+      firewall_blocked++;
+      results.push({ apollo_person_id: pid, status: "skipped_previous_no_email" });
+      continue;
+    }
+    const opKey = buildOperationKey({
+      function_source: "apollo-unlock-selected",
+      scope: `business:${businessName}`,
+      apollo_person_ids: [pid],
+    });
+    const reservation = await reserveCredits(admin, {
+      operation_key: opKey,
+      function_source: "apollo-unlock-selected",
+      estimated_credits: 1,
+      business_name: businessName,
+      run_id: runRow?.id ?? null,
+      apollo_person_ids: [pid],
+      metadata: { stage: "unlock_selected" },
+    });
+    if (!reservation.allowed) {
+      firewall_blocked++;
+      results.push({ apollo_person_id: pid, status: "firewall_blocked", reason: reservation.reason });
+      if (reservation.reason === "hard_limit_would_be_exceeded" || reservation.reason === "paid_enrichment_disabled") break;
+      continue;
+    }
+
     const r = await singleMatch(apiKey, pid);
     const person = r.data?.person ?? r.data?.matched_person ?? null;
     const email: string | null = person?.email && EMAIL_RE.test(person.email) ? person.email : null;
+    if (!r.ok) {
+      await releaseCredits(admin, opKey, `people_match_http_${r.status}`);
+    } else {
+      await settleCredits(admin, {
+        operation_key: opKey,
+        actual_credits: 1,
+        no_email_person_ids: email ? [] : [pid],
+        revealed_person_ids: email ? [pid] : [],
+        metadata: { stage: "unlock_selected", http: r.status },
+      });
+    }
     if (r.ok && email) {
+
       const domain = email.split("@")[1]?.toLowerCase() ?? null;
       // Permanent post-unlock CRM cross-check: if the unlocked email already
       // exists in contacts, link to it instead of creating a duplicate.
