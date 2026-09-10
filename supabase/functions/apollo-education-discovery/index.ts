@@ -1,15 +1,11 @@
-// Education FREE-discovery orchestrator (Stage 4).
+// Education Apollo FREE-discovery orchestrator — CRM-native correction, 10 Sep 2026.
 //
-// Reads the canonical education master account list (strategic_target_accounts,
-// source_key education_152_master:%) and finds candidate decision-makers using
-// ONLY the credit-free Apollo People Search endpoint.
+// Account truth: organisations (through strategic_target_accounts.existing_organisation_id).
+// Person truth: contacts. Free discovery creates/refreshes non-sendable CRM candidate contacts.
 //
-// HARD RULES enforced in this file:
-//  - the only Apollo URL referenced is /mixed_people/api_search (free search)
-//  - no /people/match, no /people/bulk_match, no phone reveal, no waterfall
-//  - dry_run (default) performs ZERO provider calls
-//  - writes go ONLY to relationship_intelligence_contacts (research candidates)
-//  - never promotes to CRM, never queues or sends outreach
+// Provider boundary: this function can call ONLY Apollo People Search. It contains no paid
+// reveal/enrichment endpoint, no Smartlead call and no outbound action. Dry-run is default and
+// makes zero provider calls.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import {
   EDUCATION_SEARCH_SENIORITIES,
@@ -17,8 +13,17 @@ import {
   scoreEducationRole,
 } from "../_shared/educationRoleScorer.ts";
 import { EDUCATION_RESEARCH_PROGRAM_KEY } from "../_shared/educationAccountUniverse.ts";
+import {
+  safeFreeSearchRefreshPatch,
+  toEducationCandidateContact,
+  type EducationOrganisationRow,
+} from "../_shared/educationCrm.ts";
 
 const APOLLO_FREE_SEARCH_URL = "https://api.apollo.io/api/v1/mixed_people/api_search";
+const MAX_ACCOUNTS_PER_RUN = 25;
+const DEFAULT_CANDIDATES_PER_ACCOUNT = 10;
+const MAX_CANDIDATES_PER_ACCOUNT = 25;
+const DEFAULT_QUALIFICATIONS = ["International operator"];
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -27,9 +32,6 @@ const corsHeaders = {
 };
 const json = (b: unknown, s = 200) =>
   new Response(JSON.stringify(b), { status: s, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-
-const MAX_ACCOUNTS_PER_RUN = 25;
-const MAX_CANDIDATES_PER_ACCOUNT = 3;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -53,55 +55,96 @@ Deno.serve(async (req) => {
   if (!roles?.length) return json({ error: "founder_role_required" }, 403);
 
   let body: {
-    dry_run?: boolean; confirm?: boolean;
-    account_limit?: number; group_ids?: string[];
+    dry_run?: boolean;
+    confirm?: boolean;
+    account_limit?: number;
+    group_ids?: string[];
+    qualifications?: string[];
     candidates_per_account?: number;
   } = {};
   try { body = await req.json(); } catch { /* defaults */ }
 
   const dryRun = body.dry_run !== false && body.confirm !== true;
   const accountLimit = Math.min(Math.max(1, body.account_limit ?? 10), MAX_ACCOUNTS_PER_RUN);
-  const perAccount = Math.min(Math.max(1, body.candidates_per_account ?? 3), MAX_CANDIDATES_PER_ACCOUNT);
+  const perAccount = Math.min(
+    Math.max(1, body.candidates_per_account ?? DEFAULT_CANDIDATES_PER_ACCOUNT),
+    MAX_CANDIDATES_PER_ACCOUNT,
+  );
+  const qualifications = body.qualifications?.length ? body.qualifications : DEFAULT_QUALIFICATIONS;
 
-  let query = admin
+  let accountQuery = admin
     .from("strategic_target_accounts")
-    .select("id, account_name, account_domain, geography, account_type, metadata")
+    .select("id,source_key,account_name,account_domain,account_type,existing_organisation_id,metadata")
     .like("source_key", "education_152_master:%")
+    .in("account_type", qualifications)
     .order("account_name", { ascending: true })
     .limit(accountLimit);
   if (body.group_ids?.length) {
-    query = query.in("source_key", body.group_ids.map((g) => `education_152_master:${g.toUpperCase()}`));
+    accountQuery = accountQuery.in("source_key", body.group_ids.map((g) => `education_152_master:${g.toUpperCase()}`));
   }
-  const { data: accounts, error: accErr } = await query;
-  if (accErr) return json({ error: accErr.message }, 500);
+  const { data: accounts, error: accountErr } = await accountQuery;
+  if (accountErr) return json({ error: "education_account_query_failed", detail: accountErr.message }, 500);
 
   if (!accounts?.length) {
     return json({
-      ok: true, dry_run: dryRun, provider_calls: 0, accounts_selected: 0,
-      reason: "no_education_master_accounts",
-      note: "The education account universe is empty. Import it first via apollo-education-account-import.",
+      ok: true,
+      dry_run: dryRun,
+      provider_calls: 0,
+      accounts_selected: 0,
+      reason: "no_education_accounts_for_selection",
+      qualification_filter: qualifications,
+      note: "Load the reviewed Education 152 universe into CRM organisations first.",
     });
   }
 
+  const orgIds = Array.from(new Set(accounts.map((a: any) => a.existing_organisation_id).filter(Boolean)));
+  const { data: orgRows, error: orgErr } = orgIds.length
+    ? await admin.from("organisations")
+        .select("id,name,education_group_id,website_domain,source_key,is_education_target,qualification")
+        .in("id", orgIds)
+    : { data: [], error: null } as any;
+  if (orgErr) return json({ error: "crm_organisation_query_failed", detail: orgErr.message }, 500);
+  const orgById = new Map((orgRows ?? []).map((o: any) => [o.id, o]));
+
+  const missingCanonicalOrganisation = accounts
+    .filter((a: any) => !a.existing_organisation_id || !orgById.has(a.existing_organisation_id))
+    .map((a: any) => ({ group_id: a.metadata?.education_group_id ?? null, account_name: a.account_name }));
+
   if (dryRun) {
     return json({
-      ok: true,
+      ok: missingCanonicalOrganisation.length === 0,
       dry_run: true,
       provider_calls: 0,
       apollo_endpoint_that_would_be_used: APOLLO_FREE_SEARCH_URL,
       paid_endpoints_used: [],
+      smartlead_calls: 0,
+      estimated_apollo_credits: 0,
+      qualifications,
       accounts_selected: accounts.length,
       candidates_per_account: perAccount,
-      estimated_apollo_credits: 0,
-      plan: accounts.map((a) => ({
+      max_candidates_per_account: MAX_CANDIDATES_PER_ACCOUNT,
+      canonical_company_table: "organisations",
+      canonical_person_table: "contacts",
+      missing_canonical_organisations: missingCanonicalOrganisation,
+      plan: accounts.map((a: any) => ({
+        group_id: a.metadata?.education_group_id ?? null,
         account_name: a.account_name,
-        account_domain: a.account_domain,
-        search_titles: EDUCATION_SEARCH_TITLES.length,
-        search_seniorities: EDUCATION_SEARCH_SENIORITIES,
-        writes_to: "relationship_intelligence_contacts",
+        organisation_id: a.existing_organisation_id ?? null,
+        search_by: "q_organization_name",
+        candidate_destination: "contacts",
+        candidate_sendable_status: "needs_review",
       })),
-      note: "Plan only — no Apollo request was made. Free People Search costs no credits; this run performs no reveal, no phone lookup and no outreach.",
+      note: "Plan only — zero Apollo calls and zero writes. Live discovery is free People Search only and creates non-sendable CRM candidates.",
     });
+  }
+
+  if (missingCanonicalOrganisation.length) {
+    return json({
+      ok: false,
+      error: "canonical_crm_organisation_missing",
+      missing: missingCanonicalOrganisation,
+      provider_calls: 0,
+    }, 412);
   }
 
   const apiKey = Deno.env.get("APOLLO_API_KEY");
@@ -109,110 +152,106 @@ Deno.serve(async (req) => {
 
   const results: Array<Record<string, unknown>> = [];
   let providerCalls = 0;
-  let candidatesWritten = 0;
+  let candidatesCreated = 0;
+  let candidatesRefreshed = 0;
+  let identityConflicts = 0;
 
-  for (const account of accounts) {
+  for (const account of accounts as any[]) {
+    const organisation = orgById.get(account.existing_organisation_id) as (EducationOrganisationRow & { education_group_id: string }) | undefined;
+    if (!organisation?.education_group_id) {
+      results.push({ account_name: account.account_name, skipped: "missing_education_group_id" });
+      continue;
+    }
+
     const searchBody = {
-      q_organization_domains: account.account_domain ? [account.account_domain] : undefined,
-      organization_names: account.account_domain ? undefined : [account.account_name],
+      q_organization_name: account.account_name,
       person_titles: EDUCATION_SEARCH_TITLES,
       person_seniorities: EDUCATION_SEARCH_SENIORITIES,
+      contact_email_status: ["verified"],
       page: 1,
-      per_page: 25,
+      per_page: 100,
     };
 
-    let people: Array<Record<string, unknown>> = [];
+    let people: Array<Record<string, any>> = [];
     let status = 0;
     try {
-      // FREE search only. No paid endpoint is reachable from this function.
       const res = await fetch(APOLLO_FREE_SEARCH_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "Cache-Control": "no-cache", "x-api-key": apiKey },
+        headers: { "Content-Type": "application/json", "Cache-Control": "no-cache", "X-Api-Key": apiKey },
         body: JSON.stringify(searchBody),
       });
       providerCalls++;
       status = res.status;
       if (res.ok) {
-        const payload = await res.json();
-        people = (payload?.people ?? payload?.contacts ?? []) as Array<Record<string, unknown>>;
+        const payload = await res.json().catch(() => null);
+        people = (payload?.people ?? payload?.contacts ?? []) as Array<Record<string, any>>;
       }
     } catch {
       status = 0;
     }
 
-    const scored = people.map((p) => {
-      const title = String(p.title ?? "");
-      const score = scoreEducationRole({
-        title,
-        organisation: account.account_name,
-        seniority: String(p.seniority ?? ""),
-      });
-      return { person: p, score, title };
-    })
+    const scored = people
+      .map((person) => ({
+        person,
+        score: scoreEducationRole({
+          title: String(person.title ?? ""),
+          organisation: account.account_name,
+          seniority: String(person.seniority ?? ""),
+        }),
+      }))
       .filter((c) => c.score.relevant)
       .sort((a, b) => b.score.score - a.score.score)
       .slice(0, perAccount);
 
-    for (let rank = 0; rank < scored.length; rank++) {
-      const c = scored[rank];
-      const p = c.person as Record<string, any>;
-      const apolloId = String(p.id ?? "");
-      if (!apolloId) continue;
+    for (const candidate of scored) {
+      const pid = String(candidate.person.id ?? "").trim();
+      if (!pid) continue;
 
-      const row = {
-        full_name: [p.first_name, p.last_name].filter(Boolean).join(" ") || String(p.name ?? "Unknown"),
-        role_title: c.title || null,
-        organisation_name: account.account_name,
-        source: "apollo_free_search",
-        relationship_type: "school_education_contact",
-        education_group_id: String((account.metadata as any)?.education_group_id ?? ""),
-        strategic_target_account_id: account.id,
-        apollo_org_id: String(p.organization_id ?? "") || null,
-        education_role_family: c.score.role_family,
-        education_role_score: c.score.score,
-        research_program_key: EDUCATION_RESEARCH_PROGRAM_KEY,
-        reveal_status: "not_revealed",
-        notes: `Rank ${rank + 1}. ${c.score.reasons.join("; ")}`,
-        metadata: {
-          apollo_person_id: apolloId,
-          rank: rank + 1,
-          score_reasons: c.score.reasons,
-          score_penalties: c.score.penalties,
-          group_scope: c.score.group_scope,
-          buying_authority: c.score.buying_authority,
-          discovery_mode: "free_search_only",
-        },
-      };
-
-      const { data: existing } = await admin
-        .from("relationship_intelligence_contacts")
-        .select("id")
-        .eq("strategic_target_account_id", account.id)
-        .contains("metadata", { apollo_person_id: apolloId })
+      const { data: existing, error: lookupErr } = await admin.from("contacts")
+        .select("id,organisation_id,email,email_verified_status,sendable_status,hard_bounced,is_globally_suppressed,do_not_contact_at,unsubscribed_at")
+        .eq("apollo_person_id", pid)
         .maybeSingle();
+      if (lookupErr) {
+        identityConflicts++;
+        continue;
+      }
 
       if (existing?.id) {
-        // Never overwrite a verified email — this path holds no email at all.
-        const { error } = await admin.from("relationship_intelligence_contacts")
-          .update({
-            role_title: row.role_title,
-            education_role_family: row.education_role_family,
-            education_role_score: row.education_role_score,
-            notes: row.notes,
-          })
-          .eq("id", existing.id);
-        if (!error) candidatesWritten++;
-      } else {
-        const { error } = await admin.from("relationship_intelligence_contacts").insert(row);
-        if (!error) candidatesWritten++;
+        if (existing.organisation_id && existing.organisation_id !== organisation.id) {
+          identityConflicts++;
+          continue; // fail closed; identity resolution is a separate workflow.
+        }
+        const patch = safeFreeSearchRefreshPatch({
+          person: candidate.person,
+          organisation,
+          strategic_target_account_id: account.id,
+          score: candidate.score,
+          research_program_key: EDUCATION_RESEARCH_PROGRAM_KEY,
+        });
+        const { error } = await admin.from("contacts").update(patch).eq("id", existing.id);
+        if (!error) candidatesRefreshed++;
+        continue;
       }
+
+      const row = toEducationCandidateContact({
+        person: candidate.person,
+        organisation,
+        strategic_target_account_id: account.id,
+        score: candidate.score,
+        research_program_key: EDUCATION_RESEARCH_PROGRAM_KEY,
+      });
+      const { error } = await admin.from("contacts").insert(row);
+      if (!error) candidatesCreated++;
+      else if ((error as any).code === "23505") identityConflicts++;
     }
 
     results.push({
+      education_group_id: organisation.education_group_id,
       account_name: account.account_name,
+      organisation_id: organisation.id,
       http_status: status,
       people_returned: people.length,
-      candidates_kept: scored.length,
+      relevant_candidates_retained: scored.length,
     });
   }
 
@@ -222,10 +261,15 @@ Deno.serve(async (req) => {
     apollo_endpoint_used: APOLLO_FREE_SEARCH_URL,
     paid_endpoints_used: [],
     apollo_credits_spent: 0,
+    smartlead_calls: 0,
     provider_calls: providerCalls,
     accounts_processed: accounts.length,
-    candidates_written: candidatesWritten,
+    candidates_created: candidatesCreated,
+    candidates_refreshed: candidatesRefreshed,
+    identity_conflicts: identityConflicts,
+    canonical_company_table: "organisations",
+    canonical_person_table: "contacts",
     results,
-    side_effects: { crm_promotions: 0, emails_sent: 0, outreach_queue_rows: 0, paid_reveals: 0 },
+    side_effects: { paid_reveals: 0, emails_sent: 0, outreach_queue_rows: 0, campaign_starts: 0 },
   });
 });
