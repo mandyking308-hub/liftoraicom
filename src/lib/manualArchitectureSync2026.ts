@@ -241,8 +241,11 @@ Campaign Eligibility → Conversation → Proposal → Deal → Customer → Rev
 - **Research/evidence truth:** \`relationship_intelligence_contacts\` — not the operational
   CRM. Records reach the CRM only through the controlled promotion bridge
   (\`ri-promote-to-crm\`) when role/evidence-matched or founder-approved.
-- **Client/tenant layer:** \`organisations\` remains the delivery/tenant layer. It is not the
-  prospect-account database; an account links to it only once it becomes a client/tenant.
+- **Client/tenant layer (August 2026 wording — SUPERSEDED for education by Section 101.11):**
+  \`organisations\` was described as the delivery/tenant layer only and not the prospect-account
+  database. From the 10 September 2026 CRM-native correction, \`organisations\` is the canonical
+  company/account spine for the education programme, and \`contacts.organisation_id\` is the
+  authoritative company linkage for education people.
 - **Legacy compatibility:** \`contacts.assigned_business\` is legacy single-business data, not
   the source of truth. \`contacts.company\` remains compatibility text.
 - **Suppression:** global suppression always wins; business-specific DNC stays scoped to
