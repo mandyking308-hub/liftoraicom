@@ -13,23 +13,32 @@ const ApolloCreditFirewallPanel = () => {
     queryKey: ["apollo-credit-firewall-status"],
     refetchInterval: 60000,
     queryFn: async () => {
-      const [status, accounts, candidates] = await Promise.all([
+      // CRM-native counts (10 Sep 2026 correction): organisations is the canonical
+      // education account spine and contacts is the canonical person registry.
+      const [status, orgs, candidates, revealed] = await Promise.all([
         supabase.rpc("apollo_credit_status"),
-        supabase
-          .from("strategic_target_accounts")
+        (supabase as any)
+          .from("organisations")
           .select("id", { count: "exact", head: true })
-          .like("source_key", "education_152_master:%"),
-        supabase
-          .from("relationship_intelligence_contacts")
+          .eq("is_education_account", true),
+        (supabase as any)
+          .from("contacts")
           .select("id", { count: "exact", head: true })
           .eq("research_program_key", "education_152_master_2026_09"),
+        (supabase as any)
+          .from("contacts")
+          .select("id", { count: "exact", head: true })
+          .eq("research_program_key", "education_152_master_2026_09")
+          .eq("reveal_status", "revealed"),
       ]);
       return {
         policy: (status.data ?? null) as Record<string, any> | null,
-        accountCount: accounts.count ?? 0,
+        accountCount: orgs.count ?? 0,
         candidateCount: candidates.count ?? 0,
+        revealedCount: revealed.count ?? 0,
       };
     },
+
   });
 
   if (isLoading || !data) return null;
