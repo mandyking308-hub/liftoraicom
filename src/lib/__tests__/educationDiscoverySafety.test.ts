@@ -133,7 +133,9 @@ describe("founder-selected education reveal — CRM-native and firewalled", () =
   it("is business email only — no phone, personal email or waterfall", () => {
     expect(reveal).toContain("reveal_personal_emails: false");
     expect(reveal).toContain("reveal_phone_number: false");
-    expect(reveal).not.toContain("waterfall");
+    // allow_waterfall may only be READ from firewall policy, never requested.
+    expect(reveal).not.toMatch(/waterfall\s*:\s*true/);
+    expect(reveal).not.toContain("reveal_waterfall");
     expect(reveal).not.toContain("bulk_match");
   });
 
