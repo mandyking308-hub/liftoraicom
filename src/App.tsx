@@ -837,6 +837,7 @@ import ExecutionModes from "./pages/founder/system/ExecutionModes";
 import CRMContacts from "./pages/founder/CRMContacts";
 import CRMContactDetail from "./pages/founder/CRMContactDetail";
 import CRMInboxes from "./pages/founder/CRMInboxes";
+import SendingInfrastructure from "./pages/founder/SendingInfrastructure";
 import CRMInboxConfigure from "./pages/founder/CRMInboxConfigure";
 import FinanceDashboard from "./pages/founder/finance/FinanceDashboard";
 import FinanceTargets from "./pages/founder/finance/FinanceTargets";
