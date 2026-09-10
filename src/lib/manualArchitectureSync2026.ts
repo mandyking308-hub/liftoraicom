@@ -512,14 +512,42 @@ enrichment, no mailbox activation and no provider mutation.
   It creates no contacts, no research candidates, and makes no provider call.
 - **Education FREE-discovery orchestrator** (`apollo-education-discovery`) — reads the master account list and
   uses only the credit-free Apollo People Search endpoint. It has a true plan mode that makes zero provider
-  calls, and writes broad research candidates only to Relationship Intelligence.
+  calls.
 - **Deterministic education role scorer** — campaign-neutral, contains no Neon Candy or music taxonomy.
 - **Founder read-only firewall panel** on `/founder/outreach/apollo`. It contains no control that can spend a
   credit or send an email.
 
+### 101.11 CRM-native education correction (10 September 2026) — SUPERSEDES Stage-4 placement
+
+**Superseded:** the Stage-4 wording above that places education companies solely in
+`strategic_target_accounts` and education people in `relationship_intelligence_contacts` as the canonical
+destination is **no longer correct**. It is retained only as build history.
+
+**Current canonical placement:**
+- `organisations` is the **canonical education company/account spine**. It carries additive education/source
+  fields (`account_domain`, `source_key`, `education_group_id`, `qualification`, `operating_footprint`,
+  `primary_source`, `source_version`, `research_program_key`, `is_education_account`) with partial unique
+  indexes on `source_key` and `lower(account_domain)` so a company cannot be duplicated.
+- `contacts` is the **canonical person registry**, with a real `organisation_id` foreign key plus minimal
+  education mapping fields (`education_group_id`, `education_role_family`, `education_role_score`,
+  `research_program_key`, `reveal_status`, `is_research_candidate`). `contacts.company` remains for legacy
+  display only.
+- `strategic_target_accounts` remains the research/pipeline view and now points back at the canonical CRM
+  company through `existing_organisation_id`. The account importer resolves or creates the CRM organisation
+  **first**, then links the strategic target.
+- `apollo-education-discovery` writes and updates **non-sendable CRM contacts** linked to the correct
+  organisation. It dedupes by Apollo person id and never erases a verified email, suppression flag, hard
+  bounce or do-not-contact state. Default 10 candidates per account, configurable maximum 25.
+- `apollo-education-reveal-selected` is the founder-controlled selected reveal path. It operates on CRM
+  contact ids, is business-email only (no phone, no personal email, no waterfall), routes every paid call
+  through the shared firewall, fails closed on a duplicate business email, updates the same contact row while
+  preserving its organisation link, and never sends or auto-assigns a portfolio business.
+- Relationship Intelligence stays the research/evidence layer; it is not the operational education CRM.
+
 **Live-configured state (unchanged by this build unit):** paid enrichment **disabled**, hard portfolio credit
 limit **0**, phone reveal / personal-email reveal / waterfall all **false**. The 152 education accounts are
-**NOT yet imported**, no education research candidates have been restored, and Smartlead state is untouched.
+**NOT yet imported**, no education research candidates exist yet, and Smartlead state is untouched.
 
 *End of Section 101 — September 2026 Architecture Reconciliation.*
 `;
+
