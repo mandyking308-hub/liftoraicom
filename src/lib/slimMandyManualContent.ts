@@ -2,7 +2,7 @@
 // NOT the technical source of truth. Do NOT use to overwrite the User Manual or Full Technical Manual.
 // v1.2 refresh (10 Sep 2026) — September reconciliation current-state summary. Kept deliberately slim.
 
-export const SLIM_MANDY_MANUAL_VERSION = "1.6 — 10 September 2026 (Smartlead & Sending Infrastructure)";
+export const SLIM_MANDY_MANUAL_VERSION = "1.7 — 10 September 2026 (Education Commercial Layer)";
 
 export const SLIM_MANDY_MANUAL_MARKDOWN = `# Slim Mandy Manual
 
@@ -32,6 +32,7 @@ Implemented in code · live-configured in the database/provider · historical ev
 - **CRM-native education placement (correction):** education companies live once in the master company list (\`organisations\`); education people live once in the master CRM (\`contacts\`) linked to their company. The research/pipeline account view links back to the canonical company. Relationship Intelligence is research/evidence only, not the education CRM. Discovery writes non-sendable people with no email; a separate founder-selected reveal path exists but cannot run while the credit firewall is locked at 0.
 - **Education 152 universe:** all 152 reviewed education groups are loaded once into the canonical CRM company list (\`organisations\`) and mirrored to the strategic planning layer, split 60 International operator / 54 Domestic reserve / 21 Network route / 17 Review needed. The company load spent zero Apollo credits and replayed no education people; no education research candidates have been restored yet.
 - **Education universe:** the August recovery (2,520 rows / 266 organisations) is **historical evidence only**. The 10 September live check found **zero** \`school_education_contact\` rows in Relationship Intelligence. Restoring it is a deliberate later stage.
+- **Education commercial layer (Chat 3):** one person = one \`contacts\` row; \`organisations\` is the canonical education account; \`business_contact_relationships\` carries many-to-many brand relevance with deterministic score/reason. Four exact businesses: Billy and the Wild Forest, Aurelia, Kindnesss, Kingsbridge Global. Portfolio ownership allows one active owner per contact, a 30-day cross-brand cooldown, and hard blocks on reply/conversation, suppression, unsubscribe, DNC and hard bounce — a founder override can re-prioritise but never bypass a hard block. All four campaign shells are non-live, send-blocked, unapproved and unmapped; Billy leads with a controlled 25–50 first cohort. Smartlead mapping readiness and mailbox/sender readiness remain separate gates. No change to the Apollo role score or the Apollo credit firewall (paid enrichment off, limit 0). Surfaces: /founder/education-commercial and /founder/business-manuals (exactly 12 canonical manuals rendered from the repo files).
 
 ## Classification
 LIFTOR_INTERNAL_OPERATING_SYSTEM_READY. External go-live remains LOCKED_BY_DESIGN.
