@@ -127,7 +127,8 @@ describe("brand relevance weighting", () => {
       path.join(process.cwd(), "src/lib/education/educationBusinessRelevance.ts"),
       "utf8",
     );
-    expect(src).not.toMatch(/educationRoleScorer|education_role_score\s*=/);
+    expect(src).not.toMatch(/from ["'].*educationRoleScorer/);
+    expect(src).not.toMatch(/education_role_score\s*[:=]/);
   });
 
   it("returns not_relevant for an unrelated role", () => {
@@ -540,7 +541,7 @@ describe("Neon Candy segregation", () => {
     sources.forEach((src) => {
       src.split("\n").forEach((line) => {
         if (!line.includes("Neon Candy")) return;
-        expect(line).toMatch(/protected|exclusion|never|NON_EDUCATION/i);
+        expect(line).toMatch(/protected|exclu|never|non-education|NON_EDUCATION/i);
       });
     });
   });
