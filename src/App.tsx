@@ -1003,6 +1003,8 @@ const App = () => (
             <Route path="/founder/micro-batch-preparation" element={<FounderRoute><MicroBatchPreparationPage /></FounderRoute>} />
             <Route path="/founder/build-phase-closeout" element={<FounderRoute><BuildPhaseCloseoutPage /></FounderRoute>} />
             <Route path="/founder/manuals-hub" element={<FounderRoute><ManualsHubPage /></FounderRoute>} />
+            <Route path="/founder/business-manuals" element={<FounderRoute><BusinessManualsPage /></FounderRoute>} />
+            <Route path="/founder/education-commercial" element={<FounderRoute><EducationCommercialLayerPage /></FounderRoute>} />
             <Route path="/founder/portfolio-exit" element={<FounderRoute><PortfolioExitCommandCentre /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/:assetId" element={<FounderRoute><PortfolioExitAssetDetail /></FounderRoute>} />
             <Route path="/founder/founder-led-exit" element={<FounderRoute><FounderLedExitSalesEngine /></FounderRoute>} />
