@@ -318,5 +318,184 @@ bypass that philosophy.
 - \`crm_accounts\` is described in \`portfolioCrmModel.ts\` as planned; until it lands,
   organisation context for prospects lives on the contact record plus pool membership.
 
-*End of Section 100 — August 2026 Architecture Reconciliation.*
+*End of Section 100 — August 2026 Architecture Reconciliation (retained as history; superseded
+on current state by Section 101 below).*
+
+---
+
+# SECTION 101 — SEPTEMBER 2026 RECONCILIATION DELTA (10 SEPTEMBER 2026)
+
+**Manual version:** ${ARCHITECTURE_SYNC_VERSION}
+**Date:** ${ARCHITECTURE_SYNC_DATE}
+**Previous:** ${ARCHITECTURE_SYNC_PREVIOUS_VERSION}
+**Source document:** \`docs/manual-architecture-reconciliation-2026-09-10.md\`
+**Change type:** documentation/current-state reconciliation only. No application behaviour,
+schema, data, route, gate, cron, provider or deployment change.
+
+Section 101 does not replace the August whole-platform audit. It reconciles the architecture
+changed since that audit plus the live outbound/data state. Where Section 100 (or any May/August
+section) conflicts with Section 101 on *current* state, Section 101 controls.
+
+## 101.0 Three states must always be labelled separately
+
+1. **Implemented in code** — exists on \`main\` and is testable.
+2. **Live-configured** — actually present/populated in the live database or provider account.
+3. **Historical** — evidence from an earlier dated artefact; not proof of current state.
+
+A provider connection is never permission to send.
+
+## 101.1 Live database snapshot — 10 September 2026
+
+| Area | Live state |
+| --- | --- |
+| Central \`contacts\` | 81 |
+| Active / non-archived contacts | 81 |
+| \`business_contact_relationships\` | 68 |
+| Apollo staged leads (\`apollo_leads\`) | 400 |
+| Apollo raw leads (\`apollo_raw_leads\`) | 400 |
+| Sending domains | 8 |
+| Inboxes | 2 (1 active) |
+| Smartlead provider rows | 1 (connected) |
+| Smartlead campaign mappings | 0 |
+| Smartlead lead mappings | 0 |
+| Smartlead provider events | 0 |
+| Smartlead activation-checklist rows | 0 |
+
+The Apollo lead pool and the inbox/domain rows are **legacy Neon Candy-era** material. They are
+not the planned education outbound estate and must stay segregated.
+
+## 101.2 Apollo — implemented capability vs limitation
+
+Implemented and retained: \`apollo-sync-search\`, \`apollo-sync-enrich\`,
+\`apollo-unlock-shortlist\`, \`apollo-unlock-selected\`, \`apollo-qualify\`,
+\`apollo-pull-verified\`, \`apollo-education-recovery\`, \`apollo-daily-runner\`,
+\`apollo-test-connection\`, \`_shared/apolloRelationshipUpsert.ts\`.
+
+**Working now:** credit-free People Search (\`POST /api/v1/mixed_people/api_search\`) with title,
+exclusion, seniority, geography, keyword, verified-email and saved-list criteria; staging into
+Apollo-specific tables before CRM promotion; seen-person-ID tracking and resumable pagination;
+deterministic and AI-assisted qualification; selective reveal via \`people/match\` and
+\`people/bulk_match\` driven by \`selected_apollo_person_ids\`; founder confirmation and dry-run
+cost preview on unlocks; CRM/suppression/duplicate checks around reveal and import.
+
+**Current limitations (must be fixed before generic education automation):**
+1. Several search/quality paths still carry **Neon Candy/music-specific defaults and taxonomy**.
+2. Generic sync caps are per run, **not per supplied company/organisation**.
+3. **No portfolio-wide Apollo credit ledger/ceiling** across every paid enrichment path.
+4. \`apollo-daily-runner\` can invoke enrichment when a segment sets \`auto_enrich=true\`; paid
+   automatic enrichment must stay disabled until the global credit firewall exists.
+5. Bulk enrichment can fall back to individual \`people/match\` calls — the future firewall must
+   guard the combined operation, not just the first call.
+6. No production orchestrator yet for: supplied company universe → best decision-makers per
+   organisation → selective reveal of only the chosen contacts.
+
+**Operating rule:** free Apollo search only, through an approved generic/education-safe search
+configuration. Automatic paid enrichment stays OFF.
+
+## 101.3 Education universe — historical evidence, not live truth
+
+The August recovery recorded 2,520 education rows, 2,441 distinct Apollo person IDs, 266
+organisations, 110 verified-email rows, 1,424 reveal-required and 986 with no email on file.
+**The 10 September 2026 live check found zero \`school_education_contact\` rows in
+\`relationship_intelligence_contacts\`.**
+
+Therefore: the 2,520-row education universe must **not** be described as currently live. The
+recovery artefacts remain valid historical evidence and recovery input; restoring/reconciling the
+live education universe is a deliberate later stage. No education data was recreated, deleted,
+enriched or moved by this reconciliation.
+
+## 101.4 Central CRM versus research pools
+
+The operational CRM (81 contacts, 68 business relationships) is **not** the education research
+universe. Research candidates may exist without becoming CRM contacts; a person is promoted into
+the canonical \`contacts\` spine only when the workflow requires it and identity/dedupe checks
+pass. Legacy outreach datasets must not be merged into the education programme merely because
+they share provider tables. This separation protects both data integrity and Apollo credit spend.
+
+## 101.5 Smartlead — connected, closed loop NOT activated
+
+**Implemented in code:** founder/admin-only read-only connection test (campaigns, email accounts,
+overall analytics); whitelisted mailbox health fields (SMTP/IMAP success, warm-up status,
+messages/day); bounded per-campaign webhook discovery via
+\`GET /campaigns/{campaign_id}/webhooks\`; controlled-activation/readiness function with a defined
+checklist; provider campaign-mapping and lead-mapping tables; a Smartlead → Liftor contact import
+for leads already inside a mapped campaign, with paginated/resumable import, business-ownership
+resolution, duplicate recovery and relationship create/update; tests plus an import idempotency
+migration pack.
+
+**Live-configured state:** provider connected; **0** campaign mappings, **0** lead mappings,
+**0** provider events, **0** activation-checklist rows.
+
+> Smartlead API connectivity and significant supporting code are implemented, but the production
+> closed loop is **not activated**. Campaign mapping, lead mapping, mailbox/warm-up state, webhook
+> receiver proof and capture, event return and a controlled first push all remain outstanding.
+
+The controlled-activation code fails closed: it checks API key presence, mailbox connection,
+warm-up state, campaign existence, campaign mapping, sequence verification, webhook
+secret/receiver evidence, webhook capture, lead-push preview, external-action gates, campaign
+paused/draft state, explicit founder authorisation and \`auto_send\` remaining disabled. The
+readiness function performs no Smartlead POST, no send and no Apollo call.
+
+**Direction of the import path:** \`smartlead-campaign-lead-import\` is a Smartlead → Liftor
+recovery/synchronisation path using GET operations only. It is **not** the acquisition flow, and
+Smartlead is **not** the preferred education prospect-data source. The intended education flow
+remains: Apollo/search data → Liftor staging/quality/dedupe → canonical contact + business/campaign
+eligibility → Smartlead scale delivery → events/replies back into Liftor.
+
+**Closed-loop gaps still to prove live:** campaign discovery/creation policy and explicit
+Liftor ↔ Smartlead campaign mapping; contact ↔ lead mapping; production webhook receiver
+deployment/secret/readiness; at least one captured and normalised event; reply/bounce/unsubscribe
+mutation back into the correct Liftor state; mailbox inventory sync and warm-up health; a
+controlled test push while the campaign is paused/draft; separate founder send authorisation.
+
+## 101.6 Sending estate — legacy, not the planned estate
+
+8 sending-domain records and 2 inbox records (1 active) exist. These do **not** evidence the
+planned education sending estate. The planned scale estate (initial target ~50 mailboxes, then
+expansion) is a new controlled infrastructure programme: recorded mailbox/domain ownership,
+provider IDs, visible SMTP/IMAP and warm-up state, governed daily/hourly limits and returned
+health/bounce/reply metrics. No fresh mailbox is scale-ready merely because it exists. Legacy
+Neon Candy inbox/domain records stay segregated for regression/testing history.
+
+## 101.7 Source manifest / fidelity layer — new since the August baseline
+
+\`src/components/founder/knowledge/BusinessSourceManifestBlock.tsx\`,
+\`supabase/functions/_shared/sourceManifest.ts\`,
+\`supabase/functions/business-source-manifest-register/index.ts\`,
+\`supabase/functions/business-source-fidelity-check/index.ts\` plus fidelity tests and activation
+wiring. This layer records and validates the source material behind business knowledge so later
+automation runs from intended inputs rather than inferred or stale material. It is an internal
+data-integrity control and authorises no external action.
+
+## 101.8 Statements superseded or tightened
+
+1. Education live counts — the August 2,520-row recovery is historical evidence, not a verified
+   current live count.
+2. Smartlead — connectivity verified, but campaign/lead/event mappings are empty; never describe
+   it as "fully connected end-to-end".
+3. Apollo — real and valuable, but Neon Candy-specific search/quality defaults must not be reused
+   unchanged for Education.
+4. Apollo automation — free discovery and paid reveal are separate control planes; discovery
+   never implies permission to enrich.
+5. Mailboxes — existing inbox/domain rows are legacy; the education sending estate is unbuilt.
+6. CRM — operational CRM contacts are not the education research universe.
+7. Smartlead data — delivery provider for education outbound, **not** the prospect-data source.
+
+## 101.9 Build discipline for the next phase
+
+- **GitHub \`main\` is the code source of truth.**
+- Reconciliation, code search, diff review, documentation and ordinary source changes go through
+  GitHub-first workflows wherever practical.
+- Lovable AI is reserved for work with material value: complex application-aware edits, Lovable/
+  backend integration, UI/preview validation and deployment-specific tasks.
+- Work in discrete reviewed branches/units, not long mixed-purpose conversations.
+- Every material architecture change ships its manual/current-state update in the same build unit.
+- Live database state and repository implementation state are labelled separately in all manuals.
+
+## 101.10 External-action posture
+
+Unchanged. This reconciliation authorises no sending, no Smartlead campaign start, no Apollo paid
+enrichment, no mailbox activation and no provider mutation.
+
+*End of Section 101 — September 2026 Architecture Reconciliation.*
 `;
