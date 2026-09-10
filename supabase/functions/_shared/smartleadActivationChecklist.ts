@@ -3,38 +3,41 @@
  *
  * PURE. No IO. Given the current Liftor state for a business/campaign, returns
  * the truthful status of each checklist item. The caller decides whether to
- * persist it.
+ * persist it to public.smartlead_activation_checklist.
  *
- * The 12 keys mirror the operational reality of sending infrastructure:
- *   1. business_identity_confirmed
- *   2. sending_domain_registered
- *   3. mailbox_estate_registered
- *   4. mailboxes_provider_ready
- *   5. mailboxes_warmup_ready
- *   6. smartlead_provider_connected
- *   7. smartlead_webhook_configured
- *   8. liftor_campaign_approved
- *   9. smartlead_campaign_mapped
- *  10. lead_list_prepared
- *  11. sendability_preview_passed
- *  12. founder_final_approval_recorded
+ * Canonical machine-readable keys (mandated, do not rename):
+ *   1.  provider_connection
+ *   2.  webhook_configured
+ *   3.  campaign_mapping_ready
+ *   4.  lead_mapping_ready
+ *   5.  event_return_ready
+ *   6.  sending_domains_ready
+ *   7.  mailbox_estate_ready
+ *   8.  warmup_ready
+ *   9.  sender_caps_ready
+ *   10. suppression_sync_ready
+ *   11. first_end_to_end_test_ready
+ *   12. live_launch_approval
+ *
+ * Smartlead is the delivery engine only. Liftor CRM remains the source of
+ * truth for contacts, suppression and compliance.
  */
 
-export const CHECKLIST_VERSION = "smartlead-activation-checklist-1.0.0";
+export const CHECKLIST_VERSION = "smartlead-activation-checklist-2.0.0";
 
 export const SMARTLEAD_CHECKLIST_KEYS = [
-  "business_identity_confirmed",
-  "sending_domain_registered",
-  "mailbox_estate_registered",
-  "mailboxes_provider_ready",
-  "mailboxes_warmup_ready",
-  "smartlead_provider_connected",
-  "smartlead_webhook_configured",
-  "liftor_campaign_approved",
-  "smartlead_campaign_mapped",
-  "lead_list_prepared",
-  "sendability_preview_passed",
-  "founder_final_approval_recorded",
+  "provider_connection",
+  "webhook_configured",
+  "campaign_mapping_ready",
+  "lead_mapping_ready",
+  "event_return_ready",
+  "sending_domains_ready",
+  "mailbox_estate_ready",
+  "warmup_ready",
+  "sender_caps_ready",
+  "suppression_sync_ready",
+  "first_end_to_end_test_ready",
+  "live_launch_approval",
 ] as const;
 
 export type SmartleadChecklistKey = (typeof SMARTLEAD_CHECKLIST_KEYS)[number];
@@ -44,16 +47,32 @@ export interface ChecklistInput {
   business_id?: string | null;
   liftor_campaign_id?: string | null;
   provider_campaign_id?: string | null;
-  has_sending_domain: boolean;
+
+  /** Provider row state */
+  provider_connected: boolean;
+  provider_credentials_present: boolean;
+  provider_health_ok: boolean;
+  webhook_configured: boolean;
+  /** Liftor-side webhook receiver function is deployed and authenticated */
+  webhook_receiver_deployed: boolean;
+
+  /** Mapping state */
+  campaign_mapped: boolean;
+  campaign_mapping_ambiguous: boolean;
+  lead_mapping_schema_ready: boolean;
+  eligible_lead_count: number;
+
+  /** Estate state */
+  sending_domain_count: number;
   mailbox_count: number;
   provider_ready_mailbox_count: number;
   warmup_ready_mailbox_count: number;
-  smartlead_provider_connected: boolean;
-  smartlead_webhook_configured: boolean;
-  liftor_campaign_approved: boolean;
-  smartlead_campaign_mapped: boolean;
-  eligible_lead_count: number;
-  founder_final_approval_recorded: boolean;
+  mailboxes_with_effective_cap_count: number;
+
+  /** Compliance + gates */
+  suppression_sync_enforced: boolean;
+  dry_run_passed: boolean;
+  founder_live_launch_approved: boolean;
 }
 
 export type ChecklistStatus = "ready" | "not_ready" | "blocked";
@@ -67,111 +86,136 @@ export interface ChecklistItem {
 }
 
 const LABELS: Record<SmartleadChecklistKey, string> = {
-  business_identity_confirmed: "Business identity confirmed",
-  sending_domain_registered: "Sending domain registered",
-  mailbox_estate_registered: "Mailbox estate registered",
-  mailboxes_provider_ready: "Mailboxes provider-ready (SMTP/IMAP)",
-  mailboxes_warmup_ready: "Mailboxes warmup-ready",
-  smartlead_provider_connected: "Smartlead provider connected",
-  smartlead_webhook_configured: "Smartlead webhook configured",
-  liftor_campaign_approved: "Liftor campaign approved",
-  smartlead_campaign_mapped: "Smartlead campaign mapped",
-  lead_list_prepared: "Lead list prepared",
-  sendability_preview_passed: "Sendability preview passed",
-  founder_final_approval_recorded: "Founder final approval recorded",
+  provider_connection: "Smartlead provider connection",
+  webhook_configured: "Smartlead webhook configured (external)",
+  campaign_mapping_ready: "Campaign mapping ready",
+  lead_mapping_ready: "Lead mapping ready",
+  event_return_ready: "Event return loop ready",
+  sending_domains_ready: "Sending domains ready",
+  mailbox_estate_ready: "Mailbox estate ready",
+  warmup_ready: "Mailbox warmup ready",
+  sender_caps_ready: "Sender caps and ramp ready",
+  suppression_sync_ready: "Suppression sync ready",
+  first_end_to_end_test_ready: "First end-to-end dry run passed",
+  live_launch_approval: "Founder live launch approval",
 };
 
 export function computeActivationChecklist(input: ChecklistInput): ChecklistItem[] {
   const items: ChecklistItem[] = [];
-
-  const push = (key: SmartleadChecklistKey, status: ChecklistStatus, blocker: string | null, meta: Record<string, unknown> = {}) => {
+  const push = (
+    key: SmartleadChecklistKey,
+    status: ChecklistStatus,
+    blocker: string | null,
+    meta: Record<string, unknown> = {},
+  ) => {
     items.push({ key, label: LABELS[key], status, blocker_reason: blocker, metadata: meta });
   };
 
+  const providerOk = input.provider_connected && input.provider_credentials_present && input.provider_health_ok;
   push(
-    "business_identity_confirmed",
-    input.business_id ? "ready" : "not_ready",
-    input.business_id ? null : "business_not_onboarded",
-    { business_id: input.business_id },
+    "provider_connection",
+    providerOk ? "ready" : "blocked",
+    providerOk ? null : "smartlead_provider_not_connected",
+    {
+      connected: input.provider_connected,
+      credentials_present: input.provider_credentials_present,
+      provider_health_ok: input.provider_health_ok,
+    },
   );
 
   push(
-    "sending_domain_registered",
-    input.has_sending_domain ? "ready" : "not_ready",
-    input.has_sending_domain ? null : "no_sending_domain_registered",
+    "webhook_configured",
+    input.webhook_configured ? "ready" : "not_ready",
+    input.webhook_configured ? null : "smartlead_webhook_not_configured_externally",
   );
 
   push(
-    "mailbox_estate_registered",
-    input.mailbox_count > 0 ? "ready" : "blocked",
-    input.mailbox_count > 0 ? null : "zero_mailboxes_registered",
-    { mailbox_count: input.mailbox_count },
+    "campaign_mapping_ready",
+    input.campaign_mapping_ambiguous ? "blocked" : input.campaign_mapped ? "ready" : "not_ready",
+    input.campaign_mapping_ambiguous
+      ? "ambiguous_provider_campaign_resolution"
+      : input.campaign_mapped
+        ? null
+        : "no_active_smartlead_campaign_mapping",
+    { provider_campaign_id: input.provider_campaign_id ?? null },
   );
 
+  const leadReady = input.lead_mapping_schema_ready && input.eligible_lead_count > 0;
   push(
-    "mailboxes_provider_ready",
-    input.mailbox_count > 0 && input.provider_ready_mailbox_count >= input.mailbox_count
-      ? "ready"
-      : input.mailbox_count === 0
-        ? "blocked"
-        : "not_ready",
-    input.provider_ready_mailbox_count >= input.mailbox_count ? null : "mailboxes_not_provider_ready",
-    { provider_ready_mailbox_count: input.provider_ready_mailbox_count, mailbox_count: input.mailbox_count },
-  );
-
-  push(
-    "mailboxes_warmup_ready",
-    input.mailbox_count > 0 && input.warmup_ready_mailbox_count >= input.mailbox_count
-      ? "ready"
-      : input.mailbox_count === 0
-        ? "blocked"
-        : "not_ready",
-    input.warmup_ready_mailbox_count >= input.mailbox_count ? null : "mailboxes_not_warmup_ready",
-    { warmup_ready_mailbox_count: input.warmup_ready_mailbox_count, mailbox_count: input.mailbox_count },
-  );
-
-  push(
-    "smartlead_provider_connected",
-    input.smartlead_provider_connected ? "ready" : "blocked",
-    input.smartlead_provider_connected ? null : "smartlead_provider_not_connected",
-  );
-
-  push(
-    "smartlead_webhook_configured",
-    input.smartlead_webhook_configured ? "ready" : "not_ready",
-    input.smartlead_webhook_configured ? null : "smartlead_webhook_not_configured",
-  );
-
-  push(
-    "liftor_campaign_approved",
-    input.liftor_campaign_approved ? "ready" : "not_ready",
-    input.liftor_campaign_approved ? null : "liftor_campaign_not_approved",
-  );
-
-  push(
-    "smartlead_campaign_mapped",
-    input.smartlead_campaign_mapped ? "ready" : "not_ready",
-    input.smartlead_campaign_mapped ? null : "smartlead_campaign_not_mapped",
-    { provider_campaign_id: input.provider_campaign_id },
-  );
-
-  push(
-    "lead_list_prepared",
-    input.eligible_lead_count > 0 ? "ready" : "not_ready",
-    input.eligible_lead_count > 0 ? null : "no_eligible_leads",
+    "lead_mapping_ready",
+    leadReady ? "ready" : input.lead_mapping_schema_ready ? "not_ready" : "blocked",
+    leadReady ? null : input.lead_mapping_schema_ready ? "no_eligible_leads" : "lead_mapping_schema_missing",
     { eligible_lead_count: input.eligible_lead_count },
   );
 
+  const eventReady = input.webhook_receiver_deployed && input.webhook_configured;
   push(
-    "sendability_preview_passed",
-    input.eligible_lead_count > 0 ? "ready" : "not_ready",
-    input.eligible_lead_count > 0 ? null : "sendability_preview_not_run_or_zero_eligible",
+    "event_return_ready",
+    eventReady ? "ready" : input.webhook_receiver_deployed ? "not_ready" : "blocked",
+    eventReady
+      ? null
+      : input.webhook_receiver_deployed
+        ? "provider_webhook_not_pointed_at_liftor"
+        : "liftor_webhook_receiver_not_deployed",
+    { webhook_receiver_deployed: input.webhook_receiver_deployed },
   );
 
   push(
-    "founder_final_approval_recorded",
-    input.founder_final_approval_recorded ? "ready" : "blocked",
-    input.founder_final_approval_recorded ? null : "founder_final_approval_missing",
+    "sending_domains_ready",
+    input.sending_domain_count > 0 ? "ready" : "not_ready",
+    input.sending_domain_count > 0 ? null : "no_sending_domain_registered",
+    { sending_domain_count: input.sending_domain_count },
+  );
+
+  const estateReady = input.mailbox_count > 0 && input.provider_ready_mailbox_count >= input.mailbox_count;
+  push(
+    "mailbox_estate_ready",
+    input.mailbox_count === 0 ? "blocked" : estateReady ? "ready" : "not_ready",
+    input.mailbox_count === 0
+      ? "zero_mailboxes_registered_for_business"
+      : estateReady
+        ? null
+        : "mailboxes_not_provider_ready",
+    { mailbox_count: input.mailbox_count, provider_ready_mailbox_count: input.provider_ready_mailbox_count },
+  );
+
+  const warmupReady = input.mailbox_count > 0 && input.warmup_ready_mailbox_count >= input.mailbox_count;
+  push(
+    "warmup_ready",
+    input.mailbox_count === 0 ? "blocked" : warmupReady ? "ready" : "not_ready",
+    input.mailbox_count === 0 ? "zero_mailboxes_registered_for_business" : warmupReady ? null : "mailboxes_not_warmup_ready",
+    { warmup_ready_mailbox_count: input.warmup_ready_mailbox_count, mailbox_count: input.mailbox_count },
+  );
+
+  const capsReady =
+    input.mailbox_count > 0 && input.mailboxes_with_effective_cap_count >= input.mailbox_count;
+  push(
+    "sender_caps_ready",
+    input.mailbox_count === 0 ? "blocked" : capsReady ? "ready" : "not_ready",
+    input.mailbox_count === 0
+      ? "zero_mailboxes_registered_for_business"
+      : capsReady
+        ? null
+        : "mailboxes_missing_effective_daily_cap_or_ramp",
+    { mailboxes_with_effective_cap_count: input.mailboxes_with_effective_cap_count },
+  );
+
+  push(
+    "suppression_sync_ready",
+    input.suppression_sync_enforced ? "ready" : "blocked",
+    input.suppression_sync_enforced ? null : "crm_suppression_gate_not_enforced",
+  );
+
+  push(
+    "first_end_to_end_test_ready",
+    input.dry_run_passed ? "ready" : "not_ready",
+    input.dry_run_passed ? null : "zero_mutation_dry_run_not_passed",
+  );
+
+  push(
+    "live_launch_approval",
+    input.founder_live_launch_approved ? "ready" : "blocked",
+    input.founder_live_launch_approved ? null : "founder_live_launch_approval_missing",
   );
 
   return items;
