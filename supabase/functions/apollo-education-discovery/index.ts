@@ -8,8 +8,11 @@
 //  - the only Apollo URL referenced is /mixed_people/api_search (free search)
 //  - no /people/match, no /people/bulk_match, no phone reveal, no waterfall
 //  - dry_run (default) performs ZERO provider calls
-//  - writes go ONLY to relationship_intelligence_contacts (research candidates)
-//  - never promotes to CRM, never queues or sends outreach
+//  - CRM-NATIVE (10 Sep 2026 correction): research candidates are written to the
+//    master CRM `contacts` table, linked to the canonical `organisations` row.
+//    Relationship Intelligence is no longer the canonical destination.
+//  - candidates are created NON-SENDABLE with no email; discovery never queues or sends outreach
+//  - dedupe is by Apollo person id; verified email, suppression, bounce and DNC are never erased
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import {
   EDUCATION_SEARCH_SENIORITIES,
@@ -29,7 +32,8 @@ const json = (b: unknown, s = 200) =>
   new Response(JSON.stringify(b), { status: s, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
 const MAX_ACCOUNTS_PER_RUN = 25;
-const MAX_CANDIDATES_PER_ACCOUNT = 3;
+const MAX_CANDIDATES_PER_ACCOUNT = 25;
+const DEFAULT_CANDIDATES_PER_ACCOUNT = 10;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -61,11 +65,11 @@ Deno.serve(async (req) => {
 
   const dryRun = body.dry_run !== false && body.confirm !== true;
   const accountLimit = Math.min(Math.max(1, body.account_limit ?? 10), MAX_ACCOUNTS_PER_RUN);
-  const perAccount = Math.min(Math.max(1, body.candidates_per_account ?? 3), MAX_CANDIDATES_PER_ACCOUNT);
+  const perAccount = Math.min(Math.max(1, body.candidates_per_account ?? DEFAULT_CANDIDATES_PER_ACCOUNT), MAX_CANDIDATES_PER_ACCOUNT);
 
   let query = admin
     .from("strategic_target_accounts")
-    .select("id, account_name, account_domain, geography, account_type, metadata")
+    .select("id, account_name, account_domain, geography, account_type, metadata, existing_organisation_id, source_key")
     .like("source_key", "education_152_master:%")
     .order("account_name", { ascending: true })
     .limit(accountLimit);
@@ -98,7 +102,8 @@ Deno.serve(async (req) => {
         account_domain: a.account_domain,
         search_titles: EDUCATION_SEARCH_TITLES.length,
         search_seniorities: EDUCATION_SEARCH_SENIORITIES,
-        writes_to: "relationship_intelligence_contacts",
+        crm_organisation_linked: Boolean(a.existing_organisation_id),
+        writes_to: "contacts (master CRM, non-sendable research candidates)",
       })),
       note: "Plan only — no Apollo request was made. Free People Search costs no credits; this run performs no reveal, no phone lookup and no outreach.",
     });
@@ -110,6 +115,7 @@ Deno.serve(async (req) => {
   const results: Array<Record<string, unknown>> = [];
   let providerCalls = 0;
   let candidatesWritten = 0;
+  let candidatesUpdated = 0;
 
   for (const account of accounts) {
     const searchBody = {
@@ -153,57 +159,79 @@ Deno.serve(async (req) => {
       .sort((a, b) => b.score.score - a.score.score)
       .slice(0, perAccount);
 
+    // Resolve the canonical CRM organisation for this account.
+    let organisationId: string | null = (account as any).existing_organisation_id ?? null;
+    if (!organisationId && (account as any).source_key) {
+      const { data: org } = await admin
+        .from("organisations").select("id").eq("source_key", (account as any).source_key).maybeSingle();
+      organisationId = org?.id ?? null;
+    }
+    if (!organisationId) {
+      results.push({
+        account_name: account.account_name,
+        http_status: status,
+        people_returned: people.length,
+        candidates_kept: 0,
+        skipped: "no_canonical_crm_organisation",
+      });
+      continue;
+    }
+
     for (let rank = 0; rank < scored.length; rank++) {
       const c = scored[rank];
       const p = c.person as Record<string, any>;
       const apolloId = String(p.id ?? "");
       if (!apolloId) continue;
 
-      const row = {
-        full_name: [p.first_name, p.last_name].filter(Boolean).join(" ") || String(p.name ?? "Unknown"),
-        role_title: c.title || null,
-        organisation_name: account.account_name,
-        source: "apollo_free_search",
-        relationship_type: "school_education_contact",
-        education_group_id: String((account.metadata as any)?.education_group_id ?? ""),
-        strategic_target_account_id: account.id,
-        apollo_org_id: String(p.organization_id ?? "") || null,
+      const fullName = [p.first_name, p.last_name].filter(Boolean).join(" ") || String(p.name ?? "Unknown");
+      const groupId = String((account.metadata as any)?.education_group_id ?? "");
+      const researchFields = {
+        organisation_id: organisationId,
+        company: account.account_name,
+        role: c.title || "",
+        education_group_id: groupId || null,
         education_role_family: c.score.role_family,
         education_role_score: c.score.score,
         research_program_key: EDUCATION_RESEARCH_PROGRAM_KEY,
-        reveal_status: "not_revealed",
-        notes: `Rank ${rank + 1}. ${c.score.reasons.join("; ")}`,
-        metadata: {
-          apollo_person_id: apolloId,
-          rank: rank + 1,
-          score_reasons: c.score.reasons,
-          score_penalties: c.score.penalties,
-          group_scope: c.score.group_scope,
-          buying_authority: c.score.buying_authority,
-          discovery_mode: "free_search_only",
-        },
+        is_research_candidate: true,
+        apollo_person_id: apolloId,
+        apollo_organization_id: String(p.organization_id ?? "") || null,
+        linkedin_url: p.linkedin_url ?? null,
+        first_name: p.first_name ?? null,
+        last_name: p.last_name ?? null,
+        notes: `Education research candidate. Rank ${rank + 1}. ${c.score.reasons.join("; ")}`,
       };
 
-      const { data: existing } = await admin
-        .from("relationship_intelligence_contacts")
-        .select("id")
-        .eq("strategic_target_account_id", account.id)
-        .contains("metadata", { apollo_person_id: apolloId })
-        .maybeSingle();
+      // Dedupe by Apollo person id first, then by organisation + name.
+      const { data: byApollo } = await admin
+        .from("contacts").select("id, sendable_status, reveal_status").eq("apollo_person_id", apolloId).maybeSingle();
+      let existing = byApollo ?? null;
+      if (!existing) {
+        const { data: byName } = await admin
+          .from("contacts").select("id, sendable_status, reveal_status")
+          .eq("organisation_id", organisationId).ilike("name", fullName).maybeSingle();
+        existing = byName ?? null;
+      }
 
       if (existing?.id) {
-        // Never overwrite a verified email — this path holds no email at all.
-        const { error } = await admin.from("relationship_intelligence_contacts")
-          .update({
-            role_title: row.role_title,
-            education_role_family: row.education_role_family,
-            education_role_score: row.education_role_score,
-            notes: row.notes,
-          })
-          .eq("id", existing.id);
-        if (!error) candidatesWritten++;
+        // NEVER erase a verified email, suppression, bounce or DNC state: this update
+        // touches only research/mapping fields and leaves email + status untouched.
+        const { error } = await admin.from("contacts").update(researchFields).eq("id", existing.id);
+        if (!error) candidatesUpdated++;
       } else {
-        const { error } = await admin.from("relationship_intelligence_contacts").insert(row);
+        const { error } = await admin.from("contacts").insert({
+          ...researchFields,
+          name: fullName,
+          source: "apollo_free_search_education",
+          status: "NEW",
+          sendable_status: "not_sendable",
+          reveal_status: "not_revealed",
+          apollo_enrichment_status: "pending",
+          data_source: "apollo_people_search",
+          source_platform: "apollo",
+          source_record_id: apolloId,
+          tags: ["education-research", "not-sendable"],
+        });
         if (!error) candidatesWritten++;
       }
     }
@@ -224,8 +252,11 @@ Deno.serve(async (req) => {
     apollo_credits_spent: 0,
     provider_calls: providerCalls,
     accounts_processed: accounts.length,
-    candidates_written: candidatesWritten,
+    crm_contacts_created: candidatesWritten,
+    crm_contacts_updated: candidatesUpdated,
+    candidates_written: candidatesWritten + candidatesUpdated,
     results,
-    side_effects: { crm_promotions: 0, emails_sent: 0, outreach_queue_rows: 0, paid_reveals: 0 },
+    canonical_destination: "contacts (linked to organisations)",
+    side_effects: { emails_queued: 0, emails_sent: 0, outreach_queue_rows: 0, paid_reveals: 0 },
   });
 });

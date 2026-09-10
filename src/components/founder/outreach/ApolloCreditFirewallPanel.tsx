@@ -13,23 +13,32 @@ const ApolloCreditFirewallPanel = () => {
     queryKey: ["apollo-credit-firewall-status"],
     refetchInterval: 60000,
     queryFn: async () => {
-      const [status, accounts, candidates] = await Promise.all([
+      // CRM-native counts (10 Sep 2026 correction): organisations is the canonical
+      // education account spine and contacts is the canonical person registry.
+      const [status, orgs, candidates, revealed] = await Promise.all([
         supabase.rpc("apollo_credit_status"),
-        supabase
-          .from("strategic_target_accounts")
+        (supabase as any)
+          .from("organisations")
           .select("id", { count: "exact", head: true })
-          .like("source_key", "education_152_master:%"),
-        supabase
-          .from("relationship_intelligence_contacts")
+          .eq("is_education_account", true),
+        (supabase as any)
+          .from("contacts")
           .select("id", { count: "exact", head: true })
           .eq("research_program_key", "education_152_master_2026_09"),
+        (supabase as any)
+          .from("contacts")
+          .select("id", { count: "exact", head: true })
+          .eq("research_program_key", "education_152_master_2026_09")
+          .eq("reveal_status", "revealed"),
       ]);
       return {
         policy: (status.data ?? null) as Record<string, any> | null,
-        accountCount: accounts.count ?? 0,
+        accountCount: orgs.count ?? 0,
         candidateCount: candidates.count ?? 0,
+        revealedCount: revealed.count ?? 0,
       };
     },
+
   });
 
   if (isLoading || !data) return null;
@@ -82,18 +91,24 @@ const ApolloCreditFirewallPanel = () => {
           </div>
         </div>
 
-        <div className="grid sm:grid-cols-2 gap-3">
+        <div className="grid sm:grid-cols-3 gap-3">
           <div className="rounded-lg border border-border/50 p-3">
-            <p className="text-[11px] text-muted-foreground flex items-center gap-1.5"><Database className="h-3 w-3" /> Education master accounts</p>
+            <p className="text-[11px] text-muted-foreground flex items-center gap-1.5"><Database className="h-3 w-3" /> Education companies (CRM)</p>
             <p className="text-lg font-semibold tabular-nums">{data.accountCount}</p>
-            <p className="text-[11px] text-muted-foreground">{data.accountCount === 0 ? "Universe not yet imported" : "Research only — not outreach-eligible"}</p>
+            <p className="text-[11px] text-muted-foreground">{data.accountCount === 0 ? "Not yet loaded" : "Research only — not outreach-eligible"}</p>
           </div>
           <div className="rounded-lg border border-border/50 p-3">
-            <p className="text-[11px] text-muted-foreground flex items-center gap-1.5"><Users className="h-3 w-3" /> Education research candidates</p>
+            <p className="text-[11px] text-muted-foreground flex items-center gap-1.5"><Users className="h-3 w-3" /> Education people (CRM)</p>
             <p className="text-lg font-semibold tabular-nums">{data.candidateCount}</p>
-            <p className="text-[11px] text-muted-foreground">Free search only · no email revealed</p>
+            <p className="text-[11px] text-muted-foreground">Free search only · non-sendable</p>
+          </div>
+          <div className="rounded-lg border border-border/50 p-3">
+            <p className="text-[11px] text-muted-foreground flex items-center gap-1.5"><Lock className="h-3 w-3" /> Business emails revealed</p>
+            <p className="text-lg font-semibold tabular-nums">{data.revealedCount}</p>
+            <p className="text-[11px] text-muted-foreground">Founder-selected reveal only</p>
           </div>
         </div>
+
 
         <p className="text-[11px] text-muted-foreground leading-relaxed">
           Every paid Apollo request must first obtain an atomic reservation from this firewall. With paid
