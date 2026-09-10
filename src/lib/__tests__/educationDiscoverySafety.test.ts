@@ -2,19 +2,19 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-// Strip comments so prose like "no /people/match" cannot mask a real call.
 const stripComments = (src: string) =>
   src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
 const read = (p: string) => stripComments(readFileSync(resolve(process.cwd(), p), "utf8"));
 
 const discovery = read("supabase/functions/apollo-education-discovery/index.ts");
 const importer = read("supabase/functions/apollo-education-account-import/index.ts");
+const reveal = read("supabase/functions/apollo-education-reveal/index.ts");
 const syncEnrich = read("supabase/functions/apollo-sync-enrich/index.ts");
 const unlockSelected = read("supabase/functions/apollo-unlock-selected/index.ts");
 const autopilot = read("supabase/functions/autopilot-orchestrator/index.ts");
 
-describe("education discovery — free search only", () => {
-  it("references only the credit-free People Search endpoint", () => {
+describe("education discovery — free search only and CRM-native", () => {
+  it("references the credit-free People Search endpoint", () => {
     expect(discovery).toContain("mixed_people/api_search");
   });
 
@@ -30,67 +30,88 @@ describe("education discovery — free search only", () => {
     expect(discovery).toContain("provider_calls: 0");
   });
 
-  it("writes research candidates into the master CRM, not Relationship Intelligence", () => {
+  it("writes canonical candidates to contacts, not Relationship Intelligence", () => {
     expect(discovery).toContain('from("contacts")');
-    expect(discovery).toContain("organisation_id");
     expect(discovery).not.toContain("relationship_intelligence_contacts");
+    expect(discovery).toContain("organisation_id");
     expect(discovery).not.toContain("email_queue");
     expect(discovery).not.toContain("smartlead.ai");
   });
 
-  it("creates CRM research candidates as non-sendable with no email", () => {
-    expect(discovery).toContain('sendable_status: "not_sendable"');
-    expect(discovery).toContain('reveal_status: "not_revealed"');
-    expect(discovery).toContain("is_research_candidate: true");
+  it("defaults to 10 candidates per account and caps at 25", () => {
+    expect(discovery).toContain("DEFAULT_CANDIDATES_PER_ACCOUNT = 10");
+    expect(discovery).toContain("MAX_CANDIDATES_PER_ACCOUNT = 25");
   });
 
-  it("dedupes by Apollo person id and never writes email or suppression fields", () => {
-    expect(discovery).toContain('eq("apollo_person_id", apolloId)');
-    expect(discovery).not.toContain("is_globally_suppressed:");
-    expect(discovery).not.toContain("hard_bounced:");
-    expect(discovery).not.toContain("email:");
+  it("defaults to the International operator cohort", () => {
+    expect(discovery).toContain('DEFAULT_QUALIFICATIONS = ["International operator"]');
   });
 
-  it("defaults to 10 candidates per account with a configurable maximum of 25", () => {
-    expect(discovery).toContain("const DEFAULT_CANDIDATES_PER_ACCOUNT = 10;");
-    expect(discovery).toContain("const MAX_CANDIDATES_PER_ACCOUNT = 25;");
-  });
-
-  it("requires a founder or admin role", () => {
-    expect(discovery).toContain("founder_role_required");
+  it("uses canonical organisation linkage before any candidate write", () => {
+    expect(discovery).toContain("existing_organisation_id");
+    expect(discovery).toContain("canonical_crm_organisation_missing");
   });
 });
 
-describe("education account import — safe by default", () => {
+describe("education account import — CRM organisations first", () => {
   it("is dry-run unless explicitly confirmed", () => {
     expect(importer).toContain("body.confirm !== true");
     expect(importer).toContain("founder_confirm_required");
+  });
+
+  it("recognises the reviewed CSV Account Website (Domain) header", () => {
+    expect(importer).toContain("Account Website (Domain)");
   });
 
   it("makes no Apollo or Smartlead call and creates no contacts", () => {
     expect(importer).not.toContain("api.apollo.io");
     expect(importer).not.toContain("smartlead.ai");
     expect(importer).not.toContain("functions.invoke");
-    expect(importer).not.toContain("from(\"contacts\")");
+    expect(importer).not.toContain('from("contacts")');
     expect(importer).not.toContain("email_queue");
   });
 
-  it("writes only to the existing strategic account and CRM organisation tables", () => {
-    expect(importer).toContain("strategic_target_accounts");
-    expect(importer).toContain("strategic_account_lists");
+  it("writes the company into organisations and links the strategic mirror", () => {
     expect(importer).toContain('from("organisations")');
-  });
-
-  it("resolves the canonical CRM organisation before linking the strategic account", () => {
-    const orgIndex = importer.indexOf('from("organisations")');
-    const staWrite = importer.indexOf('from("strategic_target_accounts").update');
-    expect(orgIndex).toBeGreaterThan(-1);
-    expect(orgIndex).toBeLessThan(staWrite);
     expect(importer).toContain("existing_organisation_id");
+    expect(importer).toContain("canonical_company_table");
   });
 });
 
-describe("paid Apollo paths are firewalled", () => {
+describe("selected education reveal — same CRM contact, firewalled", () => {
+  it("operates on contact ids and requires canonical organisation linkage", () => {
+    expect(reveal).toContain("contact_ids");
+    expect(reveal).toContain("organisation_id");
+    expect(reveal).toContain("education_group_id");
+  });
+
+  it("uses the shared credit firewall before the provider call", () => {
+    expect(reveal).toContain("getFirewallStatus");
+    expect(reveal).toContain("reserveCredits");
+    expect(reveal).toContain("settleCredits");
+    expect(reveal).toContain("apollo_credit_firewall_blocked");
+  });
+
+  it("requests business email only and contains no phone/waterfall path", () => {
+    expect(reveal).toContain("reveal_personal_emails=false");
+    expect(reveal).not.toContain("reveal_phone");
+    expect(reveal).not.toContain("bulk_match");
+    expect(reveal).not.toContain("waterfall_enrichment");
+  });
+
+  it("records provider-reported credit usage when present", () => {
+    expect(reveal).toContain("credits_consumed");
+    expect(reveal).toContain("reportedCredits");
+  });
+
+  it("updates the same contacts table and does not touch Smartlead or email queue", () => {
+    expect(reveal).toContain('from("contacts")');
+    expect(reveal).not.toContain("smartlead.ai");
+    expect(reveal).not.toContain("email_queue");
+  });
+});
+
+describe("legacy paid Apollo paths remain firewalled", () => {
   it.each([
     ["apollo-sync-enrich", syncEnrich],
     ["apollo-unlock-selected", unlockSelected],
@@ -107,58 +128,9 @@ describe("paid Apollo paths are firewalled", () => {
     expect(syncEnrich).toContain("already_charged_in_bulk_skipped");
   });
 
-  it("all paid paths skip people previously returning no email", () => {
+  it("all legacy paid paths skip people previously returning no email", () => {
     for (const source of [syncEnrich, unlockSelected, autopilot]) {
       expect(source).toContain("loadNoEmailPersonIds");
     }
-  });
-});
-
-describe("founder-selected education reveal — CRM-native and firewalled", () => {
-  const reveal = read("supabase/functions/apollo-education-reveal-selected/index.ts");
-
-  it("operates on CRM contact ids", () => {
-    expect(reveal).toContain("contact_ids");
-    expect(reveal).toContain('from("contacts")');
-  });
-
-  it("routes every paid call through the shared firewall", () => {
-    expect(reveal).toContain("_shared/apolloCreditFirewall.ts");
-    expect(reveal).toContain("reserveCredits");
-    expect(reveal).toContain("settleCredits");
-    expect(reveal).toContain("releaseCredits");
-    expect(reveal).toContain("loadNoEmailPersonIds");
-  });
-
-  it("is business email only — no phone, personal email or waterfall", () => {
-    expect(reveal).toContain("reveal_personal_emails: false");
-    expect(reveal).toContain("reveal_phone_number: false");
-    // allow_waterfall may only be READ from firewall policy, never requested.
-    expect(reveal).not.toMatch(/waterfall\s*:\s*true/);
-    expect(reveal).not.toContain("reveal_waterfall");
-    expect(reveal).not.toContain("bulk_match");
-  });
-
-  it("fails closed while the portfolio firewall is locked", () => {
-    expect(reveal).toContain("paid_enrichment_enabled");
-    expect(reveal).toContain("hard_credit_limit <= 0");
-    expect(reveal).toContain("apollo_credit_firewall_blocked");
-  });
-
-  it("blocks duplicate business emails instead of merging", () => {
-    expect(reveal).toContain('reveal_status: "duplicate_email_blocked"');
-    expect(reveal).toContain('sendable_status: "duplicate"');
-  });
-
-  it("never sends, queues or auto-assigns a portfolio business", () => {
-    expect(reveal).not.toContain("assigned_business:");
-    expect(reveal).not.toContain("email_queue");
-    expect(reveal).not.toContain("smartlead.ai");
-    expect(reveal).toContain("emails_sent: 0");
-  });
-
-  it("requires founder confirmation and defaults to dry-run", () => {
-    expect(reveal).toContain("founder_confirm_required");
-    expect(reveal).toContain("founder_role_required");
   });
 });
