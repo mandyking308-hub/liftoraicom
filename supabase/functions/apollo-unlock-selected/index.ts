@@ -326,7 +326,9 @@ Deno.serve(async (req) => {
     unlocked,
     already_in_crm_after_unlock,
     failed,
-    apollo_credits_spent_estimate: targets.length,
+    apollo_credits_spent_estimate: Math.max(0, targets.length - firewall_blocked),
+    firewall_blocked,
+
     results,
     note: "Unlock complete. Promotion and enqueue still require separate founder actions. Emails already in CRM are linked to existing contacts (no duplicates). Person IDs returning no email are flagged unlock_attempt_no_email and excluded from future credit estimates.",
   });
