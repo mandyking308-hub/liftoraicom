@@ -184,9 +184,15 @@ Deno.serve(async (req) => {
       last_checked_at: nowIso,
       updated_at: nowIso,
     }));
-    const { error } = await admin.from("smartlead_activation_checklist").upsert(rows, {
-      onConflict: "business_id,liftor_campaign_id,checklist_key",
-    });
+    // The live uniqueness guard is an expression index (COALESCE on nullable
+    // scope columns), so replace the scope deterministically instead of
+    // relying on a column-based ON CONFLICT target.
+    let delQ = admin.from("smartlead_activation_checklist").delete().eq("business_id", business_id);
+    delQ = liftor_campaign_id
+      ? delQ.eq("liftor_campaign_id", liftor_campaign_id)
+      : delQ.is("liftor_campaign_id", null);
+    await delQ;
+    const { error } = await admin.from("smartlead_activation_checklist").insert(rows);
     if (error) return json({ ok: false, error: "persist_failed", detail: error.message }, 500);
     persisted = true;
   }
