@@ -94,7 +94,7 @@ Deno.serve(async (req) => {
   let q = admin
     .from("contacts")
     .select(
-      "id, email, first_name, last_name, name, company, linkedin_url, source_platform, lawful_basis, unsubscribe_token, sendable_status, is_globally_suppressed, hard_bounced, unsubscribed_at, archived_at, founder_review_requested_at, assigned_business, active_campaign_id, compliance_status, do_not_contact",
+      "id, email, first_name, last_name, name, company, linkedin_url, source_platform, lawful_basis, unsubscribe_token, sendable_status, email_verified_status, is_globally_suppressed, hard_bounced, unsubscribed_at, do_not_contact_at, conversation_active, status, archived_at, founder_review_requested_at, assigned_business, active_campaign_id, compliance_status, do_not_contact",
     )
     .limit(500);
   if (business_id) q = q.eq("assigned_business", business_id);
