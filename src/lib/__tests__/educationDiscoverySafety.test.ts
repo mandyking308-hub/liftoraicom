@@ -135,3 +135,37 @@ describe("legacy paid Apollo paths remain firewalled", () => {
     }
   });
 });
+
+describe("both selected reveal paths stay CRM-native and firewalled", () => {
+  it.each([
+    ["apollo-education-reveal", reveal],
+    ["apollo-education-reveal-selected", revealSelected],
+  ])("%s reserves credits before any paid call and reveals business email only", (_name, source) => {
+    expect(source).toContain("_shared/apolloCreditFirewall.ts");
+    expect(source).toContain("getFirewallStatus");
+    expect(source).toContain("reserveCredits");
+    expect(source).toContain("settleCredits");
+    expect(source).toContain("reveal_personal_emails=false");
+    expect(source).not.toContain("reveal_phone");
+    expect(source).not.toContain("waterfall");
+  });
+
+  it.each([
+    ["apollo-education-reveal", reveal],
+    ["apollo-education-reveal-selected", revealSelected],
+  ])("%s updates the canonical CRM contact and never sends", (_name, source) => {
+    expect(source).toContain('from("contacts")');
+    expect(source).toContain("organisation_id");
+    expect(source).not.toContain("relationship_intelligence_contacts");
+    expect(source).not.toContain("smartlead");
+    expect(source).not.toContain("email_queue");
+  });
+});
+
+describe("Relationship Intelligence is not canonical education storage", () => {
+  it("no education CRM path writes RI as its candidate destination", () => {
+    for (const source of [discovery, importer, reveal, revealSelected]) {
+      expect(source).not.toContain("relationship_intelligence_contacts");
+    }
+  });
+});
