@@ -351,9 +351,9 @@ A provider connection is never permission to send.
 
 | Area | Live state |
 | --- | --- |
-| Central \`contacts\` | 81 |
-| Active / non-archived contacts | 81 |
-| \`business_contact_relationships\` | 68 |
+| Central \`contacts\` | 81 (snapshot 10 Sep 2026; grows with use) |
+| Active / non-archived contacts | 81 (snapshot) |
+| \`business_contact_relationships\` | 68 (snapshot) |
 | Apollo staged leads (\`apollo_leads\`) | 400 |
 | Apollo raw leads (\`apollo_raw_leads\`) | 400 |
 | Sending domains | 8 |
@@ -409,7 +409,7 @@ enriched or moved by this reconciliation.
 
 ## 101.4 Central CRM versus research pools
 
-The operational CRM (81 contacts, 68 business relationships) is **not** the education research
+The operational CRM (live contact and business-relationship counts; the 10 September snapshot below is a point-in-time reading, not a fixed number) is **not** the education research
 universe. Research candidates may exist without becoming CRM contacts; a person is promoted into
 the canonical \`contacts\` spine only when the workflow requires it and identity/dedupe checks
 pass. Legacy outreach datasets must not be merged into the education programme merely because
