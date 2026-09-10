@@ -1,6 +1,6 @@
 // Liftor User Manual — plain-English operating guide (separate from Founder/Technical Manual)
 
-export const LIFTOR_USER_MANUAL_VERSION = "1.6 — August 2026 Architecture Reconciliation (25 August 2026)";
+export const LIFTOR_USER_MANUAL_VERSION = "1.7 — September 2026 Architecture Reconciliation (10 September 2026)";
 
 export interface ManualSection {
   number: number;
