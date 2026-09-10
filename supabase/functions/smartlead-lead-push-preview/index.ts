@@ -1,4 +1,8 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import {
+  evaluateOutboundSendability,
+  SENDABILITY_VERSION,
+} from "../_shared/outboundSendability.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
