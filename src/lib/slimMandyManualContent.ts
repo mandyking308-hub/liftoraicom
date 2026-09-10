@@ -2,11 +2,11 @@
 // NOT the technical source of truth. Do NOT use to overwrite the User Manual or Full Technical Manual.
 // v1.2 refresh (10 Sep 2026) — September reconciliation current-state summary. Kept deliberately slim.
 
-export const SLIM_MANDY_MANUAL_VERSION = "1.2 — 10 September 2026 (September Architecture Reconciliation)";
+export const SLIM_MANDY_MANUAL_VERSION = "1.3 — 10 September 2026 (Apollo Credit Firewall & Education Universe Infrastructure)";
 
 export const SLIM_MANDY_MANUAL_MARKDOWN = `# Slim Mandy Manual
 
-_Version 1.2 — 10 September 2026_
+_Version 1.3 — 10 September 2026_
 
 _Portable summary. Safe to upload to ChatGPT or share with advisers. Not the full technical source of truth (that is the Full Technical Manual, Sections 100 and 101)._
 
@@ -26,9 +26,10 @@ Implemented in code · live-configured in the database/provider · historical ev
 
 ## Current state — 10 September 2026
 - **CRM:** 81 contacts, 68 business relationships. Distinct from research pools.
-- **Apollo:** free People Search, staging, qualification and selective founder-approved reveal all work. But several paths still carry Neon Candy-specific defaults, caps are per run not per company, and there is **no portfolio-wide credit firewall yet** — automatic paid enrichment stays OFF.
+- **Apollo:** free People Search, staging, qualification and selective founder-approved reveal all work. But several paths still carry Neon Candy-specific defaults, and caps were per run not per company. A **portfolio-wide Apollo Credit Firewall is now implemented**: every paid Apollo call must first take an atomic reservation against one shared budget. That budget is live but **disabled with a hard limit of 0**, and phone/personal-email/waterfall reveal are all false, so automatic paid enrichment stays OFF.
 - **Smartlead:** provider **connected**, substantial code implemented — but **0 campaign mappings, 0 lead mappings, 0 provider events, 0 activation-checklist rows**. The closed loop is not activated. Smartlead is the delivery lane, not the education prospect-data source.
 - **Sending estate:** 8 domains, 2 inboxes (1 active) — legacy Neon Candy infrastructure, not the planned education estate (~50 mailboxes, still to be built and warmed).
+- **Education 152 universe infrastructure:** the account importer and the free-search discovery orchestrator are implemented and preview-only. The 152 groups are **not yet imported** and no education research candidates have been restored.
 - **Education universe:** the August recovery (2,520 rows / 266 organisations) is **historical evidence only**. The 10 September live check found **zero** \`school_education_contact\` rows in Relationship Intelligence. Restoring it is a deliberate later stage.
 
 ## Classification
@@ -56,4 +57,4 @@ GitHub \`main\` is the code source of truth. Work in discrete reviewed branches.
 Any external gate, auto_send, cron, Smartlead campaign start or lead push, Apollo paid enrichment, buyer contact approval, data-room sharing, portal invites, payments or filings.
 `;
 
-export const SLIM_MANDY_MANUAL_FILENAME = `liftor-slim-mandy-manual-v1.2-2026-09-10.md`;
+export const SLIM_MANDY_MANUAL_FILENAME = `liftor-slim-mandy-manual-v1.3-2026-09-10.md`;

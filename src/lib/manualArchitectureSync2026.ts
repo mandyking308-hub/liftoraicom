@@ -497,5 +497,29 @@ data-integrity control and authorises no external action.
 Unchanged. This reconciliation authorises no sending, no Smartlead campaign start, no Apollo paid
 enrichment, no mailbox activation and no provider mutation.
 
+### Stage 4 (Apollo Education Infrastructure) — IMPLEMENTED, PAID ENRICHMENT STILL LOCKED
+
+**Implemented in code and live in the database:**
+- **Portfolio Apollo Credit Firewall.** `apollo_portfolio_credit_policy`, `apollo_credit_reservations`,
+  `apollo_paid_attempts` plus atomic `apollo_credit_status/reserve/settle/release` RPCs. Every paid Apollo
+  path (`apollo-sync-enrich`, `apollo-unlock-selected`, `autopilot-orchestrator`) must hold a reservation
+  before a request leaves the platform, keyed by a deterministic operation key so a retry cannot double-spend.
+  The bulk-to-single fallback can no longer re-charge a person already covered by a successful bulk batch, and
+  people Apollo previously returned with no email are skipped by default.
+- **Education 152 account universe importer** (`apollo-education-account-import`) — idempotent upsert into the
+  existing `strategic_account_lists` / `strategic_target_accounts` tables under stable
+  `education_152_master:EDU-###` source keys. Dry-run by default; writes only on explicit founder confirmation.
+  It creates no contacts, no research candidates, and makes no provider call.
+- **Education FREE-discovery orchestrator** (`apollo-education-discovery`) — reads the master account list and
+  uses only the credit-free Apollo People Search endpoint. It has a true plan mode that makes zero provider
+  calls, and writes broad research candidates only to Relationship Intelligence.
+- **Deterministic education role scorer** — campaign-neutral, contains no Neon Candy or music taxonomy.
+- **Founder read-only firewall panel** on `/founder/outreach/apollo`. It contains no control that can spend a
+  credit or send an email.
+
+**Live-configured state (unchanged by this build unit):** paid enrichment **disabled**, hard portfolio credit
+limit **0**, phone reveal / personal-email reveal / waterfall all **false**. The 152 education accounts are
+**NOT yet imported**, no education research candidates have been restored, and Smartlead state is untouched.
+
 *End of Section 101 — September 2026 Architecture Reconciliation.*
 `;

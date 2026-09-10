@@ -18,6 +18,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "react-router-dom";
 import { NeonCandyMonitor } from "@/components/founder/outreach/NeonCandyMonitor";
 import { WeekendPool } from "@/components/founder/outreach/WeekendPool";
+import ApolloCreditFirewallPanel from "@/components/founder/outreach/ApolloCreditFirewallPanel";
+
 
 const MUSIC_TARGET_KEYWORDS = [
   "playlist curator", "music curator", "independent curator", "music programmer",
@@ -969,6 +971,9 @@ export default function ApolloIntegration() {
             Hold-for-approval is on by default.
           </p>
         </div>
+
+        <ApolloCreditFirewallPanel />
+
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>

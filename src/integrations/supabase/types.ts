@@ -4542,6 +4542,66 @@ export type Database = {
           },
         ]
       }
+      apollo_credit_reservations: {
+        Row: {
+          actual_credits: number | null
+          apollo_person_ids: string[]
+          business_id: string | null
+          business_name: string | null
+          created_at: string
+          estimated_credits: number
+          function_source: string
+          id: string
+          ledger_id: string | null
+          metadata: Json
+          operation_key: string
+          provider: string
+          release_reason: string | null
+          run_id: string | null
+          settled_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          actual_credits?: number | null
+          apollo_person_ids?: string[]
+          business_id?: string | null
+          business_name?: string | null
+          created_at?: string
+          estimated_credits?: number
+          function_source: string
+          id?: string
+          ledger_id?: string | null
+          metadata?: Json
+          operation_key: string
+          provider?: string
+          release_reason?: string | null
+          run_id?: string | null
+          settled_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          actual_credits?: number | null
+          apollo_person_ids?: string[]
+          business_id?: string | null
+          business_name?: string | null
+          created_at?: string
+          estimated_credits?: number
+          function_source?: string
+          id?: string
+          ledger_id?: string | null
+          metadata?: Json
+          operation_key?: string
+          provider?: string
+          release_reason?: string | null
+          run_id?: string | null
+          settled_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       apollo_leads: {
         Row: {
           ai_tags: string[]
@@ -4655,6 +4715,96 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      apollo_paid_attempts: {
+        Row: {
+          apollo_person_id: string
+          attempts: number
+          created_at: string
+          function_source: string | null
+          id: string
+          last_attempt_at: string
+          metadata: Json
+          operation_key: string | null
+          outcome: string
+          provider: string
+        }
+        Insert: {
+          apollo_person_id: string
+          attempts?: number
+          created_at?: string
+          function_source?: string | null
+          id?: string
+          last_attempt_at?: string
+          metadata?: Json
+          operation_key?: string | null
+          outcome?: string
+          provider?: string
+        }
+        Update: {
+          apollo_person_id?: string
+          attempts?: number
+          created_at?: string
+          function_source?: string | null
+          id?: string
+          last_attempt_at?: string
+          metadata?: Json
+          operation_key?: string | null
+          outcome?: string
+          provider?: string
+        }
+        Relationships: []
+      }
+      apollo_portfolio_credit_policy: {
+        Row: {
+          allow_personal_email_reveal: boolean
+          allow_phone_reveal: boolean
+          allow_waterfall: boolean
+          created_at: string
+          hard_credit_limit: number
+          id: string
+          notes: string | null
+          paid_enrichment_enabled: boolean
+          per_run_cap: number
+          provider: string
+          safety_reserve: number
+          updated_at: string
+          updated_by: string | null
+          updated_by_email: string | null
+        }
+        Insert: {
+          allow_personal_email_reveal?: boolean
+          allow_phone_reveal?: boolean
+          allow_waterfall?: boolean
+          created_at?: string
+          hard_credit_limit?: number
+          id?: string
+          notes?: string | null
+          paid_enrichment_enabled?: boolean
+          per_run_cap?: number
+          provider?: string
+          safety_reserve?: number
+          updated_at?: string
+          updated_by?: string | null
+          updated_by_email?: string | null
+        }
+        Update: {
+          allow_personal_email_reveal?: boolean
+          allow_phone_reveal?: boolean
+          allow_waterfall?: boolean
+          created_at?: string
+          hard_credit_limit?: number
+          id?: string
+          notes?: string | null
+          paid_enrichment_enabled?: boolean
+          per_run_cap?: number
+          provider?: string
+          safety_reserve?: number
+          updated_at?: string
+          updated_by?: string | null
+          updated_by_email?: string | null
+        }
+        Relationships: []
       }
       apollo_sync_runs: {
         Row: {
@@ -49348,6 +49498,7 @@ export type Database = {
           age_or_age_band: string | null
           ai_summary: string | null
           alignment_quality: string | null
+          apollo_org_id: string | null
           apollo_person_id: string | null
           best_vehicle: string | null
           capital_lane: string | null
@@ -49362,6 +49513,9 @@ export type Database = {
           deal_relevance: string | null
           disclosure_level: Database["public"]["Enums"]["rni_disclosure_level"]
           disclosure_warning: string | null
+          education_group_id: string | null
+          education_role_family: string | null
+          education_role_score: number | null
           elite_context_notes: string | null
           email: string | null
           email_status: string | null
@@ -49391,11 +49545,14 @@ export type Database = {
           relationship_angle: string | null
           relationship_status: Database["public"]["Enums"]["rni_relationship_status"]
           relationship_type: Database["public"]["Enums"]["rni_relationship_type"]
+          research_program_key: string | null
+          reveal_status: string | null
           role_or_title: string | null
           source: Database["public"]["Enums"]["rni_source"]
           source_evidence: string | null
           source_notes: string | null
           source_platform: string | null
+          strategic_target_account_id: string | null
           strategic_value_score: number
           tags: string[]
           trust_level: Database["public"]["Enums"]["rni_trust_level"]
@@ -49407,6 +49564,7 @@ export type Database = {
           age_or_age_band?: string | null
           ai_summary?: string | null
           alignment_quality?: string | null
+          apollo_org_id?: string | null
           apollo_person_id?: string | null
           best_vehicle?: string | null
           capital_lane?: string | null
@@ -49421,6 +49579,9 @@ export type Database = {
           deal_relevance?: string | null
           disclosure_level?: Database["public"]["Enums"]["rni_disclosure_level"]
           disclosure_warning?: string | null
+          education_group_id?: string | null
+          education_role_family?: string | null
+          education_role_score?: number | null
           elite_context_notes?: string | null
           email?: string | null
           email_status?: string | null
@@ -49450,11 +49611,14 @@ export type Database = {
           relationship_angle?: string | null
           relationship_status?: Database["public"]["Enums"]["rni_relationship_status"]
           relationship_type?: Database["public"]["Enums"]["rni_relationship_type"]
+          research_program_key?: string | null
+          reveal_status?: string | null
           role_or_title?: string | null
           source?: Database["public"]["Enums"]["rni_source"]
           source_evidence?: string | null
           source_notes?: string | null
           source_platform?: string | null
+          strategic_target_account_id?: string | null
           strategic_value_score?: number
           tags?: string[]
           trust_level?: Database["public"]["Enums"]["rni_trust_level"]
@@ -49466,6 +49630,7 @@ export type Database = {
           age_or_age_band?: string | null
           ai_summary?: string | null
           alignment_quality?: string | null
+          apollo_org_id?: string | null
           apollo_person_id?: string | null
           best_vehicle?: string | null
           capital_lane?: string | null
@@ -49480,6 +49645,9 @@ export type Database = {
           deal_relevance?: string | null
           disclosure_level?: Database["public"]["Enums"]["rni_disclosure_level"]
           disclosure_warning?: string | null
+          education_group_id?: string | null
+          education_role_family?: string | null
+          education_role_score?: number | null
           elite_context_notes?: string | null
           email?: string | null
           email_status?: string | null
@@ -49509,11 +49677,14 @@ export type Database = {
           relationship_angle?: string | null
           relationship_status?: Database["public"]["Enums"]["rni_relationship_status"]
           relationship_type?: Database["public"]["Enums"]["rni_relationship_type"]
+          research_program_key?: string | null
+          reveal_status?: string | null
           role_or_title?: string | null
           source?: Database["public"]["Enums"]["rni_source"]
           source_evidence?: string | null
           source_notes?: string | null
           source_platform?: string | null
+          strategic_target_account_id?: string | null
           strategic_value_score?: number
           tags?: string[]
           trust_level?: Database["public"]["Enums"]["rni_trust_level"]
@@ -70557,6 +70728,34 @@ export type Database = {
         Returns: Json
       }
       ai_actions_today: { Args: { _conversation_id: string }; Returns: number }
+      apollo_credit_release: {
+        Args: { _operation_key: string; _reason?: string }
+        Returns: Json
+      }
+      apollo_credit_reserve: {
+        Args: {
+          _apollo_person_ids?: string[]
+          _business_id?: string
+          _business_name?: string
+          _estimated_credits: number
+          _function_source: string
+          _metadata?: Json
+          _operation_key: string
+          _run_id?: string
+        }
+        Returns: Json
+      }
+      apollo_credit_settle: {
+        Args: {
+          _actual_credits: number
+          _metadata?: Json
+          _no_email_person_ids?: string[]
+          _operation_key: string
+          _revealed_person_ids?: string[]
+        }
+        Returns: Json
+      }
+      apollo_credit_status: { Args: never; Returns: Json }
       apollo_decrypt_key: {
         Args: { cipher: string; enc_key: string }
         Returns: string

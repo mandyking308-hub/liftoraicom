@@ -1,4 +1,13 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import {
+  buildOperationKey,
+  getFirewallStatus,
+  loadNoEmailPersonIds,
+  releaseCredits,
+  reserveCredits,
+  settleCredits,
+} from "../_shared/apolloCreditFirewall.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -601,10 +610,32 @@ Deno.serve(async (req) => {
         await event("reveal_failed", `Apollo preflight failed: ${preflightError}`, "high",
           { preflight_error: preflightError, candidates: finalReveal.length });
       } else {
-        // Per-candidate Apollo /people/match calls
+        // Per-candidate Apollo /people/match calls — each one must first hold an
+        // atomic portfolio credit-firewall reservation.
         const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         const APOLLO_BASE = "https://api.apollo.io/api/v1";
-        for (const e of finalReveal) {
+        const firewall = await getFirewallStatus(admin);
+        const firewallOpen = firewall.ok && firewall.paid_enrichment_enabled && firewall.hard_credit_limit > 0;
+        const previousNoEmail = firewallOpen
+          ? await loadNoEmailPersonIds(admin, finalReveal.map((e) => String(e.lead.apollo_person_id ?? "")).filter(Boolean))
+          : new Set<string>();
+        if (!firewallOpen) {
+          for (const e of finalReveal) {
+            revealOutcomes.push({
+              candidate_id: e.qp.id, apollo_lead_id: e.qp.apollo_lead_id,
+              apollo_person_id: e.lead.apollo_person_id ?? null,
+              name: `${e.lead.first_name ?? ""} ${e.lead.last_name ?? ""}`.trim() || null,
+              company: e.lead.company ?? null,
+              outcome: "reveal_blocked_credit_firewall",
+              apollo_called: false, apollo_status: null,
+              email_returned: false, email: null, credit_consumed: false,
+              error: firewall.reason ?? "paid_enrichment_disabled",
+            });
+          }
+          await event("reveal_blocked", "Portfolio Apollo credit firewall blocked all reveals", "high",
+            { firewall_reason: firewall.reason ?? "paid_enrichment_disabled", candidates: finalReveal.length });
+        }
+        for (const e of firewallOpen ? finalReveal : []) {
           const pid = e.lead.apollo_person_id;
           if (!pid) {
             revealOutcomes.push({
@@ -616,6 +647,45 @@ Deno.serve(async (req) => {
               apollo_called: false, apollo_status: null,
               email_returned: false, email: null, credit_consumed: false,
             });
+            continue;
+          }
+          if (previousNoEmail.has(String(pid))) {
+            revealOutcomes.push({
+              candidate_id: e.qp.id, apollo_lead_id: e.qp.apollo_lead_id,
+              apollo_person_id: pid,
+              name: `${e.lead.first_name ?? ""} ${e.lead.last_name ?? ""}`.trim() || null,
+              company: e.lead.company ?? null,
+              outcome: "reveal_skipped_previous_no_email",
+              apollo_called: false, apollo_status: null,
+              email_returned: false, email: null, credit_consumed: false,
+            });
+            continue;
+          }
+          const opKey = buildOperationKey({
+            function_source: "autopilot-orchestrator",
+            scope: `business:${businessName}`,
+            apollo_person_ids: [String(pid)],
+          });
+          const reservation = await reserveCredits(admin, {
+            operation_key: opKey,
+            function_source: "autopilot-orchestrator",
+            estimated_credits: 1,
+            business_name: businessName,
+            apollo_person_ids: [String(pid)],
+            metadata: { stage: "autopilot_reveal" },
+          });
+          if (!reservation.allowed) {
+            revealOutcomes.push({
+              candidate_id: e.qp.id, apollo_lead_id: e.qp.apollo_lead_id,
+              apollo_person_id: pid,
+              name: `${e.lead.first_name ?? ""} ${e.lead.last_name ?? ""}`.trim() || null,
+              company: e.lead.company ?? null,
+              outcome: "reveal_blocked_credit_firewall",
+              apollo_called: false, apollo_status: null,
+              email_returned: false, email: null, credit_consumed: false,
+              error: reservation.reason ?? "firewall_blocked",
+            });
+            if (reservation.reason === "hard_limit_would_be_exceeded") break;
             continue;
           }
           let resp: Response | null = null;
@@ -636,6 +706,23 @@ Deno.serve(async (req) => {
           } catch (err) {
             httpErr = (err as Error).message;
           }
+          {
+            const okResp = !!resp?.ok;
+            const revealedEmail = data?.person?.email ?? data?.matched_person?.email ?? null;
+            if (!okResp) {
+              await releaseCredits(admin, opKey, `people_match_http_${resp?.status ?? "exception"}`);
+            } else {
+              await settleCredits(admin, {
+                operation_key: opKey,
+                actual_credits: revealedEmail ? 1 : 0,
+                no_email_person_ids: revealedEmail ? [] : [String(pid)],
+                revealed_person_ids: revealedEmail ? [String(pid)] : [],
+                metadata: { stage: "autopilot_reveal", http: resp?.status ?? null },
+              });
+              
+            }
+          }
+
           const person = data?.person ?? data?.matched_person ?? null;
           const email: string | null =
             person?.email && EMAIL_RE.test(person.email) ? person.email : null;
