@@ -1,16 +1,19 @@
 # Roadmap
 
-## In progress — CRM-Native Education Correction (10 Sep 2026)
-- [ ] `organisations` = canonical education account spine (additive education/source fields, safe partial uniqueness)
-- [ ] `contacts.organisation_id` FK + minimal education mapping/scoring/reveal fields (keep `company` text)
-- [ ] `apollo-education-account-import`: upsert CRM organisations first, then link `strategic_target_accounts.existing_organisation_id`
-- [ ] `apollo-education-discovery`: People Search only; writes non-sendable CRM contacts linked to organisation_id
-- [ ] Founder-controlled selected education reveal on CRM contact IDs (structurally complete, locked at limit 0)
-- [ ] Apollo status UI counts become CRM-native
-- [ ] Manuals updated; Stage-4 RI-placement wording marked superseded
-- [ ] Tests, type-check, build; additive migration + deploy changed functions; read-only health checks
+## Done — CRM-Native Education Correction (10 Sep 2026)
+- [x] `organisations` = canonical education account spine (additive education/source fields, safe partial uniqueness)
+- [x] `contacts.organisation_id` FK + minimal education mapping/scoring/reveal fields (keep `company` text)
+- [x] `apollo-education-account-import`: upsert CRM organisations first, then link `strategic_target_accounts.existing_organisation_id`
+- [x] `apollo-education-discovery`: People Search only; writes non-sendable CRM contacts linked to organisation_id
+- [x] Founder-controlled selected education reveal on CRM contact IDs (structurally complete, locked at limit 0)
+- [x] Apollo status UI counts become CRM-native
+- [x] Manuals updated; Stage-4 RI-placement wording marked superseded
+- [x] Tests, type-check, build; additive migration + deploy changed functions; read-only health checks
 
-## Blocked / waiting
+## Waiting on you
+- Controlled load of the 152 education companies (not run; importer stays dry-run until you confirm).
+
+## Notes
 - `docs/education-crm-native-correction-2026-09-10.md` is not present in this workspace; building to the
   nine numbered requirements supplied in chat instead.
 
