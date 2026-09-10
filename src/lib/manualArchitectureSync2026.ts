@@ -16,7 +16,7 @@
 //   5. Business Manuals            — business-specific tone/offers/rules/assets
 //   6. Slim Mandy Manual           — portable handover only, NOT technical truth
 
-export const ARCHITECTURE_SYNC_VERSION = "6.1 — September 2026 Architecture Reconciliation (10 September 2026)";
+export const ARCHITECTURE_SYNC_VERSION = "6.2 — September 2026 Architecture Reconciliation + Education Commercial Layer (10 September 2026)";
 export const ARCHITECTURE_SYNC_DATE = "2026-09-10";
 export const ARCHITECTURE_SYNC_PREVIOUS_VERSION = "6.0 — August 2026 Architecture Reconciliation (25 August 2026)";
 export const ARCHITECTURE_SYNC_SOURCE =
@@ -549,5 +549,74 @@ limit **0**, phone reveal / personal-email reveal / waterfall all **false**. The
 **NOT yet imported**, no education research candidates exist yet, and Smartlead state is untouched.
 
 *End of Section 101 — September 2026 Architecture Reconciliation.*
+
+---
+
+# Section 102 — Education Commercial Layer (10 September 2026)
+
+**Manual version:** ${ARCHITECTURE_SYNC_VERSION}
+
+Section 102 is additive. It does not replace Section 100 or Section 101, and it does not alter the
+CRM-native education correction recorded in Section 101. It records the commercial layer that sits
+on top of that CRM spine.
+
+## 102.1 Data truth (unchanged spine, restated)
+- \`public.contacts\` is the single person record. One human = one row, portfolio-wide. The commercial
+  layer never duplicates a contact per brand.
+- \`public.contacts.organisation_id\` → \`public.organisations\` is the canonical education account link.
+- \`public.business_contact_relationships\` is the many-to-many brand relevance layer: one row per
+  (contact, business), now carrying \`business_relevance_score\`, \`business_relevance_level\`,
+  \`business_relevance_reasons\`, \`business_relevance_categories\` and \`relevance_engine_version\`.
+  A unique (contact_id, business_name) index prevents duplicate relationship rows.
+
+## 102.2 Four canonical education businesses
+Exact names in \`public.businesses\`: \`Billy and the Wild Forest\`, \`Aurelia\`, \`Kindnesss\`,
+\`Kingsbridge Global\`. Billy pre-existed and was preserved; the other three were created idempotently.
+\`Neon Candy\` is explicitly out of scope of this layer and was not modified.
+
+## 102.3 Relevance engine
+\`src/lib/education/educationBusinessRelevance.ts\` (\`edu-relevance-1.0.0\`) scores each contact
+deterministically per business from role, seniority, education role family, tags and organisation
+name. Billy weights SEN/SEND and inclusion most heavily, then literacy, wellbeing, curriculum,
+leadership and PSHE. This engine is **separate from and does not modify** the campaign-neutral Apollo
+\`education_role_score\` in \`supabase/functions/_shared/educationRoleScorer.ts\`.
+
+## 102.4 Portfolio ownership and collision safety
+- \`public.portfolio_collision_policy\` — configurable policy, cross-brand cooldown default **30 days**.
+- \`public.portfolio_contact_ownership\` — a unique partial index enforces at most one \`active\` owner
+  per contact across the whole portfolio.
+- \`public.portfolio_ownership_events\` — append-only audit of claims, releases, blocks and overrides.
+- \`public.claim_portfolio_contact\` / \`public.release_portfolio_contact\` — transactional, SECURITY
+  INVOKER, executable only by \`authenticated\` and \`service_role\`.
+- Founder override may beat prioritisation and ownership. It can **never** beat global suppression,
+  unsubscribe, do-not-contact, hard bounce or an active conversation/reply.
+
+## 102.5 Campaign shells (all non-live)
+Reuses \`public.outreach_campaign_drafts\`; no parallel campaign silo. Four shells exist, each with
+\`is_live=false\`, \`external_send_blocked=true\`, no Smartlead campaign id and founder approval not
+requested. Billy is \`configured_not_live\` and scoped to a controlled first batch of **25–50**
+excellent contacts; the other three are \`prepared_not_live\`.
+
+## 102.6 Outreach eligibility gate
+\`src/lib/education/outreachEligibilityGate.ts\`, mirrored server-side by the read-only
+\`supabase/functions/education-outreach-eligibility\`. Eligibility requires ALL of: canonical
+organisation link, qualifying business relationship, contact safety clearance, collision clearance,
+usable business email, campaign approved and live with external send unblocked, **Smartlead mapping
+readiness** and **sender infrastructure readiness**. The last two are separate gates owned outside
+this layer and are currently false, so nothing is sendable.
+
+## 102.7 Analytics and manuals
+\`public.education_commercial_funnel\` reports the funnel from existing CRM/BCR/campaign/revenue
+architecture; unobservable measures return null rather than an invented figure. Twelve business
+manuals live canonically at \`docs/business-manuals/<slug>/{technical-manual,user-guide,customer-facing-manual}.md\`
+and are rendered in-app at \`/founder/business-manuals\` through \`src/lib/businessManuals/registry.ts\`
+raw imports, so GitHub and the app cannot drift.
+
+**Explicitly unchanged by Section 102:** the Apollo Credit Firewall, Apollo role scoring, Apollo
+paid-enrichment state (disabled, hard limit 0, phone/personal/waterfall false), all Smartlead
+provider objects, mailboxes and warmup. No emails were sent or queued.
+
+*End of Section 102 — Education Commercial Layer.*
 `;
+
 
