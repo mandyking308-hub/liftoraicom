@@ -59,8 +59,10 @@ Always start at /founder/command-centre. Pick a business. Work Today's Actions. 
 GitHub \`main\` is the code source of truth. Work in discrete reviewed branches. Every architecture change ships its manual update in the same build unit.
 
 ## Where to find deeper detail
-- **User Manual** — plain-English operator guide (/founder/user-manual); Section 111 is the September current state.
-- **Full Technical Manual** — canonical architecture; Section 100 (August map) plus Section 101 (10 September delta, which controls on current state) (/founder/founder-manual).
+- **User Manual** — plain-English operator guide (/founder/user-manual); Section 111 is the September current state, Section 112 the education commercial layer.
+- **Full Technical Manual** — canonical architecture; Section 100 (August map), Section 101 (10 September delta, which controls on current state) and Section 102 (education commercial layer) (/founder/founder-manual).
+- **Business Manuals** — twelve per-brand manuals (/founder/business-manuals).
+- **Education Commercial Layer** — relevance, ownership, shells and funnel (/founder/education-commercial).
 - **Build Log** — historical decisions (/founder/build-log).
 - **Manuals Hub** — layer hierarchy, versions and drafts (/founder/manuals-hub).
 
