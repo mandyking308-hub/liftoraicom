@@ -4,6 +4,7 @@ import {
   GSM_EVERGREEN_POOL_KEY,
   GSM_EVERGREEN_TARGET_CAPACITY,
   GSM_LAUNCH_POOL_KEY,
+  GSM_MIN_HEALTH_SCORE,
   GSM_LAUNCH_TARGET_CAPACITY,
   GSM_OWNER_LEGAL_ENTITY,
   GSM_TARGET_TOTAL_MAILBOXES,
@@ -13,8 +14,10 @@ import {
   evaluateSenderInfrastructureReadiness,
   isExcludedFromGsmEstate,
   isStickyAllocation,
+  pinnedSenderStillUsable,
   releasableAllocations,
   selectGsmMailboxes,
+  selectSmartleadSenderAccountIds,
   stripSecretFields,
   type GsmAllocationRecord,
   type GsmDomainSignals,
@@ -273,5 +276,70 @@ describe("Estate model and secret safety", () => {
     expect(snap.campaign_ready_count).toBe(1);
     expect(snap.launch_allocated).toBe(0);
     expect(snap.evergreen_allocated).toBe(0);
+  });
+});
+
+describe("Health score gate and Smartlead sender selection", () => {
+  it("excludes a mailbox with a low health score", () => {
+    const r = evaluateMailboxReadiness(mailbox({ health_score: 40 }), readyDomain);
+    expect(r.campaign_ready).toBe(false);
+    expect(r.readiness_state).toBe("quarantined");
+  });
+
+  it("keeps a healthy scored mailbox campaign ready", () => {
+    const r = evaluateMailboxReadiness(mailbox({ health_score: 95 }), readyDomain);
+    expect(r.campaign_ready).toBe(true);
+  });
+
+  it("returns only Smartlead account ids of ready mailboxes", () => {
+    const boxes = [
+      mailbox({ id: "mb-ok", email: "a@gsm-outbound-01.com", smartlead_email_account_id: "sl-ok", health_score: 90 }),
+      mailbox({ id: "mb-warm", email: "b@gsm-outbound-01.com", smartlead_email_account_id: "sl-warm", warmup_status: "warming" }),
+      mailbox({ id: "mb-q", email: "c@gsm-outbound-01.com", smartlead_email_account_id: "sl-q", quarantined_reason: "spam_complaint" }),
+      mailbox({ id: "mb-retired", email: "d@gsm-outbound-01.com", smartlead_email_account_id: "sl-r", retired: true }),
+      mailbox({ id: "mb-nosl", email: "e@gsm-outbound-01.com", smartlead_email_account_id: null }),
+      mailbox({ id: "mb-neon", email: "hello@neoncandy.online", smartlead_email_account_id: "sl-neon" }),
+      mailbox({ id: "mb-low", email: "f@gsm-outbound-01.com", smartlead_email_account_id: "sl-low", health_score: 10 }),
+    ];
+    const sel = selectSmartleadSenderAccountIds(boxes, [readyDomain], [], {
+      pool_key: GSM_LAUNCH_POOL_KEY,
+      requested_count: 5,
+      business_id: "biz-billy",
+    });
+    expect(sel.smartlead_email_account_ids).toEqual(["sl-ok"]);
+    expect(sel.shortfall).toBe(4);
+    expect(sel.pinned_sender_retained).toBeNull();
+  });
+
+  it("keeps a usable pinned thread sender pinned", () => {
+    const boxes = [
+      mailbox({ id: "mb-pin", email: "pin@gsm-outbound-01.com", smartlead_email_account_id: "sl-pin", health_score: 90 }),
+      mailbox({ id: "mb-new", email: "new@gsm-outbound-01.com", smartlead_email_account_id: "sl-new", health_score: 90 }),
+    ];
+    const sel = selectSmartleadSenderAccountIds(boxes, [readyDomain], [], {
+      pool_key: GSM_LAUNCH_POOL_KEY,
+      requested_count: 2,
+      business_id: "biz-billy",
+      pinned_mailbox_id: "mb-pin",
+    });
+    expect(sel.pinned_sender_retained).toBe("mb-pin");
+    expect(sel.smartlead_email_account_ids[0]).toBe("sl-pin");
+    expect(new Set(sel.smartlead_email_account_ids).size).toBe(sel.smartlead_email_account_ids.length);
+  });
+
+  it("drops a pinned sender that is no longer usable", () => {
+    const boxes = [mailbox({ id: "mb-pin", email: "pin@gsm-outbound-01.com", quarantined_reason: "bounced" })];
+    expect(pinnedSenderStillUsable("mb-pin", boxes, [readyDomain])).toBe(false);
+    const sel = selectSmartleadSenderAccountIds(boxes, [readyDomain], [], {
+      pool_key: GSM_LAUNCH_POOL_KEY,
+      requested_count: 1,
+      pinned_mailbox_id: "mb-pin",
+    });
+    expect(sel.smartlead_email_account_ids).toEqual([]);
+    expect(sel.pinned_sender_retained).toBeNull();
+  });
+
+  it("keeps the health threshold at the documented value", () => {
+    expect(GSM_MIN_HEALTH_SCORE).toBe(70);
   });
 });

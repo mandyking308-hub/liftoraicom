@@ -707,6 +707,25 @@ ready. States: \`provisioned_pending\`, \`dns_pending\`, \`smtp_failed\`, \`imap
 account id, never by email string. Founder override may re-prioritise but can never bypass a hard
 safety block.
 
+## 103.4a Health score, database-side readiness and thread stickiness (Slice 1 extension)
+Each mailbox carries a \`health_score\` (0–100); anything below **70** is quarantined and can never
+be campaign-ready. The same rule exists database-side as
+\`public.gsm_mailbox_is_campaign_ready(...)\` and the \`security_invoker\` view
+\`public.gsm_mailbox_readiness\`, so campaign-ready is true only when lifecycle is ready **and**
+SMTP, IMAP and the Smartlead connection are all good, health clears the threshold and a daily limit
+is configured. Warming, quarantined and retired can never be campaign-ready in either layer.
+\`gsm_mailbox_allocations.thread_sticky\` defaults to true: a live conversation keeps its original
+sender, and \`selectSmartleadSenderAccountIds\` / \`pinnedSenderStillUsable\` retain a pinned sender
+only while it still passes every readiness gate. Pools carry \`priority\` and a
+\`desired_capacity\` mirror of \`target_capacity\`.
+
+## 103.4b Flow and shared estate
+Apollo (data only) → Liftor (system of record, gates and approvals) → Smartlead (execution and
+rotation) → GSM sender estate (Winnr-provisioned domains and mailboxes). Launch 30 and Evergreen 20
+are one shared estate serving Billy and the Wild Forest, Aurelia, Kindnesss and Kingsbridge Global —
+not one estate per brand. The registry stores zero secrets, and Neon Candy stays segregated.
+
+
 ## 103.5 Providers
 - **Winnr** (\`supabase/functions/gsm-winnr-sync\`, paths isolated in
   \`_shared/winnrClient.ts\`, base \`https://api.winnr.app/v1\`, Bearer \`WINNR_API_TOKEN\`
