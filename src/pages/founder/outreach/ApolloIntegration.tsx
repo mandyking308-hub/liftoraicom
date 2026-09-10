@@ -970,6 +970,9 @@ export default function ApolloIntegration() {
           </p>
         </div>
 
+        <ApolloCreditFirewallPanel />
+
+
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
             <TabsTrigger value="weekend">Weekend Pool</TabsTrigger>
