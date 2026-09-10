@@ -308,7 +308,7 @@ export function selectGsmMailboxes(
       if (isStickyAllocation(active, now) && !sameOwner) {
         codes.push("sticky_in_flight_allocation");
       } else if (!sameOwner && !req.founder_override) {
-        codes.push("allocated_to_другой".replace("другой", "other_owner"));
+        codes.push("allocated_to_other_owner");
       }
     }
 
