@@ -59,4 +59,4 @@ GitHub \`main\` is the code source of truth. Work in discrete reviewed branches.
 Any external gate, auto_send, cron, Smartlead campaign start or lead push, Apollo paid enrichment, buyer contact approval, data-room sharing, portal invites, payments or filings.
 `;
 
-export const SLIM_MANDY_MANUAL_FILENAME = `liftor-slim-mandy-manual-v1.6-2026-09-10.md`;
+export const SLIM_MANDY_MANUAL_FILENAME = `liftor-slim-mandy-manual-v1.7-2026-09-10.md`;
