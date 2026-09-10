@@ -165,41 +165,125 @@ Deno.serve(async (req) => {
     const errors: any[] = [];
     const enrichedById = new Map<string, any>();
 
+    // ---- PORTFOLIO APOLLO CREDIT FIREWALL -------------------------------
+    // Every paid call below must hold an atomic reservation first. Fails closed.
+    const firewall = await getFirewallStatus(supabase);
+    if (!firewall.ok || !firewall.paid_enrichment_enabled || firewall.hard_credit_limit <= 0) {
+      await supabase.from("apollo_sync_runs").update({ status: "blocked" }).eq("id", run.id);
+      return json({
+        error: "apollo_credit_firewall_blocked",
+        firewall_reason: firewall.reason ?? (firewall.paid_enrichment_enabled ? "hard_credit_limit_zero" : "paid_enrichment_disabled"),
+        detail: "Portfolio Apollo paid enrichment is disabled or has no credit budget. No paid Apollo request was made.",
+        credits_remaining: firewall.credits_remaining,
+      }, 412);
+    }
+
+    // Never re-spend on people Apollo already returned without an email.
+    const noEmailAlready = await loadNoEmailPersonIds(supabase, ids);
+
     // Mark this chunk as enriching so UI shows in-flight rows
     await supabase.from("apollo_leads").update({ status: "enriching" }).in("id", leads.map((l) => l.id));
 
     // Try bulk first (batch of up to 10) — short timeout so we fall back fast.
     let bulkSucceeded = true;
+    const bulkChargedIds = new Set<string>();   // batches where Apollo answered (assume charged)
     for (let i = 0; i < ids.length; i += 10) {
       if (budgetExceeded()) { bulkSucceeded = false; errors.push({ stage: "bulk_match", reason: "budget_exceeded_before_bulk" }); break; }
-      const batch = ids.slice(i, i + 10);
+      const batch = ids.slice(i, i + 10).filter((id) => !noEmailAlready.has(id));
+      if (!batch.length) continue;
+
+      const opKey = buildOperationKey({
+        function_source: "apollo-sync-enrich",
+        scope: `run:${run.id}:bulk`,
+        apollo_person_ids: batch,
+      });
+      const reservation = await reserveCredits(supabase, {
+        operation_key: opKey,
+        function_source: "apollo-sync-enrich",
+        estimated_credits: batch.length,
+        business_name: run.business_name ?? null,
+        run_id: run.id,
+        apollo_person_ids: batch,
+        metadata: { stage: "bulk_match" },
+      });
+      if (!reservation.allowed) {
+        bulkSucceeded = false;
+        errors.push({ stage: "bulk_match", reason: `firewall:${reservation.reason}`, batch_start: i });
+        break;
+      }
+
       const r = await bulkMatch(apiKey, batch);
       if (!r.ok) {
+        // Provider refused/failed — nothing charged, give the credits back.
+        await releaseCredits(supabase, opKey, `bulk_match_http_${r.status}`);
         bulkSucceeded = false;
         errors.push({ stage: "bulk_match", http: r.status, batch_start: i, error: (r as any).error });
         break;
       }
       const matches = (r.data?.matches ?? []) as any[];
+      const noEmailIds: string[] = [];
       matches.forEach((m, idx) => {
         const id = batch[idx];
         if (m && id) enrichedById.set(id, m);
+        if (id && !(m?.email)) noEmailIds.push(id);
+      });
+      batch.forEach((id) => bulkChargedIds.add(id));
+      await settleCredits(supabase, {
+        operation_key: opKey,
+        actual_credits: batch.length,
+        no_email_person_ids: noEmailIds,
+        revealed_person_ids: batch.filter((id) => !noEmailIds.includes(id)),
+        metadata: { stage: "bulk_match", http: r.status },
       });
     }
 
-    // Fallback: per-person enrichment for any still-missing
-    if (!bulkSucceeded || enrichedById.size < ids.length) {
+    // Fallback: per-person enrichment ONLY for people no bulk request covered.
+    // A person already charged in a successful bulk batch is never retried here,
+    // so the bulk→single path can no longer silently double-spend.
+    if (enrichedById.size < ids.length) {
       for (const id of ids) {
         if (enrichedById.has(id)) continue;
+        if (bulkChargedIds.has(id)) { errors.push({ stage: "single_match", id, reason: "already_charged_in_bulk_skipped" }); continue; }
+        if (noEmailAlready.has(id)) { errors.push({ stage: "single_match", id, reason: "previous_no_email_skipped" }); continue; }
         if (budgetExceeded()) { errors.push({ stage: "single_match", reason: "budget_exceeded", id }); break; }
+
+        const opKey = buildOperationKey({
+          function_source: "apollo-sync-enrich",
+          scope: `run:${run.id}:single`,
+          apollo_person_ids: [id],
+        });
+        const reservation = await reserveCredits(supabase, {
+          operation_key: opKey,
+          function_source: "apollo-sync-enrich",
+          estimated_credits: 1,
+          business_name: run.business_name ?? null,
+          run_id: run.id,
+          apollo_person_ids: [id],
+          metadata: { stage: "single_match" },
+        });
+        if (!reservation.allowed) {
+          errors.push({ stage: "single_match", id, reason: `firewall:${reservation.reason}` });
+          break;
+        }
+
         const r = await singleMatch(apiKey, id);
         if (!r.ok) {
+          await releaseCredits(supabase, opKey, `single_match_http_${r.status}`);
           errors.push({ stage: "single_match", id, http: r.status, error: (r as any).error });
           continue;
         }
         const person = r.data?.person ?? r.data;
         if (person) enrichedById.set(id, person);
+        await settleCredits(supabase, {
+          operation_key: opKey,
+          actual_credits: 1,
+          no_email_person_ids: person?.email ? [] : [id],
+          revealed_person_ids: person?.email ? [id] : [],
+          metadata: { stage: "single_match", http: r.status },
+        });
       }
     }
+
 
     const attempted = ids.length;
     let returned = 0;
