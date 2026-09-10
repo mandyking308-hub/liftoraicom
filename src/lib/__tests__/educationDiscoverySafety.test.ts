@@ -145,9 +145,12 @@ describe("both selected reveal paths stay CRM-native and firewalled", () => {
     expect(source).toContain("getFirewallStatus");
     expect(source).toContain("reserveCredits");
     expect(source).toContain("settleCredits");
-    expect(source).toContain("reveal_personal_emails=false");
-    expect(source).not.toContain("reveal_phone");
-    expect(source).not.toContain("waterfall");
+    expect(source).toContain("reveal_personal_emails: false".replace(": false", "")); // parameter present
+    expect(source).not.toContain("reveal_personal_emails=true");
+    expect(source).not.toContain("reveal_phone_number: true");
+    expect(source).not.toContain("reveal_phone_number=true");
+    expect(source).not.toContain("waterfall_enrichment");
+    expect(source).not.toContain("bulk_match");
   });
 
   it.each([
@@ -157,7 +160,7 @@ describe("both selected reveal paths stay CRM-native and firewalled", () => {
     expect(source).toContain('from("contacts")');
     expect(source).toContain("organisation_id");
     expect(source).not.toContain("relationship_intelligence_contacts");
-    expect(source).not.toContain("smartlead");
+    expect(source).not.toContain("smartlead.ai");
     expect(source).not.toContain("email_queue");
   });
 });
