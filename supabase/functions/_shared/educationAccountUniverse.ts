@@ -200,8 +200,41 @@ export function planEducationImport(
   });
 }
 
+/**
+ * Row payload for the canonical CRM `organisations` spine.
+ * organisations is the single education company/account record. strategic_target_accounts
+ * keeps the research/pipeline view and points back at it via existing_organisation_id.
+ */
+export function toOrganisationRow(a: NormalisedEducationAccount) {
+  return {
+    name: a.account_name,
+    industry: "Education",
+    status: "research_account",
+    account_domain: a.account_domain,
+    website_url: a.account_domain ? `https://${a.account_domain}` : null,
+    source_key: a.source_key,
+    education_group_id: a.group_id,
+    qualification: a.qualification,
+    operating_footprint: a.operating_footprint,
+    review_note: a.review_note,
+    primary_source: a.primary_source,
+    source_version: a.source_version,
+    research_program_key: EDUCATION_RESEARCH_PROGRAM_KEY,
+    is_education_account: true,
+    metadata: {
+      education_group_id: a.group_id,
+      qualification: a.qualification,
+      outreach_eligible: false,
+    },
+  };
+}
+
 /** Row payload for strategic_target_accounts. Research-only; never outreach-eligible. */
-export function toTargetAccountRow(a: NormalisedEducationAccount, listId: string | null) {
+export function toTargetAccountRow(
+  a: NormalisedEducationAccount,
+  listId: string | null,
+  organisationId: string | null = null,
+) {
   return {
     account_name: a.account_name,
     account_domain: a.account_domain,
@@ -210,6 +243,7 @@ export function toTargetAccountRow(a: NormalisedEducationAccount, listId: string
     geography: a.operating_footprint,
     account_type: a.qualification,
     source_key: a.source_key,
+    existing_organisation_id: organisationId,
     source_notes: [a.primary_source, a.source_version].filter(Boolean).join(" · ") || null,
     founder_review_required: true,
     approval_status: "research_only",
@@ -223,6 +257,7 @@ export function toTargetAccountRow(a: NormalisedEducationAccount, listId: string
       source_version: a.source_version,
       research_program_key: EDUCATION_RESEARCH_PROGRAM_KEY,
       strategic_account_list_id: listId,
+      canonical_organisation_id: organisationId,
       outreach_eligible: false,
     },
   };
