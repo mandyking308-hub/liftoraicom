@@ -710,7 +710,7 @@ Deno.serve(async (req) => {
                 revealed_person_ids: revealedEmail ? [String(pid)] : [],
                 metadata: { stage: "autopilot_reveal", http: resp?.status ?? null },
               });
-              if (!revealedEmail) await releaseCredits(admin, opKey, "no_email_returned");
+              
             }
           }
 
