@@ -8877,6 +8877,10 @@ export type Database = {
         Row: {
           business_id: string | null
           business_name: string
+          business_relevance_categories: string[]
+          business_relevance_level: string
+          business_relevance_reasons: Json
+          business_relevance_score: number
           campaign_eligible: boolean
           contact_id: string
           created_at: string
@@ -8889,12 +8893,18 @@ export type Database = {
           qualification: Database["public"]["Enums"]["bcr_qualification"]
           qualification_reason: string
           relevance_category: string | null
+          relevance_engine_version: string
+          relevance_scored_at: string | null
           source_segment_id: string | null
           updated_at: string
         }
         Insert: {
           business_id?: string | null
           business_name: string
+          business_relevance_categories?: string[]
+          business_relevance_level?: string
+          business_relevance_reasons?: Json
+          business_relevance_score?: number
           campaign_eligible?: boolean
           contact_id: string
           created_at?: string
@@ -8907,12 +8917,18 @@ export type Database = {
           qualification?: Database["public"]["Enums"]["bcr_qualification"]
           qualification_reason?: string
           relevance_category?: string | null
+          relevance_engine_version?: string
+          relevance_scored_at?: string | null
           source_segment_id?: string | null
           updated_at?: string
         }
         Update: {
           business_id?: string | null
           business_name?: string
+          business_relevance_categories?: string[]
+          business_relevance_level?: string
+          business_relevance_reasons?: Json
+          business_relevance_score?: number
           campaign_eligible?: boolean
           contact_id?: string
           created_at?: string
@@ -8925,6 +8941,8 @@ export type Database = {
           qualification?: Database["public"]["Enums"]["bcr_qualification"]
           qualification_reason?: string
           relevance_category?: string | null
+          relevance_engine_version?: string
+          relevance_scored_at?: string | null
           source_segment_id?: string | null
           updated_at?: string
         }
@@ -43148,50 +43166,83 @@ export type Database = {
       }
       outreach_campaign_drafts: {
         Row: {
+          batch_max: number
+          batch_min: number
           business_campaign_plan_id: string | null
           business_id: string | null
+          campaign_key: string | null
           campaign_name: string
+          collision_protection_enabled: boolean
           compliance_checked: boolean
           created_at: string
           email_sequence: Json
+          exclusions: Json
           external_send_blocked: boolean
+          founder_approval_state: string
           founder_approved_at: string | null
           id: string
+          is_live: boolean
           lead_criteria: Json
+          qualification_threshold: number
+          relationship_eligibility_required: boolean
           smartlead_campaign_id: string | null
           status: string
+          target_role_families: Json
+          test_state: string
           unsubscribe_required: boolean
           updated_at: string
         }
         Insert: {
+          batch_max?: number
+          batch_min?: number
           business_campaign_plan_id?: string | null
           business_id?: string | null
+          campaign_key?: string | null
           campaign_name: string
+          collision_protection_enabled?: boolean
           compliance_checked?: boolean
           created_at?: string
           email_sequence?: Json
+          exclusions?: Json
           external_send_blocked?: boolean
+          founder_approval_state?: string
           founder_approved_at?: string | null
           id?: string
+          is_live?: boolean
           lead_criteria?: Json
+          qualification_threshold?: number
+          relationship_eligibility_required?: boolean
           smartlead_campaign_id?: string | null
           status?: string
+          target_role_families?: Json
+          test_state?: string
           unsubscribe_required?: boolean
           updated_at?: string
         }
         Update: {
+          batch_max?: number
+          batch_min?: number
           business_campaign_plan_id?: string | null
           business_id?: string | null
+          campaign_key?: string | null
           campaign_name?: string
+          collision_protection_enabled?: boolean
           compliance_checked?: boolean
           created_at?: string
           email_sequence?: Json
+          exclusions?: Json
           external_send_blocked?: boolean
+          founder_approval_state?: string
           founder_approved_at?: string | null
           id?: string
+          is_live?: boolean
           lead_criteria?: Json
+          qualification_threshold?: number
+          relationship_eligibility_required?: boolean
           smartlead_campaign_id?: string | null
           status?: string
+          target_role_families?: Json
+          test_state?: string
           unsubscribe_required?: boolean
           updated_at?: string
         }
@@ -46167,6 +46218,115 @@ export type Database = {
           },
         ]
       }
+      portfolio_collision_policy: {
+        Row: {
+          created_at: string
+          cross_brand_cooldown_days: number
+          id: string
+          notes: string
+          reply_block_enabled: boolean
+          singleton: boolean
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          cross_brand_cooldown_days?: number
+          id?: string
+          notes?: string
+          reply_block_enabled?: boolean
+          singleton?: boolean
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          cross_brand_cooldown_days?: number
+          id?: string
+          notes?: string
+          reply_block_enabled?: boolean
+          singleton?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      portfolio_contact_ownership: {
+        Row: {
+          business_id: string | null
+          business_name: string
+          campaign_id: string | null
+          campaign_key: string | null
+          claimed_at: string
+          claimed_by: string | null
+          contact_id: string
+          cooldown_until: string | null
+          created_at: string
+          founder_override: boolean
+          id: string
+          override_reason: string
+          reason_code: string
+          released_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          business_name: string
+          campaign_id?: string | null
+          campaign_key?: string | null
+          claimed_at?: string
+          claimed_by?: string | null
+          contact_id: string
+          cooldown_until?: string | null
+          created_at?: string
+          founder_override?: boolean
+          id?: string
+          override_reason?: string
+          reason_code?: string
+          released_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          business_name?: string
+          campaign_id?: string | null
+          campaign_key?: string | null
+          claimed_at?: string
+          claimed_by?: string | null
+          contact_id?: string
+          cooldown_until?: string | null
+          created_at?: string
+          founder_override?: boolean
+          id?: string
+          override_reason?: string
+          reason_code?: string
+          released_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portfolio_contact_ownership_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "portfolio_contact_ownership_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "portfolio_contact_ownership_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+        ]
+      }
       portfolio_exit_target_alerts: {
         Row: {
           acknowledged_at: string | null
@@ -46528,6 +46688,54 @@ export type Database = {
           setup_businesses?: number
           snapshot_date?: string
           total_businesses?: number
+        }
+        Relationships: []
+      }
+      portfolio_ownership_events: {
+        Row: {
+          actor_id: string | null
+          business_name: string
+          campaign_key: string | null
+          contact_id: string
+          created_at: string
+          decision: string
+          detail: Json
+          event_type: string
+          founder_override: boolean
+          id: string
+          override_reason: string
+          ownership_id: string | null
+          reason_codes: string[]
+        }
+        Insert: {
+          actor_id?: string | null
+          business_name: string
+          campaign_key?: string | null
+          contact_id: string
+          created_at?: string
+          decision?: string
+          detail?: Json
+          event_type: string
+          founder_override?: boolean
+          id?: string
+          override_reason?: string
+          ownership_id?: string | null
+          reason_codes?: string[]
+        }
+        Update: {
+          actor_id?: string | null
+          business_name?: string
+          campaign_key?: string | null
+          contact_id?: string
+          created_at?: string
+          decision?: string
+          detail?: Json
+          event_type?: string
+          founder_override?: boolean
+          id?: string
+          override_reason?: string
+          ownership_id?: string | null
+          reason_codes?: string[]
         }
         Relationships: []
       }
@@ -70389,6 +70597,57 @@ export type Database = {
         }
         Relationships: []
       }
+      education_commercial_funnel: {
+        Row: {
+          accounts_in_scope: number | null
+          allocated: number | null
+          business_name: string | null
+          collisions: number | null
+          contacted: number | null
+          contacts_eligible: number | null
+          contacts_relevant: number | null
+          exclusions: number | null
+          meetings: number | null
+          positive_replies: number | null
+          proposals: number | null
+          replies: number | null
+          revenue: number | null
+          wins: number | null
+        }
+        Insert: {
+          accounts_in_scope?: never
+          allocated?: never
+          business_name?: string | null
+          collisions?: never
+          contacted?: never
+          contacts_eligible?: never
+          contacts_relevant?: never
+          exclusions?: never
+          meetings?: never
+          positive_replies?: never
+          proposals?: never
+          replies?: never
+          revenue?: never
+          wins?: never
+        }
+        Update: {
+          accounts_in_scope?: never
+          allocated?: never
+          business_name?: string | null
+          collisions?: never
+          contacted?: never
+          contacts_eligible?: never
+          contacts_relevant?: never
+          exclusions?: never
+          meetings?: never
+          positive_replies?: never
+          proposals?: never
+          replies?: never
+          revenue?: never
+          wins?: never
+        }
+        Relationships: []
+      }
       high_intent_review_queue: {
         Row: {
           assigned_business: string | null
@@ -70859,6 +71118,17 @@ export type Database = {
           }
       check_send_throttle: {
         Args: { _contact_id: string; _inbox_id: string }
+        Returns: Json
+      }
+      claim_portfolio_contact: {
+        Args: {
+          p_business_name: string
+          p_campaign_id?: string
+          p_campaign_key?: string
+          p_contact_id: string
+          p_founder_override?: boolean
+          p_override_reason?: string
+        }
         Returns: Json
       }
       cleanup_stale_ai_leases: { Args: never; Returns: number }
@@ -71372,6 +71642,14 @@ export type Database = {
       release_ai_lease: {
         Args: { _ok?: boolean; _request_id: string }
         Returns: number
+      }
+      release_portfolio_contact: {
+        Args: {
+          p_business_name: string
+          p_contact_id: string
+          p_reason?: string
+        }
+        Returns: Json
       }
       reset_inbox_hourly_counts: { Args: never; Returns: number }
       reset_inbox_send_counts: { Args: never; Returns: number }
