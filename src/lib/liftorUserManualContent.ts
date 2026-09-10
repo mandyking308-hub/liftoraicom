@@ -1,6 +1,6 @@
 // Liftor User Manual — plain-English operating guide (separate from Founder/Technical Manual)
 
-export const LIFTOR_USER_MANUAL_VERSION = "1.12 — Smartlead & Sending Infrastructure (10 September 2026)";
+export const LIFTOR_USER_MANUAL_VERSION = "1.13 — Education Commercial Layer (10 September 2026)";
 
 export interface ManualSection {
   number: number;
@@ -1430,6 +1430,12 @@ export const ARCHITECTURE_SYNC_USER_SECTIONS: ManualSection[] = [
     key: "sending-infrastructure-user",
     title: "112. Sending infrastructure — what is built and what you must do tomorrow",
     body: "There is a new page, Sending Infrastructure (/founder/sending-infrastructure). It shows a readiness checklist, your mailbox estate, and three safe buttons: refresh readiness, run a send dry run, and read the mailboxes already on the sending provider. Nothing on that page sends an email, creates a campaign at the provider, or spends any money. You can also paste a spreadsheet of up to hundreds of mailboxes, preview it, then apply it; applying the same list twice will not create duplicates. What is built behind it: one and only one link between a Liftor campaign and a provider campaign, one link per person per campaign, a single shared safety check that blocks anyone unsubscribed, bounced, on do-not-contact or suppressed, and a return loop that records replies, bounces and unsubscribes and immediately stops any further sending to that person. A repeated notification from the provider is recorded once and never applied twice. Anything the system does not recognise is stored quietly and changes nothing. What is NOT done: the provider webhook is not configured yet, there are no campaign links, no person links and no events, and the only mailboxes on file are the two old Neon Candy ones, which are locked to Neon Candy and cannot be used for education. YOUR ACTIONS TOMORROW: buy and verify the education sending domains, create and connect about 50 mailboxes at the provider, register them on the new page, start warmup, point the provider webhook at Liftor with the shared secret, then refresh readiness and run the dry run again. Nothing goes out until you record final approval."
+  },
+  {
+    number: 113,
+    key: "education-commercial-layer-user",
+    title: "113. Your four education businesses — how they share one contact list safely",
+    body: "There is a new page, Education Commercial Layer (/founder/education-commercial), and a Business Manuals page (/founder/business-manuals) that shows the twelve business manuals exactly as written in the project files. How the data works: each person is stored once in your main CRM and attached once to their school or group in your main company list. If the same person is a good fit for more than one of your businesses, that is recorded as separate business links against the same person — you never get duplicates. The four businesses are Billy and the Wild Forest (special needs, inclusion, emotional literacy), Aurelia (digital learning and safeguarding), Kindnesss (wellbeing and pastoral) and Kingsbridge Global (international groups and partnerships). Each scores fit in its own way, and the system picks one best-fit brand first and writes down why. Safety: only one of your businesses can own a conversation with a person at a time, other brands wait at least 30 days, and anyone who has replied, unsubscribed, bounced, or is on do-not-contact is blocked outright. You can change which brand gets priority, but you cannot override those blocks — nor can I. Campaigns: all four campaigns exist as drafts only, switched off, with sending blocked, no approval recorded and no link to the sending provider. Billy goes first with a deliberately small first batch of 25 to 50 excellent contacts in large groups, nurseries excluded. None of this changes the Apollo scoring or the Apollo spend wall, which stays locked at zero, and the mailbox and sending-provider readiness are still separate gates that are not ready yet.",
   },
 ];
 
