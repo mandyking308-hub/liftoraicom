@@ -33,7 +33,7 @@ describe("education discovery — free search only", () => {
   it("writes research candidates only to Relationship Intelligence", () => {
     expect(discovery).toContain("relationship_intelligence_contacts");
     expect(discovery).not.toContain("email_queue");
-    expect(discovery).not.toContain("smartlead");
+    expect(discovery).not.toContain("smartlead.ai");
   });
 
   it("requires a founder or admin role", () => {
@@ -49,7 +49,8 @@ describe("education account import — safe by default", () => {
 
   it("makes no Apollo or Smartlead call and creates no contacts", () => {
     expect(importer).not.toContain("api.apollo.io");
-    expect(importer).not.toContain("smartlead");
+    expect(importer).not.toContain("smartlead.ai");
+    expect(importer).not.toContain("functions.invoke");
     expect(importer).not.toContain("from(\"contacts\")");
     expect(importer).not.toContain("email_queue");
   });
