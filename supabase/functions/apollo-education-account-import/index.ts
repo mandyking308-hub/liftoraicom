@@ -11,6 +11,7 @@ import {
   EDUCATION_RESEARCH_PROGRAM_KEY,
   planEducationImport,
   toTargetAccountRow,
+  toOrganisationRow,
   validateEducationAccounts,
   type ExistingAccountRow,
   type RawEducationAccountRow,
@@ -91,7 +92,7 @@ Deno.serve(async (req) => {
   // Existing education master accounts (scoped by source key prefix only).
   const { data: existingRaw, error: exErr } = await admin
     .from("strategic_target_accounts")
-    .select("id, source_key, account_name, account_domain, account_type, geography, source_notes, metadata")
+    .select("id, source_key, existing_organisation_id, account_name, account_domain, account_type, geography, source_notes, metadata")
     .like("source_key", "education_152_master:%");
   if (exErr) return json({ error: exErr.message }, 500);
   const existing = (existingRaw ?? []) as ExistingAccountRow[];
@@ -219,7 +220,15 @@ Deno.serve(async (req) => {
     ok: writeErrors.length === 0,
     dry_run: false,
     list_id: listId,
-    totals: { ...totals, created, updated, unchanged, write_errors: writeErrors.length },
+    totals: {
+      ...totals,
+      created,
+      updated,
+      unchanged,
+      organisations_created: orgsCreated,
+      organisations_matched: orgsMatched,
+      write_errors: writeErrors.length,
+    },
     education_master_account_count: finalCount ?? 0,
     write_errors: writeErrors.slice(0, 20),
     side_effects: {
