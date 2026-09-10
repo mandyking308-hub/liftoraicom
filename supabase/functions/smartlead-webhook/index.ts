@@ -1,4 +1,11 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import {
+  buildIdempotencyKey,
+  deriveContactMutation,
+  deriveMailboxMutation,
+  EVENT_NORMALIZER_VERSION,
+  extractEvent,
+} from "../_shared/smartleadEventNormalizer.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,49 +19,19 @@ const json = (b: unknown, s = 200) =>
   });
 
 /**
- * Smartlead webhook receiver — SCAFFOLD ONLY.
+ * Smartlead webhook receiver — RETURN LOOP (inbound only).
  *
- * Modes:
- *  - log_only (default)        — record event in outbound_provider_events; no operational mutation.
- *  - disabled_for_operational  — same as log_only but explicitly flagged.
+ * Security: unchanged shared-secret header pattern. The secret is never read
+ * from the URL, never echoed, and the receiver stays disabled while unset.
  *
- * NEVER mutates contacts, email_queue, compliance, campaigns or system_settings here.
- * Smartlead webhook is NOT registered inside Smartlead by this function.
+ * Safety:
+ *  - Every event is stored with raw payload + provenance + idempotency key.
+ *  - Duplicate deliveries collapse to one row and cause NO second transition.
+ *  - Reply / hard bounce / unsubscribe only ever ESCALATE canonical CRM
+ *    suppression so no further inappropriate sending can happen.
+ *  - Unknown events are stored and acknowledged with no state change.
+ *  - This function never calls Smartlead and never sends email.
  */
-
-const SUPPORTED_EVENTS = new Set([
-  "email_sent",
-  "email_opened",
-  "link_clicked",
-  "reply_received",
-  "email_bounced",
-  "lead_unsubscribed",
-  "campaign_completed",
-  "lead_status_changed",
-  "account_error",
-]);
-
-function normalizeEventType(raw: string | undefined | null): string {
-  if (!raw) return "unknown";
-  const k = String(raw).toLowerCase().trim();
-  // common Smartlead variants
-  const map: Record<string, string> = {
-    sent: "email_sent",
-    open: "email_opened",
-    opened: "email_opened",
-    click: "link_clicked",
-    clicked: "link_clicked",
-    reply: "reply_received",
-    replied: "reply_received",
-    bounce: "email_bounced",
-    bounced: "email_bounced",
-    unsubscribe: "lead_unsubscribed",
-    unsubscribed: "lead_unsubscribed",
-    completed: "campaign_completed",
-    status_change: "lead_status_changed",
-  };
-  return map[k] ?? (SUPPORTED_EVENTS.has(k) ? k : k);
-}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -64,7 +41,6 @@ Deno.serve(async (req) => {
   const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const SECRET = Deno.env.get("SMARTLEAD_WEBHOOK_SECRET") ?? null;
 
-  // Verify shared secret if configured (headers only — never accept secret in URL). Never echo it.
   const provided =
     req.headers.get("x-smartlead-signature") ??
     req.headers.get("x-webhook-secret") ??
@@ -75,7 +51,6 @@ Deno.serve(async (req) => {
       return json({ ok: false, error: "invalid_or_missing_secret" }, 401);
     }
   } else {
-    // No secret configured → safe disabled response. Do not process.
     return json({
       ok: false,
       mode: "disabled",
@@ -84,7 +59,7 @@ Deno.serve(async (req) => {
     });
   }
 
-  let payload: any = {};
+  let payload: Record<string, unknown> = {};
   try {
     payload = await req.json();
   } catch {
@@ -93,33 +68,28 @@ Deno.serve(async (req) => {
 
   const admin = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
 
-  const rawType =
-    payload?.event ?? payload?.event_type ?? payload?.type ?? payload?.action ?? null;
-  const eventType = normalizeEventType(rawType);
+  const event = extractEvent(payload);
+  const idempotencyKey = buildIdempotencyKey(event);
 
-  const providerCampaignId = payload?.campaign_id ?? payload?.campaign?.id ?? null;
-  const providerLeadId = payload?.lead_id ?? payload?.lead?.id ?? null;
-  const providerEventId = payload?.event_id ?? payload?.id ?? null;
+  // --- Idempotency: a duplicate delivery is acknowledged, never re-applied ---
+  const { data: existing } = await admin
+    .from("outbound_provider_events")
+    .select("id, processing_status, operational_mutation_applied")
+    .eq("provider_type", "smartlead")
+    .eq("idempotency_key", idempotencyKey)
+    .maybeSingle();
 
-  const normalized = {
-    event_type: eventType,
-    normalized_event_type: eventType,
-    raw_event_type: rawType ? String(rawType) : null,
-    supported: SUPPORTED_EVENTS.has(eventType),
-    provider_campaign_id: providerCampaignId ? String(providerCampaignId) : null,
-    provider_lead_id: providerLeadId ? String(providerLeadId) : null,
-    provider_event_id: providerEventId ? String(providerEventId) : null,
-    provider_message_id:
-      payload?.message_id ?? payload?.email_id ?? payload?.stats_id ?? null,
-    email: payload?.lead?.email ?? payload?.email ?? null,
-    event_timestamp:
-      payload?.event_timestamp ??
-      payload?.timestamp ??
-      payload?.time_stamp ??
-      payload?.sent_time ??
-      null,
-    received_at: new Date().toISOString(),
-  };
+  if (existing) {
+    return json({
+      ok: true,
+      duplicate: true,
+      event_id: existing.id,
+      event_type: event.canonical_event_type,
+      idempotency_key: idempotencyKey,
+      operational_mutation_applied: false,
+      notes: "Duplicate webhook delivery — already recorded. No second state transition.",
+    });
+  }
 
   const { data: provider } = await admin
     .from("outbound_providers")
@@ -127,32 +97,155 @@ Deno.serve(async (req) => {
     .eq("provider_type", "smartlead")
     .maybeSingle();
 
-  const { error: insErr } = await admin.from("outbound_provider_events").insert({
-    provider_type: "smartlead",
-    provider_id: provider?.id ?? null,
-    provider_event_type: eventType,
-    provider_event_id: normalized.provider_event_id,
-    provider_campaign_id: normalized.provider_campaign_id,
-    provider_lead_id: normalized.provider_lead_id,
-    raw_payload: payload,
-    normalized_payload: normalized,
-    // Capture-only spine. Mapping to operational tables is a separate, not-yet-built step.
-    processing_status: "received",
-    operational_mutation_applied: false,
-    error: null,
-  });
+  // --- Resolve Liftor identity from the provider identifiers ---
+  let leadMapping: Record<string, unknown> | null = null;
+  if (event.provider_lead_id || event.email) {
+    let q = admin
+      .from("outbound_provider_lead_mappings")
+      .select("id, liftor_contact_id, liftor_campaign_id, business_id, provider_campaign_id, contact_email")
+      .eq("provider_type", "smartlead");
+    q = event.provider_lead_id
+      ? q.eq("provider_lead_id", event.provider_lead_id)
+      : q.eq("contact_email", event.email);
+    if (event.provider_campaign_id) q = q.eq("provider_campaign_id", event.provider_campaign_id);
+    const { data: rows } = await q.limit(2);
+    // Fail closed on ambiguity: store the event, resolve no contact.
+    leadMapping = (rows ?? []).length === 1 ? (rows as Record<string, unknown>[])[0] : null;
+  }
+
+  let contactId = (leadMapping?.liftor_contact_id as string | null) ?? null;
+  if (!contactId && event.email) {
+    const { data: matches } = await admin
+      .from("contacts")
+      .select("id, hard_bounced, unsubscribed_at, do_not_contact_at, is_globally_suppressed")
+      .ilike("email", event.email)
+      .limit(2);
+    if ((matches ?? []).length === 1) contactId = (matches as Record<string, string>[])[0].id;
+  }
+
+  const { data: inserted, error: insErr } = await admin
+    .from("outbound_provider_events")
+    .insert({
+      provider_type: "smartlead",
+      provider_id: provider?.id ?? null,
+      provider_event_type: event.canonical_event_type,
+      provider_event_id: event.provider_event_id,
+      provider_campaign_id: event.provider_campaign_id,
+      provider_lead_id: event.provider_lead_id,
+      provider_mailbox_id: event.provider_mailbox_id,
+      idempotency_key: idempotencyKey,
+      contact_id: contactId,
+      liftor_campaign_id: (leadMapping?.liftor_campaign_id as string | null) ?? null,
+      lead_mapping_id: (leadMapping?.id as string | null) ?? null,
+      raw_payload: payload,
+      normalized_payload: {
+        ...event,
+        idempotency_key: idempotencyKey,
+        normalizer_version: EVENT_NORMALIZER_VERSION,
+        received_at: new Date().toISOString(),
+      },
+      event_occurred_at: event.event_occurred_at,
+      processing_status: "received",
+      operational_mutation_applied: false,
+      error: null,
+    })
+    .select("id")
+    .maybeSingle();
 
   if (insErr) {
-    return json({ ok: false, error: "event_log_failed", detail: insErr.message }, 500);
+    // Unique-violation on the idempotency key = concurrent duplicate delivery.
+    if ((insErr as { code?: string }).code === "23505") {
+      return json({
+        ok: true,
+        duplicate: true,
+        event_type: event.canonical_event_type,
+        idempotency_key: idempotencyKey,
+        operational_mutation_applied: false,
+        notes: "Concurrent duplicate webhook delivery collapsed to the existing event row.",
+      });
+    }
+    return json({ ok: false, error: "event_log_failed" }, 500);
+  }
+
+  const eventRowId = inserted?.id ?? null;
+
+  // --- Canonical CRM escalation (never weakens an existing block) ---
+  const contactMutation = deriveContactMutation(event, payload);
+  const mailboxMutation = deriveMailboxMutation(event, payload);
+  const applied: string[] = [];
+  const failures: string[] = [];
+
+  if (contactId && Object.keys(contactMutation.contact_patch).length > 0) {
+    const { error } = await admin
+      .from("contacts")
+      .update(contactMutation.contact_patch)
+      .eq("id", contactId);
+    if (error) failures.push("contact_update_failed");
+    else applied.push("contact_suppression_state");
+  }
+
+  // Stop any further queued sends to a replied / blocked contact.
+  if (contactId && (contactMutation.blocks_future_sends || contactMutation.opens_conversation)) {
+    const { error } = await admin
+      .from("email_queue")
+      .update({
+        status: "cancelled",
+        error_message: `cancelled_by_smartlead_${event.canonical_event_type}`,
+      })
+      .eq("contact_id", contactId)
+      .in("status", ["pending", "delayed", "throttled"]);
+    if (error) failures.push("queue_cancel_failed");
+    else applied.push("pending_queue_cancelled");
+  }
+
+  if (event.provider_mailbox_id && Object.keys(mailboxMutation.inbox_patch).length > 0) {
+    const { error } = await admin
+      .from("inboxes")
+      .update(mailboxMutation.inbox_patch)
+      .eq("provider_mailbox_id", event.provider_mailbox_id);
+    if (error) failures.push("inbox_update_failed");
+    else applied.push("mailbox_paused");
+  }
+
+  if (leadMapping?.id && event.is_operational) {
+    await admin
+      .from("outbound_provider_lead_mappings")
+      .update({ metadata: { last_provider_event: event.canonical_event_type, at: new Date().toISOString() } })
+      .eq("id", leadMapping.id as string);
+  }
+
+  const status = failures.length > 0
+    ? "error"
+    : contactId || applied.length > 0
+      ? "processed"
+      : event.is_known
+        ? "stored_unmapped"
+        : "stored_unknown_event";
+
+  if (eventRowId) {
+    await admin
+      .from("outbound_provider_events")
+      .update({
+        processing_status: status,
+        operational_mutation_applied: applied.length > 0,
+        processed_at: new Date().toISOString(),
+        error: failures.length > 0 ? failures.join(",") : null,
+      })
+      .eq("id", eventRowId);
   }
 
   return json({
     ok: true,
-    mode: "log_only",
-    event_type: eventType,
-    supported: SUPPORTED_EVENTS.has(eventType),
-    operational_mutation_applied: false,
-    notes:
-      "Scaffold only — event logged to outbound_provider_events. No contact/queue/compliance/campaign/system_settings mutation. Smartlead webhook not registered by this function.",
+    duplicate: false,
+    event_id: eventRowId,
+    event_type: event.canonical_event_type,
+    known_event: event.is_known,
+    idempotency_key: idempotencyKey,
+    contact_resolved: !!contactId,
+    transition: contactMutation.transition,
+    operational_mutation_applied: applied.length > 0,
+    mutations_applied: applied,
+    processing_status: status,
+    notes: "Inbound return loop only. No Smartlead API call, no email sent.",
   });
 });
