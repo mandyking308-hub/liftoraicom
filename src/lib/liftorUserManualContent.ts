@@ -1,6 +1,6 @@
 // Liftor User Manual — plain-English operating guide (separate from Founder/Technical Manual)
 
-export const LIFTOR_USER_MANUAL_VERSION = "1.10 — CRM-Native Education Correction (10 September 2026)";
+export const LIFTOR_USER_MANUAL_VERSION = "1.11 — CRM-Native Education Correction Quality Gate (10 September 2026)";
 
 export interface ManualSection {
   number: number;

@@ -16,9 +16,9 @@
 //   5. Business Manuals            — business-specific tone/offers/rules/assets
 //   6. Slim Mandy Manual           — portable handover only, NOT technical truth
 
-export const ARCHITECTURE_SYNC_VERSION = "6.1 — September 2026 Architecture Reconciliation (10 September 2026)";
+export const ARCHITECTURE_SYNC_VERSION = "6.2 — CRM-Native Education Correction Quality Gate (10 September 2026)";
 export const ARCHITECTURE_SYNC_DATE = "2026-09-10";
-export const ARCHITECTURE_SYNC_PREVIOUS_VERSION = "6.0 — August 2026 Architecture Reconciliation (25 August 2026)";
+export const ARCHITECTURE_SYNC_PREVIOUS_VERSION = "6.1 — September 2026 Architecture Reconciliation (10 September 2026)";
 export const ARCHITECTURE_SYNC_SOURCE =
   "August baseline: repo-wide audit of src/App.tsx routes (799 founder routes), src/pages/founder/**, src/components/founder/**, src/lib/** engines, supabase/functions/** (604 functions), supabase/migrations/** and docs/**. September delta: docs/manual-architecture-reconciliation-2026-09-10.md — 21 materially changed files since the August manual commit plus a live database state check on 10 September 2026.";
 
@@ -241,8 +241,11 @@ Campaign Eligibility → Conversation → Proposal → Deal → Customer → Rev
 - **Research/evidence truth:** \`relationship_intelligence_contacts\` — not the operational
   CRM. Records reach the CRM only through the controlled promotion bridge
   (\`ri-promote-to-crm\`) when role/evidence-matched or founder-approved.
-- **Client/tenant layer:** \`organisations\` remains the delivery/tenant layer. It is not the
-  prospect-account database; an account links to it only once it becomes a client/tenant.
+- **Client/tenant layer (August 2026 wording — SUPERSEDED for education by Section 101.11):**
+  \`organisations\` was described as the delivery/tenant layer only and not the prospect-account
+  database. From the 10 September 2026 CRM-native correction, \`organisations\` is the canonical
+  company/account spine for the education programme, and \`contacts.organisation_id\` is the
+  authoritative company linkage for education people.
 - **Legacy compatibility:** \`contacts.assigned_business\` is legacy single-business data, not
   the source of truth. \`contacts.company\` remains compatibility text.
 - **Suppression:** global suppression always wins; business-specific DNC stays scoped to
@@ -538,15 +541,23 @@ destination is **no longer correct**. It is retained only as build history.
 - \`apollo-education-discovery\` writes and updates **non-sendable CRM contacts** linked to the correct
   organisation. It dedupes by Apollo person id and never erases a verified email, suppression flag, hard
   bounce or do-not-contact state. Default 10 candidates per account, configurable maximum 25.
-- \`apollo-education-reveal-selected\` is the founder-controlled selected reveal path. It operates on CRM
-  contact ids, is business-email only (no phone, no personal email, no waterfall), routes every paid call
-  through the shared firewall, fails closed on a duplicate business email, updates the same contact row while
-  preserving its organisation link, and never sends or auto-assigns a portfolio business.
-- Relationship Intelligence stays the research/evidence layer; it is not the operational education CRM.
+- \`apollo-education-reveal\` and \`apollo-education-reveal-selected\` are the founder-controlled selected
+  reveal paths. Both operate on CRM contact ids, are business-email only (no phone, no personal email, no
+  waterfall), route every paid call through the shared firewall, fail closed on a duplicate business email,
+  update the same contact row while preserving its organisation link, and never send or auto-assign a
+  portfolio business.
+- Relationship Intelligence stays the research/evidence and provenance layer; it is **not** canonical storage
+  for education companies or education people.
+- Portfolio-business relevance is expressed through \`business_contact_relationships\`; a person is never
+  duplicated per brand. Smartlead receives approved, sendable campaign contacts later; it is neither the CRM
+  nor a prospect-data source.
 
-**Live-configured state (unchanged by this build unit):** paid enrichment **disabled**, hard portfolio credit
-limit **0**, phone reveal / personal-email reveal / waterfall all **false**. The 152 education accounts are
-**NOT yet imported**, no education research candidates exist yet, and Smartlead state is untouched.
+**Live-configured state:** paid enrichment **disabled**, hard portfolio credit limit **0**, phone reveal /
+personal-email reveal / waterfall all **false**. All 152 reviewed education groups are loaded once into
+canonical CRM \`organisations\` and mirrored to the strategic planning layer (60 International operator /
+54 Domestic reserve / 21 Network route / 17 Review needed); that company load spent zero Apollo credits and
+replayed no education people. No education candidate contacts and no revealed education emails exist yet, and
+Smartlead state is untouched.
 
 *End of Section 101 — September 2026 Architecture Reconciliation.*
 `;

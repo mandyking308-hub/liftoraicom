@@ -2,11 +2,11 @@
 // NOT the technical source of truth. Do NOT use to overwrite the User Manual or Full Technical Manual.
 // v1.2 refresh (10 Sep 2026) — September reconciliation current-state summary. Kept deliberately slim.
 
-export const SLIM_MANDY_MANUAL_VERSION = "1.4 — 10 September 2026 (CRM-Native Education Correction)";
+export const SLIM_MANDY_MANUAL_VERSION = "1.5 — 10 September 2026 (CRM-Native Education Correction, Quality Gate)";
 
 export const SLIM_MANDY_MANUAL_MARKDOWN = `# Slim Mandy Manual
 
-_Version 1.4 — 10 September 2026_
+_Version 1.5 — 10 September 2026_
 
 _Portable summary. Safe to upload to ChatGPT or share with advisers. Not the full technical source of truth (that is the Full Technical Manual, Sections 100 and 101)._
 
@@ -30,7 +30,7 @@ Implemented in code · live-configured in the database/provider · historical ev
 - **Smartlead:** provider **connected**, substantial code implemented — but **0 campaign mappings, 0 lead mappings, 0 provider events, 0 activation-checklist rows**. The closed loop is not activated. Smartlead is the delivery lane, not the education prospect-data source.
 - **Sending estate:** 8 domains, 2 inboxes (1 active) — legacy Neon Candy infrastructure, not the planned education estate (~50 mailboxes, still to be built and warmed).
 - **CRM-native education placement (correction):** education companies live once in the master company list (\`organisations\`); education people live once in the master CRM (\`contacts\`) linked to their company. The research/pipeline account view links back to the canonical company. Relationship Intelligence is research/evidence only, not the education CRM. Discovery writes non-sendable people with no email; a separate founder-selected reveal path exists but cannot run while the credit firewall is locked at 0.
-- **Education 152 universe infrastructure:** the account importer and the free-search discovery orchestrator are implemented and preview-only. The 152 groups are **not yet imported** and no education research candidates have been restored.
+- **Education 152 universe:** all 152 reviewed education groups are loaded once into the canonical CRM company list (\`organisations\`) and mirrored to the strategic planning layer, split 60 International operator / 54 Domestic reserve / 21 Network route / 17 Review needed. The company load spent zero Apollo credits and replayed no education people; no education research candidates have been restored yet.
 - **Education universe:** the August recovery (2,520 rows / 266 organisations) is **historical evidence only**. The 10 September live check found **zero** \`school_education_contact\` rows in Relationship Intelligence. Restoring it is a deliberate later stage.
 
 ## Classification
@@ -58,4 +58,4 @@ GitHub \`main\` is the code source of truth. Work in discrete reviewed branches.
 Any external gate, auto_send, cron, Smartlead campaign start or lead push, Apollo paid enrichment, buyer contact approval, data-room sharing, portal invites, payments or filings.
 `;
 
-export const SLIM_MANDY_MANUAL_FILENAME = `liftor-slim-mandy-manual-v1.4-2026-09-10.md`;
+export const SLIM_MANDY_MANUAL_FILENAME = `liftor-slim-mandy-manual-v1.5-2026-09-10.md`;
