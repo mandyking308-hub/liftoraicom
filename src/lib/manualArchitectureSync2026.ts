@@ -1,7 +1,12 @@
-// Liftor — Architecture Documentation Sync (25 August 2026)
+// Liftor — Architecture Documentation Sync (v6.1 — 10 September 2026)
 // Canonical reconciliation of the CURRENT implemented Liftor architecture on main.
 // This file EXTENDS the Full Technical / Founder Manual. It does not replace it and
 // it does not replace the Command Centre Truth Sync (live-state authority).
+//
+// Section 100 = 25 August 2026 whole-platform reconciliation (retained as history).
+// Section 101 = 10 September 2026 reconciliation delta. Where the two conflict on
+// current state, Section 101 controls.
+// Source of the September delta: docs/manual-architecture-reconciliation-2026-09-10.md
 //
 // Manual hierarchy (unchanged):
 //   1. Command Centre Truth Sync   — live-state authority
@@ -11,10 +16,11 @@
 //   5. Business Manuals            — business-specific tone/offers/rules/assets
 //   6. Slim Mandy Manual           — portable handover only, NOT technical truth
 
-export const ARCHITECTURE_SYNC_VERSION = "6.0 — August 2026 Architecture Reconciliation (25 August 2026)";
-export const ARCHITECTURE_SYNC_DATE = "2026-08-25";
+export const ARCHITECTURE_SYNC_VERSION = "6.1 — September 2026 Architecture Reconciliation (10 September 2026)";
+export const ARCHITECTURE_SYNC_DATE = "2026-09-10";
+export const ARCHITECTURE_SYNC_PREVIOUS_VERSION = "6.0 — August 2026 Architecture Reconciliation (25 August 2026)";
 export const ARCHITECTURE_SYNC_SOURCE =
-  "Repo-wide audit of src/App.tsx routes (799 founder routes), src/pages/founder/**, src/components/founder/**, src/lib/** engines, supabase/functions/** (604 functions), supabase/migrations/** and docs/**.";
+  "August baseline: repo-wide audit of src/App.tsx routes (799 founder routes), src/pages/founder/**, src/components/founder/**, src/lib/** engines, supabase/functions/** (604 functions), supabase/migrations/** and docs/**. September delta: docs/manual-architecture-reconciliation-2026-09-10.md — 21 materially changed files since the August manual commit plus a live database state check on 10 September 2026.";
 
 export type ManualModuleRisk = "internal_only" | "approval_gated" | "external_capable" | "parked_legacy";
 
