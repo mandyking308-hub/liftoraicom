@@ -17182,6 +17182,7 @@ export type Database = {
           source_platform: string | null
           source_record_id: string | null
           status: Database["public"]["Enums"]["contact_status"]
+          strategic_target_account_id: string | null
           tags: string[]
           timezone: string | null
           timezone_confidence: Database["public"]["Enums"]["timezone_confidence_level"]
@@ -17255,6 +17256,7 @@ export type Database = {
           source_platform?: string | null
           source_record_id?: string | null
           status?: Database["public"]["Enums"]["contact_status"]
+          strategic_target_account_id?: string | null
           tags?: string[]
           timezone?: string | null
           timezone_confidence?: Database["public"]["Enums"]["timezone_confidence_level"]
@@ -17328,6 +17330,7 @@ export type Database = {
           source_platform?: string | null
           source_record_id?: string | null
           status?: Database["public"]["Enums"]["contact_status"]
+          strategic_target_account_id?: string | null
           tags?: string[]
           timezone?: string | null
           timezone_confidence?: Database["public"]["Enums"]["timezone_confidence_level"]
@@ -17370,6 +17373,13 @@ export type Database = {
             columns: ["organisation_id"]
             isOneToOne: false
             referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contacts_strategic_target_account_id_fkey"
+            columns: ["strategic_target_account_id"]
+            isOneToOne: false
+            referencedRelation: "strategic_target_accounts"
             referencedColumns: ["id"]
           },
         ]
@@ -42747,9 +42757,11 @@ export type Database = {
           account_domain: string | null
           created_at: string
           education_group_id: string | null
+          education_priority_tier: string | null
           id: string
           industry: string
           is_education_account: boolean
+          is_education_target: boolean
           metadata: Json
           name: string
           operating_footprint: string | null
@@ -42759,18 +42771,22 @@ export type Database = {
           research_program_key: string | null
           review_note: string | null
           source_key: string | null
+          source_notes: string | null
           source_version: string | null
           status: string
           updated_at: string
+          website_domain: string | null
           website_url: string | null
         }
         Insert: {
           account_domain?: string | null
           created_at?: string
           education_group_id?: string | null
+          education_priority_tier?: string | null
           id?: string
           industry?: string
           is_education_account?: boolean
+          is_education_target?: boolean
           metadata?: Json
           name: string
           operating_footprint?: string | null
@@ -42780,18 +42796,22 @@ export type Database = {
           research_program_key?: string | null
           review_note?: string | null
           source_key?: string | null
+          source_notes?: string | null
           source_version?: string | null
           status?: string
           updated_at?: string
+          website_domain?: string | null
           website_url?: string | null
         }
         Update: {
           account_domain?: string | null
           created_at?: string
           education_group_id?: string | null
+          education_priority_tier?: string | null
           id?: string
           industry?: string
           is_education_account?: boolean
+          is_education_target?: boolean
           metadata?: Json
           name?: string
           operating_footprint?: string | null
@@ -42801,9 +42821,11 @@ export type Database = {
           research_program_key?: string | null
           review_note?: string | null
           source_key?: string | null
+          source_notes?: string | null
           source_version?: string | null
           status?: string
           updated_at?: string
+          website_domain?: string | null
           website_url?: string | null
         }
         Relationships: []
@@ -71879,6 +71901,7 @@ export type Database = {
           source_platform: string | null
           source_record_id: string | null
           status: Database["public"]["Enums"]["contact_status"]
+          strategic_target_account_id: string | null
           tags: string[]
           timezone: string | null
           timezone_confidence: Database["public"]["Enums"]["timezone_confidence_level"]
