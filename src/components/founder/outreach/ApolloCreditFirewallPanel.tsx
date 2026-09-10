@@ -2,43 +2,38 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ShieldCheck, ShieldAlert, Lock, Database, Users } from "lucide-react";
+import { ShieldCheck, ShieldAlert, Lock, Building2, Users, MailCheck } from "lucide-react";
 
 /**
- * Read-only Stage-4 status surface.
+ * Read-only Apollo/education status surface.
+ * CRM-native truth: organisations = companies, contacts = people.
  * Deliberately contains NO control that can spend an Apollo credit or send email.
  */
 const ApolloCreditFirewallPanel = () => {
   const { data, isLoading } = useQuery({
-    queryKey: ["apollo-credit-firewall-status"],
+    queryKey: ["apollo-credit-firewall-crm-education-status"],
     refetchInterval: 60000,
     queryFn: async () => {
-      // CRM-native counts (10 Sep 2026 correction): organisations is the canonical
-      // education account spine and contacts is the canonical person registry.
-      const [status, orgs, candidates, revealed] = await Promise.all([
-        supabase.rpc("apollo_credit_status"),
-        (supabase as any)
-          .from("organisations")
-          .select("id", { count: "exact", head: true })
-          .eq("is_education_account", true),
-        (supabase as any)
-          .from("contacts")
-          .select("id", { count: "exact", head: true })
+      const db = supabase as any;
+      const [status, organisations, international, candidates, revealed] = await Promise.all([
+        db.rpc("apollo_credit_status"),
+        db.from("organisations").select("id", { count: "exact", head: true }).eq("is_education_target", true),
+        db.from("organisations").select("id", { count: "exact", head: true })
+          .eq("is_education_target", true).eq("qualification", "International operator"),
+        db.from("contacts").select("id", { count: "exact", head: true })
           .eq("research_program_key", "education_152_master_2026_09"),
-        (supabase as any)
-          .from("contacts")
-          .select("id", { count: "exact", head: true })
+        db.from("contacts").select("id", { count: "exact", head: true })
           .eq("research_program_key", "education_152_master_2026_09")
-          .eq("reveal_status", "revealed"),
+          .eq("reveal_status", "revealed_business_email"),
       ]);
       return {
         policy: (status.data ?? null) as Record<string, any> | null,
-        accountCount: orgs.count ?? 0,
+        organisationCount: organisations.count ?? 0,
+        internationalCount: international.count ?? 0,
         candidateCount: candidates.count ?? 0,
         revealedCount: revealed.count ?? 0,
       };
     },
-
   });
 
   if (isLoading || !data) return null;
@@ -59,7 +54,7 @@ const ApolloCreditFirewallPanel = () => {
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
           {locked ? <ShieldCheck className="h-4 w-4 text-emerald-500" /> : <ShieldAlert className="h-4 w-4 text-destructive" />}
-          Apollo Credit Firewall
+          Apollo Credit Firewall · Education CRM
           <Badge variant={locked ? "secondary" : "destructive"} className="ml-auto text-[10px]">
             {locked ? "PAID ENRICHMENT LOCKED" : "PAID ENRICHMENT OPEN"}
           </Badge>
@@ -91,29 +86,33 @@ const ApolloCreditFirewallPanel = () => {
           </div>
         </div>
 
-        <div className="grid sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <div className="rounded-lg border border-border/50 p-3">
-            <p className="text-[11px] text-muted-foreground flex items-center gap-1.5"><Database className="h-3 w-3" /> Education companies (CRM)</p>
-            <p className="text-lg font-semibold tabular-nums">{data.accountCount}</p>
-            <p className="text-[11px] text-muted-foreground">{data.accountCount === 0 ? "Not yet loaded" : "Research only — not outreach-eligible"}</p>
+            <p className="text-[11px] text-muted-foreground flex items-center gap-1.5"><Building2 className="h-3 w-3" /> Education CRM companies</p>
+            <p className="text-lg font-semibold tabular-nums">{data.organisationCount}</p>
+            <p className="text-[11px] text-muted-foreground">Canonical table: organisations</p>
           </div>
           <div className="rounded-lg border border-border/50 p-3">
-            <p className="text-[11px] text-muted-foreground flex items-center gap-1.5"><Users className="h-3 w-3" /> Education people (CRM)</p>
+            <p className="text-[11px] text-muted-foreground flex items-center gap-1.5"><Building2 className="h-3 w-3" /> International operators</p>
+            <p className="text-lg font-semibold tabular-nums">{data.internationalCount}</p>
+            <p className="text-[11px] text-muted-foreground">First contact-search cohort</p>
+          </div>
+          <div className="rounded-lg border border-border/50 p-3">
+            <p className="text-[11px] text-muted-foreground flex items-center gap-1.5"><Users className="h-3 w-3" /> Education CRM candidates</p>
             <p className="text-lg font-semibold tabular-nums">{data.candidateCount}</p>
-            <p className="text-[11px] text-muted-foreground">Free search only · non-sendable</p>
+            <p className="text-[11px] text-muted-foreground">Canonical table: contacts</p>
           </div>
           <div className="rounded-lg border border-border/50 p-3">
-            <p className="text-[11px] text-muted-foreground flex items-center gap-1.5"><Lock className="h-3 w-3" /> Business emails revealed</p>
+            <p className="text-[11px] text-muted-foreground flex items-center gap-1.5"><MailCheck className="h-3 w-3" /> Business emails revealed</p>
             <p className="text-lg font-semibold tabular-nums">{data.revealedCount}</p>
-            <p className="text-[11px] text-muted-foreground">Founder-selected reveal only</p>
+            <p className="text-[11px] text-muted-foreground">Still needs sendability/campaign approval</p>
           </div>
         </div>
 
-
         <p className="text-[11px] text-muted-foreground leading-relaxed">
-          Every paid Apollo request must first obtain an atomic reservation from this firewall. With paid
-          enrichment off or the hard limit at zero, no paid request can be made from anywhere in the portfolio.
-          This panel is read-only: nothing here spends credits or sends email.
+          Education companies live in the CRM organisation spine and education people live in the CRM contact spine.
+          Strategic accounts only prioritise those companies. Every paid Apollo request must first obtain an atomic
+          reservation from the portfolio firewall. This panel is read-only and cannot spend credits or send email.
         </p>
       </CardContent>
     </Card>
