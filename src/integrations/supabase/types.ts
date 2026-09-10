@@ -30063,6 +30063,344 @@ export type Database = {
         }
         Relationships: []
       }
+      gsm_mailbox_allocations: {
+        Row: {
+          allocated_at: string
+          allocation_status: string
+          business_id: string | null
+          created_at: string
+          id: string
+          in_flight: boolean
+          liftor_campaign_id: string | null
+          mailbox_id: string
+          metadata: Json
+          pool_id: string
+          provider_campaign_id: string | null
+          released_at: string | null
+          released_reason: string | null
+          sticky_until: string | null
+          updated_at: string
+        }
+        Insert: {
+          allocated_at?: string
+          allocation_status?: string
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          in_flight?: boolean
+          liftor_campaign_id?: string | null
+          mailbox_id: string
+          metadata?: Json
+          pool_id: string
+          provider_campaign_id?: string | null
+          released_at?: string | null
+          released_reason?: string | null
+          sticky_until?: string | null
+          updated_at?: string
+        }
+        Update: {
+          allocated_at?: string
+          allocation_status?: string
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          in_flight?: boolean
+          liftor_campaign_id?: string | null
+          mailbox_id?: string
+          metadata?: Json
+          pool_id?: string
+          provider_campaign_id?: string | null
+          released_at?: string | null
+          released_reason?: string | null
+          sticky_until?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gsm_mailbox_allocations_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gsm_mailbox_allocations_mailbox_id_fkey"
+            columns: ["mailbox_id"]
+            isOneToOne: false
+            referencedRelation: "gsm_mailboxes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gsm_mailbox_allocations_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: false
+            referencedRelation: "gsm_sender_pools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gsm_mailboxes: {
+        Row: {
+          active: boolean
+          configured_daily_limit: number
+          created_at: string
+          email: string
+          estate_classification: string
+          id: string
+          imap_status: string
+          last_error: string | null
+          last_provider_check_at: string | null
+          local_part: string | null
+          metadata: Json
+          provider: string
+          provider_health: string
+          provider_mailbox_id: string | null
+          quarantined_reason: string | null
+          readiness_state: string
+          reply_owner: string | null
+          retired: boolean
+          sender_name: string | null
+          sending_domain_id: string | null
+          smartlead_email_account_id: string | null
+          smartlead_status: string
+          smtp_status: string
+          updated_at: string
+          warmup_started_at: string | null
+          warmup_status: string
+        }
+        Insert: {
+          active?: boolean
+          configured_daily_limit?: number
+          created_at?: string
+          email: string
+          estate_classification?: string
+          id?: string
+          imap_status?: string
+          last_error?: string | null
+          last_provider_check_at?: string | null
+          local_part?: string | null
+          metadata?: Json
+          provider?: string
+          provider_health?: string
+          provider_mailbox_id?: string | null
+          quarantined_reason?: string | null
+          readiness_state?: string
+          reply_owner?: string | null
+          retired?: boolean
+          sender_name?: string | null
+          sending_domain_id?: string | null
+          smartlead_email_account_id?: string | null
+          smartlead_status?: string
+          smtp_status?: string
+          updated_at?: string
+          warmup_started_at?: string | null
+          warmup_status?: string
+        }
+        Update: {
+          active?: boolean
+          configured_daily_limit?: number
+          created_at?: string
+          email?: string
+          estate_classification?: string
+          id?: string
+          imap_status?: string
+          last_error?: string | null
+          last_provider_check_at?: string | null
+          local_part?: string | null
+          metadata?: Json
+          provider?: string
+          provider_health?: string
+          provider_mailbox_id?: string | null
+          quarantined_reason?: string | null
+          readiness_state?: string
+          reply_owner?: string | null
+          retired?: boolean
+          sender_name?: string | null
+          sending_domain_id?: string | null
+          smartlead_email_account_id?: string | null
+          smartlead_status?: string
+          smtp_status?: string
+          updated_at?: string
+          warmup_started_at?: string | null
+          warmup_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gsm_mailboxes_sending_domain_id_fkey"
+            columns: ["sending_domain_id"]
+            isOneToOne: false
+            referencedRelation: "gsm_sending_domains"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gsm_provider_sync_runs: {
+        Row: {
+          domains_seen: number
+          domains_upserted: number
+          error_code: string | null
+          error_message: string | null
+          excluded_non_gsm: number
+          finished_at: string | null
+          http_status: number | null
+          id: string
+          mailboxes_seen: number
+          mailboxes_upserted: number
+          provider: string
+          run_mode: string
+          started_at: string
+          status: string
+          summary: Json
+        }
+        Insert: {
+          domains_seen?: number
+          domains_upserted?: number
+          error_code?: string | null
+          error_message?: string | null
+          excluded_non_gsm?: number
+          finished_at?: string | null
+          http_status?: number | null
+          id?: string
+          mailboxes_seen?: number
+          mailboxes_upserted?: number
+          provider: string
+          run_mode?: string
+          started_at?: string
+          status?: string
+          summary?: Json
+        }
+        Update: {
+          domains_seen?: number
+          domains_upserted?: number
+          error_code?: string | null
+          error_message?: string | null
+          excluded_non_gsm?: number
+          finished_at?: string | null
+          http_status?: number | null
+          id?: string
+          mailboxes_seen?: number
+          mailboxes_upserted?: number
+          provider?: string
+          run_mode?: string
+          started_at?: string
+          status?: string
+          summary?: Json
+        }
+        Relationships: []
+      }
+      gsm_sender_pools: {
+        Row: {
+          created_at: string
+          current_business_id: string | null
+          id: string
+          metadata: Json
+          notes: string | null
+          pool_key: string
+          pool_name: string
+          pool_type: string
+          state: string
+          target_capacity: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_business_id?: string | null
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          pool_key: string
+          pool_name: string
+          pool_type: string
+          state?: string
+          target_capacity?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_business_id?: string | null
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          pool_key?: string
+          pool_name?: string
+          pool_type?: string
+          state?: string
+          target_capacity?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gsm_sender_pools_current_business_id_fkey"
+            columns: ["current_business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gsm_sending_domains: {
+        Row: {
+          created_at: string
+          dkim_ok: boolean
+          dmarc_ok: boolean
+          dns_status: string
+          domain: string
+          health: Json
+          id: string
+          last_error: string | null
+          last_synced_at: string | null
+          metadata: Json
+          owner_legal_entity: string
+          provider: string
+          provider_domain_id: string | null
+          provisioning_status: string
+          spf_ok: boolean
+          updated_at: string
+          warmup_eligible: boolean
+          warmup_status: string
+        }
+        Insert: {
+          created_at?: string
+          dkim_ok?: boolean
+          dmarc_ok?: boolean
+          dns_status?: string
+          domain: string
+          health?: Json
+          id?: string
+          last_error?: string | null
+          last_synced_at?: string | null
+          metadata?: Json
+          owner_legal_entity?: string
+          provider?: string
+          provider_domain_id?: string | null
+          provisioning_status?: string
+          spf_ok?: boolean
+          updated_at?: string
+          warmup_eligible?: boolean
+          warmup_status?: string
+        }
+        Update: {
+          created_at?: string
+          dkim_ok?: boolean
+          dmarc_ok?: boolean
+          dns_status?: string
+          domain?: string
+          health?: Json
+          id?: string
+          last_error?: string | null
+          last_synced_at?: string | null
+          metadata?: Json
+          owner_legal_entity?: string
+          provider?: string
+          provider_domain_id?: string | null
+          provisioning_status?: string
+          spf_ok?: boolean
+          updated_at?: string
+          warmup_eligible?: boolean
+          warmup_status?: string
+        }
+        Relationships: []
+      }
       handover_pack_items: {
         Row: {
           audit_metadata: Json

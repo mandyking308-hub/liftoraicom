@@ -2,7 +2,7 @@
 // NOT the technical source of truth. Do NOT use to overwrite the User Manual or Full Technical Manual.
 // v1.2 refresh (10 Sep 2026) — September reconciliation current-state summary. Kept deliberately slim.
 
-export const SLIM_MANDY_MANUAL_VERSION = "1.7 — 10 September 2026 (Education Commercial Layer)";
+export const SLIM_MANDY_MANUAL_VERSION = "1.8 — 10 September 2026 (GSM Outbound Infrastructure)";
 
 export const SLIM_MANDY_MANUAL_MARKDOWN = `# Slim Mandy Manual
 
@@ -55,8 +55,17 @@ GitHub \`main\` is the code source of truth. Work in discrete reviewed branches.
 - **Build Log** — historical decisions (/founder/build-log).
 - **Manuals Hub** — layer hierarchy, versions and drafts (/founder/manuals-hub).
 
+## Sending estate (GSM Outbound)
+One shared company sending estate, not one per business: ~50 mailboxes across up to 10 company
+domains, Launch lane 30 lent to the business launching now, Evergreen lane 20 shared 5 each across
+the four education businesses. A mailbox in a live conversation keeps that conversation. Nothing is
+usable until the domain is verified, sending and receiving both work, it is connected at the
+sending provider, warmup is finished and a daily limit is set. Today there are zero company
+mailboxes because the Winnr account does not exist yet. hello@neoncandy.online is excluded from
+this estate permanently. Page: /founder/gsm-outbound.
+
 ## What not to touch without a deliberate decision
 Any external gate, auto_send, cron, Smartlead campaign start or lead push, Apollo paid enrichment, buyer contact approval, data-room sharing, portal invites, payments or filings.
 `;
 
-export const SLIM_MANDY_MANUAL_FILENAME = `liftor-slim-mandy-manual-v1.7-2026-09-10.md`;
+export const SLIM_MANDY_MANUAL_FILENAME = `liftor-slim-mandy-manual-v1.8-2026-09-10.md`;

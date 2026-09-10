@@ -16,7 +16,7 @@
 //   5. Business Manuals            — business-specific tone/offers/rules/assets
 //   6. Slim Mandy Manual           — portable handover only, NOT technical truth
 
-export const ARCHITECTURE_SYNC_VERSION = "6.4 — Education Commercial Layer (10 September 2026)";
+export const ARCHITECTURE_SYNC_VERSION = "6.5 — GSM Outbound Infrastructure (10 September 2026)";
 export const ARCHITECTURE_SYNC_DATE = "2026-09-10";
 export const ARCHITECTURE_SYNC_PREVIOUS_VERSION = "6.3 — Smartlead & Sending Infrastructure (10 September 2026)";
 export const ARCHITECTURE_SYNC_SOURCE =
@@ -663,6 +663,81 @@ analytics reuse existing campaign/revenue tables rather than a silo. Neon Candy 
 never eligible for education.
 
 *End of Section 102 — Education Commercial Layer.*
+
+# 103. GSM Outbound Infrastructure — one shared portfolio sending estate
+
+**This section supersedes any earlier wording implying a separate Winnr/mailbox estate per
+portfolio business, and supersedes 101.6 on the shape of the future estate.**
+
+## 103.1 Ownership model
+Global Solutions Management LLC owns ONE shared portfolio sending estate. It is not a single
+sending domain and it is not per-business infrastructure: up to 10 GSM-controlled sending domains
+carry ~50 mailboxes (normally ~5 per domain) beneath one logical GSM Outbound Engine. Sender
+identity is GSM infrastructure; portfolio businesses never own mailbox estates.
+
+Flow: **Apollo (data only) → Liftor (system of record and command centre) → Smartlead (campaign
+execution and sender rotation) → GSM/Winnr sender estate.**
+
+## 103.2 Capacity lanes
+- **Launch Lane** — target capacity 30 mailboxes, temporarily lent to the portfolio business
+  currently launching.
+- **Evergreen Lane** — target capacity 20 mailboxes, persistent smaller allocations, initially 5
+  each for Billy and the Wild Forest, Aurelia, Kindnesss and Kingsbridge Global.
+- Physical mailboxes stay GSM-owned. Allocation changes by pool/campaign/business; a mailbox is
+  never renamed or recreated because a different business is using launch capacity.
+- **Sticky in-flight senders:** an allocation marked in-flight, or inside its sticky window, cannot
+  be reallocated. Releasing launch capacity never rewrites an active thread.
+
+## 103.3 Canonical registry (additive migration)
+\`public.gsm_sending_domains\`, \`public.gsm_mailboxes\`, \`public.gsm_sender_pools\`,
+\`public.gsm_mailbox_allocations\`, \`public.gsm_provider_sync_runs\`. Lower-case uniqueness on
+domain and email, uniqueness on non-null provider identifiers, founder/admin RLS via
+\`has_role\`, service-role grants and updated-at triggers. Only logical pool templates are seeded
+(\`gsm_launch_lane\` 30, \`gsm_evergreen_lane\` 20, \`gsm_quarantine\`) — no fake domains or
+mailboxes. **No SMTP/IMAP passwords, Winnr tokens or Smartlead keys are ever persisted;**
+\`stripSecretFields\` removes credential-shaped keys before any write.
+
+## 103.4 Readiness engine
+\`supabase/functions/_shared/gsmSenderEstate.ts\` is pure and deterministic. Existing is not
+ready. States: \`provisioned_pending\`, \`dns_pending\`, \`smtp_failed\`, \`imap_failed\`,
+\`smartlead_disconnected\`, \`warming\`, \`campaign_ready\`, \`quarantined\`, \`retired\`.
+\`evaluateSenderInfrastructureReadiness\` is the canonical source of the education gate's
+\`sender_infrastructure_ready\` boolean — no second gate was invented, and the existing
+\`outreachEligibilityGate\` interface is unchanged. Selection is by stable mailbox id or Smartlead
+account id, never by email string. Founder override may re-prioritise but can never bypass a hard
+safety block.
+
+## 103.5 Providers
+- **Winnr** (\`supabase/functions/gsm-winnr-sync\`, paths isolated in
+  \`_shared/winnrClient.ts\`, base \`https://api.winnr.app/v1\`, Bearer \`WINNR_API_TOKEN\`
+  server-side only): read-only test, idempotent domain/mailbox sync into the registry, truthful
+  401/403/429/error handling. Every mutation path defaults to preview and additionally requires an
+  explicit external-action confirmation; provisioning stays disabled in this release. The GSM Winnr
+  account does not exist yet, so no provider mutation is possible today.
+- **Smartlead** (\`supabase/functions/gsm-smartlead-mailbox-sync\`): read-only
+  \`GET /email-accounts\` mapped back onto existing GSM mailboxes by Smartlead account id or
+  email, capturing SMTP/IMAP/warmup/account status. It creates no campaigns, sends no mail, creates
+  no mailbox rows and does not touch campaign mapping, reply or event paths.
+
+## 103.6 Exclusion
+\`hello@neoncandy.online\` and the whole \`neoncandy.online\` domain are classified
+\`external_non_gsm\`. They may appear in Smartlead reads but can never be inserted, counted or
+allocated in the GSM estate, and no founder override changes that.
+
+## 103.7 Founder surface
+\`/founder/gsm-outbound\` shows live canonical state only: target 50, actual domains/mailboxes,
+Launch 30 and Evergreen 20 allocations, Winnr and Smartlead connection state, SMTP/IMAP counts,
+warming, campaign-ready, quarantined/retired, configured daily capacity, last provider sync, the
+actionable blocker, the Neon Candy exclusion, and the exact next setup action while
+\`WINNR_API_TOKEN\` is absent. Provider state and counts are never faked.
+
+## 103.8 Onboarding steps
+1. Create the GSM Winnr account. 2. Add \`WINNR_API_TOKEN\` as a server secret. 3. Purchase and
+verify up to 10 GSM sending domains. 4. Provision ~50 mailboxes and start warmup. 5. Sync into the
+registry. 6. Connect them in Smartlead and sync account status. 7. Allocate Launch 30 / Evergreen
+20. 8. Only then does sender readiness become true, and founder send approval remains separate.
+
+*End of Section 103 — GSM Outbound Infrastructure.*
 `;
 
 
