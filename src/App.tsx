@@ -136,6 +136,8 @@ import ExternalActivationReadinessPage from "./pages/founder/ExternalActivationR
 import MicroBatchPreparationPage from "./pages/founder/MicroBatchPreparation";
 import BuildPhaseCloseoutPage from "./pages/founder/BuildPhaseCloseout";
 import ManualsHubPage from "./pages/founder/ManualsHub";
+import BusinessManualsPage from "./pages/founder/BusinessManuals";
+import EducationCommercialLayerPage from "./pages/founder/EducationCommercialLayer";
 import LiftorBrain from "./pages/founder/LiftorBrain";
 import PortfolioExitCommandCentre from "./pages/founder/PortfolioExitCommandCentre";
 import FounderLedExitSalesEngine from "./pages/founder/FounderLedExitSalesEngine";
