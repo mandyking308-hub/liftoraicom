@@ -16,9 +16,9 @@
 //   5. Business Manuals            — business-specific tone/offers/rules/assets
 //   6. Slim Mandy Manual           — portable handover only, NOT technical truth
 
-export const ARCHITECTURE_SYNC_VERSION = "6.2 — CRM-Native Education Correction Quality Gate (10 September 2026)";
+export const ARCHITECTURE_SYNC_VERSION = "6.3 — Smartlead & Sending Infrastructure (10 September 2026)";
 export const ARCHITECTURE_SYNC_DATE = "2026-09-10";
-export const ARCHITECTURE_SYNC_PREVIOUS_VERSION = "6.1 — September 2026 Architecture Reconciliation (10 September 2026)";
+export const ARCHITECTURE_SYNC_PREVIOUS_VERSION = "6.2 — CRM-Native Education Correction Quality Gate (10 September 2026)";
 export const ARCHITECTURE_SYNC_SOURCE =
   "August baseline: repo-wide audit of src/App.tsx routes (799 founder routes), src/pages/founder/**, src/components/founder/**, src/lib/** engines, supabase/functions/** (604 functions), supabase/migrations/** and docs/**. September delta: docs/manual-architecture-reconciliation-2026-09-10.md — 21 materially changed files since the August manual commit plus a live database state check on 10 September 2026.";
 
