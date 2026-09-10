@@ -158,14 +158,43 @@ Deno.serve(async (req) => {
 
   const existingByKey = new Map(existing.filter((e) => e.source_key).map((e) => [e.source_key as string, e]));
   let created = 0, updated = 0, unchanged = 0;
+  let orgsCreated = 0, orgsMatched = 0;
   const writeErrors: Array<{ group_id: string; message: string }> = [];
 
   for (const account of valid) {
     const entry = plan.find((p) => p.source_key === account.source_key);
-    if (entry?.action === "unchanged") { unchanged++; continue; }
-    const payload = toTargetAccountRow(account, listId);
+
+    // CRM-NATIVE: the canonical education company record lives in `organisations`.
+    // It is resolved/upserted FIRST, then the strategic target account points at it.
+    const orgPayload = toOrganisationRow(account);
+    let organisationId: string | null = null;
+
+    const { data: orgBySource } = await admin
+      .from("organisations").select("id").eq("source_key", account.source_key).maybeSingle();
+    let orgRow = orgBySource ?? null;
+    if (!orgRow && account.account_domain) {
+      const { data: orgByDomain } = await admin
+        .from("organisations").select("id").ilike("account_domain", account.account_domain).maybeSingle();
+      orgRow = orgByDomain ?? null;
+    }
+
+    if (orgRow?.id) {
+      organisationId = orgRow.id;
+      const { error } = await admin.from("organisations").update(orgPayload).eq("id", organisationId);
+      if (error) { writeErrors.push({ group_id: account.group_id, message: `organisation:${error.message}` }); continue; }
+      orgsMatched++;
+    } else {
+      const { data: newOrg, error } = await admin
+        .from("organisations").insert(orgPayload).select("id").single();
+      if (error) { writeErrors.push({ group_id: account.group_id, message: `organisation:${error.message}` }); continue; }
+      organisationId = newOrg.id;
+      orgsCreated++;
+    }
+
+    const payload = toTargetAccountRow(account, listId, organisationId);
     const found = existingByKey.get(account.source_key);
     if (found) {
+      if (entry?.action === "unchanged" && found.existing_organisation_id === organisationId) { unchanged++; continue; }
       const { error } = await admin.from("strategic_target_accounts").update(payload).eq("id", found.id);
       if (error) writeErrors.push({ group_id: account.group_id, message: error.message });
       else updated++;
@@ -175,6 +204,7 @@ Deno.serve(async (req) => {
       else created++;
     }
   }
+
 
   const { count: finalCount } = await admin
     .from("strategic_target_accounts")
