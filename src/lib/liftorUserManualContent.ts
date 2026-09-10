@@ -1,6 +1,6 @@
 // Liftor User Manual — plain-English operating guide (separate from Founder/Technical Manual)
 
-export const LIFTOR_USER_MANUAL_VERSION = "1.13 — Education Commercial Layer (10 September 2026)";
+export const LIFTOR_USER_MANUAL_VERSION = "1.14 — GSM Outbound Infrastructure (10 September 2026)";
 
 export interface ManualSection {
   number: number;
@@ -1436,6 +1436,12 @@ export const ARCHITECTURE_SYNC_USER_SECTIONS: ManualSection[] = [
     key: "education-commercial-layer-user",
     title: "113. Your four education businesses — how they share one contact list safely",
     body: "There is a new page, Education Commercial Layer (/founder/education-commercial), and a Business Manuals page (/founder/business-manuals) that shows the twelve business manuals exactly as written in the project files. How the data works: each person is stored once in your main CRM and attached once to their school or group in your main company list. If the same person is a good fit for more than one of your businesses, that is recorded as separate business links against the same person — you never get duplicates. The four businesses are Billy and the Wild Forest (special needs, inclusion, emotional literacy), Aurelia (digital learning and safeguarding), Kindnesss (wellbeing and pastoral) and Kingsbridge Global (international groups and partnerships). Each scores fit in its own way, and the system picks one best-fit brand first and writes down why. Safety: only one of your businesses can own a conversation with a person at a time, other brands wait at least 30 days, and anyone who has replied, unsubscribed, bounced, or is on do-not-contact is blocked outright. You can change which brand gets priority, but you cannot override those blocks — nor can I. Campaigns: all four campaigns exist as drafts only, switched off, with sending blocked, no approval recorded and no link to the sending provider. Billy goes first with a deliberately small first batch of 25 to 50 excellent contacts in large groups, nurseries excluded. None of this changes the Apollo scoring or the Apollo spend wall, which stays locked at zero, and the mailbox and sending-provider readiness are still separate gates that are not ready yet.",
+  },
+  {
+    number: 114,
+    key: "gsm-outbound-user",
+    title: "114. Your one shared mailbox estate — GSM Outbound",
+    body: "There is a new page, GSM Outbound Infrastructure (/founder/gsm-outbound). Read this instead of any older note that suggested each business gets its own mailboxes. The company owns ONE shared sending estate: about 50 mailboxes spread over up to 10 company-owned sending domains, roughly 5 mailboxes per domain. The businesses borrow capacity from it; they never own mailboxes. Two lanes: the Launch lane holds 30 mailboxes and is lent to whichever business is launching right now, and the Evergreen lane holds 20 for businesses already up and running, starting at 5 each for Billy and the Wild Forest, Aurelia, Kindnesss and Kingsbridge Global. If a mailbox is already in the middle of a conversation, it stays with that conversation — moving launch capacity never rewrites a live thread. A mailbox is not usable just because it exists: the domain must be verified, sending and receiving must both work, it must be connected at the sending provider, it must have finished warming up, and it must have a daily limit. Until all of that is true, the page shows exactly what is missing. The page also shows whether the mailbox provider (Winnr) and the sending provider are connected, and it never invents numbers. Right now there are zero company mailboxes, because the Winnr account does not exist yet — that is the truth, not an error. The old hello@neoncandy.online mailbox is marked as outside this estate and can never be used for the education businesses. WHAT YOU DO NEXT: create the Winnr account, give me its access token to store safely on the server, buy and verify the sending domains, create the mailboxes, start warmup, then allocate them to the lanes. Nothing on the page buys anything, creates a mailbox or sends an email today.",
   },
 ];
 
