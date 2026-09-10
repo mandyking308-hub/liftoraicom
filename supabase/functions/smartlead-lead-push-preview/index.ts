@@ -119,9 +119,19 @@ Deno.serve(async (req) => {
   const eligible: any[] = [];
   const excluded: { id: string; reason: string }[] = [];
   const seenEmails = new Set<string>();
+  const snapshots = new Map<string, unknown>();
 
   for (const c of contacts ?? []) {
     const exclude = (reason: string) => excluded.push({ id: c.id, reason });
+
+    // Shared canonical sendability gate — identical logic to apply + dry-run.
+    const verdict = evaluateOutboundSendability(c as any);
+    snapshots.set(c.id, verdict.snapshot);
+    if (!verdict.sendable) {
+      exclude(verdict.blockers[0]);
+      continue;
+    }
+
     if (!c.email) { exclude("missing_email"); continue; }
     const emailKey = String(c.email).toLowerCase().trim();
     if (seenEmails.has(emailKey)) { exclude("duplicate_email"); continue; }
