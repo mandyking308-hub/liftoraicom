@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { evaluateOutboundSendability } from "../_shared/outboundSendability.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -57,6 +58,34 @@ Deno.serve(async (req) => {
   const campaign_mapping_id: string | null = body.campaign_mapping_id ?? null;
   const max_batch_size = Math.min(Math.max(Number(body.max_batch_size ?? 5), 1), 50);
 
+  // --- Optional sendability preview (runs even while blocked, no provider calls) ---
+  let preview: { mapping_found: boolean; contacts_evaluated: number; sendable_count: number; sample_blockers: string[] } | null = null;
+  if (campaign_mapping_id) {
+    const { data: mapping } = await admin
+      .from("outbound_provider_campaign_mappings")
+      .select("id, business_id, liftor_campaign_id, provider_campaign_id")
+      .eq("id", campaign_mapping_id)
+      .single();
+    if (mapping?.business_id) {
+      const { data: contacts } = await admin
+        .from("contacts")
+        .select("id, email, email_verified_status, sendable_status, status, compliance_status, is_globally_suppressed, hard_bounced, unsubscribed_at, do_not_contact_at, conversation_active")
+        .eq("assigned_business", mapping.business_id)
+        .eq("source_business", mapping.business_id)
+        .in("sendable_status", ["sendable", "verified_sendable", "ready"])
+        .limit(max_batch_size);
+      const evaluated = (contacts ?? []).map((c) => evaluateOutboundSendability(c as any));
+      const sendable = evaluated.filter((e) => e.sendable);
+      const blockers = evaluated.flatMap((e) => e.blockers);
+      preview = {
+        mapping_found: true,
+        contacts_evaluated: evaluated.length,
+        sendable_count: sendable.length,
+        sample_blockers: Array.from(new Set(blockers)).slice(0, 5),
+      };
+    }
+  }
+
   // Hard safety gates — ALL must pass before any external POST
   const gates = {
     feature_flag_on: FEATURE_FLAG,
@@ -77,6 +106,7 @@ Deno.serve(async (req) => {
       provider_calls: 0,
       leads_pushed: 0,
       max_batch_size,
+      preview,
       notes:
         "No leads pushed. No Smartlead POST calls. No emails sent. Apply path is intentionally disabled.",
     });
@@ -90,6 +120,7 @@ Deno.serve(async (req) => {
     reason: "post_path_not_implemented_yet",
     provider_calls: 0,
     leads_pushed: 0,
+    preview,
     notes:
       "Future apply path: would record provider_lead_id into outbound_provider_lead_mappings after a successful POST. Not implemented in this build.",
   });

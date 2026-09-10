@@ -17182,6 +17182,7 @@ export type Database = {
           source_platform: string | null
           source_record_id: string | null
           status: Database["public"]["Enums"]["contact_status"]
+          strategic_target_account_id: string | null
           tags: string[]
           timezone: string | null
           timezone_confidence: Database["public"]["Enums"]["timezone_confidence_level"]
@@ -17255,6 +17256,7 @@ export type Database = {
           source_platform?: string | null
           source_record_id?: string | null
           status?: Database["public"]["Enums"]["contact_status"]
+          strategic_target_account_id?: string | null
           tags?: string[]
           timezone?: string | null
           timezone_confidence?: Database["public"]["Enums"]["timezone_confidence_level"]
@@ -17328,6 +17330,7 @@ export type Database = {
           source_platform?: string | null
           source_record_id?: string | null
           status?: Database["public"]["Enums"]["contact_status"]
+          strategic_target_account_id?: string | null
           tags?: string[]
           timezone?: string | null
           timezone_confidence?: Database["public"]["Enums"]["timezone_confidence_level"]
@@ -17370,6 +17373,13 @@ export type Database = {
             columns: ["organisation_id"]
             isOneToOne: false
             referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contacts_strategic_target_account_id_fkey"
+            columns: ["strategic_target_account_id"]
+            isOneToOne: false
+            referencedRelation: "strategic_target_accounts"
             referencedColumns: ["id"]
           },
         ]
@@ -31453,24 +31463,32 @@ export type Database = {
       }
       inboxes: {
         Row: {
+          activated_at: string | null
           active: boolean
           ai_prompt_instructions: string | null
           ai_prompt_updated_at: string | null
           ai_reply_mode: Database["public"]["Enums"]["ai_reply_mode"]
+          allowed_business_names: string[]
           bounce_rate_per_inbox: number
           business_name: string
           consecutive_failures: number
           created_at: string
           current_send_count: number
           daily_send_limit: number
+          domain_health_score: number | null
           email_address: string
           emails_sent_today: number
+          estate_key: string
+          estate_provider: string
+          excluded_from_allocation: boolean
+          exclusion_reason: string | null
           from_email: string | null
           from_name: string | null
           hourly_send_count: number
           hourly_send_limit: number
           hourly_window_start: string
           id: string
+          imap_ready: boolean
           inbound_polling_enabled: boolean
           inbound_provider: Database["public"]["Enums"]["inbound_provider_type"]
           inbound_status: Database["public"]["Enums"]["inbound_status_type"]
@@ -31480,45 +31498,64 @@ export type Database = {
           last_inbound_error: string | null
           last_inbound_message_at: string | null
           last_poll_at: string | null
+          last_provider_sync_at: string | null
           last_sent_at: string | null
           last_test_send_at: string | null
           last_test_send_status: string | null
           last_test_send_to: string | null
           last_used_sequence_position: number
           live_readiness: Database["public"]["Enums"]["inbox_live_readiness"]
+          mailbox_owner: string | null
           monitored_mailbox: string | null
           paused_reason: string
           performance_score: number
+          provider_account_id: string | null
           provider_blocked_reason: string | null
           provider_blocked_until: string | null
+          provider_mailbox_id: string | null
+          provider_ready: boolean
           provider_type: Database["public"]["Enums"]["inbox_provider_type"]
+          ramp_daily_cap: number
+          registration_batch_id: string | null
           reply_rate_per_inbox: number
           reply_to_email: string | null
           reputation_score: number
+          segregation_locked: boolean
           sending_domain_id: string | null
+          sending_load_7d: number
+          smtp_ready: boolean
           updated_at: string
+          warmup_ready: boolean
           warmup_started_at: string
           warmup_status: Database["public"]["Enums"]["inbox_warmup_status"]
         }
         Insert: {
+          activated_at?: string | null
           active?: boolean
           ai_prompt_instructions?: string | null
           ai_prompt_updated_at?: string | null
           ai_reply_mode?: Database["public"]["Enums"]["ai_reply_mode"]
+          allowed_business_names?: string[]
           bounce_rate_per_inbox?: number
           business_name?: string
           consecutive_failures?: number
           created_at?: string
           current_send_count?: number
           daily_send_limit?: number
+          domain_health_score?: number | null
           email_address: string
           emails_sent_today?: number
+          estate_key?: string
+          estate_provider?: string
+          excluded_from_allocation?: boolean
+          exclusion_reason?: string | null
           from_email?: string | null
           from_name?: string | null
           hourly_send_count?: number
           hourly_send_limit?: number
           hourly_window_start?: string
           id?: string
+          imap_ready?: boolean
           inbound_polling_enabled?: boolean
           inbound_provider?: Database["public"]["Enums"]["inbound_provider_type"]
           inbound_status?: Database["public"]["Enums"]["inbound_status_type"]
@@ -31528,45 +31565,64 @@ export type Database = {
           last_inbound_error?: string | null
           last_inbound_message_at?: string | null
           last_poll_at?: string | null
+          last_provider_sync_at?: string | null
           last_sent_at?: string | null
           last_test_send_at?: string | null
           last_test_send_status?: string | null
           last_test_send_to?: string | null
           last_used_sequence_position?: number
           live_readiness?: Database["public"]["Enums"]["inbox_live_readiness"]
+          mailbox_owner?: string | null
           monitored_mailbox?: string | null
           paused_reason?: string
           performance_score?: number
+          provider_account_id?: string | null
           provider_blocked_reason?: string | null
           provider_blocked_until?: string | null
+          provider_mailbox_id?: string | null
+          provider_ready?: boolean
           provider_type?: Database["public"]["Enums"]["inbox_provider_type"]
+          ramp_daily_cap?: number
+          registration_batch_id?: string | null
           reply_rate_per_inbox?: number
           reply_to_email?: string | null
           reputation_score?: number
+          segregation_locked?: boolean
           sending_domain_id?: string | null
+          sending_load_7d?: number
+          smtp_ready?: boolean
           updated_at?: string
+          warmup_ready?: boolean
           warmup_started_at?: string
           warmup_status?: Database["public"]["Enums"]["inbox_warmup_status"]
         }
         Update: {
+          activated_at?: string | null
           active?: boolean
           ai_prompt_instructions?: string | null
           ai_prompt_updated_at?: string | null
           ai_reply_mode?: Database["public"]["Enums"]["ai_reply_mode"]
+          allowed_business_names?: string[]
           bounce_rate_per_inbox?: number
           business_name?: string
           consecutive_failures?: number
           created_at?: string
           current_send_count?: number
           daily_send_limit?: number
+          domain_health_score?: number | null
           email_address?: string
           emails_sent_today?: number
+          estate_key?: string
+          estate_provider?: string
+          excluded_from_allocation?: boolean
+          exclusion_reason?: string | null
           from_email?: string | null
           from_name?: string | null
           hourly_send_count?: number
           hourly_send_limit?: number
           hourly_window_start?: string
           id?: string
+          imap_ready?: boolean
           inbound_polling_enabled?: boolean
           inbound_provider?: Database["public"]["Enums"]["inbound_provider_type"]
           inbound_status?: Database["public"]["Enums"]["inbound_status_type"]
@@ -31576,23 +31632,34 @@ export type Database = {
           last_inbound_error?: string | null
           last_inbound_message_at?: string | null
           last_poll_at?: string | null
+          last_provider_sync_at?: string | null
           last_sent_at?: string | null
           last_test_send_at?: string | null
           last_test_send_status?: string | null
           last_test_send_to?: string | null
           last_used_sequence_position?: number
           live_readiness?: Database["public"]["Enums"]["inbox_live_readiness"]
+          mailbox_owner?: string | null
           monitored_mailbox?: string | null
           paused_reason?: string
           performance_score?: number
+          provider_account_id?: string | null
           provider_blocked_reason?: string | null
           provider_blocked_until?: string | null
+          provider_mailbox_id?: string | null
+          provider_ready?: boolean
           provider_type?: Database["public"]["Enums"]["inbox_provider_type"]
+          ramp_daily_cap?: number
+          registration_batch_id?: string | null
           reply_rate_per_inbox?: number
           reply_to_email?: string | null
           reputation_score?: number
+          segregation_locked?: boolean
           sending_domain_id?: string | null
+          sending_load_7d?: number
+          smtp_ready?: boolean
           updated_at?: string
+          warmup_ready?: boolean
           warmup_started_at?: string
           warmup_status?: Database["public"]["Enums"]["inbox_warmup_status"]
         }
@@ -39772,6 +39839,132 @@ export type Database = {
         }
         Relationships: []
       }
+      mailbox_allocation_audit: {
+        Row: {
+          allocation_run_key: string | null
+          allocator_version: string
+          business_name: string | null
+          considered_count: number
+          created_at: string
+          created_by: string | null
+          decision: string
+          decision_reason: string | null
+          dry_run: boolean
+          eligible_count: number
+          estate_key: string | null
+          id: string
+          liftor_campaign_id: string | null
+          liftor_contact_id: string | null
+          rejected: Json
+          requested_count: number
+          selected_email: string | null
+          selected_inbox_id: string | null
+        }
+        Insert: {
+          allocation_run_key?: string | null
+          allocator_version?: string
+          business_name?: string | null
+          considered_count?: number
+          created_at?: string
+          created_by?: string | null
+          decision?: string
+          decision_reason?: string | null
+          dry_run?: boolean
+          eligible_count?: number
+          estate_key?: string | null
+          id?: string
+          liftor_campaign_id?: string | null
+          liftor_contact_id?: string | null
+          rejected?: Json
+          requested_count?: number
+          selected_email?: string | null
+          selected_inbox_id?: string | null
+        }
+        Update: {
+          allocation_run_key?: string | null
+          allocator_version?: string
+          business_name?: string | null
+          considered_count?: number
+          created_at?: string
+          created_by?: string | null
+          decision?: string
+          decision_reason?: string | null
+          dry_run?: boolean
+          eligible_count?: number
+          estate_key?: string | null
+          id?: string
+          liftor_campaign_id?: string | null
+          liftor_contact_id?: string | null
+          rejected?: Json
+          requested_count?: number
+          selected_email?: string | null
+          selected_inbox_id?: string | null
+        }
+        Relationships: []
+      }
+      mailbox_registration_batches: {
+        Row: {
+          applied_at: string | null
+          applied_by: string | null
+          batch_key: string
+          created_at: string
+          created_by: string | null
+          errors: Json
+          estate_key: string
+          id: string
+          inserted_rows: number
+          invalid_rows: number
+          mode: string
+          preview: Json
+          skipped_rows: number
+          source: string
+          submitted_rows: number
+          updated_at: string
+          updated_rows: number
+          valid_rows: number
+        }
+        Insert: {
+          applied_at?: string | null
+          applied_by?: string | null
+          batch_key: string
+          created_at?: string
+          created_by?: string | null
+          errors?: Json
+          estate_key?: string
+          id?: string
+          inserted_rows?: number
+          invalid_rows?: number
+          mode?: string
+          preview?: Json
+          skipped_rows?: number
+          source?: string
+          submitted_rows?: number
+          updated_at?: string
+          updated_rows?: number
+          valid_rows?: number
+        }
+        Update: {
+          applied_at?: string | null
+          applied_by?: string | null
+          batch_key?: string
+          created_at?: string
+          created_by?: string | null
+          errors?: Json
+          estate_key?: string
+          id?: string
+          inserted_rows?: number
+          invalid_rows?: number
+          mode?: string
+          preview?: Json
+          skipped_rows?: number
+          source?: string
+          submitted_rows?: number
+          updated_at?: string
+          updated_rows?: number
+          valid_rows?: number
+        }
+        Relationships: []
+      }
       maintenance_events: {
         Row: {
           created_at: string
@@ -42747,9 +42940,11 @@ export type Database = {
           account_domain: string | null
           created_at: string
           education_group_id: string | null
+          education_priority_tier: string | null
           id: string
           industry: string
           is_education_account: boolean
+          is_education_target: boolean
           metadata: Json
           name: string
           operating_footprint: string | null
@@ -42759,18 +42954,22 @@ export type Database = {
           research_program_key: string | null
           review_note: string | null
           source_key: string | null
+          source_notes: string | null
           source_version: string | null
           status: string
           updated_at: string
+          website_domain: string | null
           website_url: string | null
         }
         Insert: {
           account_domain?: string | null
           created_at?: string
           education_group_id?: string | null
+          education_priority_tier?: string | null
           id?: string
           industry?: string
           is_education_account?: boolean
+          is_education_target?: boolean
           metadata?: Json
           name: string
           operating_footprint?: string | null
@@ -42780,18 +42979,22 @@ export type Database = {
           research_program_key?: string | null
           review_note?: string | null
           source_key?: string | null
+          source_notes?: string | null
           source_version?: string | null
           status?: string
           updated_at?: string
+          website_domain?: string | null
           website_url?: string | null
         }
         Update: {
           account_domain?: string | null
           created_at?: string
           education_group_id?: string | null
+          education_priority_tier?: string | null
           id?: string
           industry?: string
           is_education_account?: boolean
+          is_education_target?: boolean
           metadata?: Json
           name?: string
           operating_footprint?: string | null
@@ -42801,9 +43004,11 @@ export type Database = {
           research_program_key?: string | null
           review_note?: string | null
           source_key?: string | null
+          source_notes?: string | null
           source_version?: string | null
           status?: string
           updated_at?: string
+          website_domain?: string | null
           website_url?: string | null
         }
         Relationships: []
@@ -42867,12 +43072,14 @@ export type Database = {
           business_id: string | null
           created_at: string
           id: string
+          idempotency_token: string | null
           is_active: boolean
           last_error: string | null
           last_synced_at: string | null
           liftor_campaign_id: string | null
           mapping_status: string
           metadata: Json
+          provider_campaign_created_by_liftor: boolean
           provider_campaign_id: string | null
           provider_campaign_name: string | null
           provider_campaign_status: string | null
@@ -42884,12 +43091,14 @@ export type Database = {
           business_id?: string | null
           created_at?: string
           id?: string
+          idempotency_token?: string | null
           is_active?: boolean
           last_error?: string | null
           last_synced_at?: string | null
           liftor_campaign_id?: string | null
           mapping_status?: string
           metadata?: Json
+          provider_campaign_created_by_liftor?: boolean
           provider_campaign_id?: string | null
           provider_campaign_name?: string | null
           provider_campaign_status?: string | null
@@ -42901,12 +43110,14 @@ export type Database = {
           business_id?: string | null
           created_at?: string
           id?: string
+          idempotency_token?: string | null
           is_active?: boolean
           last_error?: string | null
           last_synced_at?: string | null
           liftor_campaign_id?: string | null
           mapping_status?: string
           metadata?: Json
+          provider_campaign_created_by_liftor?: boolean
           provider_campaign_id?: string | null
           provider_campaign_name?: string | null
           provider_campaign_status?: string | null
@@ -42936,15 +43147,21 @@ export type Database = {
           contact_id: string | null
           created_at: string
           error: string | null
+          event_occurred_at: string | null
           id: string
+          idempotency_key: string | null
+          lead_mapping_id: string | null
+          liftor_campaign_id: string | null
           normalized_payload: Json
           operational_mutation_applied: boolean
+          processed_at: string | null
           processing_status: string
           provider_campaign_id: string | null
           provider_event_id: string | null
           provider_event_type: string
           provider_id: string | null
           provider_lead_id: string | null
+          provider_mailbox_id: string | null
           provider_type: string
           queue_id: string | null
           raw_payload: Json
@@ -42954,15 +43171,21 @@ export type Database = {
           contact_id?: string | null
           created_at?: string
           error?: string | null
+          event_occurred_at?: string | null
           id?: string
+          idempotency_key?: string | null
+          lead_mapping_id?: string | null
+          liftor_campaign_id?: string | null
           normalized_payload?: Json
           operational_mutation_applied?: boolean
+          processed_at?: string | null
           processing_status?: string
           provider_campaign_id?: string | null
           provider_event_id?: string | null
           provider_event_type: string
           provider_id?: string | null
           provider_lead_id?: string | null
+          provider_mailbox_id?: string | null
           provider_type?: string
           queue_id?: string | null
           raw_payload?: Json
@@ -42972,15 +43195,21 @@ export type Database = {
           contact_id?: string | null
           created_at?: string
           error?: string | null
+          event_occurred_at?: string | null
           id?: string
+          idempotency_key?: string | null
+          lead_mapping_id?: string | null
+          liftor_campaign_id?: string | null
           normalized_payload?: Json
           operational_mutation_applied?: boolean
+          processed_at?: string | null
           processing_status?: string
           provider_campaign_id?: string | null
           provider_event_id?: string | null
           provider_event_type?: string
           provider_id?: string | null
           provider_lead_id?: string | null
+          provider_mailbox_id?: string | null
           provider_type?: string
           queue_id?: string | null
           raw_payload?: Json
@@ -43026,57 +43255,78 @@ export type Database = {
       }
       outbound_provider_lead_mappings: {
         Row: {
+          block_reason: string | null
           business_id: string
           campaign_mapping_id: string | null
           contact_email: string
           created_at: string
           id: string
+          inbox_id: string | null
+          last_error: string | null
           last_previewed_at: string | null
           liftor_campaign_id: string
           liftor_contact_id: string
           metadata: Json
           provider_campaign_id: string | null
           provider_lead_id: string | null
+          provider_lead_identity: string | null
           provider_response: Json | null
           provider_type: string
           push_status: string
           pushed_at: string | null
+          sendability_snapshot: Json
+          sendability_status: string | null
+          snapshot_taken_at: string | null
           updated_at: string
         }
         Insert: {
+          block_reason?: string | null
           business_id: string
           campaign_mapping_id?: string | null
           contact_email: string
           created_at?: string
           id?: string
+          inbox_id?: string | null
+          last_error?: string | null
           last_previewed_at?: string | null
           liftor_campaign_id: string
           liftor_contact_id: string
           metadata?: Json
           provider_campaign_id?: string | null
           provider_lead_id?: string | null
+          provider_lead_identity?: string | null
           provider_response?: Json | null
           provider_type?: string
           push_status?: string
           pushed_at?: string | null
+          sendability_snapshot?: Json
+          sendability_status?: string | null
+          snapshot_taken_at?: string | null
           updated_at?: string
         }
         Update: {
+          block_reason?: string | null
           business_id?: string
           campaign_mapping_id?: string | null
           contact_email?: string
           created_at?: string
           id?: string
+          inbox_id?: string | null
+          last_error?: string | null
           last_previewed_at?: string | null
           liftor_campaign_id?: string
           liftor_contact_id?: string
           metadata?: Json
           provider_campaign_id?: string | null
           provider_lead_id?: string | null
+          provider_lead_identity?: string | null
           provider_response?: Json | null
           provider_type?: string
           push_status?: string
           pushed_at?: string | null
+          sendability_snapshot?: Json
+          sendability_status?: string | null
+          snapshot_taken_at?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -71879,6 +72129,7 @@ export type Database = {
           source_platform: string | null
           source_record_id: string | null
           status: Database["public"]["Enums"]["contact_status"]
+          strategic_target_account_id: string | null
           tags: string[]
           timezone: string | null
           timezone_confidence: Database["public"]["Enums"]["timezone_confidence_level"]

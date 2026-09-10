@@ -1,4 +1,9 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import {
+  buildIdempotencyToken,
+  normalizeCampaignList,
+  resolveProviderCampaign,
+} from "../_shared/smartleadCampaignResolve.ts";
 
 const SMARTLEAD_BASE_URL = "https://server.smartlead.ai/api/v1";
 const CONFIRMATION_PHRASE = "MAP SMARTLEAD CAMPAIGN";
@@ -104,9 +109,27 @@ Deno.serve(async (req) => {
         : Array.isArray(parsed?.results)
           ? parsed.results
           : [];
-    smartleadCampaign = list.find(
-      (c) => String(c?.id ?? c?.campaign_id ?? "") === providerCampaignId,
-    );
+    const resolution = resolveProviderCampaign(normalizeCampaignList(list), {
+      provider_campaign_id: providerCampaignId,
+    });
+    // Fail closed: anything not a single unambiguous match maps nothing.
+    if (!resolution.ok || !resolution.match) {
+      return json(
+        {
+          ok: false,
+          error: "provider_campaign_not_resolved",
+          outcome: resolution.outcome,
+          reason: resolution.reason,
+          provider_campaign_id: providerCampaignId,
+        },
+        404,
+      );
+    }
+    smartleadCampaign = {
+      id: resolution.match.provider_campaign_id,
+      name: resolution.match.provider_campaign_name,
+      status: resolution.match.provider_campaign_status,
+    };
   } catch (e: any) {
     return json({ ok: false, error: "smartlead_fetch_failed", detail: e?.message ?? String(e) }, 502);
   } finally {
@@ -136,6 +159,7 @@ Deno.serve(async (req) => {
     provider_id: provider.id,
     provider_type: "smartlead",
     provider_campaign_id: providerCampaignId,
+    idempotency_token: buildIdempotencyToken(liftorCampaignId),
     provider_campaign_name: providerCampaignName,
     provider_campaign_status: providerCampaignStatus ? String(providerCampaignStatus) : null,
     mapping_status: "mapped",
