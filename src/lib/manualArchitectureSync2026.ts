@@ -16,9 +16,9 @@
 //   5. Business Manuals            — business-specific tone/offers/rules/assets
 //   6. Slim Mandy Manual           — portable handover only, NOT technical truth
 
-export const ARCHITECTURE_SYNC_VERSION = "6.3 — Smartlead & Sending Infrastructure (10 September 2026)";
+export const ARCHITECTURE_SYNC_VERSION = "6.4 — Education Commercial Layer (10 September 2026)";
 export const ARCHITECTURE_SYNC_DATE = "2026-09-10";
-export const ARCHITECTURE_SYNC_PREVIOUS_VERSION = "6.2 — CRM-Native Education Correction Quality Gate (10 September 2026)";
+export const ARCHITECTURE_SYNC_PREVIOUS_VERSION = "6.3 — Smartlead & Sending Infrastructure (10 September 2026)";
 export const ARCHITECTURE_SYNC_SOURCE =
   "August baseline: repo-wide audit of src/App.tsx routes (799 founder routes), src/pages/founder/**, src/components/founder/**, src/lib/** engines, supabase/functions/** (604 functions), supabase/migrations/** and docs/**. September delta: docs/manual-architecture-reconciliation-2026-09-10.md — 21 materially changed files since the August manual commit plus a live database state check on 10 September 2026.";
 
@@ -613,6 +613,56 @@ dry run again before any approval. Smartlead is the **delivery engine**, never t
 prospect-data source. No live send happens until founder final approval is recorded.
 
 *End of Section 101 — September 2026 Architecture Reconciliation.*
+
+---
+
+# SECTION 102 — EDUCATION COMMERCIAL LAYER (10 SEPTEMBER 2026)
+
+Section 102 is additive. It does not change Section 100, Section 101, the Apollo
+\`education_role_score\` scorer, or the portfolio Apollo credit firewall (paid enrichment **off**,
+hard credit limit **0**, phone / personal-email / waterfall all **false**).
+
+## 102.1 Data truth
+- \`public.contacts\` — one row per person. A person is never duplicated for a second brand.
+- \`public.organisations\` — canonical education account/company record; contacts attach via
+  \`organisation_id\`. \`strategic_target_accounts\` remains a planning mirror only.
+- \`public.business_contact_relationships\` (BCR) — many-to-many business relevance, carrying the
+  deterministic \`relevance_score\`, \`relevance_reason\` and \`relevance_categories\`.
+
+## 102.2 The four exact education businesses
+Billy and the Wild Forest (SEN/SEND, inclusion, emotional literacy), Aurelia (digital learning,
+edtech, safeguarding), Kindnesss (wellbeing, pastoral, PSHE, student experience) and Kingsbridge
+Global (international groups, partnerships, regional/commercial). Scoring is per brand and separate
+from the campaign-neutral Apollo role score; a contact may qualify for several brands.
+
+## 102.3 Portfolio ownership and collision safety
+One active outbound ownership per contact across the whole portfolio, a configurable 30-day
+cross-brand cooldown, and hard blocks on active conversation/reply, global suppression,
+unsubscribe, do-not-contact and hard bounce. Reason codes are deterministic and founder-visible
+(owning business, campaign, reason). A founder override may re-prioritise which brand owns a
+contact but **cannot** bypass any hard safety block.
+
+## 102.4 Outreach eligibility preflight
+Eligibility requires all of: resolved organisation, eligible BCR, no suppression/bounce/unsubscribe/
+DNC, no collision/conversation/cooldown, a usable work email, a founder-approved campaign, a ready
+provider campaign mapping and ready sender infrastructure. Any missing item returns blocked. The
+Smartlead mapping gate and the mailbox/sender readiness gate are separate gates from this layer and
+are both currently not ready.
+
+## 102.5 Campaign shells (all non-live)
+Four idempotent campaign drafts exist with \`external_send_blocked = true\`, \`is_live = false\`, no
+founder approval and null provider IDs. Billy goes first with a controlled initial cohort of 25–50
+excellent contacts in large education groups (primary/secondary/sixth form; nurseries excluded).
+Each shell holds a distinct concise 3-step copy sequence with no measurable outcome claims.
+
+## 102.6 Founder surfaces and manuals
+\`/founder/education-commercial\` shows brand relevance, collision ownership and shell state;
+\`/founder/business-manuals\` renders exactly 12 canonical business manuals straight from
+\`docs/business-manuals/**\` raw markdown, so GitHub and the in-app manual cannot drift. Funnel
+analytics reuse existing campaign/revenue tables rather than a silo. Neon Candy is untouched and
+never eligible for education.
+
+*End of Section 102 — Education Commercial Layer.*
 `;
 
 
