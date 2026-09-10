@@ -17120,6 +17120,9 @@ export type Database = {
           data_source: string | null
           do_not_contact_at: string | null
           do_not_contact_reason: string | null
+          education_group_id: string | null
+          education_role_family: string | null
+          education_role_score: number | null
           email: string | null
           email_verified_status: string
           enriched_at: string | null
@@ -17136,6 +17139,7 @@ export type Database = {
           intent_score: number
           is_globally_suppressed: boolean
           is_internal: boolean
+          is_research_candidate: boolean
           last_compliance_review_at: string | null
           last_contacted_at: string | null
           last_name: string | null
@@ -17146,9 +17150,12 @@ export type Database = {
           linkedin_url: string | null
           name: string
           notes: string
+          organisation_id: string | null
           phone: string | null
+          research_program_key: string | null
           retention_policy: string | null
           retention_until: string | null
+          reveal_status: string
           role: string
           sendable_status: Database["public"]["Enums"]["contact_sendable_status"]
           seniority: Database["public"]["Enums"]["seniority_level"] | null
@@ -17186,6 +17193,9 @@ export type Database = {
           data_source?: string | null
           do_not_contact_at?: string | null
           do_not_contact_reason?: string | null
+          education_group_id?: string | null
+          education_role_family?: string | null
+          education_role_score?: number | null
           email?: string | null
           email_verified_status?: string
           enriched_at?: string | null
@@ -17202,6 +17212,7 @@ export type Database = {
           intent_score?: number
           is_globally_suppressed?: boolean
           is_internal?: boolean
+          is_research_candidate?: boolean
           last_compliance_review_at?: string | null
           last_contacted_at?: string | null
           last_name?: string | null
@@ -17212,9 +17223,12 @@ export type Database = {
           linkedin_url?: string | null
           name?: string
           notes?: string
+          organisation_id?: string | null
           phone?: string | null
+          research_program_key?: string | null
           retention_policy?: string | null
           retention_until?: string | null
+          reveal_status?: string
           role?: string
           sendable_status?: Database["public"]["Enums"]["contact_sendable_status"]
           seniority?: Database["public"]["Enums"]["seniority_level"] | null
@@ -17252,6 +17266,9 @@ export type Database = {
           data_source?: string | null
           do_not_contact_at?: string | null
           do_not_contact_reason?: string | null
+          education_group_id?: string | null
+          education_role_family?: string | null
+          education_role_score?: number | null
           email?: string | null
           email_verified_status?: string
           enriched_at?: string | null
@@ -17268,6 +17285,7 @@ export type Database = {
           intent_score?: number
           is_globally_suppressed?: boolean
           is_internal?: boolean
+          is_research_candidate?: boolean
           last_compliance_review_at?: string | null
           last_contacted_at?: string | null
           last_name?: string | null
@@ -17278,9 +17296,12 @@ export type Database = {
           linkedin_url?: string | null
           name?: string
           notes?: string
+          organisation_id?: string | null
           phone?: string | null
+          research_program_key?: string | null
           retention_policy?: string | null
           retention_until?: string | null
+          reveal_status?: string
           role?: string
           sendable_status?: Database["public"]["Enums"]["contact_sendable_status"]
           seniority?: Database["public"]["Enums"]["seniority_level"] | null
@@ -17325,6 +17346,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "warmup_progress"
             referencedColumns: ["inbox_id"]
+          },
+          {
+            foreignKeyName: "contacts_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -42698,31 +42726,67 @@ export type Database = {
       }
       organisations: {
         Row: {
+          account_domain: string | null
           created_at: string
+          education_group_id: string | null
           id: string
           industry: string
+          is_education_account: boolean
+          metadata: Json
           name: string
+          operating_footprint: string | null
           primary_contact: string | null
+          primary_source: string | null
+          qualification: string | null
+          research_program_key: string | null
+          review_note: string | null
+          source_key: string | null
+          source_version: string | null
           status: string
           updated_at: string
+          website_url: string | null
         }
         Insert: {
+          account_domain?: string | null
           created_at?: string
+          education_group_id?: string | null
           id?: string
           industry?: string
+          is_education_account?: boolean
+          metadata?: Json
           name: string
+          operating_footprint?: string | null
           primary_contact?: string | null
+          primary_source?: string | null
+          qualification?: string | null
+          research_program_key?: string | null
+          review_note?: string | null
+          source_key?: string | null
+          source_version?: string | null
           status?: string
           updated_at?: string
+          website_url?: string | null
         }
         Update: {
+          account_domain?: string | null
           created_at?: string
+          education_group_id?: string | null
           id?: string
           industry?: string
+          is_education_account?: boolean
+          metadata?: Json
           name?: string
+          operating_footprint?: string | null
           primary_contact?: string | null
+          primary_source?: string | null
+          qualification?: string | null
+          research_program_key?: string | null
+          review_note?: string | null
+          source_key?: string | null
+          source_version?: string | null
           status?: string
           updated_at?: string
+          website_url?: string | null
         }
         Relationships: []
       }
@@ -71493,6 +71557,9 @@ export type Database = {
           data_source: string | null
           do_not_contact_at: string | null
           do_not_contact_reason: string | null
+          education_group_id: string | null
+          education_role_family: string | null
+          education_role_score: number | null
           email: string | null
           email_verified_status: string
           enriched_at: string | null
@@ -71509,6 +71576,7 @@ export type Database = {
           intent_score: number
           is_globally_suppressed: boolean
           is_internal: boolean
+          is_research_candidate: boolean
           last_compliance_review_at: string | null
           last_contacted_at: string | null
           last_name: string | null
@@ -71519,9 +71587,12 @@ export type Database = {
           linkedin_url: string | null
           name: string
           notes: string
+          organisation_id: string | null
           phone: string | null
+          research_program_key: string | null
           retention_policy: string | null
           retention_until: string | null
+          reveal_status: string
           role: string
           sendable_status: Database["public"]["Enums"]["contact_sendable_status"]
           seniority: Database["public"]["Enums"]["seniority_level"] | null
