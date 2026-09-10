@@ -559,6 +559,51 @@ canonical CRM \`organisations\` and mirrored to the strategic planning layer (60
 replayed no education people. No education candidate contacts and no revealed education emails exist yet, and
 Smartlead state is untouched.
 
+### 101.12 Smartlead + sending infrastructure (10 September 2026) — implemented, not activated
+
+**Implemented in code (this build unit):**
+
+- **Shared, pure decision modules** under \`supabase/functions/_shared/\`: \`outboundSendability.ts\`
+  (single canonical suppression/compliance gate), \`smartleadCampaignResolve.ts\` (deterministic,
+  idempotent campaign binding), \`smartleadEventNormalizer.ts\` (event aliasing, stable idempotency
+  key, escalation-only CRM transitions), \`mailboxAllocator.ts\` (deterministic, auditable mailbox
+  selection), \`mailboxRegistrationParser.ts\` (bulk CSV estate registration) and
+  \`smartleadActivationChecklist.ts\` (canonical 12-key readiness).
+- **Campaign mapping** is one Smartlead mapping per Liftor campaign per provider, protected by a
+  unique index plus an idempotency token, storing \`provider_campaign_id\`, sync status, error and
+  \`last_synced_at\`. Ambiguous provider identity fails closed. This build never creates a campaign
+  inside Smartlead; apply may only bind to an existing unambiguous provider campaign.
+- **Lead mapping** stores Liftor contact + Liftor campaign + provider campaign + provider lead
+  identity, push state/error/timestamps and a sendability snapshot with block reason. Globally
+  suppressed, hard-bounced, unsubscribed and do-not-contact contacts are hard-blocked before any
+  push. Provider data may only escalate a block, never weaken canonical CRM truth.
+- **Return loop:** \`smartlead-webhook\` keeps its header-only shared-secret pattern and stays
+  disabled while the secret is unset. Every event is stored with raw payload, provenance and an
+  idempotency key; duplicates collapse to one row with no second transition; reply, hard bounce and
+  unsubscribe escalate canonical CRM state and cancel pending queue rows; a soft bounce does not
+  suppress; mailbox errors pause the failing sender; unknown events are stored and acknowledged
+  without any transition.
+- **Mailbox estate:** \`inboxes\` carries provider identity, SMTP/IMAP/provider readiness, warmup
+  readiness, ramp cap, health, load, ownership, estate key, allowed business names, segregation lock
+  and allocation exclusion, with \`mailbox_allocation_audit\` and \`mailbox_registration_batches\`
+  for auditability at 50+ and far larger estates.
+- **Founder surface:** \`/founder/sending-infrastructure\` shows the readiness checklist and the
+  estate, and runs bulk mailbox preview/apply, readiness refresh, the zero-mutation send dry run and
+  read-only provider mailbox discovery.
+
+**Live-configured state:** one connected Smartlead provider, \`webhook_configured=false\`, zero
+campaign mappings, zero lead mappings, zero provider events. The education mailbox estate is **not
+yet connected** — the only registered mailboxes are the two legacy Neon Candy inboxes, which are
+locked to Neon Candy, excluded from allocation and unavailable to education unless the founder
+explicitly reassigns them later.
+
+**Remaining external actions (founder, tomorrow):** buy/verify the education sending domains,
+create and connect ~50 mailboxes in Smartlead, register them through the bulk estate screen, start
+warmup, configure the Smartlead webhook to the Liftor receiver with the shared secret, then run the
+dry run again before any approval. Smartlead is the **delivery engine**, never the CRM and never the
+prospect-data source. No live send happens until founder final approval is recorded.
+
 *End of Section 101 — September 2026 Architecture Reconciliation.*
-`;
+\`;
+
 
