@@ -2,7 +2,7 @@
 // NOT the technical source of truth. Do NOT use to overwrite the User Manual or Full Technical Manual.
 // v1.2 refresh (10 Sep 2026) — September reconciliation current-state summary. Kept deliberately slim.
 
-export const SLIM_MANDY_MANUAL_VERSION = "1.4 — 10 September 2026 (CRM-Native Education Correction)";
+export const SLIM_MANDY_MANUAL_VERSION = "1.5 — 10 September 2026 (Education Commercial Layer)";
 
 export const SLIM_MANDY_MANUAL_MARKDOWN = `# Slim Mandy Manual
 
