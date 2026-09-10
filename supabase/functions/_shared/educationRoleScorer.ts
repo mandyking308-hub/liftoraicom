@@ -95,7 +95,7 @@ const FAMILY_RULES: FamilyRule[] = [
     authority: "medium",
     label: "Marketing / admissions / parent experience",
     patterns: [
-      /\b(admission|enrol|enroll|marketing|communications|brand|parent experience|parent relations|customer experience|retention)\b/i,
+      /\b(admissions?|enrol(l)?(ment|ments)?|marketing|communications|brand|parent experience|parent relations|customer experience|retention)\b/i,
     ],
   },
   {

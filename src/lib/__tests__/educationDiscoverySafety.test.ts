@@ -2,7 +2,10 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-const read = (p: string) => readFileSync(resolve(process.cwd(), p), "utf8");
+// Strip comments so prose like "no /people/match" cannot mask a real call.
+const stripComments = (src: string) =>
+  src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+const read = (p: string) => stripComments(readFileSync(resolve(process.cwd(), p), "utf8"));
 
 const discovery = read("supabase/functions/apollo-education-discovery/index.ts");
 const importer = read("supabase/functions/apollo-education-account-import/index.ts");
