@@ -6,9 +6,9 @@ export const SLIM_MANDY_MANUAL_VERSION = "1.5 — 10 September 2026 (Education C
 
 export const SLIM_MANDY_MANUAL_MARKDOWN = `# Slim Mandy Manual
 
-_Version 1.4 — 10 September 2026_
+_Version 1.5 — 10 September 2026_
 
-_Portable summary. Safe to upload to ChatGPT or share with advisers. Not the full technical source of truth (that is the Full Technical Manual, Sections 100 and 101)._
+_Portable summary. Safe to upload to ChatGPT or share with advisers. Not the full technical source of truth (that is the Full Technical Manual, Sections 100, 101 and 102)._
 
 ## What Liftor is
 Liftor is ONE internal AI operating system and control plane Mandy uses to run multiple businesses from one Command Centre. It reads, drafts, prepares, and waits for founder approval. It never sends, posts, charges or files anything without a yes.
