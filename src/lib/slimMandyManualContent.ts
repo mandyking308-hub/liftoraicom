@@ -2,11 +2,11 @@
 // NOT the technical source of truth. Do NOT use to overwrite the User Manual or Full Technical Manual.
 // v1.2 refresh (10 Sep 2026) — September reconciliation current-state summary. Kept deliberately slim.
 
-export const SLIM_MANDY_MANUAL_VERSION = "1.5 — 10 September 2026 (CRM-Native Education Correction, Quality Gate)";
+export const SLIM_MANDY_MANUAL_VERSION = "1.6 — 10 September 2026 (Smartlead & Sending Infrastructure)";
 
 export const SLIM_MANDY_MANUAL_MARKDOWN = `# Slim Mandy Manual
 
-_Version 1.5 — 10 September 2026_
+_Version 1.6 — 10 September 2026_
 
 _Portable summary. Safe to upload to ChatGPT or share with advisers. Not the full technical source of truth (that is the Full Technical Manual, Sections 100 and 101)._
 
@@ -27,7 +27,7 @@ Implemented in code · live-configured in the database/provider · historical ev
 ## Current state — 10 September 2026
 - **CRM:** 81 contacts, 68 business relationships. Distinct from research pools.
 - **Apollo:** free People Search, staging, qualification and selective founder-approved reveal all work. But several paths still carry Neon Candy-specific defaults, and caps were per run not per company. A **portfolio-wide Apollo Credit Firewall is now implemented**: every paid Apollo call must first take an atomic reservation against one shared budget. That budget is live but **disabled with a hard limit of 0**, and phone/personal-email/waterfall reveal are all false, so automatic paid enrichment stays OFF.
-- **Smartlead:** provider **connected**, substantial code implemented — but **0 campaign mappings, 0 lead mappings, 0 provider events, 0 activation-checklist rows**. The closed loop is not activated. Smartlead is the delivery lane, not the education prospect-data source.
+- **Smartlead / sending:** provider **connected**; the full delivery spine is now implemented — one campaign link per Liftor campaign, one lead link per person, a single shared suppression gate, a hardened idempotent return loop for replies/bounces/unsubscribes, a scalable mailbox estate with deterministic allocation and audit, a founder page at /founder/sending-infrastructure and a true zero-mutation dry run. **Live state is still 0 campaign mappings, 0 lead mappings, 0 provider events, webhook not configured.** The education mailbox estate is not yet connected; the only mailboxes on file are the two legacy Neon Candy inboxes, locked to Neon Candy and excluded from education allocation. Smartlead is the delivery engine, not the CRM and not the education prospect-data source. No live send until founder approval.
 - **Sending estate:** 8 domains, 2 inboxes (1 active) — legacy Neon Candy infrastructure, not the planned education estate (~50 mailboxes, still to be built and warmed).
 - **CRM-native education placement (correction):** education companies live once in the master company list (\`organisations\`); education people live once in the master CRM (\`contacts\`) linked to their company. The research/pipeline account view links back to the canonical company. Relationship Intelligence is research/evidence only, not the education CRM. Discovery writes non-sendable people with no email; a separate founder-selected reveal path exists but cannot run while the credit firewall is locked at 0.
 - **Education 152 universe:** all 152 reviewed education groups are loaded once into the canonical CRM company list (\`organisations\`) and mirrored to the strategic planning layer, split 60 International operator / 54 Domestic reserve / 21 Network route / 17 Review needed. The company load spent zero Apollo credits and replayed no education people; no education research candidates have been restored yet.
@@ -58,4 +58,4 @@ GitHub \`main\` is the code source of truth. Work in discrete reviewed branches.
 Any external gate, auto_send, cron, Smartlead campaign start or lead push, Apollo paid enrichment, buyer contact approval, data-room sharing, portal invites, payments or filings.
 `;
 
-export const SLIM_MANDY_MANUAL_FILENAME = `liftor-slim-mandy-manual-v1.5-2026-09-10.md`;
+export const SLIM_MANDY_MANUAL_FILENAME = `liftor-slim-mandy-manual-v1.6-2026-09-10.md`;
