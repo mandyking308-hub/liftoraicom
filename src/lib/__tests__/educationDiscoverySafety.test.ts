@@ -9,6 +9,7 @@ const read = (p: string) => stripComments(readFileSync(resolve(process.cwd(), p)
 const discovery = read("supabase/functions/apollo-education-discovery/index.ts");
 const importer = read("supabase/functions/apollo-education-account-import/index.ts");
 const reveal = read("supabase/functions/apollo-education-reveal/index.ts");
+const revealSelected = read("supabase/functions/apollo-education-reveal-selected/index.ts");
 const syncEnrich = read("supabase/functions/apollo-sync-enrich/index.ts");
 const unlockSelected = read("supabase/functions/apollo-unlock-selected/index.ts");
 const autopilot = read("supabase/functions/autopilot-orchestrator/index.ts");
