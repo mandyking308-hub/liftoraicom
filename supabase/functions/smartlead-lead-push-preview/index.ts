@@ -1,4 +1,8 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import {
+  evaluateOutboundSendability,
+  SENDABILITY_VERSION,
+} from "../_shared/outboundSendability.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -90,7 +94,7 @@ Deno.serve(async (req) => {
   let q = admin
     .from("contacts")
     .select(
-      "id, email, first_name, last_name, name, company, linkedin_url, source_platform, lawful_basis, unsubscribe_token, sendable_status, is_globally_suppressed, hard_bounced, unsubscribed_at, archived_at, founder_review_requested_at, assigned_business, active_campaign_id, compliance_status, do_not_contact",
+      "id, email, first_name, last_name, name, company, linkedin_url, source_platform, lawful_basis, unsubscribe_token, sendable_status, email_verified_status, is_globally_suppressed, hard_bounced, unsubscribed_at, do_not_contact_at, conversation_active, status, archived_at, founder_review_requested_at, assigned_business, active_campaign_id, compliance_status, do_not_contact",
     )
     .limit(500);
   if (business_id) q = q.eq("assigned_business", business_id);
@@ -115,9 +119,19 @@ Deno.serve(async (req) => {
   const eligible: any[] = [];
   const excluded: { id: string; reason: string }[] = [];
   const seenEmails = new Set<string>();
+  const snapshots = new Map<string, unknown>();
 
   for (const c of contacts ?? []) {
     const exclude = (reason: string) => excluded.push({ id: c.id, reason });
+
+    // Shared canonical sendability gate — identical logic to apply + dry-run.
+    const verdict = evaluateOutboundSendability(c as any);
+    snapshots.set(c.id, verdict.snapshot);
+    if (!verdict.sendable) {
+      exclude(verdict.blockers[0]);
+      continue;
+    }
+
     if (!c.email) { exclude("missing_email"); continue; }
     const emailKey = String(c.email).toLowerCase().trim();
     if (seenEmails.has(emailKey)) { exclude("duplicate_email"); continue; }
