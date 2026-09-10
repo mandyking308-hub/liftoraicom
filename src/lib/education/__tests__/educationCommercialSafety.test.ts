@@ -341,7 +341,7 @@ describe("outreach eligibility preflight", () => {
       campaign: readyCampaign,
       collision: allowedCollision,
       infrastructure: readyInfra,
-      ...(over as never),
+      ...(over as Record<string, never>),
     });
 
   it("is eligible only when every gate passes", () => {
