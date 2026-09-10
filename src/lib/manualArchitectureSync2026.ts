@@ -604,6 +604,6 @@ dry run again before any approval. Smartlead is the **delivery engine**, never t
 prospect-data source. No live send happens until founder final approval is recorded.
 
 *End of Section 101 — September 2026 Architecture Reconciliation.*
-\`;
+`;
 
 
