@@ -16,9 +16,9 @@
 //   5. Business Manuals            — business-specific tone/offers/rules/assets
 //   6. Slim Mandy Manual           — portable handover only, NOT technical truth
 
-export const ARCHITECTURE_SYNC_VERSION = "6.5 — GSM Outbound Infrastructure (10 September 2026)";
+export const ARCHITECTURE_SYNC_VERSION = "6.6 — Smartlead activation closeout (11 September 2026)";
 export const ARCHITECTURE_SYNC_DATE = "2026-09-10";
-export const ARCHITECTURE_SYNC_PREVIOUS_VERSION = "6.3 — Smartlead & Sending Infrastructure (10 September 2026)";
+export const ARCHITECTURE_SYNC_PREVIOUS_VERSION = "6.5 — GSM Outbound Infrastructure (10 September 2026)";
 export const ARCHITECTURE_SYNC_SOURCE =
   "August baseline: repo-wide audit of src/App.tsx routes (799 founder routes), src/pages/founder/**, src/components/founder/**, src/lib/** engines, supabase/functions/** (604 functions), supabase/migrations/** and docs/**. September delta: docs/manual-architecture-reconciliation-2026-09-10.md — 21 materially changed files since the August manual commit plus a live database state check on 10 September 2026.";
 
@@ -762,6 +762,54 @@ registry. 6. Connect them in Smartlead and sync account status. 7. Allocate Laun
 20. 8. Only then does sender readiness become true, and founder send approval remains separate.
 
 *End of Section 103 — GSM Outbound Infrastructure.*
+## 104 Smartlead activation closeout (11 September 2026)
+No new tables, no parallel manual. This section records the verified truth of the existing
+Smartlead + sending layer.
+
+### 104.1 Canonical tables (reused, not recreated)
+\`outbound_provider_campaign_mappings\`, \`outbound_provider_lead_mappings\`,
+\`outbound_provider_events\`, \`smartlead_activation_checklist\`, \`public.inboxes\` and the GSM
+estate tables. Live safety indexes verified in the database:
+- \`outbound_provider_campaign_mappings_liftor_uniq\` — unique \`(provider_id, liftor_campaign_id)\`
+  where \`liftor_campaign_id\` is not null: exactly one Liftor campaign mapping per provider.
+- \`outbound_provider_campaign_mappings_provider_campaign_uniq\` and \`..._idem_uniq\` — provider
+  campaign identity and idempotency token uniqueness.
+- \`outbound_provider_lead_mappings_contact_campaign_uniq\`, \`..._provider_identity_uniq\` and
+  \`..._uniq\` on \`(provider_type, provider_campaign_id, lower(contact_email))\`.
+- \`outbound_provider_events_idempotency_uniq\` on \`(provider_type, idempotency_key)\`.
+Apply paths are idempotent, ambiguity fails closed, and no external Smartlead campaign is created
+by Liftor.
+
+### 104.2 Webhook return loop
+\`smartlead-webhook\` requires \`SMARTLEAD_WEBHOOK_SECRET\` via \`x-smartlead-signature\` /
+\`x-webhook-secret\`. While the secret is unset the receiver answers \`mode: "disabled"\` and
+applies no mutation. Every accepted event stores raw payload, provenance and a deterministic
+idempotency key; duplicates collapse to one row with no second transition; ambiguous identity
+resolves to no contact; replies, hard bounces and unsubscribes only ever escalate CRM suppression.
+\`webhook_configured\` stays false until the webhook is genuinely configured inside Smartlead.
+
+### 104.3 Activation checklist
+\`_shared/smartleadActivationChecklist.ts\` is pure and emits exactly the twelve canonical keys:
+provider_connection, webhook_configured, campaign_mapping_ready, lead_mapping_ready,
+event_return_ready, sending_domains_ready, mailbox_estate_ready, warmup_ready, sender_caps_ready,
+suppression_sync_ready, first_end_to_end_test_ready, live_launch_approval.
+\`smartlead-activation-refresh\` recomputes them from live prerequisites and replaces the rows for
+that scope idempotently. Neon Candy is refused by name. Current live result for each of the four
+education businesses: 2 ready, 6 not ready, 4 blocked; \`live_launch_approval\` blocked.
+
+### 104.4 Dry run
+\`smartlead-send-dry-run\` is founder/admin only and never calls Smartlead. Any unresolved link in
+the chain — missing ids, no active mapped campaign mapping, unresolvable contact — now returns a
+structured \`decision: "BLOCKED"\` with the blocking stage and writes nothing at all. A resolvable
+run reports \`WOULD_SEND\` or \`BLOCKED\` and records a dry-run audit row only.
+
+### 104.5 Current live truth (11 September 2026)
+Campaign mappings 0, lead mappings 0, provider events 0, GSM domains 0, GSM mailboxes 0,
+campaign-ready mailboxes 0, checklist rows 48 (4 businesses x 12). Smartlead connection reachable,
+0 campaigns, 1 email account (\`hello@neoncandy.online\`, excluded as non-GSM), webhook not
+configured. Remaining steps are physical and external: buy/verify GSM domains, create ~50 mailboxes
+and warm them in Winnr, connect them in Smartlead, configure the Smartlead webhook with a shared
+secret, then founder approval.
+
+*End of Section 104 — Smartlead activation closeout.*
 `;
-
-

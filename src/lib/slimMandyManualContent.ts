@@ -2,7 +2,7 @@
 // NOT the technical source of truth. Do NOT use to overwrite the User Manual or Full Technical Manual.
 // v1.2 refresh (10 Sep 2026) — September reconciliation current-state summary. Kept deliberately slim.
 
-export const SLIM_MANDY_MANUAL_VERSION = "1.8 — 10 September 2026 (GSM Outbound Infrastructure)";
+export const SLIM_MANDY_MANUAL_VERSION = "1.9 — 11 September 2026 (Smartlead activation closeout)";
 
 export const SLIM_MANDY_MANUAL_MARKDOWN = `# Slim Mandy Manual
 
@@ -27,7 +27,7 @@ Implemented in code · live-configured in the database/provider · historical ev
 ## Current state — 10 September 2026
 - **CRM:** live contact and business-relationship counts are read from the CRM page (they grow as you work). Distinct from research pools.
 - **Apollo:** free People Search, staging, qualification and selective founder-approved reveal all work. But several paths still carry Neon Candy-specific defaults, and caps were per run not per company. A **portfolio-wide Apollo Credit Firewall is now implemented**: every paid Apollo call must first take an atomic reservation against one shared budget. That budget is live but **disabled with a hard limit of 0**, and phone/personal-email/waterfall reveal are all false, so automatic paid enrichment stays OFF.
-- **Smartlead / sending:** provider **connected**; the full delivery spine is now implemented — one campaign link per Liftor campaign, one lead link per person, a single shared suppression gate, a hardened idempotent return loop for replies/bounces/unsubscribes, a scalable mailbox estate with deterministic allocation and audit, a founder page at /founder/sending-infrastructure and a true zero-mutation dry run. **Live state is still 0 campaign mappings, 0 lead mappings, 0 provider events, webhook not configured.** The education mailbox estate is not yet connected; the only mailboxes on file are the two legacy Neon Candy inboxes, locked to Neon Candy and excluded from education allocation. Smartlead is the delivery engine, not the CRM and not the education prospect-data source. No live send until founder approval.
+- **Smartlead / sending:** provider **connected**; the full delivery spine is now implemented — one campaign link per Liftor campaign, one lead link per person, a single shared suppression gate, a hardened idempotent return loop for replies/bounces/unsubscribes, a scalable mailbox estate with deterministic allocation and audit, a founder page at /founder/sending-infrastructure and a true zero-mutation dry run. **Live state (11 Sep 2026): 0 campaign mappings, 0 lead mappings, 0 provider events, 0 GSM domains, 0 GSM mailboxes, webhook not configured.** The canonical 12-key activation checklist is now seeded per education business (2 ready / 6 not ready / 4 blocked; live_launch_approval blocked), and the dry run returns a structured BLOCKED with the blocking stage and zero writes. The education mailbox estate is not yet connected; the only mailboxes on file are the two legacy Neon Candy inboxes, locked to Neon Candy and excluded from education allocation. Smartlead is the delivery engine, not the CRM and not the education prospect-data source. No live send until founder approval.
 - **Sending estate:** 8 domains, 2 inboxes (1 active) — legacy Neon Candy infrastructure, not the planned education estate (~50 mailboxes, still to be built and warmed).
 - **CRM-native education placement (correction):** education companies live once in the master company list (\`organisations\`); education people live once in the master CRM (\`contacts\`) linked to their company. The research/pipeline account view links back to the canonical company. Relationship Intelligence is research/evidence only, not the education CRM. Discovery writes non-sendable people with no email; a separate founder-selected reveal path exists but cannot run while the credit firewall is locked at 0.
 - **Education 152 universe:** all 152 reviewed education groups are loaded once into the canonical CRM company list (\`organisations\`) and mirrored to the strategic planning layer, split 60 International operator / 54 Domestic reserve / 21 Network route / 17 Review needed. The company load spent zero Apollo credits and replayed no education people; no education research candidates have been restored yet.
@@ -68,4 +68,4 @@ this estate permanently. Page: /founder/gsm-outbound.
 Any external gate, auto_send, cron, Smartlead campaign start or lead push, Apollo paid enrichment, buyer contact approval, data-room sharing, portal invites, payments or filings.
 `;
 
-export const SLIM_MANDY_MANUAL_FILENAME = `liftor-slim-mandy-manual-v1.8-2026-09-10.md`;
+export const SLIM_MANDY_MANUAL_FILENAME = `liftor-slim-mandy-manual-v1.9-2026-09-11.md`;
