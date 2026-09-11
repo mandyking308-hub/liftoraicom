@@ -5,6 +5,8 @@ import {
   WINNR_BASE_URL,
   WINNR_ENDPOINTS,
   WINNR_MUTATION_ENDPOINTS,
+  deriveWinnrEstateState,
+  normaliseWinnrAccount,
   normaliseWinnrMailbox,
   winnrCall,
   winnrTokenConfigured,
@@ -110,5 +112,58 @@ describe("gsm-winnr-sync post-purchase safety", () => {
     expect(fn).not.toContain("inbox/send");
     expect(fn).not.toContain("campaigns/create");
     expect(fn).not.toContain("server.smartlead.ai");
+  });
+});
+
+describe("Winnr post-purchase entitlement truth", () => {
+  it("exposes the verified account endpoint", () => {
+    expect(WINNR_ENDPOINTS.getAccount).toEqual({ method: "GET", path: "/account" });
+  });
+
+  it("never copies the provider api token into the normalised account", () => {
+    const account = normaliseWinnrAccount({
+      name: "Mandy King",
+      plan: "startup",
+      stripe_subscription_status: "active",
+      domains_limit: 10,
+      domains_used: 0,
+      email_users_limit: 50,
+      email_users_used: 0,
+      api_token: { id: "abc", name: "Liftor GSM", secret: "must-not-survive" },
+    });
+    expect(account.plan).toBe("startup");
+    expect(account.email_users_limit).toBe(50);
+    expect(JSON.stringify(account)).not.toContain("must-not-survive");
+    expect(JSON.stringify(account)).not.toContain("api_token");
+  });
+
+  it("distinguishes a paid plan with no infrastructure from a built estate", () => {
+    const paidEmpty = deriveWinnrEstateState(
+      normaliseWinnrAccount({ stripe_subscription_status: "active", domains_limit: 10, domains_used: 0, email_users_limit: 50, email_users_used: 0 }),
+    );
+    expect(paidEmpty.estate_state).toBe("subscription_active_no_infrastructure");
+    expect(paidEmpty.next_action).toContain("no sending domain has been bought");
+
+    const domainsOnly = deriveWinnrEstateState(
+      normaliseWinnrAccount({ stripe_subscription_status: "active", domains_used: 3, email_users_used: 0 }),
+    );
+    expect(domainsOnly.estate_state).toBe("domains_only_no_mailboxes");
+
+    const built = deriveWinnrEstateState(
+      normaliseWinnrAccount({ stripe_subscription_status: "active", domains_used: 10, email_users_used: 50 }),
+    );
+    expect(built.estate_state).toBe("infrastructure_present");
+
+    const lapsed = deriveWinnrEstateState(normaliseWinnrAccount({ stripe_subscription_status: "canceled" }));
+    expect(lapsed.estate_state).toBe("no_subscription");
+  });
+
+  it("keeps the founder surface free of stale 'account does not exist' wording", () => {
+    const page = readFileSync(resolve(process.cwd(), "src/pages/founder/GSMOutbound.tsx"), "utf8");
+    expect(page).not.toContain("Winnr account has not been created");
+    expect(page).not.toContain("Create the GSM Winnr account");
+    expect(page).toContain("SYNC GSM WINNR REGISTRY");
+    expect(page).toContain("START GSM WINNR WARMUP");
+    expect(page).not.toContain("campaigns/create");
   });
 });
