@@ -10,10 +10,12 @@ import {
   winnrTokenConfigured,
 } from "../../../supabase/functions/_shared/winnrClient";
 
-const fn = readFileSync(
-  resolve(process.cwd(), "supabase/functions/gsm-winnr-sync/index.ts"),
-  "utf8",
-);
+const read = (path: string) => readFileSync(resolve(process.cwd(), path), "utf8");
+const winnrFn = read("supabase/functions/gsm-winnr-sync/index.ts");
+const smartleadFn = read("supabase/functions/gsm-smartlead-mailbox-sync/index.ts");
+const webhookStatusFn = read("supabase/functions/smartlead-webhook-status/index.ts");
+const poolFn = read("supabase/functions/gsm-pool-allocate/index.ts");
+const founderPage = read("src/pages/founder/GSMOutbound.tsx");
 
 describe("Winnr post-purchase API contract", () => {
   it("uses the current Winnr v1 base URL and verified resource paths", () => {
@@ -68,7 +70,7 @@ describe("Winnr post-purchase API contract", () => {
     expect(called).toBe(false);
   });
 
-  it("normalises the mailbox address without retaining credentials", () => {
+  it("normalises mailbox identity without retaining credentials", () => {
     const observed = normaliseWinnrMailbox({
       id: "eu_123",
       full_address: "Mandy@Example-Outreach.com",
@@ -85,30 +87,103 @@ describe("Winnr post-purchase API contract", () => {
 
 describe("gsm-winnr-sync post-purchase safety", () => {
   it("reads WINNR_API_TOKEN only on the server and never embeds a token value", () => {
-    expect(fn).toContain('Deno.env.get("WINNR_API_TOKEN")');
-    expect(fn).not.toMatch(/WINNR_API_TOKEN\s*=\s*["'][^"']+wnr_/);
+    expect(winnrFn).toContain('Deno.env.get("WINNR_API_TOKEN")');
+    expect(winnrFn).not.toMatch(/WINNR_API_TOKEN\s*=\s*["'][^"']+wnr_/);
   });
 
   it("states the account is purchased when the token is missing", () => {
-    expect(fn).toContain("account and mailbox estate have been purchased");
-    expect(fn).not.toContain("Create the GSM Winnr account");
+    expect(winnrFn).toContain("account and mailbox estate have been purchased");
+    expect(winnrFn).not.toContain("Create the GSM Winnr account");
   });
 
-  it("requires the exact founder confirmation before starting warmup", () => {
-    expect(fn).toContain('const WARMUP_CONFIRMATION = "START GSM WINNR WARMUP"');
-    expect(fn).toContain("external_action_confirmation_required");
-    expect(fn).toContain('winnrCall<unknown>("startWarmingAsync"');
+  it("requires separate exact founder confirmations for registry sync and warmup", () => {
+    expect(winnrFn).toContain('const SYNC_CONFIRMATION = "SYNC GSM WINNR REGISTRY"');
+    expect(winnrFn).toContain('const WARMUP_CONFIRMATION = "START GSM WINNR WARMUP"');
+    expect(winnrFn).toContain("external_action_confirmation_required");
+    expect(winnrFn).toContain('winnrCall<unknown>("startWarmingAsync"');
   });
 
   it("warms only already-synced GSM registry rows and excludes non-GSM mailboxes", () => {
-    expect(fn).toContain('eq("estate_classification", "gsm")');
-    expect(fn).toContain("isExcludedFromGsmEstate");
-    expect(fn).toContain("no_synced_gsm_mailboxes");
+    expect(winnrFn).toContain('eq("estate_classification", "gsm")');
+    expect(winnrFn).toContain("isExcludedFromGsmEstate");
+    expect(winnrFn).toContain("no_synced_gsm_mailboxes");
+  });
+
+  it("uses a conservative new-domain warmup profile", () => {
+    expect(winnrFn).toContain('emails_per_day: 15');
+    expect(winnrFn).toContain('rampup_speed: "slow"');
+    expect(winnrFn).toContain('warmup_status: "warming"');
   });
 
   it("never sends campaign email or creates a Smartlead campaign", () => {
-    expect(fn).not.toContain("inbox/send");
-    expect(fn).not.toContain("campaigns/create");
-    expect(fn).not.toContain("server.smartlead.ai");
+    expect(winnrFn).not.toContain("inbox/send");
+    expect(winnrFn).not.toContain("campaigns/create");
+    expect(winnrFn).not.toContain("server.smartlead.ai");
+  });
+});
+
+describe("GSM Smartlead reconciliation safety", () => {
+  it("uses a server-side key and provider GET only", () => {
+    expect(smartleadFn).toContain('Deno.env.get("SMARTLEAD_API_KEY")');
+    expect(smartleadFn).toContain('method: "GET"');
+    expect(smartleadFn).not.toMatch(/method:\s*["'](POST|PUT|PATCH|DELETE)["']/);
+  });
+
+  it("requires founder confirmation before registry writes", () => {
+    expect(smartleadFn).toContain('const APPLY_CONFIRMATION = "SYNC GSM SMARTLEAD REGISTRY"');
+    expect(smartleadFn).toContain("external_action_confirmation_required");
+  });
+
+  it("updates existing gsm_mailboxes only and never creates campaigns", () => {
+    expect(smartleadFn).toContain('.from("gsm_mailboxes")');
+    expect(smartleadFn).toContain(".update(");
+    expect(smartleadFn).not.toMatch(/from\("gsm_mailboxes"\)[\s\S]{0,80}\.(insert|upsert)\(/);
+    expect(smartleadFn).not.toContain("campaigns/create");
+  });
+
+  it("treats Smartlead warmup-enabled as warming, never campaign-ready", () => {
+    expect(smartleadFn).toContain('warmup_status: a.warmup_enabled === true ? "warming" : "not_started"');
+    expect(smartleadFn).not.toContain('warmup_status: "campaign_ready"');
+  });
+});
+
+describe("Webhook and sender-pool controls", () => {
+  it("webhook status exposes readiness booleans but never the secret", () => {
+    expect(webhookStatusFn).toContain('Deno.env.get("SMARTLEAD_WEBHOOK_SECRET")');
+    expect(webhookStatusFn).toContain("webhook_secret_configured");
+    expect(webhookStatusFn).not.toMatch(/SMARTLEAD_WEBHOOK_SECRET.*return/i);
+    expect(webhookStatusFn).not.toContain("webhook_secret:");
+  });
+
+  it("pool allocation is founder/admin gated, confirmation-gated and campaign-ready only", () => {
+    expect(poolFn).toContain('const APPLY_CONFIRMATION = "ALLOCATE GSM SENDER POOLS"');
+    expect(poolFn).toContain("selectGsmMailboxes");
+    expect(poolFn).toContain('eq("estate_classification", "gsm")');
+    expect(poolFn).toContain("thread_sticky: true");
+    expect(poolFn).not.toContain("server.smartlead.ai");
+    expect(poolFn).not.toContain("api.winnr.app");
+  });
+});
+
+describe("Founder GSM outbound control panel", () => {
+  it("describes the real post-purchase state and no longer claims Winnr does not exist", () => {
+    expect(founderPage).toContain("The Winnr estate is purchased");
+    expect(founderPage).toContain("has been purchased");
+    expect(founderPage).not.toContain("The Winnr account has not been created");
+    expect(founderPage).not.toContain("Create the GSM Winnr account");
+  });
+
+  it("wires every safe operational stage", () => {
+    expect(founderPage).toContain("Winnr preview");
+    expect(founderPage).toContain("SYNC GSM WINNR REGISTRY");
+    expect(founderPage).toContain("START GSM WINNR WARMUP");
+    expect(founderPage).toContain("SYNC GSM SMARTLEAD REGISTRY");
+    expect(founderPage).toContain("smartlead-webhook-status");
+    expect(founderPage).toContain("ALLOCATE GSM SENDER POOLS");
+  });
+
+  it("keeps Neon Candy exclusion and founder campaign approval explicit", () => {
+    expect(founderPage).toContain("hello@neoncandy.online");
+    expect(founderPage).toContain("Founder campaign approval remains a separate gate");
   });
 });
