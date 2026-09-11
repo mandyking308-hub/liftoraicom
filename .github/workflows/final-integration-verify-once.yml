@@ -1,4 +1,5 @@
 name: One-use Final Integrated Verification
+# rerun after GSM UI TypeScript target compatibility repair
 
 on:
   push:
