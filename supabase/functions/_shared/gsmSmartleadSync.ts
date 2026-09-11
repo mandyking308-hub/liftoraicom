@@ -39,7 +39,8 @@ export function extractSmartleadAccounts(payload: unknown): Record<string, unkno
 }
 
 export function mapSmartleadAccount(a: Record<string, unknown>): ObservedSmartleadMailbox {
-  const email = String(a.email ?? "").trim().toLowerCase();
+  // Smartlead returns the sending address as `from_email`; some payloads use `email`.
+  const email = String(a.from_email ?? a.email ?? "").trim().toLowerCase();
   const warmupEnabled = a.warmup_enabled === true || a.warmup_enabled === 1 || a.warmup_enabled === "true";
   return {
     smartlead_email_account_id: a.id != null ? String(a.id) : null,
