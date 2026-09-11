@@ -114,3 +114,18 @@ describe("gsm smartlead sync edge function safety", () => {
     expect(fn).not.toMatch(/from\("gsm_mailboxes"\)\s*\.\s*(insert|upsert)/);
   });
 });
+
+describe("smartlead field shape", () => {
+  it("reads the sending address from from_email as Smartlead returns it", () => {
+    const o = mapSmartleadAccount({ id: 7, from_email: "Ops@GSM-Outbound-03.com" });
+    expect(o.email).toBe("ops@gsm-outbound-03.com");
+    expect(o.estate_classification).toBe("gsm");
+  });
+
+  it("reports an address-less account as unidentified, not as Neon Candy", () => {
+    const r = reconcileSmartleadAccounts([mapSmartleadAccount({ id: 8 })], []);
+    expect(r.unidentified).toHaveLength(1);
+    expect(r.excluded).toHaveLength(0);
+    expect(r.gsm_candidates).toHaveLength(0);
+  });
+});
