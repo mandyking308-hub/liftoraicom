@@ -152,6 +152,7 @@ Deno.serve(async (req) => {
     accounts_seen: observed.length,
     gsm_candidates: rec.gsm_candidates.length,
     excluded_non_gsm: rec.excluded.map((e) => ({ email: e.email, classification: EXTERNAL_NON_GSM })),
+    unidentified_accounts: rec.unidentified.map((o) => o.smartlead_email_account_id),
     matched_existing_gsm_mailboxes: rec.matched.map((m) => ({
       registry_id: m.registry_id,
       email: m.email,
