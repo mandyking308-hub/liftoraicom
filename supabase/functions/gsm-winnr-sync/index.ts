@@ -113,6 +113,26 @@ Deno.serve(async (req) => {
     return [];
   };
 
+  // Provider entitlement + usage truth (read-only). This is what makes the
+  // founder surface able to distinguish "plan purchased" from "estate built".
+  const accountCall = await winnrCall<Record<string, unknown>>("getAccount", { token: TOKEN });
+  const accountRaw = (accountCall.data as { data?: Record<string, unknown> } | null)?.data ?? accountCall.data ?? null;
+  const account = normaliseWinnrAccount(accountRaw as Record<string, unknown> | null);
+  const estate = deriveWinnrEstateState(account);
+  const accountBlock = {
+    account: {
+      plan: account.plan,
+      subscription_status: account.subscription_status,
+      domains_limit: account.domains_limit,
+      domains_used: account.domains_used,
+      email_users_limit: account.email_users_limit,
+      email_users_used: account.email_users_used,
+    },
+    estate_state: estate.estate_state,
+    next_action: estate.next_action,
+  };
+
+
   // Warm-up is an explicit post-purchase external action. It only ever targets
   // mailboxes that are already present in BOTH Winnr and the GSM registry.
   if (action === "warmup") {
