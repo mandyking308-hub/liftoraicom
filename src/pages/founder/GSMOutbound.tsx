@@ -72,27 +72,52 @@ export default function GSMOutboundPage() {
     void load();
   }, [load]);
 
-  const call = async (fn: string, label: string, set: (v: Record<string, unknown>) => void) => {
+  const call = async (
+    fn: string,
+    label: string,
+    body: Record<string, unknown>,
+    set: (v: Record<string, unknown>) => void,
+  ) => {
     setBusy(label);
-    const { data, error } = await supabase.functions.invoke(fn, { body: { action: "test" } });
+    const { data, error } = await supabase.functions.invoke(fn, { body });
     setBusy(null);
     if (error) {
       toast({ title: `${label} failed`, description: error.message, variant: "destructive" });
       return;
     }
-    set((data ?? {}) as Record<string, unknown>);
+    const payload = (data ?? {}) as Record<string, unknown>;
+    set(payload);
+    if (payload.blocker) {
+      toast({ title: `${label}: blocked`, description: String(payload.blocker) });
+    } else {
+      toast({ title: `${label} complete`, description: String(payload.message ?? "Done.") });
+    }
     await load();
+  };
+
+  /** Every registry-mutating provider action needs an explicit typed confirmation. */
+  const confirmed = (label: string, phrase: string) => {
+    const typed = window.prompt(`${label}\n\nThis writes to the GSM registry. Type exactly:\n${phrase}`);
+    if (typed !== phrase) {
+      toast({ title: "Cancelled", description: "Confirmation phrase did not match. Nothing was changed." });
+      return false;
+    }
+    return true;
   };
 
   const snapshot = buildEstateSnapshot(mailboxes, domains, allocations);
   const readiness = evaluateSenderInfrastructureReadiness({ mailboxes, domains, allocations });
   const winnrConnected = winnr?.winnr_token_configured === true && winnr?.connection_state === "connected";
   const smartleadConnected = smartlead?.connection_state === "connected";
+  const winnrAccount = (winnr?.account ?? null) as Record<string, unknown> | null;
+  const winnrNextAction = winnr?.next_action ? String(winnr.next_action) : null;
 
   const blocker =
     snapshot.mailbox_count === 0
-      ? "No GSM mailboxes exist yet. The Winnr account has not been created, so no domain or mailbox can be provisioned."
+      ? winnrNextAction ??
+        "No GSM mailboxes are registered yet. Run Check Winnr to see the live provider state and the exact next step."
       : readiness.blockers.join(", ") || null;
+
 
   return (
     <FounderLayout>
