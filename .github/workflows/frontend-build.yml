@@ -1,9 +1,23 @@
-name: Frontend Build
+name: Liftor Application Quality Gate
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - "src/**"
+      - "supabase/functions/**"
+      - ".env"
+      - ".env.example"
+      - "package.json"
+      - "package-lock.json"
+      - "vite.config.*"
+      - "tsconfig*.json"
+      - ".github/workflows/frontend-build.yml"
   pull_request:
     paths:
       - "src/**"
+      - "supabase/functions/**"
       - ".env"
       - ".env.example"
       - "package.json"
@@ -17,14 +31,14 @@ permissions:
   contents: read
 
 concurrency:
-  group: frontend-build-${{ github.event.pull_request.number || github.ref }}
+  group: liftor-quality-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build:
-    name: Build Liftor frontend
+  quality:
+    name: Typecheck, tests and production build
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -37,6 +51,15 @@ jobs:
 
       - name: Install dependencies without changing the repository lockfile
         run: npm install --no-package-lock --no-audit --no-fund
+
+      - name: TypeScript typecheck
+        run: npx tsc --noEmit -p tsconfig.app.json
+
+      - name: GSM / Winnr post-purchase safety tests
+        run: npx vitest run src/lib/__tests__/winnrPostPurchase.test.ts src/lib/__tests__/gsmSenderEstate.test.ts
+
+      - name: Full Vitest suite
+        run: npx vitest run
 
       - name: Build production bundle
         run: npm run build
