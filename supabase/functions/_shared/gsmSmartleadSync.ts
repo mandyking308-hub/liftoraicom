@@ -98,7 +98,7 @@ export function reconcileSmartleadAccounts(
     else unmatched.push(o);
   }
 
-  return { observed, excluded, gsm_candidates, matched, unmatched };
+  return { observed, unidentified, excluded, gsm_candidates, matched, unmatched };
 }
 
 /** Fields written back onto an EXISTING gsm_mailboxes row. Never an insert. */
