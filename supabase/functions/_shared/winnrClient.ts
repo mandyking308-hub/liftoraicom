@@ -1,28 +1,36 @@
 /**
  * Winnr provider client — GSM mailbox/domain infrastructure.
  *
- * All endpoint paths live HERE and nowhere else, so that when the GSM Winnr
- * account exists the paths can be corrected in one file.
+ * All endpoint paths live HERE and nowhere else so provider API changes are
+ * reconciled in one audited server-side module.
  *
  * Rules:
  *  - Server-side only. WINNR_API_TOKEN never reaches the browser.
  *  - Read paths are safe. Every mutation path defaults to preview/dry-run and
  *    must be gated by founder auth + an explicit external-action confirmation.
  *  - Errors (401/403/429/5xx) are returned truthfully, never as empty success.
+ *
+ * Endpoint source reconciled 11 Sep 2026 against Winnr's current public API
+ * documentation (api.winnr.app/v1): domains, email-users, warming and export.
  */
 
 export const WINNR_BASE_URL = "https://api.winnr.app/v1";
-export const WINNR_CLIENT_VERSION = "winnr-client-1.0.0";
+export const WINNR_CLIENT_VERSION = "winnr-client-1.1.0";
 
 export const WINNR_ENDPOINTS = {
   // Read
   listDomains: { method: "GET", path: "/domains" },
   listEmailUsers: { method: "GET", path: "/email-users" },
-  listWarmings: { method: "GET", path: "/warmings" },
+  listWarmings: { method: "GET", path: "/warming" },
+  warmingOverview: { method: "GET", path: "/warming/overview" },
   // Mutations — NEVER executed without an explicit external-action confirmation.
   createDomain: { method: "POST", path: "/domains" },
   createEmailUser: { method: "POST", path: "/email-users" },
-  startWarming: { method: "POST", path: "/warmings" },
+  createEmailUsersBulk: { method: "POST", path: "/email-users/bulk" },
+  // Keep the historic key name for compatibility; the current API path is /warming/enable.
+  startWarming: { method: "POST", path: "/warming/enable" },
+  startWarmingAsync: { method: "POST", path: "/warming/enable-async" },
+  exportCredentials: { method: "POST", path: "/export" },
 } as const;
 
 export type WinnrEndpointKey = keyof typeof WINNR_ENDPOINTS;
@@ -30,7 +38,10 @@ export type WinnrEndpointKey = keyof typeof WINNR_ENDPOINTS;
 export const WINNR_MUTATION_ENDPOINTS: WinnrEndpointKey[] = [
   "createDomain",
   "createEmailUser",
+  "createEmailUsersBulk",
   "startWarming",
+  "startWarmingAsync",
+  "exportCredentials",
 ];
 
 export interface WinnrCallResult<T = unknown> {
@@ -177,7 +188,9 @@ export function normaliseWinnrDomain(raw: Record<string, unknown>) {
 
 /** Normalise a provider mailbox payload onto the canonical GSM registry shape. */
 export function normaliseWinnrMailbox(raw: Record<string, unknown>) {
-  const email = String(raw.email ?? raw.address ?? raw.username ?? "").trim().toLowerCase();
+  const email = String(
+    raw.email ?? raw.full_address ?? raw.address ?? raw.username ?? "",
+  ).trim().toLowerCase();
   return {
     email,
     local_part: email.includes("@") ? email.split("@")[0] : null,
