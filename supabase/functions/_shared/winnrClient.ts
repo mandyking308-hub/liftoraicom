@@ -203,3 +203,60 @@ export function normaliseWinnrMailbox(raw: Record<string, unknown>) {
     domain: email.includes("@") ? email.split("@")[1] : null,
   };
 }
+
+/**
+ * Normalise the Winnr account payload (GET /account). Entitlement + usage only.
+ * The API token itself is NEVER copied out of the provider payload.
+ */
+export function normaliseWinnrAccount(raw: Record<string, unknown> | null | undefined) {
+  const o = (raw ?? {}) as Record<string, unknown>;
+  const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : null);
+  return {
+    account_name: o.name != null ? String(o.name) : null,
+    plan: o.plan != null ? String(o.plan) : null,
+    subscription_status: o.stripe_subscription_status != null ? String(o.stripe_subscription_status) : null,
+    domains_limit: num(o.domains_limit),
+    domains_used: num(o.domains_used),
+    domain_credits: num(o.domain_credits),
+    email_users_limit: num(o.email_users_limit),
+    email_users_used: num(o.email_users_used),
+  };
+}
+
+/** Truthful post-purchase estate state derived from provider entitlement + usage. */
+export function deriveWinnrEstateState(account: ReturnType<typeof normaliseWinnrAccount>): {
+  estate_state:
+    | "no_subscription"
+    | "subscription_active_no_infrastructure"
+    | "domains_only_no_mailboxes"
+    | "infrastructure_present";
+  next_action: string;
+} {
+  const active = account.subscription_status === "active";
+  const domains = account.domains_used ?? 0;
+  const mailboxes = account.email_users_used ?? 0;
+  if (!active) {
+    return {
+      estate_state: "no_subscription",
+      next_action: "The Winnr subscription is not active. Reactivate the plan before any sending infrastructure can exist.",
+    };
+  }
+  if (domains === 0) {
+    return {
+      estate_state: "subscription_active_no_infrastructure",
+      next_action:
+        `The Winnr plan is active with capacity for ${account.domains_limit ?? 0} domains and ${account.email_users_limit ?? 0} mailboxes, but no sending domain has been bought or connected yet. Buy/verify the GSM sending domains in Winnr, then create the mailboxes, then run Sync registry here.`,
+    };
+  }
+  if (mailboxes === 0) {
+    return {
+      estate_state: "domains_only_no_mailboxes",
+      next_action:
+        "Sending domains exist in Winnr but no mailboxes have been created. Create the mailboxes in Winnr, then run Sync registry here.",
+    };
+  }
+  return {
+    estate_state: "infrastructure_present",
+    next_action: "Run Sync registry to import the purchased Winnr estate, then start warm-up.",
+  };
+}
