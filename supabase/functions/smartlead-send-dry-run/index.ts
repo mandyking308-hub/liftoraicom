@@ -48,8 +48,23 @@ Deno.serve(async (req) => {
   const contact_id: string | null = body.contact_id ?? null;
   const estate_key: string | null = body.estate_key ?? "education";
 
+  // Fail-closed structured result. Any unresolved link in the chain returns
+  // BLOCKED (never a send) and performs no writes at all.
+  const blocked = (stage: string, reason: string, extra: Record<string, unknown> = {}) =>
+    json({
+      ok: true,
+      dry_run: true,
+      decision: "BLOCKED",
+      would_send: false,
+      blocked_stage: stage,
+      blockers: [reason],
+      provider_payload: null,
+      notes: "No provider call made. No database mutation performed. Fail-closed dry run.",
+      ...extra,
+    });
+
   if (!campaign_mapping_id || !contact_id) {
-    return json({ ok: false, error: "campaign_mapping_id_and_contact_id_required" }, 400);
+    return blocked("input", "campaign_mapping_id_and_contact_id_required");
   }
 
   const { data: mapping } = await admin
@@ -59,21 +74,22 @@ Deno.serve(async (req) => {
     .eq("provider_type", "smartlead")
     .eq("mapping_status", "mapped")
     .eq("is_active", true)
-    .single();
+    .maybeSingle();
 
   if (!mapping) {
-    return json({ ok: false, error: "campaign_mapping_not_found_or_inactive" }, 400);
+    return blocked("campaign_mapping", "campaign_mapping_not_found_or_inactive");
   }
 
   const { data: contact } = await admin
     .from("contacts")
     .select("id, email, first_name, last_name, name, company, linkedin_url, sendable_status, email_verified_status, status, compliance_status, is_globally_suppressed, hard_bounced, unsubscribed_at, do_not_contact_at, conversation_active")
     .eq("id", contact_id)
-    .single();
+    .maybeSingle();
 
   if (!contact) {
-    return json({ ok: false, error: "contact_not_found" }, 404);
+    return blocked("contact", "contact_not_found_or_not_resolvable");
   }
+
 
   const sendability = evaluateOutboundSendability(contact as any);
 
@@ -125,6 +141,7 @@ Deno.serve(async (req) => {
   return json({
     ok: true,
     dry_run: true,
+    decision: auditRow.would_send ? "WOULD_SEND" : "BLOCKED",
     would_send: auditRow.would_send,
     sendability,
     allocation: {
