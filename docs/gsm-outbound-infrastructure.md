@@ -46,8 +46,10 @@ credential-shaped keys before every write.
 - `gsm-winnr-sync` — read-only test + idempotent registry sync. All endpoint paths live in
   `_shared/winnrClient.ts`. Mutation paths are preview-by-default and additionally require an
   explicit external-action confirmation; provisioning is disabled in this release.
-- `gsm-smartlead-mailbox-sync` — read-only `GET /email-accounts`, mapped onto existing GSM mailboxes
-  by Smartlead account id or email. No campaigns, no sends, no new mailbox rows.
+- `gsm-smartlead-mailbox-sync` — read-only `GET /email-accounts` using the server-side
+  `SMARTLEAD_API_KEY` secret (env only, never returned or stored), mapped onto existing GSM mailboxes
+  by Smartlead account id or email. Preview separates matched registry rows from unmatched provider
+  accounts. No campaigns, no sends, no new mailbox rows.
 
 ## Exclusion
 

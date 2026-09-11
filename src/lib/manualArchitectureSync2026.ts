@@ -734,8 +734,13 @@ not one estate per brand. The registry stores zero secrets, and Neon Candy stays
   explicit external-action confirmation; provisioning stays disabled in this release. The GSM Winnr
   account does not exist yet, so no provider mutation is possible today.
 - **Smartlead** (\`supabase/functions/gsm-smartlead-mailbox-sync\`): read-only
-  \`GET /email-accounts\` mapped back onto existing GSM mailboxes by Smartlead account id or
-  email, capturing SMTP/IMAP/warmup/account status. It creates no campaigns, sends no mail, creates
+  \`GET /email-accounts\`, authenticated with the canonical server-side secret
+  \`SMARTLEAD_API_KEY\` read from the function environment only (never from a database column,
+  never returned, never stored), mapped back onto existing GSM mailboxes by Smartlead account id or
+  email, capturing SMTP/IMAP/daily limit/sender name/account status. Preview reports matched
+  registry rows separately from genuinely unmatched Smartlead accounts. Warmup is only exposed as
+  enabled or not enabled, so an enabled mailbox is reported as \`warming\` and never as warmed or
+  campaign-ready. It creates no campaigns, sends no mail, creates
   no mailbox rows and does not touch campaign mapping, reply or event paths.
 
 ## 103.6 Exclusion
