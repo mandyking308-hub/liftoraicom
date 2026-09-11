@@ -14,12 +14,21 @@ const corsHeaders = {
 const json = (b: unknown, s = 200) =>
   new Response(JSON.stringify(b), { status: s, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
+type ExistingGsmMailbox = {
+  id: string;
+  email: string;
+  smartlead_email_account_id: string | null;
+};
+
 /**
  * GSM ↔ Smartlead mailbox sync. Founder/admin only.
  *
  * READ-ONLY against Smartlead (GET /email-accounts). Maps Smartlead email
  * accounts onto existing gsm_mailboxes rows by Smartlead account id or email,
  * capturing SMTP / IMAP / warmup / account status.
+ *
+ * The canonical Smartlead credential is the server-side SMARTLEAD_API_KEY
+ * secret used by the rest of Liftor. It is never returned or persisted here.
  *
  * Never creates campaigns, never sends mail, never touches Chat 2 campaign
  * mapping / reply / event paths. hello@neoncandy.online is classified
@@ -31,6 +40,7 @@ Deno.serve(async (req) => {
   const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
   const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
+  const SMARTLEAD_API_KEY = Deno.env.get("SMARTLEAD_API_KEY") ?? "";
 
   const auth = req.headers.get("Authorization") ?? "";
   if (!auth.startsWith("Bearer ")) return json({ ok: false, error: "auth_missing" }, 401);
@@ -53,19 +63,16 @@ Deno.serve(async (req) => {
   } catch { /* empty body allowed */ }
   const apply = body.apply === true;
 
-  const { data: provider } = await admin
-    .from("outbound_providers")
-    .select("id, api_key, api_key_encrypted")
-    .eq("provider_type", "smartlead")
-    .eq("connected", true)
-    .limit(1)
-    .maybeSingle();
+  if (!SMARTLEAD_API_KEY.trim()) {
+    return json({
+      ok: false,
+      error: "smartlead_api_key_missing",
+      connection_state: "not_configured",
+      blocker: "SMARTLEAD_API_KEY_missing",
+    }, 400);
+  }
 
-  if (!provider) return json({ ok: false, error: "smartlead_provider_not_connected", connection_state: "disconnected" }, 400);
-  const apiKey = provider.api_key ?? provider.api_key_encrypted ?? "";
-  if (!apiKey) return json({ ok: false, error: "smartlead_api_key_missing", connection_state: "disconnected" }, 400);
-
-  const url = `https://server.smartlead.ai/api/v1/email-accounts?api_key=${encodeURIComponent(apiKey)}`;
+  const url = `https://server.smartlead.ai/api/v1/email-accounts?api_key=${encodeURIComponent(SMARTLEAD_API_KEY)}`;
   let resp: Response;
   try {
     resp = await fetch(url, { method: "GET" });
@@ -111,6 +118,7 @@ Deno.serve(async (req) => {
       smtp_status: a.is_smtp_success === true ? "ok" : a.is_smtp_success === false ? "failed" : "unknown",
       imap_status: a.is_imap_success === true ? "ok" : a.is_imap_success === false ? "failed" : "unknown",
       smartlead_status: "connected",
+      // Smartlead's boolean says warmup is enabled, not that warming has completed.
       warmup_status: a.warmup_enabled === true ? "warming" : "not_started",
       configured_daily_limit: Number.isFinite(Number(a.daily_limit)) ? Number(a.daily_limit) : 0,
       estate_classification: classifyEstate(email),
@@ -120,53 +128,86 @@ Deno.serve(async (req) => {
   const gsmCandidates = observed.filter((o) => o.estate_classification !== EXTERNAL_NON_GSM);
   const excluded = observed.filter((o) => o.estate_classification === EXTERNAL_NON_GSM);
 
+  // Resolve registry matches before both preview and apply so preview is truthful.
+  const { data: registryRows, error: registryError } = await admin
+    .from("gsm_mailboxes")
+    .select("id,email,smartlead_email_account_id")
+    .eq("estate_classification", "gsm");
+  if (registryError) {
+    return json({
+      ok: false,
+      connection_state: "error",
+      error_code: "gsm_registry_read_failed",
+      error_message: registryError.message,
+    }, 500);
+  }
+
+  const registry = (registryRows ?? []) as ExistingGsmMailbox[];
+  const byEmail = new Map(registry.map((m) => [String(m.email ?? "").trim().toLowerCase(), m]));
+  const bySmartleadId = new Map(
+    registry
+      .filter((m) => m.smartlead_email_account_id)
+      .map((m) => [String(m.smartlead_email_account_id), m]),
+  );
+
+  const findExisting = (o: (typeof gsmCandidates)[number]) =>
+    (o.smartlead_email_account_id ? bySmartleadId.get(o.smartlead_email_account_id) : undefined) ?? byEmail.get(o.email);
+
+  const matched = gsmCandidates
+    .map((o) => ({ observed: o, existing: findExisting(o) }))
+    .filter((x) => Boolean(x.existing));
+  const unmatched = gsmCandidates
+    .filter((o) => !findExisting(o))
+    .map((o) => o.email)
+    .filter(Boolean);
+
   let updated = 0;
-  const unmatched: string[] = [];
+  const updateErrors: Array<{ email: string; error: string }> = [];
 
   if (apply) {
-    for (const o of gsmCandidates) {
-      if (isExcludedFromGsmEstate(o.email)) continue;
-      const { data: existing } = await admin
-        .from("gsm_mailboxes")
-        .select("id")
-        .ilike("email", o.email)
-        .maybeSingle();
-      if (!existing?.id) {
-        unmatched.push(o.email);
-        continue;
-      }
+    for (const { observed: o, existing } of matched) {
+      if (!existing || isExcludedFromGsmEstate(o.email)) continue;
       const { estate_classification: _drop, ...rest } = o;
-      await admin
+      const { error } = await admin
         .from("gsm_mailboxes")
         .update(stripSecretFields({ ...rest, last_provider_check_at: new Date().toISOString() }))
         .eq("id", existing.id);
-      updated += 1;
+      if (error) updateErrors.push({ email: o.email, error: error.message });
+      else updated += 1;
     }
+
     await admin.from("gsm_provider_sync_runs").insert({
       provider: "smartlead",
       run_mode: "apply",
-      status: "succeeded",
+      status: updateErrors.length ? "partial" : "succeeded",
       http_status: resp.status,
       mailboxes_seen: observed.length,
       mailboxes_upserted: updated,
       excluded_non_gsm: excluded.length,
+      error_code: updateErrors.length ? "mailbox_update_failed" : null,
+      error_message: updateErrors.length ? `${updateErrors.length} GSM mailbox update(s) failed.` : null,
       finished_at: new Date().toISOString(),
     });
-  } else {
-    unmatched.push(...gsmCandidates.map((o) => o.email));
   }
 
   return json({
-    ok: true,
+    ok: updateErrors.length === 0,
     connection_state: "connected",
     mode: apply ? "apply" : "preview",
     accounts_seen: observed.length,
     gsm_candidates: gsmCandidates.length,
     excluded_non_gsm: excluded.map((e) => ({ email: e.email, classification: EXTERNAL_NON_GSM })),
+    matched_existing_gsm: matched.map(({ observed, existing }) => ({
+      mailbox_id: existing?.id ?? null,
+      email: observed.email,
+      smartlead_email_account_id: observed.smartlead_email_account_id,
+    })),
+    matched_existing_gsm_count: matched.length,
     updated_gsm_mailboxes: updated,
     unmatched_not_in_gsm_registry: unmatched,
+    update_errors: updateErrors,
     message:
-      "Read-only Smartlead account read. No campaign was created, no email was sent and no credential was stored. Existing mailboxes are only updated, never created here.",
+      "Read-only Smartlead account read. No campaign was created, no email was sent and no credential was stored. Apply mode updates existing GSM registry rows only; Smartlead never creates GSM mailboxes.",
     checked_at: new Date().toISOString(),
-  });
+  }, updateErrors.length ? 207 : 200);
 });
