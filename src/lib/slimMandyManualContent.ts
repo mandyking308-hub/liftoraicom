@@ -61,7 +61,8 @@ domains, Launch lane 30 lent to the business launching now, Evergreen lane 20 sh
 the four education businesses. A mailbox in a live conversation keeps that conversation. Nothing is
 usable until the domain is verified, sending and receiving both work, it is connected at the
 sending provider, warmup is finished and a daily limit is set. Today there are zero company
-mailboxes because the Winnr account does not exist yet. hello@neoncandy.online is excluded from
+mailboxes: the Winnr account is bought and connected (plan active, room for 10 domains and 50
+mailboxes) but no domain or mailbox has been created inside it yet. hello@neoncandy.online is excluded from
 this estate permanently. Page: /founder/gsm-outbound.
 
 ## What not to touch without a deliberate decision
