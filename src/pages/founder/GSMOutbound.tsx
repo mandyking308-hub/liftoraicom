@@ -126,7 +126,7 @@ export default function GSMOutboundPage() {
           <h1 className="text-3xl font-semibold">GSM Outbound Infrastructure</h1>
           <p className="text-muted-foreground">
             One shared portfolio sending estate owned by {GSM_OWNER_LEGAL_ENTITY}. Apollo is data only, Liftor is the
-            system of record, Smartlead runs the campaigns, Winnr will supply the domains and mailboxes.
+            system of record, Smartlead runs the campaigns, Winnr supplies the domains and mailboxes.
           </p>
         </div>
 
@@ -148,12 +148,15 @@ export default function GSMOutboundPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="flex items-center gap-2"><Globe className="h-4 w-4" /> Providers</CardTitle>
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => call("gsm-winnr-sync", "Winnr check", setWinnr)}>
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => call("gsm-winnr-sync", "Winnr check", { action: "test" }, setWinnr)}>
                 <RefreshCw className="mr-2 h-4 w-4" /> Check Winnr
               </Button>
-              <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => call("gsm-smartlead-mailbox-sync", "Smartlead check", setSmartlead)}>
+              <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => call("gsm-smartlead-mailbox-sync", "Smartlead check", {}, setSmartlead)}>
                 <RefreshCw className="mr-2 h-4 w-4" /> Check Smartlead
+              </Button>
+              <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => call("smartlead-webhook-status", "Webhook status", {}, setWebhook)}>
+                <RefreshCw className="mr-2 h-4 w-4" /> Webhook status
               </Button>
             </div>
           </CardHeader>
@@ -162,19 +165,120 @@ export default function GSMOutboundPage() {
               <Badge variant={winnrConnected ? "default" : "secondary"}>Winnr: {winnr ? String(winnr.connection_state ?? "unknown") : "not checked"}</Badge>
               <span className="text-muted-foreground">
                 {winnr && winnr.winnr_token_configured === false
-                  ? "No Winnr access token is configured on the server."
+                  ? "No Winnr access token is stored on the server, so the mailbox provider cannot be read yet."
                   : "Domain and mailbox infrastructure provider."}
               </span>
             </div>
-            <div className="flex items-center gap-2">
-              <Badge variant={smartleadConnected ? "default" : "secondary"}>Smartlead: {smartlead ? String(smartlead.connection_state ?? "unknown") : "not checked"}</Badge>
-              <span className="text-muted-foreground">Campaign execution and sender rotation. Reads only from this page.</span>
-            </div>
-            {winnr && winnr.winnr_token_configured === false ? (
-              <div className="rounded-md border border-amber-500/40 bg-amber-500/5 p-3">
-                <strong>Next setup action:</strong> {String(winnr.next_action ?? "Create the GSM Winnr account and add its access token as a server secret.")}
+            {winnrAccount ? (
+              <div className="rounded-md border border-border/60 p-3 text-muted-foreground">
+                Winnr plan <strong>{String(winnrAccount.plan ?? "unknown")}</strong> ·{" "}
+                subscription {String(winnrAccount.subscription_status ?? "unknown")} · domains{" "}
+                {String(winnrAccount.domains_used ?? 0)} of {String(winnrAccount.domains_limit ?? 0)} · mailboxes{" "}
+                {String(winnrAccount.email_users_used ?? 0)} of {String(winnrAccount.email_users_limit ?? 0)}
               </div>
             ) : null}
+            <div className="flex items-center gap-2">
+              <Badge variant={smartleadConnected ? "default" : "secondary"}>Smartlead: {smartlead ? String(smartlead.connection_state ?? "unknown") : "not checked"}</Badge>
+              <span className="text-muted-foreground">Campaign execution and sender rotation. This page never creates or sends a campaign.</span>
+            </div>
+            {winnrNextAction ? (
+              <div className="rounded-md border border-amber-500/40 bg-amber-500/5 p-3">
+                <strong>Next setup action:</strong> {winnrNextAction}
+              </div>
+            ) : null}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2"><Mailbox className="h-4 w-4" /> Registry sync controls</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm">
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => call("gsm-winnr-sync", "Winnr preview", { action: "sync" }, setWinnr)}>
+                Preview Winnr sync
+              </Button>
+              <Button
+                size="sm"
+                disabled={busy !== null}
+                onClick={() => {
+                  if (!confirmed("Apply the Winnr registry sync", "SYNC GSM WINNR REGISTRY")) return;
+                  void call("gsm-winnr-sync", "Winnr sync", { action: "sync", apply: true, external_action_confirmation: "SYNC GSM WINNR REGISTRY" }, setWinnr);
+                }}
+              >
+                Apply Winnr sync
+              </Button>
+              <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => call("gsm-smartlead-mailbox-sync", "Smartlead preview", { apply: false }, setSmartlead)}>
+                Preview Smartlead sync
+              </Button>
+              <Button
+                size="sm"
+                disabled={busy !== null}
+                onClick={() => {
+                  if (!confirmed("Apply the Smartlead mailbox reconciliation", "APPLY GSM SMARTLEAD MAILBOX SYNC")) return;
+                  void call("gsm-smartlead-mailbox-sync", "Smartlead sync", { apply: true, external_action_confirmation: "APPLY GSM SMARTLEAD MAILBOX SYNC" }, setSmartlead);
+                }}
+              >
+                Apply Smartlead sync
+              </Button>
+              <Button
+                size="sm"
+                variant="secondary"
+                disabled={busy !== null}
+                onClick={() => {
+                  if (!confirmed("Start Winnr warm-up on synced GSM mailboxes", "START GSM WINNR WARMUP")) return;
+                  void call("gsm-winnr-sync", "Winnr warm-up", { action: "warmup", external_action_confirmation: "START GSM WINNR WARMUP" }, setWinnr);
+                }}
+              >
+                Start warm-up
+              </Button>
+            </div>
+            <div className="grid gap-2 md:grid-cols-2">
+              <div className="rounded-md border border-border/60 p-3">
+                <div className="font-medium">Winnr result</div>
+                <div className="text-muted-foreground">
+                  {winnr
+                    ? `domains seen ${String(winnr.domains_seen ?? 0)} · mailboxes seen ${String(winnr.mailboxes_seen ?? 0)} · excluded ${String(winnr.excluded_non_gsm ?? 0)} · written ${String(winnr.mailboxes_upserted ?? 0)}${winnr.blocker ? ` · blocked: ${String(winnr.blocker)}` : ""}`
+                    : "Not run yet."}
+                </div>
+              </div>
+              <div className="rounded-md border border-border/60 p-3">
+                <div className="font-medium">Smartlead result</div>
+                <div className="text-muted-foreground">
+                  {smartlead
+                    ? `accounts ${String(smartlead.accounts_seen ?? 0)} · GSM candidates ${String(smartlead.gsm_candidates ?? 0)} · matched ${String(smartlead.matched_existing_gsm_count ?? 0)} · unmatched ${String((smartlead.unmatched_not_in_gsm_registry as unknown[] | undefined)?.length ?? 0)} · updated ${String(smartlead.updated ?? 0)}${smartlead.blocker ? ` · blocked: ${String(smartlead.blocker)}` : ""}`
+                    : "Not run yet."}
+                </div>
+              </div>
+            </div>
+            <p className="text-muted-foreground">
+              Warm-up only ever means a mailbox is warming. It never makes a mailbox campaign ready, and it can never
+              touch Neon Candy. No mailbox is created or bought here.
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader><CardTitle className="flex items-center gap-2"><ShieldAlert className="h-4 w-4" /> Reply webhook</CardTitle></CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            {webhook ? (
+              <>
+                <div className="break-all text-muted-foreground">Endpoint: {String(webhook.webhook_endpoint ?? "unknown")}</div>
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant={webhook.webhook_secret_configured === true ? "default" : "destructive"}>
+                    Server secret: {webhook.webhook_secret_configured === true ? "configured" : "missing"}
+                  </Badge>
+                  <Badge variant={webhook.provider_webhook_configured === true ? "default" : "secondary"}>
+                    Provider flag: {webhook.provider_webhook_configured === true ? "configured" : "not confirmed"}
+                  </Badge>
+                </div>
+                <div className="text-muted-foreground">
+                  Reply events received so far: {String(webhook.provider_event_count ?? webhook.event_count ?? 0)}
+                </div>
+              </>
+            ) : (
+              <p className="text-muted-foreground">Not checked yet. Use “Webhook status” above.</p>
+            )}
           </CardContent>
         </Card>
 
