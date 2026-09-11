@@ -22,6 +22,7 @@ const corsHeaders = {
 const json = (b: unknown, s = 200) =>
   new Response(JSON.stringify(b), { status: s, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
+const SYNC_CONFIRMATION = "SYNC GSM WINNR REGISTRY";
 const WARMUP_CONFIRMATION = "START GSM WINNR WARMUP";
 
 /**
@@ -178,7 +179,6 @@ Deno.serve(async (req) => {
       }, 409);
     }
 
-    // New domains: use Winnr's safest documented ramp profile.
     const warmup = await winnrCall<unknown>("startWarmingAsync", {
       token: TOKEN,
       allowMutation: true,
@@ -286,6 +286,28 @@ Deno.serve(async (req) => {
       would_upsert_domains: rawDomains.length,
       would_upsert_mailboxes: gsmMailboxes.length,
       message: "Read-only. Nothing was written and no credentials were stored.",
+    });
+  }
+
+  if (action !== "sync") {
+    return json({ ...base, ok: false, action, error: "unsupported_action" }, 400);
+  }
+
+  if (confirmation !== SYNC_CONFIRMATION) {
+    return json({
+      ...base,
+      ok: true,
+      action,
+      mode: "preview",
+      executed: false,
+      blocker: "external_action_confirmation_required",
+      expected_confirmation: SYNC_CONFIRMATION,
+      domains_seen: rawDomains.length,
+      mailboxes_seen: rawMailboxes.length,
+      excluded_non_gsm: excluded,
+      would_upsert_domains: rawDomains.length,
+      would_upsert_mailboxes: gsmMailboxes.length,
+      message: "No registry rows were written. Founder confirmation is required to apply the Winnr registry sync.",
     });
   }
 
