@@ -14,6 +14,8 @@ const corsHeaders = {
 const json = (b: unknown, s = 200) =>
   new Response(JSON.stringify(b), { status: s, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
+const APPLY_CONFIRMATION = "SYNC GSM SMARTLEAD REGISTRY";
+
 type ExistingGsmMailbox = {
   id: string;
   email: string;
@@ -30,9 +32,8 @@ type ExistingGsmMailbox = {
  * The canonical Smartlead credential is the server-side SMARTLEAD_API_KEY
  * secret used by the rest of Liftor. It is never returned or persisted here.
  *
- * Never creates campaigns, never sends mail, never touches Chat 2 campaign
- * mapping / reply / event paths. hello@neoncandy.online is classified
- * external_non_gsm and is never inserted or allocated as a GSM mailbox.
+ * Never creates campaigns, never sends mail, never touches campaign mapping /
+ * reply / event paths. Neon Candy is external_non_gsm and excluded.
  */
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -62,6 +63,7 @@ Deno.serve(async (req) => {
     body = await req.json();
   } catch { /* empty body allowed */ }
   const apply = body.apply === true;
+  const confirmation = String(body.external_action_confirmation ?? "");
 
   if (!SMARTLEAD_API_KEY.trim()) {
     return json({
@@ -72,7 +74,7 @@ Deno.serve(async (req) => {
     }, 400);
   }
 
-  const url = `https://server.smartlead.ai/api/v1/email-accounts?api_key=${encodeURIComponent(SMARTLEAD_API_KEY)}`;
+  const url = `https://server.smartlead.ai/api/v1/email-accounts?api_key=${encodeURIComponent(SMARTLEAD_API_KEY)}&offset=0&limit=100`;
   let resp: Response;
   try {
     resp = await fetch(url, { method: "GET" });
@@ -110,7 +112,7 @@ Deno.serve(async (req) => {
       : [];
 
   const observed = accounts.map((a) => {
-    const email = String(a.email ?? "").trim().toLowerCase();
+    const email = String(a.from_email ?? a.email ?? "").trim().toLowerCase();
     return {
       smartlead_email_account_id: a.id != null ? String(a.id) : null,
       email,
@@ -125,8 +127,8 @@ Deno.serve(async (req) => {
     };
   });
 
-  const gsmCandidates = observed.filter((o) => o.estate_classification !== EXTERNAL_NON_GSM);
-  const excluded = observed.filter((o) => o.estate_classification === EXTERNAL_NON_GSM);
+  const gsmCandidates = observed.filter((o) => o.email && o.estate_classification !== EXTERNAL_NON_GSM);
+  const excluded = observed.filter((o) => o.email && o.estate_classification === EXTERNAL_NON_GSM);
 
   // Resolve registry matches before both preview and apply so preview is truthful.
   const { data: registryRows, error: registryError } = await admin
@@ -160,6 +162,24 @@ Deno.serve(async (req) => {
     .filter((o) => !findExisting(o))
     .map((o) => o.email)
     .filter(Boolean);
+
+  if (apply && confirmation !== APPLY_CONFIRMATION) {
+    return json({
+      ok: true,
+      connection_state: "connected",
+      mode: "preview",
+      executed: false,
+      blocker: "external_action_confirmation_required",
+      expected_confirmation: APPLY_CONFIRMATION,
+      accounts_seen: observed.length,
+      gsm_candidates: gsmCandidates.length,
+      excluded_non_gsm: excluded.map((e) => ({ email: e.email, classification: EXTERNAL_NON_GSM })),
+      matched_existing_gsm_count: matched.length,
+      unmatched_not_in_gsm_registry: unmatched,
+      message: "No GSM registry rows were updated. Founder confirmation is required to apply the Smartlead reconciliation.",
+      checked_at: new Date().toISOString(),
+    });
+  }
 
   let updated = 0;
   const updateErrors: Array<{ email: string; error: string }> = [];
