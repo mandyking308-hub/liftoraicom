@@ -1,0 +1,107 @@
+name: One-use Final Source Parity
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/final-source-parity-once.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Reconcile Winnr entitlement source and canonical manual
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          # 1) Winnr provider client: account/entitlement is read-only provider truth.
+          p = Path('supabase/functions/_shared/winnrClient.ts')
+          s = p.read_text()
+          s = s.replace('export const WINNR_CLIENT_VERSION = "winnr-client-1.1.0";', 'export const WINNR_CLIENT_VERSION = "winnr-client-1.2.0";')
+          if 'getAccount: { method: "GET", path: "/account" }' not in s:
+              s = s.replace('  // Read\n  listDomains:', '  // Read\n  getAccount: { method: "GET", path: "/account" },\n  listDomains:', 1)
+          if 'export function normaliseWinnrAccount' not in s:
+              s += '''\n\n/** Provider entitlement/usage only. Secret-shaped provider fields are never copied. */\nexport function normaliseWinnrAccount(raw: Record<string, unknown> | null | undefined) {\n  const o = (raw ?? {}) as Record<string, unknown>;\n  const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : null);\n  return {\n    account_name: o.name != null ? String(o.name) : null,\n    plan: o.plan != null ? String(o.plan) : null,\n    subscription_status: o.stripe_subscription_status != null ? String(o.stripe_subscription_status) : null,\n    domains_limit: num(o.domains_limit),\n    domains_used: num(o.domains_used),\n    domain_credits: num(o.domain_credits),\n    email_users_limit: num(o.email_users_limit),\n    email_users_used: num(o.email_users_used),\n  };\n}\n\n/** Distinguishes a paid plan from actual provisioned sender infrastructure. */\nexport function deriveWinnrEstateState(account: ReturnType<typeof normaliseWinnrAccount>): {\n  estate_state: "no_subscription" | "subscription_active_no_infrastructure" | "domains_only_no_mailboxes" | "infrastructure_present";\n  next_action: string;\n} {\n  const active = account.subscription_status === "active";\n  const domains = account.domains_used ?? 0;\n  const mailboxes = account.email_users_used ?? 0;\n  if (!active) return { estate_state: "no_subscription", next_action: "The Winnr subscription is not active. Reactivate the plan before sender infrastructure can exist." };\n  if (domains === 0) return {\n    estate_state: "subscription_active_no_infrastructure",\n    next_action: `The Winnr plan is active with capacity for ${account.domains_limit ?? 0} domains and ${account.email_users_limit ?? 0} mailboxes, but no sending domain exists yet. Buy/verify the GSM sending domains in Winnr, then create the mailboxes, then run Sync registry.`,\n  };\n  if (mailboxes === 0) return { estate_state: "domains_only_no_mailboxes", next_action: "Sending domains exist in Winnr but no mailboxes have been created. Create the mailboxes, then run Sync registry." };\n  return { estate_state: "infrastructure_present", next_action: "Run Sync registry to import the Winnr estate, then start warm-up." };\n}\n'''
+          p.write_text(s)
+
+          # 2) Winnr sync: surface provider entitlement alongside actual observed domain/mailbox counts.
+          p = Path('supabase/functions/gsm-winnr-sync/index.ts')
+          s = p.read_text()
+          if 'deriveWinnrEstateState,' not in s:
+              s = s.replace('  WINNR_CLIENT_VERSION,\n  normaliseWinnrDomain,', '  WINNR_CLIENT_VERSION,\n  deriveWinnrEstateState,\n  normaliseWinnrAccount,\n  normaliseWinnrDomain,', 1)
+          marker = '  // Warm-up is an explicit post-purchase external action.'
+          if 'const accountCall = await winnrCall<Record<string, unknown>>("getAccount"' not in s:
+              block = '''  // Read-only entitlement/usage truth: plan capacity is not sender readiness.\n  const accountCall = await winnrCall<Record<string, unknown>>("getAccount", { token: TOKEN });\n  const accountRaw = (accountCall.data as { data?: Record<string, unknown> } | null)?.data ?? accountCall.data ?? null;\n  const account = normaliseWinnrAccount(accountRaw as Record<string, unknown> | null);\n  const estate = deriveWinnrEstateState(account);\n  const accountBlock = {\n    account: {\n      plan: account.plan, subscription_status: account.subscription_status,\n      domains_limit: account.domains_limit, domains_used: account.domains_used,\n      email_users_limit: account.email_users_limit, email_users_used: account.email_users_used,\n    },\n    estate_state: estate.estate_state,\n    next_action: estate.next_action,\n  };\n\n'''
+              s = s.replace(marker, block + marker, 1)
+          # Add accountBlock to the three non-warmup responses only if absent nearby.
+          target = '''    return json({\n      ...base,\n      ok: true,\n      action,\n      mode: "preview",\n      connection_state: "connected",'''
+          repl = '''    return json({\n      ...base,\n      ...accountBlock,\n      ok: true,\n      action,\n      mode: "preview",\n      connection_state: "connected",'''
+          s = s.replace(target, repl, 1)
+          target = '''    return json({\n      ...base,\n      ok: true,\n      action,\n      mode: "preview",\n      executed: false,\n      blocker: "external_action_confirmation_required",'''
+          repl = '''    return json({\n      ...base,\n      ...accountBlock,\n      ok: true,\n      action,\n      mode: "preview",\n      executed: false,\n      blocker: "external_action_confirmation_required",'''
+          s = s.replace(target, repl, 1)
+          target = '''  return json({\n    ...base,\n    ok: true,\n    action,\n    mode: "apply",\n    connection_state: "connected",'''
+          repl = '''  return json({\n    ...base,\n    ...accountBlock,\n    ok: true,\n    action,\n    mode: "apply",\n    connection_state: "connected",'''
+          s = s.replace(target, repl, 1)
+          p.write_text(s)
+
+          # 3) Founder surface: display the read-only entitlement and use truthful provider next action.
+          p = Path('src/pages/founder/GSMOutbound.tsx')
+          s = p.read_text()
+          if '"estate_state",' not in s:
+              s = s.replace('    "connection_state",\n', '    "connection_state",\n    "estate_state",\n    "account",\n    "next_action",\n', 1)
+          old = '''  const blocker =\n    snapshot.mailbox_count === 0\n      ? "The Winnr mailbox estate has been purchased, but it has not yet been securely synced into Liftor. Configure WINNR_API_TOKEN server-side, then run Winnr Preview Sync and Apply Sync."\n      : readiness.blockers.join(", ") || null;'''
+          new = '''  const blocker =\n    snapshot.mailbox_count === 0\n      ? String(winnr?.next_action ?? "No GSM mailboxes are registered yet. Run Winnr Test to read the live provider entitlement and exact next step.")\n      : readiness.blockers.join(", ") || null;'''
+          if old in s: s = s.replace(old, new, 1)
+          p.write_text(s)
+
+          # 4) Full Technical Manual: remove the stale pre-purchase wording while preserving history elsewhere.
+          p = Path('src/lib/manualArchitectureSync2026.ts')
+          s = p.read_text()
+          s = s.replace('''  explicit external-action confirmation; provisioning stays disabled in this release. The GSM Winnr\n  account does not exist yet, so no provider mutation is possible today.''', '''  explicit external-action confirmation; provisioning stays disabled in this release. The GSM Winnr\n  account is active and reachable; its plan entitlement is read separately from actual domains/mailboxes,\n  so purchased capacity is never mistaken for a campaign-ready sender estate.''', 1)
+          s = s.replace('''actionable blocker, the Neon Candy exclusion, and the exact next setup action while\n\\`WINNR_API_TOKEN\\` is absent.''', '''actionable blocker, the Neon Candy exclusion, live Winnr entitlement/usage when available, and the\nexact next provider action without exposing any secret.''', 1)
+          s = s.replace('''1. Create the GSM Winnr account. 2. Add \\`WINNR_API_TOKEN\\` as a server secret. 3. Purchase and\nverify up to 10 GSM sending domains. 4. Provision ~50 mailboxes and start warmup.''', '''1. Winnr account and server-side \\`WINNR_API_TOKEN\\` are in place. 2. Buy/verify the GSM sending\ndomains in Winnr. 3. Create the mailboxes there. 4. Preview and apply the registry sync, then start warmup.''', 1)
+          p.write_text(s)
+
+          # 5) Regression tests for plan-vs-estate truth and secret non-persistence.
+          p = Path('src/lib/__tests__/winnrPostPurchase.test.ts')
+          s = p.read_text()
+          if 'deriveWinnrEstateState,' not in s:
+              s = s.replace('  WINNR_MUTATION_ENDPOINTS,\n  normaliseWinnrMailbox,', '  WINNR_MUTATION_ENDPOINTS,\n  deriveWinnrEstateState,\n  normaliseWinnrAccount,\n  normaliseWinnrMailbox,', 1)
+          if 'Winnr entitlement is not sender readiness' not in s:
+              s += '''\n\ndescribe("Winnr entitlement is not sender readiness", () => {\n  it("uses the read-only account endpoint", () => {\n    expect(WINNR_ENDPOINTS.getAccount).toEqual({ method: "GET", path: "/account" });\n  });\n  it("normalises entitlement without retaining provider token material", () => {\n    const a = normaliseWinnrAccount({ name: "Founder", plan: "startup", stripe_subscription_status: "active", domains_limit: 10, domains_used: 0, email_users_limit: 50, email_users_used: 0, api_token: { secret: "must-not-survive" } });\n    expect(a.plan).toBe("startup");\n    expect(a.email_users_limit).toBe(50);\n    expect(JSON.stringify(a)).not.toContain("must-not-survive");\n    expect(JSON.stringify(a)).not.toContain("api_token");\n  });\n  it("distinguishes active plan capacity from real infrastructure", () => {\n    const empty = deriveWinnrEstateState(normaliseWinnrAccount({ stripe_subscription_status: "active", domains_limit: 10, domains_used: 0, email_users_limit: 50, email_users_used: 0 }));\n    expect(empty.estate_state).toBe("subscription_active_no_infrastructure");\n    const domains = deriveWinnrEstateState(normaliseWinnrAccount({ stripe_subscription_status: "active", domains_used: 3, email_users_used: 0 }));\n    expect(domains.estate_state).toBe("domains_only_no_mailboxes");\n    const built = deriveWinnrEstateState(normaliseWinnrAccount({ stripe_subscription_status: "active", domains_used: 10, email_users_used: 50 }));\n    expect(built.estate_state).toBe("infrastructure_present");\n  });\n  it("surfaces entitlement truth without weakening the zero-send controls", () => {\n    expect(winnrFn).toContain('winnrCall<Record<string, unknown>>("getAccount"');\n    expect(founderPage).toContain('"estate_state"');\n    expect(founderPage).not.toContain("campaigns/create");\n  });\n});\n'''
+          p.write_text(s)
+          PY
+      - name: Install dependencies
+        run: npm install --no-package-lock --no-audit --no-fund
+      - name: TypeScript
+        run: npx tsc --noEmit -p tsconfig.app.json
+      - name: Focused integration tests
+        run: npx vitest run src/lib/__tests__/winnrPostPurchase.test.ts src/lib/__tests__/gsmSenderEstate.test.ts src/lib/__tests__/smartlead*.test.ts src/lib/__tests__/education*.test.ts src/lib/businessManuals/__tests__/businessManualRegistry.test.ts
+      - name: Full test suite
+        run: npx vitest run
+      - name: Production build
+        run: npm run build
+      - name: Diff check
+        run: git diff --check
+      - name: Commit reconciled source and remove this one-use job
+        run: |
+          git rm .github/workflows/final-source-parity-once.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add supabase/functions/_shared/winnrClient.ts supabase/functions/gsm-winnr-sync/index.ts src/pages/founder/GSMOutbound.tsx src/lib/manualArchitectureSync2026.ts src/lib/__tests__/winnrPostPurchase.test.ts
+          git commit -m "Reconcile Winnr entitlement source with live sender infrastructure"
+          git pull --rebase origin main
+          git push origin HEAD:main
