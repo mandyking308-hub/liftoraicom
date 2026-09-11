@@ -46,6 +46,9 @@ const ResultSummary = ({ title, value }: { title: string; value: Record<string, 
   if (!value) return null;
   const keys = [
     "connection_state",
+    "estate_state",
+    "account",
+    "next_action",
     "mode",
     "domains_seen",
     "mailboxes_seen",
@@ -147,7 +150,7 @@ export default function GSMOutboundPage() {
 
   const blocker =
     snapshot.mailbox_count === 0
-      ? "The Winnr mailbox estate has been purchased, but it has not yet been securely synced into Liftor. Configure WINNR_API_TOKEN server-side, then run Winnr Preview Sync and Apply Sync."
+      ? String(winnr?.next_action ?? "No GSM mailboxes are registered yet. Run Winnr Test to read the live provider entitlement and exact next step.")
       : readiness.blockers.join(", ") || null;
 
   return (

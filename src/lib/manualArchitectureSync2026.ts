@@ -732,7 +732,8 @@ not one estate per brand. The registry stores zero secrets, and Neon Candy stays
   server-side only): read-only test, idempotent domain/mailbox sync into the registry, truthful
   401/403/429/error handling. Every mutation path defaults to preview and additionally requires an
   explicit external-action confirmation; provisioning stays disabled in this release. The GSM Winnr
-  account does not exist yet, so no provider mutation is possible today.
+  account is active and reachable; its plan entitlement is read separately from actual domains/mailboxes,
+  so purchased capacity is never mistaken for a campaign-ready sender estate.
 - **Smartlead** (\`supabase/functions/gsm-smartlead-mailbox-sync\`): read-only
   \`GET /email-accounts\` mapped back onto existing GSM mailboxes by Smartlead account id or
   email, capturing SMTP/IMAP/warmup/account status. It creates no campaigns, sends no mail, creates
@@ -747,12 +748,12 @@ allocated in the GSM estate, and no founder override changes that.
 \`/founder/gsm-outbound\` shows live canonical state only: target 50, actual domains/mailboxes,
 Launch 30 and Evergreen 20 allocations, Winnr and Smartlead connection state, SMTP/IMAP counts,
 warming, campaign-ready, quarantined/retired, configured daily capacity, last provider sync, the
-actionable blocker, the Neon Candy exclusion, and the exact next setup action while
-\`WINNR_API_TOKEN\` is absent. Provider state and counts are never faked.
+actionable blocker, the Neon Candy exclusion, live Winnr entitlement/usage when available, and the
+exact next provider action without exposing any secret. Provider state and counts are never faked.
 
 ## 103.8 Onboarding steps
-1. Create the GSM Winnr account. 2. Add \`WINNR_API_TOKEN\` as a server secret. 3. Purchase and
-verify up to 10 GSM sending domains. 4. Provision ~50 mailboxes and start warmup. 5. Sync into the
+1. Winnr account and server-side \`WINNR_API_TOKEN\` are in place. 2. Buy/verify the GSM sending
+domains in Winnr. 3. Create the mailboxes there. 4. Preview and apply the registry sync, then start warmup. 5. Sync into the
 registry. 6. Connect them in Smartlead and sync account status. 7. Allocate Launch 30 / Evergreen
 20. 8. Only then does sender readiness become true, and founder send approval remains separate.
 

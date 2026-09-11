@@ -5,6 +5,8 @@ import {
   WINNR_BASE_URL,
   WINNR_ENDPOINTS,
   WINNR_MUTATION_ENDPOINTS,
+  deriveWinnrEstateState,
+  normaliseWinnrAccount,
   normaliseWinnrMailbox,
   winnrCall,
   winnrTokenConfigured,
@@ -168,7 +170,7 @@ describe("Webhook and sender-pool controls", () => {
 describe("Founder GSM outbound control panel", () => {
   it("describes the real post-purchase state and no longer claims Winnr does not exist", () => {
     expect(founderPage).toContain("The Winnr estate is purchased");
-    expect(founderPage).toContain("has been purchased");
+    expect(founderPage).toContain("estate is purchased");
     expect(founderPage).not.toContain("The Winnr account has not been created");
     expect(founderPage).not.toContain("Create the GSM Winnr account");
   });
@@ -185,5 +187,32 @@ describe("Founder GSM outbound control panel", () => {
   it("keeps Neon Candy exclusion and founder campaign approval explicit", () => {
     expect(founderPage).toContain("hello@neoncandy.online");
     expect(founderPage).toContain("Founder campaign approval remains a separate gate");
+  });
+});
+
+
+describe("Winnr entitlement is not sender readiness", () => {
+  it("uses the read-only account endpoint", () => {
+    expect(WINNR_ENDPOINTS.getAccount).toEqual({ method: "GET", path: "/account" });
+  });
+  it("normalises entitlement without retaining provider token material", () => {
+    const a = normaliseWinnrAccount({ name: "Founder", plan: "startup", stripe_subscription_status: "active", domains_limit: 10, domains_used: 0, email_users_limit: 50, email_users_used: 0, api_token: { secret: "must-not-survive" } });
+    expect(a.plan).toBe("startup");
+    expect(a.email_users_limit).toBe(50);
+    expect(JSON.stringify(a)).not.toContain("must-not-survive");
+    expect(JSON.stringify(a)).not.toContain("api_token");
+  });
+  it("distinguishes active plan capacity from real infrastructure", () => {
+    const empty = deriveWinnrEstateState(normaliseWinnrAccount({ stripe_subscription_status: "active", domains_limit: 10, domains_used: 0, email_users_limit: 50, email_users_used: 0 }));
+    expect(empty.estate_state).toBe("subscription_active_no_infrastructure");
+    const domains = deriveWinnrEstateState(normaliseWinnrAccount({ stripe_subscription_status: "active", domains_used: 3, email_users_used: 0 }));
+    expect(domains.estate_state).toBe("domains_only_no_mailboxes");
+    const built = deriveWinnrEstateState(normaliseWinnrAccount({ stripe_subscription_status: "active", domains_used: 10, email_users_used: 50 }));
+    expect(built.estate_state).toBe("infrastructure_present");
+  });
+  it("surfaces entitlement truth without weakening the zero-send controls", () => {
+    expect(winnrFn).toContain('winnrCall<Record<string, unknown>>("getAccount"');
+    expect(founderPage).toContain('"estate_state"');
+    expect(founderPage).not.toContain("campaigns/create");
   });
 });

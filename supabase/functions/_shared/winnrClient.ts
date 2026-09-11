@@ -15,10 +15,11 @@
  */
 
 export const WINNR_BASE_URL = "https://api.winnr.app/v1";
-export const WINNR_CLIENT_VERSION = "winnr-client-1.1.0";
+export const WINNR_CLIENT_VERSION = "winnr-client-1.2.0";
 
 export const WINNR_ENDPOINTS = {
   // Read
+  getAccount: { method: "GET", path: "/account" },
   listDomains: { method: "GET", path: "/domains" },
   listEmailUsers: { method: "GET", path: "/email-users" },
   listWarmings: { method: "GET", path: "/warming" },
@@ -201,4 +202,38 @@ export function normaliseWinnrMailbox(raw: Record<string, unknown>) {
     provider_health: String(raw.health ?? raw.status ?? "unknown").toLowerCase(),
     domain: email.includes("@") ? email.split("@")[1] : null,
   };
+}
+
+
+/** Provider entitlement/usage only. Secret-shaped provider fields are never copied. */
+export function normaliseWinnrAccount(raw: Record<string, unknown> | null | undefined) {
+  const o = (raw ?? {}) as Record<string, unknown>;
+  const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : null);
+  return {
+    account_name: o.name != null ? String(o.name) : null,
+    plan: o.plan != null ? String(o.plan) : null,
+    subscription_status: o.stripe_subscription_status != null ? String(o.stripe_subscription_status) : null,
+    domains_limit: num(o.domains_limit),
+    domains_used: num(o.domains_used),
+    domain_credits: num(o.domain_credits),
+    email_users_limit: num(o.email_users_limit),
+    email_users_used: num(o.email_users_used),
+  };
+}
+
+/** Distinguishes a paid plan from actual provisioned sender infrastructure. */
+export function deriveWinnrEstateState(account: ReturnType<typeof normaliseWinnrAccount>): {
+  estate_state: "no_subscription" | "subscription_active_no_infrastructure" | "domains_only_no_mailboxes" | "infrastructure_present";
+  next_action: string;
+} {
+  const active = account.subscription_status === "active";
+  const domains = account.domains_used ?? 0;
+  const mailboxes = account.email_users_used ?? 0;
+  if (!active) return { estate_state: "no_subscription", next_action: "The Winnr subscription is not active. Reactivate the plan before sender infrastructure can exist." };
+  if (domains === 0) return {
+    estate_state: "subscription_active_no_infrastructure",
+    next_action: `The Winnr plan is active with capacity for ${account.domains_limit ?? 0} domains and ${account.email_users_limit ?? 0} mailboxes, but no sending domain exists yet. Buy/verify the GSM sending domains in Winnr, then create the mailboxes, then run Sync registry.`,
+  };
+  if (mailboxes === 0) return { estate_state: "domains_only_no_mailboxes", next_action: "Sending domains exist in Winnr but no mailboxes have been created. Create the mailboxes, then run Sync registry." };
+  return { estate_state: "infrastructure_present", next_action: "Run Sync registry to import the Winnr estate, then start warm-up." };
 }
