@@ -51,6 +51,7 @@ export default function GSMOutboundPage() {
   const [lastSync, setLastSync] = useState<SyncRun | null>(null);
   const [winnr, setWinnr] = useState<Record<string, unknown> | null>(null);
   const [smartlead, setSmartlead] = useState<Record<string, unknown> | null>(null);
+  const [webhook, setWebhook] = useState<Record<string, unknown> | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -215,8 +216,8 @@ export default function GSMOutboundPage() {
                 size="sm"
                 disabled={busy !== null}
                 onClick={() => {
-                  if (!confirmed("Apply the Smartlead mailbox reconciliation", "APPLY GSM SMARTLEAD MAILBOX SYNC")) return;
-                  void call("gsm-smartlead-mailbox-sync", "Smartlead sync", { apply: true, external_action_confirmation: "APPLY GSM SMARTLEAD MAILBOX SYNC" }, setSmartlead);
+                  if (!confirmed("Apply the Smartlead mailbox reconciliation", "SYNC GSM SMARTLEAD REGISTRY")) return;
+                  void call("gsm-smartlead-mailbox-sync", "Smartlead sync", { apply: true, external_action_confirmation: "SYNC GSM SMARTLEAD REGISTRY" }, setSmartlead);
                 }}
               >
                 Apply Smartlead sync
@@ -273,7 +274,7 @@ export default function GSMOutboundPage() {
                   </Badge>
                 </div>
                 <div className="text-muted-foreground">
-                  Reply events received so far: {String(webhook.provider_event_count ?? webhook.event_count ?? 0)}
+                  Reply events received so far: {String(webhook.provider_events_observed ?? 0)}
                 </div>
               </>
             ) : (
