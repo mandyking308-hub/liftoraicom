@@ -763,8 +763,8 @@ No parallel architecture was created. This section records the verified current 
 Smartlead, inbox and GSM sending layers.
 
 ### 104.1 Idempotent campaign, lead and event mapping
-The existing `outbound_provider_campaign_mappings`, `outbound_provider_lead_mappings`,
-`outbound_provider_events` and `smartlead_activation_checklist` tables remain canonical. Live database
+The existing \`outbound_provider_campaign_mappings\`, \`outbound_provider_lead_mappings\`,
+\`outbound_provider_events\` and \`smartlead_activation_checklist\` tables remain canonical. Live database
 indexes enforce one provider mapping per non-null Liftor campaign, unique provider-campaign identity,
 campaign idempotency tokens, unique Liftor contact/campaign lead mapping, unique provider lead identity
 and unique provider event idempotency keys. Ambiguous identity fails closed. Liftor mapping apply binds
@@ -772,29 +772,29 @@ only to an existing unambiguous provider campaign; this closeout creates no Smar
 
 ### 104.2 Suppression and webhook return loop
 The shared sendability gate hard-blocks global suppression, hard bounce, unsubscribe and do-not-contact
-before any provider push. `smartlead-webhook` stores raw provenance plus deterministic idempotency,
+before any provider push. \`smartlead-webhook\` stores raw provenance plus deterministic idempotency,
 collapses duplicate events, maps only unambiguous identities, and only escalates CRM safety state on
 replies, hard bounces and unsubscribes. Unknown events are retained without transition. The receiver
-remains fail-closed while `SMARTLEAD_WEBHOOK_SECRET` is absent, and `webhook_configured` remains false
-until Smartlead is genuinely pointed at Liftor. `smartlead-webhook-status` exposes founder-safe readiness
+remains fail-closed while \`SMARTLEAD_WEBHOOK_SECRET\` is absent, and \`webhook_configured\` remains false
+until Smartlead is genuinely pointed at Liftor. \`smartlead-webhook-status\` exposes founder-safe readiness
 only and never returns the secret.
 
 ### 104.3 Exact activation checklist
-Exactly twelve keys are persisted per education business: `provider_connection`, `webhook_configured`,
-`campaign_mapping_ready`, `lead_mapping_ready`, `event_return_ready`, `sending_domains_ready`,
-`mailbox_estate_ready`, `warmup_ready`, `sender_caps_ready`, `suppression_sync_ready`,
-`first_end_to_end_test_ready`, `live_launch_approval`. Current live state across all four education
+Exactly twelve keys are persisted per education business: \`provider_connection\`, \`webhook_configured\`,
+\`campaign_mapping_ready\`, \`lead_mapping_ready\`, \`event_return_ready\`, \`sending_domains_ready\`,
+\`mailbox_estate_ready\`, \`warmup_ready\`, \`sender_caps_ready\`, \`suppression_sync_ready\`,
+\`first_end_to_end_test_ready\`, \`live_launch_approval\`. Current live state across all four education
 businesses is 48 rows: provider connection and suppression sync ready; webhook, campaign mapping, lead
 mapping, event return, sending domains and first end-to-end test not ready; mailbox estate, warm-up,
 sender caps and founder live-launch approval blocked.
 
 ### 104.4 Bulk estate and zero-mutation dry run
-`mailbox-estate-register` supports founder/admin CSV/TSV preview then idempotent apply for many mailboxes
+\`mailbox-estate-register\` supports founder/admin CSV/TSV preview then idempotent apply for many mailboxes
 at once. Fresh rows begin with provider/SMTP/IMAP/warm-up readiness false, conservative ramp defaults and
-business/estate segregation; legacy Neon Candy is protected and excluded. `smartlead-send-dry-run` is
+business/estate segregation; legacy Neon Candy is protected and excluded. \`smartlead-send-dry-run\` is
 founder/admin only and never posts to Smartlead. Missing input, campaign mapping or contact returns a
-structured `decision: "BLOCKED"` and performs no database write. A resolvable rehearsal may write only a
-`smartlead_send_dry_run_audit` evidence row; it still performs no provider mutation.
+structured \`decision: "BLOCKED"\` and performs no database write. A resolvable rehearsal may write only a
+\`smartlead_send_dry_run_audit\` evidence row; it still performs no provider mutation.
 
 ### 104.5 Current live truth
 Smartlead is connected and read-only verification succeeds. Live state: 0 campaign mappings, 0 lead
@@ -802,7 +802,7 @@ mappings, 0 provider events, 48 checklist rows, 0 GSM domains, 0 GSM mailboxes a
 mailboxes. The four education campaign shells remain non-live, externally send-blocked, unapproved and
 unmapped. The purchased Winnr estate still has to be reconciled/synced into the canonical GSM registry,
 warmed, connected to Smartlead and returned through the webhook before founder live-launch approval can
-be considered. `hello@neoncandy.online` remains outside the GSM estate and excluded from allocation.
+be considered. \`hello@neoncandy.online\` remains outside the GSM estate and excluded from allocation.
 
 *End of Section 104 — Smartlead activation closeout.*
 `;
