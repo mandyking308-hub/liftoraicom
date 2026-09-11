@@ -15,10 +15,11 @@
  */
 
 export const WINNR_BASE_URL = "https://api.winnr.app/v1";
-export const WINNR_CLIENT_VERSION = "winnr-client-1.1.0";
+export const WINNR_CLIENT_VERSION = "winnr-client-1.2.0";
 
 export const WINNR_ENDPOINTS = {
   // Read
+  getAccount: { method: "GET", path: "/account" },
   listDomains: { method: "GET", path: "/domains" },
   listEmailUsers: { method: "GET", path: "/email-users" },
   listWarmings: { method: "GET", path: "/warming" },
