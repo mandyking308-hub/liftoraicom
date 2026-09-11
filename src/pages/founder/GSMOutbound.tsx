@@ -77,7 +77,7 @@ const ResultSummary = ({ title, value }: { title: string; value: Record<string, 
       <div className="grid gap-1 md:grid-cols-2">
         {rows.map(([key, raw]) => (
           <div key={key} className="flex gap-2">
-            <span className="text-muted-foreground">{key.replaceAll("_", " ")}:</span>
+            <span className="text-muted-foreground">{key.split("_").join(" ")}:</span>
             <span className="break-all">{typeof raw === "object" ? JSON.stringify(raw) : String(raw)}</span>
           </div>
         ))}
