@@ -16,9 +16,9 @@
 //   5. Business Manuals            — business-specific tone/offers/rules/assets
 //   6. Slim Mandy Manual           — portable handover only, NOT technical truth
 
-export const ARCHITECTURE_SYNC_VERSION = "6.6 — Smartlead activation closeout (11 September 2026)";
+export const ARCHITECTURE_SYNC_VERSION = "6.5 — GSM Outbound Infrastructure (10 September 2026)";
 export const ARCHITECTURE_SYNC_DATE = "2026-09-10";
-export const ARCHITECTURE_SYNC_PREVIOUS_VERSION = "6.5 — GSM Outbound Infrastructure (10 September 2026)";
+export const ARCHITECTURE_SYNC_PREVIOUS_VERSION = "6.3 — Smartlead & Sending Infrastructure (10 September 2026)";
 export const ARCHITECTURE_SYNC_SOURCE =
   "August baseline: repo-wide audit of src/App.tsx routes (799 founder routes), src/pages/founder/**, src/components/founder/**, src/lib/** engines, supabase/functions/** (604 functions), supabase/migrations/** and docs/**. September delta: docs/manual-architecture-reconciliation-2026-09-10.md — 21 materially changed files since the August manual commit plus a live database state check on 10 September 2026.";
 
@@ -732,7 +732,9 @@ not one estate per brand. The registry stores zero secrets, and Neon Candy stays
   server-side only): read-only test, idempotent domain/mailbox sync into the registry, truthful
   401/403/429/error handling. Every mutation path defaults to preview and additionally requires an
   explicit external-action confirmation; provisioning stays disabled in this release. The GSM Winnr
-  account does not exist yet, so no provider mutation is possible today.
+  account exists and is connected with an active plan (10 domain / 50 mailbox entitlement); the
+  sync also reads \`GET /account\` so the founder surface can distinguish "plan purchased" from
+  "estate built". Domains and mailboxes are bought/created in Winnr, never by Liftor.
 - **Smartlead** (\`supabase/functions/gsm-smartlead-mailbox-sync\`): read-only
   \`GET /email-accounts\` mapped back onto existing GSM mailboxes by Smartlead account id or
   email, capturing SMTP/IMAP/warmup/account status. It creates no campaigns, sends no mail, creates
@@ -747,64 +749,17 @@ allocated in the GSM estate, and no founder override changes that.
 \`/founder/gsm-outbound\` shows live canonical state only: target 50, actual domains/mailboxes,
 Launch 30 and Evergreen 20 allocations, Winnr and Smartlead connection state, SMTP/IMAP counts,
 warming, campaign-ready, quarantined/retired, configured daily capacity, last provider sync, the
-actionable blocker, the Neon Candy exclusion, and the exact next setup action while
-\`WINNR_API_TOKEN\` is absent. Provider state and counts are never faked.
+actionable blocker, the Neon Candy exclusion, the live Winnr plan/entitlement/usage, founder-confirmed
+registry sync, Smartlead reconciliation and warm-up controls, the Smartlead webhook endpoint and
+server-secret readiness, and the exact next setup action. Provider state and counts are never faked.
 
 ## 103.8 Onboarding steps
-1. Create the GSM Winnr account. 2. Add \`WINNR_API_TOKEN\` as a server secret. 3. Purchase and
-verify up to 10 GSM sending domains. 4. Provision ~50 mailboxes and start warmup. 5. Sync into the
+1. Winnr account and \`WINNR_API_TOKEN\` are in place (done). 2. Purchase and
+verify up to 10 GSM sending domains inside Winnr. 4. Provision ~50 mailboxes and start warmup. 5. Sync into the
 registry. 6. Connect them in Smartlead and sync account status. 7. Allocate Launch 30 / Evergreen
 20. 8. Only then does sender readiness become true, and founder send approval remains separate.
 
 *End of Section 103 — GSM Outbound Infrastructure.*
-
-## 104 Smartlead activation closeout (11 September 2026)
-No parallel architecture was created. This section records the verified current truth of the existing
-Smartlead, inbox and GSM sending layers.
-
-### 104.1 Idempotent campaign, lead and event mapping
-The existing `outbound_provider_campaign_mappings`, `outbound_provider_lead_mappings`,
-`outbound_provider_events` and `smartlead_activation_checklist` tables remain canonical. Live database
-indexes enforce one provider mapping per non-null Liftor campaign, unique provider-campaign identity,
-campaign idempotency tokens, unique Liftor contact/campaign lead mapping, unique provider lead identity
-and unique provider event idempotency keys. Ambiguous identity fails closed. Liftor mapping apply binds
-only to an existing unambiguous provider campaign; this closeout creates no Smartlead campaign.
-
-### 104.2 Suppression and webhook return loop
-The shared sendability gate hard-blocks global suppression, hard bounce, unsubscribe and do-not-contact
-before any provider push. `smartlead-webhook` stores raw provenance plus deterministic idempotency,
-collapses duplicate events, maps only unambiguous identities, and only escalates CRM safety state on
-replies, hard bounces and unsubscribes. Unknown events are retained without transition. The receiver
-remains fail-closed while `SMARTLEAD_WEBHOOK_SECRET` is absent, and `webhook_configured` remains false
-until Smartlead is genuinely pointed at Liftor. `smartlead-webhook-status` exposes founder-safe readiness
-only and never returns the secret.
-
-### 104.3 Exact activation checklist
-Exactly twelve keys are persisted per education business: `provider_connection`, `webhook_configured`,
-`campaign_mapping_ready`, `lead_mapping_ready`, `event_return_ready`, `sending_domains_ready`,
-`mailbox_estate_ready`, `warmup_ready`, `sender_caps_ready`, `suppression_sync_ready`,
-`first_end_to_end_test_ready`, `live_launch_approval`. Current live state across all four education
-businesses is 48 rows: provider connection and suppression sync ready; webhook, campaign mapping, lead
-mapping, event return, sending domains and first end-to-end test not ready; mailbox estate, warm-up,
-sender caps and founder live-launch approval blocked.
-
-### 104.4 Bulk estate and zero-mutation dry run
-`mailbox-estate-register` supports founder/admin CSV/TSV preview then idempotent apply for many mailboxes
-at once. Fresh rows begin with provider/SMTP/IMAP/warm-up readiness false, conservative ramp defaults and
-business/estate segregation; legacy Neon Candy is protected and excluded. `smartlead-send-dry-run` is
-founder/admin only and never posts to Smartlead. Missing input, campaign mapping or contact returns a
-structured `decision: "BLOCKED"` and performs no database write. A resolvable rehearsal may write only a
-`smartlead_send_dry_run_audit` evidence row; it still performs no provider mutation.
-
-### 104.5 Current live truth
-Smartlead is connected and read-only verification succeeds. Live state: 0 campaign mappings, 0 lead
-mappings, 0 provider events, 48 checklist rows, 0 GSM domains, 0 GSM mailboxes and 0 campaign-ready
-mailboxes. The four education campaign shells remain non-live, externally send-blocked, unapproved and
-unmapped. The purchased Winnr estate still has to be reconciled/synced into the canonical GSM registry,
-warmed, connected to Smartlead and returned through the webhook before founder live-launch approval can
-be considered. `hello@neoncandy.online` remains outside the GSM estate and excluded from allocation.
-
-*End of Section 104 — Smartlead activation closeout.*
 `;
 
 
