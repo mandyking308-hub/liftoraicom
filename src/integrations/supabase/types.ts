@@ -54046,6 +54046,57 @@ export type Database = {
         }
         Relationships: []
       }
+      smartlead_send_dry_run_audit: {
+        Row: {
+          allocated_mailbox_email: string | null
+          allocated_mailbox_id: string | null
+          blockers: Json
+          business_id: string | null
+          contact_email: string | null
+          contact_id: string | null
+          created_at: string
+          dry_run_at: string
+          id: string
+          liftor_campaign_id: string | null
+          provider_campaign_id: string | null
+          provider_payload: Json | null
+          sendable: boolean
+          would_send: boolean
+        }
+        Insert: {
+          allocated_mailbox_email?: string | null
+          allocated_mailbox_id?: string | null
+          blockers?: Json
+          business_id?: string | null
+          contact_email?: string | null
+          contact_id?: string | null
+          created_at?: string
+          dry_run_at?: string
+          id?: string
+          liftor_campaign_id?: string | null
+          provider_campaign_id?: string | null
+          provider_payload?: Json | null
+          sendable?: boolean
+          would_send?: boolean
+        }
+        Update: {
+          allocated_mailbox_email?: string | null
+          allocated_mailbox_id?: string | null
+          blockers?: Json
+          business_id?: string | null
+          contact_email?: string | null
+          contact_id?: string | null
+          created_at?: string
+          dry_run_at?: string
+          id?: string
+          liftor_campaign_id?: string | null
+          provider_campaign_id?: string | null
+          provider_payload?: Json | null
+          sendable?: boolean
+          would_send?: boolean
+        }
+        Relationships: []
+      }
       social_accounts: {
         Row: {
           account_external_id: string | null
