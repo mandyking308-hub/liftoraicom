@@ -58,6 +58,8 @@ export function mapSmartleadAccount(a: Record<string, unknown>): ObservedSmartle
 
 export interface ReconciliationResult {
   observed: ObservedSmartleadMailbox[];
+  /** Accounts with no readable address — never guessed at, never excluded as Neon Candy. */
+  unidentified: ObservedSmartleadMailbox[];
   excluded: ObservedSmartleadMailbox[];
   gsm_candidates: ObservedSmartleadMailbox[];
   matched: { registry_id: string; email: string; observed: ObservedSmartleadMailbox }[];
@@ -73,10 +75,11 @@ export function reconcileSmartleadAccounts(
   observed: ObservedSmartleadMailbox[],
   registry: GsmRegistryRow[],
 ): ReconciliationResult {
+  const unidentified = observed.filter((o) => !o.email);
   const excluded = observed.filter(
-    (o) => o.estate_classification === EXTERNAL_NON_GSM || isExcludedFromGsmEstate(o.email),
+    (o) => o.email !== "" && (o.estate_classification === EXTERNAL_NON_GSM || isExcludedFromGsmEstate(o.email)),
   );
-  const gsm_candidates = observed.filter((o) => !excluded.includes(o));
+  const gsm_candidates = observed.filter((o) => !excluded.includes(o) && !unidentified.includes(o));
 
   const byId = new Map<string, GsmRegistryRow>();
   const byEmail = new Map<string, GsmRegistryRow>();
