@@ -1,14 +1,14 @@
 // Slim Mandy Manual — short, portable summary Mandy can download/upload to ChatGPT or advisers.
 // NOT the technical source of truth. Do NOT use to overwrite the User Manual or Full Technical Manual.
-// v1.2 refresh (10 Sep 2026) — September reconciliation current-state summary. Kept deliberately slim.
+// v1.9 refresh (11 Sep 2026) — Smartlead activation closeout. Kept deliberately slim.
 
-export const SLIM_MANDY_MANUAL_VERSION = "1.8 — 10 September 2026 (GSM Outbound Infrastructure)";
+export const SLIM_MANDY_MANUAL_VERSION = "1.9 — 11 September 2026 (Smartlead activation closeout)";
 
 export const SLIM_MANDY_MANUAL_MARKDOWN = `# Slim Mandy Manual
 
-_Version 1.6 — 10 September 2026_
+_Version 1.9 — 11 September 2026_
 
-_Portable summary. Safe to upload to ChatGPT or share with advisers. Not the full technical source of truth (that is the Full Technical Manual, Sections 100 and 101)._
+_Portable summary. Safe to upload to ChatGPT or share with advisers. Not the full technical source of truth (that is the Full Technical Manual)._
 
 ## What Liftor is
 Liftor is ONE internal AI operating system and control plane Mandy uses to run multiple businesses from one Command Centre. It reads, drafts, prepares, and waits for founder approval. It never sends, posts, charges or files anything without a yes.
@@ -18,54 +18,51 @@ Liftor is ONE internal AI operating system and control plane Mandy uses to run m
 - People, organisations and reusable data assets are **portfolio assets stored once and shared**, not duplicated per business.
 - Business-specific commercial relevance, eligibility and activity live on the **business relationship**, not on the person.
 - **Relationship Intelligence** is research/evidence; it reaches the CRM only through a controlled promotion bridge. It is not the operational CRM.
-- A new **source-manifest / source-fidelity** layer records and validates the material behind each business's knowledge. It authorises no external action.
+- A source-manifest / source-fidelity layer records and validates the material behind each business's knowledge. It authorises no external action.
 - Importing, deduping or promoting data **never** triggers outreach.
 
 ## Always label three states separately
 Implemented in code · live-configured in the database/provider · historical evidence. A provider connection is never permission to send.
 
-## Current state — 10 September 2026
+## Current state — 11 September 2026
 - **CRM:** live contact and business-relationship counts are read from the CRM page (they grow as you work). Distinct from research pools.
-- **Apollo:** free People Search, staging, qualification and selective founder-approved reveal all work. But several paths still carry Neon Candy-specific defaults, and caps were per run not per company. A **portfolio-wide Apollo Credit Firewall is now implemented**: every paid Apollo call must first take an atomic reservation against one shared budget. That budget is live but **disabled with a hard limit of 0**, and phone/personal-email/waterfall reveal are all false, so automatic paid enrichment stays OFF.
-- **Smartlead / sending:** provider **connected**; the full delivery spine is now implemented — one campaign link per Liftor campaign, one lead link per person, a single shared suppression gate, a hardened idempotent return loop for replies/bounces/unsubscribes, a scalable mailbox estate with deterministic allocation and audit, a founder page at /founder/sending-infrastructure and a true zero-mutation dry run. **Live state is still 0 campaign mappings, 0 lead mappings, 0 provider events, webhook not configured.** The education mailbox estate is not yet connected; the only mailboxes on file are the two legacy Neon Candy inboxes, locked to Neon Candy and excluded from education allocation. Smartlead is the delivery engine, not the CRM and not the education prospect-data source. No live send until founder approval.
-- **Sending estate:** 8 domains, 2 inboxes (1 active) — legacy Neon Candy infrastructure, not the planned education estate (~50 mailboxes, still to be built and warmed).
-- **CRM-native education placement (correction):** education companies live once in the master company list (\`organisations\`); education people live once in the master CRM (\`contacts\`) linked to their company. The research/pipeline account view links back to the canonical company. Relationship Intelligence is research/evidence only, not the education CRM. Discovery writes non-sendable people with no email; a separate founder-selected reveal path exists but cannot run while the credit firewall is locked at 0.
-- **Education 152 universe:** all 152 reviewed education groups are loaded once into the canonical CRM company list (\`organisations\`) and mirrored to the strategic planning layer, split 60 International operator / 54 Domestic reserve / 21 Network route / 17 Review needed. The company load spent zero Apollo credits and replayed no education people; no education research candidates have been restored yet.
-- **Education universe:** the August recovery (2,520 rows / 266 organisations) is **historical evidence only**. The 10 September live check found **zero** \`school_education_contact\` rows in Relationship Intelligence. Restoring it is a deliberate later stage.
-- **Education commercial layer (Chat 3):** one person = one \`contacts\` row; \`organisations\` is the canonical education account; \`business_contact_relationships\` carries many-to-many brand relevance with deterministic score/reason. Four exact businesses: Billy and the Wild Forest, Aurelia, Kindnesss, Kingsbridge Global. Portfolio ownership allows one active owner per contact, a 30-day cross-brand cooldown, and hard blocks on reply/conversation, suppression, unsubscribe, DNC and hard bounce — a founder override can re-prioritise but never bypass a hard block. All four campaign shells are non-live, send-blocked, unapproved and unmapped; Billy leads with a controlled 25–50 first cohort. Smartlead mapping readiness and mailbox/sender readiness remain separate gates. No change to the Apollo role score or the Apollo credit firewall (paid enrichment off, limit 0). Surfaces: /founder/education-commercial and /founder/business-manuals (exactly 12 canonical manuals rendered from the repo files).
+- **Apollo:** free People Search, staging, qualification and selected reveal infrastructure exist, protected by the portfolio-wide Apollo Credit Firewall. Paid enrichment is **disabled with a hard limit of 0**, and phone/personal-email/waterfall reveal are false.
+- **Smartlead / sending:** provider **connected**. The delivery spine is implemented: one campaign link per Liftor campaign, one lead link per person, a shared suppression gate, an idempotent reply/bounce/unsubscribe return loop, bulk mailbox registration, deterministic mailbox allocation and a zero-provider-mutation dry run. Live state: **0 campaign mappings, 0 lead mappings, 0 provider events, 0 GSM domains, 0 GSM mailboxes, webhook not configured.** The canonical 12-key activation checklist is seeded for each education business: 2 ready / 6 not ready / 4 blocked, with live_launch_approval blocked. A synthetic dry run returns structured **BLOCKED** and writes nothing.
+- **Winnr / GSM:** the Winnr account/estate has been purchased and the server-side API token is configured/reachable, but the canonical GSM registry deliberately remains at **0 domains and 0 mailboxes** until the purchased provider estate is synced. No mailbox is campaign-ready merely because it exists at the provider. Warm-up is founder-confirmed and remains a separate gate.
+- **Neon Candy:** its two legacy inboxes stay locked to Neon Candy and excluded from education/GSM allocation. \`hello@neoncandy.online\` may be observed in read-only Smartlead discovery but is never imported into the GSM estate.
+- **CRM-native education placement:** education companies live once in \`organisations\`; education people live once in \`contacts\` linked to their company. Relationship Intelligence is evidence/research, not the education CRM.
+- **Education 152 universe:** all 152 reviewed groups are loaded once into canonical organisations and mirrored to the planning layer: 60 International operator / 54 Domestic reserve / 21 Network route / 17 Review needed. The company load spent zero Apollo credits and replayed no education people.
+- **Education commercial layer:** Billy and the Wild Forest, Aurelia, Kindnesss and Kingsbridge Global share one person spine, with business-specific relevance and collision rules. All four campaign shells remain non-live, externally blocked, unapproved and unmapped.
 
 ## Classification
 LIFTOR_INTERNAL_OPERATING_SYSTEM_READY. External go-live remains LOCKED_BY_DESIGN.
 
 ## Safety rules (always true)
-No emails sent. No DMs sent. No posts published or scheduled externally. No Apollo credit spend. No Smartlead POST or campaign starts. No Metricool / ManyChat / ad / payment mutations. No portal accounts or invites. No surveys or reports shared. No filings. Data Room closed, no external tokens. Buyer contact blocked unless explicitly founder-approved. auto_send and outbound cron stay off. Executing a prepared packet needs a separate, channel-specific founder confirmation phrase.
+No live emails sent. No DMs sent. No posts published or scheduled externally. No Apollo credit spend. No Smartlead campaign start or live lead push. No payment or filing mutations. Data Room closed. Buyer contact blocked unless explicitly founder-approved. auto_send and outbound cron stay off. Executing a prepared packet needs a separate, channel-specific founder confirmation phrase.
 
 ## What it can do now
-Run the portfolio CRM and shared data estate. Onboard businesses internally through the Setup Tunnel, register and validate source manifests, build and materialise starter packs, activate internally, run daily and weekly loops, score external readiness, prepare micro-batch approval packets. Run intelligence radars — PR/media, social autopilot, social relationships, viral opportunity, distressed, funding, acquisition funding, wealth networks, exit and buyer warm-up. Run the finance, legal/entity, delivery, people, evidence and AI-governance stacks in review-first mode.
+Run the portfolio CRM and shared data estate; prepare and review campaigns; manage the education commercial layer; register and inspect sender infrastructure; run read-only provider checks; calculate the 12-key Smartlead activation checklist; and run zero-mutation sending rehearsals that fail closed until prerequisites are real.
 
 ## How to use it
 Always start at /founder/command-centre. Pick a business. Work Today's Actions. Review Approvals. Run safe internal agents. Glance at Revenue and Risk.
 
 ## Build discipline
-GitHub \`main\` is the code source of truth. Work in discrete reviewed branches. Every architecture change ships its manual update in the same build unit.
+GitHub \`main\` is the code source of truth. Every material architecture change ships its manual update in the same build unit.
 
 ## Where to find deeper detail
-- **User Manual** — plain-English operator guide (/founder/user-manual); Section 111 is the September current state.
-- **Full Technical Manual** — canonical architecture; Section 100 (August map) plus Section 101 (10 September delta, which controls on current state) (/founder/founder-manual).
+- **User Manual** — plain-English operator guide (/founder/user-manual).
+- **Full Technical Manual** — canonical architecture (/founder/founder-manual).
 - **Build Log** — historical decisions (/founder/build-log).
 - **Manuals Hub** — layer hierarchy, versions and drafts (/founder/manuals-hub).
 
 ## Sending estate (GSM Outbound)
-One shared company sending estate, not one per business: ~50 mailboxes across up to 10 company
-domains, Launch lane 30 lent to the business launching now, Evergreen lane 20 shared 5 each across
-the four education businesses. A mailbox in a live conversation keeps that conversation. Nothing is
-usable until the domain is verified, sending and receiving both work, it is connected at the
-sending provider, warmup is finished and a daily limit is set. Today there are zero company
-mailboxes because the Winnr account does not exist yet. hello@neoncandy.online is excluded from
-this estate permanently. Page: /founder/gsm-outbound.
+One shared GSM-owned sending estate, not one per business: target ~50 mailboxes across up to 10 GSM-controlled domains, with Launch 30 and Evergreen 20. A mailbox in a live conversation keeps that sender. Nothing is usable until the domain is verified, SMTP and IMAP are healthy, Smartlead is connected, warm-up is finished, health is acceptable and a safe daily limit is set. The purchased Winnr estate must first be synced into the canonical registry; current registered GSM count is still zero. Page: /founder/gsm-outbound.
+
+## Smartlead activation checklist
+Exactly 12 controls: provider connection; webhook; campaign mapping; lead mapping; event return; sending domains; mailbox estate; warm-up; sender caps; suppression sync; first end-to-end dry run; founder live-launch approval. Today only provider connection and suppression sync are ready. Everything else remains honestly blocked/not-ready until the physical sender estate, webhook, mappings and founder approval exist.
 
 ## What not to touch without a deliberate decision
 Any external gate, auto_send, cron, Smartlead campaign start or lead push, Apollo paid enrichment, buyer contact approval, data-room sharing, portal invites, payments or filings.
 `;
 
-export const SLIM_MANDY_MANUAL_FILENAME = `liftor-slim-mandy-manual-v1.8-2026-09-10.md`;
+export const SLIM_MANDY_MANUAL_FILENAME = `liftor-slim-mandy-manual-v1.9-2026-09-11.md`;
