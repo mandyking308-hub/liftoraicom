@@ -1,0 +1,43 @@
+name: One-use Final Integrated Verification
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/final-integration-verify-once.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install dependencies
+        run: npm install --no-package-lock --no-audit --no-fund
+      - name: TypeScript
+        run: npx tsc --noEmit -p tsconfig.app.json
+      - name: Focused Smartlead GSM mailbox education tests
+        run: npx vitest run src/lib/__tests__/smartlead*.test.ts src/lib/__tests__/gsm*.test.ts src/lib/__tests__/mailbox*.test.ts src/lib/__tests__/education*.test.ts src/lib/businessManuals/__tests__/businessManualRegistry.test.ts
+      - name: Full Vitest suite
+        run: npx vitest run
+      - name: Production build
+        run: npm run build
+      - name: Diff check
+        run: git diff --check
+      - name: Remove this one-use workflow after successful verification
+        run: |
+          git rm .github/workflows/final-integration-verify-once.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Remove one-use final integration verification job"
+          git pull --rebase origin main
+          git push origin HEAD:main
