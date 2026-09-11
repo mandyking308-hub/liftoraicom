@@ -10,9 +10,15 @@
 //   approved + live + external send unblocked, Smartlead mapping ready, sender
 //   infrastructure ready.
 //
-// Smartlead mapping readiness and sender readiness are owned by Chat 2 and are
-// read from existing architecture only — never created or modified here.
+// Smartlead mapping readiness and sender readiness are owned by Chat 2 / GSM and
+// are read from existing architecture only — never created or modified here.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import {
+  evaluateSenderInfrastructureReadiness,
+  type GsmAllocationRecord,
+  type GsmDomainSignals,
+  type GsmMailboxSignals,
+} from "../_shared/gsmSenderEstate.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -74,19 +80,37 @@ Deno.serve(async (req) => {
 
   const { data: business } = await admin.from("businesses").select("id").eq("name", businessName).maybeSingle();
 
-  // --- Chat 2 owned readiness (read only) ---------------------------------
+  // --- Chat 2 / GSM owned readiness (read only) --------------------------
   const { data: mappings } = await admin.from("outbound_provider_campaign_mappings")
     .select("id, is_active, mapping_status, provider_campaign_id")
     .eq("business_id", business?.id ?? "00000000-0000-0000-0000-000000000000")
+    .eq("provider_type", "smartlead")
     .eq("is_active", true);
   const smartleadMappingReady = !!(mappings ?? []).some(
     (m: any) => m.is_active && m.mapping_status === "mapped" && !!m.provider_campaign_id,
   );
 
-  const { data: inboxes } = await admin.from("inboxes")
-    .select("id, active, warmup_status").eq("active", true);
-  const senderInfrastructureReady = (inboxes ?? []).length > 0
-    && (inboxes ?? []).some((i: any) => i.warmup_status === "completed" || i.warmup_status === "warm");
+  // Canonical sender readiness comes from the GSM estate, not the legacy
+  // public.inboxes table. The same pure engine powers /founder/gsm-outbound.
+  const [{ data: gsmMailboxes }, { data: gsmDomains }, { data: gsmAllocations }] = await Promise.all([
+    admin.from("gsm_mailboxes")
+      .select("id,email,sending_domain_id,provider,provider_mailbox_id,smartlead_email_account_id,smtp_status,imap_status,smartlead_status,warmup_status,provider_health,configured_daily_limit,health_score,quarantined_reason,retired,active,estate_classification")
+      .eq("estate_classification", "gsm")
+      .eq("active", true)
+      .eq("retired", false),
+    admin.from("gsm_sending_domains")
+      .select("id,domain,provisioning_status,dns_status,spf_ok,dkim_ok,dmarc_ok"),
+    admin.from("gsm_mailbox_allocations")
+      .select("id,mailbox_id,pool_id,business_id,liftor_campaign_id,allocation_status,in_flight,sticky_until")
+      .eq("allocation_status", "active"),
+  ]);
+  const senderReadiness = evaluateSenderInfrastructureReadiness({
+    mailboxes: (gsmMailboxes ?? []) as GsmMailboxSignals[],
+    domains: (gsmDomains ?? []) as GsmDomainSignals[],
+    allocations: (gsmAllocations ?? []) as GsmAllocationRecord[],
+    minimum_mailboxes: 1,
+  });
+  const senderInfrastructureReady = senderReadiness.sender_infrastructure_ready;
 
   // --- contacts + relationships + ownership -------------------------------
   const { data: contacts } = await admin.from("contacts")
@@ -165,11 +189,15 @@ Deno.serve(async (req) => {
     business_name: businessName,
     campaign_key: campaign?.campaign_key ?? null,
     campaign_found: !!campaign,
-    gate_version: "edu-eligibility-1.0.0",
+    gate_version: "edu-eligibility-1.1.0-gsm",
     infrastructure: {
       smartlead_mapping_ready: smartleadMappingReady,
       sender_infrastructure_ready: senderInfrastructureReady,
-      note: "Readiness is read from existing Chat 2 architecture. This function never mutates a provider.",
+      gsm_ready_mailbox_count: senderReadiness.ready_mailbox_count,
+      gsm_allocated_ready_count: senderReadiness.allocated_ready_count,
+      gsm_total_daily_capacity: senderReadiness.total_daily_capacity,
+      gsm_blockers: senderReadiness.blockers,
+      note: "Sender readiness is evaluated by the canonical GSM engine. This function never mutates a provider.",
     },
     evaluated: results.length,
     eligible_count: results.filter((r) => r.eligible).length,
