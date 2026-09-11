@@ -298,6 +298,7 @@ Deno.serve(async (req) => {
   if (action === "test" || !apply) {
     return json({
       ...base,
+      ...accountBlock,
       ok: true,
       action,
       mode: "preview",
@@ -318,6 +319,7 @@ Deno.serve(async (req) => {
   if (confirmation !== SYNC_CONFIRMATION) {
     return json({
       ...base,
+      ...accountBlock,
       ok: true,
       action,
       mode: "preview",
@@ -392,6 +394,7 @@ Deno.serve(async (req) => {
 
   return json({
     ...base,
+    ...accountBlock,
     ok: true,
     action,
     mode: "apply",
