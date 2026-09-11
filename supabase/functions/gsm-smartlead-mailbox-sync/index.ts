@@ -1,10 +1,12 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { EXTERNAL_NON_GSM, stripSecretFields } from "../_shared/gsmSenderEstate.ts";
 import {
-  EXTERNAL_NON_GSM,
-  classifyEstate,
-  isExcludedFromGsmEstate,
-  stripSecretFields,
-} from "../_shared/gsmSenderEstate.ts";
+  buildMailboxUpdate,
+  extractSmartleadAccounts,
+  mapSmartleadAccount,
+  reconcileSmartleadAccounts,
+  type GsmRegistryRow,
+} from "../_shared/gsmSmartleadSync.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -17,13 +19,14 @@ const json = (b: unknown, s = 200) =>
 /**
  * GSM ↔ Smartlead mailbox sync. Founder/admin only.
  *
- * READ-ONLY against Smartlead (GET /email-accounts). Maps Smartlead email
- * accounts onto existing gsm_mailboxes rows by Smartlead account id or email,
- * capturing SMTP / IMAP / warmup / account status.
+ * READ-ONLY against Smartlead (GET /email-accounts). The Smartlead credential is
+ * the canonical server-side secret SMARTLEAD_API_KEY read from the Deno env; it is
+ * never returned, logged or persisted.
  *
- * Never creates campaigns, never sends mail, never touches Chat 2 campaign
- * mapping / reply / event paths. hello@neoncandy.online is classified
- * external_non_gsm and is never inserted or allocated as a GSM mailbox.
+ * Maps Smartlead email accounts onto EXISTING gsm_mailboxes rows by Smartlead
+ * account id or email. Never creates a GSM mailbox, never creates campaigns,
+ * never sends mail. hello@neoncandy.online is external_non_gsm and is always
+ * excluded.
  */
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -53,19 +56,18 @@ Deno.serve(async (req) => {
   } catch { /* empty body allowed */ }
   const apply = body.apply === true;
 
-  const { data: provider } = await admin
-    .from("outbound_providers")
-    .select("id, api_key, api_key_encrypted")
-    .eq("provider_type", "smartlead")
-    .eq("connected", true)
-    .limit(1)
-    .maybeSingle();
+  const apiKey = (Deno.env.get("SMARTLEAD_API_KEY") ?? "").trim();
+  if (!apiKey) {
+    return json({
+      ok: false,
+      connection_state: "disconnected",
+      error: "smartlead_api_key_missing",
+      error_message:
+        "Server secret SMARTLEAD_API_KEY is not configured. No provider call was made.",
+    }, 400);
+  }
 
-  if (!provider) return json({ ok: false, error: "smartlead_provider_not_connected", connection_state: "disconnected" }, 400);
-  const apiKey = provider.api_key ?? provider.api_key_encrypted ?? "";
-  if (!apiKey) return json({ ok: false, error: "smartlead_api_key_missing", connection_state: "disconnected" }, 400);
-
-  const url = `https://server.smartlead.ai/api/v1/email-accounts?api_key=${encodeURIComponent(apiKey)}`;
+  const url = `https://server.smartlead.ai/api/v1/email-accounts?api_key=${encodeURIComponent(apiKey)}&offset=0&limit=100`;
   let resp: Response;
   try {
     resp = await fetch(url, { method: "GET" });
@@ -96,50 +98,39 @@ Deno.serve(async (req) => {
     return json({ ok: false, connection_state: "error", error_code: "unparsable_response" }, 502);
   }
 
-  const accounts: Record<string, unknown>[] = Array.isArray(payload)
-    ? (payload as Record<string, unknown>[])
-    : Array.isArray((payload as Record<string, unknown>)?.data)
-      ? ((payload as Record<string, unknown>).data as Record<string, unknown>[])
-      : [];
+  const observed = extractSmartleadAccounts(payload).map(mapSmartleadAccount);
 
-  const observed = accounts.map((a) => {
-    const email = String(a.email ?? "").trim().toLowerCase();
-    return {
-      smartlead_email_account_id: a.id != null ? String(a.id) : null,
-      email,
-      sender_name: a.from_name != null ? String(a.from_name) : null,
-      smtp_status: a.is_smtp_success === true ? "ok" : a.is_smtp_success === false ? "failed" : "unknown",
-      imap_status: a.is_imap_success === true ? "ok" : a.is_imap_success === false ? "failed" : "unknown",
-      smartlead_status: "connected",
-      warmup_status: a.warmup_enabled === true ? "warming" : "not_started",
-      configured_daily_limit: Number.isFinite(Number(a.daily_limit)) ? Number(a.daily_limit) : 0,
-      estate_classification: classifyEstate(email),
-    };
-  });
+  const emails = observed.map((o) => o.email).filter(Boolean);
+  const providerIds = observed.map((o) => o.smartlead_email_account_id).filter(Boolean) as string[];
 
-  const gsmCandidates = observed.filter((o) => o.estate_classification !== EXTERNAL_NON_GSM);
-  const excluded = observed.filter((o) => o.estate_classification === EXTERNAL_NON_GSM);
+  let registry: GsmRegistryRow[] = [];
+  if (emails.length > 0) {
+    const { data: byEmail } = await admin
+      .from("gsm_mailboxes")
+      .select("id, email, smartlead_email_account_id")
+      .in("email", emails);
+    registry = registry.concat((byEmail ?? []) as GsmRegistryRow[]);
+  }
+  if (providerIds.length > 0) {
+    const { data: byId } = await admin
+      .from("gsm_mailboxes")
+      .select("id, email, smartlead_email_account_id")
+      .in("smartlead_email_account_id", providerIds);
+    for (const row of (byId ?? []) as GsmRegistryRow[]) {
+      if (!registry.some((r) => r.id === row.id)) registry.push(row);
+    }
+  }
+
+  const rec = reconcileSmartleadAccounts(observed, registry);
 
   let updated = 0;
-  const unmatched: string[] = [];
-
   if (apply) {
-    for (const o of gsmCandidates) {
-      if (isExcludedFromGsmEstate(o.email)) continue;
-      const { data: existing } = await admin
-        .from("gsm_mailboxes")
-        .select("id")
-        .ilike("email", o.email)
-        .maybeSingle();
-      if (!existing?.id) {
-        unmatched.push(o.email);
-        continue;
-      }
-      const { estate_classification: _drop, ...rest } = o;
+    for (const m of rec.matched) {
+      // Update only. There is no insert path in this function by design.
       await admin
         .from("gsm_mailboxes")
-        .update(stripSecretFields({ ...rest, last_provider_check_at: new Date().toISOString() }))
-        .eq("id", existing.id);
+        .update(stripSecretFields(buildMailboxUpdate(m.observed)))
+        .eq("id", m.registry_id);
       updated += 1;
     }
     await admin.from("gsm_provider_sync_runs").insert({
@@ -149,11 +140,9 @@ Deno.serve(async (req) => {
       http_status: resp.status,
       mailboxes_seen: observed.length,
       mailboxes_upserted: updated,
-      excluded_non_gsm: excluded.length,
+      excluded_non_gsm: rec.excluded.length,
       finished_at: new Date().toISOString(),
     });
-  } else {
-    unmatched.push(...gsmCandidates.map((o) => o.email));
   }
 
   return json({
@@ -161,12 +150,23 @@ Deno.serve(async (req) => {
     connection_state: "connected",
     mode: apply ? "apply" : "preview",
     accounts_seen: observed.length,
-    gsm_candidates: gsmCandidates.length,
-    excluded_non_gsm: excluded.map((e) => ({ email: e.email, classification: EXTERNAL_NON_GSM })),
+    gsm_candidates: rec.gsm_candidates.length,
+    excluded_non_gsm: rec.excluded.map((e) => ({ email: e.email, classification: EXTERNAL_NON_GSM })),
+    unidentified_accounts: rec.unidentified.map((o) => o.smartlead_email_account_id),
+    matched_existing_gsm_mailboxes: rec.matched.map((m) => ({
+      registry_id: m.registry_id,
+      email: m.email,
+      smtp_status: m.observed.smtp_status,
+      imap_status: m.observed.imap_status,
+      warmup_signal: m.observed.warmup_signal,
+      configured_daily_limit: m.observed.configured_daily_limit,
+    })),
+    matched_count: rec.matched.length,
+    unmatched_not_in_gsm_registry: rec.unmatched.map((o) => o.email),
+    unmatched_count: rec.unmatched.length,
     updated_gsm_mailboxes: updated,
-    unmatched_not_in_gsm_registry: unmatched,
     message:
-      "Read-only Smartlead account read. No campaign was created, no email was sent and no credential was stored. Existing mailboxes are only updated, never created here.",
+      "Read-only Smartlead account read. No campaign was created, no email was sent and no credential was stored or returned. Existing GSM mailboxes are only updated, never created here. Warmup enabled means warming, not warmed or campaign ready.",
     checked_at: new Date().toISOString(),
   });
 });
