@@ -100,11 +100,9 @@ describe("GHAT / GSM estate segregation", () => {
       estate_classification: "ghat",
     });
     const ghatDomain = readyDomain({ id: "dom-ghat", domain: GHAT_DOMAINS[0], estate_classification: "ghat" });
-    const result = selectGsmMailboxes({
-      mailboxes: [ghat],
-      domains: [ghatDomain],
-      allocations: [],
-      request: { pool_key: GSM_LAUNCH_POOL_KEY, requested_count: 1 },
+    const result = selectGsmMailboxes([ghat], [ghatDomain], [], {
+      pool_key: GSM_LAUNCH_POOL_KEY,
+      requested_count: 1,
     });
     expect(result.selected).toHaveLength(0);
     expect(result.rejected[0].codes).toContain("excluded_non_gsm_estate:ghat");

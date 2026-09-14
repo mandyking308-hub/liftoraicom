@@ -106,9 +106,9 @@ describe("gsm-winnr-sync post-purchase safety", () => {
   });
 
   it("warms only already-synced GSM registry rows and excludes non-GSM mailboxes", () => {
-    expect(winnrFn).toContain('eq("estate_classification", "gsm")');
+    expect(winnrFn).toContain('eq("estate_classification", targetEstate)');
     expect(winnrFn).toContain("isExcludedFromGsmEstate");
-    expect(winnrFn).toContain("no_synced_gsm_mailboxes");
+    expect(winnrFn).toContain("no_synced_mailboxes_for_estate");
   });
 
   it("uses a conservative new-domain warmup profile", () => {
