@@ -241,9 +241,19 @@ export function evaluateMailboxReadiness(
   if (m.active === false) setState("retired", "inactive");
   if (m.quarantined_reason) setState("quarantined", `quarantined:${m.quarantined_reason}`);
   if (BAD_HEALTH.has(norm(m.provider_health))) setState("quarantined", "provider_health_bad");
-  if (m.health_score !== undefined && m.health_score !== null && Number(m.health_score) < GSM_MIN_HEALTH_SCORE) {
+  // A health score is only meaningful once warm-up has completed. Before that a
+  // zero/low score is "not measured yet", not a reputation problem — so it must not
+  // masquerade as quarantine. Campaign readiness still requires warm-up completion,
+  // at which point the threshold below applies in full.
+  if (
+    WARM_DONE.has(norm(m.warmup_status)) &&
+    m.health_score !== undefined &&
+    m.health_score !== null &&
+    Number(m.health_score) < GSM_MIN_HEALTH_SCORE
+  ) {
     setState("quarantined", `health_score_below_${GSM_MIN_HEALTH_SCORE}`);
   }
+
 
   if (!m.provider_mailbox_id && !m.smartlead_email_account_id) {
     setState("provisioned_pending", "no_provider_identifier");
