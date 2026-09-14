@@ -30364,6 +30364,7 @@ export type Database = {
           dmarc_ok: boolean
           dns_status: string
           domain: string
+          estate_classification: string
           health: Json
           id: string
           last_error: string | null
@@ -30384,6 +30385,7 @@ export type Database = {
           dmarc_ok?: boolean
           dns_status?: string
           domain: string
+          estate_classification?: string
           health?: Json
           id?: string
           last_error?: string | null
@@ -30404,6 +30406,7 @@ export type Database = {
           dmarc_ok?: boolean
           dns_status?: string
           domain?: string
+          estate_classification?: string
           health?: Json
           id?: string
           last_error?: string | null

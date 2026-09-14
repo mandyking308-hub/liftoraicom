@@ -7,14 +7,27 @@ import {
   normaliseWinnrDomain,
   normaliseWinnrMailbox,
   winnrCall,
+  winnrDomainTags,
   winnrTokenConfigured,
+  WINNR_LIST_PAGE_SIZE,
 } from "../_shared/winnrClient.ts";
 import {
   GSM_OWNER_LEGAL_ENTITY,
-  classifyEstate,
   isExcludedFromGsmEstate,
   stripSecretFields,
 } from "../_shared/gsmSenderEstate.ts";
+import {
+  classifyDomainEstate,
+  EXTERNAL_NON_GSM_ESTATE,
+  GHAT_ESTATE_KEY,
+  GHAT_OWNER_LEGAL_ENTITY,
+  GSM_ESTATE_KEY,
+  resolveEstate,
+  type EstateClassification,
+} from "../_shared/senderEstates.ts";
+
+const ownerFor = (estate: EstateClassification) =>
+  estate === GHAT_ESTATE_KEY ? GHAT_OWNER_LEGAL_ENTITY : GSM_OWNER_LEGAL_ENTITY;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -67,6 +80,11 @@ Deno.serve(async (req) => {
   } catch { /* empty body allowed */ }
 
   const action = String(body.action ?? "test");
+  // Which physically separate sending estate this run operates on. Estates are
+  // never mixed: a GHAT mailbox can never be written or warmed as GSM.
+  const estateParam = String(body.estate ?? GSM_ESTATE_KEY).toLowerCase();
+  const targetEstate: EstateClassification =
+    estateParam === GHAT_ESTATE_KEY ? GHAT_ESTATE_KEY : GSM_ESTATE_KEY;
   const apply = body.apply === true;
   const confirmation = String(body.external_action_confirmation ?? "");
   const tokenConfigured = winnrTokenConfigured(TOKEN);
@@ -76,7 +94,8 @@ Deno.serve(async (req) => {
     base_url: WINNR_BASE_URL,
     client_version: WINNR_CLIENT_VERSION,
     winnr_token_configured: tokenConfigured,
-    owner_legal_entity: GSM_OWNER_LEGAL_ENTITY,
+    estate: targetEstate,
+    owner_legal_entity: ownerFor(targetEstate),
     checked_at: new Date().toISOString(),
   };
 
@@ -146,7 +165,10 @@ Deno.serve(async (req) => {
       });
     }
 
-    const mailboxCall = await winnrCall<unknown>("listEmailUsers", { token: TOKEN });
+    const mailboxCall = await winnrCall<unknown>("listEmailUsers", {
+      token: TOKEN,
+      query: { limit: WINNR_LIST_PAGE_SIZE },
+    });
     if (!mailboxCall.ok) {
       return json({
         ...base,
@@ -161,12 +183,17 @@ Deno.serve(async (req) => {
 
     const providerMailboxes = asArray(mailboxCall.data)
       .map(normaliseWinnrMailbox)
-      .filter((m) => m.email && !isExcludedFromGsmEstate(m.email) && m.provider_mailbox_id);
+      .filter((m) =>
+        m.email &&
+        !isExcludedFromGsmEstate(m.email) &&
+        resolveEstate(m.email) === targetEstate &&
+        m.provider_mailbox_id
+      );
 
     const { data: registry } = await admin
       .from("gsm_mailboxes")
       .select("id, email, provider_mailbox_id, estate_classification, active, retired")
-      .eq("estate_classification", "gsm")
+      .eq("estate_classification", targetEstate)
       .eq("active", true)
       .eq("retired", false);
 
@@ -191,8 +218,8 @@ Deno.serve(async (req) => {
         action,
         mode: "blocked",
         executed: false,
-        blocker: "no_synced_gsm_mailboxes",
-        message: "Sync the purchased Winnr estate into gsm_mailboxes before enabling warming.",
+        blocker: "no_synced_mailboxes_for_estate",
+        message: `Sync the purchased Winnr ${targetEstate.toUpperCase()} estate into the registry before enabling warming.`,
       }, 409);
     }
 
@@ -256,12 +283,18 @@ Deno.serve(async (req) => {
       warming_started: matched.length,
       emails_per_day: 15,
       rampup_speed: "slow",
-      message: "Winnr warming was started for the synced GSM estate only. Warming does not mean campaign-ready.",
+      message: `Winnr warming was started for the synced ${targetEstate.toUpperCase()} estate only. Warming does not mean campaign-ready.`,
     });
   }
 
-  const domainsCall = await winnrCall<unknown>("listDomains", { token: TOKEN });
-  const mailboxCall = await winnrCall<unknown>("listEmailUsers", { token: TOKEN });
+  const domainsCall = await winnrCall<unknown>("listDomains", {
+    token: TOKEN,
+    query: { limit: WINNR_LIST_PAGE_SIZE },
+  });
+  const mailboxCall = await winnrCall<unknown>("listEmailUsers", {
+    token: TOKEN,
+    query: { limit: WINNR_LIST_PAGE_SIZE },
+  });
 
   if (!domainsCall.ok || !mailboxCall.ok) {
     const failed = !domainsCall.ok ? domainsCall : mailboxCall;
@@ -285,10 +318,24 @@ Deno.serve(async (req) => {
     }, failed.http_status && failed.http_status >= 400 ? failed.http_status : 502);
   }
 
-  const rawDomains = asArray(domainsCall.data).map(normaliseWinnrDomain).filter((d) => d.domain);
+  const rawDomainRows = asArray(domainsCall.data);
+  const rawDomains = rawDomainRows
+    .map((raw) => ({ ...normaliseWinnrDomain(raw), tags: winnrDomainTags(raw) }))
+    .filter((d) => d.domain);
   const rawMailboxes = asArray(mailboxCall.data).map(normaliseWinnrMailbox).filter((m) => m.email);
-  const gsmMailboxes = rawMailboxes.filter((m) => !isExcludedFromGsmEstate(m.email));
-  const excluded = rawMailboxes.length - gsmMailboxes.length;
+
+  // Estate segregation: only rows belonging to the requested estate are written.
+  const estateDomains = rawDomains.filter((d) => classifyDomainEstate(d.domain) === targetEstate);
+  const estateMailboxes = rawMailboxes.filter(
+    (m) => !isExcludedFromGsmEstate(m.email) && resolveEstate(m.email) === targetEstate,
+  );
+  const gsmMailboxes = estateMailboxes;
+  const excluded = rawMailboxes.length - estateMailboxes.length;
+  const estate_counts = {
+    gsm: rawMailboxes.filter((m) => resolveEstate(m.email) === GSM_ESTATE_KEY).length,
+    ghat: rawMailboxes.filter((m) => resolveEstate(m.email) === GHAT_ESTATE_KEY).length,
+    external_non_gsm: rawMailboxes.filter((m) => resolveEstate(m.email) === EXTERNAL_NON_GSM_ESTATE).length,
+  };
 
   if (action === "test" || !apply) {
     return json({
@@ -301,8 +348,9 @@ Deno.serve(async (req) => {
       domains_seen: rawDomains.length,
       mailboxes_seen: rawMailboxes.length,
       excluded_non_gsm: excluded,
-      would_upsert_domains: rawDomains.length,
-      would_upsert_mailboxes: gsmMailboxes.length,
+      estate_counts,
+      would_upsert_domains: estateDomains.length,
+      would_upsert_mailboxes: estateMailboxes.length,
       message: "Read-only. Nothing was written and no credentials were stored.",
     });
   }
@@ -324,8 +372,9 @@ Deno.serve(async (req) => {
       domains_seen: rawDomains.length,
       mailboxes_seen: rawMailboxes.length,
       excluded_non_gsm: excluded,
-      would_upsert_domains: rawDomains.length,
-      would_upsert_mailboxes: gsmMailboxes.length,
+      estate_counts,
+      would_upsert_domains: estateDomains.length,
+      would_upsert_mailboxes: estateMailboxes.length,
       message: "No registry rows were written. Founder confirmation is required to apply the Winnr registry sync.",
     });
   }
@@ -334,15 +383,17 @@ Deno.serve(async (req) => {
   // stripped before persistence; only ids/status/health metadata are stored.
   let domainsUpserted = 0;
   const domainIdByName = new Map<string, string>();
-  for (const d of rawDomains) {
+  for (const d of estateDomains) {
     const { data: existing } = await admin
       .from("gsm_sending_domains")
       .select("id")
       .ilike("domain", d.domain)
       .maybeSingle();
+    const { tags: _tags, ...domainRow } = d;
     const row = stripSecretFields({
-      ...d,
-      owner_legal_entity: GSM_OWNER_LEGAL_ENTITY,
+      ...domainRow,
+      estate_classification: targetEstate,
+      owner_legal_entity: ownerFor(targetEstate),
       last_synced_at: new Date().toISOString(),
     });
     if (existing?.id) {
@@ -361,7 +412,7 @@ Deno.serve(async (req) => {
     const row = stripSecretFields({
       ...rest,
       sending_domain_id: domain ? (domainIdByName.get(domain) ?? null) : null,
-      estate_classification: classifyEstate(m.email),
+      estate_classification: resolveEstate(m.email),
       last_provider_check_at: new Date().toISOString(),
     });
     const { data: existing } = await admin
@@ -379,7 +430,7 @@ Deno.serve(async (req) => {
     run_mode: "apply",
     status: "succeeded",
     http_status: domainsCall.http_status,
-    domains_seen: rawDomains.length,
+    domains_seen: estateDomains.length,
     mailboxes_seen: rawMailboxes.length,
     domains_upserted: domainsUpserted,
     mailboxes_upserted: mailboxesUpserted,
@@ -397,6 +448,7 @@ Deno.serve(async (req) => {
     domains_upserted: domainsUpserted,
     mailboxes_upserted: mailboxesUpserted,
     excluded_non_gsm: excluded,
-    message: "Purchased Winnr estate synchronised into the GSM registry. No credentials were stored and no email was sent.",
+    estate_counts,
+    message: "Purchased Winnr estate synchronised into the segregated registry. No credentials were stored and no email was sent.",
   });
 });

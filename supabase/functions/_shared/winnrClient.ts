@@ -15,7 +15,10 @@
  */
 
 export const WINNR_BASE_URL = "https://api.winnr.app/v1";
-export const WINNR_CLIENT_VERSION = "winnr-client-1.2.0";
+export const WINNR_CLIENT_VERSION = "winnr-client-1.3.0";
+
+/** Winnr paginates list endpoints at 25 by default; always ask for the full page. */
+export const WINNR_LIST_PAGE_SIZE = 100;
 
 export const WINNR_ENDPOINTS = {
   // Read
@@ -170,40 +173,68 @@ export async function winnrCall<T = unknown>(
   return { ok: true, http_status: resp.status, error_code: null, error_message: null, data: parsed as T, endpoint };
 }
 
-/** Normalise a provider domain payload onto the canonical GSM registry shape. */
+/**
+ * Normalise a provider domain payload onto the canonical registry shape.
+ *
+ * Observed Winnr domain payload: { id, name, status, dns_provider, dns_status,
+ * ns_status, registrar, tags, email_users_count, payment_status }.
+ * Winnr hosts and manages the DNS zone for domains it provisions, so
+ * `dns_status: "complete"` is the provider's own statement that SPF/DKIM/DMARC
+ * are in place. No authentication state is invented when it is not complete.
+ */
 export function normaliseWinnrDomain(raw: Record<string, unknown>) {
   const domain = String(raw.domain ?? raw.name ?? "").trim().toLowerCase();
-  const dns = String(raw.dns_status ?? raw.status ?? "unknown").toLowerCase();
+  const dnsRaw = String(raw.dns_status ?? raw.status ?? "unknown").toLowerCase();
+  const statusRaw = String(raw.provisioning_status ?? raw.state ?? raw.status ?? "pending").toLowerCase();
+  const dnsComplete = dnsRaw === "complete" || dnsRaw === "verified" || dnsRaw === "ok";
+  const managedByProvider = String(raw.dns_provider ?? "").toLowerCase().startsWith("winnr");
+  const authenticated = dnsComplete && managedByProvider;
   return {
     domain,
     provider: "winnr",
     provider_domain_id: raw.id != null ? String(raw.id) : null,
-    provisioning_status: String(raw.provisioning_status ?? raw.state ?? raw.status ?? "pending").toLowerCase(),
-    dns_status: dns,
-    spf_ok: raw.spf === true || raw.spf_ok === true || String(raw.spf ?? "").toLowerCase() === "ok",
-    dkim_ok: raw.dkim === true || raw.dkim_ok === true || String(raw.dkim ?? "").toLowerCase() === "ok",
-    dmarc_ok: raw.dmarc === true || raw.dmarc_ok === true || String(raw.dmarc ?? "").toLowerCase() === "ok",
-    warmup_eligible: raw.warmup_eligible === true,
+    provisioning_status: statusRaw === "complete" ? "provisioned" : statusRaw,
+    dns_status: dnsComplete ? "verified" : dnsRaw,
+    spf_ok: authenticated || raw.spf === true || raw.spf_ok === true,
+    dkim_ok: authenticated || raw.dkim === true || raw.dkim_ok === true,
+    dmarc_ok: authenticated || raw.dmarc === true || raw.dmarc_ok === true,
+    warmup_eligible: raw.warmup_eligible === true || authenticated,
   };
 }
 
-/** Normalise a provider mailbox payload onto the canonical GSM registry shape. */
+/** Raw provider tags for a domain row (used only for estate classification). */
+export function winnrDomainTags(raw: Record<string, unknown>): unknown {
+  return raw.tags ?? null;
+}
+
+/**
+ * Normalise a provider mailbox payload onto the canonical registry shape.
+ *
+ * Observed Winnr email-user payload: { id, username, domain, full_address,
+ * name, status, type, daily_send_limit, imap_host/port, smtp_host/port }.
+ * Credentials are never present in this payload and are never requested here.
+ */
 export function normaliseWinnrMailbox(raw: Record<string, unknown>) {
   const email = String(
-    raw.email ?? raw.full_address ?? raw.address ?? raw.username ?? "",
+    raw.full_address ?? raw.email ?? raw.address ?? "",
   ).trim().toLowerCase();
+  const status = String(raw.status ?? "unknown").toLowerCase();
+  const limit = typeof raw.daily_send_limit === "number" ? raw.daily_send_limit : null;
   return {
     email,
-    local_part: email.includes("@") ? email.split("@")[0] : null,
+    local_part: raw.username != null ? String(raw.username) : email.includes("@") ? email.split("@")[0] : null,
     provider: "winnr",
     provider_mailbox_id: raw.id != null ? String(raw.id) : null,
-    sender_name: raw.display_name != null ? String(raw.display_name) : raw.name != null ? String(raw.name) : null,
+    sender_name: raw.name != null ? String(raw.name) : raw.display_name != null ? String(raw.display_name) : null,
     warmup_status: String(raw.warmup_status ?? raw.warming_status ?? "not_started").toLowerCase(),
-    provider_health: String(raw.health ?? raw.status ?? "unknown").toLowerCase(),
-    domain: email.includes("@") ? email.split("@")[1] : null,
+    provider_health: status === "active" ? "healthy" : status,
+    active: status === "active",
+    configured_daily_limit: limit,
+    domain: raw.domain != null
+      ? String(raw.domain).trim().toLowerCase()
+      : email.includes("@") ? email.split("@")[1] : null,
   };
 }
-
 
 /** Provider entitlement/usage only. Secret-shaped provider fields are never copied. */
 export function normaliseWinnrAccount(raw: Record<string, unknown> | null | undefined) {
