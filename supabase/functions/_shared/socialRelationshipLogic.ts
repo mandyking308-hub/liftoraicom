@@ -209,20 +209,20 @@ export interface PolicyRow {
   require_real_account_declaration?: boolean | null;
 }
 
-export const DEFAULT_POLICY: Required<
-  Pick<
-    PolicyRow,
-    | "daily_invite_limit"
-    | "weekly_invite_limit"
-    | "daily_message_limit"
-    | "weekly_message_limit"
-    | "max_ai_replies_per_conversation_per_day"
-    | "min_delay_seconds"
-    | "max_delay_seconds"
-    | "working_hours_start"
-    | "working_hours_end"
-  >
-> = {
+type PolicyDefaultKeys =
+  | "daily_invite_limit"
+  | "weekly_invite_limit"
+  | "daily_message_limit"
+  | "weekly_message_limit"
+  | "max_ai_replies_per_conversation_per_day"
+  | "min_delay_seconds"
+  | "max_delay_seconds"
+  | "working_hours_start"
+  | "working_hours_end";
+
+export const DEFAULT_POLICY: {
+  [K in PolicyDefaultKeys]-?: NonNullable<PolicyRow[K]>;
+} = {
   daily_invite_limit: 10,
   weekly_invite_limit: 40,
   daily_message_limit: 15,
