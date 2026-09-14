@@ -89,3 +89,21 @@ allocated in the GSM estate.
 6. Populate Launch / Evergreen allocation only from mailboxes that satisfy the readiness engine.
 7. Configure/verify campaign webhooks when the first Smartlead provider campaign is mapped.
 8. Run Liftor's zero-send dry-run. Live campaign approval and sending remain separate founder gates.
+
+## GHAT estate (Global Health Access Trust) — 14 September 2026
+
+`globalhealthaccesstrust.org` is a dedicated, segregated sending estate for Global Health Access
+Trust (Winnr tag `GHAT-Outbound`). It is registered in the same physical registry tables with
+`estate_classification = 'ghat'` and is never counted in the GSM target of 50, never allocated from
+the Launch/Evergreen lanes, and never selectable by `selectGsmMailboxes`.
+
+Classification is deterministic and lives in `supabase/functions/_shared/senderEstates.ts`: the
+address domain always wins over a stored column value or provider tag. `hello@neoncandy.online`
+remains `external_non_gsm`.
+
+Live state: 1 domain (DNS verified), 10 mailboxes, all SMTP and IMAP healthy, all connected to
+Smartlead, Winnr warm-up active on all 10, 0 campaign-ready, 0 campaigns, 0 sends, 0 lead pushes.
+Founder view: `/founder/ghat-outbound`.
+
+Readiness note: the health-score threshold only quarantines after warm-up completes; an unmeasured
+score during warm-up reports `warming`, never `campaign_ready`.
