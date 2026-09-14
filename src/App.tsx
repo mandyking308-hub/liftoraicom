@@ -841,6 +841,7 @@ import CRMContactDetail from "./pages/founder/CRMContactDetail";
 import CRMInboxes from "./pages/founder/CRMInboxes";
 import SendingInfrastructure from "./pages/founder/SendingInfrastructure";
 import GSMOutbound from "./pages/founder/GSMOutbound";
+import GHATOutbound from "./pages/founder/GHATOutbound";
 import CRMInboxConfigure from "./pages/founder/CRMInboxConfigure";
 import FinanceDashboard from "./pages/founder/finance/FinanceDashboard";
 import FinanceTargets from "./pages/founder/finance/FinanceTargets";
@@ -1733,6 +1734,7 @@ const App = () => (
             <Route path="/founder/crm/inboxes" element={<FounderRoute><CRMInboxes /></FounderRoute>} />
             <Route path="/founder/sending-infrastructure" element={<FounderRoute><SendingInfrastructure /></FounderRoute>} />
             <Route path="/founder/gsm-outbound" element={<FounderRoute><GSMOutbound /></FounderRoute>} />
+            <Route path="/founder/ghat-outbound" element={<FounderRoute><GHATOutbound /></FounderRoute>} />
             <Route path="/founder/crm/inboxes/:id/configure" element={<FounderRoute><CRMInboxConfigure /></FounderRoute>} />
             <Route path="/founder/finance" element={<FounderRoute><FinanceDashboard /></FounderRoute>} />
             <Route path="/founder/finance/targets" element={<FounderRoute><FinanceTargets /></FounderRoute>} />
