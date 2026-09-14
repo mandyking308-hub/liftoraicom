@@ -24,3 +24,9 @@
 - Education account importer + free-search discovery orchestrator (dry-run default)
 - Deterministic campaign-neutral education role scorer
 - Founder read-only firewall panel; 54 new safety tests
+
+## GSM estate reconciliation (requested 14 Sep 2026)
+- [ ] Reconcile 9 active Winnr GSM domains + 45 existing mailboxes into Liftor via deployed gsm-winnr-sync (metadata only, estate_classification='gsm')
+- [ ] Report gsmhq.net provider-side shortfall (5 mailboxes missing); do not create mailboxes
+- [ ] Verify GSM domain/mailbox/warmup counts; confirm GHAT still 1 domain / 10 mailboxes untouched
+- [ ] Publish frontend GHAT/GSM outbound pages if source parity is safe, else report blocker
