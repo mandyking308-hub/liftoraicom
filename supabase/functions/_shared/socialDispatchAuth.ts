@@ -22,7 +22,7 @@ export async function requireFounderOrScheduler(req: Request) {
     return { error: json({ ok: false, error: "dispatch_secret_not_configured" }, 401) } as const;
   }
   const a = await requireFounder(req);
-  if ("error" in a) return a;
+  if ("error" in a && a.error) return { error: a.error } as const;
   return { admin: a.admin, trigger_source: "founder" as const };
 }
 

@@ -16,10 +16,10 @@ import { selectDueJobs, shouldAutoDispatch } from "../_shared/socialDistribution
 
 const MAX_BUSINESSES = 10;
 
-Deno.serve(async (req) => {
+Deno.serve(async (req): Promise<Response> => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   const a = await requireFounderOrScheduler(req);
-  if ("error" in a) return a.error;
+  if ("error" in a && a.error) return a.error;
   const admin = a.admin;
 
   let body: any = {};
