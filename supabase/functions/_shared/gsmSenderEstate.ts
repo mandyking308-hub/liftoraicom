@@ -13,7 +13,32 @@
  * sticky: reallocating launch capacity must never rewrite a live thread.
  */
 
-export const GSM_ESTATE_VERSION = "gsm-sender-estate-1.0.0";
+import {
+  classifyDomainEstate,
+  classifySenderEstate,
+  EXTERNAL_NON_GSM_ESTATE,
+  GHAT_ESTATE_KEY,
+  GSM_ESTATE_KEY,
+  type EstateClassification,
+} from "./senderEstates.ts";
+
+export {
+  classifyDomainEstate,
+  classifySenderEstate,
+  GHAT_DOMAINS,
+  GHAT_ESTATE_KEY,
+  GHAT_EXPECTED_EMAILS,
+  GHAT_EXPECTED_MAILBOXES,
+  GHAT_OWNER_LEGAL_ENTITY,
+  GHAT_TARGET_MAILBOXES,
+  GHAT_WINNR_TAG,
+  GSM_ESTATE_KEY,
+  GSM_WINNR_TAG,
+  resolveEstate,
+  type EstateClassification,
+} from "./senderEstates.ts";
+
+export const GSM_ESTATE_VERSION = "gsm-sender-estate-1.1.0";
 
 export const GSM_OWNER_LEGAL_ENTITY = "Global Solutions Management LLC";
 export const GSM_TARGET_TOTAL_MAILBOXES = 50;
@@ -31,7 +56,7 @@ export const GSM_MIN_HEALTH_SCORE = 70;
 /** Legacy estate that must never be pulled into the GSM portfolio estate. */
 export const NON_GSM_EXCLUDED_EMAILS = ["hello@neoncandy.online"];
 export const NON_GSM_EXCLUDED_DOMAINS = ["neoncandy.online"];
-export const EXTERNAL_NON_GSM = "external_non_gsm";
+export const EXTERNAL_NON_GSM = EXTERNAL_NON_GSM_ESTATE;
 
 /** Field names that must never be persisted onto a GSM mailbox/domain row. */
 export const FORBIDDEN_SECRET_FIELDS = [
@@ -67,6 +92,7 @@ export interface GsmDomainSignals {
   spf_ok?: boolean | null;
   dkim_ok?: boolean | null;
   dmarc_ok?: boolean | null;
+  estate_classification?: string | null;
 }
 
 export interface GsmMailboxSignals {
@@ -123,8 +149,47 @@ export function isExcludedFromGsmEstate(email: string): boolean {
   return NON_GSM_EXCLUDED_DOMAINS.map(norm).includes(emailDomain(e));
 }
 
-export function classifyEstate(email: string): "gsm" | typeof EXTERNAL_NON_GSM {
-  return isExcludedFromGsmEstate(email) ? EXTERNAL_NON_GSM : "gsm";
+/**
+ * Deterministic estate for an address. `@globalhealthaccesstrust.org` is always
+ * `ghat` and can never be classified as `gsm`.
+ */
+export function classifyEstate(email: string): EstateClassification {
+  return classifySenderEstate(email);
+}
+
+/**
+ * Estate for a registry row. The address rule always wins over the stored
+ * column, so a mis-stamped row can never leak into the GSM commercial pool.
+ */
+export function mailboxEstate(
+  m: { email: string; estate_classification?: string | null },
+): EstateClassification {
+  const byAddress = classifySenderEstate(m.email);
+  if (byAddress !== GSM_ESTATE_KEY) return byAddress;
+  const declared = norm(m.estate_classification);
+  if (declared === GHAT_ESTATE_KEY || declared === EXTERNAL_NON_GSM_ESTATE) {
+    return declared as EstateClassification;
+  }
+  return GSM_ESTATE_KEY;
+}
+
+/** Only mailboxes in the GSM commercial estate may be counted or allocated by GSM logic. */
+export function isGsmEstateMailbox(
+  m: { email: string; estate_classification?: string | null },
+): boolean {
+  return mailboxEstate(m) === GSM_ESTATE_KEY;
+}
+
+export function domainEstate(
+  d: { domain?: string | null; estate_classification?: string | null },
+): EstateClassification {
+  const byDomain = classifyDomainEstate(String(d.domain ?? ""));
+  if (byDomain !== GSM_ESTATE_KEY) return byDomain;
+  const declared = norm(d.estate_classification);
+  if (declared === GHAT_ESTATE_KEY || declared === EXTERNAL_NON_GSM_ESTATE) {
+    return declared as EstateClassification;
+  }
+  return GSM_ESTATE_KEY;
 }
 
 /** Strip anything that looks like a credential before persisting a provider payload. */
@@ -176,9 +241,19 @@ export function evaluateMailboxReadiness(
   if (m.active === false) setState("retired", "inactive");
   if (m.quarantined_reason) setState("quarantined", `quarantined:${m.quarantined_reason}`);
   if (BAD_HEALTH.has(norm(m.provider_health))) setState("quarantined", "provider_health_bad");
-  if (m.health_score !== undefined && m.health_score !== null && Number(m.health_score) < GSM_MIN_HEALTH_SCORE) {
+  // A health score is only meaningful once warm-up has completed. Before that a
+  // zero/low score is "not measured yet", not a reputation problem — so it must not
+  // masquerade as quarantine. Campaign readiness still requires warm-up completion,
+  // at which point the threshold below applies in full.
+  if (
+    WARM_DONE.has(norm(m.warmup_status)) &&
+    m.health_score !== undefined &&
+    m.health_score !== null &&
+    Number(m.health_score) < GSM_MIN_HEALTH_SCORE
+  ) {
     setState("quarantined", `health_score_below_${GSM_MIN_HEALTH_SCORE}`);
   }
+
 
   if (!m.provider_mailbox_id && !m.smartlead_email_account_id) {
     setState("provisioned_pending", "no_provider_identifier");
@@ -305,6 +380,7 @@ export function selectGsmMailboxes(
 
     // Hard safety blocks — a founder override can never bypass these.
     if (isExcludedFromGsmEstate(m.email)) codes.push("excluded_non_gsm_neon_candy");
+    if (!isGsmEstateMailbox(m)) codes.push(`excluded_non_gsm_estate:${mailboxEstate(m)}`);
     if (!r.campaign_ready) codes.push(`not_campaign_ready:${r.readiness_state}`);
 
     const active = activeByMailbox.get(m.id);
@@ -405,7 +481,7 @@ export function evaluateSenderInfrastructureReadiness(
   const activeAlloc = input.allocations.filter((a) => norm(a.allocation_status) === "active");
 
   const ready = input.mailboxes
-    .filter((m) => !isExcludedFromGsmEstate(m.email))
+    .filter((m) => isGsmEstateMailbox(m))
     .map((m) => evaluateMailboxReadiness(m, m.sending_domain_id ? domainById.get(m.sending_domain_id) : null))
     .filter((r) => r.campaign_ready);
 
@@ -463,7 +539,8 @@ export function buildEstateSnapshot(
   allocations: GsmAllocationRecord[],
 ): GsmEstateSnapshot {
   const domainById = new Map(domains.filter((d) => d.id).map((d) => [d.id as string, d]));
-  const gsmMailboxes = mailboxes.filter((m) => !isExcludedFromGsmEstate(m.email));
+  const gsmMailboxes = mailboxes.filter((m) => isGsmEstateMailbox(m));
+  const gsmDomains = domains.filter((d) => domainEstate(d) === GSM_ESTATE_KEY);
   const results = gsmMailboxes.map((m) =>
     evaluateMailboxReadiness(m, m.sending_domain_id ? domainById.get(m.sending_domain_id) : null),
   );
@@ -472,7 +549,7 @@ export function buildEstateSnapshot(
   return {
     target_total_mailboxes: GSM_TARGET_TOTAL_MAILBOXES,
     target_max_domains: GSM_TARGET_MAX_DOMAINS,
-    domain_count: domains.length,
+    domain_count: gsmDomains.length,
     mailbox_count: gsmMailboxes.length,
     smtp_ok_count: gsmMailboxes.filter((m) => OK_SMTP.has(norm(m.smtp_status))).length,
     imap_ok_count: gsmMailboxes.filter((m) => OK_IMAP.has(norm(m.imap_status))).length,
@@ -515,7 +592,7 @@ export function pinnedSenderStillUsable(
 ): boolean {
   if (!pinnedMailboxId) return false;
   const m = mailboxes.find((x) => x.id === pinnedMailboxId);
-  if (!m || isExcludedFromGsmEstate(m.email)) return false;
+  if (!m || !isGsmEstateMailbox(m)) return false;
   const domainById = new Map(domains.filter((d) => d.id).map((d) => [d.id as string, d]));
   const r = evaluateMailboxReadiness(m, m.sending_domain_id ? domainById.get(m.sending_domain_id) : null);
   return r.campaign_ready;

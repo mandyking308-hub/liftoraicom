@@ -104,8 +104,8 @@ export default function GSMOutboundPage() {
 
   const load = useCallback(async () => {
     const [{ data: d }, { data: m }, { data: a }, { data: p }, { data: s }] = await Promise.all([
-      supabase.from("gsm_sending_domains").select("*").order("domain"),
-      supabase.from("gsm_mailboxes").select("*").order("email").limit(500),
+      supabase.from("gsm_sending_domains").select("*").eq("estate_classification", "gsm").order("domain"),
+      supabase.from("gsm_mailboxes").select("*").eq("estate_classification", "gsm").order("email").limit(500),
       supabase.from("gsm_mailbox_allocations").select("*").eq("allocation_status", "active"),
       supabase.from("gsm_sender_pools").select("id, pool_key, pool_name, pool_type, target_capacity, state").order("pool_type"),
       supabase.from("gsm_provider_sync_runs").select("provider, run_mode, status, error_code, started_at").order("started_at", { ascending: false }).limit(1),
@@ -187,16 +187,16 @@ export default function GSMOutboundPage() {
             <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant={winnrConnected ? "default" : "secondary"}>Winnr: {winnr ? String(winnr.connection_state ?? "unknown") : "not checked"}</Badge>
-                <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => call("gsm-winnr-sync", "Winnr test", { action: "test" }, setWinnr)}>
+                <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => call("gsm-winnr-sync", "Winnr test", { action: "test", estate: "gsm" }, setWinnr)}>
                   <RefreshCw className="mr-2 h-4 w-4" /> Test
                 </Button>
-                <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => call("gsm-winnr-sync", "Winnr preview", { action: "sync", apply: false }, setWinnr)}>
+                <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => call("gsm-winnr-sync", "Winnr preview", { action: "sync", apply: false, estate: "gsm" }, setWinnr)}>
                   Preview sync
                 </Button>
                 <Button
                   size="sm"
                   disabled={busy !== null}
-                  onClick={() => confirmed("Apply the purchased Winnr estate into Liftor? This writes only non-secret domain/mailbox metadata and sends no email.") && call("gsm-winnr-sync", "Winnr registry sync", { action: "sync", apply: true, external_action_confirmation: "SYNC GSM WINNR REGISTRY" }, setWinnr)}
+                  onClick={() => confirmed("Apply the purchased Winnr estate into Liftor? This writes only non-secret domain/mailbox metadata and sends no email.") && call("gsm-winnr-sync", "Winnr registry sync", { action: "sync", apply: true, estate: "gsm", external_action_confirmation: "SYNC GSM WINNR REGISTRY" }, setWinnr)}
                 >
                   Apply sync
                 </Button>
@@ -204,7 +204,7 @@ export default function GSMOutboundPage() {
                   size="sm"
                   variant="secondary"
                   disabled={busy !== null || snapshot.mailbox_count === 0}
-                  onClick={() => confirmed("Start Winnr warm-up for every synced, active GSM mailbox at 15/day with a slow ramp? This is warm-up traffic, not campaign sending.") && call("gsm-winnr-sync", "Start Winnr warm-up", { action: "warmup", external_action_confirmation: "START GSM WINNR WARMUP" }, setWinnr)}
+                  onClick={() => confirmed("Start Winnr warm-up for every synced, active GSM mailbox at 15/day with a slow ramp? This is warm-up traffic, not campaign sending.") && call("gsm-winnr-sync", "Start Winnr warm-up", { action: "warmup", estate: "gsm", external_action_confirmation: "START GSM WINNR WARMUP" }, setWinnr)}
                 >
                   <Flame className="mr-2 h-4 w-4" /> Start warm-up
                 </Button>
@@ -220,13 +220,13 @@ export default function GSMOutboundPage() {
             <div className="border-t pt-4 space-y-2">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant={smartleadConnected ? "default" : "secondary"}>Smartlead mailboxes: {smartlead ? String(smartlead.connection_state ?? "unknown") : "not checked"}</Badge>
-                <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => call("gsm-smartlead-mailbox-sync", "Smartlead preview", { apply: false }, setSmartlead)}>
+                <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => call("gsm-smartlead-mailbox-sync", "Smartlead preview", { apply: false, estate: "gsm" }, setSmartlead)}>
                   Preview sync
                 </Button>
                 <Button
                   size="sm"
                   disabled={busy !== null || snapshot.mailbox_count === 0}
-                  onClick={() => confirmed("Apply Smartlead account status to matching GSM registry rows? This does not create campaigns or send email.") && call("gsm-smartlead-mailbox-sync", "Smartlead registry sync", { apply: true, external_action_confirmation: "SYNC GSM SMARTLEAD REGISTRY" }, setSmartlead)}
+                  onClick={() => confirmed("Apply Smartlead account status to matching GSM registry rows? This does not create campaigns or send email.") && call("gsm-smartlead-mailbox-sync", "Smartlead registry sync", { apply: true, estate: "gsm", external_action_confirmation: "SYNC GSM SMARTLEAD REGISTRY" }, setSmartlead)}
                 >
                   Apply sync
                 </Button>

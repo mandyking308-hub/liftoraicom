@@ -5,6 +5,7 @@ import {
   isExcludedFromGsmEstate,
   stripSecretFields,
 } from "../_shared/gsmSenderEstate.ts";
+import { GHAT_ESTATE_KEY, GSM_ESTATE_KEY, type EstateClassification } from "../_shared/senderEstates.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -63,6 +64,10 @@ Deno.serve(async (req) => {
     body = await req.json();
   } catch { /* empty body allowed */ }
   const apply = body.apply === true;
+  // Estates are physically separate. This sync only ever touches one of them.
+  const estateParam = String(body.estate ?? GSM_ESTATE_KEY).toLowerCase();
+  const targetEstate: EstateClassification =
+    estateParam === GHAT_ESTATE_KEY ? GHAT_ESTATE_KEY : GSM_ESTATE_KEY;
   const confirmation = String(body.external_action_confirmation ?? "");
 
   if (!SMARTLEAD_API_KEY.trim()) {
@@ -127,14 +132,14 @@ Deno.serve(async (req) => {
     };
   });
 
-  const gsmCandidates = observed.filter((o) => o.email && o.estate_classification !== EXTERNAL_NON_GSM);
+  const gsmCandidates = observed.filter((o) => o.email && o.estate_classification === targetEstate);
   const excluded = observed.filter((o) => o.email && o.estate_classification === EXTERNAL_NON_GSM);
 
   // Resolve registry matches before both preview and apply so preview is truthful.
   const { data: registryRows, error: registryError } = await admin
     .from("gsm_mailboxes")
     .select("id,email,smartlead_email_account_id")
-    .eq("estate_classification", "gsm");
+    .eq("estate_classification", targetEstate);
   if (registryError) {
     return json({
       ok: false,
@@ -171,6 +176,7 @@ Deno.serve(async (req) => {
       executed: false,
       blocker: "external_action_confirmation_required",
       expected_confirmation: APPLY_CONFIRMATION,
+      estate: targetEstate,
       accounts_seen: observed.length,
       gsm_candidates: gsmCandidates.length,
       excluded_non_gsm: excluded.map((e) => ({ email: e.email, classification: EXTERNAL_NON_GSM })),
@@ -187,6 +193,7 @@ Deno.serve(async (req) => {
   if (apply) {
     for (const { observed: o, existing } of matched) {
       if (!existing || isExcludedFromGsmEstate(o.email)) continue;
+      if (o.estate_classification !== targetEstate) continue;
       const { estate_classification: _drop, ...rest } = o;
       const { error } = await admin
         .from("gsm_mailboxes")
@@ -214,6 +221,7 @@ Deno.serve(async (req) => {
     ok: updateErrors.length === 0,
     connection_state: "connected",
     mode: apply ? "apply" : "preview",
+    estate: targetEstate,
     accounts_seen: observed.length,
     gsm_candidates: gsmCandidates.length,
     excluded_non_gsm: excluded.map((e) => ({ email: e.email, classification: EXTERNAL_NON_GSM })),
