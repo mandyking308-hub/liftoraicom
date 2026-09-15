@@ -22,10 +22,10 @@ const MAX_BUSINESSES = 10;
 const MAX_RETRIES_PER_BUSINESS = 10;
 const MAX_RECONCILE_PER_BUSINESS = 100;
 
-Deno.serve(async (req) => {
+Deno.serve(async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   const a = requireScheduler(req);
-  if ("error" in a) return a.error;
+  if ("error" in a && a.error) return a.error;
   const admin = a.admin;
 
   let body: any = {};
