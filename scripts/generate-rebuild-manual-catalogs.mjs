@@ -208,6 +208,22 @@ fs.writeFileSync(path.join(OUT, "source-coverage-manifest.json"), JSON.stringify
 let man = `# Source Coverage Manifest\n\n${STAMP}\n\nEvery file tracked by git at this commit is accounted for below. Machine-readable twin: \`source-coverage-manifest.json\`.\n\n**Total tracked files: ${rows.length}.**\n\n| Category | Files | % |\n|---|---|---|\n${Object.entries(totals).sort((a, b) => b[1] - a[1]).map(([k, v]) => `| ${k} | ${v} | ${((v / rows.length) * 100).toFixed(1)}% |`).join("\n")}\n\nCategory meanings: **documented** = described in the named manual section or catalog row; **supporting** = covered collectively by a subsystem section (vendored UI primitives, auto-generated clients, static assets); **static-asset** = generated/exported data covered by the data-assets appendix; **doc** = documentation file classified as normative or historical in the doc index; **excluded** = intentionally outside the current-state manual (agent/workspace metadata, not runtime).\n\n## Coverage by directory\n\n| Directory | Files | Mapped sections |\n|---|---|---|\n${Object.entries(byPrefix).sort((a, b) => b[1].length - a[1].length).map(([k, v]) => `| \`${k}\` | ${v.length} | ${[...new Set(v.map((x) => x.section))].join("; ")} |`).join("\n")}\n\n## Unmapped files\n\n${rows.filter((r) => !r.section).length === 0 ? "None — every tracked file resolves to a manual section." : rows.filter((r) => !r.section).map((r) => `- \`${r.file}\``).join("\n")}\n`;
 fs.writeFileSync(path.join(OUT, "source-coverage-manifest.md"), man);
 
+/* ------------------------------------------- V: USER-MANUAL ROUTE COVERAGE */
+const userManualSrc = fs.readFileSync("src/lib/liftorUserManualContent.ts", "utf8");
+const manualRoutes = new Set([...userManualSrc.matchAll(/\/founder\/[a-z0-9-]+/g)].map((m) => m[0]));
+const founderPaths = [...new Set(routes.filter((r) => r.guard === "FounderRoute").map((r) => r.path))].sort();
+const umRows = founderPaths.map((p) => {
+  const base = "/" + p.split("/").filter((s) => !s.startsWith(":")).slice(1, 3).join("/");
+  if (manualRoutes.has(p)) return { route: p, coverage: "direct", via: p };
+  if (manualRoutes.has(base)) return { route: p, coverage: "parent-module", via: base };
+  const prefix = [...manualRoutes].filter((m) => p.startsWith(m + "-") || p.startsWith(m + "/")).sort((a, b) => b.length - a.length)[0];
+  if (prefix) return { route: p, coverage: "parent-module", via: prefix };
+  return { route: p, coverage: "uncovered", via: "" };
+});
+const umTotals = umRows.reduce((a, r) => ((a[r.coverage] = (a[r.coverage] || 0) + 1), a), {});
+let v = `# Appendix V — User Manual route coverage\n\n${STAMP}\n\nEvery founder-guarded route mapped to the Liftor User Manual (\`src/lib/liftorUserManualContent.ts\`, rendered at \`/founder/user-manual\`). **direct** = the manual names this exact route; **parent-module** = the route is an internal sub-tab or detail view of a named parent surface and is operated from there; **uncovered** = no operator explanation exists yet (a real gap, recorded in Section R).\n\n| Coverage | Routes |\n|---|---|\n${Object.entries(umTotals).map(([k, n]) => `| ${k} | ${n} |`).join("\n")}\n\nDistinct founder routes: **${founderPaths.length}**. Routes named in the user manual: **${manualRoutes.size}**.\n\n## Mapping\n\n| Route | Coverage | Operated from |\n|---|---|---|\n${umRows.map((r) => `| \`${r.route}\` | ${r.coverage} | ${r.via ? `\`${r.via}\`` : "—"} |`).join("\n")}\n`;
+fs.writeFileSync(path.join(OUT, "V-user-manual-coverage.md"), v);
+
 /* ------------------------------------------------------------ VALIDATION */
 const validation = {
   commit: HEAD,
