@@ -28,7 +28,9 @@ not read from history. Liftor core (`src/**`, `supabase/functions/**`, `supabase
 is unchanged by that product.
 
 If HEAD advances again, regenerate the catalogs (`node scripts/generate-rebuild-manual-catalogs.mjs`)
-and restate the SHA here before treating this manual as current.
+and restate the SHA here before treating this manual as current. The stamped SHA is the commit the
+generator read; any commit created after it in the same documentation pass contains documentation
+files only and changes no source under `src/**`, `supabase/**` or `apps/**`.
 
 ## Reading rule
 
