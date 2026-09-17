@@ -451,7 +451,7 @@ Deno.serve(async (req) => {
     .select(
       "id, email, sending_domain_id, provider, provider_mailbox_id, smartlead_email_account_id, smtp_status, imap_status, smartlead_status, warmup_status, provider_health, configured_daily_limit, health_score, quarantined_reason, retired, active, estate_classification, readiness_state",
     )
-    .eq("estate_classification", estate);
+    .eq("estate_classification", targetEstate);
   const domById = new Map((domRows ?? []).map((d: any) => [d.id, d]));
   for (const mb of mbRows ?? []) {
     const r = evaluateMailboxReadiness(mb as any, domById.get((mb as any).sending_domain_id) ?? null);
