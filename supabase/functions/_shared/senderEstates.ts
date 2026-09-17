@@ -28,8 +28,21 @@ export const EXTERNAL_NON_GSM_DOMAINS = ["neoncandy.online"];
 export const GHAT_OWNER_LEGAL_ENTITY = "Global Health Access Trust";
 export const GHAT_WINNR_TAG = "GHAT-Outbound";
 export const GSM_WINNR_TAG = "GSM-Outbound";
-export const GHAT_DOMAINS = ["globalhealthaccesstrust.org"];
-export const GHAT_TARGET_MAILBOXES = 10;
+/**
+ * Every domain physically owned by the trust estate. The primary .org domain
+ * carries the 10 commissioned identities; the .net and .co domains are the
+ * trust's additional sending domains (5 mailboxes each, Winnr tag GHAT-Outbound).
+ */
+export const GHAT_PRIMARY_DOMAIN = "globalhealthaccesstrust.org";
+export const GHAT_DOMAINS = [
+  GHAT_PRIMARY_DOMAIN,
+  "globalhealthaccesstrust.net",
+  "globalhealthaccesstrust.co",
+];
+/** Mailboxes commissioned on the primary trust domain. */
+export const GHAT_PRIMARY_DOMAIN_MAILBOXES = 10;
+/** Whole trust estate: 10 on .org plus 5 on each secondary domain. */
+export const GHAT_TARGET_MAILBOXES = 20;
 
 /** The 10 display identities commissioned on the GHAT domain. */
 export const GHAT_EXPECTED_MAILBOXES: { local_part: string; label: string }[] = [
