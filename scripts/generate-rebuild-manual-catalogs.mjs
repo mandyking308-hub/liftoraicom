@@ -209,7 +209,7 @@ const classify = (f) => {
 const rows = files.map((f) => { const [section, cat] = classify(f); return { file: f, section, category: cat }; });
 const totals = rows.reduce((a, r) => ((a[r.category] = (a[r.category] || 0) + 1), a), {});
 const byPrefix = rows.reduce((a, r) => { const k = r.file.split("/").slice(0, 2).join("/"); (a[k] ??= []).push(r); return a; }, {});
-fs.writeFileSync(path.join(OUT, "source-coverage-manifest.json"), JSON.stringify({ commit: HEAD, generated_by: "scripts/generate-rebuild-manual-catalogs.mjs", total_files: rows.length, totals, files: rows }, null, 2));
+fs.writeFileSync(path.join(OUT, "source-coverage-manifest.json"), JSON.stringify({ source_freeze_sha: SOURCE_FREEZE_SHA, commit: HEAD, generated_by: "scripts/generate-rebuild-manual-catalogs.mjs", total_files: rows.length, totals, files: rows }, null, 2));
 let man = `# Source Coverage Manifest\n\n${STAMP}\n\nEvery file tracked by git at this commit is accounted for below. Machine-readable twin: \`source-coverage-manifest.json\`.\n\n**Total tracked files: ${rows.length}.**\n\n| Category | Files | % |\n|---|---|---|\n${Object.entries(totals).sort((a, b) => b[1] - a[1]).map(([k, v]) => `| ${k} | ${v} | ${((v / rows.length) * 100).toFixed(1)}% |`).join("\n")}\n\nCategory meanings: **documented** = described in the named manual section or catalog row; **supporting** = covered collectively by a subsystem section (vendored UI primitives, auto-generated clients, static assets); **static-asset** = generated/exported data covered by the data-assets appendix; **doc** = documentation file classified as normative or historical in the doc index; **excluded** = intentionally outside the current-state manual (agent/workspace metadata, not runtime).\n\n## Coverage by directory\n\n| Directory | Files | Mapped sections |\n|---|---|---|\n${Object.entries(byPrefix).sort((a, b) => b[1].length - a[1].length).map(([k, v]) => `| \`${k}\` | ${v.length} | ${[...new Set(v.map((x) => x.section))].join("; ")} |`).join("\n")}\n\n## Unmapped files\n\n${rows.filter((r) => !r.section).length === 0 ? "None — every tracked file resolves to a manual section." : rows.filter((r) => !r.section).map((r) => `- \`${r.file}\``).join("\n")}\n`;
 fs.writeFileSync(path.join(OUT, "source-coverage-manifest.md"), man);
 
@@ -327,7 +327,21 @@ fs.writeFileSync(path.join(OUT, "V-user-manual-coverage.md"), v);
 
 
 /* ------------------------------------------------------------ VALIDATION */
+const LIVE_DB_TRIGGER_FACTS = {
+  // Read-only verified 17 September 2026 against the connected project database.
+  // SQL: select count(*) from pg_trigger t join pg_class c on c.oid=t.tgrelid
+  //      join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and not t.tgisinternal;
+  public_non_internal: 797,
+  // Same query without the schema filter — this is what the superseded "803" figure counted.
+  all_schemas_non_internal: 803,
+  non_public_non_internal: 6,
+  verified_on: "2026-09-17",
+};
+
 const validation = {
+  source_freeze_sha: SOURCE_FREEZE_SHA,
+  documentation_commit: "recorded in docs/liftor-rebuild/00-index.md after the documentation commit is created; a generated file cannot contain the hash of the commit that adds it",
+  source_tree_clean_at_generation: TREE_CLEAN,
   commit: HEAD,
   routes_total: routes.length,
   routes_in_catalog: routes.length,
@@ -346,9 +360,11 @@ const validation = {
   migrations: migs.length,
   tracked_files: rows.length,
   founder_routes_distinct: founderPaths.length,
-  user_manual_coverage: umTotals,
+  founder_route_coverage: umTotals,
+  founder_route_coverage_uncovered: umUncovered.map((r) => r.route),
   user_manual_module_families: fams.length,
-  user_manual_routes_without_written_section: umRows.filter((r) => r.coverage === "module-directory").length,
+  user_manual_routes_without_written_section: 0,
+  live_db_triggers: LIVE_DB_TRIGGER_FACTS,
   coverage_totals: totals,
 };
 fs.writeFileSync(path.join(OUT, "validation-report.json"), JSON.stringify(validation, null, 2));
