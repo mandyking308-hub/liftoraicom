@@ -1,7 +1,6 @@
 # Liftor Rebuild Manual — canonical current-state technical specification
 
-**Freeze commit audited:** `4fc7f388943cc8e70d47d50247f240c8b25a140a` (founder SME sales-linked giving rail MVP).
-**Documented tree:** `f52881aadd42bef28e7f93ed658e8be08922370a` — one commit later ("Build standalone global giving platform prototype"); the freeze commit is an ancestor of it and the delta is the standalone `apps/giving-platform` prototype, documented in Section A6.
+**Documented tree:** `__HEAD_SHA__` — the current GitHub/Lovable HEAD at the end of this documentation pass. This supersedes the earlier freeze targets `4fc7f388943cc8e70d47d50247f240c8b25a140a` (founder SME sales-linked giving rail MVP) and `f565c09876a5cfe0207dc31981ad026073508a55` (Giving Rail production backend), both of which are ancestors of the documented tree and are `HISTORICAL_ONLY` as coverage targets.
 **Audit date:** 17 September 2026.
 **Status:** current-state rebuild specification. No history, no diary. Superseded material lives in the Build Log and in dated `docs/*` reports, which remain untouched historical evidence.
 
