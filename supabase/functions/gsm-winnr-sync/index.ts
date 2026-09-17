@@ -8,11 +8,14 @@ import {
   normaliseWinnrMailbox,
   winnrCall,
   winnrDomainTags,
+  winnrList,
+  normaliseWinnrWarming,
   winnrTokenConfigured,
   WINNR_LIST_PAGE_SIZE,
 } from "../_shared/winnrClient.ts";
 import {
   GSM_OWNER_LEGAL_ENTITY,
+  evaluateMailboxReadiness,
   isExcludedFromGsmEstate,
   stripSecretFields,
 } from "../_shared/gsmSenderEstate.ts";
@@ -165,10 +168,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const mailboxCall = await winnrCall<unknown>("listEmailUsers", {
-      token: TOKEN,
-      query: { limit: WINNR_LIST_PAGE_SIZE },
-    });
+    const mailboxCall = await winnrList("listEmailUsers", { token: TOKEN });
     if (!mailboxCall.ok) {
       return json({
         ...base,
@@ -287,14 +287,18 @@ Deno.serve(async (req) => {
     });
   }
 
-  const domainsCall = await winnrCall<unknown>("listDomains", {
-    token: TOKEN,
-    query: { limit: WINNR_LIST_PAGE_SIZE },
-  });
-  const mailboxCall = await winnrCall<unknown>("listEmailUsers", {
-    token: TOKEN,
-    query: { limit: WINNR_LIST_PAGE_SIZE },
-  });
+  // Cursor-exhausted reads: the provider caps one page at WINNR_LIST_PAGE_SIZE,
+  // so a single call silently under-reports the estate.
+  const domainsCall = await winnrList("listDomains", { token: TOKEN });
+  const mailboxCall = await winnrList("listEmailUsers", { token: TOKEN });
+  // Provider warm-up truth. Read-only: this never enables or stops warming.
+  const warmingCall = await winnrList("listWarmings", { token: TOKEN });
+  const warmingByEmail = new Map<string, ReturnType<typeof normaliseWinnrWarming>>();
+  if (warmingCall.ok) {
+    for (const w of (warmingCall.data ?? []).map(normaliseWinnrWarming)) {
+      if (w.email) warmingByEmail.set(w.email, w);
+    }
+  }
 
   if (!domainsCall.ok || !mailboxCall.ok) {
     const failed = !domainsCall.ok ? domainsCall : mailboxCall;
@@ -409,11 +413,21 @@ Deno.serve(async (req) => {
   let mailboxesUpserted = 0;
   for (const m of gsmMailboxes) {
     const { domain, ...rest } = m;
+    const warm = warmingByEmail.get(m.email);
     const row = stripSecretFields({
       ...rest,
       sending_domain_id: domain ? (domainIdByName.get(domain) ?? null) : null,
       estate_classification: resolveEstate(m.email),
       last_provider_check_at: new Date().toISOString(),
+      // Warm-up state comes from the provider warm-up feed when present; the
+      // mailbox payload alone must never downgrade a live warm-up to not_started.
+      ...(warm
+        ? {
+          warmup_status: warm.warmup_status,
+          ...(warm.warmup_started_at ? { warmup_started_at: warm.warmup_started_at } : {}),
+          ...(warm.health_score != null ? { health_score: warm.health_score } : {}),
+        }
+        : {}),
     });
     const { data: existing } = await admin
       .from("gsm_mailboxes")
@@ -425,7 +439,31 @@ Deno.serve(async (req) => {
     mailboxesUpserted += 1;
   }
 
+  // Refresh canonical readiness from the reconciled registry. Deterministic,
+  // derived only from stored mailbox/domain state — never from provider claims.
+  let readinessRefreshed = 0;
+  let campaignReady = 0;
+  const { data: domRows } = await admin
+    .from("gsm_sending_domains")
+    .select("id, domain, provisioning_status, dns_status, spf_ok, dkim_ok, dmarc_ok, estate_classification");
+  const { data: mbRows } = await admin
+    .from("gsm_mailboxes")
+    .select(
+      "id, email, sending_domain_id, provider, provider_mailbox_id, smartlead_email_account_id, smtp_status, imap_status, smartlead_status, warmup_status, provider_health, configured_daily_limit, health_score, quarantined_reason, retired, active, estate_classification, readiness_state",
+    )
+    .eq("estate_classification", targetEstate);
+  const domById = new Map((domRows ?? []).map((d: any) => [d.id, d]));
+  for (const mb of mbRows ?? []) {
+    const r = evaluateMailboxReadiness(mb as any, domById.get((mb as any).sending_domain_id) ?? null);
+    if (r.campaign_ready) campaignReady += 1;
+    if (r.readiness_state !== (mb as any).readiness_state) {
+      await admin.from("gsm_mailboxes").update({ readiness_state: r.readiness_state }).eq("id", (mb as any).id);
+      readinessRefreshed += 1;
+    }
+  }
+
   await admin.from("gsm_provider_sync_runs").insert({
+
     provider: "winnr",
     run_mode: "apply",
     status: "succeeded",
@@ -449,6 +487,10 @@ Deno.serve(async (req) => {
     mailboxes_upserted: mailboxesUpserted,
     excluded_non_gsm: excluded,
     estate_counts,
+    warming_rows_seen: warmingByEmail.size,
+    warming_feed_ok: warmingCall.ok,
+    readiness_rows_refreshed: readinessRefreshed,
+    campaign_ready_count: campaignReady,
     message: "Purchased Winnr estate synchronised into the segregated registry. No credentials were stored and no email was sent.",
   });
 });

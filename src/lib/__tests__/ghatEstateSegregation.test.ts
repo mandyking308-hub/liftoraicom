@@ -5,6 +5,7 @@ import {
   estateFromWinnrTags,
   GHAT_DOMAINS,
   GHAT_EXPECTED_EMAILS,
+  GHAT_PRIMARY_DOMAIN_MAILBOXES,
   GHAT_TARGET_MAILBOXES,
   isGhatEstateEmail,
   isGsmEstateEmail,
@@ -65,7 +66,15 @@ describe("GHAT / GSM estate segregation", () => {
       expect(isGsmEstateEmail(email)).toBe(false);
     }
     expect(classifyDomainEstate(GHAT_DOMAINS[0])).toBe("ghat");
-    expect(GHAT_EXPECTED_EMAILS).toHaveLength(GHAT_TARGET_MAILBOXES);
+    expect(GHAT_EXPECTED_EMAILS).toHaveLength(GHAT_PRIMARY_DOMAIN_MAILBOXES);
+  });
+
+  it("classifies every trust sending domain as ghat", () => {
+    for (const d of ["globalhealthaccesstrust.org", "globalhealthaccesstrust.net", "globalhealthaccesstrust.co"]) {
+      expect(classifyDomainEstate(d)).toBe("ghat");
+      expect(classifySenderEstate(`partnerships@${d}`)).toBe("ghat");
+      expect(isGsmEstateEmail(`partnerships@${d}`)).toBe(false);
+    }
   });
 
   it("classifies GSM addresses as gsm and never as ghat", () => {
@@ -123,7 +132,7 @@ describe("GHAT / GSM estate segregation", () => {
     expect(snapshot.domain_count).toBe(1);
     expect(snapshot.target_total_mailboxes).toBe(GSM_TARGET_TOTAL_MAILBOXES);
     expect(GSM_TARGET_TOTAL_MAILBOXES).toBe(50);
-    expect(GHAT_TARGET_MAILBOXES).toBe(10);
+    expect(GHAT_TARGET_MAILBOXES).toBe(20);
 
     const readiness = evaluateSenderInfrastructureReadiness({ mailboxes: [ghat], domains, allocations: [] });
     expect(readiness.ready_mailbox_count).toBe(0);

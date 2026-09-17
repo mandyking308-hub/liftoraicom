@@ -268,3 +268,102 @@ export function deriveWinnrEstateState(account: ReturnType<typeof normaliseWinnr
   if (mailboxes === 0) return { estate_state: "domains_only_no_mailboxes", next_action: "Sending domains exist in Winnr but no mailboxes have been created. Create the mailboxes, then run Sync registry." };
   return { estate_state: "infrastructure_present", next_action: "Run Sync registry to import the Winnr estate, then start warm-up." };
 }
+
+/**
+ * Cursor-paginated read of a Winnr list endpoint.
+ *
+ * Winnr returns `{ <rows>, pagination: { has_more, cursor, count } }` and caps a
+ * single page at 100 rows. Reading only the first page silently under-reports the
+ * estate, so every registry read must exhaust the cursor. Read-only by design:
+ * only GET list endpoints may be passed in.
+ */
+export async function winnrList(
+  key: Extract<WinnrEndpointKey, "listDomains" | "listEmailUsers" | "listWarmings">,
+  opts: { token: string | null | undefined; query?: Record<string, string | number | undefined>; fetchImpl?: typeof fetch; maxPages?: number },
+): Promise<WinnrCallResult<Record<string, unknown>[]> & { pages: number }> {
+  const maxPages = opts.maxPages ?? 25;
+  const rows: Record<string, unknown>[] = [];
+  let cursor: string | undefined = undefined;
+  let pageNumber = 1;
+  let pages = 0;
+  let last: WinnrCallResult<unknown> | null = null;
+
+  while (pages < maxPages) {
+    const res: WinnrCallResult<unknown> = await winnrCall<unknown>(key, {
+      token: opts.token,
+      fetchImpl: opts.fetchImpl,
+      query: {
+        limit: WINNR_LIST_PAGE_SIZE,
+        ...(opts.query ?? {}),
+        ...(cursor ? { cursor } : {}),
+        ...(pageNumber > 1 ? { page: pageNumber } : {}),
+      },
+    });
+    last = res;
+    if (!res.ok) return { ...res, data: null, pages } as WinnrCallResult<Record<string, unknown>[]> & { pages: number };
+    pages += 1;
+
+    const d = res.data as Record<string, unknown> | unknown[] | null;
+    let page: Record<string, unknown>[] = [];
+    if (Array.isArray(d)) page = d as Record<string, unknown>[];
+    else if (d && typeof d === "object") {
+      const o = d as Record<string, unknown>;
+      for (const k of ["data", "results", "items", "domains", "email_users", "users"]) {
+        if (Array.isArray(o[k])) { page = o[k] as Record<string, unknown>[]; break; }
+      }
+    }
+    rows.push(...page);
+
+    const pag = (d && typeof d === "object" && !Array.isArray(d))
+      ? (d as Record<string, unknown>).pagination as
+        { has_more?: boolean; cursor?: string | null; page?: number; per_page?: number; total?: number } | undefined
+      : undefined;
+    if (page.length === 0) break;
+    if (pag?.has_more && pag?.cursor) {
+      cursor = String(pag.cursor);
+      continue;
+    }
+    // Page-numbered endpoints (e.g. /warming) report page/per_page/total instead.
+    if (typeof pag?.total === "number" && rows.length < pag.total) {
+      pageNumber = (typeof pag.page === "number" ? pag.page : pageNumber) + 1;
+      continue;
+    }
+    break;
+  }
+
+  return {
+    ok: true,
+    http_status: last?.http_status ?? 200,
+    error_code: null,
+    error_message: null,
+    data: rows,
+    endpoint: `${WINNR_ENDPOINTS[key].method} ${WINNR_ENDPOINTS[key].path}`,
+    pages,
+  };
+}
+
+
+/**
+ * Normalise a provider warm-up row. Warm-up is NEVER readiness: an active
+ * warm-up maps to `warming`, never to `campaign_ready`.
+ */
+export function normaliseWinnrWarming(raw: Record<string, unknown>) {
+  const email = String(raw.full_address ?? raw.email ?? "").trim().toLowerCase();
+  const status = String(raw.warming_status ?? "").toLowerCase();
+  const enabled = raw.warming_enabled === true;
+  const health = typeof raw.warming_health_score === "number" ? Math.round(raw.warming_health_score) : null;
+  const warmup_status = status === "completed"
+    ? "completed"
+    : status === "paused"
+    ? "paused"
+    : enabled || status === "active"
+    ? "warming"
+    : "not_started";
+  return {
+    email,
+    warmup_status,
+    warmup_started_at: raw.warming_started_at != null ? String(raw.warming_started_at) : null,
+    health_score: health,
+    warming_emails_per_day: typeof raw.warming_emails_per_day === "number" ? raw.warming_emails_per_day : null,
+  };
+}
