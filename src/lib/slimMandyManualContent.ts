@@ -1,12 +1,12 @@
 // Slim Mandy Manual — short, portable summary Mandy can download/upload to ChatGPT or advisers.
 // NOT the technical source of truth. Do NOT use to overwrite the User Manual or Full Technical Manual.
-// v1.11 refresh (17 Sep 2026) — estate reconciled (39 domains / 200 mailboxes warming); pilot-first before any estate-wide use.
+// v1.13 refresh (17 Sep 2026) — full repository mirror; source freeze cf1c1373f3affdd66c17a53b97200ac06c3a878f. (Historical: v1.11 reconciled the estate at 39 domains / 200 mailboxes warming; pilot-first before any estate-wide use.)
 
 export const SLIM_MANDY_MANUAL_VERSION = "1.13 — 17 September 2026 · full repository mirror · source freeze cf1c1373f3affdd66c17a53b97200ac06c3a878f";
 
 export const SLIM_MANDY_MANUAL_MARKDOWN = `# Slim Mandy Manual
 
-_Version 1.12 — 17 September 2026_
+_Version 1.13 — 17 September 2026 · source freeze cf1c1373f3affdd66c17a53b97200ac06c3a878f_
 
 _Portable summary. Safe to upload to ChatGPT or share with advisers. Not the full technical source of truth (that is the Full Technical Manual)._
 
