@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { BCLayout, BCSection, BCStat, SeverityBadge, RiskBadge } from "./_shared";
+import SMEGivingRailMVP from "@/components/founder/compliance/SMEGivingRailMVP";
 import {
   fetchProfiles, fetchRules, fetchTriggers, diagnoseCompliance, summarize,
   type ComplianceProfile, type ComplianceRule, type ApprovalTrigger,
@@ -28,6 +29,13 @@ export default function BCOverview() {
         <BCStat label="Approval triggers" value={sum.triggers} />
         <BCStat label="Adviser-required rules" value={sum.adviser_required} />
       </div>
+
+      <BCSection
+        title="SME sales-linked giving rail"
+        description="Prototype the gap identified today: make compliant sales-linked charity giving simple for SMEs without putting Liftor in the flow of funds."
+      >
+        <SMEGivingRailMVP />
+      </BCSection>
 
       <BCSection title="Warnings" description="Compliance Rules Agent diagnostics">
         {warns.length === 0 ? (
