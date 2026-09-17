@@ -267,7 +267,8 @@ const validation = {
   tracked_files: rows.length,
   founder_routes_distinct: founderPaths.length,
   user_manual_coverage: umTotals,
-  user_manual_uncovered_routes: umRows.filter((r) => r.coverage === "uncovered").map((r) => r.route),
+  user_manual_module_families: fams.length,
+  user_manual_routes_without_written_section: umRows.filter((r) => r.coverage === "module-directory").length,
   coverage_totals: totals,
 };
 fs.writeFileSync(path.join(OUT, "validation-report.json"), JSON.stringify(validation, null, 2));
