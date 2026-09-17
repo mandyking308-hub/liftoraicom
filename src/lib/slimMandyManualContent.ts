@@ -2,11 +2,11 @@
 // NOT the technical source of truth. Do NOT use to overwrite the User Manual or Full Technical Manual.
 // v1.11 refresh (17 Sep 2026) — estate reconciled (39 domains / 200 mailboxes warming); pilot-first before any estate-wide use.
 
-export const SLIM_MANDY_MANUAL_VERSION = "1.11 — 17 September 2026 (outbound readiness baseline)";
+export const SLIM_MANDY_MANUAL_VERSION = "1.12 — 17 September 2026 (full repository mirror)";
 
 export const SLIM_MANDY_MANUAL_MARKDOWN = `# Slim Mandy Manual
 
-_Version 1.11 — 17 September 2026_
+_Version 1.12 — 17 September 2026_
 
 _Portable summary. Safe to upload to ChatGPT or share with advisers. Not the full technical source of truth (that is the Full Technical Manual)._
 
@@ -64,6 +64,9 @@ One shared GSM-owned sending estate, not one per business, plus a separate trust
 
 ## Smartlead activation checklist
 Provider connection is live, but webhook/event return, campaign mapping, lead mapping, physical sending domains/mailboxes, warm-up, sender caps, the final end-to-end evidence and founder live-launch approval remain separate truthful gates. Nothing is marked campaign-ready from an assumption.
+
+## Where the full detail lives
+The complete rebuild-grade technical specification is the **Liftor Rebuild Manual** in \`docs/liftor-rebuild/\` (start at \`00-index.md\`). Section Q is the single live-state snapshot, Section R is the honest gap and security list, Section S is the rebuild-from-nothing runbook. If any older manual paragraph disagrees with Section Q, Section Q wins.
 
 ## What not to touch without a deliberate decision
 Any external gate, auto_send, cron, Smartlead campaign start or lead push, Apollo paid enrichment, buyer contact approval, data-room sharing, portal invites, payments or filings.
