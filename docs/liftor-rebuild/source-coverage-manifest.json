@@ -1,6 +1,6 @@
 {
   "source_freeze_sha": "cf1c1373f3affdd66c17a53b97200ac06c3a878f",
-  "commit": "47c34c17165dada608aa44a5e735c1a663d55b19",
+  "commit": "9caebf31ac29d8d0fd6cec59bbb6c184866470ff",
   "generated_by": "scripts/generate-rebuild-manual-catalogs.mjs",
   "total_files": 2975,
   "totals": {
