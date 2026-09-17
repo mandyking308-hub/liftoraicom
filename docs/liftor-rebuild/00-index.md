@@ -87,7 +87,7 @@ The generator reads the working tree only. It writes C, D, E, G, H, V, W, the co
 
 | Thing | Count |
 |---|---|
-| Tracked files | 2,972 |
+| Tracked files | 2,975 (includes the three new documentation files added by this closeout) |
 | Registered routes | 876 (800 founder-guarded — 798 distinct paths, 46 public, 6 redirects) |
 | Founder module families | 190 (Appendix W, one operator entry each) |
 | Founder route operator coverage | **191 direct + 607 inherited + 0 classified + 0 uncovered = 798** (Appendix V) |
