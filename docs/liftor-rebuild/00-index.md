@@ -79,8 +79,10 @@ The script reads the working tree only. It writes C, D, E, G, H, the coverage ma
 
 | Thing | Count |
 |---|---|
-| Tracked files | 2,932 |
-| Registered routes | 876 (800 founder-guarded, 46 public, 6 redirects) |
+| Tracked files | 2,972 |
+| Registered routes | 876 (800 founder-guarded — 798 distinct paths, 46 public, 6 redirects) |
+| Founder module families | 190 (Appendix V) |
+| User Manual route coverage | 88 direct + 249 parent-module + 461 inventory-only (Appendix V, gap R6) |
 | Page files | 945 (32 routed directly; the rest are tabs/panels of a parent page) |
 | Components | 419 |
 | `src/lib` engines/helpers | 177 |
