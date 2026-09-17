@@ -8,6 +8,7 @@ import {
   normaliseWinnrMailbox,
   winnrCall,
   winnrDomainTags,
+  winnrList,
   winnrTokenConfigured,
   WINNR_LIST_PAGE_SIZE,
 } from "../_shared/winnrClient.ts";
@@ -165,10 +166,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const mailboxCall = await winnrCall<unknown>("listEmailUsers", {
-      token: TOKEN,
-      query: { limit: WINNR_LIST_PAGE_SIZE },
-    });
+    const mailboxCall = await winnrList("listEmailUsers", { token: TOKEN });
     if (!mailboxCall.ok) {
       return json({
         ...base,
@@ -287,14 +285,10 @@ Deno.serve(async (req) => {
     });
   }
 
-  const domainsCall = await winnrCall<unknown>("listDomains", {
-    token: TOKEN,
-    query: { limit: WINNR_LIST_PAGE_SIZE },
-  });
-  const mailboxCall = await winnrCall<unknown>("listEmailUsers", {
-    token: TOKEN,
-    query: { limit: WINNR_LIST_PAGE_SIZE },
-  });
+  // Cursor-exhausted reads: the provider caps one page at WINNR_LIST_PAGE_SIZE,
+  // so a single call silently under-reports the estate.
+  const domainsCall = await winnrList("listDomains", { token: TOKEN });
+  const mailboxCall = await winnrList("listEmailUsers", { token: TOKEN });
 
   if (!domainsCall.ok || !mailboxCall.ok) {
     const failed = !domainsCall.ok ? domainsCall : mailboxCall;
