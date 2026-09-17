@@ -190,7 +190,12 @@ const classify = (f) => {
   if (f.startsWith("data/")) return ["Technical Manual K / data-assets appendix — exported research snapshots", "static-asset"];
   if (f.startsWith("scripts/")) return ["Technical Manual P/S — repository scripts", "documented"];
   if (f.startsWith(".github/")) return ["Technical Manual P — CI workflows", "documented"];
-  if (f.startsWith("apps/")) return ["Technical Manual A — standalone sub-app (giving platform prototype)", "documented"];
+  if (f.startsWith("apps/giving-platform/supabase/migrations/")) return ["Technical Manual U2/U3 — Giving Rail standalone schema and RPCs (not applied to the Liftor database)", "documented"];
+  if (f.startsWith("apps/giving-platform/supabase/functions/")) return ["Technical Manual U4 — Giving Rail standalone edge function (not deployed to the Liftor project)", "documented"];
+  if (f.startsWith("apps/giving-platform/public/")) return ["Technical Manual U5 — Giving Rail standalone static assets", "static-asset"];
+  if (f.startsWith("apps/giving-platform/src/")) return ["Technical Manual U5 — Giving Rail standalone frontend", "documented"];
+  if (f.startsWith("apps/giving-platform/")) return ["Technical Manual U1/U7 — Giving Rail standalone build, brand and launch docs", "documented"];
+  if (f.startsWith("apps/")) return ["Technical Manual U — standalone sub-app", "documented"];
   if (f.startsWith("public/")) return ["Technical Manual A — static public assets", "supporting"];
   if (f.startsWith(".lovable/")) return ["Project memory / plan files — not part of the runtime", "excluded"];
   if (f.startsWith(".workspace/") || f.startsWith(".agents/") || f.startsWith(".claude/")) return ["Agent workspace files — not part of the runtime", "excluded"];

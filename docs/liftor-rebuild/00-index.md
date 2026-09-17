@@ -1,7 +1,6 @@
 # Liftor Rebuild Manual — canonical current-state technical specification
 
-**Freeze commit audited:** `4fc7f388943cc8e70d47d50247f240c8b25a140a` (founder SME sales-linked giving rail MVP).
-**Documented tree:** `f52881aadd42bef28e7f93ed658e8be08922370a` — one commit later ("Build standalone global giving platform prototype"); the freeze commit is an ancestor of it and the delta is the standalone `apps/giving-platform` prototype, documented in Section A6.
+**Documented tree:** `08d8e89274b6f04ff3a306ff0f55bb59d7ea5cf1` — the current GitHub/Lovable HEAD at the end of this documentation pass. This supersedes the earlier freeze targets `4fc7f388943cc8e70d47d50247f240c8b25a140a` (founder SME sales-linked giving rail MVP) and `f565c09876a5cfe0207dc31981ad026073508a55` (Giving Rail production backend), both of which are ancestors of the documented tree and are `HISTORICAL_ONLY` as coverage targets.
 **Audit date:** 17 September 2026.
 **Status:** current-state rebuild specification. No history, no diary. Superseded material lives in the Build Log and in dated `docs/*` reports, which remain untouched historical evidence.
 
@@ -19,15 +18,19 @@
 | `HISTORICAL_ONLY` | true on its date, not current; retained as evidence |
 | `UNKNOWN — NOT VERIFIED` | not checked in this audit. Say this instead of guessing. |
 
-## Audit boundary and source divergence
+## Audit boundary — no source divergence
 
-Audit boundary requested: `f565c09876a5cfe0207dc31981ad026073508a55`.
-Workspace HEAD documented: `e5fe720e5b5e4add8cbd81863a00291357f48437` — an **ancestor** of the boundary commit.
+Sections A–U are written against the working tree at `08d8e89274b6f04ff3a306ff0f55bb59d7ea5cf1`; there is no gap between the
+documented tree and the audited tree. The whole `apps/giving-platform` standalone product, its three
+`gr_*` migrations, its `gr-public-intake` edge function and
+`.github/workflows/giving-platform-quality.yml` are present in the tree and documented in **Section U**,
+not read from history. Liftor core (`src/**`, `supabase/functions/**`, `supabase/migrations/**`)
+is unchanged by that product.
 
-The whole difference (19 files, +2,568 / −400) lies inside `apps/giving-platform/`. Liftor core —
-`src/**`, `supabase/functions/**`, `supabase/migrations/**`, workflows and configs — is identical at
-both commits, so Sections A–T describe the boundary commit correctly. The `apps/giving-platform`
-delta is documented in Section U, read from git history and labelled as such.
+If HEAD advances again, regenerate the catalogs (`node scripts/generate-rebuild-manual-catalogs.mjs`)
+and restate the SHA here before treating this manual as current. The stamped SHA is the commit the
+generator read; any commit created after it in the same documentation pass contains documentation
+files only and changes no source under `src/**`, `supabase/**` or `apps/**`.
 
 ## Reading rule
 

@@ -1,6 +1,6 @@
 # Appendix C — Complete Route Catalog
 
-_Generated from commit `e5fe720e5b5e4add8cbd81863a00291357f48437` by `scripts/generate-rebuild-manual-catalogs.mjs`. Regenerate with `node scripts/generate-rebuild-manual-catalogs.mjs`._
+_Generated from commit `08d8e89274b6f04ff3a306ff0f55bb59d7ea5cf1` by `scripts/generate-rebuild-manual-catalogs.mjs`. Regenerate with `node scripts/generate-rebuild-manual-catalogs.mjs`._
 
 Every route registered in `src/App.tsx`. Guard column: `FounderRoute` = founder/admin only (`user_roles.role = 'founder'`), `ProtectedRoute` = any authenticated portal user, `PartnerRoute`/`SupplierRoute`/`WorkerRoute` = scoped portals, `public` = unauthenticated, `redirect` = alias.
 

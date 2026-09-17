@@ -1,5 +1,5 @@
 {
-  "commit": "e5fe720e5b5e4add8cbd81863a00291357f48437",
+  "commit": "08d8e89274b6f04ff3a306ff0f55bb59d7ea5cf1",
   "routes_total": 876,
   "routes_in_catalog": 876,
   "founder_routes": 800,
@@ -32,11 +32,11 @@
   ],
   "edge_functions_external_capable": 34,
   "migrations": 442,
-  "tracked_files": 2957,
+  "tracked_files": 2971,
   "coverage_totals": {
-    "documented": 2714,
+    "documented": 2725,
     "excluded": 17,
-    "static-asset": 68,
+    "static-asset": 71,
     "doc": 95,
     "supporting": 63
   }

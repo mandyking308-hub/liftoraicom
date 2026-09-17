@@ -1,24 +1,50 @@
 # Section U — Standalone applications (Giving Rail platform)
 
-`apps/giving-platform` is a **separate application**, not a Liftor founder surface. It has its own `package.json`, Vite config, tsconfig, Supabase client and migrations. Liftor core does not import it and it does not use Liftor's router, auth context or Supabase client.
+`apps/giving-platform` is a **separate application**, not a Liftor founder surface. It has its own `package.json`, Vite config, tsconfig, Supabase client, migrations, edge function and CI workflow. Liftor core does not import it; it does not use Liftor's router, auth context or Supabase client, and it is not part of Liftor's build, test or deployment pipeline.
 
 Keep three things distinct:
 
 | Thing | What it is | Status |
 |---|---|---|
 | **Liftor core** | the founder operating system in `src/**` | `BUILT_IN_CODE` / `LIVE_CONFIGURED` |
-| **GHAT giving rail (Liftor-side)** | founder SME sales-linked giving surfaces inside Liftor core, documented in Section K7 | `BUILT_IN_CODE` |
+| **GHAT giving rail (Liftor-side)** | founder SME sales-linked giving surfaces inside Liftor core, documented in Section K7; GHAT is a charity counterparty, not this product | `BUILT_IN_CODE` |
 | **Giving Rail platform (this section)** | the standalone multi-tenant public product in `apps/giving-platform` | `BUILT_IN_CODE`, **not deployed** |
 
-## U1. Source-tree divergence at this audit
+## U1. Source boundary for this section
 
-The stated audit boundary `f565c09876a5cfe0207dc31981ad026073508a55` ("Add Giving Rail production backend and controlled workflows") is **ahead of** this workspace's HEAD `e5fe720e5b5e4add8cbd81863a00291357f48437`; HEAD is an ancestor of it.
+Every file described here is present in the working tree at the documented commit (see `00-index.md` for the exact SHA and parity statement). Earlier revisions of this section read part of the delta from git history; that is no longer necessary.
 
-The entire delta — 19 files, +2,568 / −400 — is confined to `apps/giving-platform/`. **Liftor core (`src/**`, `supabase/functions/**`, `supabase/migrations/**`, workflows, configs) is byte-identical between the two commits.** Sections A–T therefore describe the audit commit accurately. This section documents the delta, read directly from history rather than from the working tree, and every claim here is labelled accordingly.
+Tracked files (23):
 
-Delta files: `.env.example`, `BRAND.md`, `LAUNCH_CHECKLIST.md`, `README.md`, `index.html`, `package.json`, `public/favicon.svg`, `public/manifest.webmanifest`, `public/og-card.svg`, `src/App.tsx`, `src/lib/platformApi.ts`, `src/lib/supabase.ts`, `src/styles.css`, `supabase/README.md`, `supabase/functions/gr-public-intake/index.ts`, and three migrations.
+```
+.github/workflows/giving-platform-quality.yml
+apps/giving-platform/.env.example
+apps/giving-platform/BRAND.md
+apps/giving-platform/LAUNCH_CHECKLIST.md
+apps/giving-platform/README.md
+apps/giving-platform/index.html
+apps/giving-platform/package.json
+apps/giving-platform/tsconfig.json
+apps/giving-platform/vite.config.ts
+apps/giving-platform/public/favicon.svg
+apps/giving-platform/public/manifest.webmanifest
+apps/giving-platform/public/og-card.svg
+apps/giving-platform/src/App.tsx
+apps/giving-platform/src/main.tsx
+apps/giving-platform/src/styles.css
+apps/giving-platform/src/vite-env.d.ts
+apps/giving-platform/src/lib/platformApi.ts
+apps/giving-platform/src/lib/supabase.ts
+apps/giving-platform/supabase/README.md
+apps/giving-platform/supabase/functions/gr-public-intake/index.ts
+apps/giving-platform/supabase/migrations/20260917190000_giving_rail_core.sql
+apps/giving-platform/supabase/migrations/20260917190500_giving_rail_workflows.sql
+apps/giving-platform/supabase/migrations/20260917191000_giving_rail_public_intake.sql
+```
 
-## U2. Data model (`gr_` prefix)
+All 23 appear in `source-coverage-manifest.md` mapped to this section.
+
+## U2. Data model (`gr_` prefix) — schema written, nowhere applied
 
 18 tables: `gr_profiles`, `gr_organizations`, `gr_organization_members`, `gr_business_profiles`, `gr_charity_profiles`, `gr_verification_checks`, `gr_projects`, `gr_project_follows`, `gr_campaigns`, `gr_campaign_approvals`, `gr_campaign_events`, `gr_payment_records`, `gr_volunteer_opportunities`, `gr_volunteer_profiles`, `gr_volunteer_applications`, `gr_pilot_leads`, `gr_complaints`, `gr_audit_log` — plus a rate-limit table from the intake migration.
 
@@ -50,9 +76,21 @@ Campaign state machine: `draft → submitted → under_review → approved → l
 | Capability | internal write only; sends no email, charges nothing |
 | Idempotency | none beyond rate limiting — `UNKNOWN — NOT VERIFIED` whether duplicate submissions are deduped downstream |
 
-## U5. Frontend
+It lives outside `supabase/functions/`, so Liftor's deploy pipeline never touches it.
 
-`src/App.tsx` (rewritten in the delta), `src/lib/supabase.ts` (own client, `VITE_*` publishable keys per `.env.example`), `src/lib/platformApi.ts` (typed RPC/table wrappers), `src/styles.css`, plus PWA manifest, favicon and OG card. `BRAND.md` and `LAUNCH_CHECKLIST.md` are product documents, not Liftor manuals.
+## U5. Frontend and persistence
+
+Single-page React 18 + Vite 5 app: `index.html` → `src/main.tsx` → `src/App.tsx` (hash routing, e.g. `#/workspace`), `src/styles.css`, PWA manifest, favicon, OG card. `BRAND.md` and `LAUNCH_CHECKLIST.md` are product documents, not Liftor manuals.
+
+Persistence today, verified in source:
+
+| Path | Behaviour |
+|---|---|
+| `src/lib/supabase.ts` | creates a Supabase client **only if** `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are both set; otherwise `supabase` is `null` and `backendConfigured` is `false`. `requireSupabase()` throws "Giving Rail production backend is not configured in this environment." |
+| `src/lib/platformApi.ts` | typed wrappers over magic-link auth and the `gr_*` RPCs/tables; every call goes through `requireSupabase()`, so all of it throws when unconfigured |
+| `src/App.tsx` | a `store` helper reading/writing `localStorage` (try/catch, comment: "Browser storage is convenience only") for in-browser draft/journey state |
+
+Net effect: **as shipped in this repository the product has no configured backend.** `.env.example` carries placeholder values only, no real project URL or key is committed, so a default checkout runs as a **local-browser prototype** — content renders, drafts persist in `localStorage`, and any backend-backed action fails closed with the not-configured error. There is **no production database, no deployed edge function, no payment rail and no provider integration** of any kind (no Stripe, no email sender, no accounting connection). Money movement is modelled as records (`gr_payment_records`, `gr_record_payment_and_settle`) and reconciled by a human — nothing charges a card.
 
 ## U6. Live status — the important part
 
@@ -69,9 +107,28 @@ where n.nspname = 'public' and c.relkind = 'r' and c.relname like 'gr\_%';
 | Claim | Label |
 |---|---|
 | Giving Rail schema, workflows and RLS written | `BUILT_IN_CODE` |
-| Giving Rail schema applied to a database | `UNKNOWN — NOT VERIFIED` for any other project; **not present** in the Liftor project |
-| `gr-public-intake` deployed | `UNKNOWN — NOT VERIFIED` (not in Liftor's `supabase/functions/`, so not deployed to the Liftor project) |
+| Giving Rail schema applied to a database | not present in the Liftor project; `UNKNOWN — NOT VERIFIED` for any other project |
+| `gr-public-intake` deployed | not in Liftor's `supabase/functions/`, so not deployed to the Liftor project; elsewhere `UNKNOWN — NOT VERIFIED` |
+| Public site hosted at a domain | `UNKNOWN — NOT VERIFIED` — no deployment configuration in this repository |
 | Any real pilot lead, campaign, payment or volunteer record | none — `BLOCKED` on deployment |
 | End-to-end proof | `END_TO_END_PROVED`: **no** |
 
-The migrations live under `apps/giving-platform/supabase/migrations/`, outside Liftor's migration directory, so Liftor's migration pipeline will never apply them. Deploying this platform is a separate, deliberate act against a separate Supabase project — not a Liftor change.
+## U7. CI — `.github/workflows/giving-platform-quality.yml`
+
+Named "Giving Platform Quality Gate". Triggers on `pull_request` and on `push` to `main`, both path-filtered to `apps/giving-platform/**` and the workflow file itself. `permissions: contents: read`. One `build` job on `ubuntu-latest` with `working-directory: apps/giving-platform`: checkout → Node 20 → `npm install --no-audit --no-fund` → `npm run build` (`tsc -b && vite build`).
+
+What it proves: the standalone app typechecks and builds. What it does **not** prove: no tests, no lint, no migration validation, no deployment, no runtime or security verification. It does not run Liftor core's suite, and Liftor's own workflows ignore `apps/**`.
+
+## U8. Production gates — what must happen before this is real
+
+None of these has been done. Each is a separate, deliberate, approved act, not a side effect of a Liftor change:
+
+1. Create a **separate Supabase project** for the Giving Rail. Do not apply `gr_*` migrations to the Liftor project.
+2. Apply the three migrations in filename order and verify RLS and GRANTs on all 18 tables against the live schema.
+3. Deploy `gr-public-intake` with `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` set in that project (names only — never committed).
+4. Set `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` for the frontend build and choose a host/domain.
+5. Decide and implement the payment/settlement rail — there is none. Until then `gr_payment_records` is a human-reconciled ledger, and no public copy may imply automated collection or transfer of donor money.
+6. Legal/compliance review of charity-facing and donor-facing claims, plus the charity verification workflow (`gr_verification_checks`), before any public launch.
+7. Only then a first controlled pilot, with founder approval, as with every other Liftor external-capability launch.
+
+Until all of the above, the correct statement is: **the Giving Rail platform is built in code, runs as a local-browser prototype, and is not live.**
