@@ -1232,10 +1232,11 @@ LIFTOR_FULL_GUIDE.push(WHOLE_SYSTEM_LIVE_CAPABILITY_MAP);
 const TECHNICAL_MANUAL_LIVE_STATE: ManualSection = {
   number: 91,
   key: "technical-manual-live-state",
-  title: "Technical Manual — current architecture (v5.3 live state)",
+  title: "Technical Manual — architecture snapshot (v5.3, superseded on current state by the Rebuild Manual)",
   body: [
-    "Live-first principle. Liftor runs live by default. There are no artificial readiness gates, no simulation-only default, no pre-live blockers. Approval locks apply only to external/high-risk action.",
-    "Architecture. React 18 + Vite + TS + Tailwind + shadcn/ui frontend; Supabase Postgres + Edge Functions + Storage backend; multi-tenant by business_id with RLS on every public table.",
+    "HISTORICAL SNAPSHOT. This section records the v5.3 architecture write-up. Where it conflicts with the Liftor Rebuild Manual (docs/liftor-rebuild/, Section Q live state), the Rebuild Manual is current.",
+    "Superseded — operating posture. The 'live-first, no readiness gates' wording below is replaced by the pilot-first rule: internal activation first, readiness computed, micro-batch (≤5 recipients) before any scale, and no estate-wide activation until one controlled pilot has been delivered and returned successfully.",
+    "Architecture. React 18 + Vite + TS + Tailwind + shadcn/ui frontend; Supabase Postgres + Edge Functions + Storage backend; multi-tenant by business_id. Correction: RLS is NOT on every public table — the 17 September 2026 audit found 1,109 of 1,112 public tables with RLS enabled and 3 with RLS off (billionaire_enrichment_batches, billionaire_institution_links, philanthropic_institutions). That is an open security finding, not a fixed state.",
     "AI Gateway runtime path. Every approved AI call flows through supabase/functions/_shared/aiGateway.ts (callAIGateway / streamAIGateway). The gateway writes ai_gateway_requests, ai_runtime_events, ai_usage_ledger and enforces concurrency leases, budget caps, kill switch, redaction and idempotency.",
     "Edge function list. 14+ runtime functions import the shared gateway helper (Liftor Brain, Founder Copilot, business onboarding factory, daily/weekly loops, portfolio commander, proposal generator, etc.). external-action-executor is the single chokepoint for external mutations and reads external_action_gates before doing anything.",
     "Direct AI bypass status. 0 direct provider calls on the runtime path. The Bypass Register (/founder/ai-cost/bypass-register) reads 0. LOVABLE_API_KEY is the only AI credential; no OPENAI_API_KEY in runtime code.",
