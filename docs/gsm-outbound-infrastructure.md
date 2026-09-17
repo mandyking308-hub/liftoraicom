@@ -16,18 +16,51 @@ Apollo (data only)
 Global Solutions Management LLC owns one shared portfolio sending estate. Portfolio businesses
 borrow capacity; they never own mailbox estates.
 
-## Current post-purchase state — 11 September 2026
+## Current post-purchase state — 11 September 2026 (historical snapshot)
 
-The Winnr account and mailbox estate have now been purchased. The live GSM registry deliberately
-remains empty until the provider estate is authenticated and synced; Liftor must not invent mailbox
-or domain rows from the planned capacity. The only secure external credential required for this step
-is `WINNR_API_TOKEN`, stored as a server-side Edge Function secret and never in browser code, chat,
-GitHub or the GSM database.
+Historical snapshot. **Superseded by the 17 September 2026 truth sync below.** At that date the
+Winnr account and mailbox estate had been purchased but the GSM registry was deliberately empty
+pending an authenticated provider sync. The only secure external credential required was
+`WINNR_API_TOKEN`, stored as a server-side Edge Function secret and never in browser code, chat,
+GitHub or the GSM database. That remains true.
 
 Winnr sync reads the provider's current domains and email users and idempotently stores only
 non-secret operational metadata. SMTP/IMAP passwords and API credentials are not persisted in
 Liftor. Winnr warming is a separate founder-confirmed action and does not make a mailbox
 campaign-ready by itself.
+
+## Live estate — 17 September 2026 (current truth)
+
+| Fact | Live value |
+| --- | --- |
+| Sending domains | 39 (39 DNS verified; SPF 39/39, DKIM 39/39, DMARC 39/39) |
+| Mailboxes | 200 (all active, all warming) |
+| GSM estate | 180 mailboxes / 36 domains |
+| GHAT estate | 20 mailboxes / 3 domains |
+| Smartlead-connected | 10 (GHAT only); GSM 0 |
+| Campaign-ready mailboxes | 0 |
+| Campaign mappings / lead mappings / provider events | 0 / 0 / 0 |
+| Smartlead provider row | connected, healthy; `webhook_configured = false`; `warmup_status = not_configured` |
+
+Warm-up state and health scores are ingested from the provider warm-up feed by `gsm-winnr-sync`,
+which also refreshes canonical `readiness_state` after every apply.
+
+## Pilot-first operating rule (mandatory)
+
+**200 registered, warming mailboxes are inventory, not permission to use 200.** No estate-wide
+activation is permitted until one tiny controlled pilot has been delivered and returned
+successfully. The pilot allocates only a very small number of sender mailboxes and a tiny recipient
+micro-batch; every other mailbox stays out of allocation and out of execution. The existing
+micro-batch control caps Smartlead cold outreach at **≤5 recipients** — that is the preferred size
+of the first proof, not a reason to connect all senders.
+
+The pilot must prove, failing closed at any broken step: one business → approved ICP/offer/copy →
+Apollo/data import → canonical CRM record plus business relationship → suppression and sendability
+checks → selected sender mailbox(es) → Smartlead campaign and lead mapping → actual delivery →
+reply/bounce/unsubscribe event return → CRM state update → audit trail.
+
+No pilot has been sent and none has passed. Founder final live-launch approval remains a separate
+gate after the pilot; estate-wide activation is a further gate after that.
 
 ## Capacity model
 
@@ -92,17 +125,18 @@ allocated in the GSM estate.
 
 ## GHAT estate (Global Health Access Trust) — 14 September 2026
 
-`globalhealthaccesstrust.org` is a dedicated, segregated sending estate for Global Health Access
+`globalhealthaccesstrust.org`, `globalhealthaccesstrust.net` and `globalhealthaccesstrust.co` form a dedicated, segregated sending estate for Global Health Access
 Trust (Winnr tag `GHAT-Outbound`). It is registered in the same physical registry tables with
-`estate_classification = 'ghat'` and is never counted in the GSM target of 50, never allocated from
+`estate_classification = 'ghat'` and is never counted in the GSM capacity targets, never allocated from
 the Launch/Evergreen lanes, and never selectable by `selectGsmMailboxes`.
 
 Classification is deterministic and lives in `supabase/functions/_shared/senderEstates.ts`: the
 address domain always wins over a stored column value or provider tag. `hello@neoncandy.online`
 remains `external_non_gsm`.
 
-Live state: 1 domain (DNS verified), 10 mailboxes, all SMTP and IMAP healthy, all connected to
-Smartlead, Winnr warm-up active on all 10, 0 campaign-ready, 0 campaigns, 0 sends, 0 lead pushes.
+Live state (17 September 2026): 3 GHAT domains (globalhealthaccesstrust.org/.net/.co), 20 mailboxes,
+all warming; 10 connected to Smartlead with SMTP and IMAP healthy, 10 not yet connected;
+0 campaign-ready, 0 campaigns, 0 sends, 0 lead pushes.
 Founder view: `/founder/ghat-outbound`.
 
 Readiness note: the health-score threshold only quarantines after warm-up completes; an unmeasured
