@@ -1,6 +1,11 @@
 # Liftor Rebuild Manual — canonical current-state technical specification
 
-**Documented tree:** `08d8e89274b6f04ff3a306ff0f55bb59d7ea5cf1` — the current GitHub/Lovable HEAD at the end of this documentation pass. This supersedes the earlier freeze targets `4fc7f388943cc8e70d47d50247f240c8b25a140a` (founder SME sales-linked giving rail MVP) and `f565c09876a5cfe0207dc31981ad026073508a55` (Giving Rail production backend), both of which are ancestors of the documented tree and are `HISTORICAL_ONLY` as coverage targets.
+**source_freeze_sha:** `cf1c1373f3affdd66c17a53b97200ac06c3a878f` — the single canonical audit source for this manual and for every generated catalog, coverage manifest and validation report in this folder. Lovable HEAD and GitHub `main` were independently rechecked and matched at this SHA, and the runtime source tree (`src/**`, `supabase/**`, `apps/**`, `.github/**`) is byte-identical to it at the documentation commit (`git diff cf1c1373 -- src supabase apps .github` is empty).
+
+**documentation_commit:** recorded in `docs/liftor-rebuild/DOCUMENTATION-COMMIT.md` and in the final audit report. It is deliberately **not** embedded inside the generated files: a commit cannot contain its own hash, so a generated file that claimed to would be lying. The chain is: source frozen at `source_freeze_sha` → documentation regenerated from exactly that tree → documentation commit created on top of it, changing documentation files only.
+
+**Superseded coverage targets (`HISTORICAL_ONLY`):** `4fc7f388943cc8e70d47d50247f240c8b25a140a` (founder SME sales-linked giving rail MVP), `f565c09876a5cfe0207dc31981ad026073508a55` (Giving Rail production backend), `08d8e89274b6f04ff3a306ff0f55bb59d7ea5cf1` and `a513cacffe2a1064a5ea172c9170c46a55c51b8e` (earlier generation stamps). All are ancestors of the freeze SHA; none is a current coverage target.
+
 **Audit date:** 17 September 2026.
 **Status:** current-state rebuild specification. No history, no diary. Superseded material lives in the Build Log and in dated `docs/*` reports, which remain untouched historical evidence.
 
@@ -63,7 +68,8 @@ Capability is not permission. A file existing, a function deploying and a provid
 | S | [S-disaster-recovery-runbook.md](./S-disaster-recovery-runbook.md) | Blank repo + blank database → working Liftor |
 | T | [T-traceability.md](./T-traceability.md) | Subsystem → files/tables/routes/functions map |
 | U | [U-standalone-apps.md](./U-standalone-apps.md) | Standalone Giving Rail platform, separated from Liftor core and GHAT |
-| V | [V-user-manual-coverage.md](./V-user-manual-coverage.md) | Founder route → User Manual coverage matrix + the 190-family module directory (generated) |
+| V | [V-user-manual-coverage.md](./V-user-manual-coverage.md) | **Generated.** Every founder route → direct / inherited / classified operator coverage, route-by-route |
+| W | [W-module-operator-entries.md](./W-module-operator-entries.md) | **Generated.** One operator entry per founder module family (190) |
 | — | [source-coverage-manifest.md](./source-coverage-manifest.md) | Every tracked file mapped to a section (+ `.json` twin) |
 | — | [validation-report.json](./validation-report.json) | Machine-checkable counts behind the coverage claims |
 | — | [doc-normative-vs-historical.md](./doc-normative-vs-historical.md) | Which `docs/**` files are normative and which are historical |
@@ -71,20 +77,21 @@ Capability is not permission. A file existing, a function deploying and a provid
 ## Regenerating the generated sections
 
 ```bash
-node scripts/generate-rebuild-manual-catalogs.mjs
+SOURCE_FREEZE_SHA=cf1c1373f3affdd66c17a53b97200ac06c3a878f node scripts/generate-rebuild-manual-catalogs.mjs
+node scripts/check-rebuild-manual-consistency.mjs
 ```
 
-The script reads the working tree only. It writes C, D, E, G, H, the coverage manifest and the validation report. It never contacts the database or any provider.
+The generator reads the working tree only. It writes C, D, E, G, H, V, W, the coverage manifest and the validation report, and stamps `source_freeze_sha` into every one of them. It never contacts the database or any provider. The checker re-derives route, page, edge-function, migration and manifest coverage independently, verifies the freeze stamp is identical across all generated files, and scans for stale current-state claims.
 
-## Headline scale at this commit
+## Headline scale at this source freeze
 
 | Thing | Count |
 |---|---|
-| Tracked files | 2,972 |
+| Tracked files | 2,975 (includes the three new documentation files added by this closeout) |
 | Registered routes | 876 (800 founder-guarded — 798 distinct paths, 46 public, 6 redirects) |
-| Founder module families | 190 (Appendix V) |
-| User Manual route coverage | 88 direct + 249 parent-module + 461 inventory-only (Appendix V, gap R6) |
-| Page files | 945 (32 routed directly; the rest are tabs/panels of a parent page) |
+| Founder module families | 190 (Appendix W, one operator entry each) |
+| Founder route operator coverage | **191 direct + 607 inherited + 0 classified + 0 uncovered = 798** (Appendix V) |
+| Page files | 945 (841 registered directly in the router; the remainder are tabs/panels of a parent page) |
 | Components | 419 |
 | `src/lib` engines/helpers | 177 |
 | Edge functions | 620 (+ 52 shared helper modules) |
@@ -93,7 +100,7 @@ The script reads the working tree only. It writes C, D, E, G, H, the coverage ma
 | Public views | 26 |
 | Public functions/RPCs | 390 |
 | RLS policies | 1,520 |
-| Triggers (non-internal) | 803 |
+| Triggers (non-internal, `public`) | **797** (the superseded 803 counted six Supabase-owned `auth`/`storage`/`cron` triggers — Section F1.1) |
 | Indexes | 2,774 |
 | Foreign keys | 934 |
 | External action gates | 19, **all disabled** |

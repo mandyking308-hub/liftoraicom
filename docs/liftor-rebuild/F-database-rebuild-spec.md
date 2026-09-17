@@ -10,7 +10,7 @@ All figures below come from read-only catalog queries against the live productio
 | Views (`public`) | 26 |
 | Functions/RPCs (`public`) | 390 (includes pgvector/pg_trgm extension functions) |
 | RLS policies | 1,520 |
-| Triggers (non-internal) | 803 |
+| Triggers (non-internal, schema `public`) | **797** (see F1.1) |
 | Indexes | 2,774 |
 | Foreign keys | 934 |
 | Tables with RLS **off** | 3 |
@@ -76,7 +76,31 @@ Operationally load-bearing: `gsm_mailbox_readiness` (mailbox campaign-readiness 
 | System state | `get_active_execution_mode`, `get_system_mode`, `compute_system_health`, `export_full_system_snapshot`, `compare_system_versions` |
 | Extension functions | pgvector (`cosine_distance`, `binary_quantize`, `array_to_vector`…) and pg_trgm (`gtrgm_*`, `gin_trgm_*`) — not application logic |
 
-803 non-internal triggers implement `updated_at` maintenance, compliance enforcement (e.g. `enforce_founder_approval_for_buyer_outreach`, `enforce_founder_approval_for_warm_up_action`, `block_activation_log_mutation`), audit append-only behaviour and derived-state recomputation.
+797 non-internal triggers in the `public` schema implement `updated_at` maintenance, compliance enforcement (e.g. `enforce_founder_approval_for_buyer_outreach`, `enforce_founder_approval_for_warm_up_action`, `block_activation_log_mutation`), audit append-only behaviour and derived-state recomputation.
+
+### F1.1 Trigger count reconciliation — 797 is authoritative, 803 is superseded
+
+| Figure | SQL basis | Count | Status |
+|---|---|---|---|
+| Public non-internal triggers | `select count(*) from pg_trigger t join pg_class c on c.oid = t.tgrelid join pg_namespace n on n.oid = c.relnamespace where n.nspname = 'public' and not t.tgisinternal;` | **797** | authoritative, re-verified read-only 17 September 2026 |
+| Non-internal triggers, **all schemas** | same query **without** the `n.nspname = 'public'` filter | 803 | `HISTORICAL_ONLY` — the earlier manual figure |
+| All `pg_trigger` rows in `public` (constraint/internal included) | no `tgisinternal` filter | 4,505 | not a meaningful application figure |
+| `information_schema.triggers` rows in `public` | one row per trigger **event** | 879 | inflated: a `BEFORE INSERT OR UPDATE` trigger yields two rows. `count(distinct trigger_name || event_object_table)` = 797 |
+
+**Why the old documents said 803.** Not a schema change and not a stale count of Liftor objects: the earlier query omitted the `n.nspname = 'public'` predicate, so it also counted six non-internal triggers owned by Supabase's own schemas. The six-trigger delta is exact and fully identified:
+
+| Schema | Object | Trigger |
+|---|---|---|
+| `auth` | `users` | `on_auth_user_created` |
+| `cron` | `job` | `cron_job_cache_invalidate` |
+| `storage` | `buckets` | `enforce_bucket_name_length_trigger` |
+| `storage` | `buckets` | `protect_buckets_delete` |
+| `storage` | `objects` | `protect_objects_delete` |
+| `storage` | `objects` | `update_objects_updated_at` |
+
+797 + 6 = 803. None of the six belongs to Liftor; `auth`, `storage` and `cron` are managed schemas the platform must never modify (Section B). Every current statement in this manual therefore uses **797**; any surviving "803" must carry a `HISTORICAL_ONLY` label with this date and SQL basis.
+
+Additional read-only facts from the same pass: 797 public non-internal triggers sit on **712 distinct tables**, **0** are on views, and **0** are currently disabled (`tgenabled <> 'O'` returns 0).
 
 ## F5. RLS findings (current, unfixed)
 
