@@ -14,7 +14,7 @@ Read-only facts from the production database and the provider APIs. **Separate f
 
 ## Q2. Database
 
-1,112 public tables · 26 views · 390 functions · 1,520 policies · 803 triggers · 2,774 indexes · 934 foreign keys · **3 tables with RLS off** (Section F5).
+1,112 public tables · 26 views · 390 functions · 1,520 policies · 797 non-internal `public` triggers (the superseded 803 counted six Supabase-owned `auth`/`storage`/`cron` triggers as well — Section F1.1) · 2,774 indexes · 934 foreign keys · **3 tables with RLS off** (Section F5).
 
 ## Q3. Sending estate (Winnr)
 
