@@ -243,6 +243,9 @@ const validation = {
   edge_functions_external_capable: fns.filter((f) => f.external).length,
   migrations: migs.length,
   tracked_files: rows.length,
+  founder_routes_distinct: founderPaths.length,
+  user_manual_coverage: umTotals,
+  user_manual_uncovered_routes: umRows.filter((r) => r.coverage === "uncovered").map((r) => r.route),
   coverage_totals: totals,
 };
 fs.writeFileSync(path.join(OUT, "validation-report.json"), JSON.stringify(validation, null, 2));
