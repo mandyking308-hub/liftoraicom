@@ -1,6 +1,6 @@
 # Appendix H — Edge Function Catalog
 
-_Generated from commit `08d8e89274b6f04ff3a306ff0f55bb59d7ea5cf1` by `scripts/generate-rebuild-manual-catalogs.mjs`. Regenerate with `node scripts/generate-rebuild-manual-catalogs.mjs`._
+_Generated from commit `a513cacffe2a1064a5ea172c9170c46a55c51b8e` by `scripts/generate-rebuild-manual-catalogs.mjs`. Regenerate with `node scripts/generate-rebuild-manual-catalogs.mjs`._
 
 Every directory under `supabase/functions/` except `_shared`. **Total: 620 functions.**
 

@@ -1,14 +1,14 @@
 # Source Coverage Manifest
 
-_Generated from commit `08d8e89274b6f04ff3a306ff0f55bb59d7ea5cf1` by `scripts/generate-rebuild-manual-catalogs.mjs`. Regenerate with `node scripts/generate-rebuild-manual-catalogs.mjs`._
+_Generated from commit `a513cacffe2a1064a5ea172c9170c46a55c51b8e` by `scripts/generate-rebuild-manual-catalogs.mjs`. Regenerate with `node scripts/generate-rebuild-manual-catalogs.mjs`._
 
 Every file tracked by git at this commit is accounted for below. Machine-readable twin: `source-coverage-manifest.json`.
 
-**Total tracked files: 2971.**
+**Total tracked files: 2972.**
 
 | Category | Files | % |
 |---|---|---|
-| documented | 2725 | 91.7% |
+| documented | 2726 | 91.7% |
 | doc | 95 | 3.2% |
 | static-asset | 71 | 2.4% |
 | supporting | 63 | 2.1% |
@@ -26,7 +26,7 @@ Category meanings: **documented** = described in the named manual section or cat
 | `src/components` | 422 | Technical Manual E1 — Component catalog; Technical Manual A/E — shadcn/ui primitives (vendored design-system files) |
 | `src/lib` | 177 | Technical Manual P — Tests & CI; Technical Manual E2 — Engine/helper catalog; Technical Manual A/T — Manual source modules |
 | `src/data` | 47 | Technical Manual K / data-assets appendix |
-| `docs/liftor-rebuild` | 26 | This rebuild manual |
+| `docs/liftor-rebuild` | 27 | This rebuild manual |
 | `apps/giving-platform` | 22 | Technical Manual U1/U7 — Giving Rail standalone build, brand and launch docs; Technical Manual U5 — Giving Rail standalone static assets; Technical Manual U5 — Giving Rail standalone frontend; Technical Manual U4 — Giving Rail standalone edge function (not deployed to the Liftor project); Technical Manual U2/U3 — Giving Rail standalone schema and RPCs (not applied to the Liftor database) |
 | `src/services` | 18 | Technical Manual P — Tests & CI; Technical Manual L — AI architecture |
 | `.lovable/memory` | 16 | Project memory / plan files — not part of the runtime |

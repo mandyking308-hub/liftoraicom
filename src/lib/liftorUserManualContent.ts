@@ -1,6 +1,6 @@
 // Liftor User Manual — plain-English operating guide (separate from Founder/Technical Manual)
 
-export const LIFTOR_USER_MANUAL_VERSION = "1.17 — Full repository mirror (17 September 2026)";
+export const LIFTOR_USER_MANUAL_VERSION = "1.18 — Full repository mirror + module directory (17 September 2026)";
 
 export interface ManualSection {
   number: number;
@@ -1435,7 +1435,7 @@ export const ARCHITECTURE_SYNC_USER_SECTIONS: ManualSection[] = [
   {
     number: 113,
     key: "education-commercial-layer-user",
-    title: "113. Your four education businesses — how they share one contact list safely",
+    title: "113. HISTORICAL — the four education brands and how they share one contact list safely (scope note: \"four\" means the four education brands, not the 14-business portfolio)",
     body: "Scope note: \"four\" means the four education brands, not the size of your portfolio — there are 14 businesses in the system today. There is a new page, Education Commercial Layer (/founder/education-commercial), and a Business Manuals page (/founder/business-manuals) that shows the twelve business manuals exactly as written in the project files. How the data works: each person is stored once in your main CRM and attached once to their school or group in your main company list. If the same person is a good fit for more than one of your businesses, that is recorded as separate business links against the same person — you never get duplicates. The four businesses are Billy and the Wild Forest (special needs, inclusion, emotional literacy), Aurelia (digital learning and safeguarding), Kindnesss (wellbeing and pastoral) and Kingsbridge Global (international groups and partnerships). Each scores fit in its own way, and the system picks one best-fit brand first and writes down why. Safety: only one of your businesses can own a conversation with a person at a time, other brands wait at least 30 days, and anyone who has replied, unsubscribed, bounced, or is on do-not-contact is blocked outright. You can change which brand gets priority, but you cannot override those blocks — nor can I. Campaigns: all four campaigns exist as drafts only, switched off, with sending blocked, no approval recorded and no link to the sending provider. Billy goes first with a deliberately small first batch of 25 to 50 excellent contacts in large groups, nurseries excluded. None of this changes the Apollo scoring or the Apollo spend wall, which stays locked at zero, and the mailbox and sending-provider readiness are still separate gates that are not ready yet.",
   },
   {
@@ -1455,6 +1455,12 @@ export const ARCHITECTURE_SYNC_USER_SECTIONS: ManualSection[] = [
     key: "outbound-readiness-baseline-2026-09-17",
     title: "116. Where outbound really stands — 17 September 2026 baseline",
     body: "BUILT: the provider sync, the mailbox registry, the readiness rules, sender pools and sticky senders, the Smartlead campaign and lead links, the event return loop, the safe rehearsal, the 12-item checklist and the small-batch approval controls all exist in the system. LIVE-CONFIGURED: 39 sending domains, all DNS, SPF, DKIM and DMARC verified; 200 mailboxes, all active and all warming; 180 shared-estate mailboxes across 36 domains and 20 trust mailboxes across 3 domains; 10 mailboxes connected in Smartlead (all trust, none shared-estate); the Smartlead account itself connected and healthy but with the webhook not configured; Apollo built but only the Neon Candy connection verified, not yet set up business-by-business; and 14 businesses in the system today, with more meant to come through the Business Setup Tunnel. NOT YET PROVED: zero campaign-ready mailboxes, zero campaign links, zero lead links, zero returned events, no message delivered and no reply, bounce or unsubscribe ever flowing back into the CRM. NEXT TEST: one business, one approved audience and message, one small data import, contacts written into the CRM with their business link, suppression checks applied, one or two chosen senders, a campaign and lead link, real delivery to no more than about five recipients, events returning, the CRM updating and a full audit trail — stopping at the first broken step. Having 200 warming mailboxes is inventory, not permission. No pilot has been sent and none has passed. Your final live-launch approval, and any move beyond a handful of senders, both remain separate decisions only you make.",
+  },
+  {
+    number: 117,
+    key: "module-directory-coverage",
+    title: "117. Finding a page that is not written up here — the module directory",
+    body: "This manual names and explains 88 founder routes directly, and another 249 routes are sub-tabs or detail views of those named surfaces — you reach them from the parent page. Liftor currently registers 798 distinct founder routes in total, so 461 of them do not yet have a hand-written operator walkthrough. Those are not hidden: every one of them is listed, by module family, in Appendix V of the Rebuild Manual (docs/liftor-rebuild/V-user-manual-coverage.md). For each of the 190 module families the appendix states, from the source code itself, how many routes and pages it has, whether any of its pages write to the database, which backend functions its pages can call (the only way a page can reach an outside provider — 'none' means it cannot), and any external-action confirmation phrase guarding it. Treat that as an inventory, not a walkthrough: it tells you truthfully what a surface can touch, not step-by-step how to operate it. The missing walkthroughs are recorded as a real gap in the Rebuild Manual's Known Gaps section. Universal rule while a page has no written section: internal reads and drafts are safe; anything that asks you to type a confirmation phrase is an external action and stays blocked unless the matching gate is explicitly enabled.",
   },
 ];
 

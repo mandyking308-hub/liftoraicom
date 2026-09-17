@@ -1,9 +1,9 @@
 {
-  "commit": "08d8e89274b6f04ff3a306ff0f55bb59d7ea5cf1",
+  "commit": "a513cacffe2a1064a5ea172c9170c46a55c51b8e",
   "generated_by": "scripts/generate-rebuild-manual-catalogs.mjs",
-  "total_files": 2971,
+  "total_files": 2972,
   "totals": {
-    "documented": 2725,
+    "documented": 2726,
     "excluded": 17,
     "static-asset": 71,
     "doc": 95,
@@ -882,6 +882,11 @@
     },
     {
       "file": "docs/liftor-rebuild/U-standalone-apps.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/V-user-manual-coverage.md",
       "section": "This rebuild manual",
       "category": "documented"
     },

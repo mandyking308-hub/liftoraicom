@@ -58,3 +58,13 @@ Nothing in this section was repaired during the documentation job. Each item is 
 3. 190 mailboxes warmed but unconnected: inventory without a delivery path.
 4. Apollo per-business configuration absent.
 5. Education portfolio has 0 contacts in scope; four campaign shells exist but nothing is loaded.
+
+## R6. Operator documentation coverage gap (recorded 17 September 2026)
+
+| ID | Gap | Evidence |
+|---|---|---|
+| R6.1 | 461 of 798 distinct founder routes have no hand-written operator walkthrough in the User Manual. They are accounted for only by module-family inventory in Appendix V (routes, pages, write posture, callable edge functions, confirmation phrase). | `validation-report.json` → `user_manual_coverage` |
+| R6.2 | 190 founder module families exist; the User Manual names 88 routes directly and covers 249 more as sub-tabs of those. | Appendix V |
+| R6.3 | Sections 101–104 of the architecture manual remain historically accurate but need their superseding banners read first; a reader who skips the banner can still quote a stale estate figure. | `src/lib/manualArchitectureSync2026.ts` §101, §103/104 capacity note |
+
+Coverage by inventory is deliberately labelled as such in Appendix V. It is not a claim of operator completeness.

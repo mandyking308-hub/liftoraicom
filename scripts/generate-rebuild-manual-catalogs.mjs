@@ -208,6 +208,44 @@ fs.writeFileSync(path.join(OUT, "source-coverage-manifest.json"), JSON.stringify
 let man = `# Source Coverage Manifest\n\n${STAMP}\n\nEvery file tracked by git at this commit is accounted for below. Machine-readable twin: \`source-coverage-manifest.json\`.\n\n**Total tracked files: ${rows.length}.**\n\n| Category | Files | % |\n|---|---|---|\n${Object.entries(totals).sort((a, b) => b[1] - a[1]).map(([k, v]) => `| ${k} | ${v} | ${((v / rows.length) * 100).toFixed(1)}% |`).join("\n")}\n\nCategory meanings: **documented** = described in the named manual section or catalog row; **supporting** = covered collectively by a subsystem section (vendored UI primitives, auto-generated clients, static assets); **static-asset** = generated/exported data covered by the data-assets appendix; **doc** = documentation file classified as normative or historical in the doc index; **excluded** = intentionally outside the current-state manual (agent/workspace metadata, not runtime).\n\n## Coverage by directory\n\n| Directory | Files | Mapped sections |\n|---|---|---|\n${Object.entries(byPrefix).sort((a, b) => b[1].length - a[1].length).map(([k, v]) => `| \`${k}\` | ${v.length} | ${[...new Set(v.map((x) => x.section))].join("; ")} |`).join("\n")}\n\n## Unmapped files\n\n${rows.filter((r) => !r.section).length === 0 ? "None — every tracked file resolves to a manual section." : rows.filter((r) => !r.section).map((r) => `- \`${r.file}\``).join("\n")}\n`;
 fs.writeFileSync(path.join(OUT, "source-coverage-manifest.md"), man);
 
+/* ------------------------------------------- V: USER-MANUAL ROUTE COVERAGE */
+const userManualSrc = fs.readFileSync("src/lib/liftorUserManualContent.ts", "utf8");
+const manualRoutes = new Set([...userManualSrc.matchAll(/\/founder\/[a-z0-9-]+/g)].map((m) => m[0]));
+const founderPaths = [...new Set(routes.filter((r) => r.guard === "FounderRoute").map((r) => r.path))].sort();
+const famOf = (p) => { const parts = p.split("/").filter((s) => s && !s.startsWith(":")); return "/" + parts.slice(0, 2).join("/"); };
+const umRows = founderPaths.map((p) => {
+  const base = famOf(p);
+  if (manualRoutes.has(p)) return { route: p, coverage: "direct", via: p };
+  if (manualRoutes.has(base)) return { route: p, coverage: "parent-module", via: base };
+  const prefix = [...manualRoutes].filter((m) => p.startsWith(m + "-") || p.startsWith(m + "/")).sort((a, b) => b.length - a.length)[0];
+  if (prefix) return { route: p, coverage: "parent-module", via: prefix };
+  return { route: p, coverage: "module-directory", via: base };
+});
+const umTotals = umRows.reduce((a, r) => ((a[r.coverage] = (a[r.coverage] || 0) + 1), a), {});
+
+// Module directory: evidence-derived operator facts for every founder module family.
+const pageByComp = new Map(pages.map((p) => [p.file, p]));
+const srcToPage = (src) => { const base = src.replace(/^@\//, "src/"); return pageByComp.get(`${base}.tsx`) ?? pageByComp.get(`${base}/index.tsx`); };
+const famMap = new Map();
+for (const r of routes.filter((x) => x.guard === "FounderRoute")) {
+  const f = famOf(r.path);
+  const entry = famMap.get(f) ?? { family: f, routes: [], pages: [], invokes: new Set(), confirm: new Set(), writes: false };
+  entry.routes.push(r.path);
+  const pg = r.source ? srcToPage(r.source) : undefined;
+  if (pg) {
+    entry.pages.push(pg.file);
+    pg.invokes.forEach((i) => entry.invokes.add(i));
+    pg.confirm.forEach((c) => entry.confirm.add(c));
+    if (pg.writes) entry.writes = true;
+  }
+  famMap.set(f, entry);
+}
+const fams = [...famMap.values()].sort((a, b) => a.family.localeCompare(b.family));
+const dirTable = fams.map((e) => `| \`${e.family}\` | ${e.routes.length} | ${[...new Set(e.pages)].length} | ${e.writes ? "yes" : "no"} | ${e.invokes.size ? [...e.invokes].slice(0, 6).join(", ") + (e.invokes.size > 6 ? ` (+${e.invokes.size - 6})` : "") : "none"} | ${e.confirm.size ? [...e.confirm].join(", ") : "—"} |`).join("\n");
+
+let v = `# Appendix V — User Manual route coverage and module directory\n\n${STAMP}\n\nEvery founder-guarded route mapped to operator documentation. Coverage kinds:\n\n- **direct** — the Liftor User Manual (\`src/lib/liftorUserManualContent.ts\`, rendered at \`/founder/user-manual\`) names this exact route and explains how to operate it.\n- **parent-module** — the route is an internal sub-tab or detail view of a surface the user manual names; it is operated from that parent.\n- **module-directory** — no hand-written operator section names it yet. It is accounted for here by its module family in the directory below, which states, from source evidence only, how many routes and pages the family has, whether any of its pages write to the database, which edge functions its routed pages can call (the only way a page can reach a provider), and any external-action confirmation phrase. **This is coverage by inventory, not a hand-written operator walkthrough** — the shortfall is recorded as a real gap in Section R.\n\n| Coverage | Routes |\n|---|---|\n${Object.entries(umTotals).map(([k, n]) => `| ${k} | ${n} |`).join("\n")}\n\nDistinct founder routes: **${founderPaths.length}**. Routes named directly in the user manual: **${manualRoutes.size}**. Module families: **${fams.length}**.\n\n## Module directory (all founder families)\n\nIf the "Edge functions its pages call" column reads \`none\`, the family's routed pages make no provider call at all — they read and write Liftor's own database only. A confirmation phrase means the surface is behind an external-action gate and cannot act until the founder types that exact phrase.\n\n| Module family | Routes | Routed pages | Any page writes | Edge functions its pages call | Confirmation phrase |\n|---|---|---|---|---|---|\n${dirTable}\n\n## Route-by-route mapping\n\n| Route | Coverage | Operated from |\n|---|---|---|\n${umRows.map((r) => `| \`${r.route}\` | ${r.coverage} | ${r.via ? `\`${r.via}\`` : "—"} |`).join("\n")}\n`;
+fs.writeFileSync(path.join(OUT, "V-user-manual-coverage.md"), v);
+
 /* ------------------------------------------------------------ VALIDATION */
 const validation = {
   commit: HEAD,
@@ -227,6 +265,10 @@ const validation = {
   edge_functions_external_capable: fns.filter((f) => f.external).length,
   migrations: migs.length,
   tracked_files: rows.length,
+  founder_routes_distinct: founderPaths.length,
+  user_manual_coverage: umTotals,
+  user_manual_module_families: fams.length,
+  user_manual_routes_without_written_section: umRows.filter((r) => r.coverage === "module-directory").length,
   coverage_totals: totals,
 };
 fs.writeFileSync(path.join(OUT, "validation-report.json"), JSON.stringify(validation, null, 2));
