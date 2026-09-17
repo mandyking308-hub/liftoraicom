@@ -1,10 +1,10 @@
 {
-  "source_freeze_sha": "74f62cf938bdd4818e61c5970c1557a011ab9655",
-  "commit": "74f62cf938bdd4818e61c5970c1557a011ab9655",
+  "source_freeze_sha": "cf1c1373f3affdd66c17a53b97200ac06c3a878f",
+  "commit": "f92c0bf305e6f413a9a2e27d488f62c6cc9bc6ae",
   "generated_by": "scripts/generate-rebuild-manual-catalogs.mjs",
-  "total_files": 2972,
+  "total_files": 2973,
   "totals": {
-    "documented": 2726,
+    "documented": 2727,
     "excluded": 17,
     "static-asset": 71,
     "doc": 95,
@@ -888,6 +888,11 @@
     },
     {
       "file": "docs/liftor-rebuild/V-user-manual-coverage.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/W-module-operator-entries.md",
       "section": "This rebuild manual",
       "category": "documented"
     },
