@@ -1,0 +1,43 @@
+{
+  "commit": "aa39057614a670f1b8c64d2990c95e1f622074b9",
+  "routes_total": 876,
+  "routes_in_catalog": 876,
+  "founder_routes": 800,
+  "public_routes": 46,
+  "redirects": 6,
+  "pages_total": 945,
+  "pages_routed": 32,
+  "components_total": 419,
+  "lib_modules": 177,
+  "edge_functions_dirs": 620,
+  "edge_functions_catalogued": 620,
+  "edge_functions_missing_index": [],
+  "edge_functions_jwt_off": [
+    "autopilot-orchestrator",
+    "compliance-approve",
+    "customer-voice-call-status-webhook",
+    "customer-voice-inbound-webhook",
+    "customer-voice-transcript-ingest",
+    "outreach-inbound-poll",
+    "outreach-inbound-webhook",
+    "outreach-test-imap",
+    "pr-gmail-oauth-callback",
+    "smartlead-webhook",
+    "social-distribution-dispatch-due",
+    "social-distribution-maintenance",
+    "social-relationship-maintenance",
+    "social-relationship-webhook",
+    "stripe-webhook",
+    "unsubscribe-contact"
+  ],
+  "edge_functions_external_capable": 34,
+  "migrations": 442,
+  "tracked_files": 2932,
+  "coverage_totals": {
+    "documented": 2689,
+    "excluded": 17,
+    "static-asset": 68,
+    "doc": 95,
+    "supporting": 63
+  }
+}

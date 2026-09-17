@@ -1,0 +1,620 @@
+# Appendix E — Component & Service Catalog
+
+_Generated from commit `aa39057614a670f1b8c64d2990c95e1f622074b9` by `scripts/generate-rebuild-manual-catalogs.mjs`. Regenerate with `node scripts/generate-rebuild-manual-catalogs.mjs`._
+
+## E1. UI components (`src/components/**`, 419 files)
+
+| Component file | Classification | Edge functions invoked |
+|---|---|---|
+| `src/components/NavLink.tsx` | presentational | — |
+| `src/components/SEOHead.tsx` | presentational | — |
+| `src/components/ScrollToTop.tsx` | presentational | — |
+| `src/components/architecture/PlatformArchitectureFlow.tsx` | presentational | — |
+| `src/components/founder/AgentOrchestration.tsx` | data-reading component | — |
+| `src/components/founder/ApolloPullPanel.tsx` | operational (calls edge functions) | apollo-pull-verified |
+| `src/components/founder/AutonomousPipelineStatus.tsx` | operational (calls edge functions) | autopilot-orchestrator |
+| `src/components/founder/AutopilotPolicyPanel.tsx` | operational (writes data) | — |
+| `src/components/founder/ControlledLiveActivation.tsx` | operational (writes data) | — |
+| `src/components/founder/ControlledLiveBatch.tsx` | operational (calls edge functions) | controlled-live-batch, resolve-orphan-followups |
+| `src/components/founder/ControlledProofSend.tsx` | operational (calls edge functions) | controlled-proof-send |
+| `src/components/founder/ExecutionStatusPanel.tsx` | data-reading component | — |
+| `src/components/founder/FounderLayout.tsx` | data-reading component | — |
+| `src/components/founder/FounderRoute.tsx` | data-reading component | — |
+| `src/components/founder/LeadQualityPanel.tsx` | operational (calls edge functions) | lead-quality-autopilot, promote-leads-to-contacts, stage-to-queue-eligibility, compliance-approve, create-queue-from-staged |
+| `src/components/founder/LiftorCapabilities.tsx` | data-reading component | — |
+| `src/components/founder/SourceQualityBrief.tsx` | operational (writes data) | — |
+| `src/components/founder/SystemModeBanner.tsx` | data-reading component | — |
+| `src/components/founder/activation/BusinessActivationControlPanel.tsx` | presentational | — |
+| `src/components/founder/activation/BusinessActivationWizardPanel.tsx` | operational (calls edge functions) | business-activation-status, business-activation-checklist-generate, business-go-live-approval, pause-business-operations |
+| `src/components/founder/activation/BusinessDailyOperatingLoopPanel.tsx` | operational (calls edge functions) | business-daily-operating-run |
+| `src/components/founder/activation/BusinessInternalActivationPanel.tsx` | operational (calls edge functions) | business-internal-activate |
+| `src/components/founder/activation/BusinessOnboardingBrainPanel.tsx` | operational (calls edge functions) | business-onboarding-brain-run |
+| `src/components/founder/activation/BusinessOnboardingFactoryPanel.tsx` | operational (calls edge functions) | business-onboarding-factory-run |
+| `src/components/founder/activation/BusinessRehearsalSimulationPanel.tsx` | operational (calls edge functions) | business-rehearsal-generate, business-rehearsal-run, operator-training-checklist-generate, rehearsal-reset-preview, rehearsal-reset-apply, rehearsal-cleanliness-check |
+| `src/components/founder/activation/BusinessWeeklyReviewPanel.tsx` | operational (calls edge functions) | business-weekly-review-run |
+| `src/components/founder/activation/ControlledExternalActivationReadinessPanel.tsx` | operational (calls edge functions) | business-external-activation-readiness-run |
+| `src/components/founder/activation/ControlledMicroBatchPreparationPanel.tsx` | operational (calls edge functions) | business-micro-batch-prepare |
+| `src/components/founder/activation/LiftorBuildPhaseCloseoutPanel.tsx` | operational (calls edge functions) | liftor-build-phase-closeout |
+| `src/components/founder/activation/Phase23LaunchPathPanel.tsx` | presentational | — |
+| `src/components/founder/activation/PreLiveBaselineControlPanel.tsx` | operational (calls edge functions) | business-operating-standards-generate, business-baseline-create, business-rollback-preview, business-rollback-apply |
+| `src/components/founder/activation/StarterPackMaterialiserPanel.tsx` | operational (calls edge functions) | starter-pack-materialise |
+| `src/components/founder/agents/AIAgentOperatingModelPanel.tsx` | operational (calls edge functions) | ai-agent-status-preview |
+| `src/components/founder/agents/AIAgentOrchestratorPanel.tsx` | operational (calls edge functions) | ai-agent-orchestrator-preview |
+| `src/components/founder/agents/AIConversationDraftingPanel.tsx` | operational (calls edge functions) | ai-conversation-draft-preview |
+| `src/components/founder/agents/AIEngagementAgentLivePanel.tsx` | operational (calls edge functions) | ai-engagement-agent-run |
+| `src/components/founder/agents/AgentBusinessLivePanel.tsx` | operational (writes data) | — |
+| `src/components/founder/agents/AgentCollaborationBoard.tsx` | operational (calls edge functions) | agent-collaboration-health, agent-handover-orchestrator |
+| `src/components/founder/agents/AgentHandoverProtocolPanel.tsx` | operational (calls edge functions) | agent-handover-orchestrator |
+| `src/components/founder/ai-compliance/AIComplianceControlPanel.tsx` | presentational | — |
+| `src/components/founder/ai-compliance/GuidedSetupCard.tsx` | presentational | — |
+| `src/components/founder/ai-compliance/IncidentChecklistCard.tsx` | presentational | — |
+| `src/components/founder/ai-compliance/ReviewDialog.tsx` | presentational | — |
+| `src/components/founder/ai/AIAlertsMiniWidget.tsx` | data-reading component | — |
+| `src/components/founder/ai/AICostBreadcrumb.tsx` | presentational | — |
+| `src/components/founder/ai/AICostGovernorPortfolio.tsx` | data-reading component | — |
+| `src/components/founder/ai/AIGatewayHealthPanel.tsx` | data-reading component | — |
+| `src/components/founder/ai/AIPromptReuseWidget.tsx` | presentational | — |
+| `src/components/founder/ai/AIQualityFeedbackDialog.tsx` | presentational | — |
+| `src/components/founder/ai/AIRuntimeHealthMiniCard.tsx` | data-reading component | — |
+| `src/components/founder/ai/AISecurityBadges.tsx` | presentational | — |
+| `src/components/founder/ai/AIUsageMiniWidget.tsx` | data-reading component | — |
+| `src/components/founder/ai/CostConfidenceBadge.tsx` | presentational | — |
+| `src/components/founder/analytics/KPIOKRPerformancePanel.tsx` | operational (calls edge functions) | performance-scorecard-run |
+| `src/components/founder/approvals/ApprovedActionExecutionPanel.tsx` | operational (calls edge functions) | approved-action-executor |
+| `src/components/founder/approvals/FounderApprovalConsole.tsx` | operational (calls edge functions) | founder-approval-preview, founder-approval-apply |
+| `src/components/founder/approvals/FounderApprovalOperationsPanel.tsx` | operational (writes data) | — |
+| `src/components/founder/assets/CreativeAssetLibraryPanel.tsx` | operational (writes data) | — |
+| `src/components/founder/autonomy/AutopilotActivationGatesPanel.tsx` | operational (calls edge functions) | autopilot-eligibility-check, autopilot-activation-request, autopilot-final-activate |
+| `src/components/founder/autonomy/GlobalAutonomyControlPanel.tsx` | operational (calls edge functions) | autonomy-policy-evaluate |
+| `src/components/founder/billionaire/NetworkRegistryTab.tsx` | data-reading component | — |
+| `src/components/founder/brain/LiftorBrainInboundReplyPanel.tsx` | operational (calls edge functions) | liftor-brain-provider-check, liftor-brain-draft-inbound-reply |
+| `src/components/founder/brain/LiftorBrainPanel.tsx` | operational (calls edge functions) | liftor-brain-provider-check |
+| `src/components/founder/brand/ReputationCrisisCommsPanel.tsx` | operational (calls edge functions) | reputation-status |
+| `src/components/founder/channels/MultiChannelInboxPanel.tsx` | operational (calls edge functions) | multi-channel-intake, multi-channel-match-preview |
+| `src/components/founder/command/AccessGovernanceCard.tsx` | presentational | — |
+| `src/components/founder/command/AcquisitionFundingCard.tsx` | presentational | — |
+| `src/components/founder/command/AdviserHandoffPackCard.tsx` | presentational | — |
+| `src/components/founder/command/AgentCapabilityCard.tsx` | presentational | — |
+| `src/components/founder/command/AgentOperatingStatus.tsx` | data-reading component | — |
+| `src/components/founder/command/AiEvalCard.tsx` | presentational | — |
+| `src/components/founder/command/AttentionGuardCard.tsx` | presentational | — |
+| `src/components/founder/command/AttributionEngineCard.tsx` | presentational | — |
+| `src/components/founder/command/AuditLedgerHealthCard.tsx` | presentational | — |
+| `src/components/founder/command/BackupRecoveryCard.tsx` | presentational | — |
+| `src/components/founder/command/BusinessArchetypeCard.tsx` | presentational | — |
+| `src/components/founder/command/BusinessComplianceCard.tsx` | presentational | — |
+| `src/components/founder/command/BusinessLifecycleCard.tsx` | presentational | — |
+| `src/components/founder/command/BusinessOperatingStatus.tsx` | data-reading component | — |
+| `src/components/founder/command/BusinessProcessHealthCard.tsx` | data-reading component | — |
+| `src/components/founder/command/BusinessProcessSpinePanel.tsx` | presentational | — |
+| `src/components/founder/command/BusinessTemplateCard.tsx` | presentational | — |
+| `src/components/founder/command/BuyerWarmUpAttentionPanel.tsx` | data-reading component | — |
+| `src/components/founder/command/CapacityPlanningCard.tsx` | presentational | — |
+| `src/components/founder/command/CarrenEstateCapitalInfluenceCard.tsx` | data-reading component | — |
+| `src/components/founder/command/ChannelStrategyCard.tsx` | presentational | — |
+| `src/components/founder/command/CollectionsCard.tsx` | presentational | — |
+| `src/components/founder/command/CommandCentreMasterControlPlane.tsx` | operational (calls edge functions) | command-centre-master-status |
+| `src/components/founder/command/CommandCentreMasterIndex.tsx` | presentational | — |
+| `src/components/founder/command/CommandCentreModuleRegistryPanel.tsx` | operational (calls edge functions) | command-centre-module-status, command-centre-gap-detector |
+| `src/components/founder/command/CommandCentreStickyNav.tsx` | presentational | — |
+| `src/components/founder/command/CommandCentreTruthSyncPanel.tsx` | operational (calls edge functions) | command-centre-truth-sync |
+| `src/components/founder/command/CommandCentreUsabilityReportPanel.tsx` | operational (calls edge functions) | command-centre-usability-acceptance, command-centre-full-link-check |
+| `src/components/founder/command/CommunicationsLedgerCard.tsx` | presentational | — |
+| `src/components/founder/command/ComplaintsRefundsCard.tsx` | presentational | — |
+| `src/components/founder/command/ConnectorHealthCard.tsx` | presentational | — |
+| `src/components/founder/command/ContextGuardCard.tsx` | presentational | — |
+| `src/components/founder/command/ContractLifecycleCard.tsx` | presentational | — |
+| `src/components/founder/command/ControlFabricCard.tsx` | data-reading component | — |
+| `src/components/founder/command/CustomerJourneyControlBoard.tsx` | operational (calls edge functions) | customer-stewardship-status, agent-handover-orchestrator |
+| `src/components/founder/command/CustomerJourneyFlowMap.tsx` | operational (calls edge functions) | customer-journey-flow-status |
+| `src/components/founder/command/CustomerJourneyPositionPanel.tsx` | operational (calls edge functions) | customer-journey-flow-status |
+| `src/components/founder/command/CustomerOnboardingCard.tsx` | presentational | — |
+| `src/components/founder/command/CustomerSalesEngineCard.tsx` | data-reading component | — |
+| `src/components/founder/command/DataAssetRegisterPanel.tsx` | data-reading component | — |
+| `src/components/founder/command/DataQualityCard.tsx` | presentational | — |
+| `src/components/founder/command/DecisionRegisterCard.tsx` | presentational | — |
+| `src/components/founder/command/DeliveryEngineCard.tsx` | presentational | — |
+| `src/components/founder/command/DeploymentControlCard.tsx` | presentational | — |
+| `src/components/founder/command/DistressedRadarCard.tsx` | presentational | — |
+| `src/components/founder/command/DocumentVaultCard.tsx` | presentational | — |
+| `src/components/founder/command/EcommerceEngineCard.tsx` | presentational | — |
+| `src/components/founder/command/EntityMapCard.tsx` | presentational | — |
+| `src/components/founder/command/EventBusHealthCard.tsx` | presentational | — |
+| `src/components/founder/command/ExitMetricsCard.tsx` | data-reading component | — |
+| `src/components/founder/command/ExperimentEngineCard.tsx` | presentational | — |
+| `src/components/founder/command/FabricActivationCard.tsx` | presentational | — |
+| `src/components/founder/command/FinalGoToUseReadinessPanel.tsx` | operational (calls edge functions) | liftor-final-go-to-use-acceptance |
+| `src/components/founder/command/FinalHardeningStatusPanel.tsx` | operational (calls edge functions) | — |
+| `src/components/founder/command/FounderAlertEscalationPanel.tsx` | operational (calls edge functions) | founder-alert-run |
+| `src/components/founder/command/FounderCockpit.tsx` | data-reading component | — |
+| `src/components/founder/command/FounderHealthCockpitCard.tsx` | presentational | — |
+| `src/components/founder/command/FounderLedExitAttentionPanel.tsx` | data-reading component | — |
+| `src/components/founder/command/FounderReportingPackCard.tsx` | presentational | — |
+| `src/components/founder/command/FullManualFunctionControlPanel.tsx` | operational (calls edge functions) | full-manual-command-centre-acceptance |
+| `src/components/founder/command/GlobalAIBrainCommandCentre.tsx` | operational (calls edge functions) | global-brain-status |
+| `src/components/founder/command/GlobalSearchCard.tsx` | presentational | — |
+| `src/components/founder/command/HumanOversightChainPanel.tsx` | data-reading component | — |
+| `src/components/founder/command/IPAssetsCard.tsx` | presentational | — |
+| `src/components/founder/command/IdentityResolutionCard.tsx` | presentational | — |
+| `src/components/founder/command/ImportCentreCard.tsx` | presentational | — |
+| `src/components/founder/command/IncidentContinuityCard.tsx` | presentational | — |
+| `src/components/founder/command/InsuranceLiabilityCard.tsx` | presentational | — |
+| `src/components/founder/command/IntegrationMapCard.tsx` | presentational | — |
+| `src/components/founder/command/InternalSlaCard.tsx` | presentational | — |
+| `src/components/founder/command/JurisdictionTaxCard.tsx` | presentational | — |
+| `src/components/founder/command/KnowledgeGovernanceCard.tsx` | presentational | — |
+| `src/components/founder/command/LaunchFactoryCard.tsx` | presentational | — |
+| `src/components/founder/command/LifecycleAttentionPanel.tsx` | data-reading component | — |
+| `src/components/founder/command/LiftorBusinessLiveRunPanel.tsx` | operational (calls edge functions) | liftor-business-live-run |
+| `src/components/founder/command/MarketplaceCard.tsx` | presentational | — |
+| `src/components/founder/command/MarketplaceGrowthCard.tsx` | presentational | — |
+| `src/components/founder/command/MarketplaceHealthCard.tsx` | presentational | — |
+| `src/components/founder/command/MasterWorkQueueCard.tsx` | presentational | — |
+| `src/components/founder/command/MoneyOvernightCard.tsx` | data-reading component | — |
+| `src/components/founder/command/OperatingLoopsAttentionPanel.tsx` | presentational | — |
+| `src/components/founder/command/PartnerEngineCard.tsx` | presentational | — |
+| `src/components/founder/command/PeopleOperationsCard.tsx` | presentational | — |
+| `src/components/founder/command/PlatformBackboneHealthCard.tsx` | data-reading component | — |
+| `src/components/founder/command/PlatformMonitorCard.tsx` | presentational | — |
+| `src/components/founder/command/PolicyCoverageCard.tsx` | presentational | — |
+| `src/components/founder/command/PortalsCard.tsx` | presentational | — |
+| `src/components/founder/command/PortfolioCommandCentrePanel.tsx` | operational (calls edge functions) | business-capability-matrix, portfolio-command-summary |
+| `src/components/founder/command/PortfolioDiversityHealthCard.tsx` | presentational | — |
+| `src/components/founder/command/PortfolioExitTargetsCard.tsx` | presentational | — |
+| `src/components/founder/command/PortfolioMemoryCard.tsx` | presentational | — |
+| `src/components/founder/command/PortfolioPrioritisationCard.tsx` | presentational | — |
+| `src/components/founder/command/PortfolioRiskCard.tsx` | presentational | — |
+| `src/components/founder/command/PricingMarginCard.tsx` | presentational | — |
+| `src/components/founder/command/PrivacyOperationsCard.tsx` | presentational | — |
+| `src/components/founder/command/ProductCatalogueCard.tsx` | presentational | — |
+| `src/components/founder/command/ProductReleaseCard.tsx` | presentational | — |
+| `src/components/founder/command/QuoteToCashCard.tsx` | data-reading component | — |
+| `src/components/founder/command/ReconciliationCard.tsx` | presentational | — |
+| `src/components/founder/command/RelationshipHealthCard.tsx` | presentational | — |
+| `src/components/founder/command/RelationshipIntelligenceCard.tsx` | data-reading component | — |
+| `src/components/founder/command/ReportingTruthCard.tsx` | presentational | — |
+| `src/components/founder/command/ResourceAllocationCard.tsx` | presentational | — |
+| `src/components/founder/command/RevenueAutopilotCard.tsx` | presentational | — |
+| `src/components/founder/command/RoleAccessCard.tsx` | presentational | — |
+| `src/components/founder/command/ScaleOperationsDryRunDashboard.tsx` | operational (calls edge functions) | liftor-scale-readiness-dry-run |
+| `src/components/founder/command/ScheduledJobsCard.tsx` | presentational | — |
+| `src/components/founder/command/SchedulingEngineCard.tsx` | presentational | — |
+| `src/components/founder/command/SellerOpsCard.tsx` | presentational | — |
+| `src/components/founder/command/SopVersionControlCard.tsx` | presentational | — |
+| `src/components/founder/command/StartHereCard.tsx` | presentational | — |
+| `src/components/founder/command/StartHereOperatingPanel.tsx` | data-reading component | — |
+| `src/components/founder/command/StartUsingLiftorNote.tsx` | presentational | — |
+| `src/components/founder/command/SupportSLACard.tsx` | presentational | — |
+| `src/components/founder/command/SystemConfigCard.tsx` | presentational | — |
+| `src/components/founder/command/SystemModeSwitcherCard.tsx` | presentational | — |
+| `src/components/founder/command/TrustSafetyCard.tsx` | presentational | — |
+| `src/components/founder/command/UnifiedNotificationsCard.tsx` | presentational | — |
+| `src/components/founder/command/VendorManagementCard.tsx` | presentational | — |
+| `src/components/founder/command/VoiceOfCustomerCard.tsx` | presentational | — |
+| `src/components/founder/command/VoiceProviderStatusCard.tsx` | data-reading component | — |
+| `src/components/founder/command/WebhookHealthCard.tsx` | presentational | — |
+| `src/components/founder/command/WhatNeedsAttentionToday.tsx` | data-reading component | — |
+| `src/components/founder/command/WindDownCard.tsx` | presentational | — |
+| `src/components/founder/command/__tests__/ContextFabricRoutes.test.tsx` | presentational | — |
+| `src/components/founder/commercial/CommercialHandoffPanel.tsx` | operational (calls edge functions) | commercial-handoff-preview |
+| `src/components/founder/commercial/LiveCommercialAgentsPanel.tsx` | operational (calls edge functions) | — |
+| `src/components/founder/compliance/DataPrivacyRetentionPanel.tsx` | operational (calls edge functions) | privacy-data-inventory-scan, privacy-request-preview |
+| `src/components/founder/compliance/GlobalJurisdictionPolicyPanel.tsx` | operational (calls edge functions) | jurisdiction-action-check |
+| `src/components/founder/compliance/SMEGivingRailMVP.tsx` | presentational | — |
+| `src/components/founder/crm/BillionaireAccessResearchPanel.tsx` | data-reading component | — |
+| `src/components/founder/crm/CRMContact360Panel.tsx` | data-reading component | — |
+| `src/components/founder/crm/CRMContactTimelinePanel.tsx` | data-reading component | — |
+| `src/components/founder/crm/CRMConversationBridgePanel.tsx` | operational (calls edge functions) | crm-conversation-bridge-preview |
+| `src/components/founder/crm/CRMCustomerLifecyclePanel.tsx` | operational (calls edge functions) | crm-next-action-preview |
+| `src/components/founder/crm/CRMCustomerMemoryDashboard.tsx` | operational (calls edge functions) | crm-health-integrity-check |
+| `src/components/founder/crm/CRMHealthIntegrityPanel.tsx` | operational (calls edge functions) | crm-health-integrity-check, crm-backfill-preview |
+| `src/components/founder/crm/CRMInteractionLedgerPanel.tsx` | data-reading component | — |
+| `src/components/founder/crm/CRMInteractionMatchPreviewPanel.tsx` | operational (calls edge functions) | crm-interaction-match-preview |
+| `src/components/founder/crm/CRMInteractionSourceAdaptersPanel.tsx` | operational (calls edge functions) | crm-interaction-source-preview |
+| `src/components/founder/crm/MontvelleAdvisoryNetworkPanel.tsx` | presentational | — |
+| `src/components/founder/crm/MontvelleSupplierNetworkPanel.tsx` | presentational | — |
+| `src/components/founder/crm/PortfolioContactRelationshipsTable.tsx` | presentational | — |
+| `src/components/founder/crm/PortfolioCrmArchitecturePanel.tsx` | presentational | — |
+| `src/components/founder/crm/PortfolioCrmEducationWavePanel.tsx` | presentational | — |
+| `src/components/founder/crm/PortfolioCrmSummaryPanel.tsx` | presentational | — |
+| `src/components/founder/crm/PortfolioDataLeveragePanel.tsx` | presentational | — |
+| `src/components/founder/crm/RelationshipIntelligencePromotionPanel.tsx` | operational (calls edge functions) | ri-promote-to-crm |
+| `src/components/founder/customer-sales/CRMContactSalesPanel.tsx` | data-reading component | — |
+| `src/components/founder/customer-success/CustomerSuccessCommandCentreBlock.tsx` | operational (calls edge functions) | customer-success-healthcheck |
+| `src/components/founder/customer-success/CustomerSuccessDiagnosticsPanel.tsx` | operational (calls edge functions) | customer-success-portal-acceptance, customer-success-rehearsal-purge |
+| `src/components/founder/customer-success/CustomerSuccessPanels.tsx` | operational (calls edge functions) | — |
+| `src/components/founder/customer-upgrades/CRMContactUpgradePanel.tsx` | data-reading component | — |
+| `src/components/founder/customer/CRMTotalMemoryRecoveryPanel.tsx` | operational (calls edge functions) | crm-capture-sync-run |
+| `src/components/founder/customer/ComplaintsDisputesRecoveryPanel.tsx` | operational (calls edge functions) | customer-complaint-intake, customer-complaint-resolution-generate |
+| `src/components/founder/customer/CustomerContinuityTimeline.tsx` | data-reading component | — |
+| `src/components/founder/customer/CustomerFeedbackSurveyPanel.tsx` | data-reading component | — |
+| `src/components/founder/customer/CustomerMemoryContextGuardPanel.tsx` | operational (calls edge functions) | customer-memory-refresh |
+| `src/components/founder/customer/CustomerOnboardingPanel.tsx` | operational (calls edge functions) | customer-onboarding-plan-generate, customer-onboarding-approval |
+| `src/components/founder/customer/CustomerSuccessUpsellPanel.tsx` | data-reading component | — |
+| `src/components/founder/customer/HumanAccountManagerPanel.tsx` | operational (calls edge functions) | customer-quarterly-report-generate, customer-quarterly-report-approval |
+| `src/components/founder/customer/HumanLayerCustomerMemoryCard.tsx` | operational (calls edge functions) | customer-memory-refresh-from-events, winback-agent-run |
+| `src/components/founder/customer/MeetingCallIntelligencePanel.tsx` | operational (calls edge functions) | meeting-summary-ingest, meeting-followup-draft |
+| `src/components/founder/customer/RetentionRecurringRevenuePanel.tsx` | operational (calls edge functions) | customer-retention-health-run |
+| `src/components/founder/expansion/BusinessLaunchFactoryPanel.tsx` | operational (calls edge functions) | business-launch-plan-generate, business-launch-plan-apply |
+| `src/components/founder/final/LiftorFinalHandoverPanel.tsx` | operational (calls edge functions) | liftor-wide-final-acceptance |
+| `src/components/founder/final/LiftorFunctionalWiringMatrixPanel.tsx` | operational (calls edge functions) | liftor-functional-wiring-matrix |
+| `src/components/founder/finance/CostCreditsMarginControlPanel.tsx` | operational (calls edge functions) | cost-margin-status |
+| `src/components/founder/finance/RevenueOperationsPanel.tsx` | operational (calls edge functions) | revenue-operations-preview, supplier-match-preview |
+| `src/components/founder/finance/TreasuryCashflowControlPanel.tsx` | operational (calls edge functions) | treasury-cashflow-status, accounting-close-run |
+| `src/components/founder/funding/FundingRadarCommandPanel.tsx` | data-reading component | — |
+| `src/components/founder/global/GlobalOperatingClockPanel.tsx` | data-reading component | — |
+| `src/components/founder/global/MultilingualIntelligencePanel.tsx` | operational (calls edge functions) | multilingual-intake-preview, multilingual-draft-save |
+| `src/components/founder/governance/AIGovernanceQualityPanel.tsx` | operational (calls edge functions) | ai-governance-status, ai-draft-quality-check |
+| `src/components/founder/group/GroupHQOperatingPanel.tsx` | operational (calls edge functions) | group-hq-status |
+| `src/components/founder/integrations/BulkSendEngineBlueprint.tsx` | operational (calls edge functions) | provider-readiness-check |
+| `src/components/founder/integrations/BulkSendPreviewPanel.tsx` | operational (calls edge functions) | bulk-send-preview |
+| `src/components/founder/integrations/OutboundChannelLanesPanel.tsx` | operational (calls edge functions) | smartlead-test-connection |
+| `src/components/founder/integrations/OutboundChannelPolicyPanel.tsx` | operational (calls edge functions) | outbound-channel-route-preview |
+| `src/components/founder/integrations/OutboundProviderEnginePanel.tsx` | operational (calls edge functions) | provider-readiness-check, smartlead-test-connection |
+| `src/components/founder/integrations/SmartleadAISalesIntakePanel.tsx` | operational (calls edge functions) | smartlead-ai-intake-preview |
+| `src/components/founder/integrations/SmartleadCampaignDiscoveryPanel.tsx` | operational (calls edge functions) | smartlead-campaign-discovery |
+| `src/components/founder/integrations/SmartleadCampaignMappingPreview.tsx` | operational (calls edge functions) | smartlead-campaign-mapping-preview, smartlead-campaign-mapping-apply, smartlead-campaign-discovery |
+| `src/components/founder/integrations/SmartleadContactImportPanel.tsx` | operational (calls edge functions) | smartlead-campaign-lead-import |
+| `src/components/founder/integrations/SmartleadControlledActivationPanel.tsx` | operational (calls edge functions) | smartlead-controlled-activation |
+| `src/components/founder/integrations/SmartleadEventSpinePanel.tsx` | operational (calls edge functions) | smartlead-event-mapping-preview |
+| `src/components/founder/integrations/SmartleadLeadPushPreview.tsx` | operational (calls edge functions) | smartlead-lead-push-preview, smartlead-lead-push-apply |
+| `src/components/founder/integrations/SmartleadScaleNextActionBanner.tsx` | presentational | — |
+| `src/components/founder/integrations/SmartleadScaleSetupChecklist.tsx` | operational (calls edge functions) | provider-readiness-check, smartlead-test-connection |
+| `src/components/founder/integrations/SmartleadSequenceMappingPreview.tsx` | operational (calls edge functions) | smartlead-sequence-mapping-preview |
+| `src/components/founder/knowledge/BusinessKnowledgeBrainPanel.tsx` | operational (calls edge functions) | business-knowledge-profile-generate |
+| `src/components/founder/knowledge/BusinessKnowledgeUploadTrainingPanel.tsx` | operational (calls edge functions) | business-knowledge-upload-register, business-training-run, business-execution-starter-pack-generate |
+| `src/components/founder/knowledge/BusinessSourceManifestBlock.tsx` | operational (calls edge functions) | business-source-manifest-register, business-source-fidelity-check |
+| `src/components/founder/knowledge/KnowledgeSourceTruthPanel.tsx` | operational (calls edge functions) | knowledge-truth-check |
+| `src/components/founder/legal/ContractsProcurementControlPanel.tsx` | operational (calls edge functions) | contract-lifecycle-status, procurement-risk-run |
+| `src/components/founder/legal/IPRightsBrandControlPanel.tsx` | operational (calls edge functions) | ip-rights-status |
+| `src/components/founder/ma/MARecordDialog.tsx` | operational (writes data) | — |
+| `src/components/founder/manual/BusinessProcessSpineManualPanel.tsx` | presentational | — |
+| `src/components/founder/manual/LiftorUserManualPanel.tsx` | presentational | — |
+| `src/components/founder/manual/ManualsHierarchyPanel.tsx` | presentational | — |
+| `src/components/founder/marketing/MarketingContentFunnelPanel.tsx` | operational (calls edge functions) | marketing-content-generate, campaign-brief-generate |
+| `src/components/founder/monday/FounderMondayLaunchPanel.tsx` | presentational | — |
+| `src/components/founder/monday/MondayLaunchChecklist.tsx` | presentational | — |
+| `src/components/founder/monitoring/SelfHealingMonitoringPanel.tsx` | operational (calls edge functions) | self-healing-scan, self-healing-repair |
+| `src/components/founder/operations/BusinessCapabilityMatrixPanel.tsx` | operational (calls edge functions) | business-capability-matrix, business-module-setup-plan |
+| `src/components/founder/operations/BusinessOperatingRunbookPanel.tsx` | operational (calls edge functions) | business-runbook-status |
+| `src/components/founder/operations/ControlledExternalActionGatesPanel.tsx` | operational (calls edge functions) | external-action-readiness, external-action-executor |
+| `src/components/founder/operations/InternalOperatingSchedulesPanel.tsx` | operational (calls edge functions) | internal-schedule-runner |
+| `src/components/founder/operations/MultiBusinessOperatingLayerPanel.tsx` | operational (calls edge functions) | business-operating-readiness |
+| `src/components/founder/optimisation/LearningOptimisationEnginePanel.tsx` | operational (calls edge functions) | optimisation-engine-preview |
+| `src/components/founder/outreach/ApolloCreditFirewallPanel.tsx` | data-reading component | — |
+| `src/components/founder/outreach/ApolloRunFilteredPanel.tsx` | operational (calls edge functions) | outreach-schedule-batch |
+| `src/components/founder/outreach/NeonCandyMonitor.tsx` | data-reading component | — |
+| `src/components/founder/outreach/WeekendPool.tsx` | operational (calls edge functions) | apollo-sync-search, apollo-sync-enrich |
+| `src/components/founder/portfolio/AssetAIAnalysisPanel.tsx` | operational (calls edge functions) | ma-intelligence-orchestrator |
+| `src/components/founder/portfolio/EvidenceDrawer.tsx` | presentational | — |
+| `src/components/founder/portfolio/IntelligenceOrchestratorPanel.tsx` | operational (calls edge functions) | ma-intelligence-orchestrator |
+| `src/components/founder/portfolio/PortfolioCommanderEnginePanel.tsx` | operational (calls edge functions) | portfolio-commander-step-engine |
+| `src/components/founder/portfolio/PortfolioExitLivePanel.tsx` | data-reading component | — |
+| `src/components/founder/pr/GlobalPrRadarCard.tsx` | data-reading component | — |
+| `src/components/founder/product/ProductRoadmapQAReleasePanel.tsx` | operational (calls edge functions) | product-roadmap-status |
+| `src/components/founder/projects/PortfolioDataCoveragePanel.tsx` | presentational | — |
+| `src/components/founder/prospecting/StrategicProspectingAgentPanel.tsx` | operational (calls edge functions) | prospecting-job-generate, prospecting-agent-run, prospect-crm-match-preview, strategic-account-list-generate |
+| `src/components/founder/relationship/CapitalInfluenceTab.tsx` | operational (writes data) | — |
+| `src/components/founder/relationship/PositioningLibrary.tsx` | operational (writes data) | — |
+| `src/components/founder/relationship/SocialSignalIntakeQueue.tsx` | operational (writes data) | — |
+| `src/components/founder/revenue/ProductisationReadinessPanel.tsx` | operational (calls edge functions) | client-readiness-check |
+| `src/components/founder/revenue/RecurringRevenueRenewalsPanel.tsx` | operational (calls edge functions) | recurring-revenue-status, renewal-recommendation-run |
+| `src/components/founder/revenue/RevenueTargetOperatingPanel.tsx` | operational (calls edge functions) | revenue-target-plan, revenue-goal-monitor |
+| `src/components/founder/risk/RiskInsuranceIncidentPanel.tsx` | operational (calls edge functions) | risk-incident-status |
+| `src/components/founder/safety/CommandCentreCoverageMap.tsx` | presentational | — |
+| `src/components/founder/safety/ControlledSendReadinessPreview.tsx` | data-reading component | — |
+| `src/components/founder/safety/FooterDisclosurePreview.tsx` | data-reading component | — |
+| `src/components/founder/safety/ManualSendApplyGate.tsx` | operational (calls edge functions) | manual-send-apply |
+| `src/components/founder/safety/OutreachSafetyPanel.tsx` | presentational | — |
+| `src/components/founder/safety/ReviewRequiredDecisionGate.test.tsx` | presentational | — |
+| `src/components/founder/safety/ReviewRequiredDecisionGate.tsx` | data-reading component | — |
+| `src/components/founder/security/PeopleAccessTrainingPanel.tsx` | operational (calls edge functions) | people-access-status, people-onboarding-offboarding-checklist |
+| `src/components/founder/security/SecurityGovernancePanel.tsx` | operational (calls edge functions) | agent-permission-audit |
+| `src/components/founder/social-autopilot/LongformContentPanels.tsx` | data-reading component | — |
+| `src/components/founder/social-autopilot/PaidMediaPanels.tsx` | operational (calls edge functions) | — |
+| `src/components/founder/social-autopilot/SocialAnalyticsPanels.tsx` | data-reading component | — |
+| `src/components/founder/social-autopilot/SocialApprovalPanels.tsx` | data-reading component | — |
+| `src/components/founder/social-autopilot/SocialAssetPanels.tsx` | data-reading component | — |
+| `src/components/founder/social-autopilot/SocialAutopilotCommandCentreBlock.tsx` | data-reading component | — |
+| `src/components/founder/social-autopilot/SocialAutopilotDiagnosticsPanel.tsx` | data-reading component | — |
+| `src/components/founder/social-autopilot/SocialBrainPanels.tsx` | operational (writes data) | — |
+| `src/components/founder/social-autopilot/SocialCalendarPanels.tsx` | data-reading component | — |
+| `src/components/founder/social-autopilot/SocialCampaignEnginePanels.tsx` | data-reading component | — |
+| `src/components/founder/social-autopilot/SocialCompetitorTrendPanels.tsx` | data-reading component | — |
+| `src/components/founder/social-autopilot/SocialContentFactoryPanels.tsx` | data-reading component | — |
+| `src/components/founder/social-autopilot/SocialDistributionFabricPanels.tsx` | operational (writes data) | — |
+| `src/components/founder/social-autopilot/SocialEngagementFlowPanels.tsx` | data-reading component | — |
+| `src/components/founder/social-autopilot/SocialEngagementInboxPanels.tsx` | data-reading component | — |
+| `src/components/founder/social-autopilot/SocialProfilePanels.tsx` | operational (writes data) | — |
+| `src/components/founder/social-autopilot/SocialPublishingPanels.tsx` | data-reading component | — |
+| `src/components/founder/social-autopilot/SocialSchedulerBridgePanels.tsx` | data-reading component | — |
+| `src/components/founder/social-autopilot/SocialViralRadarPanels.tsx` | data-reading component | — |
+| `src/components/founder/social-autopilot/WebsiteFunnelPanels.tsx` | data-reading component | — |
+| `src/components/founder/social-relationships/SocialRelationshipPanels.tsx` | operational (calls edge functions) | — |
+| `src/components/founder/social/SocialAnalyticsTrendPanel.tsx` | operational (calls edge functions) | social-analytics-insights |
+| `src/components/founder/social/SocialContentFactoryPanel.tsx` | operational (calls edge functions) | social-content-pack-generate |
+| `src/components/founder/social/SocialEngagementInboxPanel.tsx` | operational (calls edge functions) | social-engagement-classify, manychat-flow-export |
+| `src/components/founder/social/SocialMediaBrainPanel.tsx` | operational (calls edge functions) | social-brain-status |
+| `src/components/founder/social/SocialRepurposingEnginePanel.tsx` | operational (calls edge functions) | social-repurpose-generate |
+| `src/components/founder/social/SocialSchedulerExportPanel.tsx` | operational (calls edge functions) | social-scheduling-export |
+| `src/components/founder/strategy/CompetitorLearningPositioningPanel.tsx` | operational (calls edge functions) | offer-positioning-recommendation |
+| `src/components/founder/strategy/FundingExitReadinessPanel.tsx` | operational (calls edge functions) | exit-readiness-run |
+| `src/components/founder/strategy/PortfolioIntelligenceBrainPanel.tsx` | operational (calls edge functions) | portfolio-intelligence-run |
+| `src/components/founder/support/SupportKnowledgeAgentPanel.tsx` | operational (calls edge functions) | support-knowledge-generate, support-agent-triage |
+| `src/components/founder/support/SupportKnowledgePanels.tsx` | operational (calls edge functions) | — |
+| `src/components/founder/testing/LiftorMasterDryRunPanel.tsx` | operational (calls edge functions) | liftor-master-dry-run |
+| `src/components/founder/testing/LiftorMasterReconciliationPanel.tsx` | operational (calls edge functions) | liftor-lost-feature-detector, command-centre-master-status, command-centre-acceptance-test |
+| `src/components/founder/valuation/BusinessValuationIntelligencePanel.tsx` | operational (calls edge functions) | business-valuation-preview |
+| `src/components/founder/video-sop/ScriptStudio.tsx` | operational (calls edge functions) | video-sop-generate-script |
+| `src/components/founder/video-sop/VideoSopWorkflows.tsx` | operational (writes data) | — |
+| `src/components/home/BrainSection.tsx` | presentational | — |
+| `src/components/home/CTASection.tsx` | presentational | — |
+| `src/components/home/ClientsSection.tsx` | presentational | — |
+| `src/components/home/ConfidentialitySection.tsx` | presentational | — |
+| `src/components/home/HeroSection.tsx` | presentational | — |
+| `src/components/home/HowItWorksSection.tsx` | presentational | — |
+| `src/components/home/PlatformSection.tsx` | presentational | — |
+| `src/components/home/ProblemSection.tsx` | presentational | — |
+| `src/components/home/ProcessSection.tsx` | presentational | — |
+| `src/components/home/SystemCredibilitySection.tsx` | presentational | — |
+| `src/components/home/WhatWeBuildSection.tsx` | presentational | — |
+| `src/components/layout/Footer.tsx` | presentational | — |
+| `src/components/layout/LiftorLogo.tsx` | presentational | — |
+| `src/components/layout/Navbar.tsx` | presentational | — |
+| `src/components/outreach/SimulatedSendingBanner.tsx` | data-reading component | — |
+| `src/components/partner/PartnerLayout.tsx` | presentational | — |
+| `src/components/partner/PartnerRoute.tsx` | data-reading component | — |
+| `src/components/platform/PlatformIntelligenceFlow.tsx` | presentational | — |
+| `src/components/portal/PortalLayout.tsx` | presentational | — |
+| `src/components/portal/ProtectedRoute.tsx` | presentational | — |
+| `src/components/proposal/ArchitectureDiagram.tsx` | presentational | — |
+| `src/components/supplier/SupplierLayout.tsx` | presentational | — |
+| `src/components/supplier/SupplierRoute.tsx` | data-reading component | — |
+| `src/components/system/SystemModeBanner.tsx` | presentational | — |
+| `src/components/systems/SystemArchitectureFlow.tsx` | presentational | — |
+| `src/components/ui/accordion.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/alert-dialog.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/alert.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/aspect-ratio.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/avatar.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/badge.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/breadcrumb.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/button.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/calendar.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/card.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/carousel.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/chart.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/checkbox.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/collapsible.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/command.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/context-menu.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/dialog.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/drawer.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/dropdown-menu.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/form.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/hover-card.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/input-otp.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/input.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/label.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/menubar.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/navigation-menu.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/pagination.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/popover.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/progress.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/radio-group.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/resizable.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/scroll-area.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/select.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/separator.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/sheet.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/sidebar.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/skeleton.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/slider.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/sonner.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/switch.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/table.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/tabs.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/textarea.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/toast.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/toaster.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/toggle-group.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/toggle.tsx` | shadcn/ui primitive | — |
+| `src/components/ui/tooltip.tsx` | shadcn/ui primitive | — |
+| `src/components/worker/AskLiftorHelp.tsx` | operational (calls edge functions) | worker-help-chat |
+| `src/components/worker/CampaignOversight.tsx` | operational (writes data) | — |
+| `src/components/worker/CampaignSetupTasks.tsx` | operational (writes data) | — |
+| `src/components/worker/ManualAckGate.tsx` | operational (writes data) | — |
+| `src/components/worker/WorkerRoute.tsx` | data-reading component | — |
+
+## E2. Engines, helpers and registries (`src/lib/**`, 177 files)
+
+Each module below is pure TypeScript unless the "Supabase" column says otherwise; the deterministic engines are the reason Liftor behaviour is reproducible and testable without a provider.
+
+| Module | Exports (first 10) | Touches Supabase | Tables referenced |
+|---|---|---|---|
+| `src/lib/__tests__/acquisitionFundingEngine.test.ts` | — | no | — |
+| `src/lib/__tests__/aiComplianceEngine.test.ts` | — | yes | — |
+| `src/lib/__tests__/apolloCreditFirewall.test.ts` | — | yes | — |
+| `src/lib/__tests__/approvalOpsEngine.test.ts` | — | no | — |
+| `src/lib/__tests__/businessActivationControl.test.ts` | — | no | — |
+| `src/lib/__tests__/campaignFactoryEngine.test.ts` | — | no | — |
+| `src/lib/__tests__/contextFabricEngine.test.ts` | — | no | — |
+| `src/lib/__tests__/crossBusinessIntegrityEngine.test.ts` | — | no | — |
+| `src/lib/__tests__/distressedRadarEngine.test.ts` | — | no | — |
+| `src/lib/__tests__/educationAccountUniverse.test.ts` | — | yes | — |
+| `src/lib/__tests__/educationCrm.test.ts` | — | yes | — |
+| `src/lib/__tests__/educationDiscoverySafety.test.ts` | — | yes | — |
+| `src/lib/__tests__/educationRoleScorer.test.ts` | — | yes | — |
+| `src/lib/__tests__/fundingRadarEngine.test.ts` | — | no | — |
+| `src/lib/__tests__/ghatEstateSegregation.test.ts` | — | yes | — |
+| `src/lib/__tests__/gsmSenderEstate.test.ts` | — | yes | — |
+| `src/lib/__tests__/humanWorkforce.test.ts` | — | no | — |
+| `src/lib/__tests__/liftorRecoveryEngine.test.ts` | — | no | — |
+| `src/lib/__tests__/mailboxAllocator.test.ts` | — | yes | — |
+| `src/lib/__tests__/mailboxRegistrationParser.test.ts` | — | yes | — |
+| `src/lib/__tests__/mondayReadinessEngine.test.ts` | — | no | — |
+| `src/lib/__tests__/portfolioExitTargetEngine.test.ts` | — | no | — |
+| `src/lib/__tests__/smartleadActivationChecklist.test.ts` | — | yes | — |
+| `src/lib/__tests__/smartleadCampaignResolver.test.ts` | — | yes | — |
+| `src/lib/__tests__/smartleadEventNormalizer.test.ts` | — | yes | — |
+| `src/lib/__tests__/smartleadImportRunner.test.ts` | — | yes | — |
+| `src/lib/__tests__/smartleadInfrastructureSafety.test.ts` | — | yes | — |
+| `src/lib/__tests__/smartleadLeadImport.test.ts` | — | yes | — |
+| `src/lib/__tests__/smartleadSendability.test.ts` | — | yes | — |
+| `src/lib/__tests__/socialDistribution.test.ts` | — | yes | — |
+| `src/lib/__tests__/socialDistributionAuto.test.ts` | — | yes | — |
+| `src/lib/__tests__/socialDistributionDispatcher.test.ts` | — | yes | — |
+| `src/lib/__tests__/socialDistributionDraftAndMaintenance.test.ts` | — | yes | social_publish_jobs |
+| `src/lib/__tests__/socialRelationshipContract.test.ts` | — | yes | — |
+| `src/lib/__tests__/socialRelationshipEngine.test.ts` | — | yes | — |
+| `src/lib/__tests__/socialViralRadar.test.ts` | — | yes | — |
+| `src/lib/__tests__/sourceManifestFidelity.test.ts` | — | yes | — |
+| `src/lib/__tests__/systemHealthEngine.test.ts` | — | no | — |
+| `src/lib/__tests__/systemModeEngine.test.ts` | — | no | — |
+| `src/lib/__tests__/winnrPostPurchase.test.ts` | — | yes | gsm_mailboxes |
+| `src/lib/accessGovernanceEngine.ts` | AccessGovSnapshot, computeAccessGovSnapshot, detectSecretLikeStrings, redactSecretLikeStrings | yes | access_systems, secret_inventory, access_assignments, access_audit_events |
+| `src/lib/acquisitionFundingEngine.ts` | AFCategory, AFDistressSignal, AFRecommendedAction, AFFunderType, AFStructure, AFRiskAppetite, AFFunderStatus, AFPitchStatus, AFApprovalStatus, AFOpportunity _(+29)_ | yes | acquisition_funding_opportunities, acquisition_funding_sources, acquisition_funding_deal_structures, acquisition_funding_pitch_packs |
+| `src/lib/adviserPackEngine.ts` | AdviserPackSnapshot, computeAdviserPackSnapshot, PACK_STATUS_TONE, QUESTION_STATUS_TONE, ITEM_TYPE_LABEL, fmtMoney | yes | adviser_handoff_packs, adviser_pack_items, adviser_questions, entity_structure_records, ai_usage_ledger, qtc_payments |
+| `src/lib/agentCapabilityEngine.ts` | AgentRegistry, AgentCapability, AgentProhibited, AgentApprovalRequirement, AgentEscalationTrigger, AgentModulePermission, AgentBoundaryViolation, listAgents, listCapabilities, listProhibited _(+6)_ | yes | agent_registry, agent_capabilities, agent_prohibited_actions, agent_approval_requirements, agent_escalation_triggers, agent_module_permissions, agent_boundary_violations |
+| `src/lib/aiComplianceEngine.ts` | SystemType, AutonomyLevel, RiskLevel, SystemStatus, AIComplianceSystem, AIDataFlowRecord, AIHumanOversightRecord, AIComplianceEvidenceItem, AIComplianceGapAction, RiskClassification _(+45)_ | yes | ai_compliance_systems, ai_data_flow_records, ai_human_oversight_records, ai_compliance_evidence_items, ai_compliance_gap_actions |
+| `src/lib/aiEvalEngine.ts` | SuiteType, RiskLevel, RunStatus, ResultStatus, EvalSuite, EvalCase, EvalRun, EvalResult, SUITE_TYPE_LABEL, RUN_STATUS_CLS _(+9)_ | yes | ai_eval_test_suites, ai_eval_test_cases, ai_eval_runs, ai_eval_results |
+| `src/lib/animations.ts` | fadeUp | no | — |
+| `src/lib/approvalOpsEngine.ts` | ApprovalRow, EscalationRow, ApprovalFilters, fetchApprovalOps, applyFilters, ApprovalMetrics, computeMetrics, reserveDecision, releaseDecision, submitDecision _(+1)_ | yes | founder_approval_items, escalation_records |
+| `src/lib/attentionGuardEngine.ts` | LoadSnapshot, NoiseRule, FocusPriority, FatigueWarning, DelegationItem, NeverHideItem, latestSnapshot, listNoiseRules, listPriorities, listFatigueWarnings _(+6)_ | yes | attention_load_snapshots, attention_noise_rules, attention_focus_priorities, attention_fatigue_warnings, attention_delegation_items, attention_never_hide_items |
+| `src/lib/attributionEngine.ts` | SourceType, EventType, ModelType, SOURCE_TYPE_META, AttributionSource, AttributionEvent, AttributionModel, fetchSources, fetchEvents, fetchModels _(+7)_ | yes | attribution_sources, attribution_events, attribution_models |
+| `src/lib/backupRecoveryEngine.ts` | BackupType, BackupStatus, ExportType, ExportStatus, RecoveryScenario, RecoveryStatus, PackStatus, RiskLevel, BackupStatusRecord, ExportRequest _(+11)_ | yes | backup_status_records, export_requests, recovery_checklists, emergency_operating_packs |
+| `src/lib/billionaireCoverage.ts` | Coverage, CompletionMetrics, SnapshotRow, fetchCompletionMetrics, fetchSnapshotRows, matchSnapshots, mapNetworkEvidence, CoverageFilters, ROUTE_STATE_LABEL, routeState _(+10)_ | yes | billionaire_completion_metrics, billionaire_wealth_snapshots, billionaire_coverage, billionaire_enrichment_queue, billionaire_candidate_routes |
+| `src/lib/businessActivationControl.ts` | MONDAY_SAFE_ALLOWLIST, AllowlistKey, RuntimeState, RiskLevel, BusinessRow, ActivationRow, ActivationLogRow, CombinedBusiness, matchAllowlist, deriveEffectiveState _(+12)_ | yes | businesses, business_runtime_activation, business_runtime_activation_log |
+| `src/lib/businessArchetypeEngine.ts` | ArchetypeRow, AssignmentRow, QuestionRow, ClassifierInput, ClassifierOutput, REQUIRED_FIELDS, classify, setupTasksFor, fetchArchetypes, fetchAssignments _(+2)_ | yes | business_archetypes, business_archetype_assignments, business_archetype_questions |
+| `src/lib/businessComplianceEngine.ts` | RiskLevel, RuleType, ActionRequired, ComplianceProfile, ComplianceRule, ApprovalTrigger, ARCHETYPE_RISK_PROFILE, STANDARD_RULES, STANDARD_TRIGGERS, fetchProfiles _(+8)_ | yes | business_compliance_profiles, business_compliance_rules, compliance_approval_triggers |
+| `src/lib/businessLifecycleEngine.ts` | StageCode, AssignmentStatus, LifecycleStage, Assignment, TransitionEvent, fetchStages, fetchAssignments, fetchTransitions, FOUNDER_CONFIRM_STAGES, isMeaningfulTransition _(+6)_ | yes | business_lifecycle_stages, business_lifecycle_assignments, business_stage_transition_events |
+| `src/lib/businessManuals/__tests__/businessManualRegistry.test.ts` | — | no | — |
+| `src/lib/businessManuals/registry.ts` | BusinessManualKind, BusinessManualEntry, BUSINESS_MANUALS, manualsForBusiness | no | — |
+| `src/lib/businessSetupTunnel.ts` | TUNNEL_STEPS, StepKey, StepState, TunnelState, emptyStep, newState, load, save, listAll, stepCompleteness _(+12)_ | yes | businesses |
+| `src/lib/businessTemplateFactory.ts` | TemplateRow, ApplicationRow, SetupTaskRow, fetchTemplates, fetchApplications, fetchSetupTasks, recommendTemplate, applyTemplate, buildSetupTasks, detectWrongTemplate | yes | business_operating_templates, business_template_applications, business_setup_tasks |
+| `src/lib/campaignFactoryEngine.ts` | CampaignPlanStatus, BusinessSeed, MonthlyBatchInput, buildBatchName, buildDefaultChannels, buildSocialContentSkeleton, buildOutreachSequenceSkeleton, generateMonthlyBatch, approvePack, parkPlan _(+6)_ | yes | campaign_factory_batches, business_campaign_plans, social_campaign_drafts, outreach_campaign_drafts, campaign_approval_packs, automation_runbooks |
+| `src/lib/capacityEngine.ts` | CapacitySnapshot, computeCapacitySnapshot | yes | capacity_plans, workload_items, bottleneck_alerts |
+| `src/lib/channelStrategyEngine.ts` | ChannelType, ChannelStatus, CampaignStatus, CHANNEL_STATUS_META, CAMPAIGN_STATUS_META, Channel, BusinessChannelStrategy, CampaignPlan, fetchChannels, fetchStrategies _(+7)_ | yes | channel_catalog, business_channel_strategies, channel_campaign_plans |
+| `src/lib/collectionsEngine.ts` | CollectionStatus, RiskTier, FailedStatus, ActionStatus, DraftStatus, OverdueInvoice, FailedPayment, RecoveryAction, ReminderDraft, PaymentPlan _(+12)_ | yes | collections_overdue_invoices, collections_failed_payments, collections_recovery_actions, collections_reminder_drafts, collections_payment_plans, collections_service_hold_recommendations, collections_writeoff_decisions |
+| `src/lib/commercialPace.ts` | SalesTargetInput, PaceResult, calculatePace, monthPctElapsed, loadSalesTarget, saveSalesTarget, savePaceCalculation, loadCurrentRevenueRollup, listSalesTargetsAll, listLatestPaceAll _(+1)_ | yes | — |
+| `src/lib/communicationsLedger.ts` | CommChannel, CommDirection, CommStatus, ThreadStatus, FlagType, FlagSeverity, CommRecord, CommThread, CommSafetyFlag, safeSummary _(+7)_ | yes | communication_records, communication_threads, communication_safety_flags |
+| `src/lib/complaintsEngine.ts` | ComplaintsSnapshot, computeComplaintsSnapshot | yes | complaint_cases, refund_requests, dispute_evidence |
+| `src/lib/connectorRegistry.ts` | ProviderType, RiskLevel, ConnectorStatus, HealthStatus, CheckType, WebhookStatus, Connector, Assignment, HealthCheck, WebhookEndpoint _(+7)_ | yes | connector_registry, business_connector_assignments, connector_health_checks, connector_webhook_endpoints |
+| `src/lib/contextFabricEngine.ts` | FabricEnvelope, FabricContract, FabricLink, FabricValidationEvent, FabricRepair, fetchFabric, FabricSummary, summarizeFabric, validateBusinessContext, detectCrossBusinessContamination | yes | business_context_envelopes, module_integration_contracts, cross_module_record_links, business_context_validation_events, context_repair_actions |
+| `src/lib/contextGuardEngine.ts` | Severity, ActionTaken, EventType, ContextEvent, ContextProfile, fetchEvents, fetchProfiles, recordEvent, upsertProfile, GuardInput _(+4)_ | yes | context_guard_events, business_context_profiles |
+| `src/lib/contractsEngine.ts` | ContractsSnapshot, computeContractsSnapshot | yes | contracts, contract_obligations |
+| `src/lib/crm/crmDedupeKey.ts` | DedupeInput, buildCrmDedupeKey | no | — |
+| `src/lib/crossBusinessIntegrityEngine.ts` | ContaminationKind, Severity, ContaminationFinding, LinkRow, EnvelopeRow, detectContamination, shouldQuarantine, shouldBlockOutbound, IntegrityScan, runIntegrityScan _(+1)_ | yes | cross_module_record_links, business_context_envelopes, business_context_validation_events, context_repair_actions |
+| `src/lib/customerOnboarding.ts` | OnboardingSnapshot, computeOnboardingSnapshot | yes | onboarding_records, onboarding_checklist_items |
+| `src/lib/customerSalesSafety.ts` | SafetyDecision, SafetyResult, ContactSafety, OutboundContext, evaluateOutboundCall, CloseSafetyContext, evaluateCloseSafety | no | — |
+| `src/lib/dataAssetRegistry.ts` | DataAssetStatus, DataAsset, DATA_ASSETS, getDataAsset | yes | — |
+| `src/lib/dataQualityEngine.ts` | DataQualitySnapshot, computeDataQualitySnapshot, DQ_FINDING_LABEL, DQ_SEVERITY_TONE, DQ_STATUS_TONE, DQ_ACTION_LABEL, DQ_ACTION_STATUS_TONE | yes | data_quality_findings, data_repair_actions |
+| `src/lib/decisionRegister.ts` | DecisionType, DecisionStatus, DecisionEventType, ReviewStatus, DecisionOption, FounderDecision, DecisionEvent, DecisionReviewReminder, DECISION_TYPE_LABEL, DECISION_STATUS_META _(+7)_ | yes | founder_decisions, founder_decision_events, decision_review_reminders |
+| `src/lib/deliveryEngine.ts` | DeliverySnapshot, computeDeliverySnapshot | yes | delivery_orders, delivery_tasks, delivery_capacity |
+| `src/lib/deploymentControl.ts` | EnvName, EnvStatus, DeployStatus, MigrationStatus, EdgeStatus, Sensitivity, EnvironmentRecord, DeploymentRecord, MigrationRecord, EdgeFunctionRecord _(+8)_ | yes | environment_records, deployment_records, migration_records, edge_function_records, environment_variable_records |
+| `src/lib/distressedRadarEngine.ts` | Category, DistressType, RecommendedStructure, RecommendedAction, SaleRoute, AcquisitionOpportunity, DisposalAsset, FinancingOption, Scores, computeScores _(+21)_ | yes | distressed_acquisition_opportunities, distressed_disposal_assets, distressed_deal_financing_options |
+| `src/lib/documentVaultEngine.ts` | DocumentType, SensitivityLevel, AccessScope, DataRoomType, DataRoomStatus, DataRoomItemStatus, EvidenceType, EvidenceStatus, DocumentVaultItem, DocumentAccessRule _(+14)_ | yes | document_vault_items, document_access_rules, data_room_profiles, data_room_items, evidence_records |
+| `src/lib/ecommerceEngine.ts` | ProductType, InventoryStatus, OrderStatus, ItemFulfilmentStatus, ShipmentStatus, ReturnStatus, SupplierType, EcommerceProduct, InventoryRecord, EcommerceOrder _(+19)_ | yes | ecommerce_products, inventory_records, ecommerce_orders, ecommerce_order_items, fulfilment_shipments, return_requests, ecommerce_suppliers |
+| `src/lib/education/__tests__/educationCommercialSafety.test.ts` | — | no | — |
+| `src/lib/education/campaignPrioritisation.ts` | PrioritisationResult, PRIORITISATION_ENGINE_VERSION, rankEducationBusinesses, selectFirstProposition | no | — |
+| `src/lib/education/educationBusinessRelevance.ts` | RELEVANCE_ENGINE_VERSION, RelevanceCategory, RelevanceContactInput, BusinessRelevanceResult, RELEVANCE_QUALIFICATION_THRESHOLD, detectCategories, scoreBusinessRelevance, scoreAllEducationBusinesses, relevantEducationBusinesses, BusinessRelationshipUpsert _(+1)_ | yes | — |
+| `src/lib/education/educationBusinesses.ts` | EducationBusinessSlug, EducationBusinessDefinition, EDUCATION_BUSINESSES, EDUCATION_BUSINESS_NAMES, businessBySlug, businessByName, NON_EDUCATION_PROTECTED_BUSINESSES, isProtectedNonEducationBusiness | no | — |
+| `src/lib/education/educationCampaignCopy.ts` | EmailStep, RoleVariant, BrandCopy, EDUCATION_CAMPAIGN_COPY, copyForBusiness | no | — |
+| `src/lib/education/educationCampaignShells.ts` | EducationCampaignShell, EDUCATION_CAMPAIGN_SHELLS, shellFor, shellToDraftRow | no | — |
+| `src/lib/education/educationFunnelAnalytics.ts` | FunnelProvenance, EducationFunnelRow, loadEducationFunnel | yes | education_commercial_funnel |
+| `src/lib/education/index.ts` | — | no | — |
+| `src/lib/education/outreachEligibilityGate.ts` | ELIGIBILITY_GATE_VERSION, EligibilityGateCode, EligibilityContact, EligibilityRelationship, EligibilityCampaign, EligibilityInfrastructure, EligibilityInput, EligibilityResult, evaluateOutreachEligibility | yes | — |
+| `src/lib/education/portfolioCollision.ts` | COLLISION_ENGINE_VERSION, DEFAULT_CROSS_BRAND_COOLDOWN_DAYS, CollisionReasonCode, HARD_BLOCK_REASON_CODES, CollisionContact, OwnershipRow, CollisionInput, CollisionDecision, evaluateCollision, cooldownFrom | no | — |
+| `src/lib/elyntorHandoff.ts` | ElyntorRegulatoryPathway, ElyntorDealApproachRequest, ElyntorCapitalPartnerSearchRequest, ElyntorHandoff, ElyntorHandoffValidation, validateElyntorHandoff, describeElyntorHandoff | no | — |
+| `src/lib/entityMapEngine.ts` | LegalEntity, EntityAssignment, RevenueRoutingRule, PolicyAssignment, AdviserQuestion, REQUIRED_POLICIES_BY_ARCHETYPE, fetchEntities, fetchAssignments, fetchRoutingRules, fetchPolicies _(+5)_ | yes | legal_entities, business_entity_assignments, revenue_routing_rules, entity_policy_assignments, tax_sensitive_questions |
+| `src/lib/eventBusEngine.ts` | EventCategory, EventStatus, RunStatus, StepStatus, FailureType, Severity, LiftorEvent, WorkflowStep, WorkflowDefinition, WorkflowRun _(+9)_ | yes | liftor_events, workflow_definitions, workflow_failure_events, master_work_items, workflow_runs, workflow_step_runs |
+| `src/lib/exitMetricsEngine.ts` | MetricCategory, MetricStatus, ARCHETYPE_META, METRIC_CATEGORY_META, METRIC_STATUS_META, ExitMetricTemplate, BusinessExitMetricValue, ExitReadinessScore, fetchTemplates, fetchValues _(+7)_ | yes | exit_metric_templates, business_exit_metric_values, business_exit_readiness_scores |
+| `src/lib/experimentEngine.ts` | PlanStatus, Approval, Recommendation, ExperimentPlan, ExperimentVariant, ExperimentMetric, ExperimentResult, ExperimentWinner, ExperimentFailure, ExperimentLearning _(+9)_ | yes | experiment_plans, experiment_variants, experiment_metrics, experiment_results, experiment_winners, experiment_failures, experiment_learnings |
+| `src/lib/founderLoadBalancerEngine.ts` | ApprovalItem, NotificationItem, UrgencyTier, ScoredItem, Group, urgencyScore, tierFromScore, makeBatchKey, scoreAll, groupItems _(+4)_ | yes | founder_approval_items, founder_notification_queue |
+| `src/lib/founderManualContent.ts` | ManualLiveData, generateManualMarkdown, PORTFOLIO_COMMANDER_ENGINE_TECH_NOTE, AI_RUNTIME_CLEANUP_NOTE, FINAL_CARRIER_GRADE_QA_NOTE, CONTROL_FABRIC_TECH_NOTE | yes | — |
+| `src/lib/founderReportingEngine.ts` | ReportingSnapshot, computeReportingSnapshot, REPORT_STATUS_TONE, REPORT_ITEM_LABEL, fmtMoney | yes | qtc_payments, ai_usage_ledger, founder_reports, founder_report_items, incident_records, privacy_breach_events, privacy_requests, complaint_records |
+| `src/lib/fundingRadarEngine.ts` | WEIGHTS, ScoreInput, computeTotalScore, ALLOWED_EXTRACTION_FIELDS, FORBIDDEN_EXTRACTION_FIELDS, sanitizeExtraction, CAPITAL_EFFICIENCY_QUESTIONS, NEEDS_VERIFICATION, FUNDING_CSV_TEMPLATE_COLUMNS, FUNDING_CSV_REQUIRED_FIELDS _(+148)_ | yes | funding_radar_companies, funding_problem_clusters, funding_shortlist, funding_monthly_runs, funding_imports, funding_radar_scores, funding_market_maps, funding_white_space_opportunities |
+| `src/lib/globalAuditLedger.ts` | AuditActorType, AuditEventCategory, AuditSensitivity, LogGlobalAuditEventInput, GlobalAuditEvent, redactForAudit, logGlobalAuditEvent, FetchAuditFilters, fetchAuditEvents, AuditSummary _(+2)_ | yes | global_audit_events |
+| `src/lib/globalSearchIndex.ts` | RecordType, Sensitivity, SearchIndexRow, safeSummary, UpsertIndexInput, upsertSearchIndex, SearchFilters, searchIndex, fetchIndexJobs, SearchSummary _(+5)_ | yes | global_search_index, search_index_jobs, saved_searches |
+| `src/lib/humanWorkforce.ts` | PortalType, WorkerRole, OPERATOR_ROLES, OVERSIGHT_ROLES, rolesForPortal, portalForRole, AccessWindow, isWindowActive, sessionExpiresAt, WorkforceContext _(+19)_ | yes | worker_kill_switch, worker_profiles, worker_access_windows, worker_sessions, worker_audit_events, worker_tasks |
+| `src/lib/identityResolution.ts` | IdentityStatus, LinkedRole, LinkStatus, MergeStatus, MergeActionStatus, IdentityProfile, listIdentities, listLinks, listDuplicates, listMergeActions _(+5)_ | yes | identity_profiles, identity_links, duplicate_identity_candidates, identity_merge_actions |
+| `src/lib/importCentre.ts` | ImportType, ImportStatus, ValidationStatus, MappingStatus, RollbackStatus, ImportBatch, listImportBatches, getImportBatch, listMappings, listPreviewRows _(+6)_ | yes | import_batches, import_mappings, import_preview_rows, import_applied_records, import_rollback_events |
+| `src/lib/incidentEngine.ts` | IncidentSnapshot, computeIncidentSnapshot, INCIDENT_STATUS_TONE, INCIDENT_SEVERITY_TONE, INCIDENT_TYPE_LABEL | yes | incident_records, incident_postmortems, continuity_plans |
+| `src/lib/insuranceLiabilityEngine.ts` | PolicyType, PolicyStatus, Severity, GapStatus, EventType, POLICY_TYPE_META, POLICY_STATUS_META, SEVERITY_META, EVENT_TYPE_META, InsurancePolicy _(+13)_ | yes | insurance_policy_records, insurance_gap_assessments, liability_events |
+| `src/lib/integrationMapEngine.ts` | CatalogRow, RequirementRow, ConnectionStatusRow, fetchCatalog, fetchRequirements, fetchConnections, recommendIntegrationsForArchetype, generateRequirementsForBusiness, IntegrationWarning, diagnoseIntegrations _(+1)_ | yes | integration_catalog, business_integration_requirements, integration_connection_status |
+| `src/lib/internalSla.ts` | HandoffType, HandoffStatus, HandoffPriority, BreachType, BreachSeverity, BreachStatus, HandoffRecord, SlaPolicy, SlaBreach, listHandoffs _(+5)_ | yes | internal_handoff_records, internal_sla_breaches, internal_sla_policies |
+| `src/lib/ipAssetsEngine.ts` | AssetType, RightsStatus, RightsType, OpportunityType, OpportunityStatus, ASSET_TYPE_META, RIGHTS_STATUS_META, OPPORTUNITY_STATUS_META, DigitalAsset, RightsRecord _(+9)_ | yes | digital_assets, asset_rights_records, licensing_opportunities |
+| `src/lib/jurisdictionTaxEngine.ts` | FxConfidence, PartyType, JurisdictionConfidence, TaxFlag, AdviserReviewType, AdviserReviewStatus, CurrencySetting, JurisdictionRecord, TaxTreatmentFlag, AdviserReviewItem _(+12)_ | yes | currency_settings, jurisdiction_records, tax_treatment_flags, jurisdiction_adviser_review_items |
+| `src/lib/knowledgeGovernanceEngine.ts` | KnowledgeSnapshot, computeKnowledgeSnapshot, TRUST_TONE, SOURCE_TYPE_LABEL, CONFLICT_STATUS_TONE, CONFLICT_SEVERITY_TONE, CLAIM_STATUS_TONE, CLAIM_TYPE_LABEL, CONFLICT_TYPE_LABEL | yes | knowledge_sources, knowledge_conflicts, approved_claims |
+| `src/lib/launchFactoryEngine.ts` | LaunchProfileRow, ChannelAccountRow, ChecklistItemRow, fetchLaunchProfiles, fetchChannelAccounts, fetchChecklist, LAUNCH_MODULE_ROUTE, ChecklistSeed, generateChecklistSeeds, generateChecklistForBusiness _(+3)_ | yes | business_launch_profiles, business_channel_accounts, business_launch_checklist_items |
+| `src/lib/lifecycleHandoffs.ts` | logHandoffAudit, DraftBusinessShellInput, createDraftBusinessShellFromPack, markReleaseCommsReadyForReview, AwaitingCommsReview, fetchReleasesAwaitingCommsReview, createDecisionFromCrmContact, WindDownSummary, fetchWindDownSummary, TrainingAssignmentSummary _(+1)_ | yes | global_audit_events, businesses, release_workflow_items, founder_decisions, winddown_plans, video_library_training_assignments |
+| `src/lib/liftorRecoveryEngine.ts` | SnapshotScope, SNAPSHOT_SCOPES, SnapshotStatus, Snapshot, RecoveryAction, integrityHash, verifyIntegrity, isDangerousRestore, SnapshotHealth, scopeHealth _(+8)_ | yes | liftor_snapshots, liftor_recovery_actions, businesses, business_context_envelopes, ai_action_queue, ai_agent_registry, ai_agent_cost_controls, system_runtime_state |
+| `src/lib/liftorUserManualContent.ts` | LIFTOR_USER_MANUAL_VERSION, ManualSection, LIFTOR_SIMPLE_GUIDE, LIFTOR_FULL_GUIDE, LIFTOR_CONTROL_FABRIC_GUIDE, NEW_BUSINESS_OPERATING_FLOW, REHEARSAL_FLOW, REHEARSAL_RESET_FLOW, PRE_LIVE_BASELINE_FLOW, REVENUE_TARGET_FLOW _(+32)_ | yes | — |
+| `src/lib/manualArchitectureSync2026.ts` | ARCHITECTURE_SYNC_VERSION, ARCHITECTURE_SYNC_DATE, ARCHITECTURE_SYNC_PREVIOUS_VERSION, ARCHITECTURE_SYNC_SOURCE, ManualModuleRisk, ManualModuleEntry, LIFTOR_MODULE_INDEX, ARCHITECTURE_SYNC_MARKDOWN | yes | — |
+| `src/lib/marketplaceEngine.ts` | MarketplaceSnapshot, computeMarketplaceSnapshot | yes | marketplace_profiles, seller_prospects, seller_onboarding_records, seller_verification_checks, marketplace_listings, marketplace_supply_demand_snapshots |
+| `src/lib/marketplaceGrowthEngine.ts` | LiquidityRow, GrowthAction, MatchAttempt, GrowthSnapshot, computeGrowthSnapshot, recommendActionForCell | yes | marketplace_liquidity_scores, marketplace_match_attempts, marketplace_growth_actions |
+| `src/lib/masterWorkQueueEngine.ts` | WorkItem, OPEN_STATUSES, PMO_SOURCES, fetchWorkItems, QueueSummary, summarize, rankScore, topN, ingestWorkItem, PRIORITY_META _(+1)_ | yes | master_work_items |
+| `src/lib/mondayReadinessEngine.ts` | ReadinessStatus, CheckSeverity, CheckStatus, ReadinessCheck, ReadinessReport, statusFromScore, aggregateScore, recommendation, checkFromBool, checkFromRatio _(+3)_ | yes | user_roles |
+| `src/lib/monthlyContentPlanner.ts` | generateMonthlyPlan, approveMonthlyPlan | yes | monthly_business_content_plans, monthly_content_items, worker_tasks |
+| `src/lib/notificationCentreEngine.ts` | Notification, Escalation, NotificationRule, OPEN_NOTIF_STATUSES, NOTIF_SOURCES, SEVERITY_META, STATUS_META, fetchNotifications, fetchEscalations, fetchRules _(+6)_ | yes | unified_notifications, escalation_records, notification_rules |
+| `src/lib/operatingLoops/corporateSecretarialEngine.ts` | SecRecord, SEC_STATUSES, fetchSecRecords, createSecRecord, updateSecRecord, logSecEvent, dueSoon, summariseSec | yes | corporate_secretarial_records, corporate_secretarial_events |
+| `src/lib/operatingLoops/dataRoomHardeningEngine.ts` | DataRoomToken, ShareRequest, fetchTokens, createToken, approveToken, revokeToken, logViewAudit, fetchShareRequests, decideShareRequest, pendingApprovalCount | yes | data_room_access_tokens, data_room_view_audit, data_room_share_requests |
+| `src/lib/operatingLoops/insuranceClaimLoopEngine.ts` | InsuranceClaim, CLAIM_STATUSES, fetchClaims, createClaim, updateClaim, logClaimEvent, summariseClaims | yes | insurance_claims, insurance_claim_events |
+| `src/lib/operatingLoops/internationalExpansionEngine.ts` | ExpansionRun, READINESS_KEYS, READINESS_STATUSES, fetchExpansionRuns, createExpansionRun, updateExpansionRun, logExpansionEvent, readinessScore, canGoLive | yes | international_expansion_runs, international_expansion_events |
+| `src/lib/operatingLoops/portfolioFxEngine.ts` | FxRate, FxWarning, fetchFxRates, upsertFxRate, fetchFxWarnings, latestRateFor, FxRow, consolidateRevenue | yes | fx_rate_snapshots, portfolio_fx_warnings, qtc_invoices |
+| `src/lib/operatingLoops/releaseWorkflowEngine.ts` | ReleaseItem, RELEASE_STATUSES, RELEASE_TYPES, fetchReleases, createRelease, updateRelease, approveRelease, logReleaseEvent, awaitingFounderReview | yes | release_workflow_items, release_workflow_events |
+| `src/lib/operatingLoops/statutoryFilingsEngine.ts` | StatutoryFiling, FILING_STATUSES, FILING_CATEGORIES, fetchFilings, createFiling, updateFiling, logFilingEvent, bucketFilings | yes | statutory_filings, statutory_filing_events |
+| `src/lib/partnerEngine.ts` | PartnerType, OutreachStatus, ReferralStatus, CommissionType, PARTNER_TYPE_META, OUTREACH_STATUS_META, REFERRAL_STATUS_META, PartnerProspect, ReferralRecord, CommissionRule _(+11)_ | yes | partner_prospects, referral_records, partner_commission_rules, partner_performance_snapshots |
+| `src/lib/peopleEngine.ts` | PeopleSnapshot, computePeopleSnapshot | yes | human_operators, human_operator_tasks, human_operator_access, human_operator_quality_reviews |
+| `src/lib/platformMonitor.ts` | PerfEventType, Severity, PerfStatus, CostSource, CostBasis, RecType, RecPriority, RecActionStatus, PerfEvent, CostRecord _(+6)_ | yes | platform_performance_events, platform_cost_records, platform_scalability_recommendations |
+| `src/lib/policyCoverageEngine.ts` | Sensitivity, ReqStatus, PublishStatus, PolicyTemplate, PolicyRequirement, PolicyDraft, PolicyApproval, PolicyPublicPage, PolicyReviewEvent, listTemplates _(+7)_ | yes | policy_templates, policy_requirements, policy_drafts, policy_approvals, policy_public_pages, policy_review_events |
+| `src/lib/portalsEngine.ts` | PortalType, PortalStatus, AccessMode, PortalRole, AccessStatus, InviteType, InviteStatus, EventType, Severity, PortalProfile _(+12)_ | yes | portal_profiles, portal_users, portal_invites, portal_access_events |
+| `src/lib/portfolioCrmModel.ts` | PortfolioDataPoolId, BusinessRelevanceLevel, PORTFOLIO_CRM_PRINCIPLES, PORTFOLIO_CRM_PIPELINE, EDUCATION_WAVE_1_POOL, relevanceLabel | no | — |
+| `src/lib/portfolioCrmPoolResolver.ts` | resolvePortfolioBusiness, resolveBusinessPools, poolLabel, poolDimension, uniquePoolsForBusinesses | no | — |
+| `src/lib/portfolioCrmQueries.ts` | PortfolioContactRow, loadPortfolioContacts, getPortfolioCrmSummary | yes | contacts, business_contact_relationships, organisations |
+| `src/lib/portfolioDiversityEngine.ts` | DiversityCounts, loadDiversity, DIVERSITY_MODULES | yes | — |
+| `src/lib/portfolioExitTargetEngine.ts` | BusinessStatus, RevenueModel, ExitStage, LikelyExitRoute, EvidencePackStatus, PortfolioExitTarget, Settings, Alert, fetchSettings, fetchTargets _(+14)_ | yes | portfolio_exit_target_settings, portfolio_exit_targets, portfolio_exit_target_alerts |
+| `src/lib/portfolioMemory.ts` | SummaryType, PackType, PackStatus, Sensitivity, ItemType, HistoryEventType, MemorySummary, HandoverPack, HandoverPackItem, HistoryEvent _(+11)_ | yes | business_memory_summaries, handover_packs, handover_pack_items, portfolio_history_events |
+| `src/lib/portfolioPrioritisationEngine.ts` | PriorityDecision, PriorityScore, PriorityDecisionRow, ScoringSignals, computeSubscores, recommendDecision, fetchScores, fetchDecisions, scoreBusiness, createDecision _(+4)_ | yes | portfolio_priority_scores, portfolio_priority_decisions |
+| `src/lib/portfolioRiskEngine.ts` | RiskStatus, ItemSeverity, ItemStatus, RISK_CATEGORIES, RiskCategory, RiskScore, RiskItem, RiskSignals, statusFor, computeRisk _(+13)_ | yes | portfolio_risk_scores, portfolio_risk_items |
+| `src/lib/pricingMarginEngine.ts` | MarginStatus, MARGIN_STATUS_META, MarginProfile, DiscountRule, BreakevenModel, fetchMarginProfiles, fetchDiscountRules, fetchBreakevenModels, totalCost, computeMargin _(+5)_ | yes | product_margin_profiles, discount_rules, breakeven_models |
+| `src/lib/privacyEngine.ts` | PrivacySnapshot, computePrivacySnapshot, isMarketingAllowed | yes | privacy_requests, data_retention_rules, consent_records, processor_register, privacy_breach_events |
+| `src/lib/productCatalogueEngine.ts` | ProductType, OfferType, OfferStatus, ClaimStatus, RequirementType, Product, Offer, Claim, Requirement, fetchProducts _(+12)_ | yes | global_products, global_offers, offer_claims, offer_delivery_requirements |
+| `src/lib/productEngine.ts` | ProductSnapshot, computeProductSnapshot, FEATURE_STATUS_TONE, BUG_SEVERITY_TONE, BUG_STATUS_TONE, RELEASE_STATUS_TONE, QA_STATUS_TONE | yes | product_features, product_bugs, release_records, qa_checklists |
+| `src/lib/providers/outboundProviderAdapter.ts` | ProviderMode, ProviderStatus, OutboundProviderRecord, RenderedMessage, SendEligibility, ProviderEvent, ProviderError, OutboundProviderAdapter, NullOutboundProviderAdapter, registerOutboundProviderAdapter _(+1)_ | no | — |
+| `src/lib/providers/smartleadAdapter.ts` | SMARTLEAD_SECRET_NAME, SMARTLEAD_BASE_URL, SMARTLEAD_AUTH_METHOD, SMARTLEAD_READ_ONLY_ENDPOINTS, SMARTLEAD_MUTATION_ENDPOINTS_FUTURE, SMARTLEAD_WEBHOOK_BLUEPRINT_EVENTS, SmartleadOutboundProviderAdapter | no | — |
+| `src/lib/providers/smartleadTemplateMapper.ts` | PlaceholderMap, LIFTOR_TO_SMARTLEAD, SUPPORTED_SMARTLEAD_TOKENS, ValidationIssue, ConversionResult, convertTemplate, LiftorSequenceStep, ConvertedSequenceStep, convertSequence | no | — |
+| `src/lib/providers/voiceProviderAdapter.ts` | VoiceProviderType, VoiceProviderStatus, VoiceProviderRecord, InboundCallContext, OutboundCallDraft, OutboundEligibility, CallEventRecord, TranscriptIngestResult, CallAnalysisResult, CloseActionDraft _(+6)_ | no | — |
+| `src/lib/reconciliationEngine.ts` | ReconSourceType, ReconStatus, MatchStatus, PayoutStatus, ExceptionType, Severity, ExceptionStatus, ReconciliationRecord, PaymentReconciliationMatch, MarketplacePayoutRecord _(+14)_ | yes | reconciliation_records, payment_reconciliation_matches, marketplace_payout_records, reconciliation_exceptions |
+| `src/lib/relationshipHealth.ts` | RelType, RelStatus, EventType, OppType, OppStatus, HealthScore, HealthEvent, Opportunity, listScores, listEvents _(+4)_ | yes | relationship_health_scores, relationship_health_events, relationship_opportunities |
+| `src/lib/reportingTruthEngine.ts` | KpiCategory, ConflictType, Severity, ConflictStatus, RuleType, KpiDefinition, TruthRule, ReportingConflict, ReportingSnapshot, SEVERITY_META _(+8)_ | yes | kpi_definitions, reporting_truth_rules, reporting_conflicts, reporting_snapshots |
+| `src/lib/resourceAllocationEngine.ts` | AllocationType, PlanStatus, ItemStatus, AllocationPlan, AllocationItem, UsageActual, TYPE_META, fetchPlans, fetchItems, fetchActuals _(+7)_ | yes | resource_allocation_plans, resource_allocation_items, resource_usage_actuals, portfolio_priority_scores |
+| `src/lib/revenueAutopilot.ts` | RevenueLoopSnapshot, computeRevenueLoop | yes | sales_revenue_targets, customer_sales_close_actions, customer_sales_conversations, customer_upgrade_opportunities, revenue_autopilot_tasks, sales_win_loss_reviews |
+| `src/lib/roleAccessEngine.ts` | RoleDefinition, UserRoleAssignment, PermissionRow, AccessRequest, AccessReviewEvent, SENSITIVE_MODULES, SENSITIVITY_META, STATUS_META, fetchRoles, fetchAssignments _(+6)_ | yes | role_definitions, user_role_assignments, module_permission_matrix, access_requests, access_review_events |
+| `src/lib/runtimeEnvCheck.ts` | RuntimeEnvReport, verifyRuntimeEnv, RUNTIME_ENV_REPORT | no | — |
+| `src/lib/salesTargetMath.ts` | ActivityAssumptions, RequiredActivity, reverseEngineerActivity, gapStatus, recommendedAction, daysBetween, pctElapsed | no | — |
+| `src/lib/scheduledJobs.ts` | JobCategory, RunStatus, FailureType, Severity, FailureStatus, JobDefinition, JobRun, JobFailure, fetchJobs, fetchRuns _(+8)_ | yes | scheduled_job_definitions, scheduled_job_runs, scheduled_job_failures |
+| `src/lib/schedulingEngine.ts` | ResourceType, BookingType, BookingStatus, BookingEventType, SchedulingResource, AvailabilityWindow, BookingRecord, BookingEvent, BOOKING_STATUS_META, RESOURCE_TYPE_LABEL _(+8)_ | yes | scheduling_resources, availability_windows, booking_records, booking_events |
+| `src/lib/securityVaultData.ts` | RiskLevel, SecretRecord, AccessRecord, envPresent, SECRETS_REGISTER, ACCESS_MAP, GITHUB_PROTECTION_CHECKLIST, SUPABASE_BACKUP_CHECKLIST, SECURITY_AUDIT_CHECKLIST, RESTORE_RUNBOOK_STEPS | yes | — |
+| `src/lib/sellerOpsEngine.ts` | SellerOpsSnapshot, computeSellerOpsSnapshot | yes | seller_accounts, seller_payout_profiles, seller_terms_acceptance, seller_performance_metrics |
+| `src/lib/slimMandyManualContent.ts` | SLIM_MANDY_MANUAL_VERSION, SLIM_MANDY_MANUAL_MARKDOWN, SLIM_MANDY_MANUAL_FILENAME | no | — |
+| `src/lib/sopEngine.ts` | SopType, SopStatus, VersionStatus, UsageType, ReviewReason, ReviewStatus, Severity, ResolutionStatus, SopDocument, SopVersion _(+14)_ | yes | sop_documents, sop_versions, sop_agent_usage, sop_review_tasks, sop_conflicts |
+| `src/lib/supportTickets.ts` | SupportSnapshot, computeSupportSnapshot | yes | support_tickets |
+| `src/lib/systemConfig.ts` | FlagCategory, ConfigCategory, Sensitivity, FeatureFlag, BusinessOverride, SystemConfigValue, ConfigAuditEvent, fetchFlags, fetchOverrides, fetchConfigs _(+6)_ | yes | feature_flags, business_feature_overrides, system_configuration_values, configuration_audit_events |
+| `src/lib/systemHealthEngine.ts` | HealthStatus, ComponentId, ComponentHealth, OverallHealth, ALL_COMPONENTS, scoreFailureRate, scoreLatency, isStale, aggregateHealth, loadSystemHealth _(+2)_ | yes | ai_gateway_requests, ai_usage_ledger, founder_approval_items, business_context_validation_events, ai_cost_alerts, ai_action_queue |
+| `src/lib/systemModeEngine.ts` | SystemMode, ALL_MODES, RuntimeState, LedgerEntry, ModeBehavior, MODE_BEHAVIOR, DANGEROUS_TRANSITIONS, isDangerousTransition, canPerform, fetchRuntimeState _(+2)_ | yes | system_runtime_state, system_mode_ledger |
+| `src/lib/trustSafety.ts` | RiskType, RiskSeverity, RiskStatus, ActionType, ActionStatus, AbuseFlagType, RiskEvent, ActionRec, AbuseFlag, listRiskEvents _(+5)_ | yes | trust_risk_events, trust_action_recommendations, abuse_message_flags |
+| `src/lib/utils.ts` | cn | no | — |
+| `src/lib/vendorEngine.ts` | VendorSnapshot, computeVendorSnapshot | yes | vendors, vendor_subscriptions, vendor_access_records, vendor_risk_reviews |
+| `src/lib/voiceOfCustomerEngine.ts` | Sentiment, FeatureStatus, TestimonialAskStatus, ReviewApproval, ChurnStatus, FeedbackRecord, FeatureRequest, TestimonialCandidate, ReviewRequest, ChurnReason _(+13)_ | yes | voc_feedback_records, voc_feature_requests, voc_testimonial_candidates, voc_review_requests, voc_churn_reasons, voc_pmf_signals, voc_insights |
+| `src/lib/webhookInbox.ts` | VerificationStatus, ProcessingStatus, EventCategory, InboxEvent, NormalisedEvent, ProcessingRule, fetchInbox, fetchNormalised, fetchRules, safeSummary _(+3)_ | yes | webhook_inbox_events, normalised_external_events, webhook_processing_rules |
+| `src/lib/windDownEngine.ts` | PlanMode, PlanStatus, Approval, WindDownPlan, ChecklistItem, CustomerOffboarding, VendorCancellation, ContractTermination, DataRetention, LegalReview _(+10)_ | yes | winddown_plans, winddown_checklist_items, winddown_customer_offboarding, winddown_vendor_cancellations, winddown_contract_terminations, winddown_data_retention, winddown_legal_reviews |
+
+## E3. Hooks and contexts (4 files)
+
+| File | Purpose signal (exports) |
+|---|---|
+| `src/contexts/AuthContext.tsx` | useAuth, AuthProvider |
+| `src/hooks/use-mobile.tsx` | useIsMobile |
+| `src/hooks/use-toast.ts` | reducer |
+| `src/hooks/useOutreachSafetyAudit.ts` | OutreachSafetyAudit, useOutreachSafetyAudit |
