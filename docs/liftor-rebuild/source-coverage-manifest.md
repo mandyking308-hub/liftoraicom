@@ -1,14 +1,14 @@
 # Source Coverage Manifest
 
-_Generated from commit `e5fe720e5b5e4add8cbd81863a00291357f48437` by `scripts/generate-rebuild-manual-catalogs.mjs`. Regenerate with `node scripts/generate-rebuild-manual-catalogs.mjs`._
+_Generated from commit `efbc518f6951dc4ad0ca78e46fb5f4b7c0847029` by `scripts/generate-rebuild-manual-catalogs.mjs`. Regenerate with `node scripts/generate-rebuild-manual-catalogs.mjs`._
 
 Every file tracked by git at this commit is accounted for below. Machine-readable twin: `source-coverage-manifest.json`.
 
-**Total tracked files: 2957.**
+**Total tracked files: 2971.**
 
 | Category | Files | % |
 |---|---|---|
-| documented | 2714 | 91.8% |
+| documented | 2728 | 91.8% |
 | doc | 95 | 3.2% |
 | static-asset | 68 | 2.3% |
 | supporting | 63 | 2.1% |
@@ -26,11 +26,11 @@ Category meanings: **documented** = described in the named manual section or cat
 | `src/components` | 422 | Technical Manual E1 — Component catalog; Technical Manual A/E — shadcn/ui primitives (vendored design-system files) |
 | `src/lib` | 177 | Technical Manual P — Tests & CI; Technical Manual E2 — Engine/helper catalog; Technical Manual A/T — Manual source modules |
 | `src/data` | 47 | Technical Manual K / data-assets appendix |
-| `docs/liftor-rebuild` | 25 | This rebuild manual |
+| `docs/liftor-rebuild` | 26 | This rebuild manual |
+| `apps/giving-platform` | 22 | Technical Manual A — standalone sub-app (giving platform prototype) |
 | `src/services` | 18 | Technical Manual P — Tests & CI; Technical Manual L — AI architecture |
 | `.lovable/memory` | 16 | Project memory / plan files — not part of the runtime |
 | `docs/business-manuals` | 12 | Business Manuals (separate canonical layer) |
-| `apps/giving-platform` | 9 | Technical Manual A — standalone sub-app (giving platform prototype) |
 | `.github/workflows` | 5 | Technical Manual P — CI workflows |
 | `src/hooks` | 3 | Technical Manual E3 — Hooks & contexts |
 | `src/integrations` | 3 | Technical Manual B — Supabase client (auto-generated, never edited) |

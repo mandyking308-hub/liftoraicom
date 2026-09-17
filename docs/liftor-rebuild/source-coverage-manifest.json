@@ -1,9 +1,9 @@
 {
-  "commit": "e5fe720e5b5e4add8cbd81863a00291357f48437",
+  "commit": "efbc518f6951dc4ad0ca78e46fb5f4b7c0847029",
   "generated_by": "scripts/generate-rebuild-manual-catalogs.mjs",
-  "total_files": 2957,
+  "total_files": 2971,
   "totals": {
-    "documented": 2714,
+    "documented": 2728,
     "excluded": 17,
     "static-asset": 68,
     "doc": 95,
@@ -141,6 +141,21 @@
       "category": "documented"
     },
     {
+      "file": "apps/giving-platform/.env.example",
+      "section": "Technical Manual A — standalone sub-app (giving platform prototype)",
+      "category": "documented"
+    },
+    {
+      "file": "apps/giving-platform/BRAND.md",
+      "section": "Technical Manual A — standalone sub-app (giving platform prototype)",
+      "category": "documented"
+    },
+    {
+      "file": "apps/giving-platform/LAUNCH_CHECKLIST.md",
+      "section": "Technical Manual A — standalone sub-app (giving platform prototype)",
+      "category": "documented"
+    },
+    {
       "file": "apps/giving-platform/README.md",
       "section": "Technical Manual A — standalone sub-app (giving platform prototype)",
       "category": "documented"
@@ -156,7 +171,32 @@
       "category": "documented"
     },
     {
+      "file": "apps/giving-platform/public/favicon.svg",
+      "section": "Technical Manual A — standalone sub-app (giving platform prototype)",
+      "category": "documented"
+    },
+    {
+      "file": "apps/giving-platform/public/manifest.webmanifest",
+      "section": "Technical Manual A — standalone sub-app (giving platform prototype)",
+      "category": "documented"
+    },
+    {
+      "file": "apps/giving-platform/public/og-card.svg",
+      "section": "Technical Manual A — standalone sub-app (giving platform prototype)",
+      "category": "documented"
+    },
+    {
       "file": "apps/giving-platform/src/App.tsx",
+      "section": "Technical Manual A — standalone sub-app (giving platform prototype)",
+      "category": "documented"
+    },
+    {
+      "file": "apps/giving-platform/src/lib/platformApi.ts",
+      "section": "Technical Manual A — standalone sub-app (giving platform prototype)",
+      "category": "documented"
+    },
+    {
+      "file": "apps/giving-platform/src/lib/supabase.ts",
       "section": "Technical Manual A — standalone sub-app (giving platform prototype)",
       "category": "documented"
     },
@@ -172,6 +212,31 @@
     },
     {
       "file": "apps/giving-platform/src/vite-env.d.ts",
+      "section": "Technical Manual A — standalone sub-app (giving platform prototype)",
+      "category": "documented"
+    },
+    {
+      "file": "apps/giving-platform/supabase/README.md",
+      "section": "Technical Manual A — standalone sub-app (giving platform prototype)",
+      "category": "documented"
+    },
+    {
+      "file": "apps/giving-platform/supabase/functions/gr-public-intake/index.ts",
+      "section": "Technical Manual A — standalone sub-app (giving platform prototype)",
+      "category": "documented"
+    },
+    {
+      "file": "apps/giving-platform/supabase/migrations/20260917190000_giving_rail_core.sql",
+      "section": "Technical Manual A — standalone sub-app (giving platform prototype)",
+      "category": "documented"
+    },
+    {
+      "file": "apps/giving-platform/supabase/migrations/20260917190500_giving_rail_workflows.sql",
+      "section": "Technical Manual A — standalone sub-app (giving platform prototype)",
+      "category": "documented"
+    },
+    {
+      "file": "apps/giving-platform/supabase/migrations/20260917191000_giving_rail_public_intake.sql",
       "section": "Technical Manual A — standalone sub-app (giving platform prototype)",
       "category": "documented"
     },
@@ -812,6 +877,11 @@
     },
     {
       "file": "docs/liftor-rebuild/T-traceability.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/U-standalone-apps.md",
       "section": "This rebuild manual",
       "category": "documented"
     },
