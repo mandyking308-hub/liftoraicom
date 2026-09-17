@@ -94,7 +94,7 @@ const staleRules = [
   { re: /\b461 (?:of|routes)/, why: "retired operator-coverage gap figure" },
   { re: /32 routed directly/, why: "superseded routed-page count" },
 ];
-const HIST = /HISTORICAL|historical|superseded|retired|no longer|There is no|Old value|\b797\b/;
+const HIST = /\bold\b|HISTORICAL|historical|superseded|retired|no longer|There is no|Old value|\b797\b/;
 const docFiles = files.filter((f) => f.startsWith("docs/liftor-rebuild/") && f.endsWith(".md"));
 const stale = [];
 for (const f of docFiles) {
