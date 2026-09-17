@@ -1,0 +1,34 @@
+name: Giving Platform Quality Gate
+
+on:
+  pull_request:
+    paths:
+      - "apps/giving-platform/**"
+      - ".github/workflows/giving-platform-quality.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/giving-platform/**"
+      - ".github/workflows/giving-platform-quality.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/giving-platform
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Production build
+        run: npm run build
