@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#12342f"/>
+  <circle cx="1070" cy="95" r="260" fill="#1d4b43"/>
+  <circle cx="1035" cy="540" r="240" fill="#0c2925"/>
+  <rect x="86" y="84" width="74" height="74" rx="20" fill="#f7f2e8"/>
+  <path d="M106 101v40M140 101v40M103 113h40M103 130h40" stroke="#e99b56" stroke-width="6" stroke-linecap="round"/>
+  <path d="M123 105c-6-7-18-3-18 7 0 10 18 19 18 19s18-9 18-19c0-10-12-14-18-7Z" fill="#12342f"/>
+  <text x="184" y="139" fill="#f7f2e8" font-family="Arial, Helvetica, sans-serif" font-size="54" font-weight="700">Giving Rail</text>
+  <text x="86" y="290" fill="#f7f2e8" font-family="Georgia, serif" font-size="78" font-weight="700">Giving that moves.</text>
+  <text x="86" y="372" fill="#d9e4de" font-family="Arial, Helvetica, sans-serif" font-size="34">Business giving. Charity control. Proof built in.</text>
+  <rect x="86" y="448" width="450" height="64" rx="32" fill="#e99b56"/>
+  <text x="121" y="490" fill="#12342f" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700">A better route from promise to impact.</text>
+</svg>
