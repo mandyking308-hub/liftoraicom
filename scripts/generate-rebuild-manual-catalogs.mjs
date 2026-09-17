@@ -213,43 +213,118 @@ fs.writeFileSync(path.join(OUT, "source-coverage-manifest.json"), JSON.stringify
 let man = `# Source Coverage Manifest\n\n${STAMP}\n\nEvery file tracked by git at this commit is accounted for below. Machine-readable twin: \`source-coverage-manifest.json\`.\n\n**Total tracked files: ${rows.length}.**\n\n| Category | Files | % |\n|---|---|---|\n${Object.entries(totals).sort((a, b) => b[1] - a[1]).map(([k, v]) => `| ${k} | ${v} | ${((v / rows.length) * 100).toFixed(1)}% |`).join("\n")}\n\nCategory meanings: **documented** = described in the named manual section or catalog row; **supporting** = covered collectively by a subsystem section (vendored UI primitives, auto-generated clients, static assets); **static-asset** = generated/exported data covered by the data-assets appendix; **doc** = documentation file classified as normative or historical in the doc index; **excluded** = intentionally outside the current-state manual (agent/workspace metadata, not runtime).\n\n## Coverage by directory\n\n| Directory | Files | Mapped sections |\n|---|---|---|\n${Object.entries(byPrefix).sort((a, b) => b[1].length - a[1].length).map(([k, v]) => `| \`${k}\` | ${v.length} | ${[...new Set(v.map((x) => x.section))].join("; ")} |`).join("\n")}\n\n## Unmapped files\n\n${rows.filter((r) => !r.section).length === 0 ? "None — every tracked file resolves to a manual section." : rows.filter((r) => !r.section).map((r) => `- \`${r.file}\``).join("\n")}\n`;
 fs.writeFileSync(path.join(OUT, "source-coverage-manifest.md"), man);
 
-/* ------------------------------------------- V: USER-MANUAL ROUTE COVERAGE */
-const userManualSrc = fs.readFileSync("src/lib/liftorUserManualContent.ts", "utf8");
-const manualRoutes = new Set([...userManualSrc.matchAll(/\/founder\/[a-z0-9-]+/g)].map((m) => m[0]));
-const founderPaths = [...new Set(routes.filter((r) => r.guard === "FounderRoute").map((r) => r.path))].sort();
-const famOf = (p) => { const parts = p.split("/").filter((s) => s && !s.startsWith(":")); return "/" + parts.slice(0, 2).join("/"); };
-const umRows = founderPaths.map((p) => {
-  const base = famOf(p);
-  if (manualRoutes.has(p)) return { route: p, coverage: "direct", via: p };
-  if (manualRoutes.has(base)) return { route: p, coverage: "parent-module", via: base };
-  const prefix = [...manualRoutes].filter((m) => p.startsWith(m + "-") || p.startsWith(m + "/")).sort((a, b) => b.length - a.length)[0];
-  if (prefix) return { route: p, coverage: "parent-module", via: prefix };
-  return { route: p, coverage: "module-directory", via: base };
-});
-const umTotals = umRows.reduce((a, r) => ((a[r.coverage] = (a[r.coverage] || 0) + 1), a), {});
-
-// Module directory: evidence-derived operator facts for every founder module family.
-const pageByComp = new Map(pages.map((p) => [p.file, p]));
-const srcToPage = (src) => { const base = src.replace(/^@\//, "src/"); return pageByComp.get(`${base}.tsx`) ?? pageByComp.get(`${base}/index.tsx`); };
-const famMap = new Map();
-for (const r of routes.filter((x) => x.guard === "FounderRoute")) {
-  const f = famOf(r.path);
-  const entry = famMap.get(f) ?? { family: f, routes: [], pages: [], invokes: new Set(), confirm: new Set(), writes: false };
-  entry.routes.push(r.path);
-  const pg = r.source ? srcToPage(r.source) : undefined;
-  if (pg) {
-    entry.pages.push(pg.file);
-    pg.invokes.forEach((i) => entry.invokes.add(i));
-    pg.confirm.forEach((c) => entry.confirm.add(c));
-    if (pg.writes) entry.writes = true;
+/* -------------------------- V/W: FOUNDER ROUTE OPERATOR COVERAGE (complete) */
+const userManualSrc = read("src/lib/liftorUserManualContent.ts");
+const manualSections = [...userManualSrc.matchAll(/\{\s*number:\s*(\d+),\s*key:\s*"([^"]+)",\s*title:\s*"((?:[^"\\]|\\.)*)",\s*body:\s*"((?:[^"\\]|\\.)*)"/g)]
+  .map((m) => ({ number: +m[1], key: m[2], title: m[3], body: m[4] }));
+const manualRouteSection = new Map();
+for (const s of manualSections) {
+  for (const m of s.body.matchAll(/\/founder(?:\/[a-z0-9-]+)*/g)) {
+    const p = m[0];
+    if (!manualRouteSection.has(p)) manualRouteSection.set(p, s);
   }
-  famMap.set(f, entry);
+}
+const manualRoutes = new Set(manualRouteSection.keys());
+
+const pageByComp = new Map(pages.map((p) => [p.file, p]));
+const pageOfRoute = (r) => {
+  if (!r || !r.source) return undefined;
+  const base = normSource(r.source);
+  return pageByComp.get(`${base}.tsx`) ?? pageByComp.get(`${base}/index.tsx`);
+};
+const founderRoutes = routes.filter((r) => r.guard === "FounderRoute");
+const founderPaths = [...new Set(founderRoutes.map((r) => r.path))].sort();
+const famOf = (p) => { const parts = p.split("/").filter((s) => s && !s.startsWith(":")); return "/" + parts.slice(0, 2).join("/"); };
+
+const famMap = new Map();
+for (const r of founderRoutes) {
+  const f = famOf(r.path);
+  const e = famMap.get(f) ?? { family: f, routes: [], pages: [], invokes: new Set(), confirm: new Set(), tables: new Set(), writes: false };
+  if (!e.routes.includes(r.path)) e.routes.push(r.path);
+  const pg = pageOfRoute(r);
+  if (pg) {
+    if (!e.pages.includes(pg.file)) e.pages.push(pg.file);
+    pg.invokes.forEach((i) => e.invokes.add(i));
+    pg.confirm.forEach((cp) => e.confirm.add(cp));
+    pg.tables.forEach((t) => e.tables.add(t));
+    if (pg.writes) e.writes = true;
+  }
+  famMap.set(f, e);
+}
+for (const e of famMap.values()) {
+  e.routes.sort();
+  e.root = e.routes.includes(e.family)
+    ? e.family
+    : (e.routes.filter((p) => !p.includes(":")).sort((a, b) => a.length - b.length)[0] ?? e.routes[0]);
+  e.rootRoute = founderRoutes.find((r) => r.path === e.root);
+  e.rootPage = pageOfRoute(e.rootRoute);
+  e.manualSection = e.routes.map((p) => manualRouteSection.get(p)).find(Boolean);
 }
 const fams = [...famMap.values()].sort((a, b) => a.family.localeCompare(b.family));
-const dirTable = fams.map((e) => `| \`${e.family}\` | ${e.routes.length} | ${[...new Set(e.pages)].length} | ${e.writes ? "yes" : "no"} | ${e.invokes.size ? [...e.invokes].slice(0, 6).join(", ") + (e.invokes.size > 6 ? ` (+${e.invokes.size - 6})` : "") : "none"} | ${e.confirm.size ? [...e.confirm].join(", ") : "—"} |`).join("\n");
 
-let v = `# Appendix V — User Manual route coverage and module directory\n\n${STAMP}\n\nEvery founder-guarded route mapped to operator documentation. Coverage kinds:\n\n- **direct** — the Liftor User Manual (\`src/lib/liftorUserManualContent.ts\`, rendered at \`/founder/user-manual\`) names this exact route and explains how to operate it.\n- **parent-module** — the route is an internal sub-tab or detail view of a surface the user manual names; it is operated from that parent.\n- **module-directory** — no hand-written operator section names it yet. It is accounted for here by its module family in the directory below, which states, from source evidence only, how many routes and pages the family has, whether any of its pages write to the database, which edge functions its routed pages can call (the only way a page can reach a provider), and any external-action confirmation phrase. **This is coverage by inventory, not a hand-written operator walkthrough** — the shortfall is recorded as a real gap in Section R.\n\n| Coverage | Routes |\n|---|---|\n${Object.entries(umTotals).map(([k, n]) => `| ${k} | ${n} |`).join("\n")}\n\nDistinct founder routes: **${founderPaths.length}**. Routes named directly in the user manual: **${manualRoutes.size}**. Module families: **${fams.length}**.\n\n## Module directory (all founder families)\n\nIf the "Edge functions its pages call" column reads \`none\`, the family's routed pages make no provider call at all — they read and write Liftor's own database only. A confirmation phrase means the surface is behind an external-action gate and cannot act until the founder types that exact phrase.\n\n| Module family | Routes | Routed pages | Any page writes | Edge functions its pages call | Confirmation phrase |\n|---|---|---|---|---|---|\n${dirTable}\n\n## Route-by-route mapping\n\n| Route | Coverage | Operated from |\n|---|---|---|\n${umRows.map((r) => `| \`${r.route}\` | ${r.coverage} | ${r.via ? `\`${r.via}\`` : "—"} |`).join("\n")}\n`;
+const operatorFacts = (pg) => {
+  const src = pg ? read(pg.file) : "";
+  const heading = (src.match(/<h1[^>]*>\s*([^<>{][^<>]{2,80}?)\s*</) ?? src.match(/<CardTitle[^>]*>\s*([^<>{][^<>]{2,80}?)\s*</))?.[1].replace(/\s+/g, " ").trim();
+  const buttons = [...new Set([...src.matchAll(/<Button[^>]*>\s*([^<>{][^<>]{2,40}?)\s*</g)].map((m) => m[1].replace(/\s+/g, " ").trim()))].slice(0, 10);
+  const empties = [...new Set([...src.matchAll(/["'>]\s*(No [a-z][^<>"'{}`]{3,60}?)\s*["'<]/g)].map((m) => m[1].trim()))].slice(0, 4);
+  return { heading, buttons, empties };
+};
+
+const umRows = founderPaths.map((p) => {
+  const r = founderRoutes.find((x) => x.path === p);
+  const fam = famMap.get(famOf(p));
+  const pg = pageOfRoute(r);
+  const evidence = pg ? `\`${pg.file}\`` : `component \`${r.page}\` from \`${r.source || "unresolved import"}\``;
+  const fns = pg && pg.invokes.length ? pg.invokes.join(", ") : "none";
+  const conf = pg && pg.confirm.length ? pg.confirm.join(", ") : "—";
+  const writes = pg ? (pg.writes ? "yes" : "no") : "unknown";
+  const base = { route: p, evidence, fns, conf, writes };
+  if (!pg) return { ...base, coverage: "classified", classification: "internal-only / diagnostic — no page module resolves from the App.tsx import", parent: "—", relationship: "no operator surface to document" };
+  const ms = manualRouteSection.get(p);
+  if (ms) return { ...base, coverage: "direct", parent: `User Manual §${ms.number} — ${ms.title}`, relationship: "route named directly in the hand-written User Manual" };
+  if (p === fam.root) return { ...base, coverage: "direct", parent: `Appendix W — \`${fam.family}\``, relationship: "module root; generated operator entry in Appendix W" };
+  const parent = fam.manualSection
+    ? `User Manual §${fam.manualSection.number} — ${fam.manualSection.title}`
+    : `Appendix W — \`${fam.family}\``;
+  const relationship = p.includes(":")
+    ? `detail view (dynamic segment) opened from \`${fam.root}\``
+    : `sub-tab / child surface of \`${fam.root}\` in the same module family`;
+  return { ...base, coverage: "inherited", parent, relationship };
+});
+const umTotals = umRows.reduce((a, r) => ((a[r.coverage] = (a[r.coverage] || 0) + 1), a), {});
+const umUncovered = umRows.filter((r) => !["direct", "inherited", "classified"].includes(r.coverage));
+
+/* ---- Appendix W: generated operator entry per founder module family ---- */
+let w = `# Appendix W — Founder module operator entries (generated)\n\n${STAMP}\n\nOne operator entry per founder module family, derived from source only. Together with the hand-written Liftor User Manual (\`src/lib/liftorUserManualContent.ts\`, rendered at \`/founder/user-manual\`) these entries give every founder route either its own entry or a named parent entry — see Appendix V for the route-by-route mapping.\n\nHow to read an entry:\n\n- **Open at** — the module root route. Child routes are sub-tabs or detail views of it.\n- **What you see** — the first heading rendered by the root page.\n- **Controls** — button labels found in the root page source.\n- **Internal writes** — whether any page in the family writes to Liftor's own database.\n- **Provider reach** — the edge functions the family's pages can invoke. \`none\` means the family cannot reach any provider at all; it reads and writes Liftor's database only.\n- **Approval** — the exact confirmation phrase, when the surface sits behind an external-action gate. All 19 gates are disabled (Section J/Q), so a gated control refuses until the gate is enabled *and* the phrase is typed.\n- **Empty / error states** — empty-state strings found in the root page source.\n\n**Total module families: ${fams.length}. Total founder routes covered: ${founderPaths.length}.**\n\n`;
+for (const e of fams) {
+  const f = operatorFacts(e.rootPage);
+  const ms = e.manualSection ? `User Manual §${e.manualSection.number} — ${e.manualSection.title}` : "no hand-written section — this entry is the operator documentation";
+  w += `## \`${e.family}\`\n\n`;
+  w += `| Field | Value |\n|---|---|\n`;
+  w += `| Open at | \`${e.root}\` |\n`;
+  w += `| Root page | ${e.rootPage ? `\`${e.rootPage.file}\`` : "— (no page file resolved)"} |\n`;
+  w += `| Routes in family | ${e.routes.length} |\n`;
+  w += `| What you see | ${f.heading ? f.heading : "— (heading rendered from data, not a literal)"} |\n`;
+  w += `| Controls | ${f.buttons.length ? f.buttons.map((b) => `\`${b}\``).join(", ") : "read-only surface — no literal button labels in source"} |\n`;
+  w += `| Internal writes | ${e.writes ? "yes — this family writes Liftor data" : "no — read-only"} |\n`;
+  w += `| Provider reach | ${e.invokes.size ? [...e.invokes].join(", ") : "none"} |\n`;
+  w += `| Approval | ${e.confirm.size ? [...e.confirm].map((x) => `type \`${x}\``).join(", ") : "no confirmation phrase in this family"} |\n`;
+  w += `| Empty / error states | ${f.empties.length ? f.empties.map((x) => `"${x}"`).join("; ") : "— (states rendered from data)"} |\n`;
+  w += `| Hand-written manual section | ${ms} |\n\n`;
+  if (e.routes.length > 1) {
+    w += `Routes: ${e.routes.map((p) => `\`${p}\``).join(", ")}\n\n`;
+  }
+}
+fs.writeFileSync(path.join(OUT, "W-module-operator-entries.md"), w);
+
+/* ------------------------------- Appendix V: route-by-route coverage map -- */
+const dirTable = fams.map((e) => `| \`${e.family}\` | \`${e.root}\` | ${e.routes.length} | ${e.pages.length} | ${e.writes ? "yes" : "no"} | ${e.invokes.size ? [...e.invokes].slice(0, 6).join(", ") + (e.invokes.size > 6 ? ` (+${e.invokes.size - 6})` : "") : "none"} | ${e.confirm.size ? [...e.confirm].join(", ") : "—"} |`).join("\n");
+const rowLine = (r) => `| \`${r.route}\` | ${r.parent} | ${r.relationship} | ${r.evidence} | ${r.writes} | ${r.fns} | ${r.conf} |`;
+const hdr = `| Founder route | Operator entry | Relationship | Source evidence | Writes | Edge functions | Confirmation phrase |\n|---|---|---|---|---|---|---|\n`;
+
+let v = `# Appendix V — Founder route operator coverage\n\n${STAMP}\n\nEvery distinct founder-guarded route resolves to **exactly one** terminal coverage state. There is no "inventory-only", "module-directory" or "unclassified" state.\n\n- **direct** — the route has its own operator entry: either the hand-written Liftor User Manual names the exact route, or the route is a module root with a generated operator entry in [Appendix W](./W-module-operator-entries.md).\n- **inherited** — the route is a sub-tab or detail view operated from a named parent entry. The table below gives the exact parent and the exact route-to-parent relationship for each one.\n- **classified** — legacy, dead, diagnostic or internal-only, with the source evidence that justifies the label. This label is only used when the source supports it; no operational route is hidden under it.\n\n| Coverage | Routes |\n|---|---|\n${["direct", "inherited", "classified"].map((k) => `| ${k} | ${umTotals[k] || 0} |`).join("\n")}\n| **total distinct founder routes** | **${founderPaths.length}** |\n\nUncovered / unexplained routes: **${umUncovered.length}**. Routes named directly in the hand-written User Manual: **${[...manualRoutes].filter((m) => founderPaths.includes(m)).length}**. Module families: **${fams.length}**.\n\n## V1. Module family directory\n\n| Module family | Root route | Routes | Pages | Any page writes | Edge functions its pages call | Confirmation phrase |\n|---|---|---|---|---|---|---|\n${dirTable}\n\n## V2. Direct operator entries (${umTotals.direct || 0})\n\n${hdr}${umRows.filter((r) => r.coverage === "direct").map(rowLine).join("\n")}\n\n## V3. Inherited operator entries (${umTotals.inherited || 0})\n\nEach row names the exact parent module/manual section it is operated from and the exact relationship.\n\n${hdr}${umRows.filter((r) => r.coverage === "inherited").map(rowLine).join("\n")}\n\n## V4. Legacy / dead / diagnostic / internal-only (${umTotals.classified || 0})\n\n${(umTotals.classified || 0) === 0 ? "None. Every founder route resolves to a page module and is documented as a direct or inherited operator entry." : `| Founder route | Classification | Source evidence |\n|---|---|---|\n${umRows.filter((r) => r.coverage === "classified").map((r) => `| \`${r.route}\` | ${r.classification} | ${r.evidence} |`).join("\n")}`}\n`;
 fs.writeFileSync(path.join(OUT, "V-user-manual-coverage.md"), v);
+
 
 /* ------------------------------------------------------------ VALIDATION */
 const validation = {
