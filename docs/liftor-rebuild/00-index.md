@@ -63,6 +63,7 @@ Capability is not permission. A file existing, a function deploying and a provid
 | S | [S-disaster-recovery-runbook.md](./S-disaster-recovery-runbook.md) | Blank repo + blank database → working Liftor |
 | T | [T-traceability.md](./T-traceability.md) | Subsystem → files/tables/routes/functions map |
 | U | [U-standalone-apps.md](./U-standalone-apps.md) | Standalone Giving Rail platform, separated from Liftor core and GHAT |
+| V | [V-user-manual-coverage.md](./V-user-manual-coverage.md) | Founder route → User Manual coverage matrix + the 190-family module directory (generated) |
 | — | [source-coverage-manifest.md](./source-coverage-manifest.md) | Every tracked file mapped to a section (+ `.json` twin) |
 | — | [validation-report.json](./validation-report.json) | Machine-checkable counts behind the coverage claims |
 | — | [doc-normative-vs-historical.md](./doc-normative-vs-historical.md) | Which `docs/**` files are normative and which are historical |
