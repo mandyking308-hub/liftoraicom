@@ -1,0 +1,16 @@
+{
+  "name": "Giving Rail",
+  "short_name": "Giving Rail",
+  "description": "Business giving, charity control and proof built into one platform.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f2e8",
+  "theme_color": "#12342f",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
