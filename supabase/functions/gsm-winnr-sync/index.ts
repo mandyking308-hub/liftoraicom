@@ -9,6 +9,7 @@ import {
   winnrCall,
   winnrDomainTags,
   winnrList,
+  normaliseWinnrWarming,
   winnrTokenConfigured,
   WINNR_LIST_PAGE_SIZE,
 } from "../_shared/winnrClient.ts";
@@ -289,6 +290,14 @@ Deno.serve(async (req) => {
   // so a single call silently under-reports the estate.
   const domainsCall = await winnrList("listDomains", { token: TOKEN });
   const mailboxCall = await winnrList("listEmailUsers", { token: TOKEN });
+  // Provider warm-up truth. Read-only: this never enables or stops warming.
+  const warmingCall = await winnrList("listWarmings", { token: TOKEN });
+  const warmingByEmail = new Map<string, ReturnType<typeof normaliseWinnrWarming>>();
+  if (warmingCall.ok) {
+    for (const w of (warmingCall.data ?? []).map(normaliseWinnrWarming)) {
+      if (w.email) warmingByEmail.set(w.email, w);
+    }
+  }
 
   if (!domainsCall.ok || !mailboxCall.ok) {
     const failed = !domainsCall.ok ? domainsCall : mailboxCall;
@@ -403,11 +412,21 @@ Deno.serve(async (req) => {
   let mailboxesUpserted = 0;
   for (const m of gsmMailboxes) {
     const { domain, ...rest } = m;
+    const warm = warmingByEmail.get(m.email);
     const row = stripSecretFields({
       ...rest,
       sending_domain_id: domain ? (domainIdByName.get(domain) ?? null) : null,
       estate_classification: resolveEstate(m.email),
       last_provider_check_at: new Date().toISOString(),
+      // Warm-up state comes from the provider warm-up feed when present; the
+      // mailbox payload alone must never downgrade a live warm-up to not_started.
+      ...(warm
+        ? {
+          warmup_status: warm.warmup_status,
+          ...(warm.warmup_started_at ? { warmup_started_at: warm.warmup_started_at } : {}),
+          ...(warm.health_score != null ? { health_score: warm.health_score } : {}),
+        }
+        : {}),
     });
     const { data: existing } = await admin
       .from("gsm_mailboxes")
@@ -443,6 +462,8 @@ Deno.serve(async (req) => {
     mailboxes_upserted: mailboxesUpserted,
     excluded_non_gsm: excluded,
     estate_counts,
+    warming_rows_seen: warmingByEmail.size,
+    warming_feed_ok: warmingCall.ok,
     message: "Purchased Winnr estate synchronised into the segregated registry. No credentials were stored and no email was sent.",
   });
 });
