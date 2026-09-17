@@ -25,14 +25,14 @@
 
 ## Audit boundary — no source divergence
 
-Sections A–U are written against the working tree at `08d8e89274b6f04ff3a306ff0f55bb59d7ea5cf1`; there is no gap between the
-documented tree and the audited tree. The whole `apps/giving-platform` standalone product, its three
+Sections A–U are written against the working tree at the canonical `source_freeze_sha` `cf1c1373f3affdd66c17a53b97200ac06c3a878f`; there is no gap between the
+documented tree and the audited tree. (Earlier boundaries `08d8e89274b6f04ff3a306ff0f55bb59d7ea5cf1`, `f565c09876a5cfe0207dc31981ad026073508a55` and `4fc7f388943cc8e70d47d50247f240c8b25a140a` are `HISTORICAL_ONLY` and are ancestors of the freeze.) The whole `apps/giving-platform` standalone product, its three
 `gr_*` migrations, its `gr-public-intake` edge function and
 `.github/workflows/giving-platform-quality.yml` are present in the tree and documented in **Section U**,
 not read from history. Liftor core (`src/**`, `supabase/functions/**`, `supabase/migrations/**`)
 is unchanged by that product.
 
-If HEAD advances again, regenerate the catalogs (`node scripts/generate-rebuild-manual-catalogs.mjs`)
+If HEAD advances again, regenerate the catalogs (`SOURCE_FREEZE_SHA=<new sha> node scripts/generate-rebuild-manual-catalogs.mjs`)
 and restate the SHA here before treating this manual as current. The stamped SHA is the commit the
 generator read; any commit created after it in the same documentation pass contains documentation
 files only and changes no source under `src/**`, `supabase/**` or `apps/**`.

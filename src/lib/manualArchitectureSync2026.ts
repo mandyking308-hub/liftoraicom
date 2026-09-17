@@ -1,10 +1,12 @@
-// Liftor — Architecture Documentation Sync (v6.1 — 10 September 2026)
+// Liftor — Architecture Documentation Sync (current file version: see ARCHITECTURE_SYNC_VERSION below)
+// Current audit source: source_freeze_sha cf1c1373f3affdd66c17a53b97200ac06c3a878f (17 September 2026).
+// HISTORICAL_ONLY: v6.1 (10 September 2026) was a previous version of this file and is superseded.
 // Canonical reconciliation of the CURRENT implemented Liftor architecture on main.
 // This file EXTENDS the Full Technical / Founder Manual. It does not replace it and
 // it does not replace the Command Centre Truth Sync (live-state authority).
 //
-// Section 100 = 25 August 2026 whole-platform reconciliation (retained as history).
-// Section 101 = 10 September 2026 reconciliation delta. Where the two conflict on
+// Section 100 = 25 August 2026 whole-platform reconciliation (HISTORICAL_ONLY, retained as history).
+// Section 101 = 10 September 2026 reconciliation delta (HISTORICAL_ONLY where it conflicts with Section 105/106). Where the two conflict on
 // current state, Section 101 controls.
 // Source of the September delta: docs/manual-architecture-reconciliation-2026-09-10.md
 //
@@ -16,7 +18,7 @@
 //   5. Business Manuals            — business-specific tone/offers/rules/assets
 //   6. Slim Mandy Manual           — portable handover only, NOT technical truth
 
-export const ARCHITECTURE_SYNC_VERSION = "6.8 — Full repository → manual mirror (Liftor Rebuild Manual)";
+export const ARCHITECTURE_SYNC_VERSION = "6.9 — Full repository → manual mirror (Liftor Rebuild Manual) · source freeze cf1c1373f3affdd66c17a53b97200ac06c3a878f · 17 September 2026";
 export const ARCHITECTURE_SYNC_DATE = "2026-09-17";
 export const ARCHITECTURE_SYNC_PREVIOUS_VERSION = "6.7 — Outbound readiness baseline truth sync (17 September 2026)";
 export const ARCHITECTURE_SYNC_SOURCE =

@@ -93,7 +93,8 @@ const staleRules = [
   { re: /\b803\b/, why: "superseded trigger count" },
   { re: /module-directory|inventory-only/, why: "retired coverage state" },
   { re: /\b461 (?:of|routes)/, why: "retired operator-coverage gap figure" },
-  { re: /32 routed directly/, why: "superseded routed-page count" },
+  { re: /32 routed directly|32 directly routed|vs 32\b/, why: "superseded routed-page count" },
+  { re: /\b(08d8e89274b6f04ff3a306ff0f55bb59d7ea5cf1|f565c09876a5cfe0207dc31981ad026073508a55|4fc7f388943cc8e70d47d50247f240c8b25a140a|a513cacffe2a1064a5ea172c9170c46a55c51b8e|8579034dfb369e8f379917aff338777b7f5aa12f)\b/, why: "old boundary/generation SHA presented without a historical label" },
 ];
 const HIST = /\bold\b|HISTORICAL|historical|superseded|retired|no longer|There is no|Old value|\b797\b/;
 const docFiles = files.filter((f) => f.startsWith("docs/liftor-rebuild/") && f.endsWith(".md"));
@@ -105,6 +106,19 @@ for (const f of docFiles) {
 }
 stale.length === 0 ? pass("stale-claim scan", "no unlabelled superseded current-state claim in the rebuild manual")
   : fail("stale-claim scan", stale.join("; "));
+
+/* 8b. generated JSON carries no stale/ambiguous SHA field */
+const jsonFiles = ["docs/liftor-rebuild/validation-report.json", "docs/liftor-rebuild/source-coverage-manifest.json"];
+const jsonBad = [];
+for (const f of jsonFiles) {
+  const j = JSON.parse(read(f));
+  if (j.source_freeze_sha !== FREEZE) jsonBad.push(`${f}: source_freeze_sha ${j.source_freeze_sha}`);
+  for (const [k, val] of Object.entries(j)) {
+    if (k !== "source_freeze_sha" && typeof val === "string" && /^[0-9a-f]{40}$/.test(val)) jsonBad.push(`${f}: ambiguous SHA field "${k}" = ${val}`);
+  }
+}
+jsonBad.length ? fail("generated JSON SHA fields", jsonBad.join("; "))
+  : pass("generated JSON SHA fields", "only source_freeze_sha carries a commit hash, identical in both generated JSON artefacts");
 
 /* 9. docs-only diff scope */
 const changed = sh(`git diff --name-only ${FREEZE}`).trim().split("\n").filter(Boolean);

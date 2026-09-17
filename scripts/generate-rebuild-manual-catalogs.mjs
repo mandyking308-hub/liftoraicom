@@ -209,7 +209,7 @@ const classify = (f) => {
 const rows = files.map((f) => { const [section, cat] = classify(f); return { file: f, section, category: cat }; });
 const totals = rows.reduce((a, r) => ((a[r.category] = (a[r.category] || 0) + 1), a), {});
 const byPrefix = rows.reduce((a, r) => { const k = r.file.split("/").slice(0, 2).join("/"); (a[k] ??= []).push(r); return a; }, {});
-fs.writeFileSync(path.join(OUT, "source-coverage-manifest.json"), JSON.stringify({ source_freeze_sha: SOURCE_FREEZE_SHA, commit: HEAD, generated_by: "scripts/generate-rebuild-manual-catalogs.mjs", total_files: rows.length, totals, files: rows }, null, 2));
+fs.writeFileSync(path.join(OUT, "source-coverage-manifest.json"), JSON.stringify({ source_freeze_sha: SOURCE_FREEZE_SHA, generated_by: "scripts/generate-rebuild-manual-catalogs.mjs", total_files: rows.length, totals, files: rows }, null, 2));
 let man = `# Source Coverage Manifest\n\n${STAMP}\n\nEvery file tracked by git at this commit is accounted for below. Machine-readable twin: \`source-coverage-manifest.json\`.\n\n**Total tracked files: ${rows.length}.**\n\n| Category | Files | % |\n|---|---|---|\n${Object.entries(totals).sort((a, b) => b[1] - a[1]).map(([k, v]) => `| ${k} | ${v} | ${((v / rows.length) * 100).toFixed(1)}% |`).join("\n")}\n\nCategory meanings: **documented** = described in the named manual section or catalog row; **supporting** = covered collectively by a subsystem section (vendored UI primitives, auto-generated clients, static assets); **static-asset** = generated/exported data covered by the data-assets appendix; **doc** = documentation file classified as normative or historical in the doc index; **excluded** = intentionally outside the current-state manual (agent/workspace metadata, not runtime).\n\n## Coverage by directory\n\n| Directory | Files | Mapped sections |\n|---|---|---|\n${Object.entries(byPrefix).sort((a, b) => b[1].length - a[1].length).map(([k, v]) => `| \`${k}\` | ${v.length} | ${[...new Set(v.map((x) => x.section))].join("; ")} |`).join("\n")}\n\n## Unmapped files\n\n${rows.filter((r) => !r.section).length === 0 ? "None — every tracked file resolves to a manual section." : rows.filter((r) => !r.section).map((r) => `- \`${r.file}\``).join("\n")}\n`;
 fs.writeFileSync(path.join(OUT, "source-coverage-manifest.md"), man);
 
@@ -342,7 +342,6 @@ const validation = {
   source_freeze_sha: SOURCE_FREEZE_SHA,
   documentation_commit: "recorded in docs/liftor-rebuild/00-index.md after the documentation commit is created; a generated file cannot contain the hash of the commit that adds it",
   source_tree_clean_at_generation: TREE_CLEAN,
-  commit: HEAD,
   routes_total: routes.length,
   routes_in_catalog: routes.length,
   founder_routes: routes.filter((r) => r.guard === "FounderRoute").length,

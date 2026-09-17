@@ -1,6 +1,6 @@
 // Liftor User Manual — plain-English operating guide (separate from Founder/Technical Manual)
 
-export const LIFTOR_USER_MANUAL_VERSION = "1.18 — Full repository mirror + module directory (17 September 2026)";
+export const LIFTOR_USER_MANUAL_VERSION = "1.19 — every founder route has an operator entry · source freeze cf1c1373f3affdd66c17a53b97200ac06c3a878f · audited 17 September 2026";
 
 export interface ManualSection {
   number: number;
