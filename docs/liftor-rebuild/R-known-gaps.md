@@ -59,12 +59,21 @@ Nothing in this section was repaired during the documentation job. Each item is 
 4. Apollo per-business configuration absent.
 5. Education portfolio has 0 contacts in scope; four campaign shells exist but nothing is loaded.
 
-## R6. Operator documentation coverage gap (recorded 17 September 2026)
+## R6. Operator documentation coverage — CLOSED at source freeze `cf1c1373f3affdd66c17a53b97200ac06c3a878f`
 
-| ID | Gap | Evidence |
-|---|---|---|
-| R6.1 | 461 of 798 distinct founder routes have no hand-written operator walkthrough in the User Manual. They are accounted for only by module-family inventory in Appendix V (routes, pages, write posture, callable edge functions, confirmation phrase). | `validation-report.json` → `user_manual_coverage` |
-| R6.2 | 190 founder module families exist; the User Manual names 88 routes directly and covers 249 more as sub-tabs of those. | Appendix V |
-| R6.3 | Sections 101–104 of the architecture manual remain historically accurate but need their superseding banners read first; a reader who skips the banner can still quote a stale estate figure. | `src/lib/manualArchitectureSync2026.ts` §101, §103/104 capacity note |
+| ID | Item | State | Evidence |
+|---|---|---|---|
+| R6.1 | 461 of 798 distinct founder routes had no operator entry and were accounted for only by module-family inventory | `HISTORICAL_ONLY` (recorded 17 September 2026, closed in the same audit) | superseded by Appendices V and W |
+| R6.2 | Every one of the 798 distinct founder routes now resolves to exactly one terminal coverage state: **191 direct**, **607 inherited** (each naming its exact parent entry and route-to-parent relationship), **0 classified legacy/dead/diagnostic**, **0 uncovered**. "module-directory" and "inventory-only" no longer exist as coverage states. | closed | `validation-report.json` → `founder_route_coverage`, Appendix V §V2–V4 |
+| R6.3 | 190 module families each have a generated operator entry (open-at route, what you see, controls, write posture, provider reach, approval phrase, empty/error states) | closed | Appendix W |
+| R6.4 | Depth caveat: the 190 generated entries are evidence-derived from source, not hand-written prose. They state truthfully what each surface shows, writes and can reach; they are not narrative walkthroughs. Hand-written depth remains desirable for high-traffic modules. | open, low severity | Appendix W header |
+| R6.5 | Sections 101–104 of the architecture manual remain historically accurate but need their superseding banners read first; a reader who skips the banner can still quote a stale estate figure. | open | `src/lib/manualArchitectureSync2026.ts` §101, §103/104 capacity note |
 
-Coverage by inventory is deliberately labelled as such in Appendix V. It is not a claim of operator completeness.
+## R7. Figure provenance corrections (this audit)
+
+| Claim | Old value | Current value | Cause |
+|---|---|---|---|
+| Non-internal triggers | 803 | **797** | the earlier catalog query omitted `n.nspname = 'public'`, so it also counted six Supabase-owned triggers in `auth`, `storage` and `cron`. Exact delta identified in Section F1.1; 797 + 6 = 803. Not a schema change. |
+| Page files registered directly in the router | 32 | **841** | the earlier generator resolved only `@/`-prefixed imports; `src/App.tsx` imports pages with `./pages/...`, so relative imports were mis-counted as unrouted. Generator fixed (documentation tooling only); no route or page changed. |
+
+Both old values are `HISTORICAL_ONLY` as of 17 September 2026 and must not be quoted as current.
