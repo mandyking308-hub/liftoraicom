@@ -5,6 +5,30 @@
 **Audit date:** 17 September 2026.
 **Status:** current-state rebuild specification. No history, no diary. Superseded material lives in the Build Log and in dated `docs/*` reports, which remain untouched historical evidence.
 
+## Truth labels — use these, never "ready", "working" or "complete"
+
+| Label | Meaning |
+|---|---|
+| `BUILT_IN_CODE` | the code exists and compiles. Nothing more. |
+| `LIVE_CONFIGURED` | configured in the live database or at the provider, verified read-only |
+| `END_TO_END_PROVED` | a real run completed and the result was observed. Rare in Liftor today. |
+| `BLOCKED` | deliberately prevented by a gate, flag or missing approval |
+| `FAIL_CLOSED` | on error or missing configuration it refuses rather than proceeding |
+| `PARTIAL` | some of the path is proved, the rest is not — state which part |
+| `DEAD_OR_UNREACHABLE` | present in the repository but not reachable from any route or caller |
+| `HISTORICAL_ONLY` | true on its date, not current; retained as evidence |
+| `UNKNOWN — NOT VERIFIED` | not checked in this audit. Say this instead of guessing. |
+
+## Audit boundary and source divergence
+
+Audit boundary requested: `f565c09876a5cfe0207dc31981ad026073508a55`.
+Workspace HEAD documented: `e5fe720e5b5e4add8cbd81863a00291357f48437` — an **ancestor** of the boundary commit.
+
+The whole difference (19 files, +2,568 / −400) lies inside `apps/giving-platform/`. Liftor core —
+`src/**`, `supabase/functions/**`, `supabase/migrations/**`, workflows and configs — is identical at
+both commits, so Sections A–T describe the boundary commit correctly. The `apps/giving-platform`
+delta is documented in Section U, read from git history and labelled as such.
+
 ## Reading rule
 
 One current statement per fact. If a sentence in this manual conflicts with an older dated document, **this manual is correct for current state** and the dated document is historical evidence of what was true on its date.
@@ -35,6 +59,7 @@ Capability is not permission. A file existing, a function deploying and a provid
 | R | [R-known-gaps.md](./R-known-gaps.md) | Contradictions, tech debt, security findings |
 | S | [S-disaster-recovery-runbook.md](./S-disaster-recovery-runbook.md) | Blank repo + blank database → working Liftor |
 | T | [T-traceability.md](./T-traceability.md) | Subsystem → files/tables/routes/functions map |
+| U | [U-standalone-apps.md](./U-standalone-apps.md) | Standalone Giving Rail platform, separated from Liftor core and GHAT |
 | — | [source-coverage-manifest.md](./source-coverage-manifest.md) | Every tracked file mapped to a section (+ `.json` twin) |
 | — | [validation-report.json](./validation-report.json) | Machine-checkable counts behind the coverage claims |
 | — | [doc-normative-vs-historical.md](./doc-normative-vs-historical.md) | Which `docs/**` files are normative and which are historical |

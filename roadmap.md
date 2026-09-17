@@ -30,3 +30,11 @@
 - [ ] Report gsmhq.net provider-side shortfall (5 mailboxes missing); do not create mailboxes
 - [ ] Verify GSM domain/mailbox/warmup counts; confirm GHAT still 1 domain / 10 mailboxes untouched
 - [ ] Publish frontend GHAT/GSM outbound pages if source parity is safe, else report blocker
+
+## Documentation-only full-repository manual mirror (17 Sep 2026)
+- [x] Liftor Rebuild Manual sections A–U written to docs/liftor-rebuild/
+- [x] Generated catalogs: routes, pages, components/engines, migrations, edge functions, coverage manifest
+- [x] Contradictions resolved / relabelled historical in the three in-app manuals
+- [x] Standalone Giving Rail platform documented and separated from Liftor core + GHAT
+- [ ] Truth labels (BUILT_IN_CODE / LIVE_CONFIGURED / END_TO_END_PROVED / BLOCKED / FAIL_CLOSED / PARTIAL /
+      DEAD_OR_UNREACHABLE / HISTORICAL_ONLY / UNKNOWN) applied across coverage matrices
