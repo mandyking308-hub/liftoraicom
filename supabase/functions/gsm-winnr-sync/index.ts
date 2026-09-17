@@ -438,7 +438,31 @@ Deno.serve(async (req) => {
     mailboxesUpserted += 1;
   }
 
+  // Refresh canonical readiness from the reconciled registry. Deterministic,
+  // derived only from stored mailbox/domain state — never from provider claims.
+  let readinessRefreshed = 0;
+  let campaignReady = 0;
+  const { data: domRows } = await admin
+    .from("gsm_sending_domains")
+    .select("id, domain, provisioning_status, dns_status, spf_ok, dkim_ok, dmarc_ok, estate_classification");
+  const { data: mbRows } = await admin
+    .from("gsm_mailboxes")
+    .select(
+      "id, email, sending_domain_id, provider, provider_mailbox_id, smartlead_email_account_id, smtp_status, imap_status, smartlead_status, warmup_status, provider_health, configured_daily_limit, health_score, quarantined_reason, retired, active, estate_classification, readiness_state",
+    )
+    .eq("estate_classification", estate);
+  const domById = new Map((domRows ?? []).map((d: any) => [d.id, d]));
+  for (const mb of mbRows ?? []) {
+    const r = evaluateMailboxReadiness(mb as any, domById.get((mb as any).sending_domain_id) ?? null);
+    if (r.campaign_ready) campaignReady += 1;
+    if (r.readiness_state !== (mb as any).readiness_state) {
+      await admin.from("gsm_mailboxes").update({ readiness_state: r.readiness_state }).eq("id", (mb as any).id);
+      readinessRefreshed += 1;
+    }
+  }
+
   await admin.from("gsm_provider_sync_runs").insert({
+
     provider: "winnr",
     run_mode: "apply",
     status: "succeeded",
