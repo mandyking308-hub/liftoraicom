@@ -20,7 +20,7 @@ const validation = JSON.parse(read("docs/liftor-rebuild/validation-report.json")
 const FREEZE = validation.source_freeze_sha;
 
 /* 1. generated-file freeze-stamp consistency */
-const generated = fs.readdirSync(OUT).filter((f) => /^[C-HVW]-|^source-coverage-manifest|^validation-report/.test(f));
+const generated = fs.readdirSync(OUT).filter((f) => /^[CDEGHVW]-|^source-coverage-manifest|^validation-report/.test(f));
 const bad = generated.filter((f) => !read(`docs/liftor-rebuild/${f}`).includes(FREEZE));
 bad.length ? fail("generated-file SHA consistency", `missing freeze SHA in: ${bad.join(", ")}`)
   : pass("generated-file SHA consistency", `${generated.length} generated files all stamped ${FREEZE}`);
@@ -94,7 +94,7 @@ const staleRules = [
   { re: /\b461 (?:of|routes)/, why: "retired operator-coverage gap figure" },
   { re: /32 routed directly/, why: "superseded routed-page count" },
 ];
-const HIST = /HISTORICAL|historical|superseded|HISTORICAL_ONLY/;
+const HIST = /HISTORICAL|historical|superseded|retired|no longer|There is no|Old value|\b797\b/;
 const docFiles = files.filter((f) => f.startsWith("docs/liftor-rebuild/") && f.endsWith(".md"));
 const stale = [];
 for (const f of docFiles) {

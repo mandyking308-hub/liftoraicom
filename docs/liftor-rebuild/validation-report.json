@@ -2,7 +2,7 @@
   "source_freeze_sha": "cf1c1373f3affdd66c17a53b97200ac06c3a878f",
   "documentation_commit": "recorded in docs/liftor-rebuild/00-index.md after the documentation commit is created; a generated file cannot contain the hash of the commit that adds it",
   "source_tree_clean_at_generation": true,
-  "commit": "f92c0bf305e6f413a9a2e27d488f62c6cc9bc6ae",
+  "commit": "47c34c17165dada608aa44a5e735c1a663d55b19",
   "routes_total": 876,
   "routes_in_catalog": 876,
   "founder_routes": 800,
@@ -35,7 +35,7 @@
   ],
   "edge_functions_external_capable": 34,
   "migrations": 442,
-  "tracked_files": 2973,
+  "tracked_files": 2975,
   "founder_routes_distinct": 798,
   "founder_route_coverage": {
     "direct": 191,
@@ -51,7 +51,7 @@
     "verified_on": "2026-09-17"
   },
   "coverage_totals": {
-    "documented": 2727,
+    "documented": 2729,
     "excluded": 17,
     "static-asset": 71,
     "doc": 95,

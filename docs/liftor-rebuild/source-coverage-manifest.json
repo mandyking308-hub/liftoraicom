@@ -1,10 +1,10 @@
 {
   "source_freeze_sha": "cf1c1373f3affdd66c17a53b97200ac06c3a878f",
-  "commit": "f92c0bf305e6f413a9a2e27d488f62c6cc9bc6ae",
+  "commit": "47c34c17165dada608aa44a5e735c1a663d55b19",
   "generated_by": "scripts/generate-rebuild-manual-catalogs.mjs",
-  "total_files": 2973,
+  "total_files": 2975,
   "totals": {
-    "documented": 2727,
+    "documented": 2729,
     "excluded": 17,
     "static-asset": 71,
     "doc": 95,
@@ -802,6 +802,11 @@
       "category": "documented"
     },
     {
+      "file": "docs/liftor-rebuild/DOCUMENTATION-COMMIT.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
       "file": "docs/liftor-rebuild/E-component-service-catalog.md",
       "section": "This rebuild manual",
       "category": "documented"
@@ -1119,6 +1124,11 @@
     {
       "file": "roadmap.md",
       "section": "Technical Manual A — repository root configuration",
+      "category": "documented"
+    },
+    {
+      "file": "scripts/check-rebuild-manual-consistency.mjs",
+      "section": "Technical Manual P/S — repository scripts",
       "category": "documented"
     },
     {
