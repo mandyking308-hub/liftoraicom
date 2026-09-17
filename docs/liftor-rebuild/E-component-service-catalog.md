@@ -1,6 +1,6 @@
 # Appendix E — Component & Service Catalog
 
-_Generated from commit `efbc518f6951dc4ad0ca78e46fb5f4b7c0847029` by `scripts/generate-rebuild-manual-catalogs.mjs`. Regenerate with `node scripts/generate-rebuild-manual-catalogs.mjs`._
+_Generated from commit `08d8e89274b6f04ff3a306ff0f55bb59d7ea5cf1` by `scripts/generate-rebuild-manual-catalogs.mjs`. Regenerate with `node scripts/generate-rebuild-manual-catalogs.mjs`._
 
 ## E1. UI components (`src/components/**`, 419 files)
 

@@ -1,6 +1,6 @@
 # Liftor Rebuild Manual — canonical current-state technical specification
 
-**Documented tree:** `__HEAD_SHA__` — the current GitHub/Lovable HEAD at the end of this documentation pass. This supersedes the earlier freeze targets `4fc7f388943cc8e70d47d50247f240c8b25a140a` (founder SME sales-linked giving rail MVP) and `f565c09876a5cfe0207dc31981ad026073508a55` (Giving Rail production backend), both of which are ancestors of the documented tree and are `HISTORICAL_ONLY` as coverage targets.
+**Documented tree:** `08d8e89274b6f04ff3a306ff0f55bb59d7ea5cf1` — the current GitHub/Lovable HEAD at the end of this documentation pass. This supersedes the earlier freeze targets `4fc7f388943cc8e70d47d50247f240c8b25a140a` (founder SME sales-linked giving rail MVP) and `f565c09876a5cfe0207dc31981ad026073508a55` (Giving Rail production backend), both of which are ancestors of the documented tree and are `HISTORICAL_ONLY` as coverage targets.
 **Audit date:** 17 September 2026.
 **Status:** current-state rebuild specification. No history, no diary. Superseded material lives in the Build Log and in dated `docs/*` reports, which remain untouched historical evidence.
 
@@ -20,7 +20,7 @@
 
 ## Audit boundary — no source divergence
 
-Sections A–U are written against the working tree at `__HEAD_SHA__`; there is no gap between the
+Sections A–U are written against the working tree at `08d8e89274b6f04ff3a306ff0f55bb59d7ea5cf1`; there is no gap between the
 documented tree and the audited tree. The whole `apps/giving-platform` standalone product, its three
 `gr_*` migrations, its `gr-public-intake` edge function and
 `.github/workflows/giving-platform-quality.yml` are present in the tree and documented in **Section U**,

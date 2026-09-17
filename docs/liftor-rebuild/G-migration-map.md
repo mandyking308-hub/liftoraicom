@@ -1,6 +1,6 @@
 # Appendix G — Migration Map
 
-_Generated from commit `efbc518f6951dc4ad0ca78e46fb5f4b7c0847029` by `scripts/generate-rebuild-manual-catalogs.mjs`. Regenerate with `node scripts/generate-rebuild-manual-catalogs.mjs`._
+_Generated from commit `08d8e89274b6f04ff3a306ff0f55bb59d7ea5cf1` by `scripts/generate-rebuild-manual-catalogs.mjs`. Regenerate with `node scripts/generate-rebuild-manual-catalogs.mjs`._
 
 **Total migrations: 442.** Applying them in filename order against a blank Postgres/Supabase database reproduces the current schema. Each row lists the objects the migration creates or alters, extracted from its DDL.
 
