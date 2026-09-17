@@ -16,9 +16,9 @@
 //   5. Business Manuals            — business-specific tone/offers/rules/assets
 //   6. Slim Mandy Manual           — portable handover only, NOT technical truth
 
-export const ARCHITECTURE_SYNC_VERSION = "6.6 — Smartlead activation closeout (11 September 2026)";
-export const ARCHITECTURE_SYNC_DATE = "2026-09-10";
-export const ARCHITECTURE_SYNC_PREVIOUS_VERSION = "6.5 — GSM Outbound Infrastructure (10 September 2026)";
+export const ARCHITECTURE_SYNC_VERSION = "6.7 — Outbound readiness baseline truth sync (17 September 2026)";
+export const ARCHITECTURE_SYNC_DATE = "2026-09-17";
+export const ARCHITECTURE_SYNC_PREVIOUS_VERSION = "6.6 — Smartlead activation closeout (11 September 2026)";
 export const ARCHITECTURE_SYNC_SOURCE =
   "August baseline: repo-wide audit of src/App.tsx routes (799 founder routes), src/pages/founder/**, src/components/founder/**, src/lib/** engines, supabase/functions/** (604 functions), supabase/migrations/** and docs/**. September delta: docs/manual-architecture-reconciliation-2026-09-10.md — 21 materially changed files since the August manual commit plus a live database state check on 10 September 2026.";
 
@@ -797,15 +797,78 @@ founder/admin only and never posts to Smartlead. Missing input, campaign mapping
 structured \`decision: "BLOCKED"\` and performs no database write. A resolvable rehearsal may write only a
 \`smartlead_send_dry_run_audit\` evidence row; it still performs no provider mutation.
 
-### 104.5 Current live truth
-Smartlead is connected and read-only verification succeeds. Live state: 0 campaign mappings, 0 lead
-mappings, 0 provider events, 48 checklist rows, 0 GSM domains, 0 GSM mailboxes and 0 campaign-ready
-mailboxes. The four education campaign shells remain non-live, externally send-blocked, unapproved and
-unmapped. The purchased Winnr estate still has to be reconciled/synced into the canonical GSM registry,
-warmed, connected to Smartlead and returned through the webhook before founder live-launch approval can
-be considered. \`hello@neoncandy.online\` remains outside the GSM estate and excluded from allocation.
+### 104.5 Live truth at closeout (11 September 2026 — historical snapshot)
+Historical snapshot, superseded by the 17 September 2026 truth sync in Section 105. At closeout the
+canonical GSM registry held 0 domains and 0 mailboxes because the purchased Winnr estate had not yet
+been reconciled. Campaign mappings, lead mappings and provider events were 0 and the four education
+campaign shells were non-live, externally send-blocked, unapproved and unmapped.
+\`hello@neoncandy.online\` remains outside the GSM estate and excluded from allocation.
 
 *End of Section 104 — Smartlead activation closeout.*
+
+
+---
+
+# SECTION 105 — 17 SEPTEMBER 2026 OUTBOUND READINESS BASELINE
+Canonical current outbound truth. Where Sections 101–104 conflict with this section on *current*
+state, this section controls. Verified live at approximately 09:29 UTC on 17 September 2026.
+
+## 105.1 BUILT (implemented in code)
+Winnr provider client with full list pagination; \`gsm-winnr-sync\` read-only test, preview and
+idempotent apply with estate segregation, provider warm-up ingestion and canonical readiness refresh;
+the deterministic readiness engine (\`_shared/gsmSenderEstate.ts\`) and estate classifier
+(\`_shared/senderEstates.ts\`); sender pools and sticky allocation; Smartlead read-only mailbox
+discovery/reconciliation; campaign- and lead-mapping preview/apply; idempotent fail-closed webhook
+receiver plus founder-safe webhook status; the zero-provider-mutation send dry run; the exact
+twelve-key activation checklist; micro-batch preparation and approval packets; the Business Setup
+Tunnel / Business Onboarding Factory.
+
+## 105.2 LIVE-CONFIGURED (verified in the database / at the provider)
+| Fact | Live value |
+| --- | --- |
+| \`gsm_sending_domains\` | 39 total, 39 DNS verified, SPF 39/39, DKIM 39/39, DMARC 39/39 |
+| \`gsm_mailboxes\` | 200 total, all active, all warming |
+| Estate split | GSM 180 mailboxes / 36 domains · GHAT 20 mailboxes / 3 domains |
+| Smartlead-connected mailboxes | 10 (GHAT only); GSM 0 |
+| Mailbox \`readiness_state = ready\` | 0 |
+| \`gsm_mailbox_readiness.campaign_ready = true\` | 0 |
+| \`outbound_provider_campaign_mappings\` | 0 |
+| \`outbound_provider_lead_mappings\` | 0 |
+| \`outbound_provider_events\` | 0 |
+| Smartlead provider row | connected / healthy; \`webhook_configured = false\`; \`warmup_status = not_configured\` |
+| Apollo | infrastructure exists; the only active verified connection row is Neon Candy (search/enrichment ok); not yet configured business-by-business across the portfolio |
+| \`businesses\` | 14 rows today; the portfolio is intended to grow through the Business Setup Tunnel / Business Onboarding Factory. Do not claim 40 businesses are configured. |
+
+## 105.3 NOT YET PROVED
+No campaign has been mapped, no lead has been pushed, no provider event has been returned, no message
+has been delivered and no reply/bounce/unsubscribe has flowed back into CRM state. Zero mailboxes are
+campaign-ready. GSM mailboxes are not connected to Smartlead. The Smartlead webhook is not configured.
+Nothing in this section may be read as a completed end-to-end proof.
+
+## 105.4 Inventory is not permission
+**200 registered, warming mailboxes are inventory, not authorisation to use 200.** Registration,
+DNS health and warm-up prove infrastructure exists; they prove nothing about deliverability, list
+quality, copy or compliance. Estate-wide activation is forbidden until a tiny controlled pilot has
+passed. The pilot selects only a very small number of sender mailboxes and a tiny recipient
+micro-batch; every other mailbox stays out of allocation and out of execution. Existing micro-batch
+controls cap Smartlead cold outreach at **≤5 recipients** — that cap is the preferred size of the
+first campaign proof, never a reason to connect all senders.
+
+## 105.5 NEXT TEST — the single pilot that must pass
+One business, executed in order, failing closed at any broken step:
+1. Approved ICP, offer and copy for that one business.
+2. Apollo / data import under the existing credit firewall.
+3. Canonical CRM person and organisation plus the business relationship.
+4. Suppression and sendability checks.
+5. One or two selected sender mailboxes only.
+6. Smartlead campaign mapping and lead mapping for that micro-batch.
+7. Actual delivery.
+8. Reply / bounce / unsubscribe event return through the webhook.
+9. CRM state update from those events.
+10. Complete audit trail.
+
+No pilot has been sent and no pilot has passed. Founder final live-launch approval remains a separate
+gate after the pilot, and estate-wide activation remains a further gate after that.
+
+*End of Section 105 — 17 September 2026 outbound readiness baseline.*
 `;
-
-

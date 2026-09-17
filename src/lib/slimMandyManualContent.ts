@@ -1,12 +1,12 @@
 // Slim Mandy Manual — short, portable summary Mandy can download/upload to ChatGPT or advisers.
 // NOT the technical source of truth. Do NOT use to overwrite the User Manual or Full Technical Manual.
-// v1.10 refresh (11 Sep 2026) — Winnr estate purchased; secure provider sync pending proof.
+// v1.11 refresh (17 Sep 2026) — estate reconciled (39 domains / 200 mailboxes warming); pilot-first before any estate-wide use.
 
-export const SLIM_MANDY_MANUAL_VERSION = "1.10 — 11 September 2026 (Winnr post-purchase wiring)";
+export const SLIM_MANDY_MANUAL_VERSION = "1.11 — 17 September 2026 (outbound readiness baseline)";
 
 export const SLIM_MANDY_MANUAL_MARKDOWN = `# Slim Mandy Manual
 
-_Version 1.10 — 11 September 2026_
+_Version 1.11 — 17 September 2026_
 
 _Portable summary. Safe to upload to ChatGPT or share with advisers. Not the full technical source of truth (that is the Full Technical Manual)._
 
@@ -24,11 +24,14 @@ Liftor is ONE internal AI operating system and control plane Mandy uses to run m
 ## Always label three states separately
 Implemented in code · live-configured in the database/provider · historical evidence. A provider connection is never permission to send.
 
-## Current state — 11 September 2026
+## Current state — 17 September 2026
 - **CRM:** live contact and business-relationship counts are read from the CRM page (they grow as you work). Distinct from research pools.
 - **Apollo:** free People Search, staging, qualification and selected reveal infrastructure exist, protected by the portfolio-wide Apollo Credit Firewall. Paid enrichment is **disabled with a hard limit of 0**, and phone/personal-email/waterfall reveal are false.
-- **Smartlead / sending:** provider **connected**. The delivery spine is implemented: one campaign link per Liftor campaign, one lead link per person, a shared suppression gate, an idempotent reply/bounce/unsubscribe return loop, deterministic mailbox allocation and a zero-provider-mutation dry run. Live state remains **0 campaign mappings, 0 lead mappings, 0 provider events** until the physical sender estate is reconciled. Live campaign sending remains blocked.
-- **Winnr / GSM:** the Winnr account and mailbox estate have been **purchased**. Liftor has the server-side Winnr sync/warm-up workflow and current API contract, but the canonical GSM registry deliberately remains at **0 domains and 0 mailboxes** until an authenticated Winnr test and apply sync prove the provider estate. A token is never treated as configured merely because code expects one. No mailbox is campaign-ready merely because it exists at the provider. Warm-up is founder-confirmed and remains a separate gate.
+- **Smartlead / sending:** provider **connected and healthy**, but the webhook is **not configured** and provider warm-up state is **not configured** on the provider row. Live state is still **0 campaign links, 0 lead links, 0 returned events, 0 campaign-ready mailboxes**. Only the 10 trust (GHAT) mailboxes are connected to Smartlead; **0** shared-estate (GSM) mailboxes are connected. Live campaign sending remains blocked.
+- **Winnr / GSM:** the estate is now reconciled into Liftor from the provider: **39 sending domains** (all DNS, SPF, DKIM and DMARC verified) and **200 mailboxes**, all active and all warming — **180 GSM mailboxes across 36 domains** and **20 trust (GHAT) mailboxes across 3 domains**. Warm-up and registration prove the infrastructure exists; they do **not** make any mailbox campaign-ready, and none is.
+- **Inventory is not permission:** 200 warming mailboxes is inventory, not authorisation to use 200. Outbound gets proved by one tiny controlled pilot first — one business, a handful of recipients (the existing cap is **≤5** for cold Smartlead outreach), one or two selected senders, every other mailbox kept out of allocation. The pilot must run all the way through: approved audience/offer/copy → data import → CRM person + business link → suppression checks → selected sender → campaign and lead link → actual delivery → replies/bounces/unsubscribes coming back → CRM updated → audit trail, stopping dead at any broken step. **No pilot has been sent or passed yet.** Your final live-launch approval stays a separate yes, and estate-wide use a further yes after that.
+- **Apollo:** the infrastructure exists, but the only active verified connection today is Neon Candy. Apollo is not yet set up business-by-business for the wider portfolio.
+- **Portfolio size:** there are **14** businesses in the system today; more are meant to be onboarded through the Business Setup Tunnel / Business Onboarding Factory. Liftor should never claim 40 are already configured.
 - **GSM control panel:** /founder/gsm-outbound now supports Winnr test/preview/apply sync, guarded Winnr warm-up, Smartlead preview/apply reconciliation, webhook status, pool preview/fill and readiness reporting. Registry writes require explicit founder confirmation; none of these controls sends a campaign email.
 - **Neon Candy:** its two legacy inboxes stay locked to Neon Candy and excluded from education/GSM allocation. \`hello@neoncandy.online\` may be observed in read-only Smartlead discovery but is never imported into the GSM estate.
 - **CRM-native education placement:** education companies live once in \`organisations\`; education people live once in \`contacts\` linked to their company. Relationship Intelligence is evidence/research, not the education CRM.
