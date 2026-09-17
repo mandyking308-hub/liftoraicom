@@ -1,0 +1,118 @@
+# Documentation index — normative vs historical
+
+_Generated from the repository. Normative = still describes how Liftor works. Historical = dated evidence of what was true on its date; never rewritten, never treated as current state._
+
+## Normative specifications (46)
+
+- `docs/AI_COMPLIANCE_CONTROL_LAYER.md`
+- `docs/GITHUB_LOVABLE_EXECUTION_MODEL.md`
+- `docs/PRIVATE_MODE_READINESS.md`
+- `docs/business-manuals/aurelia/customer-facing-manual.md`
+- `docs/business-manuals/aurelia/technical-manual.md`
+- `docs/business-manuals/aurelia/user-guide.md`
+- `docs/business-manuals/billy-and-the-wild-forest/customer-facing-manual.md`
+- `docs/business-manuals/billy-and-the-wild-forest/technical-manual.md`
+- `docs/business-manuals/billy-and-the-wild-forest/user-guide.md`
+- `docs/business-manuals/kindnesss/customer-facing-manual.md`
+- `docs/business-manuals/kindnesss/technical-manual.md`
+- `docs/business-manuals/kindnesss/user-guide.md`
+- `docs/business-manuals/kingsbridge-global/customer-facing-manual.md`
+- `docs/business-manuals/kingsbridge-global/technical-manual.md`
+- `docs/business-manuals/kingsbridge-global/user-guide.md`
+- `docs/data-asset-register.md`
+- `docs/founder-led-buyer-market-domination-engine.md`
+- `docs/founder-led-buyer-warm-up-engine.md`
+- `docs/founder-led-exit-sales-engine.md`
+- `docs/ghat-sme-sales-linked-giving-rail-mvp.md`
+- `docs/global-pr-radar.md`
+- `docs/gsm-outbound-infrastructure.md`
+- `docs/healthcare-overlay-pack.md`
+- `docs/liftor-final-founder-readiness-test.md`
+- `docs/liftor-founder-user-guide.md`
+- `docs/liftor-master-site-lifecycle-map.md`
+- `docs/liftor-operational-web-connector-correction.md`
+- `docs/liftor-operational-web-integration-test.md`
+- `docs/liftor-sales-target-revenue-pace-engine.md`
+- `docs/montvelle-1000-supplier-coverage.md`
+- `docs/montvelle-concierge-routing.md`
+- `docs/montvelle-professional-advisory-network-outreach.md`
+- `docs/montvelle-supplier-network.md`
+- `docs/next-gen-wealth-networks.md`
+- `docs/operating-loops-closure-pack.md`
+- `docs/portfolio-crm-next-migration.sql.md`
+- `docs/portfolio-crm-schema-notes.md`
+- `docs/public-front-preservation-check.md`
+- `docs/public-repo-hygiene-check.md`
+- `docs/searchable-video-library-founder-review.md`
+- `docs/searchable-video-library.md`
+- `docs/smartlead-import-idempotency-migration.sql.md`
+- `docs/social-distribution-buffer-live.md`
+- `docs/social-distribution-fabric.md`
+- `docs/social-relationship-engine.md`
+- `docs/social-viral-opportunity-radar.md`
+
+## Historical / dated evidence (61)
+
+These may contain live-state numbers that are now stale. Where they conflict with the Rebuild Manual, the Rebuild Manual (Section Q) is current.
+
+- `docs/apollo-education-infrastructure-build-spec-2026-09-10.md`
+- `docs/apollo-education-universe-recovery-2026-08-24.md`
+- `docs/billionaire-access-production-reconciliation-complete-2026-08-24.md`
+- `docs/billionaire-access-verification-batch-001-2026-top100.md`
+- `docs/billionaire-access-verification-batch-001-compliance-overrides-2026-08-23.md`
+- `docs/billionaire-access-verification-batch-002-2026-ranks-101-200.md`
+- `docs/billionaire-access-verification-batch-003-2026-ranks-201-300.md`
+- `docs/billionaire-access-verification-batch-004-2026-ranks-301-400.md`
+- `docs/billionaire-access-verification-batch-005-2026-ranks-401-500.md`
+- `docs/billionaire-access-verification-batch-006-2026-rows-501-600.md`
+- `docs/billionaire-access-verification-batch-007-2026-rows-601-700.md`
+- `docs/billionaire-access-verification-batch-008-2026-rows-701-800.md`
+- `docs/billionaire-access-verification-batch-009-2026-rows-801-900.md`
+- `docs/billionaire-access-verification-batch-010-2026-rows-901-1000.md`
+- `docs/billionaire-access-verification-batch-011-2026-rows-1001-1100.md`
+- `docs/billionaire-access-verification-batch-012-2026-rows-1101-1200.md`
+- `docs/billionaire-access-verification-batch-013-2026-rows-1201-1300.md`
+- `docs/billionaire-access-verification-batch-014-2026-rows-1301-1400.md`
+- `docs/billionaire-access-verification-batch-015-2026-rows-1401-1500.md`
+- `docs/billionaire-access-verification-batch-016-2026-rows-1501-1600.md`
+- `docs/billionaire-access-verification-batch-016-corrections-2026-08-24.md`
+- `docs/billionaire-access-verification-batch-017-2026-rows-1601-1700.md`
+- `docs/billionaire-access-verification-batch-018-2026-rows-1701-1800.md`
+- `docs/billionaire-access-verification-batch-019-2026-rows-1801-1900.md`
+- `docs/billionaire-access-verification-batch-020-2026-rows-1901-2000.md`
+- `docs/billionaire-access-verification-batch-021-2026-rows-2001-2100.md`
+- `docs/billionaire-access-verification-batch-022-2026-rows-2101-2200.md`
+- `docs/billionaire-access-verification-batch-023-2026-rows-2201-2300.md`
+- `docs/billionaire-access-verification-batch-024-2026-rows-2301-2400.md`
+- `docs/billionaire-access-verification-batch-025-2026-rows-2401-2500.md`
+- `docs/billionaire-access-verification-batch-026-2026-rows-2501-2600.md`
+- `docs/billionaire-access-verification-batch-027-2026-rows-2601-2700.md`
+- `docs/billionaire-access-verification-batch-028-2026-rows-2701-2800.md`
+- `docs/billionaire-access-verification-batch-029-2026-rows-2801-2900.md`
+- `docs/billionaire-access-verification-batch-030-2026-rows-2901-3000.md`
+- `docs/billionaire-access-verification-batch-031-2026-rows-3001-3100.md`
+- `docs/billionaire-access-verification-batch-032-2026-rows-3101-3200.md`
+- `docs/billionaire-access-verification-batch-033-2026-rows-3201-3300.md`
+- `docs/billionaire-access-verification-batch-034-2026-rows-3301-3400.md`
+- `docs/billionaire-access-verification-batch-035-2026-rows-3401-3428.md`
+- `docs/billionaire-access-verification-source-sweep-complete-2026-08-24.md`
+- `docs/billionaire-intelligence-completion.md`
+- `docs/business-function-coverage-audit.md`
+- `docs/daily-driver-polish-pass-2-handoffs.md`
+- `docs/education-crm-native-correction-2026-09-10.md`
+- `docs/education-data-reconciliation-plan-2026-09-10.md`
+- `docs/elyntor-liftor-handoff.md`
+- `docs/global-pr-radar-controlled-live-test-report.md`
+- `docs/global-pr-radar-qa-report.md`
+- `docs/liftor-business-setup-tunnel-report.md`
+- `docs/liftor-business-setup-tunnel-wiring-correction-report.md`
+- `docs/liftor-first-run-founder-setup-report.md`
+- `docs/liftor-pre-live-cleanup-report.md`
+- `docs/manual-architecture-reconciliation-2026-08-25.md`
+- `docs/manual-architecture-reconciliation-2026-09-10.md`
+- `docs/montvelle-supplier-batch-100-01.md`
+- `docs/montvelle-supplier-batch-100-02.md`
+- `docs/montvelle-supplier-batch-100-03.md`
+- `docs/portfolio-crm-architecture-2026-08-23.md`
+- `docs/searchable-video-library-qa.md`
+- `docs/social-distribution-production-qa.md`

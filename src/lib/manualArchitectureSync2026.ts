@@ -16,9 +16,9 @@
 //   5. Business Manuals            — business-specific tone/offers/rules/assets
 //   6. Slim Mandy Manual           — portable handover only, NOT technical truth
 
-export const ARCHITECTURE_SYNC_VERSION = "6.7 — Outbound readiness baseline truth sync (17 September 2026)";
+export const ARCHITECTURE_SYNC_VERSION = "6.8 — Full repository → manual mirror (Liftor Rebuild Manual)";
 export const ARCHITECTURE_SYNC_DATE = "2026-09-17";
-export const ARCHITECTURE_SYNC_PREVIOUS_VERSION = "6.6 — Smartlead activation closeout (11 September 2026)";
+export const ARCHITECTURE_SYNC_PREVIOUS_VERSION = "6.7 — Outbound readiness baseline truth sync (17 September 2026)";
 export const ARCHITECTURE_SYNC_SOURCE =
   "August baseline: repo-wide audit of src/App.tsx routes (799 founder routes), src/pages/founder/**, src/components/founder/**, src/lib/** engines, supabase/functions/** (604 functions), supabase/migrations/** and docs/**. September delta: docs/manual-architecture-reconciliation-2026-09-10.md — 21 materially changed files since the August manual commit plus a live database state check on 10 September 2026.";
 
@@ -326,7 +326,12 @@ on current state by Section 101 below).*
 
 ---
 
-# SECTION 101 — SEPTEMBER 2026 RECONCILIATION DELTA (10 SEPTEMBER 2026)
+# SECTION 101 — SEPTEMBER 2026 RECONCILIATION DELTA (10 SEPTEMBER 2026) — HISTORICAL
+
+> HISTORICAL SECTION. Dated evidence from 10 September 2026, retained in full. Its sending-estate
+> figures (the legacy "8 domains / 2 inboxes", the planned "~50 mailboxes" programme and the
+> "connect ~50 mailboxes tomorrow" action list) are SUPERSEDED by Section 105 and by Section Q of
+> the Liftor Rebuild Manual. Do not quote this section as current state.
 
 **Manual version:** ${ARCHITECTURE_SYNC_VERSION}
 **Date:** ${ARCHITECTURE_SYNC_DATE}
@@ -809,6 +814,16 @@ campaign shells were non-live, externally send-blocked, unapproved and unmapped.
 
 ---
 
+# SECTION 103/104 CAPACITY NOTE — HISTORICAL FRAMING
+
+> Sections 103 and 104 describe the GSM ownership and lane model. That model is still correct
+> (one shared GSM estate, Launch / Evergreen / Quarantine lanes, sticky senders, GHAT segregated).
+> Its CAPACITY figures — "up to 10 domains carrying ~50 mailboxes", "Launch 30 / Evergreen 20" —
+> are ALLOCATION TARGETS for a pilot-sized launch, not the size of the estate. The live estate is
+> 39 domains and 200 mailboxes (Section 105). The allocation constants in
+> \`src/lib/gsmSenderEstate.ts\` still encode the 30/20 targets; that under-allocates rather than
+> over-allocates, so it is stale modelling, not a safety defect (Rebuild Manual R3).
+
 # SECTION 105 — 17 SEPTEMBER 2026 OUTBOUND READINESS BASELINE
 Canonical current outbound truth. Where Sections 101–104 conflict with this section on *current*
 state, this section controls. Verified live at approximately 09:29 UTC on 17 September 2026.
@@ -871,4 +886,43 @@ No pilot has been sent and no pilot has passed. Founder final live-launch approv
 gate after the pilot, and estate-wide activation remains a further gate after that.
 
 *End of Section 105 — 17 September 2026 outbound readiness baseline.*
+
+---
+
+# SECTION 106 — LIFTOR REBUILD MANUAL (FULL REPOSITORY MIRROR)
+
+The canonical current-state engineering specification for the whole repository now lives in
+\`docs/liftor-rebuild/\`, generated and written against the frozen source snapshot. Section 100–105
+above remain the in-app narrative history; Section 106 is the pointer to the exhaustive mirror.
+
+| File | Contents |
+|---|---|
+| \`00-index.md\` | structure, regeneration instructions, headline scale |
+| \`A-repository-build.md\` | stack, commands, folder map, env-var names, deployment |
+| \`B-auth-roles-rls.md\` | roles, route guards, tenancy, RLS model and gaps |
+| \`C-route-catalog.md\` | every registered route (generated) |
+| \`D-page-surface-catalog.md\` | every page surface (generated) |
+| \`E-component-service-catalog.md\` | components, lib engines, hooks, contexts (generated) |
+| \`F-database-rebuild-spec.md\` | schema by domain, views, RPCs, RLS findings |
+| \`G-migration-map.md\` | every migration and what it establishes (generated) |
+| \`H-edge-function-catalog.md\` | every edge function, auth, writes, hosts, gates (generated) |
+| \`I-provider-map.md\` | Apollo, Smartlead, Winnr, AI gateway, social, payment, voice |
+| \`J-external-action-safety.md\` | all 19 gates, phrases, caps, fail-closed paths |
+| \`K-data-model-flows.md\` | CRM/RI/outreach/finance/social/PR/M&A/compliance flows |
+| \`L-ai-architecture.md\` | gateway, agents, budgets, leases, kill switch, limits |
+| \`M-business-lifecycle.md\` | setup tunnel → … → micro-batch → channel gates |
+| \`N-outbound-sending.md\` | estates, pools, readiness machine, pilot-first rule |
+| \`O-jobs-webhooks.md\` | the 16 public endpoints, cron guards, queues, locks |
+| \`P-tests-ci.md\` | what CI proves and what it does NOT prove |
+| \`Q-live-state-snapshot.md\` | **single authoritative live-state statement** |
+| \`R-known-gaps.md\` | security findings, contradictions, tech debt |
+| \`S-disaster-recovery-runbook.md\` | blank repo/database → working Liftor |
+| \`T-traceability.md\` | subsystem → files/functions/tables/routes |
+| \`source-coverage-manifest.md\` / \`.json\` | every tracked file accounted for |
+| \`doc-normative-vs-historical.md\` | which docs/** files are current vs dated evidence |
+
+**Precedence rule:** where any manual paragraph disagrees with Rebuild Manual Section Q on live
+state, Section Q is current and the other paragraph is historical.
+
+*End of Section 106.*
 `;
