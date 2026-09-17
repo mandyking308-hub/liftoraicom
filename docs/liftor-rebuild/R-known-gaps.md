@@ -41,7 +41,7 @@ Nothing in this section was repaired during the documentation job. Each item is 
 | # | Item | Impact |
 |---|---|---|
 | D1 | 876 routes and 945 page files in one router with no code-splitting — a single very large JS chunk; public visitors download founder surfaces | performance + exposure surface |
-| D2 | 945 page files vs 32 directly routed: the tab/panel convention is undocumented in code and easy to mis-navigate | maintainability |
+| D2 | 945 page files vs **841** directly routed (the superseded figure of 32 was a generator import-resolution defect, `HISTORICAL_ONLY` — Section R7): the tab/panel convention is undocumented in code and easy to mis-navigate | maintainability |
 | D3 | Duplicate/overlapping routes exist in `App.tsx` (previously observed); the later registration silently wins | correctness |
 | D4 | Some pages/engines are unreachable from any route (dead code in the bundle) | bloat, false confidence |
 | D5 | 620 edge functions with substantial copy-paste between families; a safety fix must be applied N times | safety drift |
