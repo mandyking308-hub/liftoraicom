@@ -18,15 +18,17 @@
 | `HISTORICAL_ONLY` | true on its date, not current; retained as evidence |
 | `UNKNOWN — NOT VERIFIED` | not checked in this audit. Say this instead of guessing. |
 
-## Audit boundary and source divergence
+## Audit boundary — no source divergence
 
-Audit boundary requested: `f565c09876a5cfe0207dc31981ad026073508a55`.
-Workspace HEAD documented: `e5fe720e5b5e4add8cbd81863a00291357f48437` — an **ancestor** of the boundary commit.
+Sections A–U are written against the working tree at `__HEAD_SHA__`; there is no gap between the
+documented tree and the audited tree. The whole `apps/giving-platform` standalone product, its three
+`gr_*` migrations, its `gr-public-intake` edge function and
+`.github/workflows/giving-platform-quality.yml` are present in the tree and documented in **Section U**,
+not read from history. Liftor core (`src/**`, `supabase/functions/**`, `supabase/migrations/**`)
+is unchanged by that product.
 
-The whole difference (19 files, +2,568 / −400) lies inside `apps/giving-platform/`. Liftor core —
-`src/**`, `supabase/functions/**`, `supabase/migrations/**`, workflows and configs — is identical at
-both commits, so Sections A–T describe the boundary commit correctly. The `apps/giving-platform`
-delta is documented in Section U, read from git history and labelled as such.
+If HEAD advances again, regenerate the catalogs (`node scripts/generate-rebuild-manual-catalogs.mjs`)
+and restate the SHA here before treating this manual as current.
 
 ## Reading rule
 
