@@ -284,6 +284,7 @@ export async function winnrList(
   const maxPages = opts.maxPages ?? 25;
   const rows: Record<string, unknown>[] = [];
   let cursor: string | undefined = undefined;
+  let pageNumber = 1;
   let pages = 0;
   let last: WinnrCallResult<unknown> | null = null;
 
@@ -291,7 +292,12 @@ export async function winnrList(
     const res: WinnrCallResult<unknown> = await winnrCall<unknown>(key, {
       token: opts.token,
       fetchImpl: opts.fetchImpl,
-      query: { limit: WINNR_LIST_PAGE_SIZE, ...(opts.query ?? {}), ...(cursor ? { cursor } : {}) },
+      query: {
+        limit: WINNR_LIST_PAGE_SIZE,
+        ...(opts.query ?? {}),
+        ...(cursor ? { cursor } : {}),
+        ...(pageNumber > 1 ? { page: pageNumber } : {}),
+      },
     });
     last = res;
     if (!res.ok) return { ...res, data: null, pages } as WinnrCallResult<Record<string, unknown>[]> & { pages: number };
@@ -309,10 +315,20 @@ export async function winnrList(
     rows.push(...page);
 
     const pag = (d && typeof d === "object" && !Array.isArray(d))
-      ? (d as Record<string, unknown>).pagination as { has_more?: boolean; cursor?: string | null } | undefined
+      ? (d as Record<string, unknown>).pagination as
+        { has_more?: boolean; cursor?: string | null; page?: number; per_page?: number; total?: number } | undefined
       : undefined;
-    if (!pag?.has_more || !pag?.cursor || page.length === 0) break;
-    cursor = String(pag.cursor);
+    if (page.length === 0) break;
+    if (pag?.has_more && pag?.cursor) {
+      cursor = String(pag.cursor);
+      continue;
+    }
+    // Page-numbered endpoints (e.g. /warming) report page/per_page/total instead.
+    if (typeof pag?.total === "number" && rows.length < pag.total) {
+      pageNumber = (typeof pag.page === "number" ? pag.page : pageNumber) + 1;
+      continue;
+    }
+    break;
   }
 
   return {
@@ -323,5 +339,31 @@ export async function winnrList(
     data: rows,
     endpoint: `${WINNR_ENDPOINTS[key].method} ${WINNR_ENDPOINTS[key].path}`,
     pages,
+  };
+}
+
+
+/**
+ * Normalise a provider warm-up row. Warm-up is NEVER readiness: an active
+ * warm-up maps to `warming`, never to `campaign_ready`.
+ */
+export function normaliseWinnrWarming(raw: Record<string, unknown>) {
+  const email = String(raw.full_address ?? raw.email ?? "").trim().toLowerCase();
+  const status = String(raw.warming_status ?? "").toLowerCase();
+  const enabled = raw.warming_enabled === true;
+  const health = typeof raw.warming_health_score === "number" ? Math.round(raw.warming_health_score) : null;
+  const warmup_status = status === "completed"
+    ? "completed"
+    : status === "paused"
+    ? "paused"
+    : enabled || status === "active"
+    ? "warming"
+    : "not_started";
+  return {
+    email,
+    warmup_status,
+    warmup_started_at: raw.warming_started_at != null ? String(raw.warming_started_at) : null,
+    health_score: health,
+    warming_emails_per_day: typeof raw.warming_emails_per_day === "number" ? raw.warming_emails_per_day : null,
   };
 }
