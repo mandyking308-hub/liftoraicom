@@ -15,6 +15,7 @@ import {
 } from "../_shared/winnrClient.ts";
 import {
   GSM_OWNER_LEGAL_ENTITY,
+  evaluateMailboxReadiness,
   isExcludedFromGsmEstate,
   stripSecretFields,
 } from "../_shared/gsmSenderEstate.ts";
@@ -488,6 +489,8 @@ Deno.serve(async (req) => {
     estate_counts,
     warming_rows_seen: warmingByEmail.size,
     warming_feed_ok: warmingCall.ok,
+    readiness_rows_refreshed: readinessRefreshed,
+    campaign_ready_count: campaignReady,
     message: "Purchased Winnr estate synchronised into the segregated registry. No credentials were stored and no email was sent.",
   });
 });
