@@ -1,6 +1,6 @@
 // Liftor User Manual — plain-English operating guide (separate from Founder/Technical Manual)
 
-export const LIFTOR_USER_MANUAL_VERSION = "1.16 — Outbound readiness baseline (17 September 2026)";
+export const LIFTOR_USER_MANUAL_VERSION = "1.17 — Full repository mirror (17 September 2026)";
 
 export interface ManualSection {
   number: number;

@@ -70,9 +70,12 @@ gate after the pilot; estate-wide activation is a further gate after that.
 | Evergreen | 20 mailboxes | persistent capacity for portfolio businesses |
 | Quarantine | 0 | mailboxes withdrawn from selection |
 
-The targets describe the desired 50-mailbox operating model; the actual estate count is taken only
-from the provider sync. Sticky in-flight senders: an allocation flagged in-flight, or inside its
-sticky window, is never reallocated. Releasing launch capacity cannot rewrite a live thread.
+These are **allocation targets, not the size of the estate.** The live estate is 39 domains and 200
+mailboxes (GSM 180 / GHAT 20); the actual count is taken only from the provider sync. The 30/20
+constants in `src/lib/gsmSenderEstate.ts` therefore model a 50-mailbox allocation ceiling against a
+180-mailbox GSM estate — stale modelling that under-allocates, recorded as a gap rather than a
+safety defect. Sticky in-flight senders: an allocation flagged in-flight, or inside its sticky
+window, is never reallocated. Releasing launch capacity cannot rewrite a live thread.
 
 ## Readiness
 
