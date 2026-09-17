@@ -1,6 +1,6 @@
 # Appendix D — Page / Surface Catalog
 
-_Generated from commit `aa39057614a670f1b8c64d2990c95e1f622074b9` by `scripts/generate-rebuild-manual-catalogs.mjs`. Regenerate with `node scripts/generate-rebuild-manual-catalogs.mjs`._
+_Generated from commit `e5fe720e5b5e4add8cbd81863a00291357f48437` by `scripts/generate-rebuild-manual-catalogs.mjs`. Regenerate with `node scripts/generate-rebuild-manual-catalogs.mjs`._
 
 Every page file under `src/pages/**`. `Routed` means the file is directly registered in `src/App.tsx` (sub-tab and panel files are reached through a parent page). `Writes` means the file contains an insert/update/upsert/delete call. `Edge functions` lists every `supabase.functions.invoke` target — these are the only paths through which a page can reach a provider.
 

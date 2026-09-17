@@ -1,9 +1,9 @@
 {
-  "commit": "aa39057614a670f1b8c64d2990c95e1f622074b9",
+  "commit": "e5fe720e5b5e4add8cbd81863a00291357f48437",
   "generated_by": "scripts/generate-rebuild-manual-catalogs.mjs",
-  "total_files": 2932,
+  "total_files": 2957,
   "totals": {
-    "documented": 2689,
+    "documented": 2714,
     "excluded": 17,
     "static-asset": 68,
     "doc": 95,
@@ -709,6 +709,131 @@
       "file": "docs/liftor-pre-live-cleanup-report.md",
       "section": "Technical Manual R/T — normative or historical doc (see doc index)",
       "category": "doc"
+    },
+    {
+      "file": "docs/liftor-rebuild/00-index.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/A-repository-build.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/B-auth-roles-rls.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/C-route-catalog.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/D-page-surface-catalog.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/E-component-service-catalog.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/F-database-rebuild-spec.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/G-migration-map.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/H-edge-function-catalog.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/I-provider-map.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/J-external-action-safety.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/K-data-model-flows.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/L-ai-architecture.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/M-business-lifecycle.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/N-outbound-sending.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/O-jobs-webhooks.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/P-tests-ci.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/Q-live-state-snapshot.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/R-known-gaps.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/S-disaster-recovery-runbook.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/T-traceability.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/doc-normative-vs-historical.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/source-coverage-manifest.json",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/source-coverage-manifest.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/validation-report.json",
+      "section": "This rebuild manual",
+      "category": "documented"
     },
     {
       "file": "docs/liftor-sales-target-revenue-pace-engine.md",
