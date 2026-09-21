@@ -32,6 +32,16 @@ Deno.serve(async (req) => {
       { auth: { persistSession: false } },
     );
 
+    // STAGE 1: this endpoint calls SMTP. Founder/admin only — an ordinary
+    // authenticated user must never be able to transmit an email.
+    const { data: roleRows } = await admin.from("user_roles")
+      .select("role").eq("user_id", userData.user.id);
+    const roleSet = new Set((roleRows ?? []).map((r: { role: string }) => r.role));
+    if (!roleSet.has("founder") && !roleSet.has("admin")) {
+      return json({ error: "forbidden", message: "Founder or admin role required." }, 403);
+    }
+
+
     const { data: draft, error: dErr } = await admin.from("ai_drafts")
       .select("*").eq("id", draft_id).maybeSingle();
     if (dErr || !draft) return json({ error: "draft not found" }, 404);

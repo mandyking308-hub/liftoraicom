@@ -264,12 +264,14 @@ async function sendViaIonosSmtp(
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   installSmtpShield();
+  // STAGE 1: explicit caller authorization. This worker can call SMTP, so it
+  // accepts ONLY a founder/admin session or the scheduler's CRON_SECRET.
+  // The service-role client is created after authorization, never before.
+  const caller = await requireFounderOrCron(req, corsHeaders);
+  if (isCallerError(caller)) return caller.error;
   try {
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-      { auth: { persistSession: false } },
-    );
+    const supabase = caller.admin;
+
 
     const now = new Date();
 
