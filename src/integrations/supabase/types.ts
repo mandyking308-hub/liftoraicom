@@ -33044,6 +33044,7 @@ export type Database = {
           include_demo: boolean
           industry: string
           onboarding_plan_id: string | null
+          prepared_at: string | null
           processes_to_automate: string[]
           project_scale: string
           project_types: string[]
@@ -33085,6 +33086,7 @@ export type Database = {
           include_demo?: boolean
           industry?: string
           onboarding_plan_id?: string | null
+          prepared_at?: string | null
           processes_to_automate?: string[]
           project_scale?: string
           project_types?: string[]
@@ -33126,6 +33128,7 @@ export type Database = {
           include_demo?: boolean
           industry?: string
           onboarding_plan_id?: string | null
+          prepared_at?: string | null
           processes_to_automate?: string[]
           project_scale?: string
           project_types?: string[]
@@ -72283,6 +72286,7 @@ export type Database = {
           include_demo: boolean
           industry: string
           onboarding_plan_id: string | null
+          prepared_at: string | null
           processes_to_automate: string[]
           project_scale: string
           project_types: string[]
@@ -72835,6 +72839,7 @@ export type Database = {
         | "accepted"
         | "rejected"
         | "expired"
+        | "prepared"
       invoice_status: "DRAFT" | "SENT" | "PAID" | "OVERDUE" | "PARTIALLY_PAID"
       jurisdiction_confidence: "unknown" | "inferred" | "provided" | "verified"
       lead_campaign_fit:
@@ -73535,6 +73540,7 @@ export const Constants = {
         "accepted",
         "rejected",
         "expired",
+        "prepared",
       ],
       invoice_status: ["DRAFT", "SENT", "PAID", "OVERDUE", "PARTIALLY_PAID"],
       jurisdiction_confidence: ["unknown", "inferred", "provided", "verified"],
