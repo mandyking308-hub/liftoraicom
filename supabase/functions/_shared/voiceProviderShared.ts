@@ -33,14 +33,25 @@ export async function authenticateVoiceCaller(req: Request): Promise<VoiceAuthRe
   const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
   const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
-  const admin = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
 
   const auth = req.headers.get("Authorization") ?? "";
   if (!auth.startsWith("Bearer ")) {
-    // Webhooks may arrive without a Supabase JWT — they are still logged, but
-    // every action remains gated by `external_action_attempted=false`.
+    // STAGE 1: these receivers run with verify_jwt = false, so an unauthenticated
+    // caller must present the provider webhook shared secret. Fail closed when the
+    // secret is absent — no anonymous writes to call logs or runtime events.
+    const expected = (Deno.env.get("CUSTOMER_VOICE_WEBHOOK_SECRET") ?? "").trim();
+    const provided = (req.headers.get("x-voice-webhook-secret") ?? "").trim();
+    if (!expected) {
+      return json({ ok: false, error: "voice_webhook_secret_not_configured" }, 401);
+    }
+    if (provided !== expected) {
+      return json({ ok: false, error: "unauthorized" }, 401);
+    }
+    const admin = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
     return { admin, user_id: null, is_founder_or_admin: false };
   }
+  const admin = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
+
   const userClient = createClient(SUPABASE_URL, ANON_KEY, {
     global: { headers: { Authorization: auth } },
     auth: { persistSession: false },
