@@ -84,13 +84,14 @@ export default function InternalProposalDetail() {
             </p>
           </div>
           <div className="flex gap-2">
-            {p.status === "draft" && <Button onClick={send} disabled={busy}><Send size={14} className="mr-2" /> Send</Button>}
-            {["sent","viewed"].includes(p.status) && (
+            {p.status === "draft" && <Button onClick={prepare} disabled={busy}><Send size={14} className="mr-2" /> Prepare pack</Button>}
+            {["prepared","sent","viewed"].includes(p.status) && (
               <>
                 <Button onClick={() => setStatus("accepted")} disabled={busy}><CheckCircle2 size={14} className="mr-2" /> Mark accepted</Button>
                 <Button variant="outline" onClick={() => setStatus("rejected")} disabled={busy}><XCircle size={14} className="mr-2" /> Reject</Button>
               </>
             )}
+
           </div>
         </div>
 

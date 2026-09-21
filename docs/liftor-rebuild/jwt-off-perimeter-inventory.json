@@ -1,0 +1,143 @@
+{
+  "purpose": "Machine-readable perimeter classification for every Edge Function deployed with verify_jwt = false. A function may appear in supabase/config.toml with verify_jwt = false only if it is listed here with an explicit, implemented perimeter. scripts/check-jwt-off-perimeter.mjs fails when the two lists diverge.",
+  "stage": "Stage 1 — security perimeter hardening",
+  "reviewed_at": "2026-09-21",
+  "allowed_perimeter_kinds": [
+    "provider_hmac_signature",
+    "shared_secret_header",
+    "oauth_state_hmac",
+    "single_use_token",
+    "founder_jwt_or_shared_secret"
+  ],
+  "functions": {
+    "unsubscribe-contact": {
+      "perimeter": "single_use_token",
+      "mechanism": "contacts.unsubscribe_token lookup, minimum length 16; unknown token returns 404",
+      "write_capable": true,
+      "writes": "suppression fields on the matched contact only",
+      "rationale": "one-click unsubscribe must work from an email client with no session",
+      "hardened_in_stage_1": false
+    },
+    "compliance-approve": {
+      "perimeter": "founder_jwt_or_shared_secret",
+      "mechanism": "Bearer JWT + user_roles founder check in-function",
+      "write_capable": true,
+      "writes": "contacts.compliance_status",
+      "rationale": "founder-only despite verify_jwt = false; validated in code",
+      "hardened_in_stage_1": false
+    },
+    "outreach-inbound-webhook": {
+      "perimeter": "shared_secret_header",
+      "mechanism": "x-webhook-secret === OUTREACH_WEBHOOK_SECRET, fail closed when unset",
+      "write_capable": true,
+      "writes": "inbound_messages, system_events, activity_log",
+      "rationale": "inbound mail relay cannot hold a Supabase session",
+      "hardened_in_stage_1": false
+    },
+    "outreach-inbound-poll": {
+      "perimeter": "shared_secret_header",
+      "mechanism": "x-cron-secret === CRON_SECRET",
+      "write_capable": true,
+      "writes": "inbound_messages, inbox poll state",
+      "rationale": "scheduler-driven IMAP poll",
+      "hardened_in_stage_1": false
+    },
+    "outreach-test-imap": {
+      "perimeter": "founder_jwt_or_shared_secret",
+      "mechanism": "Bearer JWT verified in-function",
+      "write_capable": false,
+      "writes": "diagnostic only",
+      "rationale": "founder diagnostic",
+      "hardened_in_stage_1": false
+    },
+    "autopilot-orchestrator": {
+      "perimeter": "founder_jwt_or_shared_secret",
+      "mechanism": "x-cron-secret === CRON_SECRET, else Bearer JWT + user_roles check",
+      "write_capable": true,
+      "writes": "autopilot run state; never sends",
+      "rationale": "runs headless on a schedule and manually by the founder",
+      "hardened_in_stage_1": false
+    },
+    "smartlead-webhook": {
+      "perimeter": "provider_hmac_signature",
+      "mechanism": "x-smartlead-signature verified against SMARTLEAD_WEBHOOK_SECRET; receiver disabled when the secret is unset",
+      "write_capable": true,
+      "writes": "smartlead event tables, contact suppression state",
+      "rationale": "provider event return path",
+      "hardened_in_stage_1": false
+    },
+    "customer-voice-inbound-webhook": {
+      "perimeter": "shared_secret_header",
+      "mechanism": "x-voice-webhook-secret === CUSTOMER_VOICE_WEBHOOK_SECRET via authenticateVoiceCaller; fail closed when unset",
+      "write_capable": true,
+      "writes": "customer_sales_call_logs, voice runtime events",
+      "rationale": "voice provider callback",
+      "hardened_in_stage_1": true,
+      "stage_1_note": "previously accepted any anonymous caller and wrote call logs"
+    },
+    "customer-voice-call-status-webhook": {
+      "perimeter": "shared_secret_header",
+      "mechanism": "same as customer-voice-inbound-webhook",
+      "write_capable": true,
+      "writes": "customer_sales_call_logs, voice runtime events",
+      "rationale": "voice provider callback",
+      "hardened_in_stage_1": true
+    },
+    "customer-voice-transcript-ingest": {
+      "perimeter": "shared_secret_header",
+      "mechanism": "same as customer-voice-inbound-webhook",
+      "write_capable": true,
+      "writes": "customer_sales_call_logs.transcript_text, voice runtime events",
+      "rationale": "voice provider callback",
+      "hardened_in_stage_1": true
+    },
+    "stripe-webhook": {
+      "perimeter": "provider_hmac_signature",
+      "mechanism": "stripe.webhooks.constructEventAsync with STRIPE_WEBHOOK_SECRET",
+      "write_capable": true,
+      "writes": "payment/invoice state",
+      "rationale": "Stripe event return path",
+      "hardened_in_stage_1": false
+    },
+    "pr-gmail-oauth-callback": {
+      "perimeter": "oauth_state_hmac",
+      "mechanism": "HMAC-signed state parameter validated before the code exchange",
+      "write_capable": true,
+      "writes": "Gmail connection record",
+      "rationale": "OAuth redirect target cannot carry a Supabase session",
+      "hardened_in_stage_1": false
+    },
+    "social-distribution-dispatch-due": {
+      "perimeter": "founder_jwt_or_shared_secret",
+      "mechanism": "requireFounderOrScheduler — x-dispatch-secret === SOCIAL_DISPATCH_SECRET, else founder/admin JWT",
+      "write_capable": true,
+      "writes": "social publish jobs, dispatch runs",
+      "rationale": "scheduler plus manual run-now",
+      "hardened_in_stage_1": false
+    },
+    "social-distribution-maintenance": {
+      "perimeter": "shared_secret_header",
+      "mechanism": "requireScheduler — x-dispatch-secret only, founder token NOT accepted",
+      "write_capable": true,
+      "writes": "distribution maintenance state",
+      "rationale": "headless maintenance",
+      "hardened_in_stage_1": false
+    },
+    "social-relationship-webhook": {
+      "perimeter": "provider_hmac_signature",
+      "mechanism": "Unipile-Signature HMAC (UNIPILE_WEBHOOK_HMAC_SECRET), fallback SOCIAL_RELATIONSHIP_WEBHOOK_SECRET",
+      "write_capable": true,
+      "writes": "social relationship events",
+      "rationale": "provider event return path",
+      "hardened_in_stage_1": false
+    },
+    "social-relationship-maintenance": {
+      "perimeter": "shared_secret_header",
+      "mechanism": "SOCIAL_RELATIONSHIP_MAINTENANCE_SECRET",
+      "write_capable": true,
+      "writes": "social relationship maintenance state",
+      "rationale": "headless maintenance",
+      "hardened_in_stage_1": false
+    }
+  }
+}
