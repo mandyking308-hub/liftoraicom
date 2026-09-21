@@ -1,0 +1,458 @@
+{
+  "artifacts": {
+    "audit": "docs/liftor-rebuild/stage1a-prechange-privilege-audit.md",
+    "jsonl": "docs/liftor-rebuild/stage1a-prechange-acl-inventory.jsonl",
+    "query": "scripts/stage1a-freeze-acl.sql",
+    "summary": "docs/liftor-rebuild/stage1a-prechange-acl-inventory.json"
+  },
+  "captured_at": "2026-09-21T16:52:40.649321+00:00",
+  "counts": {
+    "base_tables": 1112,
+    "materialized_views": 0,
+    "total_relations": 1138,
+    "views": 26
+  },
+  "current_user": "sandbox_exec",
+  "dangerous_privilege_exposure": {
+    "anon_or_authenticated_with_delete": 1137,
+    "anon_or_authenticated_with_references": 1137,
+    "anon_or_authenticated_with_trigger": 1137,
+    "anon_or_authenticated_with_truncate": 1137,
+    "anon_or_authenticated_with_update": 1137
+  },
+  "database": "postgres",
+  "default_acls": [
+    {
+      "acl": [
+        "sandbox_exec=rU/postgres"
+      ],
+      "objtype": "S",
+      "role": "postgres",
+      "schema": "auth"
+    },
+    {
+      "acl": [
+        "sandbox_exec=ar/postgres"
+      ],
+      "objtype": "r",
+      "role": "postgres",
+      "schema": "auth"
+    },
+    {
+      "acl": [
+        "sandbox_exec=rU/postgres"
+      ],
+      "objtype": "S",
+      "role": "postgres",
+      "schema": "extensions"
+    },
+    {
+      "acl": [
+        "sandbox_exec=ar/postgres"
+      ],
+      "objtype": "r",
+      "role": "postgres",
+      "schema": "extensions"
+    },
+    {
+      "acl": [
+        "postgres=rwU/postgres",
+        "anon=rwU/postgres",
+        "authenticated=rwU/postgres",
+        "service_role=rwU/postgres",
+        "sandbox_exec=rU/postgres"
+      ],
+      "objtype": "S",
+      "role": "postgres",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=X/postgres",
+        "anon=X/postgres",
+        "authenticated=X/postgres",
+        "service_role=X/postgres"
+      ],
+      "objtype": "f",
+      "role": "postgres",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres",
+        "sandbox_exec=ar/postgres"
+      ],
+      "objtype": "r",
+      "role": "postgres",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=rwU/postgres",
+        "anon=rwU/postgres",
+        "authenticated=rwU/postgres",
+        "service_role=rwU/postgres",
+        "sandbox_exec=rU/postgres"
+      ],
+      "objtype": "S",
+      "role": "postgres",
+      "schema": "storage"
+    },
+    {
+      "acl": [
+        "postgres=X/postgres",
+        "anon=X/postgres",
+        "authenticated=X/postgres",
+        "service_role=X/postgres"
+      ],
+      "objtype": "f",
+      "role": "postgres",
+      "schema": "storage"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/postgres",
+        "anon=arwdDxtm/postgres",
+        "authenticated=arwdDxtm/postgres",
+        "service_role=arwdDxtm/postgres",
+        "sandbox_exec=ar/postgres"
+      ],
+      "objtype": "r",
+      "role": "postgres",
+      "schema": "storage"
+    },
+    {
+      "acl": [
+        "postgres=r*w*U*/supabase_admin"
+      ],
+      "objtype": "S",
+      "role": "supabase_admin",
+      "schema": "cron"
+    },
+    {
+      "acl": [
+        "postgres=X*/supabase_admin"
+      ],
+      "objtype": "f",
+      "role": "supabase_admin",
+      "schema": "cron"
+    },
+    {
+      "acl": [
+        "postgres=a*r*w*d*D*x*t*m*/supabase_admin"
+      ],
+      "objtype": "r",
+      "role": "supabase_admin",
+      "schema": "cron"
+    },
+    {
+      "acl": [
+        "postgres=r*w*U*/supabase_admin"
+      ],
+      "objtype": "S",
+      "role": "supabase_admin",
+      "schema": "extensions"
+    },
+    {
+      "acl": [
+        "postgres=X*/supabase_admin"
+      ],
+      "objtype": "f",
+      "role": "supabase_admin",
+      "schema": "extensions"
+    },
+    {
+      "acl": [
+        "postgres=a*r*w*d*D*x*t*m*/supabase_admin"
+      ],
+      "objtype": "r",
+      "role": "supabase_admin",
+      "schema": "extensions"
+    },
+    {
+      "acl": [
+        "postgres=rwU/supabase_admin",
+        "anon=rwU/supabase_admin",
+        "authenticated=rwU/supabase_admin",
+        "service_role=rwU/supabase_admin"
+      ],
+      "objtype": "S",
+      "role": "supabase_admin",
+      "schema": "graphql"
+    },
+    {
+      "acl": [
+        "postgres=X/supabase_admin",
+        "anon=X/supabase_admin",
+        "authenticated=X/supabase_admin",
+        "service_role=X/supabase_admin"
+      ],
+      "objtype": "f",
+      "role": "supabase_admin",
+      "schema": "graphql"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/supabase_admin",
+        "anon=arwdDxtm/supabase_admin",
+        "authenticated=arwdDxtm/supabase_admin",
+        "service_role=arwdDxtm/supabase_admin"
+      ],
+      "objtype": "r",
+      "role": "supabase_admin",
+      "schema": "graphql"
+    },
+    {
+      "acl": [
+        "postgres=rwU/supabase_admin",
+        "anon=rwU/supabase_admin",
+        "authenticated=rwU/supabase_admin",
+        "service_role=rwU/supabase_admin"
+      ],
+      "objtype": "S",
+      "role": "supabase_admin",
+      "schema": "graphql_public"
+    },
+    {
+      "acl": [
+        "postgres=X/supabase_admin",
+        "anon=X/supabase_admin",
+        "authenticated=X/supabase_admin",
+        "service_role=X/supabase_admin"
+      ],
+      "objtype": "f",
+      "role": "supabase_admin",
+      "schema": "graphql_public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/supabase_admin",
+        "anon=arwdDxtm/supabase_admin",
+        "authenticated=arwdDxtm/supabase_admin",
+        "service_role=arwdDxtm/supabase_admin"
+      ],
+      "objtype": "r",
+      "role": "supabase_admin",
+      "schema": "graphql_public"
+    },
+    {
+      "acl": [
+        "postgres=rwU/supabase_admin",
+        "anon=rwU/supabase_admin",
+        "authenticated=rwU/supabase_admin",
+        "service_role=rwU/supabase_admin"
+      ],
+      "objtype": "S",
+      "role": "supabase_admin",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=X/supabase_admin",
+        "anon=X/supabase_admin",
+        "authenticated=X/supabase_admin",
+        "service_role=X/supabase_admin"
+      ],
+      "objtype": "f",
+      "role": "supabase_admin",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/supabase_admin",
+        "anon=arwdDxtm/supabase_admin",
+        "authenticated=arwdDxtm/supabase_admin",
+        "service_role=arwdDxtm/supabase_admin"
+      ],
+      "objtype": "r",
+      "role": "supabase_admin",
+      "schema": "public"
+    },
+    {
+      "acl": [
+        "postgres=rwU/supabase_admin",
+        "dashboard_user=rwU/supabase_admin"
+      ],
+      "objtype": "S",
+      "role": "supabase_admin",
+      "schema": "realtime"
+    },
+    {
+      "acl": [
+        "postgres=X/supabase_admin",
+        "dashboard_user=X/supabase_admin"
+      ],
+      "objtype": "f",
+      "role": "supabase_admin",
+      "schema": "realtime"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/supabase_admin",
+        "dashboard_user=arwdDxtm/supabase_admin"
+      ],
+      "objtype": "r",
+      "role": "supabase_admin",
+      "schema": "realtime"
+    },
+    {
+      "acl": [
+        "postgres=rwU/supabase_auth_admin",
+        "dashboard_user=rwU/supabase_auth_admin"
+      ],
+      "objtype": "S",
+      "role": "supabase_auth_admin",
+      "schema": "auth"
+    },
+    {
+      "acl": [
+        "postgres=X/supabase_auth_admin",
+        "dashboard_user=X/supabase_auth_admin"
+      ],
+      "objtype": "f",
+      "role": "supabase_auth_admin",
+      "schema": "auth"
+    },
+    {
+      "acl": [
+        "postgres=arwdDxtm/supabase_auth_admin",
+        "dashboard_user=arwdDxtm/supabase_auth_admin"
+      ],
+      "objtype": "r",
+      "role": "supabase_auth_admin",
+      "schema": "auth"
+    }
+  ],
+  "effective_privilege_totals": {
+    "anon": {
+      "DELETE": 1132,
+      "INSERT": 1132,
+      "REFERENCES": 1132,
+      "SELECT": 1132,
+      "TRIGGER": 1132,
+      "TRUNCATE": 1132,
+      "UPDATE": 1132
+    },
+    "authenticated": {
+      "DELETE": 1137,
+      "INSERT": 1137,
+      "REFERENCES": 1137,
+      "SELECT": 1137,
+      "TRIGGER": 1137,
+      "TRUNCATE": 1137,
+      "UPDATE": 1137
+    },
+    "service_role": {
+      "DELETE": 1138,
+      "INSERT": 1138,
+      "REFERENCES": 1138,
+      "SELECT": 1138,
+      "TRIGGER": 1138,
+      "TRUNCATE": 1138,
+      "UPDATE": 1138
+    }
+  },
+  "owner_counts": {
+    "postgres": 1138
+  },
+  "postgres_is_member_of_supabase_admin": false,
+  "record_type": "summary",
+  "relation_records": 1138,
+  "repository_head": "0d2de8f30e1c7cc4df5195ff3a4fef5bb7e4f13a",
+  "role_memberships": [
+    {
+      "member": "authenticator",
+      "member_of": "anon"
+    },
+    {
+      "member": "authenticator",
+      "member_of": "authenticated"
+    },
+    {
+      "member": "authenticator",
+      "member_of": "service_role"
+    },
+    {
+      "member": "pg_monitor",
+      "member_of": "pg_read_all_settings"
+    },
+    {
+      "member": "pg_monitor",
+      "member_of": "pg_read_all_stats"
+    },
+    {
+      "member": "pg_monitor",
+      "member_of": "pg_stat_scan_tables"
+    },
+    {
+      "member": "postgres",
+      "member_of": "anon"
+    },
+    {
+      "member": "postgres",
+      "member_of": "authenticated"
+    },
+    {
+      "member": "postgres",
+      "member_of": "authenticator"
+    },
+    {
+      "member": "postgres",
+      "member_of": "pg_create_subscription"
+    },
+    {
+      "member": "postgres",
+      "member_of": "pg_monitor"
+    },
+    {
+      "member": "postgres",
+      "member_of": "pg_read_all_data"
+    },
+    {
+      "member": "postgres",
+      "member_of": "pg_signal_backend"
+    },
+    {
+      "member": "postgres",
+      "member_of": "sandbox_exec"
+    },
+    {
+      "member": "postgres",
+      "member_of": "service_role"
+    },
+    {
+      "member": "postgres",
+      "member_of": "supabase_privileged_role"
+    },
+    {
+      "member": "supabase_etl_admin",
+      "member_of": "pg_monitor"
+    },
+    {
+      "member": "supabase_etl_admin",
+      "member_of": "pg_read_all_data"
+    },
+    {
+      "member": "supabase_etl_admin",
+      "member_of": "supabase_privileged_role"
+    },
+    {
+      "member": "supabase_read_only_user",
+      "member_of": "pg_monitor"
+    },
+    {
+      "member": "supabase_read_only_user",
+      "member_of": "pg_read_all_data"
+    },
+    {
+      "member": "supabase_storage_admin",
+      "member_of": "authenticator"
+    }
+  ],
+  "server_version": "17.6",
+  "session_user": "sandbox_exec",
+  "stage": "1A step 1 (pre-change evidence, read-only)"
+}
