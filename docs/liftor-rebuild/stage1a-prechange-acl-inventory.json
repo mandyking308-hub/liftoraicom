@@ -14,9 +14,11 @@
   },
   "current_user": "sandbox_exec",
   "dangerous_privilege_exposure": {
-    "anon_or_authenticated_with_references": 0,
-    "anon_or_authenticated_with_trigger": 0,
-    "anon_or_authenticated_with_truncate": 0
+    "anon_or_authenticated_with_delete": 1137,
+    "anon_or_authenticated_with_references": 1137,
+    "anon_or_authenticated_with_trigger": 1137,
+    "anon_or_authenticated_with_truncate": 1137,
+    "anon_or_authenticated_with_update": 1137
   },
   "database": "postgres",
   "default_acls": [
@@ -326,31 +328,31 @@
   ],
   "effective_privilege_totals": {
     "anon": {
-      "DELETE": 0,
-      "INSERT": 0,
-      "REFERENCES": 0,
-      "SELECT": 0,
-      "TRIGGER": 0,
-      "TRUNCATE": 0,
-      "UPDATE": 0
+      "DELETE": 1132,
+      "INSERT": 1132,
+      "REFERENCES": 1132,
+      "SELECT": 1132,
+      "TRIGGER": 1132,
+      "TRUNCATE": 1132,
+      "UPDATE": 1132
     },
     "authenticated": {
-      "DELETE": 0,
-      "INSERT": 0,
-      "REFERENCES": 0,
-      "SELECT": 0,
-      "TRIGGER": 0,
-      "TRUNCATE": 0,
-      "UPDATE": 0
+      "DELETE": 1137,
+      "INSERT": 1137,
+      "REFERENCES": 1137,
+      "SELECT": 1137,
+      "TRIGGER": 1137,
+      "TRUNCATE": 1137,
+      "UPDATE": 1137
     },
     "service_role": {
-      "DELETE": 0,
-      "INSERT": 0,
-      "REFERENCES": 0,
-      "SELECT": 0,
-      "TRIGGER": 0,
-      "TRUNCATE": 0,
-      "UPDATE": 0
+      "DELETE": 1138,
+      "INSERT": 1138,
+      "REFERENCES": 1138,
+      "SELECT": 1138,
+      "TRIGGER": 1138,
+      "TRUNCATE": 1138,
+      "UPDATE": 1138
     }
   },
   "owner_counts": {
@@ -358,8 +360,8 @@
   },
   "postgres_is_member_of_supabase_admin": false,
   "record_type": "summary",
-  "relation_records": 0,
-  "repository_head": "430c57cee3dd53353eddc36d52aef21eb8eaa717",
+  "relation_records": 1138,
+  "repository_head": "0d2de8f30e1c7cc4df5195ff3a4fef5bb7e4f13a",
   "role_memberships": [
     {
       "member": "authenticator",
