@@ -6,12 +6,18 @@ Nothing in this section was repaired during the documentation job. Each item is 
 
 | # | Finding | Evidence | Severity |
 |---|---|---|---|
-| S1 | `billionaire_institution_links` — RLS off, 0 policies: wealth-relationship data on private individuals readable by anyone with the anon key | `pg_class.relrowsecurity = false` | critical |
-| S2 | `philanthropic_institutions` — RLS off, 0 policies: institution and principal contact data publicly readable | same | critical |
-| S3 | `billionaire_enrichment_batches` — RLS off, 0 policies | same | warning |
-| S4 | `inbox_credentials` — RLS on with **no policy** (deny-by-default). Correct in effect but undocumented in-schema; a future permissive policy would silently expose mailbox credentials | `pg_policies` | note |
-| S5 | One Supabase project serves preview and production. There is no staging database; a preview mistake is a production mistake | project configuration | high |
-| S6 | 16 functions run with `verify_jwt = false`. Each one's own secret check is the only barrier; a future function added to that list without a check would be open to the internet | `supabase/config.toml` | structural risk |
+| S1 | `billionaire_institution_links` — RLS off, 0 policies | **FIXED (Stage 1, 21 Sep 2026)** — RLS enabled, founder/admin `ALL` policy, `anon` grants revoked, service-role retained. Live check: 0 public tables with RLS off | critical → closed |
+| S2 | `philanthropic_institutions` — RLS off, 0 policies | **FIXED (Stage 1, 21 Sep 2026)** — same treatment | critical → closed |
+| S3 | `billionaire_enrichment_batches` — RLS off, 0 policies | **FIXED (Stage 1, 21 Sep 2026)** — same treatment | warning → closed |
+| S4 | `inbox_credentials` — RLS on with **no policy** (deny-by-default). Correct in effect but undocumented in-schema; a future permissive policy would silently expose mailbox credentials | `pg_policies` | note — **still open** |
+| S5 | One Supabase project serves preview and production. There is no staging database; a preview mistake is a production mistake | project configuration | high — **still open** |
+| S6 | 16 functions run with `verify_jwt = false`. Each one's own secret check is the only barrier | **MITIGATED (Stage 1)** — every one of the 16 now carries an explicit perimeter classification in `docs/liftor-rebuild/jwt-off-perimeter-inventory.json`, enforced by `scripts/check-jwt-off-perimeter.mjs`; a new `verify_jwt = false` function without a classification fails the check | structural risk — controlled |
+| S7 | The three `customer-voice-*` receivers accepted **any anonymous caller** and wrote call logs and runtime events | **FIXED (Stage 1)** — `authenticateVoiceCaller` now requires `x-voice-webhook-secret` matching `CUSTOMER_VOICE_WEBHOOK_SECRET` and fails closed when the secret is unset | critical → closed |
+| S8 | `outreach-send-worker` (SMTP-capable) created a service-role client with **no caller authorization** at all; only the `auto_send_enabled` flag stood between a caller and the send loop | **FIXED (Stage 1)** — founder/admin JWT or `CRON_SECRET` required before any privileged work | critical → closed |
+| S9 | `outreach-send-draft` verified a session but **not a role** — any authenticated user could transmit an email over SMTP | **FIXED (Stage 1)** — founder/admin required before the transport is built | critical → closed |
+| S10 | `internal-proposal-send` ran with the service role and **no caller check**, and marked proposals `sent` although it transmits nothing | **FIXED (Stage 1)** — founder/admin required; the proposal now moves to the new `prepared` state with `prepared_at`, and the timeline record is flagged `ignored_for_send_check` / `internal_proposal_prepared_not_transmitted` | critical → closed |
+| S11 | Database linter reports 5 SECURITY DEFINER views, 3 functions without a fixed `search_path`, 3 extensions in `public`, and 405 SECURITY DEFINER functions executable by `anon`/`authenticated` | recorded, **not** repaired — pre-existing and unchanged by Stage 1; remediation is a separate approved stage because revoking EXECUTE broadly can break working RPC paths | high — **still open** |
+
 
 ## R2. Manual contradictions found and resolved by this manual
 

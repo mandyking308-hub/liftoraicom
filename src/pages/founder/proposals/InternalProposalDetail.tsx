@@ -31,14 +31,15 @@ export default function InternalProposalDetail() {
   };
   useEffect(() => { load(); }, [id]);
 
-  const send = async () => {
+  const prepare = async () => {
     setBusy(true);
     const { data, error } = await supabase.functions.invoke("internal-proposal-send", { body: { proposal_id: id } });
     setBusy(false);
-    if (error || (data as any)?.error) { toast({ title: "Send failed", description: error?.message || (data as any)?.error, variant: "destructive" }); return; }
-    toast({ title: "Proposal sent", description: "Logged in communications." });
+    if (error || (data as any)?.error) { toast({ title: "Prepare failed", description: error?.message || (data as any)?.error, variant: "destructive" }); return; }
+    toast({ title: "Proposal pack prepared", description: "Nothing was emailed. Copy the links and send it yourself." });
     load();
   };
+
 
   const setStatus = async (status: "accepted" | "rejected") => {
     setBusy(true);
@@ -83,13 +84,14 @@ export default function InternalProposalDetail() {
             </p>
           </div>
           <div className="flex gap-2">
-            {p.status === "draft" && <Button onClick={send} disabled={busy}><Send size={14} className="mr-2" /> Send</Button>}
-            {["sent","viewed"].includes(p.status) && (
+            {p.status === "draft" && <Button onClick={prepare} disabled={busy}><Send size={14} className="mr-2" /> Prepare pack</Button>}
+            {["prepared","sent","viewed"].includes(p.status) && (
               <>
                 <Button onClick={() => setStatus("accepted")} disabled={busy}><CheckCircle2 size={14} className="mr-2" /> Mark accepted</Button>
                 <Button variant="outline" onClick={() => setStatus("rejected")} disabled={busy}><XCircle size={14} className="mr-2" /> Reject</Button>
               </>
             )}
+
           </div>
         </div>
 

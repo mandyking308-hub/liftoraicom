@@ -1,4 +1,17 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+/**
+ * Internal proposal — PREPARE pack.
+ *
+ * STAGE 1 CORRECTION (state integrity):
+ * This function does NOT transmit anything. It composes the proposal message,
+ * resolves the public view/accept/demo links, records the prepared message on
+ * the contact timeline (explicitly flagged as not transmitted) and moves the
+ * proposal to the `prepared` state. It must never mark a proposal `sent`,
+ * because no provider delivery occurs here and there is no delivery receipt.
+ *
+ * Authorization: founder/admin only. Previously this endpoint ran with the
+ * service role and no caller check at all.
+ */
+import { requireFounderOrAdmin, isCallerError } from "../_shared/callerAuth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,12 +25,11 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return j({ error: "Method not allowed" }, 405);
 
+  const caller = await requireFounderOrAdmin(req, corsHeaders);
+  if (isCallerError(caller)) return caller.error;
+  const supabase = caller.admin;
+
   try {
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-      { auth: { persistSession: false } },
-    );
     const { proposal_id } = await req.json().catch(() => ({}));
     if (!proposal_id) return j({ error: "proposal_id required" }, 400);
 
@@ -56,7 +68,8 @@ Deno.serve(async (req) => {
 
     const message = lines.join("\n");
 
-    // Log via communications (handle_new_communication updates contacts.last_contacted_at)
+    // Timeline record of the PREPARED message. Explicitly flagged as not
+    // transmitted so it is never mistaken for a delivered email.
     await supabase.from("communications").insert({
       contact_id: contact.id,
       channel: "email",
@@ -64,13 +77,26 @@ Deno.serve(async (req) => {
       message,
       inbox_id: contact.assigned_inbox_id,
       ai_generated: false,
+      ignored_for_send_check: true,
+      ignored_reason: "internal_proposal_prepared_not_transmitted",
     });
 
     await supabase.from("internal_proposals").update({
-      status: "sent", sent_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+      status: "prepared",
+      prepared_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     }).eq("id", prop.id);
 
-    return j({ ok: true, proposal_url: proposalUrl, accept_url: acceptUrl, demo_url: demoUrl }, 200);
+    return j({
+      ok: true,
+      transmitted: false,
+      state: "prepared",
+      note: "Proposal pack prepared. No email was transmitted and no provider was called.",
+      message,
+      proposal_url: proposalUrl,
+      accept_url: acceptUrl,
+      demo_url: demoUrl,
+    }, 200);
   } catch (e) {
     return j({ error: (e as Error).message }, 500);
   }
