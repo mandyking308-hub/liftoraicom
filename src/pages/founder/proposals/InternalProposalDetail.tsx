@@ -31,14 +31,15 @@ export default function InternalProposalDetail() {
   };
   useEffect(() => { load(); }, [id]);
 
-  const send = async () => {
+  const prepare = async () => {
     setBusy(true);
     const { data, error } = await supabase.functions.invoke("internal-proposal-send", { body: { proposal_id: id } });
     setBusy(false);
-    if (error || (data as any)?.error) { toast({ title: "Send failed", description: error?.message || (data as any)?.error, variant: "destructive" }); return; }
-    toast({ title: "Proposal sent", description: "Logged in communications." });
+    if (error || (data as any)?.error) { toast({ title: "Prepare failed", description: error?.message || (data as any)?.error, variant: "destructive" }); return; }
+    toast({ title: "Proposal pack prepared", description: "Nothing was emailed. Copy the links and send it yourself." });
     load();
   };
+
 
   const setStatus = async (status: "accepted" | "rejected") => {
     setBusy(true);
