@@ -139,3 +139,31 @@ describe("Stage 1 — verify_jwt=false perimeter inventory", () => {
     expect(Object.keys(inv.functions)).toHaveLength(count);
   });
 });
+
+describe("Stage 1 — dangerous privilege drift guard", () => {
+  const migration = read(
+    "supabase/migrations/20260923085046_stage1_application_privilege_hardening.sql",
+  );
+  const checker = read("scripts/check-stage1-privilege-drift.sql");
+
+  it("revokes only the approved dangerous table privileges from application roles", () => {
+    const sql = migration
+      .split("\n")
+      .filter((line) => !line.trim().startsWith("--"))
+      .join("\n");
+    for (const privilege of ["TRUNCATE", "TRIGGER", "REFERENCES", "MAINTAIN"]) {
+      expect(migration).toContain(privilege);
+      expect(checker).toContain(privilege);
+    }
+    expect(sql).toContain("FROM anon, authenticated");
+    expect(sql).toContain("FOR ROLE postgres");
+    expect(sql).not.toMatch(/FROM[^;]*service_role/i);
+  });
+
+  it("fails on effective grants, public CREATE, unapproved owners, or unsafe postgres defaults", () => {
+    expect(checker).toContain("has_table_privilege");
+    expect(checker).toContain("has_schema_privilege('anon', 'public', 'CREATE')");
+    expect(checker).toContain("pg_get_userbyid(c.relowner) <> 'postgres'");
+    expect(checker).toContain("d.defaclrole::regrole::text = 'postgres'");
+  });
+});

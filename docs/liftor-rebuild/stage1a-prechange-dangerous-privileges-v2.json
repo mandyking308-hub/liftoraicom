@@ -1,0 +1,59 @@
+{
+  "stage": "1A",
+  "kind": "corrected_prechange_privilege_summary",
+  "captured_before_migration": true,
+  "repository_head": "4d6dd1b9832336d3ba9666572b546de37419df0a",
+  "schema": "public",
+  "relation_counts": {
+    "base_tables": 1112,
+    "views": 26,
+    "materialized_views": 0,
+    "total_relations": 1138,
+    "owners": {"postgres": 1138, "supabase_admin": 0},
+    "rls_enabled_tables": 1112,
+    "rls_disabled_tables": 0
+  },
+  "prechange_effective_privilege_counts": {
+    "anon": {
+      "SELECT": 1132,
+      "INSERT": 1132,
+      "UPDATE": 1132,
+      "DELETE": 1132,
+      "TRUNCATE": 1132,
+      "TRIGGER": 1132,
+      "REFERENCES": 1132,
+      "MAINTAIN": 1132
+    },
+    "authenticated": {
+      "SELECT": 1137,
+      "INSERT": 1137,
+      "UPDATE": 1137,
+      "DELETE": 1137,
+      "TRUNCATE": 1137,
+      "TRIGGER": 1137,
+      "REFERENCES": 1137,
+      "MAINTAIN": 1137
+    },
+    "service_role": {
+      "SELECT": 1138,
+      "INSERT": 1138,
+      "UPDATE": 1138,
+      "DELETE": 1138,
+      "TRUNCATE": 1138,
+      "TRIGGER": 1138,
+      "REFERENCES": 1138,
+      "MAINTAIN": 1138
+    }
+  },
+  "schema_effective_privileges": {
+    "anon": {"USAGE": true, "CREATE": false},
+    "authenticated": {"USAGE": true, "CREATE": false},
+    "PUBLIC_direct": {"USAGE": true, "CREATE": false}
+  },
+  "default_acl_snapshot": {
+    "postgres_public_tables": "postgres=arwdDxtm/postgres, anon=arwdDxtm/postgres, authenticated=arwdDxtm/postgres, service_role=arwdDxtm/postgres, sandbox_exec=ar/postgres",
+    "supabase_admin_public_tables": "postgres=arwdDxtm/supabase_admin, anon=arwdDxtm/supabase_admin, authenticated=arwdDxtm/supabase_admin, service_role=arwdDxtm/supabase_admin"
+  },
+  "dangerous_privileges": ["TRUNCATE", "TRIGGER", "REFERENCES", "MAINTAIN"],
+  "evidence_detail": "The complete object/owner/direct-ACL/grantor/grantability/effective-privilege inventory remains in stage1a-prechange-acl-inventory.jsonl; scripts/stage1a-corrected-privilege-audit.sql regenerates the corrected four-privilege fields."
+}
