@@ -278,7 +278,8 @@ Deno.serve(async (req) => {
 });
 
 async function recordInboundPoll(
-  admin: ReturnType<typeof createClient>,
+  // deno-lint-ignore no-explicit-any
+  admin: any,
   inboxId: string,
   ok: boolean,
   error: string | null,
