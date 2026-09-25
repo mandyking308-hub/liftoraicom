@@ -63819,6 +63819,60 @@ export type Database = {
           },
         ]
       }
+      strategic_organisation_register: {
+        Row: {
+          access_model: string | null
+          category: string | null
+          created_at: string
+          geography: string | null
+          id: string
+          last_reviewed_at: string | null
+          membership_cost_text: string | null
+          name: string
+          notes: string | null
+          online_usefulness: string | null
+          primary_value: string | null
+          status: string
+          updated_at: string
+          us_relevance: string | null
+          website: string | null
+        }
+        Insert: {
+          access_model?: string | null
+          category?: string | null
+          created_at?: string
+          geography?: string | null
+          id?: string
+          last_reviewed_at?: string | null
+          membership_cost_text?: string | null
+          name: string
+          notes?: string | null
+          online_usefulness?: string | null
+          primary_value?: string | null
+          status?: string
+          updated_at?: string
+          us_relevance?: string | null
+          website?: string | null
+        }
+        Update: {
+          access_model?: string | null
+          category?: string | null
+          created_at?: string
+          geography?: string | null
+          id?: string
+          last_reviewed_at?: string | null
+          membership_cost_text?: string | null
+          name?: string
+          notes?: string | null
+          online_usefulness?: string | null
+          primary_value?: string | null
+          status?: string
+          updated_at?: string
+          us_relevance?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
       strategic_target_accounts: {
         Row: {
           accessibility_score: number | null
