@@ -128,6 +128,7 @@ import BillionaireIntelligence from "./pages/founder/BillionaireIntelligence";
 import RelationshipIntelligenceImport from "./pages/founder/RelationshipIntelligenceImport";
 import GlobalPrRadar from "./pages/founder/GlobalPrRadar";
 import VideoLibrary from "./pages/founder/VideoLibrary";
+import StrategicOrganisations from "./pages/founder/StrategicOrganisations";
 import HealthcareOverlay from "./pages/founder/HealthcareOverlay";
 import BusinessInternalActivationPage from "./pages/founder/BusinessInternalActivation";
 import BusinessDailyOperatingLoopPage from "./pages/founder/BusinessDailyOperatingLoop";
@@ -990,6 +991,7 @@ const App = () => (
             <Route path="/founder/relationship-intelligence/import" element={<FounderRoute><RelationshipIntelligenceImport /></FounderRoute>} />
             <Route path="/founder/global-pr-radar" element={<FounderRoute><GlobalPrRadar /></FounderRoute>} />
             <Route path="/founder/video-library" element={<FounderRoute><VideoLibrary /></FounderRoute>} />
+            <Route path="/founder/strategic-organisations" element={<FounderRoute><StrategicOrganisations /></FounderRoute>} />
             <Route path="/founder/healthcare-overlay" element={<FounderRoute><HealthcareOverlay /></FounderRoute>} />
             <Route path="/founder/insurance-claims" element={<FounderRoute><InsuranceClaimsPage /></FounderRoute>} />
             <Route path="/founder/statutory-filings" element={<FounderRoute><StatutoryFilingsPage /></FounderRoute>} />

@@ -41,6 +41,7 @@ const navGroups: NavGroup[] = [
       { label: "Internal Proposals", to: "/founder/internal-proposals", icon: FileSignature },
       { label: "Demos", to: "/founder/demos", icon: MonitorPlay },
       { label: "Relationship Intelligence", to: "/founder/relationship-intelligence", icon: Network },
+      { label: "Strategic Organisations & Networks", to: "/founder/strategic-organisations", icon: Building2 },
       { label: "Funding Radar", to: "/founder/funding-radar/shortlist", icon: Radar },
       { label: "PR Radar", to: "/founder/global-pr-radar", icon: Megaphone },
     ],
