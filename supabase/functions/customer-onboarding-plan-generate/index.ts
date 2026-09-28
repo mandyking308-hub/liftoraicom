@@ -20,15 +20,29 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const { business_id, contact_id, deal_id, proposal_id, organisation_id, onboarding_type, dry_run = true, confirmation } = body ?? {};
     if (!contact_id) return new Response(JSON.stringify({ error: 'contact_id required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    if (!business_id) return new Response(JSON.stringify({ error: 'business_id required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
-    const contact = await safe(async () => (await admin.from('contacts').select('id,name,email,company,assigned_business,status').eq('id', contact_id).maybeSingle()).data, null as any);
-    const memory = await safe(async () => (await admin.from('customer_memory_profiles').select('*').eq('contact_id', contact_id).maybeSingle()).data, null as any);
-    const proposal = proposal_id ? await safe(async () => (await admin.from('proposals').select('*').eq('id', proposal_id).maybeSingle()).data, null as any) : null;
-    const deal = deal_id ? await safe(async () => (await admin.from('deals').select('*').eq('id', deal_id).maybeSingle()).data, null as any) : null;
-    const surveys = await safe(async () => (await admin.from('customer_survey_responses').select('csat_score,nps_score,key_needs').eq('contact_id', contact_id).limit(20)).data ?? [], [] as any[]);
-    const support = await safe(async () => (await admin.from('support_interaction_reviews').select('severity,theme').eq('contact_id', contact_id).limit(20)).data ?? [], [] as any[]);
-    const successPlans = await safe(async () => (await admin.from('customer_success_plans').select('next_best_actions,risks').eq('contact_id', contact_id).limit(5)).data ?? [], [] as any[]);
-    const businessProfile = business_id ? await safe(async () => (await admin.from('business_knowledge_profiles').select('*').eq('business_id', business_id).maybeSingle()).data, null as any) : null;
+    const businessResult = await admin.from('businesses').select('id,name').eq('id', business_id).maybeSingle();
+    if (businessResult.error || !businessResult.data) return new Response(JSON.stringify({ error: 'business_context_invalid' }), { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    const contactResult = await admin.from('contacts').select('id,name,email,company,status').eq('id', contact_id).maybeSingle();
+    if (contactResult.error || !contactResult.data) return new Response(JSON.stringify({ error: 'contact_not_found' }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    const contact = contactResult.data;
+    const relationshipResult = await admin.from('business_contact_relationships')
+      .select('id,contact_id,business_id').eq('contact_id', contact_id).eq('business_id', business_id).limit(2);
+    if (relationshipResult.error) return new Response(JSON.stringify({ error: 'business_contact_relationship_unavailable' }), { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    if ((relationshipResult.data ?? []).length !== 1) return new Response(JSON.stringify({ error: relationshipResult.data?.length ? 'ambiguous_business_contact_relationship' : 'business_contact_relationship_required' }), { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    const relationship = relationshipResult.data[0];
+    const memory = await safe(async () => (await admin.from('customer_memory_profiles').select('*').eq('contact_id', contact_id).eq('business_id', business_id).maybeSingle()).data, null as any);
+    const proposalResult = proposal_id ? await admin.from('proposals').select('*').eq('id', proposal_id).eq('business_id', business_id).maybeSingle() : null;
+    if (proposal_id && (proposalResult?.error || !proposalResult?.data)) return new Response(JSON.stringify({ error: 'proposal_business_context_mismatch' }), { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    const proposal = proposalResult?.data ?? null;
+    const dealResult = deal_id ? await admin.from('deals').select('*').eq('id', deal_id).eq('business_id', business_id).maybeSingle() : null;
+    if (deal_id && (dealResult?.error || !dealResult?.data)) return new Response(JSON.stringify({ error: 'deal_business_context_mismatch' }), { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    const deal = dealResult?.data ?? null;
+    const surveys = await safe(async () => (await admin.from('customer_survey_responses').select('csat_score,nps_score,key_needs').eq('contact_id', contact_id).eq('business_id', business_id).limit(20)).data ?? [], [] as any[]);
+    const support = await safe(async () => (await admin.from('support_interaction_reviews').select('severity,theme').eq('contact_id', contact_id).eq('business_id', business_id).limit(20)).data ?? [], [] as any[]);
+    const successPlans = await safe(async () => (await admin.from('customer_success_plans').select('next_best_actions,risks').eq('contact_id', contact_id).eq('business_id', business_id).limit(5)).data ?? [], [] as any[]);
+    const businessProfile = await safe(async () => (await admin.from('business_knowledge_profiles').select('*').eq('business_id', business_id).maybeSingle()).data, null as any);
 
     const customerName = contact?.name ?? 'there';
     const customerCompany = contact?.company ?? '';
@@ -74,7 +88,8 @@ Deno.serve(async (req) => {
     const welcomeSummary = `Welcome pack for ${customerName}: goal — ${goal}. First 30 days: kick-off, setup, bedding-in.`;
 
     const planRow = {
-      business_id: business_id ?? contact?.assigned_business ?? null,
+      business_id,
+      business_contact_relationship_id: relationship.id,
       contact_id,
       organisation_id: organisation_id ?? null,
       deal_id: deal_id ?? null,
@@ -127,7 +142,9 @@ Deno.serve(async (req) => {
     }
 
     // Upsert plan (unique business+contact+deal)
-    const existing = await admin.from('customer_onboarding_plans').select('id').eq('contact_id', contact_id).eq('business_id', planRow.business_id ?? null as any).maybeSingle();
+    let existingQuery = admin.from('customer_onboarding_plans').select('id').eq('contact_id', contact_id).eq('business_id', business_id);
+    existingQuery = deal_id ? existingQuery.eq('deal_id', deal_id) : existingQuery.is('deal_id', null);
+    const existing = await existingQuery.maybeSingle();
     let planId: string;
     if (existing.data?.id) {
       const { data, error } = await admin.from('customer_onboarding_plans').update(planRow).eq('id', existing.data.id).select('*').single();
@@ -138,15 +155,17 @@ Deno.serve(async (req) => {
     }
 
     const taskRows = [
-      ...customerActions.map((a) => ({ onboarding_plan_id: planId, business_id: planRow.business_id, contact_id, task_owner: 'customer', task_title: a.title, customer_visible: true, founder_review_required: false })),
-      ...companyActions.map((a) => ({ onboarding_plan_id: planId, business_id: planRow.business_id, contact_id, task_owner: 'company', owner_agent_key: 'customer_success_agent', task_title: a.title, customer_visible: false, founder_review_required: false })),
+      ...customerActions.map((a, i) => ({ idempotency_key: `onboarding:${planId}:customer:${i}`, onboarding_plan_id: planId, business_id: planRow.business_id, business_contact_relationship_id: relationship.id, contact_id, task_owner: 'customer', task_title: a.title, customer_visible: true, founder_review_required: false })),
+      ...companyActions.map((a, i) => ({ idempotency_key: `onboarding:${planId}:company:${i}`, onboarding_plan_id: planId, business_id: planRow.business_id, business_contact_relationship_id: relationship.id, contact_id, task_owner: 'company', owner_agent_key: 'customer_success_agent', task_title: a.title, customer_visible: false, founder_review_required: false })),
     ];
-    await admin.from('customer_onboarding_tasks').insert(taskRows);
+    const taskResult = await admin.from('customer_onboarding_tasks').upsert(taskRows, { onConflict: 'idempotency_key' });
+    if (taskResult.error) throw taskResult.error;
 
-    await admin.from('onboarding_email_drafts').insert([
-      { ...welcomeEmail, business_id: planRow.business_id, contact_id, onboarding_plan_id: planId },
-      { ...beddingInEmail, business_id: planRow.business_id, contact_id, onboarding_plan_id: planId },
-    ]);
+    const emailDraftResult = await admin.from('onboarding_email_drafts').upsert([
+      { ...welcomeEmail, idempotency_key: `onboarding:${planId}:email:welcome`, business_id: planRow.business_id, business_contact_relationship_id: relationship.id, contact_id, onboarding_plan_id: planId },
+      { ...beddingInEmail, idempotency_key: `onboarding:${planId}:email:bedding`, business_id: planRow.business_id, business_contact_relationship_id: relationship.id, contact_id, onboarding_plan_id: planId },
+    ], { onConflict: 'idempotency_key' });
+    if (emailDraftResult.error) throw emailDraftResult.error;
 
     // Try founder approval queue if it exists
     try {

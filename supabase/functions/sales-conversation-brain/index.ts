@@ -1,8 +1,9 @@
 // Sales Conversation Brain — internal analysis only.
 // No external customer contact. No provider call. No payment.
 // Live-first: prepares structured sales conversation output for founder review.
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { callAIGateway } from "../_shared/aiGateway.ts";
+import { requireFounderOrAdmin } from "../_shared/callerAuth.ts";
+import { authorizeConversationBusiness } from "../_shared/customerCommercialLifecycle.ts";
 import {
   assertCustomerSalesBusiness,
   CustomerSalesScopeError,
@@ -52,29 +53,46 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
-  const sb = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    { auth: { persistSession: false } },
-  );
+  const caller = await requireFounderOrAdmin(req, corsHeaders);
+  if ("error" in caller) return caller.error;
+  const sb = caller.admin;
 
   const body = await req.json().catch(() => ({} as any));
   const conversation_id: string | undefined = body.conversation_id;
+  const requestedBusinessId: string | undefined = body.business_id;
   const transcript: string = (body.transcript || body.customer_message || "").toString();
   if (!conversation_id) return json({ error: "conversation_id required" }, 400);
+  if (!requestedBusinessId) return json({ ok: false, error: "business_context_required" }, 400);
   if (!transcript.trim()) return json({ error: "transcript or customer_message required" }, 400);
 
-  const { data: conv } = await sb.from("customer_sales_conversations").select("*").eq("id", conversation_id).maybeSingle();
-  if (!conv) return json({ error: "conversation not found" }, 404);
-
+  // Founder/admin has portfolio scope, but every run still establishes one
+  // explicit business before loading a conversation UUID.
   let businessId: string;
   try {
-    businessId = requireCustomerSalesBusinessId(conv.business_id);
+    businessId = requireCustomerSalesBusinessId(requestedBusinessId);
   } catch (error) {
     return json({ ok: false, error: (error as CustomerSalesScopeError).code }, 409);
   }
   const { data: business, error: businessError } = await sb.from("businesses").select("id").eq("id", businessId).maybeSingle();
   if (businessError || !business) return json({ ok: false, error: "business_context_invalid" }, 409);
+
+  const { data: conv, error: conversationError } = await sb.from("customer_sales_conversations").select("*").eq("id", conversation_id).maybeSingle();
+  if (conversationError) return json({ ok: false, error: "conversation_lookup_failed" }, 503);
+  if (!conv) return json({ error: "conversation not found" }, 404);
+
+  const scope = authorizeConversationBusiness({
+    callerAuthorized: true,
+    requestedBusinessId: businessId,
+    conversationBusinessId: conv.business_id,
+  });
+  if (!scope.ok) return json({ ok: false, error: scope.reason }, scope.reason === "forbidden" ? 403 : 409);
+
+  if (conv.customer_email && !conv.contact_id) {
+    return json({ ok: false, error: "customer_contact_identity_context_required" }, 409);
+  }
+  if (conv.contact_id && !conv.business_contact_relationship_id) {
+    return json({ ok: false, error: "business_contact_relationship_context_required" }, 409);
+  }
 
   if (conv.business_contact_relationship_id) {
     const { data: relationship, error: relationshipError } = await sb.from("business_contact_relationships")

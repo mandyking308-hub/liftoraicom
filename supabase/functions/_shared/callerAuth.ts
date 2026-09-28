@@ -65,13 +65,18 @@ export async function requireFounderOrAdmin(
   if (!u?.user) {
     return { error: authJson({ ok: false, error: "auth_invalid" }, 401, headers) };
   }
-  const admin = adminClient();
-  const { data: roles } = await admin.from("user_roles").select("role").eq("user_id", u.user.id);
+  // user_roles has an RLS policy allowing a caller to read only their own
+  // roles. Check authorization through the caller-scoped client so no
+  // service-role client exists until both JWT and founder/admin status pass.
+  const { data: roles, error: rolesError } = await userClient.from("user_roles").select("role").eq("user_id", u.user.id);
+  if (rolesError) {
+    return { error: authJson({ ok: false, error: "caller_role_lookup_failed" }, 503, headers) };
+  }
   const roleSet = new Set((roles ?? []).map((r: { role: string }) => r.role));
   if (!roleSet.has("founder") && !roleSet.has("admin")) {
     return { error: authJson({ ok: false, error: "forbidden" }, 403, headers) };
   }
-  return { admin, user_id: u.user.id, trigger_source: "founder" };
+  return { admin: adminClient(), user_id: u.user.id, trigger_source: "founder" };
 }
 
 /**

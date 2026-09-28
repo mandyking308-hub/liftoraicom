@@ -129,24 +129,28 @@ export async function resolveOrCreateContact(
   const email = normalizeContactEmail(input.email);
   if (!email) throw new Error("Email is required to resolve a CRM contact.");
 
-  const { data: matches, error: lookupError } = await client.from("contacts")
-    .select("id,email")
-    .ilike("email", escapeLikePatternLiteral(email))
-    .limit(2);
-  if (lookupError) throw lookupError;
+  // Use the same normalized, ambiguity-safe global identity resolver as the
+  // checkout Edge Function. It compares lower(trim(email)) and only founder /
+  // admin CRM callers or service_role can execute it.
+  const { data: matchedContactId, error: lookupError } = await client.rpc("customer_sales_link_contact_by_email", { p_email: email });
+  if (lookupError) {
+    if (String(lookupError.message ?? "").includes("ambiguous_contact_email")) {
+      throw new Error("This email matches multiple CRM contacts. Resolve the duplicate identities before continuing.");
+    }
+    throw lookupError;
+  }
 
-  const existing = chooseUniqueContact((matches ?? []) as Array<{ id: string; email: string }>);
-  if (existing) {
+  if (typeof matchedContactId === "string" && matchedContactId) {
     const patch: Record<string, string> = {};
     for (const key of ["name", "company", "role", "source"] as const) {
       const value = input[key]?.trim();
       if (value) patch[key] = value;
     }
     if (Object.keys(patch).length) {
-      const { error } = await client.from("contacts").update(patch).eq("id", existing.id);
+      const { error } = await client.from("contacts").update(patch).eq("id", matchedContactId);
       if (error) throw error;
     }
-    return existing.id;
+    return matchedContactId;
   }
 
   // Keep the existing global-person upsert as the sole contact-creation path.
@@ -161,7 +165,8 @@ export async function resolveOrCreateContact(
     _assigned_inbox_id: null,
   });
   if (error) throw error;
-  const contactId = (data as { id?: unknown } | null)?.id;
+  const row = Array.isArray(data) ? data[0] : data;
+  const contactId = (row as { id?: unknown } | null)?.id;
   if (typeof contactId !== "string" || !contactId) {
     throw new Error("The master contact record could not be resolved.");
   }

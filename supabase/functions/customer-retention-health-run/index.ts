@@ -28,30 +28,52 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const { business_id = null, contact_id = null, dry_run = true, confirmation } = body ?? {};
     const willPersist = !dry_run && confirmation === CONFIRM;
+    if (!business_id) return new Response(JSON.stringify({ error: 'business_id required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    const businessResult = await admin.from('businesses').select('id,name').eq('id', business_id).maybeSingle();
+    if (businessResult.error || !businessResult.data) return new Response(JSON.stringify({ error: 'business_context_invalid' }), { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
-    let contactsQ = admin.from('contacts').select('id,name,email,company,assigned_business,status').limit(50);
-    if (contact_id) contactsQ = contactsQ.eq('id', contact_id);
-    else if (business_id) contactsQ = contactsQ.eq('assigned_business', business_id);
-    const { data: contacts } = await contactsQ;
+    let relationshipQuery = admin.from('business_contact_relationships').select('id,contact_id,business_id').eq('business_id', business_id).limit(50);
+    if (contact_id) relationshipQuery = relationshipQuery.eq('contact_id', contact_id);
+    const { data: relationships, error: relationshipError } = await relationshipQuery;
+    if (relationshipError) return new Response(JSON.stringify({ error: 'business_contact_relationship_unavailable' }), { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    if (contact_id && (relationships ?? []).length !== 1) return new Response(JSON.stringify({ error: (relationships ?? []).length ? 'ambiguous_business_contact_relationship' : 'business_contact_relationship_required' }), { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    const relationshipsByContact = new Map<string, any[]>();
+    for (const relationship of relationships ?? []) {
+      const matches = relationshipsByContact.get(relationship.contact_id) ?? [];
+      matches.push(relationship);
+      relationshipsByContact.set(relationship.contact_id, matches);
+    }
+    const ambiguousContactIds = new Set(
+      Array.from(relationshipsByContact.entries()).filter(([, rows]) => rows.length !== 1).map(([id]) => id),
+    );
+    const contactIds = Array.from(relationshipsByContact.keys()).filter((id) => !ambiguousContactIds.has(id));
+    const contactResult = contactIds.length
+      ? await admin.from('contacts').select('id,name,email,company,status').in('id', contactIds)
+      : { data: [], error: null };
+    if (contactResult.error) return new Response(JSON.stringify({ error: 'contact_lookup_failed' }), { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    const contacts = contactResult.data ?? [];
 
     const results: any[] = [];
     for (const c of (contacts ?? [])) {
       const cid = c.id;
-      const bid = business_id ?? c.assigned_business ?? null;
+      const bid = business_id;
+      const relationship: any = relationshipsByContact.get(cid)?.[0];
+      if (!relationship) continue;
 
-      const onboardingPlans = await safe(async () => (await admin.from('customer_onboarding_plans').select('id,onboarding_status,risks').eq('contact_id', cid).limit(20)).data ?? [], [] as any[]);
+      const onboardingPlans = await safe(async () => (await admin.from('customer_onboarding_plans').select('id,onboarding_status,risks').eq('contact_id', cid).eq('business_id', bid).limit(20)).data ?? [], [] as any[]);
       const onboardingTasks = await safe(async () => (await admin.from('customer_onboarding_tasks').select('id,task_status,due_at').in('onboarding_plan_id', onboardingPlans.map((p: any) => p.id).length ? onboardingPlans.map((p: any) => p.id) : ['00000000-0000-0000-0000-000000000000']).limit(200)).data ?? [], [] as any[]);
-      const memory = await safe(async () => (await admin.from('customer_memory_profiles').select('risk_flags,satisfaction_signals').eq('contact_id', cid).maybeSingle()).data, null as any);
-      const surveys = await safe(async () => (await admin.from('customer_survey_responses').select('csat_score,nps_score,sentiment,created_at').eq('contact_id', cid).order('created_at', { ascending: false }).limit(20)).data ?? [], [] as any[]);
-      const support = await safe(async () => (await admin.from('support_interaction_reviews').select('severity,created_at').eq('contact_id', cid).limit(50)).data ?? [], [] as any[]);
-      const complaints = await safe(async () => (await admin.from('customer_complaints').select('id,severity,status,created_at').eq('contact_id', cid).limit(50)).data ?? [], [] as any[]);
-      const disputes = await safe(async () => (await admin.from('customer_disputes').select('id,status,created_at').eq('contact_id', cid).limit(50)).data ?? [], [] as any[]);
-      const reports = await safe(async () => (await admin.from('customer_quarterly_reports').select('id,report_status,reporting_period_end,renewal_risk_flags,upsell_opportunities').eq('contact_id', cid).limit(20)).data ?? [], [] as any[]);
-      const invoices = await safe(async () => (await admin.from('invoices').select('id,status,amount,created_at').eq('contact_id', cid).limit(50)).data ?? [], [] as any[]);
-      const payments = await safe(async () => (await admin.from('payments').select('id,amount,received_at').eq('contact_id', cid).limit(50)).data ?? [], [] as any[]);
-      const upsells = await safe(async () => (await admin.from('customer_upsell_recommendations').select('id,fit_score,recommendation_status').eq('contact_id', cid).limit(50)).data ?? [], [] as any[]);
-      const conversations = await safe(async () => (await admin.from('conversations').select('id,last_message_at,status').eq('contact_id', cid).limit(50)).data ?? [], [] as any[]);
-      const ledger = await safe(async () => (await admin.from('crm_interaction_ledger').select('id,occurred_at').eq('contact_id', cid).limit(200)).data ?? [], [] as any[]);
+      const memory = await safe(async () => (await admin.from('customer_memory_profiles').select('risk_flags,satisfaction_signals').eq('contact_id', cid).eq('business_id', bid).maybeSingle()).data, null as any);
+      const surveys = await safe(async () => (await admin.from('customer_survey_responses').select('csat_score,nps_score,sentiment,created_at').eq('contact_id', cid).eq('business_id', bid).order('created_at', { ascending: false }).limit(20)).data ?? [], [] as any[]);
+      const support = await safe(async () => (await admin.from('support_interaction_reviews').select('severity,created_at').eq('contact_id', cid).eq('business_id', bid).limit(50)).data ?? [], [] as any[]);
+      const complaints = await safe(async () => (await admin.from('customer_complaints').select('id,severity,status,created_at').eq('contact_id', cid).eq('business_id', bid).limit(50)).data ?? [], [] as any[]);
+      const disputes = await safe(async () => (await admin.from('customer_disputes').select('id,status,created_at').eq('contact_id', cid).eq('business_id', bid).limit(50)).data ?? [], [] as any[]);
+      const reports = await safe(async () => (await admin.from('customer_quarterly_reports').select('id,report_status,reporting_period_end,renewal_risk_flags,upsell_opportunities').eq('contact_id', cid).eq('business_id', bid).limit(20)).data ?? [], [] as any[]);
+      const invoices = await safe(async () => (await admin.from('invoices').select('id,status,amount,created_at').eq('contact_id', cid).eq('business_name', businessResult.data.name).limit(50)).data ?? [], [] as any[]);
+      const invoiceIds = invoices.map((i: any) => i.id);
+      const payments = invoiceIds.length ? await safe(async () => (await admin.from('payments').select('id,amount_received,received_date').in('invoice_id', invoiceIds).limit(50)).data ?? [], [] as any[]) : [];
+      const upsells = await safe(async () => (await admin.from('customer_upsell_recommendations').select('id,fit_score,recommendation_status').eq('contact_id', cid).eq('business_id', bid).limit(50)).data ?? [], [] as any[]);
+      const conversations = await safe(async () => (await admin.from('customer_sales_conversations').select('id,updated_at,conversation_status').eq('contact_id', cid).eq('business_id', bid).limit(50)).data ?? [], [] as any[]);
+      const ledger = await safe(async () => (await admin.from('crm_interaction_ledger').select('id,occurred_at').eq('contact_id', cid).eq('business_id', bid).limit(200)).data ?? [], [] as any[]);
 
       const now = Date.now();
       const overdue = onboardingTasks.filter((t: any) => t.due_at && new Date(t.due_at).getTime() < now && t.task_status !== 'done').length;
@@ -112,6 +134,7 @@ Deno.serve(async (req) => {
 
       const scoreRow = {
         business_id: bid,
+        business_contact_relationship_id: relationship.id,
         contact_id: cid,
         score_date: new Date().toISOString().slice(0, 10),
         onboarding_score: onboardingScore,
@@ -133,7 +156,7 @@ Deno.serve(async (req) => {
         const ins = await admin.from('customer_retention_scores').insert(scoreRow).select('id').maybeSingle();
         persisted.score_id = ins.data?.id ?? null;
         if (recommendations.length) {
-          const recRows = recommendations.map((r) => ({ ...r, business_id: bid, contact_id: cid, owner_agent_key: 'customer_success_agent', founder_review_required: true, status: 'pending', evidence }));
+          const recRows = recommendations.map((r) => ({ ...r, business_id: bid, business_contact_relationship_id: relationship.id, contact_id: cid, owner_agent_key: 'customer_success_agent', founder_review_required: true, status: 'pending', evidence }));
           const recIns = await admin.from('retention_risk_recommendations').insert(recRows).select('id');
           persisted.recommendation_ids = (recIns.data ?? []).map((x: any) => x.id);
         }

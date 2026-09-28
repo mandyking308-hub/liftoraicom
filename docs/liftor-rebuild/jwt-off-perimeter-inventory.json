@@ -1,7 +1,7 @@
 {
   "purpose": "Machine-readable perimeter classification for every Edge Function deployed with verify_jwt = false. A function may appear in supabase/config.toml with verify_jwt = false only if it is listed here with an explicit, implemented perimeter. scripts/check-jwt-off-perimeter.mjs fails when the two lists diverge.",
   "stage": "Stage 1 — security perimeter hardening",
-  "reviewed_at": "2026-09-21",
+  "reviewed_at": "2026-09-23",
   "allowed_perimeter_kinds": [
     "provider_hmac_signature",
     "shared_secret_header",
@@ -98,6 +98,22 @@
       "writes": "payment/invoice state",
       "rationale": "Stripe event return path",
       "hardened_in_stage_1": false
+    },
+    "customer-success-standard-run": {
+      "perimeter": "founder_jwt_or_shared_secret",
+      "mechanism": "requireFounderOrCron validates founder/admin JWT or x-cron-secret === CRON_SECRET before privileged queue access",
+      "write_capable": true,
+      "writes": "business-scoped standard customer success queue, customer actions and commercial audit events",
+      "rationale": "scheduled queue execution plus founder run-now",
+      "hardened_in_stage_1": true
+    },
+    "customer-success-standard-enqueue": {
+      "perimeter": "founder_jwt_or_shared_secret",
+      "mechanism": "requireFounderOrCron validates founder/admin JWT or x-cron-secret === CRON_SECRET before scoped relationship and policy checks",
+      "write_capable": true,
+      "writes": "business-scoped, idempotent standard customer success queue and commercial audit events",
+      "rationale": "trusted CRM and scheduler events enqueue standard actions",
+      "hardened_in_stage_1": true
     },
     "pr-gmail-oauth-callback": {
       "perimeter": "oauth_state_hmac",

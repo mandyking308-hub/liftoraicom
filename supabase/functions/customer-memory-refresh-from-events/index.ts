@@ -22,25 +22,49 @@ Deno.serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const { contact_id = null, business_id = null, dry_run = false, max_contacts = 50 } = body ?? {};
+    if (!business_id) return new Response(JSON.stringify({ error: 'business_id required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    const businessResult = await admin.from('businesses').select('id').eq('id', business_id).maybeSingle();
+    if (businessResult.error || !businessResult.data) return new Response(JSON.stringify({ error: 'business_context_invalid' }), { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
-    let q = admin.from('contacts').select('id,name,assigned_business').limit(max_contacts);
-    if (contact_id) q = q.eq('id', contact_id);
-    else if (business_id) q = q.eq('assigned_business', business_id);
-    const { data: contacts } = await q;
+    let relationshipQuery = admin.from('business_contact_relationships').select('id,contact_id,business_id').eq('business_id', business_id).limit(max_contacts);
+    if (contact_id) relationshipQuery = relationshipQuery.eq('contact_id', contact_id);
+    const { data: relationships, error: relationshipError } = await relationshipQuery;
+    if (relationshipError) return new Response(JSON.stringify({ error: 'business_contact_relationship_unavailable' }), { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    if (contact_id && (relationships ?? []).length !== 1) return new Response(JSON.stringify({ error: (relationships ?? []).length ? 'ambiguous_business_contact_relationship' : 'business_contact_relationship_required' }), { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    const relationshipGroups = new Map<string, any[]>();
+    for (const relationship of (relationships ?? [])) {
+      const grouped = relationshipGroups.get(relationship.contact_id) ?? [];
+      grouped.push(relationship);
+      relationshipGroups.set(relationship.contact_id, grouped);
+    }
+    if (contact_id && (relationshipGroups.get(contact_id)?.length ?? 0) !== 1) {
+      return new Response(JSON.stringify({ error: "ambiguous_business_contact_relationship" }), { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+    const relationshipByContact = new Map(
+      [...relationshipGroups.entries()].filter(([, rows]) => rows.length === 1).map(([cid, rows]) => [cid, rows[0]]),
+    );
+    const contactIds = Array.from(relationshipByContact.keys());
+    const contactResult = contactIds.length
+      ? await admin.from('contacts').select('id,name').in('id', contactIds)
+      : { data: [], error: null };
+    if (contactResult.error) return new Response(JSON.stringify({ error: 'contact_lookup_failed' }), { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    const contacts = contactResult.data ?? [];
 
     const results: any[] = [];
     for (const c of (contacts ?? [])) {
       const cid = c.id;
-      const surveys = await safe(async () => (await admin.from('customer_survey_responses').select('csat_score,sentiment,competitor_mentions,key_needs,created_at').eq('contact_id', cid).order('created_at', { ascending: false }).limit(20)).data ?? [], [] as any[]);
-      const complaints = await safe(async () => (await admin.from('customer_complaints').select('id,severity,status,summary').eq('contact_id', cid).limit(20)).data ?? [], [] as any[]);
-      const disputes = await safe(async () => (await admin.from('customer_disputes').select('id,status').eq('contact_id', cid).limit(20)).data ?? [], [] as any[]);
-      const onboarding = await safe(async () => (await admin.from('customer_onboarding_plans').select('onboarding_status,risks').eq('contact_id', cid).limit(10)).data ?? [], [] as any[]);
-      const reports = await safe(async () => (await admin.from('customer_quarterly_reports').select('renewal_risk_flags,upsell_opportunities,reporting_period_end').eq('contact_id', cid).order('reporting_period_end', { ascending: false }).limit(5)).data ?? [], [] as any[]);
-      const winback = await safe(async () => (await admin.from('customer_winback_plans').select('id,plan_status,winback_reason,churn_risk_level').eq('contact_id', cid).order('created_at', { ascending: false }).limit(5)).data ?? [], [] as any[]);
-      const support = await safe(async () => (await admin.from('support_interaction_reviews').select('severity,theme').eq('contact_id', cid).limit(50)).data ?? [], [] as any[]);
-      const success = await safe(async () => (await admin.from('customer_success_plans').select('plan_status,risks,next_best_actions').eq('contact_id', cid).limit(10)).data ?? [], [] as any[]);
-      const upsells = await safe(async () => (await admin.from('customer_upsell_recommendations').select('id,recommendation_status,reason').eq('contact_id', cid).limit(20)).data ?? [], [] as any[]);
-      const ledger = await safe(async () => (await admin.from('crm_interaction_ledger').select('occurred_at,interaction_type').eq('contact_id', cid).order('occurred_at', { ascending: false }).limit(5)).data ?? [], [] as any[]);
+      const bcr: any = relationshipByContact.get(cid);
+      if (!bcr || bcr.business_id !== business_id || bcr.contact_id !== cid) continue;
+      const surveys = await safe(async () => (await admin.from('customer_survey_responses').select('csat_score,sentiment,competitor_mentions,key_needs,created_at').eq('contact_id', cid).eq('business_id', business_id).order('created_at', { ascending: false }).limit(20)).data ?? [], [] as any[]);
+      const complaints = await safe(async () => (await admin.from('customer_complaints').select('id,severity,status,summary').eq('contact_id', cid).eq('business_id', business_id).limit(20)).data ?? [], [] as any[]);
+      const disputes = await safe(async () => (await admin.from('customer_disputes').select('id,status').eq('contact_id', cid).eq('business_id', business_id).limit(20)).data ?? [], [] as any[]);
+      const onboarding = await safe(async () => (await admin.from('customer_onboarding_plans').select('onboarding_status,risks').eq('contact_id', cid).eq('business_id', business_id).limit(10)).data ?? [], [] as any[]);
+      const reports = await safe(async () => (await admin.from('customer_quarterly_reports').select('renewal_risk_flags,upsell_opportunities,reporting_period_end').eq('contact_id', cid).eq('business_id', business_id).order('reporting_period_end', { ascending: false }).limit(5)).data ?? [], [] as any[]);
+      const winback = await safe(async () => (await admin.from('customer_winback_plans').select('id,plan_status,winback_reason,churn_risk_level').eq('contact_id', cid).eq('business_id', business_id).order('created_at', { ascending: false }).limit(5)).data ?? [], [] as any[]);
+      const support = await safe(async () => (await admin.from('support_interaction_reviews').select('severity,theme').eq('contact_id', cid).eq('business_id', business_id).limit(50)).data ?? [], [] as any[]);
+      const success = await safe(async () => (await admin.from('customer_success_plans').select('plan_status,risks,next_best_actions').eq('contact_id', cid).eq('business_id', business_id).limit(10)).data ?? [], [] as any[]);
+      const upsells = await safe(async () => (await admin.from('customer_upsell_recommendations').select('id,recommendation_status,reason').eq('contact_id', cid).eq('business_id', business_id).limit(20)).data ?? [], [] as any[]);
+      const ledger = await safe(async () => (await admin.from('crm_interaction_ledger').select('occurred_at,interaction_type').eq('contact_id', cid).eq('business_id', business_id).order('occurred_at', { ascending: false }).limit(5)).data ?? [], [] as any[]);
 
       const csat = surveys.map((s) => s.csat_score).filter((n: any) => typeof n === 'number');
       const avgCsat = csat.length ? csat.reduce((a: number, b: number) => a + b, 0) / csat.length : null;
@@ -59,7 +83,8 @@ Deno.serve(async (req) => {
       const next_best_action = openComplaints ? 'Review complaint recovery plan and book founder check-in.' : (wb ? `Review win-back plan: ${wb.winback_reason}` : (upsellInterest.length ? 'Review upsell opportunity with founder.' : (avgCsat != null && avgCsat < 3 ? 'Schedule satisfaction recovery call.' : 'Continue regular check-ins.')));
 
       const profile = {
-        business_id: business_id ?? c.assigned_business ?? null,
+        business_id,
+        business_contact_relationship_id: bcr.id,
         contact_id: cid,
         profile_status: 'active',
         relationship_summary: `Onboarding: ${onboarding[0]?.onboarding_status ?? 'n/a'}. Last interaction: ${ledger[0]?.occurred_at ?? 'n/a'}.`,
@@ -79,7 +104,7 @@ Deno.serve(async (req) => {
 
       let persisted: any = { profile_id: null, mode: 'dry_run' };
       if (!dry_run) {
-        const exist = await admin.from('customer_memory_profiles').select('id').eq('contact_id', cid).maybeSingle();
+        const exist = await admin.from('customer_memory_profiles').select('id').eq('contact_id', cid).eq('business_id', business_id).maybeSingle();
         if (exist.data?.id) {
           const upd = await admin.from('customer_memory_profiles').update(profile).eq('id', exist.data.id).select('id').maybeSingle();
           persisted = { profile_id: upd.data?.id, mode: 'updated' };

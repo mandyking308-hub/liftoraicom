@@ -347,7 +347,7 @@ function BrainPanel({ conversation, onClose }: { conversation: any; onClose: () 
     setRunning(true);
     try {
       const { data, error } = await supabase.functions.invoke("sales-conversation-brain", {
-        body: { conversation_id: conversation.id, customer_message: message, playbook_id: playbookId },
+        body: { conversation_id: conversation.id, business_id: conversation.business_id, customer_message: message, playbook_id: playbookId },
       });
       if (error) throw error;
       if (!data?.ok) throw new Error(data?.error || "Brain run failed");
