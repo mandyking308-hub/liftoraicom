@@ -9,6 +9,8 @@ import {
   getProviderType, isInternalTestPayload,
 } from "../_shared/voiceProviderShared.ts";
 import { callAIGateway } from "../_shared/aiGateway.ts";
+import { assertCustomerSalesBusiness, CustomerSalesScopeError, requireCustomerSalesBusinessId } from "../_shared/customerSalesScope.ts";
+import { classifyCustomerSalesContactLookup } from "../_shared/customerSalesIdentity.ts";
 
 const ANALYSIS_TOOL = {
   type: "function",
@@ -83,12 +85,91 @@ Deno.serve(async (req) => {
   }
 
   // Optional product/playbook context
+  if (conversation?.business_id && callLog?.business_id && conversation.business_id !== callLog.business_id) {
+    return json({ ok: false, error: "business_context_conflict" }, 409);
+  }
   const productId = conversation?.product_id ?? body?.product_id ?? null;
   const playbookId = conversation?.playbook_id ?? body?.playbook_id ?? null;
-  const [{ data: product }, { data: playbook }] = await Promise.all([
-    productId ? a.admin.from("customer_sales_products").select("product_name,product_summary,target_customer,offers_summary,do_not_say,escalation_rules").eq("id", productId).maybeSingle() : Promise.resolve({ data: null }),
-    playbookId ? a.admin.from("customer_sales_playbooks").select("playbook_name,use_case,approved_claims,prohibited_claims,close_action_allowed,consent_notice").eq("id", playbookId).maybeSingle() : Promise.resolve({ data: null }),
+  const offerId = conversation?.offer_id ?? body?.offer_id ?? null;
+  const businessValue = conversation?.business_id ?? callLog?.business_id ?? null;
+  let businessId: string | null = null;
+  if (productId || playbookId || offerId) {
+    try {
+      businessId = requireCustomerSalesBusinessId(businessValue);
+    } catch (error) {
+      return json({ ok: false, error: (error as CustomerSalesScopeError).code }, 409);
+    }
+  } else if (typeof businessValue === "string" && businessValue.trim()) {
+    businessId = businessValue;
+  }
+
+  const [productResult, playbookResult, offerResult] = await Promise.all([
+    productId && businessId
+      ? a.admin.from("customer_sales_products").select("id,business_id,product_name,product_summary,target_customer,offers_summary,do_not_say,escalation_rules").eq("id", productId).eq("business_id", businessId).maybeSingle()
+      : Promise.resolve({ data: null, error: null }),
+    playbookId && businessId
+      ? a.admin.from("customer_sales_playbooks").select("id,business_id,product_id,offer_id,playbook_name,use_case,approved_claims,prohibited_claims,close_action_allowed,consent_notice").eq("id", playbookId).eq("business_id", businessId).maybeSingle()
+      : Promise.resolve({ data: null, error: null }),
+    offerId && businessId
+      ? a.admin.from("customer_sales_offers").select("id,business_id,product_id,offer_name,offer_summary,approved_claims,prohibited_claims").eq("id", offerId).eq("business_id", businessId).eq("active", true).maybeSingle()
+      : Promise.resolve({ data: null, error: null }),
   ]);
+  if (productResult.error || playbookResult.error || offerResult.error) {
+    return json({ ok: false, error: "business_catalog_unavailable" }, 503);
+  }
+  let product = productResult.data;
+  const playbook = playbookResult.data;
+  let offer = offerResult.data;
+  if (productId) {
+    try { assertCustomerSalesBusiness(product, businessId!, "product"); }
+    catch (error) { return json({ ok: false, error: (error as CustomerSalesScopeError).code }, 409); }
+  }
+  if (playbookId) {
+    try { assertCustomerSalesBusiness(playbook, businessId!, "playbook"); }
+    catch (error) { return json({ ok: false, error: (error as CustomerSalesScopeError).code }, 409); }
+  }
+  if (offerId) {
+    try { assertCustomerSalesBusiness(offer, businessId!, "offer"); }
+    catch (error) { return json({ ok: false, error: (error as CustomerSalesScopeError).code }, 409); }
+  }
+
+  const effectiveOfferId = offerId ?? playbook?.offer_id ?? null;
+  if (playbook?.offer_id && offerId && playbook.offer_id !== offerId) {
+    return json({ ok: false, error: "playbook_offer_mismatch" }, 409);
+  }
+  if (!offer && effectiveOfferId && businessId) {
+    const result = await a.admin.from("customer_sales_offers")
+      .select("id,business_id,product_id,offer_name,offer_summary,approved_claims,prohibited_claims")
+      .eq("id", effectiveOfferId)
+      .eq("business_id", businessId)
+      .eq("active", true)
+      .maybeSingle();
+    if (result.error) return json({ ok: false, error: "business_catalog_unavailable" }, 503);
+    offer = result.data;
+    try { assertCustomerSalesBusiness(offer, businessId, "offer"); }
+    catch (error) { return json({ ok: false, error: (error as CustomerSalesScopeError).code }, 409); }
+  }
+  const effectiveProductId = productId ?? offer?.product_id ?? playbook?.product_id ?? null;
+  if ((offer?.product_id && effectiveProductId && offer.product_id !== effectiveProductId) ||
+      (playbook?.product_id && effectiveProductId && playbook.product_id !== effectiveProductId)) {
+    return json({ ok: false, error: "product_offer_playbook_mismatch" }, 409);
+  }
+  if (!product && effectiveProductId && businessId) {
+    const result = await a.admin.from("customer_sales_products")
+      .select("id,business_id,product_name,product_summary,target_customer,offers_summary,do_not_say,escalation_rules")
+      .eq("id", effectiveProductId)
+      .eq("business_id", businessId)
+      .eq("active", true)
+      .maybeSingle();
+    if (result.error) return json({ ok: false, error: "business_catalog_unavailable" }, 503);
+    product = result.data;
+    try { assertCustomerSalesBusiness(product, businessId, "product"); }
+    catch (error) { return json({ ok: false, error: (error as CustomerSalesScopeError).code }, 409); }
+  }
+  if (businessId) {
+    const { data: business, error } = await a.admin.from("businesses").select("id").eq("id", businessId).maybeSingle();
+    if (error || !business) return json({ ok: false, error: "business_context_invalid" }, 409);
+  }
 
   const systemMsg = [
     "You are Liftor's internal Post-Call Analysis engine.",
@@ -100,14 +181,14 @@ Deno.serve(async (req) => {
 
   const userMsg = [
     "Context (JSON):",
-    JSON.stringify({ product, playbook, conversation_status: conversation?.conversation_status, channel: conversation?.channel, direction: conversation?.direction }).slice(0, 6000),
+    JSON.stringify({ product, offer, playbook, conversation_status: conversation?.conversation_status, channel: conversation?.channel, direction: conversation?.direction }).slice(0, 6000),
     "",
     "Transcript:",
     transcript.slice(0, 14000),
   ].join("\n");
 
   const gateway = await callAIGateway({
-    business_id: conversation?.business_id ?? callLog?.business_id ?? null,
+    business_id: businessId,
     action_type: "post_call_analysis",
     task_category: "sales_intelligence",
     request_type: "post_call_analysis",
@@ -135,16 +216,30 @@ Deno.serve(async (req) => {
   const buying_signals: string[] = Array.isArray(analysis.buying_signals) ? analysis.buying_signals : [];
   const escalation_needed = !!analysis.escalation_needed;
   const consent_concern = !!analysis.consent_concern;
-  const needsApproval = !!analysis.founder_approval_required || escalation_needed || (playbook?.close_action_allowed && playbook.close_action_allowed !== "auto");
+  let needsApproval = !!analysis.founder_approval_required || escalation_needed || (playbook?.close_action_allowed && playbook.close_action_allowed !== "auto");
 
   // CRM handoff — link to contact by email if available
-  let contact_id: string | null = callLog?.contact_id ?? null;
-  let linked_contact_email: string | null = conversation?.linked_contact_email ?? null;
-  const candidate_email = conversation?.customer_email ?? body?.customer_email ?? null;
-  if (!contact_id && candidate_email) {
-    const { data: hit } = await a.admin.rpc("customer_sales_link_contact_by_email", { p_email: candidate_email });
-    if (hit) { contact_id = hit as unknown as string; linked_contact_email = candidate_email; }
+  const linkedContactConflict = !!callLog?.contact_id && !!conversation?.contact_id && callLog.contact_id !== conversation.contact_id;
+  let contact_id: string | null = linkedContactConflict ? null : callLog?.contact_id ?? conversation?.contact_id ?? null;
+  let linked_contact_email: string | null = linkedContactConflict ? null : conversation?.linked_contact_email ?? null;
+  const candidate_email = (conversation?.customer_email ?? body?.customer_email ?? null)?.trim() || null;
+  let contactIdentityStatus = linkedContactConflict ? "identity_conflict" : contact_id ? "already_linked" : (candidate_email ? "not_resolved" : "not_provided");
+  let contactIdentityNeedsReview = linkedContactConflict;
+  if (linkedContactConflict) needsApproval = true;
+  if (!linkedContactConflict && !contact_id && candidate_email) {
+    const { data: hit, error } = await a.admin.rpc("customer_sales_link_contact_by_email", { p_email: candidate_email });
+    const outcome = classifyCustomerSalesContactLookup(hit, error?.message);
+    contactIdentityStatus = outcome.status;
+    if (outcome.needsReview) {
+      contactIdentityNeedsReview = true;
+      needsApproval = true;
+      linked_contact_email = null;
+    } else if (outcome.contactId) {
+      contact_id = outcome.contactId;
+      linked_contact_email = candidate_email;
+    }
   }
+  analysis.crm_identity_resolution = { status: contactIdentityStatus, founder_review_required: contactIdentityNeedsReview };
 
   // Update call log
   if (call_log_id) {
@@ -189,7 +284,7 @@ Deno.serve(async (req) => {
       last_analysed_at: new Date().toISOString(),
       contact_id: contact_id ?? conversation?.contact_id ?? null,
       linked_contact_email,
-      conversation_status: escalation_needed ? "escalated" : (analysis.call_outcome === "ready_to_buy" ? "follow_up_needed" : conversation?.conversation_status ?? "active"),
+      conversation_status: (escalation_needed || contactIdentityNeedsReview) ? "escalated" : (analysis.call_outcome === "ready_to_buy" ? "follow_up_needed" : conversation?.conversation_status ?? "active"),
       test_label: test_label ?? conversation?.test_label ?? null,
     }).eq("id", conversation_id);
   }
@@ -199,7 +294,7 @@ Deno.serve(async (req) => {
   if (needsApproval || (analysis.follow_up_draft && (analysis.call_outcome ?? "") !== "not_interested")) {
     try {
       const { data: appr } = await a.admin.from("founder_approval_items").insert({
-        business_id: conversation?.business_id ?? null,
+        business_id: businessId,
         approval_type: "customer_sales_follow_up",
         source_system: "customer_sales",
         source_table: "customer_sales_call_logs",
@@ -210,8 +305,11 @@ Deno.serve(async (req) => {
         summary: analysis.transcript_summary ?? null,
         recommended_action: analysis.recommended_next_step ?? null,
         draft_body: analysis.follow_up_draft ?? null,
-        priority_level: escalation_needed ? "high" : "normal",
-        risk_flags: consent_concern ? ["consent_missing"] : [],
+        priority_level: (escalation_needed || contactIdentityNeedsReview) ? "high" : "normal",
+        risk_flags: [
+          ...(consent_concern ? ["consent_missing"] : []),
+          ...(contactIdentityNeedsReview ? [`contact_identity_${contactIdentityStatus}`] : []),
+        ],
         status: "pending",
       }).select("id").maybeSingle();
       approval_id = appr?.id ?? null;
@@ -223,11 +321,11 @@ Deno.serve(async (req) => {
   if (analysis.call_outcome === "ready_to_buy" || (analysis.close_probability ?? 0) >= 0.7) {
     try {
       const { data: ca } = await a.admin.from("customer_sales_close_actions").insert({
-        business_id: conversation?.business_id ?? null,
+        business_id: businessId,
         conversation_id,
         contact_id,
-        product_id: productId,
-        offer_id: conversation?.offer_id ?? null,
+        product_id: effectiveProductId,
+        offer_id: effectiveOfferId,
         close_action_type: "follow_up_email",
         action_status: "draft",
         founder_approval_required: true,
@@ -243,6 +341,7 @@ Deno.serve(async (req) => {
 
   const result = {
     analysed: true, conversation_id, call_log_id, contact_id,
+    contact_identity_status: contactIdentityStatus,
     approval_id, close_action_id,
     call_outcome: analysis.call_outcome ?? null,
     escalation_needed, consent_concern,

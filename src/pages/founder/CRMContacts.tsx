@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { loadPortfolioContacts, type PortfolioContactRow } from "@/lib/portfolioCrmQueries";
+import { ensureBusinessContactRelationship, resolveOrCreateContact } from "@/lib/businessContactRelationship";
 import { toast } from "sonner";
 
 const STATUSES = ["NEW", "CONTACTED", "ENGAGED", "QUALIFIED", "CLIENT", "SUPPLIER", "DO_NOT_CONTACT"];
@@ -40,12 +41,14 @@ const CRMContacts = () => {
   const [statusFilter, setStatusFilter] = useState<string>(initialStatus);
   const [search, setSearch] = useState(params.get("search") ?? "");
   const [contacts, setContacts] = useState<PortfolioContactRow[]>([]);
+  const [businesses, setBusinesses] = useState<Array<{ id: string; name: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ email: "", name: "", company: "", role: "", source: "", assigned_business: "" });
+  const [form, setForm] = useState({ email: "", name: "", company: "", role: "", source: "", business_id: "" });
 
   useEffect(() => {
     void load();
+    void loadBusinesses();
   }, []);
 
   async function load() {
@@ -57,6 +60,15 @@ const CRMContacts = () => {
     } finally {
       setLoading(false);
     }
+  }
+
+  async function loadBusinesses() {
+    const { data, error } = await supabase.from("businesses").select("id,name").order("name");
+    if (error) {
+      toast.error(`Could not load portfolio businesses: ${error.message}`);
+      return;
+    }
+    setBusinesses(data ?? []);
   }
 
   const datasetScoped = useMemo(
@@ -80,22 +92,35 @@ const CRMContacts = () => {
       toast.error("Email is required");
       return;
     }
-    const { error } = await supabase.rpc("upsert_contact", {
-      _email: form.email.trim().toLowerCase(),
-      _name: form.name || null,
-      _company: form.company || null,
-      _role: form.role || null,
-      _source: form.source || null,
-      _assigned_business: form.assigned_business || null,
-      _assigned_inbox_id: null,
-    });
-    if (error) {
-      toast.error(error.message);
+    const business = form.business_id ? businesses.find((row) => row.id === form.business_id) : null;
+    if (form.business_id && !business) {
+      toast.error("Choose a current portfolio business or clear the relationship selection.");
       return;
     }
-    toast.success("Contact saved to master portfolio CRM");
+
+    try {
+      const contactId = await resolveOrCreateContact(supabase, {
+        email: form.email,
+        name: form.name,
+        company: form.company,
+        role: form.role,
+        source: form.source,
+      });
+      if (business) {
+        await ensureBusinessContactRelationship(supabase, {
+          contactId,
+          businessId: business.id,
+          businessName: business.name,
+        });
+      }
+    } catch (error) {
+      toast.error((error as Error).message || "Contact could not be saved.");
+      return;
+    }
+
+    toast.success(business ? "Master contact and business relationship saved" : "Contact saved to master portfolio CRM");
     setOpen(false);
-    setForm({ email: "", name: "", company: "", role: "", source: "", assigned_business: "" });
+    setForm({ email: "", name: "", company: "", role: "", source: "", business_id: "" });
     void load();
   }
 
@@ -134,7 +159,6 @@ const CRMContacts = () => {
                   { k: "company", label: "Organisation / company" },
                   { k: "role", label: "Role" },
                   { k: "source", label: "Source" },
-                  { k: "assigned_business", label: "Initial business (legacy compatibility only)" },
                 ].map((f) => (
                   <div key={f.k} className="space-y-1.5">
                     <Label className="text-xs uppercase tracking-wider text-muted-foreground">{f.label}</Label>
@@ -144,8 +168,18 @@ const CRMContacts = () => {
                     />
                   </div>
                 ))}
+                <div className="space-y-1.5">
+                  <Label className="text-xs uppercase tracking-wider text-muted-foreground">Business relationship (optional)</Label>
+                  <Select value={form.business_id || "_none"} onValueChange={(value) => setForm({ ...form, business_id: value === "_none" ? "" : value })}>
+                    <SelectTrigger><SelectValue placeholder="No business relationship" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="_none">No business relationship</SelectItem>
+                      {businesses.map((business) => <SelectItem key={business.id} value={business.id}>{business.name}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
                 <p className="text-xs text-muted-foreground">
-                  The initial business field is retained only so older workflows keep working. Add all real portfolio relevance through business relationships.
+                  This creates or resolves a business_contact_relationships record. The master person stays global; legacy assigned_business is not used for business scope.
                 </p>
               </div>
               <DialogFooter>
