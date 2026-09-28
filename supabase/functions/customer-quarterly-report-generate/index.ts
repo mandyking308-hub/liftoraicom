@@ -25,26 +25,35 @@ Deno.serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const { business_id, contact_id, deal_id, organisation_id, reporting_period_start, reporting_period_end, dry_run = true, confirmation } = body ?? {};
-    if (!contact_id || !reporting_period_start || !reporting_period_end) {
-      return new Response(JSON.stringify({ error: 'contact_id, reporting_period_start, reporting_period_end required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    if (!business_id || !contact_id || !reporting_period_start || !reporting_period_end) {
+      return new Response(JSON.stringify({ error: 'business_id, contact_id, reporting_period_start, reporting_period_end required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
     const start = reporting_period_start, end = reporting_period_end;
-    const inRange = (col: string) => ({ gte: start, lte: end, col });
+    const businessResult = await admin.from('businesses').select('id,name').eq('id', business_id).maybeSingle();
+    if (businessResult.error || !businessResult.data) return new Response(JSON.stringify({ error: 'business_context_invalid' }), { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    const contactResult = await admin.from('contacts').select('id,name,email,company,status').eq('id', contact_id).maybeSingle();
+    if (contactResult.error || !contactResult.data) return new Response(JSON.stringify({ error: 'contact_not_found' }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    const contact = contactResult.data;
+    const relationshipResult = await admin.from('business_contact_relationships').select('id,contact_id,business_id')
+      .eq('contact_id', contact_id).eq('business_id', business_id).limit(2);
+    if (relationshipResult.error) return new Response(JSON.stringify({ error: 'business_contact_relationship_unavailable' }), { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    if ((relationshipResult.data ?? []).length !== 1) return new Response(JSON.stringify({ error: relationshipResult.data?.length ? 'ambiguous_business_contact_relationship' : 'business_contact_relationship_required' }), { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    const relationship = relationshipResult.data[0];
 
-    const contact = await safe(async () => (await admin.from('contacts').select('id,name,email,company,assigned_business,status').eq('id', contact_id).maybeSingle()).data, null as any);
-    const memory = await safe(async () => (await admin.from('customer_memory_profiles').select('*').eq('contact_id', contact_id).maybeSingle()).data, null as any);
-    const ledger = await safe(async () => (await admin.from('crm_interaction_ledger').select('id,interaction_type,direction,channel,subject,occurred_at').eq('contact_id', contact_id).gte('occurred_at', start).lte('occurred_at', end).limit(500)).data ?? [], [] as any[]);
-    const conversations = await safe(async () => (await admin.from('conversations').select('id,last_message_at,status').eq('contact_id', contact_id).gte('last_message_at', start).lte('last_message_at', end).limit(200)).data ?? [], [] as any[]);
-    const proposals = await safe(async () => (await admin.from('proposals').select('id,status,created_at,total_value').eq('contact_id', contact_id).gte('created_at', start).lte('created_at', end).limit(100)).data ?? [], [] as any[]);
-    const deals = await safe(async () => (await admin.from('deals').select('id,status,value,created_at').eq('contact_id', contact_id).gte('created_at', start).lte('created_at', end).limit(100)).data ?? [], [] as any[]);
-    const invoices = await safe(async () => (await admin.from('invoices').select('id,status,amount,created_at').eq('contact_id', contact_id).gte('created_at', start).lte('created_at', end).limit(100)).data ?? [], [] as any[]);
-    const payments = await safe(async () => (await admin.from('payments').select('id,amount,received_at').eq('contact_id', contact_id).gte('received_at', start).lte('received_at', end).limit(100)).data ?? [], [] as any[]);
-    const support = await safe(async () => (await admin.from('support_interaction_reviews').select('id,severity,theme,objection,created_at').eq('contact_id', contact_id).gte('created_at', start).lte('created_at', end).limit(100)).data ?? [], [] as any[]);
-    const surveys = await safe(async () => (await admin.from('customer_survey_responses').select('csat_score,nps_score,sentiment,key_needs,competitor_mentions,created_at').eq('contact_id', contact_id).gte('created_at', start).lte('created_at', end).limit(100)).data ?? [], [] as any[]);
-    const successPlans = await safe(async () => (await admin.from('customer_success_plans').select('id,plan_status,risks,next_best_actions,follow_up_due_at').eq('contact_id', contact_id).limit(20)).data ?? [], [] as any[]);
-    const upsells = await safe(async () => (await admin.from('customer_upsell_recommendations').select('id,recommendation_status,reason,fit_score,customer_need_matched').eq('contact_id', contact_id).limit(50)).data ?? [], [] as any[]);
-    const demos = await safe(async () => (await admin.from('demo_events').select('id,event_type,occurred_at').eq('contact_id', contact_id).gte('occurred_at', start).lte('occurred_at', end).limit(100)).data ?? [], [] as any[]);
+    const memory = await safe(async () => (await admin.from('customer_memory_profiles').select('*').eq('contact_id', contact_id).eq('business_id', business_id).maybeSingle()).data, null as any);
+    const ledger = await safe(async () => (await admin.from('crm_interaction_ledger').select('id,interaction_type,direction,channel,subject,occurred_at').eq('contact_id', contact_id).eq('business_id', business_id).gte('occurred_at', start).lte('occurred_at', end).limit(500)).data ?? [], [] as any[]);
+    const conversations = await safe(async () => (await admin.from('customer_sales_conversations').select('id,updated_at,conversation_status').eq('contact_id', contact_id).eq('business_id', business_id).gte('updated_at', start).lte('updated_at', end).limit(200)).data ?? [], [] as any[]);
+    const proposals = await safe(async () => (await admin.from('proposals').select('id,status,created_at,total_value').eq('contact_id', contact_id).eq('business_id', business_id).gte('created_at', start).lte('created_at', end).limit(100)).data ?? [], [] as any[]);
+    const deals = await safe(async () => (await admin.from('deals').select('id,status,estimated_value_max,created_at').eq('contact_id', contact_id).eq('business_id', business_id).gte('created_at', start).lte('created_at', end).limit(100)).data ?? [], [] as any[]);
+    const invoices = await safe(async () => (await admin.from('invoices').select('id,status,amount,created_at').eq('contact_id', contact_id).eq('business_name', businessResult.data.name).gte('created_at', start).lte('created_at', end).limit(100)).data ?? [], [] as any[]);
+    const invoiceIds = invoices.map((row: any) => row.id);
+    const payments = invoiceIds.length ? await safe(async () => (await admin.from('payments').select('id,amount_received,received_date').in('invoice_id', invoiceIds).gte('received_date', start).lte('received_date', end).limit(100)).data ?? [], [] as any[]) : [];
+    const support = await safe(async () => (await admin.from('support_interaction_reviews').select('id,severity,theme,objection,created_at').eq('contact_id', contact_id).eq('business_id', business_id).gte('created_at', start).lte('created_at', end).limit(100)).data ?? [], [] as any[]);
+    const surveys = await safe(async () => (await admin.from('customer_survey_responses').select('csat_score,nps_score,sentiment,key_needs,competitor_mentions,created_at').eq('contact_id', contact_id).eq('business_id', business_id).gte('created_at', start).lte('created_at', end).limit(100)).data ?? [], [] as any[]);
+    const successPlans = await safe(async () => (await admin.from('customer_success_plans').select('id,plan_status,risks,next_best_actions,follow_up_due_at').eq('contact_id', contact_id).eq('business_id', business_id).limit(20)).data ?? [], [] as any[]);
+    const upsells = await safe(async () => (await admin.from('customer_upsell_recommendations').select('id,recommendation_status,reason,fit_score,customer_need_matched').eq('contact_id', contact_id).eq('business_id', business_id).limit(50)).data ?? [], [] as any[]);
+    const demos = await safe(async () => (await admin.from('demo_events').select('id,event_type,occurred_at').eq('contact_id', contact_id).eq('business_id', business_id).gte('occurred_at', start).lte('occurred_at', end).limit(100)).data ?? [], [] as any[]);
 
     const csat = surveys.map((s: any) => s.csat_score).filter((n: any) => typeof n === 'number');
     const nps = surveys.map((s: any) => s.nps_score).filter((n: any) => typeof n === 'number');
@@ -66,7 +75,8 @@ Deno.serve(async (req) => {
 
     const { quarter, year } = quarterLabel(end);
     const reportRow = {
-      business_id: business_id ?? contact?.assigned_business ?? null,
+      business_id,
+      business_contact_relationship_id: relationship.id,
       contact_id,
       organisation_id: organisation_id ?? null,
       deal_id: deal_id ?? null,
@@ -95,7 +105,7 @@ Deno.serve(async (req) => {
     };
 
     const usageRow = {
-      business_id: reportRow.business_id, contact_id,
+      business_id: reportRow.business_id, business_contact_relationship_id: relationship.id, contact_id,
       snapshot_period_start: start, snapshot_period_end: end,
       usage_source: 'aggregate',
       interactions_count: ledger.length,
@@ -122,7 +132,7 @@ Deno.serve(async (req) => {
     const { data: usage, error: e2 } = await admin.from('customer_usage_snapshots').insert(usageRow).select('*').single();
     if (e2) throw e2;
     const { data: review, error: e3 } = await admin.from('customer_account_reviews').insert({
-      business_id: reportRow.business_id, contact_id, quarterly_report_id: report.id,
+      business_id: reportRow.business_id, business_contact_relationship_id: relationship.id, contact_id, quarterly_report_id: report.id,
       review_type: 'quarterly', review_status: 'draft',
       account_health: healthScore >= 0.66 ? 'healthy' : healthScore >= 0.33 ? 'watch' : 'at_risk',
       customer_goal: memory?.customer_summary ?? null,

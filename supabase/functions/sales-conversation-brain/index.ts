@@ -1,8 +1,16 @@
 // Sales Conversation Brain — internal analysis only.
 // No external customer contact. No provider call. No payment.
 // Live-first: prepares structured sales conversation output for founder review.
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { callAIGateway } from "../_shared/aiGateway.ts";
+import { authorizeFounderOrAdmin } from "../_shared/callerAuth.ts";
+import { authorizeConversationBusiness } from "../_shared/customerCommercialLifecycle.ts";
+import {
+  assertCustomerSalesBusiness,
+  CustomerSalesScopeError,
+  filterCustomerSalesOffers,
+  requireCustomerSalesBusinessId,
+  resolveCustomerSalesRecommendation,
+} from "../_shared/customerSalesScope.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -45,30 +53,121 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
-  const sb = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    { auth: { persistSession: false } },
-  );
+  const authorization = await authorizeFounderOrAdmin(req, corsHeaders);
+  if ("error" in authorization) return authorization.error;
 
   const body = await req.json().catch(() => ({} as any));
   const conversation_id: string | undefined = body.conversation_id;
+  const requestedBusinessId: string | undefined = body.business_id;
   const transcript: string = (body.transcript || body.customer_message || "").toString();
   if (!conversation_id) return json({ error: "conversation_id required" }, 400);
+  if (!requestedBusinessId) return json({ ok: false, error: "business_context_required" }, 400);
   if (!transcript.trim()) return json({ error: "transcript or customer_message required" }, 400);
 
-  const { data: conv } = await sb.from("customer_sales_conversations").select("*").eq("id", conversation_id).maybeSingle();
+  // Founder/admin has portfolio scope, but every run still establishes one
+  // explicit business before loading a conversation UUID.
+  let businessId: string;
+  try {
+    businessId = requireCustomerSalesBusinessId(requestedBusinessId);
+  } catch (error) {
+    return json({ ok: false, error: (error as CustomerSalesScopeError).code }, 409);
+  }
+
+  // Founder/admin is a global portfolio role in this CRM. Bind one explicit
+  // business before constructing the privileged client; all subsequent
+  // conversation, catalog, relationship and state access stays in this scope.
+  const sb = authorization.createAdminClient();
+  const { data: business, error: businessError } = await sb.from("businesses").select("id").eq("id", businessId).maybeSingle();
+  if (businessError || !business) return json({ ok: false, error: "business_context_invalid" }, 409);
+
+  const { data: conv, error: conversationError } = await sb.from("customer_sales_conversations").select("*").eq("id", conversation_id).maybeSingle();
+  if (conversationError) return json({ ok: false, error: "conversation_lookup_failed" }, 503);
   if (!conv) return json({ error: "conversation not found" }, 404);
+
+  const scope = authorizeConversationBusiness({
+    callerAuthorized: true,
+    requestedBusinessId: businessId,
+    conversationBusinessId: conv.business_id,
+  });
+  if (!scope.ok) return json({ ok: false, error: scope.reason }, scope.reason === "forbidden" ? 403 : 409);
+
+  if (conv.customer_email && !conv.contact_id) {
+    return json({ ok: false, error: "customer_contact_identity_context_required" }, 409);
+  }
+  if (conv.contact_id && !conv.business_contact_relationship_id) {
+    return json({ ok: false, error: "business_contact_relationship_context_required" }, 409);
+  }
+
+  if (conv.business_contact_relationship_id) {
+    const { data: relationship, error: relationshipError } = await sb.from("business_contact_relationships")
+      .select("id,contact_id,business_id")
+      .eq("id", conv.business_contact_relationship_id)
+      .maybeSingle();
+    if (relationshipError) return json({ ok: false, error: "business_contact_relationship_unavailable" }, 503);
+    if (!relationship || relationship.business_id !== businessId || relationship.contact_id !== conv.contact_id) {
+      return json({ ok: false, error: "business_contact_relationship_context_mismatch" }, 409);
+    }
+  }
 
   const playbookId = body.playbook_id ?? conv.playbook_id;
   const productId = body.product_id ?? conv.product_id;
-  const [{ data: playbook }, { data: product }, { data: offers }, { data: library }, { data: stateRow }] = await Promise.all([
-    playbookId ? sb.from("customer_sales_playbooks").select("*").eq("id", playbookId).maybeSingle() : Promise.resolve({ data: null }),
-    productId ? sb.from("customer_sales_products").select("*").eq("id", productId).maybeSingle() : Promise.resolve({ data: null }),
-    sb.from("customer_sales_offers").select("*").eq("business_id", conv.business_id ?? "00000000-0000-0000-0000-000000000000"),
+  const offerId = body.offer_id ?? conv.offer_id;
+  const [
+    { data: playbook, error: playbookError },
+    { data: productRows, error: productError },
+    { data: offerRows, error: offerError },
+    { data: library },
+    { data: stateRow },
+  ] = await Promise.all([
+    playbookId
+      ? sb.from("customer_sales_playbooks").select("*").eq("id", playbookId).eq("business_id", businessId).maybeSingle()
+      : Promise.resolve({ data: null, error: null }),
+    sb.from("customer_sales_products").select("*").eq("business_id", businessId).eq("active", true).limit(500),
+    sb.from("customer_sales_offers").select("*").eq("business_id", businessId).eq("active", true).limit(500),
     sb.from("customer_sales_signal_library").select("signal_key,signal_kind,label,keywords,weight").eq("active", true),
     sb.from("customer_sales_conversation_states").select("*").eq("conversation_id", conversation_id).maybeSingle(),
   ]);
+
+  if (playbookError || productError || offerError) {
+    return json({ ok: false, error: "business_catalog_unavailable" }, 503);
+  }
+
+  const products = (productRows ?? []).filter((row: any) => row.business_id === businessId);
+  const productIds = new Set<string>(products.map((row: any) => row.id));
+  const offers = filterCustomerSalesOffers(offerRows ?? [], businessId, productIds);
+  const offerIds = new Set<string>(offers.map((row: any) => row.id));
+
+  if (playbookId) {
+    try {
+      assertCustomerSalesBusiness(playbook, businessId, "playbook");
+    } catch (error) {
+      return json({ ok: false, error: (error as CustomerSalesScopeError).code }, 409);
+    }
+    if (playbook.product_id && !productIds.has(playbook.product_id)) {
+      return json({ ok: false, error: "playbook_product_not_in_business" }, 409);
+    }
+    if (playbook.offer_id && !offerIds.has(playbook.offer_id)) {
+      return json({ ok: false, error: "playbook_offer_not_in_business" }, 409);
+    }
+  }
+
+  if (productId && !productIds.has(productId)) return json({ ok: false, error: "product_not_in_business" }, 409);
+  if (offerId && !offerIds.has(offerId)) return json({ ok: false, error: "offer_not_in_business" }, 409);
+  if (playbook?.product_id && productId && playbook.product_id !== productId) {
+    return json({ ok: false, error: "playbook_product_mismatch" }, 409);
+  }
+  if (playbook?.offer_id && offerId && playbook.offer_id !== offerId) {
+    return json({ ok: false, error: "playbook_offer_mismatch" }, 409);
+  }
+
+  const effectiveOfferId = offerId ?? playbook?.offer_id ?? null;
+  const selectedOffer = effectiveOfferId ? offers.find((row: any) => row.id === effectiveOfferId) ?? null : null;
+  const effectiveProductId = productId ?? playbook?.product_id ?? selectedOffer?.product_id ?? null;
+  const product = effectiveProductId ? products.find((row: any) => row.id === effectiveProductId) ?? null : null;
+  if (effectiveProductId && !product) return json({ ok: false, error: "product_not_in_business" }, 409);
+  if (selectedOffer?.product_id && effectiveProductId && selectedOffer.product_id !== effectiveProductId) {
+    return json({ ok: false, error: "offer_product_mismatch" }, 409);
+  }
 
   const detected = detectSignals(transcript, (library as SignalRow[]) || []);
 
@@ -100,6 +199,8 @@ Deno.serve(async (req) => {
       compliance_notes: playbook.compliance_notes,
     } : null,
     product,
+    available_products: products,
+    selected_offer: selectedOffer,
     offers,
     previous_state: stateRow ? { stage: stateRow.stage, required_info_collected: stateRow.required_info_collected } : null,
     deterministic_signals: detected,
@@ -131,8 +232,8 @@ Deno.serve(async (req) => {
 
   const runRow = {
     conversation_id,
-    business_id: conv.business_id,
-    product_id: productId,
+    business_id: businessId,
+    product_id: effectiveProductId,
     playbook_id: playbookId,
     input_transcript: transcript,
     input_context: context as any,
@@ -141,7 +242,7 @@ Deno.serve(async (req) => {
   const { data: brainRun } = await sb.from("customer_sales_brain_runs").insert(runRow).select("id").maybeSingle();
 
   const result = await callAIGateway({
-    business_id: conv.business_id ?? null,
+    business_id: businessId,
     action_type: "sales_conversation_brain",
     task_category: "sales_intelligence",
     request_type: "sales_brain_analysis",
@@ -150,7 +251,7 @@ Deno.serve(async (req) => {
     risk_level: "low",
     approval_required: false,
     response_format: { type: "json_object" },
-    metadata: { conversation_id, playbook_id: playbookId, product_id: productId },
+    metadata: { conversation_id, playbook_id: playbookId, product_id: effectiveProductId, offer_id: effectiveOfferId },
     messages: [
       { role: "system", content: systemMsg },
       { role: "user", content: userMsg },
@@ -167,18 +268,21 @@ Deno.serve(async (req) => {
   const buyingSignals = Array.from(new Set([...(parsed.buying_signals || []), ...detected.buying]));
   const objectionsAll = Array.from(new Set([...(parsed.objections || []), ...detected.objections]));
   const stage = ALLOWED_STAGES.includes(parsed.stage) ? parsed.stage : (stateRow?.stage || "discovery");
+  const productRecommendation = resolveCustomerSalesRecommendation(parsed.recommended_product_id, productIds);
+  const offerRecommendation = resolveCustomerSalesRecommendation(parsed.recommended_offer_id, offerIds);
 
   // Force approval if sensitive or claim violations or low product knowledge
   let needsApproval = !!parsed.founder_approval_required;
   if (detected.sensitive.length) needsApproval = true;
   if ((parsed.claim_violations || []).length) needsApproval = true;
   if (playbook?.close_action_allowed && playbook.close_action_allowed !== "auto") needsApproval = true;
+  if (productRecommendation.blocked || offerRecommendation.blocked) needsApproval = true;
 
   const brainOutput = {
     stage,
     customer_need: parsed.customer_need || null,
-    recommended_product_id: parsed.recommended_product_id || productId || null,
-    recommended_offer_id: parsed.recommended_offer_id || null,
+    recommended_product_id: productRecommendation.blocked ? null : (productRecommendation.id || effectiveProductId),
+    recommended_offer_id: offerRecommendation.blocked ? null : (offerRecommendation.id || effectiveOfferId),
     qualification_score: typeof parsed.qualification_score === "number" ? parsed.qualification_score : null,
     buying_signals: buyingSignals,
     objections: objectionsAll,
@@ -188,11 +292,14 @@ Deno.serve(async (req) => {
     next_best_question: parsed.next_best_question || null,
     founder_approval_required: needsApproval,
     suggested_follow_up: parsed.suggested_follow_up || null,
-    escalation_reason: parsed.escalation_reason || (detected.sensitive.length ? "Sensitive signal detected" : null),
+    escalation_reason: parsed.escalation_reason || (detected.sensitive.length
+      ? "Sensitive signal detected"
+      : (productRecommendation.blocked || offerRecommendation.blocked ? "Catalog recommendation requires same-business review" : null)),
     claim_violations: parsed.claim_violations || [],
     rationale: parsed.rationale || null,
     model: result.data?.model || body.model || "google/gemini-2.5-flash",
     trace_id: result.trace_id,
+    catalog_reference_blocked: productRecommendation.blocked || offerRecommendation.blocked,
   };
 
   // Upsert state row

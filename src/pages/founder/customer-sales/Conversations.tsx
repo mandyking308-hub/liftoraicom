@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Brain, Plus, Lock, AlertTriangle, ArrowRight, FileText, User } from "lucide-react";
 import { CSLayout, CSEmptyState, CSSection } from "./_shared";
+import { ensureBusinessContactRelationship, resolveOrCreateContact } from "@/lib/businessContactRelationship";
 
 const STAGES = [
   "greeting","consent_notice","discovery","qualification","product_match",
@@ -33,16 +34,13 @@ export default function Conversations() {
     },
   });
 
-  const { data: playbooks = [] } = useQuery({
-    queryKey: ["cs-playbooks-min"],
+  const { data: businesses = [] } = useQuery({
+    queryKey: ["cs-businesses"],
     queryFn: async () => {
-      const { data } = await sb.from("customer_sales_playbooks").select("id, playbook_name, use_case, product_id").eq("active", true);
+      const { data, error } = await sb.from("businesses").select("id,name").order("name");
+      if (error) throw error;
       return data ?? [];
     },
-  });
-  const { data: products = [] } = useQuery({
-    queryKey: ["cs-products-min2"],
-    queryFn: async () => (await sb.from("customer_sales_products").select("id, product_name")).data ?? [],
   });
 
   return (
@@ -77,6 +75,9 @@ export default function Conversations() {
                   <tr key={r.id} className="border-b border-border/30 hover:bg-background/40">
                     <td className="py-2 px-2">
                       {r.customer_name ?? r.customer_email ?? r.customer_phone ?? "—"}
+                      <div className="text-[10px] text-muted-foreground">
+                        {businesses.find((business: any) => business.id === r.business_id)?.name ?? "Business context missing"}
+                      </div>
                       {r.test_label === "LIVE_INTERNAL_TEST" && <Badge variant="outline" className="ml-1 text-[9px] bg-blue-500/10 text-blue-300 border-blue-500/30">TEST</Badge>}
                     </td>
                     <td className="py-2 px-2 text-muted-foreground">{r.channel}</td>
@@ -105,8 +106,7 @@ export default function Conversations() {
 
       {creating && (
         <NewConversationCard
-          playbooks={playbooks}
-          products={products}
+          businesses={businesses}
           onCancel={() => setCreating(false)}
           onCreated={(row) => { setCreating(false); setSelected(row); qc.invalidateQueries({ queryKey: ["cs-conversations"] }); }}
         />
@@ -115,7 +115,6 @@ export default function Conversations() {
       {selected && (
         <BrainPanel
           conversation={selected}
-          playbooks={playbooks}
           onClose={() => { setSelected(null); qc.invalidateQueries({ queryKey: ["cs-conversations"] }); }}
         />
       )}
@@ -123,16 +122,107 @@ export default function Conversations() {
   );
 }
 
-function NewConversationCard({ playbooks, products, onCancel, onCreated }: any) {
+function NewConversationCard({ businesses, onCancel, onCreated }: any) {
   const sb: any = supabase;
   const [form, setForm] = useState<any>({
     customer_name: "", customer_email: "", channel: "manual", direction: "inbound",
-    product_id: null, playbook_id: null,
+    business_id: "", contact_id: null, business_contact_relationship_id: null,
+    product_id: null, offer_id: null, playbook_id: null,
   });
+
+  const { data: products = [], isLoading: productsLoading } = useQuery({
+    queryKey: ["cs-products-by-business", form.business_id],
+    enabled: !!form.business_id,
+    queryFn: async () => {
+      const { data, error } = await sb.from("customer_sales_products")
+        .select("id,product_name,business_id")
+        .eq("business_id", form.business_id)
+        .eq("active", true)
+        .order("product_name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+  const productIds = new Set(products.map((product: any) => product.id));
+  const productScopeKey = Array.from(productIds).sort().join("|");
+  const { data: offers = [], isLoading: offersLoading } = useQuery({
+    queryKey: ["cs-offers-by-business", form.business_id, productScopeKey],
+    enabled: !!form.business_id,
+    queryFn: async () => {
+      const { data, error } = await sb.from("customer_sales_offers")
+        .select("id,offer_name,product_id,business_id")
+        .eq("business_id", form.business_id)
+        .eq("active", true)
+        .order("offer_name");
+      if (error) throw error;
+      return (data ?? []).filter((offer: any) => !offer.product_id || productIds.has(offer.product_id));
+    },
+  });
+  const offerIds = new Set(offers.map((offer: any) => offer.id));
+  const offerScopeKey = Array.from(offerIds).sort().join("|");
+  const { data: playbooks = [], isLoading: playbooksLoading } = useQuery({
+    queryKey: ["cs-playbooks-by-business", form.business_id, productScopeKey, offerScopeKey],
+    enabled: !!form.business_id,
+    queryFn: async () => {
+      const { data, error } = await sb.from("customer_sales_playbooks")
+        .select("id,playbook_name,use_case,product_id,offer_id,business_id")
+        .eq("business_id", form.business_id)
+        .eq("active", true)
+        .order("playbook_name");
+      if (error) throw error;
+      return (data ?? []).filter((playbook: any) =>
+        (!playbook.product_id || productIds.has(playbook.product_id)) &&
+        (!playbook.offer_id || offerIds.has(playbook.offer_id))
+      );
+    },
+  });
+
   async function create() {
-    const payload = { ...form };
-    if (!payload.product_id) delete payload.product_id;
-    if (!payload.playbook_id) delete payload.playbook_id;
+    const business = businesses.find((row: any) => row.id === form.business_id);
+    if (!business) { toast.error("Select a portfolio business before creating a conversation."); return; }
+    if (form.product_id && !products.some((row: any) => row.id === form.product_id)) {
+      toast.error("The selected product is not available to this business."); return;
+    }
+    if (form.offer_id && !offers.some((row: any) => row.id === form.offer_id)) {
+      toast.error("The selected offer is not available to this business."); return;
+    }
+    if (form.playbook_id && !playbooks.some((row: any) => row.id === form.playbook_id)) {
+      toast.error("The selected playbook is not available to this business."); return;
+    }
+
+    let contactId: string | null = null;
+    let relationshipId: string | null = null;
+    const email = form.customer_email.trim();
+    try {
+      if (email) {
+        contactId = await resolveOrCreateContact(sb, {
+          email,
+          name: form.customer_name,
+          source: "customer_sales_conversation",
+        });
+        relationshipId = await ensureBusinessContactRelationship(sb, {
+          contactId,
+          businessId: business.id,
+          businessName: business.name,
+        });
+      }
+    } catch (error) {
+      toast.error((error as Error).message || "Customer identity could not be resolved. Review the CRM identity before continuing.");
+      return;
+    }
+
+    const payload = {
+      customer_name: form.customer_name.trim() || null,
+      customer_email: email || null,
+      channel: form.channel,
+      direction: form.direction,
+      business_id: business.id,
+      contact_id: contactId,
+      business_contact_relationship_id: relationshipId,
+      product_id: form.product_id || null,
+      offer_id: form.offer_id || null,
+      playbook_id: form.playbook_id || null,
+    };
     const { data, error } = await sb.from("customer_sales_conversations").insert(payload).select("*").maybeSingle();
     if (error) { toast.error(error.message); return; }
     toast.success("Conversation created");
@@ -142,6 +232,16 @@ function NewConversationCard({ playbooks, products, onCancel, onCreated }: any) 
     <Card className="tech-card border-primary/40 mt-4">
       <CardHeader className="pb-2"><CardTitle className="text-sm">New internal conversation</CardTitle></CardHeader>
       <CardContent className="grid gap-3 md:grid-cols-2 text-xs">
+        <div className="space-y-1">
+          <Label className="text-[10px] uppercase">Business *</Label>
+          <Select value={form.business_id || "_none"} onValueChange={v => setForm({ ...form, business_id: v === "_none" ? "" : v, product_id: null, offer_id: null, playbook_id: null })}>
+            <SelectTrigger><SelectValue placeholder="Select a business" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="_none">Select a business</SelectItem>
+              {businesses.map((business: any) => <SelectItem key={business.id} value={business.id}>{business.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
         <LabeledInput label="Customer name" value={form.customer_name} onChange={(v: string) => setForm({ ...form, customer_name: v })} />
         <LabeledInput label="Customer email" value={form.customer_email} onChange={(v: string) => setForm({ ...form, customer_email: v })} />
         <div className="space-y-1">
@@ -164,8 +264,8 @@ function NewConversationCard({ playbooks, products, onCancel, onCreated }: any) 
         </div>
         <div className="space-y-1">
           <Label className="text-[10px] uppercase">Product</Label>
-          <Select value={form.product_id || "_none"} onValueChange={v => setForm({ ...form, product_id: v === "_none" ? null : v })}>
-            <SelectTrigger><SelectValue placeholder="None" /></SelectTrigger>
+          <Select value={form.product_id || "_none"} onValueChange={v => setForm({ ...form, product_id: v === "_none" ? null : v, offer_id: null, playbook_id: null })} disabled={!form.business_id || productsLoading}>
+            <SelectTrigger><SelectValue placeholder={form.business_id ? "None" : "Select a business first"} /></SelectTrigger>
             <SelectContent>
               <SelectItem value="_none">None</SelectItem>
               {products.map((p: any) => <SelectItem key={p.id} value={p.id}>{p.product_name}</SelectItem>)}
@@ -173,15 +273,26 @@ function NewConversationCard({ playbooks, products, onCancel, onCreated }: any) 
           </Select>
         </div>
         <div className="space-y-1">
+          <Label className="text-[10px] uppercase">Offer</Label>
+          <Select value={form.offer_id || "_none"} onValueChange={v => setForm({ ...form, offer_id: v === "_none" ? null : v, playbook_id: null })} disabled={!form.business_id || offersLoading}>
+            <SelectTrigger><SelectValue placeholder={form.business_id ? "None" : "Select a business first"} /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="_none">None</SelectItem>
+              {offers.map((o: any) => <SelectItem key={o.id} value={o.id}>{o.offer_name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1">
           <Label className="text-[10px] uppercase">Playbook</Label>
-          <Select value={form.playbook_id || "_none"} onValueChange={v => setForm({ ...form, playbook_id: v === "_none" ? null : v })}>
-            <SelectTrigger><SelectValue placeholder="None" /></SelectTrigger>
+          <Select value={form.playbook_id || "_none"} onValueChange={v => setForm({ ...form, playbook_id: v === "_none" ? null : v })} disabled={!form.business_id || playbooksLoading}>
+            <SelectTrigger><SelectValue placeholder={form.business_id ? "None" : "Select a business first"} /></SelectTrigger>
             <SelectContent>
               <SelectItem value="_none">None</SelectItem>
               {playbooks.map((p: any) => <SelectItem key={p.id} value={p.id}>{p.playbook_name} ({p.use_case})</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
+        {form.business_id && <p className="md:col-span-2 text-[10px] text-muted-foreground">A matching global CRM contact will be linked. Its business relationship stays separate and is stored on this conversation.</p>}
         <div className="md:col-span-2 flex justify-end gap-2">
           <Button variant="outline" size="sm" onClick={onCancel}>Cancel</Button>
           <Button size="sm" onClick={create}>Create</Button>
@@ -200,12 +311,25 @@ function LabeledInput({ label, value, onChange }: { label: string; value: string
   );
 }
 
-function BrainPanel({ conversation, playbooks, onClose }: { conversation: any; playbooks: any[]; onClose: () => void }) {
+function BrainPanel({ conversation, onClose }: { conversation: any; onClose: () => void }) {
   const sb: any = supabase;
   const qc = useQueryClient();
   const [message, setMessage] = useState("");
   const [running, setRunning] = useState(false);
   const [playbookId, setPlaybookId] = useState<string | null>(conversation.playbook_id || null);
+
+  const { data: playbooks = [] } = useQuery({
+    queryKey: ["cs-brain-playbooks", conversation.business_id],
+    enabled: !!conversation.business_id,
+    queryFn: async () => {
+      const { data, error } = await sb.from("customer_sales_playbooks")
+        .select("id,playbook_name,use_case,business_id,product_id,offer_id")
+        .eq("business_id", conversation.business_id)
+        .eq("active", true);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
 
   const { data: state } = useQuery({
     queryKey: ["cs-state", conversation.id],
@@ -223,7 +347,7 @@ function BrainPanel({ conversation, playbooks, onClose }: { conversation: any; p
     setRunning(true);
     try {
       const { data, error } = await supabase.functions.invoke("sales-conversation-brain", {
-        body: { conversation_id: conversation.id, customer_message: message, playbook_id: playbookId },
+        body: { conversation_id: conversation.id, business_id: conversation.business_id, customer_message: message, playbook_id: playbookId },
       });
       if (error) throw error;
       if (!data?.ok) throw new Error(data?.error || "Brain run failed");

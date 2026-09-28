@@ -42,8 +42,26 @@ Deno.serve(async (req) => {
 
     const conversations = await safeSelect(admin, "conversations", (q: any) => q.select("id,contact_id,business_id,status,updated_at").eq("status", "active").order("updated_at", { ascending: false }).limit(200));
     const contactIds = Array.from(new Set(conversations.map((c: any) => c.contact_id).filter(Boolean)));
-    const contacts = contactIds.length ? await safeSelect(admin, "contacts", (q: any) => q.select("id,email,name,assigned_business,status,intent_score,last_replied_at,last_contacted_at,founder_review_requested_at").in("id", contactIds)) : [];
+    const contacts = contactIds.length ? await safeSelect(admin, "contacts", (q: any) => q.select("id,email,name,status,intent_score,last_replied_at,last_contacted_at,founder_review_requested_at").in("id", contactIds)) : [];
     const contactMap = new Map(contacts.map((c: any) => [c.id, c]));
+
+    const businessIds = Array.from(new Set(conversations.map((c: any) => c.business_id).filter(Boolean)));
+    let relationshipRows: any[] = [];
+    if (businessIds.length && contactIds.length) {
+      const { data, error } = await admin.from("business_contact_relationships")
+        .select("id,business_id,contact_id")
+        .in("business_id", businessIds)
+        .in("contact_id", contactIds);
+      if (error) return new Response(JSON.stringify({ ok: false, error: "business_contact_relationship_unavailable" }), { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      relationshipRows = data ?? [];
+    }
+    const relationshipByPair = new Map<string, any>();
+    const ambiguousRelationshipPairs = new Set<string>();
+    for (const relationship of relationshipRows) {
+      const pair = `${relationship.business_id}:${relationship.contact_id}`;
+      if (relationshipByPair.has(pair)) ambiguousRelationshipPairs.add(pair);
+      else relationshipByPair.set(pair, relationship);
+    }
 
     const drafts = await safeSelect(admin, "ai_drafts", (q: any) => q.select("id,conversation_id,contact_id,status,created_at").eq("status", "pending_review").limit(500));
     const draftByContact = new Map(drafts.map((d: any) => [d.contact_id, d]));
@@ -73,11 +91,16 @@ Deno.serve(async (req) => {
     const stuck_customers: any[] = [];
     const missing_handovers: any[] = [];
     const customers: any[] = [];
+    let business_context_blocked = 0;
 
     const now = Date.now();
     for (const conv of conversations) {
       const contact = contactMap.get(conv.contact_id);
       if (!contact) continue;
+      if (!conv.business_id) { business_context_blocked++; continue; }
+      const relationshipKey = `${conv.business_id}:${conv.contact_id}`;
+      const relationship = relationshipByPair.get(relationshipKey);
+      if (!relationship || ambiguousRelationshipPairs.has(relationshipKey)) { business_context_blocked++; continue; }
       const draft = draftByContact.get(contact.id);
       const prop = propByContact.get(contact.id);
       const deal = dealByContact.get(contact.id);
@@ -126,7 +149,8 @@ Deno.serve(async (req) => {
       const row = {
         contact_id: contact.id,
         conversation_id: conv.id,
-        business_id: conv.business_id ?? contact.assigned_business,
+        business_id: conv.business_id,
+        business_contact_relationship_id: relationship.id,
         contact_email: contact.email,
         contact_name: contact.name,
         current_owner_agent_key: owner,
@@ -140,6 +164,7 @@ Deno.serve(async (req) => {
         last_interaction_at: lastInteractionAt,
         risk_flags: ctx.has_compliance_flag ? ["compliance"] : [],
         handover_summary: handover ? `${handover.from_agent_key} → ${handover.to_agent_key}` : null,
+        idempotency_key: `${conv.business_id}:${contact.id}:${conv.id}`,
       };
       journey[bucket].push(row);
       customers.push(row);
@@ -147,14 +172,12 @@ Deno.serve(async (req) => {
 
     let persisted = 0;
     if (persist && customers.length) {
-      // Upsert by (business_id, contact_id, conversation_id)
+      // Upsert only this exact business/person/conversation assignment.
       for (const c of customers.slice(0, 200)) {
         try {
-          // Simple insert; mark prior active for this contact as superseded
-          await admin.from("customer_stewardship_assignments").update({ stewardship_status: "superseded" })
-            .eq("contact_id", c.contact_id).eq("stewardship_status", "active");
-          await admin.from("customer_stewardship_assignments").insert({ ...c, stewardship_status: "active" });
-          persisted++;
+          const { error } = await admin.from("customer_stewardship_assignments")
+            .upsert({ ...c, stewardship_status: "active" }, { onConflict: "idempotency_key" });
+          if (!error) persisted++;
         } catch { /* no-op */ }
       }
     }
@@ -165,6 +188,7 @@ Deno.serve(async (req) => {
       counts: {
         active_conversations: conversations.length,
         customers: customers.length,
+        business_context_blocked,
         stuck_customers: stuck_customers.length,
         missing_handovers: missing_handovers.length,
         persisted,

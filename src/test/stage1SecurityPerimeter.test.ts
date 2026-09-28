@@ -76,19 +76,35 @@ describe("Stage 1 — authorization on direct-send and state-claiming functions"
     expect(auth).toBeLessThan(queue);
   });
 
-  it("the shared helper never builds a service-role client before the role check", () => {
+  it("the shared helper never builds a service-role client before JWT and role authorization", () => {
     const src = read("supabase/functions/_shared/callerAuth.ts");
     const getUser = src.indexOf("auth.getUser(");
-    const admin = src.indexOf("const admin = adminClient();");
-    expect(getUser).toBeLessThan(admin);
-    expect(src).toContain('error: "forbidden"');
+    const roleRead = src.indexOf('userClient.from("user_roles")');
+    const forbidden = src.indexOf('error: "forbidden"');
+    const authorizationEnd = src.indexOf("export async function requireFounderOrAdmin(");
+    const serviceClient = src.indexOf("admin: authorization.createAdminClient()", authorizationEnd);
+    expect(getUser).toBeLessThan(serviceClient);
+    expect(roleRead).toBeGreaterThan(getUser);
+    expect(roleRead).toBeLessThan(serviceClient);
+    expect(forbidden).toBeGreaterThan(roleRead);
+    expect(authorizationEnd).toBeGreaterThan(forbidden);
+    expect(src.slice(src.indexOf("export async function authorizeFounderOrAdmin("), authorizationEnd))
+      .not.toContain("adminClient()");
+    expect(src).toContain("createAdminClient: adminClient");
   });
 
-  it("manual-send-apply and create-stripe-checkout-session still check roles", () => {
-    for (const f of ["manual-send-apply", "create-stripe-checkout-session", "controlled-proof-send"]) {
+  it("direct send functions check founder/admin roles and checkout validates its caller JWT", () => {
+    for (const f of ["manual-send-apply", "controlled-proof-send"]) {
       const src = read(`supabase/functions/${f}/index.ts`);
       expect(src, f).toContain('from("user_roles")');
     }
+    const checkout = read("supabase/functions/create-stripe-checkout-session/index.ts");
+    const validateJwt = checkout.indexOf("const caller = await validateCallerJwt(req");
+    const serviceClient = checkout.indexOf("admin = createClient(supabaseUrl, serviceKey");
+    expect(checkout).toContain("async function validateCallerJwt(");
+    expect(checkout).toContain("userClient.auth.getUser(token)");
+    expect(validateJwt).toBeGreaterThanOrEqual(0);
+    expect(validateJwt).toBeLessThan(serviceClient);
   });
 });
 

@@ -19708,6 +19708,91 @@ export type Database = {
           },
         ]
       }
+      customer_commercial_audit_events: {
+        Row: {
+          id: string
+          idempotency_key: string
+          event_type: string
+          business_id: string
+          contact_id: string | null
+          business_contact_relationship_id: string | null
+          checkout_id: string | null
+          deal_id: string | null
+          payment_id: string | null
+          event_payload: Json
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          idempotency_key: string
+          event_type: string
+          business_id: string
+          contact_id?: string | null
+          business_contact_relationship_id?: string | null
+          checkout_id?: string | null
+          deal_id?: string | null
+          payment_id?: string | null
+          event_payload?: Json
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          idempotency_key?: string
+          event_type?: string
+          business_id?: string
+          contact_id?: string | null
+          business_contact_relationship_id?: string | null
+          checkout_id?: string | null
+          deal_id?: string | null
+          payment_id?: string | null
+          event_payload?: Json
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_commercial_audit_events_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_commercial_audit_events_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_commercial_audit_events_business_contact_relationship_"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_commercial_audit_events_checkout_id_fkey"
+            columns: ["checkout_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_checkout_intents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_commercial_audit_events_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_commercial_audit_events_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "qtc_payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_complaints: {
         Row: {
           assignment_id: string | null
@@ -20464,6 +20549,107 @@ export type Database = {
           },
         ]
       }
+      customer_product_accounts: {
+        Row: {
+          id: string
+          business_id: string
+          contact_id: string
+          business_contact_relationship_id: string
+          product_id: string
+          offer_id: string
+          payment_id: string
+          checkout_id: string
+          auth_user_id: string | null
+          account_scope: string
+          account_role: string
+          access_status: string
+          provisioned_at: string
+          metadata: Json
+        }
+        Insert: {
+          id?: string
+          business_id: string
+          contact_id: string
+          business_contact_relationship_id: string
+          product_id: string
+          offer_id: string
+          payment_id: string
+          checkout_id: string
+          auth_user_id?: string | null
+          account_scope?: string
+          account_role?: string
+          access_status?: string
+          provisioned_at?: string
+          metadata?: Json
+        }
+        Update: {
+          id?: string
+          business_id?: string
+          contact_id?: string
+          business_contact_relationship_id?: string
+          product_id?: string
+          offer_id?: string
+          payment_id?: string
+          checkout_id?: string
+          auth_user_id?: string | null
+          account_scope?: string
+          account_role?: string
+          access_status?: string
+          provisioned_at?: string
+          metadata?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_product_accounts_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_product_accounts_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_product_accounts_business_contact_relationship_id_fkey"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_product_accounts_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_product_accounts_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_offers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_product_accounts_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "qtc_payments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_product_accounts_checkout_id_fkey"
+            columns: ["checkout_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_checkout_intents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_prospect_segment_map: {
         Row: {
           approval_status: string
@@ -20986,6 +21172,45 @@ export type Database = {
           },
         ]
       }
+      customer_sales_billing_customers: {
+        Row: {
+          id: string
+          business_id: string
+          contact_id: string
+          stripe_customer_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          business_id: string
+          contact_id: string
+          stripe_customer_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          business_id?: string
+          contact_id?: string
+          stripe_customer_id?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_sales_billing_customers_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_sales_billing_customers_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_sales_brain_runs: {
         Row: {
           business_id: string | null
@@ -21166,6 +21391,133 @@ export type Database = {
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "customer_sales_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_sales_checkout_intents: {
+        Row: {
+          id: string
+          idempotency_key: string
+          business_id: string
+          contact_id: string
+          business_contact_relationship_id: string
+          product_id: string
+          offer_id: string
+          customer_email: string
+          customer_name: string | null
+          discount_percent: number
+          approved_price_amount: number
+          checkout_amount: number
+          checkout_amount_minor_units: number
+          currency: string
+          stripe_price_id: string
+          stripe_customer_id: string | null
+          stripe_checkout_session_id: string | null
+          qtc_payment_id: string | null
+          status: string
+          test_mode: boolean
+          request_fingerprint: Json
+          failure_reason: string | null
+          paid_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          idempotency_key: string
+          business_id: string
+          contact_id: string
+          business_contact_relationship_id: string
+          product_id: string
+          offer_id: string
+          customer_email: string
+          customer_name?: string | null
+          discount_percent?: number
+          approved_price_amount: number
+          checkout_amount: number
+          checkout_amount_minor_units: number
+          currency: string
+          stripe_price_id: string
+          stripe_customer_id?: string | null
+          stripe_checkout_session_id?: string | null
+          qtc_payment_id?: string | null
+          status?: string
+          test_mode?: boolean
+          request_fingerprint?: Json
+          failure_reason?: string | null
+          paid_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          idempotency_key?: string
+          business_id?: string
+          contact_id?: string
+          business_contact_relationship_id?: string
+          product_id?: string
+          offer_id?: string
+          customer_email?: string
+          customer_name?: string | null
+          discount_percent?: number
+          approved_price_amount?: number
+          checkout_amount?: number
+          checkout_amount_minor_units?: number
+          currency?: string
+          stripe_price_id?: string
+          stripe_customer_id?: string | null
+          stripe_checkout_session_id?: string | null
+          qtc_payment_id?: string | null
+          status?: string
+          test_mode?: boolean
+          request_fingerprint?: Json
+          failure_reason?: string | null
+          paid_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_sales_checkout_intents_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_sales_checkout_intents_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_sales_checkout_intents_business_contact_relationship_i"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_sales_checkout_intents_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_sales_checkout_intents_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_offers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_sales_checkout_intents_qtc_payment_id_fkey"
+            columns: ["qtc_payment_id"]
+            isOneToOne: false
+            referencedRelation: "qtc_payments"
             referencedColumns: ["id"]
           },
         ]
@@ -21479,6 +21831,7 @@ export type Database = {
       customer_sales_conversations: {
         Row: {
           business_id: string | null
+          business_contact_relationship_id: string | null
           buying_signals: string[] | null
           call_outcome: string | null
           channel: string
@@ -21521,6 +21874,7 @@ export type Database = {
         }
         Insert: {
           business_id?: string | null
+          business_contact_relationship_id?: string | null
           buying_signals?: string[] | null
           call_outcome?: string | null
           channel?: string
@@ -21563,6 +21917,7 @@ export type Database = {
         }
         Update: {
           business_id?: string | null
+          business_contact_relationship_id?: string | null
           buying_signals?: string[] | null
           call_outcome?: string | null
           channel?: string
@@ -21604,6 +21959,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "customer_sales_conversations_business_contact_relationship_id_fkey"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "customer_sales_conversations_offer_id_fkey"
             columns: ["offer_id"]
@@ -23002,6 +23364,124 @@ export type Database = {
           },
         ]
       }
+      customer_success_automation_queue: {
+        Row: {
+          id: string
+          idempotency_key: string
+          business_id: string
+          contact_id: string
+          business_contact_relationship_id: string
+          success_profile_id: string | null
+          onboarding_plan_id: string | null
+          checkout_id: string | null
+          action_type: string
+          execution_status: string
+          execution_mode: string
+          approval_required: boolean
+          escalation_reason: string | null
+          confidence_score: number | null
+          risk_flags: string[]
+          scheduled_at: string | null
+          execution_attempts: number
+          last_error: string | null
+          execution_result: Json
+          action_payload: Json
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          idempotency_key: string
+          business_id: string
+          contact_id: string
+          business_contact_relationship_id: string
+          success_profile_id?: string | null
+          onboarding_plan_id?: string | null
+          checkout_id?: string | null
+          action_type: string
+          execution_status?: string
+          execution_mode?: string
+          approval_required?: boolean
+          escalation_reason?: string | null
+          confidence_score?: number | null
+          risk_flags?: string[]
+          scheduled_at?: string | null
+          execution_attempts?: number
+          last_error?: string | null
+          execution_result?: Json
+          action_payload?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          idempotency_key?: string
+          business_id?: string
+          contact_id?: string
+          business_contact_relationship_id?: string
+          success_profile_id?: string | null
+          onboarding_plan_id?: string | null
+          checkout_id?: string | null
+          action_type?: string
+          execution_status?: string
+          execution_mode?: string
+          approval_required?: boolean
+          escalation_reason?: string | null
+          confidence_score?: number | null
+          risk_flags?: string[]
+          scheduled_at?: string | null
+          execution_attempts?: number
+          last_error?: string | null
+          execution_result?: Json
+          action_payload?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_success_automation_queue_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_automation_queue_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_automation_queue_business_contact_relationship"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_automation_queue_success_profile_id_fkey"
+            columns: ["success_profile_id"]
+            isOneToOne: false
+            referencedRelation: "customer_success_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_automation_queue_onboarding_plan_id_fkey"
+            columns: ["onboarding_plan_id"]
+            isOneToOne: false
+            referencedRelation: "customer_onboarding_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_automation_queue_checkout_id_fkey"
+            columns: ["checkout_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_checkout_intents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_success_checkins: {
         Row: {
           approval_status: string | null
@@ -23390,6 +23870,90 @@ export type Database = {
           upsell_potential?: string | null
         }
         Relationships: []
+      }
+      customer_success_refund_requests: {
+        Row: {
+          id: string
+          idempotency_key: string
+          business_id: string
+          contact_id: string
+          business_contact_relationship_id: string
+          checkout_id: string
+          payment_id: string
+          requested_amount: number
+          currency: string
+          status: string
+          stripe_refund_id: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          idempotency_key: string
+          business_id: string
+          contact_id: string
+          business_contact_relationship_id: string
+          checkout_id: string
+          payment_id: string
+          requested_amount: number
+          currency: string
+          status?: string
+          stripe_refund_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          idempotency_key?: string
+          business_id?: string
+          contact_id?: string
+          business_contact_relationship_id?: string
+          checkout_id?: string
+          payment_id?: string
+          requested_amount?: number
+          currency?: string
+          status?: string
+          stripe_refund_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_success_refund_requests_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_refund_requests_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_refund_requests_business_contact_relationship_"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_refund_requests_checkout_id_fkey"
+            columns: ["checkout_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_checkout_intents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_refund_requests_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "qtc_payments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       customer_survey_requests: {
         Row: {

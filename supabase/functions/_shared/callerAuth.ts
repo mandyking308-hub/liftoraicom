@@ -32,6 +32,14 @@ export type CallerOk = {
 };
 export type CallerResult = CallerOk | { error: Response };
 
+export type FounderAdminAuthorization = {
+  user_id: string;
+  trigger_source: "founder";
+  /** Construct only after the caller has bound the request to an authorised business. */
+  createAdminClient: () => SupabaseClient;
+};
+export type FounderAdminAuthorizationResult = FounderAdminAuthorization | { error: Response };
+
 export function isCallerError(r: CallerResult): r is { error: Response } {
   return (r as { error?: Response }).error instanceof Response;
 }
@@ -45,13 +53,13 @@ function adminClient(): SupabaseClient {
 }
 
 /**
- * Founder or admin only. Rejects anonymous callers and ordinary authenticated
- * users with 401/403 before any privileged client exists.
+ * Validates a founder/admin JWT and role without constructing a service-role
+ * client. Business-scoped handlers can bind their request context first.
  */
-export async function requireFounderOrAdmin(
+export async function authorizeFounderOrAdmin(
   req: Request,
   headers = callerCorsHeaders,
-): Promise<CallerResult> {
+): Promise<FounderAdminAuthorizationResult> {
   const auth = req.headers.get("Authorization") ?? "";
   if (!auth.startsWith("Bearer ")) {
     return { error: authJson({ ok: false, error: "auth_missing" }, 401, headers) };
@@ -65,13 +73,36 @@ export async function requireFounderOrAdmin(
   if (!u?.user) {
     return { error: authJson({ ok: false, error: "auth_invalid" }, 401, headers) };
   }
-  const admin = adminClient();
-  const { data: roles } = await admin.from("user_roles").select("role").eq("user_id", u.user.id);
+  // user_roles has an RLS policy allowing a caller to read only their own
+  // roles. Check authorization through the caller-scoped client so no
+  // service-role client exists until both JWT and founder/admin status pass.
+  const { data: roles, error: rolesError } = await userClient.from("user_roles").select("role").eq("user_id", u.user.id);
+  if (rolesError) {
+    return { error: authJson({ ok: false, error: "caller_role_lookup_failed" }, 503, headers) };
+  }
   const roleSet = new Set((roles ?? []).map((r: { role: string }) => r.role));
   if (!roleSet.has("founder") && !roleSet.has("admin")) {
     return { error: authJson({ ok: false, error: "forbidden" }, 403, headers) };
   }
-  return { admin, user_id: u.user.id, trigger_source: "founder" };
+  return {
+    user_id: u.user.id,
+    trigger_source: "founder",
+    createAdminClient: adminClient,
+  };
+}
+
+/** Founder/admin only; for handlers that do not need a business preflight. */
+export async function requireFounderOrAdmin(
+  req: Request,
+  headers = callerCorsHeaders,
+): Promise<CallerResult> {
+  const authorization = await authorizeFounderOrAdmin(req, headers);
+  if ("error" in authorization) return authorization;
+  return {
+    admin: authorization.createAdminClient(),
+    user_id: authorization.user_id,
+    trigger_source: authorization.trigger_source,
+  };
 }
 
 /**
