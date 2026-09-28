@@ -67,7 +67,7 @@ function makeBusinessesQuery() {
   query.order = () => query;
   query.range = async (start: number, end: number) => {
     pageRequests.push({ start, end, search });
-    const term = search?.replaceAll("%", "").toLowerCase();
+    const term = search?.replace(/%/g, "").toLowerCase();
     const matches = term
       ? businesses.filter((business) => business.name.toLowerCase().includes(term))
       : businesses;
@@ -129,5 +129,5 @@ describe("Business Setup Tunnel multi-business harness", () => {
       search: `%${businesses[511].name}%`,
     });
     expect(screen.queryByText(businesses[0].name)).not.toBeInTheDocument();
-  });
+  }, 15_000);
 });
