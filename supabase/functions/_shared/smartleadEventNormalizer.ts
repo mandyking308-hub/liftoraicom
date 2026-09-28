@@ -163,7 +163,11 @@ export function extractEvent(payload: RawWebhookPayload): ExtractedEvent {
  * Prefers the provider's own event id; otherwise a deterministic composite so
  * a retried webhook without an event id still collapses to one row.
  */
-export function buildIdempotencyKey(e: ExtractedEvent): string {
+export function buildIdempotencyKey(e: ExtractedEvent, requestId?: string | null): string {
+  const normalizedRequestId = requestId?.trim();
+  if (normalizedRequestId && normalizedRequestId.length <= 200 && !/[\u0000-\u001f\u007f]/.test(normalizedRequestId)) {
+    return `req:${normalizedRequestId}`;
+  }
   if (e.provider_event_id) return `evt:${e.provider_event_id}`;
   const parts = [
     e.canonical_event_type,
