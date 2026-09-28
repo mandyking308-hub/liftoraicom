@@ -81,12 +81,16 @@ describe("Stage 1 — authorization on direct-send and state-claiming functions"
     const getUser = src.indexOf("auth.getUser(");
     const roleRead = src.indexOf('userClient.from("user_roles")');
     const forbidden = src.indexOf('error: "forbidden"');
-    const serviceClient = src.indexOf("return { admin: adminClient()");
+    const authorizationEnd = src.indexOf("export async function requireFounderOrAdmin(");
+    const serviceClient = src.indexOf("admin: authorization.createAdminClient()", authorizationEnd);
     expect(getUser).toBeLessThan(serviceClient);
     expect(roleRead).toBeGreaterThan(getUser);
     expect(roleRead).toBeLessThan(serviceClient);
     expect(forbidden).toBeGreaterThan(roleRead);
-    expect(src).toContain("return { admin: adminClient(), user_id: u.user.id, trigger_source: \"founder\" }");
+    expect(authorizationEnd).toBeGreaterThan(forbidden);
+    expect(src.slice(src.indexOf("export async function authorizeFounderOrAdmin("), authorizationEnd))
+      .not.toContain("adminClient()");
+    expect(src).toContain("createAdminClient: adminClient");
   });
 
   it("direct send functions check founder/admin roles and checkout validates its caller JWT", () => {

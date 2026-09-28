@@ -35,13 +35,15 @@ describe("sales conversation business authorization", () => {
 
   it("validates caller authorization and business context before loading the conversation UUID", () => {
     const source = readFileSync("supabase/functions/sales-conversation-brain/index.ts", "utf8");
-    const authorization = source.indexOf("requireFounderOrAdmin(req,");
-    const explicitBusiness = source.indexOf("business_context_required");
+    const authorization = source.indexOf("authorizeFounderOrAdmin(req,");
+    const explicitBusiness = source.indexOf("requireCustomerSalesBusinessId(requestedBusinessId)");
+    const serviceClient = source.indexOf("authorization.createAdminClient()");
     const businessLookup = source.indexOf('from("businesses")');
     const conversationLookup = source.indexOf('from("customer_sales_conversations")');
     expect(authorization).toBeGreaterThanOrEqual(0);
     expect(authorization).toBeLessThan(explicitBusiness);
-    expect(explicitBusiness).toBeLessThan(businessLookup);
+    expect(explicitBusiness).toBeLessThan(serviceClient);
+    expect(serviceClient).toBeLessThan(businessLookup);
     expect(businessLookup).toBeLessThan(conversationLookup);
     expect(source).toContain("authorizeConversationBusiness");
     expect(source).toContain("customer_contact_identity_context_required");

@@ -2,7 +2,7 @@
 // No external customer contact. No provider call. No payment.
 // Live-first: prepares structured sales conversation output for founder review.
 import { callAIGateway } from "../_shared/aiGateway.ts";
-import { requireFounderOrAdmin } from "../_shared/callerAuth.ts";
+import { authorizeFounderOrAdmin } from "../_shared/callerAuth.ts";
 import { authorizeConversationBusiness } from "../_shared/customerCommercialLifecycle.ts";
 import {
   assertCustomerSalesBusiness,
@@ -53,9 +53,8 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
-  const caller = await requireFounderOrAdmin(req, corsHeaders);
-  if ("error" in caller) return caller.error;
-  const sb = caller.admin;
+  const authorization = await authorizeFounderOrAdmin(req, corsHeaders);
+  if ("error" in authorization) return authorization.error;
 
   const body = await req.json().catch(() => ({} as any));
   const conversation_id: string | undefined = body.conversation_id;
@@ -73,6 +72,11 @@ Deno.serve(async (req) => {
   } catch (error) {
     return json({ ok: false, error: (error as CustomerSalesScopeError).code }, 409);
   }
+
+  // Founder/admin is a global portfolio role in this CRM. Bind one explicit
+  // business before constructing the privileged client; all subsequent
+  // conversation, catalog, relationship and state access stays in this scope.
+  const sb = authorization.createAdminClient();
   const { data: business, error: businessError } = await sb.from("businesses").select("id").eq("id", businessId).maybeSingle();
   if (businessError || !business) return json({ ok: false, error: "business_context_invalid" }, 409);
 
