@@ -1,6 +1,11 @@
 const SIGNATURE_PREFIX = "sha256=";
 const SHA256_HEX_LENGTH = 64;
 
+/** The webhook stays unavailable until the deployment explicitly opts in. */
+export function smartleadWebhookReceiverEnabled(value: string | null | undefined): boolean {
+  return value === "true";
+}
+
 function parseDigest(signatureHeader: string | null): Uint8Array | null {
   if (!signatureHeader || !signatureHeader.startsWith(SIGNATURE_PREFIX)) return null;
   const hex = signatureHeader.slice(SIGNATURE_PREFIX.length);

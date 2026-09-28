@@ -4,6 +4,11 @@ import {
   normalizeCampaignList,
   resolveProviderCampaign,
 } from "../_shared/smartleadCampaignResolve.ts";
+import {
+  resolveProviderConnectionSecret,
+  resolveScopedProviderConnection,
+  type ScopedProviderConnection,
+} from "../_shared/providerConnectionResolver.ts";
 
 const SMARTLEAD_BASE_URL = "https://server.smartlead.ai/api/v1";
 const CONFIRMATION_PHRASE = "MAP SMARTLEAD CAMPAIGN";
@@ -32,7 +37,6 @@ Deno.serve(async (req) => {
   const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
   const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
-  const SMARTLEAD_API_KEY = Deno.env.get("SMARTLEAD_API_KEY") ?? null;
 
   const auth = req.headers.get("Authorization") ?? "";
   if (!auth.startsWith("Bearer ")) return json({ ok: false, error: "auth_missing" }, 401);
@@ -60,32 +64,58 @@ Deno.serve(async (req) => {
 
   const liftorCampaignId = String(body.liftor_campaign_id ?? "").trim();
   const providerCampaignId = String(body.provider_campaign_id ?? "").trim();
+  const providerConnectionId = String(body.provider_connection_id ?? "").trim();
   const confirmation = String(body.confirmation ?? "").trim();
 
   if (!liftorCampaignId) return json({ ok: false, error: "liftor_campaign_id_required" }, 400);
   if (!providerCampaignId) return json({ ok: false, error: "provider_campaign_id_required" }, 400);
+  if (!providerConnectionId) return json({ ok: false, error: "provider_connection_id_required" }, 400);
   if (confirmation !== CONFIRMATION_PHRASE) {
     return json({ ok: false, error: "confirmation_phrase_mismatch", expected: CONFIRMATION_PHRASE }, 400);
   }
-  if (!SMARTLEAD_API_KEY || SMARTLEAD_API_KEY.length < 8) {
-    return json({ ok: false, error: "smartlead_api_key_missing" }, 400);
-  }
-
-  // Provider row
-  const { data: provider } = await admin
-    .from("outbound_providers")
-    .select("id, provider_type")
-    .eq("provider_type", "smartlead")
-    .maybeSingle();
-  if (!provider) return json({ ok: false, error: "smartlead_provider_row_missing" }, 404);
-
-  // Liftor campaign must exist
+  // The canonical campaign and provider connection must share one stable business ID.
   const { data: liftorCampaign } = await admin
     .from("outreach_campaigns")
     .select("id, campaign_name, business_id, business_name")
     .eq("id", liftorCampaignId)
     .maybeSingle();
   if (!liftorCampaign) return json({ ok: false, error: "liftor_campaign_not_found" }, 404);
+  if (!liftorCampaign.business_id) return json({ ok: false, error: "liftor_campaign_business_unbound" }, 409);
+
+  const { data: connectionRow } = await admin
+    .from("outbound_provider_connections")
+    .select("id,business_id,provider_type,connection_status,is_enabled,inbound_receiver_enabled,mutations_enabled,credential_secret_ref,webhook_secret_ref")
+    .eq("id", providerConnectionId)
+    .eq("business_id", liftorCampaign.business_id)
+    .eq("provider_type", "smartlead")
+    .eq("connection_status", "verified")
+    .eq("is_enabled", true)
+    .maybeSingle();
+  if (!connectionRow) return json({ ok: false, error: "provider_connection_not_found" }, 404);
+
+  const connectionResult = resolveScopedProviderConnection(
+    [connectionRow as ScopedProviderConnection],
+    liftorCampaign.business_id,
+    providerConnectionId,
+    "smartlead",
+  );
+  if ("reason" in connectionResult) return json({ ok: false, error: connectionResult.reason }, 404);
+  const SMARTLEAD_API_KEY = resolveProviderConnectionSecret(
+    connectionResult.connection,
+    "CREDENTIAL",
+    (name) => Deno.env.get(name),
+  );
+  if (!SMARTLEAD_API_KEY || SMARTLEAD_API_KEY.length < 8) {
+    return json({ ok: false, error: "provider_connection_credential_missing" }, 409);
+  }
+
+  // Catalog identity is not provider credential material.
+  const { data: provider } = await admin
+    .from("outbound_providers")
+    .select("id, provider_type")
+    .eq("provider_type", "smartlead")
+    .maybeSingle();
+  if (!provider) return json({ ok: false, error: "smartlead_provider_catalog_missing" }, 404);
 
   // Server-side validation: read Smartlead campaign list and confirm provider campaign exists
   const listUrl = `${SMARTLEAD_BASE_URL}/campaigns/?include_tags=true&api_key=${encodeURIComponent(
@@ -148,6 +178,9 @@ Deno.serve(async (req) => {
   const { data: existing } = await admin
     .from("outbound_provider_campaign_mappings")
     .select("id")
+    .eq("business_id", liftorCampaign.business_id)
+    .eq("provider_connection_id", connectionResult.connection.id)
+    .eq("provider_type", "smartlead")
     .eq("provider_id", provider.id)
     .eq("liftor_campaign_id", liftorCampaignId)
     .maybeSingle();
@@ -155,6 +188,7 @@ Deno.serve(async (req) => {
   const nowIso = new Date().toISOString();
   const payload = {
     business_id: liftorCampaign.business_id,
+    provider_connection_id: connectionResult.connection.id,
     liftor_campaign_id: liftorCampaignId,
     provider_id: provider.id,
     provider_type: "smartlead",

@@ -135,6 +135,13 @@ function str(v: unknown): string | null {
   return String(v);
 }
 
+function normalizeTimestamp(v: unknown): string | null {
+  if (v === null || v === undefined || v === "") return null;
+  const numeric = typeof v === "number" ? v : /^\d{10,13}$/.test(String(v)) ? Number(v) : null;
+  const milliseconds = typeof numeric === "number" ? (numeric < 100_000_000_000 ? numeric * 1000 : numeric) : Date.parse(String(v));
+  return Number.isFinite(milliseconds) ? new Date(milliseconds).toISOString() : null;
+}
+
 export function extractEvent(payload: RawWebhookPayload): ExtractedEvent {
   const rawType = pick(payload, ["event_type", "event", "type", "action", "webhook_event_type"]);
   const canonical = normalizeEventType(rawType);
@@ -150,7 +157,7 @@ export function extractEvent(payload: RawWebhookPayload): ExtractedEvent {
     ),
     provider_message_id: str(pick(payload, ["message_id", "email_id", "stats_id", "sl_email_lead_id"])),
     email: str(pick(payload, ["lead.email", "to_email", "email", "lead_email"]))?.toLowerCase() ?? null,
-    event_occurred_at: str(
+    event_occurred_at: normalizeTimestamp(
       pick(payload, ["event_timestamp", "timestamp", "time_stamp", "sent_time", "event_time", "created_at"]),
     ),
     is_known: canonical !== "unknown",
@@ -208,7 +215,7 @@ export function deriveContactMutation(
   switch (e.canonical_event_type) {
     case "reply_received":
       return {
-        contact_patch: { conversation_active: true, status: "replied" },
+        contact_patch: { last_replied_at: e.event_occurred_at ?? nowIso },
         blocks_future_sends: false,
         opens_conversation: true,
         transition: "reply_opens_conversation_and_stops_automation",
@@ -231,8 +238,15 @@ export function deriveContactMutation(
       return {
         contact_patch: {
           hard_bounced: true,
-          sendable_status: "not_sendable",
-          status: "bounced",
+          is_globally_suppressed: true,
+          global_suppression_at: e.event_occurred_at ?? nowIso,
+          global_suppression_reason: "hard_bounce_via_smartlead",
+          sendable_status: "suppressed",
+          status: "DO_NOT_CONTACT",
+          do_not_contact_at: e.event_occurred_at ?? nowIso,
+          do_not_contact_reason: "hard_bounce_via_smartlead",
+          compliance_status: "hard_bounced",
+          last_compliance_review_at: e.event_occurred_at ?? nowIso,
         },
         blocks_future_sends: true,
         opens_conversation: false,
@@ -243,12 +257,17 @@ export function deriveContactMutation(
     case "lead_unsubscribed":
       return {
         contact_patch: {
-          unsubscribed_at: nowIso,
+          unsubscribed_at: e.event_occurred_at ?? nowIso,
           unsubscribe_source: "smartlead_webhook",
-          sendable_status: "not_sendable",
-          status: "unsubscribed",
-          do_not_contact_at: nowIso,
+          is_globally_suppressed: true,
+          global_suppression_at: e.event_occurred_at ?? nowIso,
+          global_suppression_reason: "unsubscribed_via_smartlead",
+          sendable_status: "suppressed",
+          status: "DO_NOT_CONTACT",
+          do_not_contact_at: e.event_occurred_at ?? nowIso,
           do_not_contact_reason: "unsubscribed_via_smartlead",
+          compliance_status: "unsubscribed",
+          last_compliance_review_at: e.event_occurred_at ?? nowIso,
         },
         blocks_future_sends: true,
         opens_conversation: false,

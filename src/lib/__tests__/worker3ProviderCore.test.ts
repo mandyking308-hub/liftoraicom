@@ -1,8 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { APOLLO_CONNECTION_UI_COLUMNS } from "../providers/apolloConnectionProjection";
 import { assertProviderOperationContext } from "../providers/outreachProviderContract";
-import { verifySmartleadWebhookSignature } from "../../../supabase/functions/_shared/smartleadWebhookAuth";
-import { buildIdempotencyKey, extractEvent } from "../../../supabase/functions/_shared/smartleadEventNormalizer";
+import {
+  smartleadWebhookReceiverEnabled,
+  verifySmartleadWebhookSignature,
+} from "../../../supabase/functions/_shared/smartleadWebhookAuth";
+import {
+  buildIdempotencyKey,
+  deriveContactMutation,
+  extractEvent,
+} from "../../../supabase/functions/_shared/smartleadEventNormalizer";
 
 async function sign(rawBody: string, secret: string): Promise<string> {
   const key = await crypto.subtle.importKey(
@@ -36,6 +43,31 @@ describe("Worker 3 provider core", () => {
     const event = extractEvent({ event_type: "reply", event_id: "event-1" });
     expect(buildIdempotencyKey(event, "request-1")).toBe("req:request-1");
     expect(buildIdempotencyKey(event)).toBe("evt:event-1");
+  });
+
+  it("keeps the Smartlead receiver off unless the deployment opts in literally", () => {
+    expect(smartleadWebhookReceiverEnabled(null)).toBe(false);
+    expect(smartleadWebhookReceiverEnabled("TRUE")).toBe(false);
+    expect(smartleadWebhookReceiverEnabled("true")).toBe(true);
+  });
+
+  it("normalizes event timestamps and emits only valid, escalating CRM status values", () => {
+    const reply = extractEvent({ event_type: "reply", timestamp: 1_758_000_000 });
+    expect(reply.event_occurred_at).toBe(new Date(1_758_000_000_000).toISOString());
+    expect(deriveContactMutation(reply).contact_patch).toEqual({ last_replied_at: reply.event_occurred_at });
+
+    const bounce = deriveContactMutation(extractEvent({ event_type: "hard_bounce" }));
+    expect(bounce.contact_patch).toMatchObject({
+      hard_bounced: true,
+      is_globally_suppressed: true,
+      sendable_status: "suppressed",
+      status: "DO_NOT_CONTACT",
+      compliance_status: "hard_bounced",
+    });
+    expect(JSON.stringify(bounce.contact_patch)).not.toMatch(/"status":"(bounced|replied|unsubscribed)"/);
+
+    const unsubscribe = deriveContactMutation(extractEvent({ event_type: "unsubscribe" }));
+    expect(unsubscribe.contact_patch).toMatchObject({ status: "DO_NOT_CONTACT", compliance_status: "unsubscribed" });
   });
 
   it("requires explicit business and provider-connection scope and blocks mutations", () => {

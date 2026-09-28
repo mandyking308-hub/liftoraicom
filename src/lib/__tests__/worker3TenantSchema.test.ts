@@ -5,6 +5,10 @@ const migration = readFileSync(
   "supabase/migrations/20260928130000_worker3_tenant_provider_connections.sql",
   "utf8",
 );
+const crmAttributionMigration = readFileSync(
+  "supabase/migrations/20260928140000_worker3_crm_bcr_campaign_scope.sql",
+  "utf8",
+);
 const generatedTypes = readFileSync("src/integrations/supabase/types.ts", "utf8");
 
 describe("Worker 3 tenant provider schema", () => {
@@ -40,5 +44,16 @@ describe("Worker 3 tenant provider schema", () => {
     expect(migration).toContain("UNIQUE (provider_connection_id, provider_mailbox_id)");
     expect(migration).toContain("FOREIGN KEY (inbox_id, business_id)");
     expect(generatedTypes).toContain("outbound_provider_mailbox_mappings: {");
+  });
+
+  it("binds canonical outreach campaigns to businesses without rewriting legacy rows", () => {
+    expect(crmAttributionMigration).toContain("ADD COLUMN IF NOT EXISTS business_id UUID");
+    expect(crmAttributionMigration).toContain("outreach_campaigns_business_id_fkey");
+    expect(crmAttributionMigration).toContain("campaign.business_name = business.name");
+    expect(crmAttributionMigration).toContain("FOREIGN KEY (liftor_campaign_id, business_id)");
+    expect(crmAttributionMigration).toContain("REFERENCES public.outreach_campaigns(id, business_id) NOT VALID");
+    expect(generatedTypes).toMatch(/outreach_campaigns: \{[\s\S]*?business_id: string \| null/);
+    expect(generatedTypes).toContain("outbound_provider_campaign_mappings_liftor_campaign_business_scope_fkey");
+    expect(crmAttributionMigration).not.toMatch(/\b(DROP TABLE|DROP COLUMN|TRUNCATE)\b/i);
   });
 });
