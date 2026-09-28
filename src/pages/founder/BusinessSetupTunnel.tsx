@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import FounderLayout from "@/components/founder/FounderLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,6 +22,7 @@ import {
 } from "@/lib/commercialPace";
 
 type BusinessRow = { id: string; name: string };
+const BUSINESS_PAGE_SIZE = 50;
 
 function slugify(s: string): string {
   return "draft:" + s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60) || "draft:unnamed";
@@ -32,22 +33,80 @@ export default function BusinessSetupTunnel() {
   const initialMode = (params.get("mode") || "existing") as "existing" | "new" | "continue";
   const [mode, setMode] = useState(initialMode);
   const [businesses, setBusinesses] = useState<BusinessRow[]>([]);
+  const [businessSearch, setBusinessSearch] = useState("");
+  const [businessOffset, setBusinessOffset] = useState(0);
+  const [hasMoreBusinesses, setHasMoreBusinesses] = useState(false);
+  const [loadingMoreBusinesses, setLoadingMoreBusinesses] = useState(false);
+  const [businessLoadError, setBusinessLoadError] = useState(false);
   const [loadingBiz, setLoadingBiz] = useState(true);
   const [state, setState] = useState<TunnelState | null>(null);
   const [stepIdx, setStepIdx] = useState(0);
   const [newName, setNewName] = useState("");
+  const businessRequestId = useRef(0);
 
   const counts = useMemo(fieldCounts, []);
 
   useEffect(() => {
-    (async () => {
+    let active = true;
+    const requestId = ++businessRequestId.current;
+    setLoadingBiz(true);
+    setLoadingMoreBusinesses(false);
+    setBusinessLoadError(false);
+
+    const timer = window.setTimeout(async () => {
       try {
-        const { data } = await supabase.from("businesses").select("id, name").limit(200);
-        setBusinesses((data as unknown as BusinessRow[]) || []);
-      } catch { setBusinesses([]); }
-      setLoadingBiz(false);
-    })();
-  }, []);
+        let query = supabase.from("businesses").select("id, name");
+        const term = businessSearch.trim();
+        if (term) query = query.ilike("name", `%${term}%`);
+
+        const { data, error } = await query.order("name").range(0, BUSINESS_PAGE_SIZE - 1);
+        if (!active || requestId !== businessRequestId.current) return;
+
+        const rows = (data ?? []) as unknown as BusinessRow[];
+        setBusinesses(rows);
+        setBusinessOffset(rows.length);
+        setHasMoreBusinesses(!error && rows.length === BUSINESS_PAGE_SIZE);
+        setBusinessLoadError(!!error);
+        setLoadingBiz(false);
+      } catch {
+        if (!active || requestId !== businessRequestId.current) return;
+        setBusinessLoadError(true);
+        setLoadingBiz(false);
+      }
+    }, 200);
+
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
+  }, [businessSearch]);
+
+  async function loadMoreBusinesses() {
+    if (loadingMoreBusinesses || !hasMoreBusinesses) return;
+    const requestId = businessRequestId.current;
+    const start = businessOffset;
+    const term = businessSearch.trim();
+    setLoadingMoreBusinesses(true);
+    try {
+      let query = supabase.from("businesses").select("id, name");
+      if (term) query = query.ilike("name", `%${term}%`);
+      const { data, error } = await query.order("name").range(start, start + BUSINESS_PAGE_SIZE - 1);
+      if (requestId !== businessRequestId.current) return;
+
+      const rows = (data ?? []) as unknown as BusinessRow[];
+      if (error) {
+        toast.error("Could not load more businesses.");
+        return;
+      }
+      setBusinesses((current) => [...current, ...rows]);
+      setBusinessOffset(start + rows.length);
+      setHasMoreBusinesses(rows.length === BUSINESS_PAGE_SIZE);
+    } catch {
+      if (requestId === businessRequestId.current) toast.error("Could not load more businesses.");
+    } finally {
+      if (requestId === businessRequestId.current) setLoadingMoreBusinesses(false);
+    }
+  }
 
   const [remoteDrafts, setRemoteDrafts] = useState<TunnelState[]>([]);
   useEffect(() => {
@@ -179,11 +238,20 @@ export default function BusinessSetupTunnel() {
                     </CardContent>
                   </Card>
                 )}
+                <Input
+                  value={businessSearch}
+                  onChange={(e) => setBusinessSearch(e.target.value)}
+                  placeholder="Search businesses by name"
+                  aria-label="Search businesses by name"
+                />
                 {loadingBiz && <p className="text-sm text-muted-foreground">Loading…</p>}
-                {!loadingBiz && businesses.length === 0 && (
-                  <p className="text-sm text-muted-foreground">No businesses found. Use "Create new" to start a draft.</p>
+                {!loadingBiz && businessLoadError && (
+                  <p className="text-sm text-destructive">Could not load businesses. Try changing the search or reload the page.</p>
                 )}
-                {businesses.filter((b) => b !== neonCandy).map((b) => {
+                {!loadingBiz && !businessLoadError && businesses.length === 0 && (
+                  <p className="text-sm text-muted-foreground">No matching businesses found. Use "Create new" to start a draft.</p>
+                )}
+                {!loadingBiz && !businessLoadError && businesses.filter((b) => b.id !== neonCandy?.id).map((b) => {
                   const t = load(b.id);
                   const score = t ? overallCompleteness(t, counts) : 0;
                   return (
@@ -196,6 +264,11 @@ export default function BusinessSetupTunnel() {
                     </div>
                   );
                 })}
+                {!loadingBiz && !businessLoadError && hasMoreBusinesses && (
+                  <Button size="sm" variant="outline" onClick={loadMoreBusinesses} disabled={loadingMoreBusinesses}>
+                    {loadingMoreBusinesses ? "Loading…" : "Load more businesses"}
+                  </Button>
+                )}
               </CardContent>
             </Card>
           )}
