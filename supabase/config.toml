@@ -44,5 +44,8 @@ verify_jwt = false
 [functions.social-relationship-webhook]
 verify_jwt = false
 
+[functions.social-engagement-provider-event-receiver]
+verify_jwt = false
+
 [functions.social-relationship-maintenance]
 verify_jwt = false
