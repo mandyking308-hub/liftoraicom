@@ -60,4 +60,3 @@ export function resolveProviderConnectionSecret(
   const value = readSecret(expected)?.trim();
   return value || null;
 }
-
