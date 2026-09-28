@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { authorizeOutreachImport } from "../_shared/outreachImportAuth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -23,6 +24,7 @@ interface Body {
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MAX_IMPORT_ROWS = 5000;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -35,12 +37,73 @@ Deno.serve(async (req) => {
       { auth: { persistSession: false } },
     );
 
-    const body: Body = await req.json();
-    if (!body?.rows?.length) return json({ error: "rows required" }, 400);
-    const business = (body.business_name ?? "").trim();
-    if (!business) return json({ error: "business_name required" }, 400);
+    let body: Body;
+    try {
+      body = await req.json();
+    } catch {
+      return json({ error: "invalid JSON body" }, 400);
+    }
+    if (!Array.isArray(body?.rows) || !body.rows.length) return json({ error: "rows required" }, 400);
+    if (body.rows.length > MAX_IMPORT_ROWS) return json({ error: `maximum ${MAX_IMPORT_ROWS} rows per import` }, 413);
 
-    // Build the batch
+    const authz = await authorizeOutreachImport(req.headers.get("authorization"), body.business_name, {
+      verifyAccessToken: async (token) => {
+        const { data, error } = await supabase.auth.getUser(token);
+        if (error) throw error;
+        return data.user ? { id: data.user.id } : null;
+      },
+      getRoles: async (userId) => {
+        const { data, error } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", userId)
+          .in("role", ["founder", "admin"]);
+        if (error) throw error;
+        return (data ?? []).map((row) => row.role);
+      },
+      resolveBusiness: async (businessName) => {
+        const { data, error } = await supabase
+          .from("businesses")
+          .select("id,name")
+          .eq("name", businessName)
+          .maybeSingle();
+        if (error) throw error;
+        return data;
+      },
+    });
+    if (!authz.authorized) return json({ error: authz.error }, authz.status);
+    const business = authz.business.name;
+
+    // The service-role client is used only after verifying the user's JWT,
+    // founder/admin role, and canonical businesses.name on the server.
+    const emails = [...new Set(body.rows
+      .map((r) => (r.email ?? "").toString().trim().toLowerCase())
+      .filter(Boolean))];
+    const existingByEmail = new Map<string, string>();
+    if (emails.length) {
+      const { data: existing, error: existingErr } = await supabase
+        .from("contacts")
+        .select("id,email")
+        .in("email", emails);
+      if (existingErr) return json({ error: "contact_scope_lookup_failed" }, 500);
+      for (const contact of existing ?? []) {
+        if (contact.email) existingByEmail.set(contact.email.toLowerCase(), contact.id);
+      }
+    }
+
+    const existingContactIds = [...new Set(existingByEmail.values())];
+    const alreadyLinked = new Set<string>();
+    if (existingContactIds.length) {
+      const { data: links, error: linksErr } = await supabase
+        .from("business_contact_relationships")
+        .select("contact_id")
+        .eq("business_name", business)
+        .in("contact_id", existingContactIds);
+      if (linksErr) return json({ error: "business_relationship_scope_lookup_failed" }, 500);
+      for (const link of links ?? []) alreadyLinked.add(link.contact_id);
+    }
+
+    // Batch only after the caller and business scope have both been resolved.
     const { data: batch, error: batchErr } = await supabase
       .from("import_batches")
       .insert({
@@ -56,16 +119,6 @@ Deno.serve(async (req) => {
     let valid = 0, invalid = 0, duplicate = 0;
     const leadInserts: Array<Record<string, unknown>> = [];
 
-    // Pre-fetch existing emails to detect duplicates against contacts
-    const emails = body.rows
-      .map((r) => (r.email ?? "").toString().trim().toLowerCase())
-      .filter(Boolean);
-    const { data: existing } = await supabase
-      .from("contacts")
-      .select("email")
-      .in("email", emails);
-    const existingSet = new Set((existing ?? []).map((c) => c.email));
-
     // Track duplicates within the same upload
     const seen = new Set<string>();
 
@@ -78,13 +131,13 @@ Deno.serve(async (req) => {
 
       let status: "valid" | "invalid" | "duplicate" = "valid";
       if (!EMAIL_RE.test(email)) status = "invalid";
-      else if (existingSet.has(email) || seen.has(email)) status = "duplicate";
+      else if (seen.has(email) || (existingByEmail.has(email) && alreadyLinked.has(existingByEmail.get(email)!))) status = "duplicate";
 
       if (status === "valid") valid += 1;
       else if (status === "duplicate") duplicate += 1;
       else invalid += 1;
 
-      seen.add(email);
+      if (EMAIL_RE.test(email)) seen.add(email);
       leadInserts.push({
         batch_id: batch.id,
         email,
@@ -104,7 +157,8 @@ Deno.serve(async (req) => {
       .select();
     if (leadErr) return json({ error: leadErr.message }, 500);
 
-    // Upsert valid leads into contacts and score them
+    // Upsert global people and let upsert_contact create an idempotent
+    // business_contact_relationships row for this canonical business.
     const validLeads = (insertedLeads ?? []).filter((l) => l.validation_status === "valid");
     let upserted = 0;
     for (const l of validLeads) {

@@ -1,0 +1,1020 @@
+{
+  "artifact": "stage1b-live-rpc-catalog-evidence",
+  "captured_at_utc": "2026-09-24T12:28:53.282Z",
+  "source": {
+    "provider": "Lovable cloud database",
+    "project_id": "08f86e25-a8d3-49f1-9c6a-333a4974336b",
+    "database_ref": "oiwbletmjhrhqksosphi",
+    "access": "authoritative read-only SELECT",
+    "production_write_performed": false,
+    "catalog_scope": "public postgres-owned functions with effective anon EXECUTE"
+  },
+  "result": {
+    "exact_live_signature_count": 18,
+    "all_owner_postgres": true,
+    "all_security_definer": true,
+    "all_search_path_public": true,
+    "all_anon_execute": true,
+    "all_authenticated_execute": true,
+    "all_direct_public_execute_false": true,
+    "signatures": [
+      "public._is_founder_or_admin()",
+      "public.accept_proposal_by_token(text)",
+      "public.current_worker_id()",
+      "public.get_business_outbound_status(text)",
+      "public.get_customer_quarterly_report_by_token(text)",
+      "public.get_customer_survey_request_by_token(text)",
+      "public.get_outbound_status()",
+      "public.get_proposal_by_token(text)",
+      "public.has_role(uuid, app_role)",
+      "public.is_founder()",
+      "public.is_founder_or_admin(uuid)",
+      "public.is_kill_switch_active()",
+      "public.is_oversight_reviewer()",
+      "public.log_demo_event(text, text, jsonb)",
+      "public.supplier_list_assignments(text)",
+      "public.supplier_login_with_token(text)",
+      "public.supplier_update_assignment_status(text, uuid, text, text)",
+      "public.worker_has_active_window(uuid, text)"
+    ]
+  },
+  "migration_history": {
+    "query": "SELECT version FROM supabase_migrations.schema_migrations WHERE version::text >= '20260923000000' ORDER BY version;",
+    "matching_row_count": 0,
+    "matching_versions": [],
+    "conclusion": "Stage 1B and September 23 Worker 2/3 migrations are absent from live migration history."
+  },
+  "has_role_policy_dependency": {
+    "has_role_policies_targeting_anon": 0,
+    "has_role_policies_targeting_authenticated": 1075,
+    "has_role_policies_targeting_public": 288,
+    "has_role_policy_count_union_public_or_anon": 288,
+    "query": "WITH calls AS (SELECT pol.polroles, lower(coalesce(pg_get_expr(pol.polqual, pol.polrelid), '') || ' ' || coalesce(pg_get_expr(pol.polwithcheck, pol.polrelid), '')) LIKE '%has_role(%' AS calls_has_role FROM pg_policy pol) SELECT jsonb_build_object('has_role_policies_targeting_public', count(*) FILTER (WHERE calls_has_role AND 0::oid = ANY(polroles)), 'has_role_policies_targeting_anon', count(*) FILTER (WHERE calls_has_role AND (SELECT oid FROM pg_roles WHERE rolname='anon')::oid = ANY(polroles)), 'has_role_policies_targeting_authenticated', count(*) FILTER (WHERE calls_has_role AND (SELECT oid FROM pg_roles WHERE rolname='authenticated')::oid = ANY(polroles)), 'has_role_policy_count_union_public_or_anon', count(*) FILTER (WHERE calls_has_role AND (0::oid = ANY(polroles) OR (SELECT oid FROM pg_roles WHERE rolname='anon')::oid = ANY(polroles))) FROM calls;"
+  },
+  "rollback_preflight": {
+    "other_owner_public_function_count": 0,
+    "postgres_owned_acl_entry_count": 547,
+    "postgres_owned_non_owner_grantor_function_count": 0,
+    "postgres_owned_public_function_count": 241,
+    "postgres_owned_raw_acl_null_count": 0,
+    "public_function_count": 386,
+    "supabase_admin_owned_public_function_count": 145,
+    "acl_order_replay_preflight": {
+      "duplicate_grantee_grantor_pairs": 0,
+      "functions_with_grant_options": 0,
+      "functions_with_non_execute_acl": 0,
+      "owner_execute_entry_count_not_one": 0,
+      "owner_execute_entry_not_ordinal_one": 0,
+      "postgres_owned_public_functions": 241,
+      "query": "WITH owned AS (SELECT p.oid,p.proowner,p.proacl FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='public' AND p.prokind='f' AND p.proowner='postgres'::regrole), expanded AS (SELECT o.oid,o.proowner,acl_item.ordinal,a.grantee,a.grantor,a.privilege_type,a.is_grantable FROM owned o CROSS JOIN LATERAL unnest(o.proacl) WITH ORDINALITY AS acl_item(item,ordinal) CROSS JOIN LATERAL aclexplode(ARRAY[acl_item.item]) a), per_fn AS (SELECT oid,count(*) FILTER(WHERE grantee=proowner AND privilege_type='EXECUTE') AS owner_exec_entries,min(ordinal) FILTER(WHERE grantee=proowner AND privilege_type='EXECUTE') AS owner_exec_ordinal,bool_or(privilege_type<>'EXECUTE') AS has_non_execute,bool_or(is_grantable) AS has_grant_option FROM expanded GROUP BY oid), duplicates AS (SELECT oid,grantee,grantor,count(*) AS n FROM expanded GROUP BY oid,grantee,grantor HAVING count(*)>1) SELECT jsonb_build_object('owner_execute_entry_count_not_one',count(*) FILTER(WHERE per_fn.owner_exec_entries<>1),'owner_execute_entry_not_ordinal_one',count(*) FILTER(WHERE per_fn.owner_exec_ordinal<>1),'functions_with_non_execute_acl',count(*) FILTER(WHERE per_fn.has_non_execute),'functions_with_grant_options',count(*) FILTER(WHERE per_fn.has_grant_option),'duplicate_grantee_grantor_pairs',(SELECT count(*) FROM duplicates)) FROM owned JOIN per_fn USING(oid);"
+    },
+    "conclusion": "All 241 postgres-owned public functions have explicit raw ACLs, owner EXECUTE at ordinal 1, no non-owner grantors, no duplicate grantee/grantor items, no non-EXECUTE ACL entries, and no grant options. Stage 1B captures original ACL ordinals and verifies raw ACL, expanded entries, effective anon/authenticated/service_role states after rollback."
+  },
+  "catalog_query_artifact": "scripts/stage1b-live-catalog-evidence.sql",
+  "rows": [
+    {
+      "acl_entries": [
+        {
+          "acl_ordinal": 1,
+          "grantable": false,
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 2,
+          "grantable": false,
+          "grantee": "service_role",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 3,
+          "grantable": false,
+          "grantee": "anon",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 4,
+          "grantable": false,
+          "grantee": "authenticated",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "anon_execute": true,
+      "authenticated_execute": true,
+      "configured_settings": [
+        "search_path=public"
+      ],
+      "declaration_signature": "public._is_founder_or_admin()",
+      "definition_md5": "6d67cd4f151375ffdfab296444395947",
+      "exact_definition": "CREATE OR REPLACE FUNCTION public._is_founder_or_admin()\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n  SELECT EXISTS (\n    SELECT 1 FROM public.user_roles\n    WHERE user_id = auth.uid()\n      AND role IN ('admin'::app_role, 'founder'::app_role)\n  );\n$function$\n",
+      "exact_signature": "public._is_founder_or_admin()",
+      "owner": "postgres",
+      "public_execute": false,
+      "raw_acl": [
+        "postgres=X/postgres",
+        "service_role=X/postgres",
+        "anon=X/postgres",
+        "authenticated=X/postgres"
+      ],
+      "search_path": "search_path=public",
+      "security_definer": true
+    },
+    {
+      "acl_entries": [
+        {
+          "acl_ordinal": 1,
+          "grantable": false,
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 2,
+          "grantable": false,
+          "grantee": "service_role",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 3,
+          "grantable": false,
+          "grantee": "anon",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 4,
+          "grantable": false,
+          "grantee": "authenticated",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "anon_execute": true,
+      "authenticated_execute": true,
+      "configured_settings": [
+        "search_path=public"
+      ],
+      "declaration_signature": "public.accept_proposal_by_token(_token text)",
+      "definition_md5": "897531a25dd7699a2e9639f7c7570b37",
+      "exact_definition": "CREATE OR REPLACE FUNCTION public.accept_proposal_by_token(_token text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE\n  p public.internal_proposals;\n  new_deal_id uuid;\n  mid_value numeric;\nBEGIN\n  SELECT * INTO p FROM public.internal_proposals WHERE accept_token = _token LIMIT 1;\n  IF NOT FOUND THEN\n    RETURN jsonb_build_object('ok', false, 'error', 'INVALID_TOKEN');\n  END IF;\n\n  IF p.status = 'accepted' THEN\n    RETURN jsonb_build_object('ok', true, 'already_accepted', true, 'proposal_id', p.id, 'deal_id', p.deal_id);\n  END IF;\n\n  IF p.status IN ('rejected','expired') THEN\n    RETURN jsonb_build_object('ok', false, 'error', 'PROPOSAL_'|| upper(p.status::text));\n  END IF;\n\n  -- Estimate mid-point for the deal value\n  mid_value := 50000; -- safe fallback\n\n  UPDATE public.internal_proposals\n     SET status = 'accepted', accepted_at = now(), updated_at = now()\n   WHERE id = p.id;\n\n  -- Create the deal (handle_deal_won trigger will create the invoice + flip contact to CLIENT)\n  IF p.deal_id IS NULL THEN\n    INSERT INTO public.deals (\n      contact_id, business_name, deal_name,\n      estimated_value_min, estimated_value_max, currency,\n      status, notes, won_at\n    ) VALUES (\n      p.contact_id,\n      COALESCE(p.business_name,''),\n      COALESCE(NULLIF(p.title,''), 'Accepted proposal') ,\n      mid_value, mid_value, 'GBP',\n      'WON', 'Auto-created from accepted proposal ' || p.id::text, now()\n    ) RETURNING id INTO new_deal_id;\n\n    UPDATE public.internal_proposals SET deal_id = new_deal_id WHERE id = p.id;\n  ELSE\n    UPDATE public.deals SET status = 'WON', won_at = COALESCE(won_at, now()), updated_at = now()\n     WHERE id = p.deal_id;\n    new_deal_id := p.deal_id;\n  END IF;\n\n  RETURN jsonb_build_object('ok', true, 'proposal_id', p.id, 'deal_id', new_deal_id);\nEND;\n$function$\n",
+      "exact_signature": "public.accept_proposal_by_token(text)",
+      "owner": "postgres",
+      "public_execute": false,
+      "raw_acl": [
+        "postgres=X/postgres",
+        "service_role=X/postgres",
+        "anon=X/postgres",
+        "authenticated=X/postgres"
+      ],
+      "search_path": "search_path=public",
+      "security_definer": true
+    },
+    {
+      "acl_entries": [
+        {
+          "acl_ordinal": 1,
+          "grantable": false,
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 2,
+          "grantable": false,
+          "grantee": "service_role",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 3,
+          "grantable": false,
+          "grantee": "anon",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 4,
+          "grantable": false,
+          "grantee": "authenticated",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "anon_execute": true,
+      "authenticated_execute": true,
+      "configured_settings": [
+        "search_path=public"
+      ],
+      "declaration_signature": "public.current_worker_id()",
+      "definition_md5": "c0bd16f18573625ac4dbc86ffb05a405",
+      "exact_definition": "CREATE OR REPLACE FUNCTION public.current_worker_id()\n RETURNS uuid\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n  SELECT id FROM public.worker_profiles WHERE user_id = auth.uid() LIMIT 1\n$function$\n",
+      "exact_signature": "public.current_worker_id()",
+      "owner": "postgres",
+      "public_execute": false,
+      "raw_acl": [
+        "postgres=X/postgres",
+        "service_role=X/postgres",
+        "anon=X/postgres",
+        "authenticated=X/postgres"
+      ],
+      "search_path": "search_path=public",
+      "security_definer": true
+    },
+    {
+      "acl_entries": [
+        {
+          "acl_ordinal": 1,
+          "grantable": false,
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 2,
+          "grantable": false,
+          "grantee": "service_role",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 3,
+          "grantable": false,
+          "grantee": "anon",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 4,
+          "grantable": false,
+          "grantee": "authenticated",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "anon_execute": true,
+      "authenticated_execute": true,
+      "configured_settings": [
+        "search_path=public"
+      ],
+      "declaration_signature": "public.get_business_outbound_status(_business_name text)",
+      "definition_md5": "38f4b7cb490b333b4c994c46e13937e3",
+      "exact_definition": "CREATE OR REPLACE FUNCTION public.get_business_outbound_status(_business_name text)\n RETURNS jsonb\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n  SELECT jsonb_build_object(\n    'business_name', _business_name,\n    'system_mode', public.get_system_mode(),\n    'has_live_ready_inbox', public.has_live_ready_inbox(_business_name),\n    'live_ready_inbox_count', (\n      SELECT COUNT(*) FROM public.inboxes\n       WHERE business_name = _business_name\n         AND active = true\n         AND provider_type = 'ionos_smtp'::public.inbox_provider_type\n         AND live_readiness = 'live_ready'::public.inbox_live_readiness\n    ),\n    'simulated', public.get_system_mode() = 'sandbox' AND NOT public.has_live_ready_inbox(_business_name)\n  );\n$function$\n",
+      "exact_signature": "public.get_business_outbound_status(text)",
+      "owner": "postgres",
+      "public_execute": false,
+      "raw_acl": [
+        "postgres=X/postgres",
+        "service_role=X/postgres",
+        "anon=X/postgres",
+        "authenticated=X/postgres"
+      ],
+      "search_path": "search_path=public",
+      "security_definer": true
+    },
+    {
+      "acl_entries": [
+        {
+          "acl_ordinal": 1,
+          "grantable": false,
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 2,
+          "grantable": false,
+          "grantee": "service_role",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 3,
+          "grantable": false,
+          "grantee": "anon",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 4,
+          "grantable": false,
+          "grantee": "authenticated",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "anon_execute": true,
+      "authenticated_execute": true,
+      "configured_settings": [
+        "search_path=public"
+      ],
+      "declaration_signature": "public.get_customer_quarterly_report_by_token(p_token text)",
+      "definition_md5": "5332959820f2b2e5ad35fda2cfe151a1",
+      "exact_definition": "CREATE OR REPLACE FUNCTION public.get_customer_quarterly_report_by_token(p_token text)\n RETURNS jsonb\n LANGUAGE plpgsql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE\n  r public.customer_quarterly_reports%ROWTYPE;\nBEGIN\n  IF p_token IS NULL OR length(p_token) < 16 THEN\n    RETURN NULL;\n  END IF;\n  SELECT * INTO r FROM public.customer_quarterly_reports\n   WHERE report_token = p_token\n     AND customer_share_allowed = true\n     AND approved_at IS NOT NULL\n   LIMIT 1;\n  IF NOT FOUND THEN RETURN NULL; END IF;\n  RETURN jsonb_build_object(\n    'id', r.id,\n    'report_quarter', r.report_quarter,\n    'report_year', r.report_year,\n    'reporting_period_start', r.reporting_period_start,\n    'reporting_period_end', r.reporting_period_end,\n    'customer_facing_summary', r.customer_facing_summary,\n    'usage_summary', r.usage_summary,\n    'engagement_summary', r.engagement_summary,\n    'value_summary', r.value_summary,\n    'support_summary', r.support_summary,\n    'feedback_summary', r.feedback_summary,\n    'satisfaction_summary', r.satisfaction_summary,\n    'completed_actions', r.completed_actions,\n    'recommendations', r.recommendations,\n    'next_quarter_plan', r.next_quarter_plan,\n    'customer_share_allowed', r.customer_share_allowed,\n    'approved_at', r.approved_at,\n    'shared_at', r.shared_at\n  );\nEND;\n$function$\n",
+      "exact_signature": "public.get_customer_quarterly_report_by_token(text)",
+      "owner": "postgres",
+      "public_execute": false,
+      "raw_acl": [
+        "postgres=X/postgres",
+        "service_role=X/postgres",
+        "anon=X/postgres",
+        "authenticated=X/postgres"
+      ],
+      "search_path": "search_path=public",
+      "security_definer": true
+    },
+    {
+      "acl_entries": [
+        {
+          "acl_ordinal": 1,
+          "grantable": false,
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 2,
+          "grantable": false,
+          "grantee": "service_role",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 3,
+          "grantable": false,
+          "grantee": "anon",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 4,
+          "grantable": false,
+          "grantee": "authenticated",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "anon_execute": true,
+      "authenticated_execute": true,
+      "configured_settings": [
+        "search_path=public"
+      ],
+      "declaration_signature": "public.get_customer_survey_request_by_token(p_token text)",
+      "definition_md5": "889c6d876cf4286c84276199e9e26378",
+      "exact_definition": "CREATE OR REPLACE FUNCTION public.get_customer_survey_request_by_token(p_token text)\n RETURNS jsonb\n LANGUAGE plpgsql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE\n  r public.customer_survey_requests%ROWTYPE;\nBEGIN\n  IF p_token IS NULL OR length(p_token) < 16 THEN\n    RETURN NULL;\n  END IF;\n  SELECT * INTO r FROM public.customer_survey_requests\n   WHERE survey_token = p_token\n     AND request_status = ANY (ARRAY['sent','approved','draft'])\n     AND (expires_at IS NULL OR expires_at > now())\n   LIMIT 1;\n  IF NOT FOUND THEN RETURN NULL; END IF;\n  RETURN jsonb_build_object(\n    'id', r.id,\n    'business_id', r.business_id,\n    'template_id', r.template_id,\n    'expires_at', r.expires_at,\n    'completed_at', r.completed_at,\n    'request_status', r.request_status,\n    'survey_token', r.survey_token\n  );\nEND;\n$function$\n",
+      "exact_signature": "public.get_customer_survey_request_by_token(text)",
+      "owner": "postgres",
+      "public_execute": false,
+      "raw_acl": [
+        "postgres=X/postgres",
+        "service_role=X/postgres",
+        "anon=X/postgres",
+        "authenticated=X/postgres"
+      ],
+      "search_path": "search_path=public",
+      "security_definer": true
+    },
+    {
+      "acl_entries": [
+        {
+          "acl_ordinal": 1,
+          "grantable": false,
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 2,
+          "grantable": false,
+          "grantee": "service_role",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 3,
+          "grantable": false,
+          "grantee": "anon",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 4,
+          "grantable": false,
+          "grantee": "authenticated",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "anon_execute": true,
+      "authenticated_execute": true,
+      "configured_settings": [
+        "search_path=public"
+      ],
+      "declaration_signature": "public.get_outbound_status()",
+      "definition_md5": "b5e873949952e3fea7c14d2695d85aad",
+      "exact_definition": "CREATE OR REPLACE FUNCTION public.get_outbound_status()\n RETURNS jsonb\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n  SELECT jsonb_build_object(\n    'system_mode', public.get_system_mode(),\n    'provider_configured', COALESCE(\n      (SELECT value FROM public.system_settings WHERE key='outbound_provider_configured'),\n      'false'::jsonb\n    )::boolean,\n    'test_passed_at', (\n      SELECT value FROM public.system_settings WHERE key='outbound_provider_test_passed_at'\n    ),\n    'simulated', (public.get_system_mode() = 'sandbox')\n  );\n$function$\n",
+      "exact_signature": "public.get_outbound_status()",
+      "owner": "postgres",
+      "public_execute": false,
+      "raw_acl": [
+        "postgres=X/postgres",
+        "service_role=X/postgres",
+        "anon=X/postgres",
+        "authenticated=X/postgres"
+      ],
+      "search_path": "search_path=public",
+      "security_definer": true
+    },
+    {
+      "acl_entries": [
+        {
+          "acl_ordinal": 1,
+          "grantable": false,
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 2,
+          "grantable": false,
+          "grantee": "service_role",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 3,
+          "grantable": false,
+          "grantee": "anon",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 4,
+          "grantable": false,
+          "grantee": "authenticated",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "anon_execute": true,
+      "authenticated_execute": true,
+      "configured_settings": [
+        "search_path=public"
+      ],
+      "declaration_signature": "public.get_proposal_by_token(_token text)",
+      "definition_md5": "3b76fb2376b48416dd8c2b80334306be",
+      "exact_definition": "CREATE OR REPLACE FUNCTION public.get_proposal_by_token(_token text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE p public.internal_proposals;\nBEGIN\n  SELECT * INTO p FROM public.internal_proposals\n   WHERE view_token = _token OR accept_token = _token\n   LIMIT 1;\n  IF NOT FOUND THEN RETURN NULL; END IF;\n\n  IF p.status = 'sent' AND p.viewed_at IS NULL THEN\n    UPDATE public.internal_proposals\n       SET viewed_at = now(), status = 'viewed', updated_at = now()\n     WHERE id = p.id;\n    p.viewed_at := now();\n    p.status := 'viewed';\n  END IF;\n\n  RETURN jsonb_build_object(\n    'id', p.id,\n    'title', p.title,\n    'business_name', p.business_name,\n    'suggested_solution', p.suggested_solution,\n    'estimated_scope', p.estimated_scope,\n    'estimated_timeline', p.estimated_timeline,\n    'estimated_cost_range', p.estimated_cost_range,\n    'estimated_cost_breakdown', p.estimated_cost_breakdown,\n    'architecture_components', p.architecture_components,\n    'estimated_roi_summary', p.estimated_roi_summary,\n    'estimated_annual_savings', p.estimated_annual_savings,\n    'estimated_roi_period', p.estimated_roi_period,\n    'estimated_productivity_gain', p.estimated_productivity_gain,\n    'status', p.status,\n    'accepted_at', p.accepted_at,\n    'viewed_at', p.viewed_at,\n    'accept_token', p.accept_token,\n    'include_demo', p.include_demo\n  );\nEND;\n$function$\n",
+      "exact_signature": "public.get_proposal_by_token(text)",
+      "owner": "postgres",
+      "public_execute": false,
+      "raw_acl": [
+        "postgres=X/postgres",
+        "service_role=X/postgres",
+        "anon=X/postgres",
+        "authenticated=X/postgres"
+      ],
+      "search_path": "search_path=public",
+      "security_definer": true
+    },
+    {
+      "acl_entries": [
+        {
+          "acl_ordinal": 1,
+          "grantable": false,
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 2,
+          "grantable": false,
+          "grantee": "service_role",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 3,
+          "grantable": false,
+          "grantee": "anon",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 4,
+          "grantable": false,
+          "grantee": "authenticated",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "anon_execute": true,
+      "authenticated_execute": true,
+      "configured_settings": [
+        "search_path=public"
+      ],
+      "declaration_signature": "public.has_role(_user_id uuid, _role app_role)",
+      "definition_md5": "61d9f74752fa94ff88dca7d25040221c",
+      "exact_definition": "CREATE OR REPLACE FUNCTION public.has_role(_user_id uuid, _role app_role)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n  SELECT CASE\n    WHEN auth.role() <> 'service_role'\n         AND _user_id IS DISTINCT FROM auth.uid()\n      THEN false\n    ELSE EXISTS (\n      SELECT 1 FROM public.user_roles\n      WHERE user_id = _user_id AND role = _role\n    )\n  END\n$function$\n",
+      "exact_signature": "public.has_role(uuid, app_role)",
+      "owner": "postgres",
+      "public_execute": false,
+      "raw_acl": [
+        "postgres=X/postgres",
+        "service_role=X/postgres",
+        "anon=X/postgres",
+        "authenticated=X/postgres"
+      ],
+      "search_path": "search_path=public",
+      "security_definer": true
+    },
+    {
+      "acl_entries": [
+        {
+          "acl_ordinal": 1,
+          "grantable": false,
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 2,
+          "grantable": false,
+          "grantee": "service_role",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 3,
+          "grantable": false,
+          "grantee": "anon",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 4,
+          "grantable": false,
+          "grantee": "authenticated",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "anon_execute": true,
+      "authenticated_execute": true,
+      "configured_settings": [
+        "search_path=public"
+      ],
+      "declaration_signature": "public.is_founder()",
+      "definition_md5": "1fa3250ddc36cff04d1bba9bda880473",
+      "exact_definition": "CREATE OR REPLACE FUNCTION public.is_founder()\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n  SELECT EXISTS (\n    SELECT 1 FROM public.user_roles\n    WHERE user_id = auth.uid() AND role IN ('founder'::public.app_role, 'admin'::public.app_role)\n  )\n$function$\n",
+      "exact_signature": "public.is_founder()",
+      "owner": "postgres",
+      "public_execute": false,
+      "raw_acl": [
+        "postgres=X/postgres",
+        "service_role=X/postgres",
+        "anon=X/postgres",
+        "authenticated=X/postgres"
+      ],
+      "search_path": "search_path=public",
+      "security_definer": true
+    },
+    {
+      "acl_entries": [
+        {
+          "acl_ordinal": 1,
+          "grantable": false,
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 2,
+          "grantable": false,
+          "grantee": "service_role",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 3,
+          "grantable": false,
+          "grantee": "anon",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 4,
+          "grantable": false,
+          "grantee": "authenticated",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "anon_execute": true,
+      "authenticated_execute": true,
+      "configured_settings": [
+        "search_path=public"
+      ],
+      "declaration_signature": "public.is_founder_or_admin(_uid uuid)",
+      "definition_md5": "d6b7dc1f84707f70dfe5f52d1db9ccda",
+      "exact_definition": "CREATE OR REPLACE FUNCTION public.is_founder_or_admin(_uid uuid)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n  SELECT CASE\n    WHEN auth.role() <> 'service_role'\n         AND _uid IS DISTINCT FROM auth.uid()\n      THEN false\n    ELSE EXISTS (\n      SELECT 1 FROM public.user_roles\n      WHERE user_id = _uid AND role IN ('founder','admin')\n    )\n  END\n$function$\n",
+      "exact_signature": "public.is_founder_or_admin(uuid)",
+      "owner": "postgres",
+      "public_execute": false,
+      "raw_acl": [
+        "postgres=X/postgres",
+        "service_role=X/postgres",
+        "anon=X/postgres",
+        "authenticated=X/postgres"
+      ],
+      "search_path": "search_path=public",
+      "security_definer": true
+    },
+    {
+      "acl_entries": [
+        {
+          "acl_ordinal": 1,
+          "grantable": false,
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 2,
+          "grantable": false,
+          "grantee": "service_role",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 3,
+          "grantable": false,
+          "grantee": "anon",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 4,
+          "grantable": false,
+          "grantee": "authenticated",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "anon_execute": true,
+      "authenticated_execute": true,
+      "configured_settings": [
+        "search_path=public"
+      ],
+      "declaration_signature": "public.is_kill_switch_active()",
+      "definition_md5": "0d984143b5a1c5a6b536790c8858477e",
+      "exact_definition": "CREATE OR REPLACE FUNCTION public.is_kill_switch_active()\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n  SELECT COALESCE((SELECT active FROM public.worker_kill_switch WHERE id = true), false)\n$function$\n",
+      "exact_signature": "public.is_kill_switch_active()",
+      "owner": "postgres",
+      "public_execute": false,
+      "raw_acl": [
+        "postgres=X/postgres",
+        "service_role=X/postgres",
+        "anon=X/postgres",
+        "authenticated=X/postgres"
+      ],
+      "search_path": "search_path=public",
+      "security_definer": true
+    },
+    {
+      "acl_entries": [
+        {
+          "acl_ordinal": 1,
+          "grantable": false,
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 2,
+          "grantable": false,
+          "grantee": "service_role",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 3,
+          "grantable": false,
+          "grantee": "anon",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 4,
+          "grantable": false,
+          "grantee": "authenticated",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "anon_execute": true,
+      "authenticated_execute": true,
+      "configured_settings": [
+        "search_path=public"
+      ],
+      "declaration_signature": "public.is_oversight_reviewer()",
+      "definition_md5": "03f6f90365be2187d88484480a968859",
+      "exact_definition": "CREATE OR REPLACE FUNCTION public.is_oversight_reviewer()\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n  SELECT EXISTS (\n    SELECT 1 FROM public.user_roles\n    WHERE user_id = auth.uid()\n      AND role IN ('dubai_oversight'::public.app_role, 'professional_reviewer'::public.app_role)\n  )\n$function$\n",
+      "exact_signature": "public.is_oversight_reviewer()",
+      "owner": "postgres",
+      "public_execute": false,
+      "raw_acl": [
+        "postgres=X/postgres",
+        "service_role=X/postgres",
+        "anon=X/postgres",
+        "authenticated=X/postgres"
+      ],
+      "search_path": "search_path=public",
+      "security_definer": true
+    },
+    {
+      "acl_entries": [
+        {
+          "acl_ordinal": 1,
+          "grantable": false,
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 2,
+          "grantable": false,
+          "grantee": "service_role",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 3,
+          "grantable": false,
+          "grantee": "anon",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 4,
+          "grantable": false,
+          "grantee": "authenticated",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "anon_execute": true,
+      "authenticated_execute": true,
+      "configured_settings": [
+        "search_path=public"
+      ],
+      "declaration_signature": "public.log_demo_event(_token text, _event_type text, _metadata jsonb)",
+      "definition_md5": "1c16e8f5359cd1137050b181652b1105",
+      "exact_definition": "CREATE OR REPLACE FUNCTION public.log_demo_event(_token text, _event_type text, _metadata jsonb DEFAULT '{}'::jsonb)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE\n  d public.demo_access;\n  ev_type public.demo_event_type;\n  duration int := 0;\nBEGIN\n  SELECT * INTO d FROM public.demo_access WHERE demo_token = _token LIMIT 1;\n  IF NOT FOUND THEN RETURN jsonb_build_object('ok', false, 'error', 'INVALID_TOKEN'); END IF;\n\n  IF d.status <> 'active' THEN\n    RETURN jsonb_build_object('ok', false, 'error', 'DEMO_'|| upper(d.status::text));\n  END IF;\n\n  IF d.expires_at < now() THEN\n    UPDATE public.demo_access SET status = 'expired', updated_at = now() WHERE id = d.id;\n    RETURN jsonb_build_object('ok', false, 'error', 'DEMO_EXPIRED');\n  END IF;\n\n  BEGIN\n    ev_type := _event_type::public.demo_event_type;\n  EXCEPTION WHEN invalid_text_representation THEN\n    ev_type := 'view';\n  END;\n\n  duration := COALESCE((_metadata->>'session_duration_seconds')::int, 0);\n\n  INSERT INTO public.demo_events (demo_id, event_type, metadata, session_duration_seconds)\n  VALUES (d.id, ev_type, COALESCE(_metadata,'{}'::jsonb), duration);\n\n  UPDATE public.demo_access\n     SET access_count = access_count + 1,\n         last_accessed_at = now(),\n         high_intent = (access_count + 1) >= 2,\n         updated_at = now()\n   WHERE id = d.id;\n\n  RETURN jsonb_build_object('ok', true, 'demo_id', d.id, 'access_count', d.access_count + 1);\nEND;\n$function$\n",
+      "exact_signature": "public.log_demo_event(text, text, jsonb)",
+      "owner": "postgres",
+      "public_execute": false,
+      "raw_acl": [
+        "postgres=X/postgres",
+        "service_role=X/postgres",
+        "anon=X/postgres",
+        "authenticated=X/postgres"
+      ],
+      "search_path": "search_path=public",
+      "security_definer": true
+    },
+    {
+      "acl_entries": [
+        {
+          "acl_ordinal": 1,
+          "grantable": false,
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 2,
+          "grantable": false,
+          "grantee": "service_role",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 3,
+          "grantable": false,
+          "grantee": "anon",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 4,
+          "grantable": false,
+          "grantee": "authenticated",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "anon_execute": true,
+      "authenticated_execute": true,
+      "configured_settings": [
+        "search_path=public"
+      ],
+      "declaration_signature": "public.supplier_list_assignments(_token text)",
+      "definition_md5": "42f60ecc6f5c39d071aaf6592b40f650",
+      "exact_definition": "CREATE OR REPLACE FUNCTION public.supplier_list_assignments(_token text)\n RETURNS TABLE(id uuid, deal_id uuid, deal_name text, business_name text, contact_name text, contact_company text, contact_email text, status assignment_status, share_contact_details boolean, supplier_note text, notes text, assigned_at timestamp with time zone, started_at timestamp with time zone, completed_at timestamp with time zone)\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE\n  su public.supplier_users;\nBEGIN\n  SELECT * INTO su FROM public.supplier_users\n   WHERE access_token = _token AND active = true LIMIT 1;\n  IF NOT FOUND THEN RETURN; END IF;\n\n  RETURN QUERY\n  SELECT a.id, a.deal_id, d.deal_name, a.business_name,\n         c.name AS contact_name,\n         c.company AS contact_company,\n         CASE WHEN a.share_contact_details THEN c.email ELSE '' END AS contact_email,\n         a.status, a.share_contact_details, a.supplier_note, a.notes,\n         a.assigned_at, a.started_at, a.completed_at\n    FROM public.assignments a\n    LEFT JOIN public.deals d ON d.id = a.deal_id\n    LEFT JOIN public.contacts c ON c.id = a.contact_id\n   WHERE a.supplier_id = su.supplier_id\n   ORDER BY\n     CASE a.status WHEN 'in_progress' THEN 1 WHEN 'assigned' THEN 2\n                   WHEN 'completed' THEN 3 WHEN 'failed' THEN 4 END,\n     a.assigned_at DESC;\nEND;\n$function$\n",
+      "exact_signature": "public.supplier_list_assignments(text)",
+      "owner": "postgres",
+      "public_execute": false,
+      "raw_acl": [
+        "postgres=X/postgres",
+        "service_role=X/postgres",
+        "anon=X/postgres",
+        "authenticated=X/postgres"
+      ],
+      "search_path": "search_path=public",
+      "security_definer": true
+    },
+    {
+      "acl_entries": [
+        {
+          "acl_ordinal": 1,
+          "grantable": false,
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 2,
+          "grantable": false,
+          "grantee": "service_role",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 3,
+          "grantable": false,
+          "grantee": "anon",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 4,
+          "grantable": false,
+          "grantee": "authenticated",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "anon_execute": true,
+      "authenticated_execute": true,
+      "configured_settings": [
+        "search_path=public"
+      ],
+      "declaration_signature": "public.supplier_login_with_token(_token text)",
+      "definition_md5": "bebce94572208f15ac861f1ae966a7e0",
+      "exact_definition": "CREATE OR REPLACE FUNCTION public.supplier_login_with_token(_token text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE\n  su public.supplier_users;\n  s  public.suppliers;\nBEGIN\n  SELECT * INTO su FROM public.supplier_users\n   WHERE access_token = _token AND active = true LIMIT 1;\n  IF NOT FOUND THEN\n    RETURN jsonb_build_object('ok', false, 'error', 'INVALID_TOKEN');\n  END IF;\n\n  SELECT * INTO s FROM public.suppliers WHERE id = su.supplier_id;\n  IF NOT FOUND OR s.status NOT IN ('APPROVED','QUALIFIED','CONTACTED','NEW') THEN\n    RETURN jsonb_build_object('ok', false, 'error', 'SUPPLIER_INACTIVE');\n  END IF;\n\n  UPDATE public.supplier_users\n     SET last_login_at = now(), updated_at = now()\n   WHERE id = su.id;\n\n  -- Heartbeat\n  UPDATE public.suppliers SET last_activity_at = now(), updated_at = now()\n   WHERE id = s.id;\n\n  INSERT INTO public.activity_log (event_type, description, entity_type, entity_id)\n  VALUES ('supplier_portal_login',\n          'Supplier portal login: ' || s.name,\n          'supplier_user', su.id);\n\n  RETURN jsonb_build_object(\n    'ok', true,\n    'supplier_user_id', su.id,\n    'supplier_id', s.id,\n    'supplier_name', s.name,\n    'supplier_email', su.email,\n    'business_name', s.business_name,\n    'role', s.role,\n    'status', s.status\n  );\nEND;\n$function$\n",
+      "exact_signature": "public.supplier_login_with_token(text)",
+      "owner": "postgres",
+      "public_execute": false,
+      "raw_acl": [
+        "postgres=X/postgres",
+        "service_role=X/postgres",
+        "anon=X/postgres",
+        "authenticated=X/postgres"
+      ],
+      "search_path": "search_path=public",
+      "security_definer": true
+    },
+    {
+      "acl_entries": [
+        {
+          "acl_ordinal": 1,
+          "grantable": false,
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 2,
+          "grantable": false,
+          "grantee": "service_role",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 3,
+          "grantable": false,
+          "grantee": "anon",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 4,
+          "grantable": false,
+          "grantee": "authenticated",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "anon_execute": true,
+      "authenticated_execute": true,
+      "configured_settings": [
+        "search_path=public"
+      ],
+      "declaration_signature": "public.supplier_update_assignment_status(_token text, _assignment_id uuid, _new_status text, _note text)",
+      "definition_md5": "2843af90b05692d7300e51c34a90e4f0",
+      "exact_definition": "CREATE OR REPLACE FUNCTION public.supplier_update_assignment_status(_token text, _assignment_id uuid, _new_status text, _note text DEFAULT NULL::text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE\n  su public.supplier_users;\n  a  public.assignments;\n  target_status assignment_status;\nBEGIN\n  SELECT * INTO su FROM public.supplier_users\n   WHERE access_token = _token AND active = true LIMIT 1;\n  IF NOT FOUND THEN\n    RETURN jsonb_build_object('ok', false, 'error', 'INVALID_TOKEN');\n  END IF;\n\n  IF _new_status NOT IN ('in_progress','completed') THEN\n    RETURN jsonb_build_object('ok', false, 'error', 'INVALID_STATUS',\n                              'allowed', jsonb_build_array('in_progress','completed'));\n  END IF;\n  target_status := _new_status::assignment_status;\n\n  SELECT * INTO a FROM public.assignments\n   WHERE id = _assignment_id AND supplier_id = su.supplier_id;\n  IF NOT FOUND THEN\n    RETURN jsonb_build_object('ok', false, 'error', 'ASSIGNMENT_NOT_FOUND');\n  END IF;\n  IF a.status IN ('completed','failed') THEN\n    RETURN jsonb_build_object('ok', false, 'error', 'ASSIGNMENT_LOCKED', 'status', a.status);\n  END IF;\n\n  UPDATE public.assignments\n     SET status = target_status,\n         supplier_note = COALESCE(_note, supplier_note),\n         acknowledged_at = COALESCE(acknowledged_at,\n            CASE WHEN target_status = 'in_progress' THEN now() ELSE NULL END),\n         updated_at = now()\n   WHERE id = _assignment_id;\n\n  -- Heartbeat\n  UPDATE public.suppliers SET last_activity_at = now(), updated_at = now()\n   WHERE id = su.supplier_id;\n\n  INSERT INTO public.activity_log (event_type, description, entity_type, entity_id)\n  VALUES ('supplier_status_update',\n          'Supplier ' || COALESCE((SELECT name FROM public.suppliers WHERE id = su.supplier_id), su.email)\n            || ' set assignment to ' || _new_status\n            || COALESCE(' — ' || _note, ''),\n          'assignment', _assignment_id);\n\n  RETURN jsonb_build_object('ok', true, 'assignment_id', _assignment_id, 'status', _new_status);\nEND;\n$function$\n",
+      "exact_signature": "public.supplier_update_assignment_status(text, uuid, text, text)",
+      "owner": "postgres",
+      "public_execute": false,
+      "raw_acl": [
+        "postgres=X/postgres",
+        "service_role=X/postgres",
+        "anon=X/postgres",
+        "authenticated=X/postgres"
+      ],
+      "search_path": "search_path=public",
+      "security_definer": true
+    },
+    {
+      "acl_entries": [
+        {
+          "acl_ordinal": 1,
+          "grantable": false,
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 2,
+          "grantable": false,
+          "grantee": "service_role",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 3,
+          "grantable": false,
+          "grantee": "anon",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "acl_ordinal": 4,
+          "grantable": false,
+          "grantee": "authenticated",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "anon_execute": true,
+      "authenticated_execute": true,
+      "configured_settings": [
+        "search_path=public"
+      ],
+      "declaration_signature": "public.worker_has_active_window(_worker_id uuid, _portal_type text)",
+      "definition_md5": "4a4927c37ed1918957ea3daadc25aabd",
+      "exact_definition": "CREATE OR REPLACE FUNCTION public.worker_has_active_window(_worker_id uuid, _portal_type text)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n  SELECT NOT public.is_kill_switch_active()\n     AND (auth.role() = 'service_role' OR _worker_id = public.current_worker_id())\n     AND EXISTS (\n       SELECT 1 FROM public.worker_access_windows\n       WHERE worker_id = _worker_id\n         AND portal_type = _portal_type\n         AND status IN ('scheduled','active')\n         AND now() BETWEEN start_time AND end_time\n     )\n$function$\n",
+      "exact_signature": "public.worker_has_active_window(uuid, text)",
+      "owner": "postgres",
+      "public_execute": false,
+      "raw_acl": [
+        "postgres=X/postgres",
+        "service_role=X/postgres",
+        "anon=X/postgres",
+        "authenticated=X/postgres"
+      ],
+      "search_path": "search_path=public",
+      "security_definer": true
+    }
+  ],
+  "migration_signature_gate_evidence": {
+    "query": "WITH observed AS ( SELECT format('%I.%I(%s)',n.nspname,p.proname,coalesce(args.identity_types,'')) AS exact_signature FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace JOIN pg_roles r ON r.oid=p.proowner JOIN pg_language l ON l.oid=p.prolang LEFT JOIN LATERAL (SELECT string_agg(format_type(a,NULL),', ' ORDER BY u.ordinality) AS identity_types FROM unnest(p.proargtypes::oid[]) WITH ORDINALITY AS u(a,ordinality)) args ON true WHERE n.nspname='public' AND p.prokind='f' AND has_function_privilege('anon',p.oid,'EXECUTE') AND NOT (r.rolname='supabase_admin' AND l.lanname='c' AND NOT p.prosecdef)) SELECT exact_signature FROM observed ORDER BY exact_signature COLLATE \"C\";",
+    "observed_count": 18,
+    "observed_signatures": [
+      "public._is_founder_or_admin()",
+      "public.accept_proposal_by_token(text)",
+      "public.current_worker_id()",
+      "public.get_business_outbound_status(text)",
+      "public.get_customer_quarterly_report_by_token(text)",
+      "public.get_customer_survey_request_by_token(text)",
+      "public.get_outbound_status()",
+      "public.get_proposal_by_token(text)",
+      "public.has_role(uuid, app_role)",
+      "public.is_founder()",
+      "public.is_founder_or_admin(uuid)",
+      "public.is_kill_switch_active()",
+      "public.is_oversight_reviewer()",
+      "public.log_demo_event(text, text, jsonb)",
+      "public.supplier_list_assignments(text)",
+      "public.supplier_login_with_token(text)",
+      "public.supplier_update_assignment_status(text, uuid, text, text)",
+      "public.worker_has_active_window(uuid, text)"
+    ],
+    "exact_match_to_catalog_rows": true,
+    "exact_match_to_migration_gate": true
+  }
+}

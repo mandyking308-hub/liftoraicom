@@ -1,0 +1,79 @@
+{
+  "artifact": "stage1b-public-rpc-default-acl-prechange",
+  "captured_at_utc": "2026-09-23T12:21:26.025Z",
+  "repository_head": "6300f652abd99b58eaea432c7cd162da2bfaf9d4",
+  "project_id": "08f86e25-a8d3-49f1-9c6a-333a4974336b",
+  "database_ref": "oiwbletmjhrhqksosphi",
+  "object_type": "functions",
+  "schema": "public",
+  "rows": [
+    {
+      "acl_entries": [
+        {
+          "grantable": false,
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "grantable": false,
+          "grantee": "anon",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "grantable": false,
+          "grantee": "authenticated",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "grantable": false,
+          "grantee": "service_role",
+          "grantor": "postgres",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "defaclobjtype": "f",
+      "default_acl": "{postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+      "owner_role": "postgres",
+      "schema_name": "public"
+    },
+    {
+      "acl_entries": [
+        {
+          "grantable": false,
+          "grantee": "postgres",
+          "grantor": "supabase_admin",
+          "privilege": "EXECUTE"
+        },
+        {
+          "grantable": false,
+          "grantee": "anon",
+          "grantor": "supabase_admin",
+          "privilege": "EXECUTE"
+        },
+        {
+          "grantable": false,
+          "grantee": "authenticated",
+          "grantor": "supabase_admin",
+          "privilege": "EXECUTE"
+        },
+        {
+          "grantable": false,
+          "grantee": "service_role",
+          "grantor": "supabase_admin",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "defaclobjtype": "f",
+      "default_acl": "{postgres=X/supabase_admin,anon=X/supabase_admin,authenticated=X/supabase_admin,service_role=X/supabase_admin}",
+      "owner_role": "supabase_admin",
+      "schema_name": "public"
+    }
+  ],
+  "notes": [
+    "postgres is the live migration/database role and its future EXECUTE defaults are changed by the Stage-1B migration.",
+    "supabase_admin is Supabase-managed; live pg_has_role check showed the migration role is not a member, so its residual defaults are recorded and not guessed/altered."
+  ]
+}
