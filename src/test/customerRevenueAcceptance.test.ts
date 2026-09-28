@@ -295,6 +295,8 @@ describe("Worker 2 customer revenue acceptance", () => {
     expect(auditRows.size).toBeGreaterThan(6);
     const paidWebhook = readFileSync("supabase/functions/stripe-webhook/index.ts", "utf8");
     expect(paidWebhook).not.toMatch(/from\(["']user_roles["']\)[\s\S]{0,160}(?:insert|upsert)/);
+    expect(paidWebhook).toContain("stripeMinorUnitsToMajor(session.amount_total, currency)");
+    expect(paidWebhook).toContain("paid_checkout_amount_conversion_mismatch");
     expect(paidWebhook).toContain("stripe_subscription_id: subscriptionId");
     expect(paidWebhook).toContain('onConflict: "customer_sales_checkout_id"');
     expect(paidWebhook).toContain('onConflict: "checkout_id,product_id"');

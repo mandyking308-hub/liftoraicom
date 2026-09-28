@@ -13,6 +13,7 @@ import {
   resolveApprovedCommercialOffer,
   resolveBusinessRelationshipMatches,
   resolveEmailIdentityMatches,
+  stripeMinorUnitsToMajor,
   validatePaidCheckoutSnapshot,
   validateStripePriceAgainstOffer,
 } from "../../supabase/functions/_shared/customerCommercialLifecycle";
@@ -139,6 +140,13 @@ describe("approved commercial offer envelope", () => {
       .toEqual({ ok: true, amount: 108, minorUnits: 10800 });
     expect(approvedCheckoutAmount({ approvedAmount: 120, currency: "GBP", discountPercent: 100 }))
       .toMatchObject({ ok: false, reason: "invalid_approved_checkout_amount" });
+  });
+
+  it("converts successful Stripe totals using each approved currency's minor-unit precision", () => {
+    expect(stripeMinorUnitsToMajor(10800, "GBP")).toBe(108);
+    expect(stripeMinorUnitsToMajor(108, "JPY")).toBe(108);
+    expect(stripeMinorUnitsToMajor(1234, "KWD")).toBe(1.234);
+    expect(stripeMinorUnitsToMajor(Number.MAX_SAFE_INTEGER + 1, "GBP")).toBeNull();
   });
 });
 

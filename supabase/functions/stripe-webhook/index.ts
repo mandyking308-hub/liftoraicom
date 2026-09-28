@@ -13,6 +13,7 @@ import {
   evaluateCustomerSuccessAction,
   paymentActivationIdempotencyKeys,
   planCustomerSuccessActivation,
+  stripeMinorUnitsToMajor,
   validatePaidCheckoutSnapshot,
 } from "../_shared/customerCommercialLifecycle.ts";
 import {
@@ -232,8 +233,11 @@ async function activatePaidCustomerSalesCheckout(session: Stripe.Checkout.Sessio
   }
 
   const now = new Date().toISOString();
-  const amount = (Number(session.amount_total) || 0) / 100;
   const currency = String(session.currency ?? intent.currency).toUpperCase();
+  const amount = stripeMinorUnitsToMajor(session.amount_total, currency);
+  if (amount === null || Math.abs(amount - Number(intent.checkout_amount)) > 1e-8) {
+    throw new Error("paid_checkout_amount_conversion_mismatch");
+  }
   const sessionCustomer = typeof session.customer === "string" ? session.customer : session.customer?.id ?? null;
   const paymentIntent = typeof session.payment_intent === "string" ? session.payment_intent : null;
   const subscriptionId = typeof session.subscription === "string" ? session.subscription : null;
