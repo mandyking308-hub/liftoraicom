@@ -127,13 +127,17 @@ describe("status contract", () => {
   });
 
   it("the claim RPC only transitions ready/retrying → submitting", () => {
+    const definitionPattern = /CREATE\s+OR\s+REPLACE\s+FUNCTION\s+public\.social_relationship_claim_action\s*\(/i;
     const sql = readdirSync(MIGRATION_DIR)
       .filter((f) => f.endsWith(".sql"))
-      .map((f) => readFileSync(join(MIGRATION_DIR, f), "utf8"))
-      .filter((t) => t.includes("social_relationship_claim_action"))
-      .slice(-1)[0];
+      .sort()
+      .reverse()
+      .map((file) => readFileSync(join(MIGRATION_DIR, file), "utf8"))
+      .find((text) => definitionPattern.test(text));
     expect(sql).toBeTruthy();
-    const fn = sql.slice(sql.indexOf("CREATE OR REPLACE FUNCTION public.social_relationship_claim_action"));
+    const definitionStart = sql?.search(definitionPattern) ?? -1;
+    expect(definitionStart).toBeGreaterThanOrEqual(0);
+    const fn = sql!.slice(definitionStart);
     expect(fn).toContain("action_status = 'submitting'");
     expect(fn).toContain("IN ('ready','retrying')");
     expect(fn).toContain("FOR UPDATE");

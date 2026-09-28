@@ -167,3 +167,25 @@ describe("Stage 1 — dangerous privilege drift guard", () => {
     expect(checker).toContain("d.defaclrole::regrole::text = 'postgres'");
   });
 });
+
+describe("Stage 1B — public RPC classification and drift guard", () => {
+  it("classifies every frozen public function and validates the allowlist", () => {
+    const out = execFileSync("node", ["scripts/check-stage1b-rpc-classification.mjs"], {
+      encoding: "utf8",
+    });
+    expect(out).toContain('"status":"PASS"');
+    expect(out).toContain('"public_functions":386');
+    expect(out).toContain('"unknown_functions":0');
+  });
+
+  it("keeps the live RPC checker fail-closed for new/unsafe exposure", () => {
+    const checker = read("scripts/check-stage1b-rpc-drift.sql");
+    expect(checker).toContain("UNCLASSIFIED_FUNCTION");
+    expect(checker).toContain("PUBLIC_EXECUTE");
+    expect(checker).toContain("ANON_NOT_ALLOWLISTED");
+    expect(checker).toContain("FOUNDER_SERVER_AUTH_MISSING");
+    expect(checker).toContain("DEFINER_SEARCH_PATH_MISSING");
+    expect(checker).toContain("SUPABASE_ADMIN_MANAGED_FUTURE_EXECUTE");
+  });
+
+});

@@ -1,0 +1,10 @@
+{
+  "artifact": "stage1b-public-rpc-explicit-exceptions",
+  "exceptions": [
+    {
+      "object": "public C-language functions owned by supabase_admin (145 live extension routines)",
+      "privilege": "EXECUTE",
+      "justification": "pgvector/pg_trgm extension support routines are SECURITY INVOKER, are not application RPCs, do not perform application authorization or data mutation, and retain Supabase-managed ACLs whose grantor is supabase_admin. The current postgres migration role cannot revoke those grantor ACL entries. They are excluded from privileged application-RPC checks and reported as managed extension residuals."
+    }
+  ]
+}

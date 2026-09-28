@@ -1,0 +1,1636 @@
+{
+  "artifact": "stage1b-rpc-reconciliation",
+  "captured_at_utc": "2026-09-24T12:28:53.282Z",
+  "live_evidence_artifact": "docs/liftor-rebuild/stage1b-live-rpc-catalog-evidence.json",
+  "production_migration_applied": false,
+  "expected_prechange_anon_application_signature_count": 18,
+  "authoritative_live_reconciled_count": 18,
+  "unresolved_count": 0,
+  "planned_post_stage1b_grants": {
+    "anon_execute_count": 9,
+    "authenticated_execute_count": 17,
+    "public_execute_count": 0,
+    "service_role_execute_count": 18
+  },
+  "migration_signature_gate_exact_match": true,
+  "migration_live_definition_unresolved_count": 0,
+  "rows": [
+    {
+      "ordinal": 1,
+      "exact_signature": "public._is_founder_or_admin()",
+      "declaration_signature": "public._is_founder_or_admin()",
+      "classification": "DB_INTERNAL",
+      "live": {
+        "owner": "postgres",
+        "security_definer": true,
+        "security_invoker": false,
+        "search_path": "search_path=public",
+        "configured_settings": [
+          "search_path=public"
+        ],
+        "anon_execute": true,
+        "authenticated_execute": true,
+        "public_execute": false,
+        "raw_acl": [
+          "postgres=X/postgres",
+          "service_role=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres"
+        ],
+        "acl_entries": [
+          {
+            "acl_ordinal": 1,
+            "grantable": false,
+            "grantee": "postgres",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 2,
+            "grantable": false,
+            "grantee": "service_role",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 3,
+            "grantable": false,
+            "grantee": "anon",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 4,
+            "grantable": false,
+            "grantee": "authenticated",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          }
+        ],
+        "definition_md5": "6d67cd4f151375ffdfab296444395947",
+        "definition_body_md5": "e7b64dce70a2e9a34b843147c74d439c"
+      },
+      "repository_callers": {
+        "frontend_rpc_callers": [],
+        "edge_rpc_callers": [],
+        "database_callers": [
+          "public.process_billionaire_enrichment_batch(p_batch_size integer)"
+        ]
+      },
+      "intended_caller": "Internal database role helper; public.process_billionaire_enrichment_batch(integer); no browser or Edge RPC caller.",
+      "authorization_mechanism": "Queries user_roles for founder/admin bound to auth.uid().",
+      "proposed_post_stage1b_grants": {
+        "anon_execute": false,
+        "authenticated_execute": true,
+        "public_execute": false,
+        "service_role_execute": true
+      },
+      "keep_revoke_rationale": "Revoke anon because no documented anonymous dependency exists. Keep authenticated for the auth-bound helper or founder/admin status caller; preserve service_role.",
+      "migration_live_definition_parity": {
+        "stage1b_redefines_function": false,
+        "migration_source": null,
+        "candidate_definition_sha256": null,
+        "candidate_definition_header": null,
+        "live_definition_header": "RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path TO 'public'",
+        "candidate_definition_body_md5": null,
+        "live_definition_md5": "6d67cd4f151375ffdfab296444395947",
+        "live_definition_body_md5": "e7b64dce70a2e9a34b843147c74d439c",
+        "candidate_body_matches_live": true,
+        "frozen_review_definition_md5": "6d67cd4f151375ffdfab296444395947",
+        "frozen_review_definition_matches_live": true,
+        "parity_status": "UNCHANGED_BY_STAGE1B; current live pg_get_functiondef remains in force."
+      }
+    },
+    {
+      "ordinal": 2,
+      "exact_signature": "public.accept_proposal_by_token(text)",
+      "declaration_signature": "public.accept_proposal_by_token(_token text)",
+      "classification": "PUBLIC_ANON",
+      "live": {
+        "owner": "postgres",
+        "security_definer": true,
+        "security_invoker": false,
+        "search_path": "search_path=public",
+        "configured_settings": [
+          "search_path=public"
+        ],
+        "anon_execute": true,
+        "authenticated_execute": true,
+        "public_execute": false,
+        "raw_acl": [
+          "postgres=X/postgres",
+          "service_role=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres"
+        ],
+        "acl_entries": [
+          {
+            "acl_ordinal": 1,
+            "grantable": false,
+            "grantee": "postgres",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 2,
+            "grantable": false,
+            "grantee": "service_role",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 3,
+            "grantable": false,
+            "grantee": "anon",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 4,
+            "grantable": false,
+            "grantee": "authenticated",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          }
+        ],
+        "definition_md5": "897531a25dd7699a2e9639f7c7570b37",
+        "definition_body_md5": "ae925fb81c4685fecc082f9d43c55c3b"
+      },
+      "repository_callers": {
+        "frontend_rpc_callers": [
+          {
+            "path": "src/pages/founder/proposals/InternalProposalDetail.tsx",
+            "line": 47
+          },
+          {
+            "path": "src/pages/public/PublicProposalAccept.tsx",
+            "line": 16
+          }
+        ],
+        "edge_rpc_callers": [],
+        "database_callers": []
+      },
+      "intended_caller": "Public proposal acceptance page and founder proposal detail page.",
+      "authorization_mechanism": "Exact bearer accept_token lookup plus proposal status handling; accepted calls are idempotent; rejected/expired rows are refused.",
+      "proposed_post_stage1b_grants": {
+        "anon_execute": true,
+        "authenticated_execute": true,
+        "public_execute": false,
+        "service_role_execute": true
+      },
+      "keep_revoke_rationale": "Keep anon EXECUTE for the public bearer-token/capability flow validated by the function. Direct PUBLIC remains revoked.",
+      "migration_live_definition_parity": {
+        "stage1b_redefines_function": false,
+        "migration_source": null,
+        "candidate_definition_sha256": null,
+        "candidate_definition_header": null,
+        "live_definition_header": "RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public'",
+        "candidate_definition_body_md5": null,
+        "live_definition_md5": "897531a25dd7699a2e9639f7c7570b37",
+        "live_definition_body_md5": "ae925fb81c4685fecc082f9d43c55c3b",
+        "candidate_body_matches_live": true,
+        "frozen_review_definition_md5": "897531a25dd7699a2e9639f7c7570b37",
+        "frozen_review_definition_matches_live": true,
+        "parity_status": "UNCHANGED_BY_STAGE1B; current live pg_get_functiondef remains in force."
+      }
+    },
+    {
+      "ordinal": 3,
+      "exact_signature": "public.current_worker_id()",
+      "declaration_signature": "public.current_worker_id()",
+      "classification": "DB_INTERNAL",
+      "live": {
+        "owner": "postgres",
+        "security_definer": true,
+        "security_invoker": false,
+        "search_path": "search_path=public",
+        "configured_settings": [
+          "search_path=public"
+        ],
+        "anon_execute": true,
+        "authenticated_execute": true,
+        "public_execute": false,
+        "raw_acl": [
+          "postgres=X/postgres",
+          "service_role=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres"
+        ],
+        "acl_entries": [
+          {
+            "acl_ordinal": 1,
+            "grantable": false,
+            "grantee": "postgres",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 2,
+            "grantable": false,
+            "grantee": "service_role",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 3,
+            "grantable": false,
+            "grantee": "anon",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 4,
+            "grantable": false,
+            "grantee": "authenticated",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          }
+        ],
+        "definition_md5": "c0bd16f18573625ac4dbc86ffb05a405",
+        "definition_body_md5": "675731742c3e599bb138e6fb4aafdace"
+      },
+      "repository_callers": {
+        "frontend_rpc_callers": [],
+        "edge_rpc_callers": [],
+        "database_callers": [
+          "public.worker_has_active_window(_worker_id uuid, _portal_type text)"
+        ]
+      },
+      "intended_caller": "Internal worker identity helper resolving auth.uid(); no direct browser or Edge RPC caller.",
+      "authorization_mechanism": "Resolves worker_profiles.user_id from auth.uid(); no caller-supplied identity.",
+      "proposed_post_stage1b_grants": {
+        "anon_execute": false,
+        "authenticated_execute": true,
+        "public_execute": false,
+        "service_role_execute": true
+      },
+      "keep_revoke_rationale": "Revoke anon because no documented anonymous dependency exists. Keep authenticated for the auth-bound helper or founder/admin status caller; preserve service_role.",
+      "migration_live_definition_parity": {
+        "stage1b_redefines_function": false,
+        "migration_source": null,
+        "candidate_definition_sha256": null,
+        "candidate_definition_header": null,
+        "live_definition_header": "RETURNS uuid LANGUAGE sql STABLE SECURITY DEFINER SET search_path TO 'public'",
+        "candidate_definition_body_md5": null,
+        "live_definition_md5": "c0bd16f18573625ac4dbc86ffb05a405",
+        "live_definition_body_md5": "675731742c3e599bb138e6fb4aafdace",
+        "candidate_body_matches_live": true,
+        "frozen_review_definition_md5": "c0bd16f18573625ac4dbc86ffb05a405",
+        "frozen_review_definition_matches_live": true,
+        "parity_status": "UNCHANGED_BY_STAGE1B; current live pg_get_functiondef remains in force."
+      }
+    },
+    {
+      "ordinal": 4,
+      "exact_signature": "public.get_business_outbound_status(text)",
+      "declaration_signature": "public.get_business_outbound_status(_business_name text)",
+      "classification": "FOUNDER_ADMIN_ONLY",
+      "live": {
+        "owner": "postgres",
+        "security_definer": true,
+        "security_invoker": false,
+        "search_path": "search_path=public",
+        "configured_settings": [
+          "search_path=public"
+        ],
+        "anon_execute": true,
+        "authenticated_execute": true,
+        "public_execute": false,
+        "raw_acl": [
+          "postgres=X/postgres",
+          "service_role=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres"
+        ],
+        "acl_entries": [
+          {
+            "acl_ordinal": 1,
+            "grantable": false,
+            "grantee": "postgres",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 2,
+            "grantable": false,
+            "grantee": "service_role",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 3,
+            "grantable": false,
+            "grantee": "anon",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 4,
+            "grantable": false,
+            "grantee": "authenticated",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          }
+        ],
+        "definition_md5": "38f4b7cb490b333b4c994c46e13937e3",
+        "definition_body_md5": "caf6b0591922b0a0889bcda1ae2fc2e3"
+      },
+      "repository_callers": {
+        "frontend_rpc_callers": [
+          {
+            "path": "src/components/outreach/SimulatedSendingBanner.tsx",
+            "line": 38
+          }
+        ],
+        "edge_rpc_callers": [],
+        "database_callers": []
+      },
+      "intended_caller": "src/components/outreach/SimulatedSendingBanner.tsx.",
+      "authorization_mechanism": "Live definition has no caller authorization; Stage 1B adds founder/admin auth.uid() guard with trusted service_role bypass.",
+      "proposed_post_stage1b_grants": {
+        "anon_execute": false,
+        "authenticated_execute": true,
+        "public_execute": false,
+        "service_role_execute": true
+      },
+      "keep_revoke_rationale": "Revoke anon because no documented anonymous dependency exists. Keep authenticated for the auth-bound helper or founder/admin status caller; preserve service_role.",
+      "migration_live_definition_parity": {
+        "stage1b_redefines_function": true,
+        "migration_source": "supabase/migrations/20260923130000_stage1b_rpc_authorization_hardening.sql",
+        "candidate_definition_sha256": "78744fce3b70b493b7cae997c5e69cbe59dba7e4991bd23f2aae4c093c81429c",
+        "candidate_definition_header": "RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path TO 'public'",
+        "live_definition_header": "RETURNS jsonb LANGUAGE sql STABLE SECURITY DEFINER SET search_path TO 'public'",
+        "candidate_definition_body_md5": "2da626c2b406dcd1d00f742bd30e0116",
+        "live_definition_md5": "38f4b7cb490b333b4c994c46e13937e3",
+        "live_definition_body_md5": "caf6b0591922b0a0889bcda1ae2fc2e3",
+        "candidate_body_matches_live": false,
+        "frozen_review_definition_md5": "38f4b7cb490b333b4c994c46e13937e3",
+        "frozen_review_definition_matches_live": true,
+        "parity_status": "INTENTIONAL STAGE1B AUTHORIZATION HARDENING DIFFERENCE; the migration changes the live body and is not applied."
+      }
+    },
+    {
+      "ordinal": 5,
+      "exact_signature": "public.get_customer_quarterly_report_by_token(text)",
+      "declaration_signature": "public.get_customer_quarterly_report_by_token(p_token text)",
+      "classification": "PUBLIC_ANON",
+      "live": {
+        "owner": "postgres",
+        "security_definer": true,
+        "security_invoker": false,
+        "search_path": "search_path=public",
+        "configured_settings": [
+          "search_path=public"
+        ],
+        "anon_execute": true,
+        "authenticated_execute": true,
+        "public_execute": false,
+        "raw_acl": [
+          "postgres=X/postgres",
+          "service_role=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres"
+        ],
+        "acl_entries": [
+          {
+            "acl_ordinal": 1,
+            "grantable": false,
+            "grantee": "postgres",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 2,
+            "grantable": false,
+            "grantee": "service_role",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 3,
+            "grantable": false,
+            "grantee": "anon",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 4,
+            "grantable": false,
+            "grantee": "authenticated",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          }
+        ],
+        "definition_md5": "5332959820f2b2e5ad35fda2cfe151a1",
+        "definition_body_md5": "81a24914e39ca3f74e9f8b393298b2c5"
+      },
+      "repository_callers": {
+        "frontend_rpc_callers": [
+          {
+            "path": "src/pages/public/CustomerReportView.tsx",
+            "line": 20
+          }
+        ],
+        "edge_rpc_callers": [],
+        "database_callers": []
+      },
+      "intended_caller": "Public customer report share page, using the customer report bearer token.",
+      "authorization_mechanism": "Requires token length >=16, exact report_token, customer_share_allowed=true, and approved_at set.",
+      "proposed_post_stage1b_grants": {
+        "anon_execute": true,
+        "authenticated_execute": true,
+        "public_execute": false,
+        "service_role_execute": true
+      },
+      "keep_revoke_rationale": "Keep anon EXECUTE for the public bearer-token/capability flow validated by the function. Direct PUBLIC remains revoked.",
+      "migration_live_definition_parity": {
+        "stage1b_redefines_function": false,
+        "migration_source": null,
+        "candidate_definition_sha256": null,
+        "candidate_definition_header": null,
+        "live_definition_header": "RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path TO 'public'",
+        "candidate_definition_body_md5": null,
+        "live_definition_md5": "5332959820f2b2e5ad35fda2cfe151a1",
+        "live_definition_body_md5": "81a24914e39ca3f74e9f8b393298b2c5",
+        "candidate_body_matches_live": true,
+        "frozen_review_definition_md5": "5332959820f2b2e5ad35fda2cfe151a1",
+        "frozen_review_definition_matches_live": true,
+        "parity_status": "UNCHANGED_BY_STAGE1B; current live pg_get_functiondef remains in force."
+      }
+    },
+    {
+      "ordinal": 6,
+      "exact_signature": "public.get_customer_survey_request_by_token(text)",
+      "declaration_signature": "public.get_customer_survey_request_by_token(p_token text)",
+      "classification": "PUBLIC_ANON",
+      "live": {
+        "owner": "postgres",
+        "security_definer": true,
+        "security_invoker": false,
+        "search_path": "search_path=public",
+        "configured_settings": [
+          "search_path=public"
+        ],
+        "anon_execute": true,
+        "authenticated_execute": true,
+        "public_execute": false,
+        "raw_acl": [
+          "postgres=X/postgres",
+          "service_role=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres"
+        ],
+        "acl_entries": [
+          {
+            "acl_ordinal": 1,
+            "grantable": false,
+            "grantee": "postgres",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 2,
+            "grantable": false,
+            "grantee": "service_role",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 3,
+            "grantable": false,
+            "grantee": "anon",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 4,
+            "grantable": false,
+            "grantee": "authenticated",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          }
+        ],
+        "definition_md5": "889c6d876cf4286c84276199e9e26378",
+        "definition_body_md5": "9b236528d1074ab44e7e65b3d9e0ac34"
+      },
+      "repository_callers": {
+        "frontend_rpc_callers": [
+          {
+            "path": "src/pages/public/SurveyResponse.tsx",
+            "line": 27
+          }
+        ],
+        "edge_rpc_callers": [],
+        "database_callers": []
+      },
+      "intended_caller": "Public survey response page, using the customer survey bearer token.",
+      "authorization_mechanism": "Requires token length >=16, exact survey_token, allowed status, and unexpired request.",
+      "proposed_post_stage1b_grants": {
+        "anon_execute": true,
+        "authenticated_execute": true,
+        "public_execute": false,
+        "service_role_execute": true
+      },
+      "keep_revoke_rationale": "Keep anon EXECUTE for the public bearer-token/capability flow validated by the function. Direct PUBLIC remains revoked.",
+      "migration_live_definition_parity": {
+        "stage1b_redefines_function": false,
+        "migration_source": null,
+        "candidate_definition_sha256": null,
+        "candidate_definition_header": null,
+        "live_definition_header": "RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path TO 'public'",
+        "candidate_definition_body_md5": null,
+        "live_definition_md5": "889c6d876cf4286c84276199e9e26378",
+        "live_definition_body_md5": "9b236528d1074ab44e7e65b3d9e0ac34",
+        "candidate_body_matches_live": true,
+        "frozen_review_definition_md5": "889c6d876cf4286c84276199e9e26378",
+        "frozen_review_definition_matches_live": true,
+        "parity_status": "UNCHANGED_BY_STAGE1B; current live pg_get_functiondef remains in force."
+      }
+    },
+    {
+      "ordinal": 7,
+      "exact_signature": "public.get_outbound_status()",
+      "declaration_signature": "public.get_outbound_status()",
+      "classification": "FOUNDER_ADMIN_ONLY",
+      "live": {
+        "owner": "postgres",
+        "security_definer": true,
+        "security_invoker": false,
+        "search_path": "search_path=public",
+        "configured_settings": [
+          "search_path=public"
+        ],
+        "anon_execute": true,
+        "authenticated_execute": true,
+        "public_execute": false,
+        "raw_acl": [
+          "postgres=X/postgres",
+          "service_role=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres"
+        ],
+        "acl_entries": [
+          {
+            "acl_ordinal": 1,
+            "grantable": false,
+            "grantee": "postgres",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 2,
+            "grantable": false,
+            "grantee": "service_role",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 3,
+            "grantable": false,
+            "grantee": "anon",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 4,
+            "grantable": false,
+            "grantee": "authenticated",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          }
+        ],
+        "definition_md5": "b5e873949952e3fea7c14d2695d85aad",
+        "definition_body_md5": "eecd488cf423bfb3fb657c6a82ed7a7d"
+      },
+      "repository_callers": {
+        "frontend_rpc_callers": [
+          {
+            "path": "src/components/outreach/SimulatedSendingBanner.tsx",
+            "line": 35
+          }
+        ],
+        "edge_rpc_callers": [],
+        "database_callers": []
+      },
+      "intended_caller": "src/components/outreach/SimulatedSendingBanner.tsx.",
+      "authorization_mechanism": "Live definition has no caller authorization; Stage 1B adds founder/admin auth.uid() guard with trusted service_role bypass.",
+      "proposed_post_stage1b_grants": {
+        "anon_execute": false,
+        "authenticated_execute": true,
+        "public_execute": false,
+        "service_role_execute": true
+      },
+      "keep_revoke_rationale": "Revoke anon because no documented anonymous dependency exists. Keep authenticated for the auth-bound helper or founder/admin status caller; preserve service_role.",
+      "migration_live_definition_parity": {
+        "stage1b_redefines_function": true,
+        "migration_source": "supabase/migrations/20260923130000_stage1b_rpc_authorization_hardening.sql",
+        "candidate_definition_sha256": "c0367ed76e7488794339ff86cd779ca881f7eb366624124a64cafd31c7929640",
+        "candidate_definition_header": "RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path TO 'public'",
+        "live_definition_header": "RETURNS jsonb LANGUAGE sql STABLE SECURITY DEFINER SET search_path TO 'public'",
+        "candidate_definition_body_md5": "3e1dcadb08bb1671031e15275db9e4ca",
+        "live_definition_md5": "b5e873949952e3fea7c14d2695d85aad",
+        "live_definition_body_md5": "eecd488cf423bfb3fb657c6a82ed7a7d",
+        "candidate_body_matches_live": false,
+        "frozen_review_definition_md5": "b5e873949952e3fea7c14d2695d85aad",
+        "frozen_review_definition_matches_live": true,
+        "parity_status": "INTENTIONAL STAGE1B AUTHORIZATION HARDENING DIFFERENCE; the migration changes the live body and is not applied."
+      }
+    },
+    {
+      "ordinal": 8,
+      "exact_signature": "public.get_proposal_by_token(text)",
+      "declaration_signature": "public.get_proposal_by_token(_token text)",
+      "classification": "PUBLIC_ANON",
+      "live": {
+        "owner": "postgres",
+        "security_definer": true,
+        "security_invoker": false,
+        "search_path": "search_path=public",
+        "configured_settings": [
+          "search_path=public"
+        ],
+        "anon_execute": true,
+        "authenticated_execute": true,
+        "public_execute": false,
+        "raw_acl": [
+          "postgres=X/postgres",
+          "service_role=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres"
+        ],
+        "acl_entries": [
+          {
+            "acl_ordinal": 1,
+            "grantable": false,
+            "grantee": "postgres",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 2,
+            "grantable": false,
+            "grantee": "service_role",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 3,
+            "grantable": false,
+            "grantee": "anon",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 4,
+            "grantable": false,
+            "grantee": "authenticated",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          }
+        ],
+        "definition_md5": "3b76fb2376b48416dd8c2b80334306be",
+        "definition_body_md5": "5068a104344e64a018cccebab59a377f"
+      },
+      "repository_callers": {
+        "frontend_rpc_callers": [
+          {
+            "path": "src/pages/public/PublicProposalView.tsx",
+            "line": 18
+          }
+        ],
+        "edge_rpc_callers": [],
+        "database_callers": []
+      },
+      "intended_caller": "Public proposal view page.",
+      "authorization_mechanism": "Exact bearer view_token or accept_token lookup; returns a limited proposal projection and marks first view.",
+      "proposed_post_stage1b_grants": {
+        "anon_execute": true,
+        "authenticated_execute": true,
+        "public_execute": false,
+        "service_role_execute": true
+      },
+      "keep_revoke_rationale": "Keep anon EXECUTE for the public bearer-token/capability flow validated by the function. Direct PUBLIC remains revoked.",
+      "migration_live_definition_parity": {
+        "stage1b_redefines_function": false,
+        "migration_source": null,
+        "candidate_definition_sha256": null,
+        "candidate_definition_header": null,
+        "live_definition_header": "RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public'",
+        "candidate_definition_body_md5": null,
+        "live_definition_md5": "3b76fb2376b48416dd8c2b80334306be",
+        "live_definition_body_md5": "5068a104344e64a018cccebab59a377f",
+        "candidate_body_matches_live": true,
+        "frozen_review_definition_md5": "3b76fb2376b48416dd8c2b80334306be",
+        "frozen_review_definition_matches_live": true,
+        "parity_status": "UNCHANGED_BY_STAGE1B; current live pg_get_functiondef remains in force."
+      }
+    },
+    {
+      "ordinal": 9,
+      "exact_signature": "public.has_role(uuid, app_role)",
+      "declaration_signature": "public.has_role(_user_id uuid, _role app_role)",
+      "classification": "DB_INTERNAL",
+      "live": {
+        "owner": "postgres",
+        "security_definer": true,
+        "security_invoker": false,
+        "search_path": "search_path=public",
+        "configured_settings": [
+          "search_path=public"
+        ],
+        "anon_execute": true,
+        "authenticated_execute": true,
+        "public_execute": false,
+        "raw_acl": [
+          "postgres=X/postgres",
+          "service_role=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres"
+        ],
+        "acl_entries": [
+          {
+            "acl_ordinal": 1,
+            "grantable": false,
+            "grantee": "postgres",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 2,
+            "grantable": false,
+            "grantee": "service_role",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 3,
+            "grantable": false,
+            "grantee": "anon",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 4,
+            "grantable": false,
+            "grantee": "authenticated",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          }
+        ],
+        "definition_md5": "61d9f74752fa94ff88dca7d25040221c",
+        "definition_body_md5": "4df9f3bbf4cf62fc7fd1de86a95a1a3e"
+      },
+      "repository_callers": {
+        "frontend_rpc_callers": [],
+        "edge_rpc_callers": [
+          {
+            "path": "supabase/functions/crm-interaction-match-preview/index.ts",
+            "line": 31
+          },
+          {
+            "path": "supabase/functions/crm-interaction-match-preview/index.ts",
+            "line": 32
+          },
+          {
+            "path": "supabase/functions/crm-interaction-source-preview/index.ts",
+            "line": 169
+          },
+          {
+            "path": "supabase/functions/crm-interaction-source-preview/index.ts",
+            "line": 170
+          }
+        ],
+        "database_callers": [
+          "public.apollo_credit_status()",
+          "public.crm_match_interaction_preview(p_interaction_id uuid, p_provider_event_id uuid, p_contact_email text, p_provider_message_id text, p_provider_campaign_id text, p_business_id uuid)",
+          "public.founder_confirm_assignment(_assignment_id uuid)",
+          "public.get_crm_contact_360_summary(p_contact_id uuid, p_business_id uuid)",
+          "public.get_crm_contact_timeline(p_contact_id uuid, p_business_id uuid, p_limit integer)",
+          "public.get_crm_interaction_ledger_summary(p_business_id uuid)",
+          "public.get_crm_relationship_timeline(p_business_contact_relationship_id uuid, p_limit integer)",
+          "public.list_inbox_credentials_public(_inbox_id uuid)",
+          "public.ma_generate_default_data_room(_asset_id uuid)"
+        ],
+        "live_public_rls_policy_count": 288
+      },
+      "intended_caller": "288 PUBLIC-targeted RLS policies plus two CRM preview Edge Functions; nested database callers.",
+      "authorization_mechanism": "Stage 1B uses null-safe auth.role() IS DISTINCT FROM service_role and binds supplied _user_id to auth.uid() for non-service callers; PUBLIC policy dependency retained.",
+      "proposed_post_stage1b_grants": {
+        "anon_execute": true,
+        "authenticated_execute": true,
+        "public_execute": false,
+        "service_role_execute": true
+      },
+      "keep_revoke_rationale": "Keep anon EXECUTE because 288 live RLS policies target PUBLIC and call has_role; Stage 1B makes supplied-ID checks fail closed. Direct PUBLIC remains revoked.",
+      "migration_live_definition_parity": {
+        "stage1b_redefines_function": true,
+        "migration_source": "supabase/migrations/20260923130000_stage1b_rpc_authorization_hardening.sql",
+        "candidate_definition_sha256": "25cdadcbcce58142cd919bf324cf84eebb036e3e48060da9481507ee536b3d8c",
+        "candidate_definition_header": "RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path TO 'public'",
+        "live_definition_header": "RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path TO 'public'",
+        "candidate_definition_body_md5": "642044feebc3d522bff9763fce5a3090",
+        "live_definition_md5": "61d9f74752fa94ff88dca7d25040221c",
+        "live_definition_body_md5": "4df9f3bbf4cf62fc7fd1de86a95a1a3e",
+        "candidate_body_matches_live": false,
+        "frozen_review_definition_md5": "187a79a40c4f51499677e49b6aa4e456",
+        "frozen_review_definition_matches_live": false,
+        "parity_status": "INTENTIONAL STAGE1B AUTHORIZATION HARDENING DIFFERENCE; the migration changes the live body and is not applied."
+      }
+    },
+    {
+      "ordinal": 10,
+      "exact_signature": "public.is_founder()",
+      "declaration_signature": "public.is_founder()",
+      "classification": "DB_INTERNAL",
+      "live": {
+        "owner": "postgres",
+        "security_definer": true,
+        "security_invoker": false,
+        "search_path": "search_path=public",
+        "configured_settings": [
+          "search_path=public"
+        ],
+        "anon_execute": true,
+        "authenticated_execute": true,
+        "public_execute": false,
+        "raw_acl": [
+          "postgres=X/postgres",
+          "service_role=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres"
+        ],
+        "acl_entries": [
+          {
+            "acl_ordinal": 1,
+            "grantable": false,
+            "grantee": "postgres",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 2,
+            "grantable": false,
+            "grantee": "service_role",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 3,
+            "grantable": false,
+            "grantee": "anon",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 4,
+            "grantable": false,
+            "grantee": "authenticated",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          }
+        ],
+        "definition_md5": "1fa3250ddc36cff04d1bba9bda880473",
+        "definition_body_md5": "8eaaa4cc7c4ac4f37e49c71d407719de"
+      },
+      "repository_callers": {
+        "frontend_rpc_callers": [],
+        "edge_rpc_callers": [],
+        "database_callers": []
+      },
+      "intended_caller": "Internal authenticated role helper; no direct browser or Edge RPC caller found.",
+      "authorization_mechanism": "Queries user_roles for founder/admin bound to auth.uid().",
+      "proposed_post_stage1b_grants": {
+        "anon_execute": false,
+        "authenticated_execute": true,
+        "public_execute": false,
+        "service_role_execute": true
+      },
+      "keep_revoke_rationale": "Revoke anon because no documented anonymous dependency exists. Keep authenticated for the auth-bound helper or founder/admin status caller; preserve service_role.",
+      "migration_live_definition_parity": {
+        "stage1b_redefines_function": false,
+        "migration_source": null,
+        "candidate_definition_sha256": null,
+        "candidate_definition_header": null,
+        "live_definition_header": "RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path TO 'public'",
+        "candidate_definition_body_md5": null,
+        "live_definition_md5": "1fa3250ddc36cff04d1bba9bda880473",
+        "live_definition_body_md5": "8eaaa4cc7c4ac4f37e49c71d407719de",
+        "candidate_body_matches_live": true,
+        "frozen_review_definition_md5": "1fa3250ddc36cff04d1bba9bda880473",
+        "frozen_review_definition_matches_live": true,
+        "parity_status": "UNCHANGED_BY_STAGE1B; current live pg_get_functiondef remains in force."
+      }
+    },
+    {
+      "ordinal": 11,
+      "exact_signature": "public.is_founder_or_admin(uuid)",
+      "declaration_signature": "public.is_founder_or_admin(_uid uuid)",
+      "classification": "DB_INTERNAL",
+      "live": {
+        "owner": "postgres",
+        "security_definer": true,
+        "security_invoker": false,
+        "search_path": "search_path=public",
+        "configured_settings": [
+          "search_path=public"
+        ],
+        "anon_execute": true,
+        "authenticated_execute": true,
+        "public_execute": false,
+        "raw_acl": [
+          "postgres=X/postgres",
+          "service_role=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres"
+        ],
+        "acl_entries": [
+          {
+            "acl_ordinal": 1,
+            "grantable": false,
+            "grantee": "postgres",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 2,
+            "grantable": false,
+            "grantee": "service_role",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 3,
+            "grantable": false,
+            "grantee": "anon",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 4,
+            "grantable": false,
+            "grantee": "authenticated",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          }
+        ],
+        "definition_md5": "d6b7dc1f84707f70dfe5f52d1db9ccda",
+        "definition_body_md5": "a3457a47ae77f51f444665786a2c16d6"
+      },
+      "repository_callers": {
+        "frontend_rpc_callers": [],
+        "edge_rpc_callers": [],
+        "database_callers": [
+          "public._is_founder_or_admin()",
+          "public.process_billionaire_enrichment_batch(p_batch_size integer)"
+        ]
+      },
+      "intended_caller": "Internal database helper; called by public._is_founder_or_admin() and public.process_billionaire_enrichment_batch(integer).",
+      "authorization_mechanism": "Stage 1B uses null-safe auth.role() IS DISTINCT FROM service_role and binds supplied _uid to auth.uid() for non-service callers.",
+      "proposed_post_stage1b_grants": {
+        "anon_execute": false,
+        "authenticated_execute": true,
+        "public_execute": false,
+        "service_role_execute": true
+      },
+      "keep_revoke_rationale": "Revoke anon because no documented anonymous dependency exists. Keep authenticated for the auth-bound helper or founder/admin status caller; preserve service_role.",
+      "migration_live_definition_parity": {
+        "stage1b_redefines_function": true,
+        "migration_source": "supabase/migrations/20260923130000_stage1b_rpc_authorization_hardening.sql",
+        "candidate_definition_sha256": "08c5dc4e91d76188ab114192b8bedb7b56d2389b14f926b3174695afd0eab888",
+        "candidate_definition_header": "RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path TO 'public'",
+        "live_definition_header": "RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path TO 'public'",
+        "candidate_definition_body_md5": "443cb78e85af34ff13a02d1527f7021b",
+        "live_definition_md5": "d6b7dc1f84707f70dfe5f52d1db9ccda",
+        "live_definition_body_md5": "a3457a47ae77f51f444665786a2c16d6",
+        "candidate_body_matches_live": false,
+        "frozen_review_definition_md5": "fbee4ec24e4f7b5768dbc43ef1e9ec0f",
+        "frozen_review_definition_matches_live": false,
+        "parity_status": "INTENTIONAL STAGE1B AUTHORIZATION HARDENING DIFFERENCE; the migration changes the live body and is not applied."
+      }
+    },
+    {
+      "ordinal": 12,
+      "exact_signature": "public.is_kill_switch_active()",
+      "declaration_signature": "public.is_kill_switch_active()",
+      "classification": "DB_INTERNAL",
+      "live": {
+        "owner": "postgres",
+        "security_definer": true,
+        "security_invoker": false,
+        "search_path": "search_path=public",
+        "configured_settings": [
+          "search_path=public"
+        ],
+        "anon_execute": true,
+        "authenticated_execute": true,
+        "public_execute": false,
+        "raw_acl": [
+          "postgres=X/postgres",
+          "service_role=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres"
+        ],
+        "acl_entries": [
+          {
+            "acl_ordinal": 1,
+            "grantable": false,
+            "grantee": "postgres",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 2,
+            "grantable": false,
+            "grantee": "service_role",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 3,
+            "grantable": false,
+            "grantee": "anon",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 4,
+            "grantable": false,
+            "grantee": "authenticated",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          }
+        ],
+        "definition_md5": "0d984143b5a1c5a6b536790c8858477e",
+        "definition_body_md5": "0c35e64067108adc320367605e70bcf3"
+      },
+      "repository_callers": {
+        "frontend_rpc_callers": [],
+        "edge_rpc_callers": [],
+        "database_callers": [
+          "public.worker_has_active_window(_worker_id uuid, _portal_type text)"
+        ]
+      },
+      "intended_caller": "Internal kill-switch state helper; called only by public.worker_has_active_window(uuid, text).",
+      "authorization_mechanism": "Reads internal worker_kill_switch state; no direct application authorization path.",
+      "proposed_post_stage1b_grants": {
+        "anon_execute": false,
+        "authenticated_execute": false,
+        "public_execute": false,
+        "service_role_execute": true
+      },
+      "keep_revoke_rationale": "Revoke anon and authenticated direct EXECUTE; this is internal kill-switch state used only inside worker_has_active_window. Preserve service_role.",
+      "migration_live_definition_parity": {
+        "stage1b_redefines_function": false,
+        "migration_source": null,
+        "candidate_definition_sha256": null,
+        "candidate_definition_header": null,
+        "live_definition_header": "RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path TO 'public'",
+        "candidate_definition_body_md5": null,
+        "live_definition_md5": "0d984143b5a1c5a6b536790c8858477e",
+        "live_definition_body_md5": "0c35e64067108adc320367605e70bcf3",
+        "candidate_body_matches_live": true,
+        "frozen_review_definition_md5": "0d984143b5a1c5a6b536790c8858477e",
+        "frozen_review_definition_matches_live": true,
+        "parity_status": "UNCHANGED_BY_STAGE1B; current live pg_get_functiondef remains in force."
+      }
+    },
+    {
+      "ordinal": 13,
+      "exact_signature": "public.is_oversight_reviewer()",
+      "declaration_signature": "public.is_oversight_reviewer()",
+      "classification": "DB_INTERNAL",
+      "live": {
+        "owner": "postgres",
+        "security_definer": true,
+        "security_invoker": false,
+        "search_path": "search_path=public",
+        "configured_settings": [
+          "search_path=public"
+        ],
+        "anon_execute": true,
+        "authenticated_execute": true,
+        "public_execute": false,
+        "raw_acl": [
+          "postgres=X/postgres",
+          "service_role=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres"
+        ],
+        "acl_entries": [
+          {
+            "acl_ordinal": 1,
+            "grantable": false,
+            "grantee": "postgres",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 2,
+            "grantable": false,
+            "grantee": "service_role",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 3,
+            "grantable": false,
+            "grantee": "anon",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 4,
+            "grantable": false,
+            "grantee": "authenticated",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          }
+        ],
+        "definition_md5": "03f6f90365be2187d88484480a968859",
+        "definition_body_md5": "577fec8ed30dcd65d26e5cf145fcc0ea"
+      },
+      "repository_callers": {
+        "frontend_rpc_callers": [],
+        "edge_rpc_callers": [],
+        "database_callers": []
+      },
+      "intended_caller": "Internal authenticated oversight role helper; no direct browser or Edge RPC caller found.",
+      "authorization_mechanism": "Queries user_roles for oversight reviewer bound to auth.uid().",
+      "proposed_post_stage1b_grants": {
+        "anon_execute": false,
+        "authenticated_execute": true,
+        "public_execute": false,
+        "service_role_execute": true
+      },
+      "keep_revoke_rationale": "Revoke anon because no documented anonymous dependency exists. Keep authenticated for the auth-bound helper or founder/admin status caller; preserve service_role.",
+      "migration_live_definition_parity": {
+        "stage1b_redefines_function": false,
+        "migration_source": null,
+        "candidate_definition_sha256": null,
+        "candidate_definition_header": null,
+        "live_definition_header": "RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path TO 'public'",
+        "candidate_definition_body_md5": null,
+        "live_definition_md5": "03f6f90365be2187d88484480a968859",
+        "live_definition_body_md5": "577fec8ed30dcd65d26e5cf145fcc0ea",
+        "candidate_body_matches_live": true,
+        "frozen_review_definition_md5": "03f6f90365be2187d88484480a968859",
+        "frozen_review_definition_matches_live": true,
+        "parity_status": "UNCHANGED_BY_STAGE1B; current live pg_get_functiondef remains in force."
+      }
+    },
+    {
+      "ordinal": 14,
+      "exact_signature": "public.log_demo_event(text, text, jsonb)",
+      "declaration_signature": "public.log_demo_event(_token text, _event_type text, _metadata jsonb)",
+      "classification": "PUBLIC_ANON",
+      "live": {
+        "owner": "postgres",
+        "security_definer": true,
+        "security_invoker": false,
+        "search_path": "search_path=public",
+        "configured_settings": [
+          "search_path=public"
+        ],
+        "anon_execute": true,
+        "authenticated_execute": true,
+        "public_execute": false,
+        "raw_acl": [
+          "postgres=X/postgres",
+          "service_role=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres"
+        ],
+        "acl_entries": [
+          {
+            "acl_ordinal": 1,
+            "grantable": false,
+            "grantee": "postgres",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 2,
+            "grantable": false,
+            "grantee": "service_role",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 3,
+            "grantable": false,
+            "grantee": "anon",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 4,
+            "grantable": false,
+            "grantee": "authenticated",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          }
+        ],
+        "definition_md5": "1c16e8f5359cd1137050b181652b1105",
+        "definition_body_md5": "628ba6a5ce47310f7515dc5476b1fbc9"
+      },
+      "repository_callers": {
+        "frontend_rpc_callers": [
+          {
+            "path": "src/pages/public/PublicDemo.tsx",
+            "line": 17
+          }
+        ],
+        "edge_rpc_callers": [],
+        "database_callers": []
+      },
+      "intended_caller": "Public demo page.",
+      "authorization_mechanism": "Active, unexpired demo bearer token lookup; event type casts to the enum or defaults to view, and the supplied metadata/duration values are recorded.",
+      "proposed_post_stage1b_grants": {
+        "anon_execute": true,
+        "authenticated_execute": true,
+        "public_execute": false,
+        "service_role_execute": true
+      },
+      "keep_revoke_rationale": "Keep anon EXECUTE for the public bearer-token/capability flow validated by the function. Direct PUBLIC remains revoked.",
+      "migration_live_definition_parity": {
+        "stage1b_redefines_function": false,
+        "migration_source": null,
+        "candidate_definition_sha256": null,
+        "candidate_definition_header": null,
+        "live_definition_header": "RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public'",
+        "candidate_definition_body_md5": null,
+        "live_definition_md5": "1c16e8f5359cd1137050b181652b1105",
+        "live_definition_body_md5": "628ba6a5ce47310f7515dc5476b1fbc9",
+        "candidate_body_matches_live": true,
+        "frozen_review_definition_md5": "1c16e8f5359cd1137050b181652b1105",
+        "frozen_review_definition_matches_live": true,
+        "parity_status": "UNCHANGED_BY_STAGE1B; current live pg_get_functiondef remains in force."
+      }
+    },
+    {
+      "ordinal": 15,
+      "exact_signature": "public.supplier_list_assignments(text)",
+      "declaration_signature": "public.supplier_list_assignments(_token text)",
+      "classification": "PUBLIC_ANON",
+      "live": {
+        "owner": "postgres",
+        "security_definer": true,
+        "security_invoker": false,
+        "search_path": "search_path=public",
+        "configured_settings": [
+          "search_path=public"
+        ],
+        "anon_execute": true,
+        "authenticated_execute": true,
+        "public_execute": false,
+        "raw_acl": [
+          "postgres=X/postgres",
+          "service_role=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres"
+        ],
+        "acl_entries": [
+          {
+            "acl_ordinal": 1,
+            "grantable": false,
+            "grantee": "postgres",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 2,
+            "grantable": false,
+            "grantee": "service_role",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 3,
+            "grantable": false,
+            "grantee": "anon",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 4,
+            "grantable": false,
+            "grantee": "authenticated",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          }
+        ],
+        "definition_md5": "42f60ecc6f5c39d071aaf6592b40f650",
+        "definition_body_md5": "55987d8224cb22ffcd0c6cd62636b686"
+      },
+      "repository_callers": {
+        "frontend_rpc_callers": [
+          {
+            "path": "src/pages/supplier/SupplierAssignments.tsx",
+            "line": 42
+          },
+          {
+            "path": "src/pages/supplier/SupplierDashboard.tsx",
+            "line": 24
+          }
+        ],
+        "edge_rpc_callers": [],
+        "database_callers": []
+      },
+      "intended_caller": "Supplier assignments and dashboard pages.",
+      "authorization_mechanism": "Active supplier access token resolves supplier_id; assignments are filtered to that supplier.",
+      "proposed_post_stage1b_grants": {
+        "anon_execute": true,
+        "authenticated_execute": true,
+        "public_execute": false,
+        "service_role_execute": true
+      },
+      "keep_revoke_rationale": "Keep anon EXECUTE for the public bearer-token/capability flow validated by the function. Direct PUBLIC remains revoked.",
+      "migration_live_definition_parity": {
+        "stage1b_redefines_function": false,
+        "migration_source": null,
+        "candidate_definition_sha256": null,
+        "candidate_definition_header": null,
+        "live_definition_header": "RETURNS TABLE(id uuid, deal_id uuid, deal_name text, business_name text, contact_name text, contact_company text, contact_email text, status assignment_status, share_contact_details boolean, supplier_note text, notes text, assigned_at timestamp with time zone, started_at timestamp with time zone, completed_at timestamp with time zone) LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public'",
+        "candidate_definition_body_md5": null,
+        "live_definition_md5": "42f60ecc6f5c39d071aaf6592b40f650",
+        "live_definition_body_md5": "55987d8224cb22ffcd0c6cd62636b686",
+        "candidate_body_matches_live": true,
+        "frozen_review_definition_md5": "42f60ecc6f5c39d071aaf6592b40f650",
+        "frozen_review_definition_matches_live": true,
+        "parity_status": "UNCHANGED_BY_STAGE1B; current live pg_get_functiondef remains in force."
+      }
+    },
+    {
+      "ordinal": 16,
+      "exact_signature": "public.supplier_login_with_token(text)",
+      "declaration_signature": "public.supplier_login_with_token(_token text)",
+      "classification": "PUBLIC_ANON",
+      "live": {
+        "owner": "postgres",
+        "security_definer": true,
+        "security_invoker": false,
+        "search_path": "search_path=public",
+        "configured_settings": [
+          "search_path=public"
+        ],
+        "anon_execute": true,
+        "authenticated_execute": true,
+        "public_execute": false,
+        "raw_acl": [
+          "postgres=X/postgres",
+          "service_role=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres"
+        ],
+        "acl_entries": [
+          {
+            "acl_ordinal": 1,
+            "grantable": false,
+            "grantee": "postgres",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 2,
+            "grantable": false,
+            "grantee": "service_role",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 3,
+            "grantable": false,
+            "grantee": "anon",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 4,
+            "grantable": false,
+            "grantee": "authenticated",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          }
+        ],
+        "definition_md5": "bebce94572208f15ac861f1ae966a7e0",
+        "definition_body_md5": "2646956eb96213ba3b63d53b40a7377a"
+      },
+      "repository_callers": {
+        "frontend_rpc_callers": [
+          {
+            "path": "src/components/supplier/SupplierRoute.tsx",
+            "line": 24
+          },
+          {
+            "path": "src/pages/supplier/SupplierLogin.tsx",
+            "line": 43
+          }
+        ],
+        "edge_rpc_callers": [],
+        "database_callers": []
+      },
+      "intended_caller": "Supplier route and login pages.",
+      "authorization_mechanism": "Active supplier token and allowed supplier lifecycle status.",
+      "proposed_post_stage1b_grants": {
+        "anon_execute": true,
+        "authenticated_execute": true,
+        "public_execute": false,
+        "service_role_execute": true
+      },
+      "keep_revoke_rationale": "Keep anon EXECUTE for the public bearer-token/capability flow validated by the function. Direct PUBLIC remains revoked.",
+      "migration_live_definition_parity": {
+        "stage1b_redefines_function": false,
+        "migration_source": null,
+        "candidate_definition_sha256": null,
+        "candidate_definition_header": null,
+        "live_definition_header": "RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public'",
+        "candidate_definition_body_md5": null,
+        "live_definition_md5": "bebce94572208f15ac861f1ae966a7e0",
+        "live_definition_body_md5": "2646956eb96213ba3b63d53b40a7377a",
+        "candidate_body_matches_live": true,
+        "frozen_review_definition_md5": "bebce94572208f15ac861f1ae966a7e0",
+        "frozen_review_definition_matches_live": true,
+        "parity_status": "UNCHANGED_BY_STAGE1B; current live pg_get_functiondef remains in force."
+      }
+    },
+    {
+      "ordinal": 17,
+      "exact_signature": "public.supplier_update_assignment_status(text, uuid, text, text)",
+      "declaration_signature": "public.supplier_update_assignment_status(_token text, _assignment_id uuid, _new_status text, _note text)",
+      "classification": "PUBLIC_ANON",
+      "live": {
+        "owner": "postgres",
+        "security_definer": true,
+        "security_invoker": false,
+        "search_path": "search_path=public",
+        "configured_settings": [
+          "search_path=public"
+        ],
+        "anon_execute": true,
+        "authenticated_execute": true,
+        "public_execute": false,
+        "raw_acl": [
+          "postgres=X/postgres",
+          "service_role=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres"
+        ],
+        "acl_entries": [
+          {
+            "acl_ordinal": 1,
+            "grantable": false,
+            "grantee": "postgres",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 2,
+            "grantable": false,
+            "grantee": "service_role",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 3,
+            "grantable": false,
+            "grantee": "anon",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 4,
+            "grantable": false,
+            "grantee": "authenticated",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          }
+        ],
+        "definition_md5": "2843af90b05692d7300e51c34a90e4f0",
+        "definition_body_md5": "746cb5d70952006f269c303d20e23440"
+      },
+      "repository_callers": {
+        "frontend_rpc_callers": [
+          {
+            "path": "src/pages/supplier/SupplierAssignments.tsx",
+            "line": 58
+          }
+        ],
+        "edge_rpc_callers": [],
+        "database_callers": []
+      },
+      "intended_caller": "Supplier assignments page.",
+      "authorization_mechanism": "Active supplier token, assignment ownership, allowed status transition, and terminal-state lock.",
+      "proposed_post_stage1b_grants": {
+        "anon_execute": true,
+        "authenticated_execute": true,
+        "public_execute": false,
+        "service_role_execute": true
+      },
+      "keep_revoke_rationale": "Keep anon EXECUTE for the public bearer-token/capability flow validated by the function. Direct PUBLIC remains revoked.",
+      "migration_live_definition_parity": {
+        "stage1b_redefines_function": false,
+        "migration_source": null,
+        "candidate_definition_sha256": null,
+        "candidate_definition_header": null,
+        "live_definition_header": "RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public'",
+        "candidate_definition_body_md5": null,
+        "live_definition_md5": "2843af90b05692d7300e51c34a90e4f0",
+        "live_definition_body_md5": "746cb5d70952006f269c303d20e23440",
+        "candidate_body_matches_live": true,
+        "frozen_review_definition_md5": "2843af90b05692d7300e51c34a90e4f0",
+        "frozen_review_definition_matches_live": true,
+        "parity_status": "UNCHANGED_BY_STAGE1B; current live pg_get_functiondef remains in force."
+      }
+    },
+    {
+      "ordinal": 18,
+      "exact_signature": "public.worker_has_active_window(uuid, text)",
+      "declaration_signature": "public.worker_has_active_window(_worker_id uuid, _portal_type text)",
+      "classification": "DB_INTERNAL",
+      "live": {
+        "owner": "postgres",
+        "security_definer": true,
+        "security_invoker": false,
+        "search_path": "search_path=public",
+        "configured_settings": [
+          "search_path=public"
+        ],
+        "anon_execute": true,
+        "authenticated_execute": true,
+        "public_execute": false,
+        "raw_acl": [
+          "postgres=X/postgres",
+          "service_role=X/postgres",
+          "anon=X/postgres",
+          "authenticated=X/postgres"
+        ],
+        "acl_entries": [
+          {
+            "acl_ordinal": 1,
+            "grantable": false,
+            "grantee": "postgres",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 2,
+            "grantable": false,
+            "grantee": "service_role",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 3,
+            "grantable": false,
+            "grantee": "anon",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          },
+          {
+            "acl_ordinal": 4,
+            "grantable": false,
+            "grantee": "authenticated",
+            "grantor": "postgres",
+            "privilege": "EXECUTE"
+          }
+        ],
+        "definition_md5": "4a4927c37ed1918957ea3daadc25aabd",
+        "definition_body_md5": "decb96d8d1bec7f713612fb2c6354776"
+      },
+      "repository_callers": {
+        "frontend_rpc_callers": [],
+        "edge_rpc_callers": [],
+        "database_callers": [],
+        "database_dependencies": [
+          "public.current_worker_id()",
+          "public.is_kill_switch_active()"
+        ]
+      },
+      "intended_caller": "Internal authenticated worker-window helper; no direct browser or Edge RPC caller found.",
+      "authorization_mechanism": "Kill switch must be inactive; caller must be trusted service_role or _worker_id must equal current_worker_id(); requires an active/scheduled time window.",
+      "proposed_post_stage1b_grants": {
+        "anon_execute": false,
+        "authenticated_execute": true,
+        "public_execute": false,
+        "service_role_execute": true
+      },
+      "keep_revoke_rationale": "Revoke anon because no documented anonymous dependency exists. Keep authenticated for the auth-bound helper or founder/admin status caller; preserve service_role.",
+      "migration_live_definition_parity": {
+        "stage1b_redefines_function": true,
+        "migration_source": "supabase/migrations/20260923130000_stage1b_rpc_authorization_hardening.sql",
+        "candidate_definition_sha256": "b27ba0e03fc667ce364c611a35bd4aa7f98c220d7e64e77147c7f84e4df47aeb",
+        "candidate_definition_header": "RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path TO 'public'",
+        "live_definition_header": "RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path TO 'public'",
+        "candidate_definition_body_md5": "decb96d8d1bec7f713612fb2c6354776",
+        "live_definition_md5": "4a4927c37ed1918957ea3daadc25aabd",
+        "live_definition_body_md5": "decb96d8d1bec7f713612fb2c6354776",
+        "candidate_body_matches_live": true,
+        "frozen_review_definition_md5": "fee96ce37c1a7bce7e74c19cd0611466",
+        "frozen_review_definition_matches_live": false,
+        "parity_status": "STAGE1B REDEFINITION BODY MATCHES LIVE; compare recorded declaration header and security settings."
+      }
+    }
+  ],
+  "migration_signature_gate_observed_live_count": 18,
+  "migration_signature_gate_observed_exact_match": true
+}

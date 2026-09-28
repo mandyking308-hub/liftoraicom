@@ -1,0 +1,43 @@
+{
+  "artifact": "stage1b-rpc-smoke-results",
+  "captured_at_utc": "2026-09-23T05:45:00Z",
+  "project_id": "08f86e25-a8d3-49f1-9c6a-333a4974336b",
+  "database_ref": "oiwbletmjhrhqksosphi",
+  "provider_calls": false,
+  "outbound_actions": false,
+  "tests": {
+    "anon": {
+      "current_user": "anon",
+      "auth_role": "anon",
+      "invalid_public_rpc_returns_null": true,
+      "anon_can_execute_public_rpc": true,
+      "anon_can_execute_founder_rpc": false,
+      "anon_can_execute_service_rpc": false,
+      "forged_admin_identity_rejected": true
+    },
+    "authenticated_zero_claim": {
+      "current_user": "authenticated",
+      "auth_role": "authenticated",
+      "invalid_public_rpc_returns_null": true,
+      "authenticated_can_execute_public_rpc": true,
+      "authenticated_can_execute_founder_rpc": true,
+      "ordinary_user_can_execute_service_rpc": false,
+      "forged_founder_identity_rejected": true
+    },
+    "service_role": {
+      "current_user": "service_role",
+      "auth_role": "service_role",
+      "service_can_execute_internal_rpc": true,
+      "service_can_execute_founder_rpc": true,
+      "service_role_status_call_succeeded": true
+    }
+  },
+  "authorization_evidence": {
+    "public_functions_classified": 386,
+    "unknown_functions": 0,
+    "founder_admin_functions_with_server_side_auth_evidence": 29,
+    "security_definer_search_paths_reviewed": 211,
+    "unexpected_application_role_rpc_execution": 0
+  },
+  "test_limit": "The query API runs with session_user=postgres; SET SESSION AUTHORIZATION authenticated is disallowed. Therefore the ordinary-authenticated founder-denial path is proved by the checked-in server-side guards, static review, and effective EXECUTE checks rather than by impersonating a real JWT session. No real user, provider, or outbound action was created."
+}
