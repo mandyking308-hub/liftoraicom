@@ -31,6 +31,7 @@ describe("Worker 3 tenant provider schema", () => {
   it("scopes event idempotency and connections by business, without migrating legacy rows", () => {
     expect(migration).toContain("UNIQUE (id, business_id, provider_type)");
     expect(migration).toContain("outbound_provider_events_connection_idempotency_key");
+    expect(migration).toContain("ON public.outbound_provider_events (provider_connection_id, idempotency_key)");
     expect(migration).toContain("FOREIGN KEY (provider_connection_id, business_id, provider_type)");
     expect(migration).toContain("outbound_provider_connections_credential_ref_is_namespaced");
     expect(migration).toContain("outbound_provider_connections_webhook_ref_is_namespaced");

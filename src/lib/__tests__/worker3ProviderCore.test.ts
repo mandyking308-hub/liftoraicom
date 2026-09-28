@@ -34,7 +34,15 @@ describe("Worker 3 provider core", () => {
     const body = '{"event_type":"email_reply_received","event_id":"evt-1"}';
     const signature = await sign(body, "business-connection-secret");
     expect(await verifySmartleadWebhookSignature(body, signature, "business-connection-secret")).toBe(true);
+    expect(await verifySmartleadWebhookSignature(
+      new TextEncoder().encode(body),
+      `sha256=${signature.slice("sha256=".length).toUpperCase()}`,
+      "business-connection-secret",
+    )).toBe(true);
     expect(await verifySmartleadWebhookSignature(`${body} `, signature, "business-connection-secret")).toBe(false);
+    expect(await verifySmartleadWebhookSignature(body, `SHA256=${signature.slice("sha256=".length)}`, "business-connection-secret")).toBe(false);
+    expect(await verifySmartleadWebhookSignature(body, `${signature} `, "business-connection-secret")).toBe(false);
+    expect(await verifySmartleadWebhookSignature(body, `sha256=${"0".repeat(62)}`, "business-connection-secret")).toBe(false);
     expect(await verifySmartleadWebhookSignature(body, "business-connection-secret", "business-connection-secret")).toBe(false);
     expect(await verifySmartleadWebhookSignature(body, signature, null)).toBe(false);
   });
@@ -42,6 +50,8 @@ describe("Worker 3 provider core", () => {
   it("prefers X-Request-Id before provider event/composite keys", () => {
     const event = extractEvent({ event_type: "reply", event_id: "event-1" });
     expect(buildIdempotencyKey(event, "request-1")).toBe("req:request-1");
+    expect(buildIdempotencyKey(event, "invalid\nrequest-id")).toBe("evt:event-1");
+    expect(buildIdempotencyKey(event, "x".repeat(201))).toBe("evt:event-1");
     expect(buildIdempotencyKey(event)).toBe("evt:event-1");
   });
 
