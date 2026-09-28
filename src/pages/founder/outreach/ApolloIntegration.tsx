@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { APOLLO_CONNECTION_UI_COLUMNS } from "@/lib/providers/apolloConnectionProjection";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -749,7 +750,7 @@ export default function ApolloIntegration() {
   const loadAll = useCallback(async () => {
     setLoading(true);
     const [c, s, r] = await Promise.all([
-      supabase.from("apollo_connections").select("*").order("created_at"),
+      supabase.from("apollo_connections").select(APOLLO_CONNECTION_UI_COLUMNS).order("created_at"),
       supabase.from("apollo_sync_segments").select("*").order("created_at"),
       supabase.from("apollo_sync_runs").select("*").order("started_at", { ascending: false }).limit(20),
     ]);

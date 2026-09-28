@@ -14,7 +14,7 @@ import { Plus, Play, Pause, Send, Megaphone, Activity } from "lucide-react";
 import { Link } from "react-router-dom";
 import SimulatedSendingBanner from "@/components/outreach/SimulatedSendingBanner";
 
-type Campaign = { id: string; business_name: string; campaign_name: string; status: "active" | "paused"; created_at: string };
+type Campaign = { id: string; business_id: string | null; business_name: string; campaign_name: string; status: "active" | "paused"; created_at: string };
 type Sequence = { id: string; campaign_id: string; step_number: number; subject: string; body: string; delay_days: number };
 
 const STEP_DELAYS: Record<number, number> = { 1: 0, 2: 3, 3: 7, 4: 14 };
@@ -44,7 +44,21 @@ const OutreachCampaigns = () => {
 
   async function createCampaign() {
     if (!newName.trim() || !newBiz.trim()) { toast.error("Name and business required"); return; }
-    const { error } = await supabase.from("outreach_campaigns").insert({ campaign_name: newName.trim(), business_name: newBiz.trim(), status: "paused" });
+    const { data: business, error: businessError } = await supabase
+      .from("businesses")
+      .select("id")
+      .eq("name", newBiz.trim())
+      .maybeSingle();
+    if (businessError || !business) {
+      toast.error("Choose an existing Liftor business so the campaign can be tenant-scoped.");
+      return;
+    }
+    const { error } = await supabase.from("outreach_campaigns").insert({
+      business_id: business.id,
+      campaign_name: newName.trim(),
+      business_name: newBiz.trim(),
+      status: "paused",
+    });
     if (error) { toast.error(error.message); return; }
     setNewName(""); setNewBiz("");
     toast.success("Campaign created (paused). Add sequences & inboxes, then activate.");

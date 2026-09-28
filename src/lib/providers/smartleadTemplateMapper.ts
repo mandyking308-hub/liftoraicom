@@ -77,7 +77,7 @@ function findUnresolvedBrackets(text: string): string[] {
 }
 
 function findUnsupportedSmartleadTokens(text: string): string[] {
-  const tokens = (text ?? "").match(/\{\{[^}\n]+\}\}/g) ?? [];
+  const tokens: string[] = (text ?? "").match(/\{\{[^}\n]+\}\}/g) ?? [];
   const bad = tokens.filter((t) => !SUPPORTED_SMARTLEAD_TOKENS.has(t.toLowerCase()));
   return Array.from(new Set(bad));
 }

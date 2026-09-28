@@ -1,4 +1,8 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import {
+  resolveProviderConnectionSecret,
+  type ScopedProviderConnection,
+} from "../_shared/providerConnectionResolver.ts";
 
 const SMARTLEAD_BASE_URL = "https://server.smartlead.ai/api/v1";
 
@@ -38,7 +42,6 @@ Deno.serve(async (req) => {
   const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
   const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
-  const SMARTLEAD_API_KEY = Deno.env.get("SMARTLEAD_API_KEY") ?? null;
 
   const auth = req.headers.get("Authorization") ?? "";
   if (!auth.startsWith("Bearer ")) return json({ ok: false, error: "auth_missing" }, 401);
@@ -60,20 +63,43 @@ Deno.serve(async (req) => {
   let body: any = {};
   try { body = await req.json(); } catch { body = {}; }
 
+  const providerConnectionId = String(body.provider_connection_id ?? "").trim();
   let providerCampaignId = String(body.provider_campaign_id ?? "").trim();
+  if (!providerConnectionId) {
+    return json({ ok: false, blocked: true, reason: "provider_connection_id_required", blockers: ["provider_connection_unbound"] }, 400);
+  }
+
+  const { data: connectionRow } = await admin
+    .from("outbound_provider_connections")
+    .select("id,business_id,provider_type,connection_status,is_enabled,inbound_receiver_enabled,mutations_enabled,credential_secret_ref,webhook_secret_ref")
+    .eq("id", providerConnectionId)
+    .eq("provider_type", "smartlead")
+    .eq("connection_status", "verified")
+    .eq("is_enabled", true)
+    .maybeSingle();
+  if (!connectionRow) return json({ ok: false, blocked: true, reason: "provider_connection_not_found", blockers: ["provider_connection_unbound"] }, 404);
+  const connection = connectionRow as ScopedProviderConnection;
+  const apiKey = resolveProviderConnectionSecret(connection, "CREDENTIAL", (name) => Deno.env.get(name));
+  if (!apiKey || apiKey.length < 8) {
+    return json({ ok: false, blocked: true, reason: "provider_connection_credential_missing", blockers: ["provider_credential_missing"] }, 409);
+  }
 
   // Fallback: resolve from active mapping when not supplied.
   if (!providerCampaignId) {
     const { data: mapping } = await admin
       .from("outbound_provider_campaign_mappings")
       .select("provider_campaign_id, is_active, mapping_status")
+      .eq("business_id", connection.business_id)
+      .eq("provider_connection_id", connection.id)
       .eq("provider_type", "smartlead")
       .eq("is_active", true)
       .eq("mapping_status", "mapped")
       .order("last_synced_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    providerCampaignId = String(mapping?.provider_campaign_id ?? "");
+      .limit(2);
+    if ((mapping ?? []).length !== 1) {
+      return json({ ok: false, blocked: true, reason: "campaign_mapping_missing_or_ambiguous", blockers: ["campaign_mapping_unbound"] }, 409);
+    }
+    providerCampaignId = String(mapping?.[0]?.provider_campaign_id ?? "");
   }
 
   if (!providerCampaignId) {
@@ -84,17 +110,27 @@ Deno.serve(async (req) => {
       blockers: ["no_campaign_mapping"],
     });
   }
-  if (!SMARTLEAD_API_KEY || SMARTLEAD_API_KEY.length < 8) {
-    return json({ ok: false, blocked: true, reason: "credentials_missing", blockers: ["smartlead_api_key_missing"] });
+  const { data: campaignMapping } = await admin
+    .from("outbound_provider_campaign_mappings")
+    .select("id")
+    .eq("business_id", connection.business_id)
+    .eq("provider_connection_id", connection.id)
+    .eq("provider_type", "smartlead")
+    .eq("provider_campaign_id", providerCampaignId)
+    .eq("is_active", true)
+    .eq("mapping_status", "mapped")
+    .limit(2);
+  if ((campaignMapping ?? []).length !== 1) {
+    return json({ ok: false, blocked: true, reason: "campaign_mapping_missing_or_ambiguous", blockers: ["campaign_mapping_unbound"] }, 409);
   }
 
-  const campaign = await getJson(`/campaigns/${encodeURIComponent(providerCampaignId)}`, SMARTLEAD_API_KEY);
+  const campaign = await getJson(`/campaigns/${encodeURIComponent(providerCampaignId)}`, apiKey);
   await new Promise((r) => setTimeout(r, 200));
-  const sequences = await getJson(`/campaigns/${encodeURIComponent(providerCampaignId)}/sequences`, SMARTLEAD_API_KEY);
+  const sequences = await getJson(`/campaigns/${encodeURIComponent(providerCampaignId)}/sequences`, apiKey);
   await new Promise((r) => setTimeout(r, 200));
-  const accounts = await getJson(`/campaigns/${encodeURIComponent(providerCampaignId)}/email-accounts`, SMARTLEAD_API_KEY);
+  const accounts = await getJson(`/campaigns/${encodeURIComponent(providerCampaignId)}/email-accounts`, apiKey);
   await new Promise((r) => setTimeout(r, 200));
-  const analytics = await getJson(`/campaigns/${encodeURIComponent(providerCampaignId)}/analytics`, SMARTLEAD_API_KEY);
+  const analytics = await getJson(`/campaigns/${encodeURIComponent(providerCampaignId)}/analytics`, apiKey);
 
   const asArr = (b: any): any[] =>
     Array.isArray(b) ? b : Array.isArray(b?.data) ? b.data : Array.isArray(b?.results) ? b.results : [];

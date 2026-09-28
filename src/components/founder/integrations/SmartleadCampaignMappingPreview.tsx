@@ -14,17 +14,18 @@ export default function SmartleadCampaignMappingPreview() {
   const [loading, setLoading] = useState(false);
   const [providerCampaignId, setProviderCampaignId] = useState("");
   const [liftorCampaignId, setLiftorCampaignId] = useState("");
+  const [providerConnectionId, setProviderConnectionId] = useState("");
   const [confirmation, setConfirmation] = useState("");
   const [applying, setApplying] = useState(false);
   const [applyResult, setApplyResult] = useState<any>(null);
   const [discovery, setDiscovery] = useState<any>(null);
   const [discovering, setDiscovering] = useState(false);
 
-  const run = async () => {
+  const run = async (connectionId = providerConnectionId) => {
     setLoading(true);
     const { data: res, error } = await supabase.functions.invoke(
       "smartlead-campaign-mapping-preview",
-      { body: {} },
+      { body: connectionId ? { provider_connection_id: connectionId } : {} },
     );
     setLoading(false);
     setData(error ? { ok: false, error: error.message } : res);
@@ -39,14 +40,16 @@ export default function SmartleadCampaignMappingPreview() {
   const blocked = data?.blocked ?? true;
   const smartleadCampaigns: any[] = data?.smartlead_campaigns ?? [];
   const liftorCampaigns: any[] = data?.liftor_campaigns ?? [];
+  const providerConnections: any[] = data?.provider_connections ?? [];
 
   const canApply = useMemo(
     () =>
+      !!providerConnectionId &&
       !!providerCampaignId &&
       !!liftorCampaignId &&
       confirmation === CONFIRMATION &&
       smartleadCampaigns.length > 0,
-    [providerCampaignId, liftorCampaignId, confirmation, smartleadCampaigns.length],
+    [providerConnectionId, providerCampaignId, liftorCampaignId, confirmation, smartleadCampaigns.length],
   );
 
   const apply = async () => {
@@ -55,6 +58,7 @@ export default function SmartleadCampaignMappingPreview() {
       "smartlead-campaign-mapping-apply",
       {
         body: {
+          provider_connection_id: providerConnectionId,
           provider_campaign_id: providerCampaignId,
           liftor_campaign_id: liftorCampaignId,
           confirmation,
@@ -81,7 +85,7 @@ export default function SmartleadCampaignMappingPreview() {
     setDiscovering(true);
     const { data: res, error } = await supabase.functions.invoke(
       "smartlead-campaign-discovery",
-      { body: providerCampaignId ? { provider_campaign_id: providerCampaignId } : {} },
+      { body: { provider_connection_id: providerConnectionId, provider_campaign_id: providerCampaignId } },
     );
     setDiscovering(false);
     setDiscovery(error ? { ok: false, error: error.message } : res);
@@ -95,7 +99,7 @@ export default function SmartleadCampaignMappingPreview() {
           <h3 className="text-base font-semibold">Smartlead Campaign Mapping</h3>
           <Badge variant="outline" className="text-[10px]">founder-gated</Badge>
         </div>
-        <Button size="sm" variant="outline" onClick={run} disabled={loading}>
+        <Button size="sm" variant="outline" onClick={() => run()} disabled={loading}>
           <RefreshCcw className={`h-3 w-3 mr-1 ${loading ? "animate-spin" : ""}`} />
           {loading ? "Loading…" : "Refresh"}
         </Button>
@@ -117,6 +121,35 @@ export default function SmartleadCampaignMappingPreview() {
               <div className="text-muted-foreground">Suggested matches</div>
               <div className="font-mono text-sm">{data.suggested_mappings?.length ?? 0}</div>
             </div>
+          </div>
+
+          <div className="rounded border border-border/60 p-2 text-[11px]">
+            <label className="text-muted-foreground" htmlFor="smartlead-provider-connection">
+              Business-owned Smartlead connection
+            </label>
+            <select
+              id="smartlead-provider-connection"
+              className="w-full mt-1 bg-background border border-border/60 rounded p-2"
+              value={providerConnectionId}
+              onChange={(e) => {
+                const nextConnectionId = e.target.value;
+                setProviderConnectionId(nextConnectionId);
+                setProviderCampaignId("");
+                setLiftorCampaignId("");
+                setConfirmation("");
+                void run(nextConnectionId);
+              }}
+            >
+              <option value="">— choose a verified connection —</option>
+              {providerConnections.map((connection: any) => (
+                <option key={connection.id} value={connection.id}>
+                  {connection.display_name} · {connection.business_id}
+                </option>
+              ))}
+            </select>
+            {!providerConnectionId && (
+              <div className="mt-1 text-amber-300">Select a verified business connection to load its campaign inventory.</div>
+            )}
           </div>
 
           {blocked && (
