@@ -15,6 +15,10 @@ import {
   planCustomerSuccessActivation,
   validatePaidCheckoutSnapshot,
 } from "../_shared/customerCommercialLifecycle.ts";
+import {
+  provisionPaidCustomerProductAccount,
+  resolveOrInviteCustomerIdentity,
+} from "../_shared/customerAuthProvisioning.ts";
 
 const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY") ?? "";
 const STRIPE_WEBHOOK_SECRET = Deno.env.get("STRIPE_WEBHOOK_SECRET") ?? "";
@@ -219,6 +223,13 @@ async function activatePaidCustomerSalesCheckout(session: Stripe.Checkout.Sessio
   if (bcrCheck.error || !bcrCheck.data || bcrCheck.data.contact_id !== intent.contact_id || bcrCheck.data.business_id !== intent.business_id) {
     throw new Error("paid checkout relationship context mismatch");
   }
+  const canonicalContact = await admin.from("contacts").select("id,email")
+    .eq("id", intent.contact_id).maybeSingle();
+  const normalizeEmail = (value: unknown) => typeof value === "string" ? value.trim().toLowerCase() : "";
+  if (canonicalContact.error || !canonicalContact.data || !normalizeEmail(canonicalContact.data.email) ||
+      normalizeEmail(canonicalContact.data.email) !== normalizeEmail(intent.customer_email)) {
+    throw new Error("paid checkout canonical contact identity mismatch");
+  }
 
   const now = new Date().toISOString();
   const amount = (Number(session.amount_total) || 0) / 100;
@@ -326,6 +337,65 @@ async function activatePaidCustomerSalesCheckout(session: Stripe.Checkout.Sessio
     .select("id")
     .maybeSingle();
   if (relationshipError || !clientRelationship) throw new Error(`customer relationship activation failed: ${relationshipError?.message ?? "missing row"}`);
+
+  let productAccountId: string | null = null;
+  let productAccountAccessStatus: string | null = null;
+  let customerAuthUserId: string | null = null;
+  if (product.requires_customer_account === true) {
+    let identityCreated = false;
+    let provisioningStage = "customer_auth_identity";
+    try {
+      const identity = await resolveOrInviteCustomerIdentity(admin.auth.admin, canonicalContact.data.email);
+      customerAuthUserId = identity.user.id;
+      identityCreated = identity.created;
+      provisioningStage = "customer_product_account";
+      const productAccount = await provisionPaidCustomerProductAccount({
+        businessId: intent.business_id,
+        contactId: intent.contact_id,
+        relationshipId: intent.business_contact_relationship_id,
+        productId: intent.product_id,
+        offerId: intent.offer_id,
+        paymentId: payment.id,
+        checkoutId: intent.id,
+        authUser: identity.user,
+      }, {
+        upsert: async (row) => await admin.from("customer_product_accounts").upsert(row, {
+          onConflict: "checkout_id,product_id", ignoreDuplicates: true,
+        }),
+        find: async (checkoutId, productId) => await admin.from("customer_product_accounts")
+            .select("id,business_id,contact_id,business_contact_relationship_id,product_id,offer_id,payment_id,checkout_id,auth_user_id,account_scope,account_role,access_status")
+            .eq("checkout_id", checkoutId).eq("product_id", productId).maybeSingle(),
+        attachIdentity: async (accountId, authUserId) => await admin.from("customer_product_accounts")
+            .update({ auth_user_id: authUserId }).eq("id", accountId).is("auth_user_id", null),
+      });
+      productAccountId = productAccount.id;
+      productAccountAccessStatus = productAccount.access_status;
+      await auditCommercialTransition({
+        key: `checkout:${intent.id}:customer_identity_linked`,
+        type: "customer_auth_identity_linked",
+        intent,
+        dealId: deal.id,
+        paymentId: payment.id,
+        payload: {
+          auth_user_id: identity.user.id,
+          created_by_invite: identity.created,
+          product_account_id: productAccount.id,
+          account_role: productAccount.account_role,
+          access_status: productAccount.access_status,
+        },
+      });
+    } catch (error) {
+      await auditCommercialTransition({
+        key: `checkout:${intent.id}:customer_identity_provisioning_failed`,
+        type: "customer_identity_provisioning_failed",
+        intent,
+        dealId: deal.id,
+        paymentId: payment.id,
+        payload: { stage: provisioningStage, retryable: true },
+      });
+      throw error;
+    }
+  }
 
   const profileData = {
     business_id: intent.business_id,
@@ -503,31 +573,6 @@ async function activatePaidCustomerSalesCheckout(session: Stripe.Checkout.Sessio
     .select("id").eq("customer_sales_checkout_id", intent.id).maybeSingle();
   if (welcomeUpsertError || welcomeReadError || !welcomePack) throw new Error(`welcome pack upsert failed: ${welcomeUpsertError?.message ?? welcomeReadError?.message ?? "missing row"}`);
 
-  let productAccountId: string | null = null;
-  if (product.requires_customer_account === true) {
-    const { error: productAccountUpsertError } = await admin.from("customer_product_accounts").upsert({
-      business_id: intent.business_id,
-      business_contact_relationship_id: intent.business_contact_relationship_id,
-      contact_id: intent.contact_id,
-      product_id: intent.product_id,
-      offer_id: intent.offer_id,
-      payment_id: payment.id,
-      checkout_id: intent.id,
-      auth_user_id: null,
-      account_scope: "customer_product",
-      account_role: customerProductProvisioningRole(),
-      access_status: "pending_user",
-      metadata: { reason: "paid product requires a customer account; identity must authenticate before access" },
-    }, { onConflict: "checkout_id,product_id", ignoreDuplicates: true });
-    const productAccount = await admin.from("customer_product_accounts").select("id,account_role,account_scope")
-      .eq("checkout_id", intent.id).eq("product_id", intent.product_id).maybeSingle();
-    if (productAccountUpsertError || productAccount.error || !productAccount.data) throw new Error(`product account provisioning failed: ${productAccountUpsertError?.message ?? productAccount.error?.message ?? "missing row"}`);
-    productAccountId = productAccount.data.id;
-    if (productAccount.data.account_scope !== "customer_product" || productAccount.data.account_role !== "product_customer") {
-      throw new Error("product account contains a forbidden platform role");
-    }
-  }
-
   const policyResult = await admin.from("customer_success_execution_policies").select("*")
     .eq("business_id", intent.business_id).maybeSingle();
   const policy = policyResult.error ? null : policyResult.data;
@@ -586,7 +631,12 @@ async function activatePaidCustomerSalesCheckout(session: Stripe.Checkout.Sessio
     [activationKeys.onboarding, "onboarding_started", { onboarding_plan_id: onboardingPlan.id, task_count: taskRows.length }],
     [activationKeys.welcome, "customer_welcome_prepared", { welcome_pack_id: welcomePack.id, external_send: false }],
   ];
-  if (productAccountId) transitions.push([activationKeys.productAccount, "customer_product_account_provisioned", { product_account_id: productAccountId, access_status: "pending_user", role: "product_customer" }]);
+  if (productAccountId) transitions.push([activationKeys.productAccount, "customer_product_account_provisioned", {
+    product_account_id: productAccountId,
+    auth_user_id: customerAuthUserId,
+    access_status: productAccountAccessStatus,
+    role: customerProductProvisioningRole(),
+  }]);
   for (const row of plannedActions) {
     const queued = queueRows.find((candidate: any) => candidate.idempotency_key === row.idempotencyKey);
     transitions.push([

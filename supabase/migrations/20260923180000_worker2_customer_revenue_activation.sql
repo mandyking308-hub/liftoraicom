@@ -484,7 +484,7 @@ CREATE OR REPLACE FUNCTION public.initialize_customer_success_execution_policy()
 RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = pg_catalog
 AS $$
 BEGIN
   INSERT INTO public.customer_success_execution_policies (
@@ -500,6 +500,11 @@ BEGIN
   RETURN NEW;
 END;
 $$;
+-- Trigger-only policy initializer. The trigger owns invocation; expose direct
+-- execution only to the server-side privileged role used by trusted migrations
+-- and service operations.
+REVOKE EXECUTE ON FUNCTION public.initialize_customer_success_execution_policy() FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.initialize_customer_success_execution_policy() TO service_role;
 
 CREATE TRIGGER businesses_initialize_customer_success_policy
   AFTER INSERT ON public.businesses
