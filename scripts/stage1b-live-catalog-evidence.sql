@@ -907,6 +907,7 @@ WITH classified(typed_signature, classification) AS (
     FROM unnest(p.proargtypes::oid[]) WITH ORDINALITY AS u(a, ordinality)
   ), ''))
   WHERE n.nspname = 'public' AND p.prokind = 'f'
+    AND p.prorettype <> 'trigger'::regtype
 )
 SELECT
   count(*) OVER () AS observed_anon_application_function_count,

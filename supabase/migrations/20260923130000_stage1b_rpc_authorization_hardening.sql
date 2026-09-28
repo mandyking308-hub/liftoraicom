@@ -468,6 +468,7 @@ BEGIN
     ) args ON true
    WHERE n.nspname = 'public' AND p.prokind = 'f'
      AND has_function_privilege('anon', p.oid, 'EXECUTE')
+     AND p.prorettype <> 'trigger'::regtype
      AND NOT (r.rolname = 'supabase_admin' AND l.lanname = 'c' AND NOT p.prosecdef);
 
   IF cardinality(v_candidate_anon_signatures) <> 18

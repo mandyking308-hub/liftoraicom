@@ -18,6 +18,7 @@ BEGIN
   WITH classified(typed_signature, function_name, classification) AS (
     VALUES
     ('public._is_founder_or_admin()', '_is_founder_or_admin', 'DB_INTERNAL'),
+    ('public.sor_touch_updated_at()', 'sor_touch_updated_at', 'DB_INTERNAL'),
     ('public.accept_proposal_by_token(text)', 'accept_proposal_by_token', 'PUBLIC_ANON'),
     ('public.acquire_ai_lease(text, uuid, uuid, integer, integer, text, text, integer)', 'acquire_ai_lease', 'SERVICE_ROLE_INTERNAL'),
     ('public.activate_outreach_campaign(uuid)', 'activate_outreach_campaign', 'FOUNDER_ADMIN_ONLY'),
@@ -429,6 +430,7 @@ BEGIN
       p.proname AS function_name,
       l.lanname AS language,
       pg_get_userbyid(p.proowner) AS owner,
+      p.prorettype = 'trigger'::regtype AS returns_trigger,
       p.prosecdef,
       p.proconfig,
       pg_get_functiondef(p.oid) AS definition,
@@ -457,10 +459,17 @@ BEGIN
       AND NOT (l.language='c' AND l.owner='supabase_admin' AND NOT l.prosecdef)
 
     UNION ALL
+    SELECT jsonb_build_object('code','TRIGGER_HELPER_CLIENT_EXECUTE','signature',l.typed_signature)
+    FROM live l
+    WHERE l.typed_signature = 'public.sor_touch_updated_at()'
+      AND (l.anon_execute OR l.authenticated_execute)
+
+    UNION ALL
     SELECT jsonb_build_object('code','ANON_NOT_ALLOWLISTED','signature',l.typed_signature,'classification',c.classification)
     FROM live l JOIN classified c USING (typed_signature)
     WHERE l.anon_execute
       AND NOT (l.language='c' AND l.owner='supabase_admin' AND NOT l.prosecdef)
+      AND NOT l.returns_trigger
       AND c.classification <> 'PUBLIC_ANON'
       AND NOT EXISTS (
         SELECT 1 FROM anon_rls_helpers h WHERE h.typed_signature=l.typed_signature
@@ -485,6 +494,7 @@ BEGIN
     )
     FROM live l LEFT JOIN classified c USING (typed_signature)
     WHERE l.anon_execute
+      AND NOT l.returns_trigger
       AND NOT (l.language='c' AND l.owner='supabase_admin' AND NOT l.prosecdef)
     HAVING count(*) <> 9
         OR (SELECT count(*) FROM classified WHERE classification='PUBLIC_ANON')
@@ -498,6 +508,7 @@ BEGIN
     )
     FROM live l
     WHERE l.anon_execute
+      AND NOT l.returns_trigger
       AND NOT (l.language='c' AND l.owner='supabase_admin' AND NOT l.prosecdef)
     HAVING count(*) <> 9
 
@@ -506,6 +517,7 @@ BEGIN
     FROM live l JOIN classified c USING (typed_signature)
     WHERE l.authenticated_execute
       AND NOT (l.language='c' AND l.owner='supabase_admin' AND NOT l.prosecdef)
+      AND NOT l.returns_trigger
       AND c.classification NOT IN ('PUBLIC_ANON','FOUNDER_ADMIN_ONLY')
       AND NOT EXISTS (
         SELECT 1 FROM rls_helpers h WHERE h.typed_signature=l.typed_signature
@@ -571,7 +583,7 @@ BEGIN
     UNION ALL
     SELECT jsonb_build_object('code','SERVICE_ROLE_EXECUTE_LOST','signature',l.typed_signature)
     FROM live l
-    WHERE NOT l.service_role_execute
+    WHERE NOT l.service_role_execute AND NOT l.returns_trigger
 
     UNION ALL
     SELECT jsonb_build_object(

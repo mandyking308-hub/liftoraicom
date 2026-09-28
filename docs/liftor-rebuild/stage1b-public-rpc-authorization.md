@@ -25,6 +25,8 @@ The read-only collection query is [stage1b-live-catalog-evidence.sql](../../scri
 
 The classifier now verifies the exact 18-signature live pre-change set against the migration gate and the 18-row evidence matrix. The SQL drift checker is the post-Stage-1B check: its intended anon surface is nine functions (eight public token/capability RPCs plus `has_role` for `PUBLIC` RLS policies). Against the unapplied live baseline it will correctly report pre-migration exposure until the candidate is applied in an authorized environment.
 
+The later Strategic Organisations migration adds `public.sor_touch_updated_at()`, a `RETURNS trigger` helper. It is excluded from the application-RPC signature gate and anon RPC inventory, so the original 18-signature contract remains unchanged. The later `20260928120000_stage1b_sor_touch_acl_hardening.sql` migration revokes direct `PUBLIC`, anon, and authenticated execution, snapshots that function's exact pre-change ACL/body state for rollback, and verifies its trigger remains attached without replacing the function body or trigger.
+
 ## Function review
 
 The frozen registry explicitly classifies all 386 functions. Current class counts are:
@@ -84,9 +86,12 @@ The migration no longer changes future-function default ACLs. The global/default
 Rebuild checkpoint results on `recovery/worker1-rebuild-20260928`:
 
 - Stage 1A security perimeter: **19 passed**.
-- Stage 1B RPC authorization and migration guards: **14 passed**.
+- Stage 1B RPC authorization and migration guards: **16 passed**.
 - Outreach import authorization: **6 passed**.
 - Social relationship contract, including selecting the defining migration: **46 passed**.
+- Combined focused run: **87 passed across 4 files**; full Vitest: **730 passed across 51 files**.
 - Stage 1B classifier/static guard: **PASS**; all **18/18** expected anonymous application RPC signatures match the authoritative live catalog evidence, with **0 unresolved**. Proposed grants are nine anon, 17 authenticated, zero direct PUBLIC, and all 18 prior service-role paths preserved.
+- TypeScript, production build, and JWT-off checker: **PASS**; JWT-off covers 16 functions. The build retains existing import/chunk-size warnings.
+- The post-Strategic-Organisations trigger-helper drift test passes; `sor_touch_updated_at()` is outside the app-RPC inventory and the later migration revokes client/PUBLIC execution while preserving the trigger.
 
 The full Vitest, TypeScript, production build, JWT-off, destructive SQL, and diff-check results for this rebuild are recorded in the attached commit manifest. The migration remains unapplied; no SQL was run against production. Definition and caller details are in the [18-row reconciliation matrix](./stage1b-rpc-reconciliation.json) and [live catalog evidence](./stage1b-live-rpc-catalog-evidence.json). Rollback remains transaction-guarded and catalog-preflight verified; runtime rollback has not been exercised because the migration is unapplied.

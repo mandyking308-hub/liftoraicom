@@ -130,6 +130,49 @@ describe("Stage 1B — public RPC authorization", () => {
     }
   });
 
+  it("excludes trigger-returning helpers from the application RPC inventory", () => {
+    const signatureArray = migration.match(
+      /v_candidate_anon_signatures\s+text\[\]\s*:=\s*ARRAY\[([\s\S]*?)\];/i,
+    )?.[1] ?? "";
+    const liveEvidence = readFileSync("scripts/stage1b-live-catalog-evidence.sql", "utf8");
+    const inventory = JSON.parse(
+      readFileSync("docs/liftor-rebuild/stage1b-rpc-reconciliation.json", "utf8"),
+    );
+
+    expect(signatureArray.match(/'public\.[^']+'/g)).toHaveLength(18);
+    expect(signatureArray).not.toContain("public.sor_touch_updated_at()");
+    expect(migration).toContain("AND p.prorettype <> 'trigger'::regtype");
+    expect(liveEvidence).toContain("AND p.prorettype <> 'trigger'::regtype");
+    expect(driftChecker).toContain("p.prorettype = 'trigger'::regtype AS returns_trigger");
+    expect(driftChecker).toContain("'code','TRIGGER_HELPER_CLIENT_EXECUTE'");
+    expect(inventory.rows.map((row: any) => row.exact_signature)).not.toContain(
+      "public.sor_touch_updated_at()",
+    );
+  });
+
+  it("revokes client execution from the SOR trigger helper without changing its trigger", () => {
+    const followup = readFileSync(
+      "supabase/migrations/20260928120000_stage1b_sor_touch_acl_hardening.sql",
+      "utf8",
+    );
+    const rollback = readFileSync(
+      "docs/liftor-rebuild/stage1b-sor-touch-acl-rollback.sql",
+      "utf8",
+    );
+
+    expect(followup).toContain(
+      "REVOKE EXECUTE ON FUNCTION public.sor_touch_updated_at() FROM PUBLIC, anon, authenticated",
+    );
+    expect(followup).toContain("p.prorettype = 'trigger'::regtype");
+    expect(followup).toContain("FROM pg_trigger t");
+    expect(followup).toContain("after_raw_acl = p.proacl::text");
+    expect(followup).not.toMatch(/CREATE\s+OR\s+REPLACE\s+FUNCTION/i);
+    expect(followup).not.toMatch(/DROP\s+TRIGGER|CREATE\s+TRIGGER/i);
+    expect(rollback).toContain("raw_acl");
+    expect(rollback).toContain("acl_entries");
+    expect(rollback).toContain("Rollback refused");
+  });
+
   it("removes schema-wide ACL sweeps and blocks until exact live anon signatures are reconciled", () => {
     expect(migration).not.toContain("REVOKE EXECUTE ON ALL FUNCTIONS IN SCHEMA public");
     expect(migration).not.toContain("GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public");
