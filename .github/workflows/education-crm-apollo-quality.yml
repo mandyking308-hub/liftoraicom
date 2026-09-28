@@ -40,8 +40,8 @@ jobs:
           node-version: 20
           cache: npm
 
-      - name: Install dependencies without changing lockfile
-        run: npm install --no-package-lock --no-audit --no-fund
+      - name: Install dependencies from the lockfile
+        run: npm ci --no-audit --no-fund
 
       - name: TypeScript type-check
         run: npx tsc --noEmit
