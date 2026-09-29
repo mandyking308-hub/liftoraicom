@@ -21,7 +21,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-
           EXPECTED_THIN_SHA256="d28945ea30e76f09645b1b06849bfa65d6162b5949d59cd25244f4dfa0e83989"
           EXPECTED_RELEASE="7d01787b80d6afc399a153591988f887de918c63"
           EXPECTED_BASE="d68c93e9075c95c1c3f5ac651c9b1d1460dc64d1"
@@ -36,15 +35,15 @@ jobs:
           git cat-file -e "$EXPECTED_W2^{commit}"
           git cat-file -e "$EXPECTED_W4^{commit}"
 
-          cat             .release-artifact/liftor-final-thin.bundle.b64.part00             .release-artifact/liftor-final-thin.bundle.b64.part01             .release-artifact/liftor-final-thin.bundle.b64.part02             .release-artifact/liftor-final-thin.bundle.b64.part03             | base64 --decode > "$THIN"
+          cat .release-artifact/thin16.part* | base64 --decode > "$THIN"
 
           ACTUAL_SHA256="$(sha256sum "$THIN" | awk '{print $1}')"
           echo "Thin bundle SHA-256: $ACTUAL_SHA256"
           test "$ACTUAL_SHA256" = "$EXPECTED_THIN_SHA256"
 
           git bundle verify "$THIN"
-
           git fetch "./$THIN" refs/heads/release-thin
+
           ACTUAL_RELEASE="$(git rev-parse FETCH_HEAD)"
           echo "Bundle release commit: $ACTUAL_RELEASE"
           test "$ACTUAL_RELEASE" = "$EXPECTED_RELEASE"
