@@ -22,28 +22,36 @@ jobs:
         run: |
           set -euo pipefail
           BUNDLE="liftor-final-release-7d01787b.bundle"
+          ZIP="Liftor_Final_Release_7d01787b.zip"
           EXPECTED_SHA256="302da1d44178b5bcdee4464e6d53f642f9825d46351017482900541b121c393c"
           EXPECTED_COMMIT="7d01787b80d6afc399a153591988f887de918c63"
           TARGET_REF="refs/heads/release/liftor-final-20260928"
 
+          if [ ! -f "$BUNDLE" ] && [ -f "$ZIP" ]; then
+            unzip -o "$ZIP" "$BUNDLE"
+          fi
+
           if [ ! -f "$BUNDLE" ]; then
-            echo "Bundle not uploaded yet; nothing to publish."
+            echo "Verified release bundle/zip not uploaded yet; nothing to publish."
             exit 0
           fi
 
           ACTUAL_SHA256="$(sha256sum "$BUNDLE" | awk '{print $1}')"
+          echo "Bundle SHA-256: $ACTUAL_SHA256"
           test "$ACTUAL_SHA256" = "$EXPECTED_SHA256"
 
           git bundle verify "$BUNDLE"
           git fetch "$BUNDLE" "$TARGET_REF"
 
           ACTUAL_COMMIT="$(git rev-parse FETCH_HEAD)"
+          echo "Bundle release commit: $ACTUAL_COMMIT"
           test "$ACTUAL_COMMIT" = "$EXPECTED_COMMIT"
 
           git push origin "FETCH_HEAD:$TARGET_REF"
 
           git fetch origin "$TARGET_REF"
           REMOTE_COMMIT="$(git rev-parse FETCH_HEAD)"
+          echo "Remote release commit: $REMOTE_COMMIT"
           test "$REMOTE_COMMIT" = "$EXPECTED_COMMIT"
 
-          echo "Published $REMOTE_COMMIT to $TARGET_REF"
+          echo "Published exact verified release $REMOTE_COMMIT"
