@@ -17,41 +17,47 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Publish exact verified release
+      - name: Reconstruct and publish exact verified release
         shell: bash
         run: |
           set -euo pipefail
-          BUNDLE="liftor-final-release-7d01787b.bundle"
-          ZIP="Liftor_Final_Release_7d01787b.zip"
-          EXPECTED_SHA256="302da1d44178b5bcdee4464e6d53f642f9825d46351017482900541b121c393c"
-          EXPECTED_COMMIT="7d01787b80d6afc399a153591988f887de918c63"
+
+          EXPECTED_THIN_SHA256="d28945ea30e76f09645b1b06849bfa65d6162b5949d59cd25244f4dfa0e83989"
+          EXPECTED_RELEASE="7d01787b80d6afc399a153591988f887de918c63"
+          EXPECTED_BASE="d68c93e9075c95c1c3f5ac651c9b1d1460dc64d1"
+          EXPECTED_W2="6621c1fb2b539c5ea8469eee92338cd401af9299"
+          EXPECTED_W4="e0c32882a488e923071a3354923030cc375fdfe1"
           TARGET_REF="refs/heads/release/liftor-final-20260928"
+          THIN="liftor-final-thin.bundle"
 
-          if [ ! -f "$BUNDLE" ] && [ -f "$ZIP" ]; then
-            unzip -o "$ZIP" "$BUNDLE"
-          fi
+          git fetch origin             refs/heads/main:refs/remotes/origin/main             refs/heads/recovery/worker2-rebuild-20260928:refs/remotes/origin/recovery/worker2-rebuild-20260928             refs/heads/recovery/worker4-rebuild-20260928:refs/remotes/origin/recovery/worker4-rebuild-20260928
 
-          if [ ! -f "$BUNDLE" ]; then
-            echo "Verified release bundle/zip not uploaded yet; nothing to publish."
-            exit 0
-          fi
+          git cat-file -e "$EXPECTED_BASE^{commit}"
+          git cat-file -e "$EXPECTED_W2^{commit}"
+          git cat-file -e "$EXPECTED_W4^{commit}"
 
-          ACTUAL_SHA256="$(sha256sum "$BUNDLE" | awk '{print $1}')"
-          echo "Bundle SHA-256: $ACTUAL_SHA256"
-          test "$ACTUAL_SHA256" = "$EXPECTED_SHA256"
+          cat             .release-artifact/liftor-final-thin.bundle.b64.part00             .release-artifact/liftor-final-thin.bundle.b64.part01             .release-artifact/liftor-final-thin.bundle.b64.part02             .release-artifact/liftor-final-thin.bundle.b64.part03             | base64 --decode > "$THIN"
 
-          git bundle verify "$BUNDLE"
-          git fetch "$BUNDLE" "$TARGET_REF"
+          ACTUAL_SHA256="$(sha256sum "$THIN" | awk '{print $1}')"
+          echo "Thin bundle SHA-256: $ACTUAL_SHA256"
+          test "$ACTUAL_SHA256" = "$EXPECTED_THIN_SHA256"
 
-          ACTUAL_COMMIT="$(git rev-parse FETCH_HEAD)"
-          echo "Bundle release commit: $ACTUAL_COMMIT"
-          test "$ACTUAL_COMMIT" = "$EXPECTED_COMMIT"
+          git bundle verify "$THIN"
+
+          git fetch "./$THIN" refs/heads/release-thin
+          ACTUAL_RELEASE="$(git rev-parse FETCH_HEAD)"
+          echo "Bundle release commit: $ACTUAL_RELEASE"
+          test "$ACTUAL_RELEASE" = "$EXPECTED_RELEASE"
+
+          git merge-base --is-ancestor "$EXPECTED_BASE" "$ACTUAL_RELEASE"
+          git merge-base --is-ancestor "$EXPECTED_W2" "$ACTUAL_RELEASE"
+          git merge-base --is-ancestor "$EXPECTED_W4" "$ACTUAL_RELEASE"
 
           git push origin "FETCH_HEAD:$TARGET_REF"
 
           git fetch origin "$TARGET_REF"
-          REMOTE_COMMIT="$(git rev-parse FETCH_HEAD)"
-          echo "Remote release commit: $REMOTE_COMMIT"
-          test "$REMOTE_COMMIT" = "$EXPECTED_COMMIT"
+          REMOTE_RELEASE="$(git rev-parse FETCH_HEAD)"
+          echo "Remote release commit: $REMOTE_RELEASE"
+          test "$REMOTE_RELEASE" = "$EXPECTED_RELEASE"
 
-          echo "Published exact verified release $REMOTE_COMMIT"
+          echo "Published exact verified Liftor release: $REMOTE_RELEASE"
