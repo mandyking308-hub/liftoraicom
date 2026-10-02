@@ -1,6 +1,6 @@
 {
   "purpose": "Machine-readable perimeter classification for every Edge Function deployed with verify_jwt = false. A function may appear in supabase/config.toml with verify_jwt = false only if it is listed here with an explicit, implemented perimeter. scripts/check-jwt-off-perimeter.mjs fails when the two lists diverge.",
-  "stage": "Stage 1 — security perimeter hardening",
+  "stage": "Stage 1 \u2014 security perimeter hardening",
   "reviewed_at": "2026-09-23",
   "allowed_perimeter_kinds": [
     "provider_hmac_signature",
@@ -125,7 +125,7 @@
     },
     "social-distribution-dispatch-due": {
       "perimeter": "founder_jwt_or_shared_secret",
-      "mechanism": "requireFounderOrScheduler — x-dispatch-secret === SOCIAL_DISPATCH_SECRET, else founder/admin JWT",
+      "mechanism": "requireFounderOrScheduler \u2014 x-dispatch-secret === SOCIAL_DISPATCH_SECRET, else founder/admin JWT",
       "write_capable": true,
       "writes": "social publish jobs, dispatch runs",
       "rationale": "scheduler plus manual run-now",
@@ -133,7 +133,7 @@
     },
     "social-distribution-maintenance": {
       "perimeter": "shared_secret_header",
-      "mechanism": "requireScheduler — x-dispatch-secret only, founder token NOT accepted",
+      "mechanism": "requireScheduler \u2014 x-dispatch-secret only, founder token NOT accepted",
       "write_capable": true,
       "writes": "distribution maintenance state",
       "rationale": "headless maintenance",
@@ -153,6 +153,14 @@
       "write_capable": true,
       "writes": "social relationship maintenance state",
       "rationale": "headless maintenance",
+      "hardened_in_stage_1": false
+    },
+    "social-engagement-provider-event-receiver": {
+      "perimeter": "provider_hmac_signature",
+      "mechanism": "Fails closed unless SOCIAL_INBOUND_WEBHOOK_RECEIVER_ENABLED === 'true'; resolves exactly one social_accounts row and exactly one connected social_provider_connections row for that account's business; requires webhook_secret_ref === LIFTOR_SOCIAL_INBOUND_<connection id>_WEBHOOK_SECRET; verifies x-social-signature sha256 HMAC over the exact raw body (constant-time) before any write; then requires inbound_receiver_enabled and social_business_profiles.social_inbox_enabled",
+      "write_capable": true,
+      "writes": "process_social_inbound_multiturn_event RPC only: social_inbound_event_receipts (deduped on social_account_id + external_event_id), social_engagement_events, social_inbound_conversation_states retained turns, internal draft responses with founder_review_required = true and external_send_allowed = false; AI gateway draft trace with approval_required = true; never calls a social provider or sends",
+      "rationale": "social provider inbound event return path cannot hold a Supabase session; scoped per business and provider connection",
       "hardened_in_stage_1": false
     }
   }
