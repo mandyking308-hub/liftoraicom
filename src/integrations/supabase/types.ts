@@ -19708,6 +19708,91 @@ export type Database = {
           },
         ]
       }
+      customer_commercial_audit_events: {
+        Row: {
+          id: string
+          idempotency_key: string
+          event_type: string
+          business_id: string
+          contact_id: string | null
+          business_contact_relationship_id: string | null
+          checkout_id: string | null
+          deal_id: string | null
+          payment_id: string | null
+          event_payload: Json
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          idempotency_key: string
+          event_type: string
+          business_id: string
+          contact_id?: string | null
+          business_contact_relationship_id?: string | null
+          checkout_id?: string | null
+          deal_id?: string | null
+          payment_id?: string | null
+          event_payload?: Json
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          idempotency_key?: string
+          event_type?: string
+          business_id?: string
+          contact_id?: string | null
+          business_contact_relationship_id?: string | null
+          checkout_id?: string | null
+          deal_id?: string | null
+          payment_id?: string | null
+          event_payload?: Json
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_commercial_audit_events_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_commercial_audit_events_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_commercial_audit_events_business_contact_relationship_"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_commercial_audit_events_checkout_id_fkey"
+            columns: ["checkout_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_checkout_intents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_commercial_audit_events_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_commercial_audit_events_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "qtc_payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_complaints: {
         Row: {
           assignment_id: string | null
@@ -20464,6 +20549,107 @@ export type Database = {
           },
         ]
       }
+      customer_product_accounts: {
+        Row: {
+          id: string
+          business_id: string
+          contact_id: string
+          business_contact_relationship_id: string
+          product_id: string
+          offer_id: string
+          payment_id: string
+          checkout_id: string
+          auth_user_id: string | null
+          account_scope: string
+          account_role: string
+          access_status: string
+          provisioned_at: string
+          metadata: Json
+        }
+        Insert: {
+          id?: string
+          business_id: string
+          contact_id: string
+          business_contact_relationship_id: string
+          product_id: string
+          offer_id: string
+          payment_id: string
+          checkout_id: string
+          auth_user_id?: string | null
+          account_scope?: string
+          account_role?: string
+          access_status?: string
+          provisioned_at?: string
+          metadata?: Json
+        }
+        Update: {
+          id?: string
+          business_id?: string
+          contact_id?: string
+          business_contact_relationship_id?: string
+          product_id?: string
+          offer_id?: string
+          payment_id?: string
+          checkout_id?: string
+          auth_user_id?: string | null
+          account_scope?: string
+          account_role?: string
+          access_status?: string
+          provisioned_at?: string
+          metadata?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_product_accounts_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_product_accounts_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_product_accounts_business_contact_relationship_id_fkey"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_product_accounts_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_product_accounts_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_offers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_product_accounts_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "qtc_payments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_product_accounts_checkout_id_fkey"
+            columns: ["checkout_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_checkout_intents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_prospect_segment_map: {
         Row: {
           approval_status: string
@@ -20986,6 +21172,45 @@ export type Database = {
           },
         ]
       }
+      customer_sales_billing_customers: {
+        Row: {
+          id: string
+          business_id: string
+          contact_id: string
+          stripe_customer_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          business_id: string
+          contact_id: string
+          stripe_customer_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          business_id?: string
+          contact_id?: string
+          stripe_customer_id?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_sales_billing_customers_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_sales_billing_customers_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_sales_brain_runs: {
         Row: {
           business_id: string | null
@@ -21166,6 +21391,133 @@ export type Database = {
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "customer_sales_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_sales_checkout_intents: {
+        Row: {
+          id: string
+          idempotency_key: string
+          business_id: string
+          contact_id: string
+          business_contact_relationship_id: string
+          product_id: string
+          offer_id: string
+          customer_email: string
+          customer_name: string | null
+          discount_percent: number
+          approved_price_amount: number
+          checkout_amount: number
+          checkout_amount_minor_units: number
+          currency: string
+          stripe_price_id: string
+          stripe_customer_id: string | null
+          stripe_checkout_session_id: string | null
+          qtc_payment_id: string | null
+          status: string
+          test_mode: boolean
+          request_fingerprint: Json
+          failure_reason: string | null
+          paid_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          idempotency_key: string
+          business_id: string
+          contact_id: string
+          business_contact_relationship_id: string
+          product_id: string
+          offer_id: string
+          customer_email: string
+          customer_name?: string | null
+          discount_percent?: number
+          approved_price_amount: number
+          checkout_amount: number
+          checkout_amount_minor_units: number
+          currency: string
+          stripe_price_id: string
+          stripe_customer_id?: string | null
+          stripe_checkout_session_id?: string | null
+          qtc_payment_id?: string | null
+          status?: string
+          test_mode?: boolean
+          request_fingerprint?: Json
+          failure_reason?: string | null
+          paid_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          idempotency_key?: string
+          business_id?: string
+          contact_id?: string
+          business_contact_relationship_id?: string
+          product_id?: string
+          offer_id?: string
+          customer_email?: string
+          customer_name?: string | null
+          discount_percent?: number
+          approved_price_amount?: number
+          checkout_amount?: number
+          checkout_amount_minor_units?: number
+          currency?: string
+          stripe_price_id?: string
+          stripe_customer_id?: string | null
+          stripe_checkout_session_id?: string | null
+          qtc_payment_id?: string | null
+          status?: string
+          test_mode?: boolean
+          request_fingerprint?: Json
+          failure_reason?: string | null
+          paid_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_sales_checkout_intents_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_sales_checkout_intents_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_sales_checkout_intents_business_contact_relationship_i"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_sales_checkout_intents_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_sales_checkout_intents_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_offers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_sales_checkout_intents_qtc_payment_id_fkey"
+            columns: ["qtc_payment_id"]
+            isOneToOne: false
+            referencedRelation: "qtc_payments"
             referencedColumns: ["id"]
           },
         ]
@@ -21479,6 +21831,7 @@ export type Database = {
       customer_sales_conversations: {
         Row: {
           business_id: string | null
+          business_contact_relationship_id: string | null
           buying_signals: string[] | null
           call_outcome: string | null
           channel: string
@@ -21521,6 +21874,7 @@ export type Database = {
         }
         Insert: {
           business_id?: string | null
+          business_contact_relationship_id?: string | null
           buying_signals?: string[] | null
           call_outcome?: string | null
           channel?: string
@@ -21563,6 +21917,7 @@ export type Database = {
         }
         Update: {
           business_id?: string | null
+          business_contact_relationship_id?: string | null
           buying_signals?: string[] | null
           call_outcome?: string | null
           channel?: string
@@ -21604,6 +21959,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "customer_sales_conversations_business_contact_relationship_id_fkey"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "customer_sales_conversations_offer_id_fkey"
             columns: ["offer_id"]
@@ -23002,6 +23364,124 @@ export type Database = {
           },
         ]
       }
+      customer_success_automation_queue: {
+        Row: {
+          id: string
+          idempotency_key: string
+          business_id: string
+          contact_id: string
+          business_contact_relationship_id: string
+          success_profile_id: string | null
+          onboarding_plan_id: string | null
+          checkout_id: string | null
+          action_type: string
+          execution_status: string
+          execution_mode: string
+          approval_required: boolean
+          escalation_reason: string | null
+          confidence_score: number | null
+          risk_flags: string[]
+          scheduled_at: string | null
+          execution_attempts: number
+          last_error: string | null
+          execution_result: Json
+          action_payload: Json
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          idempotency_key: string
+          business_id: string
+          contact_id: string
+          business_contact_relationship_id: string
+          success_profile_id?: string | null
+          onboarding_plan_id?: string | null
+          checkout_id?: string | null
+          action_type: string
+          execution_status?: string
+          execution_mode?: string
+          approval_required?: boolean
+          escalation_reason?: string | null
+          confidence_score?: number | null
+          risk_flags?: string[]
+          scheduled_at?: string | null
+          execution_attempts?: number
+          last_error?: string | null
+          execution_result?: Json
+          action_payload?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          idempotency_key?: string
+          business_id?: string
+          contact_id?: string
+          business_contact_relationship_id?: string
+          success_profile_id?: string | null
+          onboarding_plan_id?: string | null
+          checkout_id?: string | null
+          action_type?: string
+          execution_status?: string
+          execution_mode?: string
+          approval_required?: boolean
+          escalation_reason?: string | null
+          confidence_score?: number | null
+          risk_flags?: string[]
+          scheduled_at?: string | null
+          execution_attempts?: number
+          last_error?: string | null
+          execution_result?: Json
+          action_payload?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_success_automation_queue_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_automation_queue_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_automation_queue_business_contact_relationship"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_automation_queue_success_profile_id_fkey"
+            columns: ["success_profile_id"]
+            isOneToOne: false
+            referencedRelation: "customer_success_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_automation_queue_onboarding_plan_id_fkey"
+            columns: ["onboarding_plan_id"]
+            isOneToOne: false
+            referencedRelation: "customer_onboarding_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_automation_queue_checkout_id_fkey"
+            columns: ["checkout_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_checkout_intents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_success_checkins: {
         Row: {
           approval_status: string | null
@@ -23390,6 +23870,90 @@ export type Database = {
           upsell_potential?: string | null
         }
         Relationships: []
+      }
+      customer_success_refund_requests: {
+        Row: {
+          id: string
+          idempotency_key: string
+          business_id: string
+          contact_id: string
+          business_contact_relationship_id: string
+          checkout_id: string
+          payment_id: string
+          requested_amount: number
+          currency: string
+          status: string
+          stripe_refund_id: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          idempotency_key: string
+          business_id: string
+          contact_id: string
+          business_contact_relationship_id: string
+          checkout_id: string
+          payment_id: string
+          requested_amount: number
+          currency: string
+          status?: string
+          stripe_refund_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          idempotency_key?: string
+          business_id?: string
+          contact_id?: string
+          business_contact_relationship_id?: string
+          checkout_id?: string
+          payment_id?: string
+          requested_amount?: number
+          currency?: string
+          status?: string
+          stripe_refund_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_success_refund_requests_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_refund_requests_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_refund_requests_business_contact_relationship_"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_refund_requests_checkout_id_fkey"
+            columns: ["checkout_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_checkout_intents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_refund_requests_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "qtc_payments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       customer_survey_requests: {
         Row: {
@@ -31830,6 +32394,7 @@ export type Database = {
           ai_reply_mode: Database["public"]["Enums"]["ai_reply_mode"]
           allowed_business_names: string[]
           bounce_rate_per_inbox: number
+          business_id: string | null
           business_name: string
           consecutive_failures: number
           created_at: string
@@ -31897,6 +32462,7 @@ export type Database = {
           ai_reply_mode?: Database["public"]["Enums"]["ai_reply_mode"]
           allowed_business_names?: string[]
           bounce_rate_per_inbox?: number
+          business_id?: string | null
           business_name?: string
           consecutive_failures?: number
           created_at?: string
@@ -31964,6 +32530,7 @@ export type Database = {
           ai_reply_mode?: Database["public"]["Enums"]["ai_reply_mode"]
           allowed_business_names?: string[]
           bounce_rate_per_inbox?: number
+          business_id?: string | null
           business_name?: string
           consecutive_failures?: number
           created_at?: string
@@ -32024,6 +32591,13 @@ export type Database = {
           warmup_status?: Database["public"]["Enums"]["inbox_warmup_status"]
         }
         Relationships: [
+          {
+            foreignKeyName: "inboxes_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "inboxes_sending_domain_id_fkey"
             columns: ["sending_domain_id"]
@@ -43446,9 +44020,11 @@ export type Database = {
           provider_campaign_id: string | null
           provider_campaign_name: string | null
           provider_campaign_status: string | null
+          provider_connection_id: string | null
           provider_id: string
           provider_type: string
           updated_at: string
+          workspace_external_id: string | null
         }
         Insert: {
           business_id?: string | null
@@ -43465,9 +44041,11 @@ export type Database = {
           provider_campaign_id?: string | null
           provider_campaign_name?: string | null
           provider_campaign_status?: string | null
+          provider_connection_id?: string | null
           provider_id: string
           provider_type?: string
           updated_at?: string
+          workspace_external_id?: string | null
         }
         Update: {
           business_id?: string | null
@@ -43484,17 +44062,33 @@ export type Database = {
           provider_campaign_id?: string | null
           provider_campaign_name?: string | null
           provider_campaign_status?: string | null
+          provider_connection_id?: string | null
           provider_id?: string
           provider_type?: string
           updated_at?: string
+          workspace_external_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "outbound_provider_campaign_mappings_connection_fkey"
+            columns: ["provider_connection_id", "business_id", "provider_type"]
+            isOneToOne: false
+            referencedRelation: "outbound_provider_connections"
+            referencedColumns: ["id", "business_id", "provider_type"]
+          },
           {
             foreignKeyName: "outbound_provider_campaign_mappings_liftor_campaign_id_fkey"
             columns: ["liftor_campaign_id"]
             isOneToOne: false
             referencedRelation: "outreach_campaigns"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outbound_provider_campaign_mappings_liftor_campaign_business_scope_fkey"
+            columns: ["liftor_campaign_id", "business_id"]
+            isOneToOne: false
+            referencedRelation: "outreach_campaigns"
+            referencedColumns: ["id", "business_id"]
           },
           {
             foreignKeyName: "outbound_provider_campaign_mappings_provider_id_fkey"
@@ -43505,8 +44099,70 @@ export type Database = {
           },
         ]
       }
+      outbound_provider_connections: {
+        Row: {
+          business_id: string
+          connection_status: string
+          created_at: string
+          credential_secret_ref: string | null
+          display_name: string
+          external_account_id: string | null
+          id: string
+          inbound_receiver_enabled: boolean
+          is_enabled: boolean
+          mutations_enabled: boolean
+          provider_type: string
+          settings: Json
+          updated_at: string
+          webhook_secret_ref: string | null
+        }
+        Insert: {
+          business_id: string
+          connection_status?: string
+          created_at?: string
+          credential_secret_ref?: string | null
+          display_name: string
+          external_account_id?: string | null
+          id?: string
+          inbound_receiver_enabled?: boolean
+          is_enabled?: boolean
+          mutations_enabled?: boolean
+          provider_type: string
+          settings?: Json
+          updated_at?: string
+          webhook_secret_ref?: string | null
+        }
+        Update: {
+          business_id?: string
+          connection_status?: string
+          created_at?: string
+          credential_secret_ref?: string | null
+          display_name?: string
+          external_account_id?: string | null
+          id?: string
+          inbound_receiver_enabled?: boolean
+          is_enabled?: boolean
+          mutations_enabled?: boolean
+          provider_type?: string
+          settings?: Json
+          updated_at?: string
+          webhook_secret_ref?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outbound_provider_connections_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       outbound_provider_events: {
         Row: {
+          business_contact_relationship_id: string | null
+          business_id: string | null
+          campaign_mapping_id: string | null
           contact_id: string | null
           created_at: string
           error: string | null
@@ -43520,6 +44176,7 @@ export type Database = {
           processed_at: string | null
           processing_status: string
           provider_campaign_id: string | null
+          provider_connection_id: string | null
           provider_event_id: string | null
           provider_event_type: string
           provider_id: string | null
@@ -43531,6 +44188,9 @@ export type Database = {
           received_at: string
         }
         Insert: {
+          business_contact_relationship_id?: string | null
+          business_id?: string | null
+          campaign_mapping_id?: string | null
           contact_id?: string | null
           created_at?: string
           error?: string | null
@@ -43544,6 +44204,7 @@ export type Database = {
           processed_at?: string | null
           processing_status?: string
           provider_campaign_id?: string | null
+          provider_connection_id?: string | null
           provider_event_id?: string | null
           provider_event_type: string
           provider_id?: string | null
@@ -43555,6 +44216,9 @@ export type Database = {
           received_at?: string
         }
         Update: {
+          business_contact_relationship_id?: string | null
+          business_id?: string | null
+          campaign_mapping_id?: string | null
           contact_id?: string | null
           created_at?: string
           error?: string | null
@@ -43568,6 +44232,7 @@ export type Database = {
           processed_at?: string | null
           processing_status?: string
           provider_campaign_id?: string | null
+          provider_connection_id?: string | null
           provider_event_id?: string | null
           provider_event_type?: string
           provider_id?: string | null
@@ -43579,6 +44244,27 @@ export type Database = {
           received_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "outbound_provider_events_bcr_scope_fkey"
+            columns: ["business_contact_relationship_id", "business_id", "contact_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id", "business_id", "contact_id"]
+          },
+          {
+            foreignKeyName: "outbound_provider_events_campaign_scope_fkey"
+            columns: ["campaign_mapping_id", "business_id", "provider_connection_id", "provider_type"]
+            isOneToOne: false
+            referencedRelation: "outbound_provider_campaign_mappings"
+            referencedColumns: ["id", "business_id", "provider_connection_id", "provider_type"]
+          },
+          {
+            foreignKeyName: "outbound_provider_events_connection_fkey"
+            columns: ["provider_connection_id", "business_id", "provider_type"]
+            isOneToOne: false
+            referencedRelation: "outbound_provider_connections"
+            referencedColumns: ["id", "business_id", "provider_type"]
+          },
           {
             foreignKeyName: "outbound_provider_events_contact_id_fkey"
             columns: ["contact_id"]
@@ -43592,6 +44278,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "high_intent_review_queue"
             referencedColumns: ["contact_id"]
+          },
+          {
+            foreignKeyName: "outbound_provider_events_lead_scope_fkey"
+            columns: ["lead_mapping_id", "business_id", "provider_connection_id", "provider_type"]
+            isOneToOne: false
+            referencedRelation: "outbound_provider_lead_mappings"
+            referencedColumns: ["id", "business_id", "provider_connection_id", "provider_type"]
           },
           {
             foreignKeyName: "outbound_provider_events_provider_id_fkey"
@@ -43619,6 +44312,7 @@ export type Database = {
       outbound_provider_lead_mappings: {
         Row: {
           block_reason: string | null
+          business_contact_relationship_id: string | null
           business_id: string
           campaign_mapping_id: string | null
           contact_email: string
@@ -43631,6 +44325,7 @@ export type Database = {
           liftor_contact_id: string
           metadata: Json
           provider_campaign_id: string | null
+          provider_connection_id: string | null
           provider_lead_id: string | null
           provider_lead_identity: string | null
           provider_response: Json | null
@@ -43644,6 +44339,7 @@ export type Database = {
         }
         Insert: {
           block_reason?: string | null
+          business_contact_relationship_id?: string | null
           business_id: string
           campaign_mapping_id?: string | null
           contact_email: string
@@ -43656,6 +44352,7 @@ export type Database = {
           liftor_contact_id: string
           metadata?: Json
           provider_campaign_id?: string | null
+          provider_connection_id?: string | null
           provider_lead_id?: string | null
           provider_lead_identity?: string | null
           provider_response?: Json | null
@@ -43669,6 +44366,7 @@ export type Database = {
         }
         Update: {
           block_reason?: string | null
+          business_contact_relationship_id?: string | null
           business_id?: string
           campaign_mapping_id?: string | null
           contact_email?: string
@@ -43681,6 +44379,7 @@ export type Database = {
           liftor_contact_id?: string
           metadata?: Json
           provider_campaign_id?: string | null
+          provider_connection_id?: string | null
           provider_lead_id?: string | null
           provider_lead_identity?: string | null
           provider_response?: Json | null
@@ -43694,11 +44393,82 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "outbound_provider_lead_mappings_bcr_scope_fkey"
+            columns: ["business_contact_relationship_id", "business_id", "liftor_contact_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id", "business_id", "contact_id"]
+          },
+          {
+            foreignKeyName: "outbound_provider_lead_mappings_connection_fkey"
+            columns: ["provider_connection_id", "business_id", "provider_type"]
+            isOneToOne: false
+            referencedRelation: "outbound_provider_connections"
+            referencedColumns: ["id", "business_id", "provider_type"]
+          },
+          {
             foreignKeyName: "outbound_provider_lead_mappings_campaign_mapping_id_fkey"
             columns: ["campaign_mapping_id"]
             isOneToOne: false
             referencedRelation: "outbound_provider_campaign_mappings"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      outbound_provider_mailbox_mappings: {
+        Row: {
+          business_id: string
+          created_at: string
+          estate_key: string | null
+          id: string
+          inbox_id: string | null
+          is_active: boolean
+          metadata: Json
+          provider_connection_id: string
+          provider_mailbox_id: string
+          provider_type: string
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          estate_key?: string | null
+          id?: string
+          inbox_id?: string | null
+          is_active?: boolean
+          metadata?: Json
+          provider_connection_id: string
+          provider_mailbox_id: string
+          provider_type: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          estate_key?: string | null
+          id?: string
+          inbox_id?: string | null
+          is_active?: boolean
+          metadata?: Json
+          provider_connection_id?: string
+          provider_mailbox_id?: string
+          provider_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outbound_provider_mailbox_mappings_connection_fkey"
+            columns: ["provider_connection_id", "business_id", "provider_type"]
+            isOneToOne: false
+            referencedRelation: "outbound_provider_connections"
+            referencedColumns: ["id", "business_id", "provider_type"]
+          },
+          {
+            foreignKeyName: "outbound_provider_mailbox_mappings_inbox_fkey"
+            columns: ["inbox_id", "business_id"]
+            isOneToOne: false
+            referencedRelation: "inboxes"
+            referencedColumns: ["id", "business_id"]
           },
         ]
       }
@@ -43871,6 +44641,7 @@ export type Database = {
       }
       outreach_campaigns: {
         Row: {
+          business_id: string | null
           business_name: string
           campaign_name: string
           created_at: string
@@ -43879,6 +44650,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          business_id?: string | null
           business_name?: string
           campaign_name: string
           created_at?: string
@@ -43887,6 +44659,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          business_id?: string | null
           business_name?: string
           campaign_name?: string
           created_at?: string
@@ -43894,7 +44667,15 @@ export type Database = {
           status?: Database["public"]["Enums"]["outreach_campaign_status"]
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "outreach_campaigns_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       outreach_sequences: {
         Row: {
