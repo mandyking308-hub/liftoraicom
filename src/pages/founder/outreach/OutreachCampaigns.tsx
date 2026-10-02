@@ -31,7 +31,7 @@ const OutreachCampaigns = () => {
 
   async function load() {
     const { data: c } = await supabase.from("outreach_campaigns").select("*").order("created_at", { ascending: false });
-    const list = (c as Campaign[]) ?? [];
+    const list = (c as unknown as Campaign[]) ?? [];
     setCampaigns(list);
     if (list.length) {
       const { data: s } = await supabase.from("outreach_sequences").select("*").in("campaign_id", list.map((x) => x.id));
@@ -58,7 +58,7 @@ const OutreachCampaigns = () => {
       campaign_name: newName.trim(),
       business_name: newBiz.trim(),
       status: "paused",
-    });
+    } as never);
     if (error) { toast.error(error.message); return; }
     setNewName(""); setNewBiz("");
     toast.success("Campaign created (paused). Add sequences & inboxes, then activate.");
