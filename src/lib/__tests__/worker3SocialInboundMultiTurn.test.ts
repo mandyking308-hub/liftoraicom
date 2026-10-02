@@ -230,3 +230,52 @@ describe("Worker 3B inbound social multi-turn", () => {
     expect(migration).not.toMatch(/\b(DROP\s+TABLE|DROP\s+COLUMN|TRUNCATE|DELETE\s+FROM)\b/i);
   });
 });
+
+describe("Worker 3B inbound social acceptance closeout", () => {
+  const inventory = JSON.parse(readFileSync("docs/liftor-rebuild/jwt-off-perimeter-inventory.json", "utf8"));
+
+  it("is classified in the JWT-off perimeter inventory with its implemented HMAC perimeter", () => {
+    const entry = inventory.functions["social-engagement-provider-event-receiver"];
+    expect(entry.perimeter).toBe("provider_hmac_signature");
+    expect(entry.mechanism).toContain("SOCIAL_INBOUND_WEBHOOK_RECEIVER_ENABLED");
+    expect(entry.mechanism).toContain("x-social-signature");
+    expect(entry.write_capable).toBe(true);
+    expect(entry.writes).toContain("process_social_inbound_multiturn_event");
+  });
+
+  it("checks the feature gate and signature before any write RPC", () => {
+    const gate = receiver.indexOf("socialInboundReceiverEnabled(");
+    const sig = receiver.indexOf("verifySocialInboundSignature(");
+    const rpc = receiver.indexOf('rpc("process_social_inbound_multiturn_event"');
+    expect(gate).toBeGreaterThan(-1);
+    expect(sig).toBeGreaterThan(gate);
+    expect(rpc).toBeGreaterThan(sig);
+    expect(receiver).not.toMatch(/\.(insert|update|upsert|delete)\(/);
+  });
+
+  it("binds the webhook secret reference to one provider connection id", () => {
+    expect(expectedSocialInboundSecretRef("not-a-uuid")).toBeNull();
+    const ref = expectedSocialInboundSecretRef("12345678-1234-1234-1234-1234567890ab");
+    expect(ref).toBe("LIFTOR_SOCIAL_INBOUND_123456781234123412341234567890AB_WEBHOOK_SECRET");
+    expect(receiver).toContain("connection.webhook_secret_ref !== expectedSecretRef");
+  });
+
+  it("rejects missing secrets and malformed signature headers", async () => {
+    const body = new TextEncoder().encode('{"a":1}');
+    expect(await verifySocialInboundSignature(body, "sha256=" + "a".repeat(64), "")).toBe(false);
+    expect(await verifySocialInboundSignature(body, "a".repeat(64), "s")).toBe(false);
+    expect(await verifySocialInboundSignature(body, null, "s")).toBe(false);
+  });
+
+  it("is idempotent on duplicate provider event ids and returns the prior receipt", () => {
+    expect(buildSocialInboundIdempotencyKey("event-1", "r1")).toBe(buildSocialInboundIdempotencyKey("event-1", "r2"));
+    expect(receiver).toContain("duplicate: true");
+    expect(receiver).toContain('.eq("external_event_id", event.externalEventId)');
+  });
+
+  it("keeps the receiver literally opt-in", () => {
+    expect(socialInboundReceiverEnabled("TRUE")).toBe(false);
+    expect(socialInboundReceiverEnabled("1")).toBe(false);
+    expect(socialInboundReceiverEnabled(undefined)).toBe(false);
+  });
+});

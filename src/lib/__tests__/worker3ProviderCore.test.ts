@@ -88,3 +88,29 @@ describe("Worker 3 provider core", () => {
     expect(() => assertProviderOperationContext({ ...base, mode: "mutate" })).toThrow("provider_mutations_disabled");
   });
 });
+
+describe("Worker 3 provider core acceptance closeout", () => {
+  it("rejects a signature computed with a different business connection secret", async () => {
+    const body = '{"event_type":"email_reply_received","event_id":"evt-2"}';
+    const foreign = await sign(body, "other-business-secret");
+    expect(await verifySmartleadWebhookSignature(body, foreign, "business-connection-secret")).toBe(false);
+    expect(await verifySmartleadWebhookSignature(body, await sign(body, "business-connection-secret"), "")).toBe(false);
+  });
+
+  it("produces stable idempotency keys for identical deliveries", () => {
+    const a = extractEvent({ event_type: "reply", event_id: "event-9" });
+    const b = extractEvent({ event_type: "reply", event_id: "event-9" });
+    expect(buildIdempotencyKey(a)).toBe(buildIdempotencyKey(b));
+    expect(buildIdempotencyKey(a, "req-x")).toBe(buildIdempotencyKey(b, "req-x"));
+  });
+
+  it("blocks cross-business provider operations even in read mode", () => {
+    const ctx = { businessId: "b1", providerConnectionId: "pc1", idempotencyKey: "req:1", mode: "read" as const };
+    expect(() => assertProviderOperationContext({ ...ctx, businessId: "" })).toThrow();
+    expect(() => assertProviderOperationContext(ctx, "b9")).toThrow("provider_business_scope_mismatch");
+  });
+
+  it("never exposes encrypted credential columns to browser projections", () => {
+    expect(APOLLO_CONNECTION_UI_COLUMNS).not.toMatch(/cipher|secret|encrypted|token/i);
+  });
+});
