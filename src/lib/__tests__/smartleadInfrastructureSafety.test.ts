@@ -29,20 +29,25 @@ describe("smartlead webhook return loop", () => {
   it("escalates canonical CRM state and stops pending queue sends", () => {
     expect(webhook).toContain("deriveContactMutation");
     expect(webhook).toContain('from("contacts")');
-    expect(webhook).toContain('from("email_queue")');
-    expect(webhook).toContain('status: "cancelled"');
+    expect(webhook).toContain('from("business_contact_relationships")');
+    expect(webhook).toContain("relationshipPatch.do_not_contact = true");
+    expect(webhook).toContain("relationshipPatch.campaign_eligible = false");
   });
 
-  it("keeps the header-only shared secret and never calls Smartlead", () => {
-    expect(webhook).toContain("SMARTLEAD_WEBHOOK_SECRET");
-    expect(webhook).toContain("invalid_or_missing_secret");
+  it("verifies a per-connection raw-body HMAC and never calls Smartlead", () => {
+    expect(webhook).toContain("x-smartlead-signature");
+    expect(webhook).toContain("verifySmartleadWebhookSignature(rawBody, signature, secret)");
+    expect(webhook).toContain('resolveProviderConnectionSecret(connection, "WEBHOOK_SECRET"');
+    expect(webhook).toContain("ambiguous_provider_connection");
+    expect(webhook).not.toMatch(/fetch\s*\(/);
     expect(webhook).not.toContain("server.smartlead.ai");
     expect(webhook).not.toContain("api.smartlead.ai");
   });
 
   it("stores unknown events safely and pauses a failing mailbox", () => {
-    expect(webhook).toContain("stored_unknown_event");
+    expect(webhook).toContain('initialStatus = canProcess ? "received" : "ignored"');
     expect(webhook).toContain("deriveMailboxMutation");
+    expect(webhook).toContain('from("outbound_provider_mailbox_mappings")');
     expect(webhook).toContain('from("inboxes")');
   });
 
