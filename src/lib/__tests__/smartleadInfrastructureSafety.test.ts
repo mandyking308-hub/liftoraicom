@@ -100,3 +100,22 @@ describe("campaign mapping apply cannot create provider campaigns in this build"
     expect(mappingApply).toContain("provider_campaign_id");
   });
 });
+
+describe("smartlead webhook business/provider scoping (acceptance closeout)", () => {
+  it("scopes lead lookup to one business, one provider connection and one campaign mapping", () => {
+    expect(webhook).toContain('.eq("business_id", connection.business_id)');
+    expect(webhook).toContain('.eq("provider_connection_id", connection.id)');
+    expect(webhook).toContain('.eq("provider_type", "smartlead")');
+    expect(webhook).toContain('.eq("campaign_mapping_id", campaignMappings[0].id)');
+  });
+
+  it("never falls back to a global email lookup outside the scoped lead mapping", () => {
+    expect(webhook).not.toMatch(/from\("contacts"\)[\s\S]{0,120}\.eq\("email"/);
+    expect(webhook).toContain("canonical_contact_email_mismatch");
+    expect(webhook).toContain("event_email_invalid");
+  });
+
+  it("fails closed on attribution lookup errors", () => {
+    expect(webhook).toContain("attribution_lookup_failed");
+  });
+});
