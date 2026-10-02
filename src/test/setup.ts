@@ -18,17 +18,18 @@ const nodeSubtle = webcrypto.subtle;
 const testSubtle = new Proxy(nodeSubtle, {
   get(target, property) {
     if (property === "importKey") {
-      return (
-        format: "raw",
-        keyData: BufferSource,
-        algorithm: AlgorithmIdentifier | RsaHashedImportParams | EcKeyImportParams | HmacImportParams | AesKeyAlgorithm,
-        extractable: boolean,
-        keyUsages: readonly KeyUsage[],
-      ) => target.importKey(format, nodeBufferSource(keyData), algorithm, extractable, keyUsages);
+      return (format: unknown, keyData: unknown, algorithm: unknown, extractable: unknown, keyUsages: unknown) =>
+        (target.importKey as (...args: unknown[]) => unknown)(
+          format,
+          nodeBufferSource(keyData),
+          algorithm,
+          extractable,
+          keyUsages,
+        );
     }
     if (property === "sign") {
-      return (algorithm: AlgorithmIdentifier | RsaPssParams | EcdsaParams, key: CryptoKey, data: BufferSource) =>
-        target.sign(algorithm, key, nodeBufferSource(data));
+      return (algorithm: unknown, key: unknown, data: unknown) =>
+        (target.sign as (...args: unknown[]) => unknown)(algorithm, key, nodeBufferSource(data));
     }
     const member = Reflect.get(target, property, target);
     return typeof member === "function" ? member.bind(target) : member;
