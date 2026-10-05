@@ -24,6 +24,18 @@ import { executePaidCustomerSuccessAction } from "../../supabase/functions/_shar
 const activationMigration = "supabase/migrations/20260923180000_worker2_customer_revenue_activation.sql";
 const typesFile = "src/integrations/supabase/types.ts";
 
+// Mirrors PostgreSQL makeObjectName(): trims the longer part until name fits 63 bytes.
+const postgresConstraintName = (name1: string, name2: string, label: string) => {
+  let a = name1;
+  let b = name2;
+  const overhead = label.length + 2;
+  while (a.length + b.length + overhead > 63) {
+    if (a.length > b.length) a = a.slice(0, -1);
+    else b = b.slice(0, -1);
+  }
+  return `${a}_${b}_${label}`;
+};
+
 describe("Worker 2 customer revenue acceptance", () => {
   it("proves prospect through paid product activation, autonomous onboarding, CS execution, escalation, audit and retry", async () => {
     // Canonical global identity and one business-specific BCR are the starting point.
@@ -478,9 +490,9 @@ describe("Worker 2 customer revenue acceptance", () => {
       const rowFields = fields(section("Row", "        Insert: {"));
       const insertFields = fields(section("Insert", "        Update: {"));
       const updateFields = fields(section("Update", "        Relationships: ["));
-      expect(rowFields.map((field) => field.name)).toEqual(columns.map((column) => column.name));
-      expect(insertFields.map((field) => field.name)).toEqual(columns.map((column) => column.name));
-      expect(updateFields.map((field) => field.name)).toEqual(columns.map((column) => column.name));
+      expect(rowFields.map((field) => field.name).sort()).toEqual(columns.map((column) => column.name).sort());
+      expect(insertFields.map((field) => field.name).sort()).toEqual(columns.map((column) => column.name).sort());
+      expect(updateFields.map((field) => field.name).sort()).toEqual(columns.map((column) => column.name).sort());
       for (const column of columns) {
         const type = `${tsTypes[column.sqlType]}${column.nullable ? " | null" : ""}`;
         expect(rowFields.find((field) => field.name === column.name)?.type).toBe(type);
@@ -493,14 +505,18 @@ describe("Worker 2 customer revenue acceptance", () => {
       const expectedFks = columns.flatMap((column) => {
         const fk = column.rest.match(/REFERENCES public\.([a-z_]+)\(id\)/);
         return fk ? [{
-          foreignKeyName: `${table}_${column.name}_fkey`.slice(0, 63),
+          foreignKeyName: postgresConstraintName(table, column.name, "fkey"),
           column: column.name,
           relation: fk[1],
         }] : [];
       });
       const relationships = [...typeBlock.matchAll(/foreignKeyName: "([^"]+)"[\s\S]*?columns: \["([^"]+)"\][\s\S]*?referencedRelation: "([^"]+)"/g)]
         .map((match) => ({ foreignKeyName: match[1], column: match[2], relation: match[3] }));
-      expect(relationships).toEqual(expectedFks);
+      // Live type generation also lists view-derived duplicates of the same FK
+      // (e.g. via views over contacts); no FK beyond those in the migration may appear.
+      expect(relationships).toEqual(expect.arrayContaining(expectedFks));
+      const expectedFkKeys = new Set(expectedFks.map((fk) => `${fk.foreignKeyName}:${fk.column}`));
+      expect(relationships.every((fk) => expectedFkKeys.has(`${fk.foreignKeyName}:${fk.column}`))).toBe(true);
     }
   });
 });

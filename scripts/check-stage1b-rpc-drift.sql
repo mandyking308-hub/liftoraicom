@@ -77,6 +77,7 @@ BEGIN
     ('public.cosine_distance(vector, vector)', 'cosine_distance', 'DB_INTERNAL'),
     ('public.country_to_timezone(text)', 'country_to_timezone', 'DB_INTERNAL'),
     ('public.crm_match_interaction_preview(uuid, uuid, text, text, text, uuid)', 'crm_match_interaction_preview', 'SERVICE_ROLE_INTERNAL'),
+    ('public.initialize_customer_success_execution_policy()', 'initialize_customer_success_execution_policy', 'SERVICE_ROLE_INTERNAL'), -- accepted Stage-1 addition (20260923180000)
     ('public.current_worker_id()', 'current_worker_id', 'DB_INTERNAL'),
     ('public.customer_sales_link_contact_by_email(text)', 'customer_sales_link_contact_by_email', 'WEBHOOK_SYSTEM'),
     ('public.derive_billionaire_route_evidence_states()', 'derive_billionaire_route_evidence_states', 'DB_INTERNAL'),
@@ -297,6 +298,7 @@ BEGIN
     ('public.similarity_dist(text, text)', 'similarity_dist', 'DB_INTERNAL'),
     ('public.similarity_op(text, text)', 'similarity_op', 'DB_INTERNAL'),
     ('public.snapshot_deal_compliance_on_won()', 'snapshot_deal_compliance_on_won', 'DB_INTERNAL'),
+    ('public.process_social_inbound_multiturn_event(uuid, uuid, text, text, text, text, text, text, text, text, text, text, timestamp with time zone, integer, text, jsonb)', 'process_social_inbound_multiturn_event', 'SERVICE_ROLE_INTERNAL'), -- accepted Stage-1 addition (20260928150000)
     ('public.social_claim_distribution_job(uuid, uuid, text, uuid)', 'social_claim_distribution_job', 'SERVICE_ROLE_INTERNAL'),
     ('public.social_relationship_claim_action(uuid)', 'social_relationship_claim_action', 'SERVICE_ROLE_INTERNAL'),
     ('public.social_set_updated_at()', 'social_set_updated_at', 'DB_INTERNAL'),
@@ -519,6 +521,8 @@ BEGIN
       AND NOT (l.language='c' AND l.owner='supabase_admin' AND NOT l.prosecdef)
       AND NOT l.returns_trigger
       AND c.classification NOT IN ('PUBLIC_ANON','FOUNDER_ADMIN_ONLY')
+      -- Accepted 20260923152000 grant: body enforces founder/admin or service_role internally.
+      AND l.typed_signature <> 'public.customer_sales_link_contact_by_email(text)'
       AND NOT EXISTS (
         SELECT 1 FROM rls_helpers h WHERE h.typed_signature=l.typed_signature
       )
