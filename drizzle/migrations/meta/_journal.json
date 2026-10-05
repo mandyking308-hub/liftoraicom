@@ -8,6 +8,13 @@
       "when": 1791200049845,
       "tag": "0000_worker2_customer_revenue_activation",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791200199617,
+      "tag": "0001_stage1b_sor_touch_acl_hardening",
+      "breakpoints": true
     }
   ]
 }
