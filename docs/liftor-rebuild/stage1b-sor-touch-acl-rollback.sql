@@ -46,7 +46,8 @@ BEGIN
     SELECT DISTINCT a.grantee, CASE WHEN a.grantee = 0 THEN 'PUBLIC' ELSE pg_get_userbyid(a.grantee) END AS grantee_name
     FROM pg_proc p
     CROSS JOIN LATERAL aclexplode(COALESCE(p.proacl, acldefault('f', p.proowner))) a
-    WHERE p.oid = v_oid AND a.privilege_type = 'EXECUTE' AND a.grantee <> p.proowner
+    -- Owner entry is revoked too so the replay below rebuilds the exact captured order.
+    WHERE p.oid = v_oid AND a.privilege_type = 'EXECUTE'
   LOOP
     IF g.grantee = 0 THEN
       EXECUTE format('REVOKE EXECUTE ON FUNCTION %s FROM PUBLIC', v_oid::regprocedure);

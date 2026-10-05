@@ -88,14 +88,10 @@ BEGIN
     CROSS JOIN LATERAL aclexplode(ARRAY[acl_item.item]) a
     WHERE p.oid = v_oid
       AND (a.grantor <> p.proowner OR a.privilege_type <> 'EXECUTE' OR a.is_grantable)
-  ) OR EXISTS (
-    SELECT 1
-    FROM pg_proc p
-    CROSS JOIN LATERAL unnest(p.proacl) WITH ORDINALITY acl_item(item, ordinal)
-    CROSS JOIN LATERAL aclexplode(ARRAY[acl_item.item]) a
-    WHERE p.oid = v_oid AND acl_item.ordinal = 1
-      AND NOT (a.grantee = p.proowner AND a.privilege_type = 'EXECUTE')
   ) OR (
+    -- Live raw ACL order is {=X/postgres,postgres=X/postgres,service_role=X/postgres}
+    -- (PUBLIC first). Any order is accepted because acl_entries captures each
+    -- ordinal and the guarded rollback rebuilds the ACL in that exact order.
     SELECT count(*) FROM pg_proc p
     CROSS JOIN LATERAL unnest(p.proacl) acl_item(item)
     CROSS JOIN LATERAL aclexplode(ARRAY[acl_item.item]) a
