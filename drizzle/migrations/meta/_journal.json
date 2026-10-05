@@ -15,6 +15,13 @@
       "when": 1791200199617,
       "tag": "0001_stage1b_sor_touch_acl_hardening",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791200278534,
+      "tag": "0002_worker3_tenant_provider_connections",
+      "breakpoints": true
     }
   ]
 }
