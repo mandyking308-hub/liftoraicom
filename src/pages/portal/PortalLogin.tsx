@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { fadeUp } from "@/lib/animations";
 import { Loader2 } from "lucide-react";
+import { userHasFounderConsoleAccess } from "@/lib/founderAccess";
 
 const PortalLogin = () => {
   const [email, setEmail] = useState("");
@@ -17,13 +18,15 @@ const PortalLogin = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
-    if (error) {
-      toast.error(error.message);
-    } else {
-      navigate("/portal/dashboard");
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error || !data.user) {
+      setLoading(false);
+      toast.error(error?.message ?? "Sign in failed.");
+      return;
     }
+    const isFounderConsole = await userHasFounderConsoleAccess(data.user.id);
+    setLoading(false);
+    navigate(isFounderConsole ? "/founder" : "/portal/dashboard");
   };
 
   return (

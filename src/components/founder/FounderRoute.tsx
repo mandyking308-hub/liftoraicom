@@ -1,7 +1,7 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { userHasFounderConsoleAccess } from "@/lib/founderAccess";
 import { Loader2 } from "lucide-react";
 
 const FounderRoute = ({ children }: { children: React.ReactNode }) => {
@@ -10,14 +10,7 @@ const FounderRoute = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (!user) return;
-    supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .then(({ data }) => {
-        const hasFounderRole = data?.some((r) => r.role === "founder") ?? false;
-        setIsFounder(hasFounderRole);
-      });
+    userHasFounderConsoleAccess(user.id).then(setIsFounder);
   }, [user]);
 
   if (authLoading || (user && isFounder === null)) {
@@ -28,7 +21,7 @@ const FounderRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  if (!user) return <Navigate to="/portal/login" replace />;
+  if (!user) return <Navigate to="/founder/login" replace />;
   if (!isFounder) return <Navigate to="/portal/dashboard" replace />;
 
   return <>{children}</>;

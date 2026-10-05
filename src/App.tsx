@@ -74,6 +74,7 @@ import SecurityReporting from "./pages/legal/SecurityReporting";
 
 // Portal pages
 import PortalLogin from "./pages/portal/PortalLogin";
+import FounderLogin from "./pages/founder/FounderLogin";
 import PortalSignup from "./pages/portal/PortalSignup";
 import ForgotPassword from "./pages/portal/ForgotPassword";
 import ResetPassword from "./pages/portal/ResetPassword";
@@ -928,6 +929,7 @@ const App = () => (
 
             {/* Auth */}
             <Route path="/portal/login" element={<PortalLogin />} />
+            <Route path="/founder/login" element={<FounderLogin />} />
             <Route path="/portal/signup" element={<PortalSignup />} />
             <Route path="/portal/forgot-password" element={<ForgotPassword />} />
             <Route path="/portal/reset-password" element={<ResetPassword />} />
