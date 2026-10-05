@@ -29,6 +29,13 @@
       "when": 1791200354117,
       "tag": "0003_worker3_crm_bcr_campaign_scope",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791200521718,
+      "tag": "0004_worker3b_social_inbound_multiturn",
+      "breakpoints": true
     }
   ]
 }
