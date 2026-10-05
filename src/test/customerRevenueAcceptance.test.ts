@@ -500,7 +500,11 @@ describe("Worker 2 customer revenue acceptance", () => {
       });
       const relationships = [...typeBlock.matchAll(/foreignKeyName: "([^"]+)"[\s\S]*?columns: \["([^"]+)"\][\s\S]*?referencedRelation: "([^"]+)"/g)]
         .map((match) => ({ foreignKeyName: match[1], column: match[2], relation: match[3] }));
-      expect(relationships).toEqual(expectedFks);
+      // Live type generation also lists view-derived duplicates of the same FK
+      // (e.g. via views over contacts); no FK beyond those in the migration may appear.
+      expect(relationships).toEqual(expect.arrayContaining(expectedFks));
+      const expectedFkKeys = new Set(expectedFks.map((fk) => `${fk.foreignKeyName}:${fk.column}`));
+      expect(relationships.every((fk) => expectedFkKeys.has(`${fk.foreignKeyName}:${fk.column}`))).toBe(true);
     }
   });
 });
