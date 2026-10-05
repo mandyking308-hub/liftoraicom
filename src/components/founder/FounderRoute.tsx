@@ -6,7 +6,7 @@ import { Loader2 } from "lucide-react";
 
 const FounderRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading: authLoading } = useAuth();
-  const [isFounder, setIsFounder] = useState<boolean | null>(null);
+  const [hasExecutiveAccess, setHasExecutiveAccess] = useState<boolean | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -15,12 +15,12 @@ const FounderRoute = ({ children }: { children: React.ReactNode }) => {
       .select("role")
       .eq("user_id", user.id)
       .then(({ data }) => {
-        const hasFounderRole = data?.some((r) => r.role === "founder") ?? false;
-        setIsFounder(hasFounderRole);
+        const allowed = data?.some((r) => r.role === "founder" || r.role === "admin") ?? false;
+        setHasExecutiveAccess(allowed);
       });
   }, [user]);
 
-  if (authLoading || (user && isFounder === null)) {
+  if (authLoading || (user && hasExecutiveAccess === null)) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="animate-spin text-primary" size={32} />
@@ -28,8 +28,8 @@ const FounderRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  if (!user) return <Navigate to="/portal/login" replace />;
-  if (!isFounder) return <Navigate to="/portal/dashboard" replace />;
+  if (!user) return <Navigate to="/founder/login" replace />;
+  if (!hasExecutiveAccess) return <Navigate to="/portal/dashboard" replace />;
 
   return <>{children}</>;
 };
