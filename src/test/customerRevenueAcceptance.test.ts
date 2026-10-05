@@ -24,6 +24,18 @@ import { executePaidCustomerSuccessAction } from "../../supabase/functions/_shar
 const activationMigration = "supabase/migrations/20260923180000_worker2_customer_revenue_activation.sql";
 const typesFile = "src/integrations/supabase/types.ts";
 
+// Mirrors PostgreSQL makeObjectName(): trims the longer part until name fits 63 bytes.
+const postgresConstraintName = (name1: string, name2: string, label: string) => {
+  let a = name1;
+  let b = name2;
+  const overhead = label.length + 2;
+  while (a.length + b.length + overhead > 63) {
+    if (a.length > b.length) a = a.slice(0, -1);
+    else b = b.slice(0, -1);
+  }
+  return `${a}_${b}_${label}`;
+};
+
 describe("Worker 2 customer revenue acceptance", () => {
   it("proves prospect through paid product activation, autonomous onboarding, CS execution, escalation, audit and retry", async () => {
     // Canonical global identity and one business-specific BCR are the starting point.
@@ -493,7 +505,7 @@ describe("Worker 2 customer revenue acceptance", () => {
       const expectedFks = columns.flatMap((column) => {
         const fk = column.rest.match(/REFERENCES public\.([a-z_]+)\(id\)/);
         return fk ? [{
-          foreignKeyName: `${table}_${column.name}_fkey`.slice(0, 63),
+          foreignKeyName: postgresConstraintName(table, column.name, "fkey"),
           column: column.name,
           relation: fk[1],
         }] : [];
