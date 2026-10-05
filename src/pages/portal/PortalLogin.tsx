@@ -17,13 +17,33 @@ const PortalLogin = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
+      setLoading(false);
       toast.error(error.message);
-    } else {
-      navigate("/portal/dashboard");
+      return;
     }
+
+    const signedInUser = data.user;
+    if (!signedInUser) {
+      setLoading(false);
+      toast.error("Sign in succeeded but no user session was returned.");
+      return;
+    }
+
+    const { data: roles, error: roleError } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", signedInUser.id);
+
+    setLoading(false);
+
+    if (!roleError && roles?.some((row) => row.role === "founder" || row.role === "admin")) {
+      navigate("/founder", { replace: true });
+      return;
+    }
+
+    navigate("/portal/dashboard", { replace: true });
   };
 
   return (
