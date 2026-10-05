@@ -19517,6 +19517,7 @@ export type Database = {
       customer_account_reviews: {
         Row: {
           account_health: string | null
+          business_contact_relationship_id: string | null
           business_id: string | null
           completed_at: string | null
           contact_id: string | null
@@ -19540,6 +19541,7 @@ export type Database = {
         }
         Insert: {
           account_health?: string | null
+          business_contact_relationship_id?: string | null
           business_id?: string | null
           completed_at?: string | null
           contact_id?: string | null
@@ -19563,6 +19565,7 @@ export type Database = {
         }
         Update: {
           account_health?: string | null
+          business_contact_relationship_id?: string | null
           business_id?: string | null
           completed_at?: string | null
           contact_id?: string | null
@@ -19585,6 +19588,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "customer_account_reviews_business_contact_relationship_id_fkey"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "customer_account_reviews_business_id_fkey"
             columns: ["business_id"]
@@ -19704,6 +19714,98 @@ export type Database = {
             columns: ["success_profile_id"]
             isOneToOne: false
             referencedRelation: "customer_success_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_commercial_audit_events: {
+        Row: {
+          business_contact_relationship_id: string | null
+          business_id: string
+          checkout_id: string | null
+          contact_id: string | null
+          created_at: string
+          deal_id: string | null
+          event_payload: Json
+          event_type: string
+          id: string
+          idempotency_key: string
+          payment_id: string | null
+        }
+        Insert: {
+          business_contact_relationship_id?: string | null
+          business_id: string
+          checkout_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          deal_id?: string | null
+          event_payload?: Json
+          event_type: string
+          id?: string
+          idempotency_key: string
+          payment_id?: string | null
+        }
+        Update: {
+          business_contact_relationship_id?: string | null
+          business_id?: string
+          checkout_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          deal_id?: string | null
+          event_payload?: Json
+          event_type?: string
+          id?: string
+          idempotency_key?: string
+          payment_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_commercial_audit_eve_business_contact_relationshi_fkey"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_commercial_audit_events_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_commercial_audit_events_checkout_id_fkey"
+            columns: ["checkout_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_checkout_intents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_commercial_audit_events_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_commercial_audit_events_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+          {
+            foreignKeyName: "customer_commercial_audit_events_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_commercial_audit_events_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "qtc_payments"
             referencedColumns: ["id"]
           },
         ]
@@ -20048,6 +20150,7 @@ export type Database = {
       }
       customer_memory_profiles: {
         Row: {
+          business_contact_relationship_id: string | null
           business_id: string | null
           buying_signals: Json | null
           competitor_context: Json | null
@@ -20074,6 +20177,7 @@ export type Database = {
           upsell_interest_summary: string | null
         }
         Insert: {
+          business_contact_relationship_id?: string | null
           business_id?: string | null
           buying_signals?: Json | null
           competitor_context?: Json | null
@@ -20100,6 +20204,7 @@ export type Database = {
           upsell_interest_summary?: string | null
         }
         Update: {
+          business_contact_relationship_id?: string | null
           business_id?: string | null
           buying_signals?: Json | null
           competitor_context?: Json | null
@@ -20127,6 +20232,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "customer_memory_profiles_business_contact_relationship_id_fkey"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "customer_memory_profiles_business_id_fkey"
             columns: ["business_id"]
             isOneToOne: false
@@ -20153,6 +20265,7 @@ export type Database = {
         Row: {
           approval_status: string | null
           approved_at: string | null
+          business_contact_relationship_id: string | null
           business_id: string | null
           check_in_schedule: Json
           completion_date: string | null
@@ -20161,6 +20274,7 @@ export type Database = {
           crm_contact_id: string | null
           customer_facing_instructions: string | null
           customer_goal: string | null
+          customer_sales_checkout_id: string | null
           customer_share_allowed: boolean
           deal_id: string | null
           external_share_allowed: boolean | null
@@ -20201,6 +20315,7 @@ export type Database = {
         Insert: {
           approval_status?: string | null
           approved_at?: string | null
+          business_contact_relationship_id?: string | null
           business_id?: string | null
           check_in_schedule?: Json
           completion_date?: string | null
@@ -20209,6 +20324,7 @@ export type Database = {
           crm_contact_id?: string | null
           customer_facing_instructions?: string | null
           customer_goal?: string | null
+          customer_sales_checkout_id?: string | null
           customer_share_allowed?: boolean
           deal_id?: string | null
           external_share_allowed?: boolean | null
@@ -20249,6 +20365,7 @@ export type Database = {
         Update: {
           approval_status?: string | null
           approved_at?: string | null
+          business_contact_relationship_id?: string | null
           business_id?: string | null
           check_in_schedule?: Json
           completion_date?: string | null
@@ -20257,6 +20374,7 @@ export type Database = {
           crm_contact_id?: string | null
           customer_facing_instructions?: string | null
           customer_goal?: string | null
+          customer_sales_checkout_id?: string | null
           customer_share_allowed?: boolean
           deal_id?: string | null
           external_share_allowed?: boolean | null
@@ -20296,6 +20414,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "customer_onboarding_plans_business_contact_relationship_id_fkey"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "customer_onboarding_plans_business_id_fkey"
             columns: ["business_id"]
             isOneToOne: false
@@ -20328,14 +20453,17 @@ export type Database = {
       customer_onboarding_tasks: {
         Row: {
           blockers: Json
+          business_contact_relationship_id: string | null
           business_id: string | null
           completed_at: string | null
           contact_id: string | null
           created_at: string
+          customer_sales_checkout_id: string | null
           customer_visible: boolean
           due_at: string | null
           founder_review_required: boolean
           id: string
+          idempotency_key: string | null
           metadata: Json
           onboarding_plan_id: string | null
           owner_agent_key: string | null
@@ -20348,14 +20476,17 @@ export type Database = {
         }
         Insert: {
           blockers?: Json
+          business_contact_relationship_id?: string | null
           business_id?: string | null
           completed_at?: string | null
           contact_id?: string | null
           created_at?: string
+          customer_sales_checkout_id?: string | null
           customer_visible?: boolean
           due_at?: string | null
           founder_review_required?: boolean
           id?: string
+          idempotency_key?: string | null
           metadata?: Json
           onboarding_plan_id?: string | null
           owner_agent_key?: string | null
@@ -20368,14 +20499,17 @@ export type Database = {
         }
         Update: {
           blockers?: Json
+          business_contact_relationship_id?: string | null
           business_id?: string | null
           completed_at?: string | null
           contact_id?: string | null
           created_at?: string
+          customer_sales_checkout_id?: string | null
           customer_visible?: boolean
           due_at?: string | null
           founder_review_required?: boolean
           id?: string
+          idempotency_key?: string | null
           metadata?: Json
           onboarding_plan_id?: string | null
           owner_agent_key?: string | null
@@ -20387,6 +20521,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "customer_onboarding_tasks_business_contact_relationship_id_fkey"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "customer_onboarding_tasks_onboarding_plan_id_fkey"
             columns: ["onboarding_plan_id"]
@@ -20460,6 +20601,114 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_product_accounts: {
+        Row: {
+          access_status: string
+          account_role: string
+          account_scope: string
+          auth_user_id: string | null
+          business_contact_relationship_id: string
+          business_id: string
+          checkout_id: string
+          contact_id: string
+          id: string
+          metadata: Json
+          offer_id: string
+          payment_id: string
+          product_id: string
+          provisioned_at: string
+        }
+        Insert: {
+          access_status?: string
+          account_role?: string
+          account_scope?: string
+          auth_user_id?: string | null
+          business_contact_relationship_id: string
+          business_id: string
+          checkout_id: string
+          contact_id: string
+          id?: string
+          metadata?: Json
+          offer_id: string
+          payment_id: string
+          product_id: string
+          provisioned_at?: string
+        }
+        Update: {
+          access_status?: string
+          account_role?: string
+          account_scope?: string
+          auth_user_id?: string | null
+          business_contact_relationship_id?: string
+          business_id?: string
+          checkout_id?: string
+          contact_id?: string
+          id?: string
+          metadata?: Json
+          offer_id?: string
+          payment_id?: string
+          product_id?: string
+          provisioned_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_product_accounts_business_contact_relationship_id_fkey"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_product_accounts_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_product_accounts_checkout_id_fkey"
+            columns: ["checkout_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_checkout_intents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_product_accounts_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_product_accounts_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+          {
+            foreignKeyName: "customer_product_accounts_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_offers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_product_accounts_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "qtc_payments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_product_accounts_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_products"
             referencedColumns: ["id"]
           },
         ]
@@ -20545,6 +20794,7 @@ export type Database = {
         Row: {
           approval_status: string | null
           approved_at: string | null
+          business_contact_relationship_id: string | null
           business_id: string | null
           completed_actions: Json
           contact_id: string | null
@@ -20596,6 +20846,7 @@ export type Database = {
         Insert: {
           approval_status?: string | null
           approved_at?: string | null
+          business_contact_relationship_id?: string | null
           business_id?: string | null
           completed_actions?: Json
           contact_id?: string | null
@@ -20647,6 +20898,7 @@ export type Database = {
         Update: {
           approval_status?: string | null
           approved_at?: string | null
+          business_contact_relationship_id?: string | null
           business_id?: string | null
           completed_actions?: Json
           contact_id?: string | null
@@ -20697,6 +20949,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "customer_quarterly_reports_business_contact_relationship_i_fkey"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "customer_quarterly_reports_business_id_fkey"
             columns: ["business_id"]
             isOneToOne: false
@@ -20729,13 +20988,17 @@ export type Database = {
       customer_renewal_reviews: {
         Row: {
           approval_status: string | null
+          business_contact_relationship_id: string | null
           business_id: string
+          contact_id: string | null
           created_at: string | null
           currency: string | null
           current_value: number | null
+          customer_sales_checkout_id: string | null
           external_send_allowed: boolean | null
           founder_approval_review_id: string | null
           id: string
+          idempotency_key: string | null
           is_test_data: boolean | null
           metadata: Json | null
           missing_success_evidence: string[] | null
@@ -20753,13 +21016,17 @@ export type Database = {
         }
         Insert: {
           approval_status?: string | null
+          business_contact_relationship_id?: string | null
           business_id: string
+          contact_id?: string | null
           created_at?: string | null
           currency?: string | null
           current_value?: number | null
+          customer_sales_checkout_id?: string | null
           external_send_allowed?: boolean | null
           founder_approval_review_id?: string | null
           id?: string
+          idempotency_key?: string | null
           is_test_data?: boolean | null
           metadata?: Json | null
           missing_success_evidence?: string[] | null
@@ -20777,13 +21044,17 @@ export type Database = {
         }
         Update: {
           approval_status?: string | null
+          business_contact_relationship_id?: string | null
           business_id?: string
+          contact_id?: string | null
           created_at?: string | null
           currency?: string | null
           current_value?: number | null
+          customer_sales_checkout_id?: string | null
           external_send_allowed?: boolean | null
           founder_approval_review_id?: string | null
           id?: string
+          idempotency_key?: string | null
           is_test_data?: boolean | null
           metadata?: Json | null
           missing_success_evidence?: string[] | null
@@ -20801,6 +21072,27 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "customer_renewal_reviews_business_contact_relationship_id_fkey"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_renewal_reviews_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_renewal_reviews_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+          {
             foreignKeyName: "customer_renewal_reviews_success_profile_id_fkey"
             columns: ["success_profile_id"]
             isOneToOne: false
@@ -20812,14 +21104,18 @@ export type Database = {
       customer_retention_risk_reviews: {
         Row: {
           approval_status: string | null
+          business_contact_relationship_id: string | null
           business_id: string
           complaint_signals: string[] | null
+          contact_id: string | null
           created_at: string | null
+          customer_sales_checkout_id: string | null
           engagement_signals: string[] | null
           external_send_allowed: boolean | null
           finance_signals: string[] | null
           founder_attention_needed: boolean | null
           id: string
+          idempotency_key: string | null
           is_test_data: boolean | null
           metadata: Json | null
           recommended_recovery_actions: string[] | null
@@ -20834,14 +21130,18 @@ export type Database = {
         }
         Insert: {
           approval_status?: string | null
+          business_contact_relationship_id?: string | null
           business_id: string
           complaint_signals?: string[] | null
+          contact_id?: string | null
           created_at?: string | null
+          customer_sales_checkout_id?: string | null
           engagement_signals?: string[] | null
           external_send_allowed?: boolean | null
           finance_signals?: string[] | null
           founder_attention_needed?: boolean | null
           id?: string
+          idempotency_key?: string | null
           is_test_data?: boolean | null
           metadata?: Json | null
           recommended_recovery_actions?: string[] | null
@@ -20856,14 +21156,18 @@ export type Database = {
         }
         Update: {
           approval_status?: string | null
+          business_contact_relationship_id?: string | null
           business_id?: string
           complaint_signals?: string[] | null
+          contact_id?: string | null
           created_at?: string | null
+          customer_sales_checkout_id?: string | null
           engagement_signals?: string[] | null
           external_send_allowed?: boolean | null
           finance_signals?: string[] | null
           founder_attention_needed?: boolean | null
           id?: string
+          idempotency_key?: string | null
           is_test_data?: boolean | null
           metadata?: Json | null
           recommended_recovery_actions?: string[] | null
@@ -20878,6 +21182,27 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "customer_retention_risk_revie_business_contact_relationshi_fkey"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_retention_risk_reviews_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_retention_risk_reviews_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+          {
             foreignKeyName: "customer_retention_risk_reviews_success_profile_id_fkey"
             columns: ["success_profile_id"]
             isOneToOne: false
@@ -20888,6 +21213,7 @@ export type Database = {
       }
       customer_retention_scores: {
         Row: {
+          business_contact_relationship_id: string | null
           business_id: string | null
           complaint_risk_score: number | null
           contact_id: string | null
@@ -20913,6 +21239,7 @@ export type Database = {
           upsell_fit_score: number | null
         }
         Insert: {
+          business_contact_relationship_id?: string | null
           business_id?: string | null
           complaint_risk_score?: number | null
           contact_id?: string | null
@@ -20938,6 +21265,7 @@ export type Database = {
           upsell_fit_score?: number | null
         }
         Update: {
+          business_contact_relationship_id?: string | null
           business_id?: string | null
           complaint_risk_score?: number | null
           contact_id?: string | null
@@ -20964,6 +21292,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "customer_retention_scores_business_contact_relationship_id_fkey"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "customer_retention_scores_business_id_fkey"
             columns: ["business_id"]
             isOneToOne: false
@@ -20979,6 +21314,52 @@ export type Database = {
           },
           {
             foreignKeyName: "customer_retention_scores_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+        ]
+      }
+      customer_sales_billing_customers: {
+        Row: {
+          business_id: string
+          contact_id: string
+          created_at: string
+          id: string
+          stripe_customer_id: string
+        }
+        Insert: {
+          business_id: string
+          contact_id: string
+          created_at?: string
+          id?: string
+          stripe_customer_id: string
+        }
+        Update: {
+          business_id?: string
+          contact_id?: string
+          created_at?: string
+          id?: string
+          stripe_customer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_sales_billing_customers_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_sales_billing_customers_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_sales_billing_customers_contact_id_fkey"
             columns: ["contact_id"]
             isOneToOne: false
             referencedRelation: "high_intent_review_queue"
@@ -21166,6 +21547,140 @@ export type Database = {
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "customer_sales_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_sales_checkout_intents: {
+        Row: {
+          approved_price_amount: number
+          business_contact_relationship_id: string
+          business_id: string
+          checkout_amount: number
+          checkout_amount_minor_units: number
+          contact_id: string
+          created_at: string
+          currency: string
+          customer_email: string
+          customer_name: string | null
+          discount_percent: number
+          failure_reason: string | null
+          id: string
+          idempotency_key: string
+          offer_id: string
+          paid_at: string | null
+          product_id: string
+          qtc_payment_id: string | null
+          request_fingerprint: Json
+          status: string
+          stripe_checkout_session_id: string | null
+          stripe_customer_id: string | null
+          stripe_price_id: string
+          test_mode: boolean
+          updated_at: string
+        }
+        Insert: {
+          approved_price_amount: number
+          business_contact_relationship_id: string
+          business_id: string
+          checkout_amount: number
+          checkout_amount_minor_units: number
+          contact_id: string
+          created_at?: string
+          currency: string
+          customer_email: string
+          customer_name?: string | null
+          discount_percent?: number
+          failure_reason?: string | null
+          id?: string
+          idempotency_key: string
+          offer_id: string
+          paid_at?: string | null
+          product_id: string
+          qtc_payment_id?: string | null
+          request_fingerprint?: Json
+          status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_customer_id?: string | null
+          stripe_price_id: string
+          test_mode?: boolean
+          updated_at?: string
+        }
+        Update: {
+          approved_price_amount?: number
+          business_contact_relationship_id?: string
+          business_id?: string
+          checkout_amount?: number
+          checkout_amount_minor_units?: number
+          contact_id?: string
+          created_at?: string
+          currency?: string
+          customer_email?: string
+          customer_name?: string | null
+          discount_percent?: number
+          failure_reason?: string | null
+          id?: string
+          idempotency_key?: string
+          offer_id?: string
+          paid_at?: string | null
+          product_id?: string
+          qtc_payment_id?: string | null
+          request_fingerprint?: Json
+          status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_customer_id?: string | null
+          stripe_price_id?: string
+          test_mode?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_sales_checkout_inten_business_contact_relationshi_fkey"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_sales_checkout_intents_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_sales_checkout_intents_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_sales_checkout_intents_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+          {
+            foreignKeyName: "customer_sales_checkout_intents_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_offers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_sales_checkout_intents_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_sales_checkout_intents_qtc_payment_id_fkey"
+            columns: ["qtc_payment_id"]
+            isOneToOne: false
+            referencedRelation: "qtc_payments"
             referencedColumns: ["id"]
           },
         ]
@@ -21987,13 +22502,20 @@ export type Database = {
       customer_sales_offers: {
         Row: {
           active: boolean
+          approval_status: string
+          approved_at: string | null
+          approved_by: string | null
           approved_claims: string[] | null
+          approved_currency: string | null
+          approved_price_amount: number | null
           business_id: string | null
           close_type: string | null
           created_at: string
+          customer_segment_rules: Json
           discount_allowed: boolean | null
           discount_rules: string | null
           id: string
+          max_discount_percent: number
           offer_name: string
           offer_stage: string
           offer_summary: string | null
@@ -22002,6 +22524,7 @@ export type Database = {
           product_id: string | null
           prohibited_claims: string[] | null
           requires_founder_approval: boolean
+          standard_checkout_enabled: boolean
           stripe_price_id: string | null
           stripe_price_recurrence: string | null
           stripe_product_id: string | null
@@ -22010,13 +22533,20 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
           approved_claims?: string[] | null
+          approved_currency?: string | null
+          approved_price_amount?: number | null
           business_id?: string | null
           close_type?: string | null
           created_at?: string
+          customer_segment_rules?: Json
           discount_allowed?: boolean | null
           discount_rules?: string | null
           id?: string
+          max_discount_percent?: number
           offer_name: string
           offer_stage?: string
           offer_summary?: string | null
@@ -22025,6 +22555,7 @@ export type Database = {
           product_id?: string | null
           prohibited_claims?: string[] | null
           requires_founder_approval?: boolean
+          standard_checkout_enabled?: boolean
           stripe_price_id?: string | null
           stripe_price_recurrence?: string | null
           stripe_product_id?: string | null
@@ -22033,13 +22564,20 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
           approved_claims?: string[] | null
+          approved_currency?: string | null
+          approved_price_amount?: number | null
           business_id?: string | null
           close_type?: string | null
           created_at?: string
+          customer_segment_rules?: Json
           discount_allowed?: boolean | null
           discount_rules?: string | null
           id?: string
+          max_discount_percent?: number
           offer_name?: string
           offer_stage?: string
           offer_summary?: string | null
@@ -22048,6 +22586,7 @@ export type Database = {
           product_id?: string | null
           prohibited_claims?: string[] | null
           requires_founder_approval?: boolean
+          standard_checkout_enabled?: boolean
           stripe_price_id?: string | null
           stripe_price_recurrence?: string | null
           stripe_product_id?: string | null
@@ -22193,6 +22732,7 @@ export type Database = {
           product_type: string
           proof_points: string[] | null
           refund_policy: string | null
+          requires_customer_account: boolean
           stripe_price_id: string | null
           stripe_price_recurrence: string | null
           stripe_product_id: string | null
@@ -22225,6 +22765,7 @@ export type Database = {
           product_type?: string
           proof_points?: string[] | null
           refund_policy?: string | null
+          requires_customer_account?: boolean
           stripe_price_id?: string | null
           stripe_price_recurrence?: string | null
           stripe_product_id?: string | null
@@ -22257,6 +22798,7 @@ export type Database = {
           product_type?: string
           proof_points?: string[] | null
           refund_policy?: string | null
+          requires_customer_account?: boolean
           stripe_price_id?: string | null
           stripe_price_recurrence?: string | null
           stripe_product_id?: string | null
@@ -22547,13 +23089,17 @@ export type Database = {
       customer_satisfaction_surveys: {
         Row: {
           approval_status: string | null
+          business_contact_relationship_id: string | null
           business_id: string
           complaint_signals: string[] | null
+          contact_id: string | null
           created_at: string | null
           csat_score: number | null
+          customer_sales_checkout_id: string | null
           external_send_allowed: boolean | null
           follow_up_actions: string[] | null
           id: string
+          idempotency_key: string | null
           improvement_requests: string[] | null
           is_test_data: boolean | null
           message_draft: string | null
@@ -22575,13 +23121,17 @@ export type Database = {
         }
         Insert: {
           approval_status?: string | null
+          business_contact_relationship_id?: string | null
           business_id: string
           complaint_signals?: string[] | null
+          contact_id?: string | null
           created_at?: string | null
           csat_score?: number | null
+          customer_sales_checkout_id?: string | null
           external_send_allowed?: boolean | null
           follow_up_actions?: string[] | null
           id?: string
+          idempotency_key?: string | null
           improvement_requests?: string[] | null
           is_test_data?: boolean | null
           message_draft?: string | null
@@ -22603,13 +23153,17 @@ export type Database = {
         }
         Update: {
           approval_status?: string | null
+          business_contact_relationship_id?: string | null
           business_id?: string
           complaint_signals?: string[] | null
+          contact_id?: string | null
           created_at?: string | null
           csat_score?: number | null
+          customer_sales_checkout_id?: string | null
           external_send_allowed?: boolean | null
           follow_up_actions?: string[] | null
           id?: string
+          idempotency_key?: string | null
           improvement_requests?: string[] | null
           is_test_data?: boolean | null
           message_draft?: string | null
@@ -22631,6 +23185,27 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "customer_satisfaction_surveys_business_contact_relationshi_fkey"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_satisfaction_surveys_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_satisfaction_surveys_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+          {
             foreignKeyName: "customer_satisfaction_surveys_success_profile_id_fkey"
             columns: ["success_profile_id"]
             isOneToOne: false
@@ -22641,6 +23216,7 @@ export type Database = {
       }
       customer_stewardship_assignments: {
         Row: {
+          business_contact_relationship_id: string | null
           business_id: string | null
           contact_id: string | null
           conversation_id: string | null
@@ -22652,6 +23228,7 @@ export type Database = {
           founder_review_required: boolean
           handover_summary: string | null
           id: string
+          idempotency_key: string | null
           last_agent_handover_id: string | null
           last_interaction_at: string | null
           metadata: Json
@@ -22663,6 +23240,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          business_contact_relationship_id?: string | null
           business_id?: string | null
           contact_id?: string | null
           conversation_id?: string | null
@@ -22674,6 +23252,7 @@ export type Database = {
           founder_review_required?: boolean
           handover_summary?: string | null
           id?: string
+          idempotency_key?: string | null
           last_agent_handover_id?: string | null
           last_interaction_at?: string | null
           metadata?: Json
@@ -22685,6 +23264,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          business_contact_relationship_id?: string | null
           business_id?: string | null
           contact_id?: string | null
           conversation_id?: string | null
@@ -22696,6 +23276,7 @@ export type Database = {
           founder_review_required?: boolean
           handover_summary?: string | null
           id?: string
+          idempotency_key?: string | null
           last_agent_handover_id?: string | null
           last_interaction_at?: string | null
           metadata?: Json
@@ -22706,7 +23287,15 @@ export type Database = {
           stewardship_status?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "customer_stewardship_assignme_business_contact_relationshi_fkey"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       customer_subscriptions: {
         Row: {
@@ -23012,20 +23601,149 @@ export type Database = {
           },
         ]
       }
+      customer_success_automation_queue: {
+        Row: {
+          action_payload: Json
+          action_type: string
+          approval_required: boolean
+          business_contact_relationship_id: string
+          business_id: string
+          checkout_id: string | null
+          confidence_score: number | null
+          contact_id: string
+          created_at: string
+          escalation_reason: string | null
+          execution_attempts: number
+          execution_mode: string
+          execution_result: Json
+          execution_status: string
+          id: string
+          idempotency_key: string
+          last_error: string | null
+          onboarding_plan_id: string | null
+          risk_flags: string[]
+          scheduled_at: string | null
+          success_profile_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          action_payload?: Json
+          action_type: string
+          approval_required?: boolean
+          business_contact_relationship_id: string
+          business_id: string
+          checkout_id?: string | null
+          confidence_score?: number | null
+          contact_id: string
+          created_at?: string
+          escalation_reason?: string | null
+          execution_attempts?: number
+          execution_mode?: string
+          execution_result?: Json
+          execution_status?: string
+          id?: string
+          idempotency_key: string
+          last_error?: string | null
+          onboarding_plan_id?: string | null
+          risk_flags?: string[]
+          scheduled_at?: string | null
+          success_profile_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          action_payload?: Json
+          action_type?: string
+          approval_required?: boolean
+          business_contact_relationship_id?: string
+          business_id?: string
+          checkout_id?: string | null
+          confidence_score?: number | null
+          contact_id?: string
+          created_at?: string
+          escalation_reason?: string | null
+          execution_attempts?: number
+          execution_mode?: string
+          execution_result?: Json
+          execution_status?: string
+          id?: string
+          idempotency_key?: string
+          last_error?: string | null
+          onboarding_plan_id?: string | null
+          risk_flags?: string[]
+          scheduled_at?: string | null
+          success_profile_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_success_automation_q_business_contact_relationshi_fkey"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_automation_queue_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_automation_queue_checkout_id_fkey"
+            columns: ["checkout_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_checkout_intents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_automation_queue_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_automation_queue_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+          {
+            foreignKeyName: "customer_success_automation_queue_onboarding_plan_id_fkey"
+            columns: ["onboarding_plan_id"]
+            isOneToOne: false
+            referencedRelation: "customer_onboarding_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_automation_queue_success_profile_id_fkey"
+            columns: ["success_profile_id"]
+            isOneToOne: false
+            referencedRelation: "customer_success_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_success_checkins: {
         Row: {
           approval_status: string | null
+          business_contact_relationship_id: string | null
           business_id: string
           checkin_goal: string | null
           checkin_name: string
           checkin_status: string | null
           checkin_type: string
           completed_at: string | null
+          contact_id: string | null
           created_at: string | null
           customer_message_draft: string | null
+          customer_sales_checkout_id: string | null
           external_send_allowed: boolean | null
           founder_attention_needed: boolean | null
           id: string
+          idempotency_key: string | null
           internal_notes: string | null
           is_test_data: boolean | null
           metadata: Json | null
@@ -23039,17 +23757,21 @@ export type Database = {
         }
         Insert: {
           approval_status?: string | null
+          business_contact_relationship_id?: string | null
           business_id: string
           checkin_goal?: string | null
           checkin_name: string
           checkin_status?: string | null
           checkin_type: string
           completed_at?: string | null
+          contact_id?: string | null
           created_at?: string | null
           customer_message_draft?: string | null
+          customer_sales_checkout_id?: string | null
           external_send_allowed?: boolean | null
           founder_attention_needed?: boolean | null
           id?: string
+          idempotency_key?: string | null
           internal_notes?: string | null
           is_test_data?: boolean | null
           metadata?: Json | null
@@ -23063,17 +23785,21 @@ export type Database = {
         }
         Update: {
           approval_status?: string | null
+          business_contact_relationship_id?: string | null
           business_id?: string
           checkin_goal?: string | null
           checkin_name?: string
           checkin_status?: string | null
           checkin_type?: string
           completed_at?: string | null
+          contact_id?: string | null
           created_at?: string | null
           customer_message_draft?: string | null
+          customer_sales_checkout_id?: string | null
           external_send_allowed?: boolean | null
           founder_attention_needed?: boolean | null
           id?: string
+          idempotency_key?: string | null
           internal_notes?: string | null
           is_test_data?: boolean | null
           metadata?: Json | null
@@ -23087,10 +23813,105 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "customer_success_checkins_business_contact_relationship_id_fkey"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_checkins_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_checkins_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+          {
             foreignKeyName: "customer_success_checkins_success_profile_id_fkey"
             columns: ["success_profile_id"]
             isOneToOne: false
             referencedRelation: "customer_success_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_success_execution_policies: {
+        Row: {
+          allow_approved_support_responses: boolean
+          allow_approved_surveys: boolean
+          allow_approved_upsell_cross_sell: boolean
+          allow_customer_product_activation: boolean
+          allow_standard_checkins: boolean
+          allow_standard_refunds: boolean
+          allow_standard_renewals: boolean
+          allow_standard_retention: boolean
+          allow_standard_winback: boolean
+          business_id: string
+          enabled: boolean
+          maximum_standard_refund_amount: number
+          maximum_standard_upsell_amount: number
+          minimum_ai_confidence: number
+          policy_currency: string
+          policy_version: number
+          strategic_value_threshold: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          allow_approved_support_responses?: boolean
+          allow_approved_surveys?: boolean
+          allow_approved_upsell_cross_sell?: boolean
+          allow_customer_product_activation?: boolean
+          allow_standard_checkins?: boolean
+          allow_standard_refunds?: boolean
+          allow_standard_renewals?: boolean
+          allow_standard_retention?: boolean
+          allow_standard_winback?: boolean
+          business_id: string
+          enabled?: boolean
+          maximum_standard_refund_amount?: number
+          maximum_standard_upsell_amount?: number
+          minimum_ai_confidence?: number
+          policy_currency?: string
+          policy_version?: number
+          strategic_value_threshold?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          allow_approved_support_responses?: boolean
+          allow_approved_surveys?: boolean
+          allow_approved_upsell_cross_sell?: boolean
+          allow_customer_product_activation?: boolean
+          allow_standard_checkins?: boolean
+          allow_standard_refunds?: boolean
+          allow_standard_renewals?: boolean
+          allow_standard_retention?: boolean
+          allow_standard_winback?: boolean
+          business_id?: string
+          enabled?: boolean
+          maximum_standard_refund_amount?: number
+          maximum_standard_upsell_amount?: number
+          minimum_ai_confidence?: number
+          policy_currency?: string
+          policy_version?: number
+          strategic_value_threshold?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_success_execution_policies_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: true
+            referencedRelation: "businesses"
             referencedColumns: ["id"]
           },
         ]
@@ -23225,6 +24046,7 @@ export type Database = {
       }
       customer_success_plans: {
         Row: {
+          business_contact_relationship_id: string | null
           business_id: string | null
           contact_id: string | null
           created_at: string | null
@@ -23243,6 +24065,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          business_contact_relationship_id?: string | null
           business_id?: string | null
           contact_id?: string | null
           created_at?: string | null
@@ -23261,6 +24084,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          business_contact_relationship_id?: string | null
           business_id?: string | null
           contact_id?: string | null
           created_at?: string | null
@@ -23279,6 +24103,13 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "customer_success_plans_business_contact_relationship_id_fkey"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "customer_success_plans_business_id_fkey"
             columns: ["business_id"]
@@ -23306,6 +24137,7 @@ export type Database = {
         Row: {
           account_name: string | null
           assigned_account_manager: string | null
+          business_contact_relationship_id: string | null
           business_id: string
           conversation_id: string | null
           created_at: string | null
@@ -23313,6 +24145,7 @@ export type Database = {
           customer_email: string | null
           customer_goal: string | null
           customer_name: string | null
+          customer_sales_checkout_id: string | null
           customer_type: string | null
           founder_notes: string | null
           health_score: number | null
@@ -23338,6 +24171,7 @@ export type Database = {
         Insert: {
           account_name?: string | null
           assigned_account_manager?: string | null
+          business_contact_relationship_id?: string | null
           business_id: string
           conversation_id?: string | null
           created_at?: string | null
@@ -23345,6 +24179,7 @@ export type Database = {
           customer_email?: string | null
           customer_goal?: string | null
           customer_name?: string | null
+          customer_sales_checkout_id?: string | null
           customer_type?: string | null
           founder_notes?: string | null
           health_score?: number | null
@@ -23370,6 +24205,7 @@ export type Database = {
         Update: {
           account_name?: string | null
           assigned_account_manager?: string | null
+          business_contact_relationship_id?: string | null
           business_id?: string
           conversation_id?: string | null
           created_at?: string | null
@@ -23377,6 +24213,7 @@ export type Database = {
           customer_email?: string | null
           customer_goal?: string | null
           customer_name?: string | null
+          customer_sales_checkout_id?: string | null
           customer_type?: string | null
           founder_notes?: string | null
           health_score?: number | null
@@ -23399,7 +24236,106 @@ export type Database = {
           updated_at?: string | null
           upsell_potential?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "customer_success_profiles_business_contact_relationship_id_fkey"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_success_refund_requests: {
+        Row: {
+          business_contact_relationship_id: string
+          business_id: string
+          checkout_id: string
+          contact_id: string
+          created_at: string
+          currency: string
+          id: string
+          idempotency_key: string
+          payment_id: string
+          requested_amount: number
+          status: string
+          stripe_refund_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_contact_relationship_id: string
+          business_id: string
+          checkout_id: string
+          contact_id: string
+          created_at?: string
+          currency: string
+          id?: string
+          idempotency_key: string
+          payment_id: string
+          requested_amount: number
+          status?: string
+          stripe_refund_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_contact_relationship_id?: string
+          business_id?: string
+          checkout_id?: string
+          contact_id?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          idempotency_key?: string
+          payment_id?: string
+          requested_amount?: number
+          status?: string
+          stripe_refund_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_success_refund_reque_business_contact_relationshi_fkey"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_refund_requests_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_refund_requests_checkout_id_fkey"
+            columns: ["checkout_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_checkout_intents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_refund_requests_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_success_refund_requests_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+          {
+            foreignKeyName: "customer_success_refund_requests_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "qtc_payments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       customer_survey_requests: {
         Row: {
@@ -23774,17 +24710,21 @@ export type Database = {
       customer_upsell_opportunities: {
         Row: {
           approval_status: string | null
+          business_contact_relationship_id: string | null
           business_id: string
           confidence_score: number | null
+          contact_id: string | null
           created_at: string | null
           currency: string | null
           current_offer: string | null
           customer_message_draft: string | null
+          customer_sales_checkout_id: string | null
           estimated_value: number | null
           evidence_summary: string | null
           external_send_allowed: boolean | null
           founder_approval_review_id: string | null
           id: string
+          idempotency_key: string | null
           is_test_data: boolean | null
           metadata: Json | null
           opportunity_name: string
@@ -23799,17 +24739,21 @@ export type Database = {
         }
         Insert: {
           approval_status?: string | null
+          business_contact_relationship_id?: string | null
           business_id: string
           confidence_score?: number | null
+          contact_id?: string | null
           created_at?: string | null
           currency?: string | null
           current_offer?: string | null
           customer_message_draft?: string | null
+          customer_sales_checkout_id?: string | null
           estimated_value?: number | null
           evidence_summary?: string | null
           external_send_allowed?: boolean | null
           founder_approval_review_id?: string | null
           id?: string
+          idempotency_key?: string | null
           is_test_data?: boolean | null
           metadata?: Json | null
           opportunity_name: string
@@ -23824,17 +24768,21 @@ export type Database = {
         }
         Update: {
           approval_status?: string | null
+          business_contact_relationship_id?: string | null
           business_id?: string
           confidence_score?: number | null
+          contact_id?: string | null
           created_at?: string | null
           currency?: string | null
           current_offer?: string | null
           customer_message_draft?: string | null
+          customer_sales_checkout_id?: string | null
           estimated_value?: number | null
           evidence_summary?: string | null
           external_send_allowed?: boolean | null
           founder_approval_review_id?: string | null
           id?: string
+          idempotency_key?: string | null
           is_test_data?: boolean | null
           metadata?: Json | null
           opportunity_name?: string
@@ -23848,6 +24796,27 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "customer_upsell_opportunities_business_contact_relationshi_fkey"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_upsell_opportunities_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_upsell_opportunities_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
           {
             foreignKeyName: "customer_upsell_opportunities_success_profile_id_fkey"
             columns: ["success_profile_id"]
@@ -23952,6 +24921,7 @@ export type Database = {
       customer_usage_snapshots: {
         Row: {
           assignments_count: number
+          business_contact_relationship_id: string | null
           business_id: string | null
           contact_id: string | null
           content_engagement_count: number
@@ -23977,6 +24947,7 @@ export type Database = {
         }
         Insert: {
           assignments_count?: number
+          business_contact_relationship_id?: string | null
           business_id?: string | null
           contact_id?: string | null
           content_engagement_count?: number
@@ -24002,6 +24973,7 @@ export type Database = {
         }
         Update: {
           assignments_count?: number
+          business_contact_relationship_id?: string | null
           business_id?: string | null
           contact_id?: string | null
           content_engagement_count?: number
@@ -24026,6 +24998,13 @@ export type Database = {
           usage_source?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "customer_usage_snapshots_business_contact_relationship_id_fkey"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "customer_usage_snapshots_business_id_fkey"
             columns: ["business_id"]
@@ -24052,9 +25031,12 @@ export type Database = {
       customer_welcome_packs: {
         Row: {
           approval_status: string | null
+          business_contact_relationship_id: string | null
           business_id: string
+          contact_id: string | null
           created_at: string | null
           customer_actions_required: string[] | null
+          customer_sales_checkout_id: string | null
           expectations: string[] | null
           external_share_allowed: boolean | null
           founder_approval_review_id: string | null
@@ -24077,9 +25059,12 @@ export type Database = {
         }
         Insert: {
           approval_status?: string | null
+          business_contact_relationship_id?: string | null
           business_id: string
+          contact_id?: string | null
           created_at?: string | null
           customer_actions_required?: string[] | null
+          customer_sales_checkout_id?: string | null
           expectations?: string[] | null
           external_share_allowed?: boolean | null
           founder_approval_review_id?: string | null
@@ -24102,9 +25087,12 @@ export type Database = {
         }
         Update: {
           approval_status?: string | null
+          business_contact_relationship_id?: string | null
           business_id?: string
+          contact_id?: string | null
           created_at?: string | null
           customer_actions_required?: string[] | null
+          customer_sales_checkout_id?: string | null
           expectations?: string[] | null
           external_share_allowed?: boolean | null
           founder_approval_review_id?: string | null
@@ -24127,6 +25115,27 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "customer_welcome_packs_business_contact_relationship_id_fkey"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_welcome_packs_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_welcome_packs_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+          {
             foreignKeyName: "customer_welcome_packs_onboarding_plan_id_fkey"
             columns: ["onboarding_plan_id"]
             isOneToOne: false
@@ -24146,17 +25155,20 @@ export type Database = {
         Row: {
           approval_status: string | null
           approved_at: string | null
+          business_contact_relationship_id: string | null
           business_id: string | null
           churn_reason: string | null
           churn_risk_level: string | null
           contact_id: string | null
           created_at: string | null
           customer_history_summary: string | null
+          customer_sales_checkout_id: string | null
           external_send_allowed: boolean | null
           founder_attention_needed: boolean | null
           founder_review_required: boolean | null
           goodwill_options: Json | null
           id: string
+          idempotency_key: string | null
           inactivity_days: number | null
           is_test_data: boolean | null
           last_negative_interaction_at: string | null
@@ -24184,17 +25196,20 @@ export type Database = {
         Insert: {
           approval_status?: string | null
           approved_at?: string | null
+          business_contact_relationship_id?: string | null
           business_id?: string | null
           churn_reason?: string | null
           churn_risk_level?: string | null
           contact_id?: string | null
           created_at?: string | null
           customer_history_summary?: string | null
+          customer_sales_checkout_id?: string | null
           external_send_allowed?: boolean | null
           founder_attention_needed?: boolean | null
           founder_review_required?: boolean | null
           goodwill_options?: Json | null
           id?: string
+          idempotency_key?: string | null
           inactivity_days?: number | null
           is_test_data?: boolean | null
           last_negative_interaction_at?: string | null
@@ -24222,17 +25237,20 @@ export type Database = {
         Update: {
           approval_status?: string | null
           approved_at?: string | null
+          business_contact_relationship_id?: string | null
           business_id?: string | null
           churn_reason?: string | null
           churn_risk_level?: string | null
           contact_id?: string | null
           created_at?: string | null
           customer_history_summary?: string | null
+          customer_sales_checkout_id?: string | null
           external_send_allowed?: boolean | null
           founder_attention_needed?: boolean | null
           founder_review_required?: boolean | null
           goodwill_options?: Json | null
           id?: string
+          idempotency_key?: string | null
           inactivity_days?: number | null
           is_test_data?: boolean | null
           last_negative_interaction_at?: string | null
@@ -24258,6 +25276,13 @@ export type Database = {
           winback_reason?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "customer_winback_plans_business_contact_relationship_id_fkey"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "customer_winback_plans_business_id_fkey"
             columns: ["business_id"]
@@ -24711,11 +25736,14 @@ export type Database = {
       }
       deals: {
         Row: {
+          business_contact_relationship_id: string | null
+          business_id: string | null
           business_name: string
           compliance_score_at_close: number | null
           contact_id: string | null
           created_at: string
           currency: string
+          customer_sales_checkout_id: string | null
           customer_success_profile_id: string | null
           deal_name: string
           estimated_value_max: number
@@ -24723,19 +25751,24 @@ export type Database = {
           id: string
           lost_at: string | null
           notes: string
+          offer_id: string | null
           onboarding_plan_id: string | null
           probability: number
+          product_id: string | null
           required_skills: string[]
           status: Database["public"]["Enums"]["deal_status"]
           updated_at: string
           won_at: string | null
         }
         Insert: {
+          business_contact_relationship_id?: string | null
+          business_id?: string | null
           business_name?: string
           compliance_score_at_close?: number | null
           contact_id?: string | null
           created_at?: string
           currency?: string
+          customer_sales_checkout_id?: string | null
           customer_success_profile_id?: string | null
           deal_name: string
           estimated_value_max?: number
@@ -24743,19 +25776,24 @@ export type Database = {
           id?: string
           lost_at?: string | null
           notes?: string
+          offer_id?: string | null
           onboarding_plan_id?: string | null
           probability?: number
+          product_id?: string | null
           required_skills?: string[]
           status?: Database["public"]["Enums"]["deal_status"]
           updated_at?: string
           won_at?: string | null
         }
         Update: {
+          business_contact_relationship_id?: string | null
+          business_id?: string | null
           business_name?: string
           compliance_score_at_close?: number | null
           contact_id?: string | null
           created_at?: string
           currency?: string
+          customer_sales_checkout_id?: string | null
           customer_success_profile_id?: string | null
           deal_name?: string
           estimated_value_max?: number
@@ -24763,14 +25801,30 @@ export type Database = {
           id?: string
           lost_at?: string | null
           notes?: string
+          offer_id?: string | null
           onboarding_plan_id?: string | null
           probability?: number
+          product_id?: string | null
           required_skills?: string[]
           status?: Database["public"]["Enums"]["deal_status"]
           updated_at?: string
           won_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "deals_business_contact_relationship_id_fkey"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "deals_contact_id_fkey"
             columns: ["contact_id"]
@@ -24784,6 +25838,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "high_intent_review_queue"
             referencedColumns: ["contact_id"]
+          },
+          {
+            foreignKeyName: "deals_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_offers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "customer_sales_products"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -42813,15 +43881,18 @@ export type Database = {
       onboarding_email_drafts: {
         Row: {
           approval_status: string
+          business_contact_relationship_id: string | null
           business_id: string | null
           contact_id: string | null
           created_at: string
           customer_facing: boolean
+          customer_sales_checkout_id: string | null
           draft_body: string | null
           draft_subject: string | null
           draft_type: string
           founder_review_required: boolean
           id: string
+          idempotency_key: string | null
           metadata: Json
           onboarding_plan_id: string | null
           risk_flags: Json
@@ -42830,15 +43901,18 @@ export type Database = {
         }
         Insert: {
           approval_status?: string
+          business_contact_relationship_id?: string | null
           business_id?: string | null
           contact_id?: string | null
           created_at?: string
           customer_facing?: boolean
+          customer_sales_checkout_id?: string | null
           draft_body?: string | null
           draft_subject?: string | null
           draft_type: string
           founder_review_required?: boolean
           id?: string
+          idempotency_key?: string | null
           metadata?: Json
           onboarding_plan_id?: string | null
           risk_flags?: Json
@@ -42847,15 +43921,18 @@ export type Database = {
         }
         Update: {
           approval_status?: string
+          business_contact_relationship_id?: string | null
           business_id?: string | null
           contact_id?: string | null
           created_at?: string
           customer_facing?: boolean
+          customer_sales_checkout_id?: string | null
           draft_body?: string | null
           draft_subject?: string | null
           draft_type?: string
           founder_review_required?: boolean
           id?: string
+          idempotency_key?: string | null
           metadata?: Json
           onboarding_plan_id?: string | null
           risk_flags?: Json
@@ -42863,6 +43940,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "onboarding_email_drafts_business_contact_relationship_id_fkey"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "onboarding_email_drafts_business_id_fkey"
             columns: ["business_id"]
@@ -49411,6 +50495,7 @@ export type Database = {
           amount: number | null
           audit_metadata: Json | null
           brand_name: string | null
+          business_contact_relationship_id: string | null
           business_id: string
           business_name_snapshot: string | null
           confirmation_source: string | null
@@ -49419,6 +50504,7 @@ export type Database = {
           created_at: string
           currency: string | null
           customer_country: string | null
+          customer_sales_checkout_id: string | null
           customer_state_region: string | null
           customer_tax_id: string | null
           deal_id: string | null
@@ -49476,6 +50562,7 @@ export type Database = {
           amount?: number | null
           audit_metadata?: Json | null
           brand_name?: string | null
+          business_contact_relationship_id?: string | null
           business_id: string
           business_name_snapshot?: string | null
           confirmation_source?: string | null
@@ -49484,6 +50571,7 @@ export type Database = {
           created_at?: string
           currency?: string | null
           customer_country?: string | null
+          customer_sales_checkout_id?: string | null
           customer_state_region?: string | null
           customer_tax_id?: string | null
           deal_id?: string | null
@@ -49541,6 +50629,7 @@ export type Database = {
           amount?: number | null
           audit_metadata?: Json | null
           brand_name?: string | null
+          business_contact_relationship_id?: string | null
           business_id?: string
           business_name_snapshot?: string | null
           confirmation_source?: string | null
@@ -49549,6 +50638,7 @@ export type Database = {
           created_at?: string
           currency?: string | null
           customer_country?: string | null
+          customer_sales_checkout_id?: string | null
           customer_state_region?: string | null
           customer_tax_id?: string | null
           deal_id?: string | null
@@ -49602,7 +50692,15 @@ export type Database = {
           webhook_confirmation_source?: string | null
           website_url?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "qtc_payments_business_contact_relationship_id_fkey"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       qtc_proposals: {
         Row: {
@@ -49758,6 +50856,7 @@ export type Database = {
         Row: {
           audit_metadata: Json | null
           brand_name: string | null
+          business_contact_relationship_id: string | null
           business_id: string
           business_name_snapshot: string | null
           confirmation_source: string
@@ -49766,6 +50865,7 @@ export type Database = {
           contact_id: string | null
           created_at: string
           currency: string | null
+          customer_sales_checkout_id: string | null
           deal_id: string | null
           id: string
           invoice_id: string | null
@@ -49784,6 +50884,7 @@ export type Database = {
         Insert: {
           audit_metadata?: Json | null
           brand_name?: string | null
+          business_contact_relationship_id?: string | null
           business_id: string
           business_name_snapshot?: string | null
           confirmation_source: string
@@ -49792,6 +50893,7 @@ export type Database = {
           contact_id?: string | null
           created_at?: string
           currency?: string | null
+          customer_sales_checkout_id?: string | null
           deal_id?: string | null
           id?: string
           invoice_id?: string | null
@@ -49810,6 +50912,7 @@ export type Database = {
         Update: {
           audit_metadata?: Json | null
           brand_name?: string | null
+          business_contact_relationship_id?: string | null
           business_id?: string
           business_name_snapshot?: string | null
           confirmation_source?: string
@@ -49818,6 +50921,7 @@ export type Database = {
           contact_id?: string | null
           created_at?: string
           currency?: string | null
+          customer_sales_checkout_id?: string | null
           deal_id?: string | null
           id?: string
           invoice_id?: string | null
@@ -49833,7 +50937,15 @@ export type Database = {
           stripe_event_id?: string | null
           stripe_verified?: boolean | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "qtc_revenue_confirmations_business_contact_relationship_id_fkey"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       quarterly_pr_campaigns: {
         Row: {
@@ -51497,6 +52609,7 @@ export type Database = {
       }
       retention_risk_recommendations: {
         Row: {
+          business_contact_relationship_id: string | null
           business_id: string | null
           contact_id: string | null
           created_at: string | null
@@ -51513,6 +52626,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          business_contact_relationship_id?: string | null
           business_id?: string | null
           contact_id?: string | null
           created_at?: string | null
@@ -51529,6 +52643,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          business_contact_relationship_id?: string | null
           business_id?: string | null
           contact_id?: string | null
           created_at?: string | null
@@ -51545,6 +52660,13 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "retention_risk_recommendation_business_contact_relationshi_fkey"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "retention_risk_recommendations_business_id_fkey"
             columns: ["business_id"]
@@ -65191,8 +66313,10 @@ export type Database = {
       }
       support_reply_drafts: {
         Row: {
+          business_contact_relationship_id: string | null
           business_id: string
           compliance_warnings: string[]
+          contact_id: string | null
           conversation_id: string | null
           created_at: string
           crm_contact_id: string | null
@@ -65200,6 +66324,7 @@ export type Database = {
           founder_approval_review_id: string | null
           founder_review_required: boolean
           id: string
+          idempotency_key: string | null
           is_test_data: boolean
           metadata: Json
           missing_source_flags: string[]
@@ -65215,8 +66340,10 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          business_contact_relationship_id?: string | null
           business_id: string
           compliance_warnings?: string[]
+          contact_id?: string | null
           conversation_id?: string | null
           created_at?: string
           crm_contact_id?: string | null
@@ -65224,6 +66351,7 @@ export type Database = {
           founder_approval_review_id?: string | null
           founder_review_required?: boolean
           id?: string
+          idempotency_key?: string | null
           is_test_data?: boolean
           metadata?: Json
           missing_source_flags?: string[]
@@ -65239,8 +66367,10 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          business_contact_relationship_id?: string | null
           business_id?: string
           compliance_warnings?: string[]
+          contact_id?: string | null
           conversation_id?: string | null
           created_at?: string
           crm_contact_id?: string | null
@@ -65248,6 +66378,7 @@ export type Database = {
           founder_approval_review_id?: string | null
           founder_review_required?: boolean
           id?: string
+          idempotency_key?: string | null
           is_test_data?: boolean
           metadata?: Json
           missing_source_flags?: string[]
@@ -65263,6 +66394,27 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "support_reply_drafts_business_contact_relationship_id_fkey"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_reply_drafts_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_reply_drafts_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
           {
             foreignKeyName: "support_reply_drafts_question_intake_id_fkey"
             columns: ["question_intake_id"]
