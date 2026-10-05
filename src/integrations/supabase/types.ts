@@ -21478,6 +21478,7 @@ export type Database = {
       }
       customer_sales_conversations: {
         Row: {
+          business_contact_relationship_id: string | null
           business_id: string | null
           buying_signals: string[] | null
           call_outcome: string | null
@@ -21520,6 +21521,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          business_contact_relationship_id?: string | null
           business_id?: string | null
           buying_signals?: string[] | null
           call_outcome?: string | null
@@ -21562,6 +21564,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          business_contact_relationship_id?: string | null
           business_id?: string | null
           buying_signals?: string[] | null
           call_outcome?: string | null
@@ -21604,6 +21607,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "customer_sales_conversations_business_contact_relationship_fkey"
+            columns: ["business_contact_relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "customer_sales_conversations_offer_id_fkey"
             columns: ["offer_id"]
