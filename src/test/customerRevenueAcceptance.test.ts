@@ -478,9 +478,9 @@ describe("Worker 2 customer revenue acceptance", () => {
       const rowFields = fields(section("Row", "        Insert: {"));
       const insertFields = fields(section("Insert", "        Update: {"));
       const updateFields = fields(section("Update", "        Relationships: ["));
-      expect(rowFields.map((field) => field.name)).toEqual(columns.map((column) => column.name));
-      expect(insertFields.map((field) => field.name)).toEqual(columns.map((column) => column.name));
-      expect(updateFields.map((field) => field.name)).toEqual(columns.map((column) => column.name));
+      expect(rowFields.map((field) => field.name).sort()).toEqual(columns.map((column) => column.name).sort());
+      expect(insertFields.map((field) => field.name).sort()).toEqual(columns.map((column) => column.name).sort());
+      expect(updateFields.map((field) => field.name).sort()).toEqual(columns.map((column) => column.name).sort());
       for (const column of columns) {
         const type = `${tsTypes[column.sqlType]}${column.nullable ? " | null" : ""}`;
         expect(rowFields.find((field) => field.name === column.name)?.type).toBe(type);

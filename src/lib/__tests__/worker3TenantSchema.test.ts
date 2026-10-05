@@ -54,7 +54,8 @@ describe("Worker 3 tenant provider schema", () => {
     expect(crmAttributionMigration).toContain("FOREIGN KEY (liftor_campaign_id, business_id)");
     expect(crmAttributionMigration).toContain("REFERENCES public.outreach_campaigns(id, business_id) NOT VALID");
     expect(generatedTypes).toMatch(/outreach_campaigns: \{[\s\S]*?business_id: string \| null/);
-    expect(generatedTypes).toContain("outbound_provider_campaign_mappings_liftor_campaign_business_scope_fkey");
+    // Postgres truncates identifiers to 63 bytes; live-generated types carry the truncated FK name.
+    expect(generatedTypes).toContain("outbound_provider_campaign_mappings_liftor_campaign_business_scope_fkey".slice(0, 63));
     expect(crmAttributionMigration).not.toMatch(/\b(DROP TABLE|DROP COLUMN|TRUNCATE)\b/i);
   });
 });
