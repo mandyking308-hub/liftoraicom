@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { fadeUp } from "@/lib/animations";
 import { Loader2 } from "lucide-react";
+import { userHasFounderConsoleAccess } from "@/lib/founderAccess";
 
 const PortalLogin = () => {
   const [email, setEmail] = useState("");
@@ -18,32 +19,14 @@ const PortalLogin = () => {
     e.preventDefault();
     setLoading(true);
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
+    if (error || !data.user) {
       setLoading(false);
-      toast.error(error.message);
+      toast.error(error?.message ?? "Sign in failed.");
       return;
     }
-
-    const signedInUser = data.user;
-    if (!signedInUser) {
-      setLoading(false);
-      toast.error("Sign in succeeded but no user session was returned.");
-      return;
-    }
-
-    const { data: roles, error: roleError } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", signedInUser.id);
-
+    const isFounderConsole = await userHasFounderConsoleAccess(data.user.id);
     setLoading(false);
-
-    if (!roleError && roles?.some((row) => row.role === "founder" || row.role === "admin")) {
-      navigate("/founder", { replace: true });
-      return;
-    }
-
-    navigate("/portal/dashboard", { replace: true });
+    navigate(isFounderConsole ? "/founder" : "/portal/dashboard");
   };
 
   return (
