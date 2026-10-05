@@ -507,6 +507,7 @@ BEGIN
     JOIN pg_namespace n ON n.oid = p.pronamespace
     WHERE n.nspname = 'public' AND p.prokind = 'f'
       AND p.proowner = 'postgres'::regrole
+      AND p.oid IS DISTINCT FROM to_regprocedure('public.sor_touch_updated_at()')
       AND (
         (SELECT count(*)
          FROM unnest(p.proacl) WITH ORDINALITY AS acl_item(item, ordinal)
