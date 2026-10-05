@@ -231,6 +231,18 @@ export default function GSMOutboundPage() {
                   Apply sync
                 </Button>
               </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => call("gsm-smartlead-onboard", "Preview onboarding", { apply: false }, setSmartlead)}>
+                  Preview onboarding
+                </Button>
+                <Button
+                  size="sm"
+                  disabled={busy !== null || snapshot.mailbox_count === 0}
+                  onClick={() => confirmed("Connect GSM mailboxes to Smartlead? This CREATES sending accounts in Smartlead but sends no campaign email, creates no campaign and enables no warm-up.") && call("gsm-smartlead-onboard", "Connect GSM to Smartlead", { apply: true, external_action_confirmation: "CONNECT GSM MAILBOXES TO SMARTLEAD" }, setSmartlead)}
+                >
+                  Connect GSM to Smartlead
+                </Button>
+              </div>
               <ResultSummary title="Smartlead mailbox result" value={smartlead} />
             </div>
 
