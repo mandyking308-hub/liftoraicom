@@ -297,6 +297,7 @@ DECLARE
     'public.social_claim_distribution_job(uuid, uuid, text, uuid)',
     'public.social_relationship_claim_action(uuid)',
     'public.social_set_updated_at()',
+    'public.sor_touch_updated_at()',
     'public.sparsevec(sparsevec, integer, boolean)',
     'public.sparsevec_cmp(sparsevec, sparsevec)',
     'public.sparsevec_eq(sparsevec, sparsevec)',
@@ -447,7 +448,7 @@ BEGIN
     ) args ON true
    WHERE n.nspname = 'public' AND p.prokind = 'f';
 
-  IF v_total <> 386 OR v_postgres_owned <> 241 OR v_other_owner_count <> 0 THEN
+  IF v_total <> 387 OR v_postgres_owned <> 242 OR v_other_owner_count <> 0 THEN
     RAISE EXCEPTION 'Stage 1B live catalog differs from freeze: functions %, postgres-owned %, unexpected owners %; run the authorized evidence query',
       v_total, v_postgres_owned, v_other_owner_count;
   END IF;
@@ -506,6 +507,7 @@ BEGIN
     JOIN pg_namespace n ON n.oid = p.pronamespace
     WHERE n.nspname = 'public' AND p.prokind = 'f'
       AND p.proowner = 'postgres'::regrole
+      AND p.oid IS DISTINCT FROM to_regprocedure('public.sor_touch_updated_at()')
       AND (
         (SELECT count(*)
          FROM unnest(p.proacl) WITH ORDINALITY AS acl_item(item, ordinal)
@@ -607,7 +609,10 @@ LEFT JOIN LATERAL (
   SELECT string_agg(format_type(a, NULL), ', ' ORDER BY u.ordinality) AS identity_types
   FROM unnest(p.proargtypes::oid[]) WITH ORDINALITY AS u(a, ordinality)
 ) args ON true
-WHERE n.nspname = 'public' AND p.prokind = 'f' AND owner_role.rolname = 'postgres';
+WHERE n.nspname = 'public' AND p.prokind = 'f' AND owner_role.rolname = 'postgres'
+  -- Post-freeze internal trigger helper: frozen in the catalog gate above, but
+  -- its client EXECUTE revocation is owned by 20260928120000_stage1b_sor_touch_acl_hardening.
+  AND p.oid IS DISTINCT FROM to_regprocedure('public.sor_touch_updated_at()');
 
 DO $stage1b_snapshot_count$
 BEGIN
