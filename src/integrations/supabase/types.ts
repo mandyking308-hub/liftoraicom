@@ -59555,6 +59555,7 @@ export type Database = {
       social_engagement_events: {
         Row: {
           ai_reply_allowed: boolean
+          business_contact_relationship_id: string | null
           business_id: string
           calendar_item_id: string | null
           campaign_plan_id: string | null
@@ -59583,6 +59584,7 @@ export type Database = {
           handled_at: string | null
           handled_by_agent: string | null
           id: string
+          idempotency_key: string | null
           intent: string | null
           is_test_data: boolean
           keyword_detected: string | null
@@ -59597,11 +59599,13 @@ export type Database = {
           platform: string | null
           platform_key: string
           provider: string | null
+          provider_connection_id: string | null
           raw_payload: Json
           received_at: string
           requires_response: boolean
           risk_level: string
           sentiment: string | null
+          social_account_id: string | null
           social_handle: string | null
           source_type: string
           spam_signal: boolean
@@ -59612,6 +59616,7 @@ export type Database = {
         }
         Insert: {
           ai_reply_allowed?: boolean
+          business_contact_relationship_id?: string | null
           business_id: string
           calendar_item_id?: string | null
           campaign_plan_id?: string | null
@@ -59640,6 +59645,7 @@ export type Database = {
           handled_at?: string | null
           handled_by_agent?: string | null
           id?: string
+          idempotency_key?: string | null
           intent?: string | null
           is_test_data?: boolean
           keyword_detected?: string | null
@@ -59654,11 +59660,13 @@ export type Database = {
           platform?: string | null
           platform_key: string
           provider?: string | null
+          provider_connection_id?: string | null
           raw_payload?: Json
           received_at?: string
           requires_response?: boolean
           risk_level?: string
           sentiment?: string | null
+          social_account_id?: string | null
           social_handle?: string | null
           source_type?: string
           spam_signal?: boolean
@@ -59669,6 +59677,7 @@ export type Database = {
         }
         Update: {
           ai_reply_allowed?: boolean
+          business_contact_relationship_id?: string | null
           business_id?: string
           calendar_item_id?: string | null
           campaign_plan_id?: string | null
@@ -59697,6 +59706,7 @@ export type Database = {
           handled_at?: string | null
           handled_by_agent?: string | null
           id?: string
+          idempotency_key?: string | null
           intent?: string | null
           is_test_data?: boolean
           keyword_detected?: string | null
@@ -59711,11 +59721,13 @@ export type Database = {
           platform?: string | null
           platform_key?: string
           provider?: string | null
+          provider_connection_id?: string | null
           raw_payload?: Json
           received_at?: string
           requires_response?: boolean
           risk_level?: string
           sentiment?: string | null
+          social_account_id?: string | null
           social_handle?: string | null
           source_type?: string
           spam_signal?: boolean
@@ -59725,6 +59737,17 @@ export type Database = {
           urgency?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "social_engagement_events_bcr_scope_fkey"
+            columns: [
+              "business_contact_relationship_id",
+              "business_id",
+              "crm_contact_id",
+            ]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id", "business_id", "contact_id"]
+          },
           {
             foreignKeyName: "social_engagement_events_business_id_fkey"
             columns: ["business_id"]
@@ -59766,6 +59789,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "social_keyword_trigger_rules"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_engagement_events_provider_connection_scope_fkey"
+            columns: ["provider_connection_id", "business_id"]
+            isOneToOne: false
+            referencedRelation: "social_provider_connections"
+            referencedColumns: ["id", "business_id"]
+          },
+          {
+            foreignKeyName: "social_engagement_events_social_account_scope_fkey"
+            columns: ["social_account_id", "business_id"]
+            isOneToOne: false
+            referencedRelation: "social_accounts"
+            referencedColumns: ["id", "business_id"]
           },
         ]
       }
@@ -60077,6 +60114,317 @@ export type Database = {
           usage_count?: number
         }
         Relationships: []
+      }
+      social_inbound_contact_identities: {
+        Row: {
+          business_contact_relationship_id: string
+          business_id: string
+          contact_id: string
+          created_at: string
+          external_user_id: string
+          id: string
+          platform: string
+          provider: string
+          provider_connection_id: string
+          social_account_id: string
+          updated_at: string
+        }
+        Insert: {
+          business_contact_relationship_id: string
+          business_id: string
+          contact_id: string
+          created_at?: string
+          external_user_id: string
+          id?: string
+          platform: string
+          provider: string
+          provider_connection_id: string
+          social_account_id: string
+          updated_at?: string
+        }
+        Update: {
+          business_contact_relationship_id?: string
+          business_id?: string
+          contact_id?: string
+          created_at?: string
+          external_user_id?: string
+          id?: string
+          platform?: string
+          provider?: string
+          provider_connection_id?: string
+          social_account_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_inbound_contact_identities_account_scope_fkey"
+            columns: ["social_account_id", "business_id"]
+            isOneToOne: false
+            referencedRelation: "social_accounts"
+            referencedColumns: ["id", "business_id"]
+          },
+          {
+            foreignKeyName: "social_inbound_contact_identities_bcr_scope_fkey"
+            columns: [
+              "business_contact_relationship_id",
+              "business_id",
+              "contact_id",
+            ]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id", "business_id", "contact_id"]
+          },
+          {
+            foreignKeyName: "social_inbound_contact_identities_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_inbound_contact_identities_connection_scope_fkey"
+            columns: ["provider_connection_id", "business_id"]
+            isOneToOne: false
+            referencedRelation: "social_provider_connections"
+            referencedColumns: ["id", "business_id"]
+          },
+          {
+            foreignKeyName: "social_inbound_contact_identities_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_inbound_contact_identities_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+        ]
+      }
+      social_inbound_conversation_states: {
+        Row: {
+          business_contact_relationship_id: string
+          business_id: string
+          contact_id: string
+          conversation_id: string
+          created_at: string
+          escalation_pending: boolean
+          escalation_reason: string | null
+          external_thread_id: string
+          external_user_id: string
+          id: string
+          identity_id: string
+          last_confidence_score: number | null
+          last_event_at: string | null
+          last_event_id: string | null
+          last_intent: string | null
+          last_risk_level: string | null
+          last_sentiment: string | null
+          platform: string
+          provider: string
+          provider_connection_id: string
+          social_account_id: string
+          turn_count: number
+          turn_history: Json
+          updated_at: string
+        }
+        Insert: {
+          business_contact_relationship_id: string
+          business_id: string
+          contact_id: string
+          conversation_id: string
+          created_at?: string
+          escalation_pending?: boolean
+          escalation_reason?: string | null
+          external_thread_id: string
+          external_user_id: string
+          id?: string
+          identity_id: string
+          last_confidence_score?: number | null
+          last_event_at?: string | null
+          last_event_id?: string | null
+          last_intent?: string | null
+          last_risk_level?: string | null
+          last_sentiment?: string | null
+          platform: string
+          provider: string
+          provider_connection_id: string
+          social_account_id: string
+          turn_count?: number
+          turn_history?: Json
+          updated_at?: string
+        }
+        Update: {
+          business_contact_relationship_id?: string
+          business_id?: string
+          contact_id?: string
+          conversation_id?: string
+          created_at?: string
+          escalation_pending?: boolean
+          escalation_reason?: string | null
+          external_thread_id?: string
+          external_user_id?: string
+          id?: string
+          identity_id?: string
+          last_confidence_score?: number | null
+          last_event_at?: string | null
+          last_event_id?: string | null
+          last_intent?: string | null
+          last_risk_level?: string | null
+          last_sentiment?: string | null
+          platform?: string
+          provider?: string
+          provider_connection_id?: string
+          social_account_id?: string
+          turn_count?: number
+          turn_history?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_inbound_conversation_states_account_scope_fkey"
+            columns: ["social_account_id", "business_id"]
+            isOneToOne: false
+            referencedRelation: "social_accounts"
+            referencedColumns: ["id", "business_id"]
+          },
+          {
+            foreignKeyName: "social_inbound_conversation_states_bcr_scope_fkey"
+            columns: [
+              "business_contact_relationship_id",
+              "business_id",
+              "contact_id",
+            ]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id", "business_id", "contact_id"]
+          },
+          {
+            foreignKeyName: "social_inbound_conversation_states_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_inbound_conversation_states_connection_scope_fkey"
+            columns: ["provider_connection_id", "business_id"]
+            isOneToOne: false
+            referencedRelation: "social_provider_connections"
+            referencedColumns: ["id", "business_id"]
+          },
+          {
+            foreignKeyName: "social_inbound_conversation_states_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_inbound_conversation_states_identity_scope_fkey"
+            columns: ["identity_id", "business_id", "contact_id"]
+            isOneToOne: false
+            referencedRelation: "social_inbound_contact_identities"
+            referencedColumns: ["id", "business_id", "contact_id"]
+          },
+          {
+            foreignKeyName: "social_inbound_conversation_states_last_event_id_fkey"
+            columns: ["last_event_id"]
+            isOneToOne: false
+            referencedRelation: "social_engagement_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_inbound_event_receipts: {
+        Row: {
+          business_id: string
+          conversation_state_id: string | null
+          engagement_event_id: string | null
+          external_event_id: string
+          id: string
+          idempotency_key: string
+          payload_sha256: string
+          platform: string
+          processed_at: string | null
+          processing_status: string
+          provider: string
+          provider_connection_id: string
+          received_at: string
+          social_account_id: string
+        }
+        Insert: {
+          business_id: string
+          conversation_state_id?: string | null
+          engagement_event_id?: string | null
+          external_event_id: string
+          id?: string
+          idempotency_key: string
+          payload_sha256: string
+          platform: string
+          processed_at?: string | null
+          processing_status?: string
+          provider: string
+          provider_connection_id: string
+          received_at?: string
+          social_account_id: string
+        }
+        Update: {
+          business_id?: string
+          conversation_state_id?: string | null
+          engagement_event_id?: string | null
+          external_event_id?: string
+          id?: string
+          idempotency_key?: string
+          payload_sha256?: string
+          platform?: string
+          processed_at?: string | null
+          processing_status?: string
+          provider?: string
+          provider_connection_id?: string
+          received_at?: string
+          social_account_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_inbound_event_receipts_account_scope_fkey"
+            columns: ["social_account_id", "business_id"]
+            isOneToOne: false
+            referencedRelation: "social_accounts"
+            referencedColumns: ["id", "business_id"]
+          },
+          {
+            foreignKeyName: "social_inbound_event_receipts_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_inbound_event_receipts_connection_scope_fkey"
+            columns: ["provider_connection_id", "business_id"]
+            isOneToOne: false
+            referencedRelation: "social_provider_connections"
+            referencedColumns: ["id", "business_id"]
+          },
+          {
+            foreignKeyName: "social_inbound_event_receipts_engagement_event_id_fkey"
+            columns: ["engagement_event_id"]
+            isOneToOne: false
+            referencedRelation: "social_engagement_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_inbound_event_receipts_state_scope_fkey"
+            columns: ["conversation_state_id", "business_id"]
+            isOneToOne: false
+            referencedRelation: "social_inbound_conversation_states"
+            referencedColumns: ["id", "business_id"]
+          },
+        ]
       }
       social_inbox_messages: {
         Row: {
@@ -61483,6 +61831,7 @@ export type Database = {
           connection_status: string
           created_at: string
           id: string
+          inbound_receiver_enabled: boolean
           is_test_data: boolean
           last_channel_sync_at: string | null
           last_checked_at: string | null
@@ -61494,6 +61843,7 @@ export type Database = {
           provider_organization_name: string | null
           token_reference: string | null
           updated_at: string
+          webhook_secret_ref: string | null
         }
         Insert: {
           account_reference?: string | null
@@ -61505,6 +61855,7 @@ export type Database = {
           connection_status?: string
           created_at?: string
           id?: string
+          inbound_receiver_enabled?: boolean
           is_test_data?: boolean
           last_channel_sync_at?: string | null
           last_checked_at?: string | null
@@ -61516,6 +61867,7 @@ export type Database = {
           provider_organization_name?: string | null
           token_reference?: string | null
           updated_at?: string
+          webhook_secret_ref?: string | null
         }
         Update: {
           account_reference?: string | null
@@ -61527,6 +61879,7 @@ export type Database = {
           connection_status?: string
           created_at?: string
           id?: string
+          inbound_receiver_enabled?: boolean
           is_test_data?: boolean
           last_channel_sync_at?: string | null
           last_checked_at?: string | null
@@ -61538,6 +61891,7 @@ export type Database = {
           provider_organization_name?: string | null
           token_reference?: string | null
           updated_at?: string
+          webhook_secret_ref?: string | null
         }
         Relationships: [
           {
@@ -73741,6 +74095,27 @@ export type Database = {
         Returns: Json
       }
       process_retry_queue: { Args: never; Returns: Json }
+      process_social_inbound_multiturn_event: {
+        Args: {
+          p_analysis: Json
+          p_display_name: string
+          p_event_type: string
+          p_expected_turn_count: number
+          p_external_event_id: string
+          p_external_thread_id: string
+          p_external_user_id: string
+          p_idempotency_key: string
+          p_message_text: string
+          p_payload_sha256: string
+          p_platform: string
+          p_provider: string
+          p_provider_connection_id: string
+          p_received_at: string
+          p_social_account_id: string
+          p_social_handle: string
+        }
+        Returns: Json
+      }
       propagate_billionaire_institution_access: { Args: never; Returns: Json }
       proposals_needing_followup: {
         Args: never
