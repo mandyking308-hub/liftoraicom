@@ -44614,6 +44614,13 @@ export type Database = {
             referencedColumns: ["id", "business_id", "provider_type"]
           },
           {
+            foreignKeyName: "outbound_provider_campaign_mappings_liftor_campaign_business_sc"
+            columns: ["liftor_campaign_id", "business_id"]
+            isOneToOne: false
+            referencedRelation: "outreach_campaigns"
+            referencedColumns: ["id", "business_id"]
+          },
+          {
             foreignKeyName: "outbound_provider_campaign_mappings_liftor_campaign_id_fkey"
             columns: ["liftor_campaign_id"]
             isOneToOne: false
@@ -45213,6 +45220,7 @@ export type Database = {
       }
       outreach_campaigns: {
         Row: {
+          business_id: string | null
           business_name: string
           campaign_name: string
           created_at: string
@@ -45221,6 +45229,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          business_id?: string | null
           business_name?: string
           campaign_name: string
           created_at?: string
@@ -45229,6 +45238,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          business_id?: string | null
           business_name?: string
           campaign_name?: string
           created_at?: string
@@ -45236,7 +45246,15 @@ export type Database = {
           status?: Database["public"]["Enums"]["outreach_campaign_status"]
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "outreach_campaigns_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       outreach_sequences: {
         Row: {
