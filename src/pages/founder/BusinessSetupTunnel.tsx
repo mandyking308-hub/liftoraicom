@@ -22,6 +22,7 @@ import {
 } from "@/lib/commercialPace";
 
 type BusinessRow = { id: string; name: string };
+type ArchivedBusinessRow = { id: string; name: string; archived_at: string | null; archived_reason: string | null };
 const BUSINESS_PAGE_SIZE = 50;
 
 function slugify(s: string): string {
@@ -55,7 +56,7 @@ export default function BusinessSetupTunnel() {
 
     const timer = window.setTimeout(async () => {
       try {
-        let query = supabase.from("businesses").select("id, name");
+        let query = supabase.from("businesses").select("id, name").eq("portfolio_status", "active");
         const term = businessSearch.trim();
         if (term) query = query.ilike("name", `%${term}%`);
 
@@ -88,7 +89,7 @@ export default function BusinessSetupTunnel() {
     const term = businessSearch.trim();
     setLoadingMoreBusinesses(true);
     try {
-      let query = supabase.from("businesses").select("id, name");
+      let query = supabase.from("businesses").select("id, name").eq("portfolio_status", "active");
       if (term) query = query.ilike("name", `%${term}%`);
       const { data, error } = await query.order("name").range(start, start + BUSINESS_PAGE_SIZE - 1);
       if (requestId !== businessRequestId.current) return;
@@ -107,6 +108,18 @@ export default function BusinessSetupTunnel() {
       if (requestId === businessRequestId.current) setLoadingMoreBusinesses(false);
     }
   }
+
+  const [archivedBusinesses, setArchivedBusinesses] = useState<ArchivedBusinessRow[]>([]);
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("businesses")
+        .select("id, name, archived_at, archived_reason")
+        .eq("portfolio_status", "legacy_prelaunch")
+        .order("name");
+      setArchivedBusinesses((data ?? []) as ArchivedBusinessRow[]);
+    })();
+  }, []);
 
   const [remoteDrafts, setRemoteDrafts] = useState<TunnelState[]>([]);
   useEffect(() => {
@@ -269,6 +282,29 @@ export default function BusinessSetupTunnel() {
                     {loadingMoreBusinesses ? "Loading…" : "Load more businesses"}
                   </Button>
                 )}
+              </CardContent>
+            </Card>
+          )}
+
+          {mode === "existing" && (
+            <Card className="border-dashed">
+              <CardHeader>
+                <CardTitle className="text-base">LEGACY / PRE-LAUNCH BUSINESSES</CardTitle>
+                <p className="text-xs text-muted-foreground">
+                  Archived, read-only. Original IDs and all linked records are retained for manual review and selective reuse. Not used by onboarding.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-1">
+                {archivedBusinesses.length === 0 && <p className="text-sm text-muted-foreground">No archived businesses.</p>}
+                {archivedBusinesses.map((b) => (
+                  <div key={b.id} className="flex items-center justify-between border border-border/30 rounded p-2 opacity-80">
+                    <div>
+                      <div className="text-sm">{b.name}</div>
+                      <div className="text-[11px] font-mono text-muted-foreground">{b.id}</div>
+                    </div>
+                    <span className="text-[10px] uppercase tracking-wide text-muted-foreground border border-border/40 rounded px-2 py-0.5">Legacy</span>
+                  </div>
+                ))}
               </CardContent>
             </Card>
           )}
