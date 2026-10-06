@@ -115,7 +115,7 @@ export default function BusinessSetupTunnel() {
       const { data } = await supabase
         .from("businesses")
         .select("id, name, archived_at, archived_reason")
-        .eq("portfolio_status", "legacy_prelaunch")
+        .neq("portfolio_status", "active")
         .order("name");
       setArchivedBusinesses((data ?? []) as ArchivedBusinessRow[]);
     })();
@@ -128,8 +128,12 @@ export default function BusinessSetupTunnel() {
   const drafts = useMemo(() => {
     const local = listAll();
     const seen = new Set(remoteDrafts.map((d) => d.businessId));
-    return [...remoteDrafts, ...local.filter((d) => !seen.has(d.businessId))];
-  }, [remoteDrafts, state?.updatedAt, mode]);
+    const combined = [...remoteDrafts, ...local.filter((d) => !seen.has(d.businessId))];
+    // Archived businesses must not surface in "Continue setup already in progress".
+    // Draft entries (ids like "draft:...") never match real business ids, so they stay.
+    const archivedIds = new Set(archivedBusinesses.map((b) => b.id));
+    return combined.filter((d) => !archivedIds.has(d.businessId));
+  }, [remoteDrafts, archivedBusinesses, state?.updatedAt, mode]);
 
   const neonCandy = useMemo(
     () => businesses.find((b) => /neon\s*candy/i.test(b.name || "")),
@@ -262,7 +266,9 @@ export default function BusinessSetupTunnel() {
                   <p className="text-sm text-destructive">Could not load businesses. Try changing the search or reload the page.</p>
                 )}
                 {!loadingBiz && !businessLoadError && businesses.length === 0 && (
-                  <p className="text-sm text-muted-foreground">No matching businesses found. Use "Create new" to start a draft.</p>
+                  <p className="text-sm text-muted-foreground">
+                    No active portfolio businesses yet. Fresh onboarding can start whenever you're ready — use "Create new" to begin a draft, or browse the archived businesses below.
+                  </p>
                 )}
                 {!loadingBiz && !businessLoadError && businesses.filter((b) => b.id !== neonCandy?.id).map((b) => {
                   const t = load(b.id);
