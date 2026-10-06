@@ -90,7 +90,7 @@ describe("GSM onboarding canary whitelist", () => {
     for (const bad of ["x@globalhealthaccesstrust.org", "y@globalhealthaccesstrust.org", "hello@neoncandy.online", "zz@getgsm.net"]) {
       const r = resolveOnboardWhitelist(["a@getgsm.net", bad], safe, true);
       expect(r.ok).toBe(false);
-      if (!r.ok) expect(r.blocker).toBe("invalid_requested_email");
+      if (r.ok === false) expect(r.blocker).toBe("invalid_requested_email");
     }
   });
   it("whitelist limits selection and normalizes", () => {
