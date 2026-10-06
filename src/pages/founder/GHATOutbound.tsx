@@ -184,16 +184,6 @@ export default function GHATOutboundPage() {
                 <Badge variant={smartleadConnected === mailboxes.length && mailboxes.length > 0 ? "default" : "secondary"}>
                   Smartlead: {smartleadConnected}/{mailboxes.length} connected
                 </Badge>
-                <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => call("ghat-smartlead-onboard", "Smartlead preview", { apply: false }, setSmartlead)}>
-                  Preview connection
-                </Button>
-                <Button
-                  size="sm"
-                  disabled={busy !== null || mailboxes.length === 0}
-                  onClick={() => confirmed("Connect the GHAT mailboxes to Smartlead as sending accounts? No campaign is created, no lead is pushed and no email is sent.") && call("ghat-smartlead-onboard", "Connect to Smartlead", { apply: true, external_action_confirmation: "CONNECT GHAT MAILBOXES TO SMARTLEAD" }, setSmartlead)}
-                >
-                  Connect mailboxes
-                </Button>
                 <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => call("gsm-smartlead-mailbox-sync", "Smartlead status refresh", { apply: false, estate: GHAT_ESTATE_KEY }, setSmartlead)}>
                   Refresh status
                 </Button>
