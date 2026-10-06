@@ -2,9 +2,12 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import {
   GSM_ONBOARD_CONFIRMATION,
+  GSM_ONBOARD_MAX_EMAILS,
   chunk,
   isOnboardApplyAuthorized,
+  normalizeRequestedEmails,
   partitionAgainstSmartlead,
+  scopeRequestedGsmRegistry,
   selectGsmRegistry,
 } from "../../../supabase/functions/_shared/gsmSmartleadOnboard";
 
@@ -37,6 +40,28 @@ describe("GSM Smartlead onboarding scope", () => {
   it("chunks domains", () => {
     expect(chunk([1, 2, 3, 4, 5, 6, 7], 5)).toEqual([[1, 2, 3, 4, 5], [6, 7]]);
   });
+
+  it("normalizes and de-duplicates requested emails", () => {
+    expect(normalizeRequestedEmails([" A@getgsm.net ", "a@getgsm.net", "B@getgsm.net"]))
+      .toEqual(["a@getgsm.net", "b@getgsm.net"]);
+  });
+
+  it("whitelist scopes the safe GSM registry", () => {
+    const gsm = selectGsmRegistry(rows);
+    const { scoped, invalid } = scopeRequestedGsmRegistry(gsm, ["b@getgsm.net"]);
+    expect(invalid).toEqual([]);
+    expect(scoped.map((r) => r.email)).toEqual(["b@getgsm.net"]);
+  });
+
+  it("marks GHAT and Neon Candy requests invalid", () => {
+    const gsm = selectGsmRegistry(rows);
+    const { scoped, invalid } = scopeRequestedGsmRegistry(gsm, [
+      "x@globalhealthaccesstrust.org",
+      "hello@neoncandy.online",
+    ]);
+    expect(scoped).toHaveLength(0);
+    expect(invalid).toHaveLength(2);
+  });
 });
 
 describe("GSM onboarding apply gate", () => {
@@ -51,6 +76,12 @@ describe("GSM onboarding apply gate", () => {
   });
 });
 
+describe("GSM onboarding canary limits", () => {
+  it("caps each apply request at 10 mailboxes", () => {
+    expect(GSM_ONBOARD_MAX_EMAILS).toBe(10);
+  });
+});
+
 describe("gsm-smartlead-onboard function source", () => {
   const src = readFileSync("supabase/functions/gsm-smartlead-onboard/index.ts", "utf8");
   it("preview path returns before any create or credential export", () => {
@@ -58,6 +89,19 @@ describe("gsm-smartlead-onboard function source", () => {
     expect(gate).toBeGreaterThan(0);
     expect(src.indexOf("email-accounts/save")).toBeGreaterThan(gate);
     expect(src.indexOf('"exportCredentials"')).toBeGreaterThan(gate);
+  });
+
+  it("blocks estate-wide apply and over-limit canaries before provider mutation", () => {
+    const required = src.indexOf('blocker: "requested_emails_required"');
+    const limit = src.indexOf('blocker: "requested_email_limit_exceeded"');
+    const invalid = src.indexOf('blocker: "invalid_requested_email"');
+    const save = src.indexOf("email-accounts/save");
+    expect(required).toBeGreaterThan(0);
+    expect(limit).toBeGreaterThan(0);
+    expect(invalid).toBeGreaterThan(0);
+    expect(required).toBeLessThan(save);
+    expect(limit).toBeLessThan(save);
+    expect(invalid).toBeLessThan(save);
   });
   it("is founder/admin gated, GSM only, never returns credentials or touches campaigns", () => {
     expect(src).toContain('roleSet.has("founder")');
