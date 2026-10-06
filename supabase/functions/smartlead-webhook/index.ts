@@ -268,11 +268,11 @@ Deno.serve(async (req) => {
     provider_connection_id: connection.id,
     business_id: connection.business_id,
     campaign_mapping_id: campaignForAudit && "campaignMapping" in campaignForAudit
-      ? campaignForAudit.campaignMapping.id
+      ? campaignForAudit.campaignMapping?.id ?? null
       : null,
-    lead_mapping_id: leadForAudit && "leadMapping" in leadForAudit ? leadForAudit.leadMapping.id : null,
+    lead_mapping_id: leadForAudit && "leadMapping" in leadForAudit ? leadForAudit.leadMapping?.id ?? null : null,
     liftor_campaign_id: campaignForAudit && "campaignMapping" in campaignForAudit
-      ? campaignForAudit.campaignMapping.liftor_campaign_id
+      ? campaignForAudit.campaignMapping?.liftor_campaign_id ?? null
       : null,
     business_contact_relationship_id: attribution?.businessContactRelationship.id ?? null,
     contact_id: attribution?.contactId ?? null,
