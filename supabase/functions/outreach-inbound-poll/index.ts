@@ -389,7 +389,7 @@ async function pollInbox(
         }
       }
     } finally {
-      lock.release();
+      (lock as { release: () => void }).release();
     }
 
     result.ok = true;
