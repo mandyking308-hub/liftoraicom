@@ -3,6 +3,8 @@ import FounderLayout from "@/components/founder/FounderLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { buildApplyBody, buildPreviewBody, canApplyCanary, parseCanaryEmails, GSM_CANARY_MAX_APPLY } from "@/lib/gsmCanaryEmails";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Activity, Flame, Globe, Mailbox, RefreshCw, ShieldAlert } from "lucide-react";
@@ -69,6 +71,13 @@ const ResultSummary = ({ title, value }: { title: string; value: Record<string, 
     "provider_webhook_configured",
     "provider_events_observed",
     "verified_event_return",
+    "requested_count",
+    "scoped_registry_mailboxes",
+    "gsm_registry_mailboxes",
+    "smartlead_accounts_seen",
+    "already_connected",
+    "missing_from_smartlead",
+    "invalid_requested_emails",
     "blocker",
     "error_code",
     "message",
@@ -121,6 +130,8 @@ export default function GSMOutboundPage() {
     void load();
   }, [load]);
 
+  const [canaryText, setCanaryText] = useState("");
+
   const call = async (
     fn: string,
     label: string,
@@ -131,6 +142,18 @@ export default function GSMOutboundPage() {
     const { data, error } = await supabase.functions.invoke(fn, { body });
     setBusy(null);
     if (error) {
+      // Surface the server's blocker (e.g. invalid_requested_email) when the function rejects with a 4xx.
+      try {
+        const ctx = (error as { context?: Response }).context;
+        const parsed = ctx && typeof ctx.json === "function" ? ((await ctx.json()) as Record<string, unknown>) : null;
+        if (parsed && typeof parsed === "object") {
+          set(parsed);
+          toast({ title: `${label} blocked`, description: String(parsed.blocker ?? parsed.message ?? error.message), variant: "destructive" });
+          return;
+        }
+      } catch {
+        /* fall through to generic error */
+      }
       toast({ title: `${label} failed`, description: error.message, variant: "destructive" });
       return;
     }
@@ -139,6 +162,9 @@ export default function GSMOutboundPage() {
     toast({ title: label, description: String(result.message ?? result.connection_state ?? "Completed") });
     await load();
   };
+
+  const canaryEmails = parseCanaryEmails(canaryText);
+  const canaryApplyOk = canApplyCanary(canaryEmails);
 
   const confirmed = (message: string) => window.confirm(message);
 
@@ -231,14 +257,33 @@ export default function GSMOutboundPage() {
                   Apply sync
                 </Button>
               </div>
+              <div className="space-y-1">
+                <label htmlFor="gsm-canary-emails" className="text-xs font-medium">GSM canary mailboxes (one per line or comma-separated)</label>
+                <Textarea
+                  id="gsm-canary-emails"
+                  rows={4}
+                  value={canaryText}
+                  onChange={(e) => setCanaryText(e.target.value)}
+                  placeholder="Leave blank for a whole-estate read-only preview"
+                  className="font-mono text-xs"
+                />
+                <div className="text-xs text-muted-foreground">
+                  {canaryEmails.length} unique address(es). Connect requires 1 to {GSM_CANARY_MAX_APPLY}; the server rejects any non-GSM address.
+                </div>
+              </div>
               <div className="flex flex-wrap items-center gap-2">
-                <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => call("gsm-smartlead-onboard", "Preview onboarding", { apply: false }, setSmartlead)}>
+                <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => call("gsm-smartlead-onboard", "Preview onboarding", buildPreviewBody(canaryEmails), setSmartlead)}>
                   Preview onboarding
                 </Button>
                 <Button
                   size="sm"
-                  disabled={busy !== null || snapshot.mailbox_count === 0}
-                  onClick={() => confirmed("Connect GSM mailboxes to Smartlead? This CREATES sending accounts in Smartlead but sends no campaign email, creates no campaign and enables no warm-up.") && call("gsm-smartlead-onboard", "Connect GSM to Smartlead", { apply: true, external_action_confirmation: "CONNECT GSM MAILBOXES TO SMARTLEAD" }, setSmartlead)}
+                  disabled={busy !== null || snapshot.mailbox_count === 0 || !canaryApplyOk}
+                  onClick={() => canaryApplyOk && confirmed(`Connect ${canaryEmails.length} GSM mailbox(es) to Smartlead? This CREATES sending accounts in Smartlead but sends no campaign email, creates no campaign and enables no warm-up.`) && call("gsm-smartlead-onboard", "Connect GSM to Smartlead", buildApplyBody(canaryEmails), setSmartlead)}
+                >
+                  Connect GSM to Smartlead
+                </Button>
+              </div>
+              <!-- mailboxes to Smartlead? This CREATES sending accounts in Smartlead but sends no campaign email, creates no campaign and enables no warm-up.") && call("gsm-smartlead-onboard", "Connect GSM to Smartlead", { apply: true, external_action_confirmation: "CONNECT GSM MAILBOXES TO SMARTLEAD" }, setSmartlead)}
                 >
                   Connect GSM to Smartlead
                 </Button>
