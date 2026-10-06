@@ -83,7 +83,7 @@ describe("GSM onboarding canary limits", () => {
 });
 
 describe("gsm-smartlead-onboard function source", () => {
-  const src = readFileSync("supabase/functions/gsm-smartlead-onboard/index.ts", "utf8");
+  const src = readFileSync("supabase/functions/gsm-smartlead-onboard/handler.ts", "utf8");
   it("preview path returns before any create or credential export", () => {
     const gate = src.indexOf("isOnboardApplyAuthorized(apply, confirmation)");
     expect(gate).toBeGreaterThan(0);
