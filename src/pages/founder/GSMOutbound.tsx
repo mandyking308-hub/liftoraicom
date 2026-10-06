@@ -283,11 +283,6 @@ export default function GSMOutboundPage() {
                   Connect GSM to Smartlead
                 </Button>
               </div>
-              <!-- mailboxes to Smartlead? This CREATES sending accounts in Smartlead but sends no campaign email, creates no campaign and enables no warm-up.") && call("gsm-smartlead-onboard", "Connect GSM to Smartlead", { apply: true, external_action_confirmation: "CONNECT GSM MAILBOXES TO SMARTLEAD" }, setSmartlead)}
-                >
-                  Connect GSM to Smartlead
-                </Button>
-              </div>
               <ResultSummary title="Smartlead mailbox result" value={smartlead} />
             </div>
 
