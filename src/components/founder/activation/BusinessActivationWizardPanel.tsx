@@ -32,7 +32,7 @@ export const BusinessActivationWizardPanel = () => {
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase.from("businesses").select("id,name").order("name");
+      const { data } = await supabase.from("businesses").select("id,name").eq("portfolio_status", "active").order("name");
       const list = (data ?? []) as any[];
       setBusinesses(list);
       const neon = list.find((b) => /neon\s*candy/i.test(b.name));

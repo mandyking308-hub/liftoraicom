@@ -133,6 +133,7 @@ export async function listBusinesses(): Promise<BusinessRow[]> {
   const { data, error } = await supabase
     .from("businesses")
     .select("id, name")
+    .eq("portfolio_status", "active")
     .order("name");
   if (error) throw error;
   return (data ?? []) as BusinessRow[];

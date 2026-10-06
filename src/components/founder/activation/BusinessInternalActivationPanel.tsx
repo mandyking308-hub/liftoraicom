@@ -22,7 +22,7 @@ export default function BusinessInternalActivationPanel() {
   const { data: businesses = [] } = useQuery({
     queryKey: ["bia-businesses"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("businesses").select("id,name").order("name");
+      const { data, error } = await supabase.from("businesses").select("id,name").eq("portfolio_status", "active").order("name");
       if (error) throw error;
       return data ?? [];
     },
