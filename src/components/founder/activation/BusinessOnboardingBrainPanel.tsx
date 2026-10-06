@@ -42,7 +42,7 @@ export default function BusinessOnboardingBrainPanel() {
   const { data: businesses = [] } = useQuery({
     queryKey: ["onboarding-brain-businesses"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("businesses").select("id,name").order("name");
+      const { data, error } = await supabase.from("businesses").select("id,name").eq("portfolio_status", "active").order("name");
       if (error) throw error;
       return data ?? [];
     },

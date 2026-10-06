@@ -33,7 +33,7 @@ export default function BusinessOperatingStatus() {
     refetchInterval: 60000,
     queryFn: async () => {
       const sb: any = supabase as any;
-      const { data: businesses } = await sb.from("businesses").select("id,name,status");
+      const { data: businesses } = await sb.from("businesses").select("id,name").eq("portfolio_status", "active");
       if (!businesses?.length) return [];
       const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
       const [ledger, approvals, alerts, queue, contacts, social, deals, calls, closes] = await Promise.all([
@@ -69,8 +69,7 @@ export default function BusinessOperatingStatus() {
           : `${bCalls} calls today · ${bCloseApprovals} close awaiting`;
 
         let status: Row["status"] = "setup_needed";
-        if (b.status === "paused") status = "paused";
-        else if (failed > 0 || alertsN > 0) status = "watch";
+        if (failed > 0 || alertsN > 0) status = "watch";
         else if (bContacts.length > 0 || bDeals.length > 0) status = "active";
 
         let nextAction = "Configure business in onboarding factory";
