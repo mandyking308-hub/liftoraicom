@@ -3,6 +3,7 @@ import FounderLayout from "@/components/founder/FounderLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import GhatSmartleadControls from "@/components/founder/GhatSmartleadControls";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Flame, Globe, Mailbox, RefreshCw, ShieldCheck } from "lucide-react";
@@ -44,6 +45,11 @@ const Result = ({ title, value }: { title: string; value: Record<string, unknown
     "ghat_registry_mailboxes",
     "already_connected",
     "missing_from_smartlead",
+    "requested_count",
+    "scoped_registry_mailboxes",
+    "missing_by_domain",
+    "max_requested_emails",
+    "invalid_requested_count",
     "smartlead_accounts_created",
     "registry_rows_reconciled",
     "failed_count",
@@ -188,6 +194,11 @@ export default function GHATOutboundPage() {
                   Refresh status
                 </Button>
               </div>
+              <GhatSmartleadControls
+                busy={busy !== null}
+                onPreview={(body) => call("ghat-smartlead-onboard", "Smartlead preview", body, setSmartlead)}
+                onApply={(body) => call("ghat-smartlead-onboard", "Connect to Smartlead", body, setSmartlead)}
+              />
               <div className="text-xs text-muted-foreground">
                 Mailbox credentials are read server-side for the single provider handover and are never stored, shown or logged.
               </div>
