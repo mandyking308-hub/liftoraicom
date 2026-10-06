@@ -85,6 +85,7 @@ type CounterSnapshot = {
   ai_drafts_created: number;
   bounces: number;
   remaining_unseen: number;
+  internal_ignored?: number;
 };
 
 interface PollResult extends CounterSnapshot {
@@ -158,7 +159,8 @@ Deno.serve(async (req) => {
     }, 200);
   }
 
-  const admin = createClient(supabaseUrl, serviceRoleKey, {
+  // deno-lint-ignore no-explicit-any
+  const admin: any = createClient(supabaseUrl, serviceRoleKey, {
     auth: { persistSession: false },
   });
 
