@@ -178,7 +178,7 @@ describe("ghat-smartlead-onboard handler (behavioral)", () => {
       expect(s.warmup_enabled).toBe(false);
       expect(s.total_warmup_per_day).toBe(0);
     }
-    expect(h.calls.some((u) => /campaign|sequence|lead|webhook|apollo/i.test(u))).toBe(false);
+    expect(h.calls.every((u) => u.startsWith("https://server.smartlead.ai/api/v1/email-accounts/") || u === "https://export.stub.invalid/creds.csv")).toBe(true);
     expect(JSON.stringify(b)).not.toContain("synthetic-pw");
   });
 
