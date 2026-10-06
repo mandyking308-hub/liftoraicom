@@ -106,7 +106,19 @@ export default function GHATOutboundPage() {
     const { data, error } = await supabase.functions.invoke(fn, { body });
     setBusy(null);
     if (error) {
-      toast({ title: `${label} failed`, description: error.message, variant: "destructive" });
+      // Surface the server's blocker (e.g. invalid_requested_email) instead of a generic HTTP error.
+      let serverBody: Record<string, unknown> | null = null;
+      try {
+        const ctx = (error as { context?: Response }).context;
+        if (ctx && typeof ctx.json === "function") serverBody = (await ctx.json()) as Record<string, unknown>;
+      } catch { /* non-JSON error body */ }
+      if (serverBody) set(serverBody);
+      const blocker = serverBody?.blocker ?? serverBody?.error;
+      toast({
+        title: `${label} blocked`,
+        description: blocker ? `Server blocker: ${String(blocker)}` : error.message,
+        variant: "destructive",
+      });
       return;
     }
     const result = (data ?? {}) as Record<string, unknown>;
