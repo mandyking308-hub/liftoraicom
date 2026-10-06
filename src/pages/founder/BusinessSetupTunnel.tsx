@@ -115,7 +115,7 @@ export default function BusinessSetupTunnel() {
       const { data } = await supabase
         .from("businesses")
         .select("id, name, archived_at, archived_reason")
-        .eq("portfolio_status", "legacy_prelaunch")
+        .neq("portfolio_status", "active")
         .order("name");
       setArchivedBusinesses((data ?? []) as ArchivedBusinessRow[]);
     })();
