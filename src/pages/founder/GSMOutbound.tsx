@@ -232,13 +232,20 @@ export default function GSMOutboundPage() {
                 </Button>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => call("gsm-smartlead-onboard", "Preview onboarding", { apply: false }, setSmartlead)}>
+                <input
+                  aria-label="Canary mailbox emails"
+                  className="h-9 min-w-[260px] flex-1 rounded-md border border-input bg-background px-3 text-sm"
+                  placeholder="Canary emails (comma-separated, max 10)"
+                  value={onboardEmails}
+                  onChange={(e) => setOnboardEmails(e.target.value)}
+                />
+                <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => call("gsm-smartlead-onboard", "Preview onboarding", { apply: false, ...(canaryEmails.length ? { emails: canaryEmails } : {}) }, setSmartlead)}>
                   Preview onboarding
                 </Button>
                 <Button
                   size="sm"
-                  disabled={busy !== null || snapshot.mailbox_count === 0}
-                  onClick={() => confirmed("Connect GSM mailboxes to Smartlead? This CREATES sending accounts in Smartlead but sends no campaign email, creates no campaign and enables no warm-up.") && call("gsm-smartlead-onboard", "Connect GSM to Smartlead", { apply: true, external_action_confirmation: "CONNECT GSM MAILBOXES TO SMARTLEAD" }, setSmartlead)}
+                  disabled={busy !== null || snapshot.mailbox_count === 0 || canaryEmails.length === 0 || canaryEmails.length > 10}
+                  onClick={() => confirmed(`Connect ${canaryEmails.length} GSM mailbox(es) to Smartlead? This CREATES sending accounts in Smartlead but sends no campaign email, creates no campaign and enables no warm-up.`) && call("gsm-smartlead-onboard", "Connect GSM to Smartlead", { apply: true, emails: canaryEmails, external_action_confirmation: "CONNECT GSM MAILBOXES TO SMARTLEAD" }, setSmartlead)}
                 >
                   Connect GSM to Smartlead
                 </Button>
