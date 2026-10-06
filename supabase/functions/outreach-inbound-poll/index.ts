@@ -214,7 +214,7 @@ Deno.serve(async (req) => {
     }, 200);
   }
 
-  const settled = await Promise.allSettled((inboxes ?? []).map((ib) => pollInbox(admin, encKey, ib as InboxRow)));
+  const settled = await Promise.allSettled((inboxes ?? []).map((ib: unknown) => pollInbox(admin, encKey, ib as InboxRow)));
   const results: PollResult[] = settled.map((entry, index) => {
     if (entry.status === "fulfilled") return entry.value;
     const inbox = (inboxes ?? [])[index] as InboxRow | undefined;
@@ -231,7 +231,8 @@ Deno.serve(async (req) => {
 });
 
 async function pollInbox(
-  admin: ReturnType<typeof createClient>,
+  // deno-lint-ignore no-explicit-any
+  admin: any,
   encKey: string,
   ib: InboxRow,
 ): Promise<PollResult> {
@@ -404,7 +405,8 @@ async function pollInbox(
 }
 
 async function persistMessage(
-  admin: ReturnType<typeof createClient>,
+  // deno-lint-ignore no-explicit-any
+  admin: any,
   ib: InboxRow,
   parsed: Awaited<ReturnType<typeof simpleParser>>,
   uid: number,
@@ -1010,7 +1012,8 @@ async function closeClient(inboxId: string, client: ImapFlow | null) {
 }
 
 async function recordInboundPoll(
-  admin: ReturnType<typeof createClient>,
+  // deno-lint-ignore no-explicit-any
+  admin: any,
   result: PollResult,
 ) {
   try {
