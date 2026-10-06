@@ -101,6 +101,8 @@ export default function GSMOutboundPage() {
   const [webhook, setWebhook] = useState<Record<string, unknown> | null>(null);
   const [poolResult, setPoolResult] = useState<Record<string, unknown> | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
+  const [onboardEmails, setOnboardEmails] = useState("");
+  const canaryEmails = Array.from(new Set(onboardEmails.split(/[\s,;]+/).map((e) => e.trim().toLowerCase()).filter(Boolean)));
 
   const load = useCallback(async () => {
     const [{ data: d }, { data: m }, { data: a }, { data: p }, { data: s }] = await Promise.all([
