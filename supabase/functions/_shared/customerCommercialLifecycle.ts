@@ -187,7 +187,7 @@ export function validateStripePriceAgainstOffer(input: {
   if (String(price.currency ?? "").toUpperCase() !== currency) return { ok: false, reason: "stripe_currency_mismatch" };
   if (!Number.isInteger(price.unit_amount) || price.unit_amount <= 0) return { ok: false, reason: "stripe_price_amount_invalid" };
   let digits: number;
-  try { digits = new Intl.NumberFormat("en", { style: "currency", currency }).resolvedOptions().maximumFractionDigits; }
+  try { digits = new Intl.NumberFormat("en", { style: "currency", currency }).resolvedOptions().maximumFractionDigits ?? 2; }
   catch { return { ok: false, reason: "stripe_currency_invalid" }; }
   if (price.unit_amount !== Math.round(approvedPriceAmount * (10 ** digits))) return { ok: false, reason: "stripe_price_amount_mismatch" };
   if (recurrence ? (!price.recurring || price.recurring.interval !== recurrence) : !!price.recurring) {
