@@ -3,6 +3,7 @@ import FounderLayout from "@/components/founder/FounderLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import GhatSmartleadControls from "@/components/founder/GhatSmartleadControls";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Flame, Globe, Mailbox, RefreshCw, ShieldCheck } from "lucide-react";
@@ -44,6 +45,11 @@ const Result = ({ title, value }: { title: string; value: Record<string, unknown
     "ghat_registry_mailboxes",
     "already_connected",
     "missing_from_smartlead",
+    "requested_count",
+    "scoped_registry_mailboxes",
+    "missing_by_domain",
+    "max_requested_emails",
+    "invalid_requested_count",
     "smartlead_accounts_created",
     "registry_rows_reconciled",
     "failed_count",
@@ -100,7 +106,19 @@ export default function GHATOutboundPage() {
     const { data, error } = await supabase.functions.invoke(fn, { body });
     setBusy(null);
     if (error) {
-      toast({ title: `${label} failed`, description: error.message, variant: "destructive" });
+      // Surface the server's blocker (e.g. invalid_requested_email) instead of a generic HTTP error.
+      let serverBody: Record<string, unknown> | null = null;
+      try {
+        const ctx = (error as { context?: Response }).context;
+        if (ctx && typeof ctx.json === "function") serverBody = (await ctx.json()) as Record<string, unknown>;
+      } catch { /* non-JSON error body */ }
+      if (serverBody) set(serverBody);
+      const blocker = serverBody?.blocker ?? serverBody?.error;
+      toast({
+        title: `${label} blocked`,
+        description: blocker ? `Server blocker: ${String(blocker)}` : error.message,
+        variant: "destructive",
+      });
       return;
     }
     const result = (data ?? {}) as Record<string, unknown>;
@@ -184,20 +202,15 @@ export default function GHATOutboundPage() {
                 <Badge variant={smartleadConnected === mailboxes.length && mailboxes.length > 0 ? "default" : "secondary"}>
                   Smartlead: {smartleadConnected}/{mailboxes.length} connected
                 </Badge>
-                <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => call("ghat-smartlead-onboard", "Smartlead preview", { apply: false }, setSmartlead)}>
-                  Preview connection
-                </Button>
-                <Button
-                  size="sm"
-                  disabled={busy !== null || mailboxes.length === 0}
-                  onClick={() => confirmed("Connect the GHAT mailboxes to Smartlead as sending accounts? No campaign is created, no lead is pushed and no email is sent.") && call("ghat-smartlead-onboard", "Connect to Smartlead", { apply: true, external_action_confirmation: "CONNECT GHAT MAILBOXES TO SMARTLEAD" }, setSmartlead)}
-                >
-                  Connect mailboxes
-                </Button>
                 <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => call("gsm-smartlead-mailbox-sync", "Smartlead status refresh", { apply: false, estate: GHAT_ESTATE_KEY }, setSmartlead)}>
                   Refresh status
                 </Button>
               </div>
+              <GhatSmartleadControls
+                busy={busy !== null}
+                onPreview={(body) => call("ghat-smartlead-onboard", "Smartlead preview", body, setSmartlead)}
+                onApply={(body) => call("ghat-smartlead-onboard", "Connect to Smartlead", body, setSmartlead)}
+              />
               <div className="text-xs text-muted-foreground">
                 Mailbox credentials are read server-side for the single provider handover and are never stored, shown or logged.
               </div>
