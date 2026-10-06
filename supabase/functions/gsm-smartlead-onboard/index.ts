@@ -8,10 +8,13 @@ import { GSM_ESTATE_KEY, isGsmEstateEmail } from "../_shared/senderEstates.ts";
 import {
   GSM_EXPORT_DOMAIN_CHUNK,
   GSM_ONBOARD_CONFIRMATION,
+  GSM_ONBOARD_MAX_EMAILS,
   chunk,
   domainsOf,
   isOnboardApplyAuthorized,
+  normalizeRequestedEmails,
   partitionAgainstSmartlead,
+  scopeRequestedGsmRegistry,
   selectGsmRegistry,
 } from "../_shared/gsmSmartleadOnboard.ts";
 
@@ -111,6 +114,7 @@ Deno.serve(async (req) => {
   try { body = await req.json(); } catch { /* empty body allowed */ }
   const apply = body.apply === true;
   const confirmation = String(body.external_action_confirmation ?? "");
+  const requestedEmails = normalizeRequestedEmails(body.emails);
 
   const base = {
     ok: true,
@@ -156,14 +160,56 @@ Deno.serve(async (req) => {
     .eq("estate_classification", GSM_ESTATE_KEY);
 
   const gsmRegistry = selectGsmRegistry((registry ?? []) as { email: string; estate_classification: string; [k: string]: unknown }[]);
-  const { alreadyConnected, missing } = partitionAgainstSmartlead(gsmRegistry, smartleadEmails);
+  const { scoped: scopedRegistry, invalid: invalidRequestedEmails } =
+    scopeRequestedGsmRegistry(gsmRegistry, requestedEmails);
+  const { alreadyConnected, missing } = partitionAgainstSmartlead(scopedRegistry, smartleadEmails);
 
   const inventory = {
     smartlead_accounts_seen: accounts.length,
     gsm_registry_mailboxes: gsmRegistry.length,
+    requested_count: requestedEmails.length,
+    scoped_registry_mailboxes: scopedRegistry.length,
     already_connected: alreadyConnected.length,
     missing_from_smartlead: missing.length,
   };
+
+  if (apply && requestedEmails.length === 0) {
+    return json({
+      ...base,
+      ok: false,
+      mode: "blocked",
+      executed: false,
+      ...inventory,
+      blocker: "requested_emails_required",
+      message: "Apply requires an explicit mailbox canary list. No Smartlead account was created.",
+    }, 400);
+  }
+
+  if (requestedEmails.length > GSM_ONBOARD_MAX_EMAILS) {
+    return json({
+      ...base,
+      ok: false,
+      mode: "blocked",
+      executed: false,
+      ...inventory,
+      blocker: "requested_email_limit_exceeded",
+      max_requested_emails: GSM_ONBOARD_MAX_EMAILS,
+      message: "At most 10 GSM mailboxes may be onboarded in one call.",
+    }, 400);
+  }
+
+  if (invalidRequestedEmails.length > 0) {
+    return json({
+      ...base,
+      ok: false,
+      mode: "blocked",
+      executed: false,
+      ...inventory,
+      blocker: "invalid_requested_email",
+      invalid_requested_count: invalidRequestedEmails.length,
+      message: "One or more requested mailboxes are outside the safe GSM registry. Nothing was changed.",
+    }, 400);
+  }
 
   if (!isOnboardApplyAuthorized(apply, confirmation)) {
     return json({
@@ -176,8 +222,8 @@ Deno.serve(async (req) => {
     });
   }
 
-  if (gsmRegistry.length === 0) {
-    return json({ ...base, ok: false, mode: "blocked", executed: false, ...inventory, blocker: "no_gsm_mailboxes_in_registry" }, 409);
+  if (scopedRegistry.length === 0) {
+    return json({ ...base, ok: false, mode: "blocked", executed: false, ...inventory, blocker: "no_gsm_mailboxes_in_scope" }, 409);
   }
   if (!winnrTokenConfigured(WINNR_TOKEN)) {
     return json({ ...base, ok: false, mode: "blocked", executed: false, ...inventory, blocker: "WINNR_API_TOKEN_missing" }, 409);
@@ -291,7 +337,7 @@ Deno.serve(async (req) => {
   );
 
   let updated = 0;
-  for (const row of gsmRegistry) {
+  for (const row of scopedRegistry) {
     const acct = refreshedByEmail.get(String(row.email).toLowerCase());
     if (!acct) continue;
     const warmupDetails = acct.warmup_details as Record<string, unknown> | null;
@@ -315,7 +361,7 @@ Deno.serve(async (req) => {
     provider: "smartlead",
     run_mode: "gsm_onboard_apply",
     status: failed.length === 0 ? "succeeded" : "partial",
-    mailboxes_seen: gsmRegistry.length,
+    mailboxes_seen: scopedRegistry.length,
     mailboxes_upserted: updated,
     summary: { estate: GSM_ESTATE_KEY, created: created.length, failed: failed.length },
     finished_at: new Date().toISOString(),
