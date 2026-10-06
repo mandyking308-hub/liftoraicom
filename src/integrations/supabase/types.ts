@@ -14058,24 +14058,33 @@ export type Database = {
       }
       businesses: {
         Row: {
+          archived_at: string | null
+          archived_reason: string | null
           created_at: string
           execution_mode_id: string | null
           id: string
           name: string
+          portfolio_status: string
           updated_at: string
         }
         Insert: {
+          archived_at?: string | null
+          archived_reason?: string | null
           created_at?: string
           execution_mode_id?: string | null
           id?: string
           name: string
+          portfolio_status?: string
           updated_at?: string
         }
         Update: {
+          archived_at?: string | null
+          archived_reason?: string | null
           created_at?: string
           execution_mode_id?: string | null
           id?: string
           name?: string
+          portfolio_status?: string
           updated_at?: string
         }
         Relationships: [
