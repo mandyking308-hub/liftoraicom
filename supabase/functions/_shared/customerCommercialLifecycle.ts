@@ -187,7 +187,7 @@ export function validateStripePriceAgainstOffer(input: {
   if (String(price.currency ?? "").toUpperCase() !== currency) return { ok: false, reason: "stripe_currency_mismatch" };
   if (!Number.isInteger(price.unit_amount) || price.unit_amount <= 0) return { ok: false, reason: "stripe_price_amount_invalid" };
   let digits: number;
-  try { digits = new Intl.NumberFormat("en", { style: "currency", currency }).resolvedOptions().maximumFractionDigits; }
+  try { digits = new Intl.NumberFormat("en", { style: "currency", currency }).resolvedOptions().maximumFractionDigits ?? 2; }
   catch { return { ok: false, reason: "stripe_currency_invalid" }; }
   if (price.unit_amount !== Math.round(approvedPriceAmount * (10 ** digits))) return { ok: false, reason: "stripe_price_amount_mismatch" };
   if (recurrence ? (!price.recurring || price.recurring.interval !== recurrence) : !!price.recurring) {
@@ -207,7 +207,7 @@ export function approvedCheckoutAmount(input: {
     return { ok: false, reason: "invalid_approved_checkout_amount" };
   }
   try {
-    const digits = new Intl.NumberFormat("en", { style: "currency", currency }).resolvedOptions().maximumFractionDigits;
+    const digits = new Intl.NumberFormat("en", { style: "currency", currency }).resolvedOptions().maximumFractionDigits ?? 2;
     const minorUnits = Math.round(approvedAmount * (10 ** digits) * (1 - discountPercent / 100));
     if (minorUnits <= 0) return { ok: false, reason: "checkout_amount_must_be_positive" };
     return { ok: true, amount: minorUnits / (10 ** digits), minorUnits };
@@ -221,7 +221,7 @@ export function stripeMinorUnitsToMajor(amount: unknown, currency: string): numb
   if (!Number.isSafeInteger(minorUnits) || minorUnits < 0) return null;
   try {
     const digits = new Intl.NumberFormat("en", { style: "currency", currency: currency.toUpperCase() })
-      .resolvedOptions().maximumFractionDigits;
+      .resolvedOptions().maximumFractionDigits ?? 2;
     return minorUnits / (10 ** digits);
   } catch {
     return null;
