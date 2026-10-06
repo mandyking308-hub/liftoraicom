@@ -895,7 +895,7 @@ async function handleChargeRefunded(charge: Stripe.Charge, event: Stripe.Event) 
   if (!payment) return;
   const currentCharge = stripe ? await stripe.charges.retrieve(charge.id) : charge;
   const refundCurrency = String(currentCharge.currency ?? payment.currency ?? "USD").toUpperCase();
-  const refundExponent = new Intl.NumberFormat("en", { style: "currency", currency: refundCurrency }).resolvedOptions().maximumFractionDigits ?? 2;
+  const refundExponent = new Intl.NumberFormat("en", { style: "currency", currency: refundCurrency }).resolvedOptions().maximumFractionDigits;
   const refunded = (currentCharge.amount_refunded ?? 0) / (10 ** refundExponent);
   const fullyRefunded = (currentCharge.amount_refunded ?? 0) >= (currentCharge.amount ?? Number.POSITIVE_INFINITY);
   await admin.from("qtc_payments").update({
