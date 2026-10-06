@@ -113,6 +113,11 @@ export default function BusinessOnboardingFactoryPanel() {
                 {businesses.map((b: any) => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
               </SelectContent>
             </Select>
+            {businesses.length === 0 && (
+              <p className="mt-1 text-xs text-muted-foreground">
+                No active portfolio businesses yet. Fresh onboarding can start whenever you're ready — archived businesses are not available here.
+              </p>
+            )}
           </div>
           <div>
             <Label>Or new business name (virtual / test)</Label>
