@@ -30,7 +30,12 @@ export default function BusinessOnboardingFactoryPanel() {
   const { data: businesses = [] } = useQuery({
     queryKey: ["factory-businesses"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("businesses").select("id,name").order("name");
+      // Only active portfolio businesses can be onboarded from this workflow.
+      const { data, error } = await supabase
+        .from("businesses")
+        .select("id,name")
+        .eq("portfolio_status", "active")
+        .order("name");
       if (error) throw error;
       return data ?? [];
     },
