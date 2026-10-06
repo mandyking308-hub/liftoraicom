@@ -64,6 +64,7 @@ function makeBusinessesQuery() {
     search = pattern;
     return query;
   };
+  query.eq = () => query;
   query.order = () => query;
   query.range = async (start: number, end: number) => {
     pageRequests.push({ start, end, search });
