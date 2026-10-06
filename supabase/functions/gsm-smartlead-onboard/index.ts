@@ -8,10 +8,12 @@ import { GSM_ESTATE_KEY, isGsmEstateEmail } from "../_shared/senderEstates.ts";
 import {
   GSM_EXPORT_DOMAIN_CHUNK,
   GSM_ONBOARD_CONFIRMATION,
+  GSM_ONBOARD_MAX_APPLY_EMAILS,
   chunk,
   domainsOf,
   isOnboardApplyAuthorized,
   partitionAgainstSmartlead,
+  resolveOnboardWhitelist,
   selectGsmRegistry,
 } from "../_shared/gsmSmartleadOnboard.ts";
 
@@ -155,12 +157,28 @@ Deno.serve(async (req) => {
     .select("id, email, smartlead_email_account_id, smartlead_status, smtp_status, imap_status, warmup_status, configured_daily_limit, sender_name, estate_classification")
     .eq("estate_classification", GSM_ESTATE_KEY);
 
-  const gsmRegistry = selectGsmRegistry((registry ?? []) as { email: string; estate_classification: string; [k: string]: unknown }[]);
+  const safeGsmRegistry = selectGsmRegistry((registry ?? []) as { email: string; estate_classification: string; [k: string]: unknown }[]);
+
+  // Optional explicit whitelist. Apply REQUIRES 1..10 in-scope GSM emails.
+  const wl = resolveOnboardWhitelist(body.emails, safeGsmRegistry, apply);
+  if (!wl.ok) {
+    return json({
+      ...base,
+      ok: false,
+      mode: "blocked",
+      executed: false,
+      blocker: wl.blocker,
+      ...(wl.invalid ? { invalid_requested_emails: wl.invalid } : {}),
+      max_apply_emails: GSM_ONBOARD_MAX_APPLY_EMAILS,
+    }, 400);
+  }
+  const gsmRegistry = wl.scoped ?? safeGsmRegistry;
   const { alreadyConnected, missing } = partitionAgainstSmartlead(gsmRegistry, smartleadEmails);
 
   const inventory = {
     smartlead_accounts_seen: accounts.length,
-    gsm_registry_mailboxes: gsmRegistry.length,
+    gsm_registry_mailboxes: safeGsmRegistry.length,
+    ...(wl.scoped ? { requested_count: wl.requested.length, scoped_registry_mailboxes: gsmRegistry.length } : {}),
     already_connected: alreadyConnected.length,
     missing_from_smartlead: missing.length,
   };
