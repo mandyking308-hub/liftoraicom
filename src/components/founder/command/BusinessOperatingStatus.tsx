@@ -73,8 +73,7 @@ export default function BusinessOperatingStatus() {
         else if (bContacts.length > 0 || bDeals.length > 0) status = "active";
 
         let nextAction = "Configure business in onboarding factory";
-        if (status === "paused") nextAction = "Unpause or archive this business";
-        else if (failed > 0) nextAction = `Investigate ${failed} failed send${failed === 1 ? "" : "s"}`;
+        if (failed > 0) nextAction = `Investigate ${failed} failed send${failed === 1 ? "" : "s"}`;
         else if (appr > 0) nextAction = `Clear ${appr} pending approval${appr === 1 ? "" : "s"}`;
         else if (socialPending > 0) nextAction = `Review ${socialPending} social draft${socialPending === 1 ? "" : "s"}`;
         else if (blocked > 0) nextAction = `Review ${blocked} blocked outreach row${blocked === 1 ? "" : "s"}`;
