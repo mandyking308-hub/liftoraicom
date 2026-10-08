@@ -57,6 +57,13 @@
       "when": 1791459442817,
       "tag": "0007_provider_secret_ref_uppercase_hex",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1791460102100,
+      "tag": "0008_smartlead_campaign_sync_tables",
+      "breakpoints": true
     }
   ]
 }
