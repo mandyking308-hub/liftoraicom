@@ -206,21 +206,19 @@ export default function BusinessSetupTunnel() {
       return;
     }
     try {
-      // Legacy three (unchanged) — keep activation spine bootstrapped.
-      const bootstrap = async (table: string, payload: Record<string, unknown>) => {
-        try { await (supabase.from(table as any) as any).insert(payload); } catch { /* tolerated */ }
-      };
-      await bootstrap("business_activation_profiles", { business_id: state.businessId, status: "draft", stage: "setup_tunnel" });
-      await bootstrap("business_onboarding_factory_runs", { business_id: state.businessId, status: "draft" });
-      await bootstrap("business_runtime_activation", { business_id: state.businessId, runtime_mode: "simulation", is_live: false });
-
       const moduleConnections = await runPromoteIntoLiftorModules(state);
       const next: TunnelState = { ...state, moduleConnections };
       setState(next); save(next);
       await saveRemote(next, counts);
-      const connected = Object.values(moduleConnections).filter((c) => c?.status === "connected").length;
-      const manual = Object.values(moduleConnections).filter((c) => c?.status === "manual_action_needed").length;
-      toast.success(`Promoted as drafts only. ${connected} connected, ${manual} need manual wiring. Nothing live.`);
+      const vals = Object.values(moduleConnections);
+      const connected = vals.filter((c) => c?.status === "connected").length;
+      const manual = vals.filter((c) => c?.status === "manual_action_needed").length;
+      const failed = vals.filter((c) => c?.status === "failed");
+      if (failed.length) {
+        toast.error(`${failed.length} area(s) failed: ${failed.map((c) => c?.note).join(" | ")}`);
+      } else {
+        toast.success(`Promoted as drafts only. ${connected} connected, ${manual} manual. Nothing live.`);
+      }
     } catch (e: any) {
       toast.error(e?.message ?? "Promotion failed.");
     }
@@ -513,6 +511,7 @@ export default function BusinessSetupTunnel() {
                   const c = state.moduleConnections?.[a.key];
                   const status = c?.status ?? "not_attempted";
                   const color = status === "connected" ? "text-emerald-500"
+                    : status === "failed" ? "text-destructive"
                     : status === "manual_action_needed" ? "text-amber-500" : "text-muted-foreground";
                   return (
                     <div key={a.key} className="border border-border/40 rounded p-2">
