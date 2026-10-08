@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { AlertTriangle, MessageSquare, RefreshCw } from "lucide-react";
 import { FunctionsHttpError } from "@supabase/supabase-js";
+import { trackingFlags } from "../../../supabase/functions/_shared/smartleadCampaignSync";
 
 type Mapping = { business_id: string; provider_campaign_id: string; provider_campaign_name: string | null };
 type Snap = Record<string, any>;
@@ -45,6 +46,11 @@ export default function SmartleadCommandCentre() {
   const [drafts, setDrafts] = useState<Snap[]>([]);
   const [draftBody, setDraftBody] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [wantOpens, setWantOpens] = useState(false);
+  const [wantClicks, setWantClicks] = useState(false);
+  const [disclosed, setDisclosed] = useState(false);
+  const [trackConfirm, setTrackConfirm] = useState("");
+  const [savingTrack, setSavingTrack] = useState(false);
 
   const sel = useMemo(() => {
     const b = params.get("business"), c = params.get("campaign");
@@ -87,6 +93,23 @@ export default function SmartleadCommandCentre() {
     } finally { setSyncing(false); load(); }
   };
 
+  useEffect(() => {
+    const f = trackingFlags(snap?.track_settings);
+    setWantOpens(f.opensTracked === true); setWantClicks(f.clicksTracked === true);
+  }, [snap?.track_settings]);
+
+  const saveTracking = async () => {
+    if (!sel) return;
+    setSavingTrack(true);
+    try {
+      await invoke({ action: "set_tracking", business_id: sel.business_id, campaign_id: sel.provider_campaign_id, opens: wantOpens, clicks: wantClicks, confirmation: trackConfirm });
+      toast({ title: "Tracking updated for this campaign only" });
+      setTrackConfirm("");
+      await syncNow();
+    } catch (e) { toast({ title: "Tracking not changed", description: (e as Error).message, variant: "destructive" }); }
+    finally { setSavingTrack(false); }
+  };
+
   const openThread = async (lead: Snap) => {
     setThread(lead); setDraftBody(""); setConfirm("");
     const [m, d] = await Promise.all([
@@ -119,25 +142,26 @@ export default function SmartleadCommandCentre() {
 
   const lastOk = snap?.last_success_at as string | undefined;
   const stale = !lastOk || Date.now() - new Date(lastOk).getTime() > STALE_MS;
-  const trackingOff = Array.isArray(snap?.track_settings) && snap!.track_settings.includes("DONT_EMAIL_OPEN");
+  const tf = trackingFlags(snap?.track_settings);
+  const opensOff = tf.opensTracked === false, clicksOff = tf.clicksTracked === false;
   const hasReplies = messages.some((m) => m.direction === "REPLY");
 
   const metrics: [string, unknown, string?][] = snap ? [
     ["Status", snap.campaign_status], ["Contacts", snap.total_leads], ["Not started", snap.not_started],
     ["In progress", snap.in_progress], ["Sent", snap.sent_count],
-    ["Opens (approx.)", trackingOff ? "tracking off" : snap.unique_open_count, "Tracked opens are approximate; Apple Mail privacy can inflate them."],
-    ["Clicks", trackingOff ? "tracking off" : snap.unique_click_count], ["Replies", snap.reply_count],
+    ["Opens (approx.)", opensOff ? "tracking off" : snap.unique_open_count, "Tracked opens are approximate; Apple Mail privacy can inflate them."],
+    ["Clicks", clicksOff ? "tracking off" : snap.unique_click_count], ["Replies", snap.reply_count],
     ["Interested (Smartlead)", snap.interested], ["Bounced", snap.bounce_count], ["Unsubscribed", snap.unsubscribed_count],
     ["Daily cap", snap.max_leads_per_day],
   ] : [];
 
   return (
     <FounderLayout>
-      <div className="space-y-6 p-6">
+      <div className="space-y-6 p-4 md:p-6">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold text-foreground">Outreach Command Centre</h1>
-            <p className="text-sm text-muted-foreground">Live Smartlead figures, synced into Liftor. Read-only unless you explicitly send a reply.</p>
+            <p className="text-sm text-muted-foreground">Live Smartlead figures, synced into Liftor. Background sync is not enabled yet — use Sync now.</p>
           </div>
           <div className="flex items-center gap-2">
             <select className="h-9 rounded-md border border-border bg-background px-2 text-sm text-foreground"
@@ -187,7 +211,7 @@ export default function SmartleadCommandCentre() {
 
             <Card>
               <CardHeader><CardTitle className="text-base">Prospects</CardTitle></CardHeader>
-              <CardContent>
+              <CardContent className="overflow-x-auto">
                 <Table>
                   <TableHeader><TableRow>
                     <TableHead>Name</TableHead><TableHead>School group</TableHead><TableHead>Email</TableHead>
@@ -202,7 +226,7 @@ export default function SmartleadCommandCentre() {
                         <TableCell className="font-mono text-xs">{l.email}</TableCell>
                         <TableCell><Badge variant="outline">{fmt(l.lead_status)}</Badge></TableCell>
                         <TableCell>{l.sent_count} {l.last_sent_at ? `· ${fmtTime(l.last_sent_at)}` : ""}</TableCell>
-                        <TableCell>{trackingOff ? "tracking off" : `${fmt(l.open_count)} / ${fmt(l.click_count)}`}</TableCell>
+                        <TableCell>{`${opensOff ? "off" : fmt(l.open_count)} / ${clicksOff ? "off" : fmt(l.click_count)}`}</TableCell>
                         <TableCell className="max-w-xs truncate" title={l.last_reply_preview ?? ""}>{l.last_reply_at ? `${fmtTime(l.last_reply_at)} — ${l.last_reply_preview ?? ""}` : "No reply"}</TableCell>
                         <TableCell>{l.is_unsubscribed ? <Badge variant="destructive">Unsubscribed</Badge> : "—"}</TableCell>
                         <TableCell><Button size="sm" variant="outline" onClick={() => openThread(l)}><MessageSquare className="mr-1 h-3 w-3" />View thread</Button></TableCell>
@@ -211,6 +235,26 @@ export default function SmartleadCommandCentre() {
                     {!leads.length && <TableRow><TableCell colSpan={9} className="text-center text-muted-foreground">No synced contacts yet — press Sync now.</TableCell></TableRow>}
                   </TableBody>
                 </Table>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader><CardTitle className="text-base">Open &amp; click tracking (this campaign only)</CardTitle></CardHeader>
+              <CardContent className="space-y-3 text-sm">
+                <p className="text-muted-foreground">
+                  Currently: opens <span className="text-foreground">{tf.opensTracked === null ? "unknown" : tf.opensTracked ? "tracked" : "off"}</span>,
+                  clicks <span className="text-foreground">{tf.clicksTracked === null ? "unknown" : tf.clicksTracked ? "tracked" : "off"}</span>.
+                  Tracked opens are approximate — privacy features (e.g. Apple Mail) can register opens nobody made, so an open is never proof someone read the email. Past emails cannot be back-filled.
+                </p>
+                <div className="flex flex-wrap gap-4">
+                  <label className="flex items-center gap-2"><input type="checkbox" checked={wantOpens} onChange={(e) => setWantOpens(e.target.checked)} />Track opens</label>
+                  <label className="flex items-center gap-2"><input type="checkbox" checked={wantClicks} onChange={(e) => setWantClicks(e.target.checked)} />Track clicks</label>
+                </div>
+                <label className="flex items-start gap-2 text-muted-foreground"><input type="checkbox" className="mt-1" checked={disclosed} onChange={(e) => setDisclosed(e.target.checked)} />I confirm the privacy notice linked from these emails discloses open/click tracking.</label>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Input className="h-9 w-80" placeholder="Type CHANGE TRACKING FOR THIS CAMPAIGN ONLY" value={trackConfirm} onChange={(e) => setTrackConfirm(e.target.value)} />
+                  <Button size="sm" variant="outline" disabled={savingTrack || ((wantOpens || wantClicks) && !disclosed) || trackConfirm !== "CHANGE TRACKING FOR THIS CAMPAIGN ONLY"} onClick={saveTracking}>Save tracking</Button>
+                </div>
               </CardContent>
             </Card>
 
