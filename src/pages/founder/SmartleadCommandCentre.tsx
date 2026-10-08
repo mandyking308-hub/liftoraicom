@@ -264,7 +264,7 @@ export default function SmartleadCommandCentre() {
             <Card>
               <CardHeader><CardTitle className="text-base">Instant updates from Smartlead (webhook)</CardTitle></CardHeader>
               <CardContent className="space-y-2 text-sm text-muted-foreground">
-                {Array.isArray(snap.webhooks) && snap.webhooks.length ? snap.webhooks.map((w: Snap) => (
+                {Array.isArray(snap?.webhooks) && snap.webhooks.length ? snap.webhooks.map((w: Snap) => (
                   <div key={w.id} className="space-y-1">
                     <div className="flex flex-wrap items-center gap-2"><span className="text-foreground">{w.name}</span><Badge variant="outline">#{w.id}</Badge><Badge variant="secondary">Configured on Smartlead</Badge><Badge variant="destructive">Liftor receiver disabled until signing key is verified</Badge></div>
                     <div>Events: {(w.event_types ?? []).join(", ").toLowerCase().replace(/_/g, " ")}{w.categories?.length ? ` · categories: ${w.categories.join(", ")}` : ""}</div>
