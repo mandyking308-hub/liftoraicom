@@ -186,8 +186,13 @@ export default function BusinessSetupTunnel() {
 
   async function confirmCreateRealBusiness() {
     if (!state || !state.isDraft) return;
-    const newId = await promoteDraftToBusiness(state);
-    if (!newId) { toast.error("Could not create draft business. Try again."); return; }
+    let newId: string;
+    try {
+      newId = await promoteDraftToBusiness(state);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not create business.");
+      return;
+    }
     const next: TunnelState = { ...state, businessId: newId, isDraft: false };
     setState(next); save(next);
     await saveRemote(next, counts);

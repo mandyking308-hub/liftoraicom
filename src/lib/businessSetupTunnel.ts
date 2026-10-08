@@ -339,15 +339,27 @@ export async function listAllRemote(): Promise<TunnelState[]> {
   } catch { return []; }
 }
 
-// Create a real draft business row when founder confirms a new draft.
-// No status flags exist on `businesses`; we only insert name. Returns new uuid.
-export async function promoteDraftToBusiness(state: TunnelState): Promise<string | null> {
+// Create a real active canonical business row when founder confirms a new draft.
+// Names are unique only among active businesses; archived legacy rows may share a name.
+// Throws an Error with a meaningful message instead of silently returning null.
+export async function promoteDraftToBusiness(state: TunnelState): Promise<string> {
   if (isUuid(state.businessId)) return state.businessId;
-  try {
-    const { data, error } = await supabase.from("businesses").insert({ name: state.businessName }).select("id").single();
-    if (error) return null;
-    return (data as { id: string } | null)?.id ?? null;
-  } catch { return null; }
+  const name = (state.businessName ?? "").trim();
+  if (!name) throw new Error("Business name is required before creating the business.");
+  const { data, error } = await supabase
+    .from("businesses")
+    .insert({ name, portfolio_status: "active" } as any)
+    .select("id")
+    .single();
+  if (error) {
+    if ((error as { code?: string }).code === "23505") {
+      throw new Error(`An active business named "${name}" already exists. Archived businesses with the same name are allowed.`);
+    }
+    throw new Error(`Could not create business: ${error.message}`);
+  }
+  const id = (data as { id: string } | null)?.id;
+  if (!id) throw new Error("Could not create business: no id returned.");
+  return id;
 }
 
 // ---------------------------------------------------------------------------
