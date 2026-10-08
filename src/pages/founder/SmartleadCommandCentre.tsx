@@ -157,7 +157,7 @@ export default function SmartleadCommandCentre() {
 
   return (
     <FounderLayout>
-      <div className="space-y-6 p-4 md:p-6">
+      <div className="min-w-0 max-w-full space-y-6 overflow-x-hidden p-4 md:p-6">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold text-foreground">Outreach Command Centre</h1>
@@ -189,7 +189,7 @@ export default function SmartleadCommandCentre() {
             </div>
 
             {snap && (
-              <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
                 {metrics.map(([label, v, hint]) => (
                   <div key={label} title={hint} className="tech-card rounded-xl border border-border p-3">
                     <div className="text-xs text-muted-foreground">{label}</div>
