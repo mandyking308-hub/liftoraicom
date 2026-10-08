@@ -118,3 +118,52 @@ export const trackingFlags = (track: string[] | null | undefined) => ({
   opensTracked: Array.isArray(track) ? !track.includes("DONT_EMAIL_OPEN") : null,
   clicksTracked: Array.isArray(track) ? !track.includes("DONT_LINK_CLICK") : null,
 });
+
+export interface ActivityEvent {
+  event_type: string;
+  dedupe_key: string;
+  provider_message_id: string | null;
+  occurred_at: string | null;
+  details: Record<string, unknown>;
+}
+
+/**
+ * Derive durable, idempotent activity events from real provider data only.
+ * Message events are keyed on provider message ids; state events are keyed on
+ * lead + state, so repeated syncs never duplicate. No data -> no events.
+ */
+export function deriveActivityEvents(
+  leadId: string,
+  lead: { status?: unknown; is_unsubscribed?: unknown; lead_category_id?: unknown },
+  history: HistoryMsg[],
+): ActivityEvent[] {
+  const out: ActivityEvent[] = [];
+  history.forEach((m, i) => {
+    const t = String(m.type ?? "").toUpperCase();
+    const base = dedupeKey(m);
+    const occurred = m.time ? String(m.time) : null;
+    if (t === "SENT") {
+      out.push({ event_type: i === 0 || m.email_seq_number === "1" ? "first_email_sent" : "email_sent", dedupe_key: `sent:${base}`, provider_message_id: m.message_id ?? null, occurred_at: occurred, details: { sequence: m.email_seq_number ?? null } });
+      const opens = num(m.open_count) ?? 0, clicks = num(m.click_count) ?? 0;
+      if (opens > 0) out.push({ event_type: "email_open_approximate", dedupe_key: `open:${base}:${opens}`, provider_message_id: m.message_id ?? null, occurred_at: null, details: { open_count: opens, note: "tracked open, approximate; not proof of read" } });
+      if (clicks > 0) out.push({ event_type: "email_link_click", dedupe_key: `click:${base}:${clicks}`, provider_message_id: m.message_id ?? null, occurred_at: null, details: { click_count: clicks } });
+    } else if (t === "REPLY") {
+      out.push({ event_type: "email_reply", dedupe_key: `reply:${base}`, provider_message_id: m.message_id ?? null, occurred_at: occurred, details: { preview: m.email_body ? stripHtml(String(m.email_body)).slice(0, 200) : null } });
+    } else if (t) {
+      out.push({ event_type: `message_${t.toLowerCase()}`, dedupe_key: `msg:${base}`, provider_message_id: m.message_id ?? null, occurred_at: occurred, details: {} });
+    }
+  });
+  if (lead.is_unsubscribed === true) out.push({ event_type: "lead_unsubscribed", dedupe_key: `unsub:${leadId}`, provider_message_id: null, occurred_at: null, details: {} });
+  const st = String(lead.status ?? "").toUpperCase();
+  if (st === "BLOCKED") out.push({ event_type: "lead_blocked_or_bounced", dedupe_key: `blocked:${leadId}`, provider_message_id: null, occurred_at: null, details: { provider_status: st } });
+  if (st && st !== "STARTED") out.push({ event_type: "lead_status_changed", dedupe_key: `status:${leadId}:${st}`, provider_message_id: null, occurred_at: null, details: { provider_status: st } });
+  if (lead.lead_category_id != null) out.push({ event_type: "lead_category_updated", dedupe_key: `cat:${leadId}:${lead.lead_category_id}`, provider_message_id: null, occurred_at: null, details: { category_id: String(lead.lead_category_id) } });
+  return out;
+}
+
+/** Which Liftor protective action an event requires (this contact only). */
+export function suppressionFor(eventType: string): "do_not_contact" | "stop_followups" | null {
+  if (eventType === "lead_unsubscribed" || eventType === "lead_blocked_or_bounced") return "do_not_contact";
+  if (eventType === "email_reply") return "stop_followups";
+  return null;
+}
