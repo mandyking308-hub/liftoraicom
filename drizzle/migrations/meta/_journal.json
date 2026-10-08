@@ -71,6 +71,13 @@
       "when": 1791462933058,
       "tag": "0009_smartlead_activity_events_and_sync_token",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791463071798,
+      "tag": "0010_smartlead_snapshot_webhooks",
+      "breakpoints": true
     }
   ]
 }

@@ -1,0 +1,1 @@
+ALTER TABLE public.smartlead_campaign_snapshots ADD COLUMN IF NOT EXISTS webhooks jsonb;

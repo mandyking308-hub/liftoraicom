@@ -55539,6 +55539,7 @@ export type Database = {
           unique_sent_count: number | null
           unsubscribed_count: number | null
           updated_at: string
+          webhooks: Json | null
         }
         Insert: {
           blocked?: number | null
@@ -55568,6 +55569,7 @@ export type Database = {
           unique_sent_count?: number | null
           unsubscribed_count?: number | null
           updated_at?: string
+          webhooks?: Json | null
         }
         Update: {
           blocked?: number | null
@@ -55597,6 +55599,7 @@ export type Database = {
           unique_sent_count?: number | null
           unsubscribed_count?: number | null
           updated_at?: string
+          webhooks?: Json | null
         }
         Relationships: []
       }

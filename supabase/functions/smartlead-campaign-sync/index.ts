@@ -154,6 +154,11 @@ const cur = (await sl(`/campaigns/${campaignId}`, KEY)) as Record<string, unknow
       sl(`/campaigns/${campaignId}/analytics`, KEY),
       sl(`/campaigns/${campaignId}/email-accounts`, KEY),
     ]) as [Record<string, unknown>, Record<string, unknown>, unknown];
+    let webhooks: unknown = null;
+    try {
+      const wh = (await sl(`/campaigns/${campaignId}/webhooks`, KEY)) as Array<Record<string, unknown>>;
+      webhooks = (Array.isArray(wh) ? wh : []).map((w) => ({ id: w.id, name: w.name, updated_at: w.updated_at, event_types: w.event_types, categories: w.categories, url_host: String(w.webhook_url ?? "").replace(/^https?:\/\/([^/]+).*$/, "$1"), url_path: String(w.webhook_url ?? "").replace(/^https?:\/\/[^/]+/, "").split("?")[0] }));
+    } catch { webhooks = null; }
 
     const leads: Array<Record<string, unknown>> = [];
     for (let off = 0; off < 2000; off += 100) {
@@ -223,7 +228,7 @@ const cur = (await sl(`/campaigns/${campaignId}`, KEY)) as Record<string, unknow
 
     await admin.from("smartlead_campaign_snapshots").upsert({
       business_id: businessId, provider_campaign_id: campaignId, ...mapCampaignSnapshot(campaign, analytics),
-      senders: sanitizeSenders(accounts), last_success_at: nowIso(), last_attempt_at: nowIso(), last_error: null, updated_at: nowIso(),
+      senders: sanitizeSenders(accounts), webhooks, last_success_at: nowIso(), last_attempt_at: nowIso(), last_error: null, updated_at: nowIso(),
     });
     await admin.from("smartlead_sync_runs").update({
       status: "succeeded", finished_at: nowIso(), latency_ms: Date.now() - started,
