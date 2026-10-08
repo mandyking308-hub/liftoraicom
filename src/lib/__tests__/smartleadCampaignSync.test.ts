@@ -70,3 +70,26 @@ describe("reply payload + tracking flags", () => {
     expect(trackingFlags(null)).toEqual({ opensTracked: null, clicksTracked: null });
   });
 });
+
+import { deriveActivityEvents, suppressionFor } from "../../../supabase/functions/_shared/smartleadCampaignSync";
+describe("activity event derivation", () => {
+  it("creates no events from a not-started lead with empty history", () => {
+    expect(deriveActivityEvents("1", { status: "STARTED", is_unsubscribed: false }, [])).toEqual([]);
+  });
+  it("derives sent/open/click/reply with stable keys", () => {
+    const h = [
+      { type: "SENT", message_id: "m1", time: "t1", email_seq_number: 1, open_count: 2, click_count: 1 },
+      { type: "REPLY", message_id: "m2", time: "t2", email_body: "<p>Yes</p>" },
+    ];
+    const a = deriveActivityEvents("1", {}, h).map((e) => e.event_type);
+    expect(a).toEqual(["first_email_sent", "email_open_approximate", "email_link_click", "email_reply"]);
+    expect(deriveActivityEvents("1", {}, h).map((e) => e.dedupe_key)).toEqual(deriveActivityEvents("1", {}, h).map((e) => e.dedupe_key));
+  });
+  it("unsubscribe and blocked suppress; reply stops follow-ups", () => {
+    const ev = deriveActivityEvents("9", { is_unsubscribed: true, status: "BLOCKED", lead_category_id: 1 }, []).map((e) => e.event_type);
+    expect(ev).toEqual(["lead_unsubscribed", "lead_blocked_or_bounced", "lead_status_changed", "lead_category_updated"]);
+    expect(suppressionFor("lead_unsubscribed")).toBe("do_not_contact");
+    expect(suppressionFor("email_reply")).toBe("stop_followups");
+    expect(suppressionFor("email_open_approximate")).toBeNull();
+  });
+});
