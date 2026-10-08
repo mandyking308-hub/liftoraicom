@@ -1,3 +1,4 @@
+import { resolveCanonicalActiveBusiness } from "../_shared/canonicalBusinessResolver.ts";
 // Education outreach eligibility preflight (Chat 3 commercial layer).
 //
 // READ-ONLY. This function never sends, queues, maps or mutates any provider.
@@ -14,7 +15,6 @@
 // are read from existing architecture only — never created or modified here.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import {
-import { resolveCanonicalActiveBusiness } from "../_shared/canonicalBusinessResolver.ts";
   evaluateSenderInfrastructureReadiness,
   type GsmAllocationRecord,
   type GsmDomainSignals,
