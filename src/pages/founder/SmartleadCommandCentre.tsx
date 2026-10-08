@@ -41,6 +41,7 @@ export default function SmartleadCommandCentre() {
   const [leads, setLeads] = useState<Snap[]>([]);
   const [runs, setRuns] = useState<Snap[]>([]);
   const [events, setEvents] = useState<Snap[]>([]);
+  const lastScheduled = runs.find((r) => r.trigger === "scheduled" && r.status === "succeeded");
   const [syncing, setSyncing] = useState(false);
   const [thread, setThread] = useState<Snap | null>(null);
   const [messages, setMessages] = useState<Snap[]>([]);
@@ -77,7 +78,7 @@ export default function SmartleadCommandCentre() {
     const [s, l, r, ev] = await Promise.all([
       f("smartlead_campaign_snapshots").maybeSingle(),
       f("smartlead_lead_snapshots").order("last_name"),
-      f("smartlead_sync_runs").order("started_at", { ascending: false }).limit(8),
+      f("smartlead_sync_runs").order("started_at", { ascending: false }).limit(20),
       f("smartlead_activity_events").order("created_at", { ascending: false }).limit(50),
     ]);
     setEvents((ev.data as Snap[]) ?? []);
@@ -164,10 +165,10 @@ export default function SmartleadCommandCentre() {
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold text-foreground">Outreach Command Centre</h1>
-            <p className="text-sm text-muted-foreground">Live Smartlead figures, synced into Liftor. Updates automatically every 10 minutes; press Sync now for an instant refresh.</p>
+            <p className="text-sm text-muted-foreground">Smartlead campaign activity and conversations, synchronised into Liftor. Sync now for latest activity.</p>
           </div>
-          <div className="flex items-center gap-2">
-            <select className="h-9 rounded-md border border-border bg-background px-2 text-sm text-foreground"
+          <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
+            <select className="h-9 min-w-0 max-w-full rounded-md border border-border bg-background px-2 text-sm text-foreground"
               value={sel ? `${sel.business_id}|${sel.provider_campaign_id}` : ""}
               onChange={(e) => { const [b, c] = e.target.value.split("|"); setParams({ business: b, campaign: c }); }}>
               {mappings.map((m) => (
@@ -186,16 +187,18 @@ export default function SmartleadCommandCentre() {
           <>
             <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
               <span>Last successful fetch: <span className="text-foreground">{fmtTime(lastOk)}</span></span>
+              {lastScheduled && <span>Automatic sync: every 10 minutes · last automatic success <span className="text-foreground">{fmtTime(lastScheduled.started_at)}</span></span>}
+              <span>Instant webhook updates: <span className="text-foreground">off until signing key is verified</span></span>
               {stale && <Badge variant="outline" className="border-destructive/50 text-destructive"><AlertTriangle className="mr-1 h-3 w-3" />Data may be stale — press Sync now</Badge>}
               {snap?.last_error && <Badge variant="destructive">Last error: {snap.last_error}</Badge>}
-              <Link className="text-primary underline" to="/founder/business-setup-tunnel">Open business</Link>
+              <Link className="text-primary underline" to={`/founder/business-setup-tunnel?mode=existing&business=${sel.business_id}`}>Open {sel.business_name}</Link>
             </div>
 
             {snap && (
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
                 {metrics.map(([label, v, hint]) => (
                   <div key={label} title={hint} className="tech-card rounded-xl border border-border p-3">
-                    <div className="text-xs text-muted-foreground">{label}</div>
+                    <div className="text-[13px] text-muted-foreground">{label}</div>
                     <div className="text-lg font-semibold text-foreground">{fmt(v)}</div>
                   </div>
                 ))}
@@ -206,16 +209,20 @@ export default function SmartleadCommandCentre() {
               <CardHeader><CardTitle className="text-base">Senders</CardTitle></CardHeader>
               <CardContent className="flex flex-wrap gap-2">
                 {(snap?.senders ?? []).map((s: Snap) => (
-                  <Badge key={s.id} variant="outline">{s.from_email} · {s.smtp_ok && s.imap_ok ? "connected" : "connection issue"} · {fmt(s.daily_sent_count)}/{fmt(s.message_per_day)} today</Badge>
+                  <div key={s.id} className="rounded-lg border border-border px-3 py-2 text-sm">
+                    <div className="break-all font-medium text-foreground">{s.from_email}</div>
+                    <div className="text-muted-foreground">{s.smtp_ok && s.imap_ok ? "Connected" : "Connection issue"} · {fmt(s.daily_sent_count)} of {fmt(s.message_per_day)} mailbox allowance used today</div>
+                  </div>
                 ))}
                 {!snap?.senders?.length && <span className="text-sm text-muted-foreground">Not synced yet.</span>}
+                {snap?.max_leads_per_day != null && <p className="w-full text-sm text-muted-foreground">The campaign itself is capped at {snap.max_leads_per_day} new contacts per day, whatever the mailbox allowance.</p>}
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader><CardTitle className="text-base">Prospects</CardTitle></CardHeader>
               <CardContent className="overflow-x-auto">
-                <Table>
+                <Table className="min-w-[900px]">
                   <TableHeader><TableRow>
                     <TableHead>Name</TableHead><TableHead>School group</TableHead><TableHead>Email</TableHead>
                     <TableHead>Smartlead status</TableHead><TableHead>Sent</TableHead><TableHead>Opens / clicks</TableHead>
@@ -224,10 +231,10 @@ export default function SmartleadCommandCentre() {
                   <TableBody>
                     {leads.map((l) => (
                       <TableRow key={l.provider_lead_id}>
-                        <TableCell className="text-foreground">{l.first_name} {l.last_name}</TableCell>
+                        <TableCell className="text-foreground">{l.liftor_contact_id ? <Link className="text-primary underline" to={`/founder/crm/contacts/${l.liftor_contact_id}`}>{l.first_name} {l.last_name}</Link> : `${l.first_name ?? ""} ${l.last_name ?? ""}`}</TableCell>
                         <TableCell>{fmt(l.company_name)}</TableCell>
-                        <TableCell className="font-mono text-xs">{l.email}</TableCell>
-                        <TableCell><Badge variant="outline">{fmt(l.lead_status)}</Badge></TableCell>
+                        <TableCell className="font-mono text-[13px]">{l.email}</TableCell>
+                        <TableCell><Badge variant="outline" className="whitespace-nowrap text-xs" title={`Smartlead status: ${l.lead_status ?? "unknown"}`}>{!l.sent_count && l.lead_status === "STARTED" ? "In campaign — not emailed" : fmt(l.lead_status)}</Badge></TableCell>
                         <TableCell>{l.sent_count} {l.last_sent_at ? `· ${fmtTime(l.last_sent_at)}` : ""}</TableCell>
                         <TableCell>{`${opensOff ? "off" : fmt(l.open_count)} / ${clicksOff ? "off" : fmt(l.click_count)}`}</TableCell>
                         <TableCell className="max-w-xs truncate" title={l.last_reply_preview ?? ""}>{l.last_reply_at ? `${fmtTime(l.last_reply_at)} — ${l.last_reply_preview ?? ""}` : "No reply"}</TableCell>
@@ -244,6 +251,9 @@ export default function SmartleadCommandCentre() {
             <Card>
               <CardHeader><CardTitle className="text-base">Open &amp; click tracking (this campaign only)</CardTitle></CardHeader>
               <CardContent className="space-y-3 text-sm">
+                {snap?.send_as_plain_text === true && <p className="rounded-md border border-destructive/50 p-2 text-destructive">This campaign sends plain text. Smartlead cannot track opens or clicks in plain text and may strip the unsubscribe link — switch to HTML before enabling tracking.</p>}
+                {snap?.send_as_plain_text === false && <p className="text-muted-foreground">Emails are sent as HTML, so the unsubscribe link is kept and tracking is technically possible.</p>}
+                <p className="text-muted-foreground">Before enabling tracking, the Kindnesss privacy notice must mention email open/click tracking — it currently says there is no marketing or behavioural tracking.</p>
                 <p className="text-muted-foreground">
                   Currently: opens <span className="text-foreground">{tf.opensTracked === null ? "unknown" : tf.opensTracked ? "tracked" : "off"}</span>,
                   clicks <span className="text-foreground">{tf.clicksTracked === null ? "unknown" : tf.clicksTracked ? "tracked" : "off"}</span>.
@@ -296,7 +306,7 @@ export default function SmartleadCommandCentre() {
             <Card>
               <CardHeader><CardTitle className="text-base">Recent syncs</CardTitle></CardHeader>
               <CardContent className="space-y-1 text-sm">
-                {runs.map((r) => (
+                {runs.slice(0, 8).map((r) => (
                   <div key={r.id} className="flex flex-wrap gap-3 text-muted-foreground">
                     <span className="text-foreground">{fmtTime(r.started_at)}</span>
                     <Badge variant={r.status === "succeeded" ? "outline" : "destructive"}>{r.status}</Badge>
