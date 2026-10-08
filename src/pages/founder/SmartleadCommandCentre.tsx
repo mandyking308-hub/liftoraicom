@@ -40,6 +40,7 @@ export default function SmartleadCommandCentre() {
   const [leads, setLeads] = useState<Snap[]>([]);
   const [runs, setRuns] = useState<Snap[]>([]);
   const [syncing, setSyncing] = useState(false);
+  const [trackingBusy, setTrackingBusy] = useState(false);
   const [thread, setThread] = useState<Snap | null>(null);
   const [messages, setMessages] = useState<Snap[]>([]);
   const [drafts, setDrafts] = useState<Snap[]>([]);
@@ -87,6 +88,27 @@ export default function SmartleadCommandCentre() {
     } finally { setSyncing(false); load(); }
   };
 
+  const changeTracking = async (enable: boolean) => {
+    if (!sel || trackingBusy) return;
+    const description = enable
+      ? "Enable approximate open and click tracking for this campaign only? Mail privacy features and security scanners may generate false positives. Confirm your recipient privacy notice is appropriate."
+      : "Disable open and click tracking for this campaign?";
+    if (!window.confirm(description)) return;
+    setTrackingBusy(true);
+    try {
+      await invoke({
+        action: "set_tracking",
+        business_id: sel.business_id,
+        campaign_id: sel.provider_campaign_id,
+        confirmation: enable ? "ENABLE TRACKING FOR THIS CAMPAIGN ONLY" : "DISABLE TRACKING FOR THIS CAMPAIGN ONLY",
+      });
+      toast({ title: enable ? "Tracking enabled" : "Tracking disabled", description: "Only future email activity is affected; prior opens cannot be reconstructed." });
+      await syncNow();
+    } catch (e) {
+      toast({ title: "Tracking not changed", description: (e as Error).message, variant: "destructive" });
+    } finally { setTrackingBusy(false); }
+  };
+
   const openThread = async (lead: Snap) => {
     setThread(lead); setDraftBody(""); setConfirm("");
     const [m, d] = await Promise.all([
@@ -119,14 +141,16 @@ export default function SmartleadCommandCentre() {
 
   const lastOk = snap?.last_success_at as string | undefined;
   const stale = !lastOk || Date.now() - new Date(lastOk).getTime() > STALE_MS;
-  const trackingOff = Array.isArray(snap?.track_settings) && snap!.track_settings.includes("DONT_EMAIL_OPEN");
+  const trackingKnown = Array.isArray(snap?.track_settings);
+  const openTrackingOff = trackingKnown && snap!.track_settings.includes("DONT_EMAIL_OPEN");
+  const clickTrackingOff = trackingKnown && snap!.track_settings.includes("DONT_LINK_CLICK");
   const hasReplies = messages.some((m) => m.direction === "REPLY");
 
   const metrics: [string, unknown, string?][] = snap ? [
     ["Status", snap.campaign_status], ["Contacts", snap.total_leads], ["Not started", snap.not_started],
     ["In progress", snap.in_progress], ["Sent", snap.sent_count],
-    ["Opens (approx.)", trackingOff ? "tracking off" : snap.unique_open_count, "Tracked opens are approximate; Apple Mail privacy can inflate them."],
-    ["Clicks", trackingOff ? "tracking off" : snap.unique_click_count], ["Replies", snap.reply_count],
+    ["Opens (approx.)", !trackingKnown ? "unknown" : openTrackingOff ? "tracking off" : snap.unique_open_count, "Tracked opens are approximate; Apple Mail privacy can inflate them."],
+    ["Clicks", !trackingKnown ? "unknown" : clickTrackingOff ? "tracking off" : snap.unique_click_count], ["Replies", snap.reply_count],
     ["Interested (Smartlead)", snap.interested], ["Bounced", snap.bounce_count], ["Unsubscribed", snap.unsubscribed_count],
     ["Daily cap", snap.max_leads_per_day],
   ] : [];
@@ -150,6 +174,9 @@ export default function SmartleadCommandCentre() {
               ))}
             </select>
             <Button onClick={syncNow} disabled={!sel || syncing}><RefreshCw className={`mr-2 h-4 w-4 ${syncing ? "animate-spin" : ""}`} />Sync now</Button>
+            <Button variant="outline" disabled={!sel || trackingBusy || !trackingKnown} onClick={() => changeTracking(openTrackingOff || clickTrackingOff)}>
+              {trackingBusy ? "Updating tracking…" : !trackingKnown ? "Tracking unknown" : (openTrackingOff || clickTrackingOff) ? "Enable open/click tracking" : "Disable open/click tracking"}
+            </Button>
           </div>
         </div>
 
@@ -202,7 +229,7 @@ export default function SmartleadCommandCentre() {
                         <TableCell className="font-mono text-xs">{l.email}</TableCell>
                         <TableCell><Badge variant="outline">{fmt(l.lead_status)}</Badge></TableCell>
                         <TableCell>{l.sent_count} {l.last_sent_at ? `· ${fmtTime(l.last_sent_at)}` : ""}</TableCell>
-                        <TableCell>{trackingOff ? "tracking off" : `${fmt(l.open_count)} / ${fmt(l.click_count)}`}</TableCell>
+                        <TableCell>{openTrackingOff ? "off" : fmt(l.open_count)} / {clickTrackingOff ? "off" : fmt(l.click_count)}</TableCell>
                         <TableCell className="max-w-xs truncate" title={l.last_reply_preview ?? ""}>{l.last_reply_at ? `${fmtTime(l.last_reply_at)} — ${l.last_reply_preview ?? ""}` : "No reply"}</TableCell>
                         <TableCell>{l.is_unsubscribed ? <Badge variant="destructive">Unsubscribed</Badge> : "—"}</TableCell>
                         <TableCell><Button size="sm" variant="outline" onClick={() => openThread(l)}><MessageSquare className="mr-1 h-3 w-3" />View thread</Button></TableCell>
