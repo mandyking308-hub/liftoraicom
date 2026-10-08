@@ -50,6 +50,13 @@
       "when": 1791456344070,
       "tag": "0006_businesses_active_name_unique",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791459442817,
+      "tag": "0007_provider_secret_ref_uppercase_hex",
+      "breakpoints": true
     }
   ]
 }
