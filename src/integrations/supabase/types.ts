@@ -55459,6 +55459,219 @@ export type Database = {
         }
         Relationships: []
       }
+      smartlead_campaign_snapshots: {
+        Row: {
+          blocked: number | null
+          bounce_count: number | null
+          business_id: string
+          campaign_name: string | null
+          campaign_status: string | null
+          click_count: number | null
+          completed: number | null
+          in_progress: number | null
+          interested: number | null
+          last_attempt_at: string | null
+          last_error: string | null
+          last_success_at: string | null
+          max_leads_per_day: number | null
+          not_started: number | null
+          open_count: number | null
+          provider_campaign_id: string
+          reply_count: number | null
+          senders: Json
+          sent_count: number | null
+          stopped: number | null
+          total_leads: number | null
+          track_settings: string[] | null
+          unique_click_count: number | null
+          unique_open_count: number | null
+          unique_sent_count: number | null
+          unsubscribed_count: number | null
+          updated_at: string
+        }
+        Insert: {
+          blocked?: number | null
+          bounce_count?: number | null
+          business_id: string
+          campaign_name?: string | null
+          campaign_status?: string | null
+          click_count?: number | null
+          completed?: number | null
+          in_progress?: number | null
+          interested?: number | null
+          last_attempt_at?: string | null
+          last_error?: string | null
+          last_success_at?: string | null
+          max_leads_per_day?: number | null
+          not_started?: number | null
+          open_count?: number | null
+          provider_campaign_id: string
+          reply_count?: number | null
+          senders?: Json
+          sent_count?: number | null
+          stopped?: number | null
+          total_leads?: number | null
+          track_settings?: string[] | null
+          unique_click_count?: number | null
+          unique_open_count?: number | null
+          unique_sent_count?: number | null
+          unsubscribed_count?: number | null
+          updated_at?: string
+        }
+        Update: {
+          blocked?: number | null
+          bounce_count?: number | null
+          business_id?: string
+          campaign_name?: string | null
+          campaign_status?: string | null
+          click_count?: number | null
+          completed?: number | null
+          in_progress?: number | null
+          interested?: number | null
+          last_attempt_at?: string | null
+          last_error?: string | null
+          last_success_at?: string | null
+          max_leads_per_day?: number | null
+          not_started?: number | null
+          open_count?: number | null
+          provider_campaign_id?: string
+          reply_count?: number | null
+          senders?: Json
+          sent_count?: number | null
+          stopped?: number | null
+          total_leads?: number | null
+          track_settings?: string[] | null
+          unique_click_count?: number | null
+          unique_open_count?: number | null
+          unique_sent_count?: number | null
+          unsubscribed_count?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      smartlead_lead_snapshots: {
+        Row: {
+          business_id: string
+          campaign_lead_map_id: string | null
+          click_count: number | null
+          company_name: string | null
+          email: string | null
+          first_name: string | null
+          first_sent_at: string | null
+          is_unsubscribed: boolean
+          last_event_at: string | null
+          last_name: string | null
+          last_reply_at: string | null
+          last_reply_preview: string | null
+          last_sent_at: string | null
+          lead_category_id: string | null
+          lead_status: string | null
+          liftor_contact_id: string | null
+          open_count: number | null
+          provider_campaign_id: string
+          provider_lead_id: string
+          reply_count: number
+          sent_count: number
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          campaign_lead_map_id?: string | null
+          click_count?: number | null
+          company_name?: string | null
+          email?: string | null
+          first_name?: string | null
+          first_sent_at?: string | null
+          is_unsubscribed?: boolean
+          last_event_at?: string | null
+          last_name?: string | null
+          last_reply_at?: string | null
+          last_reply_preview?: string | null
+          last_sent_at?: string | null
+          lead_category_id?: string | null
+          lead_status?: string | null
+          liftor_contact_id?: string | null
+          open_count?: number | null
+          provider_campaign_id: string
+          provider_lead_id: string
+          reply_count?: number
+          sent_count?: number
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          campaign_lead_map_id?: string | null
+          click_count?: number | null
+          company_name?: string | null
+          email?: string | null
+          first_name?: string | null
+          first_sent_at?: string | null
+          is_unsubscribed?: boolean
+          last_event_at?: string | null
+          last_name?: string | null
+          last_reply_at?: string | null
+          last_reply_preview?: string | null
+          last_sent_at?: string | null
+          lead_category_id?: string | null
+          lead_status?: string | null
+          liftor_contact_id?: string | null
+          open_count?: number | null
+          provider_campaign_id?: string
+          provider_lead_id?: string
+          reply_count?: number
+          sent_count?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      smartlead_reply_drafts: {
+        Row: {
+          body: string
+          business_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          provider_campaign_id: string
+          provider_lead_id: string
+          provider_response: string | null
+          reply_to_message_id: string | null
+          sent_at: string | null
+          sent_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          business_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          provider_campaign_id: string
+          provider_lead_id: string
+          provider_response?: string | null
+          reply_to_message_id?: string | null
+          sent_at?: string | null
+          sent_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          business_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          provider_campaign_id?: string
+          provider_lead_id?: string
+          provider_response?: string | null
+          reply_to_message_id?: string | null
+          sent_at?: string | null
+          sent_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       smartlead_send_dry_run_audit: {
         Row: {
           allocated_mailbox_email: string | null
@@ -55507,6 +55720,123 @@ export type Database = {
           provider_payload?: Json | null
           sendable?: boolean
           would_send?: boolean
+        }
+        Relationships: []
+      }
+      smartlead_sync_runs: {
+        Row: {
+          attempts: number
+          business_id: string
+          error_code: string | null
+          error_detail: string | null
+          finished_at: string | null
+          http_status: number | null
+          id: string
+          latency_ms: number | null
+          leads_seen: number | null
+          messages_seen: number | null
+          new_messages: number | null
+          provider_campaign_id: string
+          started_at: string
+          status: string
+          trigger: string
+          triggered_by: string | null
+        }
+        Insert: {
+          attempts?: number
+          business_id: string
+          error_code?: string | null
+          error_detail?: string | null
+          finished_at?: string | null
+          http_status?: number | null
+          id?: string
+          latency_ms?: number | null
+          leads_seen?: number | null
+          messages_seen?: number | null
+          new_messages?: number | null
+          provider_campaign_id: string
+          started_at?: string
+          status?: string
+          trigger?: string
+          triggered_by?: string | null
+        }
+        Update: {
+          attempts?: number
+          business_id?: string
+          error_code?: string | null
+          error_detail?: string | null
+          finished_at?: string | null
+          http_status?: number | null
+          id?: string
+          latency_ms?: number | null
+          leads_seen?: number | null
+          messages_seen?: number | null
+          new_messages?: number | null
+          provider_campaign_id?: string
+          started_at?: string
+          status?: string
+          trigger?: string
+          triggered_by?: string | null
+        }
+        Relationships: []
+      }
+      smartlead_thread_messages: {
+        Row: {
+          body_html: string | null
+          business_id: string
+          click_count: number | null
+          created_at: string
+          dedupe_key: string
+          direction: string
+          from_email: string | null
+          id: string
+          open_count: number | null
+          provider_campaign_id: string
+          provider_lead_id: string
+          provider_message_id: string | null
+          provider_stats_id: string | null
+          sent_at: string | null
+          sequence_number: number | null
+          subject: string | null
+          to_email: string | null
+        }
+        Insert: {
+          body_html?: string | null
+          business_id: string
+          click_count?: number | null
+          created_at?: string
+          dedupe_key: string
+          direction: string
+          from_email?: string | null
+          id?: string
+          open_count?: number | null
+          provider_campaign_id: string
+          provider_lead_id: string
+          provider_message_id?: string | null
+          provider_stats_id?: string | null
+          sent_at?: string | null
+          sequence_number?: number | null
+          subject?: string | null
+          to_email?: string | null
+        }
+        Update: {
+          body_html?: string | null
+          business_id?: string
+          click_count?: number | null
+          created_at?: string
+          dedupe_key?: string
+          direction?: string
+          from_email?: string | null
+          id?: string
+          open_count?: number | null
+          provider_campaign_id?: string
+          provider_lead_id?: string
+          provider_message_id?: string | null
+          provider_stats_id?: string | null
+          sent_at?: string | null
+          sequence_number?: number | null
+          subject?: string | null
+          to_email?: string | null
         }
         Relationships: []
       }

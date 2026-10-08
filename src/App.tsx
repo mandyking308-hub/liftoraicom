@@ -843,6 +843,7 @@ import CRMContactDetail from "./pages/founder/CRMContactDetail";
 import CRMInboxes from "./pages/founder/CRMInboxes";
 import SendingInfrastructure from "./pages/founder/SendingInfrastructure";
 import GSMOutbound from "./pages/founder/GSMOutbound";
+import SmartleadCommandCentre from "./pages/founder/SmartleadCommandCentre";
 import GHATOutbound from "./pages/founder/GHATOutbound";
 import CRMInboxConfigure from "./pages/founder/CRMInboxConfigure";
 import FinanceDashboard from "./pages/founder/finance/FinanceDashboard";
@@ -1737,6 +1738,7 @@ const App = () => (
             <Route path="/founder/crm/contacts/:id" element={<FounderRoute><CRMContactDetail /></FounderRoute>} />
             <Route path="/founder/crm/inboxes" element={<FounderRoute><CRMInboxes /></FounderRoute>} />
             <Route path="/founder/sending-infrastructure" element={<FounderRoute><SendingInfrastructure /></FounderRoute>} />
+            <Route path="/founder/outreach-command-centre" element={<FounderRoute><SmartleadCommandCentre /></FounderRoute>} />
             <Route path="/founder/gsm-outbound" element={<FounderRoute><GSMOutbound /></FounderRoute>} />
             <Route path="/founder/ghat-outbound" element={<FounderRoute><GHATOutbound /></FounderRoute>} />
             <Route path="/founder/crm/inboxes/:id/configure" element={<FounderRoute><CRMInboxConfigure /></FounderRoute>} />
