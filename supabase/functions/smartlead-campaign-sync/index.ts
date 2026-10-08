@@ -1,12 +1,12 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import {
-  assertMapping, backoffMs, dedupeKey, isRetryable, mapCampaignSnapshot, normEmail, sanitizeSenders, summarizeHistory, buildReplyPayload,
+  assertMapping, backoffMs, dedupeKey, isRetryable, mapCampaignSnapshot, normEmail, sanitizeSenders, summarizeHistory, buildReplyPayload, deriveActivityEvents, suppressionFor,
   type HistoryMsg,
 } from "../_shared/smartleadCampaignSync.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-liftor-sync-token",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 const json = (b: unknown, s = 200) =>
@@ -44,14 +44,20 @@ Deno.serve(async (req) => {
   const KEY = (Deno.env.get("SMARTLEAD_API_KEY") ?? "").trim();
 
   const auth = req.headers.get("Authorization") ?? "";
-  if (!auth.startsWith("Bearer ")) return json({ ok: false, error: "auth_missing" }, 401);
-  const token = auth.slice(7);
   const admin = createClient(URL_, SERVICE, { auth: { persistSession: false } });
+  const syncToken = req.headers.get("x-liftor-sync-token") ?? "";
+  let scheduledScope: { business_id: string; provider_campaign_id: string } | null = null;
+  if (syncToken) {
+    // Scheduler path: random token held only in a locked table; read-only sync for its one campaign.
+    const { data: sch } = await admin.from("smartlead_sync_schedule").select("token, business_id, provider_campaign_id, enabled").eq("id", 1).maybeSingle();
+    if (!sch || !sch.enabled || syncToken.length < 32 || sch.token !== syncToken) return json({ ok: false, error: "auth_invalid" }, 401);
+    scheduledScope = { business_id: sch.business_id, provider_campaign_id: sch.provider_campaign_id };
+  } else if (!auth.startsWith("Bearer ")) return json({ ok: false, error: "auth_missing" }, 401);
+  const token = auth.slice(7);
 
-  // Scheduler path: service-role token. Otherwise founder/admin user only.
   let userId: string | null = null;
   let trigger = "manual";
-  if (token === SERVICE) {
+  if (scheduledScope || token === SERVICE) {
     trigger = "scheduled";
   } else {
     const uc = createClient(URL_, ANON, { global: { headers: { Authorization: auth } }, auth: { persistSession: false } });
@@ -70,6 +76,10 @@ Deno.serve(async (req) => {
   const campaignId = String(body.campaign_id ?? "");
   if (!/^[0-9a-f-]{36}$/i.test(businessId) || !/^\d{1,12}$/.test(campaignId)) {
     return json({ ok: false, error: "invalid_business_or_campaign" }, 400);
+  }
+  if (trigger === "scheduled" && action !== "sync") return json({ ok: false, error: "human_required" }, 403);
+  if (scheduledScope && (scheduledScope.business_id !== businessId || scheduledScope.provider_campaign_id !== campaignId)) {
+    return json({ ok: false, error: "schedule_scope_mismatch" }, 403);
   }
   if (!KEY) return json({ ok: false, error: "smartlead_api_key_missing" }, 503);
 
@@ -144,6 +154,11 @@ const cur = (await sl(`/campaigns/${campaignId}`, KEY)) as Record<string, unknow
       sl(`/campaigns/${campaignId}/analytics`, KEY),
       sl(`/campaigns/${campaignId}/email-accounts`, KEY),
     ]) as [Record<string, unknown>, Record<string, unknown>, unknown];
+    let webhooks: unknown = null;
+    try {
+      const wh = (await sl(`/campaigns/${campaignId}/webhooks`, KEY)) as Array<Record<string, unknown>>;
+      webhooks = (Array.isArray(wh) ? wh : []).map((w) => ({ id: w.id, name: w.name, updated_at: w.updated_at, event_types: w.event_types, categories: w.categories, url_host: String(w.webhook_url ?? "").replace(/^https?:\/\/([^/]+).*$/, "$1"), url_path: String(w.webhook_url ?? "").replace(/^https?:\/\/[^/]+/, "").split("?")[0] }));
+    } catch { webhooks = null; }
 
     const leads: Array<Record<string, unknown>> = [];
     for (let off = 0; off < 2000; off += 100) {
@@ -153,7 +168,14 @@ const cur = (await sl(`/campaigns/${campaignId}`, KEY)) as Record<string, unknow
       if (rows.length < 100) break;
     }
 
-    let messagesSeen = 0, newMessages = 0;
+    // Map provider leads to Liftor contacts only via this business's relationships + exact normalised email.
+    const { data: rels } = await admin.from("business_contact_relationships")
+      .select("id, contact_id, contacts!inner(email)").eq("business_id", businessId);
+    const relByEmail = new Map<string, { id: string; contact_id: string }>();
+    for (const r of (rels ?? []) as Array<{ id: string; contact_id: string; contacts: { email: string | null } }>) {
+      const e = normEmail(r.contacts?.email); if (e) relByEmail.set(e, { id: r.id, contact_id: r.contact_id });
+    }
+    let messagesSeen = 0, newMessages = 0, newEvents = 0;
     for (const row of leads) {
       const lead = (row.lead ?? {}) as Record<string, unknown>;
       const leadId = String(lead.id);
@@ -161,7 +183,8 @@ const cur = (await sl(`/campaigns/${campaignId}`, KEY)) as Record<string, unknow
       const history = hist.history ?? [];
       messagesSeen += history.length;
       const sum = summarizeHistory(history);
-      const contactId = (lead.custom_fields as Record<string, unknown> | undefined)?.liftor_contact_id;
+      const rel = relByEmail.get(normEmail(lead.email) ?? "");
+      const contactId: string | null = rel?.contact_id ?? null;
       await admin.from("smartlead_lead_snapshots").upsert({
         business_id: businessId, provider_campaign_id: campaignId, provider_lead_id: leadId,
         campaign_lead_map_id: row.campaign_lead_map_id ? String(row.campaign_lead_map_id) : null,
@@ -182,21 +205,36 @@ const cur = (await sl(`/campaigns/${campaignId}`, KEY)) as Record<string, unknow
         }, { onConflict: "business_id,provider_campaign_id,dedupe_key", ignoreDuplicates: true }).select("id");
         newMessages += ins?.length ?? 0;
       }
-      // Suppression sync: unsubscribed in Smartlead -> mark matching Liftor contact (this contact only).
-      if (lead.is_unsubscribed === true && typeof contactId === "string") {
-        await admin.from("contacts").update({ status: "DO_NOT_CONTACT" } as never).eq("id", contactId);
+      // Durable activity events (idempotent) + protective actions for this contact/business only.
+      const events = deriveActivityEvents(leadId, { status: row.status, is_unsubscribed: lead.is_unsubscribed, lead_category_id: row.lead_category_id }, history);
+      for (const ev of events) {
+        const action = suppressionFor(ev.event_type);
+        const { data: insEv } = await admin.from("smartlead_activity_events").upsert({
+          business_id: businessId, provider_campaign_id: campaignId, provider_lead_id: leadId,
+          liftor_contact_id: contactId, business_contact_relationship_id: rel?.id ?? null,
+          event_type: ev.event_type, dedupe_key: ev.dedupe_key, provider_message_id: ev.provider_message_id,
+          occurred_at: ev.occurred_at, details: ev.details, liftor_action: action,
+        }, { onConflict: "business_id,provider_campaign_id,dedupe_key", ignoreDuplicates: true }).select("id");
+        if (!insEv?.length) continue;
+        newEvents++;
+        if (rel && action === "do_not_contact") {
+          await admin.from("business_contact_relationships").update({ do_not_contact: true, campaign_eligible: false, do_not_contact_reason: `smartlead_${ev.event_type}` } as never).eq("id", rel.id).eq("business_id", businessId);
+          if (ev.event_type === "lead_unsubscribed") await admin.from("contacts").update({ status: "DO_NOT_CONTACT" } as never).eq("id", rel.contact_id);
+        } else if (rel && action === "stop_followups") {
+          await admin.from("business_contact_relationships").update({ campaign_eligible: false } as never).eq("id", rel.id).eq("business_id", businessId);
+        }
       }
     }
 
     await admin.from("smartlead_campaign_snapshots").upsert({
       business_id: businessId, provider_campaign_id: campaignId, ...mapCampaignSnapshot(campaign, analytics),
-      senders: sanitizeSenders(accounts), last_success_at: nowIso(), last_attempt_at: nowIso(), last_error: null, updated_at: nowIso(),
+      senders: sanitizeSenders(accounts), webhooks, last_success_at: nowIso(), last_attempt_at: nowIso(), last_error: null, updated_at: nowIso(),
     });
     await admin.from("smartlead_sync_runs").update({
       status: "succeeded", finished_at: nowIso(), latency_ms: Date.now() - started,
       leads_seen: leads.length, messages_seen: messagesSeen, new_messages: newMessages,
     }).eq("id", run?.id);
-    return json({ ok: true, leads: leads.length, messages: messagesSeen, new_messages: newMessages, campaign_status: campaign.status });
+    return json({ ok: true, leads: leads.length, messages: messagesSeen, new_messages: newMessages, new_events: newEvents, campaign_status: campaign.status });
   } catch (e) {
     const pe = e instanceof ProviderError ? e : new ProviderError(0, "sync_failed");
     await admin.from("smartlead_sync_runs").update({ status: "failed", finished_at: nowIso(), latency_ms: Date.now() - started, error_code: pe.code.slice(0, 200), http_status: pe.status }).eq("id", run?.id);

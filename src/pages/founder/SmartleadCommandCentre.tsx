@@ -40,6 +40,7 @@ export default function SmartleadCommandCentre() {
   const [snap, setSnap] = useState<Snap | null>(null);
   const [leads, setLeads] = useState<Snap[]>([]);
   const [runs, setRuns] = useState<Snap[]>([]);
+  const [events, setEvents] = useState<Snap[]>([]);
   const [syncing, setSyncing] = useState(false);
   const [thread, setThread] = useState<Snap | null>(null);
   const [messages, setMessages] = useState<Snap[]>([]);
@@ -73,11 +74,13 @@ export default function SmartleadCommandCentre() {
   const load = useCallback(async () => {
     if (!sel) return;
     const f = (t: string) => supabase.from(t as any).select("*").eq("business_id", sel.business_id).eq("provider_campaign_id", sel.provider_campaign_id);
-    const [s, l, r] = await Promise.all([
+    const [s, l, r, ev] = await Promise.all([
       f("smartlead_campaign_snapshots").maybeSingle(),
       f("smartlead_lead_snapshots").order("last_name"),
       f("smartlead_sync_runs").order("started_at", { ascending: false }).limit(8),
+      f("smartlead_activity_events").order("created_at", { ascending: false }).limit(50),
     ]);
+    setEvents((ev.data as Snap[]) ?? []);
     setSnap((s.data as Snap) ?? null); setLeads((l.data as Snap[]) ?? []); setRuns((r.data as Snap[]) ?? []);
   }, [sel]);
   useEffect(() => { load(); }, [load]);
@@ -161,7 +164,7 @@ export default function SmartleadCommandCentre() {
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold text-foreground">Outreach Command Centre</h1>
-            <p className="text-sm text-muted-foreground">Live Smartlead figures, synced into Liftor. Background sync is not enabled yet — use Sync now.</p>
+            <p className="text-sm text-muted-foreground">Live Smartlead figures, synced into Liftor. Updates automatically every 10 minutes; press Sync now for an instant refresh.</p>
           </div>
           <div className="flex items-center gap-2">
             <select className="h-9 rounded-md border border-border bg-background px-2 text-sm text-foreground"
@@ -255,6 +258,38 @@ export default function SmartleadCommandCentre() {
                   <Input className="h-9 w-80" placeholder="Type CHANGE TRACKING FOR THIS CAMPAIGN ONLY" value={trackConfirm} onChange={(e) => setTrackConfirm(e.target.value)} />
                   <Button size="sm" variant="outline" disabled={savingTrack || ((wantOpens || wantClicks) && !disclosed) || trackConfirm !== "CHANGE TRACKING FOR THIS CAMPAIGN ONLY"} onClick={saveTracking}>Save tracking</Button>
                 </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader><CardTitle className="text-base">Instant updates from Smartlead (webhook)</CardTitle></CardHeader>
+              <CardContent className="space-y-2 text-sm text-muted-foreground">
+                {Array.isArray(snap?.webhooks) && snap.webhooks.length ? snap.webhooks.map((w: Snap) => (
+                  <div key={w.id} className="space-y-1">
+                    <div className="flex flex-wrap items-center gap-2"><span className="text-foreground">{w.name}</span><Badge variant="outline">#{w.id}</Badge><Badge variant="secondary">Configured on Smartlead</Badge><Badge variant="destructive">Liftor receiver disabled until signing key is verified</Badge></div>
+                    <div>Events: {(w.event_types ?? []).join(", ").toLowerCase().replace(/_/g, " ")}{w.categories?.length ? ` · categories: ${w.categories.join(", ")}` : ""}</div>
+                    <div>Last changed on Smartlead: {fmtTime(w.updated_at)} · target {w.url_path}</div>
+                  </div>
+                )) : <p>No webhook found on Smartlead for this campaign (as of the last sync).</p>}
+                <p>Until the receiver is enabled, Liftor mirrors everything by reading Smartlead directly (Sync now and the automatic sync). Unsigned updates are always rejected.</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between gap-2"><CardTitle className="text-base">Activity log (real Smartlead events)</CardTitle><Button size="sm" variant="outline" onClick={load}>Update activity</Button></CardHeader>
+              <CardContent className="space-y-1 text-sm">
+                {events.map((e) => {
+                  const who = leads.find((l) => l.provider_lead_id === e.provider_lead_id);
+                  return (
+                    <div key={e.id} className="flex flex-wrap gap-3 text-muted-foreground">
+                      <span className="text-foreground">{fmtTime(e.occurred_at ?? e.created_at)}</span>
+                      <Badge variant="outline">{String(e.event_type).replace(/_/g, " ")}</Badge>
+                      <span>{who ? `${who.first_name ?? ""} ${who.last_name ?? ""}` : `lead ${e.provider_lead_id}`}</span>
+                      {e.liftor_action && <span className="text-destructive">Liftor: {String(e.liftor_action).replace(/_/g, " ")}</span>}
+                    </div>
+                  );
+                })}
+                {!events.length && <p className="text-muted-foreground">No activity yet — nothing has been sent, opened, clicked, replied, bounced or unsubscribed.</p>}
               </CardContent>
             </Card>
 
