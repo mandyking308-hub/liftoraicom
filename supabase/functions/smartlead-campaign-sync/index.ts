@@ -89,14 +89,14 @@ Deno.serve(async (req) => {
     const { data: d } = await admin.from("smartlead_reply_drafts").select("*").eq("id", draftId)
       .eq("business_id", businessId).eq("provider_campaign_id", campaignId).maybeSingle();
     if (!d || d.status !== "draft") return json({ ok: false, error: "draft_not_found_or_not_draft" }, 400);
-    const { data: last } = await admin.from("smartlead_thread_messages").select("provider_stats_id, provider_message_id")
+    const { data: last } = await admin.from("smartlead_thread_messages").select("provider_message_id, sent_at")
       .eq("business_id", businessId).eq("provider_campaign_id", campaignId).eq("provider_lead_id", d.provider_lead_id)
       .eq("direction", "REPLY").order("sent_at", { ascending: false }).limit(1).maybeSingle();
-    if (!last?.provider_stats_id) return json({ ok: false, error: "no_inbound_reply_to_answer" }, 400);
+    if (!last?.provider_message_id || !last?.sent_at || !/^\d+$/.test(String(d.provider_lead_id))) return json({ ok: false, error: "no_inbound_reply_to_answer" }, 400);
     try {
       const r = await sl(`/campaigns/${campaignId}/reply-email-thread`, KEY, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email_stats_id: last.provider_stats_id, email_body: d.body, reply_message_id: last.provider_message_id }),
+        body: JSON.stringify({ lead_id: Number(d.provider_lead_id), email_body: d.body, reply_message_id: last.provider_message_id, reply_email_time: new Date(last.sent_at).toISOString() }),
       });
       await admin.from("smartlead_reply_drafts").update({ status: "sent", sent_by: userId, sent_at: new Date().toISOString(), provider_response: JSON.stringify(r).slice(0, 500), updated_at: new Date().toISOString() }).eq("id", draftId);
       return json({ ok: true, sent: true });
