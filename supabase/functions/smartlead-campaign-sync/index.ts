@@ -93,17 +93,20 @@ Deno.serve(async (req) => {
       .eq("business_id", businessId).eq("provider_campaign_id", campaignId).eq("provider_lead_id", d.provider_lead_id)
       .eq("direction", "REPLY").order("sent_at", { ascending: false }).limit(1).maybeSingle();
     if (!last?.provider_message_id || !last?.sent_at) return json({ ok: false, error: "reply_message_id_or_time_missing" }, 400);
+    let payload: ReturnType<typeof buildReplyPayload>;
+    try { payload = buildReplyPayload(d.provider_lead_id, d.body, last.provider_message_id, last.sent_at); }
+    catch { return json({ ok: false, error: "reply_payload_incomplete" }, 400); }
     try {
       const r = await sl(`/campaigns/${campaignId}/reply-email-thread`, KEY, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(buildReplyPayload(d.provider_lead_id, d.body, last.provider_message_id, last.sent_at)),
+        body: JSON.stringify(payload),
       });
       await admin.from("smartlead_reply_drafts").update({ status: "sent", sent_by: userId, sent_at: new Date().toISOString(), provider_response: JSON.stringify(r).slice(0, 500), updated_at: new Date().toISOString() }).eq("id", draftId);
       return json({ ok: true, sent: true });
     } catch (e) {
-      const pe = e as ProviderError;
-      await admin.from("smartlead_reply_drafts").update({ provider_response: pe.code, updated_at: new Date().toISOString() }).eq("id", draftId);
-      return json({ ok: false, error: pe.code }, pe.status === 401 ? 502 : 502);
+      const code = e instanceof ProviderError ? e.code : "reply_failed";
+      await admin.from("smartlead_reply_drafts").update({ provider_response: code, updated_at: new Date().toISOString() }).eq("id", draftId);
+      return json({ ok: false, error: code }, 502);
     }
   }
 
