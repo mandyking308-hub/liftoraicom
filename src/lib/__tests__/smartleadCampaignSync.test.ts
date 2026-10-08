@@ -52,3 +52,21 @@ describe("smartlead campaign sync logic", () => {
     expect(backoffMs(10)).toBe(8000);
   });
 });
+
+import { buildReplyPayload, trackingFlags } from "../../../supabase/functions/_shared/smartleadCampaignSync";
+describe("reply payload + tracking flags", () => {
+  it("builds the documented reply-email-thread body", () => {
+    expect(buildReplyPayload("4714610528", "Thanks", "<m@x>", "2026-10-09T10:00:00Z"))
+      .toEqual({ lead_id: 4714610528, email_body: "Thanks", reply_message_id: "<m@x>", reply_email_time: "2026-10-09T10:00:00.000Z" });
+  });
+  it("fails closed when reply id or time missing", () => {
+    expect(() => buildReplyPayload("1", "x", null, "2026-10-09T10:00:00Z")).toThrow();
+    expect(() => buildReplyPayload("1", "x", "m", null)).toThrow();
+    expect(() => buildReplyPayload("1", "  ", "m", "2026-10-09T10:00:00Z")).toThrow();
+  });
+  it("reads open and click flags independently", () => {
+    expect(trackingFlags(["DONT_EMAIL_OPEN"])).toEqual({ opensTracked: false, clicksTracked: true });
+    expect(trackingFlags(["DONT_EMAIL_OPEN", "DONT_LINK_CLICK"])).toEqual({ opensTracked: false, clicksTracked: false });
+    expect(trackingFlags(null)).toEqual({ opensTracked: null, clicksTracked: null });
+  });
+});

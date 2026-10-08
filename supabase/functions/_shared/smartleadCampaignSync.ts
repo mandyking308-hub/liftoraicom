@@ -104,3 +104,17 @@ export function assertMapping(
 /** Exponential backoff schedule for retryable provider errors. */
 export const isRetryable = (status: number) => status === 429 || status >= 500;
 export const backoffMs = (attempt: number) => Math.min(8000, 500 * 2 ** (attempt - 1));
+
+/** Smartlead POST /campaigns/{id}/reply-email-thread body. Fails closed on missing fields. */
+export function buildReplyPayload(leadId: unknown, body: unknown, replyMessageId: unknown, replyTime: unknown) {
+  const t = typeof replyTime === "string" ? new Date(replyTime) : null;
+  if (!leadId || typeof body !== "string" || !body.trim() || !replyMessageId || !t || isNaN(t.getTime())) {
+    throw new Error("reply_payload_incomplete");
+  }
+  return { lead_id: Number(leadId), email_body: body, reply_message_id: String(replyMessageId), reply_email_time: t.toISOString() };
+}
+
+export const trackingFlags = (track: string[] | null | undefined) => ({
+  opensTracked: Array.isArray(track) ? !track.includes("DONT_EMAIL_OPEN") : null,
+  clicksTracked: Array.isArray(track) ? !track.includes("DONT_LINK_CLICK") : null,
+});

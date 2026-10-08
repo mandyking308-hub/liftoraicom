@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import {
-  assertMapping, backoffMs, dedupeKey, isRetryable, mapCampaignSnapshot, normEmail, sanitizeSenders, summarizeHistory,
+  assertMapping, backoffMs, dedupeKey, isRetryable, mapCampaignSnapshot, normEmail, sanitizeSenders, summarizeHistory, buildReplyPayload,
   type HistoryMsg,
 } from "../_shared/smartleadCampaignSync.ts";
 
@@ -89,43 +89,44 @@ Deno.serve(async (req) => {
     const { data: d } = await admin.from("smartlead_reply_drafts").select("*").eq("id", draftId)
       .eq("business_id", businessId).eq("provider_campaign_id", campaignId).maybeSingle();
     if (!d || d.status !== "draft") return json({ ok: false, error: "draft_not_found_or_not_draft" }, 400);
-    const { data: last } = await admin.from("smartlead_thread_messages").select("provider_stats_id, provider_message_id")
+    const { data: last } = await admin.from("smartlead_thread_messages").select("provider_message_id, sent_at")
       .eq("business_id", businessId).eq("provider_campaign_id", campaignId).eq("provider_lead_id", d.provider_lead_id)
       .eq("direction", "REPLY").order("sent_at", { ascending: false }).limit(1).maybeSingle();
-    if (!last?.provider_stats_id) return json({ ok: false, error: "no_inbound_reply_to_answer" }, 400);
+    if (!last?.provider_message_id || !last?.sent_at) return json({ ok: false, error: "reply_message_id_or_time_missing" }, 400);
+    let payload: ReturnType<typeof buildReplyPayload>;
+    try { payload = buildReplyPayload(d.provider_lead_id, d.body, last.provider_message_id, last.sent_at); }
+    catch { return json({ ok: false, error: "reply_payload_incomplete" }, 400); }
     try {
       const r = await sl(`/campaigns/${campaignId}/reply-email-thread`, KEY, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email_stats_id: last.provider_stats_id, email_body: d.body, reply_message_id: last.provider_message_id }),
+        body: JSON.stringify(payload),
       });
       await admin.from("smartlead_reply_drafts").update({ status: "sent", sent_by: userId, sent_at: new Date().toISOString(), provider_response: JSON.stringify(r).slice(0, 500), updated_at: new Date().toISOString() }).eq("id", draftId);
       return json({ ok: true, sent: true });
     } catch (e) {
-      const pe = e as ProviderError;
-      await admin.from("smartlead_reply_drafts").update({ provider_response: pe.code, updated_at: new Date().toISOString() }).eq("id", draftId);
-      return json({ ok: false, error: pe.code }, pe.status === 401 ? 502 : 502);
+      const code = e instanceof ProviderError ? e.code : "reply_failed";
+      await admin.from("smartlead_reply_drafts").update({ provider_response: code, updated_at: new Date().toISOString() }).eq("id", draftId);
+      return json({ ok: false, error: code }, 502);
     }
   }
 
   // ---- Opt-in open/click tracking for this pilot only ----
   if (action === "set_tracking") {
     if (!userId) return json({ ok: false, error: "human_required" }, 403);
-    if (body.confirmation !== "ENABLE TRACKING FOR THIS CAMPAIGN ONLY" && body.confirmation !== "DISABLE TRACKING FOR THIS CAMPAIGN ONLY") {
-      return json({ ok: false, error: "confirmation_required" }, 400);
-    }
-    const enable = String(body.confirmation).startsWith("ENABLE");
+    const opens = body.opens === true, clicks = body.clicks === true;
+    if (body.confirmation !== "CHANGE TRACKING FOR THIS CAMPAIGN ONLY") return json({ ok: false, error: "confirmation_required" }, 400);
     try {
-      const cur = (await sl(`/campaigns/${campaignId}`, KEY)) as Record<string, unknown>;
+const cur = (await sl(`/campaigns/${campaignId}`, KEY)) as Record<string, unknown>;
       await sl(`/campaigns/${campaignId}/settings`, KEY, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          track_settings: enable ? [] : ["DONT_EMAIL_OPEN", "DONT_LINK_CLICK"],
+          track_settings: [...(opens ? [] : ["DONT_EMAIL_OPEN"]), ...(clicks ? [] : ["DONT_LINK_CLICK"])],
           stop_lead_settings: cur.stop_lead_settings ?? "REPLY_TO_AN_EMAIL",
           send_as_plain_text: cur.send_as_plain_text ?? true,
           follow_up_percentage: cur.follow_up_percentage ?? 100,
         }),
       });
-      return json({ ok: true, tracking_enabled: enable });
+      return json({ ok: true, opens_tracked: opens, clicks_tracked: clicks });
     } catch (e) {
       return json({ ok: false, error: (e as ProviderError).code }, 502);
     }
