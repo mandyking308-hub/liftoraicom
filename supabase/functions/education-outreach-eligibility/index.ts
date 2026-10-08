@@ -1,3 +1,4 @@
+import { resolveCanonicalActiveBusiness } from "../_shared/canonicalBusinessResolver.ts";
 // Education outreach eligibility preflight (Chat 3 commercial layer).
 //
 // READ-ONLY. This function never sends, queues, maps or mutates any provider.
@@ -78,7 +79,12 @@ Deno.serve(async (req) => {
   const { data: campaigns } = await campaignQuery.limit(1);
   const campaign = campaigns?.[0] ?? null;
 
-  const { data: business } = await admin.from("businesses").select("id").eq("name", businessName).maybeSingle();
+  // Archived legacy rows may share the name; outbound resolves only the single active canonical row.
+  const { data: businessRows } = await admin.from("businesses").select("id,name,portfolio_status")
+    .eq("portfolio_status", "active").ilike("name", businessName.replace(/[%_]/g, ""));
+  const resolved = resolveCanonicalActiveBusiness(businessRows ?? [], businessName);
+  if (!resolved.ok) return json({ error: resolved.reason }, resolved.reason === "business_not_found" ? 404 : 409);
+  const business = { id: resolved.id };
 
   // --- Chat 2 / GSM owned readiness (read only) --------------------------
   const { data: mappings } = await admin.from("outbound_provider_campaign_mappings")
