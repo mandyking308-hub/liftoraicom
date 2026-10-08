@@ -183,7 +183,7 @@ Deno.serve(async (req) => {
       }
       // Suppression sync: unsubscribed in Smartlead -> mark matching Liftor contact (this contact only).
       if (lead.is_unsubscribed === true && typeof contactId === "string") {
-        await admin.from("contacts").update({ status: "do_not_contact" } as never).eq("id", contactId);
+        await admin.from("contacts").update({ status: "DO_NOT_CONTACT" } as never).eq("id", contactId);
       }
     }
 
