@@ -365,3 +365,278 @@ export async function promoteDraftToBusiness(state: TunnelState): Promise<string
   return id;
 }
 
+// ---------------------------------------------------------------------------
+// Promote setup into Liftor modules (draft / offline writes only).
+// Payloads match the real table schemas. Each area is idempotent: an existing
+// record for this business (matched on stable keys) is reused, never duplicated.
+// Errors are surfaced per area as "failed" with the database message.
+// Nothing here sends, publishes, activates providers or sets go-live.
+// ---------------------------------------------------------------------------
+
+type PromoteAttempt = {
+  area: ModuleAreaKey;
+  table: string;
+  /** Equality filters identifying this business's existing record (idempotency). */
+  match: Record<string, string>;
+  payload: Record<string, unknown>;
+  note: string;
+};
+
+const fld = (state: TunnelState, step: StepKey, key: string): string =>
+  (state.steps?.[step]?.fields?.[key] ?? "").trim();
+
+export function tunnelMissingSections(state: TunnelState): string[] {
+  return TUNNEL_STEPS.filter((s) => state.steps?.[s.key]?.status !== "saved").map((s) => s.label);
+}
+
+export function buildPromoteAttempts(state: TunnelState): PromoteAttempt[] {
+  const bizId = state.businessId;
+  const bizName = state.businessName;
+  const missing = tunnelMissingSections(state);
+  const savedCount = TUNNEL_STEPS.length - missing.length;
+  const readiness = Math.round((savedCount / TUNNEL_STEPS.length) * 100);
+  const today = new Date();
+  const periodStart = today.toISOString().slice(0, 10);
+  const periodEnd = new Date(today.getTime() + 30 * 86400 * 1000).toISOString().slice(0, 10);
+  const pricing = fld(state, "offer", "pricing");
+  const packages = fld(state, "offer", "packages");
+  const products = fld(state, "offer", "products");
+  const icp = fld(state, "market", "icp");
+  const segments = fld(state, "market", "segments");
+  const legal = fld(state, "identity", "legal_entity");
+  const website = fld(state, "web", "website_url");
+  const src = { source: "business_setup_tunnel", setup_missing_sections: missing };
+  const ns = (v: string) => (v ? "draft" : "missing_founder_input");
+
+  return [
+    {
+      area: "activation",
+      table: "business_activation_profiles",
+      match: { business_id: bizId },
+      payload: {
+        business_id: bizId,
+        activation_status: "draft",
+        operating_mode: "sandbox",
+        legal_entity_status: legal ? "recorded_unverified" : "missing_founder_input",
+        brand_profile_status: ns(fld(state, "identity", "short_description")),
+        offer_catalog_status: ns(products),
+        pricing_status: pricing ? "recorded_from_public_site" : "missing_founder_input",
+        outreach_status: "off",
+        smartlead_status: "off",
+        apollo_status: "off",
+        native_email_status: "off",
+        social_status: "off",
+        marketing_status: "missing_founder_input",
+        invoice_payment_status: "missing_founder_input",
+        onboarding_status: "missing_founder_input",
+        support_status: "missing_founder_input",
+        compliance_status: "missing_founder_input",
+        readiness_score: readiness,
+        go_live_allowed: false,
+        founder_approval_required: true,
+        metadata: { ...src, website, legal_entity: legal, pricing, readiness_basis: "share of tunnel steps saved" },
+      },
+      note: `Activation profile in sandbox. Readiness ${readiness}%. Go-live NOT allowed.`,
+    },
+    {
+      area: "onboarding_factory",
+      table: "business_onboarding_factory_runs",
+      match: { business_id: bizId },
+      payload: {
+        business_id: bizId,
+        run_status: missing.length ? "partial" : "draft",
+        provider_status: "off",
+        business_created: true,
+        knowledge_registered: state.steps?.knowledge?.status === "saved",
+        profile_created: true,
+        internal_ready: false,
+        external_ready: false,
+        readiness_score: readiness,
+        missing_context_count: missing.length,
+        no_forbidden_action_audit: { emails_sent: 0, provider_calls: 0, apollo_credits: 0, publishing: 0 },
+        is_test_data: false,
+        metadata: src,
+      },
+      note: `Onboarding factory run recorded (${missing.length} sections still missing). External ready = false.`,
+    },
+    {
+      area: "runtime",
+      table: "business_runtime_activation",
+      match: { business_id: bizId },
+      payload: {
+        business_id: bizId,
+        activated: false,
+        runtime_state: "isolated",
+        outbound_allowed: false,
+        queue_allowed: false,
+        ai_orchestration_allowed: false,
+        notes: "Created by setup tunnel. Isolated; outbound, queue and AI orchestration off.",
+      },
+      note: "Runtime isolated. Outbound, queue and AI orchestration all OFF.",
+    },
+    {
+      area: "marketing",
+      table: "marketing_campaign_briefs",
+      match: { business_id: bizId, campaign_type: "draft_from_setup_tunnel" },
+      payload: {
+        business_id: bizId,
+        campaign_name: `${bizName} — setup-tunnel draft brief`,
+        campaign_type: "draft_from_setup_tunnel",
+        target_audience: [icp, segments].filter(Boolean).join(" ") || null,
+        offer: pricing || null,
+        approval_status: "draft",
+        launch_allowed: false,
+        metadata: { ...src, brand_voice: "missing_founder_input", channels: "missing_founder_input" },
+      },
+      note: "Draft marketing brief. Launch not allowed. Brand voice and channels need founder input.",
+    },
+    {
+      area: "sales",
+      table: "outreach_campaign_drafts",
+      match: { campaign_key: `setup_tunnel_${bizId}` },
+      payload: {
+        business_id: bizId,
+        campaign_key: `setup_tunnel_${bizId}`,
+        campaign_name: `${bizName} — setup-tunnel outreach draft`,
+        status: "draft",
+        lead_criteria: { icp, segments, exclusions: "nursery-only operators" },
+        exclusions: ["nursery_only"],
+        email_sequence: [],
+        smartlead_campaign_id: null,
+        external_send_blocked: true,
+        is_live: false,
+        compliance_checked: false,
+        unsubscribe_required: true,
+        founder_approval_state: "not_requested",
+      },
+      note: "Outreach draft only. Sending blocked, no sequence, no Smartlead link, founder approval not requested.",
+    },
+    {
+      area: "crm",
+      table: "__skip__",
+      match: {},
+      payload: {},
+      note: "CRM wiring is manual in /founder/crm. No contacts created or changed.",
+    },
+    {
+      area: "support",
+      table: "customer_onboarding_plans",
+      match: { business_id: bizId, plan_name: `${bizName} — setup-tunnel onboarding plan (draft)` },
+      payload: {
+        business_id: bizId,
+        plan_name: `${bizName} — setup-tunnel onboarding plan (draft)`,
+        onboarding_status: "draft",
+        onboarding_type: "school_licence_template",
+        approval_status: "draft",
+        customer_share_allowed: false,
+        external_share_allowed: false,
+        founder_review_required: true,
+        is_test_data: false,
+        missing_information: ["onboarding steps", "support email", "refund / cancellation terms"],
+        metadata: src,
+      },
+      note: "Template onboarding plan (no customer). Not shareable. Steps, support email and terms need founder input.",
+    },
+    {
+      area: "operations",
+      table: "business_operating_runbooks",
+      match: { business_id: bizId, runbook_key: `setup_tunnel_${bizId.slice(0, 8)}` },
+      payload: {
+        business_id: bizId,
+        runbook_key: `setup_tunnel_${bizId.slice(0, 8)}`,
+        runbook_name: `${bizName} — daily loop (setup tunnel draft)`,
+        runbook_type: "daily_operating_loop",
+        status: "draft",
+        safety_notes: ["No cron", "No auto-execution", "No external sending"],
+        metadata: src,
+      },
+      note: "Draft daily runbook. No cron, no auto-execution.",
+    },
+    {
+      area: "finance",
+      table: "cashflow_forecasts",
+      match: { business_id: bizId, forecast_name: `${bizName} — setup-tunnel 30-day draft forecast` },
+      payload: {
+        business_id: bizId,
+        forecast_name: `${bizName} — setup-tunnel 30-day draft forecast`,
+        period_start: periodStart,
+        period_end: periodEnd,
+        opening_cash: null,
+        expected_inflows: 0,
+        expected_outflows: 0,
+        forecast_status: "draft",
+        founder_review_required: true,
+        assumptions: ["Opening cash, costs and revenue targets are missing founder input — no figures assumed."],
+      },
+      note: "Empty 30-day forecast skeleton. No figures assumed; founder must supply them. No invoicing.",
+    },
+    {
+      area: "evidence",
+      table: "data_room_profiles",
+      match: { business_id: bizId, data_room_type: "internal" },
+      payload: {
+        business_id: bizId,
+        data_room_name: `${bizName} — data room (closed)`,
+        data_room_type: "internal",
+        data_room_status: "closed",
+        audit_metadata: src,
+      },
+      note: "Data room registered CLOSED. No access tokens issued.",
+    },
+    {
+      area: "exit",
+      table: "__skip__",
+      match: {},
+      payload: {},
+      note: "Buyer warm-up stays quiet. Nothing created.",
+    },
+  ];
+}
+
+/** Reuse this business's existing record if present, otherwise insert once. */
+async function ensureRecord(a: PromoteAttempt): Promise<{ id: string; created: boolean }> {
+  let q = (supabase.from(a.table as any) as any).select("id");
+  for (const [k, v] of Object.entries(a.match)) q = q.eq(k, v);
+  const found = await q.limit(1);
+  if (found.error) throw new Error(found.error.message);
+  const existing = (found.data as { id: string }[] | null)?.[0];
+  if (existing) return { id: existing.id, created: false };
+  const { data, error } = await (supabase.from(a.table as any) as any).insert(a.payload).select("id").single();
+  if (error) throw new Error(error.message);
+  const id = (data as { id?: string } | null)?.id;
+  if (!id) throw new Error("insert returned no id");
+  return { id, created: true };
+}
+
+export async function promoteIntoLiftorModules(state: TunnelState): Promise<ModuleConnections> {
+  if (!isUuid(state.businessId)) {
+    throw new Error("Confirm the draft business first (must be a real businesses row).");
+  }
+  const out: ModuleConnections = { ...(state.moduleConnections ?? {}) };
+  const nowIso = new Date().toISOString();
+  for (const a of buildPromoteAttempts(state)) {
+    if (a.table === "__skip__") {
+      out[a.area] = { status: "manual_action_needed", target_table: null, draft_record_id: null, note: a.note, attempted_at: nowIso };
+      continue;
+    }
+    try {
+      const r = await ensureRecord(a);
+      out[a.area] = {
+        status: "connected",
+        target_table: a.table,
+        draft_record_id: r.id,
+        note: `${a.note}${r.created ? "" : " (existing record reused)"}`,
+        attempted_at: nowIso,
+      };
+    } catch (e) {
+      out[a.area] = {
+        status: "failed",
+        target_table: a.table,
+        draft_record_id: null,
+        note: `Failed in ${a.table}: ${e instanceof Error ? e.message : String(e)}`,
+        attempted_at: nowIso,
+      };
+    }
+  }
+  return out;
+}
