@@ -64,6 +64,13 @@
       "when": 1791460102100,
       "tag": "0008_smartlead_campaign_sync_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1791462933058,
+      "tag": "0009_smartlead_activity_events_and_sync_token",
+      "breakpoints": true
     }
   ]
 }

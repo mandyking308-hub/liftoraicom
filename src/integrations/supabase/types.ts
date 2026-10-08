@@ -55459,6 +55459,57 @@ export type Database = {
         }
         Relationships: []
       }
+      smartlead_activity_events: {
+        Row: {
+          business_contact_relationship_id: string | null
+          business_id: string
+          created_at: string
+          dedupe_key: string
+          details: Json
+          event_type: string
+          id: string
+          liftor_action: string | null
+          liftor_contact_id: string | null
+          occurred_at: string | null
+          provider_campaign_id: string
+          provider_lead_id: string | null
+          provider_message_id: string | null
+          source: string
+        }
+        Insert: {
+          business_contact_relationship_id?: string | null
+          business_id: string
+          created_at?: string
+          dedupe_key: string
+          details?: Json
+          event_type: string
+          id?: string
+          liftor_action?: string | null
+          liftor_contact_id?: string | null
+          occurred_at?: string | null
+          provider_campaign_id: string
+          provider_lead_id?: string | null
+          provider_message_id?: string | null
+          source?: string
+        }
+        Update: {
+          business_contact_relationship_id?: string | null
+          business_id?: string
+          created_at?: string
+          dedupe_key?: string
+          details?: Json
+          event_type?: string
+          id?: string
+          liftor_action?: string | null
+          liftor_contact_id?: string | null
+          occurred_at?: string | null
+          provider_campaign_id?: string
+          provider_lead_id?: string | null
+          provider_message_id?: string | null
+          source?: string
+        }
+        Relationships: []
+      }
       smartlead_campaign_snapshots: {
         Row: {
           blocked: number | null
@@ -55777,6 +55828,33 @@ export type Database = {
           status?: string
           trigger?: string
           triggered_by?: string | null
+        }
+        Relationships: []
+      }
+      smartlead_sync_schedule: {
+        Row: {
+          business_id: string
+          created_at: string
+          enabled: boolean
+          id: number
+          provider_campaign_id: string
+          token: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          enabled?: boolean
+          id?: number
+          provider_campaign_id: string
+          token?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          enabled?: boolean
+          id?: number
+          provider_campaign_id?: string
+          token?: string
         }
         Relationships: []
       }
