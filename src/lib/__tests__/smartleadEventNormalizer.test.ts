@@ -74,3 +74,27 @@ describe("smartlead event normalizer", () => {
     expect(m.inbox_patch.provider_ready).toBe(false);
   });
 });
+
+describe("smartlead webhook aliases selected on webhook 902244", () => {
+  it("recognises every selected event type distinctly", () => {
+    expect(normalizeEventType("EMAIL_LINK_CLICK")).toBe("link_clicked");
+    expect(normalizeEventType("FIRST_EMAIL_SENT")).toBe("first_email_sent");
+    expect(normalizeEventType("MANUAL_REPLY_SENT")).toBe("manual_reply_sent");
+    expect(normalizeEventType("MANUAL_STEP_REACHED")).toBe("manual_step_reached");
+    expect(normalizeEventType("LEAD_CATEGORY_UPDATED")).toBe("lead_category_updated");
+    expect(normalizeEventType("EMAIL_OPEN")).toBe("email_opened");
+    expect(normalizeEventType("CAMPAIGN_STATUS_CHANGED")).toBe("campaign_status_changed");
+  });
+  it("new types record only and never change suppression", () => {
+    for (const t of ["FIRST_EMAIL_SENT", "MANUAL_REPLY_SENT", "MANUAL_STEP_REACHED", "LEAD_CATEGORY_UPDATED", "EMAIL_LINK_CLICK"]) {
+      const m = deriveContactMutation(extractEvent({ event_type: t }));
+      expect(m.blocks_future_sends).toBe(false);
+      expect(Object.keys(m.contact_patch)).toHaveLength(0);
+      expect(m.transition).toContain("_recorded_only");
+    }
+  });
+  it("duplicate deliveries produce the same idempotency key", () => {
+    const p = { event_type: "FIRST_EMAIL_SENT", event_id: "e1", campaign_id: "4103531", lead: { id: "9" } };
+    expect(buildIdempotencyKey(extractEvent(p))).toBe(buildIdempotencyKey(extractEvent({ ...p })));
+  });
+});

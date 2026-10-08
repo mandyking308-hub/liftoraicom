@@ -15,12 +15,16 @@ export const EVENT_NORMALIZER_VERSION = "smartlead-event-normalizer-1.0.0";
 
 export type CanonicalEventType =
   | "email_sent"
+  | "first_email_sent"
   | "email_opened"
   | "link_clicked"
   | "reply_received"
   | "email_bounced"
   | "lead_unsubscribed"
   | "lead_status_changed"
+  | "lead_category_updated"
+  | "manual_reply_sent"
+  | "manual_step_reached"
   | "campaign_status_changed"
   | "campaign_completed"
   | "mailbox_error"
@@ -28,6 +32,8 @@ export type CanonicalEventType =
 
 export const OPERATIONAL_EVENT_TYPES: readonly CanonicalEventType[] = [
   "email_sent",
+  "first_email_sent",
+  "manual_reply_sent",
   "reply_received",
   "email_bounced",
   "lead_unsubscribed",
@@ -52,6 +58,17 @@ const ALIASES: Record<string, CanonicalEventType> = {
   clicked: "link_clicked",
   link_clicked: "link_clicked",
   email_link_clicked: "link_clicked",
+  email_link_click: "link_clicked",
+  link_click: "link_clicked",
+
+  first_email_sent: "first_email_sent",
+  first_email: "first_email_sent",
+
+  manual_reply_sent: "manual_reply_sent",
+  manual_reply: "manual_reply_sent",
+
+  manual_step_reached: "manual_step_reached",
+  manual_step: "manual_step_reached",
 
   reply: "reply_received",
   replied: "reply_received",
@@ -75,7 +92,8 @@ const ALIASES: Record<string, CanonicalEventType> = {
 
   lead_status_changed: "lead_status_changed",
   status_change: "lead_status_changed",
-  lead_category_updated: "lead_status_changed",
+  lead_category_updated: "lead_category_updated",
+  category_updated: "lead_category_updated",
 
   campaign_status_changed: "campaign_status_changed",
   campaign_paused: "campaign_status_changed",
@@ -276,6 +294,10 @@ export function deriveContactMutation(
 
     // Recorded for provenance, but deliberately no CRM suppression change.
     case "email_sent":
+    case "first_email_sent":
+    case "manual_reply_sent":
+    case "manual_step_reached":
+    case "lead_category_updated":
     case "email_opened":
     case "link_clicked":
     case "lead_status_changed":
