@@ -43,6 +43,13 @@
       "when": 1791305719093,
       "tag": "0005_businesses_portfolio_status_archive",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791456344070,
+      "tag": "0006_businesses_active_name_unique",
+      "breakpoints": true
     }
   ]
 }
