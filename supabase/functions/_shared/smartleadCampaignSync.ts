@@ -143,7 +143,7 @@ export function deriveActivityEvents(
     const base = dedupeKey(m);
     const occurred = m.time ? String(m.time) : null;
     if (t === "SENT") {
-      out.push({ event_type: i === 0 || m.email_seq_number === "1" ? "first_email_sent" : "email_sent", dedupe_key: `sent:${base}`, provider_message_id: m.message_id ?? null, occurred_at: occurred, details: { sequence: m.email_seq_number ?? null } });
+      out.push({ event_type: i === 0 || String(m.email_seq_number) === "1" ? "first_email_sent" : "email_sent", dedupe_key: `sent:${base}`, provider_message_id: m.message_id ?? null, occurred_at: occurred, details: { sequence: m.email_seq_number ?? null } });
       const opens = num(m.open_count) ?? 0, clicks = num(m.click_count) ?? 0;
       if (opens > 0) out.push({ event_type: "email_open_approximate", dedupe_key: `open:${base}:${opens}`, provider_message_id: m.message_id ?? null, occurred_at: null, details: { open_count: opens, note: "tracked open, approximate; not proof of read" } });
       if (clicks > 0) out.push({ event_type: "email_link_click", dedupe_key: `click:${base}:${clicks}`, provider_message_id: m.message_id ?? null, occurred_at: null, details: { click_count: clicks } });
