@@ -1,0 +1,1 @@
+- Smartlead campaign visibility comes from founder-triggered REST polling (smartlead-campaign-sync) into smartlead_* snapshot tables scoped by active business_id + mapped campaign; webhooks stay optional and signed-only, because the webhook signing secret is not yet provisioned.
