@@ -127,12 +127,14 @@ Deno.serve(async (req) => {
     if (body.confirmation !== "CHANGE TRACKING FOR THIS CAMPAIGN ONLY") return json({ ok: false, error: "confirmation_required" }, 400);
     try {
 const cur = (await sl(`/campaigns/${campaignId}`, KEY)) as Record<string, unknown>;
+      if (typeof cur.send_as_plain_text !== "boolean") return json({ ok: false, error: "plain_text_setting_unknown" }, 409);
+      if ((opens || clicks) && cur.send_as_plain_text === true) return json({ ok: false, error: "plain_text_mode_blocks_tracking" }, 409);
       await sl(`/campaigns/${campaignId}/settings`, KEY, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           track_settings: [...(opens ? [] : ["DONT_EMAIL_OPEN"]), ...(clicks ? [] : ["DONT_LINK_CLICK"])],
           stop_lead_settings: cur.stop_lead_settings ?? "REPLY_TO_AN_EMAIL",
-          send_as_plain_text: cur.send_as_plain_text ?? true,
+          send_as_plain_text: cur.send_as_plain_text,
           follow_up_percentage: cur.follow_up_percentage ?? 100,
         }),
       });
@@ -188,7 +190,7 @@ const cur = (await sl(`/campaigns/${campaignId}`, KEY)) as Record<string, unknow
       await admin.from("smartlead_lead_snapshots").upsert({
         business_id: businessId, provider_campaign_id: campaignId, provider_lead_id: leadId,
         campaign_lead_map_id: row.campaign_lead_map_id ? String(row.campaign_lead_map_id) : null,
-        liftor_contact_id: typeof contactId === "string" && /^[0-9a-f-]{36}$/i.test(contactId) ? contactId : null,
+        liftor_contact_id: contactId,
         first_name: lead.first_name ?? null, last_name: lead.last_name ?? null, email: normEmail(lead.email),
         company_name: lead.company_name ?? null, lead_status: row.status ?? null,
         lead_category_id: row.lead_category_id != null ? String(row.lead_category_id) : null,
@@ -228,7 +230,7 @@ const cur = (await sl(`/campaigns/${campaignId}`, KEY)) as Record<string, unknow
 
     await admin.from("smartlead_campaign_snapshots").upsert({
       business_id: businessId, provider_campaign_id: campaignId, ...mapCampaignSnapshot(campaign, analytics),
-      senders: sanitizeSenders(accounts), webhooks, last_success_at: nowIso(), last_attempt_at: nowIso(), last_error: null, updated_at: nowIso(),
+      senders: sanitizeSenders(accounts), webhooks, send_as_plain_text: typeof campaign.send_as_plain_text === "boolean" ? campaign.send_as_plain_text : null, last_success_at: nowIso(), last_attempt_at: nowIso(), last_error: null, updated_at: nowIso(),
     });
     await admin.from("smartlead_sync_runs").update({
       status: "succeeded", finished_at: nowIso(), latency_ms: Date.now() - started,

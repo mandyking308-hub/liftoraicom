@@ -78,6 +78,13 @@
       "when": 1791463071798,
       "tag": "0010_smartlead_snapshot_webhooks",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1791465905917,
+      "tag": "0011_smartlead_snapshot_plain_text",
+      "breakpoints": true
     }
   ]
 }

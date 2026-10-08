@@ -55529,6 +55529,7 @@ export type Database = {
           open_count: number | null
           provider_campaign_id: string
           reply_count: number | null
+          send_as_plain_text: boolean | null
           senders: Json
           sent_count: number | null
           stopped: number | null
@@ -55559,6 +55560,7 @@ export type Database = {
           open_count?: number | null
           provider_campaign_id: string
           reply_count?: number | null
+          send_as_plain_text?: boolean | null
           senders?: Json
           sent_count?: number | null
           stopped?: number | null
@@ -55589,6 +55591,7 @@ export type Database = {
           open_count?: number | null
           provider_campaign_id?: string
           reply_count?: number | null
+          send_as_plain_text?: boolean | null
           senders?: Json
           sent_count?: number | null
           stopped?: number | null

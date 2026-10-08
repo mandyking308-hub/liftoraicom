@@ -146,6 +146,18 @@ export default function BusinessSetupTunnel() {
     setState(remote ?? local ?? newState(b.id, b.name, false));
     setStepIdx(0);
   }
+  // Deep link: ?business=<id> opens that ACTIVE business directly (archived ids are ignored).
+  const deepLinked = useRef(false);
+  useEffect(() => {
+    const id = params.get("business");
+    if (!id || deepLinked.current || state) return;
+    deepLinked.current = true;
+    (async () => {
+      const { data } = await supabase.from("businesses").select("id, name").eq("id", id).eq("portfolio_status", "active").maybeSingle();
+      if (data) await pick(data as unknown as BusinessRow);
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params]);
   function pickDraft(s: TunnelState) { setState(s); setStepIdx(0); }
   function createNew() {
     if (!newName.trim()) { toast.error("Enter a name."); return; }
