@@ -164,7 +164,7 @@ export default function SmartleadCommandCentre() {
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold text-foreground">Outreach Command Centre</h1>
-            <p className="text-sm text-muted-foreground">Live Smartlead figures, synced into Liftor. Background sync is not enabled yet — use Sync now.</p>
+            <p className="text-sm text-muted-foreground">Live Smartlead figures, synced into Liftor. Updates automatically every 10 minutes; press Sync now for an instant refresh.</p>
           </div>
           <div className="flex items-center gap-2">
             <select className="h-9 rounded-md border border-border bg-background px-2 text-sm text-foreground"

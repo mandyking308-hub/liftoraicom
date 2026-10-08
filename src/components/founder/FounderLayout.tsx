@@ -311,7 +311,7 @@ const FounderLayout = ({ children }: { children: React.ReactNode }) => {
         </div>
       )}
 
-      <div className="flex-1 lg:ml-60">
+      <div className="flex-1 min-w-0 lg:ml-60">
         <div className="lg:hidden flex items-center justify-between p-4 border-b border-border/50">
           <Link to="/founder" className="text-lg font-bold tracking-tight">
             <span className="text-foreground">Liftor</span>
