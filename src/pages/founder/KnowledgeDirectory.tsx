@@ -23,6 +23,7 @@ const CATEGORIES = [
   "AI Agent Design",
   "Workflow Optimisation",
   "Deployment Lessons",
+  "Education",
   "General",
 ];
 
