@@ -38,3 +38,4 @@
 - [x] Standalone Giving Rail platform documented and separated from Liftor core + GHAT
 - [ ] Truth labels (BUILT_IN_CODE / LIVE_CONFIGURED / END_TO_END_PROVED / BLOCKED / FAIL_CLOSED / PARTIAL /
       DEAD_OR_UNREACHABLE / HISTORICAL_ONLY / UNKNOWN) applied across coverage matrices
+- [x] Knowledge Base: add 'Education' category (KnowledgeDirectory/KnowledgeDetail)

@@ -13,7 +13,7 @@ import { useState } from "react";
 import { ArrowLeft, BookOpen, FileText, Upload, Trash2, Save, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-const CATEGORIES = ["System Architecture", "Automation Patterns", "AI Agent Design", "Workflow Optimisation", "Deployment Lessons", "General"];
+const CATEGORIES = ["System Architecture", "Automation Patterns", "AI Agent Design", "Workflow Optimisation", "Deployment Lessons", "Education", "General"];
 const ENTRY_TYPES = [
   { value: "knowledge", label: "Knowledge Entry" },
   { value: "workflow_template", label: "Workflow Template" },

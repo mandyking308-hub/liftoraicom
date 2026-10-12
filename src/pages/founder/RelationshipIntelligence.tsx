@@ -205,7 +205,8 @@ export default function RelationshipIntelligence() {
     }
     if (filters.search) {
       const q = filters.search.toLowerCase();
-      const hay = `${c.contact_name} ${c.organisation_name ?? ""} ${c.email ?? ""} ${(c.tags ?? []).join(" ")}`.toLowerCase();
+      const tagText = (c.tags ?? []).join(" ");
+      const hay = `${c.contact_name} ${c.organisation_name ?? ""} ${c.email ?? ""} ${tagText} ${tagText.replace(/[_-]+/g, " ")}`.toLowerCase();
       if (!hay.includes(q)) return false;
     }
     return true;
