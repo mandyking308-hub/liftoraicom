@@ -1,0 +1,59 @@
+{
+  "source_freeze_sha": "cf1c1373f3affdd66c17a53b97200ac06c3a878f",
+  "documentation_commit": "recorded in docs/liftor-rebuild/00-index.md after the documentation commit is created; a generated file cannot contain the hash of the commit that adds it",
+  "source_tree_clean_at_generation": true,
+  "routes_total": 876,
+  "routes_in_catalog": 876,
+  "founder_routes": 800,
+  "public_routes": 46,
+  "redirects": 6,
+  "pages_total": 945,
+  "pages_routed": 841,
+  "components_total": 419,
+  "lib_modules": 177,
+  "edge_functions_dirs": 620,
+  "edge_functions_catalogued": 620,
+  "edge_functions_missing_index": [],
+  "edge_functions_jwt_off": [
+    "autopilot-orchestrator",
+    "compliance-approve",
+    "customer-voice-call-status-webhook",
+    "customer-voice-inbound-webhook",
+    "customer-voice-transcript-ingest",
+    "outreach-inbound-poll",
+    "outreach-inbound-webhook",
+    "outreach-test-imap",
+    "pr-gmail-oauth-callback",
+    "smartlead-webhook",
+    "social-distribution-dispatch-due",
+    "social-distribution-maintenance",
+    "social-relationship-maintenance",
+    "social-relationship-webhook",
+    "stripe-webhook",
+    "unsubscribe-contact"
+  ],
+  "edge_functions_external_capable": 34,
+  "migrations": 442,
+  "tracked_files": 2975,
+  "founder_routes_distinct": 798,
+  "founder_route_coverage": {
+    "direct": 191,
+    "inherited": 607
+  },
+  "founder_route_coverage_uncovered": [],
+  "user_manual_module_families": 190,
+  "user_manual_routes_without_written_section": 0,
+  "live_db_triggers": {
+    "public_non_internal": 797,
+    "all_schemas_non_internal": 803,
+    "non_public_non_internal": 6,
+    "verified_on": "2026-09-17"
+  },
+  "coverage_totals": {
+    "documented": 2729,
+    "excluded": 17,
+    "static-asset": 71,
+    "doc": 95,
+    "supporting": 63
+  }
+}

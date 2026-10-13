@@ -13,7 +13,9 @@ const OUT = path.join(ROOT, "docs/liftor-rebuild");
 fs.mkdirSync(OUT, { recursive: true });
 
 const sh = (cmd) => execSync(cmd, { cwd: ROOT, maxBuffer: 1024 * 1024 * 64 }).toString();
-const files = sh("git ls-files").trim().split("\n");
+// Includes not-yet-committed files (respecting .gitignore) so documentation added in the same
+// docs-only commit is mapped; the checker re-derives from git ls-files after commit.
+const files = sh("git ls-files --cached --others --exclude-standard").trim().split("\n").filter((f, i, a) => f && a.indexOf(f) === i && fs.existsSync(path.join(ROOT, f)));
 const read = (p) => { try { return fs.readFileSync(path.join(ROOT, p), "utf8"); } catch { return ""; } };
 const HEAD = sh("git rev-parse HEAD").trim();
 // The single canonical audit source. Defaults to the working-tree HEAD; may be pinned with
