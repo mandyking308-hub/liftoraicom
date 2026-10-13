@@ -1,7 +1,7 @@
 # Manual Architecture Reconciliation — 13 October 2026
 
 **Change type:** documentation-only reconciliation (no runtime behaviour, route, schema, RLS, gate, provider, campaign or sender change)
-**Code HEAD inspected:** `0f074fbde60e9a9a5f752eb90687f2d738829360` (Rebuild Manual catalogue freeze remains `cf1c1373…` — see "Coverage" below)
+**Code HEAD inspected:** `0f074fbde60e9a9a5f752eb90687f2d738829360` (generated catalogues regenerated at `662f42827f40a253c7b99b954de2aba4fff69f43` — see "Coverage" below)
 **Live data re-read:** 13 Oct 2026 ~09:50 UTC, read-only queries against the Liftor database. Provider figures come from the 13 Oct 09:16 UTC read-only Winnr test / Smartlead GET diagnostic and the 13 Oct 09:50 UTC Smartlead REST poll snapshot. No provider call was made for this reconciliation.
 
 ## Status vocabulary used everywhere in this delta
@@ -58,3 +58,6 @@ Liftor is the central multi-tenant control plane, portfolio CRM and AI intellige
 5. Campaign mapping inactive, 0 lead mappings; campaign holds 6 leads where the pilot is ≤5 cleared.
 6. Webhook signing secret absent; signed event return unproven (REST polling works as fallback).
 7. Four gates OFF and outbound connection disabled — correctly, until 1–6 are resolved and the founder approves launch.
+
+## Coverage update — 13 October 2026 (second pass, supersedes the "Coverage (honest)" paragraph above)
+Generated catalogues regenerated at freeze `662f42827f40a253c7b99b954de2aba4fff69f43` with `scripts/generate-rebuild-manual-catalogs.mjs` (writes only under `docs/liftor-rebuild/`). The 17 Sep versions are archived unchanged in `docs/liftor-rebuild/history/2026-09-17-freeze-cf1c1373/`. Checker: 12/12 — 880 routes, 801 founder routes (194 direct + 607 inherited operator coverage), 949 pages, 625 edge functions, 453 migrations, 3,112 tracked files mapped. The generator's file list now also includes not-yet-committed, non-ignored files so documentation added in the same commit is mapped; no check was weakened. Hand-written prose sections were not re-audited line by line.

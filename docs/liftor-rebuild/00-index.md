@@ -1,6 +1,10 @@
 # Liftor Rebuild Manual — canonical current-state technical specification
 
-**source_freeze_sha:** `cf1c1373f3affdd66c17a53b97200ac06c3a878f` — the single canonical audit source for this manual and for every generated catalog, coverage manifest and validation report in this folder. Lovable HEAD and GitHub `main` were independently rechecked and matched at this SHA, and the runtime source tree (`src/**`, `supabase/**`, `apps/**`, `.github/**`) is byte-identical to it at the documentation commit (`git diff cf1c1373 -- src supabase apps .github` is empty).
+**Current generated-catalogue freeze (13 October 2026):** `662f42827f40a253c7b99b954de2aba4fff69f43` — the generated catalogues (C, D, E, G, H, V, W), `source-coverage-manifest.*` and `validation-report.json` were regenerated at this SHA on 13 Oct 2026 and pass all 12 consistency checks. The 17 September versions are archived unchanged in `history/2026-09-17-freeze-cf1c1373/` (HISTORICAL ONLY).
+
+**Hand-written sections A, B, F, I–U:** prose was audited at the earlier freeze below and has NOT been re-audited line by line; Section Q8 and Full Technical Manual Section 107 carry the 13 October live-state delta, and Section Q8 controls on live state.
+
+**Earlier prose audit freeze (17 September 2026, HISTORICAL for generated counts):** `cf1c1373f3affdd66c17a53b97200ac06c3a878f` — the single canonical audit source for this manual and for every generated catalog, coverage manifest and validation report in this folder. Lovable HEAD and GitHub `main` were independently rechecked and matched at this SHA, and the runtime source tree (`src/**`, `supabase/**`, `apps/**`, `.github/**`) is byte-identical to it at the documentation commit (`git diff cf1c1373 -- src supabase apps .github` is empty).
 
 **documentation_commit:** recorded in `docs/liftor-rebuild/DOCUMENTATION-COMMIT.md` and in the final audit report. It is deliberately **not** embedded inside the generated files: a commit cannot contain its own hash, so a generated file that claimed to would be lying. The chain is: source frozen at `source_freeze_sha` → documentation regenerated from exactly that tree → documentation commit created on top of it, changing documentation files only.
 
@@ -77,7 +81,7 @@ Capability is not permission. A file existing, a function deploying and a provid
 ## Regenerating the generated sections
 
 ```bash
-SOURCE_FREEZE_SHA=cf1c1373f3affdd66c17a53b97200ac06c3a878f node scripts/generate-rebuild-manual-catalogs.mjs
+SOURCE_FREEZE_SHA=662f42827f40a253c7b99b954de2aba4fff69f43 node scripts/generate-rebuild-manual-catalogs.mjs
 node scripts/check-rebuild-manual-consistency.mjs
 ```
 

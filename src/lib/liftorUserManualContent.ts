@@ -1,6 +1,6 @@
 // Liftor User Manual — plain-English operating guide (separate from Founder/Technical Manual)
 
-export const LIFTOR_USER_MANUAL_VERSION = "1.20 — 13 October 2026 operating-state delta (active Kindnesss, ≤5 pilot) · route entries audited at freeze cf1c1373f3affdd66c17a53b97200ac06c3a878f (17 September 2026)";
+export const LIFTOR_USER_MANUAL_VERSION = "1.20 — 13 October 2026 operating-state delta (active Kindnesss, ≤5 pilot) · current-state section DB-verified 13 Oct · route operator coverage regenerated at freeze 662f42827f40a253c7b99b954de2aba4fff69f43 (801/801) · older sections historical where they differ";
 
 export interface ManualSection {
   number: number;

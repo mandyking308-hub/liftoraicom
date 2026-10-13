@@ -1,13 +1,15 @@
 // Liftor — Architecture Documentation Sync (current file version: see ARCHITECTURE_SYNC_VERSION below)
-// Current audit source: source_freeze_sha cf1c1373f3affdd66c17a53b97200ac06c3a878f (17 September 2026).
+// Status of this file (13 Oct 2026): Section 107 = current live-state delta (DB/provider re-read 13 Oct).
+// Generated Rebuild Manual catalogues: freeze 662f42827f40a253c7b99b954de2aba4fff69f43 (13 Oct 2026, 12/12 checks).
+// Hand-written Sections 100–106 prose: audited at freeze cf1c1373f3affdd66c17a53b97200ac06c3a878f (17 Sep 2026) — HISTORICAL where Section 107 differs.
 // HISTORICAL_ONLY: v6.1 (10 September 2026) was a previous version of this file and is superseded.
 // Canonical reconciliation of the CURRENT implemented Liftor architecture on main.
 // This file EXTENDS the Full Technical / Founder Manual. It does not replace it and
 // it does not replace the Command Centre Truth Sync (live-state authority).
 //
 // Section 100 = 25 August 2026 whole-platform reconciliation (HISTORICAL_ONLY, retained as history).
-// Section 101 = 10 September 2026 reconciliation delta (HISTORICAL_ONLY where it conflicts with Section 105/106). Where the two conflict on
-// current state, Section 101 controls.
+// Section 101 = 10 September 2026 reconciliation delta (HISTORICAL_ONLY). Precedence on current state:
+// Section 107 > Section 106 / Rebuild Manual Q8 > Section 105 > Section 101 > Section 100.
 // Source of the September delta: docs/manual-architecture-reconciliation-2026-09-10.md
 //
 // Manual hierarchy (unchanged):
@@ -18,7 +20,7 @@
 //   5. Business Manuals            — business-specific tone/offers/rules/assets
 //   6. Slim Mandy Manual           — portable handover only, NOT technical truth
 
-export const ARCHITECTURE_SYNC_VERSION = "6.10 — 13 October 2026 operating-state delta (Section 107) · code HEAD 0f074fbde60e9a9a5f752eb90687f2d738829360 · catalogue freeze cf1c1373f3affdd66c17a53b97200ac06c3a878f";
+export const ARCHITECTURE_SYNC_VERSION = "6.10 — 13 October 2026 operating-state delta (Section 107) · live state DB/provider-verified 13 Oct · generated catalogues freeze 662f42827f40a253c7b99b954de2aba4fff69f43 · Sections 100–106 prose audited at cf1c1373f3affdd66c17a53b97200ac06c3a878f (historical)";
 export const ARCHITECTURE_SYNC_DATE = "2026-10-13";
 export const ARCHITECTURE_SYNC_PREVIOUS_VERSION = "6.9 — Full repository → manual mirror (17 September 2026)";
 export const ARCHITECTURE_SYNC_SOURCE =
@@ -952,7 +954,7 @@ state, Section Q is current and the other paragraph is historical.
 
 **First pilot policy:** ≤5 evidence-cleared recipients, 1–2 verified GSM senders, never GHAT. The 25–50 education batch is HISTORICAL ONLY.
 
-**Coverage caveat:** generated catalogues (routes, pages, edge functions, migrations, manifest) remain at the 17 Sep freeze; the consistency checker lists the uncatalogued items. Do not treat them as current.
+**Coverage:** generated catalogues (880 routes, 949 pages, 625 edge functions, 453 migrations, 3,112 tracked files, 801 founder routes with operator coverage) regenerated at freeze \`662f42827f40a253c7b99b954de2aba4fff69f43\` on 13 Oct 2026; consistency checker 12/12. The 17 Sep catalogues are archived in \`docs/liftor-rebuild/history/2026-09-17-freeze-cf1c1373/\`. Hand-written Sections 100–106 were not re-audited line by line.
 
 *End of Section 107.*
 `;

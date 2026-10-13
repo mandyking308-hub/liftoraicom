@@ -2,11 +2,11 @@
 // NOT the technical source of truth. Do NOT use to overwrite the User Manual or Full Technical Manual.
 // v1.14 (13 Oct 2026): dated operating-state checkpoint added; v1.13 refresh (17 Sep 2026) — full repository mirror; source freeze cf1c1373f3affdd66c17a53b97200ac06c3a878f. (Historical: v1.11 reconciled the estate at 39 domains / 200 mailboxes warming; pilot-first before any estate-wide use.)
 
-export const SLIM_MANDY_MANUAL_VERSION = "1.14 — 13 October 2026 · operating-state checkpoint · code HEAD 0f074fbde60e9a9a5f752eb90687f2d738829360";
+export const SLIM_MANDY_MANUAL_VERSION = "1.14 — 13 October 2026 · current-state section DB/provider-verified 13 Oct · catalogue freeze 662f42827f40a253c7b99b954de2aba4fff69f43 · 17 Sep text historical";
 
 export const SLIM_MANDY_MANUAL_MARKDOWN = `# Slim Mandy Manual
 
-_Version 1.14 — 13 October 2026 · code HEAD 0f074fbde60e9a9a5f752eb90687f2d738829360 (v1.13 of 17 September 2026 retained below as history)_
+_Version 1.14 — 13 October 2026 · current state verified from the live database and read-only provider checks on 13 Oct · warm-up of chosen senders and signed replies UNVERIFIED · v1.13 (17 September 2026) retained below as history_
 
 _Portable summary. Safe to upload to ChatGPT or share with advisers. Not the full technical source of truth (that is the Full Technical Manual)._
 

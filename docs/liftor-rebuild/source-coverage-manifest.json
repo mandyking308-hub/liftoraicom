@@ -1,12 +1,12 @@
 {
-  "source_freeze_sha": "cf1c1373f3affdd66c17a53b97200ac06c3a878f",
+  "source_freeze_sha": "662f42827f40a253c7b99b954de2aba4fff69f43",
   "generated_by": "scripts/generate-rebuild-manual-catalogs.mjs",
-  "total_files": 2975,
+  "total_files": 3112,
   "totals": {
-    "documented": 2729,
+    "documented": 2864,
     "excluded": 17,
     "static-asset": 71,
-    "doc": 95,
+    "doc": 97,
     "supporting": 63
   },
   "files": [
@@ -134,6 +134,11 @@
       "file": ".lovable/plan.md",
       "section": "Project memory / plan files — not part of the runtime",
       "category": "excluded"
+    },
+    {
+      "file": "AGENTS.md",
+      "section": "Technical Manual A — repository root configuration",
+      "category": "documented"
     },
     {
       "file": "README.md",
@@ -369,6 +374,11 @@
       "file": "data/wealth-intelligence-completion-2026-08-22.json",
       "section": "Technical Manual K / data-assets appendix — exported research snapshots",
       "category": "static-asset"
+    },
+    {
+      "file": "deno.json",
+      "section": "Technical Manual A — repository root configuration",
+      "category": "documented"
     },
     {
       "file": "docs/AI_COMPLIANCE_CONTROL_LAYER.md",
@@ -906,12 +916,147 @@
       "category": "documented"
     },
     {
+      "file": "docs/liftor-rebuild/history/2026-09-17-freeze-cf1c1373/C-route-catalog.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/history/2026-09-17-freeze-cf1c1373/D-page-surface-catalog.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/history/2026-09-17-freeze-cf1c1373/E-component-service-catalog.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/history/2026-09-17-freeze-cf1c1373/G-migration-map.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/history/2026-09-17-freeze-cf1c1373/H-edge-function-catalog.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/history/2026-09-17-freeze-cf1c1373/README.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/history/2026-09-17-freeze-cf1c1373/V-user-manual-coverage.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/history/2026-09-17-freeze-cf1c1373/W-module-operator-entries.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/history/2026-09-17-freeze-cf1c1373/source-coverage-manifest.json",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/history/2026-09-17-freeze-cf1c1373/source-coverage-manifest.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/history/2026-09-17-freeze-cf1c1373/validation-report.json",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/jwt-off-perimeter-inventory.json",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
       "file": "docs/liftor-rebuild/source-coverage-manifest.json",
       "section": "This rebuild manual",
       "category": "documented"
     },
     {
       "file": "docs/liftor-rebuild/source-coverage-manifest.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/stage1a-postchange-privilege-audit.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/stage1a-prechange-acl-inventory.json",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/stage1a-prechange-acl-inventory.jsonl",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/stage1a-prechange-dangerous-privileges-v2.json",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/stage1a-prechange-privilege-audit.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/stage1b-live-rpc-catalog-evidence.json",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/stage1b-public-rpc-authorization.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/stage1b-public-rpc-default-acl-prechange.json",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/stage1b-public-rpc-prechange-inventory.json",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/stage1b-public-rpc-review.json",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/stage1b-rpc-exceptions.json",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/stage1b-rpc-reconciliation.json",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/stage1b-rpc-rollback.sql",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/stage1b-rpc-smoke-results.json",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/stage1b-sor-touch-acl-rollback.sql",
       "section": "This rebuild manual",
       "category": "documented"
     },
@@ -932,6 +1077,11 @@
     },
     {
       "file": "docs/manual-architecture-reconciliation-2026-09-10.md",
+      "section": "Technical Manual R/T — normative or historical doc (see doc index)",
+      "category": "doc"
+    },
+    {
+      "file": "docs/manual-architecture-reconciliation-2026-10-13.md",
       "section": "Technical Manual R/T — normative or historical doc (see doc index)",
       "category": "doc"
     },
@@ -1051,6 +1201,146 @@
       "category": "doc"
     },
     {
+      "file": "docs/worker3-rebuild-checkpoint.md",
+      "section": "Technical Manual R/T — normative or historical doc (see doc index)",
+      "category": "doc"
+    },
+    {
+      "file": "drizzle.config.ts",
+      "section": "Technical Manual A — repository root configuration",
+      "category": "documented"
+    },
+    {
+      "file": "drizzle/migrations/0000_worker2_customer_revenue_activation.sql",
+      "section": "Technical Manual A — repository root configuration",
+      "category": "documented"
+    },
+    {
+      "file": "drizzle/migrations/0001_stage1b_sor_touch_acl_hardening.sql",
+      "section": "Technical Manual A — repository root configuration",
+      "category": "documented"
+    },
+    {
+      "file": "drizzle/migrations/0002_worker3_tenant_provider_connections.sql",
+      "section": "Technical Manual A — repository root configuration",
+      "category": "documented"
+    },
+    {
+      "file": "drizzle/migrations/0003_worker3_crm_bcr_campaign_scope.sql",
+      "section": "Technical Manual A — repository root configuration",
+      "category": "documented"
+    },
+    {
+      "file": "drizzle/migrations/0004_worker3b_social_inbound_multiturn.sql",
+      "section": "Technical Manual A — repository root configuration",
+      "category": "documented"
+    },
+    {
+      "file": "drizzle/migrations/0005_businesses_portfolio_status_archive.sql",
+      "section": "Technical Manual A — repository root configuration",
+      "category": "documented"
+    },
+    {
+      "file": "drizzle/migrations/0006_businesses_active_name_unique.sql",
+      "section": "Technical Manual A — repository root configuration",
+      "category": "documented"
+    },
+    {
+      "file": "drizzle/migrations/0007_provider_secret_ref_uppercase_hex.sql",
+      "section": "Technical Manual A — repository root configuration",
+      "category": "documented"
+    },
+    {
+      "file": "drizzle/migrations/0008_smartlead_campaign_sync_tables.sql",
+      "section": "Technical Manual A — repository root configuration",
+      "category": "documented"
+    },
+    {
+      "file": "drizzle/migrations/0009_smartlead_activity_events_and_sync_token.sql",
+      "section": "Technical Manual A — repository root configuration",
+      "category": "documented"
+    },
+    {
+      "file": "drizzle/migrations/0010_smartlead_snapshot_webhooks.sql",
+      "section": "Technical Manual A — repository root configuration",
+      "category": "documented"
+    },
+    {
+      "file": "drizzle/migrations/0011_smartlead_snapshot_plain_text.sql",
+      "section": "Technical Manual A — repository root configuration",
+      "category": "documented"
+    },
+    {
+      "file": "drizzle/migrations/meta/0000_snapshot.json",
+      "section": "Technical Manual A — repository root configuration",
+      "category": "documented"
+    },
+    {
+      "file": "drizzle/migrations/meta/0001_snapshot.json",
+      "section": "Technical Manual A — repository root configuration",
+      "category": "documented"
+    },
+    {
+      "file": "drizzle/migrations/meta/0002_snapshot.json",
+      "section": "Technical Manual A — repository root configuration",
+      "category": "documented"
+    },
+    {
+      "file": "drizzle/migrations/meta/0003_snapshot.json",
+      "section": "Technical Manual A — repository root configuration",
+      "category": "documented"
+    },
+    {
+      "file": "drizzle/migrations/meta/0004_snapshot.json",
+      "section": "Technical Manual A — repository root configuration",
+      "category": "documented"
+    },
+    {
+      "file": "drizzle/migrations/meta/0005_snapshot.json",
+      "section": "Technical Manual A — repository root configuration",
+      "category": "documented"
+    },
+    {
+      "file": "drizzle/migrations/meta/0006_snapshot.json",
+      "section": "Technical Manual A — repository root configuration",
+      "category": "documented"
+    },
+    {
+      "file": "drizzle/migrations/meta/0007_snapshot.json",
+      "section": "Technical Manual A — repository root configuration",
+      "category": "documented"
+    },
+    {
+      "file": "drizzle/migrations/meta/0008_snapshot.json",
+      "section": "Technical Manual A — repository root configuration",
+      "category": "documented"
+    },
+    {
+      "file": "drizzle/migrations/meta/0009_snapshot.json",
+      "section": "Technical Manual A — repository root configuration",
+      "category": "documented"
+    },
+    {
+      "file": "drizzle/migrations/meta/0010_snapshot.json",
+      "section": "Technical Manual A — repository root configuration",
+      "category": "documented"
+    },
+    {
+      "file": "drizzle/migrations/meta/0011_snapshot.json",
+      "section": "Technical Manual A — repository root configuration",
+      "category": "documented"
+    },
+    {
+      "file": "drizzle/migrations/meta/_journal.json",
+      "section": "Technical Manual A — repository root configuration",
+      "category": "documented"
+    },
+    {
+      "file": "drizzle/schema.ts",
+      "section": "Technical Manual A — repository root configuration",
+      "category": "documented"
+    },
+    {
       "file": "eslint.config.js",
       "section": "Technical Manual A — repository root configuration",
       "category": "documented"
@@ -1126,7 +1416,32 @@
       "category": "documented"
     },
     {
+      "file": "scripts/check-jwt-off-perimeter.mjs",
+      "section": "Technical Manual P/S — repository scripts",
+      "category": "documented"
+    },
+    {
       "file": "scripts/check-rebuild-manual-consistency.mjs",
+      "section": "Technical Manual P/S — repository scripts",
+      "category": "documented"
+    },
+    {
+      "file": "scripts/check-stage1-privilege-drift.sql",
+      "section": "Technical Manual P/S — repository scripts",
+      "category": "documented"
+    },
+    {
+      "file": "scripts/check-stage1b-postmigration-parity.sql",
+      "section": "Technical Manual P/S — repository scripts",
+      "category": "documented"
+    },
+    {
+      "file": "scripts/check-stage1b-rpc-classification.mjs",
+      "section": "Technical Manual P/S — repository scripts",
+      "category": "documented"
+    },
+    {
+      "file": "scripts/check-stage1b-rpc-drift.sql",
       "section": "Technical Manual P/S — repository scripts",
       "category": "documented"
     },
@@ -1137,6 +1452,31 @@
     },
     {
       "file": "scripts/generate-rebuild-manual-catalogs.mjs",
+      "section": "Technical Manual P/S — repository scripts",
+      "category": "documented"
+    },
+    {
+      "file": "scripts/stage1-public-rpc-audit.sql",
+      "section": "Technical Manual P/S — repository scripts",
+      "category": "documented"
+    },
+    {
+      "file": "scripts/stage1a-corrected-privilege-audit.sql",
+      "section": "Technical Manual P/S — repository scripts",
+      "category": "documented"
+    },
+    {
+      "file": "scripts/stage1a-freeze-acl.sql",
+      "section": "Technical Manual P/S — repository scripts",
+      "category": "documented"
+    },
+    {
+      "file": "scripts/stage1b-live-catalog-evidence.sql",
+      "section": "Technical Manual P/S — repository scripts",
+      "category": "documented"
+    },
+    {
+      "file": "scripts/stage1b-public-rpc-inventory.sql",
       "section": "Technical Manual P/S — repository scripts",
       "category": "documented"
     },
@@ -1231,6 +1571,11 @@
       "category": "documented"
     },
     {
+      "file": "src/components/founder/GhatSmartleadControls.tsx",
+      "section": "Technical Manual E1 — Component catalog",
+      "category": "documented"
+    },
+    {
       "file": "src/components/founder/LeadQualityPanel.tsx",
       "section": "Technical Manual E1 — Component catalog",
       "category": "documented"
@@ -1247,6 +1592,11 @@
     },
     {
       "file": "src/components/founder/SystemModeBanner.tsx",
+      "section": "Technical Manual E1 — Component catalog",
+      "category": "documented"
+    },
+    {
+      "file": "src/components/founder/__tests__/GhatSmartleadControls.test.tsx",
       "section": "Technical Manual E1 — Component catalog",
       "category": "documented"
     },
@@ -3571,7 +3921,17 @@
       "category": "documented"
     },
     {
+      "file": "src/lib/__tests__/businessContactRelationship.test.ts",
+      "section": "Technical Manual P — Tests & CI",
+      "category": "documented"
+    },
+    {
       "file": "src/lib/__tests__/campaignFactoryEngine.test.ts",
+      "section": "Technical Manual P — Tests & CI",
+      "category": "documented"
+    },
+    {
+      "file": "src/lib/__tests__/canonicalBusinessResolver.test.ts",
       "section": "Technical Manual P — Tests & CI",
       "category": "documented"
     },
@@ -3621,7 +3981,27 @@
       "category": "documented"
     },
     {
+      "file": "src/lib/__tests__/ghatSmartleadOnboardHandler.test.ts",
+      "section": "Technical Manual P — Tests & CI",
+      "category": "documented"
+    },
+    {
+      "file": "src/lib/__tests__/gsmCanaryEmails.test.ts",
+      "section": "Technical Manual P — Tests & CI",
+      "category": "documented"
+    },
+    {
       "file": "src/lib/__tests__/gsmSenderEstate.test.ts",
+      "section": "Technical Manual P — Tests & CI",
+      "category": "documented"
+    },
+    {
+      "file": "src/lib/__tests__/gsmSmartleadOnboard.test.ts",
+      "section": "Technical Manual P — Tests & CI",
+      "category": "documented"
+    },
+    {
+      "file": "src/lib/__tests__/gsmSmartleadOnboardHandler.test.ts",
       "section": "Technical Manual P — Tests & CI",
       "category": "documented"
     },
@@ -3656,12 +4036,32 @@
       "category": "documented"
     },
     {
+      "file": "src/lib/__tests__/promoteDraftToBusiness.test.ts",
+      "section": "Technical Manual P — Tests & CI",
+      "category": "documented"
+    },
+    {
+      "file": "src/lib/__tests__/promoteIntoLiftorModules.test.ts",
+      "section": "Technical Manual P — Tests & CI",
+      "category": "documented"
+    },
+    {
+      "file": "src/lib/__tests__/providerSecretRefCase.test.ts",
+      "section": "Technical Manual P — Tests & CI",
+      "category": "documented"
+    },
+    {
       "file": "src/lib/__tests__/smartleadActivationChecklist.test.ts",
       "section": "Technical Manual P — Tests & CI",
       "category": "documented"
     },
     {
       "file": "src/lib/__tests__/smartleadCampaignResolver.test.ts",
+      "section": "Technical Manual P — Tests & CI",
+      "category": "documented"
+    },
+    {
+      "file": "src/lib/__tests__/smartleadCampaignSync.test.ts",
       "section": "Technical Manual P — Tests & CI",
       "category": "documented"
     },
@@ -3746,6 +4146,41 @@
       "category": "documented"
     },
     {
+      "file": "src/lib/__tests__/worker3CommercialHandoff.test.ts",
+      "section": "Technical Manual P — Tests & CI",
+      "category": "documented"
+    },
+    {
+      "file": "src/lib/__tests__/worker3CrmAttribution.test.ts",
+      "section": "Technical Manual P — Tests & CI",
+      "category": "documented"
+    },
+    {
+      "file": "src/lib/__tests__/worker3ProviderCore.test.ts",
+      "section": "Technical Manual P — Tests & CI",
+      "category": "documented"
+    },
+    {
+      "file": "src/lib/__tests__/worker3SmartleadReceiverBoundary.test.ts",
+      "section": "Technical Manual P — Tests & CI",
+      "category": "documented"
+    },
+    {
+      "file": "src/lib/__tests__/worker3SocialInboundMultiTurn.test.ts",
+      "section": "Technical Manual P — Tests & CI",
+      "category": "documented"
+    },
+    {
+      "file": "src/lib/__tests__/worker3TenantIsolation.test.ts",
+      "section": "Technical Manual P — Tests & CI",
+      "category": "documented"
+    },
+    {
+      "file": "src/lib/__tests__/worker3TenantSchema.test.ts",
+      "section": "Technical Manual P — Tests & CI",
+      "category": "documented"
+    },
+    {
       "file": "src/lib/accessGovernanceEngine.ts",
       "section": "Technical Manual E2 — Engine/helper catalog",
       "category": "documented"
@@ -3817,6 +4252,11 @@
     },
     {
       "file": "src/lib/businessComplianceEngine.ts",
+      "section": "Technical Manual E2 — Engine/helper catalog",
+      "category": "documented"
+    },
+    {
+      "file": "src/lib/businessContactRelationship.ts",
       "section": "Technical Manual E2 — Engine/helper catalog",
       "category": "documented"
     },
@@ -4036,6 +4476,11 @@
       "category": "documented"
     },
     {
+      "file": "src/lib/founderAccess.ts",
+      "section": "Technical Manual E2 — Engine/helper catalog",
+      "category": "documented"
+    },
+    {
       "file": "src/lib/founderLoadBalancerEngine.ts",
       "section": "Technical Manual E2 — Engine/helper catalog",
       "category": "documented"
@@ -4062,6 +4507,11 @@
     },
     {
       "file": "src/lib/globalSearchIndex.ts",
+      "section": "Technical Manual E2 — Engine/helper catalog",
+      "category": "documented"
+    },
+    {
+      "file": "src/lib/gsmCanaryEmails.ts",
       "section": "Technical Manual E2 — Engine/helper catalog",
       "category": "documented"
     },
@@ -4291,7 +4741,17 @@
       "category": "documented"
     },
     {
+      "file": "src/lib/providers/apolloConnectionProjection.ts",
+      "section": "Technical Manual E2 — Engine/helper catalog",
+      "category": "documented"
+    },
+    {
       "file": "src/lib/providers/outboundProviderAdapter.ts",
+      "section": "Technical Manual E2 — Engine/helper catalog",
+      "category": "documented"
+    },
+    {
+      "file": "src/lib/providers/outreachProviderContract.ts",
       "section": "Technical Manual E2 — Engine/helper catalog",
       "category": "documented"
     },
@@ -4876,6 +5336,11 @@
       "category": "documented"
     },
     {
+      "file": "src/pages/founder/FounderLogin.tsx",
+      "section": "Technical Manual D — Page/surface catalog",
+      "category": "documented"
+    },
+    {
       "file": "src/pages/founder/FounderManual.tsx",
       "section": "Technical Manual D — Page/surface catalog",
       "category": "documented"
@@ -5146,6 +5611,11 @@
       "category": "documented"
     },
     {
+      "file": "src/pages/founder/SmartleadCommandCentre.tsx",
+      "section": "Technical Manual D — Page/surface catalog",
+      "category": "documented"
+    },
+    {
       "file": "src/pages/founder/SocialAutopilotPage.tsx",
       "section": "Technical Manual D — Page/surface catalog",
       "category": "documented"
@@ -5172,6 +5642,11 @@
     },
     {
       "file": "src/pages/founder/StarterPackMaterialiser.tsx",
+      "section": "Technical Manual D — Page/surface catalog",
+      "category": "documented"
+    },
+    {
+      "file": "src/pages/founder/StrategicOrganisations.tsx",
       "section": "Technical Manual D — Page/surface catalog",
       "category": "documented"
     },
@@ -5232,6 +5707,11 @@
     },
     {
       "file": "src/pages/founder/WorkflowDirectory.tsx",
+      "section": "Technical Manual D — Page/surface catalog",
+      "category": "documented"
+    },
+    {
+      "file": "src/pages/founder/__tests__/BusinessSetupTunnel.multiBusiness.test.tsx",
       "section": "Technical Manual D — Page/surface catalog",
       "category": "documented"
     },
@@ -9261,12 +9741,52 @@
       "category": "documented"
     },
     {
+      "file": "src/test/customerCommercialLifecycle.test.ts",
+      "section": "Technical Manual P — Tests & CI",
+      "category": "documented"
+    },
+    {
+      "file": "src/test/customerRevenueAcceptance.test.ts",
+      "section": "Technical Manual P — Tests & CI",
+      "category": "documented"
+    },
+    {
+      "file": "src/test/customerSalesAuthorization.test.ts",
+      "section": "Technical Manual P — Tests & CI",
+      "category": "documented"
+    },
+    {
+      "file": "src/test/customerSalesIdentity.test.ts",
+      "section": "Technical Manual P — Tests & CI",
+      "category": "documented"
+    },
+    {
+      "file": "src/test/customerSalesScope.test.ts",
+      "section": "Technical Manual P — Tests & CI",
+      "category": "documented"
+    },
+    {
       "file": "src/test/example.test.ts",
       "section": "Technical Manual P — Tests & CI",
       "category": "documented"
     },
     {
+      "file": "src/test/outreachImportAuth.test.ts",
+      "section": "Technical Manual P — Tests & CI",
+      "category": "documented"
+    },
+    {
       "file": "src/test/setup.ts",
+      "section": "Technical Manual P — Tests & CI",
+      "category": "documented"
+    },
+    {
+      "file": "src/test/stage1SecurityPerimeter.test.ts",
+      "section": "Technical Manual P — Tests & CI",
+      "category": "documented"
+    },
+    {
+      "file": "src/test/stage1bRpcAuthorization.test.ts",
       "section": "Technical Manual P — Tests & CI",
       "category": "documented"
     },
@@ -9301,6 +9821,41 @@
       "category": "documented"
     },
     {
+      "file": "supabase/functions/_shared/callerAuth.ts",
+      "section": "Technical Manual H2 — Shared edge helpers",
+      "category": "documented"
+    },
+    {
+      "file": "supabase/functions/_shared/canonicalBusinessResolver.ts",
+      "section": "Technical Manual H2 — Shared edge helpers",
+      "category": "documented"
+    },
+    {
+      "file": "supabase/functions/_shared/customerAuthProvisioning.ts",
+      "section": "Technical Manual H2 — Shared edge helpers",
+      "category": "documented"
+    },
+    {
+      "file": "supabase/functions/_shared/customerCommercialLifecycle.ts",
+      "section": "Technical Manual H2 — Shared edge helpers",
+      "category": "documented"
+    },
+    {
+      "file": "supabase/functions/_shared/customerPaidSuccessExecution.ts",
+      "section": "Technical Manual H2 — Shared edge helpers",
+      "category": "documented"
+    },
+    {
+      "file": "supabase/functions/_shared/customerSalesIdentity.ts",
+      "section": "Technical Manual H2 — Shared edge helpers",
+      "category": "documented"
+    },
+    {
+      "file": "supabase/functions/_shared/customerSalesScope.ts",
+      "section": "Technical Manual H2 — Shared edge helpers",
+      "category": "documented"
+    },
+    {
       "file": "supabase/functions/_shared/customerSuccessLogic.ts",
       "section": "Technical Manual H2 — Shared edge helpers",
       "category": "documented"
@@ -9326,6 +9881,11 @@
       "category": "documented"
     },
     {
+      "file": "supabase/functions/_shared/gsmSmartleadOnboard.ts",
+      "section": "Technical Manual H2 — Shared edge helpers",
+      "category": "documented"
+    },
+    {
       "file": "supabase/functions/_shared/longformContentLogic.ts",
       "section": "Technical Manual H2 — Shared edge helpers",
       "category": "documented"
@@ -9346,7 +9906,17 @@
       "category": "documented"
     },
     {
+      "file": "supabase/functions/_shared/outreachImportAuth.ts",
+      "section": "Technical Manual H2 — Shared edge helpers",
+      "category": "documented"
+    },
+    {
       "file": "supabase/functions/_shared/paidMediaLogic.ts",
+      "section": "Technical Manual H2 — Shared edge helpers",
+      "category": "documented"
+    },
+    {
+      "file": "supabase/functions/_shared/providerConnectionResolver.ts",
       "section": "Technical Manual H2 — Shared edge helpers",
       "category": "documented"
     },
@@ -9362,6 +9932,16 @@
     },
     {
       "file": "supabase/functions/_shared/smartleadCampaignResolve.ts",
+      "section": "Technical Manual H2 — Shared edge helpers",
+      "category": "documented"
+    },
+    {
+      "file": "supabase/functions/_shared/smartleadCampaignSync.ts",
+      "section": "Technical Manual H2 — Shared edge helpers",
+      "category": "documented"
+    },
+    {
+      "file": "supabase/functions/_shared/smartleadCrmAttribution.ts",
       "section": "Technical Manual H2 — Shared edge helpers",
       "category": "documented"
     },
@@ -9382,6 +9962,11 @@
     },
     {
       "file": "supabase/functions/_shared/smartleadReceiverReadiness.ts",
+      "section": "Technical Manual H2 — Shared edge helpers",
+      "category": "documented"
+    },
+    {
+      "file": "supabase/functions/_shared/smartleadWebhookAuth.ts",
       "section": "Technical Manual H2 — Shared edge helpers",
       "category": "documented"
     },
@@ -9457,6 +10042,11 @@
     },
     {
       "file": "supabase/functions/_shared/socialEngagementLogic.ts",
+      "section": "Technical Manual H2 — Shared edge helpers",
+      "category": "documented"
+    },
+    {
+      "file": "supabase/functions/_shared/socialInboundMultiTurn.ts",
       "section": "Technical Manual H2 — Shared edge helpers",
       "category": "documented"
     },
@@ -9542,6 +10132,11 @@
     },
     {
       "file": "supabase/functions/_shared/winnrClient.ts",
+      "section": "Technical Manual H2 — Shared edge helpers",
+      "category": "documented"
+    },
+    {
+      "file": "supabase/functions/_shared/worker3CommercialHandoff.ts",
       "section": "Technical Manual H2 — Shared edge helpers",
       "category": "documented"
     },
@@ -10236,6 +10831,11 @@
       "category": "documented"
     },
     {
+      "file": "supabase/functions/customer-product-account-claim/index.ts",
+      "section": "Technical Manual H — Edge function catalog",
+      "category": "documented"
+    },
+    {
       "file": "supabase/functions/customer-quarterly-report-acceptance/index.ts",
       "section": "Technical Manual H — Edge function catalog",
       "category": "documented"
@@ -10337,6 +10937,16 @@
     },
     {
       "file": "supabase/functions/customer-success-rehearsal-purge/index.ts",
+      "section": "Technical Manual H — Edge function catalog",
+      "category": "documented"
+    },
+    {
+      "file": "supabase/functions/customer-success-standard-enqueue/index.ts",
+      "section": "Technical Manual H — Edge function catalog",
+      "category": "documented"
+    },
+    {
+      "file": "supabase/functions/customer-success-standard-run/index.ts",
       "section": "Technical Manual H — Edge function catalog",
       "category": "documented"
     },
@@ -10476,6 +11086,11 @@
       "category": "documented"
     },
     {
+      "file": "supabase/functions/ghat-smartlead-onboard/handler.ts",
+      "section": "Technical Manual H — Edge function catalog",
+      "category": "documented"
+    },
+    {
       "file": "supabase/functions/ghat-smartlead-onboard/index.ts",
       "section": "Technical Manual H — Edge function catalog",
       "category": "documented"
@@ -10502,6 +11117,16 @@
     },
     {
       "file": "supabase/functions/gsm-smartlead-mailbox-sync/index.ts",
+      "section": "Technical Manual H — Edge function catalog",
+      "category": "documented"
+    },
+    {
+      "file": "supabase/functions/gsm-smartlead-onboard/handler.ts",
+      "section": "Technical Manual H — Edge function catalog",
+      "category": "documented"
+    },
+    {
+      "file": "supabase/functions/gsm-smartlead-onboard/index.ts",
       "section": "Technical Manual H — Edge function catalog",
       "category": "documented"
     },
@@ -11347,6 +11972,11 @@
     },
     {
       "file": "supabase/functions/smartlead-campaign-mapping-preview/index.ts",
+      "section": "Technical Manual H — Edge function catalog",
+      "category": "documented"
+    },
+    {
+      "file": "supabase/functions/smartlead-campaign-sync/index.ts",
       "section": "Technical Manual H — Edge function catalog",
       "category": "documented"
     },
@@ -14852,6 +15482,61 @@
     },
     {
       "file": "supabase/migrations/20260914094059_6e161001-ebbd-4f16-9462-f0241fa04b30.sql",
+      "section": "Technical Manual G — Migration map",
+      "category": "documented"
+    },
+    {
+      "file": "supabase/migrations/20260921155229_4fb655e0-ce3d-4de9-b01e-b55fdbee677c.sql",
+      "section": "Technical Manual G — Migration map",
+      "category": "documented"
+    },
+    {
+      "file": "supabase/migrations/20260921155332_228bbd3a-1b62-413d-ba2b-2c95330aa101.sql",
+      "section": "Technical Manual G — Migration map",
+      "category": "documented"
+    },
+    {
+      "file": "supabase/migrations/20260923085046_stage1_application_privilege_hardening.sql",
+      "section": "Technical Manual G — Migration map",
+      "category": "documented"
+    },
+    {
+      "file": "supabase/migrations/20260923130000_stage1b_rpc_authorization_hardening.sql",
+      "section": "Technical Manual G — Migration map",
+      "category": "documented"
+    },
+    {
+      "file": "supabase/migrations/20260923152000_worker2_customer_sales_identity_context.sql",
+      "section": "Technical Manual G — Migration map",
+      "category": "documented"
+    },
+    {
+      "file": "supabase/migrations/20260923180000_worker2_customer_revenue_activation.sql",
+      "section": "Technical Manual G — Migration map",
+      "category": "documented"
+    },
+    {
+      "file": "supabase/migrations/20260925113623_df9930aa-72d9-443b-bed7-0576643bb71e.sql",
+      "section": "Technical Manual G — Migration map",
+      "category": "documented"
+    },
+    {
+      "file": "supabase/migrations/20260928120000_stage1b_sor_touch_acl_hardening.sql",
+      "section": "Technical Manual G — Migration map",
+      "category": "documented"
+    },
+    {
+      "file": "supabase/migrations/20260928130000_worker3_tenant_provider_connections.sql",
+      "section": "Technical Manual G — Migration map",
+      "category": "documented"
+    },
+    {
+      "file": "supabase/migrations/20260928140000_worker3_crm_bcr_campaign_scope.sql",
+      "section": "Technical Manual G — Migration map",
+      "category": "documented"
+    },
+    {
+      "file": "supabase/migrations/20260928150000_worker3b_social_inbound_multiturn.sql",
       "section": "Technical Manual G — Migration map",
       "category": "documented"
     },
