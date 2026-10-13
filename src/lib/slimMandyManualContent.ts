@@ -1,12 +1,12 @@
 // Slim Mandy Manual — short, portable summary Mandy can download/upload to ChatGPT or advisers.
 // NOT the technical source of truth. Do NOT use to overwrite the User Manual or Full Technical Manual.
-// v1.13 refresh (17 Sep 2026) — full repository mirror; source freeze cf1c1373f3affdd66c17a53b97200ac06c3a878f. (Historical: v1.11 reconciled the estate at 39 domains / 200 mailboxes warming; pilot-first before any estate-wide use.)
+// v1.14 (13 Oct 2026): dated operating-state checkpoint added; v1.13 refresh (17 Sep 2026) — full repository mirror; source freeze cf1c1373f3affdd66c17a53b97200ac06c3a878f. (Historical: v1.11 reconciled the estate at 39 domains / 200 mailboxes warming; pilot-first before any estate-wide use.)
 
-export const SLIM_MANDY_MANUAL_VERSION = "1.13 — 17 September 2026 · full repository mirror · source freeze cf1c1373f3affdd66c17a53b97200ac06c3a878f";
+export const SLIM_MANDY_MANUAL_VERSION = "1.14 — 13 October 2026 · operating-state checkpoint · code HEAD 0f074fbde60e9a9a5f752eb90687f2d738829360";
 
 export const SLIM_MANDY_MANUAL_MARKDOWN = `# Slim Mandy Manual
 
-_Version 1.13 — 17 September 2026 · source freeze cf1c1373f3affdd66c17a53b97200ac06c3a878f_
+_Version 1.14 — 13 October 2026 · code HEAD 0f074fbde60e9a9a5f752eb90687f2d738829360 (v1.13 of 17 September 2026 retained below as history)_
 
 _Portable summary. Safe to upload to ChatGPT or share with advisers. Not the full technical source of truth (that is the Full Technical Manual)._
 
@@ -24,7 +24,16 @@ Liftor is ONE internal AI operating system and control plane Mandy uses to run m
 ## Always label three states separately
 Implemented in code · live-configured in the database/provider · historical evidence. A provider connection is never permission to send.
 
-## Current state — 17 September 2026
+## Current state — 13 October 2026
+- **Direction:** Liftor is the central brain for running and onboarding many businesses. Routine steps will run automatically only after their rules and go-live gates are approved; today every external step is gated.
+- **Active business:** Kindnesss only. 14 earlier businesses (including Neon Candy) are archived and kept.
+- **Contacts:** 30 linked, verified emails, **0 eligible** — each still needs record-level review (27 no lawful basis, 3 provisional).
+- **Smartlead:** draft campaign 4103531, 6 leads, **0 sent**; mapping inactive; webhook registered but its signing key is missing, so signed replies are not proven. A scoped 10-minute poll mirrors activity.
+- **Mailboxes:** 180 GSM + 20 GHAT, all warming, **0 campaign-ready**; the Smartlead check of its first 100 accounts showed warm-up off. GHAT is never used for Kindnesss.
+- **Gates:** campaign start, lead push, native send and webhook create are **OFF**. Paid Apollo is off.
+- **First pilot:** one business, 1–2 checked GSM senders, at most 5 cleared recipients, approved copy, working opt-out. No pilot has been sent.
+
+## Previous state — 17 September 2026 (HISTORICAL ONLY where it differs from 13 October above)
 - **CRM:** live contact and business-relationship counts are read from the CRM page (they grow as you work). Distinct from research pools.
 - **Apollo:** free People Search, staging, qualification and selected reveal infrastructure exist, protected by the portfolio-wide Apollo Credit Firewall. Paid enrichment is **disabled with a hard limit of 0**, and phone/personal-email/waterfall reveal are false.
 - **Smartlead / sending:** provider **connected and healthy**, but the webhook is **not configured** and provider warm-up state is **not configured** on the provider row. Live state is still **0 campaign links, 0 lead links, 0 returned events, 0 campaign-ready mailboxes**. Only the 10 trust (GHAT) mailboxes are connected to Smartlead; **0** shared-estate (GSM) mailboxes are connected. Live campaign sending remains blocked.
@@ -72,4 +81,4 @@ The complete rebuild-grade technical specification is the **Liftor Rebuild Manua
 Any external gate, auto_send, cron, Smartlead campaign start or lead push, Apollo paid enrichment, buyer contact approval, data-room sharing, portal invites, payments or filings.
 `;
 
-export const SLIM_MANDY_MANUAL_FILENAME = `liftor-slim-mandy-manual-v1.10-2026-09-11.md`;
+export const SLIM_MANDY_MANUAL_FILENAME = `liftor-slim-mandy-manual-v1.14-2026-10-13.md`;

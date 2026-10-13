@@ -78,3 +78,11 @@ Business Weekly Review per business → portfolio priority → funding shortlist
 
 ## If something looks wrong
 Stop. Confirm Simulation mode. Take a snapshot via `/founder/recovery`. Ask Co-Pilot "what is blocked right now?". Do not flip anything live.
+
+---
+
+## Dated delta — 13 October 2026
+- The active business is **Kindnesss** (`640de582-a112-4d16-a221-03c27f00c6ec`). Neon Candy and 13 other earlier records are archived (`legacy_prelaunch`) and hidden from selectors; any guidance above naming Neon Candy as active is HISTORICAL ONLY.
+- First pilot: one business, 1–2 individually verified GSM senders, at most 5 evidence-cleared recipients, approved exact copy, working opt-out, scoped mapping, signed webhook or scoped polling. Today 0 contacts are eligible and all outbound gates are OFF.
+- Smartlead activity for campaign 4103531 is visible at /founder/outreach-command-centre (draft, 0 sent).
+- Long-term, routine steps run automatically once their policy and go-live gates are approved; today every external step is gated. See Full Technical Manual Section 107.

@@ -18,9 +18,9 @@
 //   5. Business Manuals            — business-specific tone/offers/rules/assets
 //   6. Slim Mandy Manual           — portable handover only, NOT technical truth
 
-export const ARCHITECTURE_SYNC_VERSION = "6.9 — Full repository → manual mirror (Liftor Rebuild Manual) · source freeze cf1c1373f3affdd66c17a53b97200ac06c3a878f · 17 September 2026";
-export const ARCHITECTURE_SYNC_DATE = "2026-09-17";
-export const ARCHITECTURE_SYNC_PREVIOUS_VERSION = "6.7 — Outbound readiness baseline truth sync (17 September 2026)";
+export const ARCHITECTURE_SYNC_VERSION = "6.10 — 13 October 2026 operating-state delta (Section 107) · code HEAD 0f074fbde60e9a9a5f752eb90687f2d738829360 · catalogue freeze cf1c1373f3affdd66c17a53b97200ac06c3a878f";
+export const ARCHITECTURE_SYNC_DATE = "2026-10-13";
+export const ARCHITECTURE_SYNC_PREVIOUS_VERSION = "6.9 — Full repository → manual mirror (17 September 2026)";
 export const ARCHITECTURE_SYNC_SOURCE =
   "August baseline: repo-wide audit of src/App.tsx routes (799 founder routes), src/pages/founder/**, src/components/founder/**, src/lib/** engines, supabase/functions/** (604 functions), supabase/migrations/** and docs/**. September delta: docs/manual-architecture-reconciliation-2026-09-10.md — 21 materially changed files since the August manual commit plus a live database state check on 10 September 2026.";
 
@@ -927,4 +927,32 @@ above remain the in-app narrative history; Section 106 is the pointer to the exh
 state, Section Q is current and the other paragraph is historical.
 
 *End of Section 106.*
+
+---
+
+# SECTION 107 — 13 OCTOBER 2026 OPERATING-STATE DELTA (CURRENT)
+
+**Source:** read-only Liftor database queries 13 Oct 2026 ~09:50 UTC; Smartlead REST poll snapshot 09:50 UTC; read-only Winnr/Smartlead diagnostics 09:16 UTC. Detail: \`docs/manual-architecture-reconciliation-2026-10-13.md\` and Rebuild Manual Section Q8. Sections 100–106 are preserved; where they disagree on live state, this section controls.
+
+**Status labels:** IMPLEMENTED CODE · LIVE CONFIGURED & PROVIDER-VERIFIED · HISTORICAL ONLY · TARGET FUTURE BEHAVIOUR · UNVERIFIED/BLOCKED.
+
+**Direction (TARGET FUTURE BEHAVIOUR).** Liftor is the multi-tenant control plane, portfolio CRM and AI brain for repeatable onboarding and a compliant, largely autonomous journey (prospect → outreach → conversation → qualification → demo → approved offer/checkout → onboarding → service → renewal). Routine steps run automatically only after policy, readiness, compliance and execution gates are approved; humans handle exceptions. **Today every external step is gated; nothing is activated.**
+
+| Area | 13 Oct 2026 | Class |
+|---|---|---|
+| Active business | Kindnesss \`640de582-a112-4d16-a221-03c27f00c6ec\`; 14 earlier records \`legacy_prelaunch\`, preserved (Neon Candy no longer active) | LIVE |
+| Kindnesss contacts | 30 linked, verified emails, **0 eligible**; lawful basis blank 27 / provisional 3 | LIVE |
+| Smartlead 4103531 | DRAFTED, 6 leads, 0 sent/replies/bounces, cap 3/day, tracking off | LIVE + PROVIDER |
+| Mapping | 1 campaign mapping inactive, 0 lead mappings | LIVE |
+| Mailboxes | 180 GSM + 20 GHAT, SMTP/IMAP ok, all warming, 0 campaign-ready; provider GET first 100 shows 0 warm-up enabled; chosen senders unproven | UNVERIFIED |
+| Gates | campaign start, lead push, native send, webhook create — OFF | LIVE |
+| Webhook | registered, signing secret absent, signed receipt unproven | BLOCKED |
+| REST poll | scoped 10-minute poll live | LIVE |
+| Apollo | paid enrichment off, limit 0 | LIVE |
+
+**First pilot policy:** ≤5 evidence-cleared recipients, 1–2 verified GSM senders, never GHAT. The 25–50 education batch is HISTORICAL ONLY.
+
+**Coverage caveat:** generated catalogues (routes, pages, edge functions, migrations, manifest) remain at the 17 Sep freeze; the consistency checker lists the uncatalogued items. Do not treat them as current.
+
+*End of Section 107.*
 `;

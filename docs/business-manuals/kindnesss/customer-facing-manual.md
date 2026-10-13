@@ -36,3 +36,10 @@ A named contact handles everything from sample to rollout, including practical q
 
 ## An honest note
 Kindnesss is a culture and routine resource. It is not a mental health service and is not a substitute for professional support where a child needs it.
+
+
+---
+
+## Dated status delta — 13 October 2026 (documentation only; earlier text above preserved as history)
+
+- No customer-facing change. Pricing and product text above are unchanged; this note only records that Kindnesss is the active portfolio business and that no school or group outreach has been sent yet.

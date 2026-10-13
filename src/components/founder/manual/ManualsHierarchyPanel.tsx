@@ -55,7 +55,7 @@ export default function ManualsHierarchyPanel() {
           <li>Slim Mandy Manual — portable handover only · v{SLIM_MANDY_MANUAL_VERSION}</li>
         </ol>
         <p className="text-[11px] text-muted-foreground">
-          Current-architecture map: Full Technical Manual, Section 100 (August 2026) plus Section 101 — 10 September 2026 Architecture Reconciliation, which controls on current state.
+          Current state: Full Technical Manual Section 107 — 13 October 2026 operating-state delta, which controls on live state. Sections 100–106 are retained as dated architecture history.
         </p>
 
         <div className="flex flex-wrap gap-2">

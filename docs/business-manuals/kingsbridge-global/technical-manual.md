@@ -31,3 +31,13 @@ Unsubscribe required on every sequence. International outreach must respect the 
 
 ## 10. Maintenance and troubleshooting
 Multi-brand relevance is expected at group leadership level; read the prioritisation reason to understand which brand was chosen and why. Eligibility failures return explicit gate codes. Rescoring is pure and idempotent per engine version.
+
+
+---
+
+## Dated status delta — 13 October 2026 (documentation only; earlier text above preserved as history)
+
+- **Portfolio status:** this brand's business record is **archived (`legacy_prelaunch`)** in Liftor. Its ID, history, CRM links and assets are preserved; it is hidden from active selectors. It is not currently onboarded or operating.
+- **Outbound:** no campaign, sender, mapping or send exists or is authorised for this brand. All external gates remain OFF.
+- **Active portfolio business today:** Kindnesss only (`640de582-a112-4d16-a221-03c27f00c6ec`). This brand is a future complementary education offer.
+- **Status of the text above:** product description retained as reference; any operational/readiness statements above are HISTORICAL ONLY.
