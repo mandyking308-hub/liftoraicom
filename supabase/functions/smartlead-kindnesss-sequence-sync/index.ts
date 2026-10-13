@@ -18,8 +18,21 @@ const cors = {
 const json = (b: unknown, s = 200) =>
   new Response(JSON.stringify(b), { status: s, headers: { ...cors, "Content-Type": "application/json" } });
 
-const toHtml = (body: string) =>
-  /<[a-z][\s\S]*>/i.test(body) ? body : body.split(/\n/).map((l) => l || "<br>").map((l) => l === "<br>" ? l : `<div>${l}</div>`).join("");
+const esc = (t: string) =>
+  t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+const UNSAFE_HTML = /<\s*(script|iframe|object|embed|form|style|link|meta)\b|\son[a-z]+\s*=|javascript:/i;
+// Plain text: every line escaped, line breaks preserved. Authored HTML: passed
+// through only if it contains no active content; otherwise rejected (null).
+export const toHtml = (body: string): string | null => {
+  if (/<[a-z][\s\S]*>/i.test(body)) return UNSAFE_HTML.test(body) ? null : body;
+  return body.replace(/\r\n?/g, "\n").split("\n").map((l) => (l.trim() ? `<div>${esc(l)}</div>` : "<div><br></div>")).join("");
+};
+// Calendar-day gap that lands N Mon-Fri working days after `from` (UTC date).
+export function calendarGapForWorkingDays(from: Date, n: number) {
+  const d = new Date(from); let worked = 0, gap = 0;
+  while (worked < n) { d.setUTCDate(d.getUTCDate() + 1); gap++; const w = d.getUTCDay(); if (w !== 0 && w !== 6) worked++; }
+  return { gap, next: d };
+}
 
 async function sl(path: string, key: string, init?: RequestInit) {
   const sep = path.includes("?") ? "&" : "?";
@@ -37,20 +50,27 @@ function verify(readBack: any[], expected: any[]) {
   const sorted = [...readBack].sort((a, b) => (a.seq_number ?? 0) - (b.seq_number ?? 0));
   const checks = expected.map((e, i) => {
     const r = sorted[i] ?? {};
-    const body = String(r.email_body ?? "");
-    const subj = String(r.subject ?? "");
+    const v0 = Array.isArray(r.sequence_variants) ? r.sequence_variants[0] : Array.isArray(r.variants) ? r.variants[0] : null;
+    const variantCount = Array.isArray(r.sequence_variants) ? r.sequence_variants.length : Array.isArray(r.variants) ? r.variants.length : 0;
+    const body = String(v0?.email_body ?? r.email_body ?? "");
+    const subj = String(v0?.subject ?? r.subject ?? "");
+    const ev = e.variants[0];
     return {
       seq_number: r.seq_number ?? null,
       expected_seq: e.seq_number,
       body_has_unsubscribe: body.includes("%unsubscribe-text%"),
       body_has_signature: body.includes("%signature%"),
-      body_matches_sent: body.trim() === e.email_body.trim(),
-      subject_ok: e.seq_number === 1 ? subj === e.subject : subj.trim() === "",
+      variant_source: v0 ? "nested_variant" : "top_level_fallback",
+      variant_count: variantCount,
+      body_matches_sent: body.trim() === ev.email_body.trim(),
+      subject_ok: e.seq_number === 1 ? subj === ev.subject : subj.trim() === "",
       delay_in_days: r.seq_delay_details?.delay_in_days ?? r.seq_delay_details?.delayInDays ?? null,
+      expected_delay_in_days: e.seq_delay_details.delay_in_days,
     };
   });
   const pass = sorted.length === expected.length && checks.every((c) =>
-    c.seq_number === c.expected_seq && c.body_has_unsubscribe && c.body_has_signature && c.subject_ok);
+    c.seq_number === c.expected_seq && c.body_has_unsubscribe && c.body_has_signature && c.subject_ok &&
+    c.body_matches_sent && Number(c.delay_in_days) === Number(c.expected_delay_in_days));
   return { count: sorted.length, pass, checks };
 }
 
@@ -68,8 +88,8 @@ Deno.serve(async (req) => {
   const userClient = createClient(URL_, ANON, { global: { headers: { Authorization: auth } }, auth: { persistSession: false } });
   const { data: u, error: ue } = await userClient.auth.getUser(auth.slice(7));
   if (ue || !u?.user) return json({ ok: false, error: "auth_invalid" }, 401);
-  const admin = createClient(URL_, SERVICE, { auth: { persistSession: false } });
-  const { data: roles } = await admin.from("user_roles").select("role").eq("user_id", u.user.id);
+  const { data: roles, error: re } = await userClient.from("user_roles").select("role").eq("user_id", u.user.id);
+  if (re) return json({ ok: false, error: "caller_role_lookup_failed" }, 503);
   const rs = new Set((roles ?? []).map((r: any) => r.role));
   if (!rs.has("founder") && !rs.has("admin")) return json({ ok: false, error: "forbidden" }, 403);
 
@@ -81,6 +101,14 @@ Deno.serve(async (req) => {
     return json({ ok: false, error: "confirmation_phrase_required" }, 400);
   }
   if (KEY.length < 8) return json({ ok: false, error: "smartlead_key_missing" }, 412);
+  const admin = createClient(URL_, SERVICE, { auth: { persistSession: false } });
+  // Working-day schedule: only computable from an explicit first-send date.
+  let startDate: Date | null = null;
+  if (input?.start_date) {
+    const m = /^\d{4}-\d{2}-\d{2}$/.test(String(input.start_date)) ? new Date(`${input.start_date}T00:00:00Z`) : null;
+    if (!m || isNaN(m.getTime()) || [0, 6].includes(m.getUTCDay())) return json({ ok: false, error: "start_date_invalid_or_weekend" }, 400);
+    startDate = m;
+  }
 
   // Source (same business, same mapped campaign)
   const { data: d, error: de } = await admin.from("outreach_campaign_drafts")
@@ -92,6 +120,8 @@ Deno.serve(async (req) => {
   const steps: any[] = (d.email_sequence as any)?.steps ?? [];
   const blockers: string[] = [];
   if (steps.length !== 5) blockers.push(`source_step_count_${steps.length}`);
+  let cursor = startDate ? new Date(startDate) : null;
+  const sendDates: string[] = [];
   const sequences = steps.map((s, i) => {
     const n = Number(s.step ?? i + 1);
     const body = String(s.body ?? "");
@@ -99,15 +129,24 @@ Deno.serve(async (req) => {
     if (!body.includes("%signature%")) blockers.push(`step_${n}_missing_signature`);
     if (n === 1 && !String(s.subject ?? "").trim()) blockers.push("step_1_missing_subject");
     if (n > 1 && String(s.subject ?? "").trim()) blockers.push(`step_${n}_subject_not_blank`);
+    const html = toHtml(body);
+    if (html === null) blockers.push(`step_${n}_unsafe_html`);
+    const wd = Number(s.wait_business_days ?? 4);
+    let delay = 0;
+    if (n > 1 && cursor) { const g = calendarGapForWorkingDays(cursor, wd); delay = g.gap; cursor = g.next; }
+    else if (n > 1) delay = -1;
+    if (cursor) sendDates.push(cursor.toISOString().slice(0, 10));
     return {
       seq_number: n,
-      seq_delay_details: { delay_in_days: n === 1 ? 0 : Number(s.wait_business_days ?? 4) },
-      subject: n === 1 ? String(s.subject) : "",
-      email_body: toHtml(body),
+      seq_delay_details: { delay_in_days: delay },
+      variant_distribution_type: "MANUALLY_EQUAL",
+      variants: [{ subject: n === 1 ? String(s.subject) : "", email_body: html ?? "", variant_label: "A" }],
     };
   });
-  const scheduleNote =
-    "Smartlead delay_in_days counts calendar days; it cannot express 'four working days'. Schedule is UNVERIFIED and remains a launch blocker.";
+  if (!startDate) blockers.push("start_date_required_for_working_day_schedule");
+  const scheduleNote = startDate
+    ? "delay_in_days are calendar gaps computed so each follow-up lands 4 Mon-Fri working days after the previous one, ONLY if email 1 actually goes out on start_date. Bank holidays, a later start, or Smartlead sending-window shifts invalidate it; schedule remains a launch blocker until confirmed at go-live."
+    : "No start_date given; Smartlead delay_in_days counts calendar days and cannot express working days. Schedule blocked.";
 
   // Remote campaign status immediately before any write
   const camp = await sl(`/campaigns/${CAMPAIGN_ID}`, KEY);
@@ -119,15 +158,16 @@ Deno.serve(async (req) => {
   const base = {
     mode, campaign_id: CAMPAIGN_ID, remote_status_before: remoteStatus || null,
     remote_sequence_count_before: Array.isArray(before.data) ? before.data.length : null,
-    source_step_count: steps.length, schedule_status: "unverified_blocker", schedule_note: scheduleNote,
-    proposed: sequences.map((s) => ({ seq_number: s.seq_number, subject: s.subject, delay_in_days: s.seq_delay_details.delay_in_days, body_chars: s.email_body.length })),
+    source_step_count: steps.length, schedule_status: startDate ? "computed_from_start_date_unconfirmed" : "blocked_no_start_date",
+    schedule_note: scheduleNote, start_date: startDate?.toISOString().slice(0, 10) ?? null, planned_send_dates: sendDates,
+    proposed: sequences.map((s) => ({ seq_number: s.seq_number, subject: s.variants[0].subject, delay_in_days: s.seq_delay_details.delay_in_days, body_chars: s.variants[0].email_body.length })),
     sends_triggered: false, leads_changed: false, campaign_status_changed: false,
   };
   if (blockers.length) return json({ ok: false, write_blocked: true, blockers, ...base }, 200);
   if (mode === "preview") return json({ ok: true, write_blocked: false, ...base });
 
   const w = await sl(`/campaigns/${CAMPAIGN_ID}/sequences`, KEY, {
-    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sequences }),
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(sequences),
   });
   if (!w.ok) return json({ ok: false, error: "sequence_write_failed", http_status: w.status, provider_body: w.data, ...base }, 502);
 
