@@ -11,61 +11,6 @@
   },
   "files": [
     {
-      "file": "docs/liftor-rebuild/history/2026-09-17-freeze-cf1c1373/C-route-catalog.md",
-      "section": "This rebuild manual",
-      "category": "documented"
-    },
-    {
-      "file": "docs/liftor-rebuild/history/2026-09-17-freeze-cf1c1373/D-page-surface-catalog.md",
-      "section": "This rebuild manual",
-      "category": "documented"
-    },
-    {
-      "file": "docs/liftor-rebuild/history/2026-09-17-freeze-cf1c1373/E-component-service-catalog.md",
-      "section": "This rebuild manual",
-      "category": "documented"
-    },
-    {
-      "file": "docs/liftor-rebuild/history/2026-09-17-freeze-cf1c1373/G-migration-map.md",
-      "section": "This rebuild manual",
-      "category": "documented"
-    },
-    {
-      "file": "docs/liftor-rebuild/history/2026-09-17-freeze-cf1c1373/H-edge-function-catalog.md",
-      "section": "This rebuild manual",
-      "category": "documented"
-    },
-    {
-      "file": "docs/liftor-rebuild/history/2026-09-17-freeze-cf1c1373/README.md",
-      "section": "This rebuild manual",
-      "category": "documented"
-    },
-    {
-      "file": "docs/liftor-rebuild/history/2026-09-17-freeze-cf1c1373/V-user-manual-coverage.md",
-      "section": "This rebuild manual",
-      "category": "documented"
-    },
-    {
-      "file": "docs/liftor-rebuild/history/2026-09-17-freeze-cf1c1373/W-module-operator-entries.md",
-      "section": "This rebuild manual",
-      "category": "documented"
-    },
-    {
-      "file": "docs/liftor-rebuild/history/2026-09-17-freeze-cf1c1373/source-coverage-manifest.json",
-      "section": "This rebuild manual",
-      "category": "documented"
-    },
-    {
-      "file": "docs/liftor-rebuild/history/2026-09-17-freeze-cf1c1373/source-coverage-manifest.md",
-      "section": "This rebuild manual",
-      "category": "documented"
-    },
-    {
-      "file": "docs/liftor-rebuild/history/2026-09-17-freeze-cf1c1373/validation-report.json",
-      "section": "This rebuild manual",
-      "category": "documented"
-    },
-    {
       "file": ".env",
       "section": "Technical Manual A — repository root configuration",
       "category": "documented"
@@ -967,6 +912,61 @@
     },
     {
       "file": "docs/liftor-rebuild/doc-normative-vs-historical.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/history/2026-09-17-freeze-cf1c1373/C-route-catalog.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/history/2026-09-17-freeze-cf1c1373/D-page-surface-catalog.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/history/2026-09-17-freeze-cf1c1373/E-component-service-catalog.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/history/2026-09-17-freeze-cf1c1373/G-migration-map.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/history/2026-09-17-freeze-cf1c1373/H-edge-function-catalog.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/history/2026-09-17-freeze-cf1c1373/README.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/history/2026-09-17-freeze-cf1c1373/V-user-manual-coverage.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/history/2026-09-17-freeze-cf1c1373/W-module-operator-entries.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/history/2026-09-17-freeze-cf1c1373/source-coverage-manifest.json",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/history/2026-09-17-freeze-cf1c1373/source-coverage-manifest.md",
+      "section": "This rebuild manual",
+      "category": "documented"
+    },
+    {
+      "file": "docs/liftor-rebuild/history/2026-09-17-freeze-cf1c1373/validation-report.json",
       "section": "This rebuild manual",
       "category": "documented"
     },

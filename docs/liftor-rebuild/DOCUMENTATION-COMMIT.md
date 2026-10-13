@@ -2,13 +2,22 @@
 
 This file separates the **source** being documented from the **commit** that carries the documentation.
 
+## Current — 13 October 2026
+
+| Field | Value |
+|---|---|
+| `source_freeze_sha` | `662f42827f40a253c7b99b954de2aba4fff69f43` (real commit; Lovable HEAD at regeneration) |
+| Runtime-source proof | `git diff 662f42827f40a253c7b99b954de2aba4fff69f43 -- src supabase apps .github` is empty apart from manual-content modules at the documentation commit |
+| `documentation_commit` | the commit that carries this regeneration; reported in the closeout message, not embedded (a commit cannot contain its own hash) |
+| Generated files | C, D, E, G, H, V, W, source-coverage-manifest.json/.md, validation-report.json — all stamped `662f42827f40a253c7b99b954de2aba4fff69f43` |
+| Archive | `history/2026-09-17-freeze-cf1c1373/` — immutable copy of the 17 Sep generated files |
+| Verification | `node scripts/check-rebuild-manual-consistency.mjs` → 12/12 on 13 Oct 2026 |
+| Generator change | file list now includes not-yet-committed, non-ignored files so docs added in the same docs-only commit are mapped; no check was weakened |
+
+## HISTORICAL — 17 September 2026
+
 | Field | Value |
 |---|---|
 | `source_freeze_sha` | `cf1c1373f3affdd66c17a53b97200ac06c3a878f` |
-| Parity at freeze | Lovable HEAD and GitHub `main` independently rechecked and matched at that SHA |
-| Runtime-source proof | `git diff cf1c1373f3affdd66c17a53b97200ac06c3a878f -- src supabase apps .github` returns **empty** at the documentation commit — no runtime file changed |
-| `documentation_commit` | the head commit of the documentation-only closeout that adds/updates this folder. Its hash is reported in the audit closeout message and is the current parity HEAD; it is not embedded in the generated files, because no commit can contain its own hash |
-| Allowed change scope | `docs/**`, `scripts/generate-rebuild-manual-catalogs.mjs`, `scripts/check-rebuild-manual-consistency.mjs`, manual source modules under `src/lib/*ManualContent*.ts` / `manualArchitectureSync2026.ts`, `roadmap.md` |
-| Verification | `node scripts/check-rebuild-manual-consistency.mjs` — checks freeze-stamp consistency across every generated file, route/page/edge-function/migration/manifest coverage, founder-route coverage completeness, stale-claim scan and docs-only diff scope |
-
-Every generated file in this folder carries the line `source_freeze_sha: cf1c1373f3affdd66c17a53b97200ac06c3a878f`. If a generated file carries a different SHA, the folder is mid-regeneration and must not be quoted.
+| Parity at freeze | Lovable HEAD and GitHub `main` matched at that SHA |
+| Allowed change scope | `docs/**`, `scripts/generate-rebuild-manual-catalogs.mjs`, `scripts/check-rebuild-manual-consistency.mjs`, `src/lib/*ManualContent*.ts` / `manualArchitectureSync2026.ts`, `roadmap.md` |
