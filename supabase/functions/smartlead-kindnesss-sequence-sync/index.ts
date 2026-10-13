@@ -167,7 +167,8 @@ Deno.serve(async (req) => {
   if (mode === "preview") return json({ ok: true, write_blocked: false, ...base });
 
   const w = await sl(`/campaigns/${CAMPAIGN_ID}/sequences`, KEY, {
-    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(sequences),
+    // Live API rejects a root array (400 '"value" must be of type object'); it requires { sequences: [...] }.
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sequences }),
   });
   if (!w.ok) return json({ ok: false, error: "sequence_write_failed", http_status: w.status, provider_body: w.data, ...base }, 502);
 
