@@ -31,3 +31,17 @@ Unsubscribe required on every sequence. Wellbeing copy must not present the prod
 
 ## 10. Maintenance and troubleshooting
 If a contact ranks high for both Kindnesss and Billy, prioritisation resolves deterministically by score then fixed brand order; the reason is written to the ownership audit. Eligibility failures list explicit gate codes. Rescoring is pure and idempotent per engine version.
+
+
+---
+
+## Dated status delta — 13 October 2026 (documentation only; earlier text above preserved as history)
+
+- **Active record:** Kindnesss `640de582-a112-4d16-a221-03c27f00c6ec` (active). An older Kindnesss record is archived (`legacy_prelaunch`) and preserved — never unarchive or merge.
+- **Smartlead:** draft campaign **4103531** exists (status DRAFTED, 6 leads, 0 sent / 0 replies / 0 bounces, cap 3/day, tracking off, 2 GSM senders attached). This supersedes "no Smartlead campaign ID" above. One campaign mapping exists but is inactive; 0 lead mappings.
+- **First pilot policy:** at most **5** evidence-cleared recipients with 1–2 individually verified GSM senders. The 25–50-recipient education batch above is HISTORICAL ONLY.
+- **Contacts:** 30 linked contacts with verified emails; **0 eligible** — all `needs_review` / `pending_review`; lawful basis blank on 27, provisional legitimate interests on 3. Business-level readiness was confirmed by the owner; record-level evidence is still required.
+- **Copy:** earlier generic copy rejected by the founder; current draft is unapproved and not loaded into Smartlead.
+- **Senders:** 180 GSM + 20 GHAT registered, all `warming` in Liftor, 0 campaign-ready. GHAT charitable mailboxes are never used for Kindnesss. Provider warm-up for the chosen senders is not proven.
+- **Event return:** signed webhook not proven (signing secret absent); scoped 10-minute REST polling is live.
+- **Gates:** campaign start, lead push, native send and webhook create are all OFF. Nothing has been sent.

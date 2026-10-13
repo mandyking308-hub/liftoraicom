@@ -59,3 +59,21 @@ Infrastructure built; the only active verified connection row is **Neon Candy** 
 4. Apollo not configured per business.
 5. Three RLS-off tables (data exposure, not an outbound blocker).
 6. Founder live-launch approval not given, and correctly still a separate gate.
+
+---
+
+## Q8. Dated delta — 13 October 2026 (current; Q1–Q7 above are the 17 September 2026 snapshot and are HISTORICAL where they differ)
+
+Source: read-only Liftor database queries 13 Oct ~09:50 UTC; Smartlead REST poll snapshot 13 Oct 09:50 UTC; Winnr/Smartlead read-only diagnostics 13 Oct 09:16 UTC. Full detail: `docs/manual-architecture-reconciliation-2026-10-13.md`.
+
+| Fact | 13 Oct 2026 value |
+|---|---|
+| Businesses | 1 active (Kindnesss `640de582-a112-4d16-a221-03c27f00c6ec`); 14 `legacy_prelaunch`, all preserved |
+| External gates checked | campaign start, lead push, native email send, webhook create — all OFF |
+| Mailboxes | 180 GSM + 20 GHAT, all SMTP/IMAP ok in Liftor, all `warming`, 0 campaign-ready; provider GET (first 100 only) shows 0 warm-up enabled |
+| Smartlead | connected; campaign 4103531 `DRAFTED`, 6 leads, 0 sent/replies/bounces; 1 mapping inactive, 0 lead mappings; webhook 902244 registered but signing secret absent — signed receipt unproven; scoped REST poll live |
+| Kindnesss contacts | 30 linked, verified emails, 0 eligible (27 lawful basis blank, 3 provisional) |
+| Apollo | paid enrichment off, limit 0; per-business connection not configured (Neon Candy row is legacy) |
+| Pilots sent | **none** |
+
+Q4 "10 GHAT connected / webhook false / 0 mappings" and Q5 "only Neon Candy" are HISTORICAL ONLY (17 Sep). Q2 counts and generated catalogues remain a 17 Sep snapshot.
