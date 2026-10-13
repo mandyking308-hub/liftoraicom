@@ -168,7 +168,11 @@ Deno.serve(async (req) => {
 
   const w = await sl(`/campaigns/${CAMPAIGN_ID}/sequences`, KEY, {
     // Live API rejects a root array (400 '"value" must be of type object'); it requires { sequences: [...] }.
-    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sequences }),
+    // Live API also rejects nested `variants`; single-version steps use top-level subject/email_body.
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({
+      sequences: sequences.map((s) => ({ seq_number: s.seq_number, seq_delay_details: s.seq_delay_details,
+        subject: s.variants[0].subject, email_body: s.variants[0].email_body })),
+    }),
   });
   if (!w.ok) return json({ ok: false, error: "sequence_write_failed", http_status: w.status, provider_body: w.data, ...base }, 502);
 
