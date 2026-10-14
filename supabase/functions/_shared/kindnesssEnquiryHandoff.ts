@@ -175,29 +175,48 @@ export function validateEvent(parsed: unknown): { ok: true; event: KindnesssEnqu
   return { ok: true, event: o as unknown as KindnesssEnquiryEvent };
 }
 
-export async function decideHandoff(input: HandoffInput): Promise<HandoffDecision> {
-  if (!handoffReceiverEnabled(input.enabledFlag)) return reject("receiver_disabled", 503);
-  if (new TextEncoder().encode(input.rawBody).length > MAX_BODY_BYTES) return reject("body_too_large", 413);
-  if (!input.secret) return reject("missing_secret", 503);
+export type AuthResult =
+  | { outcome: "reject"; reason: RejectReason; httpStatus: number }
+  | { outcome: "authenticated"; businessId: string; event: KindnesssEnquiryEvent; idempotencyKey: string };
+
+/** Authenticate raw bytes + timestamp, validate schema/privacy and tenant. No I/O. */
+export async function authenticateAndValidate(
+  input: Pick<HandoffInput, "enabledFlag" | "secret" | "rawBody" | "headers" | "nowSeconds">,
+): Promise<AuthResult> {
+  if (!handoffReceiverEnabled(input.enabledFlag)) return reject("receiver_disabled", 503) as AuthResult;
+  if (new TextEncoder().encode(input.rawBody).length > MAX_BODY_BYTES) return reject("body_too_large", 413) as AuthResult;
+  if (!input.secret) return reject("missing_secret", 503) as AuthResult;
 
   const source = input.headers.source;
   const ts = input.headers.timestamp;
-  if (!source || !Object.prototype.hasOwnProperty.call(SOURCE_BUSINESS_ALLOWLIST, source)) return reject("unknown_source", 401);
+  if (!source || !Object.prototype.hasOwnProperty.call(SOURCE_BUSINESS_ALLOWLIST, source)) return reject("unknown_source", 401) as AuthResult;
   if (!ts || !/^\d{9,11}$/.test(ts) || Math.abs(input.nowSeconds - Number(ts)) > MAX_SKEW_SECONDS) {
-    return reject("stale_or_future_timestamp", 401);
+    return reject("stale_or_future_timestamp", 401) as AuthResult;
   }
   // Signature checked on raw bytes before parsing.
-  if (!(await verifySignature(input.secret, ts, input.rawBody, input.headers.signature))) return reject("bad_signature", 401);
+  if (!(await verifySignature(input.secret, ts, input.rawBody, input.headers.signature))) return reject("bad_signature", 401) as AuthResult;
 
   let parsed: unknown;
-  try { parsed = JSON.parse(input.rawBody); } catch { return reject("malformed_json", 400); }
+  try { parsed = JSON.parse(input.rawBody); } catch { return reject("malformed_json", 400) as AuthResult; }
   const v = validateEvent(parsed);
-  if (v.ok === false) return reject(v.reason, v.reason === "schema_invalid" ? 400 : 422);
+  if (v.ok === false) return reject(v.reason, v.reason === "schema_invalid" ? 400 : 422) as AuthResult;
 
   const businessId = SOURCE_BUSINESS_ALLOWLIST[source];
-  if (v.event.source !== source || v.event.business_id !== businessId) return reject("tenant_mismatch", 403);
+  if (v.event.source !== source || v.event.business_id !== businessId) return reject("tenant_mismatch", 403) as AuthResult;
+  return { outcome: "authenticated", businessId, event: v.event, idempotencyKey: idempotencyKeyFor(source, businessId, v.event.event_id) };
+}
 
-  const key = idempotencyKeyFor(source, businessId, v.event.event_id);
+/**
+ * Pure decision (kept for contract tests). NOTE: `idempotencyKeyExists` is a
+ * non-atomic pre-check; the runtime receiver uses an atomic unique claim instead
+ * (see kindnesssEnquiryReceiver.ts).
+ */
+export async function decideHandoff(input: HandoffInput): Promise<HandoffDecision> {
+  const a = await authenticateAndValidate(input);
+  if (a.outcome === "reject") return a;
+  const { businessId } = a;
+  const v = { event: a.event };
+  const key = a.idempotencyKey;
   if (await input.idempotencyKeyExists(businessId, key)) return { outcome: "duplicate", idempotencyKey: key, httpStatus: 200 };
 
   const res = await input.resolveContact(businessId, normaliseEmail(v.event.contact_email));
