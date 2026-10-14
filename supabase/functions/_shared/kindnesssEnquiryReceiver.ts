@@ -87,8 +87,8 @@ export async function handleKindnesssEnquiry(
     status: "processed",
     route: matched ? "conversation" : "quarantine",
     quarantineReason: matched ? null : resolution.kind === "ambiguous" ? "ambiguous_contact" : "no_contact_match",
-    contactId: matched ? resolution.contactId : null,
-    relationshipId: matched ? resolution.relationshipId : null,
+    contactId: resolution.kind === "matched" ? resolution.contactId : null,
+    relationshipId: resolution.kind === "matched" ? resolution.relationshipId : null,
     error: null,
   });
   await deps.store.audit({ businessId, action: "kindnesss_handoff_processed", detail: { idempotencyKey, route: matched ? "conversation" : "quarantine" } });
