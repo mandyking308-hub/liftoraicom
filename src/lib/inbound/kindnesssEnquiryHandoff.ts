@@ -192,7 +192,7 @@ export async function decideHandoff(input: HandoffInput): Promise<HandoffDecisio
   let parsed: unknown;
   try { parsed = JSON.parse(input.rawBody); } catch { return reject("malformed_json", 400); }
   const v = validateEvent(parsed);
-  if (!v.ok) return reject(v.reason, v.reason === "schema_invalid" ? 400 : 422);
+  if (v.ok === false) return reject(v.reason, v.reason === "schema_invalid" ? 400 : 422);
 
   const businessId = SOURCE_BUSINESS_ALLOWLIST[source];
   if (v.event.source !== source || v.event.business_id !== businessId) return reject("tenant_mismatch", 403);
